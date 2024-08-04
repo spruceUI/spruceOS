@@ -8,11 +8,11 @@
     
 ## DOWNLOAD LATEST VERSION BELOW
 
-  - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/tenlevels/spruce/releases)
+  - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
 
 ## NEED HELP?
   
-  - [CLICK HERE TO SEE THE WIKI](https://github.com/tenlevels/spruce/wiki) 
+  - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki) 
 
 ## WHAT WAS DONE:
 
