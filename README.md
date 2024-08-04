@@ -46,8 +46,7 @@
 
   - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
     
-  - For more information, see the new [Wiki installation page](https://github.com/tenlevels/spruce/wiki/Installation-Instructions)
-
+  - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
 ## BIOS
 
   - Place your BIOS files in the BIOS folder on the root of SD card.
@@ -61,7 +60,7 @@ To update:
 
 This will retain all your games, saves, and emulator bios files.
 
-[See our updating spruce wiki page for more info](https://github.com/tenlevels/spruce/wiki/Updating-to-the-Latest-Release)
+[See our updating spruce wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
 ## CONTROLS
 
