@@ -115,8 +115,8 @@ This will retain all your games, saves, and emulator bios files.
   - Testing and encouragement by Hoo
   - Wiki, testing and support by SundownderSport
   - Photos, testing and support by supermodio64
-  - Aemiii91 for being my mentor and friend
-  - Russ from RGC - His YouTube channel started it all for me
+  - Aemiii91 for being awesome.
+  - Russ from RGC - His YouTube channel is an inspiration.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
