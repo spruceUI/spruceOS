@@ -19,10 +19,16 @@
  - All emulators and cores are preconfigured with performance considered.
 
  - Auto Save/Quick Shutdown + Resume feature added.
+   
+ - Syncthing App added.
 
  - Bootlogo App added.
 
- - Performance and overclock adjustments are preset. There is no need to change CPU in settings (keep set to "Default").
+ - Miyoo Gamelist App added.
+
+ - Recents tab is optional via App toggle.
+
+ - Performance and overclock adjustments are preset.
 
  - Removed RApp (RetroArch/Expert) from Main Menu.
 
@@ -71,11 +77,11 @@ This will retain all your games, saves, and emulator bios files.
 
   *WHILE IN GAME*
 
-  - QUIT GAME:  Hold Select for 2 seconds and then;
+  - QUIT GAME:  Press Start+Select at the same time;
     
     Press B to quit game
     **or**
-     Start to Save and Shutdown.
+    Press Start to Save and Shutdown.
 
   - SAVE/LOAD STATE RETROARCH: Home button
   - EXIT GAME: Select + Start (PSP home button and exit through menu) Pico-8 press start from gamelist and home from splore
@@ -99,11 +105,12 @@ This will retain all your games, saves, and emulator bios files.
 
 ## THEMES
 
-  - Included are four themes located in Settings. More icons and themes are planned to be added in the future.
+  - Included are five themes located in Settings. More icons and themes are planned to be added in the future.
   - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
 
 ## Credits/Thanks
 
+  - tenlevels for starting spruce and getting th A30 where it deserves to be!
   - Huge thank you to Decojon for the Auto Save/Quick Shutdown + Resume feature!
   - Help, support and Bootlogo function (and lots of other stuff!) from Shauninman.
   - Retroarch removal from MainUI by Jim Gray
