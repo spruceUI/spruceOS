@@ -110,18 +110,18 @@ This will retain all your games, saves, and emulator bios files.
 
 ## Credits/Thanks
 
-  - tenlevels for starting spruce and getting th A30 where it deserves to be!
-  - Huge thank you to Decojon for the Auto Save/Quick Shutdown + Resume feature!
-  - Help, support and Bootlogo function (and lots of other stuff!) from Shauninman.
-  - Retroarch removal from MainUI by Jim Gray
+  - Tenlevels for starting spruce and getting the A30 where it deserves to be!
+  - Shauninman, help, support and Bootlogo function (and lots of other stuff!).
+  - Decojon, Auto Save/Quick Shutdown + Resume feature!
+  - Jim Gray, Retroarch removal from MainUI. 
   - Onion team for the heavy lifting on finding the best cores to use with Miyoo and overall inspiration
-  - DinguxCommander update by BTN/Paradise
-  - Drastic by Steward
-  - Pico-8 wrapper by Ninoh-FOX and Steward
-  - Overlays from Onion & Darkhorse
-  - Testing and encouragement by Hoo
-  - Wiki, testing and support by SundownderSport
-  - Photos, testing and support by supermodio64
+  - BTN/Paradise, DinguxCommander update. 
+  - Steward, Drastic.
+  - Ninoh-FOX and Steward, Pico-8 wrapper.
+  - Onion & Darkhorse, Overlays.
+  - Hoo, Testing and encouragement.
+  - SundownderSport, Wiki, testing and support.
+  - Supermodi064, photos, testing and support.
   - Aemiii91 for being awesome.
   - Russ from RGC - His YouTube channel is an inspiration.
 
