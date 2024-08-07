@@ -113,6 +113,7 @@ This will retain all your games, saves, and emulator bios files.
   - Tenlevels: starting spruce and getting the A30 where it deserves to be!
   - Shauninman: help, support and Bootlogo function (and lots of other stuff!).
   - Decojon: Auto Save/Quick Shutdown + Resume feature.
+  - Ndguardian and XK9274: Syncthing App.
   - Jim Gray: Retroarch removal from MainUI. 
   - Onion Team: the heavy lifting finding the best cores to use with Miyoo and overall inspiration.
   - BTN/Paradise: DinguxCommander update. 
