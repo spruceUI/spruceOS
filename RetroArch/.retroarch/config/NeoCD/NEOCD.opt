@@ -1,0 +1,5 @@
+neocd_bios = "neocd.bin (CDZ)"
+neocd_cdspeedhack = "On"
+neocd_loadskip = "On"
+neocd_per_content_saves = "Off"
+neocd_region = "USA"

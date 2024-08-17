@@ -1,0 +1,743 @@
+﻿<?xml version="1.0"?>
+<gameList>
+  <game id="37561" source="ScreenScraper.fr">
+    <path>./2020bb.zip</path>
+    <name>2020 Super Baseball</name>
+    <image>./Imgs/2020bb.png</image>
+  </game>
+  <game>
+    <path>./3countb.zip</path>
+    <name>3 Count Bout</name>
+    <image>./Imgs/3countb.png</image>
+  </game>
+  <game id="37641" source="ScreenScraper.fr">
+    <path>./sonicwi2.zip</path>
+    <name>Aero Fighters 2</name>
+    <image>./Imgs/sonicwi2.png</image>
+  </game>
+  <game id="37642" source="ScreenScraper.fr">
+    <path>./sonicwi3.zip</path>
+    <name>Aero Fighters 3</name>
+    <image>./Imgs/sonicwi3.png</image>
+  </game>
+  <game id="37564" source="ScreenScraper.fr">
+    <path>./aodk.zip</path>
+    <name>Aggressors of Dark Kombat</name>
+    <image>./Imgs/aodk.png</image>
+  </game>
+  <game id="37563" source="ScreenScraper.fr">
+    <path>./alpham2.zip</path>
+    <name>Alpha Mission II</name>
+    <image>./Imgs/alpham2.png</image>
+  </game>
+  <game id="13927" source="ScreenScraper.fr">
+    <path>./androdun.zip</path>
+    <name>Andro Dunos</name>
+    <image>./Imgs/androdun.png</image>
+  </game>
+  <game id="37566" source="ScreenScraper.fr">
+    <path>./aof2.zip</path>
+    <name>Art of Fighting 2</name>
+    <image>./Imgs/aof2.png</image>
+  </game>
+  <game id="37567" source="ScreenScraper.fr">
+    <path>./aof3.zip</path>
+    <name>Art of Fighting 3 - The Path of the Warrior</name>
+    <image>./Imgs/aof3.png</image>
+  </game>
+  <game id="37565" source="ScreenScraper.fr">
+    <path>./aof.zip</path>
+    <name>Art of Fighting</name>
+    <image>./Imgs/aof.png</image>
+  </game>
+ <game>
+    <path>./b2b.zip</path>
+    <name>Bang Bang Busters</name>
+    <image>./Imgs/b2b.png</image>
+  </game>
+  <game id="37568" source="ScreenScraper.fr">
+    <path>./bangbead.zip</path>
+    <name>Bang Bead</name>
+    <image>./Imgs/bangbead.png</image>
+  </game>
+  <game id="13951" source="ScreenScraper.fr">
+    <path>./bstars2.zip</path>
+    <name>Baseball Stars 2</name>
+    <image>./Imgs/bstars2.png</image>
+  </game>
+  <game id="37571" source="ScreenScraper.fr">
+    <path>./bstars.zip</path>
+    <name>Baseball Stars Professional</name>
+    <image>./Imgs/bstars.png</image>
+  </game>
+  <game id="13917" source="ScreenScraper.fr">
+    <path>./flipshot.zip</path>
+    <name>Battle Flip Shot</name>
+    <image>./Imgs/flipshot.png</image>
+  </game>
+  <game id="13893" source="ScreenScraper.fr">
+    <path>./blazstar.zip</path>
+    <name>Blazing Star</name>
+    <image>./Imgs/blazstar.png</image>
+  </game>
+  <game id="37569" source="ScreenScraper.fr">
+    <path>./bjourney.zip</path>
+    <name>Blue's Journey</name>
+    <image>./Imgs/bjourney.png</image>
+  </game>
+  <game id="37570" source="ScreenScraper.fr">
+    <path>./breakrev.zip</path>
+    <name>Breakers Revenge</name>
+    <image>./Imgs/breakrev.png</image>
+  </game>
+  <game id="13877" source="ScreenScraper.fr">
+    <path>./breakers.zip</path>
+    <name>Breakers</name>
+    <image>./Imgs/breakers.png</image>
+  </game>
+  <game id="37572" source="ScreenScraper.fr">
+    <path>./burningf.zip</path>
+    <name>Burning Fight</name>
+    <image>./Imgs/burningf.png</image>
+  </game>
+  <game id="37613" source="ScreenScraper.fr">
+    <path>./pbobbl2n.zip</path>
+    <name>Puzzle Bobble 2</name>
+    <image>./Imgs/pbobbl2n.png</image>
+  </game>
+  <game id="37614" source="ScreenScraper.fr">
+    <path>./pbobblen.zip</path>
+    <name>Bust-A-Move</name>
+    <image>./Imgs/pbobblen.png</image>
+  </game>
+  <game id="13938" source="ScreenScraper.fr">
+    <path>./ctomaday.zip</path>
+    <name>Captain Tomaday</name>
+    <image>./Imgs/ctomaday.png</image>
+  </game>
+  <game id="13924" source="ScreenScraper.fr">
+    <path>./crsword.zip</path>
+    <name>Crossed Swords</name>
+    <image>./Imgs/crsword.png</image>
+  </game>
+  <game>
+    <path>./crswd2bl.zip</path>
+    <name>Crossed Swords 2</name>
+    <image>./Imgs/crswd2bl.png</image>
+  </game>
+  <game id="13931" source="ScreenScraper.fr">
+    <path>./cyberlip.zip</path>
+    <name>Cyber-Lip</name>
+    <image>./Imgs/cyberlip.png</image>
+  </game>
+  <game id="37573" source="ScreenScraper.fr">
+    <path>./doubledr.zip</path>
+    <name>Double Dragon</name>
+    <image>./Imgs/doubledr.png</image>
+  </game>
+  <game id="37574" source="ScreenScraper.fr">
+    <path>./eightman.zip</path>
+    <name>Eight Man</name>
+    <image>./Imgs/eightman.png</image>
+  </game>
+  <game id="37589" source="ScreenScraper.fr">
+    <path>./kabukikl.zip</path>
+    <name>Far East of Eden - Kabuki Klash</name>
+    <image>./Imgs/kabukikl.png</image>
+  </game>
+  <game id="37576" source="ScreenScraper.fr">
+    <path>./fatfury1.zip</path>
+    <name>Fatal Fury - King of Fighters</name>
+    <image>./Imgs/fatfury1.png</image>
+  </game>
+  <game id="37577" source="ScreenScraper.fr">
+    <path>./fatfury2.zip</path>
+    <name>Fatal Fury 2</name>
+    <image>./Imgs/fatfury2.png</image>
+  </game>
+  <game id="37578" source="ScreenScraper.fr">
+    <path>./fatfury3.zip</path>
+    <name>Fatal Fury 3 - Road to the Final Victory</name>
+    <image>./Imgs/fatfury3.png</image>
+  </game>
+  <game id="37575" source="ScreenScraper.fr">
+    <path>./fatfursp.zip</path>
+    <name>Fatal Fury Special</name>
+    <image>./Imgs/fatfursp.png</image>
+  </game>
+  <game id="37579" source="ScreenScraper.fr">
+    <path>./fightfev.zip</path>
+    <name>Fight Fever</name>
+    <image>./Imgs/fightfev.png</image>
+  </game>
+  <game id="37590" source="ScreenScraper.fr">
+    <path>./karnovr.zip</path>
+    <name>Fighter's History Dynamite</name>
+    <image>./Imgs/karnovr.png</image>
+  </game>
+  <game id="13966" source="ScreenScraper.fr">
+    <path>./fbfrenzy.zip</path>
+    <name>Football Frenzy</name>
+    <image>./Imgs/fbfrenzy.png</image>
+  </game>
+  <game id="37580" source="ScreenScraper.fr">
+    <path>./galaxyfg.zip</path>
+    <name>Galaxy Fight - Universal Warriors</name>
+    <image>./Imgs/galaxyfg.png</image>
+  </game>
+  <game id="13945" source="ScreenScraper.fr">
+    <path>./ganryu.zip</path>
+    <name>Ganryu</name>
+    <image>./Imgs/ganryu.png</image>
+  </game>
+  <game id="37581" source="ScreenScraper.fr">
+    <path>./garou.zip</path>
+    <name>Garou - Mark of the Wolves</name>
+    <image>./Imgs/garou.png</image>
+  </game>
+  <game id="37584" source="ScreenScraper.fr">
+    <path>./gpilots.zip</path>
+    <name>Ghost Pilots</name>
+    <image>./Imgs/gpilots.png</image>
+  </game>
+  <game id="37582" source="ScreenScraper.fr">
+    <path>./ghostlop.zip</path>
+    <name>Ghostlop</name>
+    <image>./Imgs/ghostlop.png</image>
+  </game>
+  <game id="13906" source="ScreenScraper.fr">
+    <path>./goalx3.zip</path>
+    <name>Goal! Goal! Goal!</name>
+    <image>./Imgs/goalx3.png</image>
+  </game>
+  <game id="37585" source="ScreenScraper.fr">
+    <path>./gururin.zip</path>
+    <name>Gururin</name>
+    <image>./Imgs/gururin.png</image>
+  </game>
+  <game>
+    <path>./ironclad.zip</path>
+    <name>Ironclad</name>
+    <image>./Imgs/ironclad.png</image>
+  </game>
+  <game>
+    <path>./jockeygp.zip</path>
+    <name>Jockey Grand Prix</name>
+    <image>./Imgs/jockeygp.png</image>
+  </game>
+  <game id="37598" source="ScreenScraper.fr">
+    <path>./kotm2.zip</path>
+    <name>King of the Monsters 2 - The Next Thing</name>
+    <image>./Imgs/kotm2.png</image>
+  </game>
+  <game id="37597" source="ScreenScraper.fr">
+    <path>./kotm.zip</path>
+    <name>King of the Monsters</name>
+    <image>./Imgs/kotm.png</image>
+  </game>
+  <game id="13920" source="ScreenScraper.fr">
+    <path>./kizuna.zip</path>
+    <name>Kizuna Encounter - Super Tag Battle</name>
+    <image>./Imgs/kizuna.png</image>
+  </game>
+ <game>
+    <path>./lasthope.zip</path>
+    <name>Last Hope</name>
+    <image>./Imgs/lasthope.png</image>
+  </game>
+  <game id="13957" source="ScreenScraper.fr">
+    <path>./lresort.zip</path>
+    <name>Last Resort</name>
+    <image>./Imgs/lresort.png</image>
+  </game>
+  <game id="13976" source="ScreenScraper.fr">
+    <path>./lbowling.zip</path>
+    <name>League Bowling</name>
+    <image>./Imgs/lbowling.png</image>
+  </game>
+  <game id="37601" source="ScreenScraper.fr">
+    <path>./legendos.zip</path>
+    <name>Legend of Success Joe</name>
+    <image>./Imgs/legendos.png</image>
+  </game>
+  <game id="13904" source="ScreenScraper.fr">
+    <path>./magdrop2.zip</path>
+    <name>Magical Drop II</name>
+    <image>./Imgs/magdrop2.png</image>
+  </game>
+  <game id="13883" source="ScreenScraper.fr">
+    <path>./magdrop3.zip</path>
+    <name>Magical Drop III</name>
+    <image>./Imgs/magdrop3.png</image>
+  </game>
+  <game id="37602" source="ScreenScraper.fr">
+    <path>./maglord.zip</path>
+    <name>Magician Lord</name>
+    <image>./Imgs/maglord.png</image>
+  </game>
+  <game id="37914" source="ScreenScraper.fr">
+    <path>./matrim.zip</path>
+    <name>Matrimelee</name>
+    <image>./Imgs/matrim.png</image>
+  </game>
+  <game>
+    <path>./miexchng.zip</path>
+    <name>Money Puzzle Exchanger</name>
+    <image>./Imgs/miexchng.png</image>
+  </game>
+  <game id="37604" source="ScreenScraper.fr">
+    <path>./mslug.zip</path>
+    <name>Metal Slug - Super Vehicle-001</name>
+    <image>./Imgs/mslug.png</image>
+  </game>
+  <game id="37605" source="ScreenScraper.fr">
+    <path>./mslug2.zip</path>
+    <name>Metal Slug 2 - Super Vehicle-001/II</name>
+    <image>./Imgs/mslug2.png</image>
+  </game>
+  <game id="13852" source="ScreenScraper.fr">
+    <path>./mslug3.zip</path>
+    <name>Metal Slug 3</name>
+    <image>./Imgs/mslug3.png</image>
+  </game>
+  <game id="37606" source="ScreenScraper.fr">
+    <path>./mslug4.zip</path>
+    <name>Metal Slug 4</name>
+    <image>./Imgs/mslug4.png</image>
+  </game>
+  <game id="13871" source="ScreenScraper.fr">
+    <path>./mslug5.zip</path>
+    <name>Metal Slug 5</name>
+    <image>./Imgs/mslug5.png</image>
+  </game>
+  <game id="37607" source="ScreenScraper.fr">
+    <path>./mslugx.zip</path>
+    <name>Metal Slug X - Super Vehicle-001</name>
+    <image>./Imgs/mslugx.png</image>
+  </game>
+  <game id="13896" source="ScreenScraper.fr">
+    <path>./mutnat.zip</path>
+    <name>Mutation Nation</name>
+    <image>./Imgs/mutnat.png</image>
+  </game>
+  <game id="13892" source="ScreenScraper.fr">
+    <path>./nam1975.zip</path>
+    <name>NAM-1975</name>
+    <image>./Imgs/nam1975.png</image>
+  </game>
+  <game id="13861" source="ScreenScraper.fr">
+    <path>./neobombe.zip</path>
+    <name>Neo Bomberman</name>
+    <image>./Imgs/neobombe.png</image>
+  </game>
+  <game id="37610" source="ScreenScraper.fr">
+    <path>./neodrift.zip</path>
+    <name>Neo Drift Out - New Technology</name>
+    <image>./Imgs/neodrift.png</image>
+  </game>
+  <game id="37611" source="ScreenScraper.fr">
+    <path>./neomrdo.zip</path>
+    <name>Neo Mr. Do!</name>
+    <image>./Imgs/neomrdo.png</image>
+  </game>
+  <game>
+    <path>./neopong.zip</path>
+    <name>Neo Pong</name>
+    <image>./Imgs/neopong.png</image>
+  </game>
+  <game id="37651" source="ScreenScraper.fr">
+    <path>./turfmast.zip</path>
+    <name>Neo Turf Masters</name>
+    <image>./Imgs/turfmast.png</image>
+  </game>
+  <game id="37609" source="ScreenScraper.fr">
+    <path>./neocup98.zip</path>
+    <name>Neo Geo Cup '98 - The Road to the Victory</name>
+    <image>./Imgs/neocup98.png</image>
+  </game>
+  <game id="13956" source="ScreenScraper.fr">
+    <path>./nitd.zip</path>
+    <name>Nightmare in the Dark</name>
+    <image>./Imgs/nitd.png</image>
+  </game>
+  <game id="37608" source="ScreenScraper.fr">
+    <path>./ncombat.zip</path>
+    <name>Ninja Combat</name>
+    <image>./Imgs/ncombat.png</image>
+  </game>
+  <game id="13934" source="ScreenScraper.fr">
+    <path>./ncommand.zip</path>
+    <name>Ninja Commando</name>
+    <image>./Imgs/ncommand.png</image>
+  </game>
+  <game id="37612" source="ScreenScraper.fr">
+    <path>./ninjamas.zip</path>
+    <name>Ninja Master's - Haō Ninpō Chō</name>
+    <image>./Imgs/ninjamas.png</image>
+  </game>
+  <game id="13948" source="ScreenScraper.fr">
+    <path>./overtop.zip</path>
+    <name>Over Top</name>
+    <image>./Imgs/overtop.png</image>
+  </game>
+  <game id="13933" source="ScreenScraper.fr">
+    <path>./panicbom.zip</path>
+    <name>Panic Bomber</name>
+    <image>./Imgs/panicbom.png</image>
+  </game>
+  <game id="37615" source="ScreenScraper.fr">
+    <path>./pgoal.zip</path>
+    <name>Pleasure Goal</name>
+    <image>./Imgs/pgoal.png</image>
+  </game>
+  <game id="37616" source="ScreenScraper.fr">
+    <path>./pnyaa.zip</path>
+    <name>Pochi and Nyaa</name>
+    <image>./Imgs/pnyaa.png</image>
+  </game>
+  <game id="37617" source="ScreenScraper.fr">
+    <path>./popbounc.zip</path>
+    <name>Pop 'n Bounce</name>
+    <image>./Imgs/popbounc.png</image>
+  </game>
+  <game id="37618" source="ScreenScraper.fr">
+    <path>./pspikes2.zip</path>
+    <name>Power Spikes II</name>
+    <image>./Imgs/pspikes2.png</image>
+  </game>
+  <game id="13922" source="ScreenScraper.fr">
+    <path>./preisle2.zip</path>
+    <name>Prehistoric Isle 2</name>
+    <image>./Imgs/preisle2.png</image>
+  </game>
+  <game id="13876" source="ScreenScraper.fr">
+    <path>./pulstar.zip</path>
+    <name>Pulstar</name>
+    <image>./Imgs/pulstar.png</image>
+  </game>
+  <game id="37620" source="ScreenScraper.fr">
+    <path>./puzzledp.zip</path>
+    <name>Puzzle De Pon!</name>
+    <image>./Imgs/puzzledp.png</image>
+  </game>
+  <game id="37588" source="ScreenScraper.fr">
+    <path>./joyjoy.zip</path>
+    <name>Puzzled</name>
+    <image>./Imgs/joyjoy.png</image>
+  </game>
+  <game id="37626" source="ScreenScraper.fr">
+    <path>./rotd.zip</path>
+    <name>Rage of the Dragons</name>
+    <image>./Imgs/rotd.png</image>
+  </game>
+  <game id="37621" source="ScreenScraper.fr">
+    <path>./ragnagrd.zip</path>
+    <name>Ragnagard</name>
+    <image>./Imgs/ragnagrd.png</image>
+  </game>
+  <game id="37623" source="ScreenScraper.fr">
+    <path>./rbff2.zip</path>
+    <name>Real Bout Fatal Fury 2 - The Newcomers</name>
+    <image>./Imgs/rbff2.png</image>
+  </game>
+  <game id="37624" source="ScreenScraper.fr">
+    <path>./rbffspec.zip</path>
+    <name>Real Bout Fatal Fury Special</name>
+    <image>./Imgs/rbffspec.png</image>
+  </game>
+  <game id="37622" source="ScreenScraper.fr">
+    <path>./rbff1.zip</path>
+    <name>Real Bout Fatal Fury</name>
+    <image>./Imgs/rbff1.png</image>
+  </game>
+  <game id="37625" source="ScreenScraper.fr">
+    <path>./ridhero.zip</path>
+    <name>Riding Hero</name>
+    <image>./Imgs/ridhero.png</image>
+  </game>
+  <game id="13918" source="ScreenScraper.fr">
+    <path>./roboarmy.zip</path>
+    <name>Robo Army</name>
+    <image>./Imgs/roboarmy.png</image>
+  </game>
+  <game id="37630" source="ScreenScraper.fr">
+    <path>./samsho2.zip</path>
+    <name>Samurai Shodown II</name>
+    <image>./Imgs/samsho2.png</image>
+  </game>
+  <game id="37631" source="ScreenScraper.fr">
+    <path>./samsho3.zip</path>
+    <name>Samurai Shodown III</name>
+    <image>./Imgs/samsho3.png</image>
+  </game>
+  <game id="37632" source="ScreenScraper.fr">
+    <path>./samsho4.zip</path>
+    <name>Samurai Shodown IV - Amakusa's Revenge</name>
+    <image>./Imgs/samsho4.png</image>
+  </game>
+  <game id="37628" source="ScreenScraper.fr">
+    <path>./samsh5sp.zip</path>
+    <name>Samurai Shodown V Special</name>
+    <image>./Imgs/samsh5sp.png</image>
+  </game>
+  <game id="37633" source="ScreenScraper.fr">
+    <path>./samsho5.zip</path>
+    <name>Samurai Shodown V</name>
+    <image>./Imgs/samsho5.png</image>
+  </game>
+  <game id="37629" source="ScreenScraper.fr">
+    <path>./samsho.zip</path>
+    <name>Samurai Shodown</name>
+    <image>./Imgs/samsho.png</image>
+  </game>
+  <game id="37634" source="ScreenScraper.fr">
+    <path>./savagere.zip</path>
+    <name>Savage Reign</name>
+    <image>./Imgs/savagere.png</image>
+  </game>
+  <game id="37636" source="ScreenScraper.fr">
+    <path>./sengoku2.zip</path>
+    <name>Sengoku 2</name>
+    <image>./Imgs/sengoku2.png</image>
+  </game>
+  <game id="37637" source="ScreenScraper.fr">
+    <path>./sengoku3.zip</path>
+    <name>Sengoku 3</name>
+    <image>./Imgs/sengoku3.png</image>
+  </game>
+  <game id="13874" source="ScreenScraper.fr">
+    <path>./sengoku.zip</path>
+    <name>Sengoku</name>
+    <image>./Imgs/sengoku.png</image>
+  </game>
+  <game id="37638" source="ScreenScraper.fr">
+    <path>./shocktr2.zip</path>
+    <name>Shock Troopers - 2nd Squad</name>
+    <image>./Imgs/shocktr2.png</image>
+  </game>
+  <game id="37639" source="ScreenScraper.fr">
+    <path>./shocktro.zip</path>
+    <name>Shock Troopers</name>
+    <image>./Imgs/shocktro.png</image>
+  </game>
+  <game id="37640" source="ScreenScraper.fr">
+    <path>./socbrawl.zip</path>
+    <name>Soccer Brawl</name>
+    <image>./Imgs/socbrawl.png</image>
+  </game>
+  <game id="37643" source="ScreenScraper.fr">
+    <path>./spinmast.zip</path>
+    <name>Spin Master</name>
+    <image>./Imgs/spinmast.png</image>
+  </game>
+  <game id="13978" source="ScreenScraper.fr">
+    <path>./stakwin2.zip</path>
+    <name>Stakes Winner 2</name>
+    <image>./Imgs/stakwin2.png</image>
+  </game>
+  <game id="37648" source="ScreenScraper.fr">
+    <path>./stakwin.zip</path>
+    <name>Stakes Winner</name>
+    <image>./Imgs/stakwin.png</image>
+  </game>
+  <game id="37649" source="ScreenScraper.fr">
+    <path>./strhoop.zip</path>
+    <name>Street Slam</name>
+    <image>./Imgs/strhoop.png</image>
+  </game>
+  <game id="37627" source="ScreenScraper.fr">
+    <path>./s1945p.zip</path>
+    <name>Strikers 1945 Plus</name>
+    <image>./Imgs/s1945p.png</image>
+  </game>
+  <game id="37635" source="ScreenScraper.fr">
+    <path>./sdodgeb.zip</path>
+    <name>Super Dodge Ball</name>
+    <image>./Imgs/sdodgeb.png</image>
+  </game>
+  <game id="37645" source="ScreenScraper.fr">
+    <path>./ssideki2.zip</path>
+    <name>Super Sidekicks 2 - The World Championship</name>
+    <image>./Imgs/ssideki2.png</image>
+  </game>
+  <game id="37646" source="ScreenScraper.fr">
+    <path>./ssideki3.zip</path>
+    <name>Super Sidekicks 3 - The Next Glory</name>
+    <image>./Imgs/ssideki3.png</image>
+  </game>
+  <game id="37644" source="ScreenScraper.fr">
+    <path>./ssideki.zip</path>
+    <name>Super Sidekicks</name>
+    <image>./Imgs/ssideki.png</image>
+  </game>
+  <game id="13853" source="ScreenScraper.fr">
+    <path>./svc.zip</path>
+    <name>SVC Chaos - SNK Vs. Capcom</name>
+    <image>./Imgs/svc.png</image>
+  </game>
+  <game id="37587" source="ScreenScraper.fr">
+    <path>./irrmaze.zip</path>
+    <name>The Irritating Maze</name>
+    <image>./Imgs/irrmaze.png</image>
+  </game>
+  <game id="13879" source="ScreenScraper.fr">
+    <path>./kof2000.zip</path>
+    <name>The King of Fighters 2000</name>
+    <image>./Imgs/kof2000.png</image>
+  </game>
+  <game id="37591" source="ScreenScraper.fr">
+    <path>./kof2001.zip</path>
+    <name>The King of Fighters 2001</name>
+    <image>./Imgs/kof2001.png</image>
+  </game>
+  <game id="13857" source="ScreenScraper.fr">
+    <path>./kof2002.zip</path>
+    <name>The King of Fighters 2002</name>
+    <image>./Imgs/kof2002.png</image>
+  </game>
+  <game id="13878" source="ScreenScraper.fr">
+    <path>./kof2003.zip</path>
+    <name>The King of Fighters 2003</name>
+    <image>./Imgs/kof2003.png</image>
+  </game>
+  <game id="13894" source="ScreenScraper.fr">
+    <path>./kof94.zip</path>
+    <name>The King of Fighters '94</name>
+    <image>./Imgs/kof94.png</image>
+  </game>
+  <game id="37592" source="ScreenScraper.fr">
+    <path>./kof95.zip</path>
+    <name>The King of Fighters '95</name>
+    <image>./Imgs/kof95.png</image>
+  </game>
+  <game id="37593" source="ScreenScraper.fr">
+    <path>./kof96.zip</path>
+    <name>The King of Fighters '96</name>
+    <image>./Imgs/kof96.png</image>
+  </game>
+  <game id="37594" source="ScreenScraper.fr">
+    <path>./kof97.zip</path>
+    <name>The King of Fighters '97</name>
+    <image>./Imgs/kof97.png</image>
+  </game>
+  <game id="37595" source="ScreenScraper.fr">
+    <path>./kof98.zip</path>
+    <name>The King of Fighters '98 - The Slugfest</name>
+    <image>./Imgs/kof98.png</image>
+  </game>
+  <game id="37596" source="ScreenScraper.fr">
+    <path>./kof99.zip</path>
+    <name>The King of Fighters '99 - Millennium Battle</name>
+    <image>./Imgs/kof99.png</image>
+  </game>
+  <game id="37600" source="ScreenScraper.fr">
+    <path>./lastbld2.zip</path>
+    <name>The Last Blade 2</name>
+    <image>./Imgs/lastbld2.png</image>
+  </game>
+  <game id="37599" source="ScreenScraper.fr">
+    <path>./lastblad.zip</path>
+    <name>The Last Blade</name>
+    <image>./Imgs/lastblad.png</image>
+  </game>
+  <game id="13935" source="ScreenScraper.fr">
+    <path>./superspy.zip</path>
+    <name>The Super Spy</name>
+    <image>./Imgs/superspy.png</image>
+  </game>
+  <game id="37647" source="ScreenScraper.fr">
+    <path>./ssideki4.zip</path>
+    <name>The Ultimate 11 - SNK Football Championship</name>
+    <image>./Imgs/ssideki4.png</image>
+  </game>
+  <game>
+    <path>./tws96.zip</path>
+    <name>Tecmo World Soccer '96</name>
+    <image>./Imgs/tws96.png</image>
+  </game>
+  <game id="13962" source="ScreenScraper.fr">
+    <path>./trally.zip</path>
+    <name>Thrash Rally</name>
+    <image>./Imgs/trally.png</image>
+  </game>
+  <game id="37650" source="ScreenScraper.fr">
+    <path>./tophuntr.zip</path>
+    <name>Top Hunter - Roddy &amp; Cathy</name>
+    <image>./Imgs/tophuntr.png</image>
+  </game>
+  <game id="13977" source="ScreenScraper.fr">
+    <path>./tpgolf.zip</path>
+    <name>Top Player's Golf</name>
+    <image>./Imgs/tpgolf.png</image>
+  </game>
+  <game id="87614" source="ScreenScraper.fr">
+    <path>./totc.zip</path>
+    <name>Treasure of the Caribbean</name>
+    <image>./Imgs/totc.png</image>
+  </game>
+  <game id="37652" source="ScreenScraper.fr">
+    <path>./twinspri.zip</path>
+    <name>Twinkle Star Sprites</name>
+    <image>./Imgs/twinspri.png</image>
+  </game>
+  <game id="13929" source="ScreenScraper.fr">
+    <path>./viewpoin.zip</path>
+    <name>Viewpoint</name>
+    <image>./Imgs/viewpoin.png</image>
+  </game>
+  <game id="87615" source="ScreenScraper.fr">
+    <path>./vliner.zip</path>
+    <name>V-Liner</name>
+    <image>./Imgs/vliner.png</image>
+  </game>
+  <game id="37583" source="ScreenScraper.fr">
+    <path>./gowcaizr.zip</path>
+    <name>Voltage Fighter Gowcaizer</name>
+    <image>./Imgs/gowcaizr.png</image>
+  </game>
+  <game id="13947" source="ScreenScraper.fr">
+    <path>./wakuwak7.zip</path>
+    <name>Waku Waku 7</name>
+    <image>./Imgs/wakuwak7.png</image>
+  </game>
+  <game id="37656" source="ScreenScraper.fr">
+    <path>./wjammers.zip</path>
+    <name>Windjammers</name>
+    <image>./Imgs/wjammers.png</image>
+  </game>
+  <game id="37655" source="ScreenScraper.fr">
+    <path>./wh2j.zip</path>
+    <name>World Heroes 2 Jet</name>
+    <image>./Imgs/wh2j.png</image>
+  </game>
+  <game id="13942" source="ScreenScraper.fr">
+    <path>./wh2.zip</path>
+    <name>World Heroes 2</name>
+    <image>./Imgs/wh2.png</image>
+  </game>
+  <game id="13902" source="ScreenScraper.fr">
+    <path>./whp.zip</path>
+    <name>World Heroes Perfect</name>
+    <image>./Imgs/whp.png</image>
+  </game>
+  <game id="37654" source="ScreenScraper.fr">
+    <path>./wh1.zip</path>
+    <name>World Heroes</name>
+    <image>./Imgs/wh1.png</image>
+  </game>
+  <game id="37657" source="ScreenScraper.fr">
+    <path>./zedblade.zip</path>
+    <name>Zed Blade</name>
+    <image>./Imgs/zedblade.png</image>
+  </game>
+  <game>
+    <path>./zintrckb.zip</path>
+    <name>Zintrick</name>
+    <image>./Imgs/zintrckb.png</image>
+  </game>
+  <game id="13913" source="ScreenScraper.fr">
+    <path>./zupapa.zip</path>
+    <name>Zupapa!</name>
+    <image>./Imgs/zupapa.png</image>
+  </game>
+</gameList>

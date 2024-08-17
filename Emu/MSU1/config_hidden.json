@@ -1,0 +1,33 @@
+{
+	"label":	"MSU1",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/msu1.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/msu1.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/MSU1",
+	"imgpath":	"../../Roms/MSU1/Imgs",
+	"gamelist":	"../../Roms/MSU1/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	0,
+	"extlist":	"sfc|smc|fig|bs|st|zip|7z",
+    "launchlist": [
+
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "✓ CPU is at 1344 MHz",
+            "launch": "1344.sh"
+        },
+        {
+            "name": "Set CPU to 1512 MHz",
+            "launch": "1512.sh"
+        }
+		
+	]
+}

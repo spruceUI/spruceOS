@@ -1,0 +1,572 @@
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   298217472 Bytes (   284 MB )
+ Used Ram:     1167360 Bytes (     1 MB )
+
+debug:nativeWidth, nativeHeight, bpp, Hz  0, 0, 0, 0
+OpenBoR v4.0 Build 0 (commit hash: b00efbc), Compile Date: Jun 21 2024
+
+Game Selected: /mnt/SDCARD/Emu/openbor/../../Roms/OpenBOR/Mighty Final Fight X.pak
+
+FileCaching System Init......	Enabled
+Initializing video............
+Reading video settings from 'data/video.txt'.
+
+Colordepth is depreciated. All modules are displayed with a 32bit color screen.
+
+Initialized video.............	320x240 (Mode: 0)
+
+Loading menu.txt.............	Done!
+Loading fonts................	1 2 3 4 5 6 7 8 Done!
+Timer init...................	Done!
+Initialize Sound..............	
+Loading sprites..............	Done!
+Loading level order..........	Done!
+Loading model constants......	Done!
+Loading script settings......	Done!
+Loading scripts..............	Done!
+Loading models...............
+
+Cacheing 'flash0' from data/chars/misc/flash0/flash0.txt
+Cacheing '¿ÆµÏ' from data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt
+Cacheing '¿­' from data/chars/hero/¿­/¿­.txt
+Cacheing '¹þ¸ñ' from data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt
+Cacheing '¹â±ê' from data/chars/misc/¹â±ê/¹â±ê.txt
+Cacheing '¿ÆµÏ_ïÚ' from data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt
+Cacheing '¿ÆµÏ_¹êÅÉÆø¹¦' from data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt
+Cacheing '¿­_ïÚ' from data/chars/hero/¿­/ïÚ/¿­_ïÚ.txt
+Cacheing 'haosho' from data/chars/fireball/haosho.txt
+Cacheing 'haosho2' from data/chars/fireball/haosho2.txt
+Cacheing 'explosion' from data/chars/misc/explosion/explosion.txt
+Cacheing 'e3_µ¶' from data/chars/enemy/e3/µ¶/e3_µ¶.txt
+Cacheing 'boss4_ÅÚµ¯È­' from data/chars/enemy/boss4/ÅÚµ¯È­/boss4_ÅÚµ¯È­.txt
+Cacheing '»÷´ò¶¯»­' from data/chars/misc/»÷´ò¶¯»­/»÷´ò¶¯»­.txt
+Cacheing '¸ñµ²¶¯»­' from data/chars/misc/¸ñµ²¶¯»­/¸ñµ²¶¯»­.txt
+Cacheing 'blood' from data/chars/misc/blood/blood.txt
+Cacheing '±¬Õ¨' from data/chars/misc/±¬Õ¨/±¬Õ¨.txt
+Cacheing 'RageSpend' from data/chars/misc/rage/ragespend.txt
+Cacheing '»ðÖù' from data/chars/kyo/»ðÖù/»ðÖù.txt
+Cacheing 'tempnado' from data/chars/misc/tempnado.txt
+Cacheing '1up' from data/chars/misc/1up/1up.txt
+Cacheing '1up2' from data/chars/misc/1up/1up2.txt
+Cacheing 'Ç®' from data/chars/misc/Ç®/Ç®.txt
+Cacheing 'Æ»¹û' from data/chars/misc/Æ»¹û/Æ»¹û.txt
+Cacheing 'ÂÌÆ»¹û' from data/chars/misc/Æ»¹û/ÂÌÆ»¹û.txt
+Cacheing 'ÒþÉí' from data/chars/misc/ÒþÉí/ÒþÉí.txt
+Cacheing 'Ð¡µ¶' from data/chars/misc/Ð¡µ¶/Ð¡µ¶.txt
+Cacheing 'À×µç' from data/chars/misc/À×µç/À×µç.txt
+Cacheing 'e' from data/chars/enemy/e/e.txt
+Cacheing 'e2' from data/chars/enemy/e2/e2.txt
+Cacheing 'e3' from data/chars/enemy/e3/e3.txt
+Cacheing 'e3_npc' from data/chars/enemy/e3/e3_npc.txt
+Cacheing 'e4' from data/chars/enemy/e4/e4.txt
+Cacheing 'e5' from data/chars/enemy/e5/e5.txt
+Cacheing 'e6' from data/chars/enemy/e6/e6.txt
+Cacheing 'boss' from data/chars/enemy/boss/boss.txt
+Cacheing 'boss2' from data/chars/enemy/boss2/boss2.txt
+Cacheing 'boss2_2' from data/chars/enemy/boss2/boss2_2.txt
+Cacheing 'boss3' from data/chars/enemy/boss3/boss3.txt
+Cacheing 'boss4' from data/chars/enemy/boss4/boss4.txt
+
+Loaded 'flash0' from data/chars/misc/flash0/flash0.txt 
+Loaded '¿ÆµÏ' from data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt 
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '------------------------------------------------------------------------' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '.' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command 'extabox' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¿ÆµÏ/¿ÆµÏ.txt'!
+Loaded '¿­' from data/chars/hero/¿­/¿­.txt 
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '------------------------------------------------------------------------' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '-' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '-' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '-' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/¿­.txt'!
+Loaded '¹þ¸ñ' from data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt 
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//////' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '=mponly' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Command '//' not understood in file 'data/chars/hero/¹þ¸ñ/¹þ¸ñ.txt'!
+Loaded '¹â±ê' from data/chars/misc/¹â±ê/¹â±ê.txt 
+Loaded '¿ÆµÏ_ïÚ' from data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt 
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/ïÚ/¿ÆµÏ_ïÚ.txt'!
+Loaded '¿ÆµÏ_¹êÅÉÆø¹¦' from data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt 
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//////' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Command '//' not understood in file 'data/chars/hero/¿ÆµÏ/¹êÅÉÆø¹¦/¿ÆµÏ_¹êÅÉÆø¹¦.txt'!
+Loaded '¿­_ïÚ' from data/chars/hero/¿­/ïÚ/¿­_ïÚ.txt 
+Command '//' not understood in file 'data/chars/hero/¿­/ïÚ/¿­_ïÚ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/ïÚ/¿­_ïÚ.txt'!
+Command '//' not understood in file 'data/chars/hero/¿­/ïÚ/¿­_ïÚ.txt'!
+Loaded 'HaoSho' from data/chars/fireball/haosho.txt 
+Loaded 'HaoSho2' from data/chars/fireball/haosho2.txt 
+Loaded 'Explosion' from data/chars/misc/explosion/explosion.txt 
+Command '=animationscript' not understood in file 'data/chars/misc/explosion/explosion.txt'!
+Command '=@cmd' not understood in file 'data/chars/misc/explosion/explosion.txt'!
+Loaded 'e3_µ¶' from data/chars/enemy/e3/µ¶/e3_µ¶.txt 
+Loaded 'boss4_ÅÚµ¯È­' from data/chars/enemy/boss4/ÅÚµ¯È­/boss4_ÅÚµ¯È­.txt 
+Command '//' not understood in file 'data/chars/enemy/boss4/ÅÚµ¯È­/boss4_ÅÚµ¯È­.txt'!
+Loaded 'flash' from data/chars/misc/»÷´ò¶¯»­/»÷´ò¶¯»­.txt 
+Loaded 'bflash' from data/chars/misc/¸ñµ²¶¯»­/¸ñµ²¶¯»­.txt 
+Loaded 'blood' from data/chars/misc/blood/blood.txt 
+Loaded '±¬Õ¨' from data/chars/misc/±¬Õ¨/±¬Õ¨.txt 
+sound_load_sample can't load sample from file 'data/sounds/boom2.wav'!
+Loaded 'RageSpend' from data/chars/misc/rage/ragespend.txt 
+Command '=custknife' not understood in file 'data/chars/misc/rage/ragespend.txt'!
+Command '=throwframe' not understood in file 'data/chars/misc/rage/ragespend.txt'!
+Command '=custentity' not understood in file 'data/chars/misc/rage/ragespend.txt'!
+Command '=spawnframe' not understood in file 'data/chars/misc/rage/ragespend.txt'!
+Loaded '»ðÖù' from data/chars/kyo/»ðÖù/»ðÖù.txt 
+Command '=script' not understood in file 'data/chars/kyo/»ðÖù/»ðÖù.txt'!
+Loaded 'tempnado' from data/chars/misc/tempnado.txt 
+Loaded 'À×µç' from data/chars/misc/À×µç/À×µç.txt 
+Loaded 'e3_npc' from data/chars/enemy/e3/e3_npc.txt 
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//////' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+Command '//' not understood in file 'data/chars/enemy/e3/e3_npc.txt'!
+
+Loading models...............	Done!
+Object engine init...........	Done!
+Input init...................	Done!
+Create blending tables.......	Done!
+Save settings so far........	Done!
+
+
+
+Warning, an error occurred while playing animated gif file 'data/scenes/.gif'.
+Level Loading:   'data/levels/¹Ø¿¨1/¹Ø¿¨1.txt'
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   269336576 Bytes (   256 MB )
+ Used Ram:    12393984 Bytes (    11 MB )
+
+Loaded 'e' from data/chars/enemy/e/e.txt 
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Command '//' not understood in file 'data/chars/enemy/e/e.txt'!
+Loaded 'e2' from data/chars/enemy/e2/e2.txt 
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+Command '//' not understood in file 'data/chars/enemy/e2/e2.txt'!
+
+Level Loaded:    'data/levels/¹Ø¿¨1/¹Ø¿¨1.txt'
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   269336576 Bytes (   256 MB )
+ Used Ram:    12396544 Bytes (    11 MB )
+Total sprites mapped: 478
+
+
+************ Shutting Down ************
+
+OpenBOR v4.0 Build 0 (commit hash: b00efbc), Compile Date: Jun 21 2024
+Presented by the OpenBOR Team.
+www.chronocrash.com
+OpenBOR is the open source continuation of Beats of Rage by Senile Team.
+
+Special thanks to SEGA and SNK.
+
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   268447744 Bytes (   256 MB )
+ Used Ram:    12416000 Bytes (    11 MB )
+
+Level Unloading: 'data/levels/¹Ø¿¨1/¹Ø¿¨1.txt'
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   268447744 Bytes (   256 MB )
+ Used Ram:    12416000 Bytes (    11 MB )
+
+RAM Status:
+Total Ram:   522354688 Bytes (   498 MB )
+ Free Ram:   268447744 Bytes (   256 MB )
+ Used Ram:    12416000 Bytes (    11 MB )
+
+Release level data...........
+Done!
+
+Release graphics data........	Done!
+Release game data............
+
+Unload 'flash0' ............Done.
+Unload '¿ÆµÏ' ............Done.
+Unload '¿­' ............Done.
+Unload '¹þ¸ñ' ............Done.
+Unload '¹â±ê' ............Done.
+Unload '¿ÆµÏ_ïÚ' ............Done.
+Unload '¿ÆµÏ_¹êÅÉÆø¹¦' ............Done.
+Unload '¿­_ïÚ' ............Done.
+Unload 'HaoSho' ............Done.
+Unload 'HaoSho2' ............Done.
+Unload 'Explosion' ............Done.
+Unload 'e3_µ¶' ............Done.
+Unload 'boss4_ÅÚµ¯È­' ............Done.
+Unload 'flash' ............Done.
+Unload 'bflash' ............Done.
+Unload 'blood' ............Done.
+Unload '±¬Õ¨' ............Done.
+Unload 'RageSpend' ............Done.
+Unload '»ðÖù' ............Done.
+Unload 'tempnado' ............Done.
+Unload 'À×µç' ............Done.
+Unload 'e3_npc' ............Done.
+Unload 'e' ............Done.
+Unload 'e2' ............Done.
+
+Release game data............	Done!
+Release timer................	Done!
+Release input hardware.......	Done!
+Release sound system.........	Done!
+Release FileCaching System...	Done!
+
+**************** Done *****************
+
+OpenBOR v4.0 Build 0 (commit hash: b00efbc), Compile Date: Jun 21 2024
+Presented by the OpenBOR Team.
+www.chronocrash.com
+OpenBOR is the open source continuation of Beats of Rage by Senile Team.
+
+Special thanks to SEGA and SNK.
+

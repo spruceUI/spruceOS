@@ -1,0 +1,32 @@
+{
+	"label":	"Intellivis.",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/itv.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/itv.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/INTELLIVISION",
+	"imgpath":	"../../Roms/INTELLIVISION/Imgs",
+	"gamelist":	"../../Roms/INTELLIVISION/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"bin|int|zip|7z",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "✓ CPU is at 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}

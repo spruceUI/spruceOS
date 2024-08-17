@@ -1,0 +1,47 @@
+{
+    "name": "DONT TOUCH",
+    "author": "nothing",
+    "description": "nothing",
+    "batteryPercentage": {
+        "visible": false,
+        "color": "#000000",
+        "font": "Gravity-Regular-CAPS.otf",
+        "size": 0,
+        "textAlign": "right",
+        "offsetX": 0,
+        "offsetY": 0,
+        "fixed": true
+    },
+    "title": {
+        "font": "Gravity-Regular-CAPS.otf",
+        "size": 0,
+        "color": "#00000"
+    },
+    "hint": {
+        "font": "Gravity-Regular-CAPS.otf",
+        "size": 0,
+        "color": "#000000"
+    },
+    "currentpage": {
+	"font": "nunwen.ttf",
+        "size": 0,
+        "color": "#000000"
+    },
+    "total": {
+      "font": "nunwen.ttf",
+        "size": 0, 
+        "color": "#000000"
+    },
+    "grid": {
+        "font": "Gravity-Regular-CAPS.otf",
+        "grid1x4": 0,
+        "grid3x4": 0,
+        "color": "#000000",
+        "selectedcolor": "#000000"
+    },
+    "list": {
+        "font": "Gravity-Light.otf",
+        "size": 1,
+        "color": "#000000"
+    }
+}

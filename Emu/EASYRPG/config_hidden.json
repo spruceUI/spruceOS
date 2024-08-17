@@ -1,0 +1,32 @@
+{
+	"label":	"EasyRPG",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/easyrpg.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/easyrpg.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/EASYRPG",
+	"imgpath":	"../../Roms/EASYRPG/Imgs",
+	"gamelist":	"../../Roms/EASYRPG/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"zip|ldb|easyrpg",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "✓ CPU is at 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}

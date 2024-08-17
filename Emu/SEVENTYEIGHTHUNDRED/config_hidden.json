@@ -1,0 +1,32 @@
+{
+	"label":	"Atari 7800",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/7800.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/7800.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/SEVENTYEIGHTHUNDRED",
+	"imgpath":	"../../Roms/SEVENTYEIGHTHUNDRED/Imgs",
+	"gamelist":	"../../Roms/SEVENTYEIGHTHUNDRED/miyoogamelist.xml",
+	"useswap":	0,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"a78|zip",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "✓ CPU is at 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}

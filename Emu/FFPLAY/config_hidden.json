@@ -1,0 +1,12 @@
+{
+    "label":"FFplay",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
+    "launch":"launch.sh",
+    "rompath":"../../Roms/FFPLAY",
+	"imgpath":	"../../Roms/FFPLAY/Imgs",
+    "useswap":1,
+    "shortname":0,
+    "hidebios":0
+}
+    

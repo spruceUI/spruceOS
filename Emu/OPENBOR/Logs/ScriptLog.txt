@@ -1,0 +1,308 @@
+
+#### animationscript function main #####
+# data/chars/hero/科迪/科迪.txt
+########################################
+void main()
+{
+    int frame = getlocalvar("frame");
+    int animhandle = getlocalvar("animhandle");
+    if(animhandle==9)
+    {
+        if(frame==2)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        if(frame==4)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        if(frame==6)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        if(frame==8)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        if(frame==10)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        if(frame==12)
+        {
+            projectile(1, "haosho", 0, 0, 0);
+        }
+        return;
+    }
+    if(animhandle==10)
+    {
+        if(frame==2)
+        {
+            dasher(4);
+        }
+        if(frame==3)
+        {
+            dasher(3);
+        }
+        if(frame==4)
+        {
+            dasher(2);
+        }
+        return;
+    }
+    if(animhandle==11)
+    {
+        if(frame==22)
+        {
+            stop();
+        }
+        return;
+    }
+    if(animhandle==27)
+    {
+        if(frame==0)
+        {
+            projectile("雷电");
+        }
+        return;
+    }
+
+}
+
+#### animationscript function main #####
+# data/chars/hero/凯/凯.txt
+########################################
+void main()
+{
+    int frame = getlocalvar("frame");
+    int animhandle = getlocalvar("animhandle");
+    if(animhandle==41)
+    {
+        if(frame==4)
+        {
+            projectile(1, "tempnado", 0, 0, 0);
+        }
+        return;
+    }
+    if(animhandle==42)
+    {
+        if(frame==2)
+        {
+            dasher(0.5, 0.5);
+        }
+        if(frame==3)
+        {
+            dasher(0.5, 0.8);
+        }
+        if(frame==4)
+        {
+            dasher(0.5, 1.1);
+        }
+        if(frame==5)
+        {
+            dasher(0.5, 1.4);
+        }
+        if(frame==10)
+        {
+            dasher(0.5, 0.5);
+        }
+        if(frame==11)
+        {
+            dasher(0.5, 0.8);
+        }
+        if(frame==12)
+        {
+            dasher(0.5, 1.1);
+        }
+        if(frame==13)
+        {
+            dasher(0.5, 1.4);
+        }
+        if(frame==18)
+        {
+            dasher(0.5, 0.5);
+        }
+        if(frame==19)
+        {
+            dasher(0.5, 0.8);
+        }
+        if(frame==20)
+        {
+            dasher(0.5, 1.1);
+        }
+        if(frame==21)
+        {
+            dasher(0.5, 1.4);
+        }
+        return;
+    }
+    if(animhandle==59)
+    {
+        if(frame==0)
+        {
+            projectile("雷电");
+        }
+        return;
+    }
+
+}
+
+#### animationscript function main #####
+# data/chars/hero/哈格/哈格.txt
+########################################
+void main()
+{
+    int frame = getlocalvar("frame");
+    int animhandle = getlocalvar("animhandle");
+    if(animhandle==73)
+    {
+        if(frame==1)
+        {
+            dasher(4);
+        }
+        if(frame==2)
+        {
+            dasher(4);
+        }
+        if(frame==3)
+        {
+            dasher(5);
+        }
+        if(frame==4)
+        {
+            dasher(6);
+        }
+        if(frame==5)
+        {
+            dasher(3);
+        }
+        if(frame==6)
+        {
+            dasher(2);
+        }
+        if(frame==7)
+        {
+            dasher(1);
+        }
+        return;
+    }
+    if(animhandle==74)
+    {
+        if(frame==2)
+        {
+            projectile(1, "haosho2", 0, 0, 0);
+        }
+        return;
+    }
+    if(animhandle==80)
+    {
+        if(frame==0)
+        {
+            slamstart();
+        }
+        if(frame==0)
+        {
+            position(0, 15, 0, 0, 0);
+        }
+        if(frame==0)
+        {
+            antiwall(-30, 30, 0);
+        }
+        if(frame==1)
+        {
+            position(0, 15, 0, 0, 0);
+        }
+        if(frame==2)
+        {
+            position(1, 15, 0, 0, 0);
+        }
+        if(frame==3)
+        {
+            depost(0);
+        }
+        if(frame==3)
+        {
+            throw(55, 0, -7, -6, 0, 0);
+        }
+        if(frame==3)
+        {
+            clearL();
+        }
+        return;
+    }
+    if(animhandle==92)
+    {
+        if(frame==0)
+        {
+            projectile("雷电");
+        }
+        return;
+    }
+    if(animhandle==94)
+    {
+        if(frame==0)
+        {
+            dasher(1);
+        }
+        if(frame==4)
+        {
+            dasher(2);
+        }
+        if(frame==6)
+        {
+            dasher(3);
+        }
+        if(frame==10)
+        {
+            dasher(2);
+        }
+        if(frame==14)
+        {
+            dasher(0);
+        }
+        return;
+    }
+
+}
+
+#### animationscript function main #####
+# data/chars/enemy/e3/e3_npc.txt
+########################################
+void main()
+{
+    int frame = getlocalvar("frame");
+    int animhandle = getlocalvar("animhandle");
+    if(animhandle==121)
+    {
+        if(frame==3)
+        {
+            projectile(1, "e3_刀", 0, 0, 0);
+        }
+        return;
+    }
+    if(animhandle==122)
+    {
+        if(frame==0)
+        {
+            dasher(4);
+        }
+        if(frame==1)
+        {
+            dasher(3);
+        }
+        if(frame==2)
+        {
+            dasher(2);
+        }
+        if(frame==3)
+        {
+            dasher(1);
+        }
+        if(frame==4)
+        {
+            dasher(0);
+        }
+        return;
+    }
+
+}

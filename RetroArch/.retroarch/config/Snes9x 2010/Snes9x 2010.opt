@@ -1,0 +1,8 @@
+snes9x_2010_aspect = "auto"
+snes9x_2010_blargg = "disabled"
+snes9x_2010_block_invalid_vram_access = "disabled"
+snes9x_2010_overclock = "10 MHz (Default)"
+snes9x_2010_overclock_cycles = "disabled"
+snes9x_2010_reduce_sprite_flicker = "disabled"
+snes9x_2010_region = "auto"
+snes9x_2010_turbodelay = "medium"

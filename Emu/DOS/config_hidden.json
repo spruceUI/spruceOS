@@ -1,0 +1,32 @@
+{
+	"label":	"MS-DOS",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/dos.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/dos.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/DOS",
+	"imgpath":	"../../Roms/DOS/Imgs",
+	"gamelist":	"../../Roms/DOS/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "✓ CPU is at 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}

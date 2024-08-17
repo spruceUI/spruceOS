@@ -1,0 +1,40 @@
+{
+	"label":	"CPS2",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/CPS2",
+	"imgpath":	"../../Roms/CPS2/Imgs",
+	"gamelist":	"../../Roms/CPS2/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	1,
+	"hidebios":	1,
+	"extlist":	"zip|7z|cue",
+  "launchlist": [
+        {
+            "name": "✓ Core is fbalpha2012_cps2",
+            "launch": "fbalpha2012_cps2.sh"
+        },
+        {
+            "name": "Change core to fbneo",
+            "launch": "fbneo.sh"
+        },
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "✓ CPU is at 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        },
+        {
+            "name": "Set CPU to 1512 MHz",
+            "launch": "1512.sh"
+        }
+		
+	]
+}

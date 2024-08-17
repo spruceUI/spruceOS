@@ -1,0 +1,6 @@
+{
+"label":        "RTC",
+"icon":"/mnt/SDCARD/Themes/SPRUCE/Icons/App/rtc.png",
+"launch":       "launch.sh",
+"description":  "Set the real time clock"
+}

@@ -1,0 +1,40 @@
+{
+	"label":	"Sega CD",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/SEGACD",
+	"imgpath":	"../../Roms/SEGACD/Imgs",
+	"gamelist":	"../../Roms/SEGACD/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"gen|smd|md|32x|cue|iso|sms|68k|chd|m3u|zip|7z",
+    "launchlist": [
+        {
+            "name": "Change core to genesis_plus_gx",
+            "launch": "genesis_plus_gx.sh"
+        },
+        {
+            "name": "✓ Core is picodrive",
+            "launch": "picodrive.sh"
+        },
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "✓ CPU is at 1344 MHz",
+            "launch": "1344.sh"
+        },
+        {
+            "name": "Set CPU to 1512 MHz",
+            "launch": "1512.sh"
+        }
+		
+	]
+}

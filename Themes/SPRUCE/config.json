@@ -1,0 +1,44 @@
+{
+    "name": "Spruce",
+    "author": "tenlevels",
+    "description": "spruce theme for a30",
+    "batteryPercentage": {
+        "color": "#EBDBB2",
+        "font": "nunwen.ttf",
+        "size": 18
+    },
+    "title": {
+        "font": "nunwen.ttf",
+        "size": 25,
+        "color": "#EBDBB2"
+    },
+    "hint": {
+        "font": "nunwen.ttf",
+        "size": 25,
+        "color": "#EBDBB2"
+    },
+    "currentpage": {
+        "font": "nunwen.ttf",
+        "size": 22,
+        "color": "#EBDBB2"
+    },
+    "total": {
+        "font": "nunwen.ttf",
+        "size": 22,
+        "color": "#D65D0E"
+    },
+    "grid": {
+        "font": "nunwen.ttf",
+        "grid1x4": 25,
+        "grid3x4": 18,
+        "color": "#7C6F64",
+        "selectedcolor": "#FBF1C7"
+    },
+    "list": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#FBF1C7",
+        "selectedcolor": "#FBF1C7"
+
+    }
+}

@@ -1,0 +1,51 @@
+renamekey Moveup up                            
+renamekey Movedown down                            
+renamekey Moveleft left                            
+renamekey Moveright right                            
+renamekey Attack @ttack                            
+renamekey Attack2 ]nergy                            
+renamekey Attack3 [efense                            
+renamekey Attack4 e^tra_button                            
+renamekey Jump {ump                            
+renamekey Special ~pecial                            
+renamekey Start start                            
+renamekey Screenshot select                            
+fontmonospace 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0          
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              

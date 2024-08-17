@@ -1,0 +1,29 @@
+{
+"label":"ScummVM",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/SCUMMVM",
+"imgpath":"../../Roms/SCUMMVM/Imgs",
+	"gamelist":	"../../Roms/SCUMMVM/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":"scummvm",
+    "launchlist": [
+
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "✓ CPU is at 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}                                                                                             

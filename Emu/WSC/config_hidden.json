@@ -1,0 +1,32 @@
+{
+	"label":	"WndrSwnC",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/WSC",
+	"imgpath":	"../../Roms/WSC/Imgs",
+	"gamelist":	"../../Roms/WSC/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"ws|wsc|pc2|zip|7z",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "Set CPU to 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "✓ CPU is at 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}

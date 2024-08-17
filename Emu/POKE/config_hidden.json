@@ -1,0 +1,32 @@
+{
+	"label":	"Pokemini",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
+	"iconsel":	"/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/POKE",
+	"imgpath":	"../../Roms/POKE/Imgs",
+	"gamelist":	"../../Roms/POKE/miyoogamelist.xml",
+	"useswap":	0,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"min|zip",
+  "launchlist": [
+          {
+            "name": "Set CPU to 648 MHz",
+            "launch": "648.sh"
+        },
+        {
+            "name": "✓ CPU is at 816 MHz",
+            "launch": "816.sh"
+        },
+        {
+            "name": "Set CPU to 1200 MHz",
+            "launch": "1200.sh"
+        },
+        {
+            "name": "Set CPU to 1344 MHz",
+            "launch": "1344.sh"
+        }
+		
+	]
+}
