@@ -107,6 +107,7 @@ This will retain all your games, saves, and emulator bios files.
 
   - Included are five themes located in Settings. More icons and themes are planned to be added in the future.
   - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
+  - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
 
 ## Credits/Thanks
 
@@ -128,6 +129,21 @@ This will retain all your games, saves, and emulator bios files.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
+
+## The Current Team (in no particular order):
+  - SundownerSport
+  - Kreatur3
+  - Decojon
+  - Ndguardian
+  - Dubious1
+  - Phatpat#0001
+  - Rayon
+  - Sky_Walker
+  - Veckia9x
+  - Ry
+  - SouthtownZ
+  - Supermodi064
+
 
 ## SUPPORTED GAME SYSTEMS
 
