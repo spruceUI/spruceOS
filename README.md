@@ -143,6 +143,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Ry
   - SouthtownZ
   - Supermodi064
+  - BaseInfinity
 
 
 ## SUPPORTED GAME SYSTEMS
