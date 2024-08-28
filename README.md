@@ -26,6 +26,10 @@
 
  - Miyoo Gamelist App added.
 
+ - Boxart Scraper App added.
+
+ - WiFi File Transfer App added.
+
  - Recents tab is optional via App toggle.
 
  - Performance and overclock adjustments are preset.
