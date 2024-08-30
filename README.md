@@ -147,10 +147,9 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Sky_Walker
   - Veckia9x
   - Ry
-  - SouthtownZ
-  - Supermodi064
+  - cinethezs
   - BaseInfinity
-  - oscarkcau
+  - Oscarkcau
 
 
 ## SUPPORTED GAME SYSTEMS
