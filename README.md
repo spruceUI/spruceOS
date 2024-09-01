@@ -118,17 +118,19 @@ This will retain all your games, Syncthing configurations, saves, and bios files
 ## Credits/Thanks
 
   - Tenlevels: starting spruce and getting the A30 where it deserves to be!
-  - Shauninman: help, support and Bootlogo function (and lots of other stuff!).
-  - Decojon: Auto Save/Quick Shutdown + Resume feature.
+  - Shauninman: help, support and Bootlogo function (and so much more!).
+  - Decojon: Auto Save/Quick Shutdown + Resume feature and Keymon tweaks.
+  - Rayon: Boxart Scraper App.
   - Ndguardian and XK9274: Syncthing App.
+  - Veckia9x: WiFi File Transfer App.
   - Jim Gray: Retroarch removal from MainUI. 
   - Onion Team: the heavy lifting finding the best cores to use with Miyoo and overall inspiration.
   - BTN/Paradise: DinguxCommander update. 
   - Steward: Drastic.
   - Ninoh-FOX and Steward: Pico-8 wrapper.
-  - Onion & Darkhorse: Overlays.
+  - Onion, SamuraiCowboy and Darkhorse: Overlays.
   - Hoo: Testing and encouragement.
-  - SundownderSport: Wiki, testing and support.
+  - SundownderSport: Wiki, testing, support and useless broken scripts.
   - Supermodi064: photos, testing and support.
   - Aemiii91: being awesome.
   - Russ from RGC: His YouTube channel is an inspiration.
@@ -147,7 +149,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Sky_Walker
   - Veckia9x
   - Ry
-  - cinethezs
+  - Cinethezs
   - BaseInfinity
   - Oscarkcau
 
