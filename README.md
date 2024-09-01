@@ -44,7 +44,7 @@
 
  - BIOS folder has been created on the root of SD card.
 
- - Auto save state and load enabled.
+ - Auto save state/load states enabled.
 
  - Joystick function enabled on all systems.
 
@@ -61,7 +61,7 @@
 
   - Place your BIOS files in the BIOS folder on the root of SD card.
 
-## UPDATE
+## UPDATING TO THE LATEST RELEASE
 To update:
 
 - Download the latest release and extract the contents.
@@ -117,22 +117,22 @@ This will retain all your games, Syncthing configurations, saves, and bios files
 
 ## Credits/Thanks
 
-  - Tenlevels: starting spruce and getting the A30 where it deserves to be!
-  - Shauninman: help, support and Bootlogo function (and so much more!).
+  - Tenlevels: Starting spruce and getting the A30 where it deserves to be!
+  - Shauninman: Help, support and Bootlogo function (and so much more!).
   - Decojon: Auto Save/Quick Shutdown + Resume feature and Keymon tweaks.
   - Rayon: Boxart Scraper App.
   - Ndguardian and XK9274: Syncthing App.
   - Veckia9x: WiFi File Transfer App.
   - Jim Gray: Retroarch removal from MainUI. 
-  - Onion Team: the heavy lifting finding the best cores to use with Miyoo and overall inspiration.
+  - Onion Team: The heavy lifting finding the best cores to use with Miyoo and overall inspiration.
   - BTN/Paradise: DinguxCommander update. 
   - Steward: Drastic.
   - Ninoh-FOX and Steward: Pico-8 wrapper.
   - Onion, SamuraiCowboy and Darkhorse: Overlays.
   - Hoo: Testing and encouragement.
   - SundownderSport: Wiki, testing, support and useless broken scripts.
-  - Supermodi064: photos, testing and support.
-  - Aemiii91: being awesome.
+  - Supermodi064: Photos, testing and support.
+  - Aemiii91: Being awesome.
   - Russ from RGC: His YouTube channel is an inspiration.
 
 
@@ -156,7 +156,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## SUPPORTED GAME SYSTEMS
 
-*Amiga / Amstrad CPC / Arcade (FBNEO & Mame 2003+) / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
+*Amiga / Amstrad CPC / Arcade / Arduboy / (FBNEO & Mame 2003+) / Atari 800 / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
 
   - N64/DC/PSP:
 
