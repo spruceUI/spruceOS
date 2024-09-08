@@ -84,7 +84,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
 
   *WHILE IN GAME*
 
-  - QUIT GAME:  Press Start+Select at the same time;
+  - QUIT GAME:  Hold Select (2 seconds);
     
     Press B to quit game
     **or**
