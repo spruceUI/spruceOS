@@ -1,0 +1,6 @@
+{
+    "label":"FILE MANAGEMENT",
+    "icon":"/mnt/SDCARD/Themes/SPRUCE/Icons/App/file.png",
+    "launch":"launch.sh",
+    "description":"View and Move Files On Your SD Card"
+}

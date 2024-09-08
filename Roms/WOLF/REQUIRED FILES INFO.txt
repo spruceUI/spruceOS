@@ -1,0 +1,20 @@
+See Onion Ports info. I used my files/folders from existing Miyoo and the games play. 
+
+
+
+Example:
+
+Wolfenstein 3D
+        audiohed.wl6
+        audiot.wl6
+        config.wl6
+        ecwolf.pk3
+        gamemaps.wl6
+        maphead.wl6
+        vgadict.wl6
+        vgagraph.wl6
+        vgahead.wl6
+        vswap.wl6
+        WL6.ecwolf
+        Wolf3d.exe
+        wolf3d_hdpack.pk3

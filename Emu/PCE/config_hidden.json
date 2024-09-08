@@ -1,0 +1,35 @@
+{
+  "label": "TG-16",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pce.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PCE",
+  "imgpath": "../../Roms/PCE/Imgs",
+  "gamelist": "../../Roms/PCE/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "pce|ccd|iso|img|chd|cue|zip|7z",
+  "launchlist": [
+    {
+      "name": "Select Random Game",
+      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "Set CPU to 648 MHz",
+      "launch": "648.sh"
+    },
+    {
+      "name": "Set CPU to 816 MHz",
+      "launch": "816.sh"
+    },
+    {
+      "name": "✓ CPU is at 1200 MHz",
+      "launch": "1200.sh"
+    },
+    {
+      "name": "Set CPU to 1344 MHz",
+      "launch": "1344.sh"
+    }
+  ]
+}

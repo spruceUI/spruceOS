@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export CORE="tic80"
+export RA_BIN="ra32.miyoo"
+export CPU="1200"
+export GOV="performance"
+export CORES="2"
+export GPU="384"
+export DDR="1080"
+export SWAP="1"

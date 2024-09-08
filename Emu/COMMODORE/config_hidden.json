@@ -1,0 +1,35 @@
+{
+  "label": "C64",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/COMMODORE",
+  "imgpath": "../../Roms/COMMODORE/Imgs",
+  "gamelist": "../../Roms/COMMODORE/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
+  "launchlist": [
+    {
+      "name": "Select Random Game",
+      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "Set CPU to 648 MHz",
+      "launch": "648.sh"
+    },
+    {
+      "name": "✓ CPU is at 816 MHz",
+      "launch": "816.sh"
+    },
+    {
+      "name": "Set CPU to 1200 MHz",
+      "launch": "1200.sh"
+    },
+    {
+      "name": "Set CPU to 1344 MHz",
+      "launch": "1344.sh"
+    }
+  ]
+}

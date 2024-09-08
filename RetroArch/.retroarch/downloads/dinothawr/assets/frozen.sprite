@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sprite name="frozen_dino" start_id="frozen">
+   <face id="frozen" source="frozen_dino_block.png"/>
+   <face id="defrost1" source="frozen_dino_defrost1.png"/>
+   <face id="defrost2" source="frozen_dino_defrost2.png"/>
+   <face id="down" source="frozen_dino_down.png"/>
+   <face id="cheer" source="frozen_dino_cheer.png"/>
+</sprite>
+

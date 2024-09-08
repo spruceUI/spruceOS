@@ -1,0 +1,3 @@
+Choose one of the bootlogo.bmp logos from the logos folder and place the bootlogo.bmp here.
+
+You need to copy and paste just the bootlogo.bmp and not the folder it is in.

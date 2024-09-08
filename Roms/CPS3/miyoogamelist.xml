@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<gameList>
+	<game>
+		<path>./redearth.zip</path>
+		<name>Red Earth</name>
+		<image>./Imgs/redearth.png</image>
+		<rating>0</rating>
+		<releasedate>19691231T160000</releasedate>
+	</game>
+	<game>
+		<path>./sfiii2.zip</path>
+		<name>Street Fighter III 2nd Impact: Giant Attack</name>
+		<image>./Imgs/sfiii2.png</image>
+		<rating>0</rating>
+		<releasedate>19691231T160000</releasedate>
+	</game>
+	<game>
+		<path>./sfiii3.zip</path>
+		<name>Street Fighter III 3rd Strike: Fight for the Future</name>
+		<image>./Imgs/sfiii3.png</image>
+		<rating>0</rating>
+		<releasedate>19691231T160000</releasedate>
+	</game>
+	<game>
+		<path>./sfiiin.zip</path>
+		<name>Street Fighter III: New Generation</name>
+		<image>./Imgs/sfiiin.png</image>
+		<rating>0</rating>
+		<releasedate>19691231T160000</releasedate>
+	</game>
+	<game>
+		<path>./jojoba.zip</path>
+		<name>JoJo's Bizarre Adventure</name>
+		<image>./Imgs/jojoba.png</image>
+		<rating>0</rating>
+		<releasedate>19691231T160000</releasedate>
+	</game>
+</gameList>

@@ -1,0 +1,35 @@
+{
+  "label": "Arduboy",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arduboy.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arduboy.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/ARDUBOY",
+  "imgpath": "../../Roms/ARDUBOY/Imgs",
+  "gamelist": "../../Roms/ARDUBOY/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "hex",
+  "launchlist": [
+    {
+      "name": "Select Random Game",
+      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "Set CPU to 648 MHz",
+      "launch": "648.sh"
+    },
+    {
+      "name": "✓ CPU is at 816 MHz",
+      "launch": "816.sh"
+    },
+    {
+      "name": "Set CPU to 1200 MHz",
+      "launch": "1200.sh"
+    },
+    {
+      "name": "Set CPU to 1344 MHz",
+      "launch": "1344.sh"
+    }
+  ]
+}

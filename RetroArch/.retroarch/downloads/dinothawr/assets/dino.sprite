@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sprite name="dino" start_id="up">
+   <face id="up" source="dino_up.png"/>
+   <face id="up" source="dino_up_walk1.png"/>
+   <face id="up" source="dino_up_walk2.png"/>
+   <face id="up" source="dino_up_walk3.png"/>
+   <face id="up" source="dino_up_walk4.png"/>
+   <face id="up" source="dino_up_slide1.png"/>
+   <face id="up" source="dino_up_slide2.png"/>
+   <face id="up" source="dinopush_up.png"/>
+   <face id="down" source="dino_down.png"/>
+   <face id="down" source="dino_down_walk1.png"/>
+   <face id="down" source="dino_down_walk2.png"/>
+   <face id="down" source="dino_down_walk3.png"/>
+   <face id="down" source="dino_down_walk4.png"/>
+   <face id="down" source="dino_down_slide1.png"/>
+   <face id="down" source="dino_down_slide2.png"/>
+   <face id="down" source="dinopush_down.png"/>
+   <face id="left" source="dino_left.png"/>
+   <face id="left" source="dino_left_walk1.png"/>
+   <face id="left" source="dino_left_walk2.png"/>
+   <face id="left" source="dino_left_walk3.png"/>
+   <face id="left" source="dino_left_walk4.png"/>
+   <face id="left" source="dino_left_slide1.png"/>
+   <face id="left" source="dino_left_slide2.png"/>
+   <face id="left" source="dinopush_left.png"/>
+   <face id="right" source="dino_right.png"/>
+   <face id="right" source="dino_right_walk1.png"/>
+   <face id="right" source="dino_right_walk2.png"/>
+   <face id="right" source="dino_right_walk3.png"/>
+   <face id="right" source="dino_right_walk4.png"/>
+   <face id="right" source="dino_right_slide1.png"/>
+   <face id="right" source="dino_right_slide2.png"/>
+   <face id="right" source="dinopush_right.png"/>
+   <face id="cheer" source="dino_cheer.png"/>
+</sprite>
+

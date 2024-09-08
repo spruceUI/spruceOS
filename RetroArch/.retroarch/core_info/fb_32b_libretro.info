@@ -1,0 +1,21 @@
+# Software Information
+display_name = "Arcade (FB Alpha Hack)"
+authors = "Team FB Alpha"
+supported_extensions = "iso|zip|7z"
+corename = "FB Alpha Hack"
+license = "Non-commercial"
+permissions = ""
+display_version = "v0.2.97.29"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Various"
+systemname = "Arcade (various)"
+systemid = "fb_alpha"
+
+# Libretro Features
+supports_no_game = "false"
+notes = "(!) The BIOS files must be inside the ROM directory."
+savestate = "true"
+savestate_features = "basic"
+description = ""

@@ -1,0 +1,2 @@
+#!/bin/sh
+./switch.sh

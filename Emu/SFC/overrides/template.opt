@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# HOW TO USE:
+#
+# Make a copy of this file in the same location as the original. Rename it to
+# the _EXACT_ same name as the game you would like to set the launch options
+# override for, plus the suffix ".opt". 
+#
+# For example, if your ROM is named "Advance Wars (USA) [!].zip", 
+# then your override should be named "Advance Wars (USA) [!].zip.opt".
+#
+# Everything in this .opt file is completely optional. If you do not want
+# to override any particular default or global behavior, you can safely delete # that line from your game override file.
+
+
+# LibRetro Core:
+#
+# CORE should be set to the filename of the core you want to use, minus any
+# trailing "_libretro.so". To find out what cores are available on your A30, 
+# you can look for .so files in the RetroArch/.retroarch/cores folder.
+
+CORE="mgba"
+
+# RetroArch Version:
+#
+# "ra32.miyoo" uses Miyoo's custom in-game menu - the default for spruce.
+# "retroarch" is the version used in "Jim Mode" a.k.a. RetroArch Expert Mode.
+# Uncomment the one you wish to force by removing the # in front.
+
+RA_BIN="ra32.miyoo"
+# RA_BIN="retroarch"
+
+# CPU Speed:
+#
+# Allowed values: 648, 816, 1200, 1344, 1512.
+# The higher the number, the faster the CPU clock speed.
+# But - some A30s struggle with higher speeds.
+
+CPU="1344"
+
+# Other Performance Settings:
+#
+# Highly recommended to leave these as they are! Tamper at your own risk.
+
+GOV="conservative"
+CORES="2"
+GPU="384"
+DDR="1080"
+SWAP="1"

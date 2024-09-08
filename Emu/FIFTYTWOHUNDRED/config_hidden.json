@@ -1,0 +1,35 @@
+{
+  "label": "Atari 5200",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/5200.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/5200.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/FIFTYTWOHUNDRED",
+  "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs",
+  "gamelist": "../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "a52|zip|7z|bin",
+  "launchlist": [
+    {
+      "name": "Select Random Game",
+      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "Set CPU to 648 MHz",
+      "launch": "648.sh"
+    },
+    {
+      "name": "✓ CPU is at 816 MHz",
+      "launch": "816.sh"
+    },
+    {
+      "name": "Set CPU to 1200 MHz",
+      "launch": "1200.sh"
+    },
+    {
+      "name": "Set CPU to 1344 MHz",
+      "launch": "1344.sh"
+    }
+  ]
+}
