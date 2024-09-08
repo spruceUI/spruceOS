@@ -15,4 +15,4 @@ update_core_config_name() {
 
 update_core_config_name
 
-sed -i 's/CORE=.*/CORE=\"gpsp\"/g' "$SYS_OPT"
+sed -i 's/CORE=.*/CORE=\"mednafen_supafaust\"/g' "$SYS_OPT"
