@@ -117,29 +117,49 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
 
 ## Credits/Thanks
-
-    Tenlevels: Starting spruce, making kickass Themes and getting the A30 where it deserves to be!
-    Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
-    Shauninman: Help, support and Bootlogo function (and so much more!).
-    Rayon and Cinethezs: Boxart Scraper App and tweaks.
-    Cinethezs, tenlevels, ShaunInman (show.elf): Random Game App
-    Ndguardian and XK9274: Syncthing App.
-    Veckia9x: WiFi File Transfer App.
-    Ry: Overhauled Emu folder to add initial per-game override support, LibRetro ports.
-    Oscarkcau: General debugging, clean up and optimizations to SO MANY things.
-    Cinethezs: LED App.
-    Jim Gray: Retroarch removal from MainUI.
-    Onion Team: The heavy lifting finding the best cores to use with Miyoo and overall inspiration.
-    BTN/Paradise: DinguxCommander update.
-    Steward: Drastic.
-    Ninoh-FOX and Steward: Pico-8 wrapper.
-    Sky_Walker: Avocado theme.
-    Onion, SamuraiCowboy and Darkhorse: Overlays.
-    Hoo: Testing and encouragement.
-    SundownerSport: Wiki, testing, support and many, many useless broken scripts.
-    Supermodi064: Photos, testing and support.
-    Aemiii91: Being awesome.
-    Russ from RGC: His YouTube channel is an inspiration.
+  Tenlevels: Starting spruce, making kickass Themes and getting the A30 where it deserves to be!
+  
+  Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
+  
+  Shauninman: Help, support and Bootlogo function (and so much more!).
+  
+  Rayon and Cinethezs: Boxart Scraper App and tweaks.
+  
+  Cinethezs, tenlevels, ShaunInman (show.elf): Random Game App
+  
+  Ndguardian and XK9274: Syncthing App.
+  
+  Veckia9x: WiFi File Transfer App.
+  
+  Ry: Overhauled Emu folder to add initial per-game override support, LibRetro ports.
+  
+  Oscarkcau: General debugging, clean up and optimizations to SO MANY things.
+  
+  Cinethezs: LED App.
+  
+  Jim Gray: Retroarch removal from MainUI.
+  
+  Onion Team: The heavy lifting finding the best cores to use with Miyoo and overall inspiration.
+  
+  BTN/Paradise: DinguxCommander update.
+  
+  Steward: Drastic.
+  
+  Ninoh-FOX and Steward: Pico-8 wrapper.
+  
+  Sky_Walker: Avocado theme.
+  
+  Onion and Darkhorse: Overlays.
+  
+  Hoo: Testing and encouragement.
+  
+  SundownerSport: Wiki, testing, support and many, many useless broken scripts.
+  
+  Supermodi064: Photos, testing and support.
+  
+  Aemiii91: Being awesome.
+  
+  Russ from RGC: His YouTube channel is an inspiration.
 
 
 
