@@ -30,6 +30,7 @@ Credits/Thanks
     Supermodi064: Photos, testing and support.
     Aemiii91: Being awesome.
     Sky_Walker: Avocado theme.
+    fragbait79: beta testing on per-game Emu launcher overrides.
     Russ from RGC: His YouTube channel is an inspiration.
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
