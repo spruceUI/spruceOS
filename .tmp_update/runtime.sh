@@ -16,7 +16,9 @@ export HOME="${SDCARD_PATH}"
 
 mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
 mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
-# mount -o bind /mnt/SDCARD/miyoo/ /usr/miyoo/ ###commented out this line to have it show proper FW
+mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app
+mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
+mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
