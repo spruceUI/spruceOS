@@ -12,7 +12,7 @@
 
 ## NEED HELP?
   
-  - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki) 
+  - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
 
 ## WHAT WAS DONE:
 
