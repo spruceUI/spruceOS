@@ -181,6 +181,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Cinethezs
   - BaseInfinity
   - Oscarkcau
+  - XanXic
 
 
 ## SUPPORTED GAME SYSTEMS
