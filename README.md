@@ -1,6 +1,6 @@
 ![sprucetreelogo](https://github.com/tenlevels/spruce/assets/139886575/f248b441-835c-4f2e-b849-cec145b3ffcf)
 
-# spruce: *SD Card Overhaul for Miyoo A30*
+# spruce: *SD Card Overhaul for Miyoo A30* 
 
   - Spruce is not really an operating system (OS) on its own.
   - We think spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
