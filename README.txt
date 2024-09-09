@@ -1,6 +1,6 @@
 README
 
-spruce 2.2
+spruce 2.2.1
 
 Please visit the new GitHub page @ https://github.com/spruceUI/spruceOS
 
