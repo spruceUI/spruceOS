@@ -8,7 +8,7 @@
     
 ## DOWNLOAD LATEST VERSION BELOW
 
-  - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
+  - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases) 
 
 ## NEED HELP?
   
