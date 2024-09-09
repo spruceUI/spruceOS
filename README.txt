@@ -24,13 +24,13 @@ Credits/Thanks
     BTN/Paradise: DinguxCommander update.
     Steward: Drastic.
     Ninoh-FOX and Steward: Pico-8 wrapper.
-    Onion, SamuraiCowboy and Darkhorse: Overlays.
+    Onion and Darkhorse: Overlays.
     Hoo: Testing and encouragement.
     SundownerSport: Wiki, testing, support and many, many useless broken scripts.
     Supermodi064: Photos, testing and support.
     Aemiii91: Being awesome.
     Sky_Walker: Avocado theme.
-    fragbait79: beta testing on per-game Emu launcher overrides.
+    Fragbait79: Beta testing on per-game Emu launcher overrides.
     Russ from RGC: His YouTube channel is an inspiration.
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
