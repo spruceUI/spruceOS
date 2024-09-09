@@ -22,6 +22,8 @@
    
  - Syncthing App added.
 
+ - Random Game Apps added.
+
  - Bootlogo App added.
 
  - Miyoo Gamelist App added.
@@ -50,7 +52,7 @@
 
  - Configuration of RetroArch with almost no notifications or hotkeys.
 
- - The blue LED has been disabled.
+ - LED Control App added (begrudgingly).
 
 ## INSTALL
 
