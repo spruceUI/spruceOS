@@ -24,6 +24,9 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
 [ "$wifi" -eq 0 ] && touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill || touch /tmp/wifion
 killall -9 main
+
+# Syncthing Insertion Here (Do not remove)
+
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
 /mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
