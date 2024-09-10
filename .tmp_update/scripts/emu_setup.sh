@@ -9,11 +9,12 @@ DEF_DIR="$SETUP_DIR/defaults"
 
 EMU_DIR="/mnt/SDCARD/Emu"
 
-# copy standard RA launch scripts, template.opt, and cpu speed scripts to all Emu subfolders.
+# copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
 for dir in $EMU_DIR/*; do
 	if [ -d $dir ]; then
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh"
 		cp -rf -t "$dir/" "$OVR_DIR" "$SPD_DIR/648.sh" "$SPD_DIR/816.sh" "$SPD_DIR/1200.sh" "$SPD_DIR/1344.sh" "$SPD_DIR/1512.sh"
+		cp -f "$DEF_DIR/${dir}.opt" "$dir/default.opt"
 	fi
 done
 
@@ -26,7 +27,5 @@ cp -f "$LAUNCH_DIR/ports_launch.sh" "$EMU_DIR/PORTS/launch.sh"
 cp -f "$LAUNCH_DIR/psp_launch.sh" "$EMU_DIR/PSP/launch.sh"
 
 # copy over core switch scripts to appropriate Emu subfolders
-
-# copy over default.opt files for each system
 
 # create system.opt files for each system if they don't already exist
