@@ -42,7 +42,7 @@ CPU="1344"
 #
 # Highly recommended to leave these as they are! Tamper at your own risk.
 
-GOV="conservative"
+GOV="performance"
 CORES="2"
 GPU="384"
 DDR="1080"
