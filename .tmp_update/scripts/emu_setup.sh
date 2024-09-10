@@ -5,6 +5,7 @@ SPD_DIR="$SETUP_DIR/speed"
 OVR_DIR="$SETUP_DIR/overrides"
 LAUNCH_DIR="$SETUP_DIR/launch"
 CORE_DIR="$SETUP_DIR/core"
+DEF_DIR="$SETUP_DIR/defaults"
 
 EMU_DIR="/mnt/SDCARD/Emu"
 
@@ -24,5 +25,8 @@ cp -f "$LAUNCH_DIR/pico8_launch.sh" "$EMU_DIR/PICO8/launch.sh"
 cp -f "$LAUNCH_DIR/ports_launch.sh" "$EMU_DIR/PORTS/launch.sh"
 cp -f "$LAUNCH_DIR/psp_launch.sh" "$EMU_DIR/PSP/launch.sh"
 
+# copy over core switch scripts to appropriate Emu subfolders
 
-#todo: figure out best way to consolidate core scripts for systems that have different core options from one another.
+# copy over default.opt files for each system
+
+# create system.opt files for each system if they don't already exist
