@@ -14,7 +14,7 @@ for dir in $EMU_DIR/*; do
 	if [ -d $dir ]; then
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh"
 		cp -rf -t "$dir/" "$OVR_DIR" "$SPD_DIR/648.sh" "$SPD_DIR/816.sh" "$SPD_DIR/1200.sh" "$SPD_DIR/1344.sh" "$SPD_DIR/1512.sh"
-		cp -f "$DEF_DIR/${dir}.opt" "$dir/default.opt"
+		cp -f "$DEF_DIR/${basename "$dir"}.opt" "$dir/default.opt"
 	fi
 done
 
