@@ -9,7 +9,7 @@ IMAGE_PATH_WIKI="${SDCARD_PATH}/.tmp_update/res/wiki.png"
 IMAGE_PATH_FIRMWARE="${SDCARD_PATH}/.tmp_update/res/firmware.png"
 IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 
-if [ ! -f "$FIRST_BOOT_FLAG" ]; then
+if [ -f "$FIRST_BOOT_FLAG" ]; then
     [ ! -f "${SDCARD_PATH}/copy_config" ] && cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && touch "${SDCARD_PATH}/copy_config" && sync && sleep 5
     
     if [ -f "${SWAPFILE}" ]; then
@@ -39,6 +39,6 @@ if [ ! -f "$FIRST_BOOT_FLAG" ]; then
     sleep 10
     kill $SHOW_PID
     
-    touch "$FIRST_BOOT_FLAG"
+    rm "$FIRST_BOOT_FLAG"
 fi
 
