@@ -78,7 +78,6 @@ swapon -p 40 "${SWAPFILE}"
 /mnt/SDCARD/.tmp_update/scripts/sortfaves.sh
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
-/mnt/SDCARD/.tmp_update/scripts/ledcontrol.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 
 
