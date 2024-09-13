@@ -1,0 +1,6 @@
+{
+	"label":        "EXPERT APP SWITCH",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/Icons/App/expertappswitch.png",
+	"launch":       "launch.sh",
+	"description":  "Show or Hide Expert Apps"
+}
