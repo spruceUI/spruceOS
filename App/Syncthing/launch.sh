@@ -19,11 +19,20 @@ DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
 APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/App/"
 APP_THEME_ICON_PATH=""
 
+# Log file path
+LOG_FILE="$(dirname "$0")/syncthingSpruce.log"
+
+# Function to log messages
+log_message() {
+    local message="$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$LOG_FILE"
+}
+
 # Function to show image
 show_image() {
     local image=$1
     if [ ! -f "$image" ]; then
-        echo "Image file not found at $image"
+        log_message "Image file not found at $image"
         exit 1
     fi
     killall -9 show
@@ -74,28 +83,18 @@ check_injector() {
     fi
 }
 
-build_infoPanel() {
-    local message="$1"
-    local title="Syncthing Installer"
-
-    infoPanel --title "$title" --message "$message" --persistent &
-    touch /tmp/dismiss_info_panel
-    sync
-    sleep 1
-}
-
 syncthingpid() {
     pgrep "syncthing" > /dev/null
 }
 
 injectruntime() {
-    build_infoPanel "Injecting config into runtime.sh..."
-    sed -i '/# Auto launch/i \	sh /mnt/SDCARD/App/Syncthing/script/checkrun.sh #SYNCTHING INJECTOR #SYNCTHING INJECTOR' $sysdir/runtime.sh
+    log_message "Injecting config into runtime.sh..."
+    sed -i '/# Syncthing Insertion Here (Do not remove)/a\sh /mnt/SDCARD/App/Syncthing/script/checkrun.sh #SYNCTHING INJECTOR #SYNCTHING INJECTOR' $sysdir/runtime.sh
     touch $appdir/config/gotime
     if grep -q "#SYNCTHING INJECTOR" "$sysdir/runtime.sh"; then
-        build_infoPanel "Injection successful..."
+        log_message "Injection successful..."
     else
-        build_infoPanel "Injection failed..."
+        log_message "Injection failed..."
     fi
 }
 
@@ -103,7 +102,7 @@ repair_config() {
     local config="$appdir/config/config.xml"
 
     if grep -q "<listenAddress>dynamic+https://relays.syncthing.net/endpoint</listenAddress>" "$config"; then
-        build_infoPanel "Config not generated correctly, \n Manually repairing"
+        log_message "Config not generated correctly, manually repairing..."
 
         sed -i '/<listenAddress>dynamic+https:\/\/relays.syncthing.net\/endpoint<\/listenAddress>/d' "$config"
         sed -i '/<listenAddress>quic:\/\/0.0.0.0:41383<\/listenAddress>/d' "$config"
@@ -112,9 +111,9 @@ repair_config() {
         sed -i 's|<address>127.0.0.1:40379</address>|<address>0.0.0.0:8384</address>|' "$config"
 
         if grep -q "<address>0.0.0.0:8384</address>" "$config" && grep -q "<listenAddress>default</listenAddress>" "$config"; then
-            build_infoPanel "Repair complete. \n GUI IP Forced to 0.0.0.0"
+            log_message "Repair complete. GUI IP forced to 0.0.0.0"
         else
-            build_infoPanel "Failed to repair config \n Remove the app dir \n and try again"
+            log_message "Failed to repair config. Remove the app dir and try again"
         fi
     fi
 }
@@ -122,21 +121,21 @@ repair_config() {
 startsyncthing() {
     if syncthingpid; then
         show_image "$KILL_IMAGE_PATH"
-        build_infoPanel "Already running. Stopping Syncthing..."
+        log_message "Already running. Stopping Syncthing..."
         killall -9 syncthing
         update_config "OFF"  # Update config.json to OFF
-        build_infoPanel "Syncthing stopped."
+        log_message "Syncthing stopped."
     else
-        build_infoPanel "Starting Syncthing..."
+        log_message "Starting Syncthing..."
         $appdir/bin/syncthing serve --home=$appdir/config/ > $appdir/serve.log 2>&1 &
         update_config "ON"  # Update config.json to ON
-        build_infoPanel "Syncthing started."
+        log_message "Syncthing started."
     fi
 }
 
 firststart() {
     if [ ! -f $appdir/config/config.xml ]; then
-        build_infoPanel "Config file not found, generating..."
+        log_message "Config file not found, generating..."
         # Ensure loopback interface is enabled and running as expected
         # So we'll restart it
         ifconfig lo down
@@ -157,27 +156,27 @@ changeguiip() {
     IP=$(ip route get 1 | awk '{print $NF;exit}')
 
     if grep -q "<address>0.0.0.0:8384</address>" $appdir/config/config.xml; then
-        build_infoPanel "IP already setup in config"
+        log_message "IP already setup in config"
         sleep 1
-        build_infoPanel "GUI IP is $IP:8384"
+        log_message "GUI IP is $IP:8384"
         skiplast=1
         sleep 5
     fi
 
-    build_infoPanel "Setting IP" "Changing GUI IP:Port to $IP:8384"
+    log_message "Setting IP, changing GUI IP:Port to $IP:8384"
     sed -i "s|<address>127.0.0.1:8384</address>|<address>0.0.0.0:8384</address>|g" $appdir/config/config.xml
 
     if [[ $? -eq 0 && $(grep -c "<address>0.0.0.0:8384</address>" $appdir/config/config.xml) -gt 0 ]]; then
-        build_infoPanel "GUI IP set to $IP:8384"
+        log_message "GUI IP set to $IP:8384"
         sleep 5
     else
-        build_infoPanel "Failed to set IP address"
+        log_message "Failed to set IP address"
     fi
 }
 
 ########################## GO TIME
 
-build_infoPanel "Syncthing setup"
+log_message "Syncthing setup"
 
 # Determine theme path
 if [ -f "$THEME_JSON_FILE" ]; then
@@ -197,31 +196,28 @@ else
     show_image "$IMAGE_PATH"
 fi
 
-build_infoPanel "Checking if we're already configured..."
+log_message "Checking if we're already configured..."
 
 if check_injector; then
-    build_infoPanel "We're already configured.."
+    log_message "We're already configured."
 
     if syncthingpid; then
-        build_infoPanel "Running. killing until next reboot"
+        log_message "Running. Killing until next reboot."
         killall -9 syncthing
         update_config "OFF"  # Update config.json to OFF
-        build_infoPanel "Finished" "Done..."
+        log_message "Finished."
     else
         startsyncthing
     fi
 else
-    build_infoPanel "We're not configured, starting"
+    log_message "We're not configured, starting."
     firststart
     injectruntime
     changeguiip
     startsyncthing
     if [ "$skiplast" -ne 1 ]; then
-        build_infoPanel "Browse to $IP:8384 to setup!"
+        log_message "Browse to $IP:8384 to setup!"
     fi
 fi
 
 killall -9 show
-
-
-

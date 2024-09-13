@@ -1,6 +1,6 @@
 README
 
-spruce 2.2.1
+spruce 2.2.2
 
 Please visit the new GitHub page @ https://github.com/spruceUI/spruceOS
 
@@ -17,7 +17,7 @@ Credits/Thanks
     Cinethezs, tenlevels, ShaunInman (show.elf): Random Game App
     Ndguardian and XK9274: Syncthing App.
     Veckia9x: WiFi File Transfer App.
-    Ry: Overhauled Emu folder to add initial per-game override support, LibRetro ports.
+    Ry: Overhauled Emu folder to add initial per-game override support, added LibRetro ports.
     Cinethezs: LED App.
     Jim Gray: Retroarch removal from MainUI.
     Onion Team: The heavy lifting finding the best cores to use with Miyoo and overall inspiration.
@@ -26,7 +26,7 @@ Credits/Thanks
     Ninoh-FOX and Steward: Pico-8 wrapper.
     Onion and Darkhorse: Overlays.
     Hoo: Testing and encouragement.
-    SundownerSport: Wiki, testing, support and many, many useless broken scripts.
+    SundownerSport: Wiki, testing, support and many useless broken scripts.
     Supermodi064: Photos, testing and support.
     Aemiii91: Being awesome.
     Sky_Walker: Avocado theme.
@@ -49,6 +49,7 @@ The Current Team (in no particular order):
     Cinethezs
     BaseInfinity
     Oscarkcau
+    XanXic
 
 
 Happy Gaming..........

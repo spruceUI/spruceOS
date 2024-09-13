@@ -1,32 +1,6 @@
 #!/bin/sh
 
 IMAGE_PATH="/mnt/SDCARD/App/RandomGame/random.png"
-MARKER_FILE="/mnt/SDCARD/App/RandomGame/first_run_done.txt"
-
-# Check if the marker file exists
-if [ ! -f "$MARKER_FILE" ]; then
-    # Marker file does not exist, so this is the first run
-    # Show the image for 3 seconds
-    if [ -f "$IMAGE_PATH" ]; then
-        killall -9 show
-        show "$IMAGE_PATH" &
-        sleep 3
-        killall -9 show
-    fi
-    
-    # Run the specific file and create the marker file
-    if [ -f "/mnt/SDCARD/Roms/PORTS/Dino Jump.sh" ]; then
-        /mnt/SDCARD/Roms/PORTS/Dino\ Jump.sh
-        touch "$MARKER_FILE"
-        exit 0
-    else
-        echo "Specific script not found."
-        exit 1
-    fi
-fi
-
-# If this is not the first run, proceed with the existing logic
-
 if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
@@ -105,15 +79,29 @@ get_extensions() {
 
 get_rand_folder() {
     local folder="$1"
-    SIZE=$(ls -1 "$folder" | wc -l)
+
+    # count all files (except xml files) in all sub-folders
+    SIZE=$(find "$folder" -mindepth 2 -maxdepth 2 -type f ! -name "*.xml" | wc -l)
+
+    # generate random index (0 - SIZE)
     SEED=$(date +%s%N)
     RINDEX=$(awk -v max=$SIZE -v seed=$SEED 'BEGIN{srand(seed); print int(rand()*(max))}')
-    for file in "$folder"/*/; do
-        if [ $RINDEX -eq 0 ]; then
-            echo -n "$file"
+
+    # find the selected sub-folder
+    for SUBFOLDER in "$folder"/*/; do
+
+        # count all files in sub-folder
+        SUBSIZE=$(find "$SUBFOLDER" -maxdepth 1 -type f ! -name "*.xml" | wc -l)
+
+        # select sub folder if the randon index is in range  
+        if [ $RINDEX -lt $SUBSIZE ]; then
+        #if [ $RINDEX -eq 0 ]; then
+            echo -n "$SUBFOLDER"
             return
         fi
-        RINDEX=$(expr $RINDEX - 1)
+
+        # adjust random index
+        RINDEX=$(expr $RINDEX - $SUBSIZE)
     done
 }
 

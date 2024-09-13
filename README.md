@@ -169,11 +169,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## The Current Team (in no particular order):
   - SundownerSport
-  - Kreatur3
   - Decojon
-  - Ndguardian
-  - Dubious1
-  - Phatpat#0001
   - Rayon
   - Sky_Walker
   - Veckia9x
@@ -182,6 +178,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - BaseInfinity
   - Oscarkcau
   - XanXic
+  - Fragbait79
 
 
 ## SUPPORTED GAME SYSTEMS

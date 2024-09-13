@@ -1,7 +1,9 @@
 #!/bin/sh
 
+LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
+FLAG_PATH="/mnt/SDCARD/.tmp_update/flags"
 PERCENT=2
-SLEEP=300
+SLEEP=5
 
 dot_duration=0.2
 dash_duration=0.6
@@ -37,8 +39,15 @@ while true; do
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
         done
 
+    elif [ -f ${FLAG_PATH}/ledon.lock ]; then
+        echo 1 > ${LED_PATH}/brightness
+
+    elif [ -f ${FLAG_PATH}/tlon.lock ] && \
+         [ -f ${FLAG_PATH}/in_menu.lock ]; then
+        echo 1 > ${LED_PATH}/brightness
+
     else
-        echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+        echo 0 > ${LED_PATH}/brightness
     fi
 
     sleep $SLEEP
