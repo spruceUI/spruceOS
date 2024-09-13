@@ -13,7 +13,7 @@ EMU_DIR="/mnt/SDCARD/Emu"
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
 		echo "dir is $dir";
-		local system="${dir##*/}";
+		system="${dir##*/}" ;
 		echo "system is $system";
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh" && echo "copied launch.sh to $dir";
 		cp -rf "$OVR_DIR" "$dir/" && echo "copied override template to $dir";
