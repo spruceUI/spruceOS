@@ -4,7 +4,7 @@
 BASE_DIR="/mnt/SDCARD/App/"
 
 # List of specific folders to process
-FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert Retroarch sftpgo Syncthing"
+FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert RetroArch sftpgo Syncthing"
 
 # Iterate over each folder name
 for folder in $FOLDERS; do
