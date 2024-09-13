@@ -1,10 +1,5 @@
 README
 
-CHANGELOG:
--Added Ukrainian Language
--Enhanced installation logic to allow updating without deleting Emu folder and losing your NDS saves, Ports files, Pico-8 binaries, and launch overrides.
--
-
 spruce 2.2.2
 
 Please visit the new GitHub page @ https://github.com/spruceUI/spruceOS
