@@ -1,6 +1,11 @@
 README
 
-spruce 2.2.2
+spruce 2.3
+
+CHANGELOG:
+-Added Ukrainian Language
+-Enhanced installation logic to allow updating without deleting Emu folder and losing your NDS saves, Ports files, Pico-8 binaries, and launch overrides.
+-
 
 Please visit the new GitHub page @ https://github.com/spruceUI/spruceOS
 
@@ -39,17 +44,14 @@ The Current Team (in no particular order):
     
     SundownerSport
     Decojon
-    Ndguardian
-    Dubious1
-    Phatpat#0001
     Rayon
     Sky_Walker
     Veckia9x
     Ry
     Cinethezs
-    BaseInfinity
     Oscarkcau
     XanXic
+    Fragbait79
 
 
 Happy Gaming..........

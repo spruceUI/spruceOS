@@ -20,9 +20,9 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     
     [ ! -f "${SWAPFILE}" ] && dd if=/dev/zero of="${SWAPFILE}" bs=1M count=128 && mkswap "${SWAPFILE}" && sync
     
+    /mnt/SDCARD/.tmp_update/scripts/emu_setup.sh
     /mnt/SDCARD/.tmp_update/scripts/emufresh.sh
     /mnt/SDCARD/App/IconFresh/iconfresh.sh
-    
 
     show "$IMAGE_PATH_WIKI" &
     SHOW_PID=$!
