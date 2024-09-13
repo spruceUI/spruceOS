@@ -1,0 +1,51 @@
+{
+  "label": "SNES",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/SFC",
+  "imgpath": "../../Roms/SFC/Imgs",
+  "gamelist": "../../Roms/SFC/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "smc|fig|sfc|gd3|gd7|dx2|bsx|bs|swc|st|zip|7z",
+  "launchlist": [
+    {
+      "name": "Select Random Game",
+      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "✓ Core is chimerasnes",
+      "launch": "chimerasnes.sh"
+    },
+    {
+      "name": "Change core to mednafen_supafaust",
+      "launch": "mednafen_supafaust.sh"
+    },
+    {
+      "name": "Change core to snes9x",
+      "launch": "snes9x.sh"
+    },
+    {
+      "name": "Change core to snes9x2005",
+      "launch": "snes9x2005.sh"
+    },
+    {
+      "name": "Set CPU to 816 MHz",
+      "launch": "816.sh"
+    },
+    {
+      "name": "✓ CPU is at 1200 MHz",
+      "launch": "1200.sh"
+    },
+    {
+      "name": "Set CPU to 1344 MHz",
+      "launch": "1344.sh"
+    },
+    {
+      "name": "Set CPU to 1512 MHz",
+      "launch": "1512.sh"
+    }
+  ]
+}

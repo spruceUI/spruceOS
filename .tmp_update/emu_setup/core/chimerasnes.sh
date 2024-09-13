@@ -10,10 +10,10 @@ update_core_config_name() {
         sed -i 's|"name": "✓ Core is mednafen_supafaust"|"name": "Change core to mednafen_supafaust"|g' "$CONFIG"
         sed -i 's|"name": "✓ Core is snes9x"|"name": "Change core to snes9x"|g' "$CONFIG"
         sed -i 's|"name": "✓ Core is snes9x2005"|"name": "Change core to snes9x2005"|g' "$CONFIG"
-        sed -i 's|"name": "Change core to mednafen_supafaust"|"name": "✓ Core is mednafen_supafaust"|g' "$CONFIG"
+        sed -i 's|"name": "Change core to chimerasnes"|"name": "✓ Core is chimerasnes"|g' "$CONFIG"
     fi
 }
 
 update_core_config_name
 
-sed -i 's/CORE=.*/CORE=\"mednafen_supafaust\"/g' "$SYS_OPT"
+sed -i 's/CORE=.*/CORE=\"chimerasnes\"/g' "$SYS_OPT"
