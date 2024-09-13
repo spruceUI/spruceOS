@@ -10,7 +10,7 @@ DEF_DIR="$SETUP_DIR/defaults"
 EMU_DIR="/mnt/SDCARD/Emu"
 {
 # copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
-for dir in "$EMU_DIR/*"; do
+for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
 		echo "dir is $dir";
 		local system="${dir##*/}";
