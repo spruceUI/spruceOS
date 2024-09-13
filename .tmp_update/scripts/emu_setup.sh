@@ -8,7 +8,7 @@ CORE_DIR="$SETUP_DIR/core"
 DEF_DIR="$SETUP_DIR/defaults"
 
 EMU_DIR="/mnt/SDCARD/Emu"
-
+{
 # copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
 for dir in $EMU_DIR/*; do
 	if [ -d $dir ]; then
@@ -97,3 +97,4 @@ done
 for script in "snes9x.sh" "snes9x2005.sh" "mednafen_supafaust.sh"; do
 	cp "$script" "$EMU_DIR/NEOGEO/"
 done
+} > "$SETUP_DIR/log.txt" 2>&1
