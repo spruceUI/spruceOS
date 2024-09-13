@@ -68,7 +68,7 @@ To update:
 
 - Download the latest release and extract the contents.
 - (optional) Back-up a copy of your "Syncthing" App folder and your ".config" folder.
-- Delete everything on your SD card except for the **".config" "BIOS", "Roms" and "Saves"** folders.
+- Delete everything on your SD card except for the **".config" "BIOS", "Emu", "Roms" and "Saves"** folders.
 - Place the entire contents of the latest spruce zip folder onto your SD card allowing any files to overwrite when prompted.
 - (optional)Copy/paste your backup of the Syncthing back into the App folder allowing any files to overwrite.
 - (optional)Copy/paste your .config folder back onto the root, allowing any files to overwrite.
@@ -133,7 +133,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Veckia9x: WiFi File Transfer App.
   
-  Ry: Overhauled Emu folder to add initial per-game override support, LibRetro ports.
+  Ry: Overhauled Emu folder, LibRetro ports.
   
   Oscarkcau: General debugging, clean up and optimizations to SO MANY things.
   
