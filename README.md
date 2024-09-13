@@ -150,6 +150,8 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   Ninoh-FOX and Steward: Pico-8 wrapper.
   
   Sky_Walker: Avocado theme.
+
+  Cobaltdsc4102: Building and enabling the chimerasnes core for SFC.
   
   Onion and Darkhorse: Overlays.
   
