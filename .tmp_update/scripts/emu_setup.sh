@@ -97,7 +97,7 @@ for script in "race.sh" "mednafen_ngp.sh"; do
 	cp -f "$script" "$EMU_DIR/NGPC/" && echo "copied $script to NGPC";
 done
 
-for script in "snes9x.sh" "snes9x2005.sh" "mednafen_supafaust.sh"; do
+for script in "snes9x.sh" "snes9x2005.sh" "mednafen_supafaust.sh" "chimerasnes.sh"; do
 	cp -f "$script" "$EMU_DIR/SFC/" && echo "copied $script to SFC";
 done
 } &> "$SETUP_DIR/log.txt"
