@@ -44,17 +44,14 @@ The Current Team (in no particular order):
     
     SundownerSport
     Decojon
-    Ndguardian
-    Dubious1
-    Phatpat#0001
     Rayon
     Sky_Walker
     Veckia9x
     Ry
     Cinethezs
-    BaseInfinity
     Oscarkcau
     XanXic
+    Fragbait79
 
 
 Happy Gaming..........
