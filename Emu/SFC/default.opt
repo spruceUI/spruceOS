@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CORE="mednafen_supafaust"
+export CORE="chimerasnes"
 export RA_BIN="ra32.miyoo"
 export CPU="1200"
 export GOV="performance"
