@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# whte_rbt.obj
 # >access security
 # access: PERMISSION DENIED.
 # >access security grid
