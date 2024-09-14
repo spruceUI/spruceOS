@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# >access SECURITY
+# access: PERMISSION DENIED.
+# >access security grid
+# access: PERMISSION DENIED.
+# >access main security grid
+# access: PERMISSION DENIED.
+
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 FLAG_PATH="/mnt/SDCARD/.tmp_update/flags"
 PERCENT=2
