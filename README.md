@@ -82,7 +82,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   *GLOBAL*
 
   - BRIGHTNESS: START + L1 (to lower brightness) START + R1 (to increase brightness)
-  - VOLUME: SELECT + L1 (to lower volume) START + R1 (to increase volume)
+  - VOLUME: SELECT + L1 (to lower volume) SELECT + R1 (to increase volume)
 
   *WHILE IN GAME*
 
