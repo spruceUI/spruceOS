@@ -40,3 +40,6 @@ for folder in $FOLDERS; do
         echo "Directory $DIR does not exist."
     fi
 done
+
+# Run the additional script at the end
+/mnt/SDCARD/App/IconFresh/iconsfresh.sh
