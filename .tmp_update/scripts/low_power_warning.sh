@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# >access SECURITY
+# >access security
 # access: PERMISSION DENIED.
 # >access security grid
 # access: PERMISSION DENIED.
