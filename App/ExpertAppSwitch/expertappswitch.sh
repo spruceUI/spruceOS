@@ -42,4 +42,4 @@ for folder in $FOLDERS; do
 done
 
 # Run the additional script at the end
-/mnt/SDCARD/App/IconFresh/iconsfresh.sh
+/mnt/SDCARD/App/IconFresh/iconfresh.sh
