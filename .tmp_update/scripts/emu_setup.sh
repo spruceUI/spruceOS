@@ -23,6 +23,10 @@ for dir in $EMU_DIR/* ; do
 		if [ ! -f "$dir/system.opt" ] ; then
 			cp "$dir/default.opt" "$dir/system.opt"	&& echo "created missing system.opt for $dir";
 		fi
+	# delete config_hidden.json if a config.json already exists to lessen chance of conflicts with system.opt
+		if [ -f "$dir/config.json" ] && [ -f "$dir/config_hidden.json" ]; then
+			rm -f "$dir/config_hidden.json" && echo "removed duplicate config_hidden.json from $dir"
+		fi
 	fi
 done
 
