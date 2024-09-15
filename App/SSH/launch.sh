@@ -1,0 +1,2 @@
+#!/bin/sh
+./ssh.sh
