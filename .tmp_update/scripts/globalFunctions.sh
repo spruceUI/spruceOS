@@ -10,8 +10,8 @@
 
 # Call this like:
 # log_message "Your message here"
-# To output to a custom log file, use:
-# log_message "Your message here" "/path/to/your/custom/logfile.log"
+# To output to a custom log file, set the variable within your script:
+# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
 # This will log the message to the spruce.log file in the Saves/spruce folder
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 max_size=$((10 * 1024 * 1024))  # 10MB in bytes
@@ -27,7 +27,6 @@ log_message() {
     # Check if custom log file exists, if not, use default log file
     if [ ! -f "$custom_log_file" ]; then
         mkdir -p "$(dirname "$log_file")"
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Custom log file not found. Using default log file." >> "$log_file"
         custom_log_file="$log_file"
     fi
 
