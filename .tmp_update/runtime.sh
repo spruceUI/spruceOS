@@ -25,6 +25,9 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 # Load global functions and helpers
 . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
 
+log_message " "
+log_message "---------Starting up---------"
+log_message " "
 # Ensure the spruce folder exists
 spruce_folder="/mnt/SDCARD/Saves/spruce"
 if [ ! -d "$spruce_folder" ]; then
