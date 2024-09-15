@@ -70,3 +70,11 @@ show_image() {
         kill $show_pid
     fi
 }
+
+# Vibrate the device
+# Usage: vibrate [duration]
+# If no duration is provided, defaults to 100ms
+vibrate() {
+    local duration=${1:-100}
+    echo "$duration" > /sys/devices/virtual/timed_output/vibrator/enable
+}
