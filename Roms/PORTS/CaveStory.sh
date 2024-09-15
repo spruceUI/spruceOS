@@ -6,4 +6,4 @@ CORE_DIR="$RA_DIR/.retroarch/cores"
 
 cd "$RA_DIR"
 
-./ra32.miyoo -v -L "$CORE_DIR/nxengine_libretro.so" # | tee "$ROM_DIR/cavestory.log"
+./retroarch -v -L "$CORE_DIR/nxengine_libretro.so" # | tee "$ROM_DIR/cavestory.log"
