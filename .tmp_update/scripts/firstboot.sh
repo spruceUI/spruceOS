@@ -57,7 +57,7 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     show_image "$IMAGE_PATH_FIRMWARE" 5
 
     log_message "Displaying enjoy image"
-    show_image "$IMAGE_PATH_ENJOY" 10
+    show_image "$IMAGE_PATH_ENJOY" 5
 
     rm "$FIRST_BOOT_FLAG"
     log_message "Removed first boot flag"
