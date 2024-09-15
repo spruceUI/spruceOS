@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Base directory containing the specific folders
+BASE_DIR="/mnt/SDCARD/App/"
+
+# List of specific folders to process
+FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert RetroArch sftpgo SSH"
+
+# Variable to track if any config_hidden.json was renamed to config.json
+renamed_to_config_json=false
+
+# Function to backup files
+backup_files() {
+    local file=$1
+    local backup_file="${file}.bak"
+
+    if [ -f "$file" ]; then
+        cp "$file" "$backup_file"
+        echo "Backup created for $file as $backup_file"
+    fi
+}
+
+# Iterate over each folder name
+for folder in $FOLDERS; do
+    # Construct the full path to the folder
+    DIR="$BASE_DIR$folder"
+
+    # Check if the directory exists
+    if [ -d "$DIR" ]; then
+        echo "Processing folder: $DIR"
+
+        # Find and toggle config.json and config_hidden.json files
+        find "$DIR" -type f \( -name "config.json" -o -name "config_hidden.json" \) | while read -r file; do
+            # Backup the file
+            backup_files "$file"
+
+            # Determine the new file name
+            case "$(basename "$file")" in
+                config.json)
+                    new_file="$(dirname "$file")/config_hidden.json"
+                    ;;
+                config_hidden.json)
+                    new_file="$(dirname "$file")/config.json"
+                    renamed_to_config_json=true
+                    ;;
+                *)
+                    continue
+                    ;;
+            esac
+
+            # Rename the file
+            mv "$file" "$new_file"
+
+            echo "Renamed $file to $new_file"
+        done
+    else
+        echo "Directory $DIR does not exist."
+    fi
+done
+
+# Run the additional script only if we renamed a config_hidden.json to config.json
+if $renamed_to_config_json; then
+    /mnt/SDCARD/App/IconFresh/iconfresh.sh
+    echo "Ran iconfresh.sh because config_hidden.json was renamed to config.json"
+else
+    echo "No config_hidden.json files were renamed to config.json. Skipping iconfresh.sh."
+fi
