@@ -48,14 +48,25 @@ log_message() {
     echo "$message"
 }
 
-# Call with show_image "Image Path"
+# Call with 
+# show_image "Image Path" 5
 # This will show the image at the given path and kill any existing show processes
+# If display_time is provided, it will sleep for that many seconds and then kill the show process
 show_image() {
     local image=$1
+    local display_time=$2
+
     if [ ! -f "$image" ]; then
         log_message "Image file not found at $image"
-        exit 1
+        return 1
     fi
+
     killall -9 show
     show "$image" &
+    local show_pid=$!
+
+    if [ -n "$display_time" ] && [ "$display_time" -eq "$display_time" ] 2>/dev/null; then
+        sleep "$display_time"
+        kill $show_pid
+    fi
 }

@@ -51,23 +51,14 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     /mnt/SDCARD/App/IconFresh/iconfresh.sh
 
     log_message "Displaying wiki image"
-    show "$IMAGE_PATH_WIKI" &
-    SHOW_PID=$!
-    sleep 5
-    kill $SHOW_PID
+    show_image "$IMAGE_PATH_WIKI" 5
 
     log_message "Displaying firmware image"
-    show "$IMAGE_PATH_FIRMWARE" &
-    SHOW_PID=$!
-    sleep 5
-    kill $SHOW_PID
-    
+    show_image "$IMAGE_PATH_FIRMWARE" 5
+
     log_message "Displaying enjoy image"
-    show "$IMAGE_PATH_ENJOY" &
-    SHOW_PID=$!
-    sleep 10
-    kill $SHOW_PID
-    
+    show_image "$IMAGE_PATH_ENJOY" 10
+
     rm "$FIRST_BOOT_FLAG"
     log_message "Removed first boot flag"
 else
