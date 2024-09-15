@@ -55,9 +55,9 @@ update_config() {
     fi
 
     if [ "$status" = "ON" ]; then
-        label="Syncthing - ON"
+        label="SYNCTHING - ON"
     else
-        label="Syncthing - OFF"
+        label="SYNCTHING - OFF"
     fi
 
     cat > "$CONFIG_JSON" <<EOL
