@@ -54,3 +54,69 @@ else
     show_image "$FAIL_IMAGE_PATH" 5
     exit 1
 fi
+
+#-----Upgrade-----
+UPDATE_IMAGE_PATH="$appdir/imgs/spurceUpdate.png"
+UPDATE_SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceUpdateSuccess.png"
+UPDATE_FAIL_IMAGE_PATH="$appdir/imgs/spruceUpdateFailed.png"
+
+log_message "Starting upgrade process..."
+show_image "$UPDATE_IMAGE_PATH"
+
+# Define the path for the .lastUpdate file
+last_update_file="$appdir/.lastUpdate"
+
+# Read the current version from .lastUpdate file
+if [ -f "$last_update_file" ]; then
+    current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2)
+else
+    current_version="0.0.0"
+fi
+
+log_message "Current version: $current_version"
+
+# Upgrade script locations
+upgrade_scripts="
+/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.0.sh
+"
+#/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.1.sh
+
+for script in $upgrade_scripts; do
+    script_name=$(basename "$script")
+    script_version=$(echo "$script_name" | cut -d'.' -f1-3)
+    
+    if [ "$current_version" = "0.0.0" ] || [ "$(printf '%s\n' "$current_version" "$script_version" | sort -V | head -n1)" = "$current_version" ]; then
+        log_message "Starting upgrade script: $script_name"
+        
+        if [ -f "$script" ]; then
+            log_message "Executing $script_name..."
+            output=$(sh "$script" 2>&1)
+            exit_status=$?
+            
+            log_message "Output from $script_name:"
+            echo "$output" >> "$log_file"
+            
+            if [ $exit_status -eq 0 ]; then
+                log_message "Successfully completed $script_name"
+                echo "spruce_version=$script_version" > "$last_update_file"
+                current_version=$script_version
+            else
+                log_message "Error running $script_name. Exit status: $exit_status"
+                log_message "Error details: $output"
+                show_image "$UPDATE_FAIL_IMAGE_PATH" 5
+                exit 1
+            fi
+        else
+            log_message "Warning: Script $script_name not found. Skipping."
+        fi
+        
+        log_message "Finished processing $script_name"
+    else
+        log_message "Skipping $script_name: Already at version $current_version or higher"
+    fi
+done
+
+log_message "Upgrade process completed. Current version: $current_version"
+show_image "$UPDATE_SUCCESSFUL_IMAGE_PATH" 3
+
+log_message "----------Restore and Upgrade completed----------"
