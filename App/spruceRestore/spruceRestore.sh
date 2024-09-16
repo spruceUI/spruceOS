@@ -1,12 +1,13 @@
 #!/bin/sh
 
 appdir=/mnt/SDCARD/App/spruceRestore
+upgradescriptsdir=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 backupdir=/mnt/SDCARD/Saves/spruce
 
 . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
 
 IMAGE_PATH="$appdir/imgs/spurceRestore.png"
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceRestoreUpdate.png"
+UPDATE_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
 
 log_message "----------Starting Restore script----------"
