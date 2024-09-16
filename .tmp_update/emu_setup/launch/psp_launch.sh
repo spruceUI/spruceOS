@@ -1,9 +1,9 @@
 #!/bin/sh
 
-EMU_DIR="$(dirname "$0")"
-GAME="$(basename "$1")"
-OVR_DIR="$EMU_DIR/overrides"
-OVERRIDE="$OVR_DIR/$GAME.opt"
+export EMU_DIR="$(dirname "$0")"
+export GAME="$(basename "$1")"
+export OVR_DIR="$EMU_DIR/overrides"
+export OVERRIDE="$OVR_DIR/$GAME.opt"
 
 . "$EMU_DIR/default.opt"
 . "$EMU_DIR/system.opt"

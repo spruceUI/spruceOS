@@ -5,9 +5,9 @@ export HOME=$mydir
 export PATH=$mydir/bin:$PATH
 export LD_LIBRARY_PATH=$mydir/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
 
-GAME="$(basename "$1")"
-OVR_DIR="$mydir/overrides"
-OVERRIDE="$OVR_DIR/$GAME.opt"
+export GAME="$(basename "$1")"
+export OVR_DIR="$mydir/overrides"
+export OVERRIDE="$OVR_DIR/$GAME.opt"
 
 . "$mydir/default.opt"
 . "$mydir/system.opt"
