@@ -123,7 +123,7 @@ exec_on_hotkey() {
 		
 # if all designated keys depressed, do the thing!	
 		if [ $count -eq "$num_keys" ]; then
-			exec "$cmd"
+			"$cmd"
 			break
 		fi
 		
