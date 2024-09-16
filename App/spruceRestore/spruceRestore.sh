@@ -6,8 +6,8 @@ backupdir=/mnt/SDCARD/Saves/spruce
 
 . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
 
-IMAGE_PATH="$appdir/imgs/spurceRestore.png"
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
+IMAGE_PATH="$appdir/imgs/spruceRestore.png"
+SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
 
 log_message "----------Starting Restore script----------"
@@ -48,7 +48,7 @@ tar -xzvf "$most_recent_backup" 2>> "$log_file"
 
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
-    show_image "$UPDATE_IMAGE_PATH" 5
+    show_image "$SUCCESSFUL_IMAGE_PATH" 3
 else
     log_message "Error during restore process. Check $log_file for details."
     show_image "$FAIL_IMAGE_PATH" 5
