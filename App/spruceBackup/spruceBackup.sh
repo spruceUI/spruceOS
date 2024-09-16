@@ -6,12 +6,11 @@ backupdir=/mnt/SDCARD/Saves/spruce
 . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
 
 IMAGE_PATH="$appdir/imgs/spruceBackup.png"
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupUpdate.png"
-FAIL_IMAGE_PATH="$appdir/imgs/backupFailed.png"
+UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupSuccess.png"
+FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
 
 log_message "----------Running Backup script----------"
-
-show "$IMAGE_PATH" 2
+show_image "$IMAGE_PATH"
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
 mkdir -p "$backupdir/backups"
@@ -20,7 +19,6 @@ mkdir -p "$backupdir/backups"
 log_file="$backupdir/spruceBackup.log"
 
 log_message "Created or verified spruce and backups directories"
-show_image "$IMAGE_PATH"
 
 # Get current timestamp
 timestamp=$(date +"%Y%m%d_%H%M%S")
@@ -36,16 +34,21 @@ log_message "Backup file will be: $tar_file"
 # - PICO-8 config
 # - PPSSPP saves
 # - Drastic saves
-# - RetroArch config
+# - RetroArch main configs
+# - RetroArch hotkeyprofile/nohotkeyprofile swap files
+# - RetroArch core configs
 
 # Define the folders to backup
 folders="
 /mnt/SDCARD/App/Syncthing/config
 /mnt/SDCARD/App/PICO/bin
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
-/mnt/SDCARD/RetroArch/retroarch.cfg
-/mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
+/mnt/SDCARD/RetroArch/retroarch.cfg
+/mnt/SDCARD/RetroArch/hotkeyprofile
+/mnt/SDCARD/RetroArch/nohotkeyprofile
+/mnt/SDCARD/RetroArch/.retroarch/config
+/mnt/SDCARD/App/SSH/sshkeys
 "
 
 log_message "Folders to backup: $folders"
@@ -70,9 +73,10 @@ eval $tar_command 2>> "$log_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $tar_file"
+  show_image "$UPDATE_IMAGE_PATH" 4
 else
   log_message "Error while creating backup, check $log_file for more details"
-  show_image "$FAIL_IMAGE_PATH"
+  show_image "$FAIL_IMAGE_PATH" 4
 fi
 
 log_message "Backup process finished running"
