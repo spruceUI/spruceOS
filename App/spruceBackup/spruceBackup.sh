@@ -43,11 +43,14 @@ folders="
 /mnt/SDCARD/App/Syncthing/config
 /mnt/SDCARD/App/PICO/bin
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
+/mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/hotkeyprofile
 /mnt/SDCARD/RetroArch/nohotkeyprofile
 /mnt/SDCARD/RetroArch/.retroarch/config
+/mnt/SDCARD/Emu/NDS/backup
+/mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/App/SSH/sshkeys
 "
 
