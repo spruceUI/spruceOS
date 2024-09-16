@@ -54,65 +54,65 @@ exec_on_hotkey() {
 	
 	while [ 1 ]; do
 	
-    	last_line=$(tail -n 1 "$messages_file")
-    	
-    	case "$last_line" in
-        	*"$key1 1"*)
-            	key1_pressed=1
-            	;;
-        	*"$key1 0"*)
-            	key1_pressed=0
-            	;;
-	esac
-	count="$key1_pressed"
-		
-	if [ "$#" -gt 2 ]; then
-		case "$last_line" in
-        		*"$key2 1"*)
-            		key2_pressed=1
-            		;;
-        		*"$key2 0"*)
-            		key2_pressed=0
-            		;;
-		esac
-		count=$((count + key2_pressed))
-	fi
-		
-	if [ "$#" -gt 3 ]; then
-		case "$last_line" in
-        		*"$key3 1"*)
-            		key3_pressed=1
-            		;;
-        		*"$key3 0"*)
-            		key3_pressed=0
-            		;;
-		esac
-		count=$((count + key3_pressed))
-	fi
-		
-	if [ "$#" -gt 4 ]; then
-		case "$last_line" in
-        		*"$key4 1"*)
-            		key4_pressed=1
-            		;;
-        		*"$key4 0"*)
-            		key4_pressed=0
-            		;;
-		esac
-		count=$((count + key4_pressed))
-	fi
-		
-	if [ "$#" -gt 5 ]; then
+	    	last_line=$(tail -n 1 "$messages_file")
+	    	
 	    	case "$last_line" in
-        		*"$key5 1"*)
-            		key5_pressed=1
-            		;;
-        		*"$key5 0"*)
-            		key5_pressed=0
-            		;;
+	        	*"$key1 1"*)
+	            	key1_pressed=1
+	            	;;
+	        	*"$key1 0"*)
+	            	key1_pressed=0
+	            	;;
 		esac
-		count=$((count + key5_pressed))
-	fi
+		count="$key1_pressed"
+			
+		if [ "$#" -gt 2 ]; then
+			case "$last_line" in
+	        		*"$key2 1"*)
+	            		key2_pressed=1
+	            		;;
+	        		*"$key2 0"*)
+	            		key2_pressed=0
+	            		;;
+			esac
+			count=$((count + key2_pressed))
+		fi
+			
+		if [ "$#" -gt 3 ]; then
+			case "$last_line" in
+	        		*"$key3 1"*)
+	            		key3_pressed=1
+	            		;;
+	        		*"$key3 0"*)
+	            		key3_pressed=0
+	            		;;
+			esac
+			count=$((count + key3_pressed))
+		fi
+			
+		if [ "$#" -gt 4 ]; then
+			case "$last_line" in
+	        		*"$key4 1"*)
+	            		key4_pressed=1
+	            		;;
+	        		*"$key4 0"*)
+	            		key4_pressed=0
+	            		;;
+			esac
+			count=$((count + key4_pressed))
+		fi
+			
+		if [ "$#" -gt 5 ]; then
+		    	case "$last_line" in
+	        		*"$key5 1"*)
+	            		key5_pressed=1
+	            		;;
+	        		*"$key5 0"*)
+	            		key5_pressed=0
+	            		;;
+			esac
+			count=$((count + key5_pressed))
+		fi
 		
 # make sure count doesn't go beyond bounds for some reason.
 		if [ $count -lt 0 ]; then
