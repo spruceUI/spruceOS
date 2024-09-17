@@ -91,7 +91,7 @@ update_skin_images() {
     local ALL_IMAGES_PRESENT=true
 
     # List of images to check
-    IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png save-default.png"
+    IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png"
 
     for IMAGE_NAME in $IMAGES_LIST; do
         THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
