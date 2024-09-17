@@ -44,19 +44,10 @@ for script in "fbneo.sh" "fbalpha2012.sh" "mame2003_plus.sh" "mame2003_xtreme.sh
 	cp -f "$script" "$EMU_DIR/ARCADE/";
 done
 
-for script in "fbneo.sh" "fbalpha2012_cps1.sh"; do
+for script in "fbneo.sh" "fbalpha2012.sh"; do
 	cp -f "$script" "$EMU_DIR/CPS1/" && echo "copied $script to CPS1";
-done
-
-for script in "fbneo.sh" "fbalpha2012_cps2.sh"; do
 	cp -f "$script" "$EMU_DIR/CPS2/" && echo "copied $script to CPS2";
-done
-
-for script in "fbneo.sh" "fbalpha2012_cps3.sh"; do
 	cp -f "$script" "$EMU_DIR/CPS3/" && echo "copied $script to CPS3";
-done
-
-for script in "fbneo.sh" "fbalpha2012_neogeo.sh"; do
 	cp -f "$script" "$EMU_DIR/NEOGEO/" && echo "copied $script to NEOGEO";
 done
 
