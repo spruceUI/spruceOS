@@ -12,8 +12,6 @@ show "$IMAGE_PATH" &
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
 THEME_JSON_FILE="/config/system.json"
-USB_ICON_SOURCE="/mnt/SDCARD/Icons/Default/App/usb.png"
-USB_ICON_DEST="/usr/miyoo/apps/usb_storage/usb_icon_80.png"
 SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
@@ -79,14 +77,6 @@ update_app_icons() {
     sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
 }
 
-update_usb_icon() {
-    if [ -f "${APP_THEME_ICON_PATH}usb.png" ]; then
-        mount -o bind "${APP_THEME_ICON_PATH}usb.png" "$USB_ICON_DEST"
-    else
-        mount -o bind "$USB_ICON_SOURCE" "$USB_ICON_DEST"
-    fi
-}
-
 update_skin_images() {
     local ALL_IMAGES_PRESENT=true
 
@@ -135,7 +125,6 @@ find "$APP_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_app_icons "$CONFIG_FILE"
 done
 
-update_usb_icon
 update_skin_images
 
 killall -9 show
