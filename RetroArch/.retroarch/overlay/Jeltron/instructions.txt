@@ -56,3 +56,18 @@ Width=608
 Height=448
 Bilinear filtering=optional
 
+NeoGeo Pocket
+
+Video-Scaling-
+Integer= OFF
+Aspect= Custom
+X pos=80
+Y pos=0
+Width=480
+Height=456
+Bilinear filtering=off
+
+On-screen overlay
+Preset NGP_Black
+Opacity=1.00
+
