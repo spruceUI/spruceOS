@@ -161,7 +161,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Supermodi064: Photos, testing and support.
   
-  Aemiii91: Being awesome.
+  Aemiii91 and tGecko: Being awesome.
   
   Russ from RGC: His YouTube channel is an inspiration.
 
@@ -181,6 +181,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Oscarkcau
   - XanXic
   - Fragbait79
+  - Cobaltdsc4102
 
 
 ## SUPPORTED GAME SYSTEMS
