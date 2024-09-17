@@ -2,6 +2,7 @@
 
 echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
 log_message "Set LED1 trigger to heartbeat"
+vibrate
 
 alsactl store
 log_message "Saved current sound settings"

@@ -33,7 +33,6 @@ if test -f /mnt/SDCARD/.tmp_update/flags/.save_active; then
 	log_message "Adding last game flag"
 	/mnt/SDCARD/.tmp_update/flags/.lastgame &> /dev/null
 	log_message "Running select script"
-	vibrate
 	/mnt/SDCARD/.tmp_update/scripts/select.sh &> /dev/null
 else
 	log_message "Save active flag not detected"
