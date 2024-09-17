@@ -28,7 +28,6 @@ case "$last_line" in
                     ;;
             esac
             log_message "No matching input, vibrating and waiting"
-            vibrate
             sleep 1
         done
         log_message "Exiting input loop"
