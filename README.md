@@ -101,6 +101,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   - REFRESH ROMS/ SEARCH - Home button
   - SEARCH - Select
   - SHUTDOWN - Hold power until Power Off pop up display (A to confirm)
+  - X while over a game title - Core, CPU speed, Random Game selection menu
 
   *STICK DRIFT ISSUES*
 
