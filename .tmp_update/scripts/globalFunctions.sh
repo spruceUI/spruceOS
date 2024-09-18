@@ -37,6 +37,25 @@ export B_MENU="key 1 1" # surprisingly functions like a regular button
 # export B_POWER # too complicated to bother with tbh
 
 
+# Call this just by having "acknowledge" in your script
+# This will pause until the user presses the A, B, or Start button
+acknowledge(){
+    messages_file="/var/log/messages"
+
+    while true; do
+        last_line=$(tail -n 1 "$messages_file")
+
+        case "$last_line" in
+            *"enter_pressed"*|*"key 1 57"*|*"key 1 29"*)
+                echo "ACKNOWLEDGED $(date +%s)" >> "$messages_file"
+                break
+                ;;
+        esac
+
+        sleep 1
+    done
+}
+
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
 # which are passed as further arguments, are concurrently pressed.
 # Call it with &, and don't forget to kill it whenever it is no longer needed.
