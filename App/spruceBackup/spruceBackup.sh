@@ -7,6 +7,7 @@ backupdir=/mnt/SDCARD/Saves/spruce
 
 IMAGE_PATH="$appdir/imgs/spruceBackup.png"
 UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupSuccess.png"
+SPACE_FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailedSpace.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
 
 log_message "----------Running Backup script----------"
@@ -43,6 +44,7 @@ log_message "Backup file will be: $tar_file"
 # - RetroArch main configs
 # - RetroArch hotkeyprofile/nohotkeyprofile swap files
 # - RetroArch core configs
+# - RetroArch overlays (excluding specific folders)
 
 # Define the folders to backup
 folders="
@@ -55,6 +57,7 @@ folders="
 /mnt/SDCARD/RetroArch/hotkeyprofile
 /mnt/SDCARD/RetroArch/nohotkeyprofile
 /mnt/SDCARD/RetroArch/.retroarch/config
+/mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/App/SSH/sshkeys
@@ -63,23 +66,38 @@ folders="
 
 log_message "Folders to backup: $folders"
 
-# Replace the tar creation and loop with a single tar command
+# Replace the tar creation and loop with a find command and tar
 log_message "Starting backup process"
-tar_command="tar -czf \"$tar_file\""
+temp_file=$(mktemp)
+
+# Check available space
+required_space=$((50 * 1024 * 1024))  # 50 MB in bytes
+available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
+
+if [ "$available_space" -lt "$required_space" ]; then
+    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
+    show_image "$SPACE_FAIL_IMAGE_PATH" 5
+    exit 1
+fi
+
+log_message "Sufficient free space available. Proceeding with backup."
 
 for item in $folders; do
   if [ -e "$item" ]; then
     log_message "Adding $item to backup list"
-    tar_command="$tar_command -C / ${item#/}"
+    if [ "$item" = "/mnt/SDCARD/RetroArch/.retroarch/overlay" ]; then
+      find "$item" -type d -name "Onion-Spruce" -prune -o -type f -print >> "$temp_file"
+    else
+      echo "$item" >> "$temp_file"
+    fi
   else
     log_message "Warning: $item does not exist, skipping..."
   fi
 done
 
-log_message "Tar command: $tar_command"
-
-# Execute the tar command
-eval $tar_command 2>> "$log_file"
+log_message "Creating tar archive"
+tar -czf "$tar_file" -T "$temp_file" 2>> "$log_file"
+rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $tar_file"

@@ -7,6 +7,7 @@ backupdir=/mnt/SDCARD/Saves/spruce
 . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
 
 IMAGE_PATH="$appdir/imgs/spruceRestore.png"
+NOTFOUND_IMAGE_PATH="$appdir/imgs/spruceRestoreNotfound.png"
 SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
 
@@ -24,7 +25,7 @@ log_message "Looking for backup files..."
 # Check if backups folder exists
 if [ ! -d "$backupdir/backups" ]; then
     log_message "Backup folder not found at $backupdir/backups"
-    show_image "$FAIL_IMAGE_PATH" 5
+    show_image "$NOTFOUND_IMAGE_PATH" 5
     exit 1
 fi
 

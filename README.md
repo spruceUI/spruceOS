@@ -82,7 +82,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   *GLOBAL*
 
   - BRIGHTNESS: START + L1 (to lower brightness) START + R1 (to increase brightness)
-  - VOLUME: SELECT + L1 (to lower volume) START + R1 (to increase volume)
+  - VOLUME: SELECT + L1 (to lower volume) SELECT + R1 (to increase volume)
 
   *WHILE IN GAME*
 
@@ -101,6 +101,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   - REFRESH ROMS/ SEARCH - Home button
   - SEARCH - Select
   - SHUTDOWN - Hold power until Power Off pop up display (A to confirm)
+  - X while over a game title - Core, CPU speed, Random Game selection menu
 
   *STICK DRIFT ISSUES*
 
@@ -161,9 +162,11 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Supermodi064: Photos, testing and support.
   
-  Aemiii91: Being awesome.
+  Aemiii91 and tGecko: Being awesome.
   
   Russ from RGC: His YouTube channel is an inspiration.
+
+  Icons8.com for the logo and icons.
 
 
 
@@ -181,6 +184,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Oscarkcau
   - XanXic
   - Fragbait79
+  - Cobaltdsc4102
 
 
 ## SUPPORTED GAME SYSTEMS
