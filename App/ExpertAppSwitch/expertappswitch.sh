@@ -4,7 +4,7 @@
 BASE_DIR="/mnt/SDCARD/App/"
 
 # List of specific folders to process
-FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert RecentSwitch sftpgo FileManagement SSH spruceBackup spruceRestore"
+FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert RecentSwitch sftpgo FileManagement SSH"
 
 # Iterate over each folder name
 for folder in $FOLDERS; do
