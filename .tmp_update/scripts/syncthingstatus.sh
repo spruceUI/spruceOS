@@ -2,8 +2,11 @@
 
 # Path to the runtime.sh and config.json files
 RUNTIME_SH="/mnt/SDCARD/.tmp_update/runtime.sh"
-CONFIG_JSON="/mnt/SDCARD/app/syncthing/config.json"
-
+if [ -f "/mnt/SDCARD/app/syncthing/config.json" ]; then
+    CONFIG_JSON="/mnt/SDCARD/app/syncthing/config.json"
+elif [ -f "/mnt/SDCARD/app/syncthing/config_hidden.json" ]; then
+    CONFIG_JSON="/mnt/SDCARD/app/syncthing/config_hidden.json"
+fi
 # Function to update config.json
 update_config() {
     local status=$1
