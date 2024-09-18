@@ -41,6 +41,7 @@ export B_MENU="key 1 1" # surprisingly functions like a regular button
 # This will pause until the user presses the A, B, or Start button
 acknowledge(){
     messages_file="/var/log/messages"
+	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
 
     while true; do
         last_line=$(tail -n 1 "$messages_file")
