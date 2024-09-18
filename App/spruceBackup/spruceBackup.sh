@@ -7,6 +7,7 @@ backupdir=/mnt/SDCARD/Saves/spruce
 
 IMAGE_PATH="$appdir/imgs/spruceBackup.png"
 UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupSuccess.png"
+SPACE_FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailedSpace.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
 
 log_message "----------Running Backup script----------"
@@ -68,6 +69,18 @@ log_message "Folders to backup: $folders"
 # Replace the tar creation and loop with a find command and tar
 log_message "Starting backup process"
 temp_file=$(mktemp)
+
+# Check available space
+required_space=$((50 * 1024 * 1024))  # 50 MB in bytes
+available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
+
+if [ "$available_space" -lt "$required_space" ]; then
+    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
+    show_image "$SPACE_FAIL_IMAGE_PATH" 5
+    exit 1
+fi
+
+log_message "Sufficient free space available. Proceeding with backup."
 
 for item in $folders; do
   if [ -e "$item" ]; then
