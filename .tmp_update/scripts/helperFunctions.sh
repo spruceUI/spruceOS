@@ -2,11 +2,11 @@
 # Please do not add any dependencies here, this file is meant to be self-contained
 # Keep methods in alphabetical order
 
-# Gain access to the global variables by adding this to the top of your script:
-# . "$GLOBAL_FUNCTIONS"
+# Gain access to the helper variables by adding this to the top of your script:
+# . "$HELPER_FUNCTIONS"
 # This is defined in the runtime.sh file
 # or calling the file directly like:
-# . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+# . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 
 # exports needed so we can refer to buttons by more memorable names
@@ -154,7 +154,11 @@ exec_on_hotkey() {
 }
 
 
-
+# Call this to kill all show processes	
+# Useful in some scenarios
+kill_images(){
+    killall -9 show
+}
 
 
 

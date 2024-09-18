@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$GLOBAL_FUNCTIONS"
+. "$HELPER_FUNCTIONS"
 
 SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"

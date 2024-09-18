@@ -10,12 +10,12 @@
 # Define the target version for this upgrade script
 TARGET_VERSION="X.Y.Z"  # Replace X.Y.Z with your target version number
 
-# Source the global functions
-GLOBAL_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh"
-if [ -f "$GLOBAL_FUNCTIONS" ]; then
-    . "$GLOBAL_FUNCTIONS"
+# Source the helper functions
+HELPER_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
+if [ -f "$HELPER_FUNCTIONS" ]; then
+    . "$HELPER_FUNCTIONS"
 else
-    echo "Error: globalFunctions.sh not found, cannot proceed with the upgrade"
+    echo "Error: helperFunctions.sh not found, cannot proceed with the upgrade"
     exit 1
 fi
 

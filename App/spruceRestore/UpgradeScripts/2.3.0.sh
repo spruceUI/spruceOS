@@ -4,10 +4,10 @@
 TARGET_VERSION="2.3.0"
 
 # Source the global functions
-if [ -f /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh ]; then
-    . /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+if [ -f /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh ]; then
+    . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 else
-    echo "Error: globalFunctions.sh not found, cannot proceed with the upgrade"
+    echo "Error: helperFunctions.sh not found, cannot proceed with the upgrade"
     exit 1
 fi
 

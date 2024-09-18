@@ -4,7 +4,7 @@ appdir=/mnt/SDCARD/App/spruceRestore
 upgradescriptsdir=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 backupdir=/mnt/SDCARD/Saves/spruce
 
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 IMAGE_PATH="$appdir/imgs/spruceRestore.png"
 NOTFOUND_IMAGE_PATH="$appdir/imgs/spruceRestoreNotfound.png"

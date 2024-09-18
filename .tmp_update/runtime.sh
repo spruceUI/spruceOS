@@ -13,7 +13,7 @@ export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 export HOME="${SDCARD_PATH}"
-export GLOBAL_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh"
+export HELPER_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
 
 mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
 mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
@@ -22,8 +22,8 @@ mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
-# Load global functions and helpers
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+# Load helper functions and helpers
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 log_message " "
 log_message "---------Starting up---------"

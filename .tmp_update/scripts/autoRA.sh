@@ -1,5 +1,5 @@
 #!/bin/sh
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 messages_file="/var/log/messages"
 
