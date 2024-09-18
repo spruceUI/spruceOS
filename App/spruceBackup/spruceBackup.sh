@@ -76,7 +76,8 @@ available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
 
 if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    show_image "$SPACE_FAIL_IMAGE_PATH" 5
+    show_image "$SPACE_FAIL_IMAGE_PATH"
+    acknowledge
     exit 1
 fi
 
@@ -104,7 +105,8 @@ if [ $? -eq 0 ]; then
   show_image "$UPDATE_IMAGE_PATH" 4
 else
   log_message "Error while creating backup, check $log_file for more details"
-  show_image "$FAIL_IMAGE_PATH" 4
+  show_image "$FAIL_IMAGE_PATH"
+  acknowledge
 fi
 
 log_message "Backup process finished running"
