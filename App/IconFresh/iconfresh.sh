@@ -2,12 +2,9 @@
 
 IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
-if [ ! -f "$IMAGE_PATH" ]; then
-    echo "Image file not found at $IMAGE_PATH"
-    exit 1
-fi
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
@@ -100,7 +97,7 @@ update_skin_images() {
             DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
 
             cp "$THEME_IMAGE_PATH" "$DEFAULT_IMAGE_PATH"
-            echo "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
+            log_message "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
         done
     else
         for IMAGE_NAME in $IMAGES_LIST; do
@@ -109,9 +106,9 @@ update_skin_images() {
 
             if [ -f "$FALLBACK_IMAGE_PATH" ]; then
                 cp "$FALLBACK_IMAGE_PATH" "$DEST_IMAGE_PATH"
-                echo "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
+                log_message "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
             else
-                echo "Fallback image not found: $FALLBACK_IMAGE_PATH"
+                log_message "Fallback image not found: $FALLBACK_IMAGE_PATH"
             fi
         done
     fi
@@ -127,4 +124,4 @@ done
 
 update_skin_images
 
-killall -9 show
+kill_images
