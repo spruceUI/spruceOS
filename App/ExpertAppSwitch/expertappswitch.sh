@@ -1,45 +1,52 @@
 #!/bin/sh
 
 # Base directory containing the specific folders
-BASE_DIR="/mnt/SDCARD/App/"
+APP_DIR="/mnt/SDCARD/App/"
+BASE_DIR="/mnt/SDCARD/App/ExpertAppSwitch/"
+CONFIG_FILE="${BASE_DIR}/config.json"
 
-# List of specific folders to process
-FOLDERS="LEDon BootLogo MiyooGamelist RetroExpert RecentSwitch sftpgo FileManagement SSH Syncthing"
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
-# Iterate over each folder name
-for folder in $FOLDERS; do
-    # Construct the full path to the folder
-    DIR="$BASE_DIR$folder"
+update_config_label() {
+    local state=$1
+    sed -i "s/\"label\": *\"[^\"]*\"/\"label\": \"EXPERT APPS - ${state}\"/" "$CONFIG_FILE"
+}
 
-    # Check if the directory exists
-    if [ -d "$DIR" ]; then
-        echo "Processing folder: $DIR"
-
-        # Find and toggle config.json and config_hidden.json files
-        find "$DIR" -type f \( -name "config.json" -o -name "config_hidden.json" \) | while read -r file; do
-            # Determine the new file name
-            case "$(basename "$file")" in
-                config.json)
-                    new_file="$(dirname "$file")/config_hidden.json"
-                    ;;
-                config_hidden.json)
-                    new_file="$(dirname "$file")/config.json"
-                    ;;
-                *)
-                    # Skip files that don't match the names we're interested in
-                    continue
-                    ;;
-            esac
-            
-            # Rename the file
-            mv "$file" "$new_file"
-            
-            echo "Renamed $file to $new_file"
-        done
-    else
-        echo "Directory $DIR does not exist."
-    fi
-done
+if [ -f "${BASE_DIR}/.expert" ]; then
+    # Expert mode is active, hide expert apps
+    changed_folders=""
+    find "$APP_DIR" -name "config.json" | while read -r config_file; do
+        if grep -q '"expert": *true' "$config_file"; then
+            sed -i 's/"label":/"#label":/' "$config_file"
+            folder=$(dirname "$config_file")
+            changed_folders="${changed_folders}${folder##*/} (off), "
+        fi
+    done
+    # Remove trailing comma and space
+    changed_folders=$(echo "$changed_folders" | sed 's/, $//')
+    log_message "Expert apps turned off: $changed_folders"
+    # Delete the .expert file
+    rm "${BASE_DIR}/.expert"
+    # Update the config.json label
+    update_config_label "OFF"
+else
+    # Expert mode is not active, show expert apps
+    changed_folders=""
+    find "$APP_DIR" -name "config.json" | while read -r config_file; do
+        if grep -q '"expert": *true' "$config_file"; then
+            sed -i 's/"#label":/"label":/' "$config_file"
+            folder=$(dirname "$config_file")
+            changed_folders="${changed_folders}${folder##*/} (on), "
+        fi
+    done
+    # Remove trailing comma and space
+    changed_folders=$(echo "$changed_folders" | sed 's/, $//')
+    log_message "Expert apps turned on: $changed_folders"
+    # Create the .expert file
+    touch "${BASE_DIR}/.expert"
+    # Update the config.json label
+    update_config_label "ON"
+fi
 
 # Run the additional script at the end
 /mnt/SDCARD/App/IconFresh/iconfresh.sh

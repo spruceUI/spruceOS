@@ -1,0 +1,7 @@
+{
+  "#label": "WIFI FILE TRANSFER - OFF",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/sftpgo.png",
+  "launch": "launch.sh",
+  "description": "Upload and Manage Your Files Wirelessly",
+  "expert": true
+}

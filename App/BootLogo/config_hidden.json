@@ -1,6 +1,0 @@
-{
-	"label":        "BOOT LOGO",
-	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/Icons/App/bootlogo.png",
-	"launch":       "launch.sh",
-	"description":  "Swap the Boot Logo at Start Up"
-}
