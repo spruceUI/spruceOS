@@ -8,6 +8,7 @@ CONFIG_JSON="/mnt/SDCARD/app/syncthing/config.json"
 update_config() {
     local status=$1
     local label
+    local name
     local icon
     local launch="launch.sh"
     local description="Synchronize your files"
@@ -19,17 +20,20 @@ update_config() {
     echo "Extracted icon: $icon"
 
     if [ "$status" = "ON" ]; then
-        label="SYNCTHING - ON"
+        name="SYNCTHING - ON"
+        label="label"
     else
-        label="SYNCTHING - OFF"
+        name="SYNCTHING - OFF"
+        label="#label"
     fi
 
     cat > "$CONFIG_JSON" <<EOL
 {
-"label": "$label",
+"$label": "$name",
 "icon": "$icon",
 "launch": "$launch",
-"description": "$description"
+"description": "$description",
+"expert": true
 }
 EOL
 }

@@ -4,7 +4,7 @@ appdir=/mnt/SDCARD/App/Syncthing
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 # Path to the runtime.sh and config.json files
 RUNTIME_SH="/mnt/SDCARD/.tmp_update/runtime.sh"

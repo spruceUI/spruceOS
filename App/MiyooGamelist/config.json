@@ -1,0 +1,7 @@
+{
+  "#label": "MIYOO GAMELIST",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png",
+  "launch": "launch.sh",
+  "description": "Clean Up Displayed Rom Names",
+  "expert": true
+}

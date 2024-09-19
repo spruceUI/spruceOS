@@ -1,4 +1,4 @@
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
 log_message "Set LED1 trigger to heartbeat"

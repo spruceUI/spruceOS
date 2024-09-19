@@ -4,11 +4,20 @@ appdir=/mnt/SDCARD/App/spruceRestore
 upgradescriptsdir=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 backupdir=/mnt/SDCARD/Saves/spruce
 
-. /mnt/SDCARD/.tmp_update/scripts/globalFunctions.sh
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 IMAGE_PATH="$appdir/imgs/spruceRestore.png"
+NOTFOUND_IMAGE_PATH="$appdir/imgs/spruceRestoreNotfound.png"
 SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
+
+check_injector() {
+    if grep -q "#SYNCTHING INJECTOR" "/mnt/SDCARD/.tmp_update/runtime.sh"; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 log_message "----------Starting Restore script----------"
 show_image "$IMAGE_PATH"
@@ -24,7 +33,8 @@ log_message "Looking for backup files..."
 # Check if backups folder exists
 if [ ! -d "$backupdir/backups" ]; then
     log_message "Backup folder not found at $backupdir/backups"
-    show_image "$FAIL_IMAGE_PATH" 5
+    show_image "$NOTFOUND_IMAGE_PATH"
+    acknowledge
     exit 1
 fi
 
@@ -33,7 +43,8 @@ backup_files=$(find "$backupdir/backups" -name "spruceBackup*.tar.gz" | sort -r 
 
 if [ -z "$backup_files" ]; then
     log_message "No spruceBackup tar.gz files found in $backupdir/backups"
-    show_image "$FAIL_IMAGE_PATH" 5
+    show_image "$FAIL_IMAGE_PATH"
+    acknowledge
     exit 1
 fi
 
@@ -51,12 +62,35 @@ if [ $? -eq 0 ]; then
     show_image "$SUCCESSFUL_IMAGE_PATH" 3
 else
     log_message "Error during restore process. Check $log_file for details."
-    show_image "$FAIL_IMAGE_PATH" 5
+    show_image "$FAIL_IMAGE_PATH"
+    acknowledge
     exit 1
 fi
 
+# Check if Syncthing config folder exists and run launch script if it does
+if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
+    log_message "Syncthing config folder found."
+    if ! check_injector; then
+        log_message "Syncthing injector not found in runtime. Running Syncthing launch script..."
+        if [ -f "/mnt/SDCARD/App/Syncthing/launch.sh" ]; then
+            sh /mnt/SDCARD/App/Syncthing/launch.sh
+            if [ $? -eq 0 ]; then
+                log_message "Syncthing launch script executed successfully"
+            else
+                log_message "Error executing Syncthing launch script"
+            fi
+        else
+            log_message "Syncthing launch script not found"
+        fi
+    else
+        log_message "Syncthing injector found in runtime. Skipping Syncthing launch."
+    fi
+else
+    log_message "Syncthing config folder not found. Skipping Syncthing launch."
+fi
+
 #-----Upgrade-----
-UPDATE_IMAGE_PATH="$appdir/imgs/spurceUpdate.png"
+UPDATE_IMAGE_PATH="$appdir/imgs/spruceUpdate.png"
 UPDATE_SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceUpdateSuccess.png"
 UPDATE_FAIL_IMAGE_PATH="$appdir/imgs/spruceUpdateFailed.png"
 
@@ -103,7 +137,8 @@ for script in $upgrade_scripts; do
             else
                 log_message "Error running $script_name. Exit status: $exit_status"
                 log_message "Error details: $output"
-                show_image "$UPDATE_FAIL_IMAGE_PATH" 5
+                show_image "$UPDATE_FAIL_IMAGE_PATH"
+                acknowledge
                 exit 1
             fi
         else
