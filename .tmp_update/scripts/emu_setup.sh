@@ -9,6 +9,14 @@ DEF_DIR="$SETUP_DIR/defaults"
 
 EMU_DIR="/mnt/SDCARD/Emu"
 {
+# remove config.json and system.opt versions with standalone CPS1/2/3/Neogeo cores
+for dir in "$EMU_DIR/CPS1" "$EMU_DIR/CPS2" "$EMU_DIR/CPS3" "$EMU_DIR/NEOGEO" ; do
+	if [ -f "$dir/config.json" ] && [ -f "$dir/config_hidden.json" ]; then
+		rm -f "$dir/system.opt" && echo "removed old version of system.opt from $dir"
+		rm -f "$dir/config.json" && echo "removed old version of config.json from $dir"
+	fi
+done
+
 # copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
