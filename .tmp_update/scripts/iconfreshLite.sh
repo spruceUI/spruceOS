@@ -1,13 +1,11 @@
 #!/bin/sh
 
-IMAGE_PATH="/mnt/SDCARD/.tmp_update/res/iconfresh.png"
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
-if [ ! -f "$IMAGE_PATH" ]; then
-    echo "Image file not found at $IMAGE_PATH"
-    exit 1
-fi
+log_message "Starting iconfreshLite"
 
-show "$IMAGE_PATH" &
+# Override the IMAGE_PATH variable to prevent showing the refreshing image
+IMAGE_PATH=""
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
@@ -126,5 +124,3 @@ find "$APP_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
 done
 
 update_skin_images
-
-killall -9 show

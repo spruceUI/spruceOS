@@ -1,9 +1,37 @@
 #!/bin/sh
 
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+
 runifnecessary(){
     a=`ps | grep $1 | grep -v grep`
     if [ "$a" == "" ] ; then
         $2 &
+    fi
+}
+
+detectThemeChange(){
+    SYSTEM_JSON="/config/system.json"
+    LAST_THEME_FILE="/tmp/.last_theme"
+
+    # Get current theme
+    CURRENT_THEME=$(awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON")
+    log_message "Current theme: $CURRENT_THEME"
+
+    # Check if last theme file exists
+    if [ ! -f "$LAST_THEME_FILE" ]; then
+        echo "$CURRENT_THEME" > "$LAST_THEME_FILE"
+        /mnt/SDCARD/.tmp_update/scripts/iconfreshLite.sh
+        return
+    fi
+
+    # Read last theme
+    LAST_THEME=$(cat "$LAST_THEME_FILE")
+
+    # Compare current theme with last theme
+    if [ "$CURRENT_THEME" != "$LAST_THEME" ]; then
+        log_message "Theme changed to $CURRENT_THEME"
+        echo "$CURRENT_THEME" > "$LAST_THEME_FILE"
+        /mnt/SDCARD/.tmp_update/scripts/iconfreshLite.sh
     fi
 }
 
@@ -27,6 +55,8 @@ while [ 1 ]; do
         cat /tmp/cmd_to_run.sh > /mnt/SDCARD/.tmp_update/flags/.lastgame
 	    /tmp/cmd_to_run.sh  &> /dev/null
         rm /tmp/cmd_to_run.sh
+
+        detectThemeChange
 
         # some emulators may use 2 or more cores
         # therefore after closing an emulator
