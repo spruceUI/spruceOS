@@ -1,6 +1,7 @@
 {
-"label":"BOXART SCRAPER",
-"icon":	"/mnt/SDCARD/Icons/Default/App/scraper.png",
-"launch":"launch.sh",
-"description":"Scrape Game Boxart"
+  "label": "BOXART SCRAPER",
+  "icon": "/mnt/SDCARD/Icons/Default/App/scraper.png",
+  "launch": "launch.sh",
+  "description": "Scrape Game Boxart",
+  "expert": false
 }

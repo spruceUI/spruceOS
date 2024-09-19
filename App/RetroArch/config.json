@@ -1,6 +1,7 @@
 {
-"label":"RETROARCH",
-"icon":"/mnt/SDCARD/Themes/SPRUCE/Icons/App/retroarch.png",
-"launch":"launch.sh",
-"description":"Core and Game Configuration"
+  "label": "RETROARCH",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/retroarch.png",
+  "launch": "launch.sh",
+  "description": "Core and Game Configuration",
+  "expert": false
 }
