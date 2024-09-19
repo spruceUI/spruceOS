@@ -12,6 +12,7 @@ FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
 
 log_message "----------Running Backup script----------"
 show_image "$IMAGE_PATH"
+echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
 mkdir -p "$backupdir/backups"
@@ -34,6 +35,7 @@ log_message "Created .lastUpdate file with current version: $current_version"
 # Replace zip_file with tar_file
 tar_file="$backupdir/backups/spruceBackup_${timestamp}.tar.gz"
 log_message "Backup file will be: $tar_file"
+echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
 
 # Things being backed up:
