@@ -11,6 +11,14 @@ NOTFOUND_IMAGE_PATH="$appdir/imgs/spruceRestoreNotfound.png"
 SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
 
+check_injector() {
+    if grep -q "#SYNCTHING INJECTOR" "/mnt/SDCARD/.tmp_update/runtime.sh"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 log_message "----------Starting Restore script----------"
 show_image "$IMAGE_PATH"
 
@@ -57,6 +65,28 @@ else
     show_image "$FAIL_IMAGE_PATH"
     acknowledge
     exit 1
+fi
+
+# Check if Syncthing config folder exists and run launch script if it does
+if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
+    log_message "Syncthing config folder found."
+    if ! check_injector; then
+        log_message "Syncthing injector not found in runtime. Running Syncthing launch script..."
+        if [ -f "/mnt/SDCARD/App/Syncthing/launch.sh" ]; then
+            sh /mnt/SDCARD/App/Syncthing/launch.sh
+            if [ $? -eq 0 ]; then
+                log_message "Syncthing launch script executed successfully"
+            else
+                log_message "Error executing Syncthing launch script"
+            fi
+        else
+            log_message "Syncthing launch script not found"
+        fi
+    else
+        log_message "Syncthing injector found in runtime. Skipping Syncthing launch."
+    fi
+else
+    log_message "Syncthing config folder not found. Skipping Syncthing launch."
 fi
 
 #-----Upgrade-----
