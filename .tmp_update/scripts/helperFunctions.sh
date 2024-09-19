@@ -149,7 +149,7 @@ exec_on_hotkey() {
 # if all designated keys depressed, do the thing!	
 		if [ $count -eq "$num_keys" ]; then
 			"$cmd"
-			break
+			# break
 		fi
 	done
 }

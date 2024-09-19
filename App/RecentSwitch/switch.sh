@@ -21,11 +21,11 @@ toggle_mainui() {
 
         if diff -q "${MAINUI_PATH}.bak" "$RECENTS_MAINUI_PATH" >/dev/null; then
             cp "$NORECENTS_MAINUI_PATH" "$MAINUI_PATH"
-            sed -i 's|"label":"RECENTS - ON"|"label":"RECENTS - OFF"|g' "$CONFIG_FILE"
+            sed -i 's|"label": "RECENTS - ON"|"label": "RECENTS - OFF"|g' "$CONFIG_FILE"
             echo "Switched to NO RECENTS mode"
         else
             cp "$RECENTS_MAINUI_PATH" "$MAINUI_PATH"
-            sed -i 's|"label":"RECENTS - OFF"|"label":"RECENTS - ON"|g' "$CONFIG_FILE"
+            sed -i 's|"label": "RECENTS - OFF"|"label": "RECENTS - ON"|g' "$CONFIG_FILE"
             echo "Switched to RECENTS mode"
         fi
 
