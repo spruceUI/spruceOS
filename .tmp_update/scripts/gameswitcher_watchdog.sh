@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+
 FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
 LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
 TEMP_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list_temp"
@@ -14,6 +16,7 @@ long_press_handler() {
 
     # ensure command file exists
     if [ ! -f /tmp/cmd_to_run.sh ] ; then
+        log_message "cmd_to_run.sh does not exist!"
         return
     fi
 
@@ -21,9 +24,11 @@ long_press_handler() {
     CMD=`cat /tmp/cmd_to_run.sh`
     GAME_PATH=`echo $CMD | cut -d\" -f4`
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
+    log_message "Box art path is $BOX_ART_PATH"
     
     # ensure box art file exists
     if [ ! -f "$BOX_ART_PATH" ] ; then
+        log_message "no box art for current game!"
         return
     fi
 
@@ -49,7 +54,7 @@ long_press_handler() {
     killall -15 retroarch || killall -15 ra32.miyoo || /mnt/SDCARD/miyoo/app/kill_apps.sh
     
     # set flag file for principle.sh to load game switcher later
-    touch "$FLAG_FILE"
+    touch "$FLAG_FILE" && log_message "creating game switcher flag file"
 }
 
 # listen to log file and handle key press events
@@ -58,12 +63,14 @@ tail -F -n 1 /var/log/messages | while read line; do
     case $line in
         *"key 1 28 1"*) # START key down
             # start long press handler
+            log_message "game switcher watchdog: Start button detected"
             long_press_handler &
             PID=$!
         ;;
         *"key 1 28 0"*) # START key up
             # kill the long press handler if menu button is released within time limit
             if [ "$LONG_PRESSED" = false ] ; then
+                log_message "Start button released before 2 seconds. aborting long press handler.
                 kill $PID
             fi
         ;;
