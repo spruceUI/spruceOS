@@ -2,7 +2,7 @@
 
 export CORE="fceumm"
 export RA_BIN="ra32.miyoo"
-export CPU="816"
+export CPU="648"
 export GOV="performance"
 export CORES="2"
 export GPU="384"

@@ -16,8 +16,8 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is fbalpha2012_cps3",
-      "launch": "fbalpha2012_cps3.sh"
+      "name": "✓ Core is fbalpha2012",
+      "launch": "fbalpha2012.sh"
     },
     {
       "name": "Change core to fbneo",

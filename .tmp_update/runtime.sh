@@ -13,6 +13,7 @@ export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 export HOME="${SDCARD_PATH}"
+export HELPER_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
 
 mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
 mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
@@ -21,15 +22,37 @@ mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
-wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
-[ "$wifi" -eq 0 ] && touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill || touch /tmp/wifion
-killall -9 main
+# Load helper functions and helpers
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
+log_message " "
+log_message "---------Starting up---------"
+log_message " "
+# Ensure the spruce folder exists
+spruce_folder="/mnt/SDCARD/Saves/spruce"
+if [ ! -d "$spruce_folder" ]; then
+    mkdir -p "$spruce_folder"
+    log_message "Created spruce folder at $spruce_folder"
+fi
+
+# Check if WiFi is enabled
+wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
+if [ "$wifi" -eq 0 ]; then
+    touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
+    log_message "WiFi turned off"
+else
+    touch /tmp/wifion
+    log_message "WiFi turned on"
+fi
+kill_images
 # Syncthing Insertion Here (Do not remove)
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
+log_message "ALSA configuration loaded"
+
 /mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
+log_message "Auto Resume executed"
 
 
 THEME_JSON_FILE="/config/system.json"
@@ -63,14 +86,14 @@ fi
 
 
 lcd_init 1
-show "${SDCARD_PATH}/.tmp_update/res/installing.png" &
+show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
 
 "${SCRIPTS_DIR}/firstboot.sh"
+log_message "First boot script executed"
 
-killall -9 show
+kill_images
 swapon -p 40 "${SWAPFILE}"
-
-
+log_message "Swap file activated"
 
 # Run scripts for initial setup
 /mnt/SDCARD/.tmp_update/scripts/syncthingstatus.sh
@@ -80,13 +103,12 @@ swapon -p 40 "${SWAPFILE}"
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
-
-
-
-killall -9 show
-
+log_message "Initial setup scripts executed"
+kill_images
 
 
 
 # start main loop
+log_message "Starting main loop"
 /mnt/SDCARD/.tmp_update/scripts/principal.sh
+

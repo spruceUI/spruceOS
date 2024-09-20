@@ -16,7 +16,11 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is mednafen_supafaust",
+      "name": "✓ Core is chimerasnes",
+      "launch": "chimerasnes.sh"
+    },
+    {
+      "name": "Change core to mednafen_supafaust",
       "launch": "mednafen_supafaust.sh"
     },
     {

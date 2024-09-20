@@ -7,4 +7,4 @@ CORE_DIR="$RA_DIR/.retroarch/cores"
 
 cd "$RA_DIR"
 
-./ra32.miyoo -v -L "$CORE_DIR/dinothawr_libretro.so" "$DINO_DIR/dinothawr.game" # | tee "$ROM_DIR/dinothawr.log"
+./retroarch -v -L "$CORE_DIR/dinothawr_libretro.so" "$DINO_DIR/dinothawr.game" # | tee "$ROM_DIR/dinothawr.log"

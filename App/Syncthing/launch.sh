@@ -4,6 +4,8 @@ appdir=/mnt/SDCARD/App/Syncthing
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+
 # Path to the runtime.sh and config.json files
 RUNTIME_SH="/mnt/SDCARD/.tmp_update/runtime.sh"
 CONFIG_JSON="/mnt/SDCARD/app/syncthing/config.json"
@@ -20,24 +22,7 @@ APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/App/"
 APP_THEME_ICON_PATH=""
 
 # Log file path
-LOG_FILE="$(dirname "$0")/syncthingSpruce.log"
-
-# Function to log messages
-log_message() {
-    local message="$1"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$LOG_FILE"
-}
-
-# Function to show image
-show_image() {
-    local image=$1
-    if [ ! -f "$image" ]; then
-        log_message "Image file not found at $image"
-        exit 1
-    fi
-    killall -9 show
-    show "$image" &
-}
+log_file="$appdir/spruceBackup.log"
 
 # Function to update config.json
 update_config() {
@@ -55,9 +40,9 @@ update_config() {
     fi
 
     if [ "$status" = "ON" ]; then
-        label="Syncthing - ON"
+        label="SYNCTHING - ON"
     else
-        label="Syncthing - OFF"
+        label="SYNCTHING - OFF"
     fi
 
     cat > "$CONFIG_JSON" <<EOL

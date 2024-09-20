@@ -1,6 +1,7 @@
 {
-	"label":        "EMU FRESH",
-	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/Icons/App/emufresh.png",
-	"launch":       "launch.sh",
-	"description":  "Refresh Roms & Displayed Emulators"
+  "label": "EMU FRESH",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/emufresh.png",
+  "launch": "launch.sh",
+  "description": "Refresh Roms & Displayed Emulators",
+  "expert": false
 }

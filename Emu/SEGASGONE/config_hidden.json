@@ -16,11 +16,11 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "Set CPU to 648 MHz",
+      "name": "✓ CPU is at 648 MHz",
       "launch": "648.sh"
     },
     {
-      "name": "✓ CPU is at 816 MHz",
+      "name": "Set CPU to 816 MHz",
       "launch": "816.sh"
     },
     {

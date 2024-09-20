@@ -1,9 +1,9 @@
 #!/bin/sh
 
-HOME=`dirname "$0"`
-mypak=`basename "$1"`
-OVR_DIR="$HOME/overrides"
-OVERRIDE="$OVR_DIR/$mypak.opt"
+export HOME=`dirname "$0"`
+export mypak=`basename "$1"`
+export OVR_DIR="$HOME/overrides"
+export OVERRIDE="$OVR_DIR/$mypak.opt"
 
 . "$HOME/default.opt"
 . "$HOME/system.opt"

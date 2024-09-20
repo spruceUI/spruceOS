@@ -2,18 +2,13 @@
 
 IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
-if [ ! -f "$IMAGE_PATH" ]; then
-    echo "Image file not found at $IMAGE_PATH"
-    exit 1
-fi
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
 THEME_JSON_FILE="/config/system.json"
-USB_ICON_SOURCE="/mnt/SDCARD/Icons/Default/App/usb.png"
-USB_ICON_DEST="/usr/miyoo/apps/usb_storage/usb_icon_80.png"
 SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
@@ -79,19 +74,11 @@ update_app_icons() {
     sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
 }
 
-update_usb_icon() {
-    if [ -f "${APP_THEME_ICON_PATH}usb.png" ]; then
-        mount -o bind "${APP_THEME_ICON_PATH}usb.png" "$USB_ICON_DEST"
-    else
-        mount -o bind "$USB_ICON_SOURCE" "$USB_ICON_DEST"
-    fi
-}
-
 update_skin_images() {
     local ALL_IMAGES_PRESENT=true
 
     # List of images to check
-    IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png save-default.png"
+    IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png"
 
     for IMAGE_NAME in $IMAGES_LIST; do
         THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
@@ -110,7 +97,7 @@ update_skin_images() {
             DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
 
             cp "$THEME_IMAGE_PATH" "$DEFAULT_IMAGE_PATH"
-            echo "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
+            log_message "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
         done
     else
         for IMAGE_NAME in $IMAGES_LIST; do
@@ -119,9 +106,9 @@ update_skin_images() {
 
             if [ -f "$FALLBACK_IMAGE_PATH" ]; then
                 cp "$FALLBACK_IMAGE_PATH" "$DEST_IMAGE_PATH"
-                echo "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
+                log_message "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
             else
-                echo "Fallback image not found: $FALLBACK_IMAGE_PATH"
+                log_message "Fallback image not found: $FALLBACK_IMAGE_PATH"
             fi
         done
     fi
@@ -135,7 +122,6 @@ find "$APP_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_app_icons "$CONFIG_FILE"
 done
 
-update_usb_icon
 update_skin_images
 
-killall -9 show
+kill_images

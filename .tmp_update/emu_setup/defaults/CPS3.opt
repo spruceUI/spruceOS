@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CORE="fbalpha2012_cps3"
+export CORE="fbalpha2012"
 export RA_BIN="ra32.miyoo"
 export CPU="1344"
 export GOV="performance"
