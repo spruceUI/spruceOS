@@ -1,22 +1,27 @@
 #!/bin/sh
 
+. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+
 FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
 LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
 
 # remove flag for game switcher
-rm "$FLAG_FILE"
+rm "$FLAG_FILE" && log_message "Removed game switcher flag file"
 
 # exit if no game in list file
 if [ ! -f "$LIST_FILE" ] ; then
+    log_message "no games in the game switcher list! Exiting game switcher!"
     exit 0
 fi
 
 # get the index of current displayed game
 CURRENT_INDEX=`wc -l < "$LIST_FILE"`
 MAX_INDEX=$CURRENT_INDEX
+log_message "Current index is $CURRENT_INDEX out of $MAX_INDEX"
 
 # get the command to run the current game
 CMD=`tail -n+$CURRENT_INDEX "$LIST_FILE" | head -1`
+log_message "Game switcher command to run: $CMD"
 
 # function to show box art of current selected game
 show_box_art() {
@@ -24,11 +29,13 @@ show_box_art() {
     CMD=`tail -n+$CURRENT_INDEX "$LIST_FILE" | head -1`
     GAME_PATH=`echo $CMD | cut -d\" -f4`
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
+    log_message "Box art path is $BOX_ART_PATH"
 
     # show the box art
     if [ -f "$BOX_ART_PATH" ]; then
         kill $SHOW_PID
         /mnt/SDCARD/.tmp_update/bin/show.elf "$BOX_ART_PATH" &
+        log_message "Showing box art."
         SHOW_PID=$!
     fi
 }
@@ -42,6 +49,7 @@ tail -F -n 1 /var/log/messages | while read line; do
     case $line in
         *"key 1 57 1"*) # A key down
             # store the command to tmp file, which is used for principle.sh to load the game
+            log_message "game switcher: Button A pressed."
             echo $CMD > /tmp/cmd_to_run.sh
             sync
             # exit the game switcher
@@ -51,10 +59,12 @@ tail -F -n 1 /var/log/messages | while read line; do
         *"key 1 29 1"*) # B key down
             # exit the game switcher
             # killall is necessary because the loop gives 2 processes in the name gameswitcher.sh
+            log_message "game switcher: Button B pressed."
             killall gameswitcher.sh
         ;;
         *"key 1 105 1"*) # LEFT key down
             # update the index of current selected game
+            log_message "game switcher: D-pad Left pressed."
             CURRENT_INDEX=`expr $CURRENT_INDEX - 1`
             if [ $CURRENT_INDEX -lt 1 ] ; then CURRENT_INDEX=$MAX_INDEX ; fi
             # show the box art of new selected game
@@ -62,6 +72,7 @@ tail -F -n 1 /var/log/messages | while read line; do
         ;;
         *"key 1 106 1"*) # RIGHT key down
             # update the index of current selected game
+            log_message "game switcher: D-pad Right pressed."
             CURRENT_INDEX=`expr $CURRENT_INDEX + 1`
             if [ $CURRENT_INDEX -gt $MAX_INDEX ] ; then CURRENT_INDEX=1 ; fi
             # show the box art of new selected game
