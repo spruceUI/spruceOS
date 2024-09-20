@@ -13,6 +13,8 @@ while [ 1 ]; do
     touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
     runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
+	# Restart network services with higher priority since booting to menu
+	nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
     cd ${SYSTEM_PATH}/app/
     ./MainUI  &> /dev/null
 
