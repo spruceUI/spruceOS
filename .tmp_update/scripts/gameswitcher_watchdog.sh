@@ -1,6 +1,8 @@
 #!/bin/sh
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. "/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
+
+INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 
 FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
 LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
@@ -26,9 +28,27 @@ long_press_handler() {
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
     log_message "Box art path is $BOX_ART_PATH"
     
-    # ensure box art file exists
-    if [ ! -f "$BOX_ART_PATH" ] ; then
-        log_message "no box art for current game!"
+    GAME="${GAME_PATH##*/}" #      get game name without the full path
+    LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
+    EMU_DIR="${LAUNCH%/*}"
+	OVR_DIR="$EMU_DIR/overrides"
+	OVERRIDE="$OVR_DIR/$GAME.opt"
+	. "$EMU_DIR/default.opt"
+	. "$EMU_DIR/system.opt"
+    if [ -f "$OVERRIDE" ]; then
+        . "$OVERRIDE"
+    fi
+    core_info="$INFO_DIR/${CORE}_libretro.info"
+    core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
+    core_name="$(echo ${core_name} | tr -d '"')"
+    state_dir="/mnt/SDCARD/Saves/states/$core_name"
+    game_shortname="${GAME%.*}"
+    SCREENSHOT_PATH="${state_dir}/${game_shortname}.state.auto.png"
+    log_message "Screenshot path is $SCREENSHOT_PATH"
+
+    # ensure box art or screenshot file exists
+    if [ ! -f "$BOX_ART_PATH" ] && [ ! -f "$SCREENSHOT_PATH" ]; then
+        log_message "no box art or screenshot for current game!"
         return
     fi
 
@@ -53,7 +73,7 @@ long_press_handler() {
     # kill RA or other emulator 
     killall -15 retroarch || killall -15 ra32.miyoo || /mnt/SDCARD/miyoo/app/kill_apps.sh
     
-    # set flag file for principle.sh to load game switcher later
+    # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" && log_message "creating game switcher flag file"
 }
 
@@ -63,14 +83,14 @@ tail -F -n 1 /var/log/messages | while read line; do
     case $line in
         *"key 1 28 1"*) # START key down
             # start long press handler
-            log_message "game switcher watchdog: Start button detected"
+            log_message "game switcher watchdog: Start button pressed"
             long_press_handler &
             PID=$!
         ;;
         *"key 1 28 0"*) # START key up
             # kill the long press handler if menu button is released within time limit
             if [ "$LONG_PRESSED" = false ] ; then
-                log_message "Start button released before 2 seconds. aborting long press handler."
+                log_message "game switcher watchdog: Start button released."
                 kill $PID
             fi
         ;;
