@@ -3,27 +3,32 @@
 
 messages_file="/var/log/messages"
 
+SSH_DIR="/mnt/SDCARD/App/SSH"
+SSH_KEYS="$SSH_DIR/sshkeys"
+DROPBEAR="$SSH_DIR/bin/dropbear"
+appdir=/mnt/SDCARD/App/Syncthing
+
 connect_services() {
 	
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
 			# SFTPGo check
-			if { [ -f "/mnt/SDCARD/App/sftpgo/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/sftpgo/config.json"; }; then
-			  /mnt/SDCARD/App/sftpgo/launch.sh --silent # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/sftpgo/launch.sh --silent & # Start service
+			if grep -q "ON" "/mnt/SDCARD/App/sftpgo/config.json" && ! pgrep "sftpgo" > /dev/null; then
+				# Service is enabled but not running, so start it...
+				nice -2 /mnt/SDCARD/.tmp_update/sftpgo/sftpgo serve -c /mnt/SDCARD/.tmp_update/sftpgo/ > /dev/null &
 			fi
 
 			# SSH check
-			if { [ -f "/mnt/SDCARD/App/SSH/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/SSH/config.json"; }; then
-			  /mnt/SDCARD/App/SSH/launch.sh --silent  # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/SSH/launch.sh --silent & # Start service
+			if grep -q "ON" "/mnt/SDCARD/App/SSH/config.json" && ! pgrep "dropbear" > /dev/null; then
+				# Service is enabled but not running, so start it...
+				$DROPBEAR -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" &
 			fi
-
+			
 			# Syncthing check
-			if { [ -f "/mnt/SDCARD/App/Syncthing/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/Syncthing/config.json"; }; then
-			  /mnt/SDCARD/App/Syncthing/launch.sh --silent   # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/Syncthing/launch.sh --silent & # Start service
+			if grep -q "ON" "/mnt/SDCARD/App/Syncthing/config.json" && ! pgrep "syncthing" > /dev/null; then
+				# Service is enabled but not running, so start it...
+				$appdir/bin/syncthing serve --home=$appdir/config/ > $appdir/serve.log 2>&1 &
 			fi
 			
 			break
