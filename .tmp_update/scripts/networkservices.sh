@@ -6,7 +6,7 @@ messages_file="/var/log/messages"
 SSH_DIR="/mnt/SDCARD/App/SSH"
 SSH_KEYS="$SSH_DIR/sshkeys"
 DROPBEAR="$SSH_DIR/bin/dropbear"
-appdir=/mnt/SDCARD/App/Syncthing
+SYNCTHING_DIR=/mnt/SDCARD/App/Syncthing
 
 connect_services() {
 	
@@ -28,7 +28,7 @@ connect_services() {
 			# Syncthing check
 			if grep -q "ON" "/mnt/SDCARD/App/Syncthing/config.json" && ! pgrep "syncthing" > /dev/null; then
 				# Service is enabled but not running, so start it...
-				$appdir/bin/syncthing serve --home=$appdir/config/ > $appdir/serve.log 2>&1 &
+				$SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
 			fi
 			
 			break
