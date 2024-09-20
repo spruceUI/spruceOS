@@ -50,7 +50,8 @@ update_config() {
 "label": "$label",
 "icon": "$icon",
 "launch": "$launch",
-"description": "$description"
+"description": "$description",
+"expert":true
 }
 EOL
 }
