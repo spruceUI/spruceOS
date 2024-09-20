@@ -3,6 +3,7 @@
 . "/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
 LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
@@ -47,9 +48,9 @@ long_press_handler() {
     log_message "Screenshot path is $SCREENSHOT_PATH"
 
     # ensure box art or screenshot file exists
-    if [ ! -f "$BOX_ART_PATH" ] && [ ! -f "$SCREENSHOT_PATH" ]; then
-        log_message "no box art or screenshot for current game!"
-        return
+    if [ ! -f "$BOX_ART_PATH" ] && [ ! -f "$SCREENSHOT_PATH" ] && [ ! -f "$DEFAULT_IMG" ]; then
+        log_message "no box art, screenshot, or default image for current game!"
+        return 1
     fi
 
     # update switcher game list
