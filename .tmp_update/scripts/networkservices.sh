@@ -10,20 +10,20 @@ connect_services() {
 			
 			# SFTPGo check
 			if { [ -f "/mnt/SDCARD/App/sftpgo/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/sftpgo/config.json"; }; then
-			  /mnt/SDCARD/App/sftpgo/launch_silent.sh # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/sftpgo/launch_silent.sh & # Start service
+			  /mnt/SDCARD/App/sftpgo/launch.sh --silent # Run once to toggle the menu item to OFF
+			  /mnt/SDCARD/App/sftpgo/launch.sh --silent & # Start service
 			fi
 
 			# SSH check
 			if { [ -f "/mnt/SDCARD/App/SSH/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/SSH/config.json"; }; then
-			  /mnt/SDCARD/App/SSH/launch_silent.sh  # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/SSH/launch_silent.sh & # Start service
+			  /mnt/SDCARD/App/SSH/launch.sh --silent  # Run once to toggle the menu item to OFF
+			  /mnt/SDCARD/App/SSH/launch.sh --silent & # Start service
 			fi
 
 			# Syncthing check
 			if { [ -f "/mnt/SDCARD/App/Syncthing/config.json" ] && grep -q "ON" "/mnt/SDCARD/App/Syncthing/config.json"; }; then
-			  /mnt/SDCARD/App/Syncthing/launch_silent.sh   # Run once to toggle the menu item to OFF
-			  /mnt/SDCARD/App/Syncthing/launch_silent.sh & # Start service
+			  /mnt/SDCARD/App/Syncthing/launch.sh --silent   # Run once to toggle the menu item to OFF
+			  /mnt/SDCARD/App/Syncthing/launch.sh --silent & # Start service
 			fi
 			
 			break

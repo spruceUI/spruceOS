@@ -1,5 +1,8 @@
 #!/bin/sh
 
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
+
 appdir=/mnt/SDCARD/App/Syncthing
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
@@ -105,7 +108,9 @@ repair_config() {
 
 startsyncthing() {
     if syncthingpid; then
-        show_image "$KILL_IMAGE_PATH"
+		if [ "$silent_mode" -eq 0 ]; then
+			show_image "$KILL_IMAGE_PATH"
+		fi
         log_message "Already running. Stopping Syncthing..."
         killall -9 syncthing
         update_config "OFF"  # Update config.json to OFF
@@ -175,10 +180,12 @@ if [ -f "$THEME_JSON_FILE" ]; then
     APP_THEME_ICON_PATH="${THEME_PATH}Icons/App/"
 fi
 
-if syncthingpid; then
-    show_image "$KILL_IMAGE_PATH"
-else
-    show_image "$IMAGE_PATH"
+if [ "$silent_mode" -eq 0 ]; then
+	if syncthingpid; then
+		show_image "$KILL_IMAGE_PATH"
+	else
+		show_image "$IMAGE_PATH"
+	fi
 fi
 
 log_message "Checking if we're already configured..."

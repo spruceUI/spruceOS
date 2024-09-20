@@ -3,12 +3,16 @@
 . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 WIFI_ON="/mnt/SDCARD/App/sftpgo/imgs/wifiOn.png"
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
 
 log_message "Starting SFTPGO launch script"
 
 if [ ! -f /mnt/SDCARD/.tmp_update/flags/sftpgo.lock ]; then
-    show_image "$WIFI_ON"
-    log_message "SFTPGO lock file not found, starting SFTPGO"
+    if [ "$silent_mode" -eq 0 ]; then
+		show_image "$WIFI_ON"
+	fi
+	log_message "SFTPGO lock file not found, starting SFTPGO"
     nice -2 /mnt/SDCARD/.tmp_update/sftpgo/sftpgo serve -c /mnt/SDCARD/.tmp_update/sftpgo/ > /dev/null &
     log_message "SFTPGO started with PID $!";
 

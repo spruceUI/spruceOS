@@ -6,6 +6,10 @@ SSH_KEYS="$SSH_DIR/sshkeys"
 DROPBEAR="$SSH_DIR/bin/dropbear"
 DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
 
+#Leaving for future use; network services should be able to run silently
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
+
 toggle_mainui() {
   if grep -q "SSH - OFF" "$CONFIG_FILE"; then
     sed -i 's|SSH - OFF|SSH - ON|' "$CONFIG_FILE"
