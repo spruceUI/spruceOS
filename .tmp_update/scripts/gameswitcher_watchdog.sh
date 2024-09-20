@@ -70,7 +70,7 @@ tail -F -n 1 /var/log/messages | while read line; do
         *"key 1 28 0"*) # START key up
             # kill the long press handler if menu button is released within time limit
             if [ "$LONG_PRESSED" = false ] ; then
-                log_message "Start button released before 2 seconds. aborting long press handler.
+                log_message "Start button released before 2 seconds. aborting long press handler."
                 kill $PID
             fi
         ;;
