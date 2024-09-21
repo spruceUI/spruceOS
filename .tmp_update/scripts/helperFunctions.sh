@@ -9,6 +9,8 @@
 # . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 
+DISPLAY_TEXT_FILE="/mnt/SDCARD/.tmp_update/bin/display_text.elf"
+
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
 export B_RIGHT="key 1 106"
@@ -55,6 +57,65 @@ acknowledge(){
 
         sleep 1
     done
+}
+
+DEFAULT_IMAGE="/mnt/SDCARD/Themes/SPRUCE/skin_640_480/background-small.png"
+# Call this to display text on the screen
+# Usage: display_text [options]
+# Options:
+#   -i, --image <path>    Image path (default: DEFAULT_IMAGE)
+#   -t, --text <text>     Text to display
+#   -d, --delay <seconds> Delay in seconds (default: 0)
+#   -s, --size <size>     Text size (default: 36)
+#   -p, --position <pos>  Text position (top, middle, bottom) (default: bottom)
+#   -a, --align <align>   Text alignment (left, center, right) (default: middle)
+#   -w, --width <width>   Text width (default: 600)
+#   -c, --color <color>   Text color in RGB format (default: ffffff)
+#   -f, --font <path>     Font path (optional)
+# Example: display_text -t "Hello, World!" -s 48 -p top -a center -c ff0000
+display_text() {
+    local image="$DEFAULT_IMAGE" text="" delay=0 size=20 position="center" align="middle" width=320 color="ffffff" font=""
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -i|--image) image="$2"; shift ;;
+            -t|--text) text="$2"; shift ;;
+            -d|--delay) delay="$2"; shift ;;
+            -s|--size) size="$2"; shift ;;
+            -p|--position) position="$2"; shift ;;
+            -a|--align) align="$2"; shift ;;
+            -w|--width) width="$2"; shift ;;
+            -c|--color) color="$2"; shift ;;
+            -f|--font) font="$2"; shift ;;
+            *) log_message "Unknown option: $1"; return 1 ;;
+        esac
+        shift
+    done
+
+    if [[ -z "$text" ]]; then
+        log_message "Error: Text is required"
+        return 1
+    fi
+
+    local r="${color:0:2}"
+    local g="${color:2:2}"
+    local b="${color:4:2}"
+
+    # Log the final command
+    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
+    log_message "Executing display_text command: $command"
+
+    # Execute the command and capture its output
+    local output
+    output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
+    local exit_code=$?
+
+    # Log the output and exit code
+    log_message "display_text command output: $output"
+    log_message "display_text command exit code: $exit_code"
+
+    # Return the exit code of the display_text command
+    return $exit_code
 }
 
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
