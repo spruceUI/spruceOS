@@ -67,6 +67,18 @@ long_press_handler() {
         echo "$CMD" > "$LIST_FILE"
     fi
 
+    # makesure all emulators and games in list exist
+    # remove all non existing games from list file
+    rm -f "$TEMP_FILE"
+    while read -r CMD; do
+        EMU_PATH=`echo $CMD | cut -d\" -f2`
+        GAME_PATH=`echo $CMD | cut -d\" -f4`
+        if [ ! -f "$EMU_PATH" ] ; then continue ; fi
+        if [ ! -f "$GAME_PATH" ] ; then continue ; fi
+        echo "$CMD" >> "$TEMP_FILE"
+    done <$LIST_FILE
+    mv "$TEMP_FILE" "$LIST_FILE"
+
     # trim the game list to only recent 10 games
     tail -10 "$LIST_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$LIST_FILE"
