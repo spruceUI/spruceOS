@@ -4,12 +4,12 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
   "launch": "launch.sh",
   "rompath": "../../Roms/FAKE08",
-  "imgpath": "../../Roms/FAKE08/Imgs",
+  "imgpath": "../../Roms/FAKE08",
   "gamelist": "../../Roms/FAKE08/miyoogamelist.xml",
   "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
-  "extlist": "p8",
+  "extlist": "p8|png",
   "launchlist": [
     {
       "name": "Select Random Game",
