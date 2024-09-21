@@ -67,8 +67,8 @@ DEFAULT_IMAGE="/mnt/SDCARD/Themes/SPRUCE/skin_640_480/background-small.png"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position (top, middle, bottom) (default: bottom)
-#   -a, --align <align>   Text alignment (left, center, right) (default: middle)
+#   -p, --position <pos>  Text position (top, middle, bottom) (default: middle)
+#   -a, --align <align>   Text alignment (left, center, right) (default: center)
 #   -w, --width <width>   Text width (default: 600)
 #   -c, --color <color>   Text color in RGB format (default: ffffff)
 #   -f, --font <path>     Font path (optional)
@@ -87,7 +87,7 @@ display_text() {
             -w|--width) width="$2"; shift ;;
             -c|--color) color="$2"; shift ;;
             -f|--font) font="$2"; shift ;;
-            *) log_message "Unknown option: $1"; return 1 ;;
+            *) log_message "Error: Unknown option: $1"; return 1 ;;
         esac
         shift
     done
@@ -101,21 +101,24 @@ display_text() {
     local g="${color:2:2}"
     local b="${color:4:2}"
 
-    # Log the final command
-    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
-    log_message "Executing display_text command: $command"
-
     # Execute the command and capture its output
     local output
-    output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
-    local exit_code=$?
+    if [ "$delay" -eq 0 ]; then
+        # Run in background if no delay is specified
+        $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
+        return 0
+    else
+        output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
+        local exit_code=$?
 
-    # Log the output and exit code
-    log_message "display_text command output: $output"
-    log_message "display_text command exit code: $exit_code"
+        # Log only if there's an error
+        if [ $exit_code -ne 0 ]; then
+            log_message "Error: display_text command failed with exit code $exit_code"
+            log_message "Error output: $output"
+        fi
 
-    # Return the exit code of the display_text command
-    return $exit_code
+        return $exit_code
+    fi
 }
 
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
