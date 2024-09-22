@@ -1,0 +1,7 @@
+{
+  "label": "ADVANCED SETTINGS",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/menuswitch.png",
+  "launch": "launch.sh",
+  "description": "Advanced settings for spruce",
+  "expert": false
+}
