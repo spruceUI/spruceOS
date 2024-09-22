@@ -17,6 +17,15 @@ for dir in "$EMU_DIR/CPS1" "$EMU_DIR/CPS2" "$EMU_DIR/CPS3" "$EMU_DIR/NEOGEO" ; d
 	fi
 done
 
+# fix config.json for SFC for users who had it set up pre-chimerasnes default
+if [ -f "$EMU_DIR/SFC/system.opt" ]; then
+	if ! grep -q "CORE=\"chimerasnes\"" "$EMU_DIR/SFC/system.opt" ; then
+		. $EMU_DIR/SFC/system.opt && echo "SFC core is ${CORE}"
+		cd "$EMU_DIR/SFC"
+		sh "$EMU_DIR/SFC/${CORE}.sh" && echo "executed ${CORE}.sh"
+	fi
+fi
+
 # copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
