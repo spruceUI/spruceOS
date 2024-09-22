@@ -9,22 +9,15 @@ runifnecessary(){
 
 rm /mnt/SDCARD/.tmp_update/flags/.save_active
 while [ 1 ]; do
+    # create in menu flag
+    touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
-    if [ -f /mnt/SDCARD/.tmp_update/flags/gs.lock ] ; then
-        /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
-    fi
-    
-    if [ ! -f /tmp/cmd_to_run.sh ] ; then
-        # create in menu flag
-        touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
+    runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
+    cd ${SYSTEM_PATH}/app/
+    ./MainUI  &> /dev/null
 
-        runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-        cd ${SYSTEM_PATH}/app/
-        ./MainUI  &> /dev/null
-
-        # remove in menu flag
-        rm /mnt/SDCARD/.tmp_update/flags/in_menu.lock
-    fi
+    # remove in menu flag
+    rm /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
     if [ -f /tmp/.cmdenc ] ; then
         /root/gameloader
