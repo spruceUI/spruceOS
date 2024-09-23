@@ -72,7 +72,7 @@ cores_online(){
         num_cores=4
     fi
 
-    echo "Setting $num_cores CPU core(s) online"
+    log_message "Setting $num_cores CPU core(s) online"
 
     # Always keep CPU0 online
     echo 1 > /sys/devices/system/cpu/cpu0/online
