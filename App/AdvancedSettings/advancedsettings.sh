@@ -90,7 +90,7 @@ main_settings_menu() {
 
         display_current_setting "$current_category" "$current_key"
 
-        button=$(get_buttonpress)
+        button=$(get_button_press)
         log_message "Button pressed: $button"
         case "$button" in
             "UP")
@@ -123,7 +123,7 @@ main_settings_menu() {
                 log_message "Updated setting: $current_key=$new_value"
                 ;;
             "")
-                log_message "get_buttonpress returned empty string"
+                log_message "get_button_press returned empty string"
                 ;;
             "A")
                 save_advanced_settings
