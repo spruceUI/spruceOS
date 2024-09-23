@@ -9,7 +9,7 @@ CONFIG_FILE="${BASE_DIR}/config.json"
 
 update_config_label() {
     local state=$1
-    sed -i "s/\"label\": *\"[^\"]*\"/\"label\": \"EXPERT APPS - ${state}\"/" "$CONFIG_FILE"
+    sed -i "s/\"label\": *\"[^\"]*\"/\"label\": \"Expert Apps - ${state}\"/" "$CONFIG_FILE"
 }
 
 if [ -f "${BASE_DIR}/.expert" ]; then

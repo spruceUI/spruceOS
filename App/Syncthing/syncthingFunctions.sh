@@ -9,12 +9,13 @@ syncthing_check(){
     if [ -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock ]; then
         start_syncthing_process
     else
-        sed -i 's|ON|OFF|' $SYNCTHING_CONFIG_FILE
+        sed -i 's|- On|- Off|' $SYNCTHING_CONFIG_FILE
     fi
 }
 
 start_syncthing_process(){
     log_message "Starting Syncthing..."
     $SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
-    sed -i 's|OFF|ON|' $SYNCTHING_CONFIG_FILE
+    sed -i 's|- Off|- On|' $SYNCTHING_CONFIG_FILE
+    sed -i 's|"#label"|"label"|' $SYNCTHING_CONFIG_FILE
 }

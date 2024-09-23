@@ -25,7 +25,7 @@ toggle_mainui() {
   if flag_exists; then
     display_text -t "Shutting down SSH..." -c dbcda7
     # Dropbear is running, so we'll shut it down
-    sed -i 's|ON|OFF|' "$CONFIG_FILE"
+    sed -i 's|- On|- Off|' "$CONFIG_FILE"
     sed -i 's|user: root, pass: tina|Enable SSH for Code Wizardry|' "$CONFIG_FILE"
     killall -9 dropbear
     rm /mnt/SDCARD/.tmp_update/flags/dropbear.lock

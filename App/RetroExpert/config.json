@@ -1,5 +1,5 @@
 {
-  "#label": "RETROARCH EXPERT MODE - OFF",
+  "#label": "RetroArch Expert Mode - Off",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/retroexpert.png",
   "launch": "launch.sh",
   "description": "Uses Hotkeys, No In-Game Menu",

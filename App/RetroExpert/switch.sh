@@ -21,13 +21,13 @@ toggle_sys_opt() {
         if grep -q "$MIYOO_RA" "$sys_opt"; then
             sed -i "s|$MIYOO_RA|$FULL_RA|g" "$sys_opt"
             cp /mnt/SDCARD/RetroArch/hotkeyprofile/retroarch.cfg /mnt/SDCARD/RetroArch/retroarch.cfg
-            sed -i 's|OFF|ON|' "$CONFIG_FILE"
+            sed -i 's|- Off|- On|' "$CONFIG_FILE"
             echo "Config file updated to ON mode"
 
         elif grep -q "$FULL_RA" "$sys_opt"; then
             sed -i "s|$FULL_RA|$MIYOO_RA|g" "$sys_opt"
             cp /mnt/SDCARD/RetroArch/nohotkeyprofile/retroarch.cfg /mnt/SDCARD/RetroArch/retroarch.cfg
-            sed -i 's|ON|OFF|' "$CONFIG_FILE"
+            sed -i 's|- On|- Off|' "$CONFIG_FILE"
             echo "Config file updated to OFF mode"
         else
             echo "No match found in $sys_opt"
