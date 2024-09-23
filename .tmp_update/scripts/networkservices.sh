@@ -1,12 +1,8 @@
 #!/bin/sh
 . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
-
-messages_file="/var/log/messages"
-
-SSH_DIR="/mnt/SDCARD/App/SSH"
-SSH_KEYS="$SSH_DIR/sshkeys"
-DROPBEAR="$SSH_DIR/bin/dropbear"
-SYNCTHING_DIR=/mnt/SDCARD/App/Syncthing
+. /mnt/SDCARD/App/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
+. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 connect_services() {
 	
@@ -14,28 +10,30 @@ connect_services() {
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
 			# SFTPGo check
-			if grep -q "ON" "/mnt/SDCARD/App/sftpgo/config.json" && ! pgrep "sftpgo" > /dev/null; then
-				# Service is enabled but not running, so start it...
-				nice -2 /mnt/SDCARD/.tmp_update/sftpgo/sftpgo serve -c /mnt/SDCARD/.tmp_update/sftpgo/ > /dev/null &
+			if [ -f "/mnt/SDCARD/.tmp_update/flags/sftpgo.lock" ] && ! pgrep "sftpgo" > /dev/null; then
+				# Lock file exists but service is not running, so start it...
+				log_message "Network services: SFTPGo detected not running, starting..."
+				start_sftpgo_process
 			fi
 
 			# SSH check
-			if grep -q "ON" "/mnt/SDCARD/App/SSH/config.json" && ! pgrep "dropbear" > /dev/null; then
-				# Service is enabled but not running, so start it...
-				$DROPBEAR -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" &
+			if [ -f "/mnt/SDCARD/.tmp_update/flags/dropbear.lock" ] && ! pgrep "dropbear" > /dev/null; then
+				# Lock file exists but service is not running, so start it...
+				log_message "Network services: Dropbear detected not running, starting..."
+				start_dropbear_process
 			fi
 			
 			# Syncthing check
-			if grep -q "ON" "/mnt/SDCARD/App/Syncthing/config.json" && ! pgrep "syncthing" > /dev/null; then
-				# Service is enabled but not running, so start it...
-				$SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
+			if [ -f "/mnt/SDCARD/.tmp_update/flags/syncthing.lock" ] && ! pgrep "syncthing" > /dev/null; then
+				# Lock file exists but service is not running, so start it...
+				log_message "Network services: Syncthing detected not running, starting..."
+				start_syncthing_process
 			fi
 			
 			break
 		fi
 		sleep 1
 	done
-	
 }
 
 # Attempt to bring up the network services if WIFI is system enabled
