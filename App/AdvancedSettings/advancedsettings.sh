@@ -12,7 +12,8 @@
 # "Text" is the text of the setting.
 # "Options" are the options of the setting.
 # "Default" is the default value of the setting.
-# When adding new settings, put them second to last in the list.
+# When adding new settings, make sure an empty line is added at the end of the file.
+# Settings are separated by detecting new lines at the end.
 # Categories are displayed in alphabetical order.
 
 BASE_DIR="/mnt/SDCARD/App/AdvancedSettings"
@@ -49,11 +50,11 @@ load_advanced_settings() {
         log_message "Settings file found at $SETTINGS_FILE"
     fi
 
-    while IFS='|' read -r key text options default; do
+    while IFS='|' read -r category key text options default; do
         key=$(echo "$key" | tr -d '"')
-        default=$(echo "$default" | tr -d '"')
+        default=$(echo "$default" | tr -d '"' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         if ! grep -q "^$key=" "$SETTINGS_FILE"; then
-            echo "$key=$default" >> "$SETTINGS_FILE"
+            printf "%s=%s\n" "$key" "$default" >> "$SETTINGS_FILE"
             log_message "Added missing setting: $key=$default"
         fi
     done < "$OPTIONS_FILE"
@@ -62,25 +63,32 @@ load_advanced_settings() {
 # Function to save settings to spruce.cfg
 save_advanced_settings() {
     log_message "Saving settings to $SETTINGS_FILE"
-    for key in $(echo "$settings" | cut -d'=' -f1); do
-        value=$(echo "$settings" | grep "^$key=" | cut -d'=' -f2-)
-        sed -i "s/^$key=.*/$key=$value/" "$SETTINGS_FILE"
-        log_message "Updated setting: $key=$value"
-    done
+    while IFS='|' read -r category key text options default; do
+        key=$(echo "$key" | tr -d '"')
+        value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        if [ -n "$value" ]; then
+            sed -i "s|^$key=.*|$key=$value|" "$SETTINGS_FILE"
+            log_message "Updated setting: $key=$value"
+        fi
+    done < "$OPTIONS_FILE"
 }
 
 # Function to display current setting
 display_current_setting() {
-    local key="$1"
-    local value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2-)
-    local text=$(grep "^\"$key\"" "$OPTIONS_FILE" | cut -d'|' -f2 | tr -d '"')
+    local category="$1"
+    local key="$2"
+    local value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    local line=$(grep "^\"$category\"|\"$key\"" "$OPTIONS_FILE")
+    local text=$(echo "$line" | cut -d'|' -f3 | sed 's/^"//;s/"$//')
     
     if [ -n "$text" ]; then
         log_message "Displaying setting: $text: $value"
-        display_text -i "$BASE_IMAGE" -t "$text: 
+        local category_image="$BASE_DIR/imgs/${category}.png"
+        [ -f "$category_image" ] || category_image="$BASE_IMAGE"
+        display_text -i "$category_image" -t "$text:
 $value" -p middle -s 40
     else
-        log_message "Error: Text not found for key $key"
+        log_message "Error: Text not found for key $key in category $category"
         display_text -i "$BASE_IMAGE" -t "Error: Setting not found" -p middle -s 44
     fi
 }
@@ -88,35 +96,54 @@ $value" -p middle -s 40
 # Main menu loop
 main_settings_menu() {
     log_message "Entering main menu"
-    current_index=0
-    total_options=$(wc -l < "$OPTIONS_FILE")
+    current_category_index=0
+    current_option_index=0
+
+    # Get unique categories
+    categories=$(cut -d'|' -f1 "$OPTIONS_FILE" | sort -u | tr -d '"')
+    total_categories=$(echo "$categories" | wc -l)
 
     while true; do
-        current_key=$(sed -n "$((current_index + 1))p" "$OPTIONS_FILE" | cut -d'|' -f1 | tr -d '"')
-        display_current_setting "$current_key"
+        current_category=$(echo "$categories" | sed -n "$((current_category_index + 1))p")
+        category_options=$(grep "^\"$current_category\"" "$OPTIONS_FILE")
+        total_options=$(echo "$category_options" | wc -l)
+
+        current_line=$(echo "$category_options" | sed -n "$((current_option_index + 1))p")
+        current_key=$(echo "$current_line" | cut -d'|' -f2 | tr -d '"')
+
+        display_current_setting "$current_category" "$current_key"
 
         button=$(get_button_press)
         log_message "Button pressed: $button"
         case "$button" in
             "UP")
-                current_index=$((current_index - 1))
-                [ $current_index -lt 0 ] && current_index=$((total_options - 1))
-                log_message "Moving up. New index: $current_index"
+                current_option_index=$((current_option_index - 1))
+                [ "$current_option_index" -lt 0 ] && current_option_index=$((total_options - 1))
+                log_message "Moving up. New index: $current_option_index"
                 ;;
             "DOWN")
-                current_index=$((current_index + 1))
-                [ $current_index -ge $total_options ] && current_index=0
-                log_message "Moving down. New index: $current_index"
+                current_option_index=$((current_option_index + 1))
+                [ "$current_option_index" -ge "$total_options" ] && current_option_index=0
+                log_message "Moving down. New index: $current_option_index"
+                ;;
+            "L1"|"L2")
+                current_category_index=$((current_category_index - 1))
+                [ "$current_category_index" -lt 0 ] && current_category_index=$((total_categories - 1))
+                current_option_index=0
+                log_message "Moving to previous category. New category index: $current_category_index"
+                ;;
+            "R1"|"R2")
+                current_category_index=$((current_category_index + 1))
+                [ "$current_category_index" -ge "$total_categories" ] && current_category_index=0
+                current_option_index=0
+                log_message "Moving to next category. New category index: $current_category_index"
                 ;;
             "LEFT"|"RIGHT")
-                options=$(sed -n "$((current_index + 1))p" "$OPTIONS_FILE" | cut -d'|' -f3 | tr -d '"' | tr ',' ' ')
+                options=$(echo "$current_line" | cut -d'|' -f4 | tr -d '"' | tr ',' ' ')
                 current_value=$(grep "^$current_key=" "$SETTINGS_FILE" | cut -d'=' -f2-)
                 new_value=$(change_setting "$current_value" "$options" "$button")
                 sed -i "s/^$current_key=.*/$current_key=$new_value/" "$SETTINGS_FILE"
                 log_message "Updated setting: $current_key=$new_value"
-                ;;
-            "")
-                log_message "get_buttonpress returned empty string"
                 ;;
             "A")
                 save_advanced_settings
