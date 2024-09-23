@@ -32,7 +32,7 @@ while [ 1 ]; do
 
         # some emulators may use 2 or more cores
         # therefore after closing an emulator
-        # we need to turn off other cores except cpu0
+        # we need to turn off other cores except cpu0+1
         echo 1 > /sys/devices/system/cpu/cpu0/online 
         echo 1 > /sys/devices/system/cpu/cpu1/online 
         echo 0 > /sys/devices/system/cpu/cpu2/online 
