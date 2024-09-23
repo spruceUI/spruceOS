@@ -77,7 +77,8 @@ display_current_setting() {
     
     if [ -n "$text" ]; then
         log_message "Displaying setting: $text: $value"
-        display_text -i "$BASE_IMAGE" -t "$text:$'\n'$value" -p middle -s 44
+        display_text -i "$BASE_IMAGE" -t "$text: 
+$value" -p middle -s 40
     else
         log_message "Error: Text not found for key $key"
         display_text -i "$BASE_IMAGE" -t "Error: Setting not found" -p middle -s 44
@@ -94,7 +95,7 @@ main_settings_menu() {
         current_key=$(sed -n "$((current_index + 1))p" "$OPTIONS_FILE" | cut -d'|' -f1 | tr -d '"')
         display_current_setting "$current_key"
 
-        button=$(get_buttonpress)
+        button=$(get_button_press)
         log_message "Button pressed: $button"
         case "$button" in
             "UP")
@@ -121,10 +122,12 @@ main_settings_menu() {
                 save_advanced_settings
                 display_text -t "Settings saved" -p bottom -s 26 -d 2
                 log_message "Settings saved, exiting main menu"
+                kill_images
                 return
                 ;;
             "B")
                 log_message "Exiting main menu without saving"
+                kill_images
                 return
                 ;;
             "TIMEOUT")
