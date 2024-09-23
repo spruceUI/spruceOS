@@ -61,13 +61,13 @@ acknowledge(){
 
 # Call this to set the number of CPU cores to be online
 # Usage: cores_online [number of cores]
-# Default is 1 core
+# Default is 2 core
 cores_online(){
-    local num_cores=${1:-1}  # Default to 1 if no argument is provided
+    local num_cores=${2:-1}  # Default to 2 if no argument is provided
     
-    # Ensure the input is between 1 and 4
-    if [ "$num_cores" -lt 1 ]; then
-        num_cores=1
+    # Ensure the input is between 2 and 4
+    if [ "$num_cores" -lt 2 ]; then
+        num_cores=2
     elif [ "$num_cores" -gt 4 ]; then
         num_cores=4
     fi

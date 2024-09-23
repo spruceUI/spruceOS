@@ -34,7 +34,7 @@ while [ 1 ]; do
         # therefore after closing an emulator
         # we need to turn off other cores except cpu0
         echo 1 > /sys/devices/system/cpu/cpu0/online 
-        echo 0 > /sys/devices/system/cpu/cpu1/online 
+        echo 1 > /sys/devices/system/cpu/cpu1/online 
         echo 0 > /sys/devices/system/cpu/cpu2/online 
         echo 0 > /sys/devices/system/cpu/cpu3/online 
 
