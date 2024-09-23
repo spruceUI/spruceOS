@@ -110,17 +110,25 @@ display_text() {
     # Log the final command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
     log_message "Executing display_text command: $command"
-    # Execute the command and capture its output
-    local output
-    output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
-    local exit_code=$?
-    # Log the output and exit code
-    log_message "display_text command output: $output"
-    log_message "display_text command exit code: $exit_code"
-
-    # Run acknowledge if -o or --okay was used and delay is 0 or not set
-    if [[ "$run_acknowledge" = true && "$delay" -eq 0 ]]; then
-        acknowledge
+    
+    # Execute the command in the background if delay is 0
+    if [[ "$delay" -eq 0 ]]; then
+        $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
+        local exit_code=$?
+        log_message "display_text command started in background with PID $!"
+        
+        # Run acknowledge if -o or --okay was used
+        if [[ "$run_acknowledge" = true ]]; then
+            acknowledge
+        fi
+    else
+        # Execute the command and capture its output
+        local output
+        output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
+        local exit_code=$?
+        # Log the output and exit code
+        log_message "display_text command output: $output"
+        log_message "display_text command exit code: $exit_code"
     fi
 
     # Return the exit code of the display_text command
