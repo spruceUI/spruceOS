@@ -30,10 +30,14 @@ if test -f /mnt/SDCARD/.tmp_update/flags/.save_active; then
 		log_message "Retro Acheivements enabled, checking WiFi connection"
 		check_and_connect_wifi
 	fi
+	# Restart network services
+	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+	
 	log_message "Adding last game flag"
 	/mnt/SDCARD/.tmp_update/flags/.lastgame &> /dev/null
 	log_message "Running select script"
 	/mnt/SDCARD/.tmp_update/scripts/select.sh &> /dev/null
+	
 else
 	log_message "Save active flag not detected"
 fi

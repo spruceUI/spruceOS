@@ -1,2 +1,2 @@
 #!/bin/sh
-./ssh.sh
+. /mnt/SDCARD/App/SSH/dropbearApp.sh

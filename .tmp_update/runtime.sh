@@ -24,6 +24,9 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 # Load helper functions and helpers
 . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/App/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
+. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 log_message " "
 log_message "---------Starting up---------"
@@ -45,7 +48,11 @@ else
     log_message "WiFi turned on"
 fi
 kill_images
-# Syncthing Insertion Here (Do not remove)
+
+# Start network services in the background
+dropbear_check & # Start Dropbear in the background
+sftpgo_check & # Start SFTPGo in the background
+syncthing_check & # Start Syncthing in the background
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
@@ -96,8 +103,6 @@ swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
 # Run scripts for initial setup
-/mnt/SDCARD/.tmp_update/scripts/syncthingstatus.sh
-/mnt/SDCARD/.tmp_update/scripts/sftpgo.sh
 /mnt/SDCARD/.tmp_update/scripts/sortfaves.sh
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh

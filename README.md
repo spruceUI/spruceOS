@@ -128,7 +128,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Rayon and Cinethezs: Boxart Scraper App and tweaks.
   
-  Cinethezs, tenlevels, ShaunInman (show.elf): Random Game App
+  Cinethezs, Oscarkcau and tenlevels: Random Game App
   
   Ndguardian and XK9274: Syncthing App.
   
