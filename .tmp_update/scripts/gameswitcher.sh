@@ -57,8 +57,11 @@ while read -r CMD; do
 done <$LIST_FILE
 
 # launch the switcher program
+# Usage: switcher image_list title_list [-s speed] [-m on|off]
+# -s: scrolling speed in frames (default is 20), larger value means slower.
+# -m: display title in multiple lines (default is off).
 cd /mnt/SDCARD/.tmp_update/bin/
-/mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE"
+/mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 -m on
 
 # get return value and launch game with return index
 RETURN_INDEX=$?
