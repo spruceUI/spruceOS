@@ -68,8 +68,8 @@ CONFIRM_IMAGE="/mnt/SDCARD/.tmp_update/res/displayTextConfirm.png"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position (top, middle, bottom) (default: middle)
-#   -a, --align <align>   Text alignment (left, center, right) (default: center)
+#   -p, --position <pos>  Text position (top, center, bottom) (default: center)
+#   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
 #   -c, --color <color>   Text color in RGB format (default: ffffff)
 #   -f, --font <path>     Font path (optional)
@@ -77,7 +77,7 @@ CONFIRM_IMAGE="/mnt/SDCARD/.tmp_update/res/displayTextConfirm.png"
 # Example: display_text -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display_text with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
 display_text() {
-    local image="$DEFAULT_IMAGE" text="" delay=0 size=20 position="center" align="middle" width=320 color="ffffff" font=""
+    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=320 color="ffffff" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     
