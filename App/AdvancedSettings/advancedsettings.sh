@@ -73,6 +73,23 @@ save_advanced_settings() {
     done < "$OPTIONS_FILE"
 }
 
+ramp_up_cpu() {
+    if [ "$1" = "true" ]; then
+        echo "Ramping up CPU cores"
+        echo 1 > /sys/devices/system/cpu/cpu0/online
+        echo 1 > /sys/devices/system/cpu/cpu1/online
+        echo 1 > /sys/devices/system/cpu/cpu2/online
+        echo 0 > /sys/devices/system/cpu/cpu3/online
+    else
+        echo "Ramping down CPU cores 1-3"
+        echo 0 > /sys/devices/system/cpu/cpu3/online
+        echo 0 > /sys/devices/system/cpu/cpu2/online
+        echo 0 > /sys/devices/system/cpu/cpu1/online
+        # Keep CPU0 always online
+        echo 1 > /sys/devices/system/cpu/cpu0/online
+    fi
+}
+
 # Function to display current setting
 display_current_setting() {
     local category="$1"
@@ -164,7 +181,6 @@ main_settings_menu() {
                 log_message "Unhandled button press: '$button'"
                 ;;
         esac
-        sleep 0.2
     done
 }
 
@@ -187,9 +203,9 @@ change_setting() {
         index=$((index + 1))
     done
 
-    # If current value is not in options, set index to -1
+    # If current value is not in options, set index to 0
     if [ $index -ge $option_count ]; then
-        index=-1
+        index=0
     fi
 
     # Change the index based on the direction
@@ -205,6 +221,8 @@ change_setting() {
     echo "$options" | cut -d' ' -f$((new_index + 1))
 }
 
+ramp_up_cpu true
+
 # Load settings
 log_message "Calling load_settings function"
 load_advanced_settings
@@ -218,4 +236,5 @@ log_message "Loaded settings: $settings"
 log_message "Starting main menu"
 main_settings_menu
 
+ramp_up_cpu false 
 log_message "Advanced Settings script completed"
