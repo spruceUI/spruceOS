@@ -40,6 +40,9 @@ fi
 
 log_message "OPTIONS_FILE found and is readable"
 
+# Define the global variable
+CHANGED_KEYS=""
+
 # Function to load settings from spruce.cfg
 load_advanced_settings() {
     log_message "Attempting to load settings"
@@ -63,14 +66,19 @@ load_advanced_settings() {
 # Function to save settings to spruce.cfg
 save_advanced_settings() {
     log_message "Saving settings to $SETTINGS_FILE"
+    local changed_keys=""
     while IFS='|' read -r category key text options default; do
         key=$(echo "$key" | tr -d '"')
-        value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        if [ -n "$value" ]; then
-            sed -i "s|^$key=.*|$key=$value|" "$SETTINGS_FILE"
-            log_message "Updated setting: $key=$value"
+        old_value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        new_value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        if [ -n "$new_value" ] && [ "$old_value" != "$new_value" ]; then
+            sed -i "s|^$key=.*|$key=$new_value|" "$SETTINGS_FILE"
+            changed_keys="$changed_keys $key"
         fi
     done < "$OPTIONS_FILE"
+    
+    # Set the global variable with the list of changed keys
+    CHANGED_KEYS="$changed_keys"
 }
 
 ramp_up_cpu() {
@@ -108,6 +116,24 @@ $value" -p middle -s 40
         log_message "Error: Text not found for key $key in category $category"
         display_text -i "$BASE_IMAGE" -t "Error: Setting not found" -p middle -s 44
     fi
+}
+
+# Function to handle changed settings
+handle_changed_settings() {
+    log_message "Handling changed settings: $CHANGED_KEYS"
+    for key in $CHANGED_KEYS; do
+        case "$key" in
+            "some_setting_key")
+                # Run script for some_setting_key
+                /path/to/script_for_some_setting.sh
+                ;;
+            "another_setting_key")
+                # Run script for another_setting_key
+                /path/to/script_for_another_setting.sh
+                ;;
+            # Add more cases as needed
+        esac
+    done
 }
 
 # Main menu loop
@@ -165,7 +191,11 @@ main_settings_menu() {
             "A")
                 save_advanced_settings
                 display_text -t "Settings saved" -p bottom -s 26 -d 2
-                log_message "Settings saved, exiting main menu"
+                log_message "Settings saved, changed keys: $CHANGED_KEYS"
+                
+                # Call the function to handle changed settings
+                handle_changed_settings
+                
                 kill_images
                 return
                 ;;
