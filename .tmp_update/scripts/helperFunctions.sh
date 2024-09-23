@@ -237,7 +237,7 @@ exec_on_hotkey() {
 # Call this to get the last button pressed
 # Returns the name of the button pressed, or "" if no matching button was pressed
 # Returned strings are simplified, so "B_L1" would return "L1"
-get_buttonpress() {
+get_button_press() {
     local button_pressed=""
     local timeout=500  # Timeout in seconds
     for i in $(seq 1 $timeout); do
