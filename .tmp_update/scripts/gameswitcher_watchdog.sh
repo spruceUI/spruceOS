@@ -25,33 +25,6 @@ long_press_handler() {
 
     # get game path and box art path
     CMD=`cat /tmp/cmd_to_run.sh`
-    GAME_PATH=`echo $CMD | cut -d\" -f4`
-    BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
-    log_message "Box art path is $BOX_ART_PATH"
-    
-    GAME="${GAME_PATH##*/}" #      get game name without the full path
-    LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-    EMU_DIR="${LAUNCH%/*}"
-	OVR_DIR="$EMU_DIR/overrides"
-	OVERRIDE="$OVR_DIR/$GAME.opt"
-	. "$EMU_DIR/default.opt"
-	. "$EMU_DIR/system.opt"
-    if [ -f "$OVERRIDE" ]; then
-        . "$OVERRIDE"
-    fi
-    core_info="$INFO_DIR/${CORE}_libretro.info"
-    core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
-    core_name="$(echo ${core_name} | tr -d '"')"
-    state_dir="/mnt/SDCARD/Saves/states/$core_name"
-    game_shortname="${GAME%.*}"
-    SCREENSHOT_PATH="${state_dir}/${game_shortname}.state.auto.png"
-    log_message "Screenshot path is $SCREENSHOT_PATH"
-
-    # ensure box art or screenshot file exists
-    if [ ! -f "$BOX_ART_PATH" ] && [ ! -f "$SCREENSHOT_PATH" ] && [ ! -f "$DEFAULT_IMG" ]; then
-        log_message "no box art, screenshot, or default image for current game!"
-        return 1
-    fi
 
     # update switcher game list
     if [ -f "$LIST_FILE" ] ; then
