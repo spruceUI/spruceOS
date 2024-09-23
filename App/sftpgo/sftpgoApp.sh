@@ -24,7 +24,7 @@ else
     log_message "SFTPGO process killed";
 
     log_message "Updating config.json to set SFTPGO status to OFF"
-    sed -i 's/ON/OFF/' /mnt/SDCARD/App/sftpgo/config.json
+    sed -i 's|- On|- Off|' /mnt/SDCARD/App/sftpgo/config.json
 
     log_message "Removing SFTPGO lock file"
     rm -f /mnt/SDCARD/.tmp_update/flags/sftpgo.lock

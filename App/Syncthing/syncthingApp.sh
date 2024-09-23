@@ -65,7 +65,7 @@ startsyncthing() {
 		fi
         log_message "Already running. Stopping Syncthing..."
         killall -9 syncthing
-        sed -i 's|ON|OFF|' $CONFIG_JSON
+        sed -i 's|- On|- Off|' $CONFIG_JSON
         rm -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock
         log_message "Syncthing stopped."
     else
@@ -136,7 +136,7 @@ if flag_exists; then
     if syncthingpid; then
         log_message "Running. Killing until next reboot."
         killall -9 syncthing
-        sed -i 's|ON|OFF|' $CONFIG_JSON
+        sed -i 's|- On|- Off|' $CONFIG_JSON
         rm -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock
         log_message "Finished."
     else

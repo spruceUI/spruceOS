@@ -11,6 +11,7 @@ SPACE_FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailedSpace.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
 
 log_message "----------Running Backup script----------"
+cores_online 4
 show_image "$IMAGE_PATH"
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
@@ -26,17 +27,10 @@ log_message "Created or verified spruce and backups directories"
 timestamp=$(date +"%Y%m%d_%H%M%S")
 log_message "Starting backup process with timestamp: $timestamp"
 
-# Create .lastUpdate file with the current spruce version
-upgradescriptsdir="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
-current_version=$(ls "$upgradescriptsdir" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.sh$' | sort -V | tail -n 1 | sed 's/\.sh$//')
-echo "spruce_version=$current_version" > "/mnt/SDCARD/App/spruceRestore/.lastUpdate"
-log_message "Created .lastUpdate file with current version: $current_version"
-
-# Replace zip_file with tar_file
-tar_file="$backupdir/backups/spruceBackup_${timestamp}.tar.gz"
-log_message "Backup file will be: $tar_file"
+# Replace zip_file with 7z_file
+seven_z_file="$backupdir/backups/spruceBackup_${timestamp}.7z"
+log_message "Backup file will be: $seven_z_file"
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
-
 
 # Things being backed up:
 # - Syncthing config
@@ -88,22 +82,18 @@ log_message "Sufficient free space available. Proceeding with backup."
 for item in $folders; do
   if [ -e "$item" ]; then
     log_message "Adding $item to backup list"
-    if [ "$item" = "/mnt/SDCARD/RetroArch/.retroarch/overlay" ]; then
-      find "$item" -type d -name "Onion-Spruce" -prune -o -type f -print >> "$temp_file"
-    else
-      echo "$item" >> "$temp_file"
-    fi
+    echo "$item" >> "$temp_file"
   else
     log_message "Warning: $item does not exist, skipping..."
   fi
 done
 
-log_message "Creating tar archive"
-tar -czf "$tar_file" -T "$temp_file" 2>> "$log_file"
+log_message "Creating 7z archive"
+7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 rm "$temp_file"
 
 if [ $? -eq 0 ]; then
-  log_message "Backup process completed successfully. Backup file: $tar_file"
+  log_message "Backup process completed successfully. Backup file: $seven_z_file"
   show_image "$UPDATE_IMAGE_PATH" 4
 else
   log_message "Error while creating backup, check $log_file for more details"
@@ -112,3 +102,4 @@ else
 fi
 
 log_message "Backup process finished running"
+cores_online

@@ -20,6 +20,7 @@ check_injector() {
 }
 
 log_message "----------Starting Restore script----------"
+cores_online 4
 show_image "$IMAGE_PATH"
 
 #-----Main-----
@@ -38,11 +39,11 @@ if [ ! -d "$backupdir/backups" ]; then
     exit 1
 fi
 
-# Look for spruceBackup tar.gz files
-backup_files=$(find "$backupdir/backups" -name "spruceBackup*.tar.gz" | sort -r | tr '\n' ' ')
+# Look for spruceBackup 7z files
+backup_files=$(find "$backupdir/backups" -name "spruceBackup*.7z" | sort -r | tr '\n' ' ')
 
 if [ -z "$backup_files" ]; then
-    log_message "No spruceBackup tar.gz files found in $backupdir/backups"
+    log_message "No spruceBackup 7z files found in $backupdir/backups"
     show_image "$FAIL_IMAGE_PATH"
     acknowledge
     exit 1
@@ -52,16 +53,31 @@ fi
 most_recent_backup=$(echo $backup_files | cut -d ' ' -f 1)
 log_message "Most recent backup file found: $(basename "$most_recent_backup")"
 
+# Verify the integrity of the backup file
+log_message "Verifying the integrity of the backup file..."
+7zr t "$most_recent_backup" 2>> "$log_file"
+
+if [ $? -ne 0 ]; then
+    log_message "Backup file integrity check failed. The file may be corrupted."
+    show_image "$FAIL_IMAGE_PATH"
+    acknowledge
+    exit 1
+fi
+
 # Actual restore process
 log_message "Starting actual restore process..."
 cd /
-tar -xzvf "$most_recent_backup" 2>> "$log_file"
+log_message "Current directory: $(pwd)"
+log_message "Extracting backup file: $most_recent_backup"
+7zr x -y "$most_recent_backup" 2>> "$log_file"
 
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
     show_image "$SUCCESSFUL_IMAGE_PATH" 3
 else
     log_message "Error during restore process. Check $log_file for details."
+    log_message "7zr exit code: $?"
+    log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
     show_image "$FAIL_IMAGE_PATH"
     acknowledge
     exit 1
@@ -104,7 +120,7 @@ last_update_file="$appdir/.lastUpdate"
 if [ -f "$last_update_file" ]; then
     current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2)
 else
-    current_version="0.0.0"
+    current_version="2.0.0"
 fi
 
 log_message "Current version: $current_version"
@@ -155,3 +171,4 @@ log_message "Upgrade process completed. Current version: $current_version"
 show_image "$UPDATE_SUCCESSFUL_IMAGE_PATH" 3
 
 log_message "----------Restore and Upgrade completed----------"
+cores_online

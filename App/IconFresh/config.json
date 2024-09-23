@@ -1,5 +1,5 @@
 {
-  "label": "ICON FRESH",
+  "label": "Icon Fresh",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/iconfresh.png",
   "launch": "launch.sh",
   "description": "Apply Icons From the Current Theme",
