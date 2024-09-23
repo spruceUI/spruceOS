@@ -1,4 +1,20 @@
 #!/bin/sh
+
+# Advanced Settings
+# This script allows you to present settings to the user in a menu format.
+# It reads from a file called options.txt which contains the settings.
+# The script then displays the settings to the user and allows them to change them.
+# The changes are saved to the spruce.cfg file. 
+# In options.txt, the format is:
+# "Category"|"Key"|"Text"|"Options"|"Default"
+# "Category" is the category of the setting.
+# "Key" is the key of the setting.
+# "Text" is the text of the setting.
+# "Options" are the options of the setting.
+# "Default" is the default value of the setting.
+# When adding new settings, put them second to last in the list.
+# Categories are displayed in alphabetical order.
+
 BASE_DIR="/mnt/SDCARD/App/AdvancedSettings"
 OPTIONS_FILE="$BASE_DIR/options.txt"
 SETTINGS_FILE="/mnt/SDCARD/.tmp_update/spruce.cfg"
