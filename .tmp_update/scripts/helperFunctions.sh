@@ -59,6 +59,44 @@ acknowledge(){
 }
 
 
+# Call this to set the number of CPU cores to be online
+# Usage: cores_online [number of cores]
+# Default is 1 core
+cores_online(){
+    local num_cores=${1:-1}  # Default to 1 if no argument is provided
+    
+    # Ensure the input is between 1 and 4
+    if [ "$num_cores" -lt 1 ]; then
+        num_cores=1
+    elif [ "$num_cores" -gt 4 ]; then
+        num_cores=4
+    fi
+
+    echo "Setting $num_cores CPU core(s) online"
+
+    # Always keep CPU0 online
+    echo 1 > /sys/devices/system/cpu/cpu0/online
+
+    # Set the state for CPU1-3 based on the requested number of cores
+    if [ "$num_cores" -ge 2 ]; then
+        echo 1 > /sys/devices/system/cpu/cpu1/online
+    else
+        echo 0 > /sys/devices/system/cpu/cpu1/online
+    fi
+
+    if [ "$num_cores" -ge 3 ]; then
+        echo 1 > /sys/devices/system/cpu/cpu2/online
+    else
+        echo 0 > /sys/devices/system/cpu/cpu2/online
+    fi
+
+    if [ "$num_cores" -eq 4 ]; then
+        echo 1 > /sys/devices/system/cpu/cpu3/online
+    else
+        echo 0 > /sys/devices/system/cpu/cpu3/online
+    fi
+}
+
 DEFAULT_IMAGE="/mnt/SDCARD/.tmp_update/res/displayText.png"
 CONFIRM_IMAGE="/mnt/SDCARD/.tmp_update/res/displayTextConfirm.png"
 # Call this to display text on the screen
