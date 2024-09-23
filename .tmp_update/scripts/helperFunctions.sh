@@ -234,6 +234,41 @@ exec_on_hotkey() {
 }
 
 
+# Call this to get the last button pressed
+# Returns the name of the button pressed, or "" if no matching button was pressed
+# Returned strings are simplified, so "B_L1" would return "L1"
+get_buttonpress() {
+    local button_pressed=""
+    local timeout=500  # Timeout in seconds
+    for i in $(seq 1 $timeout); do
+        local last_line=$(tail -n 1 /var/log/messages)
+        case "$last_line" in
+            *"$B_L1 1"*) button_pressed="L1" ;;
+            *"$B_L2 1"*) button_pressed="L2" ;;
+            *"$B_R1 1"*) button_pressed="R1" ;;
+            *"$B_R2 1"*) button_pressed="R2" ;;
+            *"$B_X 1"*) button_pressed="X" ;;
+            *"$B_A 1"*) button_pressed="A" ;;
+            *"$B_B 1"*) button_pressed="B" ;;
+            *"$B_Y 1"*) button_pressed="Y" ;;
+            *"$B_UP 1"*) button_pressed="UP" ;;
+            *"$B_DOWN 1"*) button_pressed="DOWN" ;;
+            *"$B_LEFT 1"*) button_pressed="LEFT" ;;
+            *"$B_RIGHT 1"*) button_pressed="RIGHT" ;;
+            *"$B_START 1"*) button_pressed="START" ;;
+            *"$B_SELECT 1"*) button_pressed="SELECT" ;;
+        esac
+
+        if [ -n "$button_pressed" ]; then
+            echo "$button_pressed"
+            return 0
+        fi
+        sleep 0.1
+    done
+    echo "B"
+}
+
+
 # Call this to kill all show processes	
 # Useful in some scenarios
 kill_images(){
