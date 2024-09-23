@@ -1,5 +1,5 @@
 {
-  "label": "ADVANCED SETTINGS",
+  "label": "Advanced Settings",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/menuswitch.png",
   "launch": "launch.sh",
   "description": "Advanced settings for spruce",
