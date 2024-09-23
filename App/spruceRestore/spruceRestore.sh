@@ -120,7 +120,7 @@ last_update_file="$appdir/.lastUpdate"
 if [ -f "$last_update_file" ]; then
     current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2)
 else
-    current_version="0.0.0"
+    current_version="2.0.0"
 fi
 
 log_message "Current version: $current_version"

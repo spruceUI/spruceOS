@@ -27,12 +27,6 @@ log_message "Created or verified spruce and backups directories"
 timestamp=$(date +"%Y%m%d_%H%M%S")
 log_message "Starting backup process with timestamp: $timestamp"
 
-# Create .lastUpdate file with the current spruce version
-upgradescriptsdir="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
-current_version=$(ls "$upgradescriptsdir" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.sh$' | sort -V | tail -n 1 | sed 's/\.sh$//')
-echo "spruce_version=$current_version" > "/mnt/SDCARD/App/spruceRestore/.lastUpdate"
-log_message "Created .lastUpdate file with current version: $current_version"
-
 # Replace zip_file with 7z_file
 seven_z_file="$backupdir/backups/spruceBackup_${timestamp}.7z"
 log_message "Backup file will be: $seven_z_file"
