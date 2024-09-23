@@ -18,7 +18,7 @@
 BASE_DIR="/mnt/SDCARD/App/AdvancedSettings"
 OPTIONS_FILE="$BASE_DIR/options.txt"
 SETTINGS_FILE="/mnt/SDCARD/.tmp_update/spruce.cfg"
-DEFAULT_IMAGE="$BASE_DIR/imgs/default.png"
+BASE_IMAGE="$BASE_DIR/imgs/default.png"
 
 # Check if helperFunctions.sh exists and is readable
 if [ ! -r "/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh" ]; then
@@ -49,7 +49,7 @@ load_advanced_settings() {
         log_message "Settings file found at $SETTINGS_FILE"
     fi
 
-    while IFS='|' read -r category key text options default; do
+    while IFS='|' read -r key text options default; do
         key=$(echo "$key" | tr -d '"')
         default=$(echo "$default" | tr -d '"')
         if ! grep -q "^$key=" "$SETTINGS_FILE"; then
@@ -71,75 +71,51 @@ save_advanced_settings() {
 
 # Function to display current setting
 display_current_setting() {
-    local category="$1"
-    local key="$2"
+    local key="$1"
     local value=$(grep "^$key=" "$SETTINGS_FILE" | cut -d'=' -f2-)
-    local text=$(grep "^\"$category\"|\"$key\"" "$OPTIONS_FILE" | cut -d'|' -f3 | tr -d '"')
-    local category_image="$BASE_DIR/imgs/${category,,}.png"
-    
-    if [ ! -f "$category_image" ]; then
-        category_image="$DEFAULT_IMAGE"
-    fi
+    local text=$(grep "^\"$key\"" "$OPTIONS_FILE" | cut -d'|' -f2 | tr -d '"')
     
     if [ -n "$text" ]; then
         log_message "Displaying setting: $text: $value"
-        display_text -i "$category_image" -t "$text:$'\n'$value" -p middle -s 44
+        display_text -i "$BASE_IMAGE" -t "$text:$'\n'$value" -p middle -s 44
     else
-        log_message "Error: Text not found for key $key in category $category"
-        display_text -i "$category_image" -t "Error: Setting not found" -p middle -s 44
+        log_message "Error: Text not found for key $key"
+        display_text -i "$BASE_IMAGE" -t "Error: Setting not found" -p middle -s 44
     fi
 }
 
 # Main menu loop
 main_settings_menu() {
     log_message "Entering main menu"
-    current_category_index=0
-    current_option_index=0
-    categories=($(cut -d'|' -f1 "$OPTIONS_FILE" | sort -u | tr -d '"'))
-    total_categories=${#categories[@]}
+    current_index=0
+    total_options=$(wc -l < "$OPTIONS_FILE")
 
     while true; do
-        current_category=${categories[$current_category_index]}
-        options_in_category=($(grep "^\"$current_category\"" "$OPTIONS_FILE" | cut -d'|' -f2 | tr -d '"'))
-        total_options=${#options_in_category[@]}
-        current_key=${options_in_category[$current_option_index]}
+        current_key=$(sed -n "$((current_index + 1))p" "$OPTIONS_FILE" | cut -d'|' -f1 | tr -d '"')
+        display_current_setting "$current_key"
 
-        display_current_setting "$current_category" "$current_key"
-
-        button=$(get_button_press)
+        button=$(get_buttonpress)
         log_message "Button pressed: $button"
         case "$button" in
             "UP")
-                current_option_index=$((current_option_index - 1))
-                [ $current_option_index -lt 0 ] && current_option_index=$((total_options - 1))
-                log_message "Moving up. New option index: $current_option_index"
+                current_index=$((current_index - 1))
+                [ $current_index -lt 0 ] && current_index=$((total_options - 1))
+                log_message "Moving up. New index: $current_index"
                 ;;
             "DOWN")
-                current_option_index=$((current_option_index + 1))
-                [ $current_option_index -ge $total_options ] && current_option_index=0
-                log_message "Moving down. New option index: $current_option_index"
-                ;;
-            "L1")
-                current_category_index=$((current_category_index - 1))
-                [ $current_category_index -lt 0 ] && current_category_index=$((total_categories - 1))
-                current_option_index=0
-                log_message "Switching to previous category. New category index: $current_category_index"
-                ;;
-            "R1")
-                current_category_index=$((current_category_index + 1))
-                [ $current_category_index -ge $total_categories ] && current_category_index=0
-                current_option_index=0
-                log_message "Switching to next category. New category index: $current_category_index"
+                current_index=$((current_index + 1))
+                [ $current_index -ge $total_options ] && current_index=0
+                log_message "Moving down. New index: $current_index"
                 ;;
             "LEFT"|"RIGHT")
-                options=$(grep "^\"$current_category\"|\"$current_key\"" "$OPTIONS_FILE" | cut -d'|' -f4 | tr -d '"' | tr ',' ' ')
+                options=$(sed -n "$((current_index + 1))p" "$OPTIONS_FILE" | cut -d'|' -f3 | tr -d '"' | tr ',' ' ')
                 current_value=$(grep "^$current_key=" "$SETTINGS_FILE" | cut -d'=' -f2-)
                 new_value=$(change_setting "$current_value" "$options" "$button")
                 sed -i "s/^$current_key=.*/$current_key=$new_value/" "$SETTINGS_FILE"
                 log_message "Updated setting: $current_key=$new_value"
                 ;;
             "")
-                log_message "get_button_press returned empty string"
+                log_message "get_buttonpress returned empty string"
                 ;;
             "A")
                 save_advanced_settings
