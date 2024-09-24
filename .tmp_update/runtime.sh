@@ -78,6 +78,7 @@ if [ -f "$THEME_JSON_FILE" ]; then
     fi
 fi
 
+. /mnt/SDCARD/.tmp_update/scripts/autoIconRefresh.sh &
 
 # killprocess() {
 #     pid=$(ps | grep $1 | grep -v grep | cut -d' ' -f3)
