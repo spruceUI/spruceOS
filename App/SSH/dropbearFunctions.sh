@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 SSH_DIR="/mnt/SDCARD/App/SSH"
 SSH_CONFIG_FILE="$SSH_DIR/config.json"
