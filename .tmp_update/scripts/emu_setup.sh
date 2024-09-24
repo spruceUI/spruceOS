@@ -1,7 +1,6 @@
 #!/bin/sh
 
 SETUP_DIR="/mnt/SDCARD/.tmp_update/emu_setup"
-SPD_DIR="$SETUP_DIR/speed"
 OVR_DIR="$SETUP_DIR/overrides"
 LAUNCH_DIR="$SETUP_DIR/launch"
 CORE_DIR="$SETUP_DIR/core"
@@ -26,7 +25,7 @@ if [ -f "$EMU_DIR/SFC/system.opt" ]; then
 	fi
 fi
 
-# copy standard RA launch scripts, default.opt, template.opt, and cpu speed scripts to all Emu subfolders.
+# copy standard RA launch scripts, default.opt, and template.opt to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
 		echo "dir is $dir";
@@ -34,7 +33,6 @@ for dir in $EMU_DIR/* ; do
 		echo "system is $system";
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh" && echo "copied launch.sh to $dir";
 		cp -rf "$OVR_DIR" "$dir/" && echo "copied override template to $dir";
-		cp -f "$SPD_DIR"/* "$dir/" && echo "copied cpu speed scripts to $dir";
 		cp -f "$DEF_DIR/${system}.opt" "$dir/default.opt" && echo "copied default.opt to $dir";
 	# create system.opt files for each system if they don't already exist
 		if [ ! -f "$dir/system.opt" ] ; then
