@@ -2,9 +2,11 @@
 
 export CORE="neocd"
 export RA_BIN="ra32.miyoo"
-export CPU="1344"
-export GOV="performance"
-export CORES="2"
-export GPU="384"
-export DDR="1080"
-export SWAP="1"
+export overclock=0
+export down_threshold=30
+export freq_step=3
+export ignore_nice_load=0
+export sampling_down_factor=1
+export sampling_rate=2000000
+export sampling_rate_min=200000
+export up_threshold=70
