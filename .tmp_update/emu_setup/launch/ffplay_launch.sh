@@ -15,7 +15,11 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-/mnt/SDCARD/App/utils/utils "conservative" 4 1344 384 1080 1
+echo 1 > /sys/devices/system/cpu/cpu2/online
+echo 1 > /sys/devices/system/cpu/cpu3/online
+echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+echo 312000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
 cd $mydir
 ffplay -vf transpose=2 -fs -i "$1"

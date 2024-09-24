@@ -23,7 +23,11 @@ cd "$picodir"
 
 sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 
-/mnt/SDCARD/App/utils/utils "conservative" 4 1344 384 1080 1
+echo 1 > /sys/devices/system/cpu/cpu2/online
+echo 1 > /sys/devices/system/cpu/cpu3/online
+echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+echo 312000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
 pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 sync
