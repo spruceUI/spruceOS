@@ -70,7 +70,6 @@ if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
     display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
 You need at least 50 MB free space to backup your files." -c dbcda7 --okay
-    acknowledge
     exit 1
 fi
 
@@ -98,7 +97,6 @@ else
   log_message "Error while creating backup."
   display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
 Check '/Saves/spruce/spruceBackup.log' for more details" -c dbcda7 --okay
-  acknowledge
 fi
 
 log_message "Backup process finished running"
