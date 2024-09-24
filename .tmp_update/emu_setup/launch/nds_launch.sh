@@ -11,7 +11,7 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-/mnt/SDCARD/App/utils/utils $GOV $CORES $CPU $GPU $DDR $SWAP
+/mnt/SDCARD/App/utils/utils "conservative" 4 1344 384 1080 1
 
 cd $EMU_DIR
 if [ ! -f "/tmp/.show_hotkeys" ]; then

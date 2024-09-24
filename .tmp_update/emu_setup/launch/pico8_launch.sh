@@ -23,7 +23,7 @@ cd "$picodir"
 
 sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 
-/mnt/SDCARD/App/utils/utils $GOV $CORES $CPU $GPU $DDR $SWAP
+/mnt/SDCARD/App/utils/utils "conservative" 4 1344 384 1080 1
 
 pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 sync

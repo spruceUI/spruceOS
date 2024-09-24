@@ -30,13 +30,10 @@ while [ 1 ]; do
 	    /tmp/cmd_to_run.sh  &> /dev/null
         rm /tmp/cmd_to_run.sh
 
-        # some emulators may use 2 or more cores
-        # therefore after closing an emulator
-        # we need to turn off other cores except cpu0+1
-        echo 1 > /sys/devices/system/cpu/cpu0/online 
-        echo 1 > /sys/devices/system/cpu/cpu1/online 
-        echo 0 > /sys/devices/system/cpu/cpu2/online 
-        echo 0 > /sys/devices/system/cpu/cpu3/online 
+        # reset CPU/GPU/RAM settings to defaults in case an emulator changes anything
+        /mnt/SDCARD/App/utils/utils "conservative" 4 1344 384 1080 1
+        echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+        echo 312000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
         # sleep 1
 
