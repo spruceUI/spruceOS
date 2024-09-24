@@ -1,18 +1,12 @@
 #!/bin/sh
 
-EMU_DIR="$(dirname "$0")"
+cd "$(dirname "$1")" || exit
+ROM_DIR="$(pwd)"
+EMU_NAME=$(basename "$ROM_DIR")
+EMU_DIR="/mnt/SDCARD/Emu/$EMU_NAME"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
-update_cpu_config_name() {
-    if [ -f "$CONFIG" ]; then
-        sed -i 's|"name": "✓ CPU is set to Smart Mode"|"name": "Set CPU to Smart Mode"|g' "$CONFIG"
-        sed -i 's|"name": "✓ CPU is set to Performance Mode"|"name": "Set CPU to Performance Mode"|g' "$CONFIG"
-        sed -i 's|"name": "✓ CPU is set to Overclock Mode"|"name": "Set CPU to Overclock Mode"|g' "$CONFIG"
-        sed -i 's|"name": "Set CPU to Smart Mode"|"name": "✓ CPU is set to Smart Mode"|g' "$CONFIG"
-    fi
-}
-
-update_cpu_config_name
-
-sed -i 's/GOV=.*/GOV=\"conservative\"/g' "$SYS_OPT"
+sed -i 's|"name": "CPU Mode".*|"name": "CPU Mode: (SMART)/performance/overclock"|g' "$CONFIG"
+sed -i 's|"/mnt/SDCARD/.tmp_update/emu_setup/speed/Smart.sh"|"/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"|g' "$CONFIG"
+sed -i 's|GOV=.*|GOV=\"conservative\"|g' "$SYS_OPT"

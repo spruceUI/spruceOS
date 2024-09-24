@@ -32,16 +32,8 @@
       "launch": "mame2003_xtreme.sh"
     },
     {
-      "name": "✓ CPU is set to Smart Mode",
-      "launch": "Smart.sh"
-    },
-    {
-      "name": "Set CPU to Performance Mode",
-      "launch": "Performance.sh"
-    },
-    {
-      "name": "Set CPU to Overclock Mode",
-      "launch": "Overclock".sh"
+      "name": "CPU Mode: (SMART)/performance/overclock",
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
     }
   ]
 }

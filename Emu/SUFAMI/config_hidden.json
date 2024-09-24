@@ -16,20 +16,8 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "Set CPU to 816 MHz",
-      "launch": "816.sh"
-    },
-    {
-      "name": "Set CPU to 1200 MHz",
-      "launch": "1200.sh"
-    },
-    {
-      "name": "✓ CPU is at 1344 MHz",
-      "launch": "1344.sh"
-    },
-    {
-      "name": "Set CPU to 1512 MHz",
-      "launch": "1512.sh"
+      "name": "CPU Mode: (SMART)/performance/overclock",
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
     }
   ]
 }

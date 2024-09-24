@@ -14,6 +14,10 @@
     {
       "name": "Select Random Game",
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "CPU Mode: (SMART)/performance/overclock",
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
     }
   ]
 }
