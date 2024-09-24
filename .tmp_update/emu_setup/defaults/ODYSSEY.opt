@@ -2,7 +2,7 @@
 
 export CORE="o2em"
 export RA_BIN="ra32.miyoo"
-export overclock=0
+export GOV="conservative"
 export down_threshold=30
 export freq_step=3
 export ignore_nice_load=0
