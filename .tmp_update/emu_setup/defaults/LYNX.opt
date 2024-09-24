@@ -10,4 +10,4 @@ export ignore_nice_load=0
 export sampling_down_factor=1
 export sampling_rate=2000000
 export sampling_rate_min=200000
-export scaling_min_freq=240000
+export scaling_min_freq=480000
