@@ -11,33 +11,45 @@ TEMP_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list_temp"
 LONG_PRESSED=false
 
 long_press_handler() {
+    # if in game now
+    if [ -f /tmp/cmd_to_run.sh ] ; then
 
-    # set flag for long pressed event
-    LONG_PRESSED=false
-    sleep 2
-    LONG_PRESSED=true
+        # set flag for long pressed event
+        LONG_PRESSED=false
+        sleep 2
+        LONG_PRESSED=true
+        
+        # get game path
+        CMD=`cat /tmp/cmd_to_run.sh`
 
-    # ensure command file exists
-    if [ ! -f /tmp/cmd_to_run.sh ] ; then
-        log_message "cmd_to_run.sh does not exist!"
-        return
-    fi
+        # update switcher game list
+        if [ -f "$LIST_FILE" ] ; then
+            # if game list file exists
+            # get all commands except the current game
+            grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
+            mv "$TEMP_FILE" "$LIST_FILE"
+            # append the command for current game to the end of game list file 
+            echo "$CMD" >> "$LIST_FILE"
+        else
+            # if game list file does not exist
+            # put command to new game list file
+            echo "$CMD" > "$LIST_FILE"
+        fi
 
-    # get game path and box art path
-    CMD=`cat /tmp/cmd_to_run.sh`
+    # if in MainUI menu
+    elif pgrep -x "./MainUI" > /dev/null ; then
 
-    # update switcher game list
-    if [ -f "$LIST_FILE" ] ; then
-        # if game list file exists
-        # get all commands except the current game
-        grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
-        mv "$TEMP_FILE" "$LIST_FILE"
-        # append the command for current game to the end of game list file 
-        echo "$CMD" >> "$LIST_FILE"
+        # set flag to ignore long pressed cancelation
+        LONG_PRESSED=true
+
+        # exit if list file does not exist
+        if [ ! -f "$LIST_FILE" ] ; then
+            return 0
+        fi
+
+    # otherwise other program is running, exit normally
     else
-        # if game list file does not exist
-        # put command to new game list file
-        echo "$CMD" > "$LIST_FILE"
+        return 0
     fi
 
     # makesure all emulators and games in list exist
@@ -56,8 +68,8 @@ long_press_handler() {
     tail -10 "$LIST_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$LIST_FILE"
 
-    # kill RA or other emulator 
-    killall -15 retroarch || killall -15 ra32.miyoo || /mnt/SDCARD/miyoo/app/kill_apps.sh
+    # kill RA or other emulator or MainUI
+    killall -15 retroarch || killall -15 ra32.miyoo || killall -9 MainUI || /mnt/SDCARD/miyoo/app/kill_apps.sh
     
     # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" && log_message "creating game switcher flag file"
@@ -74,8 +86,10 @@ tail -F -n 1 /var/log/messages | while read line; do
             PID=$!
         ;;
         *"key 1 28 0"*) # START key up
-            # kill the long press handler if menu button is released within time limit
-            if [ "$LONG_PRESSED" = false ] ; then
+            # kill the long press handler if 
+            # menu button is released within time limit
+            # and is in game now
+            if [ "$LONG_PRESSED" = false ] && [ -f /tmp/cmd_to_run.sh ] ; then
                 log_message "game switcher watchdog: Start button released."
                 kill $PID
             fi
