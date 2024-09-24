@@ -2,6 +2,6 @@
 	"label":        "Spruce Backup",
 	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/Icons/App/backup.png",
 	"launch":       "launch.sh",
-	"description":  "Back Up Your Configs and Settings",
+	"description":  "Save Your Configs and Settings",
 	"expert": false
 }
