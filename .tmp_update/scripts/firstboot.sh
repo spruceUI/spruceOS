@@ -48,7 +48,8 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     /mnt/SDCARD/.tmp_update/scripts/emufresh.sh
     
     log_message "Running iconfresh.sh"
-     /mnt/SDCARD/.tmp_update/scripts/iconfresh.sh
+    show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
+    /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
 
     log_message "Displaying wiki image"
     show_image "$IMAGE_PATH_WIKI" 5
