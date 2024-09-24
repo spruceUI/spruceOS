@@ -48,5 +48,3 @@ else
     update_config_label "ON"
 fi
 
-# Run the additional script at the end
-/mnt/SDCARD/App/IconFresh/iconfresh.sh
