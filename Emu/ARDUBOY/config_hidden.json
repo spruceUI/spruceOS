@@ -16,20 +16,16 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "Set CPU to 648 MHz",
-      "launch": "648.sh"
+      "name": "✓ CPU is set to Smart Mode",
+      "launch": "Smart.sh"
     },
     {
-      "name": "✓ CPU is at 816 MHz",
-      "launch": "816.sh"
+      "name": "Set CPU to Performance Mode",
+      "launch": "Performance.sh"
     },
     {
-      "name": "Set CPU to 1200 MHz",
-      "launch": "1200.sh"
-    },
-    {
-      "name": "Set CPU to 1344 MHz",
-      "launch": "1344.sh"
+      "name": "Set CPU to Overclock Mode",
+      "launch": "Overclock".sh"
     }
   ]
 }
