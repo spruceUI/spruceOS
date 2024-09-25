@@ -1,5 +1,6 @@
 WATCHED_FILE="/config/system.json"
 SCRIPT_TO_RUN="/mnt/SDCARD/App/IconFresh/iconfresh.sh"
+IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
 . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
@@ -16,12 +17,11 @@ while true; do
     NEW_THEME_PATH=$(get_theme_path)
     
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
+        killall -9 MainUI
+        show_image "$IMAGE_PATH"
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
         sh "$SCRIPT_TO_RUN" --silent
-        
-        killall -9 MainUI
-    else
-        log_message "Theme path unchanged. Skipping script execution."
+        kill_images
     fi
 done
