@@ -2,6 +2,6 @@
   "label": "Random Game",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/random.png",
   "launch": "launch.sh",
-  "description": "Launch a Random Game!",
+  "description": "Launch a random game",
   "expert": false
 }
