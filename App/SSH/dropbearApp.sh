@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 
 CONFIG_FILE="/mnt/SDCARD/App/SSH/config.json"

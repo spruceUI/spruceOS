@@ -7,7 +7,7 @@ appdir=/mnt/SDCARD/App/Syncthing
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 # Default image path
