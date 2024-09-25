@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EMU_DIR="$(dirname "$0")"
+EMU_DIR="$(echo "$1" | cut -d'/' -f5)"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
