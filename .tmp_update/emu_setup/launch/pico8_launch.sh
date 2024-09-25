@@ -23,9 +23,9 @@ cd "$picodir"
 
 sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 
-if [ "$GOV" -eq "overclock" ]; then
+if [ "$GOV" = "overclock" ]; then
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-elif [ "$GOV" - eq "performance" ]; then
+elif [ "$GOV" = "performance" ]; then
 		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
 else
 	echo 1 > /sys/devices/system/cpu/cpu2/online
