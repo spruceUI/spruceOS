@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export mydir="$(echo "$1" | cut -d'/' -f5)"
+export mydir="$(dirname "$0")"
 export EMU_NAME="$(basename "$mydir")"
 export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
 export GAME="$(basename "$1")"
