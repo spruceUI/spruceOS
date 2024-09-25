@@ -16,15 +16,15 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is mednafen_ngp",
-      "launch": "mednafen_ngp.sh"
-    },
-    {
-      "name": "Change core to race",
+      "name": "✓ Core is race",
       "launch": "race.sh"
     },
     {
-      "name": "Set CPU to 648 MHz",
+      "name": "Set core to mednafen_ngp",
+      "launch": "mednafen_ngp.sh"
+    },
+    {
+      "name": "✓ CPU is at 648 MHz",
       "launch": "648.sh"
     },
     {
@@ -32,7 +32,7 @@
       "launch": "816.sh"
     },
     {
-      "name": "✓ CPU is at 1200 MHz",
+      "name": "Set CPU to 1200 MHz",
       "launch": "1200.sh"
     },
     {

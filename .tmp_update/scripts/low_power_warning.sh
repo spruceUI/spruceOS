@@ -2,7 +2,7 @@
 
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 FLAG_PATH="/mnt/SDCARD/.tmp_update/flags"
-PERCENT=2
+PERCENT=4
 SLEEP=5
 
 dot_duration=0.2

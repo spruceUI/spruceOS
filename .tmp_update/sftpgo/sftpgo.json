@@ -82,7 +82,7 @@
   "sftpd": {
     "bindings": [
       {
-        "port": 2022,
+        "port": 0,
         "address": "",
         "apply_proxy_config": true
       }
@@ -115,7 +115,7 @@
   "ftpd": {
     "bindings": [
       {
-        "port": 0,
+        "port": 21,
         "address": "",
         "apply_proxy_config": true,
         "tls_mode": 0,

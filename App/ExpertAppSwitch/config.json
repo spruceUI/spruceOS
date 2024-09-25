@@ -1,0 +1,7 @@
+{
+  "label": "Expert Apps - Off",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/expertappswitch.png",
+  "launch": "launch.sh",
+  "description": "Show/hide expert apps",
+  "expert": false
+}

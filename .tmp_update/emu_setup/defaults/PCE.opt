@@ -2,7 +2,7 @@
 
 export CORE="mednafen_pce_fast"
 export RA_BIN="ra32.miyoo"
-export CPU="1200"
+export CPU="648"
 export GOV="performance"
 export CORES="2"
 export GPU="384"
