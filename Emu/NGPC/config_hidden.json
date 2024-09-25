@@ -2,7 +2,7 @@
   "label": "NGPC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngpc.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/NGPC",
   "imgpath": "../../Roms/NGPC/Imgs",
   "gamelist": "../../Roms/NGPC/miyoogamelist.xml",

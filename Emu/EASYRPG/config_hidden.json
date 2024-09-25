@@ -2,7 +2,7 @@
   "label": "EasyRPG",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/easyrpg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/easyrpg.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/EASYRPG",
   "imgpath": "../../Roms/EASYRPG/Imgs",
   "gamelist": "../../Roms/EASYRPG/miyoogamelist.xml",

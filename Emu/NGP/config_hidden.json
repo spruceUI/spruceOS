@@ -2,7 +2,7 @@
   "label": "NGP",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngp.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/NGP",
   "imgpath": "../../Roms/NGP/Imgs",
   "gamelist": "../../Roms/NGP/miyoogamelist.xml",

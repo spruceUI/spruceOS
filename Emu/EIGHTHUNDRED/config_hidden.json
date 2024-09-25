@@ -2,7 +2,7 @@
   "label": "Atari 800",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari800.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari800.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/EIGHTHUNDRED",
   "imgpath": "../../Roms/EIGHTHUNDRED/Imgs",
   "gamelist": "../../Roms/EIGHTHUNDRED/miyoogamelist.xml",

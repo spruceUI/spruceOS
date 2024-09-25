@@ -2,7 +2,7 @@
   "label": "PSP",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/psp_launch.sh",
   "rompath": "../../Roms/PSP",
   "imgpath": "../../Roms/PSP/Imgs",
   "gamelist": "../../Roms/PSP/miyoogamelist.xml",

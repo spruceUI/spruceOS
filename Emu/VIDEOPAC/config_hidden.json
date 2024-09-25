@@ -2,7 +2,7 @@
   "label": "VideoPac",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vdp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vdp.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/VIDEOPAC",
   "imgpath": "../../Roms/VIDEOPAC/Imgs",
   "gamelist": "../../Roms/VIDEOPAC/miyoogamelist.xml",

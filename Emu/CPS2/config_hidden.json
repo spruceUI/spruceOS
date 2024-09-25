@@ -2,7 +2,7 @@
   "label": "CPS2",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/CPS2",
   "imgpath": "../../Roms/CPS2/Imgs",
   "gamelist": "../../Roms/CPS2/miyoogamelist.xml",

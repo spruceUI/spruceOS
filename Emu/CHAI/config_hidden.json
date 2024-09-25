@@ -2,7 +2,7 @@
   "label": "ChaiLove",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/chai.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/chai.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/CHAI",
   "imgpath": "../../Roms/CHAI/Imgs",
   "gamelist": "../../Roms/CHAI/miyoogamelist.xml",

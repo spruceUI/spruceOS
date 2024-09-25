@@ -2,7 +2,7 @@
   "label": "Game Gear",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gg.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/GG",
   "imgpath": "../../Roms/GG/Imgs",
   "gamelist": "../../Roms/GG/miyoogamelist.xml",

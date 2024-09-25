@@ -2,7 +2,7 @@
   "label": "Atari Lynx",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/lynx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/lynx.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/LYNX",
   "imgpath": "../../Roms/LYNX/Imgs",
   "gamelist": "../../Roms/LYNX/miyoogamelist.xml",

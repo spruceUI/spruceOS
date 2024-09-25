@@ -2,7 +2,7 @@
   "label": "Atari 7800",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/7800.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/7800.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/SEVENTYEIGHTHUNDRED",
   "imgpath": "../../Roms/SEVENTYEIGHTHUNDRED/Imgs",
   "gamelist": "../../Roms/SEVENTYEIGHTHUNDRED/miyoogamelist.xml",

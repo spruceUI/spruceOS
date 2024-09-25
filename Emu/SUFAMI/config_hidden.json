@@ -2,7 +2,7 @@
   "label": "Sufami",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sufami.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sufami.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/SUFAMI",
   "imgpath": "../../Roms/SUFAMI/Imgs",
   "gamelist": "../../Roms/SUFAMI/miyoogamelist.xml",

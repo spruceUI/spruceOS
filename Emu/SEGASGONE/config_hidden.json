@@ -2,7 +2,7 @@
   "label": "SG-1000",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segasgone.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segasgone.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/SEGASGONE",
   "imgpath": "../../Roms/SEGASGONE/Imgs",
   "gamelist": "../../Roms/SEGASGONE/miyoogamelist.xml",

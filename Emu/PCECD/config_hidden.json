@@ -2,7 +2,7 @@
   "label": "TG-CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pcecd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pcecd.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/PCECD",
   "imgpath": "../../Roms/PCECD/Imgs",
   "gamelist": "../../Roms/PCECD/miyoogamelist.xml",

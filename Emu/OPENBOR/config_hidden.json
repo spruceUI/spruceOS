@@ -2,7 +2,7 @@
   "label": "OpenBOR",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/openbor.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/openbor.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/openbor_launch.sh",
   "rompath": "../../Roms/OpenBOR",
   "imgpath": "../../Imgs/OpenBOR/Imgs",
   "gamelist": "../../Roms/OpenBOR/miyoogamelist.xml",

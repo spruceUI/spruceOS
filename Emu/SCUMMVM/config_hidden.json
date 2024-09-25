@@ -2,7 +2,7 @@
   "label": "ScummVM",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/SCUMMVM",
   "imgpath": "../../Roms/SCUMMVM/Imgs",
   "gamelist": "../../Roms/SCUMMVM/miyoogamelist.xml",

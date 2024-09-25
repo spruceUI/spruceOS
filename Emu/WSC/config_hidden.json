@@ -2,7 +2,7 @@
   "label": "WndrSwnC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/WSC",
   "imgpath": "../../Roms/WSC/Imgs",
   "gamelist": "../../Roms/WSC/miyoogamelist.xml",

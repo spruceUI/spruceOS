@@ -2,7 +2,7 @@
   "label": "Quake",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/quake.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/quake.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/QUAKE",
   "imgpath": "../../Roms/QUAKE/Imgs",
   "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",

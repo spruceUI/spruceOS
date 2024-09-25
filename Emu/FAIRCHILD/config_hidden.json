@@ -2,7 +2,7 @@
   "label": "ChannelF",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fairchild.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fairchild.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/FAIRCHILD",
   "imgpath": "../../Roms/FAIRCHILD/Imgs",
   "gamelist": "../../Roms/FAIRCHILD/miyoogamelist.xml",

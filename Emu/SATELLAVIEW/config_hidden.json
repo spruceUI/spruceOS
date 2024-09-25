@@ -2,7 +2,7 @@
   "label": "Satella",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/satella.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/satella.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/SATELLAVIEW",
   "imgpath": "../../Roms/SATELLAVIEW/Imgs",
   "gamelist": "../../Roms/SATELLAVIEW/miyoogamelist.xml",

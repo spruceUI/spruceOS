@@ -2,7 +2,7 @@
   "label": "Arcade",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arcade.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
   "rompath": "../../Roms/ARCADE",
   "imgpath": "../../Roms/ARCADE/Imgs",
   "gamelist": "../../Roms/ARCADE/miyoogamelist.xml",

@@ -2,7 +2,7 @@
   "label": "FFplay",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
-  "launch": "launch.sh",
+  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/ffplay_launch.sh",
   "rompath": "../../Roms/FFPLAY",
   "imgpath": "../../Roms/FFPLAY/Imgs",
   "useswap": 1,
