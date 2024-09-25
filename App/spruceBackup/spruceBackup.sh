@@ -94,6 +94,7 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
+  /mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
   show_image "$UPDATE_IMAGE_PATH" 4
 else
   log_message "Error while creating backup, check $log_file for more details"
