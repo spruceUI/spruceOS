@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export HOME="$(dirname "$0")"
+export HOME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_NAME="$(basename "$HOME")"
 export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
 export mypak="$(basename "$1")"
