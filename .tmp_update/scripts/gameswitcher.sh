@@ -4,6 +4,7 @@ FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
 LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
 IMAGES_FILE="/mnt/SDCARD/.tmp_update/flags/gs_images"
 GAMENAMES_FILE="/mnt/SDCARD/.tmp_update/flags/gs_names"
+TEMP_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list_temp"
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
@@ -60,13 +61,24 @@ done <$LIST_FILE
 # Usage: switcher image_list title_list [-s speed] [-m on|off]
 # -s: scrolling speed in frames (default is 20), larger value means slower.
 # -m: display title in multiple lines (default is off).
+# return value: the 1-based index of the selected image
 cd /mnt/SDCARD/.tmp_update/bin/
 /mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 -m on
 
 # get return value and launch game with return index
 RETURN_INDEX=$?
 if [ $RETURN_INDEX -gt 0 ]; then
+    # get command that launches the game
     CMD=`tail -n+$RETURN_INDEX "$LIST_FILE" | head -1`
+
+    # move the selected game to the end of the list file
+    # 1. get all commands except the selected game
+    grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$LIST_FILE"
+    # 2. append the command for current game to the end of game list file 
+    echo "$CMD" >> "$LIST_FILE"
+
+    # wrtie command to file which will be run by principle.sh
     echo $CMD > /tmp/cmd_to_run.sh
     sync
 fi
