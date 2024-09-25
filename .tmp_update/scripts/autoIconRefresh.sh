@@ -17,12 +17,10 @@ while true; do
     NEW_THEME_PATH=$(get_theme_path)
 
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
-        touch /mnt/SDCARD/.tmp_update/flags/noMainUI.lock
+        touch /mnt/SDCARD/.tmp_update/flags/themeChanged.lock
         killall -9 MainUI
         show_image "$IMAGE_PATH"
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
-        sh "$SCRIPT_TO_RUN" --silent
-        rm /mnt/SDCARD/.tmp_update/flags/noMainUI.lock
     fi
 done

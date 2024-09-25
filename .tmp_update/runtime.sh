@@ -9,12 +9,6 @@ FLAGS_DIR="${SDCARD_PATH}/.tmp_update/flags"
 FIRST_BOOT_FLAG="${FLAGS_DIR}/first_boot_flag"
 SCRIPTS_DIR="${SDCARD_PATH}/.tmp_update/scripts"
 
-# Check and remove noMainUI.lock flag if it exists
-if [ -f "${FLAGS_DIR}/noMainUI.lock" ]; then
-    rm "${FLAGS_DIR}/noMainUI.lock"
-    log_message "Removed noMainUI.lock flag"
-fi
-
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
@@ -33,6 +27,12 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+
+# Check and remove noMainUI.lock flag if it exists
+if [ -f "${FLAGS_DIR}/themeChanged.lock" ]; then
+    rm "${FLAGS_DIR}/themeChanged.lock"
+    log_message "Removed leftover themeChanged.lock flag"
+fi
 
 log_message " "
 log_message "---------Starting up---------"
