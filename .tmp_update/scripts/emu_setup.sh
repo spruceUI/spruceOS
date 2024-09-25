@@ -33,10 +33,9 @@ for dir in $EMU_DIR/* ; do
 		echo "system is $system";
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh" && echo "copied launch.sh to $dir";
 		cp -rf "$OVR_DIR" "$dir/" && echo "copied override template to $dir";
-		cp -f "$DEF_DIR/${system}.opt" "$dir/default.opt" && echo "copied default.opt to $dir";
 	# create system.opt files for each system if they don't already exist
 		if [ ! -f "$dir/system.opt" ] ; then
-			cp "$dir/default.opt" "$dir/system.opt"	&& echo "created missing system.opt for $dir";
+			cp "$DEF_DIR/${system}.opt" "$dir/system.opt" && echo "created missing system.opt for $dir";
 		fi
 	# delete config_hidden.json if a config.json already exists to lessen chance of conflicts with system.opt
 		if [ -f "$dir/config.json" ] && [ -f "$dir/config_hidden.json" ]; then

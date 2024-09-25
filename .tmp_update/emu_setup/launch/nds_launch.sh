@@ -1,11 +1,13 @@
 #!/bin/sh
 
 export EMU_DIR="$(dirname "$0")"
+export EMU_NAME="$(basename "$EMU_DIR")"
+export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
 export GAME="$(basename "$1")"
 export OVR_DIR="$EMU_DIR/overrides"
 export OVERRIDE="$OVR_DIR/$GAME.opt"
 
-. "$EMU_DIR/default.opt"
+. "$DEF_DIR/${EMU_NAME}.opt"
 . "$EMU_DIR/system.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";

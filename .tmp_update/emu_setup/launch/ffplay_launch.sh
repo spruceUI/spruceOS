@@ -1,16 +1,18 @@
 #!/bin/sh
-mydir=`dirname "$0"`
+
+export mydir="$(dirname "$0")"
+export EMU_NAME="$(basename "$mydir")"
+export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export GAME="$(basename "$1")"
+export OVR_DIR="$mydir/overrides"
+export OVERRIDE="$OVR_DIR/$GAME.opt"
 
 export HOME=$mydir
 export PATH=$mydir/bin:$PATH
 export LD_LIBRARY_PATH=$mydir/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
 
-export GAME="$(basename "$1")"
-export OVR_DIR="$mydir/overrides"
-export OVERRIDE="$OVR_DIR/$GAME.opt"
-
-. "$mydir/default.opt"
-. "$mydir/system.opt"
+. "$DEF_DIR/${EMU_NAME}.opt"
+. "$EMU_DIR/system.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi

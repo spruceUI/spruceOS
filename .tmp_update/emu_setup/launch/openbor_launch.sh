@@ -1,11 +1,13 @@
 #!/bin/sh
 
-export HOME=`dirname "$0"`
-export mypak=`basename "$1"`
+export HOME="$(dirname "$0")"
+export EMU_NAME="$(basename "$HOME")"
+export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export mypak="$(basename "$1")"
 export OVR_DIR="$HOME/overrides"
 export OVERRIDE="$OVR_DIR/$mypak.opt"
 
-. "$HOME/default.opt"
+. "$DEF_DIR/${EMU_NAME}.opt"
 . "$HOME/system.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
