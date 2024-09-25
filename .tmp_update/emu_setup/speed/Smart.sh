@@ -1,9 +1,6 @@
 #!/bin/sh
 
-cd "$(dirname "$1")" || exit
-ROM_DIR="$(pwd)"
-EMU_NAME=$(basename "$ROM_DIR")
-EMU_DIR="/mnt/SDCARD/Emu/$EMU_NAME"
+EMU_DIR="$(echo "$1" | cut -d'/' -f5)"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
