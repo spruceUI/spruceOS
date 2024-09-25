@@ -9,6 +9,12 @@ FLAGS_DIR="${SDCARD_PATH}/.tmp_update/flags"
 FIRST_BOOT_FLAG="${FLAGS_DIR}/first_boot_flag"
 SCRIPTS_DIR="${SDCARD_PATH}/.tmp_update/scripts"
 
+# Check and remove noMainUI.lock flag if it exists
+if [ -f "${FLAGS_DIR}/noMainUI.lock" ]; then
+    rm "${FLAGS_DIR}/noMainUI.lock"
+    log_message "Removed noMainUI.lock flag"
+fi
+
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
