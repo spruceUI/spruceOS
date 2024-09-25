@@ -13,10 +13,22 @@ while [ 1 ]; do
     touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
     runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-	# Restart network services with higher priority since booting to menu
-	nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+    # Restart network services with higher priority since booting to menu
+    nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
     cd ${SYSTEM_PATH}/app/
-    ./MainUI  &> /dev/null
+    
+    # Check for the noMainUI flag
+    if [ ! -f /mnt/SDCARD/.tmp_update/flags/noMainUI.lock ]; then
+        # If the flag doesn't exist, start MainUI
+        ./MainUI &> /dev/null
+    else
+        # If the flag exists, wait for it to be removed
+        while [ -f /mnt/SDCARD/.tmp_update/flags/noMainUI.lock ]; do
+            sleep 0.2
+        done
+        # Once the flag is removed, start MainUI
+        ./MainUI &> /dev/null
+    fi
 
     # remove in menu flag
     rm /mnt/SDCARD/.tmp_update/flags/in_menu.lock

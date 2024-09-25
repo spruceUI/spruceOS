@@ -5,7 +5,7 @@ IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
 
 get_theme_path() {
-    awk -F'"' '/"theme":/ {print $4}' "$WATCHED_FILE" | sed 's:/*$:/:' 
+    awk -F'"' '/"theme":/ {print $4}' "$WATCHED_FILE" | sed 's:/*$:/:'
 }
 
 THEME_PATH=$(get_theme_path)
@@ -13,15 +13,16 @@ THEME_PATH=$(get_theme_path)
 while true; do
     /mnt/SDCARD/.tmp_update/bin/inotify.elf "$WATCHED_FILE"
     log_message "File $WATCHED_FILE has been modified"
-    
+
     NEW_THEME_PATH=$(get_theme_path)
-    
+
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
+        touch /mnt/SDCARD/.tmp_update/flags/noMainUI.lock
         killall -9 MainUI
         show_image "$IMAGE_PATH"
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
         sh "$SCRIPT_TO_RUN" --silent
-        kill_images
+        rm /mnt/SDCARD/.tmp_update/flags/noMainUI.lock
     fi
 done
