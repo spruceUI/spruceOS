@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export EMU_DIR="$(dirname "$0")"
-export EMU_NAME="$(basename "$EMU_DIR")"
+export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
+export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
 export GAME="$(basename "$1")"
 export OVR_DIR="$EMU_DIR/overrides"

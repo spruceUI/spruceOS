@@ -1,6 +1,7 @@
 #!/bin/sh
 
-EMU_DIR="$(echo "$1" | cut -d'/' -f5)"
+EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
+EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
