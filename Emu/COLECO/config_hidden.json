@@ -2,7 +2,7 @@
   "label": "ColecoVis",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/col.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/col.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/COLECO",
   "imgpath": "../../Roms/COLECO/Imgs",
   "gamelist": "../../Roms/COLECO/miyoogamelist.xml",

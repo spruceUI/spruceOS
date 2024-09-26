@@ -2,7 +2,7 @@
   "label": "WndrSwan",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ws.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ws.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/WS",
   "imgpath": "../../Roms/WS/Imgs",
   "gamelist": "../../Roms/WS/miyoogamelist.xml",

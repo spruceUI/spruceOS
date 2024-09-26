@@ -2,7 +2,7 @@
   "label": "Neo CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/NEOCD",
   "imgpath": "../../Roms/NEOCD/Imgs",
   "gamelist": "../../Roms/NEOCD/miyoogamelist.xml",

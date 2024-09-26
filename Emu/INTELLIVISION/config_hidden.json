@@ -2,7 +2,7 @@
   "label": "Intellivis.",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/itv.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/itv.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/INTELLIVISION",
   "imgpath": "../../Roms/INTELLIVISION/Imgs",
   "gamelist": "../../Roms/INTELLIVISION/miyoogamelist.xml",

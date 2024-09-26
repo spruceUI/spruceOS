@@ -2,7 +2,7 @@
   "label": "NES",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fc.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/FC",
   "imgpath": "../../Roms/FC/Imgs",
   "gamelist": "../../Roms/FC/miyoogamelist.xml",

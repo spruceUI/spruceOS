@@ -2,7 +2,7 @@
   "label": "ZXS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/zxs.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/zxs.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/ZXS",
   "imgpath": "../../Roms/ZXS/Imgs",
   "gamelist": "../../Roms/ZXS/miyoogamelist.xml",

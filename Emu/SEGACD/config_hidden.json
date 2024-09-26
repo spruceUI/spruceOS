@@ -2,7 +2,7 @@
   "label": "Sega CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/SEGACD",
   "imgpath": "../../Roms/SEGACD/Imgs",
   "gamelist": "../../Roms/SEGACD/miyoogamelist.xml",

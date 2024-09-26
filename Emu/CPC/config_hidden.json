@@ -2,7 +2,7 @@
   "label": "Amst CPC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cpc.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/CPC",
   "imgpath": "../../Roms/CPC/Imgs",
   "gamelist": "../../Roms/CPC/miyoogamelist.xml",

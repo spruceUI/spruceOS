@@ -2,7 +2,7 @@
   "label": "Amiga",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/AMIGA",
   "imgpath": "../../Roms/AMIGA/Imgs",
   "gamelist": "../../Roms/AMIGA/miyoogamelist.xml",

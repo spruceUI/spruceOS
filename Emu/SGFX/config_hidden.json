@@ -2,7 +2,7 @@
   "label": "SuperGfx",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgfx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgfx.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/SGFX",
   "imgpath": "../../Roms/SGFX/Imgs",
   "gamelist": "../../Roms/SGFX/miyoogamelist.xml",

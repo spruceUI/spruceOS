@@ -2,7 +2,7 @@
   "label": "Pico-8",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/pico8_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/PICO8",
   "imgpath": "../../Roms/PICO8",
   "gamelist": "../../Roms/PICO8/miyoogamelist.xml",

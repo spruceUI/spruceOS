@@ -2,7 +2,7 @@
   "label": "GBC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gbc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gbc.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/GBC",
   "imgpath": "../../Roms/GBC/Imgs",
   "gamelist": "../../Roms/GBC/miyoogamelist.xml",

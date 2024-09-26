@@ -2,7 +2,7 @@
   "label": "Wolf3D",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wolf.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wolf.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/WOLF",
   "imgpath": "../../Roms/WOLF/Imgs",
   "gamelist": "../../Roms/WOLF/miyoogamelist.xml",

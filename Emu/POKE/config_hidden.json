@@ -2,7 +2,7 @@
   "label": "Pokemini",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/POKE",
   "imgpath": "../../Roms/POKE/Imgs",
   "gamelist": "../../Roms/POKE/miyoogamelist.xml",

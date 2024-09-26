@@ -2,7 +2,7 @@
   "label": "Sega MS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/MS",
   "imgpath": "../../Roms/MS/Imgs",
   "gamelist": "../../Roms/MS/miyoogamelist.xml",

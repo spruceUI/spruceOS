@@ -2,7 +2,7 @@
   "label": "Mega Duck",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/megaduck.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/megaduck.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/MEGADUCK",
   "imgpath": "../../Roms/MEGADUCK/Imgs",
   "gamelist": "../../Roms/MEGADUCK/miyoogamelist.xml",

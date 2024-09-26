@@ -2,7 +2,7 @@
   "label": "TG-16",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pce.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/PCE",
   "imgpath": "../../Roms/PCE/Imgs",
   "gamelist": "../../Roms/PCE/miyoogamelist.xml",

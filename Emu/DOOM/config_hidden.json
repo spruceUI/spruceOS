@@ -2,7 +2,7 @@
   "label": "DOOM",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/doom.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/doom.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/DOOM",
   "imgpath": "../../Roms/DOOM/Imgs",
   "gamelist": "../../Roms/DOOM/miyoogamelist.xml",

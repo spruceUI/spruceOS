@@ -2,7 +2,7 @@
   "label": "Supervis.",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/supervision.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/SUPERVISION",
   "imgpath": "../../Roms/SUPERVISION/Imgs",
   "gamelist": "../../Roms/SUPERVISION/miyoogamelist.xml",

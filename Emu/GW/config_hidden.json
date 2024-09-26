@@ -2,7 +2,7 @@
   "label": "G&W",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gw.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gw.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/GW",
   "imgpath": "../../Roms/GW/Imgs",
   "gamelist": "../../Roms/GW/miyoogamelist.xml",

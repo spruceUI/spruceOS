@@ -2,7 +2,7 @@
   "label": "MSUMD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msumd.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/MSUMD",
   "imgpath": "../../Roms/MSUMD/Imgs",
   "gamelist": "../../Roms/MSUMD/miyoogamelist.xml",

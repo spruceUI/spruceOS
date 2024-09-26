@@ -2,7 +2,7 @@
   "label": "FBNEO",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arcade.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/FBNEO",
   "imgpath": "../../Roms/FBNEO/Imgs",
   "gamelist": "../../Roms/FBNEO/miyoogamelist.xml",

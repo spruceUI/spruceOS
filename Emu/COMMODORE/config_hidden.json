@@ -2,7 +2,7 @@
   "label": "C64",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/COMMODORE",
   "imgpath": "../../Roms/COMMODORE/Imgs",
   "gamelist": "../../Roms/COMMODORE/miyoogamelist.xml",

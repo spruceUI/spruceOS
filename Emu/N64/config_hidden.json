@@ -2,7 +2,7 @@
   "label": "N64",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
-  "launch": "/mnt/SDCARD/.tmp_update/emu_setup/launch/standard_launch.sh",
+  "launch": "launch.sh",
   "rompath": "../../Roms/N64",
   "imgpath": "../../Roms/N64/Imgs",
   "gamelist": "../../Roms/N64/miyoogamelist.xml",
