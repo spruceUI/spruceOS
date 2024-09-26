@@ -26,8 +26,8 @@ else
 	echo "$up_threshold" > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
 	echo "$freq_step" > /sys/devices/system/cpu/cpufreq/conservative/freq_step
 	echo "$sampling_down_factor" > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-	echo "$sampling_rate" > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo "$sampling_rate_min" > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
+	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 fi
 
