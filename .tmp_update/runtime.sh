@@ -111,7 +111,6 @@ swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
 # Run scripts for initial setup
-/mnt/SDCARD/.tmp_update/scripts/sortfaves.sh
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
