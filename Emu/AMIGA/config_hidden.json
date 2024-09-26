@@ -28,7 +28,7 @@
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/uae4arm.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-performance-overclock",
+      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
     }
   ]
