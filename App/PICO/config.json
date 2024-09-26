@@ -2,6 +2,6 @@
   "label": "PICO-8",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/pico8.png",
   "launch": "script/launch.sh",
-  "description": "Splore - Play and Explore Games",
+  "description": "Splore - play and explore games",
   "expert": false
 }

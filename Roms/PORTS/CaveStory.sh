@@ -6,4 +6,10 @@ CORE_DIR="$RA_DIR/.retroarch/cores"
 
 cd "$RA_DIR"
 
-./retroarch -v -L "$CORE_DIR/nxengine_libretro.so" # | tee "$ROM_DIR/cavestory.log"
+mv "./retroarch.cfg" "./retroarch.cfg.bak"
+cp "./hotkeyprofile/retroarch.cfg" "./retroarch.cfg"
+
+./retroarch -v -L "$CORE_DIR/nxengine_libretro.so"
+
+rm "./retroarch.cfg"
+mv "./retroarch.cfg.bak" "./retroarch.cfg"
