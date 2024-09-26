@@ -1,6 +1,6 @@
 #! /bin/sh
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 SYNCTHING_DIR=/mnt/SDCARD/App/Syncthing
 SYNCTHING_CONFIG_FILE="$SYNCTHING_DIR/config.json"

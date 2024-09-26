@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 
 CONFIG_FILE="/mnt/SDCARD/App/SSH/config.json"
@@ -26,7 +26,7 @@ toggle_mainui() {
     display_text -t "Shutting down SSH..." -c dbcda7
     # Dropbear is running, so we'll shut it down
     sed -i 's|- On|- Off|' "$CONFIG_FILE"
-    sed -i 's|user: root, pass: tina|Enable SSH for Code Wizardry|' "$CONFIG_FILE"
+    sed -i 's|user: root, pass: tina|Enable SSH for code wizardry|' "$CONFIG_FILE"
     killall -9 dropbear
     rm /mnt/SDCARD/.tmp_update/flags/dropbear.lock
   else
@@ -36,7 +36,7 @@ toggle_mainui() {
     [ ! -f "$SSH_KEYS/dropbear_rsa_host_key" ] && $DROPBEARKEY -t rsa -f "$SSH_KEYS/dropbear_rsa_host_key"
     [ ! -f "$SSH_KEYS/dropbear_dss_host_key" ] && $DROPBEARKEY -t dss -f "$SSH_KEYS/dropbear_dss_host_key"
     start_dropbear_process
-    sed -i 's|Enable SSH for Code Wizardry|user: root, pass: tina|' "$CONFIG_FILE"
+    sed -i 's|Enable SSH for code wizardry|user: root, pass: tina|' "$CONFIG_FILE"
     touch /mnt/SDCARD/.tmp_update/flags/dropbear.lock
     display_text -t "SSH started
     User: root

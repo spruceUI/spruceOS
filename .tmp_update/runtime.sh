@@ -13,7 +13,7 @@ export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 export HOME="${SDCARD_PATH}"
-export HELPER_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
+export HELPER_FUNCTIONS="/mnt/SDCARD/miyoo/scripts/helperFunctions.sh"
 
 mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
 mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
@@ -23,10 +23,16 @@ mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 # Load helper functions and helpers
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+
+# Check and remove noMainUI.lock flag if it exists
+if [ -f "${FLAGS_DIR}/themeChanged.lock" ]; then
+    rm "${FLAGS_DIR}/themeChanged.lock"
+    log_message "Removed leftover themeChanged.lock flag"
+fi
 
 log_message " "
 log_message "---------Starting up---------"
@@ -53,6 +59,7 @@ kill_images
 dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
+/mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.

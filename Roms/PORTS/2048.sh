@@ -5,5 +5,10 @@ RA_DIR="/mnt/SDCARD/RetroArch"
 CORE_DIR="$RA_DIR/.retroarch/cores"
 
 cd "$RA_DIR"
+mv "./retroarch.cfg" "./retroarch.cfg.bak"
+cp "./hotkeyprofile/retroarch.cfg" "./retroarch.cfg"
 
-./retroarch -v -L "$CORE_DIR/2048_libretro.so" # | tee "$ROM_DIR/2048.log"
+./retroarch -v -L "$CORE_DIR/2048_libretro.so"
+
+rm "./retroarch.cfg"
+mv "./retroarch.cfg.bak" "./retroarch.cfg"
