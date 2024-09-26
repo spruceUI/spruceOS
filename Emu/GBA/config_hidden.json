@@ -17,11 +17,11 @@
     },
     {
       "name": "Change core to gpsp",
-      "launch": "gpsp.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/gpsp.sh"
     },
     {
       "name": "✓ Core is mgba",
-      "launch": "mgba.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mgba.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

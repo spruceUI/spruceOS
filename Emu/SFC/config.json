@@ -17,19 +17,19 @@
     },
     {
       "name": "✓ Core is chimerasnes",
-      "launch": "chimerasnes.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/chimerasnes.sh"
     },
     {
       "name": "Change core to mednafen_supafaust",
-      "launch": "mednafen_supafaust.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_supafaust.sh"
     },
     {
       "name": "Change core to snes9x",
-      "launch": "snes9x.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x.sh"
     },
     {
       "name": "Change core to snes9x2005",
-      "launch": "snes9x2005.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x2005.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

@@ -17,11 +17,11 @@
     },
     {
       "name": "Change core to mgba",
-      "launch": "mgba.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mgba.sh"
     },
     {
       "name": "✓ Core is gambatte",
-      "launch": "gambatte.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/gambatte.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

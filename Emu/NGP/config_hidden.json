@@ -17,11 +17,11 @@
     },
     {
       "name": "✓ Core is race",
-      "launch": "race.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/race.sh"
     },
     {
       "name": "Set core to mednafen_ngp",
-      "launch": "mednafen_ngp.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_ngp.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

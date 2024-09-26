@@ -17,11 +17,11 @@
     },
     {
       "name": "✓ Core is mednafen_lynx",
-      "launch": "mednafen_lynx.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_lynx.sh"
     },
     {
       "name": "Change core to handy",
-      "launch": "handy.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/handy.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

@@ -17,11 +17,11 @@
     },
     {
       "name": "✓ Core is fceumm",
-      "launch": "fceumm.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/fceumm.sh"
     },
     {
       "name": "Change core to nestopia",
-      "launch": "nestopia.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/nestopia.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

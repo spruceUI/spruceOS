@@ -17,11 +17,11 @@
     },
     {
       "name": "✓ Core is fbalpha2012",
-      "launch": "fbalpha2012.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/fbalpha2012.sh"
     },
     {
       "name": "Change core to fbneo",
-      "launch": "fbneo.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/fbneo.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

@@ -17,15 +17,15 @@
     },
     {
       "name": "✓ Core is gearsystem",
-      "launch": "gearsystem.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/gearsystem.sh"
     },
     {
       "name": "Change core to picodrive",
-      "launch": "picodrive.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/picodrive.sh"
     },
     {
       "name": "Change core to genesis_plus_gx",
-      "launch": "genesis_plus_gx.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/genesis_plus_gx.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

@@ -17,11 +17,11 @@
     },
     {
       "name": "✓ Core is cap32",
-      "launch": "cap32.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/cap32.sh"
     },
     {
       "name": "Change core to crocods",
-      "launch": "crocods.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/crocods.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",

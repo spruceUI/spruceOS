@@ -17,15 +17,15 @@
     },
     {
       "name": "✓ Core is puae2021",
-      "launch": "puae2021.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/puae2021.sh"
     },
     {
       "name": "Change core to puae",
-      "launch": "puae.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/puae.sh"
     },
     {
       "name": "Change core to uae4arm",
-      "launch": "uae4arm.sh"
+      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/uae4arm.sh"
     },
     {
       "name": "CPU Mode: (SMART)/performance/overclock",
