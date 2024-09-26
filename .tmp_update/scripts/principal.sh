@@ -38,7 +38,7 @@ while [ 1 ]; do
         echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
         echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
         echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-        echo 240000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
         # sleep 1
 
