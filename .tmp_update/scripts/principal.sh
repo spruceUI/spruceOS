@@ -1,8 +1,8 @@
 #!/bin/sh
 
-runifnecessary(){
-    a=`ps | grep $1 | grep -v grep`
-    if [ "$a" == "" ] ; then
+runifnecessary() {
+    a=$(ps | grep $1 | grep -v grep)
+    if [ "$a" == "" ]; then
         $2 &
     fi
 }
@@ -13,21 +13,28 @@ while [ 1 ]; do
     touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
     runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-	# Restart network services with higher priority since booting to menu
-	nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+    # Restart network services with higher priority since booting to menu
+    nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
     cd ${SYSTEM_PATH}/app/
-    ./MainUI  &> /dev/null
+
+    # Check for the themeChanged flag
+    if [ -f /mnt/SDCARD/.tmp_update/flags/themeChanged.lock ]; then
+        /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
+        rm /mnt/SDCARD/.tmp_update/flags/themeChanged.lock
+    fi
+
+    ./MainUI &> /dev/null
 
     # remove in menu flag
     rm /mnt/SDCARD/.tmp_update/flags/in_menu.lock
 
-    if [ -f /tmp/.cmdenc ] ; then
+    if [ -f /tmp/.cmdenc ]; then
         /root/gameloader
 
-    elif [ -f /tmp/cmd_to_run.sh ] ; then
+    elif [ -f /tmp/cmd_to_run.sh ]; then
         chmod a+x /tmp/cmd_to_run.sh
-        cat /tmp/cmd_to_run.sh > /mnt/SDCARD/.tmp_update/flags/.lastgame
-	    /tmp/cmd_to_run.sh  &> /dev/null
+        cat /tmp/cmd_to_run.sh >/mnt/SDCARD/.tmp_update/flags/.lastgame
+        /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
         # reset CPU/GPU/RAM settings to defaults in case an emulator changes anything
@@ -44,7 +51,7 @@ while [ 1 ]; do
 
         # sleep 1
 
-        # show closing screen 
-        /mnt/SDCARD/.tmp_update/scripts/select.sh  &> /dev/null
+        # show closing screen
+        /mnt/SDCARD/.tmp_update/scripts/select.sh &>/dev/null
     fi
 done

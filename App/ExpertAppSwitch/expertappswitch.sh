@@ -28,7 +28,7 @@ if [ -f "${BASE_DIR}/.expert" ]; then
     # Delete the .expert file
     rm "${BASE_DIR}/.expert"
     # Update the config.json label
-    update_config_label "OFF"
+    update_config_label "Off"
 else
     # Expert mode is not active, show expert apps
     changed_folders=""
@@ -45,8 +45,6 @@ else
     # Create the .expert file
     touch "${BASE_DIR}/.expert"
     # Update the config.json label
-    update_config_label "ON"
+    update_config_label "On"
 fi
 
-# Run the additional script at the end
-/mnt/SDCARD/App/IconFresh/iconfresh.sh

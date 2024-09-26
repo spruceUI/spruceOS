@@ -2,6 +2,6 @@
   "#label": "SSH - Off",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/ssh.png",
   "launch": "launch.sh",
-  "description": "Enable SSH for Code Wizardry",
+  "description": "Enable SSH for code wizardry",
   "expert": true
 }

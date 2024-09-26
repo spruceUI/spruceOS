@@ -28,6 +28,12 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
+# Check and remove noMainUI.lock flag if it exists
+if [ -f "${FLAGS_DIR}/themeChanged.lock" ]; then
+    rm "${FLAGS_DIR}/themeChanged.lock"
+    log_message "Removed leftover themeChanged.lock flag"
+fi
+
 log_message " "
 log_message "---------Starting up---------"
 log_message " "
@@ -53,6 +59,7 @@ kill_images
 dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
+/mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
