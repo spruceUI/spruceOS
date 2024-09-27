@@ -2,7 +2,7 @@
 
 export CORE="mupen64plus"
 export RA_BIN="ra32.miyoo"
-export GOV="conservative"
+export GOV="performance"
 export down_threshold=30
 export up_threshold=70
 export scaling_min_freq=1008000
