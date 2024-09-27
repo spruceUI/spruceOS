@@ -5,15 +5,6 @@ EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
-update_core_config_name() {
-    if [ -f "$CONFIG" ]; then
-        sed -i 's|"name": "✓ Core is chimerasnes"|"name": "Change core to chimerasnes"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is mednafen_supafaust"|"name": "Change core to mednafen_supafaust"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is snes9x"|"name": "Change core to snes9x"|g' "$CONFIG"
-        sed -i 's|"name": "Change core to mednafen_supafaust"|"name": "✓ Core is mednafen_supafaust"|g' "$CONFIG"
-    fi
-}
-
-update_core_config_name
-
-sed -i 's/CORE=.*/CORE=\"mednafen_supafaust\"/g' "$SYS_OPT"
+sed -i 's|"Emu: (✓CHIMERASNES)-mednafen_supafaust-snes9x"|"Emu: chimerasnes-(✓MEDNAFEN_SUPAFAUST)-snes9x"|g' "$CONFIG"
+sed -i 's|"/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_supafaust.sh"|"/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x.sh"|g' "$CONFIG"
+sed -i 's|CORE=.*|CORE=\"mednafen_supafaust\"|g' "$SYS_OPT"

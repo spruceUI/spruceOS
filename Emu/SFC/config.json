@@ -16,16 +16,8 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is chimerasnes",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/chimerasnes.sh"
-    },
-    {
-      "name": "Change core to mednafen_supafaust",
+      "name": "Emu: (✓CHIMERASNES)-mednafen_supafaust-snes9x",
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_supafaust.sh"
-    },
-    {
-      "name": "Change core to snes9x",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
