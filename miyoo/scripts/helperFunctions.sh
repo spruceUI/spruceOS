@@ -3,12 +3,9 @@
 # Keep methods in alphabetical order
 
 # Gain access to the helper variables by adding this to the top of your script:
-# . "$HELPER_FUNCTIONS"
-# This is defined in the runtime.sh file
-# or calling the file directly like:
-# . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+# . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/.tmp_update/bin/display_text.elf"
+DISPLAY_TEXT_FILE="/mnt/SDCARD/miyoo/res/display_text.elf"
 
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
@@ -97,8 +94,8 @@ cores_online(){
     fi
 }
 
-DEFAULT_IMAGE="/mnt/SDCARD/.tmp_update/res/displayText.png"
-CONFIRM_IMAGE="/mnt/SDCARD/.tmp_update/res/displayTextConfirm.png"
+DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
+CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Call this to display text on the screen
 # Usage: display_text [options]
 # Options:
