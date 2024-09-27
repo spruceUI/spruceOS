@@ -16,11 +16,7 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is fceumm",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fceumm.sh"
-    },
-    {
-      "name": "Change core to nestopia",
+      "name": "Emu Core: (✓FCEUMM)-nestopia",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"
     },
     {

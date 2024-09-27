@@ -6,7 +6,7 @@
   "rompath": "../../Roms/FDS",
   "imgpath": "../../Roms/FDS/Imgs",
   "gamelist": "../../Roms/FDS/miyoogamelist.xml",
-  "useswap": 0,
+  "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
   "extlist": "fds|nes|unif|unf|zip|7z",
@@ -14,6 +14,10 @@
     {
       "name": "Select Random Game",
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+    },
+    {
+      "name": "Emu Core: (✓FCEUMM)-nestopia",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
