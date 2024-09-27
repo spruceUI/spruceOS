@@ -1,14 +1,14 @@
 #!/bin/sh
 
-SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
+EMU_DIR="/mnt/SDCARD/Emu"
+SETUP_DIR="$EMU_DIR/.emu_setup"
 OVR_DIR="$SETUP_DIR/overrides"
 LAUNCH_DIR="$SETUP_DIR/launch"
 CORE_DIR="$SETUP_DIR/core"
 DEF_DIR="$SETUP_DIR/defaults"
 
-EMU_DIR="/mnt/SDCARD/Emu"
 {
-# copy standard RA launch scripts, default.opt, and template.opt to all Emu subfolders.
+# copy standard RA launch scripts and template.opt to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
 		echo "dir is $dir";

@@ -42,7 +42,7 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     fi
     
     log_message "Running emu_setup.sh"
-    /mnt/SDCARD/.tmp_update/scripts/emu_setup.sh
+    /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
     
     log_message "Running emufresh.sh"
     /mnt/SDCARD/.tmp_update/scripts/emufresh.sh
