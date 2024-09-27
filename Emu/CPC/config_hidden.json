@@ -16,11 +16,7 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is cap32",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/cap32.sh"
-    },
-    {
-      "name": "Change core to crocods",
+      "name": "Emu Core: (✓CAP32)-crocods",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/crocods.sh"
     },
     {
