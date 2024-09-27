@@ -28,10 +28,6 @@
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x.sh"
     },
     {
-      "name": "Change core to snes9x2005",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/snes9x2005.sh"
-    },
-    {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
     }
