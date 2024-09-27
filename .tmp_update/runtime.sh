@@ -53,6 +53,7 @@ else
     touch /tmp/wifion
     log_message "WiFi turned on"
 fi
+killall -9 main
 kill_images
 
 # Start network services in the background
