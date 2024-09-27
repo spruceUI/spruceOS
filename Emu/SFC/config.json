@@ -16,7 +16,7 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "Emu: (✓CHIMERASNES)-mednafen_supafaust-snes9x",
+      "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
       "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mednafen_supafaust.sh"
     },
     {
