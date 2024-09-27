@@ -17,7 +17,7 @@
     },
     {
       "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Overclock.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
     }
   ]
 }

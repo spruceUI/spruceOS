@@ -1,9 +1,8 @@
 #!/bin/sh
 
-export RA_DIR="/mnt/SDCARD/RetroArch"
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
 export GAME="$(basename "$1")"
 export OVR_DIR="$EMU_DIR/overrides"
 export OVERRIDE="$OVR_DIR/$GAME.opt"
@@ -14,7 +13,18 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-set_conservative() {
+set_overclock() {
+	sleep 12
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+}
+
+set_performance() {
+	sleep 12
+	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+}
+
+set_smart() {
+	sleep 12
 	echo 1 > /sys/devices/system/cpu/cpu2/online
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -27,29 +37,37 @@ set_conservative() {
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 }
 
-enforce_conservative() {
-	while true; do
-		sleep 10
-		governor="$(cat "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")"
-		if [ $governor != "conservative" ]; then
-			set_conservative
-		fi
-	done
-}
-
 if [ "$GOV" = "overclock" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+	set_overclock &
 elif [ "$GOV" = "performance" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+	set_performance &
 else
-	set_conservative
-	enforce_conservative &
-	ENFORCE_PID="$!"
+	set_smart &
 fi
 
-echo $0 $*
+cd $EMU_DIR
+if [ ! -f "/tmp/.show_hotkeys" ]; then
+    touch /tmp/.show_hotkeys
+    LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
+fi
 
-cd "$RA_DIR"
-HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+export HOME=$EMU_DIR
+export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
+export SDL_VIDEODRIVER=mmiyoo
+export SDL_AUDIODRIVER=mmiyoo
+export EGL_VIDEODRIVER=mmiyoo
 
-kill -9 "$ENFORCE_PID"
+sv=`cat /proc/sys/vm/swappiness`
+echo 10 > /proc/sys/vm/swappiness
+
+cd $EMU_DIR
+if [ -f 'libs/libEGL.so' ]; then
+    rm -rf libs/libEGL.so
+    rm -rf libs/libGLESv1_CM.so
+    rm -rf libs/libGLESv2.so
+fi
+
+./drastic "$1"
+sync
+
+echo $sv > /proc/sys/vm/swappiness

@@ -1,18 +1,16 @@
 #!/bin/sh
+echo $0 $*
 
+export PORTS_DIR=/mnt/SDCARD/Roms/PORTS
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
-export mydir="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
+export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
 export GAME="$(basename "$1")"
-export OVR_DIR="$mydir/overrides"
+export OVR_DIR="$EMU_DIR/overrides"
 export OVERRIDE="$OVR_DIR/$GAME.opt"
 
-export HOME=$mydir
-export PATH=$mydir/bin:$PATH
-export LD_LIBRARY_PATH=$mydir/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
-
 . "$DEF_DIR/${EMU_NAME}.opt"
-. "$mydir/system.opt"
+. "$EMU_DIR/system.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
@@ -34,5 +32,5 @@ else
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 fi
 
-cd $mydir
-ffplay -vf transpose=2 -fs -i "$1"
+cd $PORTS_DIR
+/bin/sh "$1"

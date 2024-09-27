@@ -2,7 +2,7 @@
 
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
 export GAME="$(basename "$1")"
 export OVR_DIR="$EMU_DIR/overrides"
 export OVERRIDE="$OVR_DIR/$GAME.opt"
@@ -13,18 +13,23 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-set_overclock() {
-	sleep 12
+export picodir=/mnt/SDCARD/App/pico
+export HOME="$picodir"
+
+export PATH="$HOME"/bin:$PATH
+export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
+export SDL_VIDEODRIVER=mali
+export SDL_JOYSTICKDRIVER=a30
+
+cd "$picodir"
+
+sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+
+if [ "$GOV" = "overclock" ]; then
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-}
-
-set_performance() {
-	sleep 12
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
-}
-
-set_smart() {
-	sleep 12
+elif [ "$GOV" = "performance" ]; then
+		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+else
 	echo 1 > /sys/devices/system/cpu/cpu2/online
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -35,39 +40,7 @@ set_smart() {
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
 	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-}
-
-if [ "$GOV" = "overclock" ]; then
-	set_overclock &
-elif [ "$GOV" = "performance" ]; then
-	set_performance &
-else
-	set_smart &
 fi
 
-cd $EMU_DIR
-if [ ! -f "/tmp/.show_hotkeys" ]; then
-    touch /tmp/.show_hotkeys
-    LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
-fi
-
-export HOME=$EMU_DIR
-export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
-export SDL_VIDEODRIVER=mmiyoo
-export SDL_AUDIODRIVER=mmiyoo
-export EGL_VIDEODRIVER=mmiyoo
-
-sv=`cat /proc/sys/vm/swappiness`
-echo 10 > /proc/sys/vm/swappiness
-
-cd $EMU_DIR
-if [ -f 'libs/libEGL.so' ]; then
-    rm -rf libs/libEGL.so
-    rm -rf libs/libGLESv1_CM.so
-    rm -rf libs/libGLESv2.so
-fi
-
-./drastic "$1"
+pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 sync
-
-echo $sv > /proc/sys/vm/swappiness

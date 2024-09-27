@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SETUP_DIR="/mnt/SDCARD/.tmp_update/emu_setup"
+SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
 OVR_DIR="$SETUP_DIR/overrides"
 LAUNCH_DIR="$SETUP_DIR/launch"
 CORE_DIR="$SETUP_DIR/core"

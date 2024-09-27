@@ -17,23 +17,23 @@
     },
     {
       "name": "✓ Core is fbneo",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/fbneo.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fbneo.sh"
     },
     {
       "name": "Change core to mame2003_plus",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mame2003_plus.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mame2003_plus.sh"
     },
     {
       "name": "Change core to fbalpha2012",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/fbalpha2012.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fbalpha2012.sh"
     },
     {
       "name": "Change core to mame2003_xtreme",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/core/mame2003_xtreme.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mame2003_xtreme.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/.tmp_update/emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
     }
   ]
 }

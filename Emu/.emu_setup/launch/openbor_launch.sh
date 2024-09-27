@@ -2,7 +2,7 @@
 
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export HOME="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/.tmp_update/emu_setup/defaults"
+export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
 export mypak="$(basename "$1")"
 export OVR_DIR="$HOME/overrides"
 export OVERRIDE="$OVR_DIR/$mypak.opt"
