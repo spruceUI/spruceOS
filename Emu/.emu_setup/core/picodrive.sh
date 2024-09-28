@@ -5,15 +5,12 @@ EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
-update_core_config_name() {
-    if [ -f "$CONFIG" ]; then
-        sed -i 's|"name": "✓ Core is gearsystem"|"name": "Change core to gearsystem"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is picodrive"|"name": "Change core to picodrive"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is genesis_plus_gx"|"name": "Change core to genesis_plus_gx"|g' "$CONFIG"
-        sed -i 's|"name": "Change core to picodrive"|"name": "✓ Core is picodrive"|g' "$CONFIG"
-    fi
-}
 
-update_core_config_name
+if [ "$EMU_NAME" = "MD" ] || [ "$EMU_NAME" = "SEGACD" ] || [ "$EMU_NAME" = "THIRTYTWOX" ]; then
+    sed -i 's|"Emu Core: picodrive-(✓GENESIS+GX)"|"Emu Core: (✓PICODRIVE)-genesis+gx"|g' "$CONFIG"
+else
+    sed -i 's|"Emu Core: (✓GEARSYSTEM)-picodrive-genesis+gx"|"Emu Core: gearsystem-(✓PICODRIVE)-genesis+gx"|g' "$CONFIG"
+fi
 
-sed -i 's/CORE=.*/CORE=\"picodrive\"/g' "$SYS_OPT"
+sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|g' "$CONFIG"
+sed -i 's|CORE=.*|CORE=\"picodrive\"|g' "$SYS_OPT"

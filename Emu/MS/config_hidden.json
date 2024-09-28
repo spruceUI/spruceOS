@@ -16,16 +16,8 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is gearsystem",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"
-    },
-    {
-      "name": "Change core to picodrive",
+      "name": "Emu Core: (✓GEARSYSTEM)-picodrive-genesis+gx",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"
-    },
-    {
-      "name": "Change core to genesis_plus_gx",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
