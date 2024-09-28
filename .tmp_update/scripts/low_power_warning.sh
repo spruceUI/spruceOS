@@ -1,7 +1,6 @@
 #!/bin/sh
 
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
-FLAG_PATH="/mnt/SDCARD/.tmp_update/flags"
 PERCENT=4
 SLEEP=5
 
@@ -39,11 +38,10 @@ while true; do
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
         done
 
-    elif [ -f ${FLAG_PATH}/ledon.lock ]; then
+    elif flag_check "ledon"; then
         echo 1 > ${LED_PATH}/brightness
 
-    elif [ -f ${FLAG_PATH}/tlon.lock ] && \
-         [ -f ${FLAG_PATH}/in_menu.lock ]; then
+    elif flag_check "tlon" && flag_check "in_menu"; then
         echo 1 > ${LED_PATH}/brightness
 
     else

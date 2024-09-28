@@ -5,7 +5,6 @@ echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
 SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
-FLAGS_DIR="${SDCARD_PATH}/.tmp_update/flags"
 FIRST_BOOT_FLAG="${FLAGS_DIR}/first_boot_flag"
 SCRIPTS_DIR="${SDCARD_PATH}/.tmp_update/scripts"
 
@@ -29,9 +28,9 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 # Check and remove noMainUI.lock flag if it exists
-if [ -f "${FLAGS_DIR}/themeChanged.lock" ]; then
-    rm "${FLAGS_DIR}/themeChanged.lock"
-    log_message "Removed leftover themeChanged.lock flag"
+if flag_check "themeChanged"; then
+    flag_remove "themeChanged"
+    log_message "Removed leftover themeChanged flag"
 fi
 
 log_message " "

@@ -12,7 +12,7 @@ SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
 FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
 
 check_flag() {
-    if [ -f "/mnt/SDCARD/.tmp_update/flags/syncthing.lock" ]; then
+    if flag_check "syncthing"; then
         return 0
     else
         return 1

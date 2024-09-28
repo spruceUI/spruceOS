@@ -14,7 +14,7 @@ silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
 
 flag_exists(){
-    if [ -f /mnt/SDCARD/.tmp_update/flags/dropbear.lock ]; then
+    if flag_check "dropbear"; then
         return 0
     else
         return 1
@@ -28,7 +28,7 @@ toggle_mainui() {
     sed -i 's|- On|- Off|' "$CONFIG_FILE"
     sed -i 's|user: root, pass: tina|Enable SSH for code wizardry|' "$CONFIG_FILE"
     killall -9 dropbear
-    rm /mnt/SDCARD/.tmp_update/flags/dropbear.lock
+    flag_remove "dropbear"
   else
     # Dropbear is not running, so we'll start it
     display_text -t "Starting SSH..." -c dbcda7
@@ -37,7 +37,7 @@ toggle_mainui() {
     [ ! -f "$SSH_KEYS/dropbear_dss_host_key" ] && $DROPBEARKEY -t dss -f "$SSH_KEYS/dropbear_dss_host_key"
     start_dropbear_process
     sed -i 's|Enable SSH for code wizardry|user: root, pass: tina|' "$CONFIG_FILE"
-    touch /mnt/SDCARD/.tmp_update/flags/dropbear.lock
+    flag_add "dropbear"
     display_text -t "SSH started
     User: root
     Password: tina" -c dbcda7 --okay

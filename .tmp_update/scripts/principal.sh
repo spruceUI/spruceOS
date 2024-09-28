@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Source the helper functions
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+
 runifnecessary() {
     a=$(ps | grep $1 | grep -v grep)
     if [ "$a" == "" ]; then
@@ -7,10 +10,10 @@ runifnecessary() {
     fi
 }
 
-rm /mnt/SDCARD/.tmp_update/flags/.save_active
+flag_remove "save_active"
 while [ 1 ]; do
     # create in menu flag
-    touch /mnt/SDCARD/.tmp_update/flags/in_menu.lock
+    flag_add "in_menu"
 
     runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
     # Restart network services with higher priority since booting to menu
@@ -18,22 +21,22 @@ while [ 1 ]; do
     cd ${SYSTEM_PATH}/app/
 
     # Check for the themeChanged flag
-    if [ -f /mnt/SDCARD/.tmp_update/flags/themeChanged.lock ]; then
+    if flag_check "themeChanged"; then
         /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
-        rm /mnt/SDCARD/.tmp_update/flags/themeChanged.lock
+        flag_remove "themeChanged"
     fi
 
     ./MainUI &> /dev/null
 
     # remove in menu flag
-    rm /mnt/SDCARD/.tmp_update/flags/in_menu.lock
+    flag_remove "in_menu"
 
     if [ -f /tmp/.cmdenc ]; then
         /root/gameloader
 
     elif [ -f /tmp/cmd_to_run.sh ]; then
         chmod a+x /tmp/cmd_to_run.sh
-        cat /tmp/cmd_to_run.sh >/mnt/SDCARD/.tmp_update/flags/.lastgame
+        cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 

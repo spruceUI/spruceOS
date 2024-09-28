@@ -6,7 +6,7 @@ SYNCTHING_DIR=/mnt/SDCARD/App/Syncthing
 SYNCTHING_CONFIG_FILE="$SYNCTHING_DIR/config.json"
 
 syncthing_check(){
-    if [ -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock ]; then
+    if flag_check "syncthing"; then
         start_syncthing_process
     else
         sed -i 's|- On|- Off|' $SYNCTHING_CONFIG_FILE
