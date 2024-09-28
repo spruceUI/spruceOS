@@ -26,6 +26,7 @@ log_message "Starting backup process with timestamp: $timestamp"
 
 # Replace zip_file with 7z_file
 seven_z_file="$backupdir/backups/spruceBackup_${timestamp}.7z"
+seven_z_filename=$(basename "$seven_z_file")
 log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
@@ -91,8 +92,8 @@ rm "$temp_file"
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
   display_text -i "$SYNC_IMAGE" -t "Backup completed successfully! 
-Backup file: $seven_z_file
-Located in /Saves/spruce/backups/" -c dbcda7 -d 4
+Backup file: $seven_z_filename
+Located in /Saves/spruce/backups/" -c dbcda7 -d 4 -s 24
 else
   log_message "Error while creating backup."
   display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed

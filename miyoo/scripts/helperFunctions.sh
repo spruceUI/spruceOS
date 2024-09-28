@@ -127,7 +127,7 @@ CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Example: display_text -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display_text with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
 display_text() {
-    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=320 color="ffffff" font=""
+    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     
