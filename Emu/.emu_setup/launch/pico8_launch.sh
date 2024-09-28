@@ -27,6 +27,22 @@ set_smart() {
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 }
 
+set_performance() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+}
+
+set_overclock() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+}
+
+if [ "$MODE" = "overclock" ]; then
+	set_overclock
+elif [ "$MODE" = "performance" ]; then
+	set_performance
+else
+	set_smart
+fi
+
 export HOME="/mnt/SDCARD/App/PICO"
 export PATH="$HOME"/bin:$PATH
 export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
@@ -36,14 +52,6 @@ export SDL_JOYSTICKDRIVER=a30
 cd "$HOME"
 
 sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
-
-if [ "$MODE" = "overclock" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-elif [ "$MODE" = "performance" ]; then
-		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
-else
-	set_smart
-fi
 
 pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 sync

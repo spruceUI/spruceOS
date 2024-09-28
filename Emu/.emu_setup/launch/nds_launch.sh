@@ -15,7 +15,6 @@ if [ -f "$OVERRIDE" ]; then
 fi
 
 set_smart() {
-	sleep 12
 	echo 1 > /sys/devices/system/cpu/cpu2/online
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -29,21 +28,19 @@ set_smart() {
 }
 
 set_performance() {
-	sleep 12
 	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
 }
 
 set_overclock() {
-	sleep 12
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
 }
 
 if [ "$MODE" = "overclock" ]; then
-	set_overclock &
+	{sleep 12 && set_overclock} &
 elif [ "$MODE" = "performance" ]; then
-	set_performance &
+	{sleep 12 && set_performance} &
 else
-	set_smart &
+	{sleep 12 && set_smart} &
 fi
 
 cd $EMU_DIR

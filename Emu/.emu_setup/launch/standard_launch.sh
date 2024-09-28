@@ -27,6 +27,14 @@ set_smart() {
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 }
 
+set_performance() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+}
+
+set_overclock() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+}
+
 enforce_smart() {
 	while true; do
 		sleep 10
@@ -38,9 +46,9 @@ enforce_smart() {
 }
 
 if [ "$MODE" = "overclock" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+	set_overclock
 elif [ "$MODE" = "performance" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+	set_performance
 else
 	set_smart
 	enforce_smart &
