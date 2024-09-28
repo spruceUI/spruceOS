@@ -13,7 +13,7 @@
   "launchlist": [
     {
       "name": "Select Random Game",
-      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
