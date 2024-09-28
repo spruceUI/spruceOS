@@ -2,6 +2,6 @@
 
 export CORE="race"
 export RA_BIN="ra32.miyoo"
-export GOV="conservative"
+export MODE="smart"
 
 export scaling_min_freq=312000

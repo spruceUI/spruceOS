@@ -7,4 +7,4 @@ SYS_OPT="$EMU_DIR/system.opt"
 
 sed -i 's|"CPU Mode: Smart-Performance-(✓OVERCLOCK)"|"CPU Mode: (✓SMART)-Performance-Overclock"|g' "$CONFIG"
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/speed/Smart.sh"|"/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"|g' "$CONFIG"
-sed -i 's|GOV=.*|GOV=\"conservative\"|g' "$SYS_OPT"
+sed -i 's|MODE=.*|MODE=\"smart\"|g' "$SYS_OPT"

@@ -2,6 +2,6 @@
 
 export CORE="mupen64plus"
 export RA_BIN="ra32.miyoo"
-export GOV="performance"
+export MODE="performance"
 
 export scaling_min_freq=1008000

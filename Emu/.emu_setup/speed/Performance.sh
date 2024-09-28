@@ -12,4 +12,4 @@ else
 fi
 
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"|"/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"|g' "$CONFIG"
-sed -i 's|GOV=.*|GOV=\"performance\"|g' "$SYS_OPT"
+sed -i 's|MODE=.*|MODE=\"performance\"|g' "$SYS_OPT"

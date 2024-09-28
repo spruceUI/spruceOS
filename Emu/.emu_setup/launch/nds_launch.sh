@@ -37,9 +37,9 @@ set_smart() {
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 }
 
-if [ "$GOV" = "overclock" ]; then
+if [ "$MODE" = "overclock" ]; then
 	set_overclock &
-elif [ "$GOV" = "performance" ]; then
+elif [ "$MODE" = "performance" ]; then
 	set_performance &
 else
 	set_smart &

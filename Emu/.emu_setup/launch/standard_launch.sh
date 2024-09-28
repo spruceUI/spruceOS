@@ -37,9 +37,9 @@ enforce_conservative() {
 	done
 }
 
-if [ "$GOV" = "overclock" ]; then
+if [ "$MODE" = "overclock" ]; then
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-elif [ "$GOV" = "performance" ]; then
+elif [ "$MODE" = "performance" ]; then
 	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
 else
 	set_conservative

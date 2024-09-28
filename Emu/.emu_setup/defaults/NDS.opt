@@ -1,5 +1,5 @@
 #!/bin/sh
 
-export GOV="conservative"
+export MODE="smart"
 
 export scaling_min_freq=816000
