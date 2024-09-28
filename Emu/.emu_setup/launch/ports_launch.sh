@@ -14,11 +14,7 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-if [ "$MODE" = "overclock" ]; then
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-elif [ "$MODE" = "performance" ]; then
-		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
-else
+set_smart() {
 	echo 1 > /sys/devices/system/cpu/cpu2/online
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -29,6 +25,14 @@ else
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
 	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+}
+
+if [ "$MODE" = "overclock" ]; then
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+elif [ "$MODE" = "performance" ]; then
+		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+else
+	set_smart
 fi
 
 PORTS_DIR=/mnt/SDCARD/Roms/PORTS

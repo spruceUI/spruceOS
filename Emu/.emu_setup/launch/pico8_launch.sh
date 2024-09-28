@@ -14,6 +14,19 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
+set_smart() {
+	echo 1 > /sys/devices/system/cpu/cpu2/online
+	echo 1 > /sys/devices/system/cpu/cpu3/online
+	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
+	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
+	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
+	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+}
+
 export HOME="/mnt/SDCARD/App/PICO"
 export PATH="$HOME"/bin:$PATH
 export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
@@ -29,16 +42,7 @@ if [ "$MODE" = "overclock" ]; then
 elif [ "$MODE" = "performance" ]; then
 		/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
 else
-	echo 1 > /sys/devices/system/cpu/cpu2/online
-	echo 1 > /sys/devices/system/cpu/cpu3/online
-	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
-	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	set_smart
 fi
 
 pico8_dyn -width 640 -height 480 -scancodes -run "$1"

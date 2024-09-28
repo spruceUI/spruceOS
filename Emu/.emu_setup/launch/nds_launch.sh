@@ -14,16 +14,6 @@ if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-set_overclock() {
-	sleep 12
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-}
-
-set_performance() {
-	sleep 12
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
-}
-
 set_smart() {
 	sleep 12
 	echo 1 > /sys/devices/system/cpu/cpu2/online
@@ -36,6 +26,16 @@ set_smart() {
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
 	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+}
+
+set_performance() {
+	sleep 12
+	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+}
+
+set_overclock() {
+	sleep 12
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
 }
 
 if [ "$MODE" = "overclock" ]; then
