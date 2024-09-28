@@ -16,11 +16,7 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is race",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/race.sh"
-    },
-    {
-      "name": "Set core to mednafen_ngp",
+      "name": "Emu Core: (✓RACE)-mednafen",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_ngp.sh"
     },
     {

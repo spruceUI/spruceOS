@@ -5,14 +5,6 @@ EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
-update_core_config_name() {
-    if [ -f "$CONFIG" ]; then
-        sed -i 's|"name": "✓ Core is mednafen_lynx"|"name": "Change core to mednafen_lynx"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is handy"|"name": "Change core to handy"|g' "$CONFIG"
-        sed -i 's|"name": "Change core to mednafen_lynx"|"name": "✓ Core is mednafen_lynx"|g' "$CONFIG"
-    fi
-}
-
-update_core_config_name
-
-sed -i 's/CORE=.*/CORE=\"mednafen_lynx\"/g' "$SYS_OPT"
+sed -i 's|"Emu Core: (✓RACE)-mednafen"|"Emu Core: race-(✓MEDNAFEN)"|g' "$CONFIG"
+sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_ngp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/race.sh"|g' "$CONFIG"
+sed -i 's|CORE=.*|CORE=\"mednafen_lynx\"|g' "$SYS_OPT"
