@@ -3,11 +3,18 @@
 EMU_DIR="/mnt/SDCARD/Emu"
 SETUP_DIR="$EMU_DIR/.emu_setup"
 OVR_DIR="$SETUP_DIR/overrides"
+OPT_DIR="$SETUP_DIR/options"
 LAUNCH_DIR="$SETUP_DIR/launch"
 CORE_DIR="$SETUP_DIR/core"
 DEF_DIR="$SETUP_DIR/defaults"
 
 {
+# copy defaults folder into options folder if needed
+if [ ! -d "$OPT_DIR" ]; then
+	mkdir "$OPT_DIR"
+	cp "$OVR_DIR" "$OPT_DIR"
+fi
+
 # copy standard RA launch scripts and template.opt to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
