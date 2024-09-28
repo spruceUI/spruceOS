@@ -1,15 +1,15 @@
 #!/bin/sh
 
-export RA_DIR="/mnt/SDCARD/RetroArch"
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
+export OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
 export GAME="$(basename "$1")"
-export OVR_DIR="$EMU_DIR/overrides"
-export OVERRIDE="$OVR_DIR/$GAME.opt"
+export OVERRIDE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 
 . "$DEF_DIR/${EMU_NAME}.opt"
-. "$EMU_DIR/system.opt"
+. "$OPT_DIR/${EMU_NAME}.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
@@ -47,8 +47,7 @@ else
 	ENFORCE_PID="$!"
 fi
 
-echo $0 $*
-
+RA_DIR="/mnt/SDCARD/RetroArch"
 cd "$RA_DIR"
 HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
 

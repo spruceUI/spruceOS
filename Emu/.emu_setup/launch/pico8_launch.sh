@@ -3,25 +3,24 @@
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
+export OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
 export GAME="$(basename "$1")"
-export OVR_DIR="$EMU_DIR/overrides"
-export OVERRIDE="$OVR_DIR/$GAME.opt"
+export OVERRIDE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 
 . "$DEF_DIR/${EMU_NAME}.opt"
-. "$EMU_DIR/system.opt"
+. "$OPT_DIR/${EMU_NAME}.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
 
-export picodir=/mnt/SDCARD/App/pico
-export HOME="$picodir"
-
+export HOME="/mnt/SDCARD/App/PICO"
 export PATH="$HOME"/bin:$PATH
 export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
 export SDL_VIDEODRIVER=mali
 export SDL_JOYSTICKDRIVER=a30
 
-cd "$picodir"
+cd "$HOME"
 
 sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 

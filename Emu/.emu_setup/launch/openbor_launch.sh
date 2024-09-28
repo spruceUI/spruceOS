@@ -1,14 +1,15 @@
 #!/bin/sh
 
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
-export HOME="/mnt/SDCARD/Emu/${EMU_NAME}"
+export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
-export mypak="$(basename "$1")"
-export OVR_DIR="$HOME/overrides"
-export OVERRIDE="$OVR_DIR/$mypak.opt"
+export OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
+export GAME="$(basename "$1")"
+export OVERRIDE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 
 . "$DEF_DIR/${EMU_NAME}.opt"
-. "$HOME/system.opt"
+. "$OPT_DIR/${EMU_NAME}.opt"
 if [ -f "$OVERRIDE" ]; then
 	. "$OVERRIDE";
 fi
@@ -31,9 +32,9 @@ else
 fi
 
 export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
-
+export HOME=$EMU_DIR
 cd $HOME
-if [ "$mypak" == "Final Fight LNS.pak" ]; then
+if [ "$GAME" == "Final Fight LNS.pak" ]; then
     ./OpenBOR_mod "$1"
 else
     ./OpenBOR_new "$1"
