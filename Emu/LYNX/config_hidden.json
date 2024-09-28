@@ -16,11 +16,7 @@
       "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
     },
     {
-      "name": "✓ Core is mednafen_lynx",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_lynx.sh"
-    },
-    {
-      "name": "Change core to handy",
+      "name": "Emu Core: (✓MEDNAFEN)-handy",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/handy.sh"
     },
     {
