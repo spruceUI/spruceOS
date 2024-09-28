@@ -15,18 +15,13 @@ if [ ! -d "$OPT_DIR" ]; then
 	cp "$OVR_DIR" "$OPT_DIR"
 fi
 
-# copy standard RA launch scripts and template.opt to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
 		echo "dir is $dir";
 		system="${dir##*/}" ;
 		echo "system is $system";
+	# copy standard RA launch scripts to all Emu subfolders.
 		cp -f "$LAUNCH_DIR/standard_launch.sh" "$dir/launch.sh" && echo "copied launch.sh to $dir";
-		cp -rf "$OVR_DIR" "$dir/" && echo "copied override template to $dir";
-	# create system.opt files for each system if they don't already exist
-		if [ ! -f "$dir/system.opt" ] ; then
-			cp "$DEF_DIR/${system}.opt" "$dir/system.opt" && echo "created missing system.opt for $dir";
-		fi
 	# delete config_hidden.json if a config.json already exists to lessen chance of conflicts with system.opt
 		if [ -f "$dir/config.json" ] && [ -f "$dir/config_hidden.json" ]; then
 			rm -f "$dir/config_hidden.json" && echo "removed duplicate config_hidden.json from $dir"
