@@ -25,8 +25,8 @@ else
 	echo 1 > /sys/devices/system/cpu/cpu2/online
 	echo 1 > /sys/devices/system/cpu/cpu3/online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo "$down_threshold" > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-	echo "$up_threshold" > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
+	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
 	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
 	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate

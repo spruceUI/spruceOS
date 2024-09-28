@@ -3,6 +3,5 @@
 export CORE="flycast"
 export RA_BIN="ra32.miyoo"
 export GOV="performance"
-export down_threshold=30
-export up_threshold=70
+
 export scaling_min_freq=1008000
