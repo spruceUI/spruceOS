@@ -6,12 +6,17 @@ CONFIG_FILE="$APP_DIR/config.json"
 
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-if [ ! -f "$IMAGE_PATH" ]; then
+# Add a new parameter for silent mode
+SILENT_MODE=${1:-false}
+
+if [ "$SILENT_MODE" != "true" ] && [ ! -f "$IMAGE_PATH" ]; then
     log_message "Image file not found at $IMAGE_PATH"
     exit 1
 fi
 
-show_image "$IMAGE_PATH"
+if [ "$SILENT_MODE" != "true" ]; then
+    show_image "$IMAGE_PATH"
+fi
 
 EMU_PATH="/mnt/SDCARD/Emu"
 FULL_RA='RA_BIN=\"retroarch\"'
@@ -98,5 +103,8 @@ for emu_dir in "$EMU_PATH"/*; do
     fi
 done
 
-kill_images
+# Modify the end of the script to skip image display in silent mode
+if [ "$SILENT_MODE" != "true" ]; then
+    kill_images
+fi
 
