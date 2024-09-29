@@ -85,6 +85,12 @@ restore_flags_on_failure() {
 # Process flags before restore
 process_flags_before_restore
 
+# Delete the originalProfile folder if it exists
+if [ -d "/mnt/SDCARD/RetroArch/originalProfile" ]; then
+    log_message "Deleting /mnt/SDCARD/RetroArch/originalProfile folder..."
+    rm -rf /mnt/SDCARD/RetroArch/originalProfile
+fi
+
 # Actual restore process
 log_message "Starting actual restore process..."
 cd /
@@ -108,7 +114,7 @@ fi
 
 # Check for expertRA flag and run retroExpert.sh if needed
 if flag_check "expertRA"; then
-    display_text -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2
+    display_text -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
     log_message "expertRA flag found. Removing flag and running retroExpert.sh in silent mode."
     flag_remove "expertRA"
     if [ -f "/mnt/SDCARD/App/RetroExpert/retroExpert.sh" ]; then

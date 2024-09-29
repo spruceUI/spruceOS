@@ -50,6 +50,7 @@ folders="
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/hotkeyprofile
 /mnt/SDCARD/RetroArch/nohotkeyprofile
+/mnt/SDCARD/RetroArch/originalProfile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup

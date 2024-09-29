@@ -46,6 +46,9 @@ fi
 
 # Function to swap RetroArch configuration
 swap_retroarch_config() {
+
+
+
     # Check if current config is problematic
     if grep -q 'input_fps_toggle = "backspace"' "$CURRENT_CFG" && \
        grep -q 'input_exit_emulator = "nul"' "$CURRENT_CFG" && \
@@ -55,6 +58,13 @@ swap_retroarch_config() {
     else
         USE_FRESH_CONFIG=false
     fi
+    
+    # Create originalProfile directory if it doesn't exist
+    if [ ! -d "$ORIGINAL_PROFILE_DIR" ]; then
+        mkdir -p "$ORIGINAL_PROFILE_DIR"
+        log_message "Created originalProfile directory"
+    fi
+
 
     if [ "$NEW_MODE" = "expert" ] && [ "$USE_FRESH_CONFIG" = false ]; then
         # Check if current config is already expert
@@ -65,16 +75,20 @@ swap_retroarch_config() {
         fi
     fi
 
-    # Create originalProfile directory if it doesn't exist
-    if [ ! -d "$ORIGINAL_PROFILE_DIR" ]; then
-        mkdir -p "$ORIGINAL_PROFILE_DIR"
-        log_message "Created originalProfile directory"
+    # Save current config as old mode only if it's not problematic
+    if [ "$USE_FRESH_CONFIG" = false ]; then
+        cp "$CURRENT_CFG" "$ORIGINAL_PROFILE_DIR/retroarch-$OLD_MODE.cfg"
+        log_message "Saved current config as $OLD_MODE profile"
     fi
 
     if [ "$USE_FRESH_CONFIG" = false ] && [ -f "$ORIGINAL_PROFILE_DIR/retroarch-$NEW_MODE.cfg" ]; then
         # Use existing profile
         cp "$ORIGINAL_PROFILE_DIR/retroarch-$NEW_MODE.cfg" "$CURRENT_CFG"
         log_message "Using existing $NEW_MODE profile"
+        
+        # Delete the profile after using it
+        rm "$ORIGINAL_PROFILE_DIR/retroarch-$NEW_MODE.cfg"
+        log_message "Deleted $NEW_MODE profile after use"
     else
         # Copy profile from hotkey or nohotkey folder
         if [ "$NEW_MODE" = "expert" ]; then
@@ -83,12 +97,6 @@ swap_retroarch_config() {
             cp "/mnt/SDCARD/RetroArch/nohotkeyprofile/retroarch.cfg" "$CURRENT_CFG"
         fi
         log_message "Copied fresh $NEW_MODE profile"
-    fi
-
-    # Save current config as old mode only if it's not problematic
-    if [ "$USE_FRESH_CONFIG" = false ]; then
-        cp "$CURRENT_CFG" "$ORIGINAL_PROFILE_DIR/retroarch-$OLD_MODE.cfg"
-        log_message "Saved current config as $OLD_MODE profile"
     fi
 }
 
