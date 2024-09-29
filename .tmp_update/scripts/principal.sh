@@ -26,6 +26,12 @@ while [ 1 ]; do
         flag_remove "themeChanged"
     fi
 
+    if flag_check "low_battery"; then
+        CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+        display_text -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+        flag_remove "low_battery"
+    fi
+
     ./MainUI &> /dev/null
 
     # remove in menu flag

@@ -32,6 +32,11 @@ if flag_check "themeChanged"; then
     log_message "Removed leftover themeChanged flag"
 fi
 
+if flag_check "low_battery"; then
+    flag_remove "low_battery"
+    log_message "Removed leftover low_battery flag"
+fi
+
 log_message " "
 log_message "---------Starting up---------"
 log_message " "
