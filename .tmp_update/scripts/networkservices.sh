@@ -10,22 +10,22 @@ connect_services() {
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
 			# SFTPGo check
-			if [ -f "/mnt/SDCARD/.tmp_update/flags/sftpgo.lock" ] && ! pgrep "sftpgo" > /dev/null; then
-				# Lock file exists but service is not running, so start it...
+			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
+				# Flag exists but service is not running, so start it...
 				log_message "Network services: SFTPGo detected not running, starting..."
 				start_sftpgo_process
 			fi
 
 			# SSH check
-			if [ -f "/mnt/SDCARD/.tmp_update/flags/dropbear.lock" ] && ! pgrep "dropbear" > /dev/null; then
-				# Lock file exists but service is not running, so start it...
+			if flag_check "dropbear" && ! pgrep "dropbear" > /dev/null; then
+				# Flag exists but service is not running, so start it...
 				log_message "Network services: Dropbear detected not running, starting..."
 				start_dropbear_process
 			fi
 			
 			# Syncthing check
-			if [ -f "/mnt/SDCARD/.tmp_update/flags/syncthing.lock" ] && ! pgrep "syncthing" > /dev/null; then
-				# Lock file exists but service is not running, so start it...
+			if flag_check "syncthing" && ! pgrep "syncthing" > /dev/null; then
+				# Flag exists but service is not running, so start it...
 				log_message "Network services: Syncthing detected not running, starting..."
 				start_syncthing_process
 			fi

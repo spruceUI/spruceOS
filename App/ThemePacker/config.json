@@ -1,0 +1,7 @@
+{
+	"@label":        "Theme Packer",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/Icons/App/emufresh.png",
+	"launch":       "launch.sh",
+	"description":  "Pack themes into 7z archives",
+	"expert": false
+}

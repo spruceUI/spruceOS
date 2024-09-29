@@ -1,5 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 messages_file="/var/log/messages"
 
@@ -23,18 +24,18 @@ check_and_connect_wifi() {
 	done	
 }
 
-if test -f /mnt/SDCARD/.tmp_update/flags/.save_active; then
+if flag_check "save_active"; then
 	log_message "Save active flag detected"
 	keymon &
 	if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-		log_message "Retro Acheivements enabled, checking WiFi connection"
+		log_message "Retro Achievements enabled, checking WiFi connection"
 		check_and_connect_wifi
 	fi
 	# Restart network services
 	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 	
 	log_message "Adding last game flag"
-	/mnt/SDCARD/.tmp_update/flags/.lastgame &> /dev/null
+	$FLAGS_DIR/lastgame.lock &> /dev/null
 	log_message "Running select script"
 	/mnt/SDCARD/.tmp_update/scripts/select.sh &> /dev/null
 	

@@ -5,7 +5,7 @@ SFTPGO_DIR="/mnt/SDCARD/App/sftpgo"
 SFTPGO_CONFIG_FILE="$SFTPGO_DIR/config.json"
 
 sftpgo_check(){
-    if [ -f /mnt/SDCARD/.tmp_update/flags/sftpgo.lock ]; then
+    if flag_check "sftpgo"; then
         start_sftpgo_process
     else
         sed -i 's|- On|- Off|' $SFTPGO_CONFIG_FILE

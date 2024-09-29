@@ -6,7 +6,7 @@ SSH_DIR="/mnt/SDCARD/App/SSH"
 SSH_CONFIG_FILE="$SSH_DIR/config.json"
 
 dropbear_check(){
-    if [ -f /mnt/SDCARD/.tmp_update/flags/dropbear.lock ]; then
+    if flag_check "dropbear"; then
         start_dropbear_process
     else
         sed -i 's|- On|- Off|' $SSH_CONFIG_FILE
