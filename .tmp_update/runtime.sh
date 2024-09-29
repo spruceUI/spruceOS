@@ -5,7 +5,6 @@ echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
 SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
-FIRST_BOOT_FLAG="${FLAGS_DIR}/first_boot_flag"
 SCRIPTS_DIR="${SDCARD_PATH}/.tmp_update/scripts"
 
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
@@ -60,6 +59,7 @@ dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
 /mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
+/mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
