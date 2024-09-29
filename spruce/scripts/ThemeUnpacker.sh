@@ -46,8 +46,6 @@ for folder in $RA_FOLDERS_TO_UNPACK; do
         else
             log_message "Skipped unpacking RetroArch folder: ${folder}.7z (incorrect folder structure)"
         fi
-    else
-        log_message "RetroArch archive not found: ${folder}.7z"
     fi
 done
 
