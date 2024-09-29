@@ -1,0 +1,30 @@
+[
+  {
+    "Category": "System",
+    "Key": "LED",
+    "DisplayName": "LED Light",
+    "Options": ["Off", "On in menus", "On"],
+    "DefaultValue": "Off"
+  },
+  {
+    "Category": "System",
+    "Key": "Recents",
+    "DisplayName": "Recents tile",
+    "Options": ["On", "Off"],
+    "DefaultValue": "Off"
+  },
+  {
+    "Category": "RetroArch",
+    "Key": "RAExpert",
+    "DisplayName": "RetroArch Expert Mode",
+    "Options": ["Off - Normal", "On - Expert"],
+    "DefaultValue": "Off - Normal"
+  },
+  {
+    "Category": "Game Switcher",
+    "Key": "GSGameCount",
+    "DisplayName": "Game Switcher Games Shown",
+    "Options": ["2", "5", "10"],
+    "DefaultValue": "5"
+  }
+]
