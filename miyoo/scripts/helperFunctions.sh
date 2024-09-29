@@ -1,3 +1,17 @@
+# Function summaries:
+# acknowledge: Waits for user to press A, B, or Start button
+# cores_online: Sets the number of CPU cores to be online
+# display_text: Displays text on the screen with various options
+# exec_on_hotkey: Executes a command when specific buttons are pressed
+# flag_check: Checks if a flag exists
+# flag_add: Adds a flag
+# flag_remove: Removes a flag
+# get_button_press: Returns the name of the last button pressed
+# kill_images: Kills all show processes
+# log_message: Logs a message to a file
+# show_image: Displays an image for a specified duration
+# vibrate: Vibrates the device for a specified duration
+
 # This is a collection of functions that are used in multiple scripts
 # Please do not add any dependencies here, this file is meant to be self-contained
 # Keep methods in alphabetical order
@@ -6,6 +20,7 @@
 # . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/miyoo/res/display_text.elf"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
@@ -112,7 +127,7 @@ CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Example: display_text -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display_text with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
 display_text() {
-    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=320 color="ffffff" font=""
+    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     
@@ -268,6 +283,32 @@ exec_on_hotkey() {
 	done
 }
 
+
+# Check if a flag exists
+# Usage: flag_check "flag_name"
+# Returns 0 if the flag exists, 1 if it doesn't
+flag_check() {
+    local flag_name="$1"
+    if [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Add a flag
+# Usage: flag_add "flag_name"
+flag_add() {
+    local flag_name="$1"
+    touch "$FLAGS_DIR/${flag_name}.lock"
+}
+
+# Remove a flag
+# Usage: flag_remove "flag_name"
+flag_remove() {
+    local flag_name="$1"
+    rm -f "$FLAGS_DIR/${flag_name}.lock"
+}
 
 # Call this to get the last button pressed
 # Returns the name of the button pressed, or "" if no matching button was pressed

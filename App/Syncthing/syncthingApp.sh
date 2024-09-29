@@ -25,14 +25,6 @@ CONFIG_JSON="$appdir/config.json"
 
 skiplast=0
 
-flag_exists(){
-    if [ -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 syncthingpid() {
     pgrep "syncthing" > /dev/null
 }
@@ -66,12 +58,12 @@ startsyncthing() {
         log_message "Already running. Stopping Syncthing..."
         killall -9 syncthing
         sed -i 's|- On|- Off|' $CONFIG_JSON
-        rm -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock
+        flag_remove "syncthing"
         log_message "Syncthing stopped."
     else
         start_syncthing_process
         log_message "Syncthing started."
-        touch /mnt/SDCARD/.tmp_update/flags/syncthing.lock
+        flag_add "syncthing"
     fi
 }
 
@@ -121,23 +113,23 @@ changeguiip() {
 log_message "Syncthing setup"
 
 if [ "$silent_mode" -eq 0 ]; then
-	if flag_exists; then
-		show_image "$KILL_IMAGE_PATH"
-	else
-		show_image "$IMAGE_PATH"
-	fi
+    if flag_check "syncthing"; then
+        show_image "$KILL_IMAGE_PATH"
+    else
+        show_image "$IMAGE_PATH"
+    fi
 fi
 
 log_message "Checking if we're already configured..."
 
-if flag_exists; then
+if flag_check "syncthing"; then
     log_message "Flag found, stopping syncthing."
 
     if syncthingpid; then
         log_message "Running. Killing until next reboot."
         killall -9 syncthing
         sed -i 's|- On|- Off|' $CONFIG_JSON
-        rm -f /mnt/SDCARD/.tmp_update/flags/syncthing.lock
+        flag_remove "syncthing"
         log_message "Finished."
     else
         startsyncthing
