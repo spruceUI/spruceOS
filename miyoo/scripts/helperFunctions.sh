@@ -20,7 +20,7 @@
 # . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/miyoo/res/display_text.elf"
-FLAGS_DIR="/mnt/SDCARD/miyoo/flags"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"

@@ -1,6 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
-FLAGS_DIR="/mnt/SDCARD/miyoo/flags"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 messages_file="/var/log/messages"
 
