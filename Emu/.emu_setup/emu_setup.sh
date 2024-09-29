@@ -11,7 +11,7 @@ DEF_DIR="$SETUP_DIR/defaults"
 {
 # copy defaults folder into options folder if needed
 if [ ! -d "$OPT_DIR" ]; then
-	cp "$DEF_DIR" "$OPT_DIR"
+	cp -rf "$DEF_DIR" "$OPT_DIR"
 fi
 
 for dir in $EMU_DIR/* ; do
