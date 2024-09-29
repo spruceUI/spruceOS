@@ -19,7 +19,7 @@ for dir in "$THEME_DIR"/*; do
             rm -rf "$dir"
             display_text -t "Packed and removed: $theme_name" -c dbcda7 -d 1
         else
-            display_text -t "Failed to pack: $theme_name" -c ff0000
+            display_text -t "Failed to pack: $theme_name" -c dbcda7 
         fi
     fi
 done
@@ -35,10 +35,10 @@ for folder in $RA_FOLDERS_TO_BACKUP; do
             rm -rf "$RA_THEME_DIR/$folder"
             display_text -t "Packed and removed RetroArch folder: $folder" -c dbcda7 -d 1
         else
-            display_text -t "Failed to pack RetroArch folder: $folder" -c ff0000
+            display_text -t "Failed to pack RetroArch folder: $folder" -c dbcda7 
         fi
     else
-        display_text -t "RetroArch folder not found: $folder" -c ffff00
+        display_text -t "RetroArch folder not found: $folder" -c dbcda7 
     fi
 done
 
