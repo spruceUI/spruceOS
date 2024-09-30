@@ -12,7 +12,7 @@
   "extlist": "rom|ri|mx1|mx2|col|dsk|cas|sg|sc|m3u|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Colecovision game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

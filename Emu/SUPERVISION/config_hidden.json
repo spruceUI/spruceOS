@@ -1,5 +1,5 @@
 {
-  "label": "Supervis.",
+  "label": "Supervision",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/supervision.png",
   "launch": "launch.sh",
@@ -12,7 +12,7 @@
   "extlist": "sv|bin|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Supervision game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

@@ -12,7 +12,7 @@
   "extlist": "pce|sgx|cue|ccd|chd|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random SuperGrafx game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

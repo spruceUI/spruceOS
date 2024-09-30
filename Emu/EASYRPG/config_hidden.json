@@ -12,7 +12,7 @@
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random EasyRPG game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

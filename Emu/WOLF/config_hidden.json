@@ -12,7 +12,7 @@
   "extlist": "ecwolf|exe",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Wolfenstein game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

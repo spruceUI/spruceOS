@@ -12,7 +12,7 @@
   "extlist": "gen|smd|md|32x|cue|iso|sms|68k|chd|m3u|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Sega CD/MD-CD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

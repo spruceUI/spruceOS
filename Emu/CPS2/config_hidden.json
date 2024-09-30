@@ -12,7 +12,7 @@
   "extlist": "zip|7z|cue",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random CPS2 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

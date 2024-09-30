@@ -12,7 +12,7 @@
   "extlist": "iso|cso",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random PlayStation Portable game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

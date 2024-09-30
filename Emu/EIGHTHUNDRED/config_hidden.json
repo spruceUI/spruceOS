@@ -12,7 +12,7 @@
   "extlist": "xfd|atr|cdm|cas|bin|a52|zip|7z|atx|car|com|xex",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Atari 800 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

@@ -12,7 +12,7 @@
   "extlist": "a52|zip|7z|bin",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Atari 5200 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

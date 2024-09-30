@@ -12,7 +12,7 @@
   "extlist": "pce|ccd|iso|img|chd|cue|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random TG-CD/PCECD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

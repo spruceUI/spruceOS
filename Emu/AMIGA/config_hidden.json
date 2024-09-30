@@ -12,7 +12,7 @@
   "extlist": "adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|zip|7z|rp9",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Amiga game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

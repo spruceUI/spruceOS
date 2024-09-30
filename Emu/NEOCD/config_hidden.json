@@ -12,7 +12,7 @@
   "extlist": "cue|chd|m3u",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Neo CD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

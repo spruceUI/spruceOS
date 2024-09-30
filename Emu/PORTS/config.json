@@ -12,7 +12,7 @@
   "extlist": "sh",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Port",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

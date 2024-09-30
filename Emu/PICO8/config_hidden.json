@@ -12,7 +12,7 @@
   "extlist": "p8|png|miyoocmd",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Pico-8 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

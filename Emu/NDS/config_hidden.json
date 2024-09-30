@@ -13,7 +13,7 @@
   "extlist": "nds|zip|7z|rar",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random Nintendo DS game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

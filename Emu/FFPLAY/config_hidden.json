@@ -10,7 +10,7 @@
   "hidebios": 0,
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random media",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {

@@ -12,7 +12,7 @@
   "extlist": "rom|mx1|mx2|dsk|cas|zip|7z|m3u",
   "launchlist": [
     {
-      "name": "Select Random Game",
+      "name": "Jump to random MSX game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
