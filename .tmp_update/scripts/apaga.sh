@@ -1,4 +1,4 @@
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
 log_message "Set LED1 trigger to heartbeat"
@@ -13,8 +13,8 @@ killall -9 runtime.sh
 killall -9 principal.sh
 killall -9 MainUI
 
-touch /mnt/SDCARD/.tmp_update/flags/.save_active
-log_message "Created .save_active flag"
+flag_add "save_active"
+log_message "Created save_active flag"
 
 show_image "/mnt/SDCARD/.tmp_update/res/save.png" 3
 

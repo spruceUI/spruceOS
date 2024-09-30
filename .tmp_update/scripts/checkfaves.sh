@@ -40,24 +40,35 @@ sort_file() {
 remove_duplicates() {
     sort_file "$DUPLICATE_FILE" "$TEMP_FILE"
     {
-        echo "[]"
-        awk -F'"rompath":' '
-            {
-                if (NF > 1) {
-                    split($2, arr, ",")
-                    split(arr[1], path, "\"")
-                    filename = path[2]
-                    
-                    split(filename, path_parts, "/")
-                    emulator_path = path_parts[4]
-                    split(path_parts[length(path_parts)], name_parts, ".")
-                    base_name = name_parts[1]
-                    
-                    if (!seen[emulator_path base_name]++) {
-                        print $0
-                    }
+        awk -v launch='launch' -v rompath='rompath' '{ 
+            line = $0
+            split("", kv)
+            nelems = split(line, elems, ",")
+            for(i=1; i<=nelems; i++){
+                elem=elems[i]
+                cnt = 0
+                while ( match(elem,/"[^"]*"/) ) {
+                hit = substr(elem,RSTART+1,RLENGTH-2)
+                if ( ++cnt % 2 ) {
+                    tag = hit
                 }
-            }' "$DUPLICATE_FILE" 
+                else {
+                    val = hit
+                    kv[tag] = val
+                }
+                elem = substr(elem,RSTART+RLENGTH)
+                }
+            }
+            npath = split(kv[launch], path_parts, "/")
+            app = path_parts[npath-1]
+            
+            nrom = split(kv[rompath], rom_parts, "/")
+            rom = rom_parts[nrom]
+            romfolder = rom_parts[nrom-1]
+            if (!seen[app rom romfolder]++) {
+                print $0
+            }
+        }' "$DUPLICATE_FILE" 
     } > "$TEMP_FILE"
 
     if ! cmp -s "$DUPLICATE_FILE" "$TEMP_FILE"; then
@@ -78,6 +89,7 @@ remove_duplicates() {
 monitor_favourite_file() {
     while true; do
         if [ -f "$FAVOURITE_FILE" ]; then
+            /mnt/SDCARD/tmp_update/bin/inotify.elf $FAVOURITE_FILE
             if [ -f "$PREVIOUS_STATE" ]; then
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
                     create_duplicate
@@ -88,8 +100,9 @@ monitor_favourite_file() {
             else
                 cp "$FAVOURITE_FILE" "$PREVIOUS_STATE"
             fi
-        fi
-        sleep 1
+        else
+            touch $FAVOURITE_FILE
+        fi 
     done
 }
 

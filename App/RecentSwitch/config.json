@@ -1,7 +1,7 @@
 {
-  "#label": "RECENTS - OFF",
+  "#label": "Recents - Off",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/recents.png",
   "launch": "launch.sh",
-  "description": "Turn on/off Recents",
+  "description": "Turn On/Off recents",
   "expert": true
 }

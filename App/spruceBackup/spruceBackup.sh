@@ -1,42 +1,34 @@
 #!/bin/sh
 
-appdir=/mnt/SDCARD/App/spruceBackup
-backupdir=/mnt/SDCARD/Saves/spruce
+APP_DIR=/mnt/SDCARD/App/spruceBackup
+BACKUP_DIR=/mnt/SDCARD/Saves/spruce
+FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-IMAGE_PATH="$appdir/imgs/spruceBackup.png"
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupSuccess.png"
-SPACE_FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailedSpace.png"
-FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
+SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
+SYNC_IMAGE_CONFIRM="$APP_DIR/imgs/spruceBackupConfirm.png"
 
 log_message "----------Running Backup script----------"
-show_image "$IMAGE_PATH"
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
+cores_online 4
+display_text -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
-mkdir -p "$backupdir/backups"
+mkdir -p "$BACKUP_DIR/backups"
 
 # Set up logging
-log_file="$backupdir/spruceBackup.log"
-
+log_file="$BACKUP_DIR/spruceBackup.log"
 log_message "Created or verified spruce and backups directories"
 
 # Get current timestamp
 timestamp=$(date +"%Y%m%d_%H%M%S")
 log_message "Starting backup process with timestamp: $timestamp"
 
-# Create .lastUpdate file with the current spruce version
-upgradescriptsdir="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
-current_version=$(ls "$upgradescriptsdir" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.sh$' | sort -V | tail -n 1 | sed 's/\.sh$//')
-echo "spruce_version=$current_version" > "/mnt/SDCARD/App/spruceRestore/.lastUpdate"
-log_message "Created .lastUpdate file with current version: $current_version"
-
-# Replace zip_file with tar_file
-tar_file="$backupdir/backups/spruceBackup_${timestamp}.tar.gz"
-log_message "Backup file will be: $tar_file"
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
-
+# Replace zip_file with 7z_file
+seven_z_file="$BACKUP_DIR/backups/spruceBackup_${timestamp}.7z"
+seven_z_filename=$(basename "$seven_z_file")
+log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
 # - Syncthing config
@@ -58,6 +50,7 @@ folders="
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/hotkeyprofile
 /mnt/SDCARD/RetroArch/nohotkeyprofile
+/mnt/SDCARD/RetroArch/originalProfile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
@@ -78,8 +71,8 @@ available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
 
 if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    show_image "$SPACE_FAIL_IMAGE_PATH"
-    acknowledge
+    display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
+You need at least 50 MB free space to backup your files." -c dbcda7 --okay
     exit 1
 fi
 
@@ -88,27 +81,34 @@ log_message "Sufficient free space available. Proceeding with backup."
 for item in $folders; do
   if [ -e "$item" ]; then
     log_message "Adding $item to backup list"
-    if [ "$item" = "/mnt/SDCARD/RetroArch/.retroarch/overlay" ]; then
-      find "$item" -type d -name "Onion-Spruce" -prune -o -type f -print >> "$temp_file"
-    else
-      echo "$item" >> "$temp_file"
-    fi
+    echo "$item" >> "$temp_file"
   else
     log_message "Warning: $item does not exist, skipping..."
   fi
 done
 
-log_message "Creating tar archive"
-tar -czf "$tar_file" -T "$temp_file" 2>> "$log_file"
+# Add the expertRA.lock file separately
+if [ -e "$FLAGS_DIR/expertRA.lock" ]; then
+  log_message "Adding $FLAGS_DIR/expertRA.lock to backup list"
+  echo "$FLAGS_DIR/expertRA.lock" >> "$temp_file"
+else
+  log_message "Warning: $FLAGS_DIR/expertRA.lock does not exist, skipping..."
+fi
+
+log_message "Creating 7z archive"
+7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 rm "$temp_file"
 
 if [ $? -eq 0 ]; then
-  log_message "Backup process completed successfully. Backup file: $tar_file"
-  show_image "$UPDATE_IMAGE_PATH" 4
+  log_message "Backup process completed successfully. Backup file: $seven_z_file"
+  display_text -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+Backup file: $seven_z_filename
+Located in /Saves/spruce/backups/" -c dbcda7 -d 4 -s 24
 else
-  log_message "Error while creating backup, check $log_file for more details"
-  show_image "$FAIL_IMAGE_PATH"
-  acknowledge
+  log_message "Error while creating backup."
+  display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
+Check '/Saves/spruce/spruceBackup.log' for more details" -c dbcda7 --okay
 fi
 
 log_message "Backup process finished running"
+cores_online

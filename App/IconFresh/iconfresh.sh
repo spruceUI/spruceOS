@@ -2,9 +2,16 @@
 
 IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-show_image "$IMAGE_PATH"
+# Add silent mode flag
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1
+
+# Only show image if not in silent mode
+if [ $silent_mode -eq 0 ]; then
+    show_image "$IMAGE_PATH"
+fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
@@ -114,6 +121,8 @@ update_skin_images() {
     fi
 }
 
+cores_online 3
+
 find "$EMULATOR_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_emulator_icons "$CONFIG_FILE"
 done
@@ -124,4 +133,9 @@ done
 
 update_skin_images
 
-kill_images
+# Only kill images if not in silent mode
+if [ $silent_mode -eq 0 ]; then
+    kill_images
+fi
+
+cores_online

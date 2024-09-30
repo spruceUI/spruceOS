@@ -1,7 +1,7 @@
 {
-  "#label": "LED - OFF",
+  "#label": "LED - Off",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/led.png",
   "launch": "launch.sh",
-  "description": "Toggle The Blue LED Mode",
+  "description": "Change the blue LED mode",
   "expert": true
 }

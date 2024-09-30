@@ -32,6 +32,12 @@
 
  - WiFi File Transfer App added.
 
+ - SSH App added.
+
+ - ExpertAppSwitch added.
+
+ - Backup/Restore Apps added.
+
  - Recents tab is optional via App toggle.
 
  - Performance and overclock adjustments are preset.
@@ -86,11 +92,8 @@ This will retain all your games, Syncthing configurations, saves, and bios files
 
   *WHILE IN GAME*
 
-  - QUIT GAME:  Hold Select (2 seconds);
-    
-    Press B to quit game
-    **or**
-    Press Start to Save and Shutdown.
+  - QUICKSAVE/SHUTDOWN/RESUME:  Hold Select (2 seconds)
+
 
   - SAVE/LOAD STATE RETROARCH: Home button
   - EXIT GAME: Select + Start (PSP home button and exit through menu) Pico-8 press start from gamelist and home from splore
@@ -128,11 +131,15 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Rayon and Cinethezs: Boxart Scraper App and tweaks.
   
-  Cinethezs, tenlevels, ShaunInman (show.elf): Random Game App
+  Cinethezs, Oscarkcau and tenlevels: Random Game App
   
-  Ndguardian and XK9274: Syncthing App.
+  Ndguardian, XanXic and XK9274: Syncthing App.
   
-  Veckia9x: WiFi File Transfer App.
+  Veckia9x and Fragbait79: WiFi File Transfer App.
+
+  XanXic: spruceBackup and spruceRestore Apps.
+
+  Fragbait79: SSH App.
   
   Ry: Overhauled Emu folder, LibRetro ports.
   
@@ -152,9 +159,11 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Sky_Walker: Avocado theme.
 
-  Cobaltdsc4102: Building and enabling the chimerasnes core for SFC.
+  Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
   
   Onion and Darkhorse: Overlays.
+
+  Axcelon: Cleaned up and organized Overlay and Filter directories.
   
   Hoo: Testing and encouragement.
   

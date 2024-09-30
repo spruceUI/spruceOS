@@ -1,7 +1,7 @@
 {
-  "#label": "SYNCTHING - ON",
+  "#label": "Syncthing - Off",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/syncthing.png",
   "launch": "launch.sh",
-  "description": "Synchronize Your Saves and Files",
+  "description": "Synchronize your saves and files",
   "expert": true
 }

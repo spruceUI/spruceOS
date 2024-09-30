@@ -1,7 +1,7 @@
 {
-  "label": "BOXART SCRAPER",
+  "label": "Boxart Scraper",
   "icon": "/mnt/SDCARD/Icons/Default/App/scraper.png",
   "launch": "launch.sh",
-  "description": "Scrape Game Boxart",
+  "description": "Scrape game boxart",
   "expert": false
 }

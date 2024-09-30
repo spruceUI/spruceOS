@@ -5,7 +5,6 @@
 SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
-FIRST_BOOT_FLAG="${SDCARD_PATH}/.tmp_update/flags/first_boot_flag"
 
 IMAGE_PATH_WIKI="${SDCARD_PATH}/.tmp_update/res/wiki.png"
 IMAGE_PATH_FIRMWARE="${SDCARD_PATH}/.tmp_update/res/firmware.png"
@@ -13,7 +12,7 @@ IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 
 log_message "Starting firstboot script"
 
-if [ -f "$FIRST_BOOT_FLAG" ]; then
+if flag_check "first_boot"; then
     log_message "First boot flag detected"
     
     if [ ! -f "${SDCARD_PATH}/copy_config" ]; then
@@ -48,7 +47,8 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     /mnt/SDCARD/.tmp_update/scripts/emufresh.sh
     
     log_message "Running iconfresh.sh"
-     /mnt/SDCARD/.tmp_update/scripts/iconfresh.sh
+    show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
+    /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
 
     log_message "Displaying wiki image"
     show_image "$IMAGE_PATH_WIKI" 5
@@ -59,7 +59,7 @@ if [ -f "$FIRST_BOOT_FLAG" ]; then
     log_message "Displaying enjoy image"
     show_image "$IMAGE_PATH_ENJOY" 5
 
-    rm "$FIRST_BOOT_FLAG"
+    flag_remove "first_boot"
     log_message "Removed first boot flag"
 else
     log_message "First boot flag not found. Skipping first boot procedures."
