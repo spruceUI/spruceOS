@@ -1,9 +1,8 @@
 #!/bin/sh
 
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
-EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-CONFIG="$EMU_DIR/config.json"
-SYS_OPT="$EMU_DIR/system.opt"
+CONFIG="/mnt/SDCARD/Emu/${EMU_NAME}/config.json"
+SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 if [ "$EMU_NAME" = "MD" ] || [ "$EMU_NAME" = "SEGACD" ] || [ "$EMU_NAME" = "THIRTYTWOX" ]; then
     sed -i 's|"Emu Core: (✓PICODRIVE)-genesis+gx"|"Emu Core: picodrive-(✓GENESIS+GX)"|g' "$CONFIG"
