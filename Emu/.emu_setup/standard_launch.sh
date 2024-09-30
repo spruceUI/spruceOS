@@ -188,6 +188,11 @@ case $EMU_NAME in
 		;;
 	
 	*)
+		if flag_check "expertRA"; then
+			export RA_BIN="retroarch"
+		else
+			export RA_BIN="ra32.miyoo"
+		fi
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"

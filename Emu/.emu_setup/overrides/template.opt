@@ -20,15 +20,7 @@
 
 export CORE="mgba"
 
-# RetroArch Version:
-#
-# "ra32.miyoo" uses Miyoo's custom in-game menu - the default for spruce.
-# "retroarch" is the version used in "Jim Mode" a.k.a. RetroArch Expert Mode.
-# Uncomment the one you wish to force by removing the # in front.
-
-export RA_BIN="ra32.miyoo"
-# export RA_BIN="retroarch"
-
+# 
 # CPU Mode:
 #
 # "smart" -> Samples the CPU usage 2.5 times per second. At 70% CPU usage,

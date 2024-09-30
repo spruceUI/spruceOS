@@ -1,7 +1,6 @@
 #!/bin/sh
 
 export CORE="gambatte"
-export RA_BIN="ra32.miyoo"
 export MODE="smart"
 
 export scaling_min_freq=240000
