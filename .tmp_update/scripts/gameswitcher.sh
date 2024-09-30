@@ -1,16 +1,18 @@
 #!/bin/sh
 
-FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
-LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
-IMAGES_FILE="/mnt/SDCARD/.tmp_update/flags/gs_images"
-GAMENAMES_FILE="/mnt/SDCARD/.tmp_update/flags/gs_names"
-TEMP_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list_temp"
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+
+FLAG_DIR="/mnt/SDCARD/spruce/flags"
+LIST_FILE="$FLAG_DIR/gs_list"
+IMAGES_FILE="$FLAG_DIR/gs_images"
+GAMENAMES_FILE="$FLAG_DIR/gs_names"
+TEMP_FILE="$FLAG_DIR/gs_list_temp"
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 # remove flag for game switcher
-rm "$FLAG_FILE" && log_message "Removed game switcher flag file"
+flag_remove "gs" && log_message "Removed game switcher flag"
 
 # exit if no game in list file
 if [ ! -f "$LIST_FILE" ] ; then

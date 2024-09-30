@@ -1,13 +1,13 @@
 #!/bin/sh
 
-. "/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
-FLAG_FILE="/mnt/SDCARD/.tmp_update/flags/gs.lock"
-LIST_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list"
-TEMP_FILE="/mnt/SDCARD/.tmp_update/flags/gs_list_temp"
+FLAG_DIR="/mnt/SDCARD/spruce/flags"
+LIST_FILE="$FLAG_DIR/gs_list"
+TEMP_FILE="$FLAG_DIR/gs_list_temp"
 LONG_PRESSED=false
 
 long_press_handler() {
@@ -72,7 +72,7 @@ long_press_handler() {
     killall -15 retroarch || killall -15 ra32.miyoo || killall -9 MainUI || /mnt/SDCARD/miyoo/app/kill_apps.sh
     
     # set flag file for principal.sh to load game switcher later
-    touch "$FLAG_FILE" && log_message "creating game switcher flag file"
+    flag_add "gs" && log_message "Creating game switcher flag"
 }
 
 # listen to log file and handle key press events
