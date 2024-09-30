@@ -66,12 +66,13 @@ done <$LIST_FILE
 # -ts: title scrolling speed in pixel per frame (default is 4).
 # -n: display item index (default is on).
 # -d: enable item deletion with the deletion command provided (default is disable).
-#     Use TITLE in command to take the selected title as input. e.g. "echo TITLE"
+#     Use INDEX in command to take the selected index as input. e.g. "echo INDEX"
 #     Pass "" as argument if no command is provided.
 # -h,--help show this help message.
 # return value: the 1-based index of the selected image
 cd /mnt/SDCARD/.tmp_update/bin/
-/mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 -d "sed -i '/TITLE/c\removed' $LIST_FILE"
+/mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 \
+-d "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
 
 # get return value and launch game with return index
 RETURN_INDEX=$?
