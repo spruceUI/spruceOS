@@ -16,12 +16,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Change core to gpsp",
+      "name": "Emu Core: (✓MGBA)-gpsp",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"
-    },
-    {
-      "name": "✓ Core is mgba",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
