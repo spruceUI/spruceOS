@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+
 IMAGE_PATH="/mnt/SDCARD/App/RecentSwitch/switching.png"
 CONFIG_FILE="/mnt/SDCARD/App/RecentSwitch/config.json"
 MAINUI_PATH="/mnt/SDCARD/miyoo/app/mainui"
@@ -7,11 +9,11 @@ RECENTS_MAINUI_PATH="/mnt/SDCARD/miyoo/app/recents/mainui"
 NORECENTS_MAINUI_PATH="/mnt/SDCARD/miyoo/app/norecents/mainui"
 
 if [ ! -f "$IMAGE_PATH" ]; then
-    echo "Image file not found at $IMAGE_PATH"
+    log_message "Image file not found at $IMAGE_PATH"
     exit 1
 fi
 
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 
 sleep 2
 
@@ -22,19 +24,19 @@ toggle_mainui() {
         if diff -q "${MAINUI_PATH}.bak" "$RECENTS_MAINUI_PATH" >/dev/null; then
             cp "$NORECENTS_MAINUI_PATH" "$MAINUI_PATH"
             sed -i 's|- On|- Off|' "$CONFIG_FILE"
-            echo "Switched to NO RECENTS mode"
+            log_message "Switched to NO RECENTS mode"
         else
             cp "$RECENTS_MAINUI_PATH" "$MAINUI_PATH"
             sed -i 's|- Off|- On|' "$CONFIG_FILE"
-            echo "Switched to RECENTS mode"
+            log_message "Switched to RECENTS mode"
         fi
 
         rm "${MAINUI_PATH}.bak"
     else
-        echo "MainUI file not found: $MAINUI_PATH"
+        log_message "MainUI file not found: $MAINUI_PATH"
     fi
 }
 
 toggle_mainui
 
-killall -9 show
+kill_images
