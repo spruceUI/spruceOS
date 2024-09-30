@@ -1,12 +1,13 @@
 #!/bin/sh
 
-appdir=/mnt/SDCARD/App/spruceBackup
-backupdir=/mnt/SDCARD/Saves/spruce
+APP_DIR=/mnt/SDCARD/App/spruceBackup
+BACKUP_DIR=/mnt/SDCARD/Saves/spruce
+FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-SYNC_IMAGE="$appdir/imgs/spruceBackup.png"
-SYNC_IMAGE_CONFIRM="$appdir/imgs/spruceBackupConfirm.png"
+SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
+SYNC_IMAGE_CONFIRM="$APP_DIR/imgs/spruceBackupConfirm.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
@@ -14,10 +15,10 @@ display_text -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files......
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
-mkdir -p "$backupdir/backups"
+mkdir -p "$BACKUP_DIR/backups"
 
 # Set up logging
-log_file="$backupdir/spruceBackup.log"
+log_file="$BACKUP_DIR/spruceBackup.log"
 log_message "Created or verified spruce and backups directories"
 
 # Get current timestamp
@@ -25,7 +26,7 @@ timestamp=$(date +"%Y%m%d_%H%M%S")
 log_message "Starting backup process with timestamp: $timestamp"
 
 # Replace zip_file with 7z_file
-seven_z_file="$backupdir/backups/spruceBackup_${timestamp}.7z"
+seven_z_file="$BACKUP_DIR/backups/spruceBackup_${timestamp}.7z"
 seven_z_filename=$(basename "$seven_z_file")
 log_message "Backup file will be: $seven_z_file"
 
@@ -49,6 +50,7 @@ folders="
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/hotkeyprofile
 /mnt/SDCARD/RetroArch/nohotkeyprofile
+/mnt/SDCARD/RetroArch/originalProfile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
@@ -84,6 +86,14 @@ for item in $folders; do
     log_message "Warning: $item does not exist, skipping..."
   fi
 done
+
+# Add the expertRA.lock file separately
+if [ -e "$FLAGS_DIR/expertRA.lock" ]; then
+  log_message "Adding $FLAGS_DIR/expertRA.lock to backup list"
+  echo "$FLAGS_DIR/expertRA.lock" >> "$temp_file"
+else
+  log_message "Warning: $FLAGS_DIR/expertRA.lock does not exist, skipping..."
+fi
 
 log_message "Creating 7z archive"
 7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"

@@ -1,23 +1,15 @@
 #!/bin/sh
 
-appdir=/mnt/SDCARD/App/spruceRestore
-upgradescriptsdir=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
-backupdir=/mnt/SDCARD/Saves/spruce
+APP_DIR=/mnt/SDCARD/App/spruceRestore
+UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
+BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
 
-IMAGE_PATH="$appdir/imgs/spruceRestore.png"
-NOTFOUND_IMAGE_PATH="$appdir/imgs/spruceRestoreNotfound.png"
-SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceRestoreSuccess.png"
-FAIL_IMAGE_PATH="$appdir/imgs/spruceRestoreFailed.png"
-
-check_flag() {
-    if flag_check "syncthing"; then
-        return 0
-    else
-        return 1
-    fi
-}
+IMAGE_PATH="$APP_DIR/imgs/spruceRestore.png"
+NOTFOUND_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreNotfound.png"
+SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreSuccess.png"
+FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreFailed.png"
 
 log_message "----------Starting Restore script----------"
 cores_online 4
@@ -26,24 +18,24 @@ show_image "$IMAGE_PATH"
 #-----Main-----
 
 # Set up logging
-log_file="$backupdir/spruceRestore.log"
+log_file="$BACKUP_DIR/spruceRestore.log"
 
 log_message "Starting spruceRestore script..."
 log_message "Looking for backup files..."
 
 # Check if backups folder exists
-if [ ! -d "$backupdir/backups" ]; then
-    log_message "Backup folder not found at $backupdir/backups"
+if [ ! -d "$BACKUP_DIR/backups" ]; then
+    log_message "Backup folder not found at $BACKUP_DIR/backups"
     show_image "$NOTFOUND_IMAGE_PATH"
     acknowledge
     exit 1
 fi
 
 # Look for spruceBackup 7z files
-backup_files=$(find "$backupdir/backups" -name "spruceBackup*.7z" | sort -r | tr '\n' ' ')
+backup_files=$(find "$BACKUP_DIR/backups" -name "spruceBackup*.7z" | sort -r | tr '\n' ' ')
 
 if [ -z "$backup_files" ]; then
-    log_message "No spruceBackup 7z files found in $backupdir/backups"
+    log_message "No spruceBackup 7z files found in $BACKUP_DIR/backups"
     show_image "$FAIL_IMAGE_PATH"
     acknowledge
     exit 1
@@ -64,6 +56,41 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Define a list of flags to check and potentially restore
+flags_to_process="expertRA"
+
+# Function to process flags before restore
+process_flags_before_restore() {
+    for flag in $flags_to_process; do
+        if flag_check "$flag"; then
+            log_message "Removing $flag flag before restore"
+            flag_remove "$flag"
+            echo "$flag" >> "$backupdir/removed_flags.tmp"
+        fi
+    done
+}
+
+# Function to restore flags if restore fails
+restore_flags_on_failure() {
+    if [ -f "$backupdir/removed_flags.tmp" ]; then
+        log_message "Restore failed. Restoring removed flags."
+        while read -r flag; do
+            log_message "Restoring $flag flag"
+            flag_add "$flag"
+        done < "$backupdir/removed_flags.tmp"
+        rm "$backupdir/removed_flags.tmp"
+    fi
+}
+
+# Process flags before restore
+process_flags_before_restore
+
+# Delete the originalProfile folder if it exists
+if [ -d "/mnt/SDCARD/RetroArch/originalProfile" ]; then
+    log_message "Deleting /mnt/SDCARD/RetroArch/originalProfile folder..."
+    rm -rf /mnt/SDCARD/RetroArch/originalProfile
+fi
+
 # Actual restore process
 log_message "Starting actual restore process..."
 cd /
@@ -74,19 +101,36 @@ log_message "Extracting backup file: $most_recent_backup"
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
     show_image "$SUCCESSFUL_IMAGE_PATH" 3
+    rm -f "$backupdir/removed_flags.tmp"
 else
     log_message "Error during restore process. Check $log_file for details."
     log_message "7zr exit code: $?"
     log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
+    restore_flags_on_failure
     show_image "$FAIL_IMAGE_PATH"
     acknowledge
     exit 1
 fi
 
+# Check for expertRA flag and run retroExpert.sh if needed
+if flag_check "expertRA"; then
+    display_text -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
+    log_message "expertRA flag found. Removing flag and running retroExpert.sh in silent mode."
+    flag_remove "expertRA"
+    if [ -f "/mnt/SDCARD/App/RetroExpert/retroExpert.sh" ]; then
+        sh /mnt/SDCARD/App/RetroExpert/retroExpert.sh true
+        log_message "retroExpert.sh executed in silent mode"
+    else
+        log_message "retroExpert.sh not found"
+    fi
+else
+    log_message "expertRA flag not found. Skipping retroExpert.sh execution."
+fi
+
 # Check if Syncthing config folder exists and run launch script if it does
 if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
     log_message "Syncthing config folder found."
-    if ! check_flag; then
+    if ! flag_check "syncthing"; then
         log_message "Syncthing injector not found in runtime. Running Syncthing launch script..."
         if [ -f "/mnt/SDCARD/App/Syncthing/launch.sh" ]; then
             sh /mnt/SDCARD/App/Syncthing/launch.sh
@@ -99,22 +143,22 @@ if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
             log_message "Syncthing launch script not found"
         fi
     else
-        log_message "Syncthing injector found in runtime. Skipping Syncthing launch."
+        log_message "Syncthing flag found. Skipping Syncthing launch."
     fi
 else
     log_message "Syncthing config folder not found. Skipping Syncthing launch."
 fi
 
 #-----Upgrade-----
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceUpdate.png"
-UPDATE_SUCCESSFUL_IMAGE_PATH="$appdir/imgs/spruceUpdateSuccess.png"
-UPDATE_FAIL_IMAGE_PATH="$appdir/imgs/spruceUpdateFailed.png"
+UPDATE_IMAGE_PATH="$APP_DIR/imgs/spruceUpdate.png"
+UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
+UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
 show_image "$UPDATE_IMAGE_PATH"
 
 # Define the path for the .lastUpdate file
-last_update_file="$appdir/.lastUpdate"
+last_update_file="$APP_DIR/.lastUpdate"
 
 # Read the current version from .lastUpdate file
 if [ -f "$last_update_file" ]; then
@@ -127,7 +171,7 @@ log_message "Current version: $current_version"
 
 # Upgrade script locations
 upgrade_scripts="
-/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.0.sh
+$UPGRADE_SCRIPTS_DIR/2.3.0.sh
 "
 #/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.1.sh
 

@@ -34,6 +34,7 @@ RA_FOLDERS_TO_UNPACK="xmb"
 for folder in $RA_FOLDERS_TO_UNPACK; do
     archive="$RA_THEME_DIR/${folder}.7z"
     if [ -f "$archive" ]; then
+        display_text -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$folder packed retroarch theme detected. Unpacking.........." -c dbcda7
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
             7zr x "$archive" -o/
             if [ $? -eq 0 ]; then
@@ -45,8 +46,6 @@ for folder in $RA_FOLDERS_TO_UNPACK; do
         else
             log_message "Skipped unpacking RetroArch folder: ${folder}.7z (incorrect folder structure)"
         fi
-    else
-        log_message "RetroArch archive not found: ${folder}.7z"
     fi
 done
 

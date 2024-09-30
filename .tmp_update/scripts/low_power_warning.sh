@@ -2,7 +2,7 @@
 
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 PERCENT=4
-SLEEP=5
+SLEEP=30
 
 
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
