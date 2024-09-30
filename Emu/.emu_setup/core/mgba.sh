@@ -5,15 +5,11 @@ EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 CONFIG="$EMU_DIR/config.json"
 SYS_OPT="$EMU_DIR/system.opt"
 
-update_core_config_name() {
-    if [ -f "$CONFIG" ]; then
-        sed -i 's|"name": "✓ Core is gpsp"|"name": "Change core to gpsp"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is gambatte"|"name": "Change core to gambatte"|g' "$CONFIG"
-        sed -i 's|"name": "✓ Core is mgba"|"name": "Change core to mgba"|g' "$CONFIG"
-        sed -i 's|"name": "Change core to mgba"|"name": "✓ Core is mgba"|g' "$CONFIG"
-    fi
-}
-
-update_core_config_name
-
-sed -i 's/CORE=.*/CORE=\"mgba\"/g' "$SYS_OPT"
+if [ "$EMU_NAME" = "GB" ] || [ "$EMU_NAME" = "GBC" ]; then
+    sed -i 's|"Emu Core: (✓GAMBATTE)-mgba"|"Emu Core: gambatte-(✓MGBA)"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gambatte.sh"|g' "$CONFIG"
+else
+    sed -i 's|"Emu Core: mgba-(✓GPSP)"|"Emu Core: (✓MGBA)-gpsp"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"|g' "$CONFIG"
+fi
+sed -i 's|CORE=.*|CORE=\"mgba\"|g' "$SYS_OPT"
