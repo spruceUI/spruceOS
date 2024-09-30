@@ -16,11 +16,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "✓ Core is fbalpha2012",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fbalpha2012.sh"
-    },
-    {
-      "name": "Change core to fbneo",
+      "name": "Emu Core: (✓FBALPHA2012)-fbneo",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fbneo.sh"
     },
     {
