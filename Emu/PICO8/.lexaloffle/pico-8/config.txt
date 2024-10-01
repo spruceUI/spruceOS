@@ -36,7 +36,7 @@ sessions 14 // number of times program has been run
 rmb_key 0 // 0 for none  226 for LALT
 
 // Desktop for saving screenshots etc. Defaults to $HOME/Desktop
-desktop_path 
+desktop_path "/mnt/SDCARD/Saves/pico-8/screenshots"
 
 // 1 to allow controller input even when application is in background
 read_controllers_in_background 0
