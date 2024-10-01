@@ -8,6 +8,13 @@
   },
   {
     "Category": "System",
+    "Key": "Boxart",
+    "DisplayName": "Boxart",
+    "Options": ["Off", "Left", "Right"],
+    "DefaultValue": "Right"
+  },
+  {
+    "Category": "System",
     "Key": "Recents",
     "DisplayName": "Recents tile",
     "Options": ["On", "Off"],
