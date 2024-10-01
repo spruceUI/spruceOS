@@ -76,7 +76,7 @@ root_path /mnt/SDCARD/Roms/PICO8/
 
 
 // Location of cartridge save data
-cdata_path /mnt/SDCARD/App/pico/.lexaloffle/pico-8/cdata/
+cdata_path /mnt/SDCARD/Saves/pico-8/cdata/
 
 
 // Specify which player index joystick control begins at (0..7)

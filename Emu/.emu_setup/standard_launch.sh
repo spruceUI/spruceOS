@@ -161,15 +161,15 @@ case $EMU_NAME in
 		;;
 	
 	"PICO8")
-		export HOME="/mnt/SDCARD/App/PICO"
+		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
 		export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		cd "$HOME"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
-		if [ $GAME = "☆Launch Splore☆.splore" ]; then
-			pico8_dyn -splore -width 640 -height 480
+		if [ "${GAME##*.}" = "splore" ]; then
+			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/"
 		else
 			pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 		fi
