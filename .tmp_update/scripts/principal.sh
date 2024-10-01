@@ -10,32 +10,42 @@ runifnecessary() {
     fi
 }
 
+# ensure keymon is running first
+runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
+
 flag_remove "save_active"
 while [ 1 ]; do
-    # create in menu flag
-    flag_add "in_menu"
 
-    runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-    # Restart network services with higher priority since booting to menu
-    nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
-    cd ${SYSTEM_PATH}/app/
-
-    # Check for the themeChanged flag
-    if flag_check "themeChanged"; then
-        /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
-        flag_remove "themeChanged"
+    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
+        /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
     fi
+    
+    if [ ! -f /tmp/cmd_to_run.sh ] ; then
+        # create in menu flag
+        flag_add "in_menu"
 
-    if flag_check "low_battery"; then
-        CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-        display_text -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
-        flag_remove "low_battery"
+        runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
+        # Restart network services with higher priority since booting to menu
+        nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+        cd ${SYSTEM_PATH}/app/
+
+        # Check for the themeChanged flag
+        if flag_check "themeChanged"; then
+            /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
+            flag_remove "themeChanged"
+        fi
+
+        if flag_check "low_battery"; then
+            CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+            display_text -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+            flag_remove "low_battery"
+        fi
+
+        ./MainUI &> /dev/null
+
+        # remove in menu flag
+        flag_remove "in_menu"
     fi
-
-    ./MainUI &> /dev/null
-
-    # remove in menu flag
-    flag_remove "in_menu"
 
     if [ -f /tmp/.cmdenc ]; then
         /root/gameloader
