@@ -168,7 +168,11 @@ case $EMU_NAME in
 		export SDL_JOYSTICKDRIVER=a30
 		cd "$HOME"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
-		pico8_dyn -width 640 -height 480 -scancodes -run "$1"
+		if [ $GAME = "☆Launch Splore☆.splore" ]; then
+			pico8_dyn -splore -width 640 -height 480
+		else
+			pico8_dyn -width 640 -height 480 -scancodes -run "$1"
+		fi
 		sync
 		;;
 
