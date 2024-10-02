@@ -14,6 +14,9 @@ OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 
 ##### IMPORT .OPT FILES #####
 if [ -f "$OPT_FILE" ]; then
+	if [ ! -d "$OVR_DIR/$EMU_NAME" ]; then
+		mkdir "$OVR_DIR/$EMU_NAME"
+	fi
 	cp -f "$OPT_FILE" "$OVR_FILE" &
 	log_message "Current system options saved as override for $GAME."
 	display_text -d 2 -t "Saved current Mode/Core settings as override for $GAME"
