@@ -13,7 +13,7 @@ for cart in "$BBS_PATH"/* ; do
 done
 } &
 
-display_text -t "Importing carts from Splore :)" -d 3
+display_text -t "Importing carts from Splore :)" -d 2
 
 rm -f "$ROM_PATH/PICO8_cache6.db"
 log_message "Done importing. Pico-8 romlist refreshed."
