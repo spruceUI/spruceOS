@@ -1,5 +1,6 @@
 #!/bin/sh
 
+BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 FLAG_FILE="$FLAG_PATH/gs.lock"
 BOXART_FLAG_FILE="$FLAG_PATH/gs.boxart"
@@ -73,16 +74,36 @@ done <$LIST_FILE
 #      Use INDEX in command to take the selected index as input. e.g. "echo INDEX"
 # -h,--help show this help message.
 # return value: the 1-based index of the selected image
-OPTIONS="-s 10"
-if [ -f $OPTIONS_FILE ] ; then
-    OPTIONS=`cat $OPTIONS_FILE`
-fi
-cd /mnt/SDCARD/.tmp_update/bin/
-/mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 \
--dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
+while : ; do
+    # set options 
+    OPTIONS="-s 10"
+    if [ -f $OPTIONS_FILE ] ; then
+        OPTIONS=`cat $OPTIONS_FILE`
+    fi
 
-# get return value and launch game with return index
-RETURN_INDEX=$?
+    # run switcher
+    cd $BIN_PATH
+    ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
+    -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
+
+    # get return value
+    RETURN_INDEX=$?
+
+    # skip all removed items
+    grep -Fxv "removed" "$LIST_FILE" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$LIST_FILE"
+
+    # show setting page if return value is 255, otherwise exit while loop
+    if [ $RETURN_INDEX -eq 255 ]; then
+        # start setting program
+        cd $BIN_PATH
+        ./easyConfig $FLAG_PATH/gs_config -t "<< Game Switcher Settings >>" -o $FLAG_PATH/gs_options
+    else
+        break
+    fi
+done
+
+# launch game with return index
 if [ $RETURN_INDEX -gt 0 ]; then
     # get command that launches the game
     CMD=`tail -n+$RETURN_INDEX "$LIST_FILE" | head -1`
@@ -97,8 +118,4 @@ if [ $RETURN_INDEX -gt 0 ]; then
     # wrtie command to file which will be run by principle.sh
     echo $CMD > /tmp/cmd_to_run.sh
     sync
-else
-    # skip all removed items
-    grep -Fxv "removed" "$LIST_FILE" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$LIST_FILE"
 fi
