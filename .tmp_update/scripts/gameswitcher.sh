@@ -36,13 +36,22 @@ while read -r CMD; do
 
     # try get screenshot file path
     LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-    EMU_DIR="${LAUNCH%/*}"
-	OVR_DIR="$EMU_DIR/overrides"
-	OVERRIDE="$OVR_DIR/$GAME_NAME.opt"
-	. "$EMU_DIR/default.opt"
-	. "$EMU_DIR/system.opt"
-    if [ -f "$OVERRIDE" ]; then
-        . "$OVERRIDE"
+    EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+    EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
+    DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
+    OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+    OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
+    DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
+    OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
+    OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
+    if [ -f "$DEF_FILE" ]; then
+        . "$DEF_FILE"
+    fi
+    if [ -f "$OPT_FILE" ]; then
+        . "$OPT_FILE"
+    fi
+    if [ -f "$OVR_FILE" ]; then
+        . "$OVR_FILE"
     fi
     core_info="$INFO_DIR/${CORE}_libretro.info"
     core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
