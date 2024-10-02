@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+log_message "***** gameswitcher.sh: helperFunctions imported"
 
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 FLAG_FILE="$FLAG_PATH/gs.lock"
@@ -8,31 +9,40 @@ LIST_FILE="$FLAG_PATH/gs_list"
 IMAGES_FILE="$FLAG_PATH/gs_images"
 GAMENAMES_FILE="$FLAG_PATH/gs_names"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
+log_message "***** gameswitcher.sh: gs lock, list, images, names, and temp list paths defined."
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 # remove flag for game switcher
-rm "$FLAG_FILE" && log_message "Removed game switcher flag file"
+rm "$FLAG_FILE" && log_message "***** gameswitcher.sh: Removed game switcher flag file"
 
 # exit if no game in list file
 if [ ! -f "$LIST_FILE" ] ; then
-    log_message "no games in the game switcher list! Exiting game switcher!"
+    log_message "***** gameswitcher.sh: no games in the game switcher list! Exiting game switcher!"
     exit 0
 fi
 
 # prepare files for switcher program
 rm -f "$IMAGES_FILE"
 rm -f "$GAMENAMES_FILE"
+log_message "***** gameswitcher.sh: cleared out previous images and game names files"
 while read -r CMD; do
     # get and store game name to file
     GAME_PATH=`echo $CMD | cut -d\" -f4`
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
+    log_message "***** gameswitcher.sh: CMD: $CMD"
+    log_message "***** gameswitcher.sh: GAME_PATH: $GAME_PATH"
+    log_message "***** gameswitcher.sh: GAME_NAME: $GAME_NAME"
+    log_message "***** gameswitcher.sh: SHORT_NAME: $SHORT_NAME"
+
     echo "$SHORT_NAME" >> "$GAMENAMES_FILE"
+    log_message "***** gameswitcher.sh: Added $SHORT_NAME to $GAMENAMES_FILE"
 
     # try get box art file path
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
+    log_message "***** gameswitcher.sh: BOX_ART_PATH: $BOX_ART_PATH"
 
     # try get screenshot file path
     LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
@@ -44,31 +54,40 @@ while read -r CMD; do
     DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
     OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
     OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-    if [ -f "$DEF_FILE" ]; then
+    log_message "***** gameswitcher.sh: LAUNCH: $LAUNCH"
+    log_message "***** gameswitcher.sh: EMU_NAME: $EMU_NAME"
+    log_message "***** gameswitcher.sh: EMU_DIR: $EMU_DIR"
+    log_message "***** gameswitcher.sh: DEF_FILE: $DEF_FILE"
+    log_message "***** gameswitcher.sh: OPT_FILE: $OPT_FILE"
+    log_message "***** gameswitcher.sh: OVR_FILE: $OVR_FILE"
         . "$DEF_FILE"
-    fi
-    if [ -f "$OPT_FILE" ]; then
         . "$OPT_FILE"
-    fi
     if [ -f "$OVR_FILE" ]; then
         . "$OVR_FILE"
     fi
     core_info="$INFO_DIR/${CORE}_libretro.info"
+    log_message "***** gameswitcher.sh: core_info: $core_info"
+
     core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
     core_name="$(echo ${core_name} | tr -d '"')"
+    log_message "***** gameswitcher.sh: core_name: $core_name"
+
     state_dir="/mnt/SDCARD/Saves/states/$core_name"
+    log_message "***** gameswitcher.sh: state_dir: $state_dir"
+
     SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
+    log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH"
 
     # store screenshot / box art / default image to file
     if [ -f "$SCREENSHOT_PATH" ]; then
         echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"
-        log_message "using screenshot for $GAME_NAME"
+        log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME"
     elif [ -f "$BOX_ART_PATH" ]; then
         echo "$BOX_ART_PATH" >> "$IMAGES_FILE"
-        log_message "using boxart for $GAME_NAME"
+        log_message "***** gameswitcher.sh: using boxart for $GAME_NAME"
     else
         echo "$DEFAULT_IMG" >> "$IMAGES_FILE"
-        log_message "using default image for $GAME_NAME"
+        log_message "***** gameswitcher.sh: using default image for $GAME_NAME"
     fi
 done <$LIST_FILE
 
