@@ -2,6 +2,7 @@
 
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 FLAG_FILE="$FLAG_PATH/gs.lock"
+BOXART_FLAG_FILE="$FLAG_PATH/gs.boxart"
 LIST_FILE="$FLAG_PATH/gs_list"
 IMAGES_FILE="$FLAG_PATH/gs_images"
 GAMENAMES_FILE="$FLAG_PATH/gs_names"
@@ -50,7 +51,7 @@ while read -r CMD; do
     SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
 
     # store screenshot / box art / default image to file
-    if [ -f "$SCREENSHOT_PATH" ]; then
+    if [ -f "$SCREENSHOT_PATH" ] && [ ! -f "$BOXART_FLAG_FILE" ] ; then
         echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"        
     elif [ -f "$BOX_ART_PATH" ]; then
         echo "$BOX_ART_PATH" >> "$IMAGES_FILE"        
