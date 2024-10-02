@@ -3,4 +3,4 @@
 export CORE="fbalpha2012"
 export MODE="smart"
 
-export scaling_min_freq=816000
+export scaling_min_freq=1008000
