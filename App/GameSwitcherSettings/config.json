@@ -1,0 +1,6 @@
+{
+"label": "GAME SWITCHER SETTINGS",
+"icon": "/mnt/SDCARD/App/GameSwitcherSettings/dummy.png",
+"launch": "launch.sh",
+"description": "Text Based Setting App Testing"
+}

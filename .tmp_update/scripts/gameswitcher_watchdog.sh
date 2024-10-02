@@ -82,7 +82,11 @@ long_press_handler() {
 
     # kill RA or other emulator or MainUI
     log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
-    killall -15 retroarch || killall -15 ra32.miyoo || killall -9 MainUI || /mnt/SDCARD/miyoo/app/kill_apps.sh
+    killall -q -15 retroarch || \
+    killall -q -15 ra32.miyoo || \
+    killall -q -15 drastic || \
+    killall -q -9 MainUI || \
+    /mnt/SDCARD/miyoo/app/kill_apps.sh
     
     # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" 
