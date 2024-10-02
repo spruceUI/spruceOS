@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 FLAG_FILE="$FLAG_PATH/gs.lock"
 LIST_FILE="$FLAG_PATH/gs_list"
@@ -50,11 +52,14 @@ while read -r CMD; do
 
     # store screenshot / box art / default image to file
     if [ -f "$SCREENSHOT_PATH" ]; then
-        echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"        
+        echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"
+        log_message "using screenshot for $GAME_NAME"
     elif [ -f "$BOX_ART_PATH" ]; then
-        echo "$BOX_ART_PATH" >> "$IMAGES_FILE"        
+        echo "$BOX_ART_PATH" >> "$IMAGES_FILE"
+        log_message "using boxart for $GAME_NAME"
     else
         echo "$DEFAULT_IMG" >> "$IMAGES_FILE"
+        log_message "using default image for $GAME_NAME"
     fi
 done <$LIST_FILE
 
@@ -72,6 +77,7 @@ done <$LIST_FILE
 # -h,--help show this help message.
 # return value: the 1-based index of the selected image
 cd /mnt/SDCARD/.tmp_update/bin/
+log_message "launching actual swotcher executable"
 /mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 \
 -d "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
 
@@ -89,6 +95,7 @@ if [ $RETURN_INDEX -gt 0 ]; then
     echo "$CMD" >> "$LIST_FILE"
 
     # wrtie command to file which will be run by principle.sh
+    log_message "attempting $CMD"
     echo $CMD > /tmp/cmd_to_run.sh
     sync
 else
