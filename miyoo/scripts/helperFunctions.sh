@@ -159,13 +159,13 @@ display_text() {
     local b="${color:4:2}"
     # Log the final command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
-    log_message "Executing display_text command: $command"
+    #log_message "Executing display_text command: $command"
     
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
         local exit_code=$?
-        log_message "display_text command started in background with PID $!"
+        #log_message "display_text command started in background with PID $!"
         
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
@@ -177,8 +177,8 @@ display_text() {
         output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
         local exit_code=$?
         # Log the output and exit code
-        log_message "display_text command output: $output"
-        log_message "display_text command exit code: $exit_code"
+        #log_message "display_text command output: $output"
+        #log_message "display_text command exit code: $exit_code"
     fi
 
     # Return the exit code of the display_text command

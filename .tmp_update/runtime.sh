@@ -64,7 +64,14 @@ dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
 /mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
-/mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh
+
+# Check for first_boot flag and run ThemeUnpacker accordingly
+if flag_check "first_boot"; then
+    /mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh --silent &
+    log_message "ThemeUnpacker started silently in background due to firstBoot flag"
+else
+    /mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh
+fi
 
 # Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
@@ -119,7 +126,7 @@ log_message "Swap file activated"
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
-# /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
+/mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
 
