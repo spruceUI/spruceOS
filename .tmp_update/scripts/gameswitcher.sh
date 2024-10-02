@@ -33,9 +33,6 @@ while read -r CMD; do
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
     log_message "***** gameswitcher.sh: CMD: $CMD"
-    log_message "***** gameswitcher.sh: GAME_PATH: $GAME_PATH"
-    log_message "***** gameswitcher.sh: GAME_NAME: $GAME_NAME"
-    log_message "***** gameswitcher.sh: SHORT_NAME: $SHORT_NAME"
 
     echo "$SHORT_NAME" >> "$GAMENAMES_FILE"
     log_message "***** gameswitcher.sh: Added $SHORT_NAME to $GAMENAMES_FILE"
@@ -54,27 +51,15 @@ while read -r CMD; do
     DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
     OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
     OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-    log_message "***** gameswitcher.sh: LAUNCH: $LAUNCH"
-    log_message "***** gameswitcher.sh: EMU_NAME: $EMU_NAME"
-    log_message "***** gameswitcher.sh: EMU_DIR: $EMU_DIR"
-    log_message "***** gameswitcher.sh: DEF_FILE: $DEF_FILE"
-    log_message "***** gameswitcher.sh: OPT_FILE: $OPT_FILE"
-    log_message "***** gameswitcher.sh: OVR_FILE: $OVR_FILE"
         . "$DEF_FILE"
         . "$OPT_FILE"
     if [ -f "$OVR_FILE" ]; then
         . "$OVR_FILE"
     fi
     core_info="$INFO_DIR/${CORE}_libretro.info"
-    log_message "***** gameswitcher.sh: core_info: $core_info"
-
     core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
     core_name="$(echo ${core_name} | tr -d '"')"
-    log_message "***** gameswitcher.sh: core_name: $core_name"
-
     state_dir="/mnt/SDCARD/Saves/states/$core_name"
-    log_message "***** gameswitcher.sh: state_dir: $state_dir"
-
     SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
     log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH"
 
