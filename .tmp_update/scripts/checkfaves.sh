@@ -89,7 +89,7 @@ remove_duplicates() {
 monitor_favourite_file() {
     while true; do
         if [ -f "$FAVOURITE_FILE" ]; then
-            /mnt/SDCARD/tmp_update/bin/inotify.elf $FAVOURITE_FILE
+            /mnt/SDCARD/.tmp_update/bin/inotify.elf $FAVOURITE_FILE
             if [ -f "$PREVIOUS_STATE" ]; then
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
                     create_duplicate
