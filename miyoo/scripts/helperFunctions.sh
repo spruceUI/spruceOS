@@ -112,6 +112,8 @@ cores_online(){
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Call this to display text on the screen
+# IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_text_kill()
+# It's possible to leave a display_text process running
 # Usage: display_text [options]
 # Options:
 #   -i, --image <path>    Image path (default: DEFAULT_IMAGE)
@@ -131,6 +133,8 @@ display_text() {
     local use_confirm_image=false
     local run_acknowledge=false
     
+    display_text_kill
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             -i|--image) image="$2"; shift ;;
@@ -185,6 +189,11 @@ display_text() {
     return $exit_code
 }
 
+# Call this to kill any display_text processes left running
+# If you use display_text() at all you need to call this on all the possible exits of your script
+display_text_kill(){
+    kill -9 $(pgrep display_text)
+}
 
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
 # which are passed as further arguments, are concurrently pressed.
@@ -345,8 +354,8 @@ get_button_press() {
 }
 
 
-# Call this to kill all show processes	
-# Useful in some scenarios
+# Call this to kill any show/show_imimge processes left running
+# If you use show()/show_image() at all you need to call this on all the possible exits of your script
 kill_images(){
     killall -9 show
 }
@@ -393,6 +402,8 @@ log_message() {
 
 # Call with 
 # show_image "Image Path" 5
+# IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL kill_images()
+# It's possible to leave a show_image() process running
 # This will show the image at the given path and kill any existing show processes
 # If display_time is provided, it will sleep for that many seconds and then kill the show process
 show_image() {
