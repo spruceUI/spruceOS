@@ -6,6 +6,7 @@ LIST_FILE="$FLAG_PATH/gs_list"
 IMAGES_FILE="$FLAG_PATH/gs_images"
 GAMENAMES_FILE="$FLAG_PATH/gs_names"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
+OPTIONS_FILE="$FLAG_PATH/gs_options"
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
@@ -66,14 +67,18 @@ done <$LIST_FILE
 # -t: display title at start (default is on).
 # -ts: title scrolling speed in pixel per frame (default is 4).
 # -n: display item index (default is on).
-# -d: enable item deletion with the deletion command provided (default is disable).
-#     Use INDEX in command to take the selected index as input. e.g. "echo INDEX"
-#     Pass "" as argument if no command is provided.
+# -d: enable item deletion (default is on).
+# -dc: additional deletion command runs when an item is deleted (default is none).
+#      Use INDEX in command to take the selected index as input. e.g. "echo INDEX"
 # -h,--help show this help message.
 # return value: the 1-based index of the selected image
+OPTIONS="-s 10"
+if [ -f $OPTIONS_FILE ] ; then
+    OPTIONS=`cat $OPTIONS_FILE`
+fi
 cd /mnt/SDCARD/.tmp_update/bin/
 /mnt/SDCARD/.tmp_update/bin/switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -s 10 \
--d "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
+-dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
 
 # get return value and launch game with return index
 RETURN_INDEX=$?
