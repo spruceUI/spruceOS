@@ -176,12 +176,24 @@ case $EMU_NAME in
 		;;
 
 	"PSP")
-		cd $EMU_DIR
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-		export HOME=/mnt/SDCARD
-		./miyoo282_xpad_inputd&
-		./PPSSPPSDL "$*"
-		killall miyoo282_xpad_inputd
+		if [ "$CORE" = "standalone" ]; then
+			cd $EMU_DIR
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+			export HOME=/mnt/SDCARD
+			./miyoo282_xpad_inputd&
+			./PPSSPPSDL "$*"
+			killall miyoo282_xpad_inputd
+		else
+			if flag_check "expertRA"; then
+				export RA_BIN="retroarch"
+			else
+				export RA_BIN="ra32.miyoo"
+			fi
+			RA_DIR="/mnt/SDCARD/RetroArch"
+			cd "$RA_DIR"
+			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+			kill -9 "$ENFORCE_PID"
+		fi
 		;;
 	
 	*)
