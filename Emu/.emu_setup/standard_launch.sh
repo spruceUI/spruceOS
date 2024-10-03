@@ -135,8 +135,6 @@ case $EMU_NAME in
 		export SDL_VIDEODRIVER=mmiyoo
 		export SDL_AUDIODRIVER=mmiyoo
 		export EGL_VIDEODRIVER=mmiyoo
-		sv=`cat /proc/sys/vm/swappiness`
-		echo 10 > /proc/sys/vm/swappiness
 		cd $EMU_DIR
 		if [ -f 'libs/libEGL.so' ]; then
 			rm -rf libs/libEGL.so
@@ -145,7 +143,6 @@ case $EMU_NAME in
 		fi
 		./drastic "$1"
 		sync
-		echo $sv > /proc/sys/vm/swappiness
 		;;
 
 	"OPENBOR")
