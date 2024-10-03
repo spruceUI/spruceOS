@@ -131,21 +131,14 @@ case $EMU_NAME in
 			LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
 		fi
 		export HOME=$EMU_DIR
-		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
-		export SDL_VIDEODRIVER=mmiyoo
-		export SDL_AUDIODRIVER=mmiyoo
-		export EGL_VIDEODRIVER=mmiyoo
-		sv=`cat /proc/sys/vm/swappiness`
-		echo 10 > /proc/sys/vm/swappiness
+		export LD_LIBRARY_PATH=libs:LD_LIBRARY_PATH
+		# export SDL_VIDEODRIVER=mmiyoo
+		# export SDL_AUDIODRIVER=mmiyoo
+		# export EGL_VIDEODRIVER=mmiyoo
 		cd $EMU_DIR
-		if [ -f 'libs/libEGL.so' ]; then
-			rm -rf libs/libEGL.so
-			rm -rf libs/libGLESv1_CM.so
-			rm -rf libs/libGLESv2.so
-		fi
+	
 		./drastic "$1"
 		sync
-		echo $sv > /proc/sys/vm/swappiness
 		;;
 
 	"OPENBOR")
