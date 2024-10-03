@@ -1,3 +1,0 @@
-DO NOT PUT BIOS HERE
-
-The BIOS folder is located on the root of the SD card.
