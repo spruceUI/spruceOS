@@ -127,6 +127,7 @@ log_message "Swap file activated"
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
+/mnt/SDCARD/.tmp_update/scripts/credits_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
 

@@ -20,7 +20,10 @@ while [ 1 ]; do
        [ -f /mnt/SDCARD/spruce/flags/gs.fix ] ; then
         /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
     fi
-    
+    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ] ; then
+        /mnt/SDCARD/App/Credits/launch.sh
+        rm /mnt/SDCARD/spruce/flags/credits.lock
+    fi   
     if [ ! -f /tmp/cmd_to_run.sh ] ; then
         # create in menu flag
         flag_add "in_menu"
