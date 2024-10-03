@@ -3,4 +3,4 @@
 /mnt/SDCARD/App/Credits/sprucepixelbg43.png \
 /mnt/SDCARD/App/Credits/credits.txt \
 /mnt/SDCARD/App/Credits/kill-screen-194698.mp3 \
-/mnt/SDCARD/App/Credits/prstartk.ttf 22
+/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf 22
