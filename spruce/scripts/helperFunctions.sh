@@ -362,6 +362,8 @@ kill_images(){
 
 # Call this to enable verbose logging
 # After this is called, any log_message calls will output to the log file if -v is passed
+# USE THIS ONLY WHEN DEBUGGING, IT WILL GENERATE A LOT OF LOG FILE ENTRIES
+# Remove it from your script when done.
 log_verbose() {
     flag_add "log_verbose"
     local calling_script=$(basename "$0")
