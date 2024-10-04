@@ -1,5 +1,5 @@
 #!/bin/sh
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh

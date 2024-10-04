@@ -2,7 +2,7 @@ WATCHED_FILE="/config/system.json"
 SCRIPT_TO_RUN="/mnt/SDCARD/App/IconFresh/iconfresh.sh"
 IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 get_theme_path() {
     awk -F'"' '/"theme":/ {print $4}' "$WATCHED_FILE" | sed 's:/*$:/:'

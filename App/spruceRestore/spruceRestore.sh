@@ -4,7 +4,7 @@ APP_DIR=/mnt/SDCARD/App/spruceRestore
 UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 IMAGE_PATH="$APP_DIR/imgs/spruceRestore.png"
 NOTFOUND_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreNotfound.png"
@@ -114,7 +114,7 @@ fi
 
 # Check for expertRA flag and run retroExpert.sh if needed
 if flag_check "expertRA"; then
-    display_text -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
+    display -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
     log_message "expertRA flag found. Removing flag and running retroExpert.sh in silent mode."
     flag_remove "expertRA"
     if [ -f "/mnt/SDCARD/App/RetroExpert/retroExpert.sh" ]; then

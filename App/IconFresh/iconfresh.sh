@@ -2,7 +2,7 @@
 
 IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Add silent mode flag
 silent_mode=0

@@ -1,5 +1,5 @@
 #!/bin/sh
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 
 WIFI_ON="/mnt/SDCARD/App/sftpgo/imgs/wifiOn.png"

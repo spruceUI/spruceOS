@@ -1,7 +1,7 @@
 # Function summaries:
 # acknowledge: Waits for user to press A, B, or Start button
 # cores_online: Sets the number of CPU cores to be online
-# display_text: Displays text on the screen with various options
+# display: Displays text on the screen with various options
 # exec_on_hotkey: Executes a command when specific buttons are pressed
 # flag_check: Checks if a flag exists
 # flag_add: Adds a flag
@@ -17,9 +17,9 @@
 # Keep methods in alphabetical order
 
 # Gain access to the helper variables by adding this to the top of your script:
-# . /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+# . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/miyoo/res/display_text.elf"
+DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # exports needed so we can refer to buttons by more memorable names
@@ -112,7 +112,9 @@ cores_online(){
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Call this to display text on the screen
-# Usage: display_text [options]
+# IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
+# It's possible to leave a display process running
+# Usage: display [options]
 # Options:
 #   -i, --image <path>    Image path (default: DEFAULT_IMAGE)
 #   -t, --text <text>     Text to display
@@ -124,13 +126,15 @@ CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 #   -c, --color <color>   Text color in RGB format (default: ffffff)
 #   -f, --font <path>     Font path (optional)
 #   -o, --okay            Use CONFIRM_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
-# Example: display_text -t "Hello, World!" -s 48 -p top -a center -c ff0000
-# Calling display_text with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
-display_text() {
-    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
+# Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
+# Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+display() {
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     
+    display_kill
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             -i|--image) image="$2"; shift ;;
@@ -147,10 +151,6 @@ display_text() {
         esac
         shift
     done
-    if [[ -z "$text" ]]; then
-        log_message "Error: Text is required"
-        return 1
-    fi
     if [[ "$use_confirm_image" = true ]]; then
         image="$CONFIRM_IMAGE"
     fi
@@ -159,13 +159,13 @@ display_text() {
     local b="${color:4:2}"
     # Log the final command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
-    #log_message "Executing display_text command: $command"
+    #log_message "Executing display command: $command"
     
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
         local exit_code=$?
-        #log_message "display_text command started in background with PID $!"
+        #log_message "display command started in background with PID $!"
         
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
@@ -177,14 +177,19 @@ display_text() {
         output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
         local exit_code=$?
         # Log the output and exit code
-        #log_message "display_text command output: $output"
-        #log_message "display_text command exit code: $exit_code"
+        #log_message "display command output: $output"
+        #log_message "display command exit code: $exit_code"
     fi
 
-    # Return the exit code of the display_text command
+    # Return the exit code of the display command
     return $exit_code
 }
 
+# Call this to kill any display processes left running
+# If you use display() at all you need to call this on all the possible exits of your script
+display_kill(){
+    kill -9 $(pgrep display)
+}
 
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
 # which are passed as further arguments, are concurrently pressed.
@@ -345,8 +350,8 @@ get_button_press() {
 }
 
 
-# Call this to kill all show processes	
-# Useful in some scenarios
+# Call this to kill any show/show_imimge processes left running
+# If you use show()/show_image() at all you need to call this on all the possible exits of your script
 kill_images(){
     killall -9 show
 }
@@ -393,6 +398,8 @@ log_message() {
 
 # Call with 
 # show_image "Image Path" 5
+# IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL kill_images()
+# It's possible to leave a show_image() process running
 # This will show the image at the given path and kill any existing show processes
 # If display_time is provided, it will sleep for that many seconds and then kill the show process
 show_image() {

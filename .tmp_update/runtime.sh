@@ -11,7 +11,7 @@ export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
 export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 export HOME="${SDCARD_PATH}"
-export HELPER_FUNCTIONS="/mnt/SDCARD/miyoo/scripts/helperFunctions.sh"
+export HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
 mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
 mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
@@ -21,7 +21,7 @@ mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 # Load helper functions and helpers
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
@@ -109,8 +109,7 @@ fi
 #     [ "$a" == "" ] && $2 &
 # }
 
-
-
+VERSION=$(cat /usr/miyoo/version)
 
 lcd_init 1
 show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"

@@ -4,7 +4,7 @@ APP_DIR="/mnt/SDCARD/App/RetroExpert"
 IMAGE_PATH="$APP_DIR/imgs/switching.png"
 CONFIG_FILE="$APP_DIR/config.json"
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Add a new parameter for silent mode
 SILENT_MODE=${1:-false}

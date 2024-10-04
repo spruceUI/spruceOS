@@ -5,7 +5,7 @@ PERCENT=4
 SLEEP=30
 
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 dot_duration=0.2
 dash_duration=0.6
