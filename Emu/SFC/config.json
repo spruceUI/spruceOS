@@ -12,40 +12,24 @@
   "extlist": "smc|fig|sfc|gd3|gd7|dx2|bsx|bs|swc|st|zip|7z",
   "launchlist": [
     {
-      "name": "Select Random Game",
-      "launch": "/mnt/SDCARD/App/aleatorio/aleatorio.sh"
+      "name": "Jump to random SNES/SFC game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "✓ Core is chimerasnes",
-      "launch": "chimerasnes.sh"
+      "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_supafaust.sh"
     },
     {
-      "name": "Change core to mednafen_supafaust",
-      "launch": "mednafen_supafaust.sh"
+      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
     },
     {
-      "name": "Change core to snes9x",
-      "launch": "snes9x.sh"
+      "name": "Save current launch settings as per-game override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
     },
     {
-      "name": "Change core to snes9x2005",
-      "launch": "snes9x2005.sh"
-    },
-    {
-      "name": "Set CPU to 816 MHz",
-      "launch": "816.sh"
-    },
-    {
-      "name": "✓ CPU is at 1200 MHz",
-      "launch": "1200.sh"
-    },
-    {
-      "name": "Set CPU to 1344 MHz",
-      "launch": "1344.sh"
-    },
-    {
-      "name": "Set CPU to 1512 MHz",
-      "launch": "1512.sh"
+      "name": "Remove per-game launch setting override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ]
 }

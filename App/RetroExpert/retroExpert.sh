@@ -18,17 +18,12 @@ if [ "$SILENT_MODE" != "true" ]; then
     show_image "$IMAGE_PATH"
 fi
 
-EMU_PATH="/mnt/SDCARD/Emu"
-FULL_RA='RA_BIN=\"retroarch\"'
-MIYOO_RA='RA_BIN=\"ra32.miyoo\"'
-
 ORIGINAL_PROFILE_DIR="/mnt/SDCARD/RetroArch/originalProfile"
 CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 # Check if expertRA flag exists
 if flag_check "expertRA"; then
     # Switch to Miyoo RA (Normal mode)
-    NEW_RA="$MIYOO_RA"
     NEW_MODE="normal"
     OLD_MODE="expert"
     sed -i 's|- On|- Off|' "$CONFIG_FILE"
@@ -36,7 +31,6 @@ if flag_check "expertRA"; then
     flag_remove "expertRA"
 else
     # Switch to Full RA (Expert mode)
-    NEW_RA="$FULL_RA"
     NEW_MODE="expert"
     OLD_MODE="normal"
     sed -i 's|- Off|- On|' "$CONFIG_FILE"
@@ -46,8 +40,6 @@ fi
 
 # Function to swap RetroArch configuration
 swap_retroarch_config() {
-
-
 
     # Check if current config is problematic
     if grep -q 'input_fps_toggle = "backspace"' "$CURRENT_CFG" && \
@@ -64,7 +56,6 @@ swap_retroarch_config() {
         mkdir -p "$ORIGINAL_PROFILE_DIR"
         log_message "Created originalProfile directory"
     fi
-
 
     if [ "$NEW_MODE" = "expert" ] && [ "$USE_FRESH_CONFIG" = false ]; then
         # Check if current config is already expert
@@ -102,14 +93,6 @@ swap_retroarch_config() {
 
 # Call the function to swap configs
 swap_retroarch_config
-
-# Loop through emulator directories
-for emu_dir in "$EMU_PATH"/*; do
-    if [ -d "$emu_dir" ]; then
-        sys_opt="$emu_dir/system.opt"
-        toggle_sys_opt "$sys_opt"
-    fi
-done
 
 # Modify the end of the script to skip image display in silent mode
 if [ "$SILENT_MODE" != "true" ]; then

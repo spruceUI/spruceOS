@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export CORE="puae2021"
+export MODE="smart"
+
+export scaling_min_freq=1008000

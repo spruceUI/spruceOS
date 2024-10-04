@@ -34,6 +34,7 @@ while [ 1 ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] || \
        [ -f /mnt/SDCARD/spruce/flags/gs.fix ] ; then
+        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
         /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
     fi
     
@@ -76,13 +77,17 @@ while [ 1 ]; do
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
-        # some emulators may use 2 or more cores
-        # therefore after closing an emulator
-        # we need to turn off other cores except cpu0+1
-        echo 1 >/sys/devices/system/cpu/cpu0/online
-        echo 1 >/sys/devices/system/cpu/cpu1/online
-        echo 0 >/sys/devices/system/cpu/cpu2/online
-        echo 0 >/sys/devices/system/cpu/cpu3/online
+        # reset CPU/GPU/RAM settings to defaults in case an emulator changes anything
+        echo 1 > /sys/devices/system/cpu/cpu2/online
+        echo 1 > /sys/devices/system/cpu/cpu3/online
+        echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+        echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
+        echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
+        echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+        echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+    	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
+        echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
         # sleep 1
 

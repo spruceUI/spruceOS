@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+log_message "***** gameswitcher.sh: helperFunctions imported"
+
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 FLAG_FILE="$FLAG_PATH/gs.lock"
@@ -9,55 +12,70 @@ IMAGES_FILE="$FLAG_PATH/gs_images"
 GAMENAMES_FILE="$FLAG_PATH/gs_names"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
 OPTIONS_FILE="$FLAG_PATH/gs_options"
+log_message "***** gameswitcher.sh: gs lock, list, images, names, options and temp list paths defined."
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 # remove flag for game switcher
-rm "$FLAG_FILE" && log_message "Removed game switcher flag file"
+rm "$FLAG_FILE" && log_message "***** gameswitcher.sh: Removed game switcher flag file"
 
 # exit if no game in list file
 if [ ! -f "$LIST_FILE" ] ; then
-    log_message "no games in the game switcher list! Exiting game switcher!"
+    log_message "***** gameswitcher.sh: no games in the game switcher list! Exiting game switcher!"
     exit 0
 fi
 
 # prepare files for switcher program
 rm -f "$IMAGES_FILE"
 rm -f "$GAMENAMES_FILE"
+log_message "***** gameswitcher.sh: cleared out previous images and game names files"
 while read -r CMD; do
     # get and store game name to file
     GAME_PATH=`echo $CMD | cut -d\" -f4`
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
+    log_message "***** gameswitcher.sh: CMD: $CMD"
+
     echo "$SHORT_NAME" >> "$GAMENAMES_FILE"
+    log_message "***** gameswitcher.sh: Added $SHORT_NAME to $GAMENAMES_FILE"
 
     # try get box art file path
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
+    log_message "***** gameswitcher.sh: BOX_ART_PATH: $BOX_ART_PATH"
 
     # try get screenshot file path
     LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-    EMU_DIR="${LAUNCH%/*}"
-	OVR_DIR="$EMU_DIR/overrides"
-	OVERRIDE="$OVR_DIR/$GAME_NAME.opt"
-	. "$EMU_DIR/default.opt"
-	. "$EMU_DIR/system.opt"
-    if [ -f "$OVERRIDE" ]; then
-        . "$OVERRIDE"
+    EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+    EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
+    DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
+    OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+    OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
+    DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
+    OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
+    OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
+        . "$DEF_FILE"
+        . "$OPT_FILE"
+    if [ -f "$OVR_FILE" ]; then
+        . "$OVR_FILE"
     fi
     core_info="$INFO_DIR/${CORE}_libretro.info"
     core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
     core_name="$(echo ${core_name} | tr -d '"')"
     state_dir="/mnt/SDCARD/Saves/states/$core_name"
     SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
+    log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH"
 
     # store screenshot / box art / default image to file
     if [ -f "$SCREENSHOT_PATH" ] && [ ! -f "$BOXART_FLAG_FILE" ] ; then
-        echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"        
+        echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"
+        log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME"
     elif [ -f "$BOX_ART_PATH" ]; then
-        echo "$BOX_ART_PATH" >> "$IMAGES_FILE"        
+        echo "$BOX_ART_PATH" >> "$IMAGES_FILE"
+        log_message "***** gameswitcher.sh: using boxart for $GAME_NAME"
     else
         echo "$DEFAULT_IMG" >> "$IMAGES_FILE"
+        log_message "***** gameswitcher.sh: using default image for $GAME_NAME"
     fi
 done <$LIST_FILE
 
@@ -82,6 +100,7 @@ while : ; do
     fi
 
     # run switcher
+    log_message "***** gameswitcher.sh: launching actual swotcher executable"
     cd $BIN_PATH
     ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
     -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
@@ -116,6 +135,7 @@ if [ $RETURN_INDEX -gt 0 ]; then
     echo "$CMD" >> "$LIST_FILE"
 
     # wrtie command to file which will be run by principle.sh
+    log_message "attempting $CMD"
     echo $CMD > /tmp/cmd_to_run.sh
     sync
 fi
