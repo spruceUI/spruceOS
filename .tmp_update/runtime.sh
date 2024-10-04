@@ -26,16 +26,10 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 . /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
-# Check and remove noMainUI.lock flag if it exists
-if flag_check "themeChanged"; then
-    flag_remove "themeChanged"
-    log_message "Removed leftover themeChanged flag"
-fi
-
-if flag_check "low_battery"; then
-    flag_remove "low_battery"
-    log_message "Removed leftover low_battery flag"
-fi
+# Flag cleanup
+flag_remove "themeChanged"
+flag_remove "log_verbose"
+flag_remove "low_battery"
 
 log_message " "
 log_message "---------Starting up---------"

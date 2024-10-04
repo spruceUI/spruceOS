@@ -360,18 +360,40 @@ kill_images(){
 }
 
 
+# Call this to enable verbose logging
+# After this is called, any log_message calls will output to the log file if -v is passed
+log_verbose() {
+    flag_add "log_verbose"
+    local calling_script=$(basename "$0")
+    log_message "Verbose logging enabled in script: $calling_script"
+}
 
 # Call this like:
 # log_message "Your message here"
 # To output to a custom log file, set the variable within your script:
 # log_file="/mnt/SDCARD/App/MyApp/spruce.log"
 # This will log the message to the spruce.log file in the Saves/spruce folder
+#
+# Usage examples:
+# Log a regular message:
+#    log_message "This is a regular log message"
+# Log a verbose message (only logged if log_verbose was called):
+#    log_message "This is a verbose log message" -v
+# Log to a custom file:
+#    log_message "Custom file log message" "" "/path/to/custom/log.file"
+# Log a verbose message to a custom file:
+#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-max_size=$((10 * 1024 * 1024))  # 10MB in bytes
-lines_to_keep=30
+max_entries=200
 log_message() {
     local message="$1"
-    local custom_log_file="${2:-$log_file}"
+    local verbose_flag="$2"
+    local custom_log_file="${3:-$log_file}"
+
+    # Check if it's a verbose message and if verbose logging is not enabled
+    if [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose"; then
+        return
+    fi
 
     # Ensure the directory for the log file exists
     mkdir -p "$(dirname "$custom_log_file")"
@@ -385,17 +407,21 @@ log_message() {
     # Ensure the log file exists
     touch "$custom_log_file"
 
-    # Check if file exists and is larger than max_size
-    if [ -f "$custom_log_file" ] && [ $(stat -c%s "$custom_log_file") -gt $max_size ]; then
-        # Keep last 30 lines and save to a temp file
-        tail -n $lines_to_keep "$custom_log_file" > "$custom_log_file.tmp"
-        # Replace original file with trimmed version
-        mv "$custom_log_file.tmp" "$custom_log_file"
-        echo "Log file trimmed to last $lines_to_keep lines due to size limit." >> "$custom_log_file"
+    # Add "-v" indicator for verbose messages
+    local verbose_indicator=""
+    if [ "$verbose_flag" = "-v" ]; then
+        verbose_indicator=" -v"
     fi
 
-    # Append new log message
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$custom_log_file"
+    # Append new log message with verbose indicator if applicable
+    echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >> "$custom_log_file"
+
+    # Keep only the last 200 entries
+    if [ $(wc -l < "$custom_log_file") -gt $max_entries ]; then
+        tail -n $max_entries "$custom_log_file" > "$custom_log_file.tmp"
+        mv "$custom_log_file.tmp" "$custom_log_file"
+    fi
+
     echo "$message"
 }
 
