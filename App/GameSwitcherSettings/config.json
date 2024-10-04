@@ -1,5 +1,5 @@
 {
-"label": "GAME SWITCHER SETTINGS",
+"label": "Game Switcher Settings",
 "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/menuswitch.png",
 "launch": "launch.sh",
 "description": "Text Based Setting App Testing"
