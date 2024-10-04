@@ -4,14 +4,14 @@ APP_DIR=/mnt/SDCARD/App/spruceBackup
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
 SYNC_IMAGE_CONFIRM="$APP_DIR/imgs/spruceBackupConfirm.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
-display_text -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+display -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
@@ -71,7 +71,7 @@ available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
 
 if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
+    display -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
 You need at least 50 MB free space to backup your files." -c dbcda7 --okay
     exit 1
 fi
@@ -101,12 +101,12 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  display_text -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+  display -i "$SYNC_IMAGE" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
 Located in /Saves/spruce/backups/" -c dbcda7 -d 4 -s 24
 else
   log_message "Error while creating backup."
-  display_text -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
+  display -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
 Check '/Saves/spruce/spruceBackup.log' for more details" -c dbcda7 --okay
 fi
 

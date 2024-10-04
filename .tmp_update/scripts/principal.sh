@@ -17,7 +17,7 @@
 # responds accordingly, managing the overall system state.
 
 # Source the helper functions
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 runifnecessary() {
     a=$(ps | grep $1 | grep -v grep)
@@ -54,12 +54,12 @@ while [ 1 ]; do
 
         if flag_check "low_battery"; then
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-            display_text -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
             flag_remove "low_battery"
         fi
 
         # This is to kill leftover display and show processes that may be running
-        display_text_kill
+        display_kill
         kill_images
 
         ./MainUI &> /dev/null

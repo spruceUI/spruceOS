@@ -1,5 +1,5 @@
 #!/bin/sh
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 messages_file="/var/log/messages"
 last_line=$(tail -n 1 "$messages_file")
