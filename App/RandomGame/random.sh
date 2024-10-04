@@ -1,11 +1,11 @@
 #!/bin/sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 IMAGE_PATH="/mnt/SDCARD/App/RandomGame/random.png"
 if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
-killall -9 show
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 PREV_SELECTION_FILE="/mnt/SDCARD/App/RandomGame/prev_selection.txt"
 PREV5_FILE="/mnt/SDCARD/App/RandomGame/5_previous.txt"
 
@@ -157,9 +157,8 @@ done
 BOX_ART_PATH="$(dirname "$SELECTED_GAME")/Imgs/$(basename "$SELECTED_GAME" | sed 's/\.[^.]*$/.png/')"
 
 if [ -f "$BOX_ART_PATH" ]; then
-    killall -9 show
-    ./show.elf "$BOX_ART_PATH" &
-    sleep 2
+    show_image "$BOX_ART_PATH" 2
+    kill_images
     kill $(jobs -p)
 fi
 

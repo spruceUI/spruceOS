@@ -1,14 +1,14 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 IMAGE_PATH="/mnt/SDCARD/App/MiyooGamelist/generating.png"
 
 if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
 
-show "$IMAGE_PATH" &
-SHOW_PID=$!
-
+show_image "$IMAGE_PATH"
 
 delete_gamelist_files() {
     rootdir="/mnt/SDCARD/roms"
@@ -151,7 +151,4 @@ for system in "$rootdir"/*; do
     fi
 done
 
-kill -9 $SHOW_PID
-
-
-
+kill_images
