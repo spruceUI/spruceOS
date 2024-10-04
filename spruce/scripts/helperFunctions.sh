@@ -22,6 +22,9 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
+# Export for enabling SSL support in CURL
+export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
+
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
 export B_RIGHT="key 1 106"

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 IMAGE_PATH="/mnt/SDCARD/.tmp_update/res/refreshing.png"
 
 if [ ! -f "$IMAGE_PATH" ]; then
@@ -7,7 +9,7 @@ if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
 
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 
 delete_gamelist_files() {
     rootdir="/mnt/SDCARD/roms"
@@ -555,4 +557,4 @@ check_and_rename "$X68000_EMU_PATH" "$X68000_ROMS_PATH" "$X68000_EXTENSIONS"
 check_and_rename "$ZXS_EMU_PATH" "$ZXS_ROMS_PATH" "$ZXS_EXTENSIONS"
 
 
-killall -9 show
+kill_images
