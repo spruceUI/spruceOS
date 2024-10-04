@@ -1,4 +1,5 @@
 #!/bin/sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 IMAGE_PATH="/mnt/SDCARD/App/EmuFresh/refreshing.png"
 
@@ -7,7 +8,7 @@ if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
 
-show "$IMAGE_PATH" &
+show_image "$IMAGE_PATH"
 
 delete_gamelist_files() {
     rootdir="/mnt/SDCARD/roms"

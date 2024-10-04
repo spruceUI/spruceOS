@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 IMAGE_PATH="/mnt/SDCARD/icons/systemoptions/1344.png"
 EMU_DIR="$(dirname "$0")"
 CONFIG="$EMU_DIR/config.json"
@@ -21,8 +23,5 @@ update_cpu_config_name
 sed -i 's/CPU=.*/CPU=\"1344\"/g' "$SYS_OPT"
 
 if [ -f "$IMAGE_PATH" ]; then
-    show "$IMAGE_PATH" &
-    show_pid=$!
-    sleep 2
-    kill "$show_pid"
+    show_image "$IMAGE_PATH" 2
 fi

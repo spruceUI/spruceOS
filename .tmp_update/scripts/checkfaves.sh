@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 FAVOURITE_FILE="/mnt/SDCARD/Roms/favourite.json"
 DUPLICATE_FILE="/mnt/SDCARD/Roms/favourite.duplicate"
 PREVIOUS_STATE="/mnt/SDCARD/Roms/favourite.previous"
@@ -76,10 +78,7 @@ remove_duplicates() {
         chmod 444 "$DUPLICATE_FILE"
 
         if [ -f "$IMAGE_PATH" ]; then
-            killall -9 show
-            show "$IMAGE_PATH" &
-            sleep 5
-            killall -9 show
+            show_image "$IMAGE_PATH" 5
         fi
     else
         rm -f "$TEMP_FILE"
