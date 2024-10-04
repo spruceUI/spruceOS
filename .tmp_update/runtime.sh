@@ -109,8 +109,7 @@ fi
 #     [ "$a" == "" ] && $2 &
 # }
 
-
-
+VERSION=$(cat /usr/miyoo/version)
 
 lcd_init 1
 show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"

@@ -129,7 +129,7 @@ CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
 display() {
-    local image="$DEFAULT_IMAGE" text="" delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     
@@ -151,10 +151,6 @@ display() {
         esac
         shift
     done
-    if [[ -z "$text" ]]; then
-        log_message "Error: Text is required"
-        return 1
-    fi
     if [[ "$use_confirm_image" = true ]]; then
         image="$CONFIRM_IMAGE"
     fi
