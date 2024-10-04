@@ -10,10 +10,10 @@
 # Define the target version for this upgrade script
 TARGET_VERSION="X.Y.Z"  # Replace X.Y.Z with your target version number
 
-/mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+/mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Source the helper functions
-HELPER_FUNCTIONS="/mnt/SDCARD/miyoo/scripts/helperFunctions.sh"
+HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 if [ -f "$HELPER_FUNCTIONS" ]; then
     . "$HELPER_FUNCTIONS"
 else

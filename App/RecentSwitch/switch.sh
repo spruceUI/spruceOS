@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 IMAGE_PATH="/mnt/SDCARD/App/RecentSwitch/switching.png"
 CONFIG_FILE="/mnt/SDCARD/App/RecentSwitch/config.json"

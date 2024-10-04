@@ -5,7 +5,7 @@ APP_DIR="/mnt/SDCARD/App/"
 BASE_DIR="/mnt/SDCARD/App/ExpertAppSwitch/"
 CONFIG_FILE="${BASE_DIR}/config.json"
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 update_config_label() {
     local state=$1

@@ -1,4 +1,4 @@
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 APP_DIR=/mnt/SDCARD/App/spruceRestore
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce

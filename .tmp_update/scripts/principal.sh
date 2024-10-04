@@ -1,7 +1,23 @@
 #!/bin/sh
 
+# Principal Script for Miyoo Mini
+# 
+# This script serves as the main control loop for the system. It operates as follows:
+# 
+# Initializes by ensuring keymon is running
+# Enters an infinite loop that:
+#    a. Checks for and handles game switching if necessary
+#    b. If not switching games, it runs the main UI
+#    c. After UI closes, it either:
+#       - Loads and runs a game
+#       - Or executes a custom command
+# Then the loop repeats, returning to the main UI
+#
+# Throughout this process, it monitors various system flags and 
+# responds accordingly, managing the overall system state.
+
 # Source the helper functions
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 runifnecessary() {
     a=$(ps | grep $1 | grep -v grep)
@@ -41,12 +57,15 @@ while [ 1 ]; do
 
         if flag_check "low_battery"; then
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-            display_text -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
             flag_remove "low_battery"
         fi
 
-        ./MainUI &> /dev/null
+        # This is to kill leftover display and show processes that may be running
+        display_kill
+        kill_images
 
+        ./MainUI &> /dev/null
         # remove in menu flag
         flag_remove "in_menu"
     fi
@@ -70,7 +89,6 @@ while [ 1 ]; do
 
         # sleep 1
 
-        # show closing screen
         /mnt/SDCARD/.tmp_update/scripts/select.sh &>/dev/null
     fi
 done

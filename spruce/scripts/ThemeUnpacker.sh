@@ -4,7 +4,7 @@ THEME_DIR="/mnt/SDCARD/Themes"
 RA_THEME_DIR="/mnt/SDCARD/RetroArch/.retroarch/assets"
 ROOT_DIR="/mnt/SDCARD"
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Check for --silent flag
 SILENT_MODE=0
@@ -16,9 +16,9 @@ cores_online 4
 log_message "Starting theme unpacking process"
 
 # Function to display text if not in silent mode
-display_text_if_not_silent() {
+display_if_not_silent() {
     if [ $SILENT_MODE -eq 0 ]; then
-        display_text "$@"
+        display "$@"
     fi
 }
 
@@ -26,7 +26,7 @@ display_text_if_not_silent() {
 for archive in "$THEME_DIR"/*.7z; do
     if [ -f "$archive" ]; then
         theme_name=$(basename "$archive" .7z)
-        display_text_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$theme_name packed theme detected. Unpacking.........." -c dbcda7
+        display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$theme_name packed theme detected. Unpacking.........." -c dbcda7
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
             7zr x "$archive" -o/
             if [ $? -eq 0 ]; then
@@ -47,7 +47,7 @@ RA_FOLDERS_TO_UNPACK="xmb"
 for folder in $RA_FOLDERS_TO_UNPACK; do
     archive="$RA_THEME_DIR/${folder}.7z"
     if [ -f "$archive" ]; then
-        display_text_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$folder packed retroarch theme detected. Unpacking.........." -c dbcda7
+        display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$folder packed retroarch theme detected. Unpacking.........." -c dbcda7
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
             7zr x "$archive" -o/
             if [ $? -eq 0 ]; then

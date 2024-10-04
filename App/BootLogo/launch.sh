@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 LOGO_NAME="bootlogo.bmp"
 
 DIR="$(dirname "$0")"

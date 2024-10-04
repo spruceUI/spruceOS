@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Source the helper functions
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 for i in $(seq 1 3); do 
     echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
