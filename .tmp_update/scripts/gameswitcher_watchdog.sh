@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." 
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"

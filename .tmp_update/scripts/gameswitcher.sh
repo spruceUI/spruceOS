@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "***** gameswitcher.sh: helperFunctions imported"
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"

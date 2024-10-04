@@ -4,7 +4,7 @@
 
 ##### DEFINE BASE VARIABLES #####
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"

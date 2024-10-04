@@ -2,7 +2,7 @@
 
 ##### DEFINE BASE VARIABLES #####
 
-. /mnt/SDCARD/miyoo/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "--- Removing per-game launch options ---"
 
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
