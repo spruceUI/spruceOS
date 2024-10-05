@@ -112,6 +112,22 @@ else
     exit 1
 fi
 
+# Move PICO files from legacy location to Emu folder if they exist
+pico_files_moved=0
+if [ -f "/mnt/SDCARD/App/PICO/bin/pico8.dat" ]; then
+    mv "/mnt/SDCARD/App/PICO/bin/pico8.dat" "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat"
+    pico_files_moved=1
+fi
+if [ -f "/mnt/SDCARD/App/PICO/bin/pico8_dyn" ]; then
+    mv "/mnt/SDCARD/App/PICO/bin/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn"
+    pico_files_moved=1
+fi
+
+if [ -d "/mnt/SDCARD/App/PICO/"  ]; then
+    log_message "PICO files moved. Deleting /mnt/SDCARD/App/PICO/ folder..."
+    rm -rf "/mnt/SDCARD/App/PICO"
+fi
+
 # Check for expertRA flag and run retroExpert.sh if needed
 if flag_check "expertRA"; then
     display -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
