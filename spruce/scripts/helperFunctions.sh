@@ -352,6 +352,26 @@ get_button_press() {
     echo "B"
 }
 
+get_version(){
+    local spruce_file="/mnt/SDCARD/spruce/spruce"
+    
+    if [ ! -f "$spruce_file" ]; then
+        return "0"
+    fi
+    
+    local version=$(cat "$spruce_file" | tr -d '[:space:]')
+    
+    if [ -z "$version" ]; then
+        return "0"
+    fi
+    
+    # Check if the returned version is in the correct format
+    if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then
+        return "$version"
+    else
+        return "0"
+    fi
+}
 
 # Call this to kill any show/show_imimge processes left running
 # If you use show()/show_image() at all you need to call this on all the possible exits of your script
