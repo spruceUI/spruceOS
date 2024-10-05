@@ -9,6 +9,12 @@ connect_services() {
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
+			# Sync Time and RTC
+			ntpd -p pool.ntp.org	 
+			hwclock -w
+			# Kill zombie processes; the NTP daemon will restart cleanly on its own
+			kill -9 $(pgrep ntpd)
+			
 			# SFTPGo check
 			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
 				# Flag exists but service is not running, so start it...
@@ -31,6 +37,7 @@ connect_services() {
 			fi
 			
 			break
+			
 		fi
 		sleep 1
 	done
