@@ -53,9 +53,12 @@ if flag_check "first_boot"; then
     log_message "Displaying wiki image"
     show_image "$IMAGE_PATH_WIKI" 5
 
-    log_message "Displaying firmware image"
-    show_image "$IMAGE_PATH_FIRMWARE" 5
-
+    VERSION=$(cat /usr/miyoo/version)
+    if [ "$VERSION" -lt 20240713100458 ]; then
+        log_message "Displaying firmware image"
+        show_image "$IMAGE_PATH_FIRMWARE" 5
+    fi
+    
     log_message "Displaying enjoy image"
     show_image "$IMAGE_PATH_ENJOY" 5
 
