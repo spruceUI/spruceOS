@@ -10,9 +10,7 @@ connect_services() {
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
 			# Sync Device Time to Network Time
-			ntpd -p pool.ntp.org	 
-			# Kill zombie processes; the NTP daemon will restart cleanly on its own
-			kill -9 $(pgrep ntpd)
+			ntpd -n -q -p pool.ntp.org	 
 			
 			# Sync RTC to Device Time
 			if flag_check "RTCSync" > /dev/null; then
