@@ -69,7 +69,7 @@ acknowledge(){
                 ;;
         esac
 
-        sleep 1
+        sleep 0.3
     done
 }
 

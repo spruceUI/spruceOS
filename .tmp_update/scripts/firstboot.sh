@@ -55,7 +55,7 @@ if flag_check "first_boot"; then
 
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
-        log_message "Displaying firmware image"
+        log_message "Detected firmware version $VERSION, suggesting update"
         show_image "$IMAGE_PATH_FIRMWARE" 5
     fi
     
