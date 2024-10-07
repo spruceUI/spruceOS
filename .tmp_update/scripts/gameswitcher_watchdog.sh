@@ -14,7 +14,7 @@ TEMP_FILE="$FLAG_PATH/gs_list_temp"
 LONG_PRESSED=false
 
 long_press_handler() {
-    # if in game now
+    # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ] ; then
 
         # set flag for long pressed event
@@ -25,6 +25,13 @@ long_press_handler() {
         # get game path
         CMD=`cat /tmp/cmd_to_run.sh`
         log_message "*** gameswitcher_watchdog.sh: $CMD" 
+
+        # check command is emulator
+        # exit if not emulator is in command
+        if echo "$CMD" | grep -q -v '/mnt/SDCARD/Emu' ; then
+            return 0
+        fi
+
         # update switcher game list
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
@@ -86,8 +93,8 @@ long_press_handler() {
     killall -q -15 retroarch || \
     killall -q -15 ra32.miyoo || \
     killall -q -15 drastic || \
-    killall -q -9 MainUI || \
-    /mnt/SDCARD/miyoo/app/kill_apps.sh
+    killall -q -15 PPSSPPSDL || \    
+    killall -q -9 MainUI
     
     # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" 
