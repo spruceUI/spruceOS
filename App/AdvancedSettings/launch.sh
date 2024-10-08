@@ -1,8 +1,8 @@
 #!/bin/sh
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
+SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 
 cd $BIN_PATH
-./easyConfig $FLAG_PATH/gs_config 
+./easyConfig $SETTINGS_PATH/gs_config 
 

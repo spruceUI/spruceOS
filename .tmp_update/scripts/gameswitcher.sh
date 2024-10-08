@@ -5,9 +5,10 @@
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
+SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
+LIST_FILE="$SETTINGS_PATH/gs_list"
 FLAG_FILE="$FLAG_PATH/gs.lock"
 BOXART_FLAG_FILE="$FLAG_PATH/gs.boxart"
-LIST_FILE="$FLAG_PATH/gs_list"
 IMAGES_FILE="$FLAG_PATH/gs_images"
 GAMENAMES_FILE="$FLAG_PATH/gs_names"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
@@ -116,7 +117,7 @@ while : ; do
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
         cd $BIN_PATH
-        ./easyConfig $FLAG_PATH/gs_config 
+        ./easyConfig $SETTINGS_PATH/gs_config 
     else
         break
     fi

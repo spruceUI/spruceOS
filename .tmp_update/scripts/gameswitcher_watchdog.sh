@@ -8,8 +8,9 @@ DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
+SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
+LIST_FILE="$SETTINGS_PATH/gs_list"
 FLAG_FILE="$FLAG_PATH/gs.lock"
-LIST_FILE="$FLAG_PATH/gs_list"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
 LONG_PRESSED=false
 
