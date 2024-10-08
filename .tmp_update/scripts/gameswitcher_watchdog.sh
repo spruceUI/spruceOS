@@ -91,11 +91,24 @@ long_press_handler() {
 
     # kill RA or other emulator or MainUI
     #log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
-    killall -q -15 retroarch || \
-    killall -q -15 ra32.miyoo || \
-    killall -q -15 drastic || \
-    killall -q -15 PPSSPPSDL || \    
-    killall -q -9 MainUI
+
+    if pgrep -x "./drastic" > /dev/null ; then
+        # use sendevent to send menu + L1 combin buttons to drastic  
+        {
+            echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
+            echo 1 1 1   # menu down
+            echo 1 15 1  # L1 down
+            echo 1 15 0  # L1 up
+            echo 1 1 0   # menu up
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event3
+        killall -q sendevent
+    else
+        killall -q -15 retroarch || \
+        killall -q -15 ra32.miyoo || \
+        killall -q -15 PPSSPPSDL || \    
+        killall -q -9 MainUI
+    fi
     
     # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" 
