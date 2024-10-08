@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." 
+#. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+#log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." 
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
@@ -24,7 +24,7 @@ long_press_handler() {
         
         # get game path
         CMD=`cat /tmp/cmd_to_run.sh`
-        log_message "*** gameswitcher_watchdog.sh: $CMD" 
+        #log_message "*** gameswitcher_watchdog.sh: $CMD" 
 
         # check command is emulator
         # exit if not emulator is in command
@@ -36,7 +36,7 @@ long_press_handler() {
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
             # get all commands except the current game
-            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" 
+            #log_message "*** gameswitcher_watchdog.sh: Appending command to list file" 
             grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file 
@@ -44,7 +44,7 @@ long_press_handler() {
         else
             # if game list file does not exist
             # put command to new game list file
-            log_message "*** gameswitcher_watchdog.sh: Creating new list file" 
+            #log_message "*** gameswitcher_watchdog.sh: Creating new list file" 
             echo "$CMD" > "$LIST_FILE"
         fi
 
@@ -69,15 +69,15 @@ long_press_handler() {
     rm -f "$TEMP_FILE"
     while read -r CMD; do
         EMU_PATH=`echo $CMD | cut -d\" -f2`
-        log_message "*** gameswitcher_watchdog.sh: EMU_PATH = $EMU_PATH" 
+        #log_message "*** gameswitcher_watchdog.sh: EMU_PATH = $EMU_PATH" 
         GAME_PATH=`echo $CMD | cut -d\" -f4`
-        log_message "*** gameswitcher_watchdog.sh: GAME_PATH = $GAME_PATH" 
+        #log_message "*** gameswitcher_watchdog.sh: GAME_PATH = $GAME_PATH" 
         if [ ! -f "$EMU_PATH" ] ; then 
-            log_message "*** gameswitcher_watchdog.sh: EMU_PATH does not exist!" 
+            #log_message "*** gameswitcher_watchdog.sh: EMU_PATH does not exist!" 
             continue
         fi
         if [ ! -f "$GAME_PATH" ] ; then
-            log_message "*** gameswitcher_watchdog.sh: GAME_PATH does not exist!" 
+            #log_message "*** gameswitcher_watchdog.sh: GAME_PATH does not exist!" 
             continue
         fi
         echo "$CMD" >> "$TEMP_FILE"
@@ -89,7 +89,7 @@ long_press_handler() {
     mv "$TEMP_FILE" "$LIST_FILE"
 
     # kill RA or other emulator or MainUI
-    log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
+    #log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
     killall -q -15 retroarch || \
     killall -q -15 ra32.miyoo || \
     killall -q -15 drastic || \
@@ -98,7 +98,7 @@ long_press_handler() {
     
     # set flag file for principal.sh to load game switcher later
     touch "$FLAG_FILE" 
-    log_message "*** gameswitcher_watchdog.sh: flag file created at $FLAG_FILE"
+    #log_message "*** gameswitcher_watchdog.sh: flag file created at $FLAG_FILE"
 }
 
 # listen to log file and handle key press events
@@ -107,7 +107,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
     case $line in
         *"key 1 28 1"*) # START key down
             # start long press handler
-            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER"
+            #log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER"
             long_press_handler &
             PID=$!
         ;;
@@ -117,7 +117,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
             # and is in game now
             if [ "$LONG_PRESSED" = false ] && [ -f /tmp/cmd_to_run.sh ] ; then
                 kill $PID
-                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
+                #log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
             fi
         ;;
     esac
