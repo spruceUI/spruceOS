@@ -242,6 +242,11 @@ MD_EMU_PATH="/mnt/SDCARD/Emu/MD"
 MD_ROMS_PATH="/mnt/SDCARD/Roms/MD"
 MD_EXTENSIONS="*gen *smd *md *32x *bin *iso *sms *68k *chd *zip *7z"
 
+# MEDIA FFplay paths and File extensions
+MEDIA_EMU_PATH="/mnt/SDCARD/Emu/VIDEOS"
+MEDIA_ROMS_PATH="/mnt/SDCARD/Roms/VIDEOS"
+MEDIA_EXTENSIONS="*mp4 *mp3 *mov *avi *wmv *avchd *webm *flv"
+
 # MEGADUCK Emulator paths and ROM extensions
 MEGADUCK_EMU_PATH="/mnt/SDCARD/Emu/MEGADUCK"
 MEGADUCK_ROMS_PATH="/mnt/SDCARD/Roms/MEGADUCK"
@@ -427,11 +432,6 @@ VIDEOPAC_EMU_PATH="/mnt/SDCARD/Emu/VIDEOPAC"
 VIDEOPAC_ROMS_PATH="/mnt/SDCARD/Roms/VIDEOPAC"
 VIDEOPAC_EXTENSIONS="*bin *zip *7z"
 
-# VIDEOS FFplay paths and File extensions
-VIDEOS_EMU_PATH="/mnt/SDCARD/Emu/VIDEOS"
-VIDEOS_ROMS_PATH="/mnt/SDCARD/Roms/VIDEOS"
-VIDEOS_EXTENSIONS="*mp4 *mp3 *mov *avi *wmv *avchd *webm *flv"
-
 # WOLF Emulator paths and ROM extensions
 WOLF_EMU_PATH="/mnt/SDCARD/Emu/WOLF"
 WOLF_ROMS_PATH="/mnt/SDCARD/Roms/WOLF"
@@ -511,6 +511,7 @@ check_and_rename "$INTELLIVISION_EMU_PATH" "$INTELLIVISION_ROMS_PATH" "$INTELLIV
 check_and_rename "$LYNX_EMU_PATH" "$LYNX_ROMS_PATH" "$LYNX_EXTENSIONS"
 check_and_rename "$MAME2003PLUS_EMU_PATH" "$MAME2003PLUS_ROMS_PATH" "$MAME2003PLUS_EXTENSIONS"
 check_and_rename "$MD_EMU_PATH" "$MD_ROMS_PATH" "$MD_EXTENSIONS"
+check_and_rename "$MEDIA_EMU_PATH" "$MEDIA_ROMS_PATH" "$MEDIA_EXTENSIONS"
 check_and_rename "$MEGADUCK_EMU_PATH" "$MEGADUCK_ROMS_PATH" "$MEGADUCK_EXTENSIONS"
 check_and_rename "$MS_EMU_PATH" "$MS_ROMS_PATH" "$MS_EXTENSIONS"
 check_and_rename "$MSU1_EMU_PATH" "$MSU1_ROMS_PATH" "$MSU1_EXTENSIONS"
@@ -548,7 +549,6 @@ check_and_rename "$VB_EMU_PATH" "$VB_ROMS_PATH" "$VB_EXTENSIONS"
 check_and_rename "$VECTREX_EMU_PATH" "$VECTREX_ROMS_PATH" "$VECTREX_EXTENSIONS"
 check_and_rename "$VIC20_EMU_PATH" "$VIC20_ROMS_PATH" "$VIC20_EXTENSIONS"
 check_and_rename "$VIDEOPAC_EMU_PATH" "$VIDEOPAC_ROMS_PATH" "$VIDEOPAC_EXTENSIONS"
-check_and_rename "$VIDEOS_EMU_PATH" "$VIDEOS_ROMS_PATH" "$VIDEOS_EXTENSIONS"
 check_and_rename "$WOLF_EMU_PATH" "$WOLF_ROMS_PATH" "$WOLF_EXTENSIONS"
 check_and_rename "$WS_EMU_PATH" "$WS_ROMS_PATH" "$WS_EXTENSIONS"
 check_and_rename "$WSC_EMU_PATH" "$WSC_ROMS_PATH" "$WSC_EXTENSIONS"
