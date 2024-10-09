@@ -162,5 +162,6 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd='"$EMU_FOLDER/launch.sh" "${SELECTED_GAME}"'
+cmd="\"${EMU_FOLDER}/launch.sh\" \"${SELECTED_GAME}\""
+echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"

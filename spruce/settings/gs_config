@@ -1,6 +1,7 @@
 # thhs line is documentation
 # the line below define a group, with group name and optional output option file
 [Game Switcher\[GS\]] [/mnt/SDCARD/spruce/flags/gs_options]
+""    "Run GS on start" "|" "on|off" "off" "touch /mnt/SDCARD/spruce/flags/gs.boot|rm -f /mnt/SDCARD/spruce/flags/gs.boot"
 ""    "Run GS after closing a game" "|" "on|off" "on" "touch /mnt/SDCARD/spruce/flags/gs.fix|rm -f /mnt/SDCARD/spruce/flags/gs.fix"
 ""    "Always show game box art" "|" "on|off" "on" "touch /mnt/SDCARD/spruce/flags/gs.boxart|rm -f /mnt/SDCARD/spruce/flags/gs.boxart" 
 "-s"  "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast"

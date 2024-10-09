@@ -34,8 +34,16 @@ if flag_check "save_active"; then
 	# Restart network services
 	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 	
-	log_message "Adding last game flag"
+	# copy command to cmd_to_run.sh so game switcher can work correctly
+	cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
+
+	log_message "load game to play"
 	$FLAGS_DIR/lastgame.lock &> /dev/null
+
+	# remove tmp command file after game exit
+	# otherwise the game will load again in principle.sh later
+	rm -f /tmp/cmd_to_run.sh
+
 	log_message "Running select script"
 	/mnt/SDCARD/.tmp_update/scripts/select.sh &> /dev/null
 	

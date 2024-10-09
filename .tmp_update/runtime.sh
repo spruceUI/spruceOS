@@ -71,6 +71,9 @@ fi
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
+# run game switcher watchdog before auto load game is loaded
+/mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
+
 /mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
@@ -119,7 +122,6 @@ log_message "Swap file activated"
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
-/mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
 
