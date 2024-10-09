@@ -213,8 +213,7 @@ exec_on_hotkey() {
 	count=0
 	messages_file="/var/log/messages"
 	
-	while [ 1 ]; do
-	    last_line=$(tail -n 1 "$messages_file")
+get_event | while read last_line; do
 	    case "$last_line" in
 	        *"$key1 1"*)
 	            key1_pressed=1
@@ -277,7 +276,6 @@ exec_on_hotkey() {
 # if all designated keys depressed, do the thing!	
 		if [ $count -eq "$num_keys" ]; then
 			"$cmd"
-			# break
 		fi
 	done
 }
@@ -342,6 +340,12 @@ get_button_press() {
     done
     echo "B"
 }
+
+
+get_event() {
+    "/mnt/SDCARD/.tmp_update/bin/getevent" /dev/input/event3
+}
+
 
 get_version(){
     local spruce_file="/mnt/SDCARD/spruce/spruce"

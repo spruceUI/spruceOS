@@ -6,7 +6,7 @@ CONFIG="/mnt/SDCARD/App/FirmwareUpdate/config.json"
 
 FW_FILE="/mnt/SDCARD/spruce/FIRMWARE_UPDATE/miyoo282_fw.img"
 
-# get the free space on the SD card in MB
+# get the free space on the SD card in MiB
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
 CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
