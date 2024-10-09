@@ -12,16 +12,16 @@ SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 FLAG_FILE="$FLAG_PATH/gs.lock"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
-LONG_PRESSED=false
+LONG_PRESS_FILE="$FLAG_PATH/gs.longpress"
 
 long_press_handler() {
     # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ] ; then
 
-        # set flag for long pressed event
-        LONG_PRESSED=false
+        # remove flag for long pressed event
+        touch "$LONG_PRESS_FILE"
         sleep 2
-        LONG_PRESSED=true
+        rm "$LONG_PRESS_FILE"
         
         # get game path
         CMD=`cat /tmp/cmd_to_run.sh`
@@ -51,9 +51,6 @@ long_press_handler() {
 
     # if in MainUI menu
     elif pgrep -x "./MainUI" > /dev/null ; then
-
-        # set flag to ignore long pressed cancelation
-        LONG_PRESSED=true
 
         # exit if list file does not exist
         if [ ! -f "$LIST_FILE" ] ; then
@@ -93,20 +90,32 @@ long_press_handler() {
     #log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
 
     if pgrep -x "./drastic" > /dev/null ; then
-        # use sendevent to send menu + L1 combin buttons to drastic  
+        # use sendevent to send MENU + L1 combin buttons to drastic  
         {
             echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            echo 1 1 1   # menu down
+            echo 1 1 1   # MENU down
             echo 1 15 1  # L1 down
             echo 1 15 0  # L1 up
-            echo 1 1 0   # menu up
+            echo 1 1 0   # MENU up
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
-        killall -q sendevent
+    elif pgrep "PPSSPPSDL" > /dev/null ; then
+        # use sendevent to send SELECT + L2 combin buttons to drastic  
+        {
+            #echo 1 28 0  # START up, to complete the START key press
+            echo 1 314 1   # SELECT down
+            echo 3 2 255 1  # L2 down
+            echo 3 2 0  # L2 up
+            echo 1 314 0   # SELECT up
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event4
+        # wait 1 seconds for ensuring saving is started
+        sleep 1
+        # kill PPSSPP with signal 15, it should exit after saving is done
+        killall -15 PPSSPPSDL 
     else
         killall -q -15 retroarch || \
         killall -q -15 ra32.miyoo || \
-        killall -q -15 PPSSPPSDL || \    
         killall -q -9 MainUI
     fi
     
@@ -129,7 +138,8 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
             # kill the long press handler if 
             # menu button is released within time limit
             # and is in game now
-            if [ "$LONG_PRESSED" = false ] && [ -f /tmp/cmd_to_run.sh ] ; then
+            if [ -f "$LONG_PRESS_FILE" ] && [ -f /tmp/cmd_to_run.sh ] ; then
+                rm "$LONG_PRESS_FILE"
                 kill $PID
                 #log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
             fi
