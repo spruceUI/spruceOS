@@ -244,8 +244,8 @@ MD_ROMS_PATH="/mnt/SDCARD/Roms/MD"
 MD_EXTENSIONS="*gen *smd *md *32x *bin *iso *sms *68k *chd *zip *7z"
 
 # MEDIA FFplay paths and File extensions
-MEDIA_EMU_PATH="/mnt/SDCARD/Emu/VIDEOS"
-MEDIA_ROMS_PATH="/mnt/SDCARD/Roms/VIDEOS"
+MEDIA_EMU_PATH="/mnt/SDCARD/Emu/MEDIA"
+MEDIA_ROMS_PATH="/mnt/SDCARD/Roms/MEDIA"
 MEDIA_EXTENSIONS="*mp4 *mp3 *mov *avi *wmv *avchd *webm *flv"
 
 # MEGADUCK Emulator paths and ROM extensions
