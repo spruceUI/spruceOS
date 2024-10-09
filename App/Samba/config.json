@@ -1,0 +1,7 @@
+{
+  "label": "Samba - Off",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/ssh.png",
+  "launch": "launch.sh",
+  "description": "Enable Samba for network file share",
+  "expert": true
+}
