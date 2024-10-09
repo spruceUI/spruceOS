@@ -211,10 +211,9 @@ exec_on_hotkey() {
 	num_keys="$#"
 	num_keys=$((num_keys - 1))
 	count=0
-	messages_file="/var/log/messages"
 	
-get_event | while read last_line; do
-	    case "$last_line" in
+get_event | while read input; do
+	    case "$input" in
 	        *"$key1 1"*)
 	            key1_pressed=1
 	            ;;
@@ -224,7 +223,7 @@ get_event | while read last_line; do
 		esac
 		count="$key1_pressed"
 		if [ "$#" -gt 2 ]; then
-			case "$last_line" in
+			case "$input" in
 	        		*"$key2 1"*)
 	            		key2_pressed=1
 	            		;;
@@ -235,7 +234,7 @@ get_event | while read last_line; do
 			count=$((count + key2_pressed))
 		fi
 		if [ "$#" -gt 3 ]; then
-			case "$last_line" in
+			case "$input" in
 	        		*"$key3 1"*)
 	            		key3_pressed=1
 	            		;;
@@ -246,7 +245,7 @@ get_event | while read last_line; do
 			count=$((count + key3_pressed))
 		fi
 		if [ "$#" -gt 4 ]; then
-			case "$last_line" in
+			case "$input" in
 	        		*"$key4 1"*)
 	            		key4_pressed=1
 	            		;;
@@ -257,7 +256,7 @@ get_event | while read last_line; do
 			count=$((count + key4_pressed))
 		fi
 		if [ "$#" -gt 5 ]; then
-		    	case "$last_line" in
+		    	case "$input" in
 	        		*"$key5 1"*)
 	            		key5_pressed=1
 	            		;;

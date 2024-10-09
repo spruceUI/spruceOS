@@ -20,8 +20,8 @@ if [ -f "$OPT_FILE" ]; then
 	cp -f "$OPT_FILE" "$OVR_FILE" &
 	log_message "Current system options saved as override for $GAME."
 	. "$OVR_FILE"
-	display_text -d 2 -t "Setting $CORE core and $MODE mode as override for $GAME."
+	display -d 2 -t "Setting $CORE core and $MODE mode as override for $GAME."
 else
 	log_message "ERROR: no system options file found for $EMU_NAME". Override could not be created.
-	display_text -d 2 -t "Error: Override could not be created."
+	display -d 2 -t "Error: Override could not be created."
 fi

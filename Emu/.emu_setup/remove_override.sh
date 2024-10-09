@@ -19,4 +19,4 @@ if [ -f "$OVR_FILE" ]; then
 else
 	log_message "No override file to delete for $GAME."
 fi
-display_text -d 2 -t "Removed launch override from $GAME"
+display -d 2 -t "Removed launch override from $GAME"
