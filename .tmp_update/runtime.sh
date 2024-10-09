@@ -121,7 +121,7 @@ log_message "Swap file activated"
 # Run scripts for initial setup
 /mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
 /mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
-/mnt/SDCARD/.tmp_update/scripts/ffplay_is_now_media.sh
+/mnt/SDCARD/spruce/scripts/ffplay_is_now_media.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 log_message "Initial setup scripts executed"
 kill_images
