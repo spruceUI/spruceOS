@@ -42,6 +42,7 @@ fi
 
 if [ "$FREE_SPACE" -lt 64 ]; then
 	display -d 5 -t "Not enough free space. Please ensure at least 64 MiB of space is available on your SD card, then try again."
+	log_message "Less than 64 MiB free space. Aborting FW update app."
 	exit 1
 fi
 
