@@ -75,7 +75,7 @@ log_message "ALSA configuration loaded"
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 
 # unhide FirmwareUpdate App only if necessary
-VERSION=$(cat /usr/miyoo/version)
+VERSION="$(cat /usr/miyoo/version)"
 if [ "$VERSION" -lt 20240713100458 ]; then
     sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/FirmwareUpdate/config.json"
     log_message "Detected firmware version $VERSION; enabling FirmwareUpdate app"
@@ -112,8 +112,6 @@ fi
 #     a=$(ps | grep $1 | grep -v grep)
 #     [ "$a" == "" ] && $2 &
 # }
-
-VERSION=$(cat /usr/miyoo/version)
 
 lcd_init 1
 show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
