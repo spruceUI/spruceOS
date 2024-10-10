@@ -104,7 +104,7 @@ long_press_handler() {
         {
             #echo 1 28 0  # START up, to complete the START key press
             echo 1 314 1   # SELECT down
-            echo 3 2 255 1  # L2 down
+            echo 3 2 255 # L2 down
             echo 3 2 0  # L2 up
             echo 1 314 0   # SELECT up
             echo 0 0 0   # tell sendevent to exit
