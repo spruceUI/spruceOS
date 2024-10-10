@@ -48,7 +48,7 @@ if flag_check "first_boot"; then
     
     log_message "Running iconfresh.sh"
     show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
-    /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
+    /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
 
     log_message "Displaying wiki image"
     show_image "$IMAGE_PATH_WIKI" 5

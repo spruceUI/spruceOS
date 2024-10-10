@@ -1,6 +1,6 @@
 #!/bin/sh
 
-IMAGE_PATH="/mnt/SDCARD/App/IconFresh/refreshing.png"
+IMAGE_PATH="/mnt/SDCARD/spruce/imgs/refreshing.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 

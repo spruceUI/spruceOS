@@ -49,7 +49,7 @@ while [ 1 ]; do
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
-            /mnt/SDCARD/App/IconFresh/iconfresh.sh --silent
+            /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
             flag_remove "themeChanged"
         fi
 

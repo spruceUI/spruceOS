@@ -1,7 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-IMAGE_PATH="/mnt/SDCARD/App/EmuFresh/refreshing.png"
+IMAGE_PATH="/mnt/SDCARD/spruce/imgs/refreshing.png"
 
 if [ ! -f "$IMAGE_PATH" ]; then
     echo "Image file not found at $IMAGE_PATH"
