@@ -11,6 +11,6 @@ case "$last_line" in
         ;;
     # *)
     #    log_message "No matching condition, running principal.sh"
-    #    /mnt/SDCARD/.tmp_update/scripts/principal.sh
+    #    /mnt/SDCARD/spruce/scripts/principal.sh
     #    ;;
 esac
