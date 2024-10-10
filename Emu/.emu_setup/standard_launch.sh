@@ -184,9 +184,30 @@ case $EMU_NAME in
 			cd $EMU_DIR
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
-			./miyoo282_xpad_inputd&
+			
+			# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
+			mv /dev/ttyS0 /dev/ttyS2
+
+			# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+			./joypad /dev/input/event3 &
+
+			# wait long enough for creating virtual joypad
+			sleep 0.5
+
+			# read joystick raw data from serial input and apply calibration,
+			# then send to /dev/input/event4
+			( ./joystickinput /dev/ttyS2 /config/joypad.config | /mnt/SDCARD/.tmp_update/bin/sendevent /dev/input/event4 ) &
+
 			./PPSSPPSDL "$*"
-			killall miyoo282_xpad_inputd
+
+			# kill all helper programs
+			killall joypad
+			killall joystickinput
+			killall sendevent
+
+			# remember to rename serial port filename to original name
+			# otherwise RA and other emulator cannot read joystick input anymore 
+			mv /dev/ttyS2 /dev/ttyS0
 		else
 			if flag_check "expertRA"; then
 				export RA_BIN="retroarch"

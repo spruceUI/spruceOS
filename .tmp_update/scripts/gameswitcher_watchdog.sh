@@ -100,14 +100,13 @@ long_press_handler() {
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" > /dev/null ; then
-        # use sendevent to send SELECT + L2 combin buttons to drastic  
+        # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
         {
-            #echo 1 28 0  # START up, to complete the START key press
-            echo 1 314 1   # SELECT down
-            echo 3 2 255 # L2 down
-            echo 3 2 0  # L2 up
-            echo 1 314 0   # SELECT up
-            echo 0 0 0   # tell sendevent to exit
+            echo 1 314 1  # SELECT down
+            echo 3 2 255  # L2 down
+            echo 3 2 0    # L2 up
+            echo 1 314 0  # SELECT up
+            echo 0 0 0    # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event4
         # wait 1 seconds for ensuring saving is started
         sleep 1
