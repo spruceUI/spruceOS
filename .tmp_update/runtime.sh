@@ -74,6 +74,13 @@ log_message "ALSA configuration loaded"
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 
+# unhide FirmwareUpdate App only if necessary
+VERSION=$(cat /usr/miyoo/version)
+if [ "$VERSION" -lt 20240713100458 ]; then
+    sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/FirmwareUpdate/config.json"
+    log_message "Detected firmware version $VERSION; enabling FirmwareUpdate app"
+fi
+
 /mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
