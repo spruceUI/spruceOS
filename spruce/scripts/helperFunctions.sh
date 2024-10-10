@@ -185,7 +185,7 @@ display_kill(){
     kill -9 $(pgrep display)
 }
 
-# Executes a command or script passed as the first argument, once any number of specific buttons
+# Executes a command or script passed as the first argument, once 1-5 specific buttons
 # which are passed as further arguments, are concurrently pressed.
 # Call it with &, and don't forget to kill it whenever it is no longer needed.
 # 
@@ -197,24 +197,86 @@ display_kill(){
 # kill -9 "$hotkey_pid"
 # 
 exec_on_hotkey() {
-    cmd="$1"
-    shift
-    keys="$@"
-    num_keys=$(echo $keys | wc -w)
-    count=0
-
-    get_event | while read input; do
-        count=0
-        for key in $keys; do
-            if echo "$input" | grep -q "$key 1"; then
-                count=$((count + 1))
-            fi
-        done
-
-        if [ "$count" -eq "$num_keys" ]; then
-            "$cmd"
-        fi
-    done
+	cmd="$1"
+	key1="$2"
+	key2="$3"
+	key3="$4"
+	key4="$5"
+	key5="$6"
+	key1_pressed=0
+	key2_pressed=0
+	key3_pressed=0
+	key4_pressed=0
+	key5_pressed=0
+	num_keys="$#"
+	num_keys=$((num_keys - 1))
+	count=0
+	
+get_event | while read input; do
+	    case "$input" in
+	        *"$key1 1"*)
+	            key1_pressed=1
+	            ;;
+	        *"$key1 0"*)
+	            key1_pressed=0
+	            ;;
+		esac
+		count="$key1_pressed"
+		if [ "$#" -gt 2 ]; then
+			case "$input" in
+	        		*"$key2 1"*)
+	            		key2_pressed=1
+	            		;;
+	        		*"$key2 0"*)
+	            		key2_pressed=0
+	            		;;
+			esac
+			count=$((count + key2_pressed))
+		fi
+		if [ "$#" -gt 3 ]; then
+			case "$input" in
+	        		*"$key3 1"*)
+	            		key3_pressed=1
+	            		;;
+	        		*"$key3 0"*)
+	            		key3_pressed=0
+	            		;;
+			esac
+			count=$((count + key3_pressed))
+		fi
+		if [ "$#" -gt 4 ]; then
+			case "$input" in
+	        		*"$key4 1"*)
+	            		key4_pressed=1
+	            		;;
+	        		*"$key4 0"*)
+	            		key4_pressed=0
+	            		;;
+			esac
+			count=$((count + key4_pressed))
+		fi
+		if [ "$#" -gt 5 ]; then
+		    	case "$input" in
+	        		*"$key5 1"*)
+	            		key5_pressed=1
+	            		;;
+	        		*"$key5 0"*)
+	            		key5_pressed=0
+	            		;;
+			esac
+			count=$((count + key5_pressed))
+		fi
+# make sure count doesn't go beyond bounds for some reason.
+		if [ $count -lt 0 ]; then
+			count=0
+		elif [ $count -gt "$num_keys" ]; then
+			count="$num_keys"
+		fi
+# if all designated keys depressed, do the thing!	
+		if [ $count -eq "$num_keys" ]; then
+			"$cmd"
+		fi
+	done
 }
 
 
