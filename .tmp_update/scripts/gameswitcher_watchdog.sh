@@ -107,6 +107,15 @@ long_press_handler() {
     elif pgrep "PPSSPPSDL" > /dev/null ; then
         # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
         {
+            # close in-game menu
+            echo 1 316 0  # MENU up
+            echo 1 316 1  # MENU down
+            echo 1 316 0  # MENU up
+            echo 0 0 0    # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event4
+        sleep 0.5
+        {
+            # send autosave hot key
             echo 1 314 1  # SELECT down
             echo 3 2 255  # L2 down
             echo 3 2 0    # L2 up
