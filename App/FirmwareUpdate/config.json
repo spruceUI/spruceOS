@@ -1,0 +1,7 @@
+{
+  "#label": "A firmware update is available",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/file.png",
+  "launch": "launch.sh",
+  "description": "Plug in your A30 and run this to get the latest fixes",
+  "expert": false
+}

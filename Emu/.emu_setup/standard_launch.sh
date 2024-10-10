@@ -90,7 +90,7 @@ case $EMU_NAME in
 		fi
 		;;
 
-	"VIDEOS"|"OPENBOR"|"PICO8"|"PORTS"|"PSP")
+	"MEDIA"|"OPENBOR"|"PICO8"|"PORTS"|"PSP")
 		if [ "$MODE" = "overclock" ]; then
 			set_overclock
 		elif [ "$MODE" = "performance" ]; then
@@ -116,7 +116,7 @@ esac
 ##### LAUNCH STUFF #####
 
 case $EMU_NAME in
-	"VIDEOS")
+	"MEDIA")
 		export HOME=$EMU_DIR
 		export PATH=$EMU_DIR/bin:$PATH
 		export LD_LIBRARY_PATH=$EMU_DIR/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
