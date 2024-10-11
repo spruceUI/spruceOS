@@ -1,9 +1,12 @@
-# thhs line is documentation
-# the line below define a group, with group name and optional output option file
+# this line is documentation
+# you can use the following format to define alias to make your commands shorter
+$FLAGS=/mnt/SDCARD/spruce/flags$
+$LCD=/mnt/SDCARD/spruce/scripts/LEDon.sh$
+# the lines below define a group, with group name and optional output option file
 [Game Switcher\[GS\]] [/mnt/SDCARD/spruce/flags/gs_options]
-""    "Run GS on start" "|" "on|off" "off" "touch /mnt/SDCARD/spruce/flags/gs.boot|rm -f /mnt/SDCARD/spruce/flags/gs.boot"
-""    "Run GS after closing a game" "|" "on|off" "on" "touch /mnt/SDCARD/spruce/flags/gs.fix|rm -f /mnt/SDCARD/spruce/flags/gs.fix"
-""    "Always show game box art" "|" "on|off" "on" "touch /mnt/SDCARD/spruce/flags/gs.boxart|rm -f /mnt/SDCARD/spruce/flags/gs.boxart" 
+""    "Run GS on start" "|" "on|off" "off" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot"
+""    "Run GS after closing a game" "|" "on|off" "on" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix"
+""    "Always show game box art" "|" "on|off" "on" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" 
 "-s"  "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast"
 "-b"  "Swap left/right buttons" "on|off" "on|off" "off"
 "-m"  "Display title in multiple lines" "on|off" "on|off" "off"
@@ -13,7 +16,7 @@
 "-d"  "Enable item deletion" "on|off" "on|off" "on"
 # thhs line second group
 [Network]
-""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "Always off"
+""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "Always off" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "-a" "Enable WIFI file transfer" "on|off" "on|off" "on"
 ""   "Enable SSH" "|" "on|off" "on" "echo 'SSH on'|echo 'SSH off'"
 "-b" "Enable Syncthing" "on|off" "on|off" "off"
