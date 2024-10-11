@@ -1,0 +1,14 @@
+{
+  "games": [
+    {
+      "name": "The Oregon Trail",
+      "cover": "https://www.neverdiemedia.com/cdn/shop/files/2012125151646567REWL6778RE.jpg?v=1713623724",
+      "recommended_by": ["sundownersport", "369px"]
+    },
+    {
+      "name": "Commando",
+      "cover": "https://cdn.wikimg.net/en/strategywiki/images/thumb/3/36/Commando_CPC_box.jpg/300px-Commando_CPC_box.jpg",
+      "recommended_by": ["369px"]
+    }
+  ]
+}
