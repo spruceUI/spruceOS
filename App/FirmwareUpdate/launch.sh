@@ -13,24 +13,23 @@ CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply
 VERSION="$(cat /usr/miyoo/version)"
 
 cancel_update() {
-	kill -9 "$confirm_pid"
-	display -d 5 -t "Firmware update cancelled."
+	display -o -t "Firmware update cancelled."
+	display_kill
 	if [ -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
 		rm "/mnt/SDCARD/miyoo282_fw.img"
 		log_message "User cancelled FW update. Removing FW image from root of card."
 	fi
-	kill -9 "$cancel_pid"
 	exit 1
 }
 
 confirm_update() {
-	kill -9 "$cancel_pid"
 	if [ ! -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
-		display -t "Moving firmware update file into place."
+		display -d 2 -t "Moving firmware update file into place."
 		cp "$FW_FILE" "/mnt/SDCARD/"
 	fi
-	display -o -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete."
+	display -d 8 -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete."
     sed -i 's|"label":|"#label":|' "$CONFIG"
+	flag_add "first_boot"
 	sync
 	poweroff
 }
@@ -42,19 +41,40 @@ if [ "$VERSION" -ge 20240713100458 ]; then
 fi
 
 if [ "$FREE_SPACE" -lt 64 ]; then
-	display -d 5 -t "Not enough free space. Please ensure at least 64 MiB of space is available on your SD card, then try again."
+	display -d 3 -t "Not enough free space. Please ensure at least 64 MiB of space is available on your SD card, then try again."
 	exit 1
 fi
 
 if [ "$CHARGING" -eq 1 ] && [ "$CAPACITY" -ge 20 ]; then
-	exec_on_hotkey cancel_update "$B_B" &
-	cancel_pid="$!"
-	exec_on_hotkey confirm_update "$B_Y" "$B_L2" &
-	confirm_pid="$!"
-	display -d 300 -t "A firmware update is ready for your device. The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press L2+Y to continue."
-	kill -9 "$cancel_pid"
-	kill -9 "$confirm_pid"
+
+	display -t "A firmware update is ready for your device. The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press SELECT to continue."
+	B_pressed=0
+	SE_pressed=0
+	get_event | while read input; do
+		case "$input" in 
+			*"$B_B 1"*)
+				B_pressed=1
+				log_message "B pressed"
+				;;
+			*"$B_SELECT 1"*)
+				SE_pressed=1
+				log_message "SELECT pressed"
+				;;
+		esac
+		if [ "$B_pressed" = 1 ]; then
+			log_message "cancelling update."
+			display_kill
+			cancel_update
+			break
+		elif [ "$SE_pressed" = 1 ]; then
+			log_message "confirming update."
+			display_kill
+			confirm_update
+			break
+		fi
+	done
+
 else
-	display -d 5 -t "Please plug in your device and allow it to charge above 20%, then try again."
+	display -d 3 -t "Please plug in your device and allow it to charge above 20%, then try again."
 	exit 1
 fi
