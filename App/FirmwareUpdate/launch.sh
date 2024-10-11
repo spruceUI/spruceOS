@@ -13,17 +13,18 @@ CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply
 VERSION="$(cat /usr/miyoo/version)"
 
 cancel_update() {
+	kill -9 "$confirm_pid"
 	display -d 5 -t "Firmware update cancelled."
 	if [ -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
 		rm "/mnt/SDCARD/miyoo282_fw.img"
 		log_message "User cancelled FW update. Removing FW image from root of card."
 	fi
 	kill -9 "$cancel_pid"
-	kill -9 "$confirm_pid"
 	exit 1
 }
 
 confirm_update() {
+	kill -9 "$cancel_pid"
 	if [ ! -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
 		display -t "Moving firmware update file into place."
 		cp "$FW_FILE" "/mnt/SDCARD/"
@@ -50,7 +51,7 @@ if [ "$CHARGING" -eq 1 ] && [ "$CAPACITY" -ge 20 ]; then
 	cancel_pid="$!"
 	exec_on_hotkey confirm_update "$B_Y" "$B_L2" &
 	confirm_pid="$!"
-	display -t "A firmware update is ready for your device. The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press L2+Y to continue."
+	display -d 300 -t "A firmware update is ready for your device. The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press L2+Y to continue."
 	kill -9 "$cancel_pid"
 	kill -9 "$confirm_pid"
 else
