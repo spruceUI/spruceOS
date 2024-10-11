@@ -1,4 +1,12 @@
-# Check out these games!
+# Adding covers to your games
+1. Download a .png file of the cover you want to use.
+2. Make sure it has the right dimensions (`498x680px`)
+3. Change the images name to the exact file name of the game (but with `.png` extension)
+4. Move it inside `Roms/Emulator/imgs/` and you're done!
+   
+(Try it with the Wifi Transfer App for real time changes!)
+
+# DOS games we love!
 <img width="123" src="https://www.neverdiemedia.com/cdn/shop/files/2012125151646567REWL6778RE.jpg?v=1713623724">
 <div background-color="#eeeeee">
 <details>
