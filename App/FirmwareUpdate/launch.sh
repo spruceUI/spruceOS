@@ -14,7 +14,6 @@ VERSION="$(cat /usr/miyoo/version)"
 
 cancel_update() {
 	display -o -t "Firmware update cancelled."
-	display_kill
 	if [ -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
 		rm "/mnt/SDCARD/miyoo282_fw.img"
 		log_message "User cancelled FW update. Removing FW image from root of card."
@@ -62,13 +61,13 @@ if [ "$CHARGING" -eq 1 ] && [ "$CAPACITY" -ge 20 ]; then
 				;;
 		esac
 		if [ "$B_pressed" = 1 ]; then
+			killall getevent
 			log_message "cancelling update."
-			display_kill
 			cancel_update
 			break
 		elif [ "$SE_pressed" = 1 ]; then
+			killall getevent
 			log_message "confirming update."
-			display_kill
 			confirm_update
 			break
 		fi
