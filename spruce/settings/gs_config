@@ -2,6 +2,7 @@
 # you can use the following format to define alias to make your commands shorter
 $FLAGS=/mnt/SDCARD/spruce/flags$
 $LCD=/mnt/SDCARD/spruce/scripts/LEDon.sh$
+$SSH=/mnt/SDCARD/spruce/scripts/SSH.sh$
 # the lines below define a group, with group name and optional output option file
 [Game Switcher\[GS\]] [/mnt/SDCARD/spruce/flags/gs_options]
 ""    "Run GS on start" "|" "on|off" "off" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot"
@@ -18,7 +19,7 @@ $LCD=/mnt/SDCARD/spruce/scripts/LEDon.sh$
 [Network]
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "Always off" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "-a" "Enable WIFI file transfer" "on|off" "on|off" "on"
-""   "Enable SSH" "|" "on|off" "on" "echo 'SSH on'|echo 'SSH off'"
+""   "Enable SSH" "|" "on|off" "on" "$SSH$ on|$SSH$ off"
 "-b" "Enable Syncthing" "on|off" "on|off" "off"
 [Others]
 "-e" "Show recent games in main menu" "|" "on|off" "off"
