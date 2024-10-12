@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# chech flag and print on/off (without newline) as return value
+# this function is placed before loading helping functions for fast checking
+if [ "$1" == "check" ] ; then
+    if [ -f "/mnt/SDCARD/spruce/flags/dropbear.lock" ]; then
+        echo -n "on"
+    else
+        echo -n "off"
+    fi
+    return 0
+fi
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
 
