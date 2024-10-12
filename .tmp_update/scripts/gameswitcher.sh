@@ -116,7 +116,7 @@ while : ; do
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
         cd $BIN_PATH
-        ./easyConfig $SETTINGS_PATH/gs_config 
+        ./easyConfig $SETTINGS_PATH/spruce_config 
     else
         break
     fi
