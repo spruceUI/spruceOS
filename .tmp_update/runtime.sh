@@ -58,7 +58,7 @@ kill_images
 dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
-/mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
@@ -82,7 +82,7 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
-/mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
+${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
 
@@ -125,8 +125,8 @@ swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
 # Run scripts for initial setup
-/mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
-/mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
+${NEW_SCRIPTS_DIR}/forcedisplay.sh
+${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 log_message "Initial setup scripts executed"
