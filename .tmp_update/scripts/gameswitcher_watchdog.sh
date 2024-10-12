@@ -1,31 +1,28 @@
 #!/bin/sh
 
-#. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-#log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." -v
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 LIST_FILE="$SETTINGS_PATH/gs_list"
-FLAG_FILE="$FLAG_PATH/gs.lock"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
-LONG_PRESS_FILE="$FLAG_PATH/gs.longpress"
 
 long_press_handler() {
     # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ] ; then
 
         # setup flag for long pressed event
-        touch "$LONG_PRESS_FILE"
+        flag_add "gs.longpress"
         sleep 2
-        rm "$LONG_PRESS_FILE"
+        flag_remove "gs.longpress"
         
         # get game path
-        CMD=`cat /tmp/cmd_to_run.sh`
-        #log_message "*** gameswitcher_watchdog.sh: $CMD" 
+        CMD=$(cat /tmp/cmd_to_run.sh)
+        log_message "*** gameswitcher_watchdog.sh: $CMD" -v
 
         # check command is emulator
         # exit if not emulator is in command
@@ -37,7 +34,7 @@ long_press_handler() {
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
             # get all commands except the current game
-            #log_message "*** gameswitcher_watchdog.sh: Appending command to list file" 
+            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" -v
             grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file 
@@ -45,7 +42,7 @@ long_press_handler() {
         else
             # if game list file does not exist
             # put command to new game list file
-            #log_message "*** gameswitcher_watchdog.sh: Creating new list file" 
+            log_message "*** gameswitcher_watchdog.sh: Creating new list file" -v
             echo "$CMD" > "$LIST_FILE"
         fi
 
@@ -53,9 +50,9 @@ long_press_handler() {
     elif pgrep -x "./MainUI" > /dev/null ; then
 
         # setup flag for long pressed event
-        touch "$LONG_PRESS_FILE"
+        flag_add "gs.longpress"
         sleep 2
-        rm "$LONG_PRESS_FILE"
+        flag_remove "gs.longpress"
         
         # exit if list file does not exist
         if [ ! -f "$LIST_FILE" ] ; then
@@ -71,16 +68,16 @@ long_press_handler() {
     # remove all non existing games from list file
     rm -f "$TEMP_FILE"
     while read -r CMD; do
-        EMU_PATH=`echo $CMD | cut -d\" -f2`
-        #log_message "*** gameswitcher_watchdog.sh: EMU_PATH = $EMU_PATH" 
-        GAME_PATH=`echo $CMD | cut -d\" -f4`
-        #log_message "*** gameswitcher_watchdog.sh: GAME_PATH = $GAME_PATH" 
+        EMU_PATH=$(echo $CMD | cut -d\" -f2)
+        log_message "*** gameswitcher_watchdog.sh: EMU_PATH = $EMU_PATH" -v
+        GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        log_message "*** gameswitcher_watchdog.sh: GAME_PATH = $GAME_PATH" -v
         if [ ! -f "$EMU_PATH" ] ; then 
-            #log_message "*** gameswitcher_watchdog.sh: EMU_PATH does not exist!" 
+            log_message "*** gameswitcher_watchdog.sh: EMU_PATH does not exist!" -v
             continue
         fi
         if [ ! -f "$GAME_PATH" ] ; then
-            #log_message "*** gameswitcher_watchdog.sh: GAME_PATH does not exist!" 
+            log_message "*** gameswitcher_watchdog.sh: GAME_PATH does not exist!" -v
             continue
         fi
         echo "$CMD" >> "$TEMP_FILE"
@@ -92,7 +89,7 @@ long_press_handler() {
     mv "$TEMP_FILE" "$LIST_FILE"
 
     # kill RA or other emulator or MainUI
-    #log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!"
+    log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
 
     if pgrep -x "./drastic" > /dev/null ; then
         # use sendevent to send MENU + L1 combin buttons to drastic  
@@ -141,8 +138,8 @@ long_press_handler() {
     fi
     
     # set flag file for principal.sh to load game switcher later
-    touch "$FLAG_FILE" 
-    #log_message "*** gameswitcher_watchdog.sh: flag file created at $FLAG_FILE"
+    flag_add "gs"
+    log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
 }
 
 # listen to log file and handle key press events
@@ -151,7 +148,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
     case $line in
         *"key 1 1 1"*) # START key down
             # start long press handler
-            #log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER"
+            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
         ;;
@@ -159,10 +156,10 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
             # kill the long press handler if 
             # menu button is released within time limit
             # and is in game now
-            if [ -f "$LONG_PRESS_FILE" ] && [ -f /tmp/cmd_to_run.sh ] ; then
-                rm "$LONG_PRESS_FILE"
+            if flag_check "gs.longpress" && [ -f /tmp/cmd_to_run.sh ] ; then
+                flag_remove "gs.longpress"
                 kill $PID
-                #log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
+                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
             fi
         ;;
     esac
