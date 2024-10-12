@@ -1,0 +1,7 @@
+{
+  "#label": "File Management spruce",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/file.png",
+  "launch": "launch.sh",
+  "description": "View and edit files on your SD card",
+  "expert": true
+}
