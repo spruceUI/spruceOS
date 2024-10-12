@@ -21,7 +21,6 @@ $SSH=/mnt/SDCARD/spruce/scripts/SSH.sh$
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "-a" "Enable WIFI file transfer" "on|off" "on|off" "on"
 ""   "Enable SSH" "|" "on|off" "$SSH$ check" "$SSH$ on|$SSH$ off"
-@"user:root, password:tina"
 "-b" "Enable Syncthing" "on|off" "on|off" "off"
 [Others]
 "-e" "Show recent games in main menu" "|" "on|off" "off"
