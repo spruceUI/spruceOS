@@ -13,16 +13,8 @@ DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
 silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
 
-flag_exists(){
-    if flag_check "dropbear"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 toggle_mainui() {
-  if flag_exists; then
+  if flag_check "dropbear"; then
     display -t "Shutting down SSH..." -c dbcda7
     # Dropbear is running, so we'll shut it down
     sed -i 's|- On|- Off|' "$CONFIG_FILE"
