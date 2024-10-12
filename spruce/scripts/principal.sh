@@ -31,7 +31,8 @@ runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
 
 flag_remove "save_active"
 
-if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] ; then
+if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
+   [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
     log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
     /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
 fi
