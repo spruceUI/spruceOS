@@ -29,6 +29,7 @@ confirm_update() {
 	display -d 8 -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete."
     sed -i 's|"label":|"#label":|' "$CONFIG"
 	flag_add "first_boot"
+	flag_remove "config_copied"
 	sync
 	poweroff
 }

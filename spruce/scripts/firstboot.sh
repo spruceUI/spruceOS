@@ -15,12 +15,13 @@ log_message "Starting firstboot script"
 if flag_check "first_boot"; then
     log_message "First boot flag detected"
     
-    if [ ! -f "${SDCARD_PATH}/copy_config" ]; then
+    # don't overwrite user's config if it's not a TRUE first boot
+    if ! flag_check "config_copied"; then
         cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE"
-        touch "${SDCARD_PATH}/copy_config"
+        flag_add "config_copied"
         sync
         sleep 5
-        log_message "Copied system.json and created copy_config flag"
+        log_message "Copied system.json and created config_copied.lock"
     fi
     
     if [ -f "${SWAPFILE}" ]; then
