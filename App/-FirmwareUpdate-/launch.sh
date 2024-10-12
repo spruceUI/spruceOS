@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-CONFIG="/mnt/SDCARD/App/FirmwareUpdate/config.json"
+CONFIG="/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 FW_FILE="/mnt/SDCARD/spruce/FIRMWARE_UPDATE/miyoo282_fw.img"
 
 # get the free space on the SD card in MiB
