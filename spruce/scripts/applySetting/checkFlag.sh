@@ -7,8 +7,8 @@ if [ -z "$1" ] ; then
     return 1
 fi
 
-# check file existance
-if [ -f "/mnt/SDCARD/spruce/flags/$1" ]; then
+# check file existence for both flag and flag.lock
+if [ -f "/mnt/SDCARD/spruce/flags/$1" ] || [ -f "/mnt/SDCARD/spruce/flags/$1.lock" ]; then
     echo -n "on"
 else
     echo -n "off"

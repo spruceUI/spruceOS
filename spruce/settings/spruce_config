@@ -2,7 +2,9 @@
 # you can use the following format to define alias to make your commands shorter
 $FLAGS=/mnt/SDCARD/spruce/flags$
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
+# Setting Scripts
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
+$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 
@@ -32,5 +34,5 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 @"User: root Password: tina"
 [System]
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
-"-e" "Show recent games in main menu" "|" "on|off" "off"
+"-e" "Show recent games in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$"
 "-f" "Enable RetroArch expert mode" "|" "on|off" "on"
