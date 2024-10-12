@@ -23,13 +23,13 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 [Network]
 "" "Sync RTC with network time" "|" "on|off" "$CHECK$ RTCSync" "touch $FLAGS$/RTCSync|rm -f $FLAGS$/RTCSync"
 "" "Enable WIFI file transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
-@"User: spruce, password: happygaming"
+@"Port: 8080 User: spruce Password: happygaming"
 "" "Enable SSH" "|" "on|off" "$SSH$ check" "$SSH$ on|$SSH$ off" "$SSH$"
-@"User: root, password: tina"
+@"User: root Password: tina"
 "" "Enable Syncthing" "|" "on|off" "off"
-@"Synchronize your saves and files"
+@"Port: 8384 Synchronize your saves and files"
 "" "Enable Samba" "|" "on|off" "off"
-@"User: root, password: tina"
+@"User: root Password: tina"
 [System]
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "-e" "Show recent games in main menu" "|" "on|off" "off"
