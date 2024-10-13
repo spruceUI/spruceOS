@@ -94,7 +94,7 @@ while [ 1 ]; do
 
         # sleep 1
 
-        /mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
+        #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
     fi
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] || \

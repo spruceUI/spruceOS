@@ -45,7 +45,7 @@ if flag_check "save_active"; then
 	rm -f /tmp/cmd_to_run.sh
 
 	log_message "Running select script"
-	/mnt/SDCARD/spruce/scripts/select.sh &> /dev/null
+	#/mnt/SDCARD/spruce/scripts/select.sh &> /dev/null
 	
 else
 	log_message "Save active flag not detected"
