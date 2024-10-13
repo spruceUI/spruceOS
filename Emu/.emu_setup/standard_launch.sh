@@ -191,9 +191,16 @@ case $EMU_NAME in
 		fi
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
-		;;
 
+		# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+		./joypad /dev/input/event3 &
+
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+
+		# kill all helper programs
+		killall joypad
+		;;
+		
 esac
 
 kill -9 "$ENFORCE_PID"
