@@ -2,6 +2,7 @@
 # you can use the following format to define alias to make your commands shorter
 $FLAGS=/mnt/SDCARD/spruce/flags$
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
+$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 # Setting Scripts
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
@@ -36,3 +37,26 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "-e" "Show recent games in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$"
 "-f" "Enable RetroArch expert mode" "|" "on|off" "on"
+[Available Apps]
+"" "Boot Logo Changer" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json"
+@"Flash a custom boot logo"
+"" "Boxart Scraper" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json"
+@"Download boxart for your games"
+"" "File Manager" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json"
+@"Manage your files"
+"" "Miyoo GameList Generator" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json"
+@"Generate GameList files for alternate/full rom names"
+"" "Random Game Launcher" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json"
+@"Launch random games from your roms folder"
+"" "Real Time Clock" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json"
+@"Set the RTC to the current date and time"
+"" "Samba" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/Samba/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Samba/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Samba/config.json"
+@"Access your files via Samba"
+"" "Spruce Restore" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json"
+@"Restore spruce from a backup file"
+"" "SSH" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/SSH/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/SSH/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/SSH/config.json"
+@"Access your device via SSH"
+"" "Syncthing" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json"
+@"Synchronize your files via Syncthing"
+"" "Wifi File Transfer" "|" "Show|Hide" "$SHOW_HIDE$ check /mnt/SDCARD/App/WifiFileTransfer/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/WifiFileTransfer/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/WifiFileTransfer/config.json"
+@"Transfer files to your device via WiFi through your browser"

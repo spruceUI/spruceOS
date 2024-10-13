@@ -26,9 +26,9 @@ if [ "$1" == "1" ] ; then
 fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
+. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 
-WIFI_ON="/mnt/SDCARD/App/sftpgo/imgs/wifiOn.png"
+WIFI_ON="/mnt/SDCARD/App/WifiFileTransfer/imgs/wifiOn.png"
 
 if [ "$1" == "on" ] ; then
     log_message "Starting SFTPGO"

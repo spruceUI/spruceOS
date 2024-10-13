@@ -1,7 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SFTPGO_DIR="/mnt/SDCARD/App/sftpgo"
+SFTPGO_DIR="/mnt/SDCARD/App/WifiFileTransfer"
 SFTPGO_CONFIG_FILE="$SFTPGO_DIR/config.json"
 
 sftpgo_check(){
