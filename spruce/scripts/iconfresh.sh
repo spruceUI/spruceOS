@@ -138,4 +138,7 @@ if [ $silent_mode -eq 0 ]; then
     kill_images
 fi
 
+/mnt/SDCARD/.tmp_update/scripts/powerdisplay.sh
+
 cores_online
+
