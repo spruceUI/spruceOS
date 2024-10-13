@@ -81,18 +81,7 @@ while [ 1 ]; do
         rm /tmp/cmd_to_run.sh
 
         # reset CPU/GPU/RAM settings to defaults in case an emulator changes anything
-        echo 1 > /sys/devices/system/cpu/cpu2/online
-        echo 1 > /sys/devices/system/cpu/cpu3/online
-        echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-        echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-        echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-        echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-        echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-    	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
-        echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-
-        # sleep 1
+        set_smart
 
         #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
     fi
