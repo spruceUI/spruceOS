@@ -57,16 +57,17 @@ export B_MENU="key 1 1"          # surprisingly functions like a regular button
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
+    # These echo's are needed to seperate the events in the key press log file
     local messages_file="/var/log/messages"
     echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
 
     while true; do
         $INOTIFY "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
-
         case "$last_line" in
-        *"enter_pressed"* | *"key 1 57"* | *"key 1 29"*)
+        *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
+            log_message "last_line: $last_line" -v
             break
             ;;
         esac
