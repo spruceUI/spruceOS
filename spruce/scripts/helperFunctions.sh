@@ -280,10 +280,10 @@ exec_on_hotkey() {
 
 # Check if a flag exists
 # Usage: flag_check "flag_name"
-# Returns 0 if the flag exists, 1 if it doesn't
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
         return 0
     else
         return 1

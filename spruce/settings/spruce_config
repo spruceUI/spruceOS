@@ -35,6 +35,7 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 @"User: root Password: tina"
 [System]
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
+"" "Show battery percentage on main menu" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent"
 "-e" "Show recent games in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$"
 "-f" "Enable RetroArch expert mode" "|" "on|off" "on"
 [Visible Apps]

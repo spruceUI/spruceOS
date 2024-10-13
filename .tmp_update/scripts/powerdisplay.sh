@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+BATTERY_PERCENT="/mnt/SDCARD/.tmp_update/bin/battery_percent.elf"
 THEME_JSON_FILE="/config/system.json"
 CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 BATTERY_ICONS="ic-power-charge-0% \
@@ -12,8 +15,6 @@ power-20%-icon \
 power-50%-icon \
 power-80%-icon \
 power-full-icon"
-
-
 
 if [ ! -f "$THEME_JSON_FILE" ]; then
     exit 1
@@ -37,4 +38,13 @@ for icon in ${BATTERY_ICONS}; do
         fi
     fi
 done
-/mnt/SDCARD/.tmp_update/bin/battery_percent.elf $THEME_PATH_SKIN $CAPACITY
+
+if ! flag_check "show_battery_percent"; then
+    log_message "Cleaning battery icons" -v 
+    # Clean the icon somehow I guess
+    $BATTERY_PERCENT $THEME_PATH_SKIN " "
+    exit 1
+fi
+
+log_message "Applying battery percent to icons" -v 
+$BATTERY_PERCENT $THEME_PATH_SKIN $CAPACITY
