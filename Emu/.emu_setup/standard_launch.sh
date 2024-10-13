@@ -56,36 +56,25 @@ enforce_smart() {
 case $EMU_NAME in
 	"NDS")
 		if [ "$MODE" = "overclock" ]; then
-			{sleep 12 && set_overclock} &
-		elif [ "$MODE" = "performance" ]; then
-			{sleep 12 && set_performance} &
+			{sleep 33 && set_overclock} &
 		else
-			{sleep 12 && set_smart} &
-		fi
-		;;
-
-	"MEDIA"|"OPENBOR"|"PICO8"|"PORTS"|"PSP")
-		if [ "$MODE" = "overclock" ]; then
-			set_overclock
-		elif [ "$MODE" = "performance" ]; then
-			set_performance
-		else
-			set_smart
+			{sleep 33 && set_performance} &
 		fi
 		;;
 
 	*)
 		if [ "$MODE" = "overclock" ]; then
 			set_overclock
-		elif [ "$MODE" = "performance" ]; then
-			set_performance
 		else
-			set_smart
-			enforce_smart &
-			ENFORCE_PID="$!"
+			set_performance
 		fi
 		;;
 esac
+
+if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
+	enforce_smart &
+	ENFORCE_PID="$!"
+fi
 
 ##### LAUNCH STUFF #####
 
@@ -191,7 +180,6 @@ case $EMU_NAME in
 			RA_DIR="/mnt/SDCARD/RetroArch"
 			cd "$RA_DIR"
 			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
-			kill -9 "$ENFORCE_PID"
 		fi
 		;;
 	
@@ -204,9 +192,9 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
-		kill -9 "$ENFORCE_PID"
 		;;
 
 esac
 
+kill -9 "$ENFORCE_PID"
 log_message "-----Closing Emulator-----"
