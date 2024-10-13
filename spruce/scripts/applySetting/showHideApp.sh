@@ -3,9 +3,9 @@
 check_app_visibility() {
     config_file="$1"
     if grep -q '"#label"' "$config_file"; then
-        echo -n "Hide"
+        echo -n "off"
     else
-        echo -n "Show"
+        echo -n "on"
     fi
 }
 
