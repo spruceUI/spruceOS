@@ -15,6 +15,8 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 @"this is hardcoded minor text"
 ""    "Run GS after closing a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix"
 ""    "Always show game box art" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" 
+""    "Activate GS with short tap" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" 
+@"Except for NDS games"
 "-s"  "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast"
 "-b"  "Swap left/right buttons" "on|off" "on|off" "off"
 "-m"  "Display title in multiple lines" "on|off" "on|off" "off"

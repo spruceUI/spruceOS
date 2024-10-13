@@ -18,7 +18,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** gameswitcher_watchdog.sh: $CMD" -v
+        log_message "*** gameswitcher_watchdog.sh: $CMD" 
 
         # check command is emulator
         # exit if not emulator is in command
@@ -30,7 +30,7 @@ prepare_game_switcher() {
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
             # get all commands except the current game
-            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" -v
+            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" 
             grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file 
@@ -38,7 +38,7 @@ prepare_game_switcher() {
         else
             # if game list file does not exist
             # put command to new game list file
-            log_message "*** gameswitcher_watchdog.sh: Creating new list file" -v
+            log_message "*** gameswitcher_watchdog.sh: Creating new list file" 
             echo "$CMD" > "$LIST_FILE"
         fi
 
@@ -86,7 +86,7 @@ prepare_game_switcher() {
         # use sendevent to send MENU + L1 combin buttons to drastic  
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            echo 1 1 1   # MENU down
+            #echo 1 1 1   # MENU down
             echo 1 15 1  # L1 down
             echo 1 15 0  # L1 up
             echo 1 1 0   # MENU up
@@ -126,6 +126,19 @@ prepare_game_switcher() {
     log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
 }
 
+send_virtual_key() {
+    {
+        echo 1 316 0   # MENU up
+        echo 1 317 1   # L3 down
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4
+    sleep 0.3
+    {
+        echo 1 317 0   # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4    
+}
+
 long_press_handler() {
     # setup flag for long pressed event
     flag_add "gs.longpress"
@@ -133,26 +146,23 @@ long_press_handler() {
     flag_remove "gs.longpress"
 
     # if IS long press
-    # if miyoo RA or PSP is running, send virtual joypad L3 button event to activate in-game menu
-    if pgrep "ra32.miyoo" > /dev/null || \
-       pgrep "retroarch" > /dev/null || \
-       pgrep "PPSSPPSDL" > /dev/null ; then
-        {
-            echo 1 316 0   # MENU up
-            echo 1 317 1   # L3 down
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4
-        sleep 0.3
-        {
-            echo 1 317 0   # L3 up
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4    
-    fi
-
-    # if NDS or original RA is running, prepare to run GS
-    if pgrep "drastic" > /dev/null || \ 
-       pgrep "retroarch" > /dev/null ; then
+    if pgrep "retroarch" > /dev/null ; then
         prepare_game_switcher
+    elif pgrep "drastic" > /dev/null ; then
+        prepare_game_switcher
+
+    elif flag_check "gs.runontap" ; then
+        if pgrep "ra32.miyoo" > /dev/null ; then
+            send_virtual_key
+        elif pgrep "PPSSPPSDL" > /dev/null ; then
+            send_virtual_key
+        fi
+    else
+        if pgrep "ra32.miyoo" > /dev/null ; then
+            prepare_game_switcher
+        elif pgrep "PPSSPPSDL" > /dev/null ; then
+            prepare_game_switcher
+        fi
     fi
 }
 
@@ -162,7 +172,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
     case $line in
         *"key 1 1 1"*) # MENU key down
             # start long press handler
-            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
+            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" 
             long_press_handler &
             PID=$!
         ;;
@@ -171,13 +181,27 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
             if flag_check "gs.longpress" ; then
                 flag_remove "gs.longpress"
                 kill $PID
-                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
+                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
 
-                # if RA is running, prepare to run GS
-                if pgrep "ra32.miyoo" > /dev/null || \
-                   pgrep "PPSSPPSDL" > /dev/null || \
-                   pgrep "MainUI" > /dev/null ; then
+                if pgrep "MainUI" > /dev/null ; then
+                    log_message "*** gameswitcher_watchdog.sh: FUCK 1"
                     prepare_game_switcher
+
+                elif flag_check "gs.runontap" ; then
+                    log_message "*** gameswitcher_watchdog.sh: FUCK 2"
+
+                    if pgrep "ra32.miyoo" > /dev/null ; then
+                        prepare_game_switcher
+                    elif pgrep "PPSSPPSDL" > /dev/null ; then
+                        prepare_game_switcher
+                    fi
+                else
+                    log_message "*** gameswitcher_watchdog.sh: FUCK 3"
+                    if pgrep "ra32.miyoo" > /dev/null ; then
+                        send_virtual_key
+                    elif pgrep "PPSSPPSDL" > /dev/null ; then
+                        send_virtual_key
+                    fi
                 fi
             fi
         ;;
