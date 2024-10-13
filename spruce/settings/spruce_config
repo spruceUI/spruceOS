@@ -36,6 +36,7 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 [System]
 ""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
 "" "Show battery percentage on main menu" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent"
+@"Only on supported themes"
 "-e" "Show recent games in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$"
 "-f" "Enable RetroArch expert mode" "|" "on|off" "on"
 [Visible Apps]
@@ -44,7 +45,6 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 "" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json"
 @"Download boxart for your games"
 "" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json"
-@"Manage your files"
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json"
 @"Generate GameList files for alternate/full rom names"
 "" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json"
