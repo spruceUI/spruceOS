@@ -9,6 +9,7 @@ BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
+WAS_IN_EMULATOR=1
 
 # Not entirely sure this is necessary
 update_game_list() {
@@ -52,6 +53,7 @@ handle_emulator_exit() {
             echo 1 1 0   # MENU up
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
+        WAS_IN_EMULATOR=0
     elif pgrep "PPSSPPSDL" > /dev/null ; then
         {
             echo 1 316 0  # MENU up
@@ -69,6 +71,7 @@ handle_emulator_exit() {
         } | $BIN_PATH/sendevent /dev/input/event4
         sleep 1
         killall -15 PPSSPPSDL
+        WAS_IN_EMULATOR=0
     elif pgrep "ra32.miyoo" > /dev/null ; then
         {
             echo 1 1 0   # MENU up
@@ -77,8 +80,10 @@ handle_emulator_exit() {
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
         killall -q -15 ra32.miyoo
-    else
+        WAS_IN_EMULATOR=0
+    elif pgrep "retroarch" > /dev/null || pgrep "MainUI" > /dev/null; then
         killall -q -15 retroarch || killall -q -9 MainUI
+        WAS_IN_EMULATOR=0
     fi
 }
 
@@ -93,4 +98,22 @@ sleep 2
 #cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/.tmp_update/brillo
 #cat /sys/devices/virtual/disp/disp/attr/enhance >/mnt/SDCARD/.tmp_update/color
 
- /mnt/SDCARD/.tmp_update/scripts/apaga.sh
+if [ "$WAS_IN_EMULATOR" = 0 ]; then
+    /mnt/SDCARD/.tmp_update/scripts/apaga.sh
+else
+    killall -9 main
+    killall -9 runtime.sh
+    killall -9 principal.sh
+    killall -9 MainUI
+
+    flag_add "save_active"
+    log_message "Created save_active flag"
+
+    show_image "/mnt/SDCARD/.tmp_update/res/save.png" 3
+
+    sync
+    log_message "Synced file systems"
+
+    log_message "Shutting down"
+    poweroff
+fi
