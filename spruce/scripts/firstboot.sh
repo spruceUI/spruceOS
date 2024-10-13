@@ -13,6 +13,7 @@ IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 log_message "Starting firstboot script"
 
 if flag_check "first_boot"; then
+    show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
     log_message "First boot flag detected"
     
     # don't overwrite user's config if it's not a TRUE first boot

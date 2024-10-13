@@ -115,7 +115,6 @@ fi
 # }
 
 lcd_init 1
-show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
 
 "${NEW_SCRIPTS_DIR}/firstboot.sh"
 log_message "First boot script executed"
