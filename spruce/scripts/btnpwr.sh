@@ -81,8 +81,8 @@ handle_emulator_exit() {
         } | $BIN_PATH/sendevent /dev/input/event3
         killall -q -15 ra32.miyoo
         WAS_IN_EMULATOR=0
-    elif pgrep "retroarch" > /dev/null || pgrep "MainUI" > /dev/null; then
-        killall -q -15 retroarch || killall -q -9 MainUI
+    elif pgrep "retroarch" > /dev/null; then
+        killall -q -15 retroarch
         WAS_IN_EMULATOR=0
     fi
 }
@@ -108,8 +108,6 @@ else
 
     flag_add "save_active"
     log_message "Created save_active flag"
-
-    show_image "/mnt/SDCARD/.tmp_update/res/save.png" 3
 
     sync
     log_message "Synced file systems"

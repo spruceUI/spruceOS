@@ -9,9 +9,6 @@
 # get_button_press: Returns the name of the last button pressed
 # kill_images: Kills all show processes
 # log_message: Logs a message to a file
-# set_smart: sets CPU to 4 cores, conservative governor, variable MHz
-# set_performance: sets CPU to 4 cores, performance governor, 1344 MHz
-# set_overclock: sets CPU to 4 cores, performance governor, 1512 MHz
 # show_image: Displays an image for a specified duration
 # vibrate: Vibrates the device for a specified duration
 
@@ -29,6 +26,7 @@ INOTIFY="/mnt/SDCARD/.tmp_update/bin/inotify.elf"
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
+# Key
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
 export B_RIGHT="key 1 106"
@@ -59,13 +57,17 @@ export B_MENU="key 1 1"          # surprisingly functions like a regular button
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
+    local messages_file="/var/log/messages"
+    echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
+
     while true; do
         $INOTIFY "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
 
         case "$last_line" in
         *"enter_pressed"* | *"key 1 57"* | *"key 1 29"*)
-            return 0
+            echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
+            break
             ;;
         esac
     done
