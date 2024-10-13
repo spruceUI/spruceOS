@@ -6,6 +6,7 @@ SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 SCRIPTS_DIR="${SDCARD_PATH}/.tmp_update/scripts"
+NEW_SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
 
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
@@ -23,7 +24,7 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
+. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 # Flag cleanup
@@ -57,14 +58,14 @@ kill_images
 dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
-/mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
-    /mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh --silent &
+    ${NEW_SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
     log_message "ThemeUnpacker started silently in background due to firstBoot flag"
 else
-    /mnt/SDCARD/spruce/scripts/ThemeUnpacker.sh
+    ${NEW_SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
 # Checks if quick-resume is active and runs it if not returns to this point.
@@ -74,7 +75,14 @@ log_message "ALSA configuration loaded"
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 
-/mnt/SDCARD/.tmp_update/scripts/autoRA.sh  &> /dev/null
+# unhide -FirmwareUpdate- App only if necessary
+VERSION="$(cat /usr/miyoo/version)"
+if [ "$VERSION" -lt 20240713100458 ]; then
+    sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+    log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
+fi
+
+${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
 
@@ -106,12 +114,9 @@ fi
 #     [ "$a" == "" ] && $2 &
 # }
 
-VERSION=$(cat /usr/miyoo/version)
-
 lcd_init 1
-show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
 
-"${SCRIPTS_DIR}/firstboot.sh"
+"${NEW_SCRIPTS_DIR}/firstboot.sh"
 log_message "First boot script executed"
 
 kill_images
@@ -119,25 +124,17 @@ swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
 # Run scripts for initial setup
-/mnt/SDCARD/.tmp_update/scripts/forcedisplay.sh
-/mnt/SDCARD/.tmp_update/scripts/low_power_warning.sh
+${NEW_SCRIPTS_DIR}/forcedisplay.sh
+${NEW_SCRIPTS_DIR}/low_power_warning.sh
+${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 log_message "Initial setup scripts executed"
 kill_images
 
-# Initialize CPU/GPU/RAM settings
-echo 1 > /sys/devices/system/cpu/cpu2/online
-echo 1 > /sys/devices/system/cpu/cpu3/online
-echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
-echo 480000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+# Initialize CPU settings
+set_smart
 
 # start main loop
 log_message "Starting main loop"
-/mnt/SDCARD/.tmp_update/scripts/principal.sh
+${NEW_SCRIPTS_DIR}/principal.sh
 

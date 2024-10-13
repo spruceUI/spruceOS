@@ -57,6 +57,7 @@ folders="
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/App/SSH/sshkeys
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/spruce/settings/
 "
 
 log_message "Folders to backup: $folders"

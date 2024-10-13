@@ -21,10 +21,12 @@
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+INOTIFY="/mnt/SDCARD/.tmp_update/bin/inotify.elf"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
+# Key
 # exports needed so we can refer to buttons by more memorable names
 export B_LEFT="key 1 105"
 export B_RIGHT="key 1 106"
@@ -46,41 +48,38 @@ export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
 export B_SELECT="key 1 97"
 export B_SELECT_2="rctrl_pressed"
 
-export B_VOLUP="volume up" # only registers on press and on change, not on release. No 1 or 0.
-export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
+export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
+export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
 export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-export B_MENU="key 1 1" # surprisingly functions like a regular button
+export B_MENU="key 1 1"          # surprisingly functions like a regular button
 # export B_POWER # too complicated to bother with tbh
-
 
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
-acknowledge(){
-    messages_file="/var/log/messages"
-	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
+acknowledge() {
+    local messages_file="/var/log/messages"
+    echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
 
     while true; do
+        $INOTIFY "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
 
         case "$last_line" in
-            *"enter_pressed"*|*"key 1 57"*|*"key 1 29"*)
-                echo "ACKNOWLEDGED $(date +%s)" >> "$messages_file"
-                break
-                ;;
+        *"enter_pressed"* | *"key 1 57"* | *"key 1 29"*)
+            echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
+            break
+            ;;
         esac
-
-        sleep 0.3
     done
 }
-
 
 # Call this to set the number of CPU cores to be online
 # Usage: cores_online [number of cores]
 # Default is 4 cores (all cores online)
-cores_online(){
-    local min_cores=4  # Minimum number of cores to keep online
-    local num_cores=${1:-$min_cores}  # Default to min_cores if no argument is provided
-    
+cores_online() {
+    local min_cores=4                # Minimum number of cores to keep online
+    local num_cores=${1:-$min_cores} # Default to min_cores if no argument is provided
+
     # Ensure the input is between min_cores and 4
     if [ "$num_cores" -lt "$min_cores" ]; then
         num_cores=$min_cores
@@ -91,14 +90,14 @@ cores_online(){
     echo "Setting $num_cores CPU core(s) online"
 
     # Always keep CPU0 online
-    echo 1 > /sys/devices/system/cpu/cpu0/online
+    echo 1 >/sys/devices/system/cpu/cpu0/online
 
     # Set the state for CPU1-3 based on num_cores
     for i in 1 2 3; do
         if [ "$i" -lt "$num_cores" ]; then
-            echo 1 > /sys/devices/system/cpu/cpu$i/online
+            echo 1 >/sys/devices/system/cpu/cpu$i/online
         else
-            echo 0 > /sys/devices/system/cpu/cpu$i/online
+            echo 0 >/sys/devices/system/cpu/cpu$i/online
         fi
     done
 }
@@ -154,13 +153,13 @@ display() {
     # Log the final command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
     #log_message "Executing display command: $command"
-    
+
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
         local exit_code=$?
         #log_message "display command started in background with PID $!"
-        
+
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
             acknowledge
@@ -181,114 +180,110 @@ display() {
 
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
-display_kill(){
+display_kill() {
     kill -9 $(pgrep display)
 }
 
 # Executes a command or script passed as the first argument, once 1-5 specific buttons
 # which are passed as further arguments, are concurrently pressed.
 # Call it with &, and don't forget to kill it whenever it is no longer needed.
-# 
+#
 # Example Usage to reboot when all 4 face buttons are pressed at once:
-# 
+#
 # exec_on_hotkey reboot "$B_A" "$B_B" "$B_X" "$B_Y" &
 # hotkey_pid="$!"
 # <the actual rest of your script>
 # kill -9 "$hotkey_pid"
-# 
+#
 exec_on_hotkey() {
-	cmd="$1"
-	key1="$2"
-	key2="$3"
-	key3="$4"
-	key4="$5"
-	key5="$6"
-	key1_pressed=0
-	key2_pressed=0
-	key3_pressed=0
-	key4_pressed=0
-	key5_pressed=0
-	num_keys="$#"
-	num_keys=$((num_keys - 1))
-	count=0
-	messages_file="/var/log/messages"
-	
-	while [ 1 ]; do
-	    last_line=$(tail -n 1 "$messages_file")
-	    case "$last_line" in
-	        *"$key1 1"*)
-	            key1_pressed=1
-	            ;;
-	        *"$key1 0"*)
-	            key1_pressed=0
-	            ;;
-		esac
-		count="$key1_pressed"
-		if [ "$#" -gt 2 ]; then
-			case "$last_line" in
-	        		*"$key2 1"*)
-	            		key2_pressed=1
-	            		;;
-	        		*"$key2 0"*)
-	            		key2_pressed=0
-	            		;;
-			esac
-			count=$((count + key2_pressed))
-		fi
-		if [ "$#" -gt 3 ]; then
-			case "$last_line" in
-	        		*"$key3 1"*)
-	            		key3_pressed=1
-	            		;;
-	        		*"$key3 0"*)
-	            		key3_pressed=0
-	            		;;
-			esac
-			count=$((count + key3_pressed))
-		fi
-		if [ "$#" -gt 4 ]; then
-			case "$last_line" in
-	        		*"$key4 1"*)
-	            		key4_pressed=1
-	            		;;
-	        		*"$key4 0"*)
-	            		key4_pressed=0
-	            		;;
-			esac
-			count=$((count + key4_pressed))
-		fi
-		if [ "$#" -gt 5 ]; then
-		    	case "$last_line" in
-	        		*"$key5 1"*)
-	            		key5_pressed=1
-	            		;;
-	        		*"$key5 0"*)
-	            		key5_pressed=0
-	            		;;
-			esac
-			count=$((count + key5_pressed))
-		fi
-# make sure count doesn't go beyond bounds for some reason.
-		if [ $count -lt 0 ]; then
-			count=0
-		elif [ $count -gt "$num_keys" ]; then
-			count="$num_keys"
-		fi
-# if all designated keys depressed, do the thing!	
-		if [ $count -eq "$num_keys" ]; then
-			"$cmd"
-			# break
-		fi
-	done
-}
+    cmd="$1"
+    key1="$2"
+    key2="$3"
+    key3="$4"
+    key4="$5"
+    key5="$6"
+    key1_pressed=0
+    key2_pressed=0
+    key3_pressed=0
+    key4_pressed=0
+    key5_pressed=0
+    num_keys="$#"
+    num_keys=$((num_keys - 1))
+    count=0
 
+    get_event | while read input; do
+        case "$input" in
+        *"$key1 1"*)
+            key1_pressed=1
+            ;;
+        *"$key1 0"*)
+            key1_pressed=0
+            ;;
+        esac
+        count="$key1_pressed"
+        if [ "$#" -gt 2 ]; then
+            case "$input" in
+            *"$key2 1"*)
+                key2_pressed=1
+                ;;
+            *"$key2 0"*)
+                key2_pressed=0
+                ;;
+            esac
+            count=$((count + key2_pressed))
+        fi
+        if [ "$#" -gt 3 ]; then
+            case "$input" in
+            *"$key3 1"*)
+                key3_pressed=1
+                ;;
+            *"$key3 0"*)
+                key3_pressed=0
+                ;;
+            esac
+            count=$((count + key3_pressed))
+        fi
+        if [ "$#" -gt 4 ]; then
+            case "$input" in
+            *"$key4 1"*)
+                key4_pressed=1
+                ;;
+            *"$key4 0"*)
+                key4_pressed=0
+                ;;
+            esac
+            count=$((count + key4_pressed))
+        fi
+        if [ "$#" -gt 5 ]; then
+            case "$input" in
+            *"$key5 1"*)
+                key5_pressed=1
+                ;;
+            *"$key5 0"*)
+                key5_pressed=0
+                ;;
+            esac
+            count=$((count + key5_pressed))
+        fi
+        # make sure count doesn't go beyond bounds for some reason.
+        if [ $count -lt 0 ]; then
+            count=0
+        elif [ $count -gt "$num_keys" ]; then
+            count="$num_keys"
+        fi
+        # if all designated keys depressed, do the thing!
+        if [ $count -eq "$num_keys" ]; then
+            "$cmd"
+        fi
+    done
+}
 
 # Check if a flag exists
 # Usage: flag_check "flag_name"
-# Returns 0 if the flag exists, 1 if it doesn't
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
         return 0
     else
         return 1
@@ -314,24 +309,24 @@ flag_remove() {
 # Returned strings are simplified, so "B_L1" would return "L1"
 get_button_press() {
     local button_pressed=""
-    local timeout=500  # Timeout in seconds
+    local timeout=500 # Timeout in seconds
     for i in $(seq 1 $timeout); do
         local last_line=$(tail -n 1 /var/log/messages)
         case "$last_line" in
-            *"$B_L1 1"*) button_pressed="L1" ;;
-            *"$B_L2 1"*) button_pressed="L2" ;;
-            *"$B_R1 1"*) button_pressed="R1" ;;
-            *"$B_R2 1"*) button_pressed="R2" ;;
-            *"$B_X 1"*) button_pressed="X" ;;
-            *"$B_A 1"*) button_pressed="A" ;;
-            *"$B_B 1"*) button_pressed="B" ;;
-            *"$B_Y 1"*) button_pressed="Y" ;;
-            *"$B_UP 1"*) button_pressed="UP" ;;
-            *"$B_DOWN 1"*) button_pressed="DOWN" ;;
-            *"$B_LEFT 1"*) button_pressed="LEFT" ;;
-            *"$B_RIGHT 1"*) button_pressed="RIGHT" ;;
-            *"$B_START 1"*) button_pressed="START" ;;
-            *"$B_SELECT 1"*) button_pressed="SELECT" ;;
+        *"$B_L1 1"*) button_pressed="L1" ;;
+        *"$B_L2 1"*) button_pressed="L2" ;;
+        *"$B_R1 1"*) button_pressed="R1" ;;
+        *"$B_R2 1"*) button_pressed="R2" ;;
+        *"$B_X 1"*) button_pressed="X" ;;
+        *"$B_A 1"*) button_pressed="A" ;;
+        *"$B_B 1"*) button_pressed="B" ;;
+        *"$B_Y 1"*) button_pressed="Y" ;;
+        *"$B_UP 1"*) button_pressed="UP" ;;
+        *"$B_DOWN 1"*) button_pressed="DOWN" ;;
+        *"$B_LEFT 1"*) button_pressed="LEFT" ;;
+        *"$B_RIGHT 1"*) button_pressed="RIGHT" ;;
+        *"$B_START 1"*) button_pressed="START" ;;
+        *"$B_SELECT 1"*) button_pressed="SELECT" ;;
         esac
 
         if [ -n "$button_pressed" ]; then
@@ -343,19 +338,23 @@ get_button_press() {
     echo "B"
 }
 
-get_version(){
+get_event() {
+    "/mnt/SDCARD/.tmp_update/bin/getevent" /dev/input/event3
+}
+
+get_version() {
     local spruce_file="/mnt/SDCARD/spruce/spruce"
-    
+
     if [ ! -f "$spruce_file" ]; then
         return "0"
     fi
-    
+
     local version=$(cat "$spruce_file" | tr -d '[:space:]')
-    
+
     if [ -z "$version" ]; then
         return "0"
     fi
-    
+
     # Check if the returned version is in the correct format
     if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then
         return "$version"
@@ -366,10 +365,9 @@ get_version(){
 
 # Call this to kill any show/show_imimge processes left running
 # If you use show()/show_image() at all you need to call this on all the possible exits of your script
-kill_images(){
+kill_images() {
     killall -9 show
 }
-
 
 # Call this to toggle verbose logging
 # After this is called, any log_message calls will output to the log file if -v is passed
@@ -433,18 +431,44 @@ log_message() {
     fi
 
     # Append new log message with verbose indicator if applicable
-    echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >> "$custom_log_file"
+    echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >>"$custom_log_file"
 
     # Keep only the last 200 entries
-    if [ $(wc -l < "$custom_log_file") -gt $max_entries ]; then
-        tail -n $max_entries "$custom_log_file" > "$custom_log_file.tmp"
+    if [ $(wc -l <"$custom_log_file") -gt $max_entries ]; then
+        tail -n $max_entries "$custom_log_file" >"$custom_log_file.tmp"
         mv "$custom_log_file.tmp" "$custom_log_file"
     fi
 
     echo "$message"
 }
 
-# Call with 
+scaling_min_freq=480000 ### default value, may be overridden in specific script
+set_smart() {
+	cores_online
+	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
+	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
+	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
+	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
+	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	log_message "CPU Mode set to SMART"
+}
+
+set_performance() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+	log_message "CPU Mode set to PERFORMANCE"
+
+}
+
+set_overclock() {
+	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+	log_message "CPU Mode set to OVERCLOCK"
+
+}
+
+# Call with
 # show_image "Image Path" 5
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL kill_images()
 # It's possible to leave a show_image() process running
@@ -474,5 +498,5 @@ show_image() {
 # If no duration is provided, defaults to 100ms
 vibrate() {
     local duration=${1:-100}
-    echo "$duration" > /sys/devices/virtual/timed_output/vibrator/enable
+    echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }

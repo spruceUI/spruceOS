@@ -40,32 +40,6 @@ fi
 
 ##### DEFINE FUNCTIONS #####
 
-set_smart() {
-	echo 1 > /sys/devices/system/cpu/cpu2/online
-	echo 1 > /sys/devices/system/cpu/cpu3/online
-	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
-	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	log_message "CPU Mode set to SMART"
-}
-
-set_performance() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
-	log_message "CPU Mode set to PERFORMANCE"
-
-}
-
-set_overclock() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-	log_message "CPU Mode set to OVERCLOCK"
-
-}
-
 enforce_smart() {
 	while true; do
 		sleep 10
@@ -82,41 +56,30 @@ enforce_smart() {
 case $EMU_NAME in
 	"NDS")
 		if [ "$MODE" = "overclock" ]; then
-			{sleep 12 && set_overclock} &
-		elif [ "$MODE" = "performance" ]; then
-			{sleep 12 && set_performance} &
+			{sleep 33 && set_overclock} &
 		else
-			{sleep 12 && set_smart} &
-		fi
-		;;
-
-	"FFPLAY"|"OPENBOR"|"PICO8"|"PORTS"|"PSP")
-		if [ "$MODE" = "overclock" ]; then
-			set_overclock
-		elif [ "$MODE" = "performance" ]; then
-			set_performance
-		else
-			set_smart
+			{sleep 33 && set_performance} &
 		fi
 		;;
 
 	*)
 		if [ "$MODE" = "overclock" ]; then
 			set_overclock
-		elif [ "$MODE" = "performance" ]; then
-			set_performance
 		else
-			set_smart
-			enforce_smart &
-			ENFORCE_PID="$!"
+			set_performance
 		fi
 		;;
 esac
 
+if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
+	enforce_smart &
+	ENFORCE_PID="$!"
+fi
+
 ##### LAUNCH STUFF #####
 
 case $EMU_NAME in
-	"FFPLAY")
+	"MEDIA")
 		export HOME=$EMU_DIR
 		export PATH=$EMU_DIR/bin:$PATH
 		export LD_LIBRARY_PATH=$EMU_DIR/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
@@ -184,9 +147,30 @@ case $EMU_NAME in
 			cd $EMU_DIR
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
-			./miyoo282_xpad_inputd&
+			
+			# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
+			mv /dev/ttyS0 /dev/ttyS2
+
+			# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+			./joypad /dev/input/event3 &
+
+			# wait long enough for creating virtual joypad
+			sleep 0.5
+
+			# read joystick raw data from serial input and apply calibration,
+			# then send to /dev/input/event4
+			( ./joystickinput /dev/ttyS2 /config/joypad.config | /mnt/SDCARD/.tmp_update/bin/sendevent /dev/input/event4 ) &
+
 			./PPSSPPSDL "$*"
-			killall miyoo282_xpad_inputd
+
+			# kill all helper programs
+			killall joypad
+			killall joystickinput
+			killall sendevent
+
+			# remember to rename serial port filename to original name
+			# otherwise RA and other emulator cannot read joystick input anymore 
+			mv /dev/ttyS2 /dev/ttyS0
 		else
 			if flag_check "expertRA"; then
 				export RA_BIN="retroarch"
@@ -196,7 +180,6 @@ case $EMU_NAME in
 			RA_DIR="/mnt/SDCARD/RetroArch"
 			cd "$RA_DIR"
 			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
-			kill -9 "$ENFORCE_PID"
 		fi
 		;;
 	
@@ -208,10 +191,17 @@ case $EMU_NAME in
 		fi
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
-		kill -9 "$ENFORCE_PID"
-		;;
 
+		# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+		./joypad /dev/input/event3 &
+
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+
+		# kill all helper programs
+		killall joypad
+		;;
+		
 esac
 
+kill -9 "$ENFORCE_PID"
 log_message "-----Closing Emulator-----"

@@ -1,7 +1,8 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/sftpgo/sftpgoFunctions.sh
+. /mnt/SDCARD/App/Samba/sambaFunctions.sh
+. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 connect_services() {
@@ -31,6 +32,13 @@ connect_services() {
 				# Flag exists but service is not running, so start it...
 				log_message "Network services: Dropbear detected not running, starting..."
 				start_dropbear_process
+			fi
+			
+			# Samba check
+			if flag_check "samba" && ! pgrep "smbd" > /dev/null; then
+				# Flag exists but service is not running, so start it...
+				log_message "Network services: Samba detected not running, starting..."
+				start_samba_process
 			fi
 			
 			# Syncthing check
