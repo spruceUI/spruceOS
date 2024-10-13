@@ -41,7 +41,6 @@ done
 
 if ! flag_check "show_battery_percent"; then
     log_message "Cleaning battery icons" -v 
-    # Clean the icon somehow I guess
     $BATTERY_PERCENT $THEME_PATH_SKIN " "
     exit 1
 fi
