@@ -40,32 +40,6 @@ fi
 
 ##### DEFINE FUNCTIONS #####
 
-set_smart() {
-	echo 1 > /sys/devices/system/cpu/cpu2/online
-	echo 1 > /sys/devices/system/cpu/cpu3/online
-	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
-	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	log_message "CPU Mode set to SMART"
-}
-
-set_performance() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
-	log_message "CPU Mode set to PERFORMANCE"
-
-}
-
-set_overclock() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-	log_message "CPU Mode set to OVERCLOCK"
-
-}
-
 enforce_smart() {
 	while true; do
 		sleep 10
