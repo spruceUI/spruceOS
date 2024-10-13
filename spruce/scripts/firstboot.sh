@@ -7,7 +7,7 @@ SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 
 IMAGE_PATH_WIKI="${SDCARD_PATH}/.tmp_update/res/wiki.png"
-IMAGE_PATH_FIRMWARE="${SDCARD_PATH}/.tmp_update/res/firmware.png"
+FW_ICON="${SDCARD_PATH}/Themes/SPRUCE/icons/App/firmwareupdate.png"
 IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 
 log_message "Starting firstboot script"
@@ -57,7 +57,7 @@ if flag_check "first_boot"; then
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, suggesting update"
-        show_image "$IMAGE_PATH_FIRMWARE" 5
+        display -i "$FW_ICON" -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
     
     log_message "Displaying enjoy image"
