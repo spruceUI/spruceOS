@@ -18,7 +18,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** gameswitcher_watchdog.sh: $CMD" 
+        log_message "*** gameswitcher_watchdog.sh: $CMD" -v
 
         # check command is emulator
         # exit if not emulator is in command
@@ -30,7 +30,7 @@ prepare_game_switcher() {
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
             # get all commands except the current game
-            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" 
+            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" -v
             grep -Fxv "$CMD" "$LIST_FILE" > "$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file 
@@ -38,7 +38,7 @@ prepare_game_switcher() {
         else
             # if game list file does not exist
             # put command to new game list file
-            log_message "*** gameswitcher_watchdog.sh: Creating new list file" 
+            log_message "*** gameswitcher_watchdog.sh: Creating new list file" -v
             echo "$CMD" > "$LIST_FILE"
         fi
 
@@ -94,14 +94,6 @@ prepare_game_switcher() {
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" > /dev/null ; then
         # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
-        {
-            # close in-game menu
-            echo 1 316 0  # MENU up
-            echo 1 316 1  # MENU down
-            echo 1 316 0  # MENU up
-            echo 0 0 0    # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4
-        sleep 0.5
         {
             # send autosave hot key
             echo 1 314 1  # SELECT down
@@ -172,7 +164,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
     case $line in
         *"key 1 1 1"*) # MENU key down
             # start long press handler
-            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" 
+            log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
         ;;
@@ -181,22 +173,18 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
             if flag_check "gs.longpress" ; then
                 flag_remove "gs.longpress"
                 kill $PID
-                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED"
+                log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
                 if pgrep "MainUI" > /dev/null ; then
-                    log_message "*** gameswitcher_watchdog.sh: FUCK 1"
                     prepare_game_switcher
 
                 elif flag_check "gs.runontap" ; then
-                    log_message "*** gameswitcher_watchdog.sh: FUCK 2"
-
                     if pgrep "ra32.miyoo" > /dev/null ; then
                         prepare_game_switcher
                     elif pgrep "PPSSPPSDL" > /dev/null ; then
                         prepare_game_switcher
                     fi
                 else
-                    log_message "*** gameswitcher_watchdog.sh: FUCK 3"
                     if pgrep "ra32.miyoo" > /dev/null ; then
                         send_virtual_key
                     elif pgrep "PPSSPPSDL" > /dev/null ; then
