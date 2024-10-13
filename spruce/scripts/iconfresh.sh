@@ -81,46 +81,6 @@ update_app_icons() {
     sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
 }
 
-update_skin_images() {
-    local ALL_IMAGES_PRESENT=true
-
-    # List of images to check
-    IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png"
-
-    for IMAGE_NAME in $IMAGES_LIST; do
-        THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
-        DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-        FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
-
-        if [ ! -f "$THEME_IMAGE_PATH" ]; then
-            ALL_IMAGES_PRESENT=false
-            break
-        fi
-    done
-
-    if [ "$ALL_IMAGES_PRESENT" = true ]; then
-        for IMAGE_NAME in $IMAGES_LIST; do
-            THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
-            DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-
-            cp "$THEME_IMAGE_PATH" "$DEFAULT_IMAGE_PATH"
-            log_message "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
-        done
-    else
-        for IMAGE_NAME in $IMAGES_LIST; do
-            FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
-            DEST_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-
-            if [ -f "$FALLBACK_IMAGE_PATH" ]; then
-                cp "$FALLBACK_IMAGE_PATH" "$DEST_IMAGE_PATH"
-                log_message "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
-            else
-                log_message "Fallback image not found: $FALLBACK_IMAGE_PATH"
-            fi
-        done
-    fi
-}
-
 cores_online 3
 
 find "$EMULATOR_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
@@ -131,7 +91,7 @@ find "$APP_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_app_icons "$CONFIG_FILE"
 done
 
-update_skin_images
+# Removed the update_skin_images function and its call
 
 # Only kill images if not in silent mode
 if [ $silent_mode -eq 0 ]; then
@@ -141,4 +101,3 @@ fi
 /mnt/SDCARD/.tmp_update/scripts/powerdisplay.sh
 
 cores_online
-
