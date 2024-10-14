@@ -72,6 +72,19 @@ fi
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
+
+
+# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
+mv /dev/ttyS0 /dev/ttyS2
+# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+cd /mnt/SDCARD/.tmp_update/bin
+./joypad /dev/input/event3 &
+# wait long enough for creating virtual joypad
+sleep 0.5
+# read joystick raw data from serial input and apply calibration,
+# then send to /dev/input/event4
+( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
+        
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 

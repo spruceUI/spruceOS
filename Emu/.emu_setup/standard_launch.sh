@@ -134,29 +134,7 @@ case $EMU_NAME in
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
 			
-			# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
-			mv /dev/ttyS0 /dev/ttyS2
-
-			# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-			./joypad /dev/input/event3 &
-
-			# wait long enough for creating virtual joypad
-			sleep 0.5
-
-			# read joystick raw data from serial input and apply calibration,
-			# then send to /dev/input/event4
-			( ./joystickinput /dev/ttyS2 /config/joypad.config | /mnt/SDCARD/.tmp_update/bin/sendevent /dev/input/event4 ) &
-
 			./PPSSPPSDL "$*"
-
-			# kill all helper programs
-			killall joypad
-			killall joystickinput
-			killall sendevent
-
-			# remember to rename serial port filename to original name
-			# otherwise RA and other emulator cannot read joystick input anymore 
-			mv /dev/ttyS2 /dev/ttyS0
 		else
 			if flag_check "expertRA"; then
 				export RA_BIN="retroarch"
@@ -178,13 +156,8 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-		./joypad /dev/input/event3 &
-
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
 
-		# kill all helper programs
-		killall joypad
 		;;
 		
 esac
