@@ -5,7 +5,7 @@ IMAGE_PATH="/mnt/SDCARD/App/RandomGame/random.png"
 if [ ! -f "$IMAGE_PATH" ]; then
     exit 1
 fi
-show_image "$IMAGE_PATH"
+display -i "$IMAGE_PATH"
 PREV_SELECTION_FILE="/mnt/SDCARD/App/RandomGame/prev_selection.txt"
 PREV5_FILE="/mnt/SDCARD/App/RandomGame/5_previous.txt"
 
@@ -157,8 +157,7 @@ done
 BOX_ART_PATH="$(dirname "$SELECTED_GAME")/Imgs/$(basename "$SELECTED_GAME" | sed 's/\.[^.]*$/.png/')"
 
 if [ -f "$BOX_ART_PATH" ]; then
-    show_image "$BOX_ART_PATH" 2
-    kill_images
+    display -i "$BOX_ART_PATH" -d 2
     kill $(jobs -p)
 fi
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/App/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/Samba/sambaFunctions.sh
 . /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh

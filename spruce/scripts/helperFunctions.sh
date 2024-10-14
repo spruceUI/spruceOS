@@ -60,16 +60,17 @@ export B_MENU="key 1 1"          # surprisingly functions like a regular button
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
+    # These echo's are needed to seperate the events in the key press log file
     local messages_file="/var/log/messages"
     echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
 
     while true; do
         $INOTIFY "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
-
         case "$last_line" in
-        *"enter_pressed"* | *"key 1 57"* | *"key 1 29"*)
+        *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
+            log_message "last_line: $last_line" -v
             break
             ;;
         esac
@@ -283,10 +284,10 @@ exec_on_hotkey() {
 
 # Check if a flag exists
 # Usage: flag_check "flag_name"
-# Returns 0 if the flag exists, 1 if it doesn't
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
         return 0
     else
         return 1
