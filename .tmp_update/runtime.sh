@@ -128,7 +128,6 @@ ${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
-/mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 /mnt/SDCARD/spruce/scripts/credits_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
