@@ -1,63 +1,58 @@
-# this line is documentation
-# you can use the following format to define alias to make your commands shorter
-$FLAGS=/mnt/SDCARD/spruce/flags$
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
-$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
-# Setting Scripts
+$FLAGS=/mnt/SDCARD/spruce/flags$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
-$SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
-
-# the lines below define a group, with group name and optional output option file
-[Game Switcher\[GS\]] [/mnt/SDCARD/spruce/flags/gs_options]
-""    "Run GS on start" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot"
-@"this is hardcoded minor text"
-""    "Run GS after closing a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix"
-""    "Use boxart instead of screenshots" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" 
-""    "Launch GS with tap of Home button" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" 
-@"Except for NDS games"
-"-s"  "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast"
-"-b"  "Swap left/right buttons" "on|off" "on|off" "off"
-"-m"  "Display title in multiple lines" "on|off" "on|off" "off"
-"-t"  "Display title at start" "on|off" "on|off" "on"
-"-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal"
-"-n"  "Display item index" "on|off" "on|off" "on"
-"-d"  "Enable item deletion" "on|off" "on|off" "on"
-# thhs line second group
-[Network]
-"" "Sync RTC with network time" "|" "on|off" "$CHECK$ RTCSync" "touch $FLAGS$/RTCSync|rm -f $FLAGS$/RTCSync"
-"" "Enable WIFI file transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
-@"Port: 8080 User: spruce Password: happygaming"
-"" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
-@"User: root Password: tina"
-"" "Enable Syncthing" "|" "on|off" "off"
-@"Port: 8384 Synchronize your saves and files"
-"" "Enable Samba" "|" "on|off" "off"
-@"User: root Password: tina"
+$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
+$SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 [System]
-""   "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off"
-"" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent"
+"-s" "Powerdown on main menu idle" "0|2|5|10" "Off|2 min|5 min |10 min" "Off" "" ""
+"" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
+"" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"
-"-e" "Enable Recents tab in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$"
-"-f" "Enable RetroArch expert mode" "|" "on|off" "on"
+"-e" "Enable Recents tab in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
+"-f" "Enable RetroArch expert mode" "|" "on|off" "on" "" ""
+[Network]
+"" "Sync RTC with network time" "|" "on|off" "$CHECK$ RTCSync" "touch $FLAGS$/RTCSync|rm -f $FLAGS$/RTCSync" ""
+"" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
+@"u: spruce p: happygaming port:8080"
+"" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
+@"u: root, p: tina port:22"
+"" "Enable Samba" "|" "on|off" "off" "" ""
+@"Network file-sharing. u: root p: tina"
+"" "Enable Syncthing" "|" "on|off" "off" "" ""
+@"Synchronize files. port: 8384 "
+[Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
+"" "Run on start" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot" ""
+@"Boot into Game Switcher"
+"" "Run after closing a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix" ""
+"" "Launch with tap of Home button" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" ""
+@"Except for NDS games"
+"" "Use boxart instead of screenshots" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" ""
+"-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
+"-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
+"-t" "Display title at start" "on|off" "on|off" "on" "" ""
+"-n" "Display item index" "on|off" "on|off" "on" "" ""
+"-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
+"-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
+"-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
 [Visible Apps]
-"" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json"
+"" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json" ""
 @"Change the boot logo"
-"" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json"
+"" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json" ""
 @"Download boxart for your games"
-"" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json"
-"" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json"
+"" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
+"" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
 @"Generate GameList files for alternate/full rom names"
-"" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json"
+"" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
 @"Launch random games from your roms folder"
-"" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json"
+"" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the RTC to the current date and time"
-"" "Samba" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Samba/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Samba/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Samba/config.json"
+"" "Samba" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Samba/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Samba/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Samba/config.json" ""
 @"Access your files via Samba"
-"" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json"
+"" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
-"" "Syncthing" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json"
+"" "Syncthing" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json" ""
 @"Synchronize your files via Syncthing"
-"" "Wifi File Transfer" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/WifiFileTransfer/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/WifiFileTransfer/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/WifiFileTransfer/config.json"
+"" "Wifi File Transfer" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/WifiFileTransfer/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/WifiFileTransfer/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/WifiFileTransfer/config.json" ""
 @"Transfer files to your device via WiFi through your browser"

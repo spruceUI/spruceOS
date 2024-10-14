@@ -1,5 +1,10 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+if flag_check "in_menu"; then
+    log_message "btnpwr not active in MainUI"
+    exit 0
+fi
 # Kill keymon
 killall -9 keymon
 vibrate
