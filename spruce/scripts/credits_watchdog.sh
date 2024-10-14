@@ -5,10 +5,11 @@
 LONG_PRESSED=false
 
 long_press_handler() {
-    LONG_PRESSED=false
+
+    flag_add "credits.longpress"
     sleep 5
     if flag_check "in_menu"; then
-        LONG_PRESSED=true
+        flag_remove "credits.longpress"
 
         # kill MainUI
         killall -q -9 MainUI || \
@@ -17,6 +18,7 @@ long_press_handler() {
         # set flag file for principal.sh to load credits app
         flag_add "credits"
     fi
+    flag_remove "credits.longpress"
 }
 
 # listen to log file and handle key press events
@@ -24,16 +26,17 @@ long_press_handler() {
 tail -F -n 1 /var/log/messages | while read line; do
     if flag_check "in_menu"; then
         case $line in
-            *"$B_L1 1"*) # START key down
+            *"$B_L1 1"*) # L1 key down
                 # start long press handler
                 long_press_handler &
                 PID=$!
             ;;
-            *"$B_L1 0"*) # START key up
+            *"$B_L1 0"*) # L1 key up
                 # kill the long press handler if 
                 # menu button is released within time limit
                 # and is in game now
-                if [ "$LONG_PRESSED" = false ] ; then
+                if [ flag_check "credits.longpress" ] ; then
+                    flag_remove "credits.longpress"
                     kill $PID
                 fi
             ;;
