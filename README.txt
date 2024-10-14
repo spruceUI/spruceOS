@@ -1,6 +1,6 @@
 README
 
-spruce 2.3
+spruce 2.3.0
 
 CHANGELOG:
 -Added Ukrainian Language
