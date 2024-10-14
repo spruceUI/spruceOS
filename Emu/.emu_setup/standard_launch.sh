@@ -38,19 +38,6 @@ else
 	log_message "No launch OVR_FILE detected. Using current system settings."
 fi
 
-##### DEFINE FUNCTIONS #####
-
-enforce_smart() {
-	while true; do
-		sleep 10
-		governor="$(cat "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")"
-		if [ $governor != "conservative" ]; then
-			log_message "CPU Mode has changed. Re-enforcing SMART mode"
-			set_smart
-		fi
-	done
-}
-
 ##### SET CPU MODE #####
 
 case $EMU_NAME in
@@ -72,8 +59,7 @@ case $EMU_NAME in
 esac
 
 if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
-	enforce_smart &
-	ENFORCE_PID="$!"
+	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
 ##### LAUNCH STUFF #####
@@ -196,5 +182,5 @@ case $EMU_NAME in
 
 esac
 
-kill -9 "$ENFORCE_PID"
+kill -9 $(pgrep enforceSmartCPU.sh)
 log_message "-----Closing Emulator-----"

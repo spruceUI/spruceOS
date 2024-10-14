@@ -9,6 +9,9 @@
 # get_button_press: Returns the name of the last button pressed
 # kill_images: Kills all show processes
 # log_message: Logs a message to a file
+# set_smart: sets CPU to 4 cores, conservative governor, variable MHz
+# set_performance: sets CPU to 4 cores, performance governor, 1344 MHz
+# set_overclock: sets CPU to 4 cores, performance governor, 1512 MHz
 # show_image: Displays an image for a specified duration
 # vibrate: Vibrates the device for a specified duration
 
@@ -459,13 +462,11 @@ set_smart() {
 set_performance() {
 	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
 	log_message "CPU Mode set to PERFORMANCE"
-
 }
 
 set_overclock() {
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
 	log_message "CPU Mode set to OVERCLOCK"
-
 }
 
 # Call with
