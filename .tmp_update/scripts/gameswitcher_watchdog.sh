@@ -86,7 +86,7 @@ prepare_game_switcher() {
         # use sendevent to send MENU + L1 combin buttons to drastic  
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            echo 1 1 1   # MENU down
+            #echo 1 1 1   # MENU down
             echo 1 15 1  # L1 down
             echo 1 15 0  # L1 up
             echo 1 1 0   # MENU up
@@ -94,14 +94,6 @@ prepare_game_switcher() {
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" > /dev/null ; then
         # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
-        {
-            # close in-game menu
-            echo 1 316 0  # MENU up
-            echo 1 316 1  # MENU down
-            echo 1 316 0  # MENU up
-            echo 0 0 0    # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4
-        sleep 0.5
         {
             # send autosave hot key
             echo 1 314 1  # SELECT down
@@ -126,6 +118,19 @@ prepare_game_switcher() {
     log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
 }
 
+send_virtual_key() {
+    {
+        echo 1 316 0   # MENU up
+        echo 1 317 1   # L3 down
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4
+    sleep 0.3
+    {
+        echo 1 317 0   # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4    
+}
+
 long_press_handler() {
     # setup flag for long pressed event
     flag_add "gs.longpress"
@@ -133,26 +138,23 @@ long_press_handler() {
     flag_remove "gs.longpress"
 
     # if IS long press
-    # if miyoo RA or PSP is running, send virtual joypad L3 button event to activate in-game menu
-    if pgrep "ra32.miyoo" > /dev/null || \
-       pgrep "retroarch" > /dev/null || \
-       pgrep "PPSSPPSDL" > /dev/null ; then
-        {
-            echo 1 316 0   # MENU up
-            echo 1 317 1   # L3 down
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4
-        sleep 0.3
-        {
-            echo 1 317 0   # L3 up
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4    
-    fi
-
-    # if NDS or original RA is running, prepare to run GS
-    if pgrep "drastic" > /dev/null || \ 
-       pgrep "retroarch" > /dev/null ; then
+    if pgrep "retroarch" > /dev/null ; then
         prepare_game_switcher
+    elif pgrep "drastic" > /dev/null ; then
+        prepare_game_switcher
+
+    elif flag_check "gs.runontap" ; then
+        if pgrep "ra32.miyoo" > /dev/null ; then
+            send_virtual_key
+        elif pgrep "PPSSPPSDL" > /dev/null ; then
+            send_virtual_key
+        fi
+    else
+        if pgrep "ra32.miyoo" > /dev/null ; then
+            prepare_game_switcher
+        elif pgrep "PPSSPPSDL" > /dev/null ; then
+            prepare_game_switcher
+        fi
     fi
 }
 
@@ -173,11 +175,21 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
-                # if RA is running, prepare to run GS
-                if pgrep "ra32.miyoo" > /dev/null || \
-                   pgrep "PPSSPPSDL" > /dev/null || \
-                   pgrep "MainUI" > /dev/null ; then
+                if pgrep "MainUI" > /dev/null ; then
                     prepare_game_switcher
+
+                elif flag_check "gs.runontap" ; then
+                    if pgrep "ra32.miyoo" > /dev/null ; then
+                        prepare_game_switcher
+                    elif pgrep "PPSSPPSDL" > /dev/null ; then
+                        prepare_game_switcher
+                    fi
+                else
+                    if pgrep "ra32.miyoo" > /dev/null ; then
+                        send_virtual_key
+                    elif pgrep "PPSSPPSDL" > /dev/null ; then
+                        send_virtual_key
+                    fi
                 fi
             fi
         ;;
