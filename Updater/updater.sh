@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Spruce updater: checks for updates and applies them if found
+# Spruce updater: checks for an update file and applies them if found
 
 DISPLAY="/mnt/SDCARD/Updater/bin/display_text.elf"
 UPDATE_FILE=""
