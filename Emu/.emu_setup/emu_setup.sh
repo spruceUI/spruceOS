@@ -6,6 +6,7 @@ OVR_DIR="$SETUP_DIR/overrides"
 OPT_DIR="$SETUP_DIR/options"
 CORE_DIR="$SETUP_DIR/core"
 DEF_DIR="$SETUP_DIR/defaults"
+SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 
 {
 # copy defaults folder into options folder if needed
@@ -27,5 +28,9 @@ for dir in $EMU_DIR/* ; do
 		fi
 	fi
 done
+
+if [ ! -f "$SPLORE_CART" ]; then
+	touch "$SPLORE_CART"
+fi
 
 } &> "$SETUP_DIR/log.txt"
