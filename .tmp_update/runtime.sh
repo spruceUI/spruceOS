@@ -72,7 +72,7 @@ fi
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
-# run keymon before virtual keyboard is created
+# ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
 keymon /dev/input/event0 &
 keymon /dev/input/event3 &
 

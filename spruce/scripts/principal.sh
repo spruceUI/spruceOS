@@ -26,9 +26,6 @@ runifnecessary() {
     fi
 }
 
-# ensure keymon is running first
-runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-
 flag_remove "save_active"
 
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
