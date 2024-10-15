@@ -6,50 +6,51 @@
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 connect_services() {
-	
+
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-			
-			# Sync Device Time to Network Time
-			ntpd -n -q -p pool.ntp.org	 
-			
-			# Sync RTC to Device Time
-			if flag_check "RTCSync" > /dev/null; then
-				# Flag exists so sync RTC to Device Time ...
+
+			if ! flag_check "time_synced_this_boot" && ! pgrep -f "geoSyncSystemTime.sh" >/dev/null; then
+				# Sync Device Time to Network Time
+				/mnt/SDCARD/spruce/scripts/geoSyncSystemTime.sh
+			fi
+
+			if flag_check "time_synced_this_boot" && flag_check "RTCSync" >/dev/null; then
+				# Time was synced this boot cycle, so sync RTC to Device Time ...
 				log_message "Network services: Syncing RTC to Device Time..."
 				hwclock -w
 			fi
-			
+
 			# SFTPGo check
-			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
+			if flag_check "sftpgo" && ! pgrep "sftpgo" >/dev/null; then
 				# Flag exists but service is not running, so start it...
 				log_message "Network services: SFTPGo detected not running, starting..."
 				start_sftpgo_process
 			fi
 
 			# SSH check
-			if flag_check "dropbear" && ! pgrep "dropbear" > /dev/null; then
+			if flag_check "dropbear" && ! pgrep "dropbear" >/dev/null; then
 				# Flag exists but service is not running, so start it...
 				log_message "Network services: Dropbear detected not running, starting..."
 				start_dropbear_process
 			fi
-			
+
 			# Samba check
-			if flag_check "samba" && ! pgrep "smbd" > /dev/null; then
+			if flag_check "samba" && ! pgrep "smbd" >/dev/null; then
 				# Flag exists but service is not running, so start it...
 				log_message "Network services: Samba detected not running, starting..."
 				start_samba_process
 			fi
-			
+
 			# Syncthing check
-			if flag_check "syncthing" && ! pgrep "syncthing" > /dev/null; then
+			if flag_check "syncthing" && ! pgrep "syncthing" >/dev/null; then
 				# Flag exists but service is not running, so start it...
 				log_message "Network services: Syncthing detected not running, starting..."
 				start_syncthing_process
 			fi
-			
+
 			break
-			
+
 		fi
 		sleep 1
 	done
