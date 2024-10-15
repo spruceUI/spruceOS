@@ -46,7 +46,7 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
     
     log_message "Running emufresh.sh"
-    /mnt/SDCARD/.tmp_update/scripts/emufresh.sh
+    /mnt/SDCARD/spruce/scripts/emufresh_new.sh
     
     log_message "Running iconfresh.sh"
     show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
@@ -58,7 +58,7 @@ if flag_check "first_boot"; then
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, suggesting update"
-        display -i "$FW_ICON" -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+        display -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
     
     log_message "Displaying enjoy image"
