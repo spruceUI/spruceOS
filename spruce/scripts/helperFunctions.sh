@@ -424,6 +424,7 @@ log_verbose() {
 #    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 max_entries=200
+log_write_count=0
 log_message() {
     local message="$1"
     local verbose_flag="$2"
@@ -435,13 +436,10 @@ log_message() {
     fi
 
     # Ensure the directory for the log file exists
-    mkdir -p "$(dirname "$custom_log_file")"
+    [ -d "$(dirname "$custom_log_file")" ] || mkdir -p "$(dirname "$custom_log_file")"
 
-    # Check if custom log file exists, if not, use default log file
-    if [ ! -f "$custom_log_file" ]; then
-        mkdir -p "$(dirname "$log_file")"
-        custom_log_file="$log_file"
-    fi
+    # Ensure the log file exists
+    [ -f "$custom_log_file" ] || touch "$custom_log_file"
 
     # Ensure the log file exists
     touch "$custom_log_file"
@@ -455,10 +453,14 @@ log_message() {
     # Append new log message with verbose indicator if applicable
     echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >>"$custom_log_file"
 
-    # Keep only the last 200 entries
-    if [ $(wc -l <"$custom_log_file") -gt $max_entries ]; then
-        tail -n $max_entries "$custom_log_file" >"$custom_log_file.tmp"
-        mv "$custom_log_file.tmp" "$custom_log_file"
+    # Increment log write count and only check every 10th write
+    log_write_count=$((log_write_count + 1))
+    if [ $log_write_count -ge 10 ]; then
+        log_write_count=0
+        if [ $(wc -l <"$custom_log_file") -gt $max_entries ]; then
+            tail -n $max_entries "$custom_log_file" >"$custom_log_file.tmp"
+            mv "$custom_log_file.tmp" "$custom_log_file"
+        fi
     fi
 
     echo "$message"
