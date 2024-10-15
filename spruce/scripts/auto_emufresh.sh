@@ -1,9 +1,9 @@
 #!/bin/sh
 
-EMU_DIR="/mnt/SDCARD/Emu"
+ROM_DIR="/mnt/SDCARD/Roms"
 SPRUCE_DIR="/mnt/SDCARD/Saves/spruce"
 LAST_LS_FILE="$SPRUCE_DIR/emufresh.ls"
-CURRENT_LS="$(ls -R $EMU_DIR)"
+CURRENT_LS="$(ls -R $ROM_DIR)"
 EMUFRESH="$/mnt/SDCARD/spruce/scripts/emufresh_new.sh"
 
 if [ -f "$LAST_LS_FILE" ]; then
