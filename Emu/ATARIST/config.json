@@ -1,23 +1,19 @@
 {
-  "label": "Amiga",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
+  "label": "Atari ST",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atarist.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atarist.png",
   "launch": "launch.sh",
-  "rompath": "../../Roms/AMIGA",
-  "imgpath": "../../Roms/AMIGA/Imgs",
-  "gamelist": "../../Roms/AMIGA/miyoogamelist.xml",
-  "useswap": 0,
+  "rompath": "../../Roms/ATARIST",
+  "imgpath": "../../Roms/ATARIST/Imgs",
+  "gamelist": "../../Roms/ATARIST/miyoogamelist.xml",
+  "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|zip|7z|rp9",
+  "extlist": "st|msa|stx|dim|ipf|zip|7z",
   "launchlist": [
     {
-      "name": "Jump to random Amiga game",
+      "name": "Jump to random Atari ST game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓UAE4ARM)-puae2021-puae",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/puae2021.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
