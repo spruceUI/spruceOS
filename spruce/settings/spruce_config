@@ -13,8 +13,9 @@ $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"
-"-e" "Enable Recents tab in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
-"-f" "Enable RetroArch expert mode" "|" "on|off" "on" "" ""
+"-e" "Enable Recents in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
+"-f" "Enable RetroArch expert mode" "|" "on|off" "off" "" ""
+@"NOT IMPLEMENTED YET"
 [Network]
 "" "Sync RTC with network time" "|" "on|off" "$CHECK$ RTCSync" "touch $FLAGS$/RTCSync|rm -f $FLAGS$/RTCSync" ""
 "" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
