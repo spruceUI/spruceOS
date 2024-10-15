@@ -143,7 +143,9 @@ long_press_handler() {
     flag_remove "gs.longpress"
 
     # if IS long press
-    if pgrep "retroarch" > /dev/null ; then
+    if pgrep "MainUI" > /dev/null ; then
+        prepare_game_switcher
+    elif pgrep "retroarch" > /dev/null ; then
         prepare_game_switcher
     elif pgrep "drastic" > /dev/null ; then
         prepare_game_switcher
@@ -180,10 +182,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
-                if pgrep "MainUI" > /dev/null ; then
-                    prepare_game_switcher
-
-                elif flag_check "gs.runontap" ; then
+                if flag_check "gs.runontap" ; then
                     if pgrep "ra32.miyoo" > /dev/null ; then
                         prepare_game_switcher
                     elif pgrep "PPSSPPSDL" > /dev/null ; then
