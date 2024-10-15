@@ -30,9 +30,9 @@ display() {
     pkill -f "$DISPLAY"
 
     if [ "$delay" = "0" ]; then
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" &
+        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 &
     else
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}"
+        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0
     fi
 }
 
@@ -90,8 +90,14 @@ if [ "$UPDATE_SAME_VERSION" = true ] || [ "$(echo "$UPDATE_VERSION $CURRENT_VERS
     log_update_message "Proceeding with update"
 else
     log_update_message "Current version is up to date"
-    display "Current version is up to date" 5
-    exit 0
+    if ! check_installation_validity; then
+        log_update_message "Bad installation detected"
+        display "Detected current installation is invalid.
+Allowing reinstall." 5
+    else
+        display "Current version is up to date" 5
+        exit 0
+    fi
 fi
 
 # Verify update file contents

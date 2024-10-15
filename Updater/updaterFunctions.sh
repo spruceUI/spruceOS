@@ -19,6 +19,24 @@ check_for_update_file() {
     return 0
 }
 
+check_installation_validity() {
+    # Check if .tmp_update folder exists
+    if [ ! -d "/mnt/SDCARD/.tmp_update" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: .tmp_update folder does not exist"
+        return 1
+    fi
+
+    # Check if .tmp_update/updater file exists
+    if [ ! -f "/mnt/SDCARD/.tmp_update/updater" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: .tmp_update/updater file does not exist"
+        return 1
+    fi
+
+    # Both files exist, installation is valid
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Installation appears to be valid"
+    return 0
+}
+
 verify_7z_content() {
     local archive="$1"
     local required_dirs=".tmp_update App spruce"
