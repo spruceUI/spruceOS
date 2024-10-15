@@ -108,6 +108,7 @@ cores_online() {
 
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
+DEFAULT_FONT="/mnt/SDCARD/Updater/bin/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
 # It's possible to leave a display process running
@@ -120,15 +121,16 @@ CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
 #   -p, --position <pos>  Text position (top, center, bottom) (default: center)
 #   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
-#   -c, --color <color>   Text color in RGB format (default: ffffff)
+#   -c, --color <color>   Text color in RGB format (default: dbcda7) Spruce text yellow
 #   -f, --font <path>     Font path (optional)
 #   -o, --okay            Use CONFIRM_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
 display() {
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ffffff" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
     local use_confirm_image=false
     local run_acknowledge=false
+    local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     
     display_kill
 
@@ -144,6 +146,9 @@ display() {
             -c|--color) color="$2"; shift ;;
             -f|--font) font="$2"; shift ;;
             -o|--okay) use_confirm_image=true; run_acknowledge=true ;;
+            -bg|--bg-color) bg_color="$2"; shift ;;
+            -bga|--bg-alpha) bg_alpha="$2"; shift ;;
+            -is|--image-scaling) image_scaling="$2"; shift ;;
             *) log_message "Unknown option: $1"; return 1 ;;
         esac
         shift
@@ -154,32 +159,31 @@ display() {
     local r="${color:0:2}"
     local g="${color:2:2}"
     local b="${color:4:2}"
-    # Log the final command
-    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" \"$delay\" \"$size\" \"$position\" \"$align\" \"$width\" \"$r\" \"$g\" \"$b\" \"$font\""
-    #log_message "Executing display command: $command"
+    local bg_r="${bg_color:0:2}"
+    local bg_g="${bg_color:2:2}"
+    local bg_b="${bg_color:4:2}"
 
+    # Set font to DEFAULT_FONT if it's empty
+    if [ -z "$font" ]; then
+        font="$DEFAULT_FONT"
+    fi
+
+    # Construct the command
+    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
-        $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font &
-        local exit_code=$?
-        #log_message "display command started in background with PID $!"
-
+         $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b "$font" $bg_r $bg_g $bg_b $bg_alpha $image_scaling &
+        log_message "display command: $command"
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
             acknowledge
         fi
     else
         # Execute the command and capture its output
-        local output
-        output=$($DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b $font 2>&1)
-        local exit_code=$?
-        # Log the output and exit code
-        #log_message "display command output: $output"
-        #log_message "display command exit code: $exit_code"
+        $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b "$font" $bg_r $bg_g $bg_b $bg_alpha $image_scaling
+        log_message "display command: $command"
     fi
-
-    # Return the exit code of the display command
-    return $exit_code
 }
 
 # Call this to kill any display processes left running
