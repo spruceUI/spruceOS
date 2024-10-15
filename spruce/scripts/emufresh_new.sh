@@ -1,6 +1,9 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+set_performance
+
 EMU_DIR="/mnt/SDCARD/Emu"
 ROM_DIR="/mnt/SDCARD/Roms"
 P8_DIR="$EMU_DIR/PICO8"
