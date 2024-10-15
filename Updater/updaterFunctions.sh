@@ -31,12 +31,15 @@ verify_7z_content() {
     local temp_list=$(mktemp)
     7zr l "$archive" > "$temp_list"
     
-    # Uncomment both lines to debug archive contents
-    #echo "$(date '+%Y-%m-%d %H:%M:%S') - Debug: Archive contents:"
-    #cat "$temp_list"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Debug: Archive contents:"
+    cat "$temp_list"
     
     for dir in $required_dirs; do
-        if ! grep -q "^[0-9-]* [0-9:]* D\.\.\.\. *0 *0 *$dir$" "$temp_list"; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Searching for directory: $dir"
+        if grep -q "^.*DR.*[[:space:]]$dir$" "$temp_list"; then
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Found directory: $dir"
+        else
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Directory not found: $dir"
             missing_dirs="$missing_dirs $dir"
         fi
     done
