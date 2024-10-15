@@ -27,6 +27,7 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+rotate_logs &
 
 # Flag cleanup
 flag_remove "themeChanged"
