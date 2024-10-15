@@ -91,10 +91,5 @@ while [ 1 ]; do
         log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
         /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
     fi
-
-    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ] ; then
-        /mnt/SDCARD/App/Credits/launch.sh
-        rm /mnt/SDCARD/spruce/flags/credits.lock
-    fi
-    
+        
 done

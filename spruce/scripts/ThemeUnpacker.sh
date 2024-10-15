@@ -28,7 +28,7 @@ for archive in "$THEME_DIR"/*.7z; do
         theme_name=$(basename "$archive" .7z)
         display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$theme_name packed theme detected. Unpacking.........." -c dbcda7
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
-            7zr x -aoa "$archive" -o/
+            7zr x "$archive" -o/
             if [ $? -eq 0 ]; then
                 rm -f "$archive"
                 log_message "Unpacked and removed: $theme_name.7z"
@@ -49,7 +49,7 @@ for folder in $RA_FOLDERS_TO_UNPACK; do
     if [ -f "$archive" ]; then
         display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$folder packed retroarch theme detected. Unpacking.........." -c dbcda7
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
-            7zr x -aoa "$archive" -o/
+            7zr x "$archive" -o/
             if [ $? -eq 0 ]; then
                 rm -f "$archive"
                 log_message "Unpacked and removed RetroArch folder: ${folder}.7z"

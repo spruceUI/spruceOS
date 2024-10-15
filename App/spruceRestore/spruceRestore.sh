@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Add silent mode flag
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1
+
 APP_DIR=/mnt/SDCARD/App/spruceRestore
 UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
@@ -13,7 +17,15 @@ FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreFailed.png"
 
 log_message "----------Starting Restore script----------"
 cores_online 4
-show_image "$IMAGE_PATH"
+
+# Modify display function to respect silent mode
+display_image() {
+    if [ "$silent_mode" -eq 0 ]; then
+        display "$@"
+    fi
+}
+
+display_image -i "$IMAGE_PATH"
 
 #-----Main-----
 
@@ -26,8 +38,7 @@ log_message "Looking for backup files..."
 # Check if backups folder exists
 if [ ! -d "$BACKUP_DIR/backups" ]; then
     log_message "Backup folder not found at $BACKUP_DIR/backups"
-    show_image "$NOTFOUND_IMAGE_PATH"
-    acknowledge
+    display_image -i "$NOTFOUND_IMAGE_PATH" --okay
     exit 1
 fi
 
@@ -36,8 +47,7 @@ backup_files=$(find "$BACKUP_DIR/backups" -name "spruceBackup*.7z" | sort -r | t
 
 if [ -z "$backup_files" ]; then
     log_message "No spruceBackup 7z files found in $BACKUP_DIR/backups"
-    show_image "$FAIL_IMAGE_PATH"
-    acknowledge
+    display_image -i "$FAIL_IMAGE_PATH" --okay
     exit 1
 fi
 
@@ -51,8 +61,7 @@ log_message "Verifying the integrity of the backup file..."
 
 if [ $? -ne 0 ]; then
     log_message "Backup file integrity check failed. The file may be corrupted."
-    show_image "$FAIL_IMAGE_PATH"
-    acknowledge
+    display_image -i "$FAIL_IMAGE_PATH" --okay
     exit 1
 fi
 
@@ -100,15 +109,14 @@ log_message "Extracting backup file: $most_recent_backup"
 
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
-    show_image "$SUCCESSFUL_IMAGE_PATH" 3
+    display_image -i "$SUCCESSFUL_IMAGE_PATH" -d 3
     rm -f "$backupdir/removed_flags.tmp"
 else
     log_message "Error during restore process. Check $log_file for details."
     log_message "7zr exit code: $?"
     log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
     restore_flags_on_failure
-    show_image "$FAIL_IMAGE_PATH"
-    acknowledge
+    display_image -i "$FAIL_IMAGE_PATH" --okay
     exit 1
 fi
 
@@ -130,7 +138,7 @@ fi
 
 # Check for expertRA flag and run retroExpert.sh if needed
 if flag_check "expertRA"; then
-    display -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
+    display_image -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
     log_message "expertRA flag found. Removing flag and running retroExpert.sh in silent mode."
     flag_remove "expertRA"
     if [ -f "/mnt/SDCARD/App/RetroExpert/retroExpert.sh" ]; then
@@ -171,7 +179,7 @@ UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
 UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
-show_image "$UPDATE_IMAGE_PATH"
+display_image -i "$UPDATE_IMAGE_PATH"
 
 # Define the path for the .lastUpdate file
 last_update_file="$APP_DIR/.lastUpdate"
@@ -213,8 +221,7 @@ for script in $upgrade_scripts; do
             else
                 log_message "Error running $script_name. Exit status: $exit_status"
                 log_message "Error details: $output"
-                show_image "$UPDATE_FAIL_IMAGE_PATH"
-                acknowledge
+                display_image -i "$UPDATE_FAIL_IMAGE_PATH" --okay
                 exit 1
             fi
         else
@@ -228,7 +235,7 @@ for script in $upgrade_scripts; do
 done
 
 log_message "Upgrade process completed. Current version: $current_version"
-show_image "$UPDATE_SUCCESSFUL_IMAGE_PATH" 3
+display_image -i "$UPDATE_SUCCESSFUL_IMAGE_PATH" -d 3
 
 log_message "----------Restore and Upgrade completed----------"
 cores_online

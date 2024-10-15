@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Add silent mode flag
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1
+
 APP_DIR=/mnt/SDCARD/App/spruceBackup
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 FLAGS_DIR=/mnt/SDCARD/spruce/flags
@@ -11,7 +15,15 @@ SYNC_IMAGE_CONFIRM="$APP_DIR/imgs/spruceBackupConfirm.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
-display -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+
+# Modify display function to respect silent mode
+display_message() {
+    if [ "$silent_mode" -eq 0 ]; then
+        display "$@"
+    fi
+}
+
+display_message -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
@@ -58,6 +70,7 @@ folders="
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/spruce/settings/
+/mnt/SDCARD/spruce/flags/samba*
 "
 
 log_message "Folders to backup: $folders"
@@ -67,12 +80,12 @@ log_message "Starting backup process"
 temp_file=$(mktemp)
 
 # Check available space
-required_space=$((50 * 1024 * 1024))  # 50 MB in bytes
-available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
+required_space=$((50 * 1024))  # 50 MB in KB
+available_space=$(df -k /mnt/SDCARD | awk 'NR==2 {print $4}')
 
 if [ "$available_space" -lt "$required_space" ]; then
-    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    display -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
+    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024)) MB"
+    display_message -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
 You need at least 50 MB free space to backup your files." -c dbcda7 --okay
     exit 1
 fi
@@ -102,12 +115,12 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  display -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+  display_message -i "$SYNC_IMAGE" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
 Located in /Saves/spruce/backups/" -c dbcda7 -d 4 -s 24
 else
   log_message "Error while creating backup."
-  display -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
+  display_message -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
 Check '/Saves/spruce/spruceBackup.log' for more details" -c dbcda7 --okay
 fi
 
