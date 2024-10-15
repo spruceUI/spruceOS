@@ -6,8 +6,9 @@ $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
+$SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 [System]
-"-s" "Powerdown on main menu idle" "0|2|5|10" "Off|2 min|5 min |10 min" "Off" "" ""
+"" "Powerdown on main menu idle" "0|2|5|10" "Off|2 min|5 min |10 min" "Off" "" ""
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"
@@ -19,7 +20,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"u: spruce p: happygaming port:8080"
 "" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
 @"u: root, p: tina port:22"
-"" "Enable Samba" "|" "on|off" "off" "" ""
+"" "Enable Samba" "|" "on|off" "$CHECK$ samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
 @"Network file-sharing. u: root p: tina"
 "" "Enable Syncthing" "|" "on|off" "off" "" ""
 @"Synchronize files. port: 8384 "
