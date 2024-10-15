@@ -4,6 +4,7 @@
 EMU_DIR="/mnt/SDCARD/Emu"
 ROM_DIR="/mnt/SDCARD/Roms"
 P8_DIR="$EMU_DIR/PICO8"
+show_img="/mnt/SDCARD/App/EMUFRESH/refreshing.png"
 
 ##### DEFINE FUNCTIONS #####
 
@@ -50,6 +51,10 @@ unhide_system() {
 
 ##### MAIN EXECUTION #####
 
+if [ -f "$show_img" ]; then
+    show "$show_img" &
+fi
+
 delete_cache_files
 
 for dir in "$EMU_DIR"/*; do
@@ -67,3 +72,5 @@ if [ -f "$P8_DIR/bin/pico8.dat" ] && [ -f "$P8_DIR/bin/pico8_dyn" ]; then
 else
     hide_system "$P8_DIR"
 fi
+
+killall -9 show
