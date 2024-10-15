@@ -23,6 +23,7 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARS/spruce/scripts/runtimeHelper.sh
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
@@ -35,12 +36,6 @@ flag_remove "low_battery"
 log_message " "
 log_message "---------Starting up---------"
 log_message " "
-# Ensure the spruce folder exists
-spruce_folder="/mnt/SDCARD/Saves/spruce"
-if [ ! -d "$spruce_folder" ]; then
-    mkdir -p "$spruce_folder"
-    log_message "Created spruce folder at $spruce_folder"
-fi
 
 # Check if WiFi is enabled
 wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
@@ -58,7 +53,7 @@ kill_images
 dropbear_check & # Start Dropbear in the background
 sftpgo_check & # Start SFTPGo in the background
 syncthing_check & # Start Syncthing in the background
-${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
@@ -100,23 +95,6 @@ fi
 ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
-
-THEME_JSON_FILE="/config/system.json"
-USB_ICON_SOURCE="/mnt/SDCARD/Icons/Default/App/usb.png"
-USB_ICON_DEST="/usr/miyoo/apps/usb_storage/usb_icon_80.png"
-
-if [ -f "$THEME_JSON_FILE" ]; then
-    THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
-    THEME_PATH="${THEME_PATH%/}/"
-    [ "${THEME_PATH: -1}" != "/" ] && THEME_PATH="${THEME_PATH}/"
-    APP_THEME_ICON_PATH="${THEME_PATH}Icons/App/"
-    if [ -f "${APP_THEME_ICON_PATH}usb.png" ]; then
-        mount -o bind "${APP_THEME_ICON_PATH}usb.png" "$USB_ICON_DEST"
-    else
-        mount -o bind "$USB_ICON_SOURCE" "$USB_ICON_DEST"
-    fi
-fi
-
 . /mnt/SDCARD/.tmp_update/scripts/autoIconRefresh.sh &
 
 # killprocess() {
@@ -134,7 +112,6 @@ lcd_init 1
 "${NEW_SCRIPTS_DIR}/firstboot.sh"
 log_message "First boot script executed"
 
-kill_images
 swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
@@ -154,4 +131,3 @@ set_smart
 # start main loop
 log_message "Starting main loop"
 ${NEW_SCRIPTS_DIR}/principal.sh
-
