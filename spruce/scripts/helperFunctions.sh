@@ -124,13 +124,21 @@ DEFAULT_FONT="/mnt/SDCARD/Updater/bin/nunwen.ttf"
 #   -c, --color <color>   Text color in RGB format (default: dbcda7) Spruce text yellow
 #   -f, --font <path>     Font path (optional)
 #   -o, --okay            Use CONFIRM_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
+#   -bg, --bg-color <color> Background color in RGB format (default: 7f7f7f)
+#   -bga, --bg-alpha <alpha> Background alpha value (0-255, default: 0)
+#   -is, --image-scaling <scale> Image scaling factor (default: 1.0)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
 # Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+# You can also call infinite image layers with (next-image.png scale height side)*
+#   --icon <path>         Path to an icon image to display on top (default: none)
+# Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
+
 display() {
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
     local use_confirm_image=false
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
+    local icon_image=""
     
     display_kill
 
@@ -149,6 +157,7 @@ display() {
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
+            --icon) icon_image="$2"; shift ;;
             *) log_message "Unknown option: $1"; return 1 ;;
         esac
         shift
@@ -171,9 +180,14 @@ display() {
     # Construct the command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
     
+    # Add icon image if specified
+    if [ -n "$icon_image" ]; then
+        command="$command \"$icon_image\" 1.0 top center"
+    fi
+    
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
-         $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b "$font" $bg_r $bg_g $bg_b $bg_alpha $image_scaling &
+        eval "$command" &
         log_message "display command: $command"
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
@@ -181,7 +195,7 @@ display() {
         fi
     else
         # Execute the command and capture its output
-        $DISPLAY_TEXT_FILE "$image" "$text" $delay $size $position $align $width $r $g $b "$font" $bg_r $bg_g $bg_b $bg_alpha $image_scaling
+        eval "$command"
         log_message "display command: $command"
     fi
 }
