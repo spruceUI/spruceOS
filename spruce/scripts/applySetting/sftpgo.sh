@@ -14,14 +14,14 @@ fi
 # print minor info text with the value index zero (i.e. "on" value in config file )
 # this is placed before loading helping functions for fast checking
 if [ "$1" == "0" ] ; then
-    echo -n "User: spurce, pwd: happygaming, port: 8080"
+    echo -n "User: spruce, Password: happygaming, Port: 8080"
     return 0
 fi
 
 # print minor info text with the value index one (i.e. "off" value in config file )
 # this is placed before loading helping functions for fast checking
 if [ "$1" == "1" ] ; then
-    echo -n "Manage your file wirelessly"
+    echo -n "Manage your files wirelessly"
     return 0
 fi
 
