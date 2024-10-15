@@ -29,12 +29,6 @@ fi
 
 THEME_PATH_SKIN="${THEME_PATH}skin/"
 
-if ! flag_check "show_battery_percent"; then
-    log_message "Cleaning battery icons" -v 
-    $BATTERY_PERCENT "${THEME_PATH_SKIN}" " "
-    exit 1
-fi
-
 for icon in ${BATTERY_ICONS}; do 
     TMP_OG_FILE="${THEME_PATH_SKIN}${icon}.png"
     if [ -f "$TMP_OG_FILE" ]; then
@@ -44,6 +38,12 @@ for icon in ${BATTERY_ICONS}; do
         fi
     fi
 done
+
+if ! flag_check "show_battery_percent"; then
+    log_message "Cleaning battery icons" -v 
+    $BATTERY_PERCENT "${THEME_PATH_SKIN}" " " "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf" 20 "#FFFFFF"
+    exit 1
+fi
 
 THEME_PATH_CONFIG="${THEME_PATH}config.json"
 if [ -f "$THEME_PATH_CONFIG" ]; then
