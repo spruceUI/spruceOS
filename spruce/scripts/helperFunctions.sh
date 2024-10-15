@@ -188,7 +188,7 @@ display() {
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &
-        log_message "display command: $command"
+        log_message "display command: $command" -v
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
             acknowledge
@@ -196,7 +196,7 @@ display() {
     else
         # Execute the command and capture its output
         eval "$command"
-        log_message "display command: $command"
+        log_message "display command: $command" -v
     fi
 }
 
