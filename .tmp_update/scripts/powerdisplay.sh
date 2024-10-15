@@ -29,6 +29,12 @@ fi
 
 THEME_PATH_SKIN="${THEME_PATH}skin/"
 
+if ! flag_check "show_battery_percent"; then
+    log_message "Cleaning battery icons" -v 
+    $BATTERY_PERCENT "${THEME_PATH_SKIN}" " "
+    exit 1
+fi
+
 for icon in ${BATTERY_ICONS}; do 
     TMP_OG_FILE="${THEME_PATH_SKIN}${icon}.png"
     if [ -f "$TMP_OG_FILE" ]; then
@@ -39,11 +45,22 @@ for icon in ${BATTERY_ICONS}; do
     fi
 done
 
-if ! flag_check "show_battery_percent"; then
-    log_message "Cleaning battery icons" -v 
-    $BATTERY_PERCENT "${THEME_PATH_SKIN}" " "
-    exit 1
+THEME_PATH_CONFIG="${THEME_PATH}config.json"
+
+PATH_FONT=$(jq -r '.batteryPercentage.font' "${THEME_PATH_CONFIG}" )
+if [[ -z "$PATH_FONT" ]]; then
+    PATH_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+else
+    PATH_FONT="${THEME_PATH}${PATH_FONT}"
+fi
+SIZE_FONT=$(jq -r '.batteryPercentage.size' "${THEME_PATH_CONFIG}" )
+if [[ -z "$SIZE_FONT" ]]; then
+    SIZE_FONT="20"
+fi
+COLOR_FONT=$(jq -r '.batteryPercentage.color' "${THEME_PATH_CONFIG}" )
+if [[ -z "$COLOR_FONT" ]]; then
+    COLOR_FONT="#FFFFFF"
 fi
 
 log_message "Applying battery percent to icons" -v 
-$BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY
+$BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY "${PATH_FONT}" "${SIZE_FONT}" "${COLOR_FONT}" 

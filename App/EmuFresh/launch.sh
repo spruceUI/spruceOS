@@ -1,2 +1,2 @@
 #!/bin/sh
-./emufresh.sh
+/mnt/SDCARD/spruce/scripts/emufresh_new.sh
