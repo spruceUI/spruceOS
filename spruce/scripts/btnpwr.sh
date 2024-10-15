@@ -103,6 +103,8 @@ sleep 2
 #cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/.tmp_update/brillo
 #cat /sys/devices/virtual/disp/disp/attr/enhance >/mnt/SDCARD/.tmp_update/color
 
+flag_remove "syncthing_startup_synced"
+
 if [ "$WAS_IN_EMULATOR" = 0 ]; then
     /mnt/SDCARD/.tmp_update/scripts/apaga.sh
 else
