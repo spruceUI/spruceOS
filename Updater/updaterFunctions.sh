@@ -1,6 +1,6 @@
-boost_processing(){
-    /mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
-	echo "CPU Mode set to PERFORMANCE"
+boost_processing() {
+    /mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+    echo "CPU Mode set to PERFORMANCE"
     echo 1 >/sys/devices/system/cpu/cpu0/online
     echo 1 >/sys/devices/system/cpu/cpu1/online
     echo 1 >/sys/devices/system/cpu/cpu2/online
@@ -19,21 +19,20 @@ check_for_update_file() {
     return 0
 }
 
-
 verify_7z_content() {
     local archive="$1"
-    local required_dirs="App Emu"
+    local required_dirs=".tmp_update App spruce"
     local missing_dirs=""
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Verifying update file contents"
-    
+
     # List contents of the archive and save to a temporary file
     local temp_list=$(mktemp)
-    7zr l "$archive" > "$temp_list"
-    
+    7zr l "$archive" >"$temp_list"
+
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Debug: Archive contents:"
     cat "$temp_list"
-    
+
     for dir in $required_dirs; do
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Searching for directory: $dir"
         if grep -q "^.*DR.*[[:space:]]$dir$" "$temp_list"; then
@@ -43,7 +42,7 @@ verify_7z_content() {
             missing_dirs="$missing_dirs $dir"
         fi
     done
-    
+
     rm -f "$temp_list"
 
     if [ -n "$missing_dirs" ]; then

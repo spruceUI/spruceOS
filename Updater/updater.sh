@@ -12,7 +12,7 @@ CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply
 
 # Function to log messages
 log_update_message() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_LOCATION"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >>"$LOG_LOCATION"
 }
 
 # Simplified display function
@@ -41,10 +41,9 @@ log_update_message "Update process started"
 display "Checking for update file..."
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
-
 # Create fresh updater.log and start logging
-echo "Update process started" > "$LOG_LOCATION"
-exec >> "$LOG_LOCATION" 2>&1
+echo "Update process started" >"$LOG_LOCATION"
+exec >>"$LOG_LOCATION" 2>&1
 
 # Find update 7z file
 if ! check_for_update_file; then
@@ -109,9 +108,8 @@ if ! verify_7z_content "$UPDATE_FILE"; then
     exit 1
 fi
 
-
 log_update_message "Checking file permissions"
-ls -l "$UPDATE_FILE" >> "$LOG_LOCATION"
+ls -l "$UPDATE_FILE" >>"$LOG_LOCATION"
 
 # Creating a backup of current install
 display "Creating a backup of user data and configs..."
@@ -119,7 +117,7 @@ display "Creating a backup of user data and configs..."
 
 # Delete all folders and files except Updater, update zip, BIOS, Roms, Saves, miyoo/app, and miyoo/lib
 PERFORM_DELETION=true
-echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 if [ "$PERFORM_DELETION" = true ]; then
     log_update_message "Deleting unnecessary folders and files"
@@ -133,8 +131,8 @@ if [ "$PERFORM_DELETION" = true ]; then
     rm -rf .tmp_update
 
     for item in *; do
-        if [ "$item" != "Updater" ] && [ "$item" != "$(basename "$UPDATE_FILE")" ] && \
-           [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ]; then
+        if [ "$item" != "Updater" ] && [ "$item" != "$(basename "$UPDATE_FILE")" ] &&
+            [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ]; then
             if [ "$item" = "miyoo" ]; then
                 log_update_message "Handling miyoo folder"
                 find "$item" -mindepth 1 -maxdepth 1 ! -name "app" ! -name "lib" -exec rm -rf {} +
@@ -153,14 +151,14 @@ fi
 
 # Extract update file
 log_update_message "Extracting update file."
-echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 cd /mnt/SDCARD
 log_update_message "Current directory: $(pwd)"
 log_update_message "Extracting update file: $UPDATE_FILE"
 
 display "Applying update. This should take around 5 minutes..."
 
-if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >> "$LOG_LOCATION" 2>&1; then
+if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
     display "Update completed with warnings. Check the update log for details." 5
 else
@@ -175,7 +173,7 @@ for dir in .tmp_update spruce miyoo; do
         display "Update extraction incomplete: $dir" 5
         exit 1
     fi
-    
+
     if [ -z "$(ls -A "$dir")" ]; then
         log_update_message "Extraction verification failed: $dir is empty"
         display "Update extraction incomplete: $dir empty" 5
