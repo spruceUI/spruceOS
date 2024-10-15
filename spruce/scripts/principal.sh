@@ -26,9 +26,6 @@ runifnecessary() {
     fi
 }
 
-# ensure keymon is running first
-runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
-
 flag_remove "save_active"
 
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
@@ -43,7 +40,6 @@ while [ 1 ]; do
         # create in menu flag
         flag_add "in_menu"
 
-        runifnecessary "keymon" ${SYSTEM_PATH}/app/keymon
         # Restart network services with higher priority since booting to menu
         nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/

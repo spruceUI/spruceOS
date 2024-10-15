@@ -75,7 +75,9 @@ fi
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
-
+# ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
+keymon /dev/input/event0 &
+keymon /dev/input/event3 &
 
 # rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
 mv /dev/ttyS0 /dev/ttyS2
@@ -83,7 +85,7 @@ mv /dev/ttyS0 /dev/ttyS2
 cd /mnt/SDCARD/.tmp_update/bin
 ./joypad /dev/input/event3 &
 # wait long enough for creating virtual joypad
-sleep 0.5
+sleep 0.3
 # read joystick raw data from serial input and apply calibration,
 # then send to /dev/input/event4
 ( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
