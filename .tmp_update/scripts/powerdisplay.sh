@@ -46,21 +46,13 @@ for icon in ${BATTERY_ICONS}; do
 done
 
 THEME_PATH_CONFIG="${THEME_PATH}config.json"
-
-PATH_FONT=$(jq -r '.batteryPercentage.font' "${THEME_PATH_CONFIG}" )
-if [[ -z "$PATH_FONT" ]]; then
-    PATH_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+if [ -f "$THEME_PATH_CONFIG" ]; then
+    echo $(cat "${THEME_PATH_CONFIG}" | jq -r '.batteryPercentage.font, .batteryPercentage.size, .batteryPercentage.color' ) | while read PATH_FONT SIZE_FONT COLOR_FONT; do 
+        PATH_FONT="${THEME_PATH}${PATH_FONT}"
+        log_message "Applying battery percent to icons" -v 
+        $BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY "${PATH_FONT}" "${SIZE_FONT}" "${COLOR_FONT}"
+    done
 else
-    PATH_FONT="${THEME_PATH}${PATH_FONT}"
-fi
-SIZE_FONT=$(jq -r '.batteryPercentage.size' "${THEME_PATH_CONFIG}" )
-if [[ -z "$SIZE_FONT" ]]; then
-    SIZE_FONT="20"
-fi
-COLOR_FONT=$(jq -r '.batteryPercentage.color' "${THEME_PATH_CONFIG}" )
-if [[ -z "$COLOR_FONT" ]]; then
-    COLOR_FONT="#FFFFFF"
+    $BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf" 20 "#FFFFFF"
 fi
 
-log_message "Applying battery percent to icons" -v 
-$BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY "${PATH_FONT}" "${SIZE_FONT}" "${COLOR_FONT}" 
