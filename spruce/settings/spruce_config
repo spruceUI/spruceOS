@@ -1,5 +1,6 @@
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
 $FLAGS=/mnt/SDCARD/spruce/flags$
+$SETTINGS=/mnt/SDCARD/spruce/settings$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
@@ -29,6 +30,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Launch with tap of Home button" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" ""
 @"Except for NDS games"
 "" "Use boxart instead of screenshots" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" ""
+"" "Maximum number of games" "||" "5|10|20" "cat $SETTINGS$/gs_max" "echo -n 5 > $SETTINGS$/gs_max|echo -n 10 > $SETTINGS$/gs_max|echo -n 20 > $SETTINGS$/gs_max"
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
 "-t" "Display title at start" "on|off" "on|off" "on" "" ""

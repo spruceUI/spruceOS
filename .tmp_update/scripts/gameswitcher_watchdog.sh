@@ -10,6 +10,7 @@ BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 LIST_FILE="$SETTINGS_PATH/gs_list"
+MAX_COUNT_FILE="$SETTINGS_PATH/gs_max"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
 
 prepare_game_switcher() {
@@ -76,7 +77,11 @@ prepare_game_switcher() {
     mv "$TEMP_FILE" "$LIST_FILE"
 
     # trim the game list to only recent 10 games
-    tail -10 "$LIST_FILE" > "$TEMP_FILE"
+    COUNT=10
+    if [ -f "$MAX_COUNT_FILE" ] ; then
+        COUNT=$(cat "$MAX_COUNT_FILE")    
+    fi
+    tail -$COUNT "$LIST_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$LIST_FILE"
 
     # kill RA or other emulator or MainUI
