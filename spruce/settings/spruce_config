@@ -9,6 +9,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 [System]
 "" "Powerdown on main menu idle" "0|2|5|10" "Off|2 min|5 min |10 min" "Off" "" ""
+@"NOT IMPLEMENTED YET"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"
@@ -17,13 +18,13 @@ $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 [Network]
 "" "Sync RTC with network time" "|" "on|off" "$CHECK$ RTCSync" "touch $FLAGS$/RTCSync|rm -f $FLAGS$/RTCSync" ""
 "" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
-@"u: spruce p: happygaming port:8080"
+@"Manage your files wirelessly"
 "" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
-@"u: root, p: tina port:22"
+@"Secure Shell for remote login"
 "" "Enable Samba" "|" "on|off" "$CHECK$ samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
-@"Network file-sharing. u: root p: tina"
+@"Network file-sharing."
 "" "Enable Syncthing" "|" "on|off" "off" "" ""
-@"Synchronize files. port: 8384 "
+@"NOT IMPLEMENTED YET Synchronize files."
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 "" "Run on start" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot" ""
 @"Boot into Game Switcher"
@@ -51,8 +52,6 @@ $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 @"Launch random games from your roms folder"
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the RTC to the current date and time"
-"" "Samba" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Samba/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Samba/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Samba/config.json" ""
-@"Access your files via Samba"
 "" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
 "" "Syncthing" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json" ""

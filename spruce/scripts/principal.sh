@@ -40,6 +40,9 @@ while [ 1 ]; do
         # create in menu flag
         flag_add "in_menu"
 
+        # check if emufresh needed; run it if so
+        /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
+
         # Restart network services with higher priority since booting to menu
         nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/
@@ -76,7 +79,7 @@ while [ 1 ]; do
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
-        # reset CPU/GPU/RAM settings to defaults in case an emulator changes anything
+        # reset CPU settings to defaults in case an emulator changes anything
         set_smart
 
         #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null

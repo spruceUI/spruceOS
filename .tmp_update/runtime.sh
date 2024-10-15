@@ -152,6 +152,7 @@ log_message "Swap file activated"
 ${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
+${NEW_SCRIPTS_DIR}/auto_emufresh.sh
 /mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
 /mnt/SDCARD/spruce/scripts/credits_watchdog.sh &
 log_message "Initial setup scripts executed"
