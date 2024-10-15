@@ -5,8 +5,8 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-log_message "-----Launching Emulator-----"
-log_message "trying: $0 $@"
+log_message "-----Launching Emulator-----" -v
+log_message "trying: $0 $@" -v
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export GAME="$(basename "$1")"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
@@ -22,34 +22,21 @@ export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 if [ -f "$DEF_FILE" ]; then
 	. "$DEF_FILE"
 else
-	log_message "WARNING: Default .opt file not found for $EMU_NAME!"
+	log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
 fi
 
 if [ -f "$OPT_FILE" ]; then
 	. "$OPT_FILE"
 else
-	log_message "WARNING: System .opt file not found for $EMU_NAME!"
+	log_message "WARNING: System .opt file not found for $EMU_NAME!" -v
 fi
 
 if [ -f "$OVR_FILE" ]; then
 	. "$OVR_FILE";
-	log_message "Launch setting OVR_FILE detected @ $OVR_FILE"
+	log_message "Launch setting OVR_FILE detected @ $OVR_FILE" -v
 else
-	log_message "No launch OVR_FILE detected. Using current system settings."
+	log_message "No launch OVR_FILE detected. Using current system settings." -v
 fi
-
-##### DEFINE FUNCTIONS #####
-
-enforce_smart() {
-	while true; do
-		sleep 10
-		governor="$(cat "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")"
-		if [ $governor != "conservative" ]; then
-			log_message "CPU Mode has changed. Re-enforcing SMART mode"
-			set_smart
-		fi
-	done
-}
 
 ##### SET CPU MODE #####
 
@@ -72,8 +59,7 @@ case $EMU_NAME in
 esac
 
 if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
-	enforce_smart &
-	ENFORCE_PID="$!"
+	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
 ##### LAUNCH STUFF #####
@@ -148,29 +134,7 @@ case $EMU_NAME in
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
 			
-			# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
-			mv /dev/ttyS0 /dev/ttyS2
-
-			# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-			./joypad /dev/input/event3 &
-
-			# wait long enough for creating virtual joypad
-			sleep 0.5
-
-			# read joystick raw data from serial input and apply calibration,
-			# then send to /dev/input/event4
-			( ./joystickinput /dev/ttyS2 /config/joypad.config | /mnt/SDCARD/.tmp_update/bin/sendevent /dev/input/event4 ) &
-
 			./PPSSPPSDL "$*"
-
-			# kill all helper programs
-			killall joypad
-			killall joystickinput
-			killall sendevent
-
-			# remember to rename serial port filename to original name
-			# otherwise RA and other emulator cannot read joystick input anymore 
-			mv /dev/ttyS2 /dev/ttyS0
 		else
 			if flag_check "expertRA"; then
 				export RA_BIN="retroarch"
@@ -192,16 +156,11 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		# create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-		./joypad /dev/input/event3 &
-
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
 
-		# kill all helper programs
-		killall joypad
 		;;
 		
 esac
 
-kill -9 "$ENFORCE_PID"
-log_message "-----Closing Emulator-----"
+kill -9 $(pgrep enforceSmartCPU.sh)
+log_message "-----Closing Emulator-----" -v

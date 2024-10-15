@@ -34,16 +34,16 @@ for icon in ${BATTERY_ICONS}; do
     if [ -f "$TMP_OG_FILE" ]; then
         TMP_BACKUP_FILE="${THEME_PATH_SKIN}${icon}-backup.png"
         if [ ! -f "$TMP_BACKUP_FILE" ]; then
-            cp $TMP_OG_FILE $TMP_BACKUP_FILE
+            cp "${TMP_OG_FILE}" "${TMP_BACKUP_FILE}" 
         fi
     fi
 done
 
 if ! flag_check "show_battery_percent"; then
     log_message "Cleaning battery icons" -v 
-    $BATTERY_PERCENT $THEME_PATH_SKIN " "
+    $BATTERY_PERCENT "${THEME_PATH_SKIN}" " "
     exit 1
 fi
 
 log_message "Applying battery percent to icons" -v 
-$BATTERY_PERCENT $THEME_PATH_SKIN $CAPACITY
+$BATTERY_PERCENT "${THEME_PATH_SKIN}" $CAPACITY
