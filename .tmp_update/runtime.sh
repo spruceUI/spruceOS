@@ -54,11 +54,6 @@ fi
 killall -9 main
 kill_images
 
-# Start network services in the background
-dropbear_check & # Start Dropbear in the background
-sftpgo_check & # Start SFTPGo in the background
-syncthing_check & # Start Syncthing in the background
-${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
@@ -68,7 +63,6 @@ else
     ${NEW_SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
-# Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
@@ -97,9 +91,15 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
+# Checks if quick-resume is active and runs it if not returns to this point.
 ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
+# Start network services in the background
+dropbear_check & # Start Dropbear in the background
+sftpgo_check & # Start SFTPGo in the background
+syncthing_check & # Start Syncthing in the background
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh
 
 THEME_JSON_FILE="/config/system.json"
 USB_ICON_SOURCE="/mnt/SDCARD/Icons/Default/App/usb.png"
