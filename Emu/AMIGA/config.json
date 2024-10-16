@@ -16,8 +16,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓PUAE2021)-puae-uae4arm",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/puae.sh"
+      "name": "Emu Core: (✓UAE4ARM)-puae2021-puae",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/puae2021.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
