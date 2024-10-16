@@ -40,9 +40,6 @@ while [ 1 ]; do
         # create in menu flag
         flag_add "in_menu"
 
-        # check if emufresh needed; run it if so
-        /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
-
         # Restart network services with higher priority since booting to menu
         nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/
