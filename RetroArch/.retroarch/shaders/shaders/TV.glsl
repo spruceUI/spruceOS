@@ -1,5 +1,7 @@
 #version 110
 
+#pragma parameter scan "Scanlines scale" 2.0 1.0 8.0 1.0
+
 #define PI   3.14159265358979323846
 #define tau  6.283185
 
@@ -93,10 +95,10 @@ COMPAT_VARYING vec2 ogl2pos;
 #define OutSize vec4(OutputSize, 1.0 / OutputSize)
 
 #ifdef PARAMETER_UNIFORM
-uniform COMPAT_PRECISION float sharpness;
+uniform COMPAT_PRECISION float scan;
 
 #else
-#define sharpness 0.0
+#define scan 0.0
 
 #endif
 
@@ -108,7 +110,7 @@ float quil = (near + 4.0*n*n*n)*SourceSize.w;
 vec2 pos = vec2(vTexCoord.x,quil);
 
 vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
-res *= 0.2*sin(vTexCoord.y*480.0*PI)+0.8;
+res *= 0.2*sin(vTexCoord.y*480.0*scan)+0.8;
 FragColor.rgb = res;
 }
 #endif
