@@ -110,7 +110,7 @@ float quil = (near + 4.0*n*n*n)*SourceSize.w;
 vec2 pos = vec2(vTexCoord.x,quil);
 
 vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
-res *= 0.2*sin(vTexCoord.y*480.0*scan)+0.8;
+res *= 0.2*sin(vTexCoord.y*480.0*PI*scan)+0.8;
 FragColor.rgb = res;
 }
 #endif
