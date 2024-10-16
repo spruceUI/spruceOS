@@ -52,7 +52,7 @@ check_rom_folders() {
 			# store new md5 value
 			echo "$new_md5" > "$md5_path/$system_name.md5"
 
-			echo "$system_name need update"
+			# echo "$system_name need update"
 
 			# if config file exists
 			config_file="$emu_path/$system_name/config.json"
@@ -63,7 +63,7 @@ check_rom_folders() {
 				# count files with acceptable extension
 				count=$(echo "$file_list" | grep -icE "\.($types)$")
 
-				echo "$types"
+				# echo "$types"
 
 			# if config file does not exist
 			else
@@ -74,10 +74,10 @@ check_rom_folders() {
 			# hide / show system in MainUI
 			if [ $count = 0 ]; then
 				sed -i 's/^{*$/{{/' "$config_file"
-				echo "hide system"
+				# echo "hide system"
 			else
 				sed -i 's/^{{*$/{/' "$config_file"
-				echo "show system"
+				# echo "show system"
 			fi
 		fi
 	done
@@ -93,5 +93,11 @@ check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
 check_rom_folders "$folders"
 
+# wait all process to finish
+wait
+echo "all processes finished"
+
 # kill MainUI to refresh, it should restart by principle.sh very soon
 killall -9 MainUI
+echo "kill MainUI"
+
