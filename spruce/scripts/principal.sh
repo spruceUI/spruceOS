@@ -59,7 +59,7 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
-        /mnt/SDCARD/.tmp_update/scripts/powerdisplay.sh
+        /mnt/SDCARD/spruce/scripts/powerdisplay.sh
 
         # This is to kill leftover display and show processes that may be running
         display_kill
