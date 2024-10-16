@@ -46,7 +46,7 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
     
     log_message "Running emufresh.sh"
-    /mnt/SDCARD/spruce/scripts/emufresh_new.sh
+    /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
     
     log_message "Running iconfresh.sh"
     show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"

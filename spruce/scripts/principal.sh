@@ -74,6 +74,9 @@ while [ 1 ]; do
 		# Check to update System Time via network, before entering MainUI
 		updateSystemTime
 
+        # check if emu visibility needs a refresh, before entering MainUI
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+
         ./MainUI &> /dev/null
         # remove in menu flag
         flag_remove "in_menu"
