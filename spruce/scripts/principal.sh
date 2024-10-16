@@ -28,7 +28,7 @@ runifnecessary() {
 
 updateSystemTime() {
     # Check to update System Time via network...
-	if flag_check "ntp" > /dev/null; then
+	if flag_check "ntp" && flag_check "enableNetworkTimeSync" > /dev/null; then
 		# Flag exists, so sync time to network...
 		log_message "Network services: Syncing System Time & RTC to Network, starting..."
 		/mnt/SDCARD/spruce/scripts/geo_timeset.sh
