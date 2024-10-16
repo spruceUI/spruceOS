@@ -13,7 +13,7 @@ IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 log_message "Starting firstboot script"
 
 if flag_check "first_boot"; then
-    show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
+    display --icon "/mnt/SDCARD/spruce/imgs/spruce_logo.png" -t "Installing spruce v3.0.0!"
     log_message "First boot flag detected"
     
     # don't overwrite user's config if it's not a TRUE first boot
@@ -43,7 +43,7 @@ if flag_check "first_boot"; then
     fi
     
     log_message "Running emu_setup.sh"
-    /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
+    /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh &
     
     log_message "Running emufresh.sh"
     /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
