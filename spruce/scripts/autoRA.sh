@@ -32,6 +32,12 @@ if flag_check "save_active"; then
 	fi
 	# Restart network services
 	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+	#Set the LED
+	if flag_check "ledon"; then
+		echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+	else
+		echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+	fi
 	
 	# copy command to cmd_to_run.sh so game switcher can work correctly
 	cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
