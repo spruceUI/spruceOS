@@ -76,6 +76,7 @@ check_rom_folders() {
 				sed -i 's/^{*$/{{/' "$config_file"
 				# echo "hide system"
 			else
+				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
 				sed -i 's/^{{*$/{/' "$config_file"
 				# echo "show system"
 			fi
