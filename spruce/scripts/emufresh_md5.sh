@@ -13,7 +13,7 @@ if [ -f "$md5_path/all.md5" ] ; then
 fi
 
 # compute new md5 value
-new_all_md5=$(find "$roms_path" -mindepth 2 -maxdepth 2 -type f ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 echo "$new_all_md5"
 
 # if no update, exit with 0
@@ -46,7 +46,7 @@ find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
 	system_name=$(basename "$folder")
 
 	# get all file names except known non-rom files
-	file_list=$(find "$folder" -mindepth 1 -maxdepth 1 -type f ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db")
+	file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db")
 	
 	# get old md5 value
 	md5=$(cat "$md5_path/$system_name.md5" 2>/dev/null)
