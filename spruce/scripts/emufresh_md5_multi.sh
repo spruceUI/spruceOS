@@ -7,13 +7,33 @@ md5_path="/mnt/SDCARD/Saves/spruce/md5"
 # ensure md5 folder exists
 mkdir -p "$md5_path"
 
+# handle clear all option
+if [ "$1" = "-clearall" ] ; then
+	# remove all md5 files
+	rm -r "$md5_path"
+	
+	# hide all systems
+	find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
+		system_name=$(basename "$folder")
+		config_file="$emu_path/$system_name/config.json"
+		sed -i 's/^{*$/{{/' "$config_file"
+	done
+
+	# kill MainUI
+	killall -9 MainUI
+
+	# exit with 0
+	return 0
+fi
+
 # read old md5 value for Roms folder
 if [ -f "$md5_path/all.md5" ] ; then
 	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
 fi
 
-# compute new md5 value
-new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+# compute new md5 value for files under Roms 
+# except known non-rom files and folders PICO8 
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "$roms_path/PICO8/*" ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 echo "$new_all_md5"
 
 # if no update and no force option is used, exit with 0
@@ -27,8 +47,8 @@ else
 	echo "$new_all_md5" > "$md5_path/all.md5"
 fi
 
-# get all rom folders
-rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d -print)
+# get all rom folders except folders PICO8
+rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d ! -path "$roms_path/PICO8")
 
 # function to check list of rom folders
 check_rom_folders() {
@@ -38,8 +58,8 @@ check_rom_folders() {
 		system_name=$(basename "$folder")
 
 		# get all file names except known non-rom files
-		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db")
-		
+		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | sed '/^\s*$/d')
+
 		# get old md5 value
 		md5=$(cat "$md5_path/$system_name.md5" 2>/dev/null)
 
@@ -59,9 +79,14 @@ check_rom_folders() {
 			if [ -f "$config_file" ]; then
 				# get acceptable extensions
 				types=$(cat "$config_file" | grep -m1 extlist | cut -d ":" -f 2 | sed "s/,//" | sed "s/ //" | sed "s/\	//" | sed 's/|\"/\"/g' | sed 's/\"//' | sed 's/\"//')
-				
-				# count files with acceptable extension
-				count=$(echo "$file_list" | grep -icE "\.($types)$")
+
+				if [ -z "$types" ]; then 
+					# count files in list
+					count=$(echo "$file_list" | sed '/^\s*$/d' | wc -l)
+				else
+					# count files with acceptable extension
+					count=$(echo "$file_list" | sed '/^\s*$/d' | grep -icE "\.($types)$")
+				fi
 
 				# echo "$types"
 
@@ -74,11 +99,11 @@ check_rom_folders() {
 			# hide / show system in MainUI
 			if [ $count = 0 ]; then
 				sed -i 's/^{*$/{{/' "$config_file"
-				# echo "hide system"
+				echo "hide system $system_name"
 			else
 				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
 				sed -i 's/^{{*$/{/' "$config_file"
-				# echo "show system"
+				echo "show system $system_name"
 			fi
 		fi
 	done
@@ -93,6 +118,18 @@ folders=$(echo "$rom_folders" | sed -n 'n;n;p;n')
 check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
 check_rom_folders "$folders"
+
+# check folder PICO8
+# for speed reason we check with hardcoded filenames
+if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
+   [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
+	rm -f "$roms_path/PICO8/PICO8_cache6.db"
+	sed -i 's/^{{*$/{/' "$emu_path/PICO8/config.json"
+	# echo "show system"
+else
+	sed -i 's/^{*$/{{/' "$emu_path/PICO8/config.json"
+	# echo "hide system"
+fi
 
 # wait all process to finish
 wait
