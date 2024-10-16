@@ -6,7 +6,7 @@ messages_file="/var/log/messages"
 
 check_and_connect_wifi() {
 	log_message "Attempting to connect to WiFi"
-	show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
+	show_image "/mnt/SDCARD/spruce/res/waitingtoconnect.png" 1
 	
 	ifconfig wlan0 up
 	wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
@@ -31,7 +31,7 @@ if flag_check "save_active"; then
 		check_and_connect_wifi
 	fi
 	# Restart network services
-	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 	#Set the LED
 	if flag_check "ledon"; then
 		echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness

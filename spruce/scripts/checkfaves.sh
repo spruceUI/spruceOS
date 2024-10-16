@@ -6,7 +6,7 @@ FAVOURITE_FILE="/mnt/SDCARD/Roms/favourite.json"
 DUPLICATE_FILE="/mnt/SDCARD/Roms/favourite.duplicate"
 PREVIOUS_STATE="/mnt/SDCARD/Roms/favourite.previous"
 TEMP_FILE="/mnt/SDCARD/Roms/favourite_temp.json"
-IMAGE_PATH="/mnt/SDCARD/.tmp_update/res/duplicategame.png"
+IMAGE_PATH="/mnt/SDCARD/spruce/res/duplicategame.png"
 
 create_duplicate() {
     cp "$FAVOURITE_FILE" "$DUPLICATE_FILE"
@@ -88,7 +88,7 @@ remove_duplicates() {
 monitor_favourite_file() {
     while true; do
         if [ -f "$FAVOURITE_FILE" ]; then
-            /mnt/SDCARD/.tmp_update/bin/inotify.elf $FAVOURITE_FILE
+            /mnt/SDCARD/spruce/bin/inotify.elf $FAVOURITE_FILE
             if [ -f "$PREVIOUS_STATE" ]; then
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
                     create_duplicate

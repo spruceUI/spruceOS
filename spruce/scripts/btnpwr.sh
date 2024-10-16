@@ -10,7 +10,7 @@ killall -9 keymon
 vibrate
 
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$FLAG_PATH/gs_list_temp"
@@ -97,14 +97,14 @@ kill_current_process
 update_game_list
 sleep 2
 
-#/mnt/SDCARD/spruce/bin/display_text.elf "/mnt/SDCARD/.tmp_update/res/save.png"
+#/mnt/SDCARD/spruce/bin/display_text.elf "/mnt/SDCARD/spruce/res/save.png"
 
 # Save brightness and color settings
-#cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/.tmp_update/brillo
-#cat /sys/devices/virtual/disp/disp/attr/enhance >/mnt/SDCARD/.tmp_update/color
+#cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/brillo
+#cat /sys/devices/virtual/disp/disp/attr/enhance >/mnt/SDCARD/spruce/color
 
 if [ "$WAS_IN_EMULATOR" = 0 ]; then
-    /mnt/SDCARD/.tmp_update/scripts/apaga.sh
+    /mnt/SDCARD/spruce/scripts/apaga.sh
 else
     killall -9 main
     killall -9 runtime.sh

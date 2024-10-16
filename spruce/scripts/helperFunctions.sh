@@ -24,7 +24,7 @@
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-INOTIFY="/mnt/SDCARD/.tmp_update/bin/inotify.elf"
+INOTIFY="/mnt/SDCARD/spruce/bin/inotify.elf"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
@@ -361,7 +361,7 @@ get_button_press() {
 }
 
 get_event() {
-    "/mnt/SDCARD/.tmp_update/bin/getevent" /dev/input/event3
+    "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
 }
 
 get_version() {

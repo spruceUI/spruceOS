@@ -31,7 +31,7 @@ flag_remove "save_active"
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
    [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
     log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
-    /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
+    /mnt/SDCARD/spruce/scripts/gameswitcher.sh
 fi
 
 while [ 1 ]; do
@@ -44,7 +44,7 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
 
         # Restart network services with higher priority since booting to menu
-        nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+        nice -n -15 /mnt/SDCARD/spruce/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/
 
         # Check for the themeChanged flag
@@ -88,7 +88,7 @@ while [ 1 ]; do
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] || \
        [ -f /mnt/SDCARD/spruce/flags/gs.fix ] ; then
         log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
-        /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
+        /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
     if [ -f /mnt/SDCARD/spruce/flags/credits.lock ] ; then

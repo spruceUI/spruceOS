@@ -14,7 +14,7 @@ sftpgo_check(){
 
 start_sftpgo_process() {
     log_message "Starting SFTPGO..."
-    nice -2 /mnt/SDCARD/.tmp_update/sftpgo/sftpgo serve -c /mnt/SDCARD/.tmp_update/sftpgo/ > /dev/null &
+    nice -2 /mnt/SDCARD/spruce/sftpgo/sftpgo serve -c /mnt/SDCARD/spruce/sftpgo/ > /dev/null &
     sed -i 's|- Off|- On|' $SFTPGO_CONFIG_FILE
     sed -i 's|"#label"|"label"|' $SFTPGO_CONFIG_FILE
     log_message "SFTPGO started with PID $!";

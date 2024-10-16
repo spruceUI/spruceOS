@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 
 cd $BIN_PATH

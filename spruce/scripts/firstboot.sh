@@ -6,19 +6,19 @@ SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 
-IMAGE_PATH_WIKI="${SDCARD_PATH}/.tmp_update/res/wiki.png"
+IMAGE_PATH_WIKI="${SDCARD_PATH}/spruce/res/wiki.png"
 FW_ICON="${SDCARD_PATH}/Themes/SPRUCE/icons/App/firmwareupdate.png"
-IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
+IMAGE_PATH_ENJOY="${SDCARD_PATH}/spruce/res/enjoy.png"
 
 log_message "Starting firstboot script"
 
 if flag_check "first_boot"; then
-    show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
+    show_image "${SDCARD_PATH}/spruce/res/installing.png"
     log_message "First boot flag detected"
     
     # don't overwrite user's config if it's not a TRUE first boot
     if ! flag_check "config_copied"; then
-        cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE"
+        cp "${SDCARD_PATH}/spruce/system.json" "$SETTINGS_FILE"
         flag_add "config_copied"
         sync
         sleep 5
@@ -49,7 +49,7 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/spruce/scripts/emufresh_new.sh
     
     log_message "Running iconfresh.sh"
-    show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
+    show_image "/mnt/SDCARD/spruce/res/iconfresh.png"
     /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
 
     log_message "Displaying wiki image"

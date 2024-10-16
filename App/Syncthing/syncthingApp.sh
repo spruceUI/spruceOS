@@ -4,7 +4,7 @@ silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1 #run silently via cli arg?
 
 appdir=/mnt/SDCARD/App/Syncthing
-sysdir=/mnt/SDCARD/.tmp_update
+sysdir=/mnt/SDCARD/spruce
 miyoodir=/mnt/SDCARD/miyoo
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
