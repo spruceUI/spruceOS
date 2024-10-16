@@ -21,12 +21,17 @@ mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
+# Stop NTPD
+/etc/init.d/sysntpd stop
+/etc/init.d/ntpd stop
+
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 #. /mnt/SDCARS/spruce/scripts/runtimeHelper.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
-. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+#. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+#. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+#. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
+#. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 #rotate_logs &
 
 # Flag cleanup
@@ -50,10 +55,9 @@ fi
 killall -9 main
 kill_images
 
-# Start network services in the background
-dropbear_check & # Start Dropbear in the background
-sftpgo_check & # Start SFTPGo in the background
-syncthing_check & # Start Syncthing in the background
+# Bring up network services
+nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+
 ${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
@@ -120,6 +124,7 @@ log_message "Swap file activated"
 ${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
+${NEW_SCRIPTS_DIR}/auto_emufresh.sh
 ${NEW_SCRIPTS_DIR}/checkfaves.sh &
 ${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
 log_message "Initial setup scripts executed"

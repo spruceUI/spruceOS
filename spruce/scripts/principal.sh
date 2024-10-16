@@ -26,6 +26,17 @@ runifnecessary() {
     fi
 }
 
+updateSystemTime() {
+    # Check to update System Time via network...
+	if flag_check "ntp" > /dev/null; then
+		# Flag exists, so sync time to network...
+		log_message "Network services: Syncing System Time & RTC to Network, starting..."
+		/mnt/SDCARD/spruce/scripts/geo_timeset.sh
+		hwclock -w
+		flag_remove "ntp"
+	fi
+}
+
 flag_remove "save_active"
 
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
@@ -40,8 +51,9 @@ while [ 1 ]; do
         # create in menu flag
         flag_add "in_menu"
 
-        # Restart network services with higher priority since booting to menu
-        nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+        # check if emufresh needed; run it if so
+        /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
+
         cd ${SYSTEM_PATH}/app/
 
         # Check for the themeChanged flag
@@ -61,6 +73,9 @@ while [ 1 ]; do
         # This is to kill leftover display and show processes that may be running
         display_kill
         kill_images
+		
+		# Check to update System Time via network, before entering MainUI
+		updateSystemTime
 
         ./MainUI &> /dev/null
         # remove in menu flag
