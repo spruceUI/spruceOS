@@ -2,7 +2,7 @@
 
 emu_path="/mnt/SDCARD/Emu"
 roms_path="/mnt/SDCARD/Roms"
-md5_path="/mnt/SDCARD/Saves/spruce/md5"
+md5_path="/mnt/SDCARD/Emu/.emu_setup/md5"
 
 # ensure md5 folder exists
 mkdir -p "$md5_path"
