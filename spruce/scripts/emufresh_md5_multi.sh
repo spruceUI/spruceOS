@@ -26,6 +26,26 @@ if [ "$1" = "-clearall" ] ; then
 	return 0
 fi
 
+# check folder PICO8 first
+config_file="$emu_path/PICO8/config.json"
+show_pico8=$(cat "$config_file" | grep -Fc '{{' )
+need_restart_mainui=false
+if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
+   [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
+	if [ ! $show_pico8 = 0 ] ; then
+		need_restart_mainui=true
+		rm -f "$roms_path/PICO8/PICO8_cache6.db"
+		sed -i 's/^{{*$/{/' "$config_file"
+		echo "show system PICO8"
+	fi
+else
+	if [ $show_pico8 = 0 ] ; then
+		need_restart_mainui=true
+		sed -i 's/^{*$/{{/' "$config_file"
+		echo "hide system PICO8"
+	fi
+fi
+
 # read old md5 value for Roms folder
 if [ -f "$md5_path/all.md5" ] ; then
 	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
@@ -39,6 +59,11 @@ echo "$new_all_md5"
 # if no update and no force option is used, exit with 0
 if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
 	echo "no update"
+	# kill mainUI if pico8 files are updated
+	if [ "$need_restart_mainui" = true ] ; then
+		killall -9 MainUI
+		echo "kill MainUI"
+	fi
 	return 0
 
 # otherwise update md5 file and continue
@@ -119,18 +144,6 @@ check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
 check_rom_folders "$folders"
 
-# check folder PICO8
-# for speed reason we check with hardcoded filenames
-if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
-   [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
-	rm -f "$roms_path/PICO8/PICO8_cache6.db"
-	sed -i 's/^{{*$/{/' "$emu_path/PICO8/config.json"
-	# echo "show system"
-else
-	sed -i 's/^{*$/{{/' "$emu_path/PICO8/config.json"
-	# echo "hide system"
-fi
-
 # wait all process to finish
 wait
 echo "all processes finished"
@@ -138,4 +151,5 @@ echo "all processes finished"
 # kill MainUI to refresh, it should restart by principle.sh very soon
 killall -9 MainUI
 echo "kill MainUI"
+return 0
 
