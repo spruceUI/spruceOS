@@ -8,8 +8,8 @@ if [ "$EMU_NAME" = "MD" ] || [ "$EMU_NAME" = "SEGACD" ] || [ "$EMU_NAME" = "THIR
     sed -i 's|"Emu Core: (✓PICODRIVE)-genesis+gx"|"Emu Core: picodrive-(✓GENESIS+GX)"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"|g' "$CONFIG"
 else
-    sed -i 's|"Emu Core: gearsystem-(✓PICODRIVE)-genesis+gx"|"Emu Core: gearsystem-picodrive-(✓GENESIS+GX)"|g' "$CONFIG"
-    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|g' "$CONFIG"
+    sed -i 's|"Emu Core: genesis+gx-picodrive-(✓GEARSYSTEM)"|"Emu Core: (✓GENESIS+GX)-picodrive-gearsystem"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"|g' "$CONFIG"
 fi
 
 sed -i 's|CORE=.*|CORE=\"genesis_plus_gx\"|g' "$SYS_OPT"
