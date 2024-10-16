@@ -1,6 +1,6 @@
 #version 110
 
-#pragma parameter scan "Scanlines scale" 2.0 1.0 8.0 1.0
+#pragma parameter scan "Scanlines scale" 2.0 1.0 6.0 0.5
 
 #define PI   3.14159265358979323846
 #define tau  6.283185
