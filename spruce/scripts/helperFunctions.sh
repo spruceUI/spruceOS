@@ -105,7 +105,7 @@ cores_online() {
 
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
-DEFAULT_FONT="/mnt/SDCARD/Updater/bin/nunwen.ttf"
+DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
 # It's possible to leave a display process running
@@ -185,7 +185,7 @@ display() {
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &
-        log_message "display command: $command"
+        log_message "display command: $command" -v
         # Run acknowledge if -o or --okay was used
         if [[ "$run_acknowledge" = true ]]; then
             acknowledge
@@ -193,7 +193,7 @@ display() {
     else
         # Execute the command and capture its output
         eval "$command"
-        log_message "display command: $command"
+        log_message "display command: $command" -v
     fi
 }
 

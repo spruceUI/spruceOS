@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "xfd|atr|cdm|cas|bin|a52|zip|7z|atx|car|com|xex",
+  "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
   "launchlist": [
     {
       "name": "Jump to random Atari 800 game",

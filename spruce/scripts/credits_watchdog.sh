@@ -35,7 +35,7 @@ tail -F -n 1 /var/log/messages | while read line; do
                 # kill the long press handler if 
                 # menu button is released within time limit
                 # and is in game now
-                if [ flag_check "credits.longpress" ] ; then
+                if flag_check "credits.longpress" ; then
                     flag_remove "credits.longpress"
                     kill $PID
                 fi

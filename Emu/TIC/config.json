@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "tic|fd|sap|k7|m7|rom|zip|7z",
+  "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [
     {
       "name": "Jump to random Tic-80 game",

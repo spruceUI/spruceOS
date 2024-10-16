@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "cdi|gdi|cue|iso|chd",
+  "extlist": "chd|cdi|gdi|cue|iso",
   "launchlist": [
     {
       "name": "Jump to random Dreamcast game",
