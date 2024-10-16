@@ -52,7 +52,7 @@ uniform COMPAT_PRECISION float size;
 void main()
 {
     gl_Position = MVPMatrix * VertexCoord;
-    TEX0.xy = TexCoord.xy;
+    TEX0.xy = TexCoord.xy*1.0001;
     ogl2pos = TEX0.xy*SourceSize.xy;
 }
 
