@@ -479,7 +479,7 @@ set_smart() {
 }
 
 set_performance() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	log_message "CPU Mode set to PERFORMANCE"
 }
 
