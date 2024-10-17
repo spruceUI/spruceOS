@@ -7,13 +7,6 @@ vibrate
 alsactl store
 log_message "Saved current sound settings"
 
-if flag_check "syncthing"; then
-	log_message "Syncthing is enabled, WiFi connection needed"
-	if check_and_connect_wifi; then
-		/mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --shutdown
-	fi
-fi
-
 log_message "Killing processes"
 killall -9 main
 killall -9 runtime.sh
