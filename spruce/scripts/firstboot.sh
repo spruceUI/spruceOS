@@ -53,7 +53,7 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
 
     log_message "Displaying wiki image"
-    show_image "$IMAGE_PATH_WIKI" 5
+    display -d 5 -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" --icon "/mnt/SDCARD/spruce/imgs/book.png" -p bottom -t "Check out the spruce wiki on our GitHub page for tips and FAQs!"
 
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
@@ -62,7 +62,7 @@ if flag_check "first_boot"; then
     fi
     
     log_message "Displaying enjoy image"
-    show_image "$IMAGE_PATH_ENJOY" 5
+    display -d 5 -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" --icon "/mnt/SDCARD/spruce/imgs/smile.png" -p bottom -t "Happy gaming..........!"
 
     flag_remove "first_boot"
     log_message "Removed first boot flag"
