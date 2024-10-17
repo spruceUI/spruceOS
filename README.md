@@ -175,7 +175,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Russ from RGC: His YouTube channel is an inspiration.
 
- [https://Icons8.com](https://Icons8.com) for the logo and icons.
+ [https://Icons8.com](https://Icons8.com) for the logo and icons. The reuse of these icons requires a subscription to [Icons8](https://Icons8.com)
 
 
 
