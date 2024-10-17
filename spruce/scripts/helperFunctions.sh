@@ -1,5 +1,6 @@
 # Function summaries:
 # acknowledge: Waits for user to press A, B, or Start button
+# check_and_connect_wifi: Polls for Wifi, Cancels on Start Press
 # cores_online: Sets the number of CPU cores to be online
 # display: Displays text on the screen with various options
 # exec_on_hotkey: Executes a command when specific buttons are pressed
@@ -74,6 +75,28 @@ acknowledge() {
             break
             ;;
         esac
+    done
+}
+
+check_and_connect_wifi() {
+    messages_file="/var/log/messages"
+
+    log_message "Attempting to connect to WiFi"
+    show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
+
+    ifconfig wlan0 up
+    wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+    udhcpc -i wlan0 &
+
+    while true; do
+        if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+            log_message "Successfully connected to WiFi"
+            return 0
+        elif tail -n1 "$messages_file" | grep -q "enter_pressed 0"; then
+            log_message "WiFi connection cancelled by user"
+            return 1
+        fi
+        sleep 1
     done
 }
 
@@ -519,26 +542,4 @@ show_image() {
 vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
-}
-
-check_and_connect_wifi() {
-    messages_file="/var/log/messages"
-
-    log_message "Attempting to connect to WiFi"
-    show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
-
-    ifconfig wlan0 up
-    wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-    udhcpc -i wlan0 &
-
-    while true; do
-        if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-            log_message "Successfully connected to WiFi"
-            return 0
-        elif tail -n1 "$messages_file" | grep -q "enter_pressed 0"; then
-            log_message "WiFi connection cancelled by user"
-            return 1
-        fi
-        sleep 1
-    done
 }
