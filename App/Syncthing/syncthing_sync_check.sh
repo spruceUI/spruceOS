@@ -258,6 +258,10 @@ main() {
             fi
             ;;
         --shutdown)
+            # Kill MainUI and principal so it doesn't clash with my display
+            killall -9 MainUI
+            killall -9 principal.sh
+
             # Add a similar wait_for_syncthing_api function if this proves to cause troubles
             # Ideally this is not needed on shutdown as the API is already available
             monitor_sync_status "shutdown"
