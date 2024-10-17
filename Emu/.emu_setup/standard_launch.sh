@@ -58,7 +58,7 @@ if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
-##### SyncThing Sync Check, perform only once per session #####
+##### Syncthing Sync Check, perform only once per session #####
 if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
 	if check_and_connect_wifi; then
