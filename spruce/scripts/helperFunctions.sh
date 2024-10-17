@@ -496,7 +496,6 @@ set_smart() {
 	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
 	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 	log_message "CPU Mode set to SMART"
 }

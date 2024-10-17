@@ -1,3 +1,5 @@
+#!/bin/sh
+
 WATCHED_FILE="/config/system.json"
 SCRIPT_TO_RUN="/mnt/SDCARD/spruce/scripts/iconfresh.sh"
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/refreshing.png"

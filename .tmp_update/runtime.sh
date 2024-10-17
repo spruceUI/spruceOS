@@ -67,8 +67,9 @@ alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
 # ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
-keymon /dev/input/event0 &
+# keymon /dev/input/event0 &
 keymon /dev/input/event3 &
+${NEW_SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
 # rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
 mv /dev/ttyS0 /dev/ttyS2
@@ -94,7 +95,7 @@ fi
 ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
-. "${NEW_SCRIPTS_DIR}/autoIconRefresh.sh" &
+#${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
 
 nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 
@@ -119,10 +120,10 @@ swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
 
 # Run scripts for initial setup
-${NEW_SCRIPTS_DIR}/forcedisplay.sh
+#${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
-${NEW_SCRIPTS_DIR}/checkfaves.sh &
+#${NEW_SCRIPTS_DIR}/checkfaves.sh &
 ${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
