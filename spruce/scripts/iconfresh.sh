@@ -10,7 +10,7 @@ silent_mode=0
 
 # Only show image if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    show_image "$IMAGE_PATH"
+    display -p bottom -t "Refreshing icons... please wait......" --icon "/mnt/SDCARD/Themes/SPRUCE/App/iconfresh.png"
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
@@ -95,7 +95,7 @@ done
 
 # Only kill images if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    kill_images
+    display_kill
 fi
 
 /mnt/SDCARD/spruce/scripts/powerdisplay.sh

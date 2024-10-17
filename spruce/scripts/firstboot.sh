@@ -13,7 +13,7 @@ IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 log_message "Starting firstboot script"
 
 if flag_check "first_boot"; then
-    display --icon "/mnt/SDCARD/spruce/imgs/spruce_logo.png" -t "Installing spruce v3.0.0!"
+    display -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" --icon "/mnt/SDCARD/spruce/imgs/spruce_logo.png" -t "Installing spruce v3.0.0!" -p bottom
     log_message "First boot flag detected"
     
     # don't overwrite user's config if it's not a TRUE first boot
@@ -21,7 +21,7 @@ if flag_check "first_boot"; then
         cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE"
         flag_add "config_copied"
         sync
-        sleep 5
+        sleep 5  ### why is this here? -Ry
         log_message "Copied system.json and created config_copied.lock"
     fi
     
@@ -49,7 +49,7 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
     
     log_message "Running iconfresh.sh"
-    show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
+    display -p bottom -t "Refreshing icons... please wait......" -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" --icon "/mnt/SDCARD/Themes/SPRUCE/App/iconfresh.png"
     /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
 
     log_message "Displaying wiki image"
@@ -58,7 +58,7 @@ if flag_check "first_boot"; then
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, suggesting update"
-        display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+        display -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png" -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
     
     log_message "Displaying enjoy image"
