@@ -98,7 +98,12 @@ handle_emulator_exit() {
 }
 
 handle_emulator_exit
+
+# TODO: FIX THIS
+# Current way will prematurely kill RetroArch before it has finished AutoSaving on Exit.
+# This causes AutoSave files to become corrupt
 kill_current_process
+
 update_game_list
 sleep 2
 
