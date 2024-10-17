@@ -81,8 +81,6 @@ update_app_icons() {
     sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
 }
 
-cores_online 3
-
 find "$EMULATOR_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_emulator_icons "$CONFIG_FILE"
 done
@@ -99,5 +97,3 @@ if [ $silent_mode -eq 0 ]; then
 fi
 
 /mnt/SDCARD/spruce/scripts/powerdisplay.sh
-
-cores_online
