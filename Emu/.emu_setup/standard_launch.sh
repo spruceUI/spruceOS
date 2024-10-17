@@ -44,16 +44,12 @@ case $EMU_NAME in
 	"NDS")
 		if [ "$MODE" = "overclock" ]; then
 			{sleep 33 && set_overclock} &
-		else
-			{sleep 33 && set_performance} &
 		fi
 		;;
 
 	*)
 		if [ "$MODE" = "overclock" ]; then
 			set_overclock
-		else
-			set_performance
 		fi
 		;;
 esac

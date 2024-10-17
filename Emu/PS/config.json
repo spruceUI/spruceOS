@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "bin|cue|img|mdf|pbp|PBP|toc|cbn|m3u|chd|",
+  "extlist": "m3u|chd|bin|cue|img|mdf|pbp|PBP|toc|cbn",
   "launchlist": [
     {
       "name": "Jump to random PlayStation game",

@@ -13,7 +13,7 @@ IMAGE_PATH_ENJOY="${SDCARD_PATH}/.tmp_update/res/enjoy.png"
 log_message "Starting firstboot script"
 
 if flag_check "first_boot"; then
-    show_image "${SDCARD_PATH}/.tmp_update/res/installing.png"
+    display --icon "/mnt/SDCARD/spruce/imgs/spruce_logo.png" -t "Installing spruce v3.0.0!"
     log_message "First boot flag detected"
     
     # don't overwrite user's config if it's not a TRUE first boot
@@ -43,10 +43,10 @@ if flag_check "first_boot"; then
     fi
     
     log_message "Running emu_setup.sh"
-    /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
+    /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh &
     
     log_message "Running emufresh.sh"
-    /mnt/SDCARD/spruce/scripts/emufresh_new.sh
+    /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
     
     log_message "Running iconfresh.sh"
     show_image "/mnt/SDCARD/.tmp_update/res/iconfresh.png"
@@ -58,7 +58,7 @@ if flag_check "first_boot"; then
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, suggesting update"
-        display -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+        display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
     
     log_message "Displaying enjoy image"

@@ -6,10 +6,12 @@ BBS_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/bbs/carts"
 ROM_PATH="/mnt/SDCARD/Roms/PICO8"
 
 {
-for cart in "$BBS_PATH"/* ; do
+for cart in "$BBS_PATH"/*.p8.png ; do
 	cartname="$(basename "$cart")"
-	cp -f "$cart" "$ROM_PATH/$cartname"
-	log_message "$cartname imported to $ROM_PATH"
+	if [ -s "${cart}" ]; then
+		cp -f "$cart" "$ROM_PATH/$cartname"
+		log_message "$cartname imported to $ROM_PATH"
+	fi
 done
 } &
 

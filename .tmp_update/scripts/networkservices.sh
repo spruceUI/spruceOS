@@ -10,15 +10,8 @@ connect_services() {
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
-			# Sync Device Time to Network Time
-			ntpd -n -q -p pool.ntp.org	 
-			
-			# Sync RTC to Device Time
-			if flag_check "RTCSync" > /dev/null; then
-				# Flag exists so sync RTC to Device Time ...
-				log_message "Network services: Syncing RTC to Device Time..."
-				hwclock -w
-			fi
+			# The network is connected, lets flag for System Time & RTC NTP update in next principal.sh run..
+			flag_add "ntp"
 			
 			# SFTPGo check
 			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then

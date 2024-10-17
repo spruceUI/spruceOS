@@ -21,12 +21,17 @@ mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
+# Stop NTPD
+/etc/init.d/sysntpd stop
+/etc/init.d/ntpd stop
+
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 #. /mnt/SDCARS/spruce/scripts/runtimeHelper.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
-. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+#. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+#. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+#. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
+#. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 #rotate_logs &
 
 # Flag cleanup
@@ -75,7 +80,7 @@ sleep 0.3
 # read joystick raw data from serial input and apply calibration,
 # then send to /dev/input/event4
 ( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
-        
+
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 
@@ -89,13 +94,11 @@ fi
 ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
-# Start network services in the background
-dropbear_check & # Start Dropbear in the background
-sftpgo_check & # Start SFTPGo in the background
-syncthing_check & # Start Syncthing in the background
-${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
+. "${NEW_SCRIPTS_DIR}/autoIconRefresh.sh" &
 
-. /mnt/SDCARD/.tmp_update/scripts/autoIconRefresh.sh &
+nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
 
 # killprocess() {
 #     pid=$(ps | grep $1 | grep -v grep | cut -d' ' -f3)
@@ -119,9 +122,8 @@ log_message "Swap file activated"
 ${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
-${NEW_SCRIPTS_DIR}/auto_emufresh.sh
-/mnt/SDCARD/.tmp_update/scripts/checkfaves.sh &
-/mnt/SDCARD/spruce/scripts/credits_watchdog.sh &
+${NEW_SCRIPTS_DIR}/checkfaves.sh &
+${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
 log_message "Initial setup scripts executed"
 kill_images
 

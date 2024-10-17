@@ -26,6 +26,17 @@ runifnecessary() {
     fi
 }
 
+updateSystemTime() {
+    # Check to update System Time via network...
+	if flag_check "ntp" && flag_check "enableNetworkTimeSync" > /dev/null; then
+		# Flag exists, so sync time to network...
+		log_message "Network services: Syncing System Time & RTC to Network, starting..."
+		/mnt/SDCARD/spruce/scripts/geo_timeset.sh
+		hwclock -w
+		flag_remove "ntp"
+	fi
+}
+
 flag_remove "save_active"
 
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
@@ -40,11 +51,6 @@ while [ 1 ]; do
         # create in menu flag
         flag_add "in_menu"
 
-        # check if emufresh needed; run it if so
-        /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
-
-        # Restart network services with higher priority since booting to menu
-        nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/
 
         # Check for the themeChanged flag
@@ -59,11 +65,17 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
-        /mnt/SDCARD/.tmp_update/scripts/powerdisplay.sh
+        /mnt/SDCARD/spruce/scripts/powerdisplay.sh
 
         # This is to kill leftover display and show processes that may be running
         display_kill
         kill_images
+		
+		# Check to update System Time via network, before entering MainUI
+		updateSystemTime
+
+        # check if emu visibility needs a refresh, before entering MainUI
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
 
         ./MainUI &> /dev/null
         # remove in menu flag
@@ -74,13 +86,14 @@ while [ 1 ]; do
         /root/gameloader
 
     elif [ -f /tmp/cmd_to_run.sh ]; then
+        set_performance &
         chmod a+x /tmp/cmd_to_run.sh
         cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
         # reset CPU settings to defaults in case an emulator changes anything
-        set_smart
+        set_smart &
 
         #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
     fi

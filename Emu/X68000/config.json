@@ -9,7 +9,7 @@
   "useswap": 0,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "dim|zip|img|d88|88d|hdm|dup|2hd|xdf|hdf|cmd|m3u|7z",
+  "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
   "launchlist": [
     {
       "name": "Jump to random X68000 game",

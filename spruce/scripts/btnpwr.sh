@@ -5,9 +5,14 @@ if flag_check "in_menu"; then
     log_message "btnpwr not active in MainUI"
     exit 0
 fi
+vibrate
+if pgrep "pico8_dyn" > /dev/null; then
+    log_message "No shutdown, only exit to MainUI"
+    killall -q -15 pico8_dyn
+    exit 0
+fi
 # Kill keymon
 killall -9 keymon
-vibrate
 
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"

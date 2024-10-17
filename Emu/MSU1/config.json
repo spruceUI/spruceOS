@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
-  "extlist": "sfc|smc|fig|bs|st|zip|7z",
+  "extlist": "sfc|smc|zip|7z|fig|bs|st",
   "launchlist": [
     {
       "name": "Jump to random SNES MSU1 game",

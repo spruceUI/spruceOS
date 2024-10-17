@@ -139,7 +139,7 @@ display() {
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
-    
+
     display_kill
 
     while [[ $# -gt 0 ]]; do
@@ -179,12 +179,12 @@ display() {
 
     # Construct the command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
-    
+
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 1.0 top center"
+        command="$command \"$icon_image\" 0.30 top center"
     fi
-    
+
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &
@@ -479,7 +479,7 @@ set_smart() {
 }
 
 set_performance() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	log_message "CPU Mode set to PERFORMANCE"
 }
 
