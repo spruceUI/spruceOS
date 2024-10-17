@@ -160,12 +160,7 @@ Press START to cancel"
         # Remove the status files at the beginning of each iteration
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
-    
-        # TODO: Consider refactoring to use in-memory approach instead of temporary files
-        # for performance improvement and reduced I/O. Current file-based method:
-        # - Writes status to /tmp/sync_status
-        # - Writes display content to /tmp/sync_display.txt
-        # This is okay for now since this script is called in very specific situations
+
         for device in $devices; do
             local device_name=$(get_device_name "$device")
             local short_id=$(echo "$device" | cut -c1-7)
