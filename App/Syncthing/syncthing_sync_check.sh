@@ -6,9 +6,9 @@
 SYNCTHING_CONFIG_DIR="${SYNCTHING_CONFIG_DIR:-/mnt/SDCARD/App/Syncthing/config}"
 API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
-CHECK_INTERVAL=2  # Interval between checks in seconds
-MAX_API_RETRIES=15
-API_RETRY_INTERVAL=2
+CHECK_INTERVAL=2  # Interval in seconds to wait while Syncthing is syncing
+MAX_API_RETRIES=15 # Give up after this many times waiting for Syncthing API to be available
+API_RETRY_INTERVAL=1 # Interval in seconds
 API_KEY=""
 
 # Function to start network interface
