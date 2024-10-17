@@ -7,9 +7,9 @@ $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
+$IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 [System]
-"" "Powerdown on main menu idle" "0|2|5|10" "Off|2 min|5 min |10 min" "Off" "" ""
-@"NOT IMPLEMENTED YET"
+"" "Powerdown on main menu idle" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_mainmenu" "echo -n Off > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ Off|echo -n 2m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 2m|echo -n 5m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 5m|echo -n 10m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 10m" ""
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"

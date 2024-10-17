@@ -127,6 +127,7 @@ ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
 #${NEW_SCRIPTS_DIR}/checkfaves.sh &
 ${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
+${NEW_SCRIPTS_DIR}/applySetting/idlemon_mm.sh
 log_message "Initial setup scripts executed"
 kill_images
 
