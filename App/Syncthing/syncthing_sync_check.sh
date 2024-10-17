@@ -168,12 +168,15 @@ Press START to cancel"
             summary="${summary}Device $device_name ($short_id):\n"
 
             echo "$folders" | while IFS='|' read -r folder_id folder_label; do
+                # On Startup, we only care about downloading remote files to local device
                 if [ "$mode" = "startup" ]; then
                     local completion=$(calculate_folder_completion "$folder_id")
                     [ "$completion" != "100" ] && echo "not_synced" > /tmp/sync_status
+                # On Shutdown, we only care about making sure we are done uploading local files to remote device
                 elif [ "$mode" = "shutdown" ]; then
                     local completion=$(calculate_total_completion "$device" "$folder_id")
                     [ "$completion" != "100" ] && echo "not_synced" > /tmp/sync_status
+                # This we display both startup/shutdown functionality, used for testing
                 elif [ "$mode" = "monitor" ]; then
                     local download_completion=$(calculate_folder_completion "$folder_id")
                     local upload_completion=$(calculate_total_completion "$device" "$folder_id")
@@ -241,6 +244,7 @@ main() {
     fi
 
     case "$1" in
+        # This mode is only used for testing, this performs both startup/shutdown at once without exiting
         --monitor)
             monitor_sync_status "monitor"
             ;;
