@@ -133,9 +133,8 @@ Press START to cancel"
         sleep 1
     elif [ "$mode" = "startup" ]; then
         force_rediscovery
-        # THIS MIGHT NOT BE NEEDED, WE MIGHT BE ABLE TO JUST SLEEP 1
-        # sleep 1
-        sleep 5
+        # Give a couple seconds for forced discovery to trigger a rescan
+        sleep 2
     fi
 
     # Check if any devices are online
