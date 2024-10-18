@@ -97,6 +97,7 @@ handle_emulator_exit() {
     fi
 }
 
+
 handle_emulator_exit
 
 # TODO: FIX THIS
@@ -112,6 +113,7 @@ sleep 2
 # Save brightness and color settings
 #cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/.tmp_update/brillo
 #cat /sys/devices/virtual/disp/disp/attr/enhance >/mnt/SDCARD/.tmp_update/color
+
 
 if [ "$WAS_IN_EMULATOR" = 0 ]; then
     /mnt/SDCARD/.tmp_update/scripts/apaga.sh

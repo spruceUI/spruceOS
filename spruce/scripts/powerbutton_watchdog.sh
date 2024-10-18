@@ -64,6 +64,16 @@ long_press_handler() {
         sleep 0.5
     done
 
+    if flag_check "syncthing"; then
+        log_message "Syncthing is enabled, WiFi connection needed"
+
+        if check_and_connect_wifi; then
+            /mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --shutdown
+        fi
+    fi
+
+    flag_remove "syncthing_startup_synced"
+
     # Created save_active flag
     flag_add "save_active"
 

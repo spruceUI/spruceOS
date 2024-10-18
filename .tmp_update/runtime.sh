@@ -55,11 +55,6 @@ fi
 killall -9 main
 kill_images
 
-# Bring up network services
-nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
-
-${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
-
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
     ${NEW_SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
@@ -68,7 +63,6 @@ else
     ${NEW_SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
-# Checks if quick-resume is active and runs it if not returns to this point.
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
@@ -87,7 +81,7 @@ sleep 0.3
 # read joystick raw data from serial input and apply calibration,
 # then send to /dev/input/event4
 ( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
-        
+
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
 
@@ -102,6 +96,10 @@ ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
 #${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
+
+nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+
+${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
 
 # killprocess() {
 #     pid=$(ps | grep $1 | grep -v grep | cut -d' ' -f3)
