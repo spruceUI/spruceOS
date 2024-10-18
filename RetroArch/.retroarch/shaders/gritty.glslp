@@ -1,0 +1,5 @@
+shaders = "1"
+
+feedback_pass = "0"
+shader0 = "shaders/gritty.glsl"
+filter_linear0 = "true"
