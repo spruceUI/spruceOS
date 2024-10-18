@@ -38,6 +38,7 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
+flag_remove "in_menu"
 
 log_message " "
 log_message "---------Starting up---------"

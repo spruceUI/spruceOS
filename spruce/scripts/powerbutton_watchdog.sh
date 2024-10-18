@@ -7,6 +7,19 @@ BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 
+kill_current_process() {
+    pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
+    ppid=$pid
+    while [ "" != "$pid" ]; do
+        ppid=$pid
+        pid=$(pgrep -P $ppid)
+    done
+
+    if [ "" != "$ppid" ]; then
+        kill -9 $ppid
+    fi
+}
+
 long_press_handler() {
     # setup flag for long pressed event
     flag_add "pb.longpress"
@@ -15,11 +28,18 @@ long_press_handler() {
 
     # exit if MainUI is running
     if flag_check "in_menu" ; then
-        exit 0
+        return 0
     fi
 
-    # exit if not emulator is running
+    # kill app without reboot if not emulator is running 
     if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu' ; then
+        kill_current_process
+        return 0
+    fi
+
+    # kill PICO8 without reboot if PICO8 is running
+    if pgrep "pico8_dyn" > /dev/null; then
+        killall -q -15 pico8_dyn
         return 0
     fi
 
@@ -29,6 +49,9 @@ long_press_handler() {
     # notify user with vibration and led 
     echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
     vibrate
+
+    # show saving screen
+    show_image "/mnt/SDCARD/.tmp_update/res/save.png"
 
     # kill principle first so no new app / MainUI will be loaded anymore
     killall -q -15 principal.sh
@@ -74,6 +97,7 @@ long_press_handler() {
         sleep 0.5
     done
 
+    # show saving screen
     show_image "/mnt/SDCARD/.tmp_update/res/save.png"
 
     # Created save_active flag
