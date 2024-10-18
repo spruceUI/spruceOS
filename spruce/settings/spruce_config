@@ -9,7 +9,9 @@ $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 [System]
-"" "Powerdown on main menu idle" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_mainmenu" "echo -n Off > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ Off|echo -n 2m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 2m|echo -n 5m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 5m|echo -n 10m > $SETTINGS$/idlemon_mainmenu && $IDLEMON_MM$ 10m" ""
+"" "Powerdown on main menu idle" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
+"" "Powerdown on game idle" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "cat $SETTINGS$/idlemon_in_game" "echo -n Off > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game Off|echo -n 2m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 2m|echo -n 5m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 5m|echo -n 10m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 10m|echo -n 30m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 30m" ""
+@"Excludes ports"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 @"Only on supported themes"
