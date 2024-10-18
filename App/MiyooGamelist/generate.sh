@@ -2,13 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-IMAGE_PATH="/mnt/SDCARD/App/MiyooGamelist/generating.png"
+IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png"
 
-if [ ! -f "$IMAGE_PATH" ]; then
-    exit 1
-fi
-
-show_image "$IMAGE_PATH"
+display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes.
+ 
+ " -p bottom
 
 delete_gamelist_files() {
     rootdir="/mnt/SDCARD/roms"
@@ -151,4 +149,4 @@ for system in "$rootdir"/*; do
     fi
 done
 
-kill_images
+display_kill
