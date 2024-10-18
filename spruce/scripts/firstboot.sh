@@ -6,7 +6,6 @@ SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 
-BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/spruce_logo.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
@@ -20,6 +19,7 @@ if flag_check "first_boot"; then
     cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && sync
 
     display --icon "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
+     
      " -p bottom
     log_message "First boot flag detected"
     
@@ -50,8 +50,9 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
     log_message "Displaying wiki image"
-    display -d 5 -i "$BG_IMAGE" --icon "$WIKI_ICON" -p bottom -t "Check out the spruce wiki on our GitHub page for tips and FAQs!
-     "
+    display -d 5 --icon "$WIKI_ICON" -t "Check out the spruce wiki on our GitHub page for tips and FAQs!
+     
+     " -p bottom
 
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
@@ -61,8 +62,9 @@ if flag_check "first_boot"; then
     fi
     
     log_message "Displaying enjoy image"
-    display -d 5 -i "$BG_IMAGE" --icon "$HAPPY_ICON" -p bottom -t "Happy gaming..........!
-     "
+    display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming..........!
+     
+     " -p bottom
 
     flag_remove "first_boot"
     log_message "Removed first boot flag"
