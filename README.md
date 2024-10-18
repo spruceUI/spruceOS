@@ -178,7 +178,6 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   Icons8.com for the logo and icons.
 
 
-
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## The Current Team (in no particular order):
