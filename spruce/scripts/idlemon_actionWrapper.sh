@@ -15,8 +15,8 @@ case "$process_name" in
         sync
         poweroff
         ;;
-    /mnt/SDCARD/RetroArch/ra32.miyoo)
-        #/mnt/SDCARD/spruce/scripts/SUPER-DUPER-CLEAN-SHUTDOWN-TBD.sh
+    ra32.miyoo|drastic|PPSSPP)
+        /mnt/SDCARD/spruce/scripts/btnpwr.sh
         ;;
     *)
         exit 1
