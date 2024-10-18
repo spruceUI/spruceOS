@@ -115,6 +115,7 @@ prepare_game_switcher() {
         killall -q -15 ra32.miyoo
     else
         killall -q -15 retroarch || \
+        killall -q -15 pico8_dyn || \
         killall -q -9 MainUI
     fi
     
@@ -146,6 +147,8 @@ long_press_handler() {
     if pgrep "MainUI" > /dev/null ; then
         prepare_game_switcher
     elif pgrep "drastic" > /dev/null ; then
+        prepare_game_switcher
+    elif pgrep "pico8_dyn" > /dev/null; then
         prepare_game_switcher
 
     elif flag_check "gs.runontap" ; then
