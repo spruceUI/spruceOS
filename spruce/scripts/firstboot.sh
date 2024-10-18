@@ -6,7 +6,7 @@ SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 
-SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/spruce_logo.png"
+SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
@@ -18,7 +18,7 @@ if flag_check "first_boot"; then
     # initialize the settings... users can restore their own backup later.
     cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && sync
 
-    display --icon "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
+    display - "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
      
      " -p bottom
     log_message "First boot flag detected"
