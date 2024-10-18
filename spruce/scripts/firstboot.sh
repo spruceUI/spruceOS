@@ -18,7 +18,7 @@ if flag_check "first_boot"; then
     # initialize the settings... users can restore their own backup later.
     cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && sync
 
-    display - "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
+    display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
      
      " -p bottom
     log_message "First boot flag detected"
