@@ -13,6 +13,16 @@ long_press_handler() {
     sleep 2
     flag_remove "pb.longpress"
 
+    # exit if MainUI is running
+    if flag_check "in_menu" ; then
+        exit 0
+    fi
+
+    # exit if not emulator is running
+    if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu' ; then
+        return 0
+    fi
+
     # now here long press is detected
     # trigger auto save and then power down the device
 
@@ -53,7 +63,7 @@ long_press_handler() {
     fi
 
     # show saving screen
-    show_image "/mnt/SDCARD/.tmp_update/res/save.png" 3
+    show_image "/mnt/SDCARD/.tmp_update/res/save.png"
 
     # wait until emulator or MainUI exit 
     while killall -q -0 ra32.miyoo || \
@@ -63,6 +73,8 @@ long_press_handler() {
           killall -q -0 MainUI ; do 
         sleep 0.5
     done
+
+    show_image "/mnt/SDCARD/.tmp_update/res/save.png"
 
     # Created save_active flag
     flag_add "save_active"
@@ -138,6 +150,10 @@ $BIN_PATH/getevent /dev/input/event0 | while read line; do
 
             # wait long enough for emulator to resume 
             sleep 2
+
+            # update display setting after wakeup
+            ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
+            echo "$ENHANCE_SETTINGS" > /sys/devices/virtual/disp/disp/attr/enhance
 
             # RESUME any process that may crash the system during wakeup
             killall -q -18 enforceSmartCPU.sh

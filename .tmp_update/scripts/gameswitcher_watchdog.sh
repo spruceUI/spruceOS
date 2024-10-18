@@ -145,19 +145,21 @@ long_press_handler() {
     # if IS long press
     if pgrep "MainUI" > /dev/null ; then
         prepare_game_switcher
-    elif pgrep "retroarch" > /dev/null ; then
-        prepare_game_switcher
     elif pgrep "drastic" > /dev/null ; then
         prepare_game_switcher
 
     elif flag_check "gs.runontap" ; then
         if pgrep "ra32.miyoo" > /dev/null ; then
             send_virtual_key
+        elif pgrep "retroarch" > /dev/null ; then
+            send_virtual_key
         elif pgrep "PPSSPPSDL" > /dev/null ; then
             send_virtual_key
         fi
     else
         if pgrep "ra32.miyoo" > /dev/null ; then
+            prepare_game_switcher
+        elif pgrep "retroarch" > /dev/null ; then
             prepare_game_switcher
         elif pgrep "PPSSPPSDL" > /dev/null ; then
             prepare_game_switcher
@@ -185,11 +187,15 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 if flag_check "gs.runontap" ; then
                     if pgrep "ra32.miyoo" > /dev/null ; then
                         prepare_game_switcher
+                    elif pgrep "retroarch" > /dev/null ; then
+                        prepare_game_switcher
                     elif pgrep "PPSSPPSDL" > /dev/null ; then
                         prepare_game_switcher
                     fi
                 else
                     if pgrep "ra32.miyoo" > /dev/null ; then
+                        send_virtual_key
+                    elif pgrep "retroarch" > /dev/null ; then
                         send_virtual_key
                     elif pgrep "PPSSPPSDL" > /dev/null ; then
                         send_virtual_key
