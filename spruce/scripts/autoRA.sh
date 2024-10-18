@@ -25,6 +25,7 @@ check_and_connect_wifi() {
 }
 
 if flag_check "save_active"; then
+	set_performance
 	log_message "Save active flag detected"
 	if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 		log_message "Retro Achievements enabled, checking WiFi connection"
