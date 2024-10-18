@@ -75,6 +75,9 @@ while read -r CMD; do
     elif [ -f "$BOX_ART_PATH" ]; then
         echo "$BOX_ART_PATH" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using boxart for $GAME_NAME" -v
+    elif [ "${GAME_PATH#*.}" = "png" ]; then
+        echo "$GAME_PATH" >> "$IMAGES_FILE"
+        log_message "***** gameswitcher.sh: using Pico-8 cart as artwork for $GAME_NAME" -v
     else
         echo "$DEFAULT_IMG" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using default image for $GAME_NAME" -v
