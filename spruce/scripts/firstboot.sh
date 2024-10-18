@@ -9,7 +9,6 @@ SDCARD_PATH="/mnt/SDCARD"
 BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/spruce_logo.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
-ICONFRESH_ICON="/mnt/SDCARD/Themes/SPRUCE/App/iconfresh.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 
@@ -20,7 +19,8 @@ if flag_check "first_boot"; then
     # initialize the settings... users can restore their own backup later.
     cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && sync
 
-    display -i "$BG_IMAGE" --icon "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!" -p bottom
+    display --icon "$SPRUCE_LOGO" -t "Installing spruce v3.0.0!
+     " -p bottom
     log_message "First boot flag detected"
     
     if [ -f "${SWAPFILE}" ]; then
@@ -47,20 +47,22 @@ if flag_check "first_boot"; then
     /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
     
     log_message "Running iconfresh.sh"
-    display -p bottom -t "Refreshing icons... please wait......" -i "$BG_IMAGE" --icon "$ICONFRESH_ICON"
-    /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
+    /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
     log_message "Displaying wiki image"
-    display -d 5 -i "$BG_IMAGE" --icon "$WIKI_ICON" -p bottom -t "Check out the spruce wiki on our GitHub page for tips and FAQs!"
+    display -d 5 -i "$BG_IMAGE" --icon "$WIKI_ICON" -p bottom -t "Check out the spruce wiki on our GitHub page for tips and FAQs!
+     "
 
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
-        log_message "Detected firmware version $VERSION, suggesting update"
+        log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
+        sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
         display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
     
     log_message "Displaying enjoy image"
-    display -d 5 -i "$BG_IMAGE" --icon "$HAPPY_ICON" -p bottom -t "Happy gaming..........!"
+    display -d 5 -i "$BG_IMAGE" --icon "$HAPPY_ICON" -p bottom -t "Happy gaming..........!
+     "
 
     flag_remove "first_boot"
     log_message "Removed first boot flag"
