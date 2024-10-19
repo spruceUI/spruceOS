@@ -6,6 +6,7 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 messages_file="/var/log/messages"
 
 if flag_check "save_active"; then
+	set_performance
 	log_message "Save active flag detected"
 
 	wifi_needed=false
@@ -44,6 +45,9 @@ if flag_check "save_active"; then
 	else
 		echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
 	fi
+	
+	#Bring up idle monitors
+	/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
 	
 	# copy command to cmd_to_run.sh so game switcher can work correctly
 	cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh

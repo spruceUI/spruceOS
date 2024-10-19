@@ -13,6 +13,6 @@
 	"theme":	"/mnt/SDCARD/Themes/SPRUCE/",
 	"fontsize":	24,
 	"audiofix":	1,
-	"wifi":	0,
+	"wifi":	1,
 	"cpufreq":	0
 }

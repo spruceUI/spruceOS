@@ -205,7 +205,7 @@ display() {
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.30 middle center"
+        command="$command \"$icon_image\" 0.20 middle center"
     fi
 
     # Execute the command in the background if delay is 0
@@ -487,7 +487,7 @@ log_message() {
     echo "$message"
 }
 
-scaling_min_freq=480000 ### default value, may be overridden in specific script
+scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart() {
 	cores_online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor

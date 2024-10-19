@@ -1,6 +1,6 @@
 #!/bin/sh
 
-IMAGE_PATH="/mnt/SDCARD/spruce/imgs/refreshing.png"
+ICONFRESH_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -10,7 +10,9 @@ silent_mode=0
 
 # Only show image if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    display -p bottom -t "Refreshing icons... please wait......" --icon "/mnt/SDCARD/Themes/SPRUCE/App/iconfresh.png"
+    display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......
+     
+     " -p bottom
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"

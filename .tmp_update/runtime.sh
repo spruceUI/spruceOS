@@ -38,6 +38,7 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
+flag_remove "in_menu"
 
 log_message " "
 log_message "---------Starting up---------"
@@ -95,7 +96,7 @@ fi
 ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
-#${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
+${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
 
 nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 
@@ -123,8 +124,9 @@ log_message "Swap file activated"
 #${NEW_SCRIPTS_DIR}/forcedisplay.sh
 ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
-#${NEW_SCRIPTS_DIR}/checkfaves.sh &
+${NEW_SCRIPTS_DIR}/checkfaves.sh &
 ${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
+${NEW_SCRIPTS_DIR}/applySetting/idlemon_mm.sh
 log_message "Initial setup scripts executed"
 kill_images
 
