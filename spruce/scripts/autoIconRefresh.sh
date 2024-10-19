@@ -13,7 +13,7 @@ get_theme_path() {
 THEME_PATH=$(get_theme_path)
 
 while true; do
-    /mnt/SDCARD/.tmp_update/bin/inotify.elf "$WATCHED_FILE"
+    inotifywait "$WATCHED_FILE"
     log_message "File $WATCHED_FILE has been modified"
 
     NEW_THEME_PATH=$(get_theme_path)
