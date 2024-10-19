@@ -26,17 +26,6 @@ runifnecessary() {
     fi
 }
 
-updateSystemTime() {
-    # Check to update System Time via network...
-	if flag_check "ntp" && flag_check "enableNetworkTimeSync" > /dev/null; then
-		# Flag exists, so sync time to network...
-		log_message "Network services: Syncing System Time & RTC to Network, starting..."
-		/mnt/SDCARD/spruce/scripts/geo_timeset.sh
-		hwclock -w
-		flag_remove "ntp"
-	fi
-}
-
 flag_remove "save_active"
 
 if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] ; then
@@ -74,9 +63,6 @@ while [ 1 ]; do
         display_kill
         kill_images
 		
-		# Check to update System Time via network, before entering MainUI
-		updateSystemTime
-
         # check if emu visibility needs a refresh, before entering MainUI
         /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
 
