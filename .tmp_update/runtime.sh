@@ -14,8 +14,8 @@ export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 export HOME="${SDCARD_PATH}"
 export HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
-mkdir /var/lib /var/lib/alsa ### We create the directories that by default are not included in the system.
-mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ###We mount the folder that includes the alsa configuration, just as the system should include it.
+mkdir /var/lib /var/lib/alsa ### Create the directories that by default are not included in the system.
+mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ### We mount the folder that includes the alsa configuration, just as the system should include it.
 mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app
 mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
@@ -57,7 +57,7 @@ else
     log_message "WiFi turned on"
 fi
 
-killall -9 main
+killall -9 main ### SUPER important in preventing .tmp_update suicide
 kill_images
 
 # Bring up network services
@@ -82,13 +82,12 @@ log_message "ALSA configuration loaded"
 keymon /dev/input/event3 &
 ${NEW_SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
-# rename ttyS0 to ttyS2, therefore PPSSPP cannot read the joystick raw data
+# rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
 mv /dev/ttyS0 /dev/ttyS2
 # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
 cd /mnt/SDCARD/.tmp_update/bin
 ./joypad /dev/input/event3 &
-# wait long enough for creating virtual joypad
-sleep 0.3
+sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
 # then send to /dev/input/event4
 ( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
@@ -103,6 +102,7 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
+# check whether to auto-resume into a game
 if flag_check "save_active"; then
     ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
     log_message "Auto Resume executed"
@@ -114,6 +114,7 @@ ${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
 
 lcd_init 1
 
+# check whether to run first boot procedure
 if flag_check "first_boot"; then
     "${NEW_SCRIPTS_DIR}/firstboot.sh"
 else
