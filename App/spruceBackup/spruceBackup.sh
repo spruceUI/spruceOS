@@ -42,21 +42,20 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
-/mnt/SDCARD/App/Syncthing/config
-/mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
+/mnt/SDCARD/App/Syncthing/config
+/mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/RetroArch/retroarch.cfg
-/mnt/SDCARD/RetroArch/hotkeyprofile
-/mnt/SDCARD/RetroArch/nohotkeyprofile
-/mnt/SDCARD/RetroArch/originalProfile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
-/mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/spruce/flags/expertRA*
+/mnt/SDCARD/spruce/settings/gs_list
 "
 
 log_message "Folders to backup: $folders"
