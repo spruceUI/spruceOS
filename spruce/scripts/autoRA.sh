@@ -1,7 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-
 messages_file="/var/log/messages"
 
 check_and_connect_wifi() {
@@ -24,37 +23,29 @@ check_and_connect_wifi() {
 	done	
 }
 
-if flag_check "save_active"; then
-	set_performance
-	log_message "Save active flag detected"
-	if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-		log_message "Retro Achievements enabled, checking WiFi connection"
-		check_and_connect_wifi
-	fi
-	#Set the LED
-	if flag_check "ledon"; then
-		echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
-	else
-		echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
-	fi
-	
-	#Bring up idle monitors
-	/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
-	
-	# copy command to cmd_to_run.sh so game switcher can work correctly
-	cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
-
-	log_message "load game to play"
-	sleep 5
-	nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null
-
-	# remove tmp command file after game exit
-	# otherwise the game will load again in principle.sh later
-	rm -f /tmp/cmd_to_run.sh
-
-	log_message "Running select script"
-	#/mnt/SDCARD/spruce/scripts/select.sh &> /dev/null
-	
-else
-	log_message "Save active flag not detected"
+set_performance
+log_message "Save active flag detected"
+if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+	log_message "Retro Achievements enabled, checking WiFi connection"
+	check_and_connect_wifi
 fi
+#Set the LED
+if flag_check "ledon"; then
+	echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+else
+	echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+fi
+
+#Bring up idle monitors
+/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
+
+# copy command to cmd_to_run.sh so game switcher can work correctly
+cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
+
+log_message "load game to play"
+sleep 5
+nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null
+
+# remove tmp command file after game exit
+# otherwise the game will load again in principle.sh later
+rm -f /tmp/cmd_to_run.sh

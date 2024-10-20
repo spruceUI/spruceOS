@@ -103,8 +103,12 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
-${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
-log_message "Auto Resume executed"
+if flag_check "save_active"; then
+    ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
+    log_message "Auto Resume executed"
+else
+	log_message "Save_active flag not detected - not executing Auto Resume."
+fi
 
 ${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
 
