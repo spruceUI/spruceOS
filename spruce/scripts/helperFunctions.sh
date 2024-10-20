@@ -113,32 +113,48 @@ check_and_connect_wifi() {
 # fi    
 confirm(){
     local messages_file="/var/log/messages"
+    local timeout=${1:-0}  # Default to 0 (no timeout) if not provided
+    local timeout_return=${2:-1}  # Default to 1 if not provided
+    local start_time=$(date +%s)
+
     echo "CONFIRM $(date +%s)" >>"$messages_file"
 
     while true; do
-		# wait for log message update
-        inotifywait "$messages_file"
-		# get the last line of log file
+        # Check for timeout
+        if [ $timeout -ne 0 ]; then
+            local current_time=$(date +%s)
+            local elapsed_time=$((current_time - start_time))
+            if [ $elapsed_time -ge $timeout ]; then
+                display_kill
+                echo "CONFIRM TIMEOUT $(date +%s)" >>"$messages_file"
+                return $timeout_return
+            fi
+        fi
+
+        # Wait for log message update (with a 1-second timeout)
+        if ! $INOTIFY -t 1000 "$messages_file"; then
+            continue
+        fi
+
+        # Get the last line of log file
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-			# B button - cancel
-			*"key 1 29"*)
-				# dismiss notification screen
-				display_kill
-				# exit script
-				echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
-				return 1
-				break
-				;;
-			# A button - confirm
-			*"key 1 57"*) 
-				# dismiss notification screen
-				display_kill
-				# exit script
-				echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
-				return 0
-				break
-				;;
+            # B button - cancel
+            *"key 1 29"*)
+                # dismiss notification screen
+                display_kill
+                # exit script
+                echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
+                return 1
+                ;;
+            # A button - confirm
+            *"key 1 57"*) 
+                # dismiss notification screen
+                display_kill
+                # exit script
+                echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
+                return 0
+                ;;
         esac
     done
 }

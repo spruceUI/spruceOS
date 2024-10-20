@@ -26,7 +26,7 @@ if flag_check "in_menu" && ! flag_check "skip_shutdown_confirm"; then
 	killall -q -19 MainUI
 	# show notification screen
 	display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
-	if confirm; then
+	if confirm 30; then
 		# remove lastgame flag to prevent loading any App after next boot
 		rm "${FLAGS_DIR}/lastgame.lock"
 		# turn off screen
