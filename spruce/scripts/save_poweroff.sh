@@ -20,39 +20,39 @@ kill_current_process() {
 # ask for user response if MainUI is running
 if flag_check "in_menu" ; then
     messages_file="/var/log/messages"
+	# pause MainUI
 	killall -q -19 MainUI
+	# show notification screen
 	display --text "Shutdown A30?  B-Cancel A-Okay"
+	# wait for button input
     while true; do
+		# wait for log message update
         inotifywait "$messages_file"
+		# get the last line of log file
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-			# B button
+			# B button - cancel shutdown
 			*"key 1 29"*)
+				# dismiss notification screen
 				display_kill
+				# resume Mainui
 				killall -q -18 MainUI
+				# exit script
 				return 0
 				break
 				;;
-			# A button	
+			# A button - confirm shutdown
 			*"key 1 57"*) 
+				# dismiss notification screen
 				display_kill
+				# remove lastgame flag to prevent loading any App after next boot
 				rm "${FLAGS_DIR}/lastgame.lock"
+				# turn off screen
+				echo 0 > /sys/devices/virtual/disp/disp/attr/lcdbl
 				break
 				;;
         esac
     done
-fi
-
-# kill app without reboot if not emulator is running 
-if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu' ; then
-	kill_current_process
-	return 0
-fi
-
-# kill PICO8 without reboot if PICO8 is running
-if pgrep "pico8_dyn" > /dev/null; then
-	killall -q -15 pico8_dyn
-	return 0
 fi
 
 # notify user with vibration and led 
@@ -65,6 +65,18 @@ killall -q -15 principal.sh
 
 # kill enforceSmartCPU first so no CPU setting is changed during shutdown
 killall -q -15 enforceSmartCPU.sh
+
+# kill app if not emulator is running 
+if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu' ; then
+	kill_current_process
+	# remove lastgame flag to prevent loading any App after next boot
+	rm "${FLAGS_DIR}/lastgame.lock"
+fi
+
+# kill PICO8 if PICO8 is running
+if pgrep "pico8_dyn" > /dev/null; then
+	killall -q -15 pico8_dyn
+fi
 
 # trigger auto save and send kill signal 
 if pgrep "ra32.miyoo" > /dev/null ; then
