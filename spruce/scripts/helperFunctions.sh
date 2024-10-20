@@ -107,7 +107,7 @@ cores_online() {
 }
 
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
-CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
+ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
 DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
@@ -123,19 +123,19 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -w, --width <width>   Text width (default: 600)
 #   -c, --color <color>   Text color in RGB format (default: dbcda7) Spruce text yellow
 #   -f, --font <path>     Font path (optional)
-#   -o, --okay            Use CONFIRM_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
+#   -o, --okay            Use ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
 #   -bg, --bg-color <color> Background color in RGB format (default: 7f7f7f)
 #   -bga, --bg-alpha <alpha> Background alpha value (0-255, default: 0)
 #   -is, --image-scaling <scale> Image scaling factor (default: 1.0)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
-# Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+# Calling display with -o will use the ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE
 # You can also call infinite image layers with (next-image.png scale height side)*
 #   --icon <path>         Path to an icon image to display on top (default: none)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
-    local use_confirm_image=false
+    local use_acknowledge_image=false
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
@@ -153,7 +153,7 @@ display() {
             -w|--width) width="$2"; shift ;;
             -c|--color) color="$2"; shift ;;
             -f|--font) font="$2"; shift ;;
-            -o|--okay) use_confirm_image=true; run_acknowledge=true ;;
+            -o|--okay) use_acknowledge_image=true; run_acknowledge=true ;;
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
@@ -162,9 +162,6 @@ display() {
         esac
         shift
     done
-    if [[ "$use_confirm_image" = true ]]; then
-        image="$CONFIRM_IMAGE"
-    fi
     local r="${color:0:2}"
     local g="${color:2:2}"
     local b="${color:4:2}"
@@ -182,7 +179,12 @@ display() {
     
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.20 middle center"
+        command="$command \"$icon_image\" 0.20 top center"
+    fi
+
+    # Add ACKNOWLEDGE_IMAGE if --okay flag is used
+    if [[ "$use_acknowledge_image" = true ]]; then
+        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 middle center"
     fi
     
     # Execute the command in the background if delay is 0
@@ -436,7 +438,7 @@ log_message() {
         mkdir -p "$(dirname "$custom_log_file")"
         touch "$custom_log_file"
     fi
-    
+
     printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
