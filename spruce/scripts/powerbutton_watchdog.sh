@@ -32,6 +32,7 @@ while true ; do
                 # not in previous sleep event 
                 if ! flag_check "pb.sleep" && ! flag_check "pb.longpress" ; then
                     # start long press handler
+                    kill $PID
                     long_press_handler &
                     PID=$!
                 fi
@@ -41,6 +42,7 @@ while true ; do
                 if flag_check "pb.longpress" ; then
                     # kill long press handler and remove flag
                     kill $PID
+                    PID=""
                     flag_remove "pb.longpress"
 
                     # add sleep flag
@@ -74,14 +76,14 @@ while true ; do
     echo -n mem > /sys/power/state
 
     # wait long enough to ensure device enter sleep mode
-    sleep 1
+    # sleep 1
 
     # update display setting after wakeup
     ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
     echo "$ENHANCE_SETTINGS" > /sys/devices/virtual/disp/disp/attr/enhance
 
     # wait long enough to ensure wakeup task is finished
-    sleep 2
+    # sleep 2
 
     # RESUME any running emulator or MainUI
     killall -q -18 ra32.miyoo || \

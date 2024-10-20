@@ -1,6 +1,9 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
     ppid=$pid
@@ -14,9 +17,30 @@ kill_current_process() {
     fi
 }
 
-# exit if MainUI is running
+# ask for user response if MainUI is running
 if flag_check "in_menu" ; then
-	return 0
+    messages_file="/var/log/messages"
+	killall -q -19 MainUI
+	display --text "Shutdown A30?  B-Cancel A-Okay"
+    while true; do
+        inotifywait "$messages_file"
+        last_line=$(tail -n 1 "$messages_file")
+        case "$last_line" in
+			# B button
+			*"key 1 29"*)
+				display_kill
+				killall -q -18 MainUI
+				return 0
+				break
+				;;
+			# A button	
+			*"key 1 57"*) 
+				display_kill
+				rm "${FLAGS_DIR}/lastgame.lock"
+				break
+				;;
+        esac
+    done
 fi
 
 # kill app without reboot if not emulator is running 
