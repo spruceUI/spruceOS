@@ -17,6 +17,8 @@ kill_current_process() {
     fi
 }
 
+vibrate
+
 # ask for user response if MainUI is running
 if flag_check "in_menu" ; then
     messages_file="/var/log/messages"
@@ -58,7 +60,6 @@ fi
 
 # notify user with vibration and led 
 echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
-vibrate
 
 # kill principle and runtime first so no new app / MainUI will be loaded anymore
 killall -q -15 runtime.sh
