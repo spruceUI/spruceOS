@@ -423,45 +423,21 @@ log_verbose() {
 # Log a verbose message to a custom file:
 #    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-max_entries=200
 log_message() {
     local message="$1"
     local verbose_flag="$2"
     local custom_log_file="${3:-$log_file}"
 
     # Check if it's a verbose message and if verbose logging is not enabled
-    if [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose"; then
-        return
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
     fi
-
-    # Ensure the directory for the log file exists
-    mkdir -p "$(dirname "$custom_log_file")"
-
-    # Check if custom log file exists, if not, use default log file
-    if [ ! -f "$custom_log_file" ]; then
-        mkdir -p "$(dirname "$log_file")"
-        custom_log_file="$log_file"
-    fi
-
-    # Ensure the log file exists
-    touch "$custom_log_file"
-
-    # Add "-v" indicator for verbose messages
-    local verbose_indicator=""
-    if [ "$verbose_flag" = "-v" ]; then
-        verbose_indicator=" -v"
-    fi
-
-    # Append new log message with verbose indicator if applicable
-    echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >>"$custom_log_file"
-
-    # Keep only the last 200 entries
-    if [ $(wc -l <"$custom_log_file") -gt $max_entries ]; then
-        tail -n $max_entries "$custom_log_file" >"$custom_log_file.tmp"
-        mv "$custom_log_file.tmp" "$custom_log_file"
-    fi
-
-    echo "$message"
+    
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
@@ -519,3 +495,4 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
+

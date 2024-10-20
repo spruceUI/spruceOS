@@ -27,12 +27,9 @@ mount -o bind "/mnt/SDCARD/.tmp_update/etc/profile" /etc/profile
 
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-#. /mnt/SDCARS/spruce/scripts/runtimeHelper.sh
-#. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-#. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-#. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
-#. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
-#rotate_logs &
+. /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
+
+rotate_logs &
 
 # Flag cleanup
 flag_remove "themeChanged"
