@@ -24,7 +24,7 @@ if flag_check "in_menu" ; then
 	killall -q -19 MainUI
 	# show notification screen
 	display --text "Are you sure you want to shutdown?
-B-Cancel A-Confirm" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+ A-Confirm B-Cancel" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 	# wait for button input
     while true; do
 		# wait for log message update
