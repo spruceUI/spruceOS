@@ -251,7 +251,7 @@ display() {
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.20 top center"
+        command="$command \"$icon_image\" 0.20 middle center"
     fi
 
     # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
