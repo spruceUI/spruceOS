@@ -27,6 +27,7 @@ COMPAT_ATTRIBUTE vec4 TexCoord;
 COMPAT_VARYING vec4 COL0;
 COMPAT_VARYING vec4 TEX0;
 COMPAT_VARYING vec2 ogl2pos;
+COMPAT_VARYING vec2 ps;
 
 vec4 _oPosition1; 
 uniform mat4 MVPMatrix;
@@ -50,8 +51,9 @@ uniform COMPAT_PRECISION float size;
 void main()
 {
     gl_Position = MVPMatrix * VertexCoord;
-    TEX0.xy = TexCoord.xy*1.0001;
+    TEX0.xy = TexCoord.xy;
     ogl2pos = TEX0.xy*SourceSize.xy;
+    ps = vec2(1.0/TextureSize.x,0.0);
 }
 
 #elif defined(FRAGMENT)
@@ -85,6 +87,7 @@ uniform COMPAT_PRECISION vec2 InputSize;
 uniform sampler2D Texture;
 COMPAT_VARYING vec4 TEX0;
 COMPAT_VARYING vec2 ogl2pos;
+COMPAT_VARYING vec2 ps;
 
 // compatibility #defines
 #define vTexCoord TEX0.xy
@@ -93,10 +96,10 @@ COMPAT_VARYING vec2 ogl2pos;
 #define OutSize vec4(OutputSize, 1.0 / OutputSize)
 
 #ifdef PARAMETER_UNIFORM
-uniform COMPAT_PRECISION float scan;
+uniform COMPAT_PRECISION float sharpness;
 
 #else
-#define scan 0.0
+#define sharpness 0.0
 
 #endif
 
@@ -107,10 +110,8 @@ float n    = ogl2pos.y - near;
 float quil = (near + 4.0*n*n*n)*SourceSize.w;    
 vec2 pos = vec2(vTexCoord.x,quil);
 
-vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
-float spos = mod(gl_FragCoord.y,2.0);
-if (spos < 1.0) res *= 0.6; 
-
+vec3 res = COMPAT_TEXTURE(Source,pos).rgb*0.5;
+     res += COMPAT_TEXTURE(Source,pos + ps).rgb*0.5;
 FragColor.rgb = res;
 }
 #endif

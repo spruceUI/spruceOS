@@ -83,8 +83,6 @@ while [ 1 ]; do
 
         # reset CPU settings to defaults in case an emulator changes anything
         set_smart &
-
-        #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set

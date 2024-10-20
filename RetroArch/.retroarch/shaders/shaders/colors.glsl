@@ -1,8 +1,13 @@
-#version 110
+/*
+	Fragment shader based on "Improved texture interpolation" by Iñigo Quílez
+	Original description: http://www.iquilezles.org/www/articles/texture/texture.htm
+	Modified by DariusG for Miyoo A30.
+*/
 
-#define PI   3.14159265358979323846
-#define tau  6.283185
-
+#pragma parameter bri "BRIGHTNESS" 1.0 0.0 2.0 0.05
+#pragma parameter sat "SATURATION" 1.0 0.0 3.0 0.05
+#pragma parameter gam "GAMMA" 1.0 0.0 3.0 0.05
+ 
 #if defined(VERTEX)
 
 #if __VERSION__ >= 130
@@ -26,9 +31,7 @@ COMPAT_ATTRIBUTE vec4 COLOR;
 COMPAT_ATTRIBUTE vec4 TexCoord;
 COMPAT_VARYING vec4 COL0;
 COMPAT_VARYING vec4 TEX0;
-COMPAT_VARYING vec2 ogl2pos;
 
-vec4 _oPosition1; 
 uniform mat4 MVPMatrix;
 uniform COMPAT_PRECISION int FrameDirection;
 uniform COMPAT_PRECISION int FrameCount;
@@ -36,22 +39,16 @@ uniform COMPAT_PRECISION vec2 OutputSize;
 uniform COMPAT_PRECISION vec2 TextureSize;
 uniform COMPAT_PRECISION vec2 InputSize;
 
-// compatibility #defines
+// vertex compatibility #defines
 #define vTexCoord TEX0.xy
 #define SourceSize vec4(TextureSize, 1.0 / TextureSize) //either TextureSize or InputSize
-#define OutSize vec4(OutputSize, 1.0 / OutputSize)
-
-#ifdef PARAMETER_UNIFORM
-uniform COMPAT_PRECISION float size;
-#else
-#define size 0.0
-#endif
+#define outsize vec4(OutputSize, 1.0 / OutputSize)
 
 void main()
 {
     gl_Position = MVPMatrix * VertexCoord;
-    TEX0.xy = TexCoord.xy*1.0001;
-    ogl2pos = TEX0.xy*SourceSize.xy;
+    COL0 = COLOR;
+    TEX0.xy = TexCoord.xy;
 }
 
 #elif defined(FRAGMENT)
@@ -84,33 +81,45 @@ uniform COMPAT_PRECISION vec2 TextureSize;
 uniform COMPAT_PRECISION vec2 InputSize;
 uniform sampler2D Texture;
 COMPAT_VARYING vec4 TEX0;
-COMPAT_VARYING vec2 ogl2pos;
 
-// compatibility #defines
-#define vTexCoord TEX0.xy
+// fragment compatibility #defines
 #define Source Texture
+#define vTexCoord TEX0.xy
+
 #define SourceSize vec4(TextureSize, 1.0 / TextureSize) //either TextureSize or InputSize
-#define OutSize vec4(OutputSize, 1.0 / OutputSize)
+#define outsize vec4(OutputSize, 1.0 / OutputSize)
 
 #ifdef PARAMETER_UNIFORM
-uniform COMPAT_PRECISION float scan;
+uniform COMPAT_PRECISION float bri;
+uniform COMPAT_PRECISION float sat;
+uniform COMPAT_PRECISION float gam;
 
 #else
-#define scan 0.0
+#define bri 1.0
+#define sat 1.0
+#define gam 1.0
 
 #endif
 
-void main() 
+void main()
 {
-float near = floor(ogl2pos.y)+0.5;
-float n    = ogl2pos.y - near;   
-float quil = (near + 4.0*n*n*n)*SourceSize.w;    
-vec2 pos = vec2(vTexCoord.x,quil);
+	vec2 p = vTexCoord.xy;
 
-vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
-float spos = mod(gl_FragCoord.y,2.0);
-if (spos < 1.0) res *= 0.6; 
+	p = p * SourceSize.xy + vec2(0.5, 0.5);
 
-FragColor.rgb = res;
-}
+	vec2 i = floor(p);
+	vec2 f = p - i;
+	f = f * f * f * (f * (f * 6.0 - vec2(15.0, 15.0)) + vec2(10.0, 10.0));
+	p = i + f;
+
+	p = (p - vec2(0.5, 0.5)) * SourceSize.zw;
+	vec4 res = vec4(COMPAT_TEXTURE(Source, p));
+    res.rgb = pow(res.rgb, vec3(gam));
+
+	float gray = dot(vec3(0.33),res.rgb);
+	res.rgb = mix(vec3(gray), res.rgb, sat);
+	res *= bri;
+   // final sum and weight normalization
+   FragColor = res;
+} 
 #endif
