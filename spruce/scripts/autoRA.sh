@@ -47,7 +47,8 @@ if flag_check "save_active"; then
 	cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 
 	log_message "load game to play"
-	$FLAGS_DIR/lastgame.lock &> /dev/null
+	sleep 5
+	nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null
 
 	# remove tmp command file after game exit
 	# otherwise the game will load again in principle.sh later

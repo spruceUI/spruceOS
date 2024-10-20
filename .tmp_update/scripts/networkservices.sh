@@ -10,11 +10,12 @@ connect_services() {
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
+			# May be moved to powerdown script...
 			# Sync System Time & RTC to network
 			# RA is a safe process to initiate the update of time while it's running, many processes are not!!
-			if pgrep "ra32.miyoo" > /dev/null; then
-				/mnt/SDCARD/spruce/scripts/geoip_timesync.sh
-			fi
+			#if pgrep "ra32.miyoo" > /dev/null; then
+			#	/mnt/SDCARD/spruce/scripts/geoip_timesync.sh
+			#fi
 			
 			# SFTPGo check
 			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then

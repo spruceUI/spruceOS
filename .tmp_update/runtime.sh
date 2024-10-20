@@ -57,7 +57,7 @@ killall -9 main
 kill_images
 
 # Bring up network services
-nice -n -20 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
+nice -n 15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 
 ${NEW_SCRIPTS_DIR}/spruceRestoreShow.sh &
 
