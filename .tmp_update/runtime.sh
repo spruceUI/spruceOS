@@ -114,8 +114,11 @@ ${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
 
 lcd_init 1
 
-"${NEW_SCRIPTS_DIR}/firstboot.sh"
-log_message "First boot script executed"
+if flag_check "first_boot"; then
+    "${NEW_SCRIPTS_DIR}/firstboot.sh"
+else
+    log_message "First boot flag not found. Skipping first boot procedures."
+fi
 
 swapon -p 40 "${SWAPFILE}"
 log_message "Swap file activated"
