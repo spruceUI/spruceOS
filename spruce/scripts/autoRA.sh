@@ -36,9 +36,6 @@ else
 	echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
 fi
 
-#Bring up idle monitors
-/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
-
 # copy command to cmd_to_run.sh so game switcher can work correctly
 cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 

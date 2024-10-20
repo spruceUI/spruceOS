@@ -102,6 +102,9 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
+# Load idle monitors before game resume or MainUI
+${NEW_SCRIPTS_DIR}/applySetting/idlemon_mm.sh
+
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
     ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
@@ -130,7 +133,6 @@ ${NEW_SCRIPTS_DIR}/low_power_warning.sh
 ${NEW_SCRIPTS_DIR}/ffplay_is_now_media.sh
 ${NEW_SCRIPTS_DIR}/checkfaves.sh &
 ${NEW_SCRIPTS_DIR}/credits_watchdog.sh &
-${NEW_SCRIPTS_DIR}/applySetting/idlemon_mm.sh
 log_message "Initial setup scripts executed"
 kill_images
 
