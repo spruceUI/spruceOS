@@ -34,7 +34,7 @@ $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 @"Boot into Game Switcher"
 "" "Run after closing a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix" ""
 "" "Launch with tap of Home button" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" ""
-@"Except for NDS games"
+@"Except for NDS and PICO8 games"
 "" "Use boxart instead of screenshots" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" ""
 "" "Maximum number of games" "||" "5|10|20" "cat $SETTINGS$/gs_max" "echo -n 5 > $SETTINGS$/gs_max|echo -n 10 > $SETTINGS$/gs_max|echo -n 20 > $SETTINGS$/gs_max" ""
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
