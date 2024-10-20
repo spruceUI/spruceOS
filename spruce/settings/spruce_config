@@ -1,5 +1,7 @@
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
 $FLAGS=/mnt/SDCARD/spruce/flags$
+$GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
+$IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
@@ -7,10 +9,8 @@ $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
-$IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
-$GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 [System]
-"" "Shutdown when idle in main menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
+"" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "cat $SETTINGS$/idlemon_in_game" "echo -n Off > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game Off|echo -n 2m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 2m|echo -n 5m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 5m|echo -n 10m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 10m|echo -n 30m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 30m" ""
 @"Excludes ports"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
@@ -38,7 +38,7 @@ $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
-"-n" "Display item index" "on|off" "on|off" "on" "" ""
+"-n" "Display item index" "on|off" "on|off" "off" "" ""
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
@@ -53,10 +53,10 @@ $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 "" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
 @"Launch a random game!"
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
-@"Set the current date and time"
+@"Set the current time and date"
 "" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
 "" "Syncthing" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json" ""
 @"Synchronize your files via Syncthing"
 "" "Wifi File Transfer" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/WifiFileTransfer/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/WifiFileTransfer/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/WifiFileTransfer/config.json" ""
-@"Transfer files to your device via WiFi through your browser"
+@"WHY IS THIS APP ALSO LISTED IN NETWORK TAB?"
