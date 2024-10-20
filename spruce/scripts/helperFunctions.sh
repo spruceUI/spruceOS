@@ -66,12 +66,12 @@ acknowledge() {
     echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
 
     while true; do
-        $INOTIFY "$messages_file"
+        inotifywait "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
         *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
-            log_message "last_line: $last_line" -v
+            log_message "last_line: $last_line" -vS
             break
             ;;
         esac
@@ -97,6 +97,49 @@ check_and_connect_wifi() {
             return 1
         fi
         sleep 1
+    done
+}
+
+# Call this to wait for the user to confirm an action
+# Use this with display --confirm to show an image with a confirm/cancel prompt
+# The combined usage would be like
+
+# display -t "Do you want to do this?" --confirm
+# if confirm; then
+#     display -t "You confirmed the action" -d 3
+# else
+#     log_message "User did not confirm" -v
+#     display -t "You did not confirm the action" -d 3
+# fi    
+confirm(){
+    local messages_file="/var/log/messages"
+    echo "CONFIRM $(date +%s)" >>"$messages_file"
+
+    while true; do
+		# wait for log message update
+        inotifywait "$messages_file"
+		# get the last line of log file
+        last_line=$(tail -n 1 "$messages_file")
+        case "$last_line" in
+			# B button - cancel
+			*"key 1 29"*)
+				# dismiss notification screen
+				display_kill
+				# exit script
+				echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
+				return 1
+				break
+				;;
+			# A button - confirm
+			*"key 1 57"*) 
+				# dismiss notification screen
+				display_kill
+				# exit script
+				echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
+				return 0
+				break
+				;;
+        esac
     done
 }
 
@@ -131,6 +174,7 @@ cores_online() {
 
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
+CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
 DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
@@ -151,7 +195,10 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -bga, --bg-alpha <alpha> Background alpha value (0-255, default: 0)
 #   -is, --image-scaling <scale> Image scaling factor (default: 1.0)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
-# Calling display with -o will use the ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE
+# Calling display with -o/--okay will use the ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE
+# Calling display with --confirm will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+# If using --confirm, you should call the confirm() message in an if block in your script
+# --confirm will supercede -o/--okay
 # You can also call infinite image layers with (next-image.png scale height side)*
 #   --icon <path>         Path to an icon image to display on top (default: none)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
@@ -159,6 +206,7 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 display() {
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
     local use_acknowledge_image=false
+    local use_confirm_image=false
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
@@ -177,6 +225,7 @@ display() {
             -c|--color) color="$2"; shift ;;
             -f|--font) font="$2"; shift ;;
             -o|--okay) use_acknowledge_image=true; run_acknowledge=true ;;
+            --confirm) use_confirm_image=true; use_acknowledge_image=false; run_acknowledge=false ;;
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
@@ -205,8 +254,11 @@ display() {
         command="$command \"$icon_image\" 0.20 top center"
     fi
 
-    # Add ACKNOWLEDGE_IMAGE if --okay flag is used
-    if [[ "$use_acknowledge_image" = true ]]; then
+    # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
+    if [[ "$use_confirm_image" = true ]]; then
+        command="$command \"$CONFIRM_IMAGE\" 1.0 middle center"
+        delay=0
+    elif [[ "$use_acknowledge_image" = true ]]; then
         command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 middle center"
     fi
 
@@ -214,8 +266,8 @@ display() {
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &
         log_message "display command: $command" -v
-        # Run acknowledge if -o or --okay was used
-        if [[ "$run_acknowledge" = true ]]; then
+        # Run acknowledge if -o or --okay was used and --confirm was not used
+        if [[ "$run_acknowledge" = true && "$use_confirm_image" = false ]]; then
             acknowledge
         fi
     else
