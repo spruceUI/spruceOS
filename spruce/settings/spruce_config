@@ -15,7 +15,6 @@ $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 @"Excludes ports"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
-@"Only on supported themes"
 "-e" "Enable Recents in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
 "-f" "Enable RetroArch expert mode" "|" "on|off" "off" "" ""
 @"NOT IMPLEMENTED YET"
