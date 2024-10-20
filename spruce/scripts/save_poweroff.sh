@@ -23,7 +23,7 @@ if flag_check "in_menu" ; then
 	# pause MainUI
 	killall -q -19 MainUI
 	# show notification screen
-	display --text "Shutdown A30?  B-Cancel A-Okay"
+	display --text "Shutdown A30?  B-Cancel A-Okay" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 	# wait for button input
     while true; do
 		# wait for log message update
