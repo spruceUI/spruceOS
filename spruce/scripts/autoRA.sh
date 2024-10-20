@@ -31,8 +31,6 @@ if flag_check "save_active"; then
 		log_message "Retro Achievements enabled, checking WiFi connection"
 		check_and_connect_wifi
 	fi
-	# Restart network services
-	/mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
 	#Set the LED
 	if flag_check "ledon"; then
 		echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness

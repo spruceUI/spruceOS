@@ -56,6 +56,7 @@ else
     touch /tmp/wifion
     log_message "WiFi turned on"
 fi
+
 killall -9 main
 kill_images
 
@@ -106,16 +107,6 @@ ${NEW_SCRIPTS_DIR}/autoRA.sh  &> /dev/null
 log_message "Auto Resume executed"
 
 ${NEW_SCRIPTS_DIR}/autoIconRefresh.sh &
-
-# killprocess() {
-#     pid=$(ps | grep $1 | grep -v grep | cut -d' ' -f3)
-#     kill -9 $pid
-# }
-
-# runifnecessary() {
-#     a=$(ps | grep $1 | grep -v grep)
-#     [ "$a" == "" ] && $2 &
-# }
 
 lcd_init 1
 
