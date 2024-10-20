@@ -122,6 +122,9 @@ flag_add "save_active"
 # Saved current sound settings
 alsactl store
 
+# All processes should have been killed, safe to update time if enabled
+/mnt/SDCARD/spruce/scripts/geoip_timesync.sh
+
 # sync files and power off device
 sync
 poweroff
