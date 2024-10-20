@@ -1,5 +1,6 @@
 # Function summaries:
 # acknowledge: Waits for user to press A, B, or Start button
+# check_and_connect_wifi: Polls for Wifi, Cancels on Start Press
 # cores_online: Sets the number of CPU cores to be online
 # display: Displays text on the screen with various options
 # exec_on_hotkey: Executes a command when specific buttons are pressed
@@ -77,6 +78,28 @@ acknowledge() {
     done
 }
 
+check_and_connect_wifi() {
+    messages_file="/var/log/messages"
+
+    log_message "Attempting to connect to WiFi"
+    show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
+
+    ifconfig wlan0 up
+    wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+    udhcpc -i wlan0 &
+
+    while true; do
+        if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+            log_message "Successfully connected to WiFi"
+            return 0
+        elif tail -n1 "$messages_file" | grep -q "enter_pressed 0"; then
+            log_message "WiFi connection cancelled by user"
+            return 1
+        fi
+        sleep 1
+    done
+}
+
 # Call this to set the number of CPU cores to be online
 # Usage: cores_online [number of cores]
 # Default is 4 cores (all cores online)
@@ -139,7 +162,7 @@ display() {
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
-    
+
     display_kill
 
     while [[ $# -gt 0 ]]; do
@@ -176,7 +199,7 @@ display() {
 
     # Construct the command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
-    
+
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
         command="$command \"$icon_image\" 0.20 top center"
@@ -186,7 +209,7 @@ display() {
     if [[ "$use_acknowledge_image" = true ]]; then
         command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 middle center"
     fi
-    
+
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &

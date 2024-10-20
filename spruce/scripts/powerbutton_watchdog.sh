@@ -29,7 +29,7 @@ while true ; do
     $BIN_PATH/getevent /dev/input/event0 -exclusive | while read line; do
         case $line in
             *"key 1 116 1"*) # MENU key down
-                # not in previous sleep event 
+                # not in previous sleep event
                 if ! flag_check "pb.sleep" && ! flag_check "pb.longpress" ; then
                     # start long press handler
                     kill $PID
@@ -67,9 +67,9 @@ while true ; do
                 fi
             ;;
         esac
-    done 
+    done
 
-    # ensure all cache is written to SD card 
+    # ensure all cache is written to SD card
     sync
 
     # suspend to memory

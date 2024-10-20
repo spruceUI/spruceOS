@@ -1,32 +1,36 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 messages_file="/var/log/messages"
 
-check_and_connect_wifi() {
-	log_message "Attempting to connect to WiFi"
-	show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
-	
-	ifconfig wlan0 up
-	wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-	udhcpc -i wlan0 &
-	
-	while true; do
-		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-			log_message "Successfully connected to WiFi"
-			break
-		elif tail -n1 "$messages_file" | grep -q "enter_pressed 0"; then
-			log_message "WiFi connection cancelled by user"
-			break
-		fi
-		sleep 1
-	done	
-}
-
 set_performance
 log_message "Save active flag detected"
+
+wifi_needed=false
+syncthing_enabled=false
+
 if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-	log_message "Retro Achievements enabled, checking WiFi connection"
+	log_message "Retro Achievements enabled, WiFi connection needed"
+	wifi_needed=true
+fi
+
+if flag_check "syncthing"; then
+	log_message "Syncthing is enabled, WiFi connection needed"
+	wifi_needed=true
+	syncthing_enabled=true
+fi
+
+if $syncthing_enabled; then
+	if check_and_connect_wifi; then
+		start_syncthing_process
+		/mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --startup
+		flag_add "syncthing_startup_synced"
+	else
+		log_message "Failed to connect to WiFi, skipping Sync check"
+	fi
+elif $wifi_needed; then
 	check_and_connect_wifi
 fi
 #Set the LED

@@ -121,6 +121,16 @@ show_image "/mnt/SDCARD/.tmp_update/res/save.png"
 # Created save_active flag
 flag_add "save_active"
 
+if flag_check "syncthing"; then
+	log_message "Syncthing is enabled, WiFi connection needed"
+
+	if check_and_connect_wifi; then
+		/mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --shutdown
+	fi
+
+    flag_remove "syncthing_startup_synced"
+fi
+
 # Saved current sound settings
 alsactl store
 
