@@ -1,0 +1,31 @@
+{
+  "label": "PSX",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PS",
+  "imgpath": "../../Roms/PS/Imgs",
+  "gamelist": "../../Roms/PS/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "m3u|chd|bin|cue|img|mdf|pbp|PBP|toc|cbn",
+  "launchlist": [
+    {
+      "name": "Jump to random PlayStation game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    },
+    {
+      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+    },
+    {
+      "name": "Save current launch settings as per-game override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
+    },
+    {
+      "name": "Remove per-game launch setting override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    }
+  ]
+}

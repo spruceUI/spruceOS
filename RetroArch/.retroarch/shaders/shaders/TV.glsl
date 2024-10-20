@@ -108,9 +108,9 @@ float quil = (near + 4.0*n*n*n)*SourceSize.w;
 vec2 pos = vec2(vTexCoord.x,quil);
 
 vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
-
 float spos = mod(gl_FragCoord.y,2.0);
 if (spos < 1.0) res *= 0.6; 
+
 FragColor.rgb = res;
 }
 #endif

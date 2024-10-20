@@ -1,2 +1,2 @@
 #!/bin/sh
-./switch.sh
+./retroExpert.sh

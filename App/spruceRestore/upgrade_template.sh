@@ -10,8 +10,10 @@
 # Define the target version for this upgrade script
 TARGET_VERSION="X.Y.Z"  # Replace X.Y.Z with your target version number
 
+/mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 # Source the helper functions
-HELPER_FUNCTIONS="/mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh"
+HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 if [ -f "$HELPER_FUNCTIONS" ]; then
     . "$HELPER_FUNCTIONS"
 else
