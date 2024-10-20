@@ -18,8 +18,8 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
 "-e" "Enable Recents in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
-"-f" "Enable RetroArch expert mode" "|" "on|off" "off" "" ""
-@"NOT IMPLEMENTED YET"
+"" "Home key opens RetroArch" "|" "on|off" "$CHECK$ expertRa" "touch $FLAGS$/expertRa|rm -f $FLAGS$/expertRa" ""
+@"While using RetroArch emulators."
 [Network]
 "" "Sync Time/RTC with network" "|" "on|off" "$CHECK$ enableNetworkTimeSync" "touch $FLAGS$/enableNetworkTimeSync && $GEOTIME$|rm -f $FLAGS$/enableNetworkTimeSync" ""
 "" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
