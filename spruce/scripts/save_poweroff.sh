@@ -19,8 +19,8 @@ kill_current_process() {
 
 vibrate
 
-# ask for user response if MainUI is running
-if flag_check "in_menu"; then
+# ask for user response if MainUI is running and skip_shutdown_confirm flag is not set
+if flag_check "in_menu" && ! flag_check "skip_shutdown_confirm"; then
 	messages_file="/var/log/messages"
 	# pause MainUI
 	killall -q -19 MainUI
@@ -38,9 +38,13 @@ if flag_check "in_menu"; then
 		# exit script
 		return 0
 	fi
+else
+	# If skip_shutdown_confirm flag is set or not in menu, proceed with shutdown
+	rm "${FLAGS_DIR}/lastgame.lock"
+	echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
 fi
 
-# notify user with vibration and led
+# notify user with led
 echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
 # kill principle and runtime first so no new app / MainUI will be loaded anymore
