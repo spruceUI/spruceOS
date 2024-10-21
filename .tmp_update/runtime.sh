@@ -83,7 +83,7 @@ cd /mnt/SDCARD/.tmp_update/bin
 sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
 # then send to /dev/input/event4
-( ./joystickinput /dev/ttyS2 /config/joypad.config | ./sendevent /dev/input/event4 ) &
+./joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event4 &
 
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
