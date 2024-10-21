@@ -20,28 +20,30 @@ kill_current_process() {
 vibrate
 
 # ask for user response if MainUI is running and skip_shutdown_confirm flag is not set
-if flag_check "in_menu" && ! flag_check "skip_shutdown_confirm"; then
-	messages_file="/var/log/messages"
-	# pause MainUI
-	killall -q -19 MainUI
-	# show notification screen
-	display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
-	if confirm 30; then
-		# remove lastgame flag to prevent loading any App after next boot
-		rm "${FLAGS_DIR}/lastgame.lock"
-		# turn off screen
-		echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+if flag_check "in_menu"; then
+	if ! flag_check "skip_shutdown_confirm"; then
+		messages_file="/var/log/messages"
+		# pause MainUI
+		killall -q -19 MainUI
+		# show notification screen
+		display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
+		if confirm 30; then
+			# remove lastgame flag to prevent loading any App after next boot
+			rm "${FLAGS_DIR}/lastgame.lock"
+			# turn off screen
+			echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+		else
+			display_kill
+			# resume Mainui
+			killall -q -18 MainUI
+			# exit script
+			return 0
+		fi
 	else
-		display_kill
-		# resume Mainui
-		killall -q -18 MainUI
-		# exit script
-		return 0
+		# If skip_shutdown_confirm flag is set or not in menu, proceed with shutdown
+		rm "${FLAGS_DIR}/lastgame.lock"
+		echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
 	fi
-else
-	# If skip_shutdown_confirm flag is set or not in menu, proceed with shutdown
-	rm "${FLAGS_DIR}/lastgame.lock"
-	echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
 fi
 
 # notify user with led
