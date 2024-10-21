@@ -2,7 +2,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
+. /mnt/SDCARD/spruce/bin/SFTPGo/sftpgoFunctions.sh
 . /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
 
 connect_services() {
