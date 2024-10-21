@@ -14,15 +14,21 @@ SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 
 ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/App/syncthing.png"
 
+display_message() {
+    if [ $silent_mode -eq 0 ]; then
+        display "$@"
+    fi
+}
+
 log_message "----------Starting Restore script----------"
 cores_online 4
-display --icon "$ICON_PATH" -t "Restoring from your most recent backup..." 
+display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
 
 #-----Main-----
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
-> "$log_file"  # Empty out or create the log file
+>"$log_file" # Empty out or create the log file
 
 log_message "Starting spruceRestore script..."
 log_message "Looking for backup files..."
@@ -30,7 +36,7 @@ log_message "Looking for backup files..."
 # Check if backups folder exists
 if [ ! -d "$BACKUP_DIR/backups" ]; then
     log_message "Backup folder not found at $BACKUP_DIR/backups"
-    display --icon "$ICON_PATH" -t "No backup found. Make sure you've ran the backup app or have a recent backup located in
+    display_message --icon "$ICON_PATH" -t "No backup found. Make sure you've ran the backup app or have a recent backup located in
     $BACKUP_DIR/backups" -o
     exit 1
 fi
@@ -40,7 +46,7 @@ backup_files=$(find "$BACKUP_DIR/backups" -name "spruceBackup*.7z" | sort -r | t
 
 if [ -z "$backup_files" ]; then
     log_message "No spruceBackup 7z files found in $BACKUP_DIR/backups"
-    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
 
@@ -54,9 +60,13 @@ log_message "Verifying the integrity of the backup file..."
 
 if [ $? -ne 0 ]; then
     log_message "Backup file integrity check failed. The file may be corrupted."
-    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
+
+
+# Define the path for the .lastUpdate file
+last_update_file="$APP_DIR/.lastUpdate"
 
 # Define a list of flags to check and potentially restore
 flags_to_process="expertRA"
@@ -87,6 +97,8 @@ restore_flags_on_failure() {
 # Process flags before restore
 process_flags_before_restore
 
+rm -f "$last_update_file"
+
 # Actual restore process
 log_message "Starting actual restore process..."
 cd /
@@ -96,14 +108,14 @@ log_message "Extracting backup file: $most_recent_backup"
 
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
-    display --icon "$ICON_PATH" -t "Restore completed successfully!" -d 3
+    display_message --icon "$ICON_PATH" -t "Restore completed successfully!" -d 3
     rm -f "$backupdir/removed_flags.tmp"
 else
     log_message "Error during restore process. Check $log_file for details."
     log_message "7zr exit code: $?"
     log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
     restore_flags_on_failure
-    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
 
@@ -148,10 +160,8 @@ UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
 UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
-display --icon "$ICON_PATH" -t "Applying upgrades to your system..." 
+display_message --icon "$ICON_PATH" -t "Applying upgrades to your system..."
 
-# Define the path for the .lastUpdate file
-last_update_file="$APP_DIR/.lastUpdate"
 
 # Read the current version from .lastUpdate file
 if [ -f "$last_update_file" ]; then
@@ -173,10 +183,10 @@ for script in $upgrade_scripts; do
     script_name=$(basename "$script")
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
 
-    if [ "$current_version" = "0.0.0" ] || [ "$(printf '%s\n' "$current_version" "$script_version" | sort -V | head -n1)" = "$current_version" ]; then
+    if [ "$(printf '%s\n' "$current_version" "$script_version" | sort -V | head -n1)" != "$script_version" ]; then
         log_message "Starting upgrade script: $script_name"
-        display --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..." 
-        
+        display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
+
         if [ -f "$script" ]; then
             log_message "Executing $script_name..."
             output=$(sh "$script" 2>&1)
@@ -192,7 +202,7 @@ for script in $upgrade_scripts; do
             else
                 log_message "Error running $script_name. Exit status: $exit_status"
                 log_message "Error details: $output"
-                display --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
+                display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
                 exit 1
             fi
         else
@@ -201,12 +211,13 @@ for script in $upgrade_scripts; do
 
         log_message "Finished processing $script_name"
     else
-        log_message "Skipping $script_name: Already at version $current_version or higher"
+        log_message "Skipping $script_name: Current version $current_version is equal to or higher than $script_version"
     fi
 done
 
 log_message "Upgrade process completed. Current version: $current_version"
-display --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
+display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 log_message "----------Restore and Upgrade completed----------"
 cores_online
+
