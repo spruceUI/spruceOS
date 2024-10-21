@@ -192,7 +192,7 @@ cores_online() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    local start_brightness=50
+    local start_brightness=40
     local end_brightness=3
     local step=1
     local delay=0.03  # 50ms delay between each step
