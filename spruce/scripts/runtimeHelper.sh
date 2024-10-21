@@ -2,20 +2,27 @@
 
 
 rotate_logs() {
-local log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-local max_log_files=5
+    local log_dir="/mnt/SDCARD/Saves/spruce"
+    local log_file="$log_dir/spruce.log"
+    local max_log_files=5
+
+    # Create the log directory if it doesn't exist
+    if [ ! -d "$log_dir" ]; then
+        mkdir -p "$log_dir"
+    fi
+
     # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
     i=$((max_log_files - 1))
     while [ $i -ge 1 ]; do
-        if [ -f "/mnt/SDCARD/Saves/spruce/spruce${i}.log" ]; then
-            mv "/mnt/SDCARD/Saves/spruce/spruce${i}.log" "/mnt/SDCARD/Saves/spruce/spruce$((i+1)).log"
+        if [ -f "$log_dir/spruce${i}.log" ]; then
+            mv "$log_dir/spruce${i}.log" "$log_dir/spruce$((i+1)).log"
         fi
         i=$((i - 1))
     done
 
     # If spruce.log exists, move it to spruce1.log
     if [ -f "$log_file" ]; then
-        mv "$log_file" "/mnt/SDCARD/Saves/spruce/spruce1.log"
+        mv "$log_file" "$log_dir/spruce1.log"
     fi
 
     # Create a fresh spruce.log
@@ -39,3 +46,6 @@ set_usb_icon_from_theme(){
         fi
     fi
 }
+
+
+
