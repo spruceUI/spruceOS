@@ -23,7 +23,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 [Network]
 "" "Sync Time/RTC with network" "|" "on|off" "$CHECK$ enableNetworkTimeSync" "touch $FLAGS$/enableNetworkTimeSync && $GEOTIME$|rm -f $FLAGS$/enableNetworkTimeSync" ""
 "" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
-@"Manage your files wirelessly"
+@"User: spruce, Password: happygaming"
 "" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
 @"User: root, Password: tina"
 "" "Enable Samba" "|" "on|off" "$CHECK$ samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
