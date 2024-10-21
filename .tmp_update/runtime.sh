@@ -30,6 +30,9 @@ mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile
 
 rotate_logs &
 
+# Resetting log file location
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
+
 # Flag cleanup
 flag_remove "themeChanged"
 flag_remove "log_verbose"
@@ -90,6 +93,13 @@ VERSION="$(cat /usr/miyoo/version)"
 if [ "$VERSION" -lt 20240713100458 ]; then
     sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
+fi
+
+# Hide Update App if no update file is found
+. /mnt/SDCARD/Updater/updaterFunctions.sh
+if ! check_for_update_file; then
+    sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
+    log_message "No update file found; hiding Updater app"
 fi
 
 # Load idle monitors before game resume or MainUI

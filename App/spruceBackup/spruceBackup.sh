@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Add silent mode flag
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1
+
 APP_DIR=/mnt/SDCARD/App/spruceBackup
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 FLAGS_DIR=/mnt/SDCARD/spruce/flags
@@ -10,7 +14,15 @@ SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
-display -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+
+# Modify display function to respect silent mode
+display_message() {
+    if [ "$silent_mode" -eq 0 ]; then
+        display "$@"
+    fi
+}
+
+display_message -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
@@ -54,9 +66,10 @@ folders="
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
+/mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/spruce/bin/Syncthing/config
-/mnt/SDCARD/spruce/flags/expertRA*
 /mnt/SDCARD/spruce/flags/samba*
+/mnt/SDCARD/spruce/flags/expertRA*
 /mnt/SDCARD/spruce/settings/gs_list
 "
 
@@ -97,7 +110,7 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  display -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+  display_message -i "$SYNC_IMAGE" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
 Located in /Saves/spruce/backups/" -d 4
 else

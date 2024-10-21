@@ -7,7 +7,7 @@ If you do not have the dat and dyn files to play Pico-8 here then you need to us
 
 USING THIS PICO8
 
-PICO-8 games will launch native from the roms folder. Place your games in the PICO8 Roms folder as they are from the Pico-8 website. You need to provide your own dat and dyn files and place them in the bin folder located in Emu/PICO8/bin. You can also use splore with Wi-Fi to browse and play games by launching it from the App. There are so many wonderful games and they seem to just keep getting better. Pico-8 is a great way for indie game makers to create and share with the world. We cannot say enough good things about Pico-8. Enjoy!
+PICO-8 games will launch native from the roms folder. Place your games in the PICO8 Roms folder as they are from the Pico-8 website. You need to provide your own dat and dyn files and place them in the bin folder located in sdcard/App/PICO/bin. You can also use splore with Wi-Fi to browse and play games by launching it from the App. There are so many wonderful games and they seem to just keep getting better. Pico-8 is a great way for indie game makers to create and share with the world. We cannot say enough good things about Pico-8. Enjoy!
 
 
 
