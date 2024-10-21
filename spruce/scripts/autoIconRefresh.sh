@@ -21,7 +21,7 @@ while true; do
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
         flag_add "themeChanged"
         killall -9 MainUI
-        show_image "$IMAGE_PATH"
+        # show_image "$IMAGE_PATH" ### image has been removed
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
     fi
