@@ -55,6 +55,7 @@ folders="
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/flags/expertRA*
+/mnt/SDCARD/spruce/flags/samba*
 /mnt/SDCARD/spruce/settings/gs_list
 "
 
@@ -88,14 +89,6 @@ for item in $folders; do
     log_message "Warning: $item does not exist, skipping..."
   fi
 done
-
-# Add the expertRA.lock file separately
-if [ -e "$FLAGS_DIR/expertRA.lock" ]; then
-  log_message "Adding $FLAGS_DIR/expertRA.lock to backup list"
-  echo "$FLAGS_DIR/expertRA.lock" >> "$temp_file"
-else
-  log_message "Warning: $FLAGS_DIR/expertRA.lock does not exist, skipping..."
-fi
 
 log_message "Creating 7z archive"
 7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"

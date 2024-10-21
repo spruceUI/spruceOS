@@ -161,6 +161,7 @@ log_message "Current version: $current_version"
 # Upgrade script locations
 upgrade_scripts="
 $UPGRADE_SCRIPTS_DIR/2.3.0.sh
+$UPGRADE_SCRIPTS_DIR/3.0.0.sh
 "
 #/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.1.sh
 
