@@ -94,5 +94,10 @@ while [ 1 ]; do
         grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
+    
+    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ] ; then
+        /mnt/SDCARD/App/Credits/launch.sh
+        rm /mnt/SDCARD/spruce/flags/credits.lock
+    fi
         
 done
