@@ -44,8 +44,6 @@ while [ 1 ]; do
         flag_add "in_menu"
         flag_remove "lastgame"
 
-        cd ${SYSTEM_PATH}/app/
-
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
             /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
@@ -70,12 +68,22 @@ while [ 1 ]; do
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0
+		# pause global joystickinput 
+		killall -STOP joystickinput
+		# run new joystickinput that map joystick input to dpad input
+		/mnt/SDCARD/.tmp_update/bin/joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event3 -dpad &
+        PID=$!
 
         # run Main menu
+        cd ${SYSTEM_PATH}/app/
         ./MainUI &> /dev/null
 
         # remove soft link
         rm /dev/ttyS0
+		# kill new joystickinput
+		kill $PID
+		# resume global joystickinput 
+		killall -CONT joystickinput
 
         # remove in menu flag
         flag_remove "in_menu"
