@@ -189,6 +189,20 @@ cores_online() {
     done
 }
 
+# Call this to dim the screen
+# Call it as a background process
+dim_screen() {
+    local start_brightness=50
+    local end_brightness=3
+    local step=1
+    local delay=0.03  # 50ms delay between each step
+
+    for brightness in $(seq $start_brightness -$step $end_brightness); do
+        echo $brightness > /sys/devices/virtual/disp/disp/attr/lcdbl
+        sleep $delay
+    done
+}
+
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"

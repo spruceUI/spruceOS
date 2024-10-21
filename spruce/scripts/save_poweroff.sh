@@ -113,8 +113,10 @@ flag_add "save_active"
 
 if flag_check "syncthing"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
+	dim_screen &
 
 	if check_and_connect_wifi; then
+		# Dimming screen before syncthing sync check
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
 	fi
 
