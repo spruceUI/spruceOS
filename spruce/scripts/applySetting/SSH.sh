@@ -17,11 +17,6 @@ fi
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 
-SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
-SSH_KEYS="$SSH_DIR/sshkeys"
-DROPBEAR="$SSH_DIR/bin/dropbear"
-DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
-
 if [ "$1" == "on" ] ; then
     first_time_setup &
 elif [ "$1" == "off" ] ; then

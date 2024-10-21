@@ -25,7 +25,7 @@ fi
 if $syncthing_enabled; then
 	if check_and_connect_wifi; then
 		start_syncthing_process
-		/mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --startup
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced"
 	else
 		log_message "Failed to connect to WiFi, skipping Sync check"

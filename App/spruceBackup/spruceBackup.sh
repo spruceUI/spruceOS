@@ -45,7 +45,6 @@ folders="
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
-/mnt/SDCARD/App/Syncthing/config
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/RetroArch/retroarch.cfg
@@ -54,6 +53,7 @@ folders="
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
+/mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/flags/expertRA*
 /mnt/SDCARD/spruce/settings/gs_list
 "

@@ -62,7 +62,7 @@ fi
 if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
 	if check_and_connect_wifi; then
-		/mnt/SDCARD/App/Syncthing/syncthing_sync_check.sh --startup
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced"
 		log_message "Syncthing startup completed"
 	fi

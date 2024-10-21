@@ -14,7 +14,7 @@ THEME_PATH=$(get_theme_path)
 
 while true; do
     inotifywait "$WATCHED_FILE"
-    log_message "File $WATCHED_FILE has been modified"
+    log_message "File $WATCHED_FILE has been modified" -v
 
     NEW_THEME_PATH=$(get_theme_path)
 
