@@ -70,7 +70,6 @@ folders="
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/flags/samba*
 /mnt/SDCARD/spruce/flags/expertRA*
-/mnt/SDCARD/spruce/flags/samba*
 /mnt/SDCARD/spruce/settings/gs_list
 "
 
