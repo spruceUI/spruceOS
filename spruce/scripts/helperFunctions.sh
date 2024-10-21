@@ -25,7 +25,6 @@
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-INOTIFY="/mnt/SDCARD/.tmp_update/bin/inotify.elf"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
@@ -132,7 +131,7 @@ confirm(){
         fi
 
         # Wait for log message update (with a 1-second timeout)
-        if ! $INOTIFY -t 1000 "$messages_file"; then
+        if ! inotifywait -t 1000 "$messages_file"; then
             continue
         fi
 
