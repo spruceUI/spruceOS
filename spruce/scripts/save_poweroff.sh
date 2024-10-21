@@ -102,7 +102,9 @@ while killall -q -0 ra32.miyoo ||
 done
 
 # show saving screen
-show_image "/mnt/SDCARD/.tmp_update/res/save.png"
+display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment.
+ 
+ " -p bottom
 
 # Created save_active flag
 flag_add "save_active"
