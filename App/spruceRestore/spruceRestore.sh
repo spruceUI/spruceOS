@@ -18,6 +18,7 @@ display --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
+> "$log_file"  # Empty out or create the log file
 
 log_message "Starting spruceRestore script..."
 log_message "Looking for backup files..."
