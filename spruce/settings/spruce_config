@@ -60,5 +60,3 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Restore spruce from a backup file"
 "" "Syncthing" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/Syncthing/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/Syncthing/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/Syncthing/config.json" ""
 @"Synchronize your files via Syncthing"
-"" "Wifi File Transfer" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/WifiFileTransfer/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/WifiFileTransfer/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/WifiFileTransfer/config.json" ""
-@"WHY IS THIS APP ALSO LISTED IN NETWORK TAB?"
