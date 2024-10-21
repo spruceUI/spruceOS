@@ -113,6 +113,14 @@ case $EMU_NAME in
 		;;
 	
 	"PICO8")
+		# pause global joystickinput 
+		killall -STOP joystickinput
+
+		# run new joystickinput that map joystick input to dpad input
+		cd /mnt/SDCARD/.tmp_update/bin
+		./joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event3 -dpad &
+        PID=$!
+
 		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
 		export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
@@ -126,6 +134,12 @@ case $EMU_NAME in
 			pico8_dyn -width 640 -height 480 -scancodes -run "$1"
 		fi
 		sync
+
+		# kill new joystickinput
+		kill $PID
+
+		# resume global joystickinput 
+		killall -CONT joystickinput
 		;;
 
 	"PORTS")
