@@ -10,7 +10,7 @@ CHECK_INTERVAL=2  # Interval in seconds to wait while Syncthing is syncing
 MAX_API_RETRIES=15 # Give up after this many times waiting for Syncthing API to be available
 API_RETRY_INTERVAL=1 # Interval in seconds
 API_KEY=""
-
+BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 # Function to start network interface
 start_network() {
     log_message "Starting network interface..."
@@ -126,7 +126,7 @@ monitor_sync_status() {
     log_message "Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
 
-Press START to cancel"
+Press START to cancel" -i "$BG_TREE"
 
     if [ "$mode" = "shutdown" ]; then
         force_rescan
@@ -140,7 +140,7 @@ Press START to cancel"
     # Check if any devices are online
     if ! are_devices_online; then
         log_message "No devices are online. Exiting sync check."
-        display -t "No devices online"
+        display -t "No devices online" -i "$BG_TREE"
         sleep 1
         return 1
     fi
@@ -200,7 +200,7 @@ Press START to cancel"
         status_content=$(cat /tmp/sync_display.txt)
         display -t "$status_content
 
-Press START to cancel"
+Press START to cancel" -i "$BG_TREE"
 
         if [ ! -f /tmp/sync_status ]; then
             log_message "All folders on all devices are in sync."
@@ -236,7 +236,7 @@ main() {
     
     # Set the API key
     if ! set_api_key; then
-        display -t "Error: Unable to find API key"
+        display -t "Error: Unable to find API key" -i "$BG_TREE"
         sleep 2
         stop_network
         exit 1
@@ -251,7 +251,7 @@ main() {
             if wait_for_syncthing_api; then
                 monitor_sync_status "startup"
             else
-                display -t "Failed to connect to Syncthing API"
+                display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
                 sleep 1
                 stop_network
                 exit 1
