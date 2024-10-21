@@ -146,6 +146,7 @@ ${SCRIPTS_DIR}/low_power_warning.sh
 ${SCRIPTS_DIR}/ffplay_is_now_media.sh
 ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
+${SCRIPTS_DIR}/autoReloadCalibration.sh &
 log_message "Initial setup scripts executed"
 kill_images
 
