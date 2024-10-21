@@ -47,6 +47,7 @@ folders="
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/bin
+/mnt/SDCARD/Emu/.emu_setup/overrides
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
