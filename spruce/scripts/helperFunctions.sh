@@ -81,7 +81,9 @@ check_and_connect_wifi() {
     messages_file="/var/log/messages"
 
     log_message "Attempting to connect to WiFi"
-    show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -d 1 -t "Waiting to connect..........
+     
+    Press START to continue anyway." -p bottom
 
     ifconfig wlan0 up
     wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
