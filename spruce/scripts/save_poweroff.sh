@@ -117,6 +117,7 @@ if flag_check "syncthing"; then
 
 	if check_and_connect_wifi; then
 		# Dimming screen before syncthing sync check
+		dim_screen
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
 	fi
 
