@@ -68,8 +68,14 @@ while [ 1 ]; do
         # check if emu visibility needs a refresh, before entering MainUI
         /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
 
+        # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
+        ln -s /dev/ttyS2 /dev/ttyS0
+
         # run Main menu
         ./MainUI &> /dev/null
+
+        # remove soft link
+        rm /dev/ttyS0
 
         # remove in menu flag
         flag_remove "in_menu"
