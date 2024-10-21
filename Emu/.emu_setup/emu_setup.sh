@@ -2,35 +2,23 @@
 
 EMU_DIR="/mnt/SDCARD/Emu"
 SETUP_DIR="$EMU_DIR/.emu_setup"
-OVR_DIR="$SETUP_DIR/overrides"
 OPT_DIR="$SETUP_DIR/options"
-CORE_DIR="$SETUP_DIR/core"
 DEF_DIR="$SETUP_DIR/defaults"
 SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 
-{
 # copy defaults folder into options folder if needed
-
 if [ ! -d "$OPT_DIR" ]; then
-	cp -rf "$DEF_DIR" "$OPT_DIR"
+	cp -rf "$DEF_DIR" "$OPT_DIR" && log_message "copied $DEF_DIR into $OPT_DIR"
 fi
 
+# copy standard RA launch scripts to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
 	if [ -d $dir ]; then
-		echo "dir is $dir";
-		system="${dir##*/}" ;
-		echo "system is $system";
-# copy standard RA launch scripts to all Emu subfolders.
-		cp -f "$SETUP_DIR/redirect_launch.sh" "$dir/launch.sh" && echo "copied launch.sh to $dir";
-# delete config_hidden.json if a config.json already exists
-		if [ -f "$dir/config.json" ] && [ -f "$dir/config_hidden.json" ]; then
-			rm -f "$dir/config_hidden.json" && echo "removed duplicate config_hidden.json from $dir"
-		fi
+		cp -f "$SETUP_DIR/redirect_launch.sh" "$dir/launch.sh" && log_message "copied launch.sh to $dir"
 	fi
 done
 
+# create splore launcher if it doesn't already exist
 if [ ! -f "$SPLORE_CART" ]; then
-	touch "$SPLORE_CART"
+	touch "$SPLORE_CART" && log_message "created $SPLORE_CART"
 fi
-
-} &> "$SETUP_DIR/log.txt"

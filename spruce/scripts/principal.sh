@@ -28,23 +28,22 @@ runifnecessary() {
 
 flag_remove "save_active"
 
-if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] || \
-   [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
-    log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
-    /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
+if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] ; then
+    touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
 while [ 1 ]; do
 
+    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
+        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
+        /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
+    fi
+
     if [ ! -f /tmp/cmd_to_run.sh ] ; then
-        # create in menu flag
+        # create in menu flag and remove last played game flag
         flag_add "in_menu"
+        flag_remove "lastgame"
 
-        # check if emufresh needed; run it if so
-        /mnt/SDCARD/spruce/scripts/auto_emufresh.sh
-
-        # Restart network services with higher priority since booting to menu
-        nice -n -15 /mnt/SDCARD/.tmp_update/scripts/networkservices.sh &
         cd ${SYSTEM_PATH}/app/
 
         # Check for the themeChanged flag
@@ -53,6 +52,7 @@ while [ 1 ]; do
             flag_remove "themeChanged"
         fi
 
+        # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
             display -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
@@ -64,8 +64,13 @@ while [ 1 ]; do
         # This is to kill leftover display and show processes that may be running
         display_kill
         kill_images
+		
+        # check if emu visibility needs a refresh, before entering MainUI
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
 
+        # run Main menu
         ./MainUI &> /dev/null
+
         # remove in menu flag
         flag_remove "in_menu"
     fi
@@ -74,21 +79,20 @@ while [ 1 ]; do
         /root/gameloader
 
     elif [ -f /tmp/cmd_to_run.sh ]; then
+        set_performance &
         chmod a+x /tmp/cmd_to_run.sh
         cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
         # reset CPU settings to defaults in case an emulator changes anything
-        set_smart
-
-        #/mnt/SDCARD/spruce/scripts/select.sh &>/dev/null
+        set_smart &
     fi
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] || \
-       [ -f /mnt/SDCARD/spruce/flags/gs.fix ] ; then
-        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
-        /mnt/SDCARD/.tmp_update/scripts/gameswitcher.sh
+    # set gs.lock flag if last loaded program is real game and gs.fix flag is set
+    if [ -f /mnt/SDCARD/spruce/flags/gs.fix ] && \
+        grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
+        touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
         
 done

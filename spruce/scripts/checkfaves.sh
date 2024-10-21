@@ -6,7 +6,7 @@ FAVOURITE_FILE="/mnt/SDCARD/Roms/favourite.json"
 DUPLICATE_FILE="/mnt/SDCARD/Roms/favourite.duplicate"
 PREVIOUS_STATE="/mnt/SDCARD/Roms/favourite.previous"
 TEMP_FILE="/mnt/SDCARD/Roms/favourite_temp.json"
-IMAGE_PATH="/mnt/SDCARD/.tmp_update/res/duplicategame.png"
+IMAGE_PATH="/mnt/SDCARD/spruce/imgs/duplicate_file.png"
 
 create_duplicate() {
     cp "$FAVOURITE_FILE" "$DUPLICATE_FILE"
@@ -78,7 +78,8 @@ remove_duplicates() {
         chmod 444 "$DUPLICATE_FILE"
 
         if [ -f "$IMAGE_PATH" ]; then
-            show_image "$IMAGE_PATH" 5
+            display --icon "$IMAGE_PATH" -d 5 -t "You cannot add multiple games with the same exact name to Favorites. Please rename the file you wish to add, then try again.
+         " -p bottom
         fi
     else
         rm -f "$TEMP_FILE"
@@ -88,7 +89,7 @@ remove_duplicates() {
 monitor_favourite_file() {
     while true; do
         if [ -f "$FAVOURITE_FILE" ]; then
-            /mnt/SDCARD/.tmp_update/bin/inotify.elf $FAVOURITE_FILE
+            inotifywait $FAVOURITE_FILE
             if [ -f "$PREVIOUS_STATE" ]; then
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
                     create_duplicate

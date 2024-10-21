@@ -16,7 +16,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓UAE4ARM)-puae2021-puae",
+      "name": "Emu Core: (✓UAE4ARM)-puae2021",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/puae2021.sh"
     },
     {

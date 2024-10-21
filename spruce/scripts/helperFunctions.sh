@@ -1,5 +1,6 @@
 # Function summaries:
 # acknowledge: Waits for user to press A, B, or Start button
+# check_and_connect_wifi: Polls for Wifi, Cancels on Start Press
 # cores_online: Sets the number of CPU cores to be online
 # display: Displays text on the screen with various options
 # exec_on_hotkey: Executes a command when specific buttons are pressed
@@ -21,7 +22,6 @@
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-INOTIFY="/mnt/SDCARD/.tmp_update/bin/inotify.elf"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
@@ -62,14 +62,95 @@ acknowledge() {
     echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
 
     while true; do
-        $INOTIFY "$messages_file"
+        inotifywait "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
         *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
-            log_message "last_line: $last_line" -v
+            log_message "last_line: $last_line" -vS
             break
             ;;
+        esac
+    done
+}
+
+check_and_connect_wifi() {
+    messages_file="/var/log/messages"
+
+    log_message "Attempting to connect to WiFi"
+    show_image "/mnt/SDCARD/.tmp_update/res/waitingtoconnect.png" 1
+
+    ifconfig wlan0 up
+    wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+    udhcpc -i wlan0 &
+
+    while true; do
+        if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+            log_message "Successfully connected to WiFi"
+            return 0
+        elif tail -n1 "$messages_file" | grep -q "enter_pressed 0"; then
+            log_message "WiFi connection cancelled by user"
+            return 1
+        fi
+        sleep 1
+    done
+}
+
+# Call this to wait for the user to confirm an action
+# Use this with display --confirm to show an image with a confirm/cancel prompt
+# The combined usage would be like
+
+# display -t "Do you want to do this?" --confirm
+# if confirm; then
+#     display -t "You confirmed the action" -d 3
+# else
+#     log_message "User did not confirm" -v
+#     display -t "You did not confirm the action" -d 3
+# fi    
+confirm(){
+    local messages_file="/var/log/messages"
+    local timeout=${1:-0}  # Default to 0 (no timeout) if not provided
+    local timeout_return=${2:-1}  # Default to 1 if not provided
+    local start_time=$(date +%s)
+
+    echo "CONFIRM $(date +%s)" >>"$messages_file"
+
+    while true; do
+        # Check for timeout
+        if [ $timeout -ne 0 ]; then
+            local current_time=$(date +%s)
+            local elapsed_time=$((current_time - start_time))
+            if [ $elapsed_time -ge $timeout ]; then
+                display_kill
+                echo "CONFIRM TIMEOUT $(date +%s)" >>"$messages_file"
+                return $timeout_return
+            fi
+        fi
+
+        # Wait for log message update (with a 1-second timeout)
+        if ! inotifywait -t 1000 "$messages_file"; then
+            continue
+        fi
+
+        # Get the last line of log file
+        last_line=$(tail -n 1 "$messages_file")
+        case "$last_line" in
+            # B button - cancel
+            *"key 1 29"*)
+                # dismiss notification screen
+                display_kill
+                # exit script
+                echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
+                return 1
+                ;;
+            # A button - confirm
+            *"key 1 57"*) 
+                # dismiss notification screen
+                display_kill
+                # exit script
+                echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
+                return 0
+                ;;
         esac
     done
 }
@@ -104,7 +185,8 @@ cores_online() {
 }
 
 DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
-CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextConfirm.png"
+ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
+CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
 DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
@@ -120,23 +202,27 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -w, --width <width>   Text width (default: 600)
 #   -c, --color <color>   Text color in RGB format (default: dbcda7) Spruce text yellow
 #   -f, --font <path>     Font path (optional)
-#   -o, --okay            Use CONFIRM_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
+#   -o, --okay            Use ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE and runs acknowledge()
 #   -bg, --bg-color <color> Background color in RGB format (default: 7f7f7f)
 #   -bga, --bg-alpha <alpha> Background alpha value (0-255, default: 0)
 #   -is, --image-scaling <scale> Image scaling factor (default: 1.0)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000
-# Calling display with -o will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+# Calling display with -o/--okay will use the ACKNOWLEDGE_IMAGE instead of DEFAULT_IMAGE
+# Calling display with --confirm will use the CONFIRM_IMAGE instead of DEFAULT_IMAGE
+# If using --confirm, you should call the confirm() message in an if block in your script
+# --confirm will supercede -o/--okay
 # You can also call infinite image layers with (next-image.png scale height side)*
 #   --icon <path>         Path to an icon image to display on top (default: none)
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
+    local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
-    
+
     display_kill
 
     while [[ $# -gt 0 ]]; do
@@ -150,7 +236,8 @@ display() {
             -w|--width) width="$2"; shift ;;
             -c|--color) color="$2"; shift ;;
             -f|--font) font="$2"; shift ;;
-            -o|--okay) use_confirm_image=true; run_acknowledge=true ;;
+            -o|--okay) use_acknowledge_image=true; run_acknowledge=true ;;
+            --confirm) use_confirm_image=true; use_acknowledge_image=false; run_acknowledge=false ;;
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
@@ -159,9 +246,6 @@ display() {
         esac
         shift
     done
-    if [[ "$use_confirm_image" = true ]]; then
-        image="$CONFIRM_IMAGE"
-    fi
     local r="${color:0:2}"
     local g="${color:2:2}"
     local b="${color:4:2}"
@@ -176,18 +260,26 @@ display() {
 
     # Construct the command
     local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
-    
+
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 1.0 top center"
+        command="$command \"$icon_image\" 0.20 middle center"
     fi
-    
+
+    # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
+    if [[ "$use_confirm_image" = true ]]; then
+        command="$command \"$CONFIRM_IMAGE\" 1.0 middle center"
+        delay=0
+    elif [[ "$use_acknowledge_image" = true ]]; then
+        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 middle center"
+    fi
+
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
         eval "$command" &
         log_message "display command: $command" -v
-        # Run acknowledge if -o or --okay was used
-        if [[ "$run_acknowledge" = true ]]; then
+        # Run acknowledge if -o or --okay was used and --confirm was not used
+        if [[ "$run_acknowledge" = true && "$use_confirm_image" = false ]]; then
             acknowledge
         fi
     else
@@ -420,48 +512,24 @@ log_verbose() {
 # Log a verbose message to a custom file:
 #    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-max_entries=200
 log_message() {
     local message="$1"
     local verbose_flag="$2"
     local custom_log_file="${3:-$log_file}"
 
     # Check if it's a verbose message and if verbose logging is not enabled
-    if [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose"; then
-        return
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
     fi
 
-    # Ensure the directory for the log file exists
-    mkdir -p "$(dirname "$custom_log_file")"
-
-    # Check if custom log file exists, if not, use default log file
-    if [ ! -f "$custom_log_file" ]; then
-        mkdir -p "$(dirname "$log_file")"
-        custom_log_file="$log_file"
-    fi
-
-    # Ensure the log file exists
-    touch "$custom_log_file"
-
-    # Add "-v" indicator for verbose messages
-    local verbose_indicator=""
-    if [ "$verbose_flag" = "-v" ]; then
-        verbose_indicator=" -v"
-    fi
-
-    # Append new log message with verbose indicator if applicable
-    echo "$(date '+%Y-%m-%d %H:%M:%S')$verbose_indicator - $message" >>"$custom_log_file"
-
-    # Keep only the last 200 entries
-    if [ $(wc -l <"$custom_log_file") -gt $max_entries ]; then
-        tail -n $max_entries "$custom_log_file" >"$custom_log_file.tmp"
-        mv "$custom_log_file.tmp" "$custom_log_file"
-    fi
-
-    echo "$message"
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
-scaling_min_freq=480000 ### default value, may be overridden in specific script
+scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart() {
 	cores_online
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -470,13 +538,12 @@ set_smart() {
 	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
 	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo 200000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate_min
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 	log_message "CPU Mode set to SMART"
 }
 
 set_performance() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1	
+	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	log_message "CPU Mode set to PERFORMANCE"
 
 }
@@ -519,3 +586,4 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
+

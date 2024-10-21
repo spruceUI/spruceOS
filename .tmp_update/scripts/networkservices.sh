@@ -2,23 +2,20 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/App/WifiFileTransfer/sftpgoFunctions.sh
-. /mnt/SDCARD/App/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/bin/SFTPGo/sftpgoFunctions.sh
+. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 
 connect_services() {
 	
 	while true; do
 		if ifconfig wlan0 | grep -qE "inet |inet6 "; then
 			
-			# Sync Device Time to Network Time
-			ntpd -n -q -p pool.ntp.org	 
-			
-			# Sync RTC to Device Time
-			if flag_check "RTCSync" > /dev/null; then
-				# Flag exists so sync RTC to Device Time ...
-				log_message "Network services: Syncing RTC to Device Time..."
-				hwclock -w
-			fi
+			# May be moved to powerdown script...
+			# Sync System Time & RTC to network
+			# RA is a safe process to initiate the update of time while it's running, many processes are not!!
+			#if pgrep "ra32.miyoo" > /dev/null; then
+			#	/mnt/SDCARD/spruce/scripts/geoip_timesync.sh
+			#fi
 			
 			# SFTPGo check
 			if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then

@@ -11,7 +11,6 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
-SYNC_IMAGE_CONFIRM="$APP_DIR/imgs/spruceBackupConfirm.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
@@ -31,6 +30,7 @@ mkdir -p "$BACKUP_DIR/backups"
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceBackup.log"
+> "$log_file"  # Empty out or create the log file
 log_message "Created or verified spruce and backups directories"
 
 # Get current timestamp
@@ -54,23 +54,22 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
-/mnt/SDCARD/App/Syncthing/config
-/mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
+/mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/RetroArch/retroarch.cfg
-/mnt/SDCARD/RetroArch/hotkeyprofile
-/mnt/SDCARD/RetroArch/nohotkeyprofile
-/mnt/SDCARD/RetroArch/originalProfile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
-/mnt/SDCARD/spruce/settings/
+/mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/flags/samba*
+/mnt/SDCARD/spruce/flags/expertRA*
+/mnt/SDCARD/spruce/settings/gs_list
 "
 
 log_message "Folders to backup: $folders"
@@ -80,13 +79,16 @@ log_message "Starting backup process"
 temp_file=$(mktemp)
 
 # Check available space
-required_space=$((50 * 1024))  # 50 MB in KB
-available_space=$(df -k /mnt/SDCARD | awk 'NR==2 {print $4}')
+required_space=$((50 * 1024 * 1024))  # 50 MB in bytes
+available_space=$(df -k /mnt/SDCARD | awk 'NR==2 {print $4 * 1024}')
+
+log_message "Required space: $required_space bytes"
+log_message "Available space: $available_space bytes"
 
 if [ "$available_space" -lt "$required_space" ]; then
-    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024)) MB"
-    display_message -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed, not enough space.
-You need at least 50 MB free space to backup your files." -c dbcda7 --okay
+    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
+    display -i "$SYNC_IMAGE" -t "Backup failed, not enough space.
+You need at least 50 MB free space to backup your files." --okay
     exit 1
 fi
 
@@ -117,11 +119,11 @@ if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
   display_message -i "$SYNC_IMAGE" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
-Located in /Saves/spruce/backups/" -c dbcda7 -d 4 -s 24
+Located in /Saves/spruce/backups/" -d 4
 else
   log_message "Error while creating backup."
-  display_message -i "$SYNC_IMAGE_CONFIRM" -t "Backup failed
-Check '/Saves/spruce/spruceBackup.log' for more details" -c dbcda7 --okay
+  display -i "$SYNC_IMAGE" -t "Backup failed
+Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
 log_message "Backup process finished running"

@@ -7,30 +7,22 @@ silent_mode=0
 APP_DIR=/mnt/SDCARD/App/spruceRestore
 UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
+SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 
-IMAGE_PATH="$APP_DIR/imgs/spruceRestore.png"
-NOTFOUND_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreNotfound.png"
-SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreSuccess.png"
-FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceRestoreFailed.png"
+ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/App/syncthing.png"
 
 log_message "----------Starting Restore script----------"
 cores_online 4
-
-# Modify display function to respect silent mode
-display_image() {
-    if [ "$silent_mode" -eq 0 ]; then
-        display "$@"
-    fi
-}
-
-display_image -i "$IMAGE_PATH"
+display --icon "$ICON_PATH" -t "Restoring from your most recent backup..." 
 
 #-----Main-----
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
+> "$log_file"  # Empty out or create the log file
 
 log_message "Starting spruceRestore script..."
 log_message "Looking for backup files..."
@@ -38,7 +30,8 @@ log_message "Looking for backup files..."
 # Check if backups folder exists
 if [ ! -d "$BACKUP_DIR/backups" ]; then
     log_message "Backup folder not found at $BACKUP_DIR/backups"
-    display_image -i "$NOTFOUND_IMAGE_PATH" --okay
+    display --icon "$ICON_PATH" -t "No backup found. Make sure you've ran the backup app or have a recent backup located in
+    $BACKUP_DIR/backups" -o
     exit 1
 fi
 
@@ -47,7 +40,7 @@ backup_files=$(find "$BACKUP_DIR/backups" -name "spruceBackup*.7z" | sort -r | t
 
 if [ -z "$backup_files" ]; then
     log_message "No spruceBackup 7z files found in $BACKUP_DIR/backups"
-    display_image -i "$FAIL_IMAGE_PATH" --okay
+    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
 
@@ -57,11 +50,11 @@ log_message "Most recent backup file found: $(basename "$most_recent_backup")"
 
 # Verify the integrity of the backup file
 log_message "Verifying the integrity of the backup file..."
-7zr t "$most_recent_backup" 2>> "$log_file"
+7zr t "$most_recent_backup" 2>>"$log_file"
 
 if [ $? -ne 0 ]; then
     log_message "Backup file integrity check failed. The file may be corrupted."
-    display_image -i "$FAIL_IMAGE_PATH" --okay
+    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
 
@@ -74,7 +67,7 @@ process_flags_before_restore() {
         if flag_check "$flag"; then
             log_message "Removing $flag flag before restore"
             flag_remove "$flag"
-            echo "$flag" >> "$backupdir/removed_flags.tmp"
+            echo "$flag" >>"$backupdir/removed_flags.tmp"
         fi
     done
 }
@@ -86,7 +79,7 @@ restore_flags_on_failure() {
         while read -r flag; do
             log_message "Restoring $flag flag"
             flag_add "$flag"
-        done < "$backupdir/removed_flags.tmp"
+        done <"$backupdir/removed_flags.tmp"
         rm "$backupdir/removed_flags.tmp"
     fi
 }
@@ -94,29 +87,23 @@ restore_flags_on_failure() {
 # Process flags before restore
 process_flags_before_restore
 
-# Delete the originalProfile folder if it exists
-if [ -d "/mnt/SDCARD/RetroArch/originalProfile" ]; then
-    log_message "Deleting /mnt/SDCARD/RetroArch/originalProfile folder..."
-    rm -rf /mnt/SDCARD/RetroArch/originalProfile
-fi
-
 # Actual restore process
 log_message "Starting actual restore process..."
 cd /
 log_message "Current directory: $(pwd)"
 log_message "Extracting backup file: $most_recent_backup"
-7zr x -y "$most_recent_backup" 2>> "$log_file"
+7zr x -y "$most_recent_backup" 2>>"$log_file"
 
 if [ $? -eq 0 ]; then
     log_message "Restore completed successfully"
-    display_image -i "$SUCCESSFUL_IMAGE_PATH" -d 3
+    display --icon "$ICON_PATH" -t "Restore completed successfully!" -d 3
     rm -f "$backupdir/removed_flags.tmp"
 else
     log_message "Error during restore process. Check $log_file for details."
     log_message "7zr exit code: $?"
     log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
     restore_flags_on_failure
-    display_image -i "$FAIL_IMAGE_PATH" --okay
+    display --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
     exit 1
 fi
 
@@ -131,41 +118,23 @@ if [ -f "/mnt/SDCARD/App/PICO/bin/pico8_dyn" ]; then
     pico_files_moved=1
 fi
 
-if [ -d "/mnt/SDCARD/App/PICO/"  ]; then
+if [ -d "/mnt/SDCARD/App/PICO/" ]; then
     log_message "PICO files moved. Deleting /mnt/SDCARD/App/PICO/ folder..."
     rm -rf "/mnt/SDCARD/App/PICO"
 fi
 
-# Check for expertRA flag and run retroExpert.sh if needed
-if flag_check "expertRA"; then
-    display_image -t "Detected RetroArch in backup was running in expert mode. Switching to expert mode now..." -c dbcda7 -d 2 -s 20
-    log_message "expertRA flag found. Removing flag and running retroExpert.sh in silent mode."
-    flag_remove "expertRA"
-    if [ -f "/mnt/SDCARD/App/RetroExpert/retroExpert.sh" ]; then
-        sh /mnt/SDCARD/App/RetroExpert/retroExpert.sh true
-        log_message "retroExpert.sh executed in silent mode"
-    else
-        log_message "retroExpert.sh not found"
-    fi
-else
-    log_message "expertRA flag not found. Skipping retroExpert.sh execution."
-fi
-
 # Check if Syncthing config folder exists and run launch script if it does
 if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
+    log_message "Syncthing legacy location config folder found."
+    # Move it to the new location
+    mv "/mnt/SDCARD/App/Syncthing/config" "$SYNCTHING_DIR/config"
+    rm -rf "/mnt/SDCARD/App/Syncthing"
+fi
+if [ -d "$SYNCTHING_DIR/config" ]; then
     log_message "Syncthing config folder found."
     if ! flag_check "syncthing"; then
-        log_message "Syncthing injector not found in runtime. Running Syncthing launch script..."
-        if [ -f "/mnt/SDCARD/App/Syncthing/launch.sh" ]; then
-            sh /mnt/SDCARD/App/Syncthing/launch.sh
-            if [ $? -eq 0 ]; then
-                log_message "Syncthing launch script executed successfully"
-            else
-                log_message "Error executing Syncthing launch script"
-            fi
-        else
-            log_message "Syncthing launch script not found"
-        fi
+        log_message "Running Syncthing startup script..."
+        syncthing_startup_process
     else
         log_message "Syncthing flag found. Skipping Syncthing launch."
     fi
@@ -179,7 +148,7 @@ UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
 UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
-display_image -i "$UPDATE_IMAGE_PATH"
+display --icon "$ICON_PATH" -t "Applying upgrades to your system..." 
 
 # Define the path for the .lastUpdate file
 last_update_file="$APP_DIR/.lastUpdate"
@@ -202,32 +171,33 @@ $UPGRADE_SCRIPTS_DIR/2.3.0.sh
 for script in $upgrade_scripts; do
     script_name=$(basename "$script")
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
-    
+
     if [ "$current_version" = "0.0.0" ] || [ "$(printf '%s\n' "$current_version" "$script_version" | sort -V | head -n1)" = "$current_version" ]; then
         log_message "Starting upgrade script: $script_name"
+        display --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..." 
         
         if [ -f "$script" ]; then
             log_message "Executing $script_name..."
             output=$(sh "$script" 2>&1)
             exit_status=$?
-            
+
             log_message "Output from $script_name:"
-            echo "$output" >> "$log_file"
-            
+            echo "$output" >>"$log_file"
+
             if [ $exit_status -eq 0 ]; then
                 log_message "Successfully completed $script_name"
-                echo "spruce_version=$script_version" > "$last_update_file"
+                echo "spruce_version=$script_version" >"$last_update_file"
                 current_version=$script_version
             else
                 log_message "Error running $script_name. Exit status: $exit_status"
                 log_message "Error details: $output"
-                display_image -i "$UPDATE_FAIL_IMAGE_PATH" --okay
+                display --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
                 exit 1
             fi
         else
             log_message "Warning: Script $script_name not found. Skipping."
         fi
-        
+
         log_message "Finished processing $script_name"
     else
         log_message "Skipping $script_name: Already at version $current_version or higher"
@@ -235,7 +205,7 @@ for script in $upgrade_scripts; do
 done
 
 log_message "Upgrade process completed. Current version: $current_version"
-display_image -i "$UPDATE_SUCCESSFUL_IMAGE_PATH" -d 3
+display --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 log_message "----------Restore and Upgrade completed----------"
 cores_online

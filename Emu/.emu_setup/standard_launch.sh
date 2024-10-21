@@ -44,22 +44,28 @@ case $EMU_NAME in
 	"NDS")
 		if [ "$MODE" = "overclock" ]; then
 			{sleep 33 && set_overclock} &
-		else
-			{sleep 33 && set_performance} &
 		fi
 		;;
 
 	*)
 		if [ "$MODE" = "overclock" ]; then
 			set_overclock
-		else
-			set_performance
 		fi
 		;;
 esac
 
 if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
+fi
+
+##### Syncthing Sync Check, perform only once per session #####
+if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
+	log_message "Syncthing is enabled, WiFi connection needed"
+	if check_and_connect_wifi; then
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+		flag_add "syncthing_startup_synced"
+		log_message "Syncthing startup completed"
+	fi
 fi
 
 ##### LAUNCH STUFF #####

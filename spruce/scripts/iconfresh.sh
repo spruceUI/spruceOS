@@ -1,6 +1,6 @@
 #!/bin/sh
 
-IMAGE_PATH="/mnt/SDCARD/spruce/imgs/refreshing.png"
+ICONFRESH_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -10,7 +10,9 @@ silent_mode=0
 
 # Only show image if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    show_image "$IMAGE_PATH"
+    display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......
+     
+     " -p bottom
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
@@ -81,8 +83,6 @@ update_app_icons() {
     sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
 }
 
-cores_online 3
-
 find "$EMULATOR_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
     update_emulator_icons "$CONFIG_FILE"
 done
@@ -95,9 +95,7 @@ done
 
 # Only kill images if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    kill_images
+    display_kill
 fi
 
 /mnt/SDCARD/spruce/scripts/powerdisplay.sh
-
-cores_online

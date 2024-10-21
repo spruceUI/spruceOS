@@ -16,7 +16,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓GEARSYSTEM)-picodrive-genesis+gx",
+      "name": "Emu Core: (✓GENESIS+GX)-picodrive-gearsystem",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"
     },
     {

@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BATTERY_PERCENT="/mnt/SDCARD/.tmp_update/bin/battery_percent.elf"
+BATTERY_PERCENT="/mnt/SDCARD/spruce/bin/battery_percent.elf"
 THEME_JSON_FILE="/config/system.json"
 CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 BATTERY_ICONS="ic-power-charge-0% \
