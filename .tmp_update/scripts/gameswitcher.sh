@@ -4,6 +4,7 @@
 log_message "***** gameswitcher.sh: helperFunctions imported" -v
 
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+NEW_BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 LIST_FILE="$SETTINGS_PATH/gs_list"
@@ -127,7 +128,7 @@ while : ; do
     # show setting page if return value is 255, otherwise exit while loop
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
-        cd $BIN_PATH
+        cd $NEW_BIN_PATH
         ./easyConfig $SETTINGS_PATH/spruce_config  -p 3
     else
         break
