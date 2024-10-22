@@ -58,14 +58,32 @@ if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
+wifi_needed=false
+syncthing_enabled=false
+
+##### RAC Check
+if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+	log_message "Retro Achievements enabled, WiFi connection needed"
+	wifi_needed=true
+fi
+
 ##### Syncthing Sync Check, perform only once per session #####
 if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
+	wifi_needed=true
+	syncthing_enabled=true
+fi
+
+if $syncthing_enabled; then
 	if check_and_connect_wifi; then
+		start_syncthing_process
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced"
-		log_message "Syncthing startup completed"
+	else
+		log_message "Failed to connect to WiFi, skipping Sync check"
 	fi
+elif $wifi_needed; then
+	check_and_connect_wifi
 fi
 
 ##### LAUNCH STUFF #####
