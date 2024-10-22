@@ -5,6 +5,7 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
@@ -62,7 +63,7 @@ wifi_needed=false
 syncthing_enabled=false
 
 ##### RAC Check
-if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+if flag_check "save_active" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 	log_message "Retro Achievements enabled, WiFi connection needed"
 	wifi_needed=true
 fi
