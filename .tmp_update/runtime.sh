@@ -14,7 +14,7 @@ export HOME="${SDCARD_PATH}"
 export HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
 mkdir /var/lib /var/lib/alsa ### Create the directories that by default are not included in the system.
-mount -o bind "/mnt/SDCARD/.tmp_update/lib" /var/lib ### We mount the folder that includes the alsa configuration, just as the system should include it.
+mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib ### Mount the folder containing the alsa configuration, just as the system should include it.
 mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app
 mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
@@ -57,7 +57,7 @@ else
 fi
 
 killall -9 main ### SUPER important in preventing .tmp_update suicide
-kill_images
+kill_images ##### this can probably be removed! - RS
 
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
