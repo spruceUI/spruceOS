@@ -8,31 +8,6 @@ messages_file="/var/log/messages"
 set_performance
 log_message "Save active flag detected"
 
-wifi_needed=false
-syncthing_enabled=false
-
-if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-	log_message "Retro Achievements enabled, WiFi connection needed"
-	wifi_needed=true
-fi
-
-if flag_check "syncthing"; then
-	log_message "Syncthing is enabled, WiFi connection needed"
-	wifi_needed=true
-	syncthing_enabled=true
-fi
-
-if $syncthing_enabled; then
-	if check_and_connect_wifi; then
-		start_syncthing_process
-		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-		flag_add "syncthing_startup_synced"
-	else
-		log_message "Failed to connect to WiFi, skipping Sync check"
-	fi
-elif $wifi_needed; then
-	check_and_connect_wifi
-fi
 #Set the LED
 if flag_check "ledon"; then
 	echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
