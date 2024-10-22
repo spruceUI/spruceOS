@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ICONFRESH_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/iconfresh.png"
+ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
