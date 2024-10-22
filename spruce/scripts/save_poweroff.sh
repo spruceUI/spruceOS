@@ -109,7 +109,11 @@ display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down..
  " -p bottom
 
 # Created save_active flag
-flag_add "save_active"
+if flag_check "in_menu"; then
+    flag_remove "save_active"
+else
+    flag_add "save_active"
+fi
 
 if flag_check "syncthing"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
