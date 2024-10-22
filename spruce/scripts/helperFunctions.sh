@@ -482,7 +482,7 @@ get_button_press() {
 }
 
 get_event() {
-    "/mnt/SDCARD/.tmp_update/bin/getevent" /dev/input/event3
+    "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
 }
 
 get_version() {

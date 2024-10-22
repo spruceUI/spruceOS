@@ -1,7 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 kill_current_process() {

@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 
 LONG_PRESSED=false
 

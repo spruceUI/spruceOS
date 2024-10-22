@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 

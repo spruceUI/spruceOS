@@ -13,5 +13,6 @@ while true; do
     killall -TERM joystickinput
 
     # start new joystickinput process with new calibration values
-    /mnt/SDCARD/.tmp_update/bin/joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event4 &
+    /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+
 done

@@ -6,7 +6,7 @@ log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." -v
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
-BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 LIST_FILE="$SETTINGS_PATH/gs_list"
