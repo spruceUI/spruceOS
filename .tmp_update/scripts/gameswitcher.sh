@@ -87,6 +87,10 @@ while read -r CMD; do
     fi
 done <$LIST_FILE
 
+# send signal USR2 to joystickinput to switch to KEYBOARD MODE
+# this allows joystick to be used as DPAD in game switcher
+killall -USR2 joystickinput
+
 # launch the switcher program
 # Usage: switcher image_list title_list [-s speed] [-b on|off] [-m on|off] [-t on|off] [-ts speed] [-n on|off] [-d command]
 # -s: scrolling speed in frames (default is 20), larger value means slower.
@@ -129,6 +133,9 @@ while : ; do
         break
     fi
 done
+
+# send signal USR1 to joystickinput to switch to ANALOG MODE
+killall -USR1 joystickinput
 
 # launch game with return index
 if [ $RETURN_INDEX -gt 0 ]; then

@@ -68,11 +68,10 @@ while [ 1 ]; do
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0
-		# pause global joystickinput 
-		killall -STOP joystickinput
-		# run new joystickinput that map joystick input to dpad input
-		/mnt/SDCARD/.tmp_update/bin/joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event3 -dpad &
-        PID=$!
+
+        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+        # this allows joystick to be used as DPAD in MainUI
+        killall -USR2 joystickinput
 
         # run Main menu
         cd ${SYSTEM_PATH}/app/
@@ -80,10 +79,9 @@ while [ 1 ]; do
 
         # remove soft link
         rm /dev/ttyS0
-		# kill new joystickinput
-		kill $PID
-		# resume global joystickinput 
-		killall -CONT joystickinput
+
+        # send signal USR1 to joystickinput to switch to ANALOG MODE
+        killall -USR1 joystickinput
 
         # remove in menu flag
         flag_remove "in_menu"

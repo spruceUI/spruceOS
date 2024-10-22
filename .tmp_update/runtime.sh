@@ -82,8 +82,11 @@ cd /mnt/SDCARD/.tmp_update/bin
 ./joypad /dev/input/event3 &
 sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
-# then send to /dev/input/event4
-./joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event4 &
+# then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
+# and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
+# Please send kill signal USR1 to switch to ANALOG_MODE
+# and send kill signal USR2 to switch to KEYBOARD_MODE
+./joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
 
 # run game switcher watchdog before auto load game is loaded
 /mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &

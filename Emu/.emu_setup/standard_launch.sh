@@ -132,13 +132,9 @@ case $EMU_NAME in
 		;;
 	
 	"PICO8")
-		# pause global joystickinput 
-		killall -STOP joystickinput
-
-		# run new joystickinput that map joystick input to dpad input
-		cd /mnt/SDCARD/.tmp_update/bin
-		./joystickinput /dev/ttyS2 /config/joypad.config /dev/input/event3 -dpad &
-        PID=$!
+        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+        # this allows joystick to be used as DPAD in MainUI
+        killall -USR2 joystickinput
 
 		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
@@ -154,11 +150,9 @@ case $EMU_NAME in
 		fi
 		sync
 
-		# kill new joystickinput
-		kill $PID
+        # send signal USR1 to joystickinput to switch to ANALOG MODE
+        killall -USR1 joystickinput
 
-		# resume global joystickinput 
-		killall -CONT joystickinput
 		;;
 
 	"PORTS")
