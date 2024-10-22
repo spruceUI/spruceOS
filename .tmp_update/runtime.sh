@@ -89,7 +89,7 @@ sleep 0.3 ### wait long enough to create the virtual joypad
 ./joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
 
 # run game switcher watchdog before auto load game is loaded
-/mnt/SDCARD/.tmp_update/scripts/gameswitcher_watchdog.sh &
+${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
 
 # unhide -FirmwareUpdate- App only if necessary
 VERSION="$(cat /usr/miyoo/version)"
