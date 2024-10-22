@@ -6,6 +6,7 @@ SETTINGS_FILE="/config/system.json"
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
+BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
@@ -78,7 +79,7 @@ ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
 mv /dev/ttyS0 /dev/ttyS2
 # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-cd /mnt/SDCARD/.tmp_update/bin
+cd ${BIN_DIR}
 ./joypad /dev/input/event3 &
 sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
