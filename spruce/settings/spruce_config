@@ -33,6 +33,8 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"User: root, Password: tina"
 "" "Enable Syncthing" "|" "on|off" "$CHECK$ syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
 @"Sync files across devices"
+"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
+@"Disconnect and clear all networks"
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 "" "Boot into Game Switcher" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot" ""
 "" "Run GS when game you exit a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix" ""

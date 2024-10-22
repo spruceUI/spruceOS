@@ -60,6 +60,10 @@ fi
 killall -9 main ### SUPER important in preventing .tmp_update suicide
 kill_images ##### this can probably be removed! - RS
 
+# Bring up network and services
+nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
+${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
+
 # Check for first_boot flag and run ThemeUnpacker accordingly
 if flag_check "first_boot"; then
     ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
@@ -116,8 +120,6 @@ if flag_check "save_active"; then
 else
 	log_message "Save_active flag not detected - not executing Auto Resume."
 fi
-
-nice -n -20 ${SCRIPTS_DIR}/networkservices.sh &
 
 ${SCRIPTS_DIR}/spruceRestoreShow.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
