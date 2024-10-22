@@ -20,11 +20,12 @@ kill_current_process() {
 vibrate
 
 # ask for user response if MainUI is running and skip_shutdown_confirm flag is not set
-if flag_check "in_menu"; then
+if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 	if ! flag_check "skip_shutdown_confirm"; then
 		messages_file="/var/log/messages"
-		# pause MainUI
+		# pause MainUI or pico8_dyn
 		killall -q -19 MainUI
+		killall -q -19 pico8_dyn
 		# show notification screen
 		display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
 		if confirm 30; then
@@ -34,8 +35,9 @@ if flag_check "in_menu"; then
 			echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
 		else
 			display_kill
-			# resume Mainui
+			# resume Mainui or pico8_dyn
 			killall -q -18 MainUI
+			killall -q -18 pico8_dyn
 			# exit script
 			return 0
 		fi
