@@ -3,6 +3,12 @@
 BIN_PATH="/mnt/SDCARD/.tmp_update/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 
+# send signal USR2 to joystickinput to switch to KEYBOARD MODE
+# this allows joystick to be used as DPAD in setting app
+killall -USR2 joystickinput
+
 cd $BIN_PATH
 ./easyConfig $SETTINGS_PATH/spruce_config 
 
+# send signal USR1 to joystickinput to switch to ANALOG MODE
+killall -USR1 joystickinput
