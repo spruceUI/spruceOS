@@ -63,7 +63,7 @@ wifi_needed=false
 syncthing_enabled=false
 
 ##### RAC Check
-if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+if flag_check "save_active" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 	log_message "Retro Achievements enabled, WiFi connection needed"
 	wifi_needed=true
 fi
