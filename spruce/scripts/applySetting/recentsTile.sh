@@ -1,5 +1,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
 
 MAINUI_PATH="/mnt/SDCARD/miyoo/app/mainui"
 RECENTS_MAINUI_PATH="/mnt/SDCARD/miyoo/app/recents/mainui"
@@ -10,12 +11,12 @@ toggle_mainui() {
         mv "$MAINUI_PATH" "${MAINUI_PATH}.bak"
 
         if diff -q "${MAINUI_PATH}.bak" "$RECENTS_MAINUI_PATH" >/dev/null; then
+            update_setting "recentsTile" "off"
             cp "$NORECENTS_MAINUI_PATH" "$MAINUI_PATH"
-            flag_remove "recentsTile"
             log_message "Switched to NO RECENTS mode"
         else
+            update_setting "recentsTile" "on"
             cp "$RECENTS_MAINUI_PATH" "$MAINUI_PATH"
-            flag_add "recentsTile"
             log_message "Switched to RECENTS mode"
         fi
 

@@ -7,8 +7,8 @@ $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
-$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
+$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
@@ -19,19 +19,19 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "cat $SETTINGS$/idlemon_in_game" "echo -n Off > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game Off|echo -n 2m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 2m|echo -n 5m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 5m|echo -n 10m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 10m|echo -n 30m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 30m" ""
 @"Excludes ports"
-"" "Skip shutdown confirmation" "|" "on|off" "$CHECK$ skip_shutdown_confirm" "touch $FLAGS$/skip_shutdown_confirm|rm -f $FLAGS$/skip_shutdown_confirm" ""
+"" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm on|$HELP$ update skip_shutdown_confirm off" ""
 @"While in main menu or native PICO-8"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent on|$HELP$ update show_battery_percent off" ""
-"-e" "Enable Recents in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
+"-e" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
 "" "Home key directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 [Network]
-"" "Sync Time/RTC with network" "|" "on|off" "$CHECK$ enableNetworkTimeSync" "touch $FLAGS$/enableNetworkTimeSync && $GEOTIME$|rm -f $FLAGS$/enableNetworkTimeSync" ""
+"" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on|$HELP$ update enableNetworkTimeSync off" ""
 "" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
 @"User: spruce, Password: happygaming"
-"" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
+"" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
 @"User: root, Password: tina"
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
 @"User: root, Password: tina"

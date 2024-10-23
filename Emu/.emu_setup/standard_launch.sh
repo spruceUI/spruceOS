@@ -169,7 +169,7 @@ case $EMU_NAME in
 			
 			./PPSSPPSDL "$*"
 		else
-			if flag_check "expertRA"; then
+			if setting_get "expertRA"; then
 				export RA_BIN="retroarch"
 			else
 				export RA_BIN="ra32.miyoo"
@@ -181,7 +181,7 @@ case $EMU_NAME in
 		;;
 	
 	*)
-		if flag_check "expertRA"; then
+		if setting_get "expertRA"; then
 			export RA_BIN="retroarch"
 		else
 			export RA_BIN="ra32.miyoo"

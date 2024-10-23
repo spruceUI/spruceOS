@@ -25,6 +25,8 @@ update_setting() {
     if grep -q "^$key=" "$CFG_FILE"; then
         sed -i "s/^$key=.*/$key=$value/" "$CFG_FILE"
     else
+        # Ensure there's a newline at the end of the file before appending
+        sed -i -e '$a\' "$CFG_FILE"
         echo "$key=$value" >> "$CFG_FILE"
     fi
 }

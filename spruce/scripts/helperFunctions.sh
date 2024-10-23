@@ -631,6 +631,19 @@ setting_update(){
     fi
 }
 
+settings_organize() {
+    # Create a temporary file
+    temp_file=$(mktemp)
+
+    # Sort the file, remove empty lines, and preserve a single newline at the end
+    sort "$CFG_FILE" | sed '/^$/d' | sed '$a\' > "$temp_file"
+
+    # Replace the original file with the sorted and cleaned version
+    mv "$temp_file" "$CFG_FILE"
+
+    log_message "Settings file organized and cleaned up" -v
+}
+
 
 # Call with
 # show_image "Image Path" 5
@@ -664,4 +677,5 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
+
 

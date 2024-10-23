@@ -8,7 +8,7 @@ DROPBEAR="$SSH_DIR/bin/dropbear"
 DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
 
 dropbear_check(){
-    if flag_check "dropbear"; then
+    if setting_get "dropbear"; then
         start_dropbear_process
     fi
 }

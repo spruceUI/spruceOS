@@ -7,7 +7,7 @@ set_system_time() {
 	ntpd -n -q -p "$1"
 }
 
-if ifconfig wlan0 | grep -qE "inet |inet6 " && flag_check "enableNetworkTimeSync" > /dev/null; then
+if ifconfig wlan0 | grep -qE "inet |inet6 " && setting_get "enableNetworkTimeSync" > /dev/null; then
 
 	# Try to set the time using pool.ntp.org, fallback to time.google.com
 	set_system_time "pool.ntp.org" || set_system_time "time.google.com"
