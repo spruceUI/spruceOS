@@ -97,20 +97,34 @@ check_and_connect_wifi() {
         wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
         udhcpc -i wlan0 &
         
-        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -d 1 -p bottom -t "Waiting to connect....
+        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -p bottom -t "Waiting to connect....
 Press START to continue anyway.
        "
+        {
+            while true; do
+                if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+                    echo "Successfully connected to WiFi" >> "$messages_file"
+                    break
+                fi
+                sleep 0.5
+            done
+        } &
         while true; do
-            if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-                log_message "Successfully connected to WiFi"
-                return 0
-            elif tail -n3 "$messages_file" | grep "enter_pressed 0" >/dev/null 2>&1; then
-                log_message "WiFi connection cancelled by user"
-				return 1
-            fi
-            sleep .5
+            inotifywait "$messages_file"
+            last_line=$(tail -n 1 "$messages_file")
+            case $last_line in 
+                *"$B_START"* | *"$B_START_2"*)
+                    log_message "WiFi connection cancelled by user"
+                    display_kill
+                    return 1
+                    ;;
+                *"Successfully connected to WiFi"*)
+                    log_message "Successfully connected to WiFi"
+                    display_kill
+                    return 0
+                    ;; 
+            esac
         done
-		 
     fi
 }
 
