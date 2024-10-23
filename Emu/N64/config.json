@@ -17,7 +17,7 @@
     },
     {
       "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/km_parallel_n64_xtreme_amped.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/km_parallel_n64_xtreme_amped_turbo.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
