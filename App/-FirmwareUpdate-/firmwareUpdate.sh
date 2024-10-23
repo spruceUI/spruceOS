@@ -19,7 +19,8 @@ log_message "firmwareUpdate.sh: current charge percent: $CAPACITY"
 log_message "firmwareUpdate.sh: current FW version: $VERSION"
 
 cancel_update() {
-	display -o -t "Firmware update cancelled."
+	log_message "firmwareUpdate.sh: Firmware update cancelled."
+	display -i "$BG_IMAGE" -o -t "Firmware update cancelled."
 	if [ -f "/mnt/SDCARD/miyoo282_fw.img" ]; then
 		rm "/mnt/SDCARD/miyoo282_fw.img"
 		log_message "Removing FW image from root of card."
@@ -32,10 +33,9 @@ confirm_update() {
 		display -i "$BG_IMAGE" -d 2 -t "Moving firmware update file into place."
 		cp "$FW_FILE" "/mnt/SDCARD/"
 	fi
-	display -d 8 -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete."
+	display -i "$BG_IMAGE" -d 8 -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete."
     sed -i 's|"label":|"#label":|' "$CONFIG"
 	flag_add "first_boot"
-	flag_remove "config_copied"
 	sync
 	poweroff
 }
@@ -77,7 +77,7 @@ fi
 
 if [ "$CHARGING" -eq 1 ]; then
 	log_message "firmwareUpdate.sh: Device is plugged in. Prompting for SELECT to proceed or B to cancel."
-	display -i "$BG_IMAGE" -t " The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press A to continue." --confirm
+	display -i "$BG_IMAGE" -t "WARNING: If unplugged or powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software. Press B to cancel the update, or press A to continue." --confirm
 
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."
@@ -87,5 +87,6 @@ if [ "$CHARGING" -eq 1 ]; then
 		cancel_update
 	fi
 else
+	display -d 3 -i "$BG_IMAGE" -t "Exiting Firmware Update app. Please try again once you have plugged in your A30."
 	log_message "firmwareUpdate.sh: Device still not plugged in. Aborting."
 fi
