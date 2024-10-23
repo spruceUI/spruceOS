@@ -1,16 +1,20 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 emu_path="/mnt/SDCARD/Emu"
 roms_path="/mnt/SDCARD/Roms"
 md5_path="/mnt/SDCARD/Emu/.emu_setup/md5"
 
+log_message "emufresh: checking if emufresh required"
+
 # ensure md5 folder exists
-mkdir -p "$md5_path"
+mkdir -p "$md5_path" && log_message "emufresh: created $md5_path"
 
 # handle clear all option
 if [ "$1" = "-clearall" ] ; then
 	# remove all md5 files
-	rm -r "$md5_path"
+	rm -r "$md5_path" && log_message "emufresh: removed $md5_path and its contents"
 	
 	# hide all systems
 	find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
@@ -18,9 +22,10 @@ if [ "$1" = "-clearall" ] ; then
 		config_file="$emu_path/$system_name/config.json"
 		sed -i 's/^{*$/{{/' "$config_file"
 	done
+	log_message "emufresh: hid all systems by breaking their config.json"
 
 	# kill MainUI
-	killall -9 MainUI
+	killall -9 MainUI && log_message "emufresh: killed MainUI"
 
 	# exit with 0
 	return 0
@@ -32,17 +37,19 @@ show_pico8=$(cat "$config_file" | grep -Fc '{{' )
 need_restart_mainui=false
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
    [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
+	log_message "emufresh: pico8.dat and pico8_dyn detected"
 	if [ ! $show_pico8 = 0 ] ; then
 		need_restart_mainui=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
 		sed -i 's/^{{*$/{/' "$config_file"
-		echo "show system PICO8"
+		echo "show system PICO8" && log_message "emufresh: revealing PICO8 system"
 	fi
 else
 	if [ $show_pico8 = 0 ] ; then
+		log_message "emufresh: pico8.dat and pico8_dyn not detected"
 		need_restart_mainui=true
 		sed -i 's/^{*$/{{/' "$config_file"
-		echo "hide system PICO8"
+		echo "hide system PICO8" && log_message "emufresh: hiding PICO8 system"
 	fi
 fi
 
