@@ -19,9 +19,9 @@ kill_current_process() {
 
 vibrate
 
-# ask for user response if MainUI is running and skip_shutdown_confirm flag is not set
+# ask for user response if MainUI is running and skip_shutdown_confirm setting is not set
 if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
-	if ! flag_check "skip_shutdown_confirm"; then
+	if ! setting_get "skip_shutdown_confirm"; then
 		messages_file="/var/log/messages"
 		# pause MainUI or pico8_dyn
 		killall -q -19 MainUI
@@ -42,7 +42,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 			return 0
 		fi
 	else
-		# If skip_shutdown_confirm flag is set or not in menu, proceed with shutdown
+		# If skip_shutdown_confirm setting is set or not in menu, proceed with shutdown
 		rm "${FLAGS_DIR}/lastgame.lock"
 		echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
 	fi
@@ -135,6 +135,9 @@ alsactl store
 
 # All processes should have been killed, safe to update time if enabled
 /mnt/SDCARD/spruce/scripts/geoip_timesync.sh
+
+# Now that nothing might need it, organize settings file
+settings_organize
 
 # sync files and power off device
 sync

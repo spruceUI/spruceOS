@@ -68,9 +68,8 @@ folders="
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/spruce/bin/Syncthing/config
-/mnt/SDCARD/spruce/flags/samba*
-/mnt/SDCARD/spruce/flags/expertRA*
 /mnt/SDCARD/spruce/settings/gs_list
+/mnt/SDCARD/spruce/settings/spruce.cfg
 "
 
 log_message "Folders to backup: $folders"

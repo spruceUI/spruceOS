@@ -69,7 +69,7 @@ fi
 last_update_file="$APP_DIR/.lastUpdate"
 
 # Define a list of flags to check and potentially restore
-flags_to_process="expertRA"
+flags_to_process=""
 
 # Function to process flags before restore
 process_flags_before_restore() {

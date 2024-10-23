@@ -18,7 +18,7 @@ connect_services() {
             fi
 
             # SSH check
-            if flag_check "dropbear" && ! pgrep "dropbear" > /dev/null; then
+            if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
                 # Flag exists but service is not running, so start it...
                 log_message "Network services: Dropbear detected not running, starting..."
                 start_dropbear_process
