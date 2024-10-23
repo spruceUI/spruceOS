@@ -1,6 +1,6 @@
 #!/bin/sh
 
 export CORE="km_ludicrousn64_2k22_xtreme_amped"
-export MODE="smart"
+export MODE="performance"
 
 export scaling_min_freq=1008000

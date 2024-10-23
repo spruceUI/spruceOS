@@ -20,8 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/km_parallel_n64_xtreme_amped_turbo.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
     },
     {
       "name": "Save current launch settings as per-game override",
