@@ -14,7 +14,7 @@ HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
-cp "${SDCARD_PATH}/.tmp_update/system.json" "$SETTINGS_FILE" && sync
+cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
 
 display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0
     
