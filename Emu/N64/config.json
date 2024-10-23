@@ -16,7 +16,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓LUDICROUSN64)-mupen64plus",
+      "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mupen64plus.sh"
     },
     {
