@@ -32,9 +32,13 @@ prepare_game_switcher() {
         GAME_NAME="${GAME_PATH##*/}"
         SHORT_NAME="${GAME_NAME%.*}"
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+        # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
+        # ensure framebuffer information is set correctly
+        $BIN_PATH/fbfixcolor
+        # capture screenshot
         $BIN_PATH/fbgrab -a "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
-        echo "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        log_message "*** gameswitcher_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
         if [ -f "$LIST_FILE" ] ; then
