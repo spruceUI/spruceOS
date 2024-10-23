@@ -133,6 +133,9 @@ fi
 # Saved current sound settings
 alsactl store
 
+# Save system brightness level
+cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
+
 # All processes should have been killed, safe to update time if enabled
 /mnt/SDCARD/spruce/scripts/geoip_timesync.sh
 
