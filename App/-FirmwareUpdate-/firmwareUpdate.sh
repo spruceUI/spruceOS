@@ -67,7 +67,7 @@ fi
 
 if [ "$CHARGING" -eq 0 ]; then
 	log_message "firmwareUpdate.sh: Device not plugged in. Prompting user to plug in their A30."
-	display -i "$BG_IMAGE" -t "A firmware update is ready for your device. Please connect your device to a power source in order to proceed with the update process."
+	display -i "$BG_IMAGE" -t "A firmware update is ready for your device. Please connect your device to a power source in order to proceed with the update process." -o
 
 	# re-evaluate charging status in case they plug it in here.
 	CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
@@ -77,32 +77,15 @@ fi
 
 if [ "$CHARGING" -eq 1 ]; then
 	log_message "firmwareUpdate.sh: Device is plugged in. Prompting for SELECT to proceed or B to cancel."
-	display -i "$BG_IMAGE" -t " The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press SELECT to continue."
-	B_pressed=0
-	SE_pressed=0
-	get_event | while read input; do
-		case "$input" in 
-			*"$B_B 1"*)
-				B_pressed=1
-				;;
-			*"$B_SELECT 1"*)
-				SE_pressed=1
-				;;
-		esac
-		if [ "$B_pressed" = 1 ]; then
-			killall getevent
-			log_message "firmwareUpdate.sh: B button pressed. Cancelling update."
-			cancel_update
-			break
-		elif [ "$SE_pressed" = 1 ]; then
-			killall getevent
-			log_message "firmwareUpdate.sh: SELECT button pressed. Confirming update."
-			confirm_update
-			break
-		fi
-	done
+	display -i "$BG_IMAGE" -t " The spruce team highly recommends that you proceed with the update; however, please be aware that if interrupted before the update is complete, it could temporarily brick your device, requiring you to run the unbricker software. Press B to cancel the update, or press A to continue." --confirm
+
+	if confirm; then
+		log_message "firmwareUpdate.sh: A button pressed. Confirming update."
+		confirm_update
+	else
+		log_message "firmwareUpdate.sh: B button pressed. Cancelling update."
+		cancel_update
+	fi
 else
 	log_message "firmwareUpdate.sh: Device still not plugged in. Aborting."
 fi
-
-killall getevent
