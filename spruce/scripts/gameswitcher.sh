@@ -35,6 +35,7 @@ while read -r CMD; do
     GAME_PATH=$(echo $CMD | cut -d\" -f4)
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
+    EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
     log_message "***** gameswitcher.sh: CMD: $CMD" -v
 
     echo "$SHORT_NAME" >> "$GAMENAMES_FILE"
@@ -45,31 +46,42 @@ while read -r CMD; do
     log_message "***** gameswitcher.sh: BOX_ART_PATH: $BOX_ART_PATH" -v
 
     # try get screenshot file path only if boxart flag does not exist
-    if [ ! -f "$FLAG_PATH/gs.boxart" ] ; then
-        LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-        EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
-        EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-        DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
-        OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
-        OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
-        DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
-        OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
-        OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-            . "$DEF_FILE"
-            . "$OPT_FILE"
-        if [ -f "$OVR_FILE" ]; then
-            . "$OVR_FILE"
+    if [ ! -f "$FLAG_PATH/gs.boxart" ]; then
+        # try get our screenshot
+        OWN_SCREENSHOT_PATH="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        log_message "***** gameswitcher.sh: OWN_SCREENSHOT_PATH: $OWN_SCREENSHOT_PATH" -v
+
+        # try get RA screenshot if our screenshot does not exist
+        if [ ! -f "${OWN_SCREENSHOT_PATH}" ]; then
+
+            LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
+            EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
+            DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
+            OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
+            OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
+            DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
+            OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
+            OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
+                . "$DEF_FILE"
+                . "$OPT_FILE"
+            if [ -f "$OVR_FILE" ]; then
+                . "$OVR_FILE"
+            fi
+            core_info="$INFO_DIR/${CORE}_libretro.info"
+            core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
+            core_name="$(echo ${core_name} | tr -d '"')"
+            state_dir="/mnt/SDCARD/Saves/states/$core_name"
+            SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
+            log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
         fi
-        core_info="$INFO_DIR/${CORE}_libretro.info"
-        core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
-        core_name="$(echo ${core_name} | tr -d '"')"
-        state_dir="/mnt/SDCARD/Saves/states/$core_name"
-        SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
-        log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
     fi
 
     # store screenshot / box art / default image to file
-    if [ -f "$SCREENSHOT_PATH" ] ; then
+    if [ -f "$OWN_SCREENSHOT_PATH" ] ; then
+        echo "__NO_ROTATE__" >> "$IMAGES_FILE"
+        echo "$OWN_SCREENSHOT_PATH" >> "$IMAGES_FILE"
+        log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME" -v
+    elif [ -f "$SCREENSHOT_PATH" ] ; then
         echo "$SCREENSHOT_PATH" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME" -v
     elif [ -f "$BOX_ART_PATH" ]; then

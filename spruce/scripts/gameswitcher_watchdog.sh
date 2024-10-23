@@ -27,6 +27,15 @@ prepare_game_switcher() {
             return 0
         fi
 
+        # capture screenshot
+        GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        GAME_NAME="${GAME_PATH##*/}"
+        SHORT_NAME="${GAME_NAME%.*}"
+        EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+        mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
+        $BIN_PATH/fbgrab -a "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        echo "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+
         # update switcher game list
         if [ -f "$LIST_FILE" ] ; then
             # if game list file exists
@@ -83,6 +92,8 @@ prepare_game_switcher() {
     fi
     tail -$COUNT "$LIST_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$LIST_FILE"
+
+
 
     # kill RA or other emulator or MainUI
     log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
