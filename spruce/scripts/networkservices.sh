@@ -11,7 +11,7 @@ connect_services() {
         if ifconfig wlan0 | grep -qE "inet |inet6 "; then
             
             # SFTPGo check
-            if flag_check "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
+            if setting_get "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
                 # Flag exists but service is not running, so start it...
                 log_message "Network services: SFTPGo detected not running, starting..."
                 start_sftpgo_process
@@ -25,7 +25,7 @@ connect_services() {
             fi
             
             # Samba check
-            if flag_check "samba" && ! pgrep "smbd" > /dev/null; then
+            if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
                 # Flag exists but service is not running, so start it...
                 log_message "Network services: Samba detected not running, starting..."
                 start_samba_process

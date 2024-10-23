@@ -1,4 +1,7 @@
 #!/bin/sh
+. /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
+
+
 
 # print minor info text with the value index zero (i.e. "on" value in config file )
 # this is placed before loading helping functions for fast checking
@@ -18,7 +21,9 @@ fi
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
 
 if [ "$1" == "on" ] ; then
+    update_setting "samba" "on"
     start_samba_process &
 elif [ "$1" == "off" ] ; then
+    update_setting "samba" "off"
     stop_samba_process &
 fi

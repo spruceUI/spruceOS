@@ -571,20 +571,52 @@ set_smart() {
 	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	log_message "CPU Mode set to SMART"
+	log_message "CPU Mode set to SMART" -v
 }
 
 set_performance() {
 	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	log_message "CPU Mode set to PERFORMANCE"
+	log_message "CPU Mode set to PERFORMANCE" -v
 
 }
 
 set_overclock() {
 	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
-	log_message "CPU Mode set to OVERCLOCK"
+	log_message "CPU Mode set to OVERCLOCK" -v
 
 }
+
+
+CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
+
+setting_get(){
+    [ $# -eq 1 ] || return 1
+    value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2)
+    if [ -z "$value" ]; then
+        return 1
+    else
+       return "$value"
+    fi
+}
+
+
+setting_update(){
+    [ $# -eq 2 ] || return 1
+    key="$1"
+    value="$2"
+
+    case "$value" in
+    "on"|"true"|"1") value=0 ;;
+    "off"|"false"|"0") value=1 ;;
+    esac
+
+    if grep -q "^$key=" "$CFG_FILE"; then
+        sed -i "s/^$key=.*/$key=$value/" "$CFG_FILE"
+    else
+        echo "$key=$value" >> "$CFG_FILE"
+    fi
+}
+
 
 # Call with
 # show_image "Image Path" 5

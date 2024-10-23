@@ -39,7 +39,7 @@ for icon in ${BATTERY_ICONS}; do
     fi
 done
 
-if ! flag_check "show_battery_percent"; then
+if ! setting_get "show_battery_percent"; then
     log_message "Cleaning battery icons" -v 
     $BATTERY_PERCENT "${THEME_PATH_SKIN}" " " "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf" 20 "#FFFFFF"
     exit 1

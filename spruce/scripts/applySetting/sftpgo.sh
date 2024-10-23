@@ -1,15 +1,6 @@
 #!/bin/sh
 
-# chech flag and print on/off (without newline) as return value
-# this is placed before loading helping functions for fast checking
-if [ "$1" == "check" ]; then
-    if [ -f "/mnt/SDCARD/spruce/flags/sftpgo.lock" ]; then
-        echo -n "on"
-    else
-        echo -n "off"
-    fi
-    return 0
-fi
+. /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
 
 # print minor info text with the value index zero (i.e. "on" value in config file )
 # this is placed before loading helping functions for fast checking
@@ -28,17 +19,14 @@ fi
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/SFTPGo/sftpgoFunctions.sh
 
-WIFI_ON="/mnt/SDCARD/App/WifiFileTransfer/imgs/wifiOn.png"
-
 if [ "$1" == "on" ]; then
+    update_setting "sftpgo" "on"
+    log_message "Turning on SFTPGO"
     start_sftpgo_process
 
-    log_message "Creating SFTPGO flag"
-    flag_add "sftpgo"
-
 elif [ "$1" == "off" ]; then
+    update_setting "sftpgo" "off"
     stop_sftpgo_process
 
-    log_message "Removing SFTPGO flag"
-    flag_remove "sftpgo"
+    log_message "Turning off SFTPGO"
 fi

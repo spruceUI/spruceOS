@@ -1,5 +1,9 @@
+#Generic helpers
 $CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
 $FLAGS=/mnt/SDCARD/spruce/flags$
+$HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
+
+# Function specific scripts
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
@@ -18,18 +22,18 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Skip shutdown confirmation" "|" "on|off" "$CHECK$ skip_shutdown_confirm" "touch $FLAGS$/skip_shutdown_confirm|rm -f $FLAGS$/skip_shutdown_confirm" ""
 @"While in main menu or native PICO-8"
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
-"" "Show battery percentage" "|" "on|off" "$CHECK$ show_battery_percent" "touch $FLAGS$/show_battery_percent|rm -f $FLAGS$/show_battery_percent" ""
+"" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent on|$HELP$ update show_battery_percent off" ""
 "-e" "Enable Recents in main menu" "|" "on|off" "$CHECK$ recentsTile" "$RECENTS$|$RECENTS$" ""
-"" "Home key directly opens RA menu" "|" "on|off" "$CHECK$ expertRa" "touch $FLAGS$/expertRa|rm -f $FLAGS$/expertRa" ""
+"" "Home key directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 [Network]
 "" "Sync Time/RTC with network" "|" "on|off" "$CHECK$ enableNetworkTimeSync" "touch $FLAGS$/enableNetworkTimeSync && $GEOTIME$|rm -f $FLAGS$/enableNetworkTimeSync" ""
-"" "Enable WiFi File Transfer" "|" "on|off" "$SFTPGO$ check" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
+"" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
 @"User: spruce, Password: happygaming"
 "" "Enable SSH" "|" "on|off" "$CHECK$ dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
 @"User: root, Password: tina"
-"" "Enable Samba" "|" "on|off" "$CHECK$ samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
+"" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
 @"User: root, Password: tina"
 "" "Enable Syncthing" "|" "on|off" "$CHECK$ syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
 @"Sync files across devices"
