@@ -13,7 +13,7 @@ fi
 
 # copy standard RA launch scripts to all Emu subfolders.
 for dir in $EMU_DIR/* ; do
-	if [ -d $dir ]; then
+	if [ -d $dir ] && [ ! -f $dir/launch.sh ]; then
 		cp -f "$SETUP_DIR/redirect_launch.sh" "$dir/launch.sh" && log_message "copied launch.sh to $dir"
 	fi
 done
