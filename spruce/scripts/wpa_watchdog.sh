@@ -47,6 +47,33 @@ fi
 # Preserve the original WPA_FILE to TEMP_FILE on startup
 cp "$WPA_FILE" "$TEMP_FILE"
 
+remove_ssid() {
+
+    SSID="$1"       # The SSID to remove
+    FILE="$2"       # The file to process
+    TMP_FILE=$(mktemp)
+
+    # Process only complete network blocks and remove those matching the SSID
+    awk -v ssid="$SSID" '
+    BEGIN { in_network = 0; skip = 0; }
+
+    /^network=/ { in_network = 1; block = ""; skip = 0; }
+    /^}/ { in_network = 0; if (!skip) { print block; print $0; } next; }
+
+    in_network {
+        block = block $0 "\n";
+        if ($0 ~ /ssid/ && $0 ~ ssid) { skip = 1; }
+        next;
+    }
+
+    !in_network { print; }
+    ' "$FILE" > "$TMP_FILE"
+
+    # Overwrite the original file with the cleaned content
+    mv "$TMP_FILE" "$FILE"
+
+}
+
 # Append a new network only if the SSID doesn't already exist
 append_network() {
     # Extract the new network block (last added network)
@@ -66,12 +93,14 @@ append_network() {
     if [ -n "$NEW_SSID" ]; then
         # Check if the SSID already exists in the TEMP_FILE
         if grep "ssid=\"$NEW_SSID\"" "$TEMP_FILE" > /dev/null; then
-            log_message "WPA Watchdog: SSID \"$NEW_SSID\" already exists, skipping append."         
-        else
+                
+            # Remove all instances of the existing SSID
+            remove_ssid "$NEW_SSID" "$TEMP_FILE"
+            
             # Append the new network to the TEMP_FILE
             echo "$NEW_NETWORK" >> "$TEMP_FILE"
             log_message "WPA Watchdog: \"$NEW_SSID\" added."
-
+    
         fi
         # Overwrite WPA_FILE with TEMP_FILE (safe because duplicate SSIDs are considered)
         cp "$TEMP_FILE" "$WPA_FILE"
