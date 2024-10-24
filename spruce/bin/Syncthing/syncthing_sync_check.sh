@@ -118,15 +118,34 @@ calculate_total_completion() {
     fi
 }
 
+monitor_start_button() {
+    messages_file="/var/log/messages"
+    while true; do
+        inotifywait "$messages_file"
+        last_line=$(tail -n 1 "$messages_file")
+        case $last_line in
+            *"$B_START"* | *"$B_START_2"*)
+                log_message "START button pressed - cancelling sync"
+                echo "cancelled" > /tmp/sync_cancelled
+                exit 0
+                ;;
+        esac
+    done
+}
+
 monitor_sync_status() {
     local mode="$1"
     local folders=$(get_folders)
     local devices=$(get_devices)
 
+    rm -f /tmp/sync_cancelled
+
     log_message "Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
 
 Press START to cancel" -i "$BG_TREE"
+
+    monitor_start_button &
 
     if [ "$mode" = "shutdown" ]; then
         force_rescan
@@ -150,10 +169,9 @@ Press START to cancel" -i "$BG_TREE"
         local summary=""
         local status_lines=""
 
-        # Check if the Start button was pressed
-        if tail -n1 "/var/log/messages" | grep -q "enter_pressed 0"; then
-            log_message "Sync check cancelled by user"
-            return 1
+        if [ -f /tmp/sync_cancelled ]; then
+            rm -f /tmp/sync_cancelled
+            exit 1
         fi
 
         # Remove the status files at the beginning of each iteration
