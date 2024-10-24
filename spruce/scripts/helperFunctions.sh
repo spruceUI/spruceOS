@@ -595,7 +595,7 @@ set_performance() {
 }
 
 set_overclock() {
-	/mnt/SDCARD/App/utils/utils "performance" 4 1512 384 1080 1
+	/mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
 	log_message "CPU Mode set to OVERCLOCK" -v
 
 }

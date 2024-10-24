@@ -1,5 +1,5 @@
 boost_processing() {
-    /mnt/SDCARD/App/utils/utils "performance" 4 1344 384 1080 1
+    /mnt/SDCARD/miyoo/utils/utils "performance" 4 1344 384 1080 1
     echo "CPU Mode set to PERFORMANCE"
     echo 1 >/sys/devices/system/cpu/cpu0/online
     echo 1 >/sys/devices/system/cpu/cpu1/online
