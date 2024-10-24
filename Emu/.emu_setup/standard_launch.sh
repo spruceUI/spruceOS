@@ -87,6 +87,8 @@ elif $wifi_needed; then
 	check_and_connect_wifi
 fi
 
+flag_add 'emulator_launched'
+
 ##### LAUNCH STUFF #####
 
 case $EMU_NAME in
