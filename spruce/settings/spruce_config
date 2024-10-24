@@ -1,0 +1,70 @@
+#Generic helpers
+$CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
+$FLAGS=/mnt/SDCARD/spruce/flags$
+$HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
+
+# Function specific scripts
+$GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
+$IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
+$LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
+$RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
+$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
+$SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
+$SETTINGS=/mnt/SDCARD/spruce/settings$
+$SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
+$SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
+$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
+$SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
+[System]
+"" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
+"" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "cat $SETTINGS$/idlemon_in_game" "echo -n Off > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game Off|echo -n 2m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 2m|echo -n 5m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 5m|echo -n 10m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 10m|echo -n 30m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 30m" ""
+@"Excludes ports"
+"" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm on|$HELP$ update skip_shutdown_confirm off" ""
+@"While in main menu or native PICO-8"
+"" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
+"" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent on|$HELP$ update show_battery_percent off" ""
+"-e" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
+"" "Home key directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
+@"In systems using RetroArch"
+"" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
+[Network]
+"" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on|$HELP$ update enableNetworkTimeSync off" ""
+"" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
+@"User: spruce, Password: happygaming"
+"" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
+@"User: root, Password: tina"
+"" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
+@"User: root, Password: tina"
+"" "Enable Syncthing" "|" "on|off" "$CHECK$ syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
+@"Sync files across devices"
+"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
+@"Disconnect and clear all networks"
+[Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
+"" "Boot into Game Switcher" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot" ""
+"" "Run GS when game you exit a game" "|" "on|off" "$CHECK$ gs.fix" "touch $FLAGS$/gs.fix|rm -f $FLAGS$/gs.fix" ""
+"" "Launch with tap of Home button" "|" "on|off" "$CHECK$ gs.runontap" "touch $FLAGS$/gs.runontap|rm -f $FLAGS$/gs.runontap" ""
+@"Except for NDS and PICO8 games"
+"" "Use boxart instead of screenshots" "|" "on|off" "$CHECK$ gs.boxart" "touch $FLAGS$/gs.boxart|rm -f $FLAGS$/gs.boxart" ""
+"" "Maximum number of games" "||" "5|10|20" "cat $SETTINGS$/gs_max" "echo -n 5 > $SETTINGS$/gs_max|echo -n 10 > $SETTINGS$/gs_max|echo -n 20 > $SETTINGS$/gs_max" ""
+"-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
+"-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
+"-t" "Display title and options" "on|off" "on|off" "on" "" ""
+"-n" "Display item index" "on|off" "on|off" "on" "" ""
+"-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
+"-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
+"-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
+[Visible Apps]
+"" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json" ""
+@"Change the boot logo"
+"" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json" ""
+@"Download boxart for your games"
+"" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
+@"Manage files on your A30"
+"" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
+@"Cleans up displayed game names"
+"" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
+@"Launch a random game!"
+"" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
+@"Set the current time and date"
+"" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
+@"Restore spruce from a backup file"

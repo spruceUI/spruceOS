@@ -1,2 +1,0 @@
-#!/bin/sh
-./expertappswitch.sh

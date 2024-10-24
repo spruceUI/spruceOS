@@ -4,8 +4,8 @@
 TARGET_VERSION="2.3.0"
 
 # Source the global functions
-if [ -f /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh ]; then
-    . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+if [ -f /mnt/SDCARD/spruce/scripts/helperFunctions.sh ]; then
+    . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 else
     echo "Error: helperFunctions.sh not found, cannot proceed with the upgrade"
     exit 1

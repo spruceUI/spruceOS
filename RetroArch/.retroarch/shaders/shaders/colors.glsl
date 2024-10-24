@@ -1,5 +1,5 @@
 /*
-	Fragment shader based on "Improved texture interpolation" by Iñigo Quílez
+	Fragment shader based on "Improved texture interpolation" by IÃ±igo QuÃ­lez
 	Original description: http://www.iquilezles.org/www/articles/texture/texture.htm
 	Modified by DariusG for Miyoo A30.
 */
@@ -129,6 +129,7 @@ void main()
 	res.rgb = mix(vec3(gray), res.rgb, sat);
 	res *= bri;
 	res.rgb *= vec3(rr,gg,bb);
+
    // final sum and weight normalization
    FragColor = res;
 } 

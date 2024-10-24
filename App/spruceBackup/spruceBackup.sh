@@ -1,26 +1,36 @@
 #!/bin/sh
 
-appdir=/mnt/SDCARD/App/spruceBackup
-backupdir=/mnt/SDCARD/Saves/spruce
+# Add silent mode flag
+silent_mode=0
+[ "$1" = "--silent" ] && silent_mode=1
 
-. /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+APP_DIR=/mnt/SDCARD/App/spruceBackup
+BACKUP_DIR=/mnt/SDCARD/Saves/spruce
+FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
-IMAGE_PATH="$appdir/imgs/spruceBackup.png"
-UPDATE_IMAGE_PATH="$appdir/imgs/spruceBackupSuccess.png"
-SPACE_FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailedSpace.png"
-FAIL_IMAGE_PATH="$appdir/imgs/spruceBackupFailed.png"
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
-show_image "$IMAGE_PATH"
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
+
+# Modify display function to respect silent mode
+display_message() {
+    if [ "$silent_mode" -eq 0 ]; then
+        display "$@"
+    fi
+}
+
+display_message -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
-mkdir -p "$backupdir/backups"
+mkdir -p "$BACKUP_DIR/backups"
 
 # Set up logging
-log_file="$backupdir/spruceBackup.log"
-
+log_file="$BACKUP_DIR/spruceBackup.log"
+> "$log_file"  # Empty out or create the log file
 log_message "Created or verified spruce and backups directories"
 
 # Get current timestamp
@@ -28,9 +38,9 @@ timestamp=$(date +"%Y%m%d_%H%M%S")
 log_message "Starting backup process with timestamp: $timestamp"
 
 # Replace zip_file with 7z_file
-seven_z_file="$backupdir/backups/spruceBackup_${timestamp}.7z"
+seven_z_file="$BACKUP_DIR/backups/spruceBackup_${timestamp}.7z"
+seven_z_filename=$(basename "$seven_z_file")
 log_message "Backup file will be: $seven_z_file"
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
 # Things being backed up:
 # - Syncthing config
@@ -44,20 +54,22 @@ echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 
 # Define the folders to backup
 folders="
-/mnt/SDCARD/App/Syncthing/config
-/mnt/SDCARD/App/PICO/bin
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
+/mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/Emu/PICO8/bin
+/mnt/SDCARD/Emu/.emu_setup/overrides
 /mnt/SDCARD/RetroArch/retroarch.cfg
-/mnt/SDCARD/RetroArch/hotkeyprofile
-/mnt/SDCARD/RetroArch/nohotkeyprofile
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
-/mnt/SDCARD/App/SSH/sshkeys
+/mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/spruce/bin/Syncthing/config
+/mnt/SDCARD/spruce/settings/gs_list
+/mnt/SDCARD/spruce/settings/spruce.cfg
 "
 
 log_message "Folders to backup: $folders"
@@ -68,12 +80,15 @@ temp_file=$(mktemp)
 
 # Check available space
 required_space=$((50 * 1024 * 1024))  # 50 MB in bytes
-available_space=$(df -B1 /mnt/SDCARD | awk 'NR==2 {print $4}')
+available_space=$(df -k /mnt/SDCARD | awk 'NR==2 {print $4 * 1024}')
+
+log_message "Required space: $required_space bytes"
+log_message "Available space: $available_space bytes"
 
 if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    show_image "$SPACE_FAIL_IMAGE_PATH"
-    acknowledge
+    display -i "$SYNC_IMAGE" -t "Backup failed, not enough space.
+You need at least 50 MB free space to backup your files." --okay
     exit 1
 fi
 
@@ -94,12 +109,13 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  /mnt/SDCARD/.tmp_update/scripts/spruceRestoreShow.sh
-  show_image "$UPDATE_IMAGE_PATH" 4
+  display_message -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+Backup file: $seven_z_filename
+Located in /Saves/spruce/backups/" -d 4
 else
-  log_message "Error while creating backup, check $log_file for more details"
-  show_image "$FAIL_IMAGE_PATH"
-  acknowledge
+  log_message "Error while creating backup."
+  display -i "$SYNC_IMAGE" -t "Backup failed
+Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
 log_message "Backup process finished running"
