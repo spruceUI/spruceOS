@@ -49,7 +49,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
-"-n" "Display item index" "on|off" "on|off" "off" "" ""
+"-n" "Display item index" "on|off" "on|off" "on" "" ""
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""

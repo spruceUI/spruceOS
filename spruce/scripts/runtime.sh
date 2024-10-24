@@ -75,6 +75,12 @@ fi
 alsactl nrestore ###We tell the sound driver to load the configuration.
 log_message "ALSA configuration loaded"
 
+# Restore and monitor brightness
+if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
+	cat /mnt/SDCARD/spruce/settings/sys_brightness_level > /sys/devices/virtual/disp/disp/attr/lcdbl
+fi
+${SCRIPTS_DIR}/brightness_watchdog.sh > /dev/null &
+
 # ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
 # keymon /dev/input/event0 &
 keymon /dev/input/event3 &
