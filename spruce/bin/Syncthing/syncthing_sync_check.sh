@@ -126,7 +126,8 @@ monitor_start_button() {
         case $last_line in
             *"$B_START"* | *"$B_START_2"*)
                 log_message "START button pressed - cancelling sync"
-                exit 1
+                echo "cancelled" > /tmp/sync_cancelled
+                exit 0
                 ;;
         esac
     done
@@ -136,6 +137,8 @@ monitor_sync_status() {
     local mode="$1"
     local folders=$(get_folders)
     local devices=$(get_devices)
+
+    rm -f /tmp/sync_cancelled
 
     log_message "Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
@@ -165,6 +168,11 @@ Press START to cancel" -i "$BG_TREE"
         local all_synced=true
         local summary=""
         local status_lines=""
+
+        if [ -f /tmp/sync_cancelled ]; then
+            rm -f /tmp/sync_cancelled
+            exit 1
+        fi
 
         # Remove the status files at the beginning of each iteration
         rm -f /tmp/sync_status
