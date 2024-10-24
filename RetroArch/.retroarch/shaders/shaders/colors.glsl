@@ -1,5 +1,5 @@
 /*
-	Fragment shader based on "Improved texture interpolation" by Iñigo Quílez
+	Fragment shader based on "Improved texture interpolation" by IÃ±igo QuÃ­lez
 	Original description: http://www.iquilezles.org/www/articles/texture/texture.htm
 	Modified by DariusG for Miyoo A30.
 */
@@ -7,6 +7,9 @@
 #pragma parameter bri "BRIGHTNESS" 1.0 0.0 2.0 0.05
 #pragma parameter sat "SATURATION" 1.0 0.0 3.0 0.05
 #pragma parameter gam "GAMMA" 1.0 0.0 3.0 0.05
+#pragma parameter rr "RED" 1.0 0.0 2.0 0.01
+#pragma parameter gg "GREEN" 1.0 0.0 2.0 0.01
+#pragma parameter bb "BLUE" 1.0 0.0 2.0 0.01
  
 #if defined(VERTEX)
 
@@ -93,11 +96,17 @@ COMPAT_VARYING vec4 TEX0;
 uniform COMPAT_PRECISION float bri;
 uniform COMPAT_PRECISION float sat;
 uniform COMPAT_PRECISION float gam;
+uniform COMPAT_PRECISION float rr;
+uniform COMPAT_PRECISION float gg;
+uniform COMPAT_PRECISION float bb;
 
 #else
 #define bri 1.0
 #define sat 1.0
 #define gam 1.0
+#define rr 1.0
+#define gg 1.0
+#define bb 1.0
 
 #endif
 
@@ -119,6 +128,8 @@ void main()
 	float gray = dot(vec3(0.33),res.rgb);
 	res.rgb = mix(vec3(gray), res.rgb, sat);
 	res *= bri;
+	res.rgb *= vec3(rr,gg,bb);
+
    // final sum and weight normalization
    FragColor = res;
 } 
