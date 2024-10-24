@@ -9,7 +9,7 @@ md5_path="/mnt/SDCARD/Emu/.emu_setup/md5"
 log_message "emufresh: checking if emufresh required"
 
 # ensure md5 folder exists
-mkdir -p "$md5_path" && log_message "emufresh: created $md5_path"
+mkdir -p "$md5_path"
 
 # handle clear all option
 if [ "$1" = "-clearall" ] ; then
@@ -37,7 +37,7 @@ show_pico8=$(cat "$config_file" | grep -Fc '{{' )
 need_restart_mainui=false
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
    [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
-	log_message "emufresh: pico8.dat and pico8_dyn detected"
+	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
 	if [ ! $show_pico8 = 0 ] ; then
 		need_restart_mainui=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
