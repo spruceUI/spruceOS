@@ -44,8 +44,8 @@ log_message " "
 log_message "---------Starting up---------"
 log_message " "
 
-# Generate wpa_supplicant.conf from wifi.cfg if available
-${SCRIPTS_DIR}/multipass.sh
+# import multipass.cfg and start watchdog for new network additions via MainUI
+nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
 # Check if WiFi is enabled
 wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
@@ -61,7 +61,6 @@ killall -9 main ### SUPER important in preventing .tmp_update suicide
 kill_images ##### this can probably be removed! - RS
 
 # Bring up network and services
-nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 
 # Check for first_boot flag and run ThemeUnpacker accordingly

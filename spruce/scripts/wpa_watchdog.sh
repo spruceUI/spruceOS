@@ -4,10 +4,44 @@
 
 WPA_FILE="/config/wpa_supplicant.conf"
 TEMP_FILE="/config/wpa_supplicant_temp.conf"
+MULTIPASS="/mnt/SDCARD/multipass.cfg"
 
-# Check if the WPA file exists
+# Check if the WPA file exists; create one if not
 if [ ! -f "$WPA_FILE" ]; then
+    log_message "Creating new $WPA_FILE"
     echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "WPA_FILE"
+fi
+
+append_network_from_multipass() {
+    echo ""
+    echo "network={"
+    echo "ssid=\"$1\""
+    echo "psk=\"$2\""
+    echo "}"
+}
+
+# If multipass.cfg exists at SD root and is properly formed, append its contents to the WPA file.
+if [ -f /mnt/SDCARD/multipass.cfg ]; then
+    . "$MULTIPASS"
+    if [ -z "$ID_1" ] || [ -z "$PW_1" ]; then
+        log_message "Primary SSID or password missing. Aborting multipass import"
+    else
+        for i in 1 2 3 4 5; do
+            eval "ID=\$ID_$i"
+            eval "PW=\$PW_$i"
+            # Only consider new SSIDs for addition to the WPA file
+            if ! grep -q "ssid=\"$ID\"" "$WPA_FILE"
+                # SSID and PSK must be non-empty
+                if [ -n "$ID" ] && [ -n "$PW" ]; then
+                    append_network_from_multipass "$ID" "$PW" >> "$WIFI_FILE"
+                    log_message "Network $ID added to wpa_supplicant.conf"
+                fi
+            fi
+        done
+        rm -f "$MULTIPASS"
+    fi
+else
+    log_message "No multipass.cfg file found at SD root. Aborting multipass import"
 fi
 
 # Preserve the original WPA_FILE to TEMP_FILE on startup
@@ -44,6 +78,7 @@ append_network() {
     fi
 }
 
+# Monitor WPA file for new additions
 while true; do
     # Wait for a modify event on the WPA file
     inotifywait -e modify -qq "$WPA_FILE"
