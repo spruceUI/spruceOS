@@ -25,7 +25,7 @@ if [ "$1" = "-clearall" ] ; then
 	log_message "emufresh: hid all systems by breaking their config.json"
 
 	# kill MainUI
-	killall -9 MainUI && log_message "emufresh: killed MainUI"
+	killall -9 MainUI
 
 	# exit with 0
 	return 0
@@ -56,16 +56,17 @@ fi
 # read old md5 value for Roms folder
 if [ -f "$md5_path/all.md5" ] ; then
 	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
+	log_message "emufresh: previous MD5 sum of all Roms folders is $all_md5" -v
 fi
 
 # compute new md5 value for files under Roms 
 # except known non-rom files and folders PICO8 
 new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "$roms_path/PICO8/*" ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
-echo "$new_all_md5"
+echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is $all_md5" -v
 
 # if no update and no force option is used, exit with 0
 if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
-	echo "no update"
+	echo "no update" && log_message "emufresh: no update needed. Exiting!"
 	# kill mainUI if pico8 files are updated
 	if [ "$need_restart_mainui" = true ] ; then
 		killall -9 MainUI
@@ -75,7 +76,7 @@ if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
 
 # otherwise update md5 file and continue
 else
-	echo "need update"
+	echo "need update" && log_message "emufresh: update needed!"
 	echo "$new_all_md5" > "$md5_path/all.md5"
 fi
 
@@ -104,7 +105,7 @@ check_rom_folders() {
 			# store new md5 value
 			echo "$new_md5" > "$md5_path/$system_name.md5"
 
-			# echo "$system_name need update"
+			log_message "emufresh: MD5 for $system_name has changed. Update required"
 
 			# if config file exists
 			config_file="$emu_path/$system_name/config.json"
@@ -131,11 +132,11 @@ check_rom_folders() {
 			# hide / show system in MainUI
 			if [ $count = 0 ]; then
 				sed -i 's/^{*$/{{/' "$config_file"
-				echo "hide system $system_name"
+				echo "hide system $system_name" && log_message "emufresh: Hiding $system_name"
 			else
 				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
 				sed -i 's/^{{*$/{/' "$config_file"
-				echo "show system $system_name"
+				echo "show system $system_name" && log_message "emufresh: Revealing $system_name"
 			fi
 		fi
 	done
@@ -153,7 +154,7 @@ check_rom_folders "$folders"
 
 # wait all process to finish
 wait
-echo "all processes finished"
+echo "all processes finished" && log_message "emufresh complete!"
 
 # kill MainUI to refresh, it should restart by principle.sh very soon
 killall -9 MainUI
