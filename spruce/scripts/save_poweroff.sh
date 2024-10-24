@@ -107,8 +107,11 @@ done
 
 # show saving screen
 display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment.
- 
+
  " -p bottom
+
+# Save system brightness level
+cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
 
 # Created save_active flag
 if flag_check "in_menu"; then
@@ -133,9 +136,6 @@ flag_remove "emulator_launched"
 
 # Saved current sound settings
 alsactl store
-
-# Save system brightness level
-cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
 
 # All processes should have been killed, safe to update time if enabled
 /mnt/SDCARD/spruce/scripts/geoip_timesync.sh
