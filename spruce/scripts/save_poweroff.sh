@@ -107,8 +107,11 @@ done
 
 # show saving screen
 display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment.
- 
+
  " -p bottom
+
+# Save system brightness level
+cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
 
 # Created save_active flag
 if flag_check "in_menu"; then
@@ -117,24 +120,22 @@ else
     flag_add "save_active"
 fi
 
-if flag_check "syncthing"; then
+if flag_check "syncthing" && flag_check "emulator_launched"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
-	dim_screen &
 
 	if check_and_connect_wifi; then
 		# Dimming screen before syncthing sync check
-		dim_screen
+		dim_screen &
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
 	fi
 
 	flag_remove "syncthing_startup_synced"
 fi
 
+flag_remove "emulator_launched"
+
 # Saved current sound settings
 alsactl store
-
-# Save system brightness level
-cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
 
 # All processes should have been killed, safe to update time if enabled
 /mnt/SDCARD/spruce/scripts/geoip_timesync.sh
