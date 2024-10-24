@@ -9,7 +9,7 @@ MULTIPASS="/mnt/SDCARD/multipass.cfg"
 # Check if the WPA file exists; create one if not
 if [ ! -f "$WPA_FILE" ]; then
     log_message "Creating new $WPA_FILE"
-    echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "WPA_FILE"
+    echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$WPA_FILE"
 fi
 
 append_network_from_multipass() {
@@ -20,26 +20,63 @@ append_network_from_multipass() {
     echo "}"
 }
 
-# If multipass.cfg exists at SD root and is properly formed, append its contents to the WPA file.
-if [ -f /mnt/SDCARD/multipass.cfg ]; then
-    . "$MULTIPASS"
-    if [ -z "$ID_1" ] || [ -z "$PW_1" ]; then
-        log_message "Primary SSID or password missing. Aborting multipass import"
-    else
-        for i in 1 2 3 4 5; do
-            eval "ID=\$ID_$i"
-            eval "PW=\$PW_$i"
-            # Only consider new SSIDs for addition to the WPA file
-            if ! grep -q "ssid=\"$ID\"" "$WPA_FILE"
-                # SSID and PSK must be non-empty
-                if [ -n "$ID" ] && [ -n "$PW" ]; then
-                    append_network_from_multipass "$ID" "$PW" >> "$WIFI_FILE"
-                    log_message "Network $ID added to wpa_supplicant.conf"
-                fi
+get_psk() {
+    ssid="$1"
+    found=0
+
+    while IFS= read -r line; do
+        if [ "$found" -eq 1 ]; then
+            # The PSK line follows the SSID line
+            if echo "$line" | grep -q '^psk='; then
+                echo "${line#psk=}"
+                return
             fi
-        done
-        rm -f "$MULTIPASS"
-    fi
+            found=0
+        fi
+
+        # Check for the SSID line
+        if echo "$line" | grep -q "ssid=\"$ssid\""; then
+            found=1
+        fi
+    done < "$WPA_FILE"
+}
+
+# Check if multipass.cfg exists at SD root.
+if [ -f /mnt/SDCARD/multipass.cfg ]; then
+    . "$MULTIPASS" ### Import variables from multipass.cfg
+
+    # Loop through the 5 potential SSID/PSK combos in multipass.cfg
+    for i in 1 2 3 4 5; do
+        eval "ID=\$ID_$i"
+        eval "PW=\$PW_$i"
+
+        # SSID and PSK must be non-empty to be evaluated
+        if [ -n "$ID" ] && [ -n "$PW" ]; then
+
+            # Check if given SSID already exists in wpa_supplicant.conf
+            if grep -q "ssid=\"$ID\"" "$WPA_FILE"; then
+            
+                # If SSID but not PSK already found, update PSK
+                if ! grep -q "psk=\"$PW\"" "$WPA_FILE"; then
+                    OLD_PW="$(get_psk "$ID")"
+                    sed -i 's|"$OLD_PW"|"$PW"|' "$WPA_FILE"
+
+                else ### both SSID and PSK found
+                    log_message "Network $ID already has up-to-date password."
+                fi
+
+            else ### SSID not found in wpa_supplicant.conf, so we add it
+                append_network_from_multipass "$ID" "$PW" >> "$WPA_FILE"
+                log_message "Network $ID added to wpa_supplicant.conf"
+            fi
+
+        else ### either SSID or PSK is empty, so we skip that index
+            log_message "Missing ID or PW for network $i in multipass.cfg. Skipping."
+        fi
+    done
+    
+    rm -f "$MULTIPASS" && log_message "Deleted $MULTIPASS"
+
 else
     log_message "No multipass.cfg file found at SD root. Aborting multipass import"
 fi
