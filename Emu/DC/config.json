@@ -16,6 +16,10 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
+      "name": "Emu Core: (✓FCXTREME)-flycast",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/flycast.sh"
+    },
+    {
       "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
     },
