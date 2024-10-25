@@ -155,7 +155,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Steward: Drastic.
   
-  XK9274, Steward and Ninoh-FOX: Pico-8 wrapper.
+  Ninoh-FOX and Steward: Pico-8 wrapper.
   
   Sky_Walker: Avocado theme.
 
