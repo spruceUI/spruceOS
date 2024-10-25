@@ -149,11 +149,11 @@ Press START to cancel" -i "$BG_TREE"
 
     if [ "$mode" = "shutdown" ]; then
         force_rescan
-        sleep 1
+        sleep 2
     elif [ "$mode" = "startup" ]; then
         force_rediscovery
         # Give a few seconds for forced discovery to trigger a rescan
-        sleep 3
+        sleep 4
     fi
 
     # Check if any devices are online
