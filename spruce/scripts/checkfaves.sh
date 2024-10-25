@@ -9,7 +9,7 @@ TEMP_FILE="/mnt/SDCARD/Roms/favourite_temp.json"
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/duplicate_file.png"
 
 create_duplicate() {
-    cp "$FAVOURITE_FILE" "$DUPLICATE_FILE"
+    cp "$FAVOURITE_FILE" "$DUPLICATE_FILE" && log_message "checkfaves.sh: copied $FAVOURITE_FILE into $DUPLICATE_FILE"
 }
 
 sort_file() {
@@ -17,8 +17,11 @@ sort_file() {
     local TEMP=$2
 
     if [ ! -f "$FILE" ]; then
+        log_message "checkfaves.sh: $FILE does not exist, so cannot be sorted."
         return 1
     fi
+
+    log_message "checkfaves.sh: sorting $FILE"
 
     awk -F'"label":' '
         {
@@ -30,17 +33,21 @@ sort_file() {
         }
     ' "$FILE" | sort -t'"' -k4,4 > "$TEMP"
 
+    log_message "checkfaves.sh: sorted $FILE into $TEMP"
+
     {
         echo "[]"
         awk '{print}' "$TEMP"
     } > "$FILE"
+    log_message "checkfaves.sh: printed $TEMP into $FILE"
 
-    rm "$TEMP"
+    rm "$TEMP" && log_message "checkfaves.sh: removed $TEMP"
     return 0
 }
 
 remove_duplicates() {
     sort_file "$DUPLICATE_FILE" "$TEMP_FILE"
+    log_message "checkfaves.sh: removing duplicates"
     {
         awk -v launch='launch' -v rompath='rompath' '{ 
             line = $0
@@ -78,6 +85,7 @@ remove_duplicates() {
         chmod 444 "$DUPLICATE_FILE"
 
         if [ -f "$IMAGE_PATH" ]; then
+            log_message "checkfaves.sh: displaying $IMAGE_PATH"
             display --icon "$IMAGE_PATH" -d 5 -t "You cannot add multiple games with the same exact name to Favorites. Please rename the file you wish to add, then try again.
          " -p bottom
         fi
@@ -87,21 +95,25 @@ remove_duplicates() {
 }
 
 monitor_favourite_file() {
+    log_message "checkfaves.sh: begin monitoring favourites file"
     while true; do
         if [ -f "$FAVOURITE_FILE" ]; then
+            log_message "checkfaves.sh: $FAVOURITE_FILE exists"
             inotifywait -e modify $FAVOURITE_FILE
             if [ -f "$PREVIOUS_STATE" ]; then
+                log_message "checkfaves.sh: $PREVIOUS_STATE exists"
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
+                    log_message "checkfaves.sh: $FAVOURITE_FILE and $PREVIOUS_STATE do not match"
                     create_duplicate
                     remove_duplicates
-                    cp "$DUPLICATE_FILE" "$FAVOURITE_FILE"
-                    cp "$FAVOURITE_FILE" "$PREVIOUS_STATE"
+                    cp "$DUPLICATE_FILE" "$FAVOURITE_FILE" && log_message "checkfaves.sh: copied $DUPLICATE_FILE into $FAVOURITE_FILE"
+                    cp "$FAVOURITE_FILE" "$PREVIOUS_STATE" && log_message "checkfaves.sh: copied $FAVOURITE_FILE into $PREVIOUS_STATE"
                 fi
             else
-                cp "$FAVOURITE_FILE" "$PREVIOUS_STATE"
+                cp "$FAVOURITE_FILE" "$PREVIOUS_STATE" && log_message "checkfaves.sh: copied $FAVOURITE_FILE into $PREVIOUS_STATE"
             fi
         else
-            touch $FAVOURITE_FILE
+            touch $FAVOURITE_FILE && log_message "checkfaves.sh: created $FAVOURITE_FILE"
         fi 
     done
 }
