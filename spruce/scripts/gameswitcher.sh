@@ -117,8 +117,15 @@ killall -USR2 joystickinput
 # -h,--help show this help message.
 # return value: the 1-based index of the selected image
 while : ; do
+
     # set options 
-    OPTIONS="-s 10"
+    OPTIONS="-s 10" # basic options if option file does not exist
+    # try to generate option file
+    if [ ! -f $OPTIONS_FILE ] ; then
+        cd $BIN_PATH
+        ./easyConfig $SETTINGS_PATH/spruce_config -o
+    fi
+    # apply option file if file exists
     if [ -f $OPTIONS_FILE ] ; then
         OPTIONS=$(cat $OPTIONS_FILE)
     fi
