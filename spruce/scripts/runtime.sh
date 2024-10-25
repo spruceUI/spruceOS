@@ -21,6 +21,8 @@ mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib
 mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res
 mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile
 
+lcd_init 1
+
 # Stop NTPD
 /etc/init.d/sysntpd stop
 /etc/init.d/ntpd stop
@@ -29,6 +31,7 @@ mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+cores_online &
 rotate_logs &
 
 # Resetting log file location
@@ -40,9 +43,9 @@ flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
 
-log_message " "
+log_message " " -v
 log_message "---------Starting up---------"
-log_message " "
+log_message " " -v
 
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
@@ -94,13 +97,13 @@ mv /dev/ttyS0 /dev/ttyS2
 # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
 cd ${BIN_DIR}
 ./joypad /dev/input/event3 &
-sleep 0.3 ### wait long enough to create the virtual joypad
+### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
 # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
 # and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
 # Please send kill signal USR1 to switch to ANALOG_MODE
 # and send kill signal USR2 to switch to KEYBOARD_MODE
-./joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+{sleep 0.3 && ./joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3} &
 
 # run game switcher watchdog before auto load game is loaded
 ${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
@@ -143,7 +146,7 @@ ${SCRIPTS_DIR}/autoIconRefresh.sh &
 #     [ "$a" == "" ] && $2 &
 # }
 
-lcd_init 1
+
 
 # check whether to run first boot procedure
 if flag_check "first_boot"; then
