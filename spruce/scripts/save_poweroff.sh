@@ -19,7 +19,18 @@ kill_current_process() {
 
 vibrate
 
-# ask for user response if MainUI is running and skip_shutdown_confirm setting is not set
+if pgrep -f gameswitcher.sh > /dev/null ; then
+	# pause game switcher
+	killall -q -19 switcher
+	# remove lastgame flag to prevent loading any App after next boot
+    flag_remove "lastgame"
+	# add flag to load game switcher after next boot
+	flag_add "gs"
+	# turn off screen
+	echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+fi
+
+# ask for user response if MainUI or PICO8 is running and skip_shutdown_confirm setting is not set
 if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 	if ! setting_get "skip_shutdown_confirm"; then
 		messages_file="/var/log/messages"
