@@ -59,7 +59,7 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
                 # If SSID but not PSK already found, update PSK
                 if ! grep -q "psk=\"$PW\"" "$WPA_FILE"; then
                     OLD_PW="$(get_psk "$ID")"
-                    sed -i 's|"$OLD_PW"|"$PW"|' "$WPA_FILE"
+                    sed -i "s|$(printf '%s' "$OLD_PW" | sed 's/[\/&]/\\&/g')|$(printf '%s' "$PW" | sed 's/[\/&]/\\&/g')|" "$WPA_FILE"
                     log_message "Password updated for network $ID"
 
                 else ### both SSID and PSK found
