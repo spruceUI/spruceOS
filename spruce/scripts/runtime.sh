@@ -76,7 +76,11 @@ log_message "ALSA configuration loaded"
 
 # Restore and monitor brightness
 if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
-	cat /mnt/SDCARD/spruce/settings/sys_brightness_level > /sys/devices/virtual/disp/disp/attr/lcdbl
+    BRIGHTNESS=$(cat /mnt/SDCARD/spruce/settings/sys_brightness_level)
+    # only set non zero brightness value
+    if [ $BRIGHTNESS -ne 0 ]; then 
+	    echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
+    fi
 fi
 ${SCRIPTS_DIR}/brightness_watchdog.sh > /dev/null &
 

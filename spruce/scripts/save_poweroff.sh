@@ -19,6 +19,10 @@ kill_current_process() {
 
 vibrate
 
+# Save system brightness level
+# this is done first because the brightness may be modify later - oscar
+cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
+
 if pgrep -f gameswitcher.sh > /dev/null ; then
 	# pause game switcher
 	killall -q -19 switcher
@@ -120,9 +124,6 @@ done
 display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment.
 
  " -p bottom
-
-# Save system brightness level
-cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
 
 # Created save_active flag
 if flag_check "in_menu"; then
