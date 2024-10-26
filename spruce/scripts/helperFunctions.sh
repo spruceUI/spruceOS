@@ -575,6 +575,14 @@ log_message() {
     printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
+log_precise() {
+    local message="$1"
+    local date_part=$(date '+%Y-%m-%d %H:%M:%S')
+    local uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
+    local timestamp="${date_part}.${uptime_part#*.}"
+    printf '%s %s\n' "$timestamp" "$message" >> "$log_file"
+}
+
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart() {
 	cores_online
@@ -677,5 +685,3 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
-
-
