@@ -75,16 +75,20 @@ if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
 	syncthing_enabled=true
 fi
 
-if $syncthing_enabled; then
-	if check_and_connect_wifi; then
-		start_syncthing_process
-		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-		flag_add "syncthing_startup_synced"
-	else
-		log_message "Failed to connect to WiFi, skipping Sync check"
-	fi
-elif $wifi_needed; then
-	check_and_connect_wifi
+if setting_get "disableNetworkServicesInGame"; then
+    /mnt/SDCARD/spruce/scripts/networkservices.sh off &
+else
+    if $syncthing_enabled; then
+        if check_and_connect_wifi; then
+            start_syncthing_process
+            /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+            flag_add "syncthing_startup_synced"
+        else
+            log_message "Failed to connect to WiFi, skipping Sync check"
+        fi
+    elif $wifi_needed; then
+        check_and_connect_wifi
+    fi
 fi
 
 flag_add 'emulator_launched'

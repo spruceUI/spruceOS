@@ -45,5 +45,24 @@ connect_services() {
     done
 }
 
-# Attempt to bring up the network services if WIFI is connected
-connect_services
+disconnect_services() {
+
+    log_message "Network services: Stopping all network services..."
+    for service in "sftpgo" "dropbear" "smbd" "syncthing"; do
+        if pgrep "$service" > /dev/null; then
+            case "$service" in
+                "sftpgo") stop_sftpgo_process ;;
+                "dropbear") stop_dropbear_process ;;
+                "smbd") stop_samba_process ;;
+                "syncthing") stop_syncthing_process ;;
+            esac
+        fi
+    done
+
+}
+
+if [ "$1" = "off" ]; then
+    disconnect_services
+else
+    connect_services
+fi
