@@ -39,6 +39,8 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Sync files across devices"
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame on|$HELP$ update disableNetworkServicesInGame off" ""
 @"Auto restart when in main menu"
+"" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame on|$HELP$ update disableWifiInGame off" ""
+@"Improves battery life"
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
 @"Disconnect and clear all networks"
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
