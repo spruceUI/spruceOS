@@ -18,6 +18,9 @@ fi
 # copy command to cmd_to_run.sh so game switcher can work correctly
 cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 
+# load a dummy SDL program and try to initialize GPU and other hardware before loading game
+./easyConfig > /dev/null 2&>1 &
+
 log_message "load game to play"
 sleep 5
 nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null
