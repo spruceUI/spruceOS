@@ -12,7 +12,7 @@ SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 
-ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/App/syncthing.png"
+ICON_PATH="/mnt/SDCARD/spruce/imgs/restore.png"
 
 display_message() {
     if [ $silent_mode -eq 0 ]; then
