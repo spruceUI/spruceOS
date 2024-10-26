@@ -24,8 +24,7 @@ mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile
 lcd_init 1
 
 # Stop NTPD
-/etc/init.d/sysntpd stop
-/etc/init.d/ntpd stop
+nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 
 # Load helper functions and helpers
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
