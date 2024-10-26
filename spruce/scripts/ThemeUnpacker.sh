@@ -11,8 +11,6 @@ SILENT_MODE=0
 if [ "$1" = "--silent" ]; then
     SILENT_MODE=1
 fi
-
-cores_online 4
 log_message "Starting theme unpacking process"
 
 # Function to display text if not in silent mode
@@ -66,4 +64,3 @@ log_message "Theme Unpacker finished running"
 if [ $SILENT_MODE -eq 0 ]; then
     kill_images
 fi
-cores_online
