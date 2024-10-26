@@ -87,13 +87,11 @@ while [ 1 ]; do
         flag_remove "in_menu"
     fi
 
-    if [ -f /tmp/.cmdenc ]; then
-        /root/gameloader
-
-    elif [ -f /tmp/cmd_to_run.sh ]; then
+    if [ -f /tmp/cmd_to_run.sh ]; then
         set_performance &
         chmod a+x /tmp/cmd_to_run.sh
-        cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
+        #cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
+        cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
 
