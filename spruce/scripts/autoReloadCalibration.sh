@@ -5,14 +5,6 @@ WATCHED_FILE="/config/joypad.config"
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 while true; do
-    if [ -f "$WATCHED_FILE" ]; then
-        # monitor the calibration file if the file exists
-        inotifywait -e modify "$WATCHED_FILE"
-        log_message "File $WATCHED_FILE has been modified" -v
-    else
-        # monitor any event about calibration file like move or create if file does not exist
-        inotifywait --include $(basename $WATCHED_FILE) $(dirname $WATCHED_FILE)
-    fi
 
     # restart joystickinput if calibration file exists
     if [ -f "$WATCHED_FILE" ]; then
@@ -28,7 +20,14 @@ while true; do
             killall -USR2 joystickinput
         fi
     fi
-
-    # avoid potential busy looping
     sleep 1
+    if [ -f "$WATCHED_FILE" ]; then
+        # monitor the calibration file if the file exists
+        inotifywait -e modify "$WATCHED_FILE"
+        log_message "File $WATCHED_FILE has been modified" -v
+    else
+        # monitor any event about calibration file like move or create if file does not exist
+        inotifywait --include $(basename $WATCHED_FILE) $(dirname $WATCHED_FILE)
+    fi
+    # avoid potential busy looping
 done
