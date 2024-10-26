@@ -115,12 +115,19 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION; enabling -FirmwareUpdate- app"
 fi
 
-# Hide Update App if no update file is found
-. /mnt/SDCARD/Updater/updaterFunctions.sh
-if ! check_for_update_file; then
-    sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
-    log_message "No update file found; hiding Updater app"
-fi
+# Function to check and hide the Update App if necessary
+check_and_hide_update_app() {
+    . /mnt/SDCARD/Updater/updaterFunctions.sh
+    if ! check_for_update_file; then
+        sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        log_message "No update file found; hiding Updater app"
+    else
+        sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        log_message "Update file found; Updater app is visible"
+    fi
+}
+
+check_and_hide_update_app &
 
 # Load idle monitors before game resume or MainUI
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh
