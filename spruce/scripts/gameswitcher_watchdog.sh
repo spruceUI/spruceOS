@@ -90,14 +90,13 @@ prepare_game_switcher() {
     mv "$TEMP_FILE" "$LIST_FILE"
 
     # trim the game list to only recent 10 games
-    COUNT=10
-    if [ -f "$MAX_COUNT_FILE" ] ; then
-        COUNT=$(cat "$MAX_COUNT_FILE")    
+    setting_get "maxGamesInGS"
+    COUNT=$?
+    if [ $COUNT -eq 0 ] ; then
+        COUNT=10
     fi
     tail -$COUNT "$LIST_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$LIST_FILE"
-
-
 
     # kill RA or other emulator or MainUI
     log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
@@ -166,7 +165,7 @@ long_press_handler() {
     elif pgrep "pico8_dyn" > /dev/null; then
         prepare_game_switcher
 
-    elif flag_check "gs.runontap" ; then
+    elif setting_get "runGSOnTapHome" ; then
         if pgrep "ra32.miyoo" > /dev/null ; then
             send_virtual_key
         elif pgrep "retroarch" > /dev/null ; then
@@ -202,7 +201,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
-                if flag_check "gs.runontap" ; then
+                if setting_get "runGSOnTapHome" ; then
                     if pgrep "ra32.miyoo" > /dev/null ; then
                         prepare_game_switcher
                     elif pgrep "retroarch" > /dev/null ; then

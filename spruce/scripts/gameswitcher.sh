@@ -16,6 +16,10 @@ log_message "***** gameswitcher.sh: gs lock, list, images, names, options and te
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
+# get setting always use box art 
+setting_get "alwaysUseBoxartInGS"
+USEBOXART=$?
+
 # remove flag for game switcher
 flag_remove "gs"
 log_message "***** gameswitcher.sh: Removed game switcher flag file" -v
@@ -46,7 +50,7 @@ while read -r CMD; do
     log_message "***** gameswitcher.sh: BOX_ART_PATH: $BOX_ART_PATH" -v
 
     # try get screenshot file path only if boxart flag does not exist
-    if [ ! -f "$FLAG_PATH/gs.boxart" ]; then
+    if [ $USEBOXART -eq 1 ]; then
         # try get our screenshot
         OWN_SCREENSHOT_PATH="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         log_message "***** gameswitcher.sh: OWN_SCREENSHOT_PATH: $OWN_SCREENSHOT_PATH" -v

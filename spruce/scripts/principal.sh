@@ -28,7 +28,7 @@ runifnecessary() {
 
 flag_remove "save_active"
 
-if [ -f /mnt/SDCARD/spruce/flags/gs.boot ] ; then
+if setting_get "runGSAtBoot" ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
@@ -90,7 +90,6 @@ while [ 1 ]; do
     if [ -f /tmp/cmd_to_run.sh ]; then
         set_performance &
         chmod a+x /tmp/cmd_to_run.sh
-        #cat /tmp/cmd_to_run.sh > "$FLAGS_DIR/lastgame.lock"
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
@@ -100,8 +99,8 @@ while [ 1 ]; do
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
-    if [ -f /mnt/SDCARD/spruce/flags/gs.fix ] && \
-        grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
+    if setting_get "runGSOnGameExit" && \
+       grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
     
