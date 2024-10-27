@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Principal Script for Miyoo Mini
+# Principal Script for Miyoo A30
 # 
 # This script serves as the main control loop for the system. It operates as follows:
 # 
@@ -19,12 +19,6 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-runifnecessary() {
-    a=$(ps | grep $1 | grep -v grep)
-    if [ "$a" == "" ]; then
-        $2 &
-    fi
-}
 
 flag_remove "save_active"
 
@@ -57,14 +51,18 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
+        log_precise "Running percentage show script"
         /mnt/SDCARD/spruce/scripts/powerdisplay.sh
+        log_precise "Power display complete"
 
         # This is to kill leftover display and show processes that may be running
-        display_kill
-        kill_images
+        display_kill &
+        kill_images &
 		
         # check if emu visibility needs a refresh, before entering MainUI
+        log_precise "Checking for emulator visibility refresh"
         /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+        log_precise "Emulator visibility refresh complete"
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0
@@ -73,7 +71,6 @@ while [ 1 ]; do
         # this allows joystick to be used as DPAD in MainUI
         killall -USR2 joystickinput
 
-        # run Main menu
         cd ${SYSTEM_PATH}/app/
         ./MainUI &> /dev/null
 
@@ -83,7 +80,6 @@ while [ 1 ]; do
         # send signal USR1 to joystickinput to switch to ANALOG MODE
         killall -USR1 joystickinput
 
-        # remove in menu flag
         flag_remove "in_menu"
     fi
 
@@ -108,5 +104,4 @@ while [ 1 ]; do
         /mnt/SDCARD/App/Credits/launch.sh
         rm /mnt/SDCARD/spruce/flags/credits.lock
     fi
-        
 done
