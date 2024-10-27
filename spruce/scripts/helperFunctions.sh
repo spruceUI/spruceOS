@@ -262,12 +262,14 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position="center" align="middle" width=600 color="ebdbb2" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
     local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
     local icon_image=""
+    local additional_images=""
+    local position_set=false
 
     display_kill
 
@@ -277,7 +279,7 @@ display() {
             -t|--text) text="$2"; shift ;;
             -d|--delay) delay="$2"; shift ;;
             -s|--size) size="$2"; shift ;;
-            -p|--position) position="$2"; shift ;;
+            -p|--position) position="$2"; position_set=true; shift ;;
             -a|--align) align="$2"; shift ;;
             -w|--width) width="$2"; shift ;;
             -c|--color) color="$2"; shift ;;
@@ -287,9 +289,19 @@ display() {
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
-            --icon) icon_image="$2"; shift ;;
+            --icon) 
+                icon_image="$2"
+                if ! $position_set; then
+                    position=$((position + 30))
+                fi
+                shift 
+                ;;
+            --add-image) 
+                additional_images="$additional_images $2 $3 $4"
+                shift 3
+                ;;
             *) log_message "Unknown option: $1"; return 1 ;;
-        esac
+        esac 
         shift
     done
     local r="${color:0:2}"
@@ -309,15 +321,20 @@ display() {
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.20 middle center"
+        command="$command \"$icon_image\" 0.20 160 center"
     fi
 
     # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
     if [[ "$use_confirm_image" = true ]]; then
-        command="$command \"$CONFIRM_IMAGE\" 1.0 middle center"
+        command="$command \"$CONFIRM_IMAGE\" 1.0 240 center"
         delay=0
     elif [[ "$use_acknowledge_image" = true ]]; then
-        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 middle center"
+        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 240 center"
+    fi
+
+    # Add additional images
+    if [ -n "$additional_images" ]; then
+        command="$command $additional_images"
     fi
 
     # Execute the command in the background if delay is 0
@@ -685,3 +702,4 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
+
