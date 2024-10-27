@@ -52,7 +52,7 @@ verify_7z_content() {
     cat "$temp_list"
 
     # Adding a skip for now
-    return 0
+    #return 0
 
     for dir in $required_dirs; do
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Searching for directory: $dir"

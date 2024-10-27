@@ -71,6 +71,23 @@ last_update_file="$APP_DIR/.lastUpdate"
 # Define a list of flags to check and potentially restore
 flags_to_process=""
 
+compare_versions() {
+    echo "$1 $2" | awk '{
+        split($1, a, ".")
+        split($2, b, ".")
+        for (i = 1; i <= 3; i++) {
+            if (a[i] < b[i]) {
+                print "older"
+                exit
+            } else if (a[i] > b[i]) {
+                print "newer"
+                exit
+            }
+        }
+        print "equal"
+    }'
+}
+
 # Function to process flags before restore
 process_flags_before_restore() {
     for flag in $flags_to_process; do
@@ -183,7 +200,8 @@ for script in $upgrade_scripts; do
     script_name=$(basename "$script")
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
 
-    if [ "$(printf '%s\n' "$current_version" "$script_version" | sort -V | head -n1)" != "$script_version" ]; then
+    # Replace the version comparison logic
+    if [ "$(compare_versions "$current_version" "$script_version")" = "older" ]; then
         log_message "Starting upgrade script: $script_name"
         display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
 
