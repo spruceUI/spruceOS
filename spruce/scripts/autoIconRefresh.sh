@@ -24,4 +24,7 @@ while true; do
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
     fi
+
+    # avoid potential busy looping
+    sleep 1
 done

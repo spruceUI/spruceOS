@@ -114,6 +114,9 @@ monitor_favourite_file() {
         else
             touch $FAVOURITE_FILE && log_message "checkfaves.sh: created $FAVOURITE_FILE"
         fi 
+
+        # avoid potential busy looping
+        sleep 1
     done
 }
 
