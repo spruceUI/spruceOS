@@ -99,7 +99,7 @@ mv /dev/ttyS0 /dev/ttyS2
 cd ${BIN_DIR}
 ./joypad /dev/input/event3 &
 
-### wait long enough to create the virtual joypad
+sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
 # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
 # and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
@@ -125,6 +125,7 @@ else
 	log_message "Auto Resume skipped (no save_active flag)"
 fi
 
+${SCRIPTS_DIR}/emufresh_md5_multi.sh &
 ${SCRIPTS_DIR}/spruceRestoreShow.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
