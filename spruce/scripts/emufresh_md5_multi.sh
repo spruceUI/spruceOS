@@ -27,6 +27,9 @@ if [ "$1" = "-clearall" ] ; then
 	# kill MainUI
 	killall -9 MainUI
 
+	# remove flag before exit
+	flag_remove "emufresh"
+
 	# exit with 0
 	return 0
 fi
@@ -67,11 +70,16 @@ echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is
 # if no update and no force option is used, exit with 0
 if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
 	echo "no update" && log_message "emufresh: no update needed. Exiting!"
+
 	# kill mainUI if pico8 files are updated
-	if [ "$need_restart_mainui" = true ] ; then
-		killall -9 MainUI
-		echo "kill MainUI"
-	fi
+	# if [ "$need_restart_mainui" = true ] ; then
+	#	 killall -9 MainUI
+	#	 echo "kill MainUI"
+	# fi
+	
+	# remove flag before exit
+	flag_remove "emufresh"
+
 	return 0
 
 # otherwise update md5 file and continue
