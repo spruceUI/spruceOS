@@ -97,9 +97,8 @@ check_and_connect_wifi() {
         wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
         udhcpc -i wlan0 &
         
-        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -p bottom -t "Waiting to connect....
-Press START to continue anyway.
-       "
+        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
+Press START to continue anyway."
         {
             while true; do
                 if ifconfig wlan0 | grep -qE "inet |inet6 "; then
@@ -292,7 +291,7 @@ display() {
             --icon) 
                 icon_image="$2"
                 if ! $position_set; then
-                    position=$((position + 30))
+                    position=$((position + 80))
                 fi
                 shift 
                 ;;

@@ -86,8 +86,7 @@ remove_duplicates() {
 
         if [ -f "$IMAGE_PATH" ]; then
             log_message "checkfaves.sh: displaying $IMAGE_PATH"
-            display --icon "$IMAGE_PATH" -d 5 -t "You cannot add multiple games with the same exact name to Favorites. Please rename the file you wish to add, then try again.
-         " -p bottom
+            display --icon "$IMAGE_PATH" -d 5 -t "You cannot add multiple games with the same exact name to Favorites. Please rename the file you wish to add, then try again."
         fi
     else
         rm -f "$TEMP_FILE"

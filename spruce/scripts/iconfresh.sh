@@ -10,9 +10,7 @@ silent_mode=0
 
 # Only show image if not in silent mode
 if [ $silent_mode -eq 0 ]; then
-    display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......
-     
-     " -p bottom
+    display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......"
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"

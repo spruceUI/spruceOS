@@ -16,9 +16,7 @@ log_message "Starting firstboot script"
 # initialize the settings... users can restore their own backup later.
 cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
 
-display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0
-    
-    " -p bottom
+display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0" -p 400
 log_message "First boot flag detected"
 
 if [ -f "${SWAPFILE}" ]; then
@@ -48,21 +46,17 @@ log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
 log_message "Displaying wiki image"
-display -d 5 --icon "$WIKI_ICON" -t "Check out the spruce wiki on our GitHub page for tips and FAQs!
-    
-    " -p bottom
+display -d 5 --icon "$WIKI_ICON" -t "Check out the spruce wiki on our GitHub page for tips and FAQs!"
 
 VERSION=$(cat /usr/miyoo/version)
 if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
     sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
-    display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -p bottom -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+    display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
 fi
 
 log_message "Displaying enjoy image"
-display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming..........
-    
-    " -p bottom
+display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 
 flag_remove "first_boot"
 log_message "Removed first boot flag"

@@ -20,9 +20,7 @@ while true; do
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
         flag_add "themeChanged"
         killall -9 MainUI
-        display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......
-     
-     " -p bottom
+        display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......"
         THEME_PATH="$NEW_THEME_PATH"
         log_message "Theme path changed to: $THEME_PATH"
     fi

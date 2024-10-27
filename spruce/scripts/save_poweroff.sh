@@ -121,9 +121,7 @@ while killall -q -0 ra32.miyoo ||
 done
 
 # show saving screen
-display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment.
-
- " -p bottom
+display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
 
 # Created save_active flag
 if flag_check "in_menu"; then

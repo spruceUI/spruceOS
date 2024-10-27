@@ -4,8 +4,7 @@
 
 IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png"
 
-display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes.
- " -p bottom
+display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes."
 
 delete_gamelist_files() {
     rootdir="/mnt/SDCARD/roms"

@@ -3,9 +3,7 @@
 
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/random.png"
 
-display --icon "$IMAGE_PATH" -t "Selecting random game - please wait a moment
- 
- " -p bottom
+display --icon "$IMAGE_PATH" -t "Selecting random game - please wait a moment"
 PREV_SELECTION_FILE="/mnt/SDCARD/App/RandomGame/prev_selection.txt"
 PREV5_FILE="/mnt/SDCARD/App/RandomGame/5_previous.txt"
 
