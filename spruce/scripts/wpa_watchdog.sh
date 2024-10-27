@@ -138,7 +138,10 @@ append_network() {
             # Append the new network to the TEMP_FILE
             echo "$NEW_NETWORK" >> "$TEMP_FILE"
             log_message "WPA Watchdog: \"$NEW_SSID\" added."
-    
+        else
+            # SSID not found, append the new network to TEMP_FILE
+            echo "$NEW_NETWORK" >> "$TEMP_FILE"
+            log_message "WPA Watchdog: \"$NEW_SSID\" added."
         fi
         # Overwrite WPA_FILE with TEMP_FILE (safe because duplicate SSIDs are considered)
         cp "$TEMP_FILE" "$WPA_FILE"
