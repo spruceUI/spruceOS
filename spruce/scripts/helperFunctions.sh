@@ -321,15 +321,15 @@ display() {
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.20 160 center"
+        command="$command \"$icon_image\" 0.20 160 middle"
     fi
 
     # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
     if [[ "$use_confirm_image" = true ]]; then
-        command="$command \"$CONFIRM_IMAGE\" 1.0 240 center"
+        command="$command \"$CONFIRM_IMAGE\" 1.0 240 middle"
         delay=0
     elif [[ "$use_acknowledge_image" = true ]]; then
-        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 240 center"
+        command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 240 middle"
     fi
 
     # Add additional images

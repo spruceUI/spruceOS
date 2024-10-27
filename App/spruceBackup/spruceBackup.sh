@@ -10,7 +10,8 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SYNC_IMAGE="$APP_DIR/imgs/spruceBackup.png"
+log_verbose
+ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
 cores_online 4
@@ -22,7 +23,7 @@ display_message() {
     fi
 }
 
-display_message -i "$SYNC_IMAGE" -t "Backing up your spruce configs and files.........." -c dbcda7
+display_message --icon "$ICON_PATH" -t "Backing up your spruce configs and files.........."
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
@@ -66,7 +67,6 @@ folders="
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
-/mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
 /mnt/SDCARD/spruce/settings/spruce.cfg
@@ -87,7 +87,7 @@ log_message "Available space: $available_space bytes"
 
 if [ "$available_space" -lt "$required_space" ]; then
     log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    display -i "$SYNC_IMAGE" -t "Backup failed, not enough space.
+    display --icon "$ICON_PATH" -t "Backup failed, not enough space.
 You need at least 50 MB free space to backup your files." --okay
     exit 1
 fi
@@ -109,14 +109,15 @@ rm "$temp_file"
 
 if [ $? -eq 0 ]; then
   log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  display_message -i "$SYNC_IMAGE" -t "Backup completed successfully! 
+  display_message --icon "$ICON_PATH" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
 Located in /Saves/spruce/backups/" -d 4
 else
   log_message "Error while creating backup."
-  display -i "$SYNC_IMAGE" -t "Backup failed
+  display --icon "$ICON_PATH" -t "Backup failed
 Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
 log_message "Backup process finished running"
 cores_online
+log_verbose
