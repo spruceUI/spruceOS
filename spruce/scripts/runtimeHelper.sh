@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Function to check and hide the Update App if necessary
+check_and_hide_update_app() {
+    . /mnt/SDCARD/Updater/updaterFunctions.sh
+    if ! check_for_update_file; then
+        sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        log_message "No update file found; hiding Updater app"
+    else
+        sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        log_message "Update file found; Updater app is visible"
+    fi
+}
 
 rotate_logs() {
     local log_dir="/mnt/SDCARD/Saves/spruce"
