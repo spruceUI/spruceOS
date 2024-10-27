@@ -2,6 +2,14 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# check flag to avoid reenter
+if flag_check "emufresh" ; then
+	return 0
+fi
+
+# setup flag to avoid reenter
+flag_add "emufresh"
+
 emu_path="/mnt/SDCARD/Emu"
 roms_path="/mnt/SDCARD/Roms"
 md5_path="/mnt/SDCARD/Emu/.emu_setup/md5"
@@ -70,13 +78,13 @@ echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is
 # if no update and no force option is used, exit with 0
 if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
 	echo "no update" && log_message "emufresh: no update needed. Exiting!"
-
 	# kill mainUI if pico8 files are updated
+
 	# if [ "$need_restart_mainui" = true ] ; then
-	#	 killall -9 MainUI
-	#	 echo "kill MainUI"
+	#	killall -9 MainUI
+	#	echo "kill MainUI"
 	# fi
-	
+
 	# remove flag before exit
 	flag_remove "emufresh"
 
@@ -165,7 +173,10 @@ wait
 echo "all processes finished" && log_message "emufresh complete!"
 
 # kill MainUI to refresh, it should restart by principle.sh very soon
-killall -9 MainUI
-echo "kill MainUI"
-return 0
+# killall -9 MainUI
+# echo "kill MainUI"
+# return 0
+
+# remove flag before exit
+flag_remove "emufresh"
 
