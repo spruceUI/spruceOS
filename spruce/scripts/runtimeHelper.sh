@@ -1,6 +1,15 @@
 #!/bin/sh
 
 # Function to check and hide the Update App if necessary
+
+# Define the function to check and unhide the firmware update app
+check_and_handle_firmware_app() {
+    VERSION="$(cat /usr/miyoo/version)"
+    if [ "$VERSION" -lt 20240713100458 ]; then
+        sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+    fi
+}
+
 check_and_hide_update_app() {
     . /mnt/SDCARD/Updater/updaterFunctions.sh
     if ! check_for_update_file; then
@@ -14,7 +23,7 @@ check_and_hide_update_app() {
 
 rotate_logs() {
     local log_dir="/mnt/SDCARD/Saves/spruce"
-    local log_file="$log_dir/spruce.log"
+    local log_target="$log_dir/spruce.log"
     local max_log_files=5
 
     # Create the log directory if it doesn't exist
@@ -22,22 +31,30 @@ rotate_logs() {
         mkdir -p "$log_dir"
     fi
 
-    # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
-    i=$((max_log_files - 1))
-    while [ $i -ge 1 ]; do
-        if [ -f "$log_dir/spruce${i}.log" ]; then
-            mv "$log_dir/spruce${i}.log" "$log_dir/spruce$((i+1)).log"
-        fi
-        i=$((i - 1))
-    done
-
-    # If spruce.log exists, move it to spruce1.log
-    if [ -f "$log_file" ]; then
-        mv "$log_file" "$log_dir/spruce1.log"
+    # If spruce.log exists, move it to a temporary file
+    if [ -f "$log_target" ]; then
+        mv "$log_target" "$log_target.tmp"
     fi
 
-    # Create a fresh spruce.log
-    touch "$log_file"
+    # Create a fresh spruce.log immediately
+    touch "$log_target"
+
+    # Perform log rotation in the background
+    (
+        # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
+        i=$((max_log_files - 1))
+        while [ $i -ge 1 ]; do
+            if [ -f "$log_dir/spruce${i}.log" ]; then
+                mv "$log_dir/spruce${i}.log" "$log_dir/spruce$((i+1)).log"
+            fi
+            i=$((i - 1))
+        done
+
+        # Move the temporary file to spruce1.log
+        if [ -f "$log_target.tmp" ]; then
+            mv "$log_target.tmp" "$log_dir/spruce1.log"
+        fi
+    ) &
 }
 
 set_usb_icon_from_theme(){

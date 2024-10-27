@@ -11,6 +11,13 @@ SILENT_MODE=0
 if [ "$1" = "--silent" ]; then
     SILENT_MODE=1
 fi
+
+# Quick check for .7z files
+if [ ! "$(find "$THEME_DIR" -name '*.7z' -print -quit)" ] && [ ! "$(find "$RA_THEME_DIR" -name '*.7z' -print -quit)" ]; then
+    log_message "No .7z files found to unpack. Exiting."
+    exit 0
+fi
+
 log_message "Starting theme unpacking process"
 
 # Function to display text if not in silent mode
