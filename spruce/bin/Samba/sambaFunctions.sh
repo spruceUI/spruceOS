@@ -15,21 +15,20 @@ start_samba_process(){
 	export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/bin/Samba/lib:$LD_LIBRARY_PATH"
 
 	# Create necessary directories
-	mkdir -p /mnt/SDCARD/spruce/bin/Samba/runtime/private
-	mkdir -p /mnt/SDCARD/spruce/bin/Samba/runtime/lock
-	mkdir -p /mnt/SDCARD/spruce/bin/Samba/runtime/run
+	mkdir -p /tmp/samba/private
+	mkdir -p /tmp/samba/lock
+	mkdir -p /tmp/samba/run
 
 	# Set the Samba password for the root user
 	PASSWORD="tina"
 	echo -ne "$PASSWORD\n$PASSWORD\n" | /mnt/SDCARD/spruce/bin/Samba/bin/smbpasswd -c /mnt/SDCARD/spruce/bin/Samba/config/smb.conf -s -a root
 
 	# Start the Samba daemon
-	rm /mnt/SDCARD/spruce/bin/Samba/runtime/run/smbd-smb.conf.pid
-	LD_LIBRARY_PATH="$LD_LIBRARY_PATH" /mnt/SDCARD/spruce/bin/Samba/bin/smbd -s /mnt/SDCARD/spruce/bin/Samba/config/smb.conf --no-process-group -D
+	rm /tmp/samba/run/smbd-smb.conf.pid
+	LD_LIBRARY_PATH="$LD_LIBRARY_PATH" /mnt/SDCARD/spruce/bin/Samba/bin/smbd -s /mnt/SDCARD/spruce/bin/Samba/config/smb.conf -D
 }
 
 stop_samba_process(){
-    log_message "Shutting down Samba..."	
-    kill -9 $(pgrep smbd)
-    rm /mnt/SDCARD/spruce/bin/Samba/runtime/run/smbd-smb.conf.pid
+    log_message "Shutting down Samba..."
+    kill $(pgrep smbd)
 }
