@@ -242,7 +242,8 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position (top, center, bottom) (default: center)
+#   -p, --position <pos>  Text position in pixels from the top of the screen 
+#   (Text is offset from it's center, images are offset from the top of the image)
 #   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
 #   -c, --color <color>   Text color in RGB format (default: dbcda7) Spruce text yellow

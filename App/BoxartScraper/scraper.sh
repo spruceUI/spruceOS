@@ -211,11 +211,10 @@ roms_dir="/mnt/SDCARD/Roms"
 # Function to show splash screen
 display_image() {
     local image_path="$status_img_dir/$1.png"
-    killall -9 show
     if [ -f "$image_path" ]; then
-        show_image "$image_path"
+        display -i "$image_path"
     else
-        show_image "$status_img_dir/generic.png"
+        display -i "$status_img_dir/generic.png"
     fi
 }
 display_image "generic"
@@ -223,8 +222,8 @@ display_image "generic"
 # Check if Wi-Fi is enabled
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
 if [ "$wifi_enabled" -eq 0 ]; then
+    log_message "BoxartScraper: Wi-Fi is disabled, exiting."
     display_image "wifi_off"
-    echo "Wi-Fi is disabled, exiting."
     sleep 3
     exit
 fi
