@@ -1,5 +1,6 @@
 # Function summaries:
 # acknowledge: Waits for user to press A, B, or Start button
+# auto_regen_tmp_update: makes .tmp_update/updater if needed
 # check_and_connect_wifi: Polls for Wifi, Cancels on Start Press
 # cores_online: Sets the number of CPU cores to be online
 # display: Displays text on the screen with various options
@@ -72,6 +73,13 @@ acknowledge() {
             ;;
         esac
     done
+}
+
+auto_regen_tmp_update() {
+    tmp_dir="/mnt/SDCARD/.tmp_update"
+    updater="/mnt/SDCARD/spruce/scripts/.tmp_update/updater"
+    [ ! -d "$tmp_dir" ] && mkdir "$tmp_dir"
+    [ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater"
 }
 
 check_and_connect_wifi() {

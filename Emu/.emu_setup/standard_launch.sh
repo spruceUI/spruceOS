@@ -216,3 +216,5 @@ esac
 
 kill -9 $(pgrep enforceSmartCPU.sh)
 log_message "-----Closing Emulator-----" -v
+
+auto_regen_tmp_update
