@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # check flag to avoid reenter
-if flag_check "emufresh" ; then
+if flag_check "emufresh"; then
 	return 0
 fi
 
@@ -20,10 +20,10 @@ log_message "emufresh: checking if emufresh required"
 mkdir -p "$md5_path"
 
 # handle clear all option
-if [ "$1" = "-clearall" ] ; then
+if [ "$1" = "-clearall" ]; then
 	# remove all md5 files
 	rm -r "$md5_path" && log_message "emufresh: removed $md5_path and its contents"
-	
+
 	# hide all systems
 	find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
 		system_name=$(basename "$folder")
@@ -44,19 +44,19 @@ fi
 
 # check folder PICO8 first
 config_file="$emu_path/PICO8/config.json"
-show_pico8=$(cat "$config_file" | grep -Fc '{{' )
+show_pico8=$(cat "$config_file" | grep -Fc '{{')
 need_restart_mainui=false
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
-   [ -f "$emu_path/PICO8/bin/pico8_dyn" ] ; then
+	[ -f "$emu_path/PICO8/bin/pico8_dyn" ]; then
 	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
-	if [ ! $show_pico8 = 0 ] ; then
+	if [ ! $show_pico8 = 0 ]; then
 		need_restart_mainui=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
 		sed -i 's/^{{*$/{/' "$config_file"
 		echo "show system PICO8" && log_message "emufresh: revealing PICO8 system"
 	fi
 else
-	if [ $show_pico8 = 0 ] ; then
+	if [ $show_pico8 = 0 ]; then
 		log_message "emufresh: pico8.dat and pico8_dyn not detected"
 		need_restart_mainui=true
 		sed -i 's/^{*$/{{/' "$config_file"
@@ -65,18 +65,18 @@ else
 fi
 
 # read old md5 value for Roms folder
-if [ -f "$md5_path/all.md5" ] ; then
+if [ -f "$md5_path/all.md5" ]; then
 	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
 	log_message "emufresh: previous MD5 sum of all Roms folders is $all_md5" -v
 fi
 
-# compute new md5 value for files under Roms 
-# except known non-rom files and folders PICO8 
+# compute new md5 value for files under Roms
+# except known non-rom files and folders PICO8
 new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "$roms_path/PICO8/*" ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is $all_md5" -v
 
 # if no update and no force option is used, exit with 0
-if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
+if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ]; then
 	echo "no update" && log_message "emufresh: no update needed. Exiting!"
 	# kill mainUI if pico8 files are updated
 
@@ -93,7 +93,7 @@ if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ] ; then
 # otherwise update md5 file and continue
 else
 	echo "need update" && log_message "emufresh: update needed!"
-	echo "$new_all_md5" > "$md5_path/all.md5"
+	echo "$new_all_md5" >"$md5_path/all.md5"
 fi
 
 # get all rom folders except folders PICO8
@@ -116,10 +116,10 @@ check_rom_folders() {
 		new_md5=$(echo "$file_list" | md5sum)
 
 		# check rom updates if md5 is different
-		if [ ! "$new_md5" = "$md5" ] ; then
+		if [ ! "$new_md5" = "$md5" ]; then
 
 			# store new md5 value
-			echo "$new_md5" > "$md5_path/$system_name.md5"
+			echo "$new_md5" >"$md5_path/$system_name.md5"
 
 			log_message "emufresh: MD5 for $system_name has changed. Update required"
 
@@ -129,7 +129,7 @@ check_rom_folders() {
 				# get acceptable extensions
 				types=$(cat "$config_file" | grep -m1 extlist | cut -d ":" -f 2 | sed "s/,//" | sed "s/ //" | sed "s/\	//" | sed 's/|\"/\"/g' | sed 's/\"//' | sed 's/\"//')
 
-				if [ -z "$types" ]; then 
+				if [ -z "$types" ]; then
 					# count files in list
 					count=$(echo "$file_list" | sed '/^\s*$/d' | wc -l)
 				else
@@ -177,6 +177,12 @@ echo "all processes finished" && log_message "emufresh complete!"
 # echo "kill MainUI"
 # return 0
 
+if pgrep -x "MainUI" > /dev/null; then
+	display -t "New emulators or roms detected, press confirm to restart the menu to see them immediatley. Press cancel to see them next time you return to the menu." --confirm
+	if confirm 10 0; then
+		killall -9 MainUI
+	fi
+fi
+
 # remove flag before exit
 flag_remove "emufresh"
-

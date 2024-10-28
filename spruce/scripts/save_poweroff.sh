@@ -43,7 +43,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 		killall -q -19 pico8_dyn
 		# show notification screen
 		display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
-		if confirm 30; then
+		if confirm 30 0; then
 			# remove lastgame flag to prevent loading any App after next boot
 			rm "${FLAGS_DIR}/lastgame.lock"
 			# turn off screen

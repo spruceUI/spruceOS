@@ -6,6 +6,7 @@ rotate_logs
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
+cores_online &
 echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
 echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
 SETTINGS_FILE="/config/system.json"
@@ -36,7 +37,6 @@ lcd_init 1
 # Stop NTPD
 nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 
-cores_online &
 # Flag cleanup
 flag_remove "themeChanged"
 flag_remove "log_verbose"
@@ -73,8 +73,10 @@ else
     ${SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
+${SCRIPTS_DIR}/emufresh_md5_multi.sh &
+
 log_precise "Alsa configuration loading"
-alsactl nrestore
+alsactl nrestore &
 log_precise "ALSA configuration loaded"
 
 # Restore and monitor brightness
@@ -124,7 +126,6 @@ else
 	log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-${SCRIPTS_DIR}/emufresh_md5_multi.sh &
 ${SCRIPTS_DIR}/spruceRestoreShow.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 

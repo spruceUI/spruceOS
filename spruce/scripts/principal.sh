@@ -35,8 +35,12 @@ while [ 1 ]; do
 
     if [ ! -f /tmp/cmd_to_run.sh ] ; then
         # create in menu flag and remove last played game flag
-        flag_add "in_menu"
         flag_remove "lastgame"
+
+        # check if emu visibility needs a refresh, before entering MainUI
+        log_precise "Checking for emulator visibility refresh"
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+        log_precise "Emulator visibility refresh complete"
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
@@ -58,11 +62,6 @@ while [ 1 ]; do
         # This is to kill leftover display and show processes that may be running
         display_kill &
         kill_images &
-		
-        # check if emu visibility needs a refresh, before entering MainUI
-        log_precise "Checking for emulator visibility refresh"
-        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
-        log_precise "Emulator visibility refresh complete"
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0
@@ -71,6 +70,7 @@ while [ 1 ]; do
         # this allows joystick to be used as DPAD in MainUI
         killall -USR2 joystickinput
 
+        flag_add "in_menu"
         cd ${SYSTEM_PATH}/app/
         ./MainUI &> /dev/null
 
