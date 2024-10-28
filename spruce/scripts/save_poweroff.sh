@@ -48,7 +48,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 			# remove lastgame flag to prevent loading any App after next boot
 			rm "${FLAGS_DIR}/lastgame.lock"
 			# display shutdown warning
-			display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+			display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 			dim_screen &
 		else
 			display_kill
