@@ -162,3 +162,5 @@ fi
 cmd="\"${EMU_FOLDER}/launch.sh\" \"${SELECTED_GAME}\""
 echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"
+
+auto_regen_tmp_update

@@ -56,3 +56,5 @@ rm $LOGO_PATH boot0 boot0-suffix
 mv $DIR $DIR.disabled
 
 echo "DONE."
+
+auto_regen_tmp_update

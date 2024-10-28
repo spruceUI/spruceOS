@@ -198,3 +198,4 @@ display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 log_message "----------Restore and Upgrade completed----------"
 cores_online
 
+auto_regen_tmp_update

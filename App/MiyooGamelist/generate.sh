@@ -148,3 +148,5 @@ for system in "$rootdir"/*; do
 done
 
 display_kill
+
+auto_regen_tmp_update
