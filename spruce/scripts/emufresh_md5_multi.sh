@@ -178,7 +178,7 @@ echo "all processes finished" && log_message "emufresh complete!"
 # return 0
 
 if pgrep -x "MainUI" > /dev/null; then
-	display -t "New emulators or roms detected, press confirm to restart the menu to see them immediatley. Press cancel to see them next time you return to the menu." --confirm
+	display -t "New emulators or roms detected, press confirm to restart the menu to see them immediately. Press cancel to see them next time you return to the menu." --confirm
 	if confirm 10 0; then
 		killall -9 MainUI
 	fi
