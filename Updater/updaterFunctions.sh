@@ -56,7 +56,7 @@ verify_7z_content() {
 
     for dir in $required_dirs; do
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Searching for directory: $dir"
-        if grep -q "^.*DR.*[[:space:]]$dir$" "$temp_list"; then
+        if grep -q "^.*D.*[[:space:]]$dir$" "$temp_list"; then
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Found directory: $dir"
         else
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Directory not found: $dir"
