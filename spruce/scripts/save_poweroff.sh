@@ -30,8 +30,8 @@ if pgrep -f gameswitcher.sh > /dev/null ; then
     flag_remove "lastgame"
 	# add flag to load game switcher after next boot
 	flag_add "gs"
-	# turn off screen
-	echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+	# display shutdown warning
+	display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 fi
 
 # ask for user response if MainUI or PICO8 is running and skip_shutdown_confirm setting is not set
@@ -46,8 +46,8 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 		if confirm 30 0; then
 			# remove lastgame flag to prevent loading any App after next boot
 			rm "${FLAGS_DIR}/lastgame.lock"
-			# turn off screen
-			echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+			# display shutdown warning
+			display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 		else
 			display_kill
 			# resume Mainui or pico8_dyn
@@ -59,7 +59,8 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 	else
 		# If skip_shutdown_confirm setting is set or not in menu, proceed with shutdown
 		rm "${FLAGS_DIR}/lastgame.lock"
-		echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
+		# display shutdown warning
+		display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 	fi
 fi
 
@@ -121,7 +122,9 @@ while killall -q -0 ra32.miyoo ||
 done
 
 # show saving screen
-display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
+if ! pgrep "display_text.elf" >/dev/null; then
+	display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
+fi
 
 # Created save_active flag
 if flag_check "in_menu"; then
