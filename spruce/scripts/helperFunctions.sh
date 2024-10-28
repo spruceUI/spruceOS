@@ -219,12 +219,32 @@ cores_online() {
 # Call it as a background process
 dim_screen() {
     local start_brightness=40
-    local end_brightness=3
-    local step=1
-    local delay=0.03  # 50ms delay between each step
+    local end_brightness=5
+    local steps=90  # Total number of steps for the transition
+    local delay=0.01  # 50ms delay between each step
 
-    for brightness in $(seq $start_brightness -$step $end_brightness); do
-        echo $brightness > /sys/devices/virtual/disp/disp/attr/lcdbl
+    # Check if another dim_screen is running
+    if pgrep -f "dim_screen" | grep -v $$ > /dev/null; then
+        log_message "Another dim_screen process is already running" -v
+        return 1
+    fi
+
+    # Get current brightness
+    local current_brightness=$(cat /sys/devices/virtual/disp/disp/attr/lcdbl)
+
+    # Check if we're already at target brightness
+    if [ "$current_brightness" -eq "$end_brightness" ]; then
+        log_message "Screen already at target brightness" -v
+        return 0
+    fi
+
+    # Calculate the brightness decrease per step
+    local brightness_range=$((start_brightness - end_brightness))
+    local current=$start_brightness
+
+    while [ $current -gt $end_brightness ]; do
+        echo $current > /sys/devices/virtual/disp/disp/attr/lcdbl
+        current=$((current - 1))
         sleep $delay
     done
 }
@@ -702,4 +722,3 @@ vibrate() {
     local duration=${1:-100}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
-

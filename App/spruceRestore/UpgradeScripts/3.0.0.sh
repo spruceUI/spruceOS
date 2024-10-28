@@ -46,6 +46,7 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
     "input_player1_l_x_plus_axis = \"+0\"" \
     "input_player1_l_y_minus_axis = \"-1\"" \
     "input_player1_l_y_plus_axis = \"+1\"" \
+    "input_quit_gamepad_combo = \"0\"" \
     "input_save_state = \"backspace\"" \
     "input_screenshot = \"space\"" \
     "input_state_slot_decrease = \"left\"" \
@@ -89,6 +90,7 @@ fi
 #input_player1_l_x_plus_axis = "+0"
 #input_player1_l_y_minus_axis = "-1"
 #input_player1_l_y_plus_axis = "+1"
+#input_quit_gamepad_combo = "0"
 #input_save_state = "backspace"
 #input_screenshot = "space"
 #input_state_slot_decrease = "left"

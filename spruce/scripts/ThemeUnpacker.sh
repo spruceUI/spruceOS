@@ -13,12 +13,12 @@ if [ "$1" = "--silent" ]; then
 fi
 
 # Quick check for .7z files
-if [ ! "$(find "$THEME_DIR" -name '*.7z' -print -quit)" ] && [ ! "$(find "$RA_THEME_DIR" -name '*.7z' -print -quit)" ]; then
-    log_message "No .7z files found to unpack. Exiting."
+if [ -z "$(find "$THEME_DIR" -maxdepth 1 -name '*.7z' | head -n 1)" ] && [ -z "$(find "$RA_THEME_DIR" -maxdepth 1 -name '*.7z' | head -n 1)" ]; then
+    log_message "ThemeUnpacker: No .7z files found to unpack. Exiting."
     exit 0
 fi
 
-log_message "Starting theme unpacking process"
+log_message "ThemeUnpacker: Starting theme unpacking process"
 
 # Function to display text if not in silent mode
 display_if_not_silent() {
@@ -36,12 +36,12 @@ for archive in "$THEME_DIR"/*.7z; do
             7zr x -aoa "$archive" -o/
             if [ $? -eq 0 ]; then
                 rm -f "$archive"
-                log_message "Unpacked and removed: $theme_name.7z"
+                log_message "ThemeUnpacker: Unpacked and removed: $theme_name.7z"
             else
-                log_message "Failed to unpack: $theme_name.7z"
+                log_message "ThemeUnpacker: Failed to unpack: $theme_name.7z"
             fi
         else
-            log_message "Skipped unpacking: $theme_name.7z (incorrect folder structure)"
+            log_message "ThemeUnpacker: Skipped unpacking: $theme_name.7z (incorrect folder structure)"
         fi
     fi
 done
@@ -57,17 +57,17 @@ for folder in $RA_FOLDERS_TO_UNPACK; do
             7zr x -aoa "$archive" -o/
             if [ $? -eq 0 ]; then
                 rm -f "$archive"
-                log_message "Unpacked and removed RetroArch folder: ${folder}.7z"
+                    log_message "ThemeUnpacker: Unpacked and removed RetroArch folder: ${folder}.7z"
             else
-                log_message "Failed to unpack RetroArch folder: ${folder}.7z"
+                log_message "ThemeUnpacker: Failed to unpack RetroArch folder: ${folder}.7z"
             fi
         else
-            log_message "Skipped unpacking RetroArch folder: ${folder}.7z (incorrect folder structure)"
+            log_message "ThemeUnpacker: Skipped unpacking RetroArch folder: ${folder}.7z (incorrect folder structure)"
         fi
     fi
 done
 
-log_message "Theme Unpacker finished running"
+log_message "ThemeUnpacker: Finished running"
 if [ $SILENT_MODE -eq 0 ]; then
     kill_images
 fi

@@ -32,6 +32,7 @@ if pgrep -f gameswitcher.sh > /dev/null ; then
 	flag_add "gs"
 	# display shutdown warning
 	display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+	dim_screen &
 fi
 
 # ask for user response if MainUI or PICO8 is running and skip_shutdown_confirm setting is not set
@@ -48,6 +49,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 			rm "${FLAGS_DIR}/lastgame.lock"
 			# display shutdown warning
 			display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+			dim_screen &
 		else
 			display_kill
 			# resume Mainui or pico8_dyn
@@ -61,6 +63,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 		rm "${FLAGS_DIR}/lastgame.lock"
 		# display shutdown warning
 		display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+		dim_screen &
 	fi
 fi
 
@@ -124,6 +127,7 @@ done
 # show saving screen
 if ! pgrep "display_text.elf" >/dev/null; then
 	display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
+	dim_screen &
 fi
 
 # Created save_active flag

@@ -75,9 +75,7 @@ fi
 
 ${SCRIPTS_DIR}/emufresh_md5_multi.sh &
 
-log_precise "Alsa configuration loading"
 alsactl nrestore &
-log_precise "ALSA configuration loaded"
 
 # Restore and monitor brightness
 if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
