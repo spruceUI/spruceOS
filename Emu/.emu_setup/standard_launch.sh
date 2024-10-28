@@ -214,5 +214,5 @@ case $EMU_NAME in
 		
 esac
 
-kill -9 $(pgrep enforceSmartCPU.sh)
+kill -9 $(pgrep -f enforceSmartCPU.sh)
 log_message "-----Closing Emulator-----" -v
