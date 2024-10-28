@@ -4,6 +4,8 @@ WATCHED_FILE="/config/joypad.config"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+sleep 0.3 ### wait long enough to create the virtual joypad
+
 while true; do
 
     # restart joystickinput if calibration file exists

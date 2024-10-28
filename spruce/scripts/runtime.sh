@@ -99,13 +99,12 @@ mv /dev/ttyS0 /dev/ttyS2
 cd ${BIN_DIR}
 ./joypad /dev/input/event3 &
 
-sleep 0.3 ### wait long enough to create the virtual joypad
 # read joystick raw data from serial input and apply calibration,
 # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
 # and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
 # Please send kill signal USR1 to switch to ANALOG_MODE
 # and send kill signal USR2 to switch to KEYBOARD_MODE
-./joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
 # run game switcher watchdog before auto load game is loaded
 ${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
@@ -146,7 +145,6 @@ ${SCRIPTS_DIR}/low_power_warning.sh
 ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
 ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
-${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
 # Initialize CPU settings
 set_smart
