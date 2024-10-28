@@ -36,8 +36,7 @@ log_message "Starting upgrade to version $TARGET_VERSION"
 # Update specific files
 update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
     "xmb_menu_color_theme = \"15\"" \
-    "xmb_alpha_factor = \"100\"" \
-    "savestate_thumbnail_enable = \"true\""
+    "xmb_alpha_factor = \"100\""
 
 update_file "/mnt/SDCARD/RetroArch/nohotkeyprofile/retroarch.cfg" \
     "savestate_thumbnail_enable = \"true\""

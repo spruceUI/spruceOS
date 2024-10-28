@@ -68,9 +68,6 @@ fi
 # Define the path for the .lastUpdate file
 last_update_file="$APP_DIR/.lastUpdate"
 
-# Define a list of flags to check and potentially restore
-flags_to_process=""
-
 compare_versions() {
     echo "$1 $2" | awk '{
         split($1, a, ".")
@@ -87,32 +84,6 @@ compare_versions() {
         print "equal"
     }'
 }
-
-# Function to process flags before restore
-process_flags_before_restore() {
-    for flag in $flags_to_process; do
-        if flag_check "$flag"; then
-            log_message "Removing $flag flag before restore"
-            flag_remove "$flag"
-            echo "$flag" >>"$backupdir/removed_flags.tmp"
-        fi
-    done
-}
-
-# Function to restore flags if restore fails
-restore_flags_on_failure() {
-    if [ -f "$backupdir/removed_flags.tmp" ]; then
-        log_message "Restore failed. Restoring removed flags."
-        while read -r flag; do
-            log_message "Restoring $flag flag"
-            flag_add "$flag"
-        done <"$backupdir/removed_flags.tmp"
-        rm "$backupdir/removed_flags.tmp"
-    fi
-}
-
-# Process flags before restore
-process_flags_before_restore
 
 rm -f "$last_update_file"
 
@@ -137,38 +108,26 @@ else
 fi
 
 # Move PICO files from legacy location to Emu folder if they exist
-pico_files_moved=0
 if [ -f "/mnt/SDCARD/App/PICO/bin/pico8.dat" ]; then
     mv "/mnt/SDCARD/App/PICO/bin/pico8.dat" "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat"
-    pico_files_moved=1
 fi
 if [ -f "/mnt/SDCARD/App/PICO/bin/pico8_dyn" ]; then
     mv "/mnt/SDCARD/App/PICO/bin/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn"
-    pico_files_moved=1
 fi
 
+# Check legacy PICO folder and delete it if it exists
 if [ -d "/mnt/SDCARD/App/PICO/" ]; then
     log_message "PICO files moved. Deleting /mnt/SDCARD/App/PICO/ folder..."
     rm -rf "/mnt/SDCARD/App/PICO"
 fi
 
-# Check if Syncthing config folder exists and run launch script if it does
+# Check if legacy Syncthing config folder exists and run launch script if it does
 if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
     log_message "Syncthing legacy location config folder found."
     # Move it to the new location
     mv "/mnt/SDCARD/App/Syncthing/config" "$SYNCTHING_DIR/config"
     rm -rf "/mnt/SDCARD/App/Syncthing"
-fi
-if [ -d "$SYNCTHING_DIR/config" ]; then
-    log_message "Syncthing config folder found."
-    if ! flag_check "syncthing"; then
-        log_message "Running Syncthing startup script..."
-        syncthing_startup_process
-    else
-        log_message "Syncthing flag found. Skipping Syncthing launch."
-    fi
-else
-    log_message "Syncthing config folder not found. Skipping Syncthing launch."
+    setting_update "syncthing" "true"
 fi
 
 #-----Upgrade-----
