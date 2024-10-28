@@ -30,8 +30,8 @@ if pgrep -f gameswitcher.sh > /dev/null ; then
     flag_remove "lastgame"
 	# add flag to load game switcher after next boot
 	flag_add "gs"
-	# display shutdown warning
-	display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+	# display blank tree screen while shutting down
+	display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 	dim_screen &
 fi
 
@@ -47,7 +47,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 		if confirm 30 0; then
 			# remove lastgame flag to prevent loading any App after next boot
 			rm "${FLAGS_DIR}/lastgame.lock"
-			# display shutdown warning
+			# display blank tree screen while shutting down
 			display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 			dim_screen &
 		else
@@ -61,8 +61,8 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 	else
 		# If skip_shutdown_confirm setting is set or not in menu, proceed with shutdown
 		rm "${FLAGS_DIR}/lastgame.lock"
-		# display shutdown warning
-		display -t "Shutting down..." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+		# display blank tree screen while shutting down
+		display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
 		dim_screen &
 	fi
 fi
