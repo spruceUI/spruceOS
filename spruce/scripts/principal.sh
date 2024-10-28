@@ -52,7 +52,7 @@ while [ 1 ]; do
         fi
 
         log_precise "Running percentage show script"
-        /mnt/SDCARD/spruce/scripts/powerdisplay.sh
+        /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
         log_precise "Power display complete"
 
         # This is to kill leftover display and show processes that may be running
