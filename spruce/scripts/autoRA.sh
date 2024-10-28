@@ -6,7 +6,7 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 messages_file="/var/log/messages"
 
 set_performance
-log_message "Save active flag detected"
+log_message "AutoRA: Save active flag detected"
 
 #Set the LED
 if flag_check "ledon"; then
@@ -21,7 +21,7 @@ cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 # load a dummy SDL program and try to initialize GPU and other hardware before loading game
 ./easyConfig > /dev/null 2&>1 &
 
-log_message "load game to play"
+log_message "AutoRA: load game to play"
 sleep 5
 nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null
 

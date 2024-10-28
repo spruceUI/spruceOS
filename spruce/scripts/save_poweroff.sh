@@ -137,7 +137,7 @@ else
     flag_add "save_active"
 fi
 
-if flag_check "syncthing" && flag_check "emulator_launched"; then
+if setting_get "syncthing" && flag_check "emulator_launched"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
 
 	if check_and_connect_wifi; then

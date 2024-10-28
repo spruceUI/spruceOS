@@ -35,7 +35,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Secure Shell for remote login"
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
 @"Network file-sharing"
-"" "Enable Syncthing" "|" "on|off" "$CHECK$ syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
+"" "Enable Syncthing" "|" "on|off" "$HELP$ check syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
 @"Sync files across devices"
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame on|$HELP$ update disableNetworkServicesInGame off" ""
 @"Auto restart when in main menu"

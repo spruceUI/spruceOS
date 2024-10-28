@@ -32,7 +32,7 @@ connect_services() {
             fi
             
             # Syncthing check
-            if flag_check "syncthing" && ! pgrep "syncthing" > /dev/null; then
+            if setting_get "syncthing" && ! pgrep "syncthing" > /dev/null; then
                 # Flag exists but service is not running, so start it...
                 log_message "Network services: Syncthing detected not running, starting..."
                 start_syncthing_process

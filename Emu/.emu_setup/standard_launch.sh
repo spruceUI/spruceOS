@@ -69,7 +69,7 @@ if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 fi
 
 ##### Syncthing Sync Check, perform only once per session #####
-if flag_check "syncthing" && ! flag_check "syncthing_startup_synced"; then
+if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
 	wifi_needed=true
 	syncthing_enabled=true

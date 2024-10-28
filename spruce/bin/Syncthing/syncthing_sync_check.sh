@@ -13,45 +13,45 @@ API_KEY=""
 BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 # Function to start network interface
 start_network() {
-    log_message "Starting network interface..."
+    log_message "SyncthingCheck: Starting network interface..."
     ifconfig lo up
 }
 
 wait_for_syncthing_api() {
-    log_message "Waiting for Syncthing API to become available..."
+    log_message "SyncthingCheck: Waiting for Syncthing API to become available..."
     for i in $(seq 1 $MAX_API_RETRIES); do
         if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
-            log_message "Syncthing API is now available"
+            log_message "SyncthingCheck: Syncthing API is now available"
             return 0
         fi
         sleep $API_RETRY_INTERVAL
     done
-    log_message "Syncthing API did not become available within the expected time"
+    log_message "SyncthingCheck: Syncthing API did not become available within the expected time"
     return 1
 }
 
 force_rescan() {
-    log_message "Forcing rescan of all folders for upload..."
+    log_message "SyncthingCheck: Forcing rescan of all folders for upload..."
     local folders=$(get_folders)
 
     echo "$folders" | while IFS='|' read -r folder_id folder_label; do
         curl -s -X POST -H "X-API-Key: $API_KEY" "$API_ENDPOINT/db/scan?folder=$folder_id"
-        log_message "Initiated rescan for folder: $folder_label"
+        log_message "SyncthingCheck: Initiated rescan for folder: $folder_label"
     done
 }
 
 force_rediscovery() {
-    log_message "Forcing rediscovery of devices..."
+    log_message "SyncthingCheck: Forcing rediscovery of devices..."
     local response=$(curl -s -X GET -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/discovery")
     if [ $? -eq 0 ]; then
-        log_message "Initiated device rediscovery"
+        log_message "SyncthingCheck: Initiated device rediscovery"
     else
-        log_message "Error: Failed to initiate device rediscovery"
+        log_message "SyncthingCheck: Error: Failed to initiate device rediscovery"
     fi
 }
 
 stop_network() {
-    log_message "Stopping network interface..."
+    log_message "SyncthingCheck: Stopping network interface..."
     ifconfig lo down
 }
 
@@ -125,7 +125,7 @@ monitor_start_button() {
         last_line=$(tail -n 1 "$messages_file")
         case $last_line in
             *"$B_START"* | *"$B_START_2"*)
-                log_message "START button pressed - cancelling sync"
+                log_message "SyncthingCheck: START button pressed - cancelling sync"
                 echo "cancelled" > /tmp/sync_cancelled
                 exit 0
                 ;;
@@ -140,7 +140,7 @@ monitor_sync_status() {
 
     rm -f /tmp/sync_cancelled
 
-    log_message "Monitoring sync status in $mode mode"
+    log_message "SyncthingCheck: Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
 
 Press START to cancel" -i "$BG_TREE"
@@ -158,7 +158,7 @@ Press START to cancel" -i "$BG_TREE"
 
     # Check if any devices are online
     if ! are_devices_online; then
-        log_message "No devices are online. Exiting sync check."
+        log_message "SyncthingCheck: No devices are online. Exiting sync check."
         display -t "No devices online" -i "$BG_TREE"
         sleep 1
         return 1
@@ -181,7 +181,7 @@ Press START to cancel" -i "$BG_TREE"
         for device in $devices; do
             local device_name=$(get_device_name "$device")
             local short_id=$(echo "$device" | cut -c1-7)
-            log_message "Device $device_name ($short_id):"
+            log_message "SyncthingCheck: Device $device_name ($short_id):"
             summary="${summary}Device $device_name ($short_id):\n"
 
             echo "$folders" | while IFS='|' read -r folder_id folder_label; do
@@ -202,7 +202,7 @@ Press START to cancel" -i "$BG_TREE"
                 fi
 
                 status_line="$folder_label:\n$completion%"
-                log_message "  $status_line"
+                log_message "SyncthingCheck:   $status_line"
                 summary="${summary}  $status_line\n"
 
                 # Append the status line to the display file with an extra blank line
@@ -211,7 +211,7 @@ Press START to cancel" -i "$BG_TREE"
                 echo "" >> /tmp/sync_display.txt
             done
             summary="${summary}\n"
-            log_message ""
+            log_message "SyncthingCheck: "
         done
 
         # Read the contents of the display file for display
@@ -221,29 +221,29 @@ Press START to cancel" -i "$BG_TREE"
 Press START to cancel" -i "$BG_TREE"
 
         if [ ! -f /tmp/sync_status ]; then
-            log_message "All folders on all devices are in sync."
+            log_message "SyncthingCheck: All folders on all devices are in sync."
             if [ "$mode" != "monitor" ]; then
                 return 0
             fi
         fi
 
-        log_message "---"
+        log_message "SyncthingCheck: ---"
         sleep $CHECK_INTERVAL
     done
 }
 
 set_api_key() {
-    log_message "Reading API key from $CONFIG_XML"
+    log_message "SyncthingCheck: Reading API key from $CONFIG_XML"
     if [ ! -f "$CONFIG_XML" ]; then
-        log_message "Error: Config file $CONFIG_XML does not exist" >&2
+        log_message "SyncthingCheck: Error: Config file $CONFIG_XML does not exist" >&2
         return 1
     fi
 
     API_KEY=$(sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$CONFIG_XML")
-    log_message "API key: $API_KEY"
+    log_message "SyncthingCheck: API key: $API_KEY"
 
     if [ -z "$API_KEY" ]; then
-        log_message "Error: No API key found in config.xml" >&2
+        log_message "SyncthingCheck: Error: No API key found in config.xml" >&2
         return 1
     fi
 }
@@ -286,14 +286,14 @@ main() {
             killall -9 syncthing
             ;;
         *)
-            log_message "Usage: $0 {--monitor|--startup|--shutdown}"
+            log_message "SyncthingCheck: Usage: $0 {--monitor|--startup|--shutdown}"
             stop_network
             exit 1
             ;;
     esac
 
     exit_code=$?
-    log_message "Sync check completed with exit code: $exit_code"
+    log_message "SyncthingCheck: Sync check completed with exit code: $exit_code"
 
     stop_network
 
