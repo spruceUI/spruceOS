@@ -125,9 +125,10 @@ done
 
 update_skin_images
 
+/mnt/SDCARD/spruce/scripts/powerdisplay.sh
+
 # Only kill images if not in silent mode
 if [ $silent_mode -eq 0 ]; then
     display_kill
 fi
 
-/mnt/SDCARD/spruce/scripts/powerdisplay.sh
