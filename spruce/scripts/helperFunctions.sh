@@ -620,7 +620,6 @@ log_precise() {
     printf '%s %s\n' "$timestamp" "$message" >> "$log_file"
 }
 
-scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart() {
 	cores_online
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor

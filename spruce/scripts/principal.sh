@@ -91,6 +91,7 @@ while [ 1 ]; do
         rm /tmp/cmd_to_run.sh
 
         # reset CPU settings to defaults in case an emulator changes anything
+        scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart &
     fi
 
