@@ -1,8 +1,12 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 CONFIG="/mnt/SDCARD/Emu/${EMU_NAME}/config.json"
 SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
+
+display -i "$BG" -t "CPU Mode changed to Overclock"
 
 if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ]; then
     sed -i 's|"CPU Mode: (✓PERFORMANCE)-Overclock"|"CPU Mode: Performance-(✓OVERCLOCK)"|g' "$CONFIG"
@@ -13,3 +17,6 @@ else
 fi
 
 sed -i 's|MODE=.*|MODE=\"overclock\"|g' "$SYS_OPT"
+
+sleep 2
+display_kill
