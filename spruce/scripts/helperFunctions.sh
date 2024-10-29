@@ -78,8 +78,10 @@ acknowledge() {
 auto_regen_tmp_update() {
     tmp_dir="/mnt/SDCARD/.tmp_update"
     updater="/mnt/SDCARD/spruce/scripts/.tmp_update/updater"
-    [ ! -d "$tmp_dir" ] && mkdir "$tmp_dir"
-    [ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater"
+    if ! flag_check "tmp_update_repair_attempted"; then
+        [ ! -d "$tmp_dir" ] && mkdir "$tmp_dir" && flag_add "tmp_update_repair_attempted" && log_message ".tmp_update folder repair attempted. Adding tmp_update_repair_attempted flag."
+        [ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater"
+    fi
 }
 
 check_and_connect_wifi() {
