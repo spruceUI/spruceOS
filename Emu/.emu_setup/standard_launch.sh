@@ -182,6 +182,16 @@ case $EMU_NAME in
 
 	"PSP")
 		if [ "$CORE" = "standalone" ]; then
+
+			# move .config folder into place in case emu setup never ran
+			if [ ! -d "/mnt/SDCARD/.config" ]; then
+				if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]
+					mv "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: moved .config folder to root of SD card."
+				else
+					log_message "emu_setup.sh: WARNING!!! No .config folder found!"
+				fi
+			fi
+
 			cd $EMU_DIR
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
