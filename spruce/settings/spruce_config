@@ -28,6 +28,8 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 [Network]
+# below are two dynamic info texts with scripts that print the needed text
+# info text should start with % and follow with quoted command
 %"/mnt/SDCARD/spruce/scripts/applySetting/IP.sh"
 %"/mnt/SDCARD/spruce/scripts/applySetting/MAC.sh"
 "" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on && $GEOTIME$ && hwclock -w|$HELP$ update enableNetworkTimeSync off" ""
