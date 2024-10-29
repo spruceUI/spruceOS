@@ -628,9 +628,9 @@ log_precise() {
     printf '%s %s\n' "$timestamp" "$message" >> "$log_file"
 }
 
-scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart() {
 	cores_online
+    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
 	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
@@ -638,19 +638,24 @@ set_smart() {
 	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
 	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
 	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-	log_message "CPU Mode set to SMART" -v
+    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	log_message "CPU Mode now locked to SMART" -v
 }
 
 set_performance() {
+	cores_online
+    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	log_message "CPU Mode set to PERFORMANCE" -v
+    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	log_message "CPU Mode now locked to PERFORMANCE" -v
 
 }
 
 set_overclock() {
+    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 	/mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
-	log_message "CPU Mode set to OVERCLOCK" -v
-
+    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	log_message "CPU Mode now locked to OVERCLOCK" -v
 }
 
 

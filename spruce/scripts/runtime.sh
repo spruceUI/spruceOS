@@ -146,6 +146,7 @@ ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
 
 # Initialize CPU settings
+scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart
 
 # start main loop
