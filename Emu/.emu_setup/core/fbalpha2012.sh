@@ -16,5 +16,5 @@ fi
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/fbalpha2012.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/fbneo.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"fbalpha2012\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

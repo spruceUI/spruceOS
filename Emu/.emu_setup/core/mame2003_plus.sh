@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓FBNEO)-mame2003+-fbalpha2012"|"Emu Core: fbneo-(✓MAME
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mame2003_plus.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/fbalpha2012.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"mame2003_plus\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

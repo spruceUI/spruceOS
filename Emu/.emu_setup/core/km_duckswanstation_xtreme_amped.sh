@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓PCSX_REARMED)-duckswanstation"|"Emu Core: pcsx_rearmed-
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/km_duckswanstation_xtreme_amped.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/pcsx_rearmed.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"km_duckswanstation_xtreme_amped\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

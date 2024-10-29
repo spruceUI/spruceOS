@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓FCEUMM)-nestopia"|"Emu Core: fceumm-(✓NESTOPIA)"|g' "
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/fceumm.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"nestopia\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓RACE)-mednafen"|"Emu Core: race-(✓MEDNAFEN)"|g' "$CON
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_ngp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/race.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"mednafen_ngp\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: fcxtreme-(✓FLYCAST)"|"Emu Core: (✓FCXTREME)-flycast"|g'
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/km_flycast_xtreme.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/flycast.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"km_flycast_xtreme\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

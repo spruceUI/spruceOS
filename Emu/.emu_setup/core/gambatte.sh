@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: gambatte-(✓MGBA)"|"Emu Core: (✓GAMBATTE)-mgba"|g' "$CON
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gambatte.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"gambatte\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

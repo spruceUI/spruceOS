@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓CAP32)-crocods"|"Emu Core: cap32-(✓CROCODS)"|g' "$CON
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/crocods.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/cap32.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"crocods\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

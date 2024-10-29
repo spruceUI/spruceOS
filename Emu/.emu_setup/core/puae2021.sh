@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓UAE4ARM)-puae2021"|"Emu Core: uae4arm-(✓PUAE2021)"|g'
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/puae2021.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/uae4arm.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"puae2021\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

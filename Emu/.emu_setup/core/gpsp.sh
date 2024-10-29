@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓MGBA)-gpsp"|"Emu Core: mgba-(✓GPSP)"|g' "$CONFIG"
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"gpsp\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

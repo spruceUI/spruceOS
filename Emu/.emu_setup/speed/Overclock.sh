@@ -18,5 +18,5 @@ fi
 
 sed -i 's|MODE=.*|MODE=\"overclock\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: (✓CHIMERASNES)-supafaust-snes9x"|"Emu Core: chimerasnes-(
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_supafaust.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/snes9x.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"mednafen_supafaust\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

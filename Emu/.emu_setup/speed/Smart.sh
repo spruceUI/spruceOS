@@ -12,5 +12,5 @@ sed -i 's|"CPU Mode: Smart-Performance-(✓OVERCLOCK)"|"CPU Mode: (✓SMART)-Per
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/speed/Smart.sh"|"/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"|g' "$CONFIG"
 sed -i 's|MODE=.*|MODE=\"smart\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

@@ -17,5 +17,5 @@ else
 fi
 sed -i 's|CORE=.*|CORE=\"fbneo\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

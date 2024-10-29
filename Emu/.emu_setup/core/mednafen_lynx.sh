@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: mednafen-(✓HANDY)"|"Emu Core: (✓MEDNAFEN)-handy"|g' "$C
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_lynx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/handy.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"mednafen_lynx\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

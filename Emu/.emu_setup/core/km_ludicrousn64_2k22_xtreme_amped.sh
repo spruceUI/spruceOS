@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: ludicrousn64-parallel-(✓MUPEN64PLUS)"|"Emu Core: (✓LUDI
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/km_ludicrousn64_2k22_xtreme_amped.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/km_parallel_n64_xtreme_amped_turbo.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"km_ludicrousn64_2k22_xtreme_amped\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

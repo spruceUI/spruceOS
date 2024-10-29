@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: genesis+gx-(✓PICODRIVE)-gearsystem"|"Emu Core: genesis+gx
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"gearsystem\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill

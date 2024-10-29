@@ -12,5 +12,5 @@ sed -i 's|"Emu Core: chimerasnes-(✓SUPAFAUST)-snes9x"|"Emu Core: chimerasnes-s
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/snes9x.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/chimerasnes.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"snes9x\"|g' "$SYS_OPT"
 
-sleep 3
+sleep 2
 display_kill
