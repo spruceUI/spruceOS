@@ -5,9 +5,8 @@ BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 CONFIG="/mnt/SDCARD/Emu/${EMU_NAME}/config.json"
 SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
-. "$SYS_OPT"
 
-display -i "$BG" -t "Core changed to $CORE"
+display -i "$BG" -t "Core changed to mame2003_plus"
 
 sed -i 's|"Emu Core: (✓FBNEO)-mame2003+-fbalpha2012"|"Emu Core: fbneo-(✓MAME2003+)-fbalpha2012"|g' "$CONFIG"
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mame2003_plus.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/fbalpha2012.sh"|g' "$CONFIG"
