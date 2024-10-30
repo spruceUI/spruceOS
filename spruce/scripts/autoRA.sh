@@ -19,7 +19,7 @@ fi
 cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 
 # load a dummy SDL program and try to initialize GPU and other hardware before loading game
-./easyConfig > /dev/null 2&>1 &
+./easyConfig &> /dev/null &
 
 log_message "AutoRA: load game to play"
 sleep 5

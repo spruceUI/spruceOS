@@ -69,6 +69,9 @@ while true ; do
         esac
     done
 
+    # notify MainUI (if it is running) the system is going to sleep
+    touch /tmp/ui_sleeped_notification
+
     # ensure all cache is written to SD card
     sync
 
