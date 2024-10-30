@@ -56,7 +56,7 @@ update_emulator_icons() {
     if [ -f "$THEME_ICON_SEL_PATH" ]; then
         NEW_ICON_SEL_PATH="$THEME_ICON_SEL_PATH"
     else
-        NEW_ICON_SEL_PATH="${DEFAULT_ICON_PATH}${ICON_SEL_FILE_NAME}"
+        NEW_ICON_SEL_PATH="${DEFAULT_ICON_SEL_PATH}${ICON_SEL_FILE_NAME}"
     fi
 
     sed -i "s|${OLD_ICON_PATH}|${NEW_ICON_PATH}|g" "$CONFIG_FILE"
