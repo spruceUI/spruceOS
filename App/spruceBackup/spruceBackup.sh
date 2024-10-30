@@ -121,3 +121,5 @@ fi
 log_message "Backup process finished running"
 cores_online
 log_verbose
+
+auto_regen_tmp_update

@@ -17,3 +17,5 @@ export LD_LIBRARY_PATH=lib:$LD_LIBRARY_PATH
 cd $HOME
 ./DinguxCommander #--res-dir ${THEME_PATH} || ./DinguxCommander --res-dir /mnt/SDCARD/Themes/SPRUCE
 sync
+
+auto_regen_tmp_update

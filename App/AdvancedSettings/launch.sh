@@ -12,3 +12,5 @@ cd $BIN_PATH
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
 killall -USR1 joystickinput
+
+auto_regen_tmp_update
