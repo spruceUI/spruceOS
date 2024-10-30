@@ -21,7 +21,7 @@ done
 # move .config folder into place at SD root
 if [ ! -d "/mnt/SDCARD/.config" ]; then
 	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]
-		mv "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: moved .config folder to root of SD card."
+		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: copied .config folder to root of SD card."
 	else
 		log_message "emu_setup.sh: WARNING!!! No .config folder found!"
 	fi
