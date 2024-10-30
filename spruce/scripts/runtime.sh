@@ -85,7 +85,7 @@ if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
         echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
     fi
 fi
-${SCRIPTS_DIR}/brightness_watchdog.sh > /dev/null &
+${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
 
 # ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
 # keymon /dev/input/event0 &
