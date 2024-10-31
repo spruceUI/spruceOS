@@ -219,11 +219,11 @@ display_image() {
 }
 display_image "generic"
 
-# Check if Wi-Fi is enabled
+# Check for Wi-Fi and active connection
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ]; then
-    log_message "BoxartScraper: Wi-Fi is disabled, exiting."
-    display_image "wifi_off"
+if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 thumbnails.libretro.com > /dev/null 2>&1; then
+    log_message "BoxartScraper: No active network connection, exiting."
+	display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No active network connection detected, exiting..."
     sleep 3
     exit
 fi
