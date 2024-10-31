@@ -36,7 +36,6 @@ sort_file() {
     log_message "checkfaves.sh: sorted $FILE into $TEMP"
 
     {
-        echo "[]"
         awk '{print}' "$TEMP"
     } > "$FILE"
     log_message "checkfaves.sh: printed $TEMP into $FILE"
@@ -103,6 +102,7 @@ monitor_favourite_file() {
                 log_message "checkfaves.sh: $PREVIOUS_STATE exists"
                 if ! cmp -s "$FAVOURITE_FILE" "$PREVIOUS_STATE"; then
                     log_message "checkfaves.sh: $FAVOURITE_FILE and $PREVIOUS_STATE do not match"
+                    echo "$(jq -r '. as $o | if .label | endswith( "(" + ($o.launch | split("/") | .[4]) + ")" ) then "{\"label\":\"\(.label)\",\"rompath\":\"\(.rompath)\",\"launch\":\"\(.launch)\",\"type\":\(.type)}" else "{\"label\":\"\(.label) \( "(" + ($o.launch | split("/") | .[4]) + ")" )\",\"rompath\":\"\(.rompath)\",\"launch\":\"\(.launch)\",\"type\":\(.type)}" end ' "$FAVOURITE_FILE")" > "$FAVOURITE_FILE"
                     create_duplicate
                     remove_duplicates
                     cp "$DUPLICATE_FILE" "$FAVOURITE_FILE" && log_message "checkfaves.sh: copied $DUPLICATE_FILE into $FAVOURITE_FILE"
