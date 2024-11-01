@@ -190,7 +190,7 @@ done
 log_update_message "Update file extracted successfully"
 display "Now using spruce $UPDATE_VERSION" 2
 
-DELETE_UPDATE=false
+DELETE_UPDATE=true
 if [ "$DELETE_UPDATE" = true ]; then
     log_update_message "Deleting update file"
     rm "$UPDATE_FILE"
