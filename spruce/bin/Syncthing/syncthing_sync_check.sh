@@ -142,7 +142,6 @@ monitor_sync_status() {
 
     log_message "SyncthingCheck: Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
-
 Press START to cancel" -i "$BG_TREE"
 
     monitor_start_button &
@@ -217,7 +216,6 @@ Press START to cancel" -i "$BG_TREE"
         # Read the contents of the display file for display
         status_content=$(cat /tmp/sync_display.txt)
         display -t "$status_content
-
 Press START to cancel" -i "$BG_TREE"
 
         if [ ! -f /tmp/sync_status ]; then
