@@ -151,6 +151,7 @@ check_rom_folders() {
 				echo "hide system $system_name" && log_message "emufresh: Hiding $system_name"
 			else
 				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
+				[ "$system_name" = "ARCADE" ] || rm -f "$roms_path/$system_name/miyoogamelist.xml"
 				sed -i 's/^{{*$/{/' "$config_file"
 				echo "show system $system_name" && log_message "emufresh: Revealing $system_name"
 			fi
