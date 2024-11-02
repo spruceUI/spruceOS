@@ -240,7 +240,7 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
     case $line in
         *"key 1 28 1"*) # START key down
             START_DOWN=true
-            logger -p 15 -t "keymon[$$]" "enter_pressed 0"
+            logger -p 15 -t "keymon[$$]" "enter_pressed 1"
         ;;
         *"key 1 28 0"*) # START key up
             START_DOWN=false

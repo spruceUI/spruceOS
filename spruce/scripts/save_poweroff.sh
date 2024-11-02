@@ -38,7 +38,6 @@ fi
 # ask for user response if MainUI or PICO8 is running and skip_shutdown_confirm setting is not set
 if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 	if ! setting_get "skip_shutdown_confirm"; then
-		messages_file="/var/log/messages"
 		# pause MainUI or pico8_dyn
 		killall -q -19 MainUI
 		killall -q -19 pico8_dyn
