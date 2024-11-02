@@ -85,11 +85,9 @@ if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
         echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
     fi
 fi
-${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
 
-# ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
-# keymon /dev/input/event0 &
-keymon /dev/input/event3 &
+# listen hotkeys for brightness adjustment, volume buttons and power button
+${SCRIPTS_DIR}/buttons_watchdog.sh &
 ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
 # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
