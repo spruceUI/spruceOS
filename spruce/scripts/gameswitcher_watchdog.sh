@@ -189,8 +189,10 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
-                if setting_get "runGSOnTapHome" ; then
-                    if pgrep "ra32.miyoo|retroarch|pico8_dyn|PPSSPPSDL" > /dev/null ; then
+                if pgrep "pico8_dyn" > /dev/null ; then
+                    prepare_game_switcher
+                elif setting_get "runGSOnTapHome" ; then
+                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
                         prepare_game_switcher
                     fi
                 else
