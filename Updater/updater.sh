@@ -26,13 +26,15 @@ display() {
     local color="${7:-dbcda7}"
     local image="/mnt/SDCARD/Updater/imgs/back.png"
 
-    # Kill any existing display processes
-    pkill -f "$DISPLAY"
+    # Kill any existing display processes more safely
+    ps | grep display_text.elf | grep -v grep | while read pid rest; do
+        kill "$pid" 2>/dev/null
+    done
 
     if [ "$delay" = "0" ]; then
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 &
+        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null &
     else
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0
+        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null
     fi
 }
 

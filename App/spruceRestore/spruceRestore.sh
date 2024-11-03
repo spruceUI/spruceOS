@@ -21,7 +21,7 @@ display_message() {
 }
 
 log_message "----------Starting Restore script----------"
-cores_online 4
+set_performance
 display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
 
 #-----Main-----
@@ -196,6 +196,5 @@ log_message "Upgrade process completed. Current version: $current_version"
 display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 log_message "----------Restore and Upgrade completed----------"
-cores_online
 
 auto_regen_tmp_update
