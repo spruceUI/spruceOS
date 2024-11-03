@@ -16,7 +16,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓MGBA)-gpsp",
+      "name": "Emu Core: (✓MGBA)-gpsp-gpsp_wireless",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"
     },
     {
