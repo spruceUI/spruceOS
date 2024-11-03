@@ -12,7 +12,7 @@ if [ "$EMU_NAME" = "GB" ] || [ "$EMU_NAME" = "GBC" ]; then
     sed -i 's|"Emu Core: (✓GAMBATTE)-mgba"|"Emu Core: gambatte-(✓MGBA)"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gambatte.sh"|g' "$CONFIG"
 else
-    sed -i 's|"Emu Core: mgba-gpsp-(✓GPSP_WIRELESS)"|"Emu Core: (✓MGBA)-gpsp-gpsp_wireless"|g' "$CONFIG"
+    sed -i 's|"Emu Core: mgba-(✓GPSP)"|"Emu Core: (✓MGBA)-gpsp"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"|g' "$CONFIG"
 fi
 sed -i 's|CORE=.*|CORE=\"mgba\"|g' "$SYS_OPT"
