@@ -8,8 +8,8 @@ SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 display -i "$BG" -t "Core changed to gpsp"
 
-sed -i 's|"Emu Core: (✓MGBA)-gpsp"|"Emu Core: mgba-(✓GPSP)"|g' "$CONFIG"
-sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/mgba.sh"|g' "$CONFIG"
+sed -i 's|"Emu Core: (✓MGBA)-gpsp-gpsp_wireless"|"Emu Core: mgba-(✓GPSP)-gpsp_wireless"|g' "$CONFIG"
+sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gpsp_wireless.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"gpsp\"|g' "$SYS_OPT"
 
 sleep 2
