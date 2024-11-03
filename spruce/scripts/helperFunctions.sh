@@ -229,7 +229,7 @@ cores_online() {
 # Call it as a background process
 dim_screen() {
     local start_brightness=40
-    local end_brightness=15
+    local end_brightness=10
     local steps=90  # Total number of steps for the transition
     local delay=0.01  # 50ms delay between each step
 
