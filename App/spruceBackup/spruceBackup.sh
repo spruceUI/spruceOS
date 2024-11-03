@@ -14,7 +14,7 @@ log_verbose
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
-cores_online 4
+set_performance
 
 # Modify display function to respect silent mode
 display_message() {
@@ -119,7 +119,6 @@ Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
 log_message "Backup process finished running"
-cores_online
 log_verbose
 
 auto_regen_tmp_update
