@@ -2,6 +2,5 @@
   "label": "spruce Updater",
   "icon": "/mnt/SDCARD/Updater/imgs/updater.png",
   "launch": "../../Updater/updater.sh",
-  "description": "Apply an update to spruce",
-  "expert": false
+  "description": "Apply an update to spruce"
 }
