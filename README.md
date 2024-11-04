@@ -34,11 +34,11 @@
 
  - SSH App added.
 
- - ExpertAppSwitch added.
-
  - Backup/Restore Apps added.
 
- - Recents tab is optional via App toggle.
+ - Auto-updater App added.
+
+ - Recents tab is optional via Advanced Settings toggle.
 
  - Performance and overclock adjustments are preset.
 
@@ -54,11 +54,11 @@
 
  - Auto save state/load states enabled.
 
- - Joystick function enabled on all systems.
+ - Joystick function enabled on all systems and Main Menu.
 
  - Configuration of RetroArch with almost no notifications or hotkeys.
 
- - LED Control App added (begrudgingly).
+ - LED Control App added.
 
 ## INSTALL
 
@@ -71,15 +71,6 @@
 
 ## UPDATING TO THE LATEST RELEASE
 To update:
-
-- Download the latest release and extract the contents.
-- (optional) Back-up a copy of your "Syncthing" App folder and your ".config" folder.
-- Delete everything on your SD card except for the **".config" "BIOS", "Emu", "Roms" and "Saves"** folders.
-- Place the entire contents of the latest spruce zip folder onto your SD card allowing any files to overwrite when prompted.
-- (optional)Copy/paste your backup of the Syncthing back into the App folder allowing any files to overwrite.
-- (optional)Copy/paste your .config folder back onto the root, allowing any files to overwrite.
-
-This will retain all your games, Syncthing configurations, saves, and bios files.
 
 [See our updating spruce wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
@@ -98,6 +89,31 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   - SAVE/LOAD STATE RETROARCH: Home button
   - EXIT GAME: Select + Start (PSP home button and exit through menu) Pico-8 press start from gamelist and home from splore
   - FAST FORWARD: R2 (not for PSX)
+
+  *RETROARCH HOTKEYS*
+
+New unified Hotkeys configured for RetroArch, we updated them to what we would
+ consider a 'common' layout and to make them compatible with our new use of the home
+ key.
+ -SELECT+A=Screenshot
+ 
+-SELECT+B=Exit toMainUI
+ 
+-SELECT+X=OpenMenu
+ 
+-SELECT+Y=ToggleFPS
+ 
+-SELECT+L1=LoadState
+ 
+-SELECT+R1=SaveState
+ 
+-SELECT+L2=ToggleSlow Motion
+ 
+-SELECT+R2=ToggleFast Forward
+ 
+-SELECT+Up/Down=Cycle through shaders
+ 
+-SELECT+Left/Right = Cycle through state slots
 
   *WHILE IN MENU*
 
@@ -118,12 +134,13 @@ This will retain all your games, Syncthing configurations, saves, and bios files
 
 ## THEMES
 
-  - Included are five themes located in Settings. More icons and themes are planned to be added in the future.
+  - Included are six themes located in Settings. More icons and themes are planned to be added in the future.
   - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
   - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
+  - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
 ## Credits/Thanks
-  Tenlevels: Starting spruce, making kickass Themes and getting the A30 where it deserves to be!
+  Tenlevels: Starting spruce, making kickass Themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in.
   
   Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   
@@ -133,29 +150,27 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Cinethezs, Oscarkcau and tenlevels: Random Game App
   
-  Ndguardian, XanXic and XK9274: Syncthing App.
+  Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
   
   Veckia9x and Fragbait79: WiFi File Transfer App.
 
   XanXic: spruceBackup and spruceRestore Apps.
 
-  Fragbait79: SSH App.
+  Fragbait79: SSH App, network services tweaks and other optimizations.
   
   Ry: Overhauled Emu folder, LibRetro ports.
   
-  Oscarkcau: General debugging, clean up and optimizations to SO MANY things.
+  Oscarkcau: GameSwitcher, Advanced Settings App and general debugging, clean up and optimizations to SO MANY things.
   
-  Cinethezs: LED App.
+  Cinethezs: LED App, show-battery-percentage. 
   
-  Jim Gray: Retroarch removal from MainUI.
+  Jim Gray: Retroarch removal from MainUI, sick jams and general inspiration.
   
-  Onion Team: The heavy lifting finding the best cores to use with Miyoo and overall inspiration.
-  
-  BTN/Paradise: DinguxCommander update.
+  Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
   
   Steward: Drastic.
   
-  Ninoh-FOX and Steward: Pico-8 wrapper.
+  XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
   
   Sky_Walker: Avocado theme.
 
@@ -167,7 +182,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Hoo: Testing and encouragement.
   
-  SundownerSport: Wiki, testing, support and many, many useless broken scripts.
+  SundownerSport: Wiki, testing and poor leadership.
   
   Supermodi064: Photos, testing and support.
   
@@ -175,7 +190,7 @@ This will retain all your games, Syncthing configurations, saves, and bios files
   
   Russ from RGC: His YouTube channel is an inspiration.
 
-  Icons8.com for the logo and icons.
+  [Icons8.com](icons8.com) for the logo and icons.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
@@ -183,8 +198,6 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## The Current Team (in no particular order):
   - SundownerSport
   - Decojon
-  - Rayon
-  - Sky_Walker
   - Veckia9x
   - Ry
   - Cinethezs
