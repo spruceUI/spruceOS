@@ -8,10 +8,10 @@ DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
+TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 MAX_COUNT_FILE="$SETTINGS_PATH/gs_max"
-TEMP_FILE="$FLAG_PATH/gs_list_temp"
+TEMP_FILE="$TEMP_PATH/gs_list_temp"
 
 prepare_game_switcher() {
     # if in game or app now
@@ -87,7 +87,6 @@ prepare_game_switcher() {
         fi
         echo "$CMD" >> "$TEMP_FILE"
     done <$LIST_FILE
-    mv "$TEMP_FILE" "$LIST_FILE"
 
     # trim the game list to only recent 10 games
     setting_get "maxGamesInGS"
@@ -95,8 +94,7 @@ prepare_game_switcher() {
     if [ $COUNT -eq 0 ] ; then
         COUNT=10
     fi
-    tail -$COUNT "$LIST_FILE" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$LIST_FILE"
+    tail -$COUNT "$TEMP_FILE" > "$LIST_FILE"
 
     # kill RA or other emulator or MainUI
     log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
@@ -125,9 +123,8 @@ prepare_game_switcher() {
         sleep 1
         # kill PPSSPP with signal 15, it should exit after saving is done
         killall -15 PPSSPPSDL
-    elif pgrep "ra32.miyoo" > /dev/null ; then
-        killall -q -15 ra32.miyoo
     else
+        killall -q -15 ra32.miyoo || \
         killall -q -15 retroarch || \
         killall -q -15 pico8_dyn || \
         killall -q -9 MainUI
@@ -153,9 +150,9 @@ send_virtual_key() {
 
 long_press_handler() {
     # setup flag for long pressed event
-    flag_add "gs.longpress"
+    touch "$TEMP_PATH/gs.longpress"
     sleep 2
-    flag_remove "gs.longpress"
+    rm "$TEMP_PATH/gs.longpress"
 
     # if IS long press
     if pgrep "MainUI|drastic|pico8_dyn" > /dev/null; then
@@ -184,8 +181,8 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
         ;;
         *"key 1 1 0"*) # MENU key up
             # if NOT long press
-            if flag_check "gs.longpress" ; then
-                flag_remove "gs.longpress"
+            if [ -f "$TEMP_PATH/gs.longpress" ] ; then
+                rm "$TEMP_PATH/gs.longpress"
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
