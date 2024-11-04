@@ -6,6 +6,11 @@ WATCHED_FILE="/config/joypad.config"
 
 sleep 0.3 ### wait long enough to create the virtual joypad
 
+if [ ! -f "$WATCHED_FILE" ]; then
+    log_message "File $WATCHED_FILE does not exist. Exiting."
+    touch "$WATCHED_FILE"
+fi
+
 while true; do
 
     # restart joystickinput if calibration file exists
@@ -16,13 +21,13 @@ while true; do
         # start new joystickinput process with new calibration values
         /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
 
-        if pgrep MainUI >/dev/null ; then
+        if pgrep MainUI >/dev/null; then
             # send signal USR2 to joystickinput to switch to KEYBOARD MODE
             # this allows joystick to be used as DPAD in MainUI
             killall -USR2 joystickinput
         fi
     fi
-    
+
     # avoid potential busy looping
     sleep 1
 

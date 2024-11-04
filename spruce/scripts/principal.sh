@@ -80,6 +80,13 @@ while [ 1 ]; do
         # send signal USR1 to joystickinput to switch to ANALOG MODE
         killall -USR1 joystickinput
 
+        if flag_check "ra_themes_unpacking"; then
+            display -t "Finishing up unpacking RetroArch themes.........."
+            while flag_check "ra_themes_unpacking"; do
+                sleep 0.1
+            done
+        fi
+
         flag_remove "in_menu"
     fi
 

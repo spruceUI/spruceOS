@@ -45,6 +45,12 @@ log_message "Running emufresh.sh"
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
+log_message "Checking for DONTTOUCH theme"
+if [ -d "/mnt/SDCARD/Themes/DONTTOUCH" ]; then
+    log_message "DONTTOUCH theme found. Removing theme."
+    rm -rf /mnt/SDCARD/Themes/DONTTOUCH
+fi
+
 sleep 3 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Displaying wiki image"
@@ -55,6 +61,13 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
     sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
     display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+fi
+
+if flag_check "themes_unpacking"; then
+    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
+    while flag_check "themes_unpacking"; do
+        sleep 0.3
+    done
 fi
 
 log_message "Displaying enjoy image"
