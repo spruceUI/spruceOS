@@ -6,11 +6,12 @@ log_message "***** gameswitcher.sh: helperFunctions imported" -v
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
+TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
-IMAGES_FILE="$FLAG_PATH/gs_images"
-GAMENAMES_FILE="$FLAG_PATH/gs_names"
-TEMP_FILE="$FLAG_PATH/gs_list_temp"
 OPTIONS_FILE="$FLAG_PATH/gs_options"
+IMAGES_FILE="$TEMP_PATH/gs_images"
+GAMENAMES_FILE="$TEMP_PATH/gs_names"
+TEMP_FILE="$TEMP_PATH/gs_list_temp"
 log_message "***** gameswitcher.sh: gs lock, list, images, names, options and temp list paths defined." -v
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"

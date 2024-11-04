@@ -5,13 +5,13 @@ log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
+TEMP_PATH="/tmp"
 
 long_press_handler() {
     # setup flag for long pressed event
-    flag_add "pb.longpress"
+    touch "$TEMP_PATH/pb.longpress"
     sleep 2
-    flag_remove "pb.longpress"
+    rm "$TEMP_PATH/pb.longpress"
 
     # now here long press is detected
     # trigger auto save and then power down the device
@@ -20,8 +20,8 @@ long_press_handler() {
 }
 
 # ensure no flag files before main loop started
-flag_remove "pb.longpress"
-flag_remove "pb.sleep"
+rm "$TEMP_PATH/pb.sleep"
+rm "$TEMP_PATH/pb.longpress"
 
 while true ; do
 
@@ -30,7 +30,7 @@ while true ; do
         case $line in
             *"key 1 116 1"*) # MENU key down
                 # not in previous sleep event
-                if ! flag_check "pb.sleep" && ! flag_check "pb.longpress" ; then
+                if [ ! -f "$TEMP_PATH/pb.sleep" ] && [ ! -f "$TEMP_PATH/pb.longpress" ] ; then
                     # start long press handler
                     kill $PID
                     long_press_handler &
@@ -39,14 +39,14 @@ while true ; do
             ;;
             *"key 1 116 0"*) # MENU key up
                 # if NOT long press
-                if flag_check "pb.longpress" ; then
+                if [ -f "$TEMP_PATH/pb.longpress" ] ; then
                     # kill long press handler and remove flag
                     kill $PID
                     PID=""
-                    flag_remove "pb.longpress"
+                    rm "$TEMP_PATH/pb.longpress"
 
                     # add sleep flag
-                    flag_add "pb.sleep"
+                    touch "$TEMP_PATH/pb.sleep"
 
                     # PAUSE pany process that may crash the system during wakeup
                     killall -q -19 enforceSmartCPU.sh
@@ -99,5 +99,5 @@ while true ; do
     killall -q -18 enforceSmartCPU.sh
 
     # delete sleep flag, now ready for sleep again
-    flag_remove "pb.sleep"
+    rm "$TEMP_PATH/pb.sleep"
 done
