@@ -45,6 +45,12 @@ log_message "Running emufresh.sh"
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
+log_message "Checking for DONTTOUCH theme"
+if [ -d "/mnt/SDCARD/Themes/DONTTOUCH" ]; then
+    log_message "DONTTOUCH theme found. Removing theme."
+    rm -rf /mnt/SDCARD/Themes/DONTTOUCH
+fi
+
 sleep 3 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Displaying wiki image"
