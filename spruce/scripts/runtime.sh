@@ -124,7 +124,6 @@ else
 	log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-${SCRIPTS_DIR}/spruceRestoreShow.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
 # check whether to run first boot procedure

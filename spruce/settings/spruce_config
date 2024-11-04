@@ -74,5 +74,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Launch a random game"
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the current time and date"
+"" "Spruce Backup" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceBackup/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceBackup/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceBackup/config.json" ""
+@"Create a backup of your spruce install"
 "" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
