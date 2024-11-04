@@ -55,20 +55,26 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
+/config/system.json
+/config/joypad.config
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/Emu/.emu_setup/overrides
+/mnt/SDCARD/Emu/NDS/backup
+/mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
-/mnt/SDCARD/Emu/NDS/backup
-/mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
+/mnt/SDCARD/spruce/settings/gs_max
+/mnt/SDCARD/spruce/settings/idlemon_in_game
+/mnt/SDCARD/spruce/settings/idlemon_in_menu
 /mnt/SDCARD/spruce/settings/spruce.cfg
 "
 
