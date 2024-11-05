@@ -1,6 +1,6 @@
 The Current Team (Alphabetical order):
    - 369px
-   - BaseInfinity
+   - Basecase - Stefan Ayala
    - Cinethezs
    - Cobaltdsc4102
    - Decojon
@@ -43,7 +43,9 @@ Rayon and Cinethezs: Boxart Scraper App and tweaks.
 
 Cinethezs, Oscarkcau and tenlevels: Random Game App.
 
-Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
+Ndguardian, XanXic, and XK9274: Syncthing App.
+
+Basecase - Stefan Ayala: Syncthing sync check on Shutdown/Startup/Resume
 
 Veckia9x and Fragbait79: WiFi File Transfer App.
 

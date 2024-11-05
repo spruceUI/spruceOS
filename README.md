@@ -159,7 +159,8 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   - Shauninman: Help, support and Bootlogo function (and so much more!).
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
-  - Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
+  - Ndguardian, XanXic, and XK9274: Syncthing App.
+  - Basecase (Stefan Ayala): Syncthing sync check on Shutdown/Startup
   - Veckia9x and Fragbait79: WiFi File Transfer App.
   - XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
   - Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
@@ -191,7 +192,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## The Current Team (Alphabetical order):
    - 369px
-   - BaseInfinity
+   - Basecase - Stefan Ayala
    - Cinethezs
    - Cobaltdsc4102
    - Decojon
