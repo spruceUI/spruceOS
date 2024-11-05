@@ -189,7 +189,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - Veckia9x
   - Ry
   - Cinethezs
-  - BaseInfinity
+  - Basecase - Stefan Ayala
   - Oscarkcau
   - XanXic
   - Fragbait79
