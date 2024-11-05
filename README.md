@@ -18,9 +18,17 @@
 
  - All emulators and cores are preconfigured with performance considered.
 
+ - Emulator systems are automatically detected games and show in the Games menu.
+
+ - Advanced Settings App added.
+
  - Auto Save/Quick Shutdown + Resume feature added.
 
  - GameSwitcher App added.
+
+ - Multiple WiFi networks can be remembered.
+
+ - Automatic Firmware Updater App added.
    
  - Syncthing App added.
 
@@ -41,6 +49,10 @@
  - Backup/Restore Apps added.
 
  - Auto-updater App added.
+
+ - Battery% shown in Main Menu.
+
+ - Auto Shutdown when idle function added.
 
  - Recents tab is optional via Advanced Settings toggle.
 
@@ -143,6 +155,8 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
 
 ## Credits/Thanks
   Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
+
+  All past and present Team Members!
   
   Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   
@@ -156,9 +170,9 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   
   Veckia9x and Fragbait79: WiFi File Transfer App.
 
-  XanXic: spruceBackup and spruceRestore Apps, organizational wizardry and so much more!
+  XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
 
-  Fragbait79: SSH App, network services tweaks and other optimizations.
+  Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
   
   Ry: Overhauled Emu folder, LibRetro ports and so much more.
   
@@ -180,7 +194,7 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
 
   Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
 
-  KMFDManic: Building and testing new cores.
+  KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
   
   Onion and Darkhorse: Overlays.
 
@@ -203,7 +217,7 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
-## The Current Team:
+## The Current Team (Alphabetical order):
    - 369px
    - BaseInfinity
    - Cinethezs
