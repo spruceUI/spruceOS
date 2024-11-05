@@ -86,7 +86,7 @@
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
-[See our updating spruce wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
+See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
 ## CONTROLS
 
@@ -99,10 +99,7 @@ To update:
 
   - QUICKSAVE/SHUTDOWN/RESUME:  Hold Power button.
 
-
-  - SAVE/LOAD STATE RETROARCH: Home button
-  - EXIT GAME: Select + Start (PSP home button and exit through menu) Pico-8 press start from gamelist and home from splore
-  - FAST FORWARD: R2 (not for PSX)
+Holding the power button after the vibration can cause the A30 to force shutdown (in case of freezes etc)
 
   *RETROARCH HOTKEYS*
 
@@ -134,7 +131,7 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   - REFRESH ROMS/ SEARCH - Home button
   - SEARCH - Select
   - SHUTDOWN - Hold power until Power Off pop up display (A to confirm)
-  - X while over a game title - Core, CPU speed, Random Game selection menu
+  - X while over a game title - Core selection, CPU speed and Random Game menu
 
   *STICK DRIFT ISSUES*
 
@@ -154,67 +151,38 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
 ## Credits/Thanks
-  Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
-
-  All past and present Team Members!
-  
-  Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
-  
-  Shauninman: Help, support and Bootlogo function (and so much more!).
-  
-  Rayon and Cinethezs: Boxart Scraper App and tweaks.
-  
-  Cinethezs, Oscarkcau and tenlevels: Random Game App
-  
-  Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
-  
-  Veckia9x and Fragbait79: WiFi File Transfer App.
-
-  XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
-
-  Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
-  
-  Ry: Overhauled Emu folder, LibRetro ports and so much more.
-  
-  Oscarkcau: GameSwitcher, Advanced Settings App and general debugging, clean up and optimizations to SO MANY things.
-  
-  Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
-  
-  Jim Gray: Retroarch removal from MainUI, sick jams and general inspiration.
-  
-  Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
-  
-  Steward: Drastic.
-  
-  XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
-  
-  Sky_Walker: Avocado theme.
-
-  KyleBing: Cozy theme.
-
-  369px: Theme Guide.
-
-  Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
-
-  KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
-  
-  Onion and Darkhorse: Overlays.
-
-  Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
-  
-  Hoo: Testing and encouragement.
-  
-  SundownerSport: Team Lead, Wiki and testing.
-
-  Metallic77: Shaders and core adjustments.
-  
-  Supermodi064: Photos, testing and support.
-  
-  Aemiii91, tGecko and QuackWalks: Being awesome!
-  
-  Russ from RGC: His YouTube channel is an inspiration.
-
-  [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
+  - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
+  - All past and present Team Members!
+  - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
+  - Shauninman: Help, support and Bootlogo function (and so much more!).
+  - Rayon and Cinethezs: Boxart Scraper App and tweaks.
+  - Cinethezs, Oscarkcau and tenlevels: Random Game App
+  - Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
+  - Veckia9x and Fragbait79: WiFi File Transfer App.
+  - XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
+  - Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
+  - Ry: Overhauled Emu folder, LibRetro ports and so much more.
+  - Oscarkcau: GameSwitcher, Advanced Settings App and general debugging, clean up and optimizations to SO MANY things.
+  - Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
+  - Jim Gray: Retroarch removal from MainUI, sick jams and general inspiration.
+  - Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
+  - Steward: Drastic.
+  - XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
+  - Sky_Walker: Avocado theme.
+  - KyleBing: Cozy theme.
+  - 369px: Theme Guide.
+  - Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
+  - KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
+  - Onion and Darkhorse: Overlays.
+  - Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
+  - Hoo: Testing and encouragement.
+  - All of out Beta testers!
+  - SundownerSport: Team Lead, Wiki and testing.
+  - Metallic77: Shaders and core adjustments.
+  - Supermodi064: Photos, testing and support.
+  - Aemiii91, tGecko and QuackWalks: Being awesome!
+  - Russ from RGC: His YouTube channel is an inspiration.
+  - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
