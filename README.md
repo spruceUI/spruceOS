@@ -192,6 +192,8 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
 
   KyleBing: Cozy theme.
 
+  369px: Theme Guide.
+
   Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
 
   KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
