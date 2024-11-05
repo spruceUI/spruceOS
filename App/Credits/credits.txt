@@ -1,115 +1,96 @@
-The Current Team (in no particular order):
-
-SundownerSport
-Decojon
-Rayon
-Sky_Walker
-Veckia9x
-Ry
-Cinethezs
-BaseInfinity
-Oscarkcau
-XanXic
-Fragbait79
-Cobaltdsc4102
+The Current Team (Alphabetical order):
+   - 369px
+   - BaseInfinity
+   - Cinethezs
+   - Cobaltdsc4102
+   - Decojon
+   - Fragbait79
+   - Oscarkcau
+   - Ry
+   - SundownerSport
+   - Veckia9x
+   - XanXic
 
 
 
+Credits and Thanks:
 
-Credits/Thanks:
 
-Tenlevels:
-Starting spruce, making kickass Themes
-and getting the A30 where it deserves to be!
+  - Tenlevels: Starting spruce, making kickass themes
+and getting the A30 where it deserves to be! Spruce 
+would never have existed without him, we are eternally 
+grateful to the long hours and dedication he put in. 
 
-Decojon:
-Auto Save/Quick Shutdown + Resume feature,
-MainUI patches, Keymon tweaks,
-Random Game Selector (X-menu).
+Thanks buddy!
 
-Shauninman:
-Help, support and Bootlogo function
-(and so much more!).
+All past and present Team Members!
+Decojon: Auto Save/Quick Shutdown + Resume feature,
+MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
 
-Rayon and Cinethezs:
-Boxart Scraper App and tweaks.
+Shauninman: Help, support and Bootlogo function (and so much more!).
 
-Cinethezs, Oscarkcau and tenlevels:
-Random Game App
+Rayon and Cinethezs: Boxart Scraper App and tweaks.
 
-Ndguardian, XanXic and XK9274:
-Syncthing App.
+Cinethezs, Oscarkcau and tenlevels: Random Game App.
 
-Veckia9x and Fragbait79:
-WiFi File Transfer App.
+Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
 
-XanXic:
-spruceBackup and spruceRestore Apps.
+Veckia9x and Fragbait79: WiFi File Transfer App.
 
-Fragbait79:
-SSH App.
+XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App,
+organizational wizardry and so much more!
 
-Ry:
-Overhauled Emu folder, LibRetro ports.
+Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
 
-Oscarkcau:
-General debugging, clean up
-and optimizations to SO MANY things.
+Ry: Overhauled Emu folder, LibRetro ports and so much more.
 
-Cinethezs:
-LED App.
+Oscarkcau: GameSwitcher, Advanced Settings App and general debugging,
+clean up and optimizations to SO MANY things.
 
-Jim Gray:
-Retroarch removal from MainUI.
+Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
 
-Onion Team:
-The heavy lifting finding the best cores to
-use with Miyoo and overall inspiration.
+Jim Gray: Retroarch removal from MainUI,
+the sick jams your dancing to now and general inspiration.
 
-BTN/Paradise:
-DinguxCommander update.
+Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
 
-Steward:
-Drastic.
+Steward: Drastic.
 
-Ninoh-FOX and Steward:
-Pico-8 wrapper.
+XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
 
-Sky_Walker:
-Avocado theme.
+Sky_Walker: Avocado theme.
 
-Cobaltdsc4102:
-Building and enabling the chimerasnes core
-for SFC and additional cores for other systems.
+KyleBing: Cozy theme.
 
-Onion and Darkhorse:
-Overlays.
+369px: Theme Guide.
 
-Axcelon:
-Cleaned up and organized Overlay
-and Filter directories.
+Cobaltdsc4102: Building and enabling the chimerasnes
+core for SFC and additional cores for other systems.
 
-Hoo:
-Testing and encouragement.
+KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
 
-SundownerSport:
-Wiki, testing, support
-and many, many useless broken scripts.
+Onion and Darkhorse: Overlays.
 
-Supermodi064:
-Photos, testing and support.
+Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
 
-Aemiii91 and tGecko:
-Being awesome.
+Hoo: Testing and encouragement.
 
-Russ from RGC:
-His YouTube channel is an inspiration.
+All of out Beta testers!
 
-https://Icons8.com for the logo and icons.
-The reuse of these icons requires a subscription to Icons8
+SundownerSport: Team Lead, Wiki and testing.
+
+Metallic77: Shaders and core adjustments.
+
+Supermodi064: Photos, testing and support.
+
+Aemiii91, tGecko and QuackWalks: Being awesome!
+
+Russ from RGC: His YouTube channel is an inspiration.
+
+Icons8.com for the logo, icons and their genrosityin giving
+us expanded access to high resolution icons for this project.
 
 
 
 
-THANK YOU
-TO THE AMAZING MIYOO COMMUNITY!!
+THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
