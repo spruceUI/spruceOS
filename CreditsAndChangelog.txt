@@ -25,7 +25,7 @@ Spruce 3.0.0: The Game Switcher update
  that your Syncthing state is synced, when shutting down, launching games, or resuming
  from shutdown. This will allow you to safely shutdown mid game and be sure the
  save/state is synced with other devices. On auto resume it will also check the sync state
- so you can be sure you’re playing the latest version. (BaseCase)
+ so you can be sure you’re playing the latest version. (Basecase - Stefan Ayala)
  ● Samba: InAdvanced Settings > Network tab you’ll find Samba. You can connect to this
  by going to your A30’s IP address in a file explorer, like “\\10.0.0.10” Username ‘root’
  Password ‘tina’. (FragBait)
@@ -172,7 +172,8 @@ Credits/Thanks
   - Shauninman: Help, support and Bootlogo function (and so much more!).
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
-  - Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
+  - Ndguardian, XanXic, and XK9274: Syncthing App.
+  - Basecase (Stefan Ayala): Syncthing sync check on Shutdown/Startup/Resume
   - Veckia9x and Fragbait79: WiFi File Transfer App.
   - XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
   - Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
@@ -204,7 +205,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 The Current Team (Alphabetical order):
    - 369px
-   - BaseInfinity
+   - Basecase - Stefan Ayala
    - Cinethezs
    - Cobaltdsc4102
    - Decojon
