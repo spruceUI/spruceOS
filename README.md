@@ -98,8 +98,10 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
   *WHILE IN GAME*
 
   - QUICKSAVE/SHUTDOWN/RESUME:  Hold Power button.
+  - GAMESWITCHER: Hold the Home button.
+  - IN-GAME-MENU: Tap the Home button.
 
-Holding the power button after the vibration can cause the A30 to force shutdown (in case of freezes etc)
+**Holding the power button after the vibration can cause the A30 to force shutdown (in case of freezes etc)**
 
   *RETROARCH HOTKEYS*
 
