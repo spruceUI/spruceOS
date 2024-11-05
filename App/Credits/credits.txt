@@ -23,11 +23,21 @@ grateful to the long hours and dedication he put in.
 
 Thanks buddy!
 
-All past and present Team Members!
-Decojon: Auto Save/Quick Shutdown + Resume feature,
-MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
 
-Shauninman: Help, support and Bootlogo function (and so much more!).
+
+
+
+
+
+
+All past and present Team Members!
+
+Decojon: Auto Save/Quick Shutdown + Resume feature,
+MainUI patches, Keymon tweaks,
+Random Game Selector (X-menu).
+
+Shauninman: Help, support and Bootlogo function
+(and so much more!).
 
 Rayon and Cinethezs: Boxart Scraper App and tweaks.
 
@@ -37,22 +47,29 @@ Ndguardian, Basefinity, XanXic and XK9274: Syncthing App.
 
 Veckia9x and Fragbait79: WiFi File Transfer App.
 
-XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App,
-organizational wizardry and so much more!
+XanXic: spruceBackup and spruceRestore Apps,
+AutoUpdater App, organizational wizardry
+and so much more!
 
-Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
+Fragbait79: SSH App, RTC-Sync, network services
+tweaks and many other optimizations.
 
-Ry: Overhauled Emu folder, LibRetro ports and so much more.
+Ry: Overhauled Emu folder, LibRetro ports
+and so much more.
 
-Oscarkcau: GameSwitcher, Advanced Settings App and general debugging,
-clean up and optimizations to SO MANY things.
+Oscarkcau: GameSwitcher, Advanced Settings App
+and general debugging, clean up 
+and optimizations to SO MANY things.
 
-Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
+Cinethezs: LED App, show-battery-percentage,
+Credits App and so much more. 
 
 Jim Gray: Retroarch removal from MainUI,
-the sick jams your dancing to now and general inspiration.
+the sick jams your dancing to now 
+and general inspiration.
 
-Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
+Onion Team: Finding the best cores
+to use and inspiration.
 
 Steward: Drastic.
 
