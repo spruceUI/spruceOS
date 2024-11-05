@@ -19,6 +19,8 @@
  - All emulators and cores are preconfigured with performance considered.
 
  - Auto Save/Quick Shutdown + Resume feature added.
+
+ - GameSwitcher App added.
    
  - Syncthing App added.
 
@@ -34,17 +36,17 @@
 
  - SSH App added.
 
+ - Samba App added.
+
  - Backup/Restore Apps added.
 
  - Auto-updater App added.
 
  - Recents tab is optional via Advanced Settings toggle.
 
- - Performance and overclock adjustments are preset.
+ - Performance and overclock adjustments are preset and adjustable.
 
  - Removed RApp (RetroArch/Expert) from Main Menu.
-
- - Visual changes to default theme to match stock Miyoo.
 
  - In-game menu matches that of the theme loaded.
 
@@ -83,7 +85,7 @@ To update:
 
   *WHILE IN GAME*
 
-  - QUICKSAVE/SHUTDOWN/RESUME:  Hold Select (2 seconds)
+  - QUICKSAVE/SHUTDOWN/RESUME:  Hold Power button.
 
 
   - SAVE/LOAD STATE RETROARCH: Home button
@@ -140,7 +142,7 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
 ## Credits/Thanks
-  Tenlevels: Starting spruce, making kickass Themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in.
+  Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
   
   Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   
@@ -154,15 +156,15 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   
   Veckia9x and Fragbait79: WiFi File Transfer App.
 
-  XanXic: spruceBackup and spruceRestore Apps.
+  XanXic: spruceBackup and spruceRestore Apps, organizational wizardry and so much more!
 
   Fragbait79: SSH App, network services tweaks and other optimizations.
   
-  Ry: Overhauled Emu folder, LibRetro ports.
+  Ry: Overhauled Emu folder, LibRetro ports and so much more.
   
   Oscarkcau: GameSwitcher, Advanced Settings App and general debugging, clean up and optimizations to SO MANY things.
   
-  Cinethezs: LED App, show-battery-percentage. 
+  Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
   
   Jim Gray: Retroarch removal from MainUI, sick jams and general inspiration.
   
@@ -174,39 +176,45 @@ New unified Hotkeys configured for RetroArch, we updated them to what we would
   
   Sky_Walker: Avocado theme.
 
+  KyleBing: Cozy theme.
+
   Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
+
+  KMFDManic: Building and testing new cores.
   
   Onion and Darkhorse: Overlays.
 
-  Axcelon: Cleaned up and organized Overlay and Filter directories.
+  Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
   
   Hoo: Testing and encouragement.
   
-  SundownerSport: Wiki, testing and poor leadership.
+  SundownerSport: Team Lead, Wiki and testing.
+
+  Metallic77: Shaders and core adjustments.
   
   Supermodi064: Photos, testing and support.
   
-  Aemiii91 and tGecko: Being awesome.
+  Aemiii91, tGecko and QuackWalks: Being awesome!
   
   Russ from RGC: His YouTube channel is an inspiration.
 
-  [Icons8.com](icons8.com) for the logo and icons.
+  [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
-## The Current Team (in no particular order):
-  - SundownerSport
-  - Decojon
-  - Veckia9x
-  - Ry
-  - Cinethezs
-  - BaseInfinity
-  - Oscarkcau
-  - XanXic
-  - Fragbait79
-  - Cobaltdsc4102
-
+## The Current Team:
+   - 369px
+   - BaseInfinity
+   - Cinethezs
+   - Cobaltdsc4102
+   - Decojon
+   - Fragbait79
+   - Oscarkcau
+   - Ry
+   - SundownerSport
+   - Veckia9x
+   - XanXic
 
 ## SUPPORTED GAME SYSTEMS
 
