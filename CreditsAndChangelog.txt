@@ -143,7 +143,7 @@ Spruce 3.0.0: The Game Switcher update
  ● Enable use of Analog Stick within the main menu and applications (Oscar)
  ● Fixed brightness not being consistent across reboots. (FragBait)
  ● Fixed audio not adjusting consistently across modes (FragBait)
- ●
+ ● Fixed low power warning not working when using auto resume (XanXic)
  ● Fixed Polish translation (S3V3Npl)
  ● Fixed Boxart Scraper app only checking for wifi being turned on and not verifying an
  actual connection. (Fragbait79)
