@@ -4,8 +4,8 @@
 TARGET_VERSION="2.3.0"
 
 # Source the global functions
-if [ -f /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh ]; then
-    . /mnt/SDCARD/.tmp_update/scripts/helperFunctions.sh
+if [ -f /mnt/SDCARD/spruce/scripts/helperFunctions.sh ]; then
+    . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 else
     echo "Error: helperFunctions.sh not found, cannot proceed with the upgrade"
     exit 1
@@ -36,8 +36,7 @@ log_message "Starting upgrade to version $TARGET_VERSION"
 # Update specific files
 update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
     "xmb_menu_color_theme = \"15\"" \
-    "xmb_alpha_factor = \"100\"" \
-    "savestate_thumbnail_enable = \"true\""
+    "xmb_alpha_factor = \"100\""
 
 update_file "/mnt/SDCARD/RetroArch/nohotkeyprofile/retroarch.cfg" \
     "savestate_thumbnail_enable = \"true\""

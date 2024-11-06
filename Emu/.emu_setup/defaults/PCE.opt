@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export CORE="mednafen_pce_fast"
+export MODE="smart"
+
+export scaling_min_freq=408000

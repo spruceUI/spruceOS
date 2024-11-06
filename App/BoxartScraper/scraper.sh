@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 # ==========================================================
 # Box Art Scraper Script
 # ==========================================================
@@ -207,22 +209,21 @@ system_config_file="/config/system.json"
 roms_dir="/mnt/SDCARD/Roms"
 
 # Function to show splash screen
-show_image() {
+display_image() {
     local image_path="$status_img_dir/$1.png"
-    killall -9 show
     if [ -f "$image_path" ]; then
-        show "$image_path" &
+        display -i "$image_path"
     else
-        show "$status_img_dir/generic.png" &
+        display -i "$status_img_dir/generic.png"
     fi
 }
-show_image "generic"
+display_image "generic"
 
-# Check if Wi-Fi is enabled
+# Check for Wi-Fi and active connection
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ]; then
-    show_image "wifi_off"
-    echo "Wi-Fi is disabled, exiting."
+if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 thumbnails.libretro.com > /dev/null 2>&1; then
+    log_message "BoxartScraper: No active network connection, exiting."
+	display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No active network connection detected, exiting..."
     sleep 3
     exit
 fi
@@ -246,7 +247,7 @@ for sys_dir in "$roms_dir"/*/; do
         continue
     fi
 
-    show_image "$sys_name"
+    display_image "$sys_name"
 
     get_extensions "$sys_name"
 
@@ -263,7 +264,7 @@ for sys_dir in "$roms_dir"/*/; do
         # Check if the user pressed B to exit
         if tail -n1 "$messages_file" | grep -q "key 1 29 . , postpone dimmed state"; then
             echo "User pressed B, exiting."
-            show_image "user_exit"
+            display_image "user_exit"
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             sleep 3
             killall -9 show
@@ -308,3 +309,5 @@ done
 
 # Reset CPU governor to ondemand mode
 echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+auto_regen_tmp_update

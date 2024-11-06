@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export CORE="mednafen_wswan"
+export MODE="smart"
+
+export scaling_min_freq=648000

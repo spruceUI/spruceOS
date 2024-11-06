@@ -1,3 +1,0 @@
-aspect_ratio_index = "7"
-video_filter = "./.retroarch/filters/video/Grid2x.filt"
-input_hold_fast_forward = "backspace"
