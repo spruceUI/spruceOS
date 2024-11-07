@@ -743,14 +743,14 @@ vibrate() {
     elif [ $intensity -eq 75 ]; then
         timer=0
         while [ $timer -lt $duration ]; do
-            vibrate 3
+            echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
             sleep 0.004
             timer=$(($timer + 4 ))
         done &
     elif [ $intensity -eq 66 ]; then
         timer=0
         while [ $timer -lt $duration ]; do
-            vibrate 2
+            echo 2 >/sys/devices/virtual/timed_output/vibrator/enable
             sleep 0.003
             timer=$(($timer + 3 ))
         done &
