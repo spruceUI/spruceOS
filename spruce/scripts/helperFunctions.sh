@@ -735,5 +735,26 @@ show_image() {
 # If no duration is provided, defaults to 100ms
 vibrate() {
     local duration=${1:-30}
-    echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
+
+    intensity=$(setting_get rumble_intensity)
+
+    if [ $intensity -eq 100 ]; then
+        echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
+    elif [ $intensity -eq 75 ]; then
+        timer=0
+        while [ $timer -lt $duration ]; do
+            vibrate 3
+            sleep 0.004
+            timer=$(($timer + 4 ))
+        done &
+    elif [ $intensity -eq 66 ]; then
+        timer=0
+        while [ $timer -lt 1000 ]; do
+            vibrate 2
+            sleep 0.003
+            timer=$(($timer + 3 ))
+        done &
+    else
+        log_message "this is where I'd put my vibration... IF I HAD ONE"
+    fi
 }
