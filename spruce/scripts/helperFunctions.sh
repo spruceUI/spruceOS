@@ -736,18 +736,18 @@ show_image() {
 vibrate() {
     local duration=${1:-30}
 
-    intensity=$(setting_get rumble_intensity)
+    intensity="$(cat "/mnt/SDCARD/spruce/settings/rumble_intensity")"
 
-    if [ $intensity -eq 100 ]; then
+    if [ "$intensity" -eq 100 ]; then
         echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
-    elif [ $intensity -eq 75 ]; then
+    elif [ "$intensity" -eq 75 ]; then
         timer=0
         while [ $timer -lt $duration ]; do
             echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
             sleep 0.004
             timer=$(($timer + 4 ))
         done &
-    elif [ $intensity -eq 66 ]; then
+    elif [ "$intensity" -eq 66 ]; then
         timer=0
         while [ $timer -lt $duration ]; do
             echo 2 >/sys/devices/virtual/timed_output/vibrator/enable

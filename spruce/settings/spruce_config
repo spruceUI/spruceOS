@@ -29,7 +29,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Home key directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
-"" "Rumble intensity" "100|75|66|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 100" "$HELP$ update rumble_intensity 100|$HELP$ update rumble_intensity 75|$HELP$ update rumble_intensity 66|$HELP$ update rumble_intensity Off" ""
+"" "Rumble intensity" "100|75|66|Off" "Strong|Medium|Weak|Off" "cat $SETTINGS$/rumble_intensity" "echo -n 100 > $SETTINGS$/rumble_intensity|echo -n 75 > $SETTINGS$/rumble_intensity|echo -n 66 > $SETTINGS$/rumble_intensity|echo -n Off > $SETTINGS$/rumble_intensity" ""
 @"For system notifications"
 [Network]
 # below are two dynamic info texts with scripts that print the needed text
