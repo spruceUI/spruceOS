@@ -734,6 +734,6 @@ show_image() {
 # Usage: vibrate [duration]
 # If no duration is provided, defaults to 100ms
 vibrate() {
-    local duration=${1:-100}
+    local duration=${1:-30}
     echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
 }
