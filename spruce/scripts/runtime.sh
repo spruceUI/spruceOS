@@ -111,6 +111,8 @@ check_and_handle_firmware_app &
 
 check_and_hide_update_app &
 
+${SCRIPTS_DIR}/low_power_warning.sh &
+
 # Load idle monitors before game resume or MainUI
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 
@@ -122,7 +124,6 @@ else
 	log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-${SCRIPTS_DIR}/spruceRestoreShow.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
 # check whether to run first boot procedure
@@ -138,7 +139,6 @@ log_precise "Swap file activated"
 
 # Run scripts for initial setup
 #${SCRIPTS_DIR}/forcedisplay.sh
-${SCRIPTS_DIR}/low_power_warning.sh
 ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
 ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &

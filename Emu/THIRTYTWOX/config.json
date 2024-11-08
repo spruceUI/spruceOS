@@ -16,10 +16,6 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓PICODRIVE)-genesis+gx",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"
-    },
-    {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
     },

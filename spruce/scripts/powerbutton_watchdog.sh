@@ -6,6 +6,9 @@ log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
+WAKE_ALARM_SEC=300  # Fallback time in seconds until the wake alarm triggers
+RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
+SLEEP_FILE="/mnt/SDCARD/spruce/settings/sleep_powerdown"
 
 long_press_handler() {
     # setup flag for long pressed event
@@ -47,7 +50,46 @@ while true ; do
 
                     # add sleep flag
                     flag_add "pb.sleep"
+                            
+                    # Check settings to determine how long to set RTC wake timer
+                    if [ -f "$SLEEP_FILE" ]; then
+                        sleep_setting=$(cat "$SLEEP_FILE")
+                        # Map to corresponding seconds
+                        case "$sleep_setting" in
+                            Instant) WAKE_ALARM_SEC=-1 ;;
+                            Off) WAKE_ALARM_SEC=0 ;;
+                            2m) WAKE_ALARM_SEC=120 ;;
+                            5m) WAKE_ALARM_SEC=300 ;;
+                            10m) WAKE_ALARM_SEC=600 ;;
+                            30m) WAKE_ALARM_SEC=1800 ;;
+                            60m) WAKE_ALARM_SEC=3600 ;;
+                        esac
+                    fi
 
+                    if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
+                        if pgrep "MainUI" > /dev/null || pgrep "ra32.miyoo" > /dev/null || pgrep "drastic" > /dev/null || pgrep "PPSSPP" > /dev/null; then
+                            echo "+$WAKE_ALARM_SEC" > "$RTC_WAKE_FILE"
+                            cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
+                            CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                            echo $CURRENT_VOLUME > /mnt/SDCARD/spruce/settings/tmp_sys_volume_level
+                            echo 0 > /sys/devices/virtual/disp/disp/attr/lcdbl
+                            amixer set 'Soft Volume Master' 0
+                            flag_add "wake.alarm"
+                        fi
+                    fi
+                    
+                    if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
+                        if pgrep "MainUI" > /dev/null || pgrep "ra32.miyoo" > /dev/null || pgrep "drastic" > /dev/null || pgrep "PPSSPP" > /dev/null; then
+                            flag_add "sleep.powerdown"
+                            cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
+                            CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                            echo $CURRENT_VOLUME > /mnt/SDCARD/spruce/settings/tmp_sys_volume_level
+                            echo 0 > /sys/devices/virtual/disp/disp/attr/lcdbl
+                            amixer set 'Soft Volume Master' 0
+                            /mnt/SDCARD/spruce/scripts/save_poweroff.sh
+                        fi
+                    fi
+                    
                     # PAUSE pany process that may crash the system during wakeup
                     killall -q -19 enforceSmartCPU.sh
 
@@ -81,13 +123,24 @@ while true ; do
     # wait long enough to ensure device enter sleep mode
     # sleep 1
 
-    # update display setting after wakeup
-    ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
-    echo "$ENHANCE_SETTINGS" > /sys/devices/virtual/disp/disp/attr/enhance
-
+    if flag_check "wake.alarm"; then
+    
+        # If RTC alarm is cleared, we woke from from the alarm
+        CURRENT_ALARM=$(cat "$RTC_WAKE_FILE" 2>/dev/null)
+        
+        if ! [ -z "$CURRENT_ALARM" ]; then
+            # update display and volume setting after wakeup
+            cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level > /sys/devices/virtual/disp/disp/attr/lcdbl
+            ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
+            echo "$ENHANCE_SETTINGS" > /sys/devices/virtual/disp/disp/attr/enhance
+            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        fi
+    
+    fi
+        
     # wait long enough to ensure wakeup task is finished
     # sleep 2
-
+    
     # RESUME any running emulator or MainUI
     killall -q -18 ra32.miyoo || \
     killall -q -18 retroarch || \
@@ -100,4 +153,25 @@ while true ; do
 
     # delete sleep flag, now ready for sleep again
     flag_remove "pb.sleep"
+    
+    # Power down if awoken via alarm
+    if flag_check "wake.alarm"; then
+    
+        # If RTC alarm is cleared, we woke from from the alarm
+        CURRENT_ALARM=$(cat "$RTC_WAKE_FILE" 2>/dev/null)
+        
+        if [ -z "$CURRENT_ALARM" ]; then
+            flag_remove "wake.alarm"
+            flag_add "sleep.powerdown"
+            
+            if pgrep "MainUI" > /dev/null || pgrep "ra32.miyoo" > /dev/null || pgrep "drastic" > /dev/null || pgrep "PPSSPP" > /dev/null; then
+                /mnt/SDCARD/spruce/scripts/save_poweroff.sh
+            fi
+
+        else
+            echo 0 > "$RTC_WAKE_FILE"
+            flag_remove "wake.alarm"
+        fi
+        
+    fi
 done

@@ -1,10 +1,13 @@
 boost_processing() {
     /mnt/SDCARD/miyoo/utils/utils "performance" 4 1344 384 1080 1
     echo "CPU Mode set to PERFORMANCE"
-    echo 1 >/sys/devices/system/cpu/cpu0/online
-    echo 1 >/sys/devices/system/cpu/cpu1/online
-    echo 1 >/sys/devices/system/cpu/cpu2/online
-    echo 1 >/sys/devices/system/cpu/cpu3/online
+    echo 1 >/sys/devices/system/cpu/cpu0/online 2>/dev/null
+    echo 1 >/sys/devices/system/cpu/cpu1/online 2>/dev/null
+    echo 1 >/sys/devices/system/cpu/cpu2/online 2>/dev/null
+    echo 1 >/sys/devices/system/cpu/cpu3/online 2>/dev/null
+    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
+	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
+    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 }
 
 check_for_update_file() {
@@ -48,7 +51,7 @@ verify_7z_content() {
     local temp_list=$(mktemp)
     7zr l "$archive" >"$temp_list"
 
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Debug: Archive contents:"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Archive contents:"
     cat "$temp_list"
 
     # Adding a skip for now

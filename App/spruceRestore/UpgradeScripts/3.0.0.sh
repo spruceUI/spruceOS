@@ -34,6 +34,11 @@ log_message "Starting upgrade to version $TARGET_VERSION"
 # ----------------File Updates Here----------------
 # Update specific files
 update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
+    "content_show_add = \"false\"" \
+    "content_show_explore = \"false\"" \
+    "content_show_favorites = \"false\"" \
+    "content_show_playlists = \"false\"" \
+    "core_info_savestate_bypass = \"true\"" \
     "core_updater_buildbot_assets_url = \"http://buildbot.libretro.com/assets/\"" \
     "input_enable_hotkey = \"rctrl\"" \
     "input_exit_emulator = \"ctrl\"" \
@@ -49,12 +54,27 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
     "input_quit_gamepad_combo = \"0\"" \
     "input_save_state = \"backspace\"" \
     "input_screenshot = \"space\"" \
+    "input_shader_toggle = \"up\"" \
     "input_state_slot_decrease = \"left\"" \
     "input_state_slot_increase = \"right\"" \
     "input_toggle_slowmotion = \"e\"" \
+    "menu_show_core_updater = \"false\"" \
     "menu_unified_controls = \"true\"" \
     "notification_show_autoconfig = \"false\"" \
-    "notification_show_save_state = \"true\""
+    "notification_show_save_state = \"true\"" \
+    "quick_menu_show_add_to_favorites = \"false\"" \
+    "quick_menu_show_core_options_flush = \"true\"" \
+    "quick_menu_show_download_thumbnails = \"false\"" \
+    "quick_menu_show_reset_core_association = \"false\"" \
+    "quick_menu_show_savestate_submenu = \"false\"" \
+    "quick_menu_show_set_core_association = \"false\"" \
+    "quick_menu_show_start_recording = \"false\"" \
+    "quick_menu_show_start_streaming = \"false\"" \
+    "remap_save_on_exit = \"true\"" \
+    "settings_show_accessibility = \"false\"" \
+    "settings_show_playlists = \"false\"" \
+    "settings_show_power_management = \"false\"" \
+    "settings_show_recording = \"false\""
 
 # Remove nohotkeyprofile and hotkeyprofile folders if they exist
 
@@ -78,6 +98,11 @@ else
 fi
 
 # Changes made this update
+#content_show_add = "false"
+#content_show_explore = "false"
+#content_show_favorites = "false"
+#content_show_playlists = "false"
+#core_info_savestate_bypass = "true"
 #core_updater_buildbot_assets_url = "http://buildbot.libretro.com/assets/"
 #input_enable_hotkey = "rctrl"
 #input_exit_emulator = "ctrl"
@@ -93,9 +118,25 @@ fi
 #input_quit_gamepad_combo = "0"
 #input_save_state = "backspace"
 #input_screenshot = "space"
+#input_shader_toggle = "up"
 #input_state_slot_decrease = "left"
 #input_state_slot_increase = "right"
 #input_toggle_slowmotion = "e"
+#menu_show_core_updater = "false"
 #menu_unified_controls = "true"
 #notification_show_autoconfig = "false"
 #notification_show_save_state = "true"
+#quick_menu_show_add_to_favorites = "false"
+#quick_menu_show_core_options_flush = "true"
+#quick_menu_show_download_thumbnails = "false"
+#quick_menu_show_reset_core_association = "false"
+#quick_menu_show_savestate_submenu = "false"
+#quick_menu_show_set_core_association = "false"
+#quick_menu_show_start_recording = "false"
+#quick_menu_show_start_streaming = "false"
+#remap_save_on_exit = "true"
+#settings_show_accessibility = "false"
+#settings_show_playlists = "false"
+#settings_show_power_management = "false"
+#settings_show_recording = "false"
+

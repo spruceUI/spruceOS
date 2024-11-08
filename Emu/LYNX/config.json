@@ -16,8 +16,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓MEDNAFEN)-handy",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/handy.sh"
+      "name": "Emu Core: (✓HANDY)-mednafen",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_lynx.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",

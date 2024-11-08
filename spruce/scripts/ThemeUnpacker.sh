@@ -4,6 +4,9 @@ THEME_DIR="/mnt/SDCARD/Themes"
 RA_THEME_DIR="/mnt/SDCARD/RetroArch/.retroarch/assets"
 ROOT_DIR="/mnt/SDCARD"
 
+
+ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Check for --silent flag
@@ -27,11 +30,12 @@ display_if_not_silent() {
     fi
 }
 
+flag_add "themes_unpacking"
 # Unpack themes from 7z archives
 for archive in "$THEME_DIR"/*.7z; do
     if [ -f "$archive" ]; then
         theme_name=$(basename "$archive" .7z)
-        display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$theme_name packed theme detected. Unpacking.........." -c dbcda7
+        display_if_not_silent --icon "$ICON" -t "$theme_name packed theme detected. Unpacking.........."
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
             7zr x -aoa "$archive" -o/
             if [ $? -eq 0 ]; then
@@ -45,14 +49,16 @@ for archive in "$THEME_DIR"/*.7z; do
         fi
     fi
 done
+flag_remove "themes_unpacking"
 
 # Unpack RetroArch theme folders
 RA_FOLDERS_TO_UNPACK="xmb"
 
+flag_add "ra_themes_unpacking"
 for folder in $RA_FOLDERS_TO_UNPACK; do
     archive="$RA_THEME_DIR/${folder}.7z"
     if [ -f "$archive" ]; then
-        display_if_not_silent -i "/mnt/SDCARD/spruce/imgs/displayTextPreColor.png" -t "$folder packed retroarch theme detected. Unpacking.........." -c dbcda7
+        display_if_not_silent --icon "$ICON" -t "$folder packed retroarch theme detected. Unpacking.........."
         if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
             7zr x -aoa "$archive" -o/
             if [ $? -eq 0 ]; then
@@ -66,8 +72,6 @@ for folder in $RA_FOLDERS_TO_UNPACK; do
         fi
     fi
 done
+flag_remove "ra_themes_unpacking"
 
 log_message "ThemeUnpacker: Finished running"
-if [ $SILENT_MODE -eq 0 ]; then
-    kill_images
-fi

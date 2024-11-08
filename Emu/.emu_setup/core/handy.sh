@@ -8,7 +8,7 @@ SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 display -i "$BG" -t "Core changed to handy"
 
-sed -i 's|"Emu Core: (✓MEDNAFEN)-handy"|"Emu Core: mednafen-(✓HANDY)"|g' "$CONFIG"
+sed -i 's|"Emu Core: handy-(✓MEDNAFEN)"|"Emu Core: (✓HANDY)-mednafen"|g' "$CONFIG"
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/handy.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_lynx.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"handy\"|g' "$SYS_OPT"
 

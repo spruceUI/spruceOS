@@ -70,10 +70,10 @@ tail -F "$LOG_FILE" | while read line; do
             # Map the system volume level to the mainui value
             MAINUI_VOLUME=$(map_system_value_to_mainui_volume "$CURRENT_VOLUME")
             
-            if ! pgrep "$PROCESS_NAME" > /dev/null; then
+            #if ! pgrep "$PROCESS_NAME" > /dev/null; then
                 # Update MainUI Conf    
                 sed -i "s/\"vol\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"vol\": $MAINUI_VOLUME/" "$MAINUI_CONF"
-            fi
+            #fi
         fi
     fi
 
