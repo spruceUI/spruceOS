@@ -86,6 +86,12 @@ if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
     fi
 fi
 
+
+# ensure keymon is running first and only listen to event3 for keyboard events
+#keymon /dev/input/event3 &
+# load watchdog for auto adjustment of brightness and volume when hotkey is using
+#${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
+
 # listen hotkeys for brightness adjustment, volume buttons and power button
 ${SCRIPTS_DIR}/buttons_watchdog.sh &
 ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
