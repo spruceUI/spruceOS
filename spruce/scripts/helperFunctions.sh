@@ -735,5 +735,26 @@ show_image() {
 # If no duration is provided, defaults to 100ms
 vibrate() {
     local duration=${1:-30}
-    echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
+
+    intensity="$(cat "/mnt/SDCARD/spruce/settings/rumble_intensity")"
+
+    if [ "$intensity" = "Strong" ]; then
+        echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
+    elif [ "$intensity" = "Medium" ]; then
+        timer=0
+        while [ $timer -lt $duration ]; do
+            echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
+            sleep 0.004
+            timer=$(($timer + 4 ))
+        done &
+    elif [ "$intensity" = "Weak" ]; then
+        timer=0
+        while [ $timer -lt $duration ]; do
+            echo 2 >/sys/devices/virtual/timed_output/vibrator/enable
+            sleep 0.003
+            timer=$(($timer + 3 ))
+        done &
+    else
+        log_message "this is where I'd put my vibration... IF I HAD ONE"
+    fi
 }
