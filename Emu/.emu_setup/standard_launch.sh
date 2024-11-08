@@ -118,6 +118,10 @@ case $EMU_NAME in
 		;;
 
 	"NDS")
+        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+        # this allows joystick to be used as DPAD
+        killall -USR2 joystickinput
+
 		cd $EMU_DIR
 		if [ ! -f "/tmp/.show_hotkeys" ]; then
 			touch /tmp/.show_hotkeys
@@ -136,6 +140,10 @@ case $EMU_NAME in
 		fi
 		./drastic "$1"
 		sync
+
+        # send signal USR1 to joystickinput to switch to ANALOG MODE
+        killall -USR1 joystickinput
+
 		;;
 
 	"OPENBOR")
@@ -152,7 +160,7 @@ case $EMU_NAME in
 	
 	"PICO8")
         # send signal USR2 to joystickinput to switch to KEYBOARD MODE
-        # this allows joystick to be used as DPAD in MainUI
+        # this allows joystick to be used as DPAD
         killall -USR2 joystickinput
 
 		export HOME="$EMU_DIR"
