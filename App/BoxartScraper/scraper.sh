@@ -262,7 +262,7 @@ for sys_dir in "$roms_dir"/*/; do
 
     for file in "$sys_dir"*; do
         # Check if the user pressed B to exit
-        if tail -n1 "$messages_file" | grep -q "key 1 29 . , postpone dimmed state"; then
+        if tail -n1 "$messages_file" | grep -q "key 1 29"; then
             echo "User pressed B, exiting."
             display_image "user_exit"
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor

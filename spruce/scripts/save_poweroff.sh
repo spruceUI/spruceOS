@@ -46,7 +46,6 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
         display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
         dim_screen &
     else
-        messages_file="/var/log/messages"
         # Pause MainUI or pico8_dyn
         killall -q -19 MainUI
         killall -q -19 pico8_dyn
