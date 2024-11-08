@@ -59,9 +59,8 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
         log_precise "Power display complete"
 
-        # This is to kill leftover display and show processes that may be running
+        # This is to kill leftover display processes that may be running
         display_kill &
-        kill_images &
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0

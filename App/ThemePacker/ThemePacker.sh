@@ -43,5 +43,4 @@ for folder in $RA_FOLDERS_TO_BACKUP; do
 done
 
 log_message "Theme Packer finished running"
-kill_images
 cores_online

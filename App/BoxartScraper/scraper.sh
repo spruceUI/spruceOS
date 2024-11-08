@@ -267,7 +267,6 @@ for sys_dir in "$roms_dir"/*/; do
             display_image "user_exit"
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             sleep 3
-            killall -9 show
             exit
         fi
 
