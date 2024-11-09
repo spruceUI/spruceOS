@@ -157,25 +157,17 @@ long_press_handler() {
     # if IS long press
     if pgrep "MainUI|drastic|pico8_dyn" && setting_get "enableGS" > /dev/null; then
         prepare_game_switcher
-    elif setting_get "runGSOnTapHome"; then
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
-            if setting_get "enableGS"; then
+    elif pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
+        if setting_get "enableGS"; then
+            if setting_get "runGSOnTapHome"; then
                 send_virtual_key
             else
-                killall -q ra32.miyoo
-                killall -q retroarch
-                killall -q PPSSPPDL
-            fi
-        fi
-    else
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
-            if setting_get "enableGS"; then
                 prepare_game_switcher
-            else
-                killall -q ra32.miyoo
-                killall -q retroarch
-                killall -q PPSSPPDL
-            fi  
+            fi
+        else
+            killall -q ra32.miyoo
+            killall -q retroarch
+            killall -q PPSSPPDL
         fi
     fi
 }
