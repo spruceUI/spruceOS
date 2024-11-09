@@ -155,16 +155,27 @@ long_press_handler() {
     rm "$TEMP_PATH/gs.longpress"
 
     # if IS long press
-    if pgrep "MainUI|drastic|pico8_dyn" > /dev/null; then
+    if pgrep "MainUI|drastic|pico8_dyn" && setting_get "enableGS" > /dev/null; then
         prepare_game_switcher
-
-    elif setting_get "runGSOnTapHome" ; then
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-            send_virtual_key
+    elif setting_get "runGSOnTapHome"; then
+        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
+            if setting_get "enableGS"; then
+                send_virtual_key
+            else
+                killall -q ra32.miyoo
+                killall -q retroarch
+                killall -q PPSSPPDL
+            fi
         fi
     else
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-            prepare_game_switcher
+        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
+            if setting_get "enableGS"; then
+                prepare_game_switcher
+            else
+                killall -q ra32.miyoo
+                killall -q retroarch
+                killall -q PPSSPPDL
+            fi  
         fi
     fi
 }
@@ -188,12 +199,16 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
 
                 if pgrep "pico8_dyn" > /dev/null ; then
                     prepare_game_switcher
-                elif setting_get "runGSOnTapHome" ; then
-                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-                        prepare_game_switcher
+                elif setting_get "runGSOnTapHome"; then
+                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
+                        if setting_get "enableGS"; then
+                            prepare_game_switcher
+                        else
+                            send_virtual_key
+                        fi
                     fi
                 else
-                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
+                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null; then
                         send_virtual_key
                     fi
                 fi
