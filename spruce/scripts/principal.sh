@@ -22,14 +22,14 @@
 
 flag_remove "save_active"
 
-if setting_get "runGSAtBoot" ; then
+if setting_get "runGSAtBoot" && setting_get "enableGS" ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
 while [ 1 ]; do
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
-        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
+    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] && setting_get "enableGS" ; then
+        log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
@@ -102,7 +102,7 @@ while [ 1 ]; do
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
-    if setting_get "runGSOnGameExit" && \
+    if setting_get "runGSOnGameExit" && setting_get "enableGS" && \
        grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi

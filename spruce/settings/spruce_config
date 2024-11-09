@@ -52,6 +52,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
 @"Disconnect and clear all networks"
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
+"" "Enable Game Switcher" "|" "on|off" "$HELP$ check enableGS" "$HELP$ update enableGS on|$HELP$ update enableGS off" ""
 "" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot on|$HELP$ update runGSAtBoot off" ""
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit on|$HELP$ update runGSOnGameExit off" ""
 "" "Launch GS with tap of Home button" "|" "on|off" "$HELP$ check runGSOnTapHome" "$HELP$ update runGSOnTapHome on|$HELP$ update runGSOnTapHome off" ""
