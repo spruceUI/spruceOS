@@ -164,10 +164,6 @@ long_press_handler() {
             else
                 prepare_game_switcher
             fi
-        else
-            killall -q ra32.miyoo
-            killall -q retroarch
-            killall -q PPSSPPDL
         fi
     fi
 }
