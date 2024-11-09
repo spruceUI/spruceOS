@@ -22,14 +22,14 @@
 
 flag_remove "save_active"
 
-if setting_get "runGSAtBoot" ; then
+if setting_get "runGSAtBoot" && setting_get "enableGS" ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
 while [ 1 ]; do
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
-        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
+    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] && setting_get "enableGS" ; then
+        log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
