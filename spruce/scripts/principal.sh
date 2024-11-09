@@ -102,7 +102,7 @@ while [ 1 ]; do
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
-    if setting_get "runGSOnGameExit" && \
+    if setting_get "runGSOnGameExit" && setting_get "enableGS" && \
        grep -q '/mnt/SDCARD/Emu' "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
