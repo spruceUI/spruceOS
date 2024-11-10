@@ -30,7 +30,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Excludes NDS, PICO8 & ports"
 "" "Hold home key to" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home 'Game Switcher'|$HELP$ update hold_home 'In-game menu'|$HELP$ update hold_home 'Exit game'" ""
 @"Excludes NDS, PICO8 & ports"
-"" "Directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
+"" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "cat $SETTINGS$/rumble_intensity" "echo -n Strong > $SETTINGS$/rumble_intensity|echo -n Medium > $SETTINGS$/rumble_intensity|echo -n Weak > $SETTINGS$/rumble_intensity|echo -n Off > $SETTINGS$/rumble_intensity" ""
