@@ -10,9 +10,6 @@
 
   - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
 
-## FREE PORTS AND GAMES
-  - [CLICK HERE FOR THE LATEST RELEASE OF OUR FREE GAME COLLECTION](https://github.com/spruceUI/Ports-and-Free-Games/releases/tag/3.0.0)
-
 ## NEED HELP?
   
   - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
