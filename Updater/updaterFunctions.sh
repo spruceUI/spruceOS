@@ -1,3 +1,21 @@
+acknowledge(){
+    local messages_file="/var/log/messages"
+	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
+
+    while true; do
+        last_line=$(tail -n 1 "$messages_file")
+
+        case "$last_line" in
+            *"enter_pressed"*|*"key 1 57"*|*"key 1 29"*)
+                echo "ACKNOWLEDGED $(date +%s)" >> "$messages_file"
+                break
+                ;;
+        esac
+
+        sleep 0.1
+    done
+}
+
 boost_processing() {
     /mnt/SDCARD/miyoo/utils/utils "performance" 4 1344 384 1080 1
     echo "CPU Mode set to PERFORMANCE"

@@ -15,6 +15,13 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
 $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
+
+# Task Scripts
+$CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/clearwifi.sh$
+$RESET_EMUFRESH=/mnt/SDCARD/spruce/scripts/tasks/resetEmufresh.sh$
+$RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
+
+
 [System]
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "cat $SETTINGS$/idlemon_in_menu" "echo -n Off > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu Off|echo -n 2m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 2m|echo -n 5m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 5m|echo -n 10m > $SETTINGS$/idlemon_in_menu && $IDLEMON_MM$ in_menu 10m" ""
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "cat $SETTINGS$/idlemon_in_game" "echo -n Off > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game Off|echo -n 2m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 2m|echo -n 5m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 5m|echo -n 10m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 10m|echo -n 30m > $SETTINGS$/idlemon_in_game && $IDLEMON_MM$ in_game 30m" ""
@@ -35,6 +42,10 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "cat $SETTINGS$/rumble_intensity" "echo -n Strong > $SETTINGS$/rumble_intensity|echo -n Medium > $SETTINGS$/rumble_intensity|echo -n Weak > $SETTINGS$/rumble_intensity|echo -n Off > $SETTINGS$/rumble_intensity" ""
 @"For system notifications"
+"" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$"
+@"We recommend backing up first."
+"" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$"
+@"Use this to trigger a full reset of Emufresh. Helpful if your displayed roms or consoles are incorrect."
 [Network]
 # below are two dynamic info texts with scripts that print the needed text
 # info text should start with % and follow with quoted command
@@ -53,7 +64,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Auto restart when in main menu"
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame on|$HELP$ update disableWifiInGame off" ""
 @"Improves battery life"
-"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
+"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 "" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot on|$HELP$ update runGSAtBoot off" ""

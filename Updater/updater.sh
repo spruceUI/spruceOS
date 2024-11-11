@@ -25,6 +25,17 @@ display() {
     local width="${6:-600}"
     local color="${7:-dbcda7}"
     local image="/mnt/SDCARD/Updater/imgs/back.png"
+    local acknowledge_mode=false
+
+    # Parse arguments to handle --acknowledge flag
+    for arg in "$@"; do
+        if [ "$arg" = "--acknowledge" ]; then
+            acknowledge_mode=true
+            delay=0
+            image="/mnt/SDCARD/Updater/imgs/acknowledge.png"
+            break
+        fi
+    done
 
     # Kill any existing display processes more safely
     ps | grep display_text.elf | grep -v grep | while read pid rest; do
@@ -35,6 +46,10 @@ display() {
         $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null &
     else
         $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null
+    fi
+
+    if [ "$acknowledge_mode" = true ]; then
+        acknowledge
     fi
 }
 
@@ -47,9 +62,51 @@ echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 echo "Update process started" >"$LOG_LOCATION"
 exec >>"$LOG_LOCATION" 2>&1
 
+# Check SD Card health
+TEST_FILE="/mnt/SDCARD/.sd_test_$$"
+SD_ERROR=false
+
+# Test write capability
+if ! echo "test" > "$TEST_FILE" 2>/dev/null; then
+    log_update_message "ERROR: Cannot write to SD card"
+    display "SD card error: Write failed" --acknowledge
+    SD_ERROR=true
+else
+    # Test read capability
+    if ! read_test=$(cat "$TEST_FILE" 2>/dev/null) || [ "$read_test" != "test" ]; then
+        log_update_message "ERROR: Cannot read from SD card or data mismatch"
+        display "SD card error: Read failed" --acknowledge
+        SD_ERROR=true
+    fi
+    # Clean up test file
+    rm -f "$TEST_FILE"
+fi
+
+# Check filesystem space and inode usage
+df_output=$(df /mnt/SDCARD 2>/dev/null)
+if [ $? -ne 0 ]; then
+    log_update_message "ERROR: Cannot get filesystem information"
+    display "SD card error: Cannot check space" --acknowledge
+    SD_ERROR=true
+else
+    # Get available space percentage (using last line in case of wrapped output)
+    avail_space=$(echo "$df_output" | tail -n1 | awk '{ print $4 }')
+    if [ "$avail_space" -lt 1024 ]; then  # Less than 1MB free
+        log_update_message "ERROR: Insufficient space on SD card"
+        display "SD card error: No free space" --acknowledge
+        SD_ERROR=true
+    fi
+fi
+
+if [ "$SD_ERROR" = true ]; then
+    exit 1
+else
+    log_update_message "SD card is healthy"
+fi
+
 # Find update 7z file
 if ! check_for_update_file; then
-    display "No update file found" 5
+    display "No update file found" --acknowledge
     sed -i 's|"label"|"#label"|' "$APP_DIR/config.json"
     exit 1
 fi
@@ -64,7 +121,7 @@ log_update_message "Current battery level: $BATTERY_CAPACITY%"
 if [ "$BATTERY_CAPACITY" -lt 30 ] && [ "$CHARGING" -eq 0 ]; then
     log_update_message "Battery level too low for update"
     display "Battery too low for update.
-    Please charge to at least 30% or plug in your device." 5
+    Please charge to at least 30% or plug in your device." --acknowledge
     exit 1
 fi
 
@@ -97,7 +154,7 @@ else
         display "Detected current installation is invalid.
 Allowing reinstall." 5
     else
-        display "Current version is up to date" 5
+        display "Current version is up to date"
         exit 0
     fi
 fi
@@ -106,13 +163,13 @@ fi
 log_update_message "Verifying update file contents"
 if [ ! -f "$UPDATE_FILE" ]; then
     log_update_message "Update file not found: $UPDATE_FILE"
-    display "Update file not found" 5
+    display "Update file not found" --acknowledge
     exit 1
 fi
 # Verify the content of the 7z starts with /mnt/
 
 if ! verify_7z_content "$UPDATE_FILE"; then
-    display "Invalid update file structure" 5
+    display "Invalid update file structure, update file corrupt or not a spruce update" --acknowledge
     exit 1
 fi
 
@@ -178,13 +235,13 @@ fi
 for dir in .tmp_update spruce miyoo; do
     if [ ! -d "$dir" ]; then
         log_update_message "Extraction verification failed: $dir missing"
-        display "Update extraction incomplete: $dir" 5
+        display "Update extraction incomplete: $dir" --acknowledge
         exit 1
     fi
 
     if [ -z "$(ls -A "$dir")" ]; then
         log_update_message "Extraction verification failed: $dir is empty"
-        display "Update extraction incomplete: $dir empty" 5
+        display "Update extraction incomplete: $dir empty" --acknowledge
         exit 1
     fi
 done
