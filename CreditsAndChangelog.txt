@@ -1,4 +1,12 @@
-spruce 3.0.0
+spruce v3.0.1
+
+Added reset RetroArch task to Advanced Settings (XanXic)
+Added reset Emufresh task to Advanced Settings (XanXic)
+Rudimentary SDCard health checks added to AutoUpdater (XanXic)
+Enabled CHD's in the romlist for PPSSPP (Ry)
+Removed nonfunctional Genesis+GX core (Cobalt)
+Resolved joystick not working in Drastic/NDS (Oscarkcau)
+
 
 Spruce 3.0.0: The Game Switcher update
 
