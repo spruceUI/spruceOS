@@ -6,12 +6,14 @@ on:
       - "RetroArch/retroarch.cfg"  # Monitors changes to this specific file
 
 jobs:
-  sync_files:
+  backup_retroarch_cfg:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}  # Check out the branch where the change was made
 
       - name: Copy retroarch.cfg to target location
         run: |
@@ -26,4 +28,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "$TARGET_PATH"
           git commit -m "Sync retroarch.cfg to $TARGET_PATH" || echo "No changes to commit"
-          git push || echo "No changes to push"
+          git push origin ${{ github.ref_name }} || echo "No changes to push"
