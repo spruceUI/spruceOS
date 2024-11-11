@@ -19,7 +19,7 @@ cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
 display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0" -p 400
 log_message "First boot flag detected"
 
-log_message "Toggle developer options"
+log_message "Running developer mode check" -v
 /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
 
 if [ -f "${SWAPFILE}" ]; then

@@ -3,8 +3,12 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
 
-if [ -f "/mnt/SDCARD/developer_mode" ]; then
-   
+EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
+
+DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
+
+if flag_check "developer_mode" || flag_check "designer_mode"; then
+   log_message "Developer mode enabled"
     # Turn off idle monitors
     echo -n Off > /mnt/SDCARD/spruce/settings/idlemon_in_menu 
     echo -n Off > /mnt/SDCARD/spruce/settings/idlemon_in_game
@@ -18,7 +22,29 @@ if [ -f "/mnt/SDCARD/developer_mode" ]; then
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
     
-    # Add flag for global use
-    flag_add "developer_mode"
-    
+    # Add developer menu option to spruce_config if it doesn't exist
+    if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
+        sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
+    fi
+fi
+
+
+if flag_check "designer_mode"; then
+    log_message "Designer mode enabled"
+    if [ -f "$EMUFRESH" ]; then
+        "$EMUFRESH" -showall
+    elif [ -f "$EMUFRESH.bak" ]; then
+        "$EMUFRESH.bak" -showall
+    fi
+    # Changing the name to break future calls.
+    mv "$EMUFRESH" "$EMUFRESH.bak"
+fi
+
+# Restore if neither mode is enabled
+if ! flag_check "designer_mode" && ! flag_check "developer_mode"; then
+
+    # Restore EMUFRESH if it exists
+    if [ -f "$EMUFRESH.bak" ]; then
+        mv "$EMUFRESH.bak" "$EMUFRESH"
+    fi
 fi

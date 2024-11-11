@@ -42,6 +42,26 @@ if [ "$1" = "-clearall" ]; then
 	return 0
 fi
 
+# handle show all option
+if [ "$1" = "-showall" ]; then
+	# show all systems
+	find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
+		system_name=$(basename "$folder")
+		config_file="$emu_path/$system_name/config.json"
+		sed -i 's/^{{*$/{/' "$config_file"
+	done
+	log_message "emufresh: showed all systems by fixing their config.json"
+
+	# kill MainUI
+	killall -9 MainUI
+
+	# remove flag before exit
+	flag_remove "emufresh"
+
+	# exit with 0
+	return 0
+fi
+
 # check folder PICO8 first
 config_file="$emu_path/PICO8/config.json"
 show_pico8=$(cat "$config_file" | grep -Fc '{{')
