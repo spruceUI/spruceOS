@@ -14,5 +14,6 @@ fi
 ORIGINAL_RA_FILE="/mnt/SDCARD/RetroArch/retroarch.cfg"
 BACKUP_RA_FILE="/mnt/SDCARD/spruce/bin/res/retroarch.cfg"
 
+
 log_message "Resetting RetroArch config to default."
 cp $BACKUP_RA_FILE $ORIGINAL_RA_FILE
