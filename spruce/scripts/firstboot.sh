@@ -11,12 +11,14 @@ FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 
+SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
+
 log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
 cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
 
-display -i "$SPRUCE_LOGO" -t "Installing spruce v3.1.0" -p 400
+display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
 log_message "Running developer mode check" -v
