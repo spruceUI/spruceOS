@@ -16,7 +16,7 @@ log_message "Starting firstboot script"
 # initialize the settings... users can restore their own backup later.
 cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
 
-display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.0" -p 400
+display -i "$SPRUCE_LOGO" -t "Installing spruce v3.0.1" -p 400
 log_message "First boot flag detected"
 
 if [ -f "${SWAPFILE}" ]; then
