@@ -157,11 +157,11 @@ send_virtual_key() {
 long_press_handler() {
     # setup flag for long pressed event
     touch "$TEMP_PATH/gs.longpress"
-    sleep 2
+    sleep 1.6
     rm "$TEMP_PATH/gs.longpress"
 
     # if IS long press
-
+    vibrate
     # In MainUI long press will load GS 
     if pgrep "MainUI" > /dev/null ; then
         prepare_game_switcher
@@ -169,8 +169,9 @@ long_press_handler() {
     fi
     
     # get setting
-    HOLD_HOME=$(grep "^hold_home=" "$CFG_FILE" | cut -d'=' -f2)
-    [ ! -z "$HOLD_HOME" ] || HOLD_HOME="Game Switcher"
+    HOLD_HOME=$(setting_get "hold_home")
+    log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
+    [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
     
     case $HOLD_HOME in
         "Game Switcher")
@@ -219,8 +220,8 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
                 fi
 
                 # get setting
-                TAP_HOME=$(grep "^tap_home=" "$CFG_FILE" | cut -d'=' -f2)
-                [ ! -z "$TAP_HOME" ] || TAP_HOME="In-game menu"
+                TAP_HOME=$(setting_get "tap_home")
+                [ -z "$TAP_HOME" ] && TAP_HOME="In-game menu"
 
                 # handle short press
                 case $TAP_HOME in

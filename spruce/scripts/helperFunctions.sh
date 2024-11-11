@@ -569,13 +569,25 @@ set_overclock() {
 
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 
+
+# For simple settings that use 0/1 putting this in an if statement is the easiest usage
+# For complex values, you can use setting_get and then use the value in your script by capturing it
+# For example:
+#    VALUE=$(setting_get "my_setting")
+#    if [ "$VALUE" = "complex value" ]; then
+#        do complex tasks
+#    fi
 setting_get(){
     [ $# -eq 1 ] || return 1
     value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2)
     if [ -z "$value" ]; then
+        echo ""
         return 1
     else
-       return "$value"
+        echo "$value"
+        # Return 1 if value is "1", 0 otherwise
+        [ "$value" = "1" ] && return 1
+        return 0
     fi
 }
 
