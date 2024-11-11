@@ -5,8 +5,6 @@
 
 EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
 
-DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
-
 if flag_check "developer_mode" || flag_check "designer_mode"; then
    log_message "Developer mode enabled"
     # Turn off idle monitors
@@ -21,11 +19,6 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
     
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
-    
-    # Add developer menu option to spruce_config if it doesn't exist
-    if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
-        sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
-    fi
 fi
 
 

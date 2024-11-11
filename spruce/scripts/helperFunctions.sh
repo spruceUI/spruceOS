@@ -60,7 +60,6 @@ export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
 export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
 export B_MENU="key 1 1"          # surprisingly functions like a regular button
 
-
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
@@ -91,34 +90,34 @@ auto_regen_tmp_update() {
 }
 
 check_and_connect_wifi() {
-    
+
     # ########################################################################
     # WARNING: Avoid running this function in-game, it will lead to stuttters!
     # ########################################################################
-    
+
     messages_file="/var/log/messages"
 
     # Check for connection first
     if ! ifconfig wlan0 | grep -qE "inet |inet6 "; then
-    
+
         log_message "Attempting to connect to WiFi"
-        
+
         # Bring the existing interface down cleanly if its running
         ifconfig wlan0 down
         killall wpa_supplicant
         killall udhcpc
-        
+
         # Restart the interface and try to connect
         ifconfig wlan0 up
         wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
         udhcpc -i wlan0 &
-        
+
         display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
 Press START to continue anyway."
         {
             while true; do
                 if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-                    echo "Successfully connected to WiFi" >> "$messages_file"
+                    echo "Successfully connected to WiFi" >>"$messages_file"
                     break
                 fi
                 sleep 0.5
@@ -127,17 +126,17 @@ Press START to continue anyway."
         while true; do
             inotifywait "$messages_file"
             last_line=$(tail -n 1 "$messages_file")
-            case $last_line in 
-                *"$B_START"* | *"$B_START_2"*)
-                    log_message "WiFi connection cancelled by user"
-                    display_kill
-                    return 1
-                    ;;
-                *"Successfully connected to WiFi"*)
-                    log_message "Successfully connected to WiFi"
-                    display_kill
-                    return 0
-                    ;; 
+            case $last_line in
+            *"$B_START"* | *"$B_START_2"*)
+                log_message "WiFi connection cancelled by user"
+                display_kill
+                return 1
+                ;;
+            *"Successfully connected to WiFi"*)
+                log_message "Successfully connected to WiFi"
+                display_kill
+                return 0
+                ;;
             esac
         done
     fi
@@ -153,11 +152,11 @@ Press START to continue anyway."
 # else
 #     log_message "User did not confirm" -v
 #     display -t "You did not confirm the action" -d 3
-# fi    
-confirm(){
+# fi
+confirm() {
     local messages_file="/var/log/messages"
-    local timeout=${1:-0}  # Default to 0 (no timeout) if not provided
-    local timeout_return=${2:-1}  # Default to 1 if not provided
+    local timeout=${1:-0}        # Default to 0 (no timeout) if not provided
+    local timeout_return=${2:-1} # Default to 1 if not provided
     local start_time=$(date +%s)
 
     echo "CONFIRM $(date +%s)" >>"$messages_file"
@@ -182,22 +181,22 @@ confirm(){
         # Get the last line of log file
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-            # B button - cancel
-            *"key 1 29"*)
-                # dismiss notification screen
-                display_kill
-                # exit script
-                echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
-                return 1
-                ;;
-            # A button - confirm
-            *"key 1 57"*) 
-                # dismiss notification screen
-                display_kill
-                # exit script
-                echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
-                return 0
-                ;;
+        # B button - cancel
+        *"key 1 29"*)
+            # dismiss notification screen
+            display_kill
+            # exit script
+            echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
+            return 1
+            ;;
+        # A button - confirm
+        *"key 1 57"*)
+            # dismiss notification screen
+            display_kill
+            # exit script
+            echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
+            return 0
+            ;;
         esac
     done
 }
@@ -231,16 +230,29 @@ cores_online() {
     done
 }
 
+DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
+developer_mode_task() {
+    if flag_check "developer_mode" || flag_check "designer_mode"; then
+        # Add developer menu option to spruce_config if it doesn't exist
+        if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
+            sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
+        fi
+    else
+        # Remove the line if it exists and no flags are present
+        sed -i '/Reapply Developer\/Designer mode/d' /mnt/SDCARD/spruce/settings/spruce_config
+    fi
+}
+
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
     local start_brightness=40
     local end_brightness=10
-    local steps=90  # Total number of steps for the transition
-    local delay=0.01  # 50ms delay between each step
+    local steps=90   # Total number of steps for the transition
+    local delay=0.01 # 50ms delay between each step
 
     # Check if another dim_screen is running
-    if pgrep -f "dim_screen" | grep -v $$ > /dev/null; then
+    if pgrep -f "dim_screen" | grep -v $$ >/dev/null; then
         log_message "Another dim_screen process is already running" -v
         return 1
     fi
@@ -259,7 +271,7 @@ dim_screen() {
     local current=$start_brightness
 
     while [ $current -gt $end_brightness ]; do
-        echo $current > /sys/devices/virtual/disp/disp/attr/lcdbl
+        echo $current >/sys/devices/virtual/disp/disp/attr/lcdbl
         current=$((current - 1))
         sleep $delay
     done
@@ -278,7 +290,7 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position in pixels from the top of the screen 
+#   -p, --position <pos>  Text position in pixels from the top of the screen
 #   (Text is offset from it's center, images are offset from the top of the image)
 #   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
@@ -533,42 +545,40 @@ log_precise() {
     local date_part=$(date '+%Y-%m-%d %H:%M:%S')
     local uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
     local timestamp="${date_part}.${uptime_part#*.}"
-    printf '%s %s\n' "$timestamp" "$message" >> "$log_file"
+    printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
 }
 
 set_smart() {
-	cores_online
+    cores_online
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo conservative > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo 30 > /sys/devices/system/cpu/cpufreq/conservative/down_threshold
-	echo 70 > /sys/devices/system/cpu/cpufreq/conservative/up_threshold
-	echo 3 > /sys/devices/system/cpu/cpufreq/conservative/freq_step
-	echo 1 > /sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-	echo 400000 > /sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-	echo "$scaling_min_freq" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    echo 30 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
+    echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
+    echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
+    echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+    echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+    echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	log_message "CPU Mode now locked to SMART" -v
+    log_message "CPU Mode now locked to SMART" -v
 }
 
 set_performance() {
-	cores_online
+    cores_online
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	log_message "CPU Mode now locked to PERFORMANCE" -v
+    log_message "CPU Mode now locked to PERFORMANCE" -v
 
 }
 
 set_overclock() {
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	/mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+    /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	log_message "CPU Mode now locked to OVERCLOCK" -v
+    log_message "CPU Mode now locked to OVERCLOCK" -v
 }
 
-
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
-
 
 # For simple settings that use 0/1 putting this in an if statement is the easiest usage
 # For complex values, you can use setting_get and then use the value in your script by capturing it
@@ -577,7 +587,7 @@ CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 #    if [ "$VALUE" = "complex value" ]; then
 #        do complex tasks
 #    fi
-setting_get(){
+setting_get() {
     [ $# -eq 1 ] || return 1
     value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2)
     if [ -z "$value" ]; then
@@ -591,21 +601,20 @@ setting_get(){
     fi
 }
 
-
-setting_update(){
+setting_update() {
     [ $# -eq 2 ] || return 1
     key="$1"
     value="$2"
 
     case "$value" in
-    "on"|"true"|"1") value=0 ;;
-    "off"|"false"|"0") value=1 ;;
+    "on" | "true" | "1") value=0 ;;
+    "off" | "false" | "0") value=1 ;;
     esac
 
     if grep -q "^$key=" "$CFG_FILE"; then
         sed -i "s/^$key=.*/$key=$value/" "$CFG_FILE"
     else
-        echo "$key=$value" >> "$CFG_FILE"
+        echo "$key=$value" >>"$CFG_FILE"
     fi
 }
 
@@ -614,14 +623,13 @@ settings_organize() {
     temp_file=$(mktemp)
 
     # Sort the file, remove empty lines, and preserve a single newline at the end
-    sort "$CFG_FILE" | sed '/^$/d' | sed '$a\' > "$temp_file"
+    sort "$CFG_FILE" | sed '/^$/d' | sed '$a\' >"$temp_file"
 
     # Replace the original file with the sorted and cleaned version
     mv "$temp_file" "$CFG_FILE"
 
     log_message "Settings file organized and cleaned up" -v
 }
-
 
 # Vibrate the device
 # Usage: vibrate [duration] [--intensity Strong|Medium|Weak]
@@ -635,13 +643,13 @@ vibrate() {
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
         case "$1" in
-            --intensity)
-                shift
-                intensity="$1"
-                ;;
-            [0-9]*)
-                duration="$1"
-                ;;
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
         esac
         shift
     done
@@ -658,14 +666,14 @@ vibrate() {
         while [ $timer -lt $duration ]; do
             echo 5 >/sys/devices/virtual/timed_output/vibrator/enable
             sleep 0.006
-            timer=$(($timer + 6 ))
+            timer=$(($timer + 6))
         done &
     elif [ "$intensity" = "Weak" ]; then
         timer=0
         while [ $timer -lt $duration ]; do
             echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
             sleep 0.004
-            timer=$(($timer + 4 ))
+            timer=$(($timer + 4))
         done &
     else
         log_message "this is where I'd put my vibration... IF I HAD ONE"
