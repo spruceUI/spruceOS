@@ -17,7 +17,7 @@ $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 
 # Task Scripts
-$CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/clearwifi.sh$
+$CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh$
 $RESET_EMUFRESH=/mnt/SDCARD/spruce/scripts/tasks/resetEmufresh.sh$
 $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 
