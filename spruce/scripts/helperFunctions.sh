@@ -624,12 +624,32 @@ settings_organize() {
 
 
 # Vibrate the device
-# Usage: vibrate [duration]
+# Usage: vibrate [duration] [--intensity Strong|Medium|Weak]
+#        vibrate [--intensity Strong|Medium|Weak] [duration]
 # If no duration is provided, defaults to 50ms
+# If no intensity is provided, gets value from settings
 vibrate() {
-    local duration=${1:-50}
+    local duration=50
+    local intensity
 
-    intensity="$(cat "/mnt/SDCARD/spruce/settings/rumble_intensity")"
+    # Parse arguments in any order
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --intensity)
+                shift
+                intensity="$1"
+                ;;
+            [0-9]*)
+                duration="$1"
+                ;;
+        esac
+        shift
+    done
+
+    # If no intensity was specified, get from settings
+    if [ -z "$intensity" ]; then
+        intensity="$(setting_get "rumble_intensity")"
+    fi
 
     if [ "$intensity" = "Strong" ]; then
         echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable

@@ -9,6 +9,7 @@ $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
+$RUMBLE=/mnt/SDCARD/spruce/scripts/applySetting/rumbleIntensity.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
@@ -39,7 +40,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent on|$HELP$ update show_battery_percent off" ""
 "-e" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
-"" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "cat $SETTINGS$/rumble_intensity" "echo -n Strong > $SETTINGS$/rumble_intensity|echo -n Medium > $SETTINGS$/rumble_intensity|echo -n Weak > $SETTINGS$/rumble_intensity|echo -n Off > $SETTINGS$/rumble_intensity" ""
+"" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity 'Strong'|$HELP$ update rumble_intensity 'Medium'|$HELP$ update rumble_intensity 'Weak'|$HELP$ update rumble_intensity 'Off'" "$RUMBLE$"
 @"For system notifications"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 "" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$"
