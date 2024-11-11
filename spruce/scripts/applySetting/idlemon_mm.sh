@@ -1,4 +1,5 @@
 #!/bin/sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 idle_type="$1"
 timeout_value="$2"
@@ -81,8 +82,9 @@ start_idlemon() {
 # If idle_type is not provided, handle both in_menu and in_game
 if [ -z "$idle_type" ]; then
   # Read timeout_value for in_menu
-  if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_menu ]; then
-    timeout_value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_menu)
+  IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
+  if [ "$IDLE_MENU_VALUE" != "Off" ]; then
+    timeout_value="$IDLE_MENU_VALUE"
   else
     timeout_value="Off" 
   fi
@@ -90,8 +92,9 @@ if [ -z "$idle_type" ]; then
   start_idlemon "in_menu" "$timeout_value"
 
   # Read timeout_value for in_game
-  if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_game ]; then
-    timeout_value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_game)
+  IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
+  if [ "$IDLE_GAME_VALUE" != "Off" ]; then
+    timeout_value="$IDLE_GAME_VALUE"
   else
     timeout_value="Off"
   fi
@@ -102,15 +105,17 @@ else
   if [ -z "$timeout_value" ]; then
     case "$idle_type" in
       in_menu)
-        if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_menu ]; then
-          timeout_value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_menu)
+        IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
+        if [ "$IDLE_MENU_VALUE" != "Off" ]; then
+          timeout_value="$IDLE_MENU_VALUE"
         else
           timeout_value="Off"
         fi
         ;;
       in_game)
-        if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_game ]; then
-          timeout_value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_game)
+        IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
+        if [ "$IDLE_GAME_VALUE" != "Off" ]; then
+          timeout_value="$IDLE_GAME_VALUE"
         else
           timeout_value="Off"
         fi
