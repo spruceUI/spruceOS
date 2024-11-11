@@ -230,19 +230,6 @@ cores_online() {
     done
 }
 
-DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
-developer_mode_task() {
-    if flag_check "developer_mode" || flag_check "designer_mode"; then
-        # Add developer menu option to spruce_config if it doesn't exist
-        if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
-            sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
-        fi
-    else
-        # Remove the line if it exists and no flags are present
-        sed -i '/Reapply Developer\/Designer mode/d' /mnt/SDCARD/spruce/settings/spruce_config
-    fi
-}
-
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
