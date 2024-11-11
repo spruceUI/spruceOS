@@ -1,4 +1,7 @@
-You need to place your Pico-8 dat and dyn files in the bin folder of the Pico App for Pico-8 games to launch using native Pico-8.
+You need to place your Pico-8 dat and dyn files in the bin folder of the Pico Emu for Pico-8 games to launch using native Pico-8.
+
+/Emu/PICO8/bin/
+
 We strongly encourage you to buy and support Pico-8. https://www.lexaloffle.com/pico-8.php?#getpico8
 
 
@@ -7,7 +10,7 @@ If you do not have the dat and dyn files to play Pico-8 here then you need to us
 
 USING THIS PICO8
 
-PICO-8 games will launch native from the roms folder. Place your games in the PICO8 Roms folder as they are from the Pico-8 website. You need to provide your own dat and dyn files and place them in the bin folder located in sdcard/App/PICO/bin. You can also use splore with Wi-Fi to browse and play games by launching it from the App. There are so many wonderful games and they seem to just keep getting better. Pico-8 is a great way for indie game makers to create and share with the world. We cannot say enough good things about Pico-8. Enjoy!
+PICO-8 games will launch native from the roms folder. Place your games in the PICO8 Roms folder as they are from the Pico-8 website. You need to provide your own dat and dyn files and place them in the bin folder located in sdcard/Emu/PICO8/bin. You can also use splore with Wi-Fi to browse and play games by launching it from the App. There are so many wonderful games and they seem to just keep getting better. Pico-8 is a great way for indie game makers to create and share with the world. We cannot say enough good things about Pico-8. Enjoy!
 
 
 
@@ -21,16 +24,5 @@ PICO-8 games will launch native from the roms folder. Place your games in the PI
 	- X = Escape (options).
 	- Menu = Escape (options).
 	- Start = Option
-	- Select = change to mouse mode.
-	
-- in mouse mode: enable and disable mouse mode by pressing d-pad and select
-   
-	- stick = direction.
-	- dpad = move mouse cursor.
-	- A = button X.
-	- B = button O.
-	- R2 = mouse button Left.
-	- L2 = mouse button Right.
-	- X = Escape (options).
-	- Select = change to joypad mode.
+	-L and R also serve as X and O, we forget which is which though :p
    
