@@ -27,6 +27,8 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 "" "Home key directly opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
+"" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh|" ""
+@"We recommend backing up first."
 [Network]
 # below are two dynamic info texts with scripts that print the needed text
 # info text should start with % and follow with quoted command
@@ -45,7 +47,7 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 @"Auto restart when in main menu"
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame on|$HELP$ update disableWifiInGame off" ""
 @"Improves battery life"
-"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/clearwifi.sh|" ""
+"" "Forget all WiFi networks" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh|" ""
 @"Disconnect and clear all networks"
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 "" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot on|$HELP$ update runGSAtBoot off" ""
