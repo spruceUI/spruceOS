@@ -30,6 +30,15 @@ wait_for_syncthing_api() {
     return 1
 }
 
+get_folders() {
+    local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
+    if [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders configured"
+        return 1
+    fi
+    echo "$folders"
+}
+
 force_rescan() {
     log_message "SyncthingCheck: Forcing rescan of all folders for upload..."
     local folders=$(get_folders)
@@ -137,6 +146,15 @@ monitor_sync_status() {
     local mode="$1"
     local folders=$(get_folders)
     local devices=$(get_devices)
+
+    # Check if there are any folders configured
+    if [ $? -ne 0 ] || [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders are configured. Exiting sync check."
+        display -t "Syncthing Check:
+No folders configured" -i "$BG_TREE"
+        sleep 1
+        return 1
+    fi
 
     rm -f /tmp/sync_cancelled
 
