@@ -72,9 +72,6 @@ folders="
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
-/mnt/SDCARD/spruce/settings/gs_max
-/mnt/SDCARD/spruce/settings/idlemon_in_game
-/mnt/SDCARD/spruce/settings/idlemon_in_menu
 /mnt/SDCARD/spruce/settings/spruce.cfg
 "
 
