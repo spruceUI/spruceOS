@@ -62,7 +62,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
 
 "" "Pico-8 Control Profile" "Doubled|Racing|One-handed|Steward" "Doubled|Racing|One-handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile 'Doubled'|$HELP$ update pico8_control_profile 'Racing'|$HELP$ update pico8_control_profile 'One-Handed'|$HELP$ update pico8_control_profile 'Steward'" "$P8_CONTROLLER$"
-@"A-(o) B-(x) L1-(o) R1-(x)"
+@"A-(x) B-(o) L1-(x) R1-(o)"
 
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png on && $F8_PNG$ on|$HELP$ update fake08_allow_png off && $F8_PNG$ off" ""
 @"Also uses cart as box art for Fake08"

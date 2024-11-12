@@ -6,21 +6,21 @@
 
 # Steward
 if [ "$1" -eq 3 ]; then
-	echo -n "A-(o) B-(x) X-(esc) SELECT-(mouse)"
+	echo -n "A-(x) B-(o) X-(esc) SELECT-(mouse)"
 	return 0
 
 # Doubled/Face Buttons
 elif [ "$1" -eq 0 ]; then
-	echo -n "A-(o) B-(x) Y-(o) X-(x)"
+	echo -n "A-(x) B-(o) Y-(x) X-(o)"
 	return 0
 
 # One-handed
 elif [ "$1" -eq 2 ]; then
-	echo -n "A-(o) B-(x) L1-(o) L2-(x)"
+	echo -n "A-(x) B-(o) L1-(x) L2-(o)"
 	return 0
 
 # Racing/Default
 else ### if [ "$1" -eq 1 ]; then
-	echo -n "A-(o) B-(x) L1-(o) R1-(x)"
+	echo -n "A-(x) B-(o) L1-(x) R1-(o)"
 	return 0
 fi
