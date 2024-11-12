@@ -168,12 +168,23 @@ case $EMU_NAME in
 		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
 
-		if [ "$(setting_get "pico8_control_profile")" = "Steward" ]; then
+		P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
+		CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
+
+		if [ "$CONTROL_PROFILE" = "Steward" ]; then
 			export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
 		else
 			export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
 		fi
-		
+
+		if [ "$CONTROL_PROFILE" = "Doubled" ]; then
+			cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
+		elif [ "$CONTROL_PROFILE" = "One-handed" ]; then
+			cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
+		elif [ "$CONTROL_PROFILE" = "Racing" ]; then
+			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
+		fi
+
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		cd "$HOME"

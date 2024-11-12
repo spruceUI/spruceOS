@@ -1,24 +1,26 @@
 #!/bin/sh
 
-P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
+# This script only sets the dynamic text. The actual handling
+# for these controller profiles is done between spruce.cfg and
+# standard_launch.sh.
 
-if [ "$1" = "Steward" ]; then
+# Steward
+if [ "$1" -eq 3 ]; then
 	echo -n "A->(o); B->(x); X->(pause); SELECT->(mouse)"
+	return 0
 
-
-elif [ "$1" = "Doubled" ]; then
+# Doubled/Face Buttons
+elif [ "$1" -eq 0 ]; then
 	echo -n "A->(o); B->(x); Y->(o); X->(x)"
-	cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
+	return 0
 
-
-elif [ "$1" = "One-handed"]; then
+# One-handed
+elif [ "$1" -eq 2 ]; then
 	echo -n "A->(o); B->(x); L1->(o); L2->(x)"
-	cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
+	return 0
 
-
-else ### if [ "$1" = "Racing"]; then
+# Racing/Default
+else ### if [ "$1" -eq 1 ]; then
 	echo -n "A->(o); B->(x); L1->(o); R1->(x)"
-	cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
-
-
+	return 0
 fi
