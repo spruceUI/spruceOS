@@ -27,7 +27,7 @@ syncthing_startup_process() {
 
 
 firststart() {
-    if [ ! -f $appdir/config/config.xml ]; then
+    if [ ! -f $SYNCTHING_DIR/config/config.xml ]; then
         log_message "Syncthing: Config file not found, generating..."
         # Ensure loopback interface is enabled and running as expected
         # So we'll restart it
@@ -45,7 +45,7 @@ firststart() {
 }
 
 repair_config() {
-    local config="$appdir/config/config.xml"
+    local config="$SYNCTHING_DIR/config/config.xml"
 
     if grep -q "<listenAddress>dynamic+https://relays.syncthing.net/endpoint</listenAddress>" "$config"; then
         log_message "Syncthing: Config not generated correctly, manually repairing..."
