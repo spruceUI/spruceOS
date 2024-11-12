@@ -167,7 +167,13 @@ case $EMU_NAME in
 
 		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
-		export LD_LIBRARY_PATH="$HOME"/lib:$LD_LIBRARY_PATH
+
+		if [ "$(setting_get "pico8_control_profile")" = "Steward" ]; then
+			export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
+		else
+			export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
+		fi
+		
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		cd "$HOME"
