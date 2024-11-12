@@ -1,0 +1,3 @@
+// add SDL2 game controller mappings to this file
+4d69796f6f20413330204a6f79737469,Miyoo A30 Joystick,platform:Linux,
+030000005e0400008e0200005e040000,MIYOO Pad1,a:b0,b:b1,x:b5,y:b4,start:b7,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftx:a0,lefty:a1,platform:Linux,
