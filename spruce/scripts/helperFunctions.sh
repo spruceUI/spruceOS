@@ -687,20 +687,22 @@ setting_get(){
 }
 
 
-setting_update(){
+setting_update() {
     [ $# -eq 2 ] || return 1
     key="$1"
     value="$2"
 
     case "$value" in
-    "on"|"true"|"1") value=0 ;;
-    "off"|"false"|"0") value=1 ;;
+    "on" | "true" | "1") value=0 ;;
+    "off" | "false" | "0") value=1 ;;
     esac
 
     if grep -q "^$key=" "$CFG_FILE"; then
         sed -i "s/^$key=.*/$key=$value/" "$CFG_FILE"
     else
-        echo "$key=$value" >> "$CFG_FILE"
+        # Ensure there's a newline at the end of the file before appending
+        sed -i -e '$a\' "$CFG_FILE"
+        echo "$key=$value" >>"$CFG_FILE"
     fi
 }
 
