@@ -6,7 +6,7 @@
 
 # Steward
 if [ "$1" -eq 3 ]; then
-	echo -n "A-(o) B-(x) X-(pause) SELECT-(mouse)"
+	echo -n "A-(o) B-(x) X-(esc) SELECT-(mouse)"
 	return 0
 
 # Doubled/Face Buttons
