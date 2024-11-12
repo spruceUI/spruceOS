@@ -1,5 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
@@ -141,6 +142,7 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
 	log_message "Syncthing is enabled, WiFi connection needed"
 
 	if check_and_connect_wifi; then
+		start_syncthing_process
 		# Dimming screen before syncthing sync check
 		dim_screen &
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
