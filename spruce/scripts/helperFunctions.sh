@@ -85,16 +85,27 @@ auto_regen_tmp_update() {
 }
 
 check_and_connect_wifi() {
-    
     # ########################################################################
     # WARNING: Avoid running this function in-game, it will lead to stuttters!
     # ########################################################################
     
     messages_file="/var/log/messages"
-
-    # Check for connection first
-    if ! ifconfig wlan0 | grep -qE "inet |inet6 "; then
     
+    # More thorough connection check
+    connection_active=0
+    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+        # Additional validation - try to ping a reliable host
+        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+            connection_active=1
+            log_message "Active WiFi connection verified"
+        else
+            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
+            ifconfig wlan0 down  # Force a reconnection attempt
+            connection_active=0
+        fi
+    fi
+    
+    if [ $connection_active -eq 0 ]; then
         log_message "Attempting to connect to WiFi"
         
         # Bring the existing interface down cleanly if its running
@@ -111,7 +122,7 @@ check_and_connect_wifi() {
 Press START to continue anyway."
         {
             while true; do
-                if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
                     echo "Successfully connected to WiFi" >> "$messages_file"
                     break
                 fi
@@ -135,6 +146,8 @@ Press START to continue anyway."
             esac
         done
     fi
+    
+    return 0
 }
 
 # Call this to wait for the user to confirm an action
