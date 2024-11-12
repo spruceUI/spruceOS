@@ -95,7 +95,7 @@ check_and_connect_wifi() {
     connection_active=0
     if ifconfig wlan0 | grep -qE "inet |inet6 "; then
         # Additional validation - try to ping a reliable host
-        if ping -c 1 -W 3 8.8.8.8 >/dev/null 2>&1; then
+        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
             connection_active=1
             log_message "Active WiFi connection verified"
         else
@@ -122,7 +122,7 @@ check_and_connect_wifi() {
 Press START to continue anyway."
         {
             while true; do
-                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 8.8.8.8 >/dev/null 2>&1; then
+                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
                     echo "Successfully connected to WiFi" >> "$messages_file"
                     break
                 fi
