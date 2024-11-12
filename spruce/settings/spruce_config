@@ -4,6 +4,7 @@ $FLAGS=/mnt/SDCARD/spruce/flags$
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
 # Function specific scripts
+$F8_PNG=/mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
@@ -24,12 +25,6 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 
 
 [System]
-"" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home 'Game Switcher'|$HELP$ update tap_home 'In-game menu'|$HELP$ update tap_home 'Exit game'" ""
-@"Excludes NDS, PICO8 & ports"
-"" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home 'Game Switcher'|$HELP$ update hold_home 'In-game menu'|$HELP$ update hold_home 'Exit game'" ""
-@"Excludes NDS, PICO8 & ports"
-"" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
-@"In systems using RetroArch"
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "$HELP$ get idlemon_in_menu '5m'" "$HELP$ update idlemon_in_menu 'Off' && $IDLEMON_MM$ in_menu Off|$HELP$ update idlemon_in_menu '2m' && $IDLEMON_MM$ in_menu 2m|$HELP$ update idlemon_in_menu '5m' && $IDLEMON_MM$ in_menu 5m|$HELP$ update idlemon_in_menu '10m' && $IDLEMON_MM$ in_menu 10m" ""
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "$HELP$ get idlemon_in_game '30m'" "$HELP$ update idlemon_in_game 'Off' && $IDLEMON_MM$ in_game Off|$HELP$ update idlemon_in_game '2m' && $IDLEMON_MM$ in_game 2m|$HELP$ update idlemon_in_game '5m' && $IDLEMON_MM$ in_game 5m|$HELP$ update idlemon_in_game '10m' && $IDLEMON_MM$ in_game 10m|$HELP$ update idlemon_in_game '30m' && $IDLEMON_MM$ in_game 30m" ""
 @"Excludes ports"
@@ -42,11 +37,22 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "-e" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity 'Strong'|$HELP$ update rumble_intensity 'Medium'|$HELP$ update rumble_intensity 'Weak'|$HELP$ update rumble_intensity 'Off'" "$RUMBLE$"
 @"For system notifications"
+
+[Emulators]
+"" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home 'Game Switcher'|$HELP$ update tap_home 'In-game menu'|$HELP$ update tap_home 'Exit game'" ""
+@"Excludes NDS, PICO8 & ports"
+"" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home 'Game Switcher'|$HELP$ update hold_home 'In-game menu'|$HELP$ update hold_home 'Exit game'" ""
+@"Excludes NDS, PICO8 & ports"
+"" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
+@"In systems using RetroArch"
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
+"" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png on && $F8_PNG$ on|$HELP$ update fake08_allow_png off && $F8_PNG$ off" ""
+@"Also uses cart as box art for Fake08"
 "" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$"
 @"We recommend backing up first."
 "" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$"
 @"Use this to trigger a full reset of Emufresh. Helpful if your displayed roms or consoles are incorrect."
+
 [Network]
 # below are two dynamic info texts with scripts that print the needed text
 # info text should start with % and follow with quoted command
@@ -67,6 +73,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 @"Improves battery life"
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
+
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 "" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot on|$HELP$ update runGSAtBoot off" ""
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit on|$HELP$ update runGSOnGameExit off" ""
@@ -79,6 +86,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
+
 [Visible Apps]
 "" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json" ""
 @"Change the boot logo"
