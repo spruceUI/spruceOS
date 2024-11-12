@@ -64,10 +64,6 @@ stop_network() {
     ifconfig lo down
 }
 
-get_folders() {
-    curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"'
-}
-
 get_devices() {
     curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/connections" | jq -r '.connections | keys[]'
 }
