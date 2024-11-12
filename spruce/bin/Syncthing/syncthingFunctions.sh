@@ -7,6 +7,11 @@ SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 # Generic Statup
 # Should only be used in contexts where firststart has already been called
 start_syncthing_process(){
+    if pgrep "syncthing" >/dev/null; then
+        log_message "Syncthing: Already running, skipping start"
+        return
+    fi
+    
     log_message "Syncthing: Starting Syncthing..."
     $SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
 }

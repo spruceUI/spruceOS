@@ -61,6 +61,7 @@ fi
 
 wifi_needed=false
 syncthing_enabled=false
+wifi_connected=false
 
 ##### RAC Check
 if grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
@@ -70,38 +71,36 @@ fi
 
 ##### Syncthing Sync Check, perform only once per session #####
 if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
-	log_message "Syncthing is enabled, WiFi connection needed"
-	wifi_needed=true
-	syncthing_enabled=true
+    log_message "Syncthing is enabled, WiFi connection needed"
+    wifi_needed=true
+    syncthing_enabled=true
 fi
 
-if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
-    
-	/mnt/SDCARD/spruce/scripts/networkservices.sh off &
-	
-	if setting_get "disableWifiInGame"; then
-		
-		if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
-			ifconfig wlan0 down &
-		fi
-  
-		killall wpa_supplicant
-		killall udhcpc
-	fi
-else
-    if $syncthing_enabled; then
-        if check_and_connect_wifi; then
-            start_syncthing_process
-            /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-            flag_add "syncthing_startup_synced"
-        else
-            log_message "Failed to connect to WiFi, skipping Sync check"
-        fi
+# Connect to WiFi if needed for any service
+if $wifi_needed; then
+    if check_and_connect_wifi; then
+        wifi_connected=true
     fi
 fi
 
-if $wifi_needed && ! setting_get "disableWifiInGame"; then
-    check_and_connect_wifi
+# Handle Syncthing sync if enabled
+if $syncthing_enabled && $wifi_connected; then
+    start_syncthing_process
+    /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+    flag_add "syncthing_startup_synced"
+fi
+
+# Handle network service disabling
+if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
+    /mnt/SDCARD/spruce/scripts/networkservices.sh off &
+    
+    if setting_get "disableWifiInGame"; then
+        if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
+            ifconfig wlan0 down &
+        fi
+        killall wpa_supplicant
+        killall udhcpc
+    fi
 fi
 
 flag_add 'emulator_launched'
