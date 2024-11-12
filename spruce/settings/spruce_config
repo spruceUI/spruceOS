@@ -26,62 +26,95 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 
 
 [System]
+
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "$HELP$ get idlemon_in_menu '5m'" "$HELP$ update idlemon_in_menu 'Off' && $IDLEMON_MM$ in_menu Off|$HELP$ update idlemon_in_menu '2m' && $IDLEMON_MM$ in_menu 2m|$HELP$ update idlemon_in_menu '5m' && $IDLEMON_MM$ in_menu 5m|$HELP$ update idlemon_in_menu '10m' && $IDLEMON_MM$ in_menu 10m" ""
+
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "$HELP$ get idlemon_in_game '30m'" "$HELP$ update idlemon_in_game 'Off' && $IDLEMON_MM$ in_game Off|$HELP$ update idlemon_in_game '2m' && $IDLEMON_MM$ in_game 2m|$HELP$ update idlemon_in_game '5m' && $IDLEMON_MM$ in_game 5m|$HELP$ update idlemon_in_game '10m' && $IDLEMON_MM$ in_game 10m|$HELP$ update idlemon_in_game '30m' && $IDLEMON_MM$ in_game 30m" ""
 @"Excludes ports"
+
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown 'Off'|$HELP$ update sleep_powerdown 'Instant'|$HELP$ update sleep_powerdown '2m'|$HELP$ update sleep_powerdown '5m'|$HELP$ update sleep_powerdown '10m'|$HELP$ update sleep_powerdown '30m'|$HELP$ update sleep_powerdown '60m'" ""
 @"Excludes ports
+
 "" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm on|$HELP$ update skip_shutdown_confirm off" ""
 @"While in main menu or native PICO-8"
+
 "" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
+
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent on|$HELP$ update show_battery_percent off" ""
+
 "-e" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
+
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity 'Strong'|$HELP$ update rumble_intensity 'Medium'|$HELP$ update rumble_intensity 'Weak'|$HELP$ update rumble_intensity 'Off'" "$RUMBLE$"
 @"For system notifications"
 
+
 [Emulators]
+
 "" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home 'Game Switcher'|$HELP$ update tap_home 'In-game menu'|$HELP$ update tap_home 'Exit game'" ""
 @"Excludes NDS, PICO8 & ports"
+
 "" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home 'Game Switcher'|$HELP$ update hold_home 'In-game menu'|$HELP$ update hold_home 'Exit game'" ""
 @"Excludes NDS, PICO8 & ports"
+
 "" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA on|$HELP$ update expertRA off" ""
 @"In systems using RetroArch"
+
 "" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ on|$RAHOTKEY$ off" ""
-"" "Pico-8 Control Profile" "Doubled|Racing|One-Handed|Steward" "Doubled|Racing|One-Handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile 'Doubled'|$HELP$ update pico8_control_profile 'Racing'$HELP$ update pico8_control_profile 'One-Handed'$HELP$ update pico8_control_profile 'Steward'" "$P8_CONTROLLER$"
+
+"" "Pico-8 Control Profile" "Doubled|Racing|One-handed|Steward" "Doubled|Racing|One-handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile 'Doubled'|$HELP$ update pico8_control_profile 'Racing'|$HELP$ update pico8_control_profile 'One-Handed'|$HELP$ update pico8_control_profile 'Steward'" "$P8_CONTROLLER$"
 @"A->(o); B->(x); L1->(o); R1->(x)"
+
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png on && $F8_PNG$ on|$HELP$ update fake08_allow_png off && $F8_PNG$ off" ""
 @"Also uses cart as box art for Fake08"
+
 "" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$"
 @"We recommend backing up first."
+
 "" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$"
 @"Use this to trigger a full reset of Emufresh. Helpful if your displayed roms or consoles are incorrect."
 
+
 [Network]
+
 # below are two dynamic info texts with scripts that print the needed text
 # info text should start with % and follow with quoted command
 %"/mnt/SDCARD/spruce/scripts/applySetting/IP.sh"
 %"/mnt/SDCARD/spruce/scripts/applySetting/MAC.sh"
+
 "" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on && $GEOTIME$ && hwclock -w|$HELP$ update enableNetworkTimeSync off" ""
+
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ on|$SAMBA$ off" "$SAMBA$"
 @"Network file-sharing"
+
 "" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ on|$SSH$ off" "$SSH$"
 @"Secure Shell for remote login"
+
 "" "Enable Syncthing" "|" "on|off" "$HELP$ check syncthing" "$SYNCTHING$ on|$SYNCTHING$ off" "$SYNCTHING$"
 @"Sync files across devices"
+
 "" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ on|$SFTPGO$ off" "$SFTPGO$"
 @"User: spruce, Password: happygaming"
+
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame on|$HELP$ update disableNetworkServicesInGame off" ""
 @"Auto restart when in main menu"
+
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame on|$HELP$ update disableWifiInGame off" ""
 @"Improves battery life"
+
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
 
+
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
+
 "" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot on|$HELP$ update runGSAtBoot off" ""
+
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit on|$HELP$ update runGSOnGameExit off" ""
+
 "" "Use boxart instead of screenshots" "|" "on|off" "$HELP$ check alwaysUseBoxartInGS" "$HELP$ update alwaysUseBoxartInGS on|$HELP$ update alwaysUseBoxartInGS off" ""
+
 "" "Maximum number of games" "||" "5|10|20" "$HELP$ get maxGamesInGS 10" "$HELP$ update maxGamesInGS 5|$HELP$ update maxGamesInGS 10|$HELP$ update maxGamesInGS 20" ""
+
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
@@ -90,20 +123,29 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
 
+
 [Visible Apps]
+
 "" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json" ""
 @"Change the boot logo"
+
 "" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json" ""
 @"Download boxart for your games"
+
 "" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
 @"Manage files on your A30"
+
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
 @"Clean up displayed game names"
+
 "" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
 @"Launch a random game"
+
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the current time and date"
+
 "" "Spruce Backup" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceBackup/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceBackup/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceBackup/config.json" ""
 @"Create a backup of your spruce install"
+
 "" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
