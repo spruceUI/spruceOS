@@ -58,6 +58,14 @@ check_installation_validity() {
     return 0
 }
 
+kill_network_services() {
+    killall -9 dropbear
+    killall -9 smbd
+    killall -9 sftpgo
+    killall -9 syncthing
+}
+
+
 verify_7z_content() {
     local archive="$1"
     local required_dirs=".tmp_update App spruce"

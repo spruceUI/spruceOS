@@ -30,6 +30,15 @@ wait_for_syncthing_api() {
     return 1
 }
 
+get_folders() {
+    local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
+    if [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders configured"
+        return 1
+    fi
+    echo "$folders"
+}
+
 force_rescan() {
     log_message "SyncthingCheck: Forcing rescan of all folders for upload..."
     local folders=$(get_folders)
@@ -53,10 +62,6 @@ force_rediscovery() {
 stop_network() {
     log_message "SyncthingCheck: Stopping network interface..."
     ifconfig lo down
-}
-
-get_folders() {
-    curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"'
 }
 
 get_devices() {
@@ -138,6 +143,15 @@ monitor_sync_status() {
     local folders=$(get_folders)
     local devices=$(get_devices)
 
+    # Check if there are any folders configured
+    if [ $? -ne 0 ] || [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders are configured. Exiting sync check."
+        display -t "Syncthing Check:
+No folders configured" -i "$BG_TREE"
+        sleep 1
+        return 1
+    fi
+
     rm -f /tmp/sync_cancelled
 
     log_message "SyncthingCheck: Monitoring sync status in $mode mode"
@@ -149,18 +163,24 @@ Press START to cancel" -i "$BG_TREE"
     if [ "$mode" = "shutdown" ]; then
         force_rescan
         sleep 2
-    elif [ "$mode" = "startup" ]; then
-        force_rediscovery
-        # Give a few seconds for forced discovery to trigger a rescan
-        sleep 4
     fi
 
-    # Check if any devices are online
+    # Always force rediscovery in case service was not running
+    force_rediscovery
+
+    # Give a few seconds for forced discovery to trigger a rescan
+    sleep 5
+
     if ! are_devices_online; then
-        log_message "SyncthingCheck: No devices are online. Exiting sync check."
-        display -t "No devices online" -i "$BG_TREE"
-        sleep 1
-        return 1
+        log_message "SyncthingCheck: No devices found on first attempt, waiting for second attempt..."
+        sleep 2
+        # Second attempt
+        if ! are_devices_online; then
+            log_message "SyncthingCheck: No devices are online after retry. Exiting sync check."
+            display -t "No devices online" -i "$BG_TREE"
+            sleep 1
+            return 1
+        fi
     fi
 
     while true; do
@@ -269,8 +289,6 @@ main() {
             else
                 display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
                 sleep 1
-                stop_network
-                exit 1
             fi
             ;;
         --shutdown)
@@ -278,9 +296,13 @@ main() {
             killall -9 MainUI
             killall -9 principal.sh
 
-            # Add a similar wait_for_syncthing_api function if this proves to cause troubles
-            # Ideally this is not needed on shutdown as the API is already available
-            monitor_sync_status "shutdown"
+            if wait_for_syncthing_api; then
+                monitor_sync_status "shutdown"
+            else
+                display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
+                sleep 1
+            fi
+
             killall -9 syncthing
             ;;
         *)

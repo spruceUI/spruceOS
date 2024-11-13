@@ -1,5 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
@@ -151,11 +152,12 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
         cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level > /sys/devices/virtual/disp/disp/attr/lcdbl
         amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
-    if check_and_connect_wifi; then
-        # Dimming screen before syncthing sync check
-        dim_screen &
-        /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
-    fi
+	if check_and_connect_wifi; then
+		start_syncthing_process
+		# Dimming screen before syncthing sync check
+		dim_screen &
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
+	fi
 
     flag_remove "syncthing_startup_synced"
 fi
