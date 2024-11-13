@@ -1,0 +1,31 @@
+name: Sync RetroArch Config
+
+on:
+  push:
+    paths:
+      - "RetroArch/retroarch.cfg"  # Monitors changes to this specific file
+
+jobs:
+  backup_retroarch_cfg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}  # Check out the branch where the change was made
+
+      - name: Copy retroarch.cfg to target location
+        run: |
+          FILE_TO_COPY="RetroArch/retroarch.cfg"
+          TARGET_PATH="spruce/bin/res/retroarch.cfg"
+
+          # Copy the file to the target location
+          cp "$FILE_TO_COPY" "$TARGET_PATH"
+          
+          # Add, commit, and push the changes if any
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$TARGET_PATH"
+          git commit -m "Sync retroarch.cfg to $TARGET_PATH" || echo "No changes to commit"
+          git push "https://${{ github.token }}@github.com/${{ github.repository }}.git" "${{ github.ref_name }}" || echo "No changes to push"

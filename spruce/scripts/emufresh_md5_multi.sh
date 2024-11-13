@@ -42,23 +42,44 @@ if [ "$1" = "-clearall" ]; then
 	return 0
 fi
 
+# handle show all option
+if [ "$1" = "-showall" ]; then
+	# show all systems
+	find "$roms_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
+		system_name=$(basename "$folder")
+		config_file="$emu_path/$system_name/config.json"
+		sed -i 's/^{{*$/{/' "$config_file"
+	done
+	log_message "emufresh: showed all systems by fixing their config.json"
+
+	# kill MainUI
+	killall -9 MainUI
+
+	# remove flag before exit
+	flag_remove "emufresh"
+
+	# exit with 0
+	return 0
+fi
+
 # check folder PICO8 first
 config_file="$emu_path/PICO8/config.json"
 show_pico8=$(cat "$config_file" | grep -Fc '{{')
-need_restart_mainui=false
+pico8_updated=false
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
 	[ -f "$emu_path/PICO8/bin/pico8_dyn" ]; then
 	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
 	if [ ! $show_pico8 = 0 ]; then
-		need_restart_mainui=true
+		pico8_updated=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
-		sed -i 's/^{{*$/{/' "$config_file"
+ 		rm -f "$roms_path/PICO8/miyoogamelist.xml"
+ 		sed -i 's/^{{*$/{/' "$config_file"
 		echo "show system PICO8" && log_message "emufresh: revealing PICO8 system"
 	fi
 else
 	if [ $show_pico8 = 0 ]; then
 		log_message "emufresh: pico8.dat and pico8_dyn not detected"
-		need_restart_mainui=true
+		pico8_updated=true
 		sed -i 's/^{*$/{{/' "$config_file"
 		echo "hide system PICO8" && log_message "emufresh: hiding PICO8 system"
 	fi
@@ -71,19 +92,13 @@ if [ -f "$md5_path/all.md5" ]; then
 fi
 
 # compute new md5 value for files under Roms
-# except known non-rom files and folders PICO8
-new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "$roms_path/PICO8/*" ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+# except known non-rom files
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is $all_md5" -v
 
 # if no update and no force option is used, exit with 0
-if [ "$new_all_md5" = "$all_md5" ] && [ ! "$1" = "-force" ]; then
+if [ "$new_all_md5" = "$all_md5" ] && [ $pico8_updated = false ] && [ ! "$1" = "-force" ]; then
 	echo "no update" && log_message "emufresh: no update needed. Exiting!"
-	# kill mainUI if pico8 files are updated
-
-	# if [ "$need_restart_mainui" = true ] ; then
-	#	killall -9 MainUI
-	#	echo "kill MainUI"
-	# fi
 
 	# remove flag before exit
 	flag_remove "emufresh"
@@ -96,8 +111,8 @@ else
 	echo "$new_all_md5" >"$md5_path/all.md5"
 fi
 
-# get all rom folders except folders PICO8
-rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d ! -path "$roms_path/PICO8")
+# get all rom folders
+rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d)
 
 # function to check list of rom folders
 check_rom_folders() {
@@ -152,7 +167,7 @@ check_rom_folders() {
 			else
 				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
 				[ "$system_name" = "ARCADE" ] || rm -f "$roms_path/$system_name/miyoogamelist.xml"
-				sed -i 's/^{{*$/{/' "$config_file"
+				[ "$system_name" = "PICO8" ] || sed -i 's/^{{*$/{/' "$config_file"
 				echo "show system $system_name" && log_message "emufresh: Revealing $system_name"
 			fi
 		fi
@@ -173,15 +188,17 @@ check_rom_folders "$folders"
 wait
 echo "all processes finished" && log_message "emufresh complete!"
 
-# kill MainUI to refresh, it should restart by principle.sh very soon
-# killall -9 MainUI
-# echo "kill MainUI"
-# return 0
+# notify user to confirm restarting MainUI
+if pgrep "MainUI" > /dev/null; then
+	# pause MainUI
+	killall -STOP MainUI
 
-if pgrep -x "MainUI" > /dev/null; then
+	# show dialog
 	display -t "New emulators or roms detected, press confirm to restart the menu to see them immediately. Press cancel to see them next time you return to the menu." --confirm
 	if confirm 10 0; then
 		killall -9 MainUI
+	else
+		killall -CONT MainUI
 	fi
 fi
 

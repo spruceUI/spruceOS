@@ -1,7 +1,7 @@
 {
   "pen":3,
   "theme":0,
-  "mode":10,
+  "mode":11,
   "xv":80000,
   "yv":85000,
   "alpha":3,
@@ -30,10 +30,10 @@
   "menu_bg":0,
   "menu_cursor":1,
   "fast_forward":6,
-  "joy_mode":0,
+  "joy_mode":2,
   "joy_dzone":65,
-  "joy_cuskey0": 0,
-  "joy_cuskey1": 1,
-  "joy_cuskey2": 2,
-  "joy_cuskey3": 3
+  "joy_cuskey0":0,
+  "joy_cuskey1":1,
+  "joy_cuskey2":2,
+  "joy_cuskey3":3
 }

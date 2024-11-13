@@ -1,3 +1,21 @@
+acknowledge(){
+    local messages_file="/var/log/messages"
+	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
+
+    while true; do
+        last_line=$(tail -n 1 "$messages_file")
+
+        case "$last_line" in
+            *"enter_pressed"*|*"key 1 57"*|*"key 1 29"*)
+                echo "ACKNOWLEDGED $(date +%s)" >> "$messages_file"
+                break
+                ;;
+        esac
+
+        sleep 0.1
+    done
+}
+
 boost_processing() {
     /mnt/SDCARD/miyoo/utils/utils "performance" 4 1344 384 1080 1
     echo "CPU Mode set to PERFORMANCE"
@@ -39,6 +57,14 @@ check_installation_validity() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Installation appears to be valid"
     return 0
 }
+
+kill_network_services() {
+    killall -9 dropbear
+    killall -9 smbd
+    killall -9 sftpgo
+    killall -9 syncthing
+}
+
 
 verify_7z_content() {
     local archive="$1"

@@ -7,6 +7,11 @@ SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 # Generic Statup
 # Should only be used in contexts where firststart has already been called
 start_syncthing_process(){
+    if pgrep "syncthing" >/dev/null; then
+        log_message "Syncthing: Already running, skipping start"
+        return
+    fi
+    
     log_message "Syncthing: Starting Syncthing..."
     $SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
 }
@@ -27,7 +32,7 @@ syncthing_startup_process() {
 
 
 firststart() {
-    if [ ! -f $appdir/config/config.xml ]; then
+    if [ ! -f $SYNCTHING_DIR/config/config.xml ]; then
         log_message "Syncthing: Config file not found, generating..."
         # Ensure loopback interface is enabled and running as expected
         # So we'll restart it
@@ -45,7 +50,7 @@ firststart() {
 }
 
 repair_config() {
-    local config="$appdir/config/config.xml"
+    local config="$SYNCTHING_DIR/config/config.xml"
 
     if grep -q "<listenAddress>dynamic+https://relays.syncthing.net/endpoint</listenAddress>" "$config"; then
         log_message "Syncthing: Config not generated correctly, manually repairing..."
