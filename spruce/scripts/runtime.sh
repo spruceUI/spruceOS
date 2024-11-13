@@ -1,4 +1,13 @@
 #!/bin/sh
+
+# mnt "/mnt/SDCARD/spruce/scripts/whte_rbt.obj"
+# >access security
+# access: PERMISSION DENIED.
+# >access security grid
+# access: PERMISSION DENIED.
+# >access main security grid
+# access: PERMISSION DENIED.
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 rotate_logs
