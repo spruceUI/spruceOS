@@ -2,6 +2,11 @@
 
 HELPER_MESSAGE="For system notifications"
 
+if [ "$IS_LOADING" = true ] ; then
+    echo -n "$HELPER_MESSAGE"
+    return 0
+fi
+
 if [ -z "$1" ]; then
     return 0
 fi
