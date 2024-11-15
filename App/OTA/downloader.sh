@@ -74,31 +74,62 @@ fi
 # Extract filename from RELEASE_LINK
 FILENAME=$(echo "$RELEASE_LINK" | sed 's/.*\///')
 
-# Download update file
-display --icon "$IMAGE_PATH" -t "Downloading update..."
-download_progress "$SD_CARD/$FILENAME" "$RELEASE_SIZE" &
-download_pid=$!  # Store the PID of the background process
+# Function to verify checksum and handle file cleanup
+verify_checksum() {
+    local file="$1"
+    local expected_checksum="$2"
+    local downloaded_checksum
 
-if ! curl -L -o "$SD_CARD/$FILENAME" "$RELEASE_LINK"; then
-    kill $download_pid  # Kill the progress display if download fails
-    log_message "OTA: Failed to download update file"
-    display --icon "$IMAGE_PATH" -t "Update download failed" --okay
-    rm -rf "$TMP_DIR"
-    exit 1
+    downloaded_checksum=$(md5sum "$file" | cut -d' ' -f1)
+    
+    if [ "$(printf '%s' "$downloaded_checksum")" = "$(printf '%s' "$expected_checksum")" ]; then
+        return 0  # Success
+    else
+        log_message "OTA: Checksum verification failed, received: $downloaded_checksum, expected: $expected_checksum"
+        rm -f "$file"
+        return 1  # Failure
+    fi
+}
+
+# Check if update file already exists
+if [ -f "$SD_CARD/$FILENAME" ]; then
+    log_message "OTA: Update file already exists"
+    if verify_checksum "$SD_CARD/$FILENAME" "$RELEASE_CHECKSUM"; then
+        display --icon "$IMAGE_PATH" -t "Valid update file already exists. Download again anyways?" --confirm
+        if ! confirm; then
+            log_message "OTA: User chose to use existing file"
+            rm -rf "$TMP_DIR"
+            goto_install=true
+        fi
+    else
+        display --icon "$IMAGE_PATH" -t "Existing update file is corrupt. Will download fresh copy." -d 3
+    fi
 fi
 
-kill $download_pid  # Kill the progress display after successful download
+if [ "$goto_install" != "true" ]; then
+    # Download update file
+    display --icon "$IMAGE_PATH" -t "Downloading update..."
+    download_progress "$SD_CARD/$FILENAME" "$RELEASE_SIZE" &
+    download_pid=$!  # Store the PID of the background process
 
-# Verify checksum
-DOWNLOADED_CHECKSUM=$(md5sum "$SD_CARD/$FILENAME" | cut -d' ' -f1)
-display --icon "$IMAGE_PATH" -t "Download complete! Verifying..." -d 3
+    if ! curl -L -o "$SD_CARD/$FILENAME" "$RELEASE_LINK"; then
+        kill $download_pid  # Kill the progress display if download fails
+        log_message "OTA: Failed to download update file"
+        display --icon "$IMAGE_PATH" -t "Update download failed" --okay
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
 
-if [ "$(printf '%s' "$DOWNLOADED_CHECKSUM")" != "$(printf '%s' "$RELEASE_CHECKSUM")" ]; then
-    log_message "OTA: Checksum verification failed, received: $DOWNLOADED_CHECKSUM, expected: $RELEASE_CHECKSUM"
-    display --icon "$IMAGE_PATH" -t "File downloaded but not verified. Try again..." --okay
-    rm -f "$SD_CARD/$FILENAME"
-    rm -rf "$TMP_DIR"
-    exit 1
+    kill $download_pid  # Kill the progress display after successful download
+
+    # Verify checksum
+    display --icon "$IMAGE_PATH" -t "Download complete! Verifying..." -d 3
+    if ! verify_checksum "$SD_CARD/$FILENAME" "$RELEASE_CHECKSUM"; then
+        display --icon "$IMAGE_PATH" -t "File downloaded but not verified. Try again..." --okay
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    vibrate &
 fi
 
 rm -rf "$TMP_DIR"
@@ -106,8 +137,7 @@ rm -rf "$TMP_DIR"
 /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show "$SD_CARD/App/-Updater/config.json"
 
 # Update script call
-vibrate &
-display --icon "$IMAGE_PATH" -t "Download complete! Install?" --confirm
+display --icon "$IMAGE_PATH" -t "Download complete! Install now?" --confirm
 if confirm; then
     log_message "OTA: User confirmed"
     /mnt/SDCARD/Updater/updater.sh
