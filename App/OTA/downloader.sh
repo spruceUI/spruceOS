@@ -107,7 +107,7 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
 fi
 
 
-if ! $goto_install; then
+if [ "$goto_install" != "true" ]; then
     # Check free disk space
     sdcard_mountpoint="$(mount | grep -m 1 "$SD_CARD" | awk '{print $1}')"
     sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
