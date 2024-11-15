@@ -16,11 +16,11 @@ mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 thumbnails.libretro.com > /dev/null 2>&1; then
+if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io  > /dev/null 2>&1; then
     log_message "OTA: No active network connection, exiting."
 	display --icon "$IMAGE_PATH" -t "No active network connection detected, please turn on WiFi and try again." --okay
     rm -rf "$TMP_DIR"
-    exit
+    exit 1
 fi
 
 CURRENT_VERSION=$(get_version)
@@ -106,7 +106,19 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
     fi
 fi
 
-if [ "$goto_install" != "true" ]; then
+
+if ! $goto_install; then
+    # Check free disk space
+    sdcard_mountpoint="$(mount | grep -m 1 "$SD_CARD" | awk '{print $1}')"
+    sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
+    min_install_space=$(((RELEASE_SIZE * 2) + 128))
+    if [ "$free_space" -lt "$min_install_space" ]; then
+        log_message "OTA: Not enough free space on SD card (at least ${min_install_space}MB should be free)"
+        display --icon "$IMAGE_PATH" -t "Insufficient space on SD card. At least ${min_install_space}MB of space should be free." --okay
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+
     # Download update file
     display --icon "$IMAGE_PATH" -t "Downloading update..."
     download_progress "$SD_CARD/$FILENAME" "$RELEASE_SIZE" &
