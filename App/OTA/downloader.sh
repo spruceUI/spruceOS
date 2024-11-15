@@ -91,7 +91,7 @@ kill $download_pid  # Kill the progress display after successful download
 
 # Verify checksum
 DOWNLOADED_CHECKSUM=$(md5sum "$SD_CARD/$FILENAME" | cut -d' ' -f1)
-display --icon "$IMAGE_PATH" -t "Download complete! Verifying..."
+display --icon "$IMAGE_PATH" -t "Download complete! Verifying..." -d 3
 
 if [ "$(printf '%s' "$DOWNLOADED_CHECKSUM")" != "$(printf '%s' "$RELEASE_CHECKSUM")" ]; then
     log_message "OTA: Checksum verification failed, received: $DOWNLOADED_CHECKSUM, expected: $RELEASE_CHECKSUM"
@@ -102,10 +102,16 @@ if [ "$(printf '%s' "$DOWNLOADED_CHECKSUM")" != "$(printf '%s' "$RELEASE_CHECKSU
 fi
 
 rm -rf "$TMP_DIR"
-
-# Update script call
-display --icon "$IMAGE_PATH" -t "Installing update..." -d 3
-# $SD_CARD/Updater/update.sh
-
 # Show updater app
 /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show "$SD_CARD/App/-Updater/config.json"
+
+# Update script call
+vibrate &
+display --icon "$IMAGE_PATH" -t "Download complete! Install?" --confirm
+if confirm; then
+    log_message "OTA: User confirmed"
+    /mnt/SDCARD/Updater/updater.sh
+else
+    log_message "OTA: User did not confirm"
+    exit 0
+fi
