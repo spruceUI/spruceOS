@@ -148,9 +148,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
-log_precise "Starting swap file activation"
 swapon -p 40 "${SWAPFILE}"
-log_precise "Swap file activated"
 
 # Run scripts for initial setup
 #${SCRIPTS_DIR}/forcedisplay.sh

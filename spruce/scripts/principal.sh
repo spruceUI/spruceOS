@@ -38,9 +38,7 @@ while [ 1 ]; do
         flag_remove "lastgame"
 
         # check if emu visibility needs a refresh, before entering MainUI
-        log_precise "Checking for emulator visibility refresh"
         /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
-        log_precise "Emulator visibility refresh complete"
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
@@ -55,9 +53,7 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
-        log_precise "Running percentage show script"
         /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
-        log_precise "Power display complete"
 
         # This is to kill leftover display processes that may be running
         display_kill &
