@@ -184,7 +184,7 @@ case $EMU_NAME in
 			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
 		fi
 
-		if [ "$(setting_get "pico8_stretch")" = "0" ]; then
+		if setting_get "pico8_stretch"; then
 			SCALING="-draw_rect 0,0,480,640"
 		else
 			SCALING=""
@@ -195,9 +195,9 @@ case $EMU_NAME in
 		cd "$HOME"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 		if [ "${GAME##*.}" = "splore" ]; then
-			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" "$SCALING"
+			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 		else
-			pico8_dyn -width 640 -height 480 -scancodes -run "$1" "$SCALING"
+			pico8_dyn -width 640 -height 480 -scancodes -run "$1" $SCALING
 		fi
 		sync
 
