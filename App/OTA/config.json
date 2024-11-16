@@ -1,6 +1,6 @@
 {
   "label": "OTA Updater",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png",
   "launch": "launch.sh",
   "description": "OTA Updater"
 }
