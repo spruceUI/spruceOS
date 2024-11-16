@@ -552,6 +552,7 @@ read_only_check() {
     if [ $(mount | grep SDCARD | cut -d"(" -f 2 | cut -d"," -f1 ) == "ro" ]; then
         log_message "SDCARD is mounted read-only, remounting as read-write"
         mount -o remount,rw /dev/mmcblk0p1 /mnt/SDCARD
+        log_message "SDCARD remounted as read-write"
     fi
 }
 
