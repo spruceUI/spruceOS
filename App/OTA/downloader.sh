@@ -25,10 +25,12 @@ fi
 
 CURRENT_VERSION=$(get_version)
 
+read_only_check
+
 # Download and parse the release info file
 if ! curl -s -o "$TMP_DIR/spruce" "$OTA_URL"; then
     log_message "OTA: Failed to download release info"
-    display --icon "$IMAGE_PATH" -t "Failed to check for updates" --okay
+    display --icon "$IMAGE_PATH" -t "Update check failed, please try again." --okay
     rm -rf "$TMP_DIR"
     exit 1
 fi

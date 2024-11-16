@@ -548,6 +548,13 @@ log_precise() {
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
 }
 
+read_only_check() {
+    if [ $(mount | grep SDCARD | cut -d"(" -f 2 | cut -d"," -f1 ) == "ro" ]; then
+        log_message "SDCARD is mounted read-only, remounting as read-write"
+        mount -o remount,rw /dev/mmcblk0p1 /mnt/SDCARD
+    fi
+}
+
 set_smart() {
     cores_online
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
