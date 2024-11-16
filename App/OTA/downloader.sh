@@ -151,7 +151,7 @@ rm -rf "$TMP_DIR"
 /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show "$SD_CARD/App/-Updater/config.json"
 
 # Update script call
-display --icon "$IMAGE_PATH" -t "Download complete! Install now?" --confirm
+display --icon "$IMAGE_PATH" -t "Download successful! Install now?" --confirm
 if confirm; then
     log_message "OTA: User confirmed"
     /mnt/SDCARD/Updater/updater.sh

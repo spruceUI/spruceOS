@@ -38,21 +38,38 @@ download_progress() {
                 # Convert to minutes and seconds
                 REMAINING_MIN=$((REMAINING_SECONDS / 60))
                 REMAINING_SEC=$((REMAINING_SECONDS % 60))
-                ETA_MSG="ETA: ${REMAINING_MIN}m ${REMAINING_SEC}s"
+                ETA_MSG="Time remaining: ${REMAINING_MIN}m ${REMAINING_SEC}s"
             else
-                ETA_MSG="ETA: calculating..."
+                ETA_MSG="Time remaining: calculating..."
             fi
         else
-            ETA_MSG="ETA: calculating..."
+            ETA_MSG="Time remaining: calculating..."
         fi
         
         PERCENTAGE=$(( (CURRENT_SIZE_MB * 100) / total_size_mb ))
         
         log_message "OTA: Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
         
-        # Update display with ETA
+        # Calculate filled and empty segments of progress bar (20 chars total)
+        FILLED_CHARS=$((PERCENTAGE / 5))
+        EMPTY_CHARS=$((20 - FILLED_CHARS))
+        PROGRESS_BAR=""
+        
+        # Build progress bar string
+        i=0
+        while [ $i -lt $FILLED_CHARS ]; do
+            PROGRESS_BAR="${PROGRESS_BAR}="
+            i=$((i + 1))
+        done
+        while [ $i -lt 20 ]; do
+            PROGRESS_BAR="${PROGRESS_BAR}   "
+            i=$((i + 1))
+        done
+
+        # Update display with ETA and progress bar
         display --icon "$IMAGE_PATH" -t "Downloading update... $PERCENTAGE%
-$ETA_MSG"
+$ETA_MSG
+[${PROGRESS_BAR}]"
         
         # Update previous size for next iteration
         prev_size=$CURRENT_SIZE
