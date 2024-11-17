@@ -4,6 +4,8 @@
 # one or more apostrophes in them, and removes those apostrophes, allowing
 # MainUI to see them.
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 ROMS_DIR="/mnt/SDCARD/Roms"
 
 for SYSTEM in "$ROMS_DIR"/*; do
@@ -13,7 +15,7 @@ for SYSTEM in "$ROMS_DIR"/*; do
 				case "$FILENAME" in
 					*\'*)
 						NEW_FILENAME="${FILENAME//\'/}"
-						mv "$FILENAME" "$NEW_FILENAME"
+						mv "$FILENAME" "$NEW_FILENAME" && log_message "romdirpostrofix.sh: Moved $FILENAME to $NEW_FILENAME."
 					;;
 				esac
 			fi
