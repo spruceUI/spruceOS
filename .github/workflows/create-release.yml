@@ -70,21 +70,35 @@ jobs:
             spruceV${{ steps.get_version.outputs.version }}.zip
           tag_name: v${{ steps.get_version.outputs.version }}
           body: |
-            ## Updating
-
+          
+            Spruce ${{ steps.get_version.outputs.version }}
             ******
 
             Check out our repo of various [free games and ports](https://github.com/spruceUI/Ports-and-Free-Games/releases/latest)!
 
             ******
-
-            Spruce ${{ steps.get_version.outputs.version }}
-
-
             ## Changes/Additions:
 
 
             ## Bug Fixes/Removals:
+
+            ******
+
+            ## Updating
+
+            *****
+
+            [Fresh Install instructions](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
+
+            *****
+
+            [Update from 3.0.0 instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce-vversions-300-and-above)
+
+            *****
+
+            [Update from pre-3.0.0 instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce--versions-230-and-below)
+
+            *****
 
 
             Credits/Thanks
