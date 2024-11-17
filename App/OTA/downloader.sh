@@ -125,6 +125,7 @@ verify_checksum() {
 
 # Check if update file already exists
 if [ -f "$SD_CARD/$FILENAME" ]; then
+    display --icon "$IMAGE_PATH" -t "Update file already exists. Verifying..."
     log_message "OTA: Update file already exists"
     if verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
         display --icon "$IMAGE_PATH" -t "Valid update file already exists. Download again anyways?" --confirm
@@ -132,9 +133,11 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
             log_message "OTA: User chose to use existing file"
             rm -rf "$TMP_DIR"
             goto_install=true
+        else
+            rm -rf "$SD_CARD/$FILENAME"
         fi
     else
-        display --icon "$IMAGE_PATH" -t "Existing update file is corrupt. Will download fresh copy." -d 3
+        display --icon "$IMAGE_PATH" -t "Existing update file isn't valid. Will download fresh copy." -d 3
     fi
 fi
 

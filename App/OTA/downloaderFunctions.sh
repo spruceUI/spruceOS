@@ -127,9 +127,10 @@ download_progress() {
         done
 
         # Update display with ETA and progress bar
-        display --icon "$IMAGE_PATH" -t "Downloading update... $PERCENTAGE%
+        display --icon "$IMAGE_PATH" -t "Downloading update...
 $ETA_MSG
-[${PROGRESS_BAR}]"
+[${PROGRESS_BAR}]
+$PERCENTAGE%" -p 250
 
         # Update previous size for next iteration
         prev_size=$CURRENT_SIZE
