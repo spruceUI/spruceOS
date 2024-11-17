@@ -78,9 +78,10 @@ jobs:
 
             ******
             ## Changes/Additions:
-
+            - Some new things
 
             ## Bug Fixes/Removals:
+            - Fixed some bugs
 
             ******
 
@@ -92,7 +93,7 @@ jobs:
 
             *****
 
-            [Update from 3.0.0 instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce-vversions-300-and-above)
+            [Update from 3.0.0 or newer instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce-vversions-300-and-above)
 
             *****
 
