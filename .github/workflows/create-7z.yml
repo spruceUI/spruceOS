@@ -47,4 +47,5 @@ jobs:
           repository: spruceUI/spruceOSNightlies
           draft: false
           prerelease: true
-          token: ${{ secrets.PAT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
