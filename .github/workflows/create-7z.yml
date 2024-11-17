@@ -40,7 +40,6 @@ jobs:
           files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           repository: spruceUI/spruceOSNightlies
+          token: ${{ secrets.PAT_TOKEN }}
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
