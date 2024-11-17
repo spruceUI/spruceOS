@@ -81,7 +81,7 @@ jobs:
           body: ${{ steps.check_commits.outputs.commits }}
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
-          draft: false
+          draft: true
           prerelease: true
 
       - name: Update OTA file
