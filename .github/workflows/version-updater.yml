@@ -1,0 +1,37 @@
+name: Version File Update
+
+on:
+  push:
+    paths:
+      - 'spruce/spruce'
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Get new version
+        id: get-version
+        run: |
+          VERSION=$(cat spruce/spruce | tr -d '\n\r')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          
+      - name: Update autorun.inf
+        run: |
+          sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' autorun.inf
+          
+      - name: Update language files
+        run: |
+          find miyoo/res/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update version to ${{ steps.get-version.outputs.version }}"
+          git push
