@@ -32,7 +32,12 @@ jobs:
 
       - name: Create 7z archive
         run: |
-          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" README.md
+          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * \
+            -xr!.git* \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
