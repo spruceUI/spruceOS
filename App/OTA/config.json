@@ -1,5 +1,5 @@
 {
-  "label": "OTA Updater",
+  "label": "Check for  Update",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png",
   "launch": "launch.sh",
   "description": "OTA Updater"
