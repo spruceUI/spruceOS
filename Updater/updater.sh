@@ -129,7 +129,7 @@ boost_processing
 
 # Extract version from update file
 log_update_message "Extracting version from update file"
-UPDATE_VERSION=$(echo "$UPDATE_FILE" | sed -n 's/.*spruceV\([0-9.]*\)\.7z/\1/p')
+UPDATE_VERSION=$(echo "$UPDATE_FILE" | sed -n 's/.*spruceV\([0-9.]*\).*/\1/p')
 log_update_message "Extracted update version: $UPDATE_VERSION"
 
 # Check current version
