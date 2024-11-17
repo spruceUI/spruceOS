@@ -10,7 +10,6 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-log_verbose
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
@@ -122,6 +121,6 @@ Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
 log_message "Backup process finished running"
-log_verbose
+
 
 auto_regen_tmp_update
