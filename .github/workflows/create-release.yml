@@ -61,17 +61,27 @@ jobs:
             -x!"spruceV${{ steps.get_version.outputs.version }}.7z"
           7z u "spruceV${{ steps.get_version.outputs.version }}.zip" commit_hash.txt
 
+          # Clone AutoUpdater repo and create EZ Updater bundle
+          git clone https://github.com/spruceUI/AutoUpdater.git
+          cp "spruceV${{ steps.get_version.outputs.version }}.7z" AutoUpdater/
+          7z a -tzip "EZ.Updater.spruceV${{ steps.get_version.outputs.version }}.zip" ./AutoUpdater/* \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
           files: |
+            EZ.Updater.spruceV${{ steps.get_version.outputs.version }}.zip
             spruceV${{ steps.get_version.outputs.version }}.7z
             spruceV${{ steps.get_version.outputs.version }}.zip
           tag_name: v${{ steps.get_version.outputs.version }}
           body: |
           
-            Spruce ${{ steps.get_version.outputs.version }}
+            Spruce v${{ steps.get_version.outputs.version }}
             ******
 
             Check out our repo of various [free games and ports](https://github.com/spruceUI/Ports-and-Free-Games/releases/latest)!
