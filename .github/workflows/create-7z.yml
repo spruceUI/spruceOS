@@ -1,0 +1,114 @@
+name: Create 7z
+
+on:
+  schedule:
+    - cron: '20 5 * * *'
+#  push:
+#    branches: [ Development ]
+
+jobs:
+  create-7z:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Development
+
+      - name: Install 7zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Get version and date
+        id: get_version
+        run: |
+          if [ ! -f "spruce/spruce" ]; then
+            echo "Error: spruce/spruce file not found"
+            exit 1
+          fi
+          echo "version=$(cat spruce/spruce)-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Check for recent commits
+        id: check_commits
+        run: |
+          # Get commits from last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --pretty=format:"- %s (%an)%n")
+          if [ -z "$COMMITS" ]; then
+            echo "No commits in the last 24 hours"
+            exit 1
+          fi
+          echo "commits<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$COMMITS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create 7z archive
+        run: |
+          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * \
+            -xr!.git* \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: success() && steps.check_commits.outcome == 'success'
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.check_commits.outputs.commits }}
+          repository: spruceUI/spruceOSNightlies
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: false
+          prerelease: false
+
+      - name: Update OTA file
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone the OTA repository
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          
+          # Calculate file info
+          CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
+          SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
+          
+          # Read existing file content
+          CONTENT=$(cat ota_repo/OTA/spruce)
+          
+          # Update nightly information while preserving other content
+          echo "$CONTENT" | grep -v "^NIGHTLY_" > ota_repo/OTA/spruce
+          echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> ota_repo/OTA/spruce
+          
+          # Configure git
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          # Commit and push changes
+          git add OTA/spruce
+          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+
+      - name: Delete old releases
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Get all releases sorted by created date (newest first)
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[].id')
+          
+          # Convert to array and keep only releases after the first 3
+          COUNT=0
+          for RELEASE_ID in $RELEASES; do
+            COUNT=$((COUNT + 1))
+            if [ $COUNT -gt 3 ]; then
+              gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
+            fi
+          done
