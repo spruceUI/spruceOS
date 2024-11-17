@@ -1,6 +1,8 @@
 name: Create 7z
 
 on:
+#  schedule:
+#    - cron: '40 3 * * *'
   push:
     branches: [ ReleaseFileAction ]
 
@@ -11,6 +13,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: Development
 
       - name: Install 7zip
         run: |
@@ -35,21 +39,13 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh
 
-      - name: Commit and push 7z
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          git add "spruceV${{ steps.get_version.outputs.version }}.7z"
-          git commit -m "Add spruceV${{ steps.get_version.outputs.version }}.7z"
-          git push
-
-      # - name: Create Release
-      #   id: create_release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: spruceV${{ steps.get_version.outputs.version }}.7z
-      #     tag_name: v${{ steps.get_version.outputs.version }}
-      #     draft: false
-      #     prerelease: false
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          repository: spruceUI/spruceOSNightlies
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
