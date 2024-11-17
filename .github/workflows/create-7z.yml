@@ -3,6 +3,7 @@ name: Create 7z
 on:
   schedule:
     - cron: '10 10 * * *'
+  workflow_dispatch:
 #  push:
 #    branches: [ Development ]
 
@@ -15,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: Development
+          fetch-depth: 0
 
       - name: Install 7zip
         run: |
@@ -29,6 +31,8 @@ jobs:
             exit 1
           fi
           echo "version=$(cat spruce/spruce)-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+          # Get last commit hash and save to file
+          git rev-parse HEAD > commit_hash.txt
 
       - name: Check for commits
         id: check_commits
@@ -48,12 +52,16 @@ jobs:
 
       - name: Create 7z archive
         run: |
-          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * \
-            -xr!.git* \
+          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+            -xr!.git \
+            -xr!.github \
             -x!.gitignore \
             -x!.gitattributes \
             -x!create_spruce_release.bat \
-            -x!create_spruce_release.sh
+            -x!create_spruce_release.sh \
+            -x!commit_hash.txt
+          # Add the commit hash file separately to place it at the root
+          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commit_hash.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
