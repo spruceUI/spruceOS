@@ -2,5 +2,5 @@
   "label": "Check for Updates",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png",
   "launch": "launch.sh",
-  "description": "Check for and apply updates over the Internet"
+  "description": "Check for updates over Wi-Fi"
 }
