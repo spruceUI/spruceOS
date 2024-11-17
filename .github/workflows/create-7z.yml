@@ -7,6 +7,8 @@ on:
 jobs:
   create-7z:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -33,11 +35,13 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: spruce-7z
-          path: spruceV${{ steps.get_version.outputs.version }}.7z
+      - name: Commit and push 7z
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add "spruceV${{ steps.get_version.outputs.version }}.7z"
+          git commit -m "Add spruceV${{ steps.get_version.outputs.version }}.7z"
+          git push
 
       # - name: Create Release
       #   id: create_release
