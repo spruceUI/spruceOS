@@ -1,9 +1,8 @@
 name: Create 7z
 
 on:
-  workflow_run:
-    workflows: [create_zip]
-    types: [completed]
+  push:
+    branches: [ ReleaseFileAction ]
 
 jobs:
   create-7z:
