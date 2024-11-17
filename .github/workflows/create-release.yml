@@ -2,6 +2,12 @@ name: Create Release
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to create release from'
+        required: true
+        default: 'Development'
+        type: string
 
 jobs:
   create-release:
@@ -11,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: Development
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
       - name: Install 7zip
