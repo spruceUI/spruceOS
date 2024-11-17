@@ -21,14 +21,27 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y p7zip-full
 
-      - name: Get version
+      - name: Get version and date
         id: get_version
         run: |
           if [ ! -f "spruce/spruce" ]; then
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
-          echo "version=$(cat spruce/spruce)" >> "$GITHUB_OUTPUT"
+          echo "version=$(cat spruce/spruce)-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Check for recent commits
+        id: check_commits
+        run: |
+          # Get commits from last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --pretty=format:"- %s%n")
+          if [ -z "$COMMITS" ]; then
+            echo "No commits in the last 24 hours"
+            exit 1
+          fi
+          echo "commits<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$COMMITS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create 7z archive
         run: |
@@ -41,9 +54,11 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        if: success() && steps.check_commits.outcome == 'success'
         with:
           files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.check_commits.outputs.commits }}
           repository: spruceUI/spruceOSNightlies
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
