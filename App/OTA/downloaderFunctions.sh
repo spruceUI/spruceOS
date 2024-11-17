@@ -66,6 +66,11 @@ download_progress() {
     # Add start time tracking
     START_TIME=$(date +%s)
     local prev_size=0
+    local downloadBar="/mnt/SDCARD/App/OTA/imgs/downloadBar.png"
+    local downloadFill="/mnt/SDCARD/App/OTA/imgs/downloadFill.png"
+    # Bar slider, 0.15 is 0, 0.85 is 100
+    local fill_scale_int=15  # 0.15 * 100
+    
 
     # Convert MB to bytes (1MB = 1048576 bytes)
     log_message "OTA: Total size: $total_size_mb MB"
@@ -110,27 +115,16 @@ download_progress() {
 
         log_message "OTA: Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
 
-        # Calculate filled and empty segments of progress bar (20 chars total)
-        FILLED_CHARS=$((PERCENTAGE / 5))
-        EMPTY_CHARS=$((20 - FILLED_CHARS))
-        PROGRESS_BAR=""
+        # Calculate fill_scale_int based on percentage (15 to 85 range)
+        # 0% = 15, 100% = 85, linear interpolation
+        fill_scale_int=$((15 + (PERCENTAGE * 70 / 100)))
 
-        # Build progress bar string
-        i=0
-        while [ $i -lt $FILLED_CHARS ]; do
-            PROGRESS_BAR="${PROGRESS_BAR}="
-            i=$((i + 1))
-        done
-        while [ $i -lt 20 ]; do
-            PROGRESS_BAR="${PROGRESS_BAR}   "
-            i=$((i + 1))
-        done
+        display -t "Downloading update...
+        
 
-        # Update display with ETA and progress bar
-        display --icon "$IMAGE_PATH" -t "Downloading update...
-$ETA_MSG
-[${PROGRESS_BAR}]
-$PERCENTAGE%" -p 250
+        
+$PERCENTAGE%
+$ETA_MSG" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 220 left --add-image $downloadBar 1.0 240 middle
 
         # Update previous size for next iteration
         prev_size=$CURRENT_SIZE

@@ -319,8 +319,6 @@ display() {
     local additional_images=""
     local position_set=false
 
-    display_kill
-
     while [[ $# -gt 0 ]]; do
         case $1 in
             -i|--image) image="$2"; shift ;;
@@ -345,8 +343,8 @@ display() {
                 shift 
                 ;;
             --add-image) 
-                additional_images="$additional_images $2 $3 $4"
-                shift 3
+                additional_images="$additional_images \"$2\" $3 $4 $5"
+                shift 4
                 ;;
             *) log_message "Unknown option: $1"; return 1 ;;
         esac 
@@ -384,6 +382,8 @@ display() {
     if [ -n "$additional_images" ]; then
         command="$command $additional_images"
     fi
+
+    display_kill
 
     # Execute the command in the background if delay is 0
     if [[ "$delay" -eq 0 ]]; then
