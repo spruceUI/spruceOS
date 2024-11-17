@@ -2,7 +2,7 @@ name: Create 7z
 
 on:
   schedule:
-    - cron: '20 5 * * *'
+    - cron: '10 10 * * *'
 #  push:
 #    branches: [ Development ]
 
@@ -30,18 +30,21 @@ jobs:
           fi
           echo "version=$(cat spruce/spruce)-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
 
-      - name: Check for recent commits
+      - name: Check for commits
         id: check_commits
         run: |
-          # Get commits from last 24 hours
-          COMMITS=$(git log --since="24 hours ago" --pretty=format:"- %s (%an)%n")
+          # Get all commits from last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
           fi
-          echo "commits<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$COMMITS" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          # Write commits to output
+          {
+            echo "commits<<EOF"
+            echo "$COMMITS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create 7z archive
         run: |
