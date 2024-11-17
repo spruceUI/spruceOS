@@ -8,8 +8,8 @@ EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
 if flag_check "developer_mode" || flag_check "designer_mode"; then
    log_message "Developer mode enabled"
     # Turn off idle monitors
-    echo -n Off > /mnt/SDCARD/spruce/settings/idlemon_in_menu 
-    echo -n Off > /mnt/SDCARD/spruce/settings/idlemon_in_game
+    update_setting "idlemon_in_game" "Off"
+    update_setting "idlemon_in_menu" "Off"
     
     # Enable certain network services
     update_setting "samba" "on"
