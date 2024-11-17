@@ -1,0 +1,52 @@
+name: Create 7z
+
+on:
+  workflow_run:
+    workflows: [create_zip]
+    types: [completed]
+
+jobs:
+  create-7z:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install 7zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ ! -f "spruce/spruce" ]; then
+            echo "Error: spruce/spruce file not found"
+            exit 1
+          fi
+          echo "version=$(cat spruce/spruce)" >> "$GITHUB_OUTPUT"
+
+      - name: Create 7z archive
+        run: |
+          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * \
+            -xr!.git* \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spruce-7z
+          path: spruceV${{ steps.get_version.outputs.version }}.7z
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: spruceV${{ steps.get_version.outputs.version }}.7z
+      #     tag_name: v${{ steps.get_version.outputs.version }}
+      #     draft: false
+      #     prerelease: false
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
