@@ -2,7 +2,7 @@ name: Create 7z
 
 on:
   schedule:
-    - cron: '17 17 * * *'
+    - cron: '10 10 * * *'
 #  push:
 #    branches: [ Development ]
 
