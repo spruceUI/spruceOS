@@ -34,7 +34,7 @@ jobs:
         id: check_commits
         run: |
           # Get commits from last 24 hours
-          COMMITS=$(git log --since="24 hours ago" --pretty=format:"- %s%n")
+          COMMITS=$(git log --since="24 hours ago" --pretty=format:"- %s (%an)%n")
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
@@ -63,3 +63,52 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
           prerelease: false
+
+      - name: Update OTA file
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone the OTA repository
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          
+          # Calculate file info
+          CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
+          SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
+          
+          # Read existing file content
+          CONTENT=$(cat ota_repo/OTA/spruce)
+          
+          # Update nightly information while preserving other content
+          echo "$CONTENT" | grep -v "^NIGHTLY_" > ota_repo/OTA/spruce
+          echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> ota_repo/OTA/spruce
+          
+          # Configure git
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          # Commit and push changes
+          git add OTA/spruce
+          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+
+      - name: Delete old releases
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Get all releases sorted by created date (newest first)
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[].id')
+          
+          # Convert to array and keep only releases after the first 3
+          COUNT=0
+          for RELEASE_ID in $RELEASES; do
+            COUNT=$((COUNT + 1))
+            if [ $COUNT -gt 3 ]; then
+              gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
+            fi
+          done
