@@ -1,4 +1,4 @@
-name: Create 7z
+name: Create Nightly
 
 on:
   schedule:
