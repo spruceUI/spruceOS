@@ -34,18 +34,22 @@ developer_mode_task() {
             sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
         fi
         
-        if setting_get "samba"; then
+        if setting_get "samba" || setting_get "dropbear"; then
             # Loop until WiFi is connected
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
-                sleep 1
+                sleep 0.5
             done
             
-            # Start Samba if it's not running
-            if ! pgrep "smbd" > /dev/null; then
-                log_message "Network services: Samba detected not running, starting..."
+            if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
+                log_message "Dev Mode: Samba starting..."
                 start_samba_process
+            fi
+
+            if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
+                log_message "Dev Mode: Dropbear starting..."
                 start_dropbear_process
             fi
+            
         fi
     else
         # Remove the line if it exists and no flags are present
