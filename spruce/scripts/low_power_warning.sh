@@ -37,6 +37,16 @@ while true; do
     CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
     PERCENT="$(setting_get "low_power_warning_percent")"
 
+    # force a safe shutdown at 1% regardless of settings
+    if [ "$CAPACITY" -le 1 ]; then
+        if ! setting_get "skip_shutdown_confirm"; then
+            setting_update "skip_shutdown_confirm" on
+            flag_add "forced_shutdown"
+        fi
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh
+        exit
+    fi
+
     # disable script if turned off in spruce.cfg
     [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
 

@@ -51,6 +51,10 @@ flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
+if flag_check "forced_shutdown"; then
+    flag_remove "forced_shutdown"
+    setting_update "skip_shutdown_confirm" off
+fi
 
 log_message " " -v
 log_message "---------Starting up---------"
