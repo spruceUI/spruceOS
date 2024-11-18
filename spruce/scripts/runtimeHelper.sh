@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Function to check and hide the Update App if necessary
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -10,6 +11,7 @@ check_and_handle_firmware_app() {
     fi
 }
 
+# Function to check and hide the Update App if necessary
 check_and_hide_update_app() {
     . /mnt/SDCARD/Updater/updaterFunctions.sh
     if ! check_for_update_file; then
@@ -22,11 +24,26 @@ check_and_hide_update_app() {
 }
 
 DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
+
+
 developer_mode_task() {
     if flag_check "developer_mode" || flag_check "designer_mode"; then
         # Add developer menu option to spruce_config if it doesn't exist
         if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
             sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
+        fi
+        
+        if setting_get "samba"; then
+            # Loop until WiFi is connected
+            while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
+                sleep 1
+            done
+            
+            # Start Samba if it's not running
+            if ! pgrep "smbd" > /dev/null; then
+                log_message "Network services: Samba detected not running, starting..."
+                start_samba_process
+            fi
         fi
     else
         # Remove the line if it exists and no flags are present
