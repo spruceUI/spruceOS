@@ -35,7 +35,7 @@ CURRENT_VERSION=$(get_version)
 read_only_check
 
 # Download and parse the release info file
-if ! curl -S -s -o "$TMP_DIR/spruce" "$OTA_URL" 2>"$TMP_DIR/curl_error"; then
+if ! curl -k -S -s -o "$TMP_DIR/spruce" "$OTA_URL" 2>"$TMP_DIR/curl_error"; then
     error_msg=$(cat "$TMP_DIR/curl_error")
     log_message "OTA: Failed to download release info - Error: $error_msg"
     display --icon "$IMAGE_PATH" -t "Update check failed, could not get update info from server. Please try again." --okay
@@ -166,7 +166,7 @@ if [ "$goto_install" != "true" ]; then
     download_progress "$SD_CARD/$FILENAME" "$TARGET_SIZE" &
     download_pid=$! # Store the PID of the background process
 
-    if ! curl -L -o "$SD_CARD/$FILENAME" "$TARGET_LINK" 2>"$TMP_DIR/curl_error"; then
+    if ! curl -k -L -o "$SD_CARD/$FILENAME" "$TARGET_LINK" 2>"$TMP_DIR/curl_error"; then
         kill $download_pid # Kill the progress display if download fails
         error_msg=$(cat "$TMP_DIR/curl_error")
         log_message "OTA: Failed to download update file - Error: $error_msg"
