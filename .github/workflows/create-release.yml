@@ -46,7 +46,9 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!commit_hash.txt
+            -x!commit_hash.txt \
+            -x!spruce/flags/developer_mode \
+            -x!spruce/flags/developer_mode.lock
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commit_hash.txt
 
           # Create zip archive with same exclusions plus the 7z file
@@ -58,6 +60,8 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
             -x!commit_hash.txt \
+            -x!spruce/flags/developer_mode \
+            -x!spruce/flags/developer_mode.lock \
             -x!"spruceV${{ steps.get_version.outputs.version }}.7z"
           7z u "spruceV${{ steps.get_version.outputs.version }}.zip" commit_hash.txt
 
