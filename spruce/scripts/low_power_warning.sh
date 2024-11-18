@@ -3,11 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
-PERCENT="$(setting_get "low_power_warning_percent")"
 SLEEP=30
-
-# disable script if turned off in spruce.cfg
-[ "$PERCENT" = "Off" ] && exit
 
 dot_duration=0.2
 dash_duration=0.6
@@ -44,8 +40,12 @@ morse_code_sos() {
 
 while true; do
     CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+    PERCENT="$(setting_get "low_power_warning_percent")"
 
-    if [ "$CAPACITY" -le $PERCENT ]; then 
+    # disable script if turned off in spruce.cfg
+    [ "$PERCENT" = "Off" ] && continue
+    
+    if [ "$CAPACITY" -le $PERCENT ]; then
         vibrate_count=0
         flag_added=false
         while [ "$CAPACITY" -le $PERCENT ]; do
