@@ -17,15 +17,11 @@ morse_code_sos() {
     for symbol in "$@"; do
         case $symbol in
             ".") echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
-                 if [ "$vibrate" = "true" ]; then
-                     echo 100 > /sys/devices/virtual/timed_output/vibrator/enable
-                 fi
+                 [ "$vibrate" = "true" ] && vibrate 100
                  sleep $dot_duration
                  ;;
             "-") echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
-                 if [ "$vibrate" = "true" ]; then
-                     echo 100 > /sys/devices/virtual/timed_output/vibrator/enable
-                 fi
+                 [ "$vibrate" = "true" ] && vibrate 100
                  sleep $dash_duration
                  ;;
         esac
@@ -44,7 +40,7 @@ while true; do
 
     # disable script if turned off in spruce.cfg
     [ "$PERCENT" = "Off" ] && continue
-    
+
     if [ "$CAPACITY" -le $PERCENT ]; then
         vibrate_count=0
         flag_added=false
