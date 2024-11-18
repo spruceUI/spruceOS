@@ -2,6 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
+. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 
 EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
 
@@ -17,6 +18,9 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
     update_setting "sftpgo" "on"
     #update_setting "enableNetworkTimeSync" "on"
     
+    # Dropbear first time setup and start
+    first_time_setup &
+
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
 fi
