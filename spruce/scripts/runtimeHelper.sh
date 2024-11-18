@@ -2,6 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -43,6 +44,7 @@ developer_mode_task() {
             if ! pgrep "smbd" > /dev/null; then
                 log_message "Network services: Samba detected not running, starting..."
                 start_samba_process
+                start_dropbear_process
             fi
         fi
     else
