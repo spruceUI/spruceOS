@@ -12,13 +12,20 @@ TMP_DIR="$SD_CARD/App/OTA/tmp"
 
 display --icon "$IMAGE_PATH" -t "Checking for updates..."
 
+VERSION="$(cat /usr/miyoo/version)"
+if [ "$VERSION" -lt 20240713100458 ]; then
+    sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+    display --icon "$IMAGE_PATH" -t "Firmware version is too old. Please update your firmware to 20240713100458 or later." --okay
+    exit 1
+fi
+
 mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io  > /dev/null 2>&1; then
+if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io >/dev/null 2>&1; then
     log_message "OTA: No active network connection, exiting."
-	display --icon "$IMAGE_PATH" -t "No active network connection detected, please turn on WiFi and try again." --okay
+    display --icon "$IMAGE_PATH" -t "No active network connection detected, please turn on WiFi and try again." --okay
     rm -rf "$TMP_DIR"
     exit 1
 fi
@@ -114,13 +121,13 @@ verify_checksum() {
     local downloaded_checksum
 
     downloaded_checksum=$(md5sum "$file" | cut -d' ' -f1)
-    
+
     if [ "$(printf '%s' "$downloaded_checksum")" = "$(printf '%s' "$expected_checksum")" ]; then
-        return 0  # Success
+        return 0 # Success
     else
         log_message "OTA: Checksum verification failed, received: $downloaded_checksum, expected: $expected_checksum"
         rm -f "$file"
-        return 1  # Failure
+        return 1 # Failure
     fi
 }
 
@@ -142,7 +149,6 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
     fi
 fi
 
-
 if [ "$goto_install" != "true" ]; then
     # Check free disk space
     sdcard_mountpoint="$(mount | grep -m 1 "$SD_CARD" | awk '{print $1}')"
@@ -158,10 +164,10 @@ if [ "$goto_install" != "true" ]; then
     # Download update file
     display --icon "$IMAGE_PATH" -t "Downloading update..."
     download_progress "$SD_CARD/$FILENAME" "$TARGET_SIZE" &
-    download_pid=$!  # Store the PID of the background process
+    download_pid=$! # Store the PID of the background process
 
     if ! curl -L -o "$SD_CARD/$FILENAME" "$TARGET_LINK" 2>"$TMP_DIR/curl_error"; then
-        kill $download_pid  # Kill the progress display if download fails
+        kill $download_pid # Kill the progress display if download fails
         error_msg=$(cat "$TMP_DIR/curl_error")
         log_message "OTA: Failed to download update file - Error: $error_msg"
         display --icon "$IMAGE_PATH" -t "Update download failed" --okay
@@ -169,7 +175,7 @@ if [ "$goto_install" != "true" ]; then
         exit 1
     fi
 
-    kill $download_pid  # Kill the progress display after successful download
+    kill $download_pid # Kill the progress display after successful download
 
     # Verify checksum
     display --icon "$IMAGE_PATH" -t "Download complete! Verifying..." -d 3
@@ -194,5 +200,3 @@ else
     log_message "OTA: User did not confirm"
     exit 0
 fi
-
-
