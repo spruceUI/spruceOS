@@ -8,7 +8,6 @@ SLEEP=30
 dot_duration=0.2
 dash_duration=0.6
 intra_char_gap=0.2
-inter_char_gap=0.6
 inter_word_gap=1.4
 
 morse_code_sos() {
@@ -16,16 +15,16 @@ morse_code_sos() {
     shift
     for symbol in "$@"; do
         case $symbol in
-            ".") echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+            ".") echo 1 > ${LED_PATH}/brightness
                  [ "$vibrate" = "true" ] && vibrate 100
                  sleep $dot_duration
                  ;;
-            "-") echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+            "-") echo 1 > ${LED_PATH}/brightness
                  [ "$vibrate" = "true" ] && vibrate 100
                  sleep $dash_duration
                  ;;
         esac
-        echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+        echo 0 > ${LED_PATH}/brightness
         if [ "$vibrate" = "true" ]; then
             echo 0 > /sys/devices/virtual/timed_output/vibrator/enable
         fi
