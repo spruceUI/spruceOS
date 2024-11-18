@@ -1,11 +1,13 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
-PERCENT=4
+PERCENT="$(setting_get "low_power_warning_percent")"
 SLEEP=30
 
-
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+# disable script if turned off in spruce.cfg
+[ "$PERCENT" = "Off" ] && exit
 
 dot_duration=0.2
 dash_duration=0.6
