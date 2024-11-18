@@ -35,7 +35,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown '_VALUE_'" ""
 @"Excludes ports
 
-"" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'; kill -9 $(pgrep -f low_power_warning.sh); /mnt/SDCARD/spruce/scripts/low_power_warning.sh" ""
+"" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'; kill -9 $(pgrep -f low_power_warning.sh); sleep 10 && /mnt/SDCARD/spruce/scripts/low_power_warning.sh &" ""
 
 "" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm _VALUE_" ""
 @"While in main menu or native PICO-8"
