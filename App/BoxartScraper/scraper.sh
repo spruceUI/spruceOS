@@ -281,6 +281,9 @@ for sys_dir in "$roms_dir"/*/; do
         rom_name="${rom_file_name%.*}"
         image_path="${sys_dir}Imgs/$rom_name.png"
 
+        # Create Imgs directory if it doesn't exist
+        mkdir -p "${sys_dir}Imgs"
+
         if [ -f "$image_path" ]; then
             skip_count=$((skip_count + 1))
             continue
@@ -295,7 +298,7 @@ for sys_dir in "$roms_dir"/*/; do
 
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
         echo "Downloading $boxart_url"
-        wget -q -O "$image_path" "$boxart_url" 2>&1 || rm -f "$image_path" # Remove image if not found
+        curl -k -s -o "$image_path" "$boxart_url" || rm -f "$image_path" # Remove image if not found
 
         if [ -f "$image_path" ]; then
             scraped_count=$((scraped_count + 1))
