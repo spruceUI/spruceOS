@@ -38,7 +38,7 @@ while true; do
     PERCENT="$(setting_get "low_power_warning_percent")"
 
     # disable script if turned off in spruce.cfg
-    [ "$PERCENT" = "Off" ] && continue
+    [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
 
     if [ "$CAPACITY" -le $PERCENT ]; then
         vibrate_count=0
