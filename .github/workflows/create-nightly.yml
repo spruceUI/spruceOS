@@ -31,8 +31,13 @@ jobs:
             exit 1
           fi
           echo "version=$(cat spruce/spruce)-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-          # Get last commit hash and save to file
-          git rev-parse HEAD > commit_hash.txt
+          # Get last commit hash and commits, save to file
+          {
+            echo "Last commit: $(git rev-parse HEAD)"
+            echo ""
+            echo "Changes in last 24 hours:"
+            git log --since="24 hours ago" --pretty=format:'- %s (%an)'
+          } > commits_nightly.txt
 
       - name: Check for commits
         id: check_commits
@@ -50,6 +55,22 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Update version in language files
+        run: |
+          # Get the version-date string
+          VERSION="${{ steps.get_version.outputs.version }}"
+          
+          # Find and update all .lang files
+          find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
+            for file do
+              # Create temp file
+              tmp=$(mktemp)
+              # Replace version string, preserving the v prefix
+              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$VERSION/" "$file" > "$tmp"
+              mv "$tmp" "$file"
+            done
+          ' sh {} +
+
       - name: Create 7z archive
         run: |
           7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
@@ -59,9 +80,9 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!commit_hash.txt
-          # Add the commit hash file separately to place it at the root
-          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commit_hash.txt
+            -x!commits_nightly.txt
+          # Add the commits file separately to place it at the root
+          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -96,6 +117,7 @@ jobs:
           echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> ota_repo/OTA/spruce
           echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> ota_repo/OTA/spruce
           echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> ota_repo/OTA/spruce
+          echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
           
           # Configure git
           cd ota_repo
