@@ -1,6 +1,6 @@
 {
   "label": "Check for Updates",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/updater.png",
   "launch": "launch.sh",
   "description": "Check for updates over Wi-Fi"
 }
