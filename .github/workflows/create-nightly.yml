@@ -69,7 +69,7 @@ jobs:
               sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
               mv "$tmp" "$file"
             done
-          ' sh {} "$VERSION" +
+          ' sh "$VERSION" {} +
 
       - name: Create 7z archive
         run: |
