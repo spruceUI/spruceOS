@@ -50,10 +50,11 @@ while true; do
     # disable script if turned off in spruce.cfg
     [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
 
-    if [ "$CAPACITY" -le $PERCENT ]; then
+    if [ "$CAPACITY" -le "$PERCENT" ]; then
         vibrate_count=0
         flag_added=false
-        while [ "$CAPACITY" -le $PERCENT ]; do
+        while [ "$CAPACITY" -le "$PERCENT" ]; do
+
             if [ "$vibrate_count" -lt 2 ]; then
                 morse_code_sos "true" "." "." "." "-" "-" "-" "." "." "."
                 vibrate_count=$((vibrate_count + 1))
@@ -64,7 +65,22 @@ while true; do
                 fi
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
             fi
+
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+            PERCENT="$(setting_get "low_power_warning_percent")"
+
+            # force a safe shutdown at 1% regardless of settings
+            if [ "$CAPACITY" -le 1 ]; then
+                if ! setting_get "skip_shutdown_confirm"; then
+                    setting_update "skip_shutdown_confirm" on
+                    flag_add "forced_shutdown"
+                fi
+                /mnt/SDCARD/spruce/scripts/save_poweroff.sh
+                exit
+            fi
+
+            # disable script if turned off in spruce.cfg
+            [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
         done
 
     elif flag_check "ledon"; then
