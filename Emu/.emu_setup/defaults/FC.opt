@@ -3,4 +3,4 @@
 export CORE="fceumm"
 export MODE="smart"
 
-export scaling_min_freq=408000
+export scaling_min_freq=312000
