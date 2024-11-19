@@ -66,10 +66,10 @@ jobs:
               # Create temp file
               tmp=$(mktemp)
               # Replace version string, preserving the v prefix
-              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$VERSION/" "$file" > "$tmp"
+              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
               mv "$tmp" "$file"
             done
-          ' sh {} +
+          ' sh {} "$VERSION" +
 
       - name: Create 7z archive
         run: |
