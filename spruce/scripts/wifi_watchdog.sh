@@ -21,22 +21,19 @@ reset_wifi() {
     log_message "WiFi Watchdog: Resetting Wi-Fi on $WIFI_INTERFACE"
     
     # Bring the Wi-Fi interface down
-    ifconfig "$WIFI_INTERFACE" down
-    sleep 2  
+    ifconfig "$WIFI_INTERFACE" down 
     killall wpa_supplicant
     killall udhcpc
-    sleep 2
     
     # Bring the Wi-Fi interface back up
     ifconfig "$WIFI_INTERFACE" up
-    sleep    2  
+    sleep .5
     wpa_supplicant -B -i "$WIFI_INTERFACE" -c /config/wpa_supplicant.conf
-    udhcpc -i "$WIFI_INTERFACE" &
-    sleep 5  # Wait for DHCP 
+    udhcpc -i "$WIFI_INTERFACE" & 
     log_message "WiFi Watchdog: Wi-Fi reset completed."
     
     #Bring up network services
-    nice -n 15 /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    /mnt/SDCARD/spruce/scripts/networkservices.sh &
 }
 
 # Check if Wi-Fi is up and connected
@@ -60,7 +57,7 @@ check_wifi() {
             attempt_count=0
 			
 			# Check network services in the case of save/resume
-			nice -n 15 /mnt/SDCARD/spruce/scripts/networkservices.sh &
+			/mnt/SDCARD/spruce/scripts/networkservices.sh &
         fi
     #else
         # log_message "WiFi Watchdog: Global Wi-Fi option is disabled. Skipping Wi-Fi check."
@@ -86,11 +83,16 @@ manage_reconnection() {
     fi
 }
 
+# Start network services on first start
+if [ "$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
+	/mnt/SDCARD/spruce/scripts/networkservices.sh &
+fi
+
 # Infinite loop to keep monitoring by process and Wi-Fi status
 while true; do
     if pgrep "$PROCESS_NAME" > /dev/null; then
         if "$first_run"; then
-            sleep 20 # Give time for initial connection to Wifi upon boot
+		    sleep 20 # Give time for initial connection to Wifi upon boot
             first_run=false
         fi   
         check_wifi
