@@ -65,7 +65,7 @@ TARGET_SIZE="$RELEASE_SIZE"
 if flag_check "developer_mode"; then
     display --icon "$IMAGE_PATH" -t "Developer mode detected. Would you like to use the latest nightly instead?
 Latest nightly: $NIGHTLY_VERSION
-Current release version: $RELEASE_VERSION" -p 220 --confirm
+Public release version: $RELEASE_VERSION" -p 220 --confirm
     if confirm; then
         log_message "OTA: Developer chose nightly builds"
         TARGET_VERSION="$NIGHTLY_VERSION"
@@ -94,7 +94,7 @@ if [ "$SKIP_VERSION_CHECK" = true ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSI
 else
     log_update_message "Current version is up to date"
     display --icon "$IMAGE_PATH" -t "System is up to date
-Current version: $CURRENT_VERSION
+Installed version: $CURRENT_VERSION
 Latest version: $TARGET_VERSION" --okay
     rm -rf "$TMP_DIR"
     exit 0
