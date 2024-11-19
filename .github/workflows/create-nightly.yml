@@ -30,7 +30,7 @@ jobs:
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
-          VERSION="$(cat spruce/spruce)"
+          VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
           # Get last commit hash and commits, save to file
           {
