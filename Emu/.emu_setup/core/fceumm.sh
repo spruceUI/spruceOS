@@ -10,12 +10,11 @@ display -i "$BG" -t "Core changed to fceumm"
 
 if [ "$EMU_NAME" = "FC" ]; then
     sed -i 's|"Emu Core: fceumm-(✓NESTOPIA)-quicknes"|"Emu Core: (✓FCEUMM)-nestopia-quicknes"|g' "$CONFIG"
-    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/fceumm.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"|g' "$CONFIG"
 elif [ "$EMU_NAME" = "FDS" ]; then
     sed -i 's|"Emu Core: fceumm-(✓NESTOPIA)"|"Emu Core: (✓FCEUMM)-nestopia"|g' "$CONFIG"
-    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/fceumm.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"|g' "$CONFIG"
 fi
 
+sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/fceumm.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/nestopia.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"fceumm\"|g' "$SYS_OPT"
 
 sleep 2
