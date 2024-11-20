@@ -64,13 +64,15 @@ TARGET_LINK="$RELEASE_LINK"
 TARGET_SIZE="$RELEASE_SIZE"
 TARGET_INFO="$RELEASE_INFO"
 
-# Check if developer mode is enabled and ask about nightly builds
-if flag_check "developer_mode"; then
-    display --icon "$IMAGE_PATH" -t "Developer mode detected. Would you like to use the latest nightly instead?
+# Check if developer mode or tester mode is enabled and ask about nightly builds
+if flag_check "developer_mode" || flag_check "tester_mode"; then
+    mode="Developer"
+    [ "$(flag_check "tester_mode")" = "true" ] && mode="Tester"
+    display --icon "$IMAGE_PATH" -t "$mode mode detected. Would you like to use the latest nightly instead?
 Latest nightly: $NIGHTLY_VERSION
 Public release version: $RELEASE_VERSION" -p 220 --confirm
     if confirm; then
-        log_message "OTA: Developer chose nightly builds"
+        log_message "OTA: $mode chose nightly builds"
         TARGET_VERSION="$NIGHTLY_VERSION"
         TARGET_CHECKSUM="$NIGHTLY_CHECKSUM"
         TARGET_LINK="$NIGHTLY_LINK"
@@ -80,6 +82,13 @@ Public release version: $RELEASE_VERSION" -p 220 --confirm
             TARGET_INFO="https://github.com/spruceUI/spruceOSNightlies/releases/latest"
         fi
     fi
+fi
+
+# Set SKIP_VERSION_CHECK to true if developer mode or tester mode is enabled
+if flag_check "developer_mode" || flag_check "tester_mode"; then
+    SKIP_VERSION_CHECK=true
+else
+    SKIP_VERSION_CHECK=true
 fi
 
 # Fallback to default release URL if INFO is not available
@@ -99,7 +108,6 @@ if [ -z "$TARGET_VERSION" ] || [ -z "$TARGET_CHECKSUM" ] || [ -z "$TARGET_LINK" 
 fi
 
 # Compare versions
-SKIP_VERSION_CHECK=true
 log_update_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
 if [ "$SKIP_VERSION_CHECK" = true ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
     log_update_message "Proceeding with update"
