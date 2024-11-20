@@ -2,8 +2,8 @@
 
 SD_CARD="/mnt/SDCARD"
 OTA_URL="https://spruceui.github.io/OTA/spruce"
-TMP_DIR="$SD_CARD/App/OTA/tmp"
-CONFIG_FILE="$SD_CARD/App/OTA/config.json"
+TMP_DIR="$SD_CARD/App/-OTA/tmp"
+CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
@@ -66,8 +66,8 @@ download_progress() {
     # Add start time tracking
     START_TIME=$(date +%s)
     local prev_size=0
-    local downloadBar="/mnt/SDCARD/App/OTA/imgs/downloadBar.png"
-    local downloadFill="/mnt/SDCARD/App/OTA/imgs/downloadFill.png"
+    local downloadBar="/mnt/SDCARD/App/-OTA/imgs/downloadBar.png"
+    local downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
     # Bar slider, 0.15 is 0, 0.85 is 100
     local fill_scale_int=15  # 0.15 * 100
     

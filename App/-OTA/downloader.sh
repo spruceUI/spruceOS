@@ -1,14 +1,14 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/App/OTA/downloaderFunctions.sh
+. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 SD_CARD="/mnt/SDCARD"
 
 IMAGE_PATH="$SD_CARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
-TMP_DIR="$SD_CARD/App/OTA/tmp"
+TMP_DIR="$SD_CARD/App/-OTA/tmp"
 
 display --icon "$IMAGE_PATH" -t "Checking for updates..."
 
