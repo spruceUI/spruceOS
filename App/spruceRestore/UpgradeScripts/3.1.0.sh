@@ -50,6 +50,9 @@ log_message "Starting upgrade to version $TARGET_VERSION"
 #     "setting2 = \"value2\"" \
 #     "setting3 = \"value3\""
 
+update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
+    "xinput_pause_toggle_btn = \"10\""
+
 
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
 # Add any additional upgrade steps here, such as:
