@@ -48,18 +48,21 @@ RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r
 RELEASE_CHECKSUM=$(sed -n 's/RELEASE_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 RELEASE_LINK=$(sed -n 's/RELEASE_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 RELEASE_SIZE=$(sed -n 's/RELEASE_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+RELEASE_INFO=$(sed -n 's/RELEASE_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
 # Extract nightly info
 NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_CHECKSUM=$(sed -n 's/NIGHTLY_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_LINK=$(sed -n 's/NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_SIZE=$(sed -n 's/NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_INFO=$(sed -n 's/NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
 # Set default target to release
 TARGET_VERSION="$RELEASE_VERSION"
 TARGET_CHECKSUM="$RELEASE_CHECKSUM"
 TARGET_LINK="$RELEASE_LINK"
 TARGET_SIZE="$RELEASE_SIZE"
+TARGET_INFO="$RELEASE_INFO"
 
 # Check if developer mode is enabled and ask about nightly builds
 if flag_check "developer_mode"; then
@@ -72,7 +75,16 @@ Public release version: $RELEASE_VERSION" -p 220 --confirm
         TARGET_CHECKSUM="$NIGHTLY_CHECKSUM"
         TARGET_LINK="$NIGHTLY_LINK"
         TARGET_SIZE="$NIGHTLY_SIZE"
+        TARGET_INFO="$NIGHTLY_INFO"
+        if [ -z "$TARGET_INFO" ]; then
+            TARGET_INFO="https://github.com/spruceUI/spruceOSNightlies/releases/latest"
+        fi
     fi
+fi
+
+# Fallback to default release URL if INFO is not available
+if [ -z "$TARGET_INFO" ]; then
+    TARGET_INFO="https://github.com/spruceUI/spruceOS/releases/latest"
 fi
 
 if [ -z "$TARGET_VERSION" ] || [ -z "$TARGET_CHECKSUM" ] || [ -z "$TARGET_LINK" ] || [ -z "$TARGET_SIZE" ]; then
@@ -100,8 +112,9 @@ Latest version: $TARGET_VERSION" --okay
     exit 0
 fi
 
-display --icon "$IMAGE_PATH" -t "Newer version available: $TARGET_VERSION
-Download and install?" --confirm
+display -t "Scan QR code for release notes.
+Newer version available: $TARGET_VERSION
+Download and install?" --confirm --qr "$TARGET_INFO"
 if confirm; then
     log_message "OTA: User confirmed"
 else
