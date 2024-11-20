@@ -148,17 +148,15 @@ fi
 
 log_message "Current version: $current_version"
 
-# Upgrade script locations
-upgrade_scripts="
-$UPGRADE_SCRIPTS_DIR/2.3.0.sh
-$UPGRADE_SCRIPTS_DIR/3.0.0.sh
-$UPGRADE_SCRIPTS_DIR/3.0.1.sh
-$UPGRADE_SCRIPTS_DIR/3.1.0.sh
-"
-#/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.1.sh
+# List the contents of the directory for debugging
+log_message "Contents of $UPGRADE_SCRIPTS_DIR: $(ls -l "$UPGRADE_SCRIPTS_DIR")"
 
-for script in $upgrade_scripts; do
-    script_name=$(basename "$script")
+# Use cd and a direct for loop instead of find
+cd "$UPGRADE_SCRIPTS_DIR" || exit 1
+for script in *.sh; do
+    [ -f "$script" ] || continue  # Skip if no .sh files found
+    
+    script_name="$script"
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
 
     # Replace the version comparison logic
@@ -166,26 +164,23 @@ for script in $upgrade_scripts; do
         log_message "Starting upgrade script: $script_name"
         display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
 
-        if [ -f "$script" ]; then
-            log_message "Executing $script_name..."
-            output=$(sh "$script" 2>&1)
-            exit_status=$?
+        log_message "Executing $script_name..."
+        output=$(sh "$script" 2>&1)
+        exit_status=$?
 
-            log_message "Output from $script_name:"
-            echo "$output" >>"$log_file"
+        log_message "Output from $script_name:"
+        echo "$output" >>"$log_file"
 
-            if [ $exit_status -eq 0 ]; then
-                log_message "Successfully completed $script_name"
-                echo "spruce_version=$script_version" >"$last_update_file"
-                current_version=$script_version
-            else
-                log_message "Error running $script_name. Exit status: $exit_status"
-                log_message "Error details: $output"
-                display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
-                exit 1
-            fi
+        if [ $exit_status -eq 0 ]; then
+            log_message "Successfully completed $script_name"
+            echo "spruce_version=$script_version" >"$last_update_file"
+            current_version=$script_version
         else
-            log_message "Warning: Script $script_name not found. Skipping."
+            log_message "Error running $script_name. Exit status: $exit_status"
+            log_message "Error details: $output"
+            display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
+            cd - >/dev/null
+            exit 1
         fi
 
         log_message "Finished processing $script_name"
@@ -193,6 +188,7 @@ for script in $upgrade_scripts; do
         log_message "Skipping $script_name: Current version $current_version is equal to or higher than $script_version"
     fi
 done
+cd - >/dev/null
 
 log_message "Upgrade process completed. Current version: $current_version"
 display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
