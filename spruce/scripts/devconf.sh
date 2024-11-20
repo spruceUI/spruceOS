@@ -23,6 +23,7 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
 
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
+    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
 fi
 
 
