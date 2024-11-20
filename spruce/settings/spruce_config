@@ -71,7 +71,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png _VALUE_ && $F8_PNG$ _VALUE_" ""
 @"Also uses cart as box art for Fake08"
 
-"" "Reset RetroArch to Spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
+"" "Reset RetroArch to spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
 @"We recommend backing up first."
 
 "" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$ _INDEX_"
