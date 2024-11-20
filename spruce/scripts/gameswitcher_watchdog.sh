@@ -29,6 +29,7 @@ kill_emulator() {
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" > /dev/null ; then
+        killall -q -CONT PPSSPPSDL
         # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
         {
             # send autosave hot key
@@ -43,6 +44,7 @@ kill_emulator() {
         # kill PPSSPP with signal 15, it should exit after saving is done
         killall -15 PPSSPPSDL
     else
+        killall -q -CONT pico8_dyn
         killall -q -15 ra32.miyoo retroarch pico8_dyn
     fi
 }
@@ -139,6 +141,8 @@ prepare_game_switcher() {
     log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
 }
 
+# Send L3 and R3 press event, this would toggle in-game and pause in RA
+# or toggle in-game menu in PPSSPP
 send_virtual_key() {
     {
         echo 1 316 0   # MENU up
@@ -151,6 +155,7 @@ send_virtual_key() {
     } | $BIN_PATH/sendevent /dev/input/event4    
 }
 
+# Send R3 press event, this would toggle pause in RA
 send_virtual_key_2() {
     {
         echo 1 318 1   # R3 down
@@ -186,6 +191,7 @@ long_press_handler() {
         "In-game menu")
             if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
                 send_virtual_key
+                killall -q -CONT PPSSPPSDL
 
             # PICO8 has no in-game menu and 
             # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap  
@@ -216,8 +222,9 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             long_press_handler &
             PID=$!
 
-            # pause RA if it is running
+            # pause RA, PPSSPP or PICO8 if it is running
             send_virtual_key_2
+            killall -q -STOP PPSSPPSDL pico8_dyn 
         ;;
         # MENU key up
         *"key 1 1 0"*)
@@ -244,6 +251,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                     "In-game menu")
                         if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
                             send_virtual_key
+                            killall -q -CONT PPSSPPSDL
 
                         # PICO8 has no in-game menu
                         elif pgrep "pico8_dyn" > /dev/null ; then
