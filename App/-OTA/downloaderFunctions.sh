@@ -10,17 +10,40 @@ check_for_update() {
 
     mkdir -p "$TMP_DIR"
 
-    # Check for Wi-Fi and active connection
+    # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-    if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io >/dev/null 2>&1; then
-        log_message "Update Check: No active network connection, exiting."
+    if [ "$wifi_enabled" -eq 0 ]; then
+        log_message "Update Check: WiFi is disabled, exiting."
         rm -rf "$TMP_DIR"
         return 1
     fi
 
-    CURRENT_VERSION=$(get_version)
+    # Try up to 3 times to get a connection
+    attempts=0
+    while [ $attempts -lt 3 ]; do
+        if ping -c 3 spruceui.github.io >/dev/null 2>&1; then
+            break
+        fi
+        attempts=$((attempts + 1))
+        if [ $attempts -eq 3 ]; then
+            log_message "Update Check: Failed to establish network connection after 3 attempts."
+            rm -rf "$TMP_DIR"
+            return 1
+        fi
+        log_message "Update Check: Waiting for network connection (attempt $attempts of 3)..."
+        sleep 20
+    done
+
+    # Get current version based on mode
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
+        CURRENT_VERSION=$(get_version_nightly)
+    else
+        CURRENT_VERSION=$(get_version)
+    fi
 
     read_only_check
+
+    log_message "Update Check: Current version: $CURRENT_VERSION"
 
     # Download and parse the release info file
     if ! curl -s -o "$TMP_DIR/spruce" "$OTA_URL"; then
@@ -35,25 +58,48 @@ check_for_update() {
     RELEASE_LINK=$(sed -n 's/RELEASE_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     RELEASE_SIZE=$(sed -n 's/RELEASE_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
-    if [ -z "$RELEASE_VERSION" ] || [ -z "$RELEASE_CHECKSUM" ] || [ -z "$RELEASE_LINK" ] || [ -z "$RELEASE_SIZE" ]; then
-        log_message "Update Check: Invalid release info file format"
-        rm -rf "$TMP_DIR"
-        return 1
+    # Extract nightly info
+    NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_CHECKSUM=$(sed -n 's/NIGHTLY_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_LINK=$(sed -n 's/NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_SIZE=$(sed -n 's/NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+
+    # Set target version based on developer/tester mode
+    TARGET_VERSION="$RELEASE_VERSION"
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
+        TARGET_VERSION="$NIGHTLY_VERSION"
     fi
 
-    # Compare versions
-    log_update_message "Comparing versions: $RELEASE_VERSION vs $CURRENT_VERSION"
-    if [ "$(echo "$RELEASE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
-        log_update_message "Update available"
-        # Update is available - show app and set label to "Update Available"
-        sed -i 's|"#label"|"label"|; s|"label": "[^"]*"|"label": "Update Available"|' "$CONFIG_FILE"
+    # Compare versions, handling nightly date format
+    log_message "Update Check: Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
+    
+    # Extract base version and date for nightly builds
+    current_base_version=$(echo "$CURRENT_VERSION" | cut -d'-' -f1)
+    current_date=$(echo "$CURRENT_VERSION" | cut -d'-' -f2 -s)
+    target_base_version=$(echo "$TARGET_VERSION" | cut -d'-' -f1)
+    target_date=$(echo "$TARGET_VERSION" | cut -d'-' -f2 -s)
+
+    update_available=0
+    if [ "$(echo "$target_base_version $current_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$current_base_version" ]; then
+        update_available=1
+    elif [ -n "$current_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$current_date" ]; then
+        update_available=1
+    fi
+
+    if [ $update_available -eq 1 ]; then
+        log_message "Update Check: Update available"
+        # Update is available - show app and set label and description
+        sed -i 's|"#label"|"label"|; 
+                s|"label": "[^"]*"|"label": "Update Available"|;
+                s|"description": "[^"]*"|"description": "Version '"$TARGET_VERSION"' is available"|' "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
         return 0
     else
-        log_update_message "Current version is up to date"
-        # No update - if app is visible, set label to "Check for Updates"
+        log_message "Update Check: Current version is up to date"
+        # No update - if app is visible, set label and description back to default
         if grep -q '"label"' "$CONFIG_FILE"; then
-            sed -i 's|"label": "[^"]*"|"label": "Check for Updates"|' "$CONFIG_FILE"
+            sed -i 's|"label": "[^"]*"|"label": "Check for Updates"|;
+                    s|"description": "[^"]*"|"description": "Check for updates over Wi-Fi"|' "$CONFIG_FILE"
         fi
         rm -rf "$TMP_DIR"
         return 1

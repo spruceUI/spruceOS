@@ -3,6 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
 . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -111,5 +112,10 @@ set_usb_icon_from_theme(){
     fi
 }
 
+
+update_checker(){
+    sleep 20
+    check_for_update
+}
 
 

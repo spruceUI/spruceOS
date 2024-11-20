@@ -492,20 +492,49 @@ get_version() {
     local spruce_file="/mnt/SDCARD/spruce/spruce"
 
     if [ ! -f "$spruce_file" ]; then
-        return "0"
+        echo "0"
+        return 1
     fi
 
     local version=$(cat "$spruce_file" | tr -d '[:space:]')
 
     if [ -z "$version" ]; then
-        return "0"
+        echo "0"
+        return 1
     fi
 
     # Check if the returned version is in the correct format
     if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then
-        return "$version"
+        echo "$version"
+        return 0
     else
-        return "0"
+        echo "0"
+        return 1
+    fi
+}
+
+get_version_nightly() {
+    local base_version=$(get_version)
+    
+    # Ensure we got a valid base version
+    if [ -z "$base_version" ] || [ "$base_version" = "0" ]; then
+        echo "$base_version"
+        return 1
+    fi
+    
+    local nightly_pattern="/mnt/SDCARD/${base_version}-*"
+    
+    # List all matching files and log them
+    local matching_files=$(ls $nightly_pattern 2>/dev/null)
+    
+    # Find any matching nightly version file
+    local nightly_file=$(ls $nightly_pattern 2>/dev/null | head -n 1)
+    
+    if [ -n "$nightly_file" ]; then
+        local nightly_version=$(basename "$nightly_file")
+        echo "$nightly_version"
+    else
+        echo "$base_version"
     fi
 }
 
@@ -751,3 +780,6 @@ vibrate() {
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
 }
+
+
+

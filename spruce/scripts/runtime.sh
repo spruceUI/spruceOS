@@ -160,6 +160,7 @@ ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
 ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
 developer_mode_task &
+update_checker &
 
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script

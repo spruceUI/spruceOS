@@ -148,6 +148,9 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the current time and date"
 
+"" "Spruce Update App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/-OTA/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/-OTA/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/-OTA/config.json" ""
+@"Check for updates over Wi-Fi"
+
 "" "Spruce Backup" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceBackup/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceBackup/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceBackup/config.json" ""
 @"Create a backup of your spruce install"
 
