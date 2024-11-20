@@ -143,7 +143,8 @@ jobs:
           echo "RELEASE_CHECKSUM=$CHECKSUM" >> ota_repo/OTA/spruce
           echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> ota_repo/OTA/spruce
           echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> ota_repo/OTA/spruce
-          
+          echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
+
           # Configure git
           cd ota_repo
           git config user.name "GitHub Actions Bot"
