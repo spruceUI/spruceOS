@@ -155,10 +155,14 @@ log_message "Contents of $UPGRADE_SCRIPTS_DIR: $(ls -l "$UPGRADE_SCRIPTS_DIR")"
 cd "$UPGRADE_SCRIPTS_DIR" || exit 1
 
 # Before the upgrade loop, add check for developer/tester mode
-is_developer_mode=$(get_setting "developer_mode")
-is_tester_mode=$(get_setting "tester_mode")
+is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
+is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
 allow_same_version=0
-[ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ] && allow_same_version=1
+
+if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+    allow_same_version=1
+    log_message "Dev/Tester mode detected, allowing same version upgrades"
+fi
 
 # Modify the version comparison logic in the upgrade loop
 for script in *.sh; do
