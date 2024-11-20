@@ -153,14 +153,23 @@ log_message "Contents of $UPGRADE_SCRIPTS_DIR: $(ls -l "$UPGRADE_SCRIPTS_DIR")"
 
 # Use cd and a direct for loop instead of find
 cd "$UPGRADE_SCRIPTS_DIR" || exit 1
+
+# Before the upgrade loop, add check for developer/tester mode
+is_developer_mode=$(get_setting "developer_mode")
+is_tester_mode=$(get_setting "tester_mode")
+allow_same_version=0
+[ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ] && allow_same_version=1
+
+# Modify the version comparison logic in the upgrade loop
 for script in *.sh; do
     [ -f "$script" ] || continue  # Skip if no .sh files found
     
     script_name="$script"
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
 
-    # Replace the version comparison logic
-    if [ "$(compare_versions "$current_version" "$script_version")" = "older" ]; then
+    version_compare=$(compare_versions "$current_version" "$script_version")
+    # Run if version is older OR if same version and in developer/tester mode
+    if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
         log_message "Starting upgrade script: $script_name"
         display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
 
