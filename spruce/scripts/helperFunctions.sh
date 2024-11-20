@@ -318,6 +318,7 @@ display() {
     local icon_image=""
     local additional_images=""
     local position_set=false
+    local qr_url=""
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -345,6 +346,13 @@ display() {
             --add-image) 
                 additional_images="$additional_images \"$2\" $3 $4 $5"
                 shift 4
+                ;;
+            --qr)
+                qr_url="$2"
+                if ! $position_set; then
+                    position=$((position + 85))
+                fi
+                shift
                 ;;
             *) log_message "Unknown option: $1"; return 1 ;;
         esac 
@@ -381,6 +389,16 @@ display() {
     # Add additional images
     if [ -n "$additional_images" ]; then
         command="$command $additional_images"
+    fi
+
+    # Generate QR code if --qr flag is used
+    if [ -n "$qr_url" ]; then
+        qr_image=$(qr_code -t "$qr_url")
+        if [ -n "$qr_image" ]; then
+            command="$command \"$qr_image\" 0.50 140 middle"
+        else
+            log_message "Failed to generate QR code for URL: $qr_url" -v
+        fi
     fi
 
     display_kill
@@ -546,6 +564,50 @@ log_precise() {
     local uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
     local timestamp="${date_part}.${uptime_part#*.}"
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
+}
+
+# Generate a QR code
+# Usage: qr_code -t "text" -s "size" -l "level" -o "output"
+# If no output is provided, the QR code will be saved to /tmp/tmp/qr.png
+#   QR_CODE=$(qr_code -t "https://www.google.com")
+#   display -i "$QR_CODE" -t "DT: QR Code" -d 5
+QRENCODE_PATH="/mnt/SDCARD/miyoo/app/qrencode"
+qr_code() {
+    local text=""
+    local size=3
+    local level="M"
+    local output="/mnt/SDCARD/spruce/tmp/qr.png"
+    
+    # Parse arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -t|--text) text="$2"; shift ;;
+            -s|--size) size="$2"; shift ;;
+            -l|--level) level="$2"; shift ;;
+            -o|--output) output="$2"; shift ;;
+            *) text="$1" ;;  # If no flag, assume it's the text
+        esac
+        shift
+    done
+    
+    # Ensure text is provided
+    if [ -z "$text" ]; then
+        log_message "QR Code error: No text provided" -v
+        return 1
+    fi
+    
+    # Make tmp directory if it doesn't exist
+    mkdir -p "/mnt/SDCARD/spruce/tmp"
+
+    # Generate QR code
+    if "$QRENCODE_PATH" -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
+        echo "$output"
+        return 0
+    else
+        log_message "QR Code generation failed"
+        echo ""
+        return 1
+    fi
 }
 
 read_only_check() {
