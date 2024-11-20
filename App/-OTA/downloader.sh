@@ -66,8 +66,10 @@ TARGET_INFO="$RELEASE_INFO"
 
 # Check if developer mode or tester mode is enabled and ask about nightly builds
 if flag_check "developer_mode" || flag_check "tester_mode"; then
-    mode="Developer"
-    [ "$(flag_check "tester_mode")" = "true" ] && mode="Tester"
+    mode="Tester"
+    if flag_check "developer_mode"; then
+        mode="Developer"
+    fi
     display --icon "$IMAGE_PATH" -t "$mode mode detected. Would you like to use the latest nightly instead?
 Latest nightly: $NIGHTLY_VERSION
 Public release version: $RELEASE_VERSION" -p 220 --confirm

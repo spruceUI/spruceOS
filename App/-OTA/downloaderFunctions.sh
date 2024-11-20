@@ -92,7 +92,7 @@ download_progress() {
         CURRENT_TIME=$(date +%s)
         ELAPSED_SECONDS=$((CURRENT_TIME - START_TIME))
 
-        if [ "$ELAPSED_SECONDS" -gt 0 ] && [ "$CURRENT_SIZE" -gt "$prev_size" ]; then
+        if [ "$ELAPSED_SECONDS" -gt 3 ] && [ "$CURRENT_SIZE" -gt "$prev_size" ]; then
             # Calculate speed in MB/s
             SPEED_MB=$(((CURRENT_SIZE_MB * 100) / (ELAPSED_SECONDS * 100)))
             # Calculate remaining MB
@@ -105,7 +105,7 @@ download_progress() {
                 REMAINING_SEC=$((REMAINING_SECONDS % 60))
                 ETA_MSG="Time remaining: ${REMAINING_MIN}m ${REMAINING_SEC}s"
             else
-                ETA_MSG="Time remaining: calculating..."
+                ETA_MSG="Download speed less than 1MB/s"
             fi
         else
             ETA_MSG="Time remaining: calculating..."
