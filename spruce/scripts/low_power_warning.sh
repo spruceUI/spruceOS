@@ -43,6 +43,7 @@ while true; do
             setting_update "skip_shutdown_confirm" on
             flag_add "forced_shutdown"
         fi
+        display -d 2 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         exit
     fi
@@ -75,6 +76,7 @@ while true; do
                     setting_update "skip_shutdown_confirm" on
                     flag_add "forced_shutdown"
                 fi
+                display -d 2 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                 exit
             fi
