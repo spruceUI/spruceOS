@@ -173,11 +173,6 @@ long_press_handler() {
 
     # if IS long press
     vibrate
-    # In MainUI long press will load GS 
-    if pgrep "MainUI" > /dev/null ; then
-        prepare_game_switcher
-        return
-    fi
     
     # get setting
     HOLD_HOME=$(setting_get "hold_home")
@@ -196,10 +191,18 @@ long_press_handler() {
             # PICO8 has no in-game menu and 
             # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap  
             else
+                # resume MainUI if it is running
+                # and it will then read menu up event and show popup menu
+                killall -q -CONT  MainUI
+                # or kill NDS or PICO8
                 kill_emulator
             fi
         ;;
         "Exit game")
+            # resume MainUI if it is running
+            # and it will then read menu up event and show popup menu
+            killall -q -CONT  MainUI
+            # or kill any emulator
             kill_emulator
         ;;
     esac    
@@ -210,21 +213,15 @@ long_press_handler() {
 $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
         # MENU key down
-        *"key 1 28 1"*)
-            if pgrep "MainUI" > /dev/null; then
-                prepare_game_switcher
-            fi
-        ;;
-        # MENU key down
         *"key 1 1 1"*)
             # start long press handler
             log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
 
-            # pause RA, PPSSPP or PICO8 if it is running
+            # pause RA, PPSSPP, PICO8 or MainUI if it is running
             send_virtual_key_2
-            killall -q -STOP PPSSPPSDL pico8_dyn 
+            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
         ;;
         # MENU key up
         *"key 1 1 0"*)
@@ -235,7 +232,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
                 # skip mainUI and NDS, they need short press for their hotkeys
-                if pgrep "MainUI|drastic" > /dev/null ; then
+                if pgrep "drastic" > /dev/null ; then
                     continue
                 fi
 
@@ -256,9 +253,17 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                         # PICO8 has no in-game menu
                         elif pgrep "pico8_dyn" > /dev/null ; then
                             kill_emulator
+
+                        # resume MainUI and it will then read menu up event and show popup menu
+                        elif pgrep "MainUI" > /dev/null ; then
+                            killall -q -CONT  MainUI
                         fi
                     ;;
                     "Exit game")
+                        # resume MainUI if it is running
+                        # and it will then read menu up event and show popup menu
+                        killall -q -CONT  MainUI
+                        # or kill any emulator
                         kill_emulator
                     ;;
                 esac
