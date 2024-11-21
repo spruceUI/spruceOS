@@ -107,13 +107,16 @@ flag_add 'emulator_launched'
 
 ##### LAUNCH STUFF #####
 
+# we sanitise the rom path
+ROM_FILE="$(readlink -f "$1")"
+
 case $EMU_NAME in
 	"MEDIA")
 		export HOME=$EMU_DIR
 		export PATH=$EMU_DIR/bin:$PATH
 		export LD_LIBRARY_PATH=$EMU_DIR/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
 		cd $EMU_DIR
-		ffplay -vf transpose=2 -fs -i "$1"
+		ffplay -vf transpose=2 -fs -i "$ROM_FILE"
 		;;
 
 	"NDS")
@@ -138,7 +141,7 @@ case $EMU_NAME in
 			rm -rf libs/libGLESv1_CM.so
 			rm -rf libs/libGLESv2.so
 		fi
-		./drastic "$1"
+		./drastic "$ROM_FILE"
 		sync
 
         # remove soft link and resume joystickinput
@@ -152,9 +155,9 @@ case $EMU_NAME in
 		export HOME=$EMU_DIR
 		cd $HOME
 		if [ "$GAME" == "Final Fight LNS.pak" ]; then
-			./OpenBOR_mod "$1"
+			./OpenBOR_mod "$ROM_FILE"
 		else
-			./OpenBOR_new "$1"
+			./OpenBOR_new "$ROM_FILE"
 		fi
 		sync
 		;;
@@ -197,7 +200,7 @@ case $EMU_NAME in
 		if [ "${GAME##*.}" = "splore" ]; then
 			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 		else
-			pico8_dyn -width 640 -height 480 -scancodes -run "$1" $SCALING
+			pico8_dyn -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
 		fi
 		sync
 
@@ -209,7 +212,7 @@ case $EMU_NAME in
 	"PORTS")
 		PORTS_DIR=/mnt/SDCARD/Roms/PORTS
 		cd $PORTS_DIR
-		/bin/sh "$1"
+		/bin/sh "$ROM_FILEs"
 		;;
 
 	"PSP")
@@ -239,7 +242,7 @@ case $EMU_NAME in
 			fi
 			RA_DIR="/mnt/SDCARD/RetroArch"
 			cd "$RA_DIR"
-			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
 		fi
 		;;
 	
@@ -252,7 +255,7 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$1"
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE" >$EMU_DIR/emu.log 2>&1
 
 		;;
 		
