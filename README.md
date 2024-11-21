@@ -6,6 +6,8 @@
   - We think spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
     
+    _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
+
 ## DOWNLOAD LATEST VERSION BELOW
 
   - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
