@@ -1,0 +1,24 @@
+name: Restrict .github Folder Changes
+on:
+  push:
+    branches:
+      - 'main'
+      - 'Development'
+      
+jobs:
+  restrict-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for changes in .github/ folder
+        uses: actions/checkout@v3
+      - name: Verify .github/ folder changes
+        run: |
+          if [ "${{ github.actor_is_admin }}" = "true" ]; then
+            echo "Organization admin detected - allowing changes"
+            exit 0
+          fi
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^.github/'; then
+            echo "Changes to .github/ require a pull request."
+            exit 1
+          fi
+          echo "No restricted changes detected."
