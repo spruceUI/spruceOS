@@ -41,7 +41,6 @@ fi
 
 ##### SET CPU MODE #####
 
-# if-statement
 if [ "$MODE" = "overclock" ]; then
 	if [ "$EMU_NAME" = "NDS" ]; then
 		{sleep 33 && set_overclock} &
