@@ -20,7 +20,7 @@ jobs:
 
       - name: Install 7zip
         run: |
-          echo "Welcome to the H.E.V Mark IV protective system for use in hazardous environment conditions."
+          echo "They're waiting for you, Gordon, in the test chamber"
           sudo apt-get update
           sudo apt-get install -y p7zip-full
 
