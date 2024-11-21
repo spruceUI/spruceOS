@@ -41,19 +41,14 @@ fi
 
 ##### SET CPU MODE #####
 
-case $EMU_NAME in
-	"NDS")
-		if [ "$MODE" = "overclock" ]; then
-			{sleep 33 && set_overclock} &
-		fi
-		;;
-
-	*)
-		if [ "$MODE" = "overclock" ]; then
-			set_overclock
-		fi
-		;;
-esac
+# if-statement
+if [ "$MODE" = "overclock" ]; then
+	if [ "$EMU_NAME" = "NDS" ]; then
+		{sleep 33 && set_overclock} &
+	else
+		set_overclock
+	fi
+fi
 
 if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
