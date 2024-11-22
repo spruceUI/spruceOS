@@ -227,7 +227,7 @@ case $EMU_NAME in
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
 			export HOME=/mnt/SDCARD
 			
-			./PPSSPPSDL "$*"
+			./PPSSPPSDL "$ROM_FILE"
 		else
 			if setting_get "expertRA"; then
 				export RA_BIN="retroarch"
