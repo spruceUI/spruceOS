@@ -62,6 +62,8 @@ echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 echo "Update process started" >"$LOG_LOCATION"
 exec >>"$LOG_LOCATION" 2>&1
 
+read_only_check
+
 # Check SD Card health
 TEST_FILE="/mnt/SDCARD/.sd_test_$$"
 SD_ERROR=false
@@ -241,6 +243,8 @@ echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 cd /mnt/SDCARD
 log_update_message "Current directory: $(pwd)"
 log_update_message "Extracting update file: $UPDATE_FILE"
+
+read_only_check
 
 display "Applying update. This should take around 5 minutes..."
 
