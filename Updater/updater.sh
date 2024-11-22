@@ -152,7 +152,7 @@ if ls "$FLAG_DIR"/developer_mode* >/dev/null 2>&1; then
     DEVELOPER_MODE=1
 fi
 
-if ls "$FLAG_DIR"/test_mode* >/dev/null 2>&1; then
+if ls "$FLAG_DIR"/tester_mode* >/dev/null 2>&1; then
     TESTER_MODE=1
 fi
 
