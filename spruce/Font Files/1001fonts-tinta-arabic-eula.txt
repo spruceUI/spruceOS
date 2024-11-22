@@ -1,0 +1,38 @@
+1001Fonts Free For Personal Use License (FFP)
+
+Preamble
+In this license, 'Tinta Arabic' refers to the given .zip file, which may contain one or numerous fonts. These fonts can be of any type (.ttf, .otf, ...) and together they form a 'font family' or in short a 'typeface'.
+
+1. Copyright
+Tinta Arabic is the intellectual property of its respective author, provided it is original, and is protected by copyright laws in many parts of the world.
+
+2. Personal Use
+Tinta Arabic may be downloaded and used free of charge for personal use, as long as the usage is not racist or illegal. Personal use refers to all usage that does not generate financial income in a business manner, for instance:
+
+ - personal scrapbooking for yourself
+ - recreational websites and blogs for friends and family
+ - prints such as flyers, posters, t-shirts for churches, charities, and non-profit organizations
+
+3. Commercial Use
+Commercial use is not allowed without prior written permission from the respective author. Please contact the author to ask for commercial licensing. Commercial use refers to usage in a business environment, including:
+
+ - business cards, logos, advertising, websites, mobile apps for companies
+ - t-shirts, books, apparel that will be sold for money
+ - flyers, posters for events that charge admission
+ - freelance graphic design work
+ - anything that will generate direct or indirect income
+
+4. Modification
+Tinta Arabic may not be modified, altered, adapted or built upon without written permission by its respective author. This pertains all files within the downloadable font zip-file.
+
+5. Conversion
+Tinta Arabic may be converted to other formats such as WOFF, SVG or EOT webfonts, as long as the font is not modified in any other way, such as changing names or altering individual glyphs.
+
+6. Distribution
+While Tinta Arabic may freely be copied and passed along to other individuals for private use as its original downloadable zip-file, it may not be sold or published without written permission by its respective author.
+
+7. Embedding
+Tinta Arabic may be embedded into an application such as a web- or mobile app, as long as the application is of personal use and does not distribute Tinta Arabic, such as offering it as a download.
+
+8. Disclaimer
+Tinta Arabic is offered 'as is' without any warranty. 1001fonts.com and the respective author of Tinta Arabic shall not be liable for any damage derived from using this typeface. By using Tinta Arabic you agree to the terms of this license.
