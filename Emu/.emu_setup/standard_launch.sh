@@ -206,7 +206,7 @@ case $EMU_NAME in
 	"PORTS")
 		PORTS_DIR=/mnt/SDCARD/Roms/PORTS
 		cd $PORTS_DIR
-		/bin/sh "$ROM_FILEs"
+		/bin/sh "$ROM_FILE"
 		;;
 
 	"PSP")
@@ -249,7 +249,7 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE" >$EMU_DIR/emu.log 2>&1
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
 
 		;;
 		
