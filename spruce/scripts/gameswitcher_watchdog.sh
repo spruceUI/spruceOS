@@ -143,7 +143,7 @@ prepare_game_switcher() {
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
 # or toggle in-game menu in PPSSPP
-send_virtual_key() {
+send_virtual_key_L3R3() {
     {
         echo 1 316 0   # MENU up
         echo 1 317 1   # L3 down
@@ -155,8 +155,18 @@ send_virtual_key() {
     } | $BIN_PATH/sendevent /dev/input/event4    
 }
 
+send_virtual_key_L3() {
+    {
+        echo 1 316 0   # MENU up
+        echo 1 317 1   # L3 down
+        sleep 0.1
+        echo 1 317 0   # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4    
+}
+
 # Send R3 press event, this would toggle pause in RA
-send_virtual_key_2() {
+send_virtual_key_R3() {
     {
         echo 1 318 1   # R3 down
         sleep 0.1
@@ -184,8 +194,14 @@ long_press_handler() {
             prepare_game_switcher
         ;;
         "In-game menu")
-            if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-                send_virtual_key
+            if pgrep "ra32.miyoo" > /dev/null ; then
+                send_virtual_key_L3
+
+            elif pgrep "retroarch" > /dev/null ; then
+                send_virtual_key_L3R3
+
+            elif pgrep "PPSSPPSDL" > /dev/null ; then
+                send_virtual_key_L3
                 killall -q -CONT PPSSPPSDL
 
             # PICO8 has no in-game menu and 
@@ -220,7 +236,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             PID=$!
 
             # pause RA, PPSSPP, PICO8 or MainUI if it is running
-            send_virtual_key_2
+            send_virtual_key_R3
             killall -q -STOP PPSSPPSDL pico8_dyn MainUI
         ;;
         # MENU key up
@@ -246,8 +262,14 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                         prepare_game_switcher
                     ;;
                     "In-game menu")
-                        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-                            send_virtual_key
+                        if pgrep "ra32.miyoo" > /dev/null ; then
+                            send_virtual_key_L3
+
+                        elif pgrep "retroarch" > /dev/null ; then
+                            send_virtual_key_L3R3
+
+                        elif pgrep "PPSSPPSDL" > /dev/null ; then
+                            send_virtual_key_L3
                             killall -q -CONT PPSSPPSDL
 
                         # PICO8 has no in-game menu
