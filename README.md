@@ -8,6 +8,9 @@
     
     _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
 
+    ![1auezwmegbzd1](https://github.com/user-attachments/assets/74411c1b-a4ae-4558-98f5-151b573b2b30)
+
+
 ## Features
 
 * Game Switcher: seamlessly switch between save states during gameplay.
