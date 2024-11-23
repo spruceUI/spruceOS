@@ -11,9 +11,9 @@
 ## Features
 
 * Game Switcher app: seamlessly switch between save states during gameplay.
-* Automatic save states when powering off in-game, powering on will resume play right from where you last left off.
-* Network services, including RTC synchronisation, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
-* CPU performance profiles pre-configured for optimised battery life and performance.
+* Automatic save states when powering off in-game; powering on will resume play from where you last left off.
+* Network services: Retroachievments, RTC sync via WiFi, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
+* CPU performance profiles pre-configured for optimized battery life and performance.
 * Native Pico-8 support with Splore.
 * Built-in boxart scraper app using libretro API.
 * OTA updates over Wi-Fi on device.
@@ -30,7 +30,7 @@ Plus many more enhancements over the original stock operating system!
 
 ## What was done:
 
- - All emulators and cores are preconfigured with performance considered.
+ - All emulators and cores are pre-configured with performance considered.
  - Emulator systems are automatically detected games and show in the Games menu.
  - Advanced Settings App added.
  - Auto Save/Quick Shutdown + Resume feature added.
@@ -61,7 +61,6 @@ Plus many more enhancements over the original stock operating system!
  - LED Control App added.
 
 ## Installation
-
   - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
