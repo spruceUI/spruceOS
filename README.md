@@ -2,16 +2,16 @@
 
 # spruce: *SD Card Overhaul for Miyoo A30* 
 
-  - Spruce is not really an operating system (OS) on its own.
-  - We think spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
+  - Spruce is not an operating system (OS) on its own.
+  - Spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
     
     _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
 
 ## Features
 
-* Game Switcher app: seamlessly switch between save states during gameplay.
-* Automatic save states when powering off in-game; powering on will resume play from where you last left off.
+* Game Switcher: seamlessly switch between save states during gameplay.
+* Autosave shutdown/resume: automatic save state when powering off in-game; powering on will resume play from where you left off.
 * Network services: Retroachievments, RTC sync via WiFi, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
 * CPU performance profiles pre-configured for optimized battery life and performance.
 * Native Pico-8 support with Splore.
@@ -20,7 +20,7 @@
 
 Plus many more enhancements over the original stock operating system!
 
-## DOWNLOAD LATEST VERSION BELOW
+## Download the latest version
 
   - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
 
@@ -110,20 +110,20 @@ New unified hotkeys configured for RetroArch, updated to what is considered a 'c
 * Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
 
 Please do not adjust the RetroArch configurations unless you are already familiar with RetroArch's workings: removing or changing settings may cause games and/or controls to not work correctly. The *Default* settings are from Miyoo and will undo any modifications that have been done to the configurations for spruce.
-## RETROARCH
+## Retroarch
 
   - Please do not adjust the settings in Retroarch unless you are very familiar with it.
   - Removing or changing settings may cause games or controls to not work correctly.
   - The "Default" settings are from Miyoo and will remove all the custom configuration that has been done for spruce.
 
-## THEMES
+## Themes
 
   - Included are six themes located in Settings. More icons and themes are planned to be added in the future.
   - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
   - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
   - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
-## Credits/Thanks
+## Credits and Thanks
   - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
   - All past and present Team Members!
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
