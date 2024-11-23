@@ -63,7 +63,7 @@ while [ 1 ]; do
 
         # send signal USR2 to joystickinput to switch to KEYBOARD MODE
         # this allows joystick to be used as DPAD in MainUI
-        killall -USR2 joystickinput
+        killall -q -USR2 joystickinput
 
         flag_add "in_menu"
         cd ${SYSTEM_PATH}/app/
@@ -73,7 +73,7 @@ while [ 1 ]; do
         rm /dev/ttyS0
 
         # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -USR1 joystickinput
+        killall -q -USR1 joystickinput
 
         if flag_check "ra_themes_unpacking"; then
             display -t "Finishing up unpacking RetroArch themes.........."
