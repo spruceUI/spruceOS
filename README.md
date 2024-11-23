@@ -8,139 +8,109 @@
     
     _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
 
+## Features
+
+* Game Switcher app: seamlessly switch between save states during gameplay.
+* Automatic save states when powering off in-game, powering on will resume play right from where you last left off.
+* Network services, including RTC synchronisation, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
+* CPU performance profiles pre-configured for optimised battery life and performance.
+* Native Pico-8 support with Splore.
+* Built-in boxart scraper app using libretro API.
+* OTA updates over Wi-Fi on device.
+
+Plus many more enhancements over the original stock operating system!
+
 ## DOWNLOAD LATEST VERSION BELOW
 
   - [CLICK HERE FOR THE LATEST RELEASE](https://github.com/spruceUI/spruceOS/releases)
 
-## NEED HELP?
+## Need help?
   
   - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
 
-## WHAT WAS DONE:
+## What was done:
 
  - All emulators and cores are preconfigured with performance considered.
-
  - Emulator systems are automatically detected games and show in the Games menu.
-
  - Advanced Settings App added.
-
  - Auto Save/Quick Shutdown + Resume feature added.
-
  - GameSwitcher App added.
-
  - Multiple WiFi networks can be remembered.
-
  - Automatic Firmware Updater App added.
-   
  - Syncthing App added.
-
  - Random Game Apps added.
-
  - Bootlogo App added.
-
  - Miyoo Gamelist App added.
-
  - Boxart Scraper App added.
-
  - WiFi File Transfer App added.
-
  - SSH App added.
-
  - Samba App added.
-
  - Backup/Restore Apps added.
-
  - Auto-updater App added.
-
  - Battery% shown in Main Menu.
-
  - Auto Shutdown when idle function added.
-
  - Recents tab is optional via Advanced Settings toggle.
-
  - Performance and overclock adjustments are preset and adjustable.
-
  - Removed RApp (RetroArch/Expert) from Main Menu.
-
  - In-game menu matches that of the theme loaded.
-
  - Imgs folders for box art are now located inside each Rom folder.
-
  - BIOS folder has been created on the root of SD card.
-
  - Auto save state/load states enabled.
-
  - Joystick function enabled on all systems and Main Menu.
-
  - Configuration of RetroArch with almost no notifications or hotkeys.
-
  - LED Control App added.
 
-## INSTALL
+## Installation
 
   - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
-    
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
-## BIOS
-
-  - Place your BIOS files in the BIOS folder on the root of SD card.
+  - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
 See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
-## CONTROLS
+## Controls and Hotkeys
 
-  *GLOBAL*
+Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and calibrate your joystick
 
-  - BRIGHTNESS: START + L1 (to lower brightness) START + R1 (to increase brightness)
-  - VOLUME: SELECT + L1 (to lower volume) SELECT + R1 (to increase volume)
+### Global
 
-  *WHILE IN GAME*
+* Brightness: START + L1/R1 (to lower/increase brightness respectively)
+* Volume: SELECT + L1/R1 (to lower/increase volume respectively)
 
-  - QUICKSAVE/SHUTDOWN/RESUME:  Hold Power button.
-  - GAMESWITCHER: Hold the Home button.
-  - IN-GAME-MENU: Tap the Home button.
+### Main Menu
 
-**Holding the power button after the vibration can cause the A30 to force shutdown (in case of freezes etc)**
+* Refresh ROMs/Search: HOME
+* Search: SELECT
+* Shutdown: Hold POWER until *Power Off* pop-up display (press A to confirm)
+* Emulator/CPU clock/Random Game selection menu: X while over a game title
 
-  *RETROARCH HOTKEYS*
+### In-game
 
-New unified Hotkeys configured for RetroArch, we updated them to what we would
- consider a 'common' layout and to make them compatible with our new use of the home
- key.
- -SELECT+A=Screenshot
- 
--SELECT+B=Exit toMainUI
- 
--SELECT+X=OpenMenu
- 
--SELECT+Y=ToggleFPS
- 
--SELECT+L1=LoadState
- 
--SELECT+R1=SaveState
- 
--SELECT+L2=ToggleSlow Motion
- 
--SELECT+R2=ToggleFast Forward
- 
--SELECT+Up/Down=Cycle through shaders
- 
--SELECT+Left/Right = Cycle through state slots
+* Quicksave/Shutdown/Resume: Hold POWER for 3 seconds*
+* Game Switcher: Hold HOME for 3 seconds
+* In-game menu (RetroArch/PPSSPP only): Tap HOME
 
-  *WHILE IN MENU*
+\*Holding POWER after the vibration occurs will cause the A30 to force shutdown (in case of freezes etc.)
 
-  - REFRESH ROMS/ SEARCH - Home button
-  - SEARCH - Select
-  - SHUTDOWN - Hold power until Power Off pop up display (A to confirm)
-  - X while over a game title - Core selection, CPU speed and Random Game menu
+### RetroArch
 
-  *STICK DRIFT ISSUES*
+New unified hotkeys configured for RetroArch, updated to what is considered a 'common' layout and what is compatible with our new use of the HOME key
 
-  - Calibrate your stick through the settings tab in the main menu.
+* Screenshot: SELECT + A
+* Exit to MainUI: SELECT + B
+* Open menu: SELECT + X
+* Toggle FPS display: SELECT + Y
+* Load state: SELECT + L1
+* Save state: SELECT + R1
+* Toggle slow-motion: SELECT + L2
+* Toggle fast-forward: SELECT + R2
+* Cycle shaders: SELECT + D-Pad UP/D-Pad DOWN
+* Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
 
+Please do not adjust the RetroArch configurations unless you are already familiar with RetroArch's workings: removing or changing settings may cause games and/or controls to not work correctly. The *Default* settings are from Miyoo and will undo any modifications that have been done to the configurations for spruce.
 ## RETROARCH
 
   - Please do not adjust the settings in Retroarch unless you are very familiar with it.
