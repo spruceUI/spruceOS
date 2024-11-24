@@ -8,7 +8,11 @@ SD_CARD="/mnt/SDCARD"
 IMAGE_PATH="$SD_CARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
+OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
 TMP_DIR="$SD_CARD/App/-OTA/tmp"
+
+BATTERY_CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
+CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
 
 display --icon "$IMAGE_PATH" -t "Checking for updates..."
 
@@ -34,14 +38,17 @@ CURRENT_VERSION=$(get_version)
 
 read_only_check
 
-# Download and parse the release info file
-if ! curl -k -S -s -o "$TMP_DIR/spruce" "$OTA_URL" 2>"$TMP_DIR/curl_error"; then
-    error_msg=$(cat "$TMP_DIR/curl_error")
-    log_message "OTA: Failed to download release info - Error: $error_msg"
-    display --icon "$IMAGE_PATH" -t "Update check failed, could not get update info from server. Please try again." --okay
-    rm -rf "$TMP_DIR"
-    exit 1
+# Try primary and backup URLs
+if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
+    log_message "OTA: Primary URL failed, trying backup URL"
+    if ! download_release_info "$OTA_URL_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
+        display --icon "$IMAGE_PATH" -t "Update check failed, could not get valid update info. Please try again later." --okay
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
 fi
+
+# If we get here, we have valid content in $TMP_DIR/spruce
 
 # Extract version info from downloaded file
 RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
@@ -122,10 +129,20 @@ Latest version: $TARGET_VERSION" --okay
     exit 0
 fi
 
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
+    log_message "OTA: Battery level too low for update"
+    display --icon "$IMAGE_PATH" -t "Battery too low for update.
+You can still download the update, but you will need to charge your device to at least 20% or plug it in.
+Afterwards you may use the EZ Updater app to install the update." -p 220 --okay
+log_message "OTA: Battery level: $BATTERY_CAPACITY%
+Charging: $CHARGING"
+fi
+
+
 display -t "Scan QR code for release notes.
 Newer version available: $TARGET_VERSION
 Download and install?" --confirm --qr "$TARGET_INFO"
-if confirm; then
+if confirm 300; then
     log_message "OTA: User confirmed"
 else
     log_message "OTA: User did not confirm"
@@ -190,7 +207,7 @@ if [ "$goto_install" != "true" ]; then
     download_pid=$! # Store the PID of the background process
 
     if ! curl -k -L -o "$SD_CARD/$FILENAME" "$TARGET_LINK" 2>"$TMP_DIR/curl_error"; then
-        kill $download_pid # Kill the progress display if download fails
+        kill $download_pid
         error_msg=$(cat "$TMP_DIR/curl_error")
         log_message "OTA: Failed to download update file - Error: $error_msg"
         display --icon "$IMAGE_PATH" -t "Update download failed" --okay
@@ -214,12 +231,20 @@ rm -rf "$TMP_DIR"
 # Show updater app
 /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show "$SD_CARD/App/-Updater/config.json"
 
+# Check battery level before asking to update
+if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then
+    log_message "OTA: Battery level too low for update"
+    display --icon "$IMAGE_PATH" -t "Battery too low for update.
+Please charge to at least 30% or plug in your device. You can run the EZ Updater app to install the already downloaded update." -p 220 --okay
+    exit 0
+fi
+
 # Update script call
 display --icon "$IMAGE_PATH" -t "Download successful! Install now?" --confirm
-if confirm; then
-    log_message "OTA: User confirmed"
+if confirm 30 0; then
+    log_message "OTA: Update confirmed"
     /mnt/SDCARD/Updater/updater.sh
 else
-    log_message "OTA: User did not confirm"
+    log_message "OTA: Update declined"
     exit 0
 fi
