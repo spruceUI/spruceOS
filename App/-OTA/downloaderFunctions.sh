@@ -7,8 +7,29 @@ CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
+    local timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
+    local check_interval=86400  # 24 hours in seconds
+
+    # If update was previously prompted, check the timestamp
+    if flag_check "update_prompted"; then
+        # Create timestamp file if it doesn't exist
+        [ ! -f "$timestamp_file" ] && date +%s > "$timestamp_file"
+        
+        current_time=$(date +%s)
+        last_check=$(cat "$timestamp_file")
+        time_diff=$((current_time - last_check))
+        
+        # If less than 24 hours have passed, skip the check
+        if [ $time_diff -lt $check_interval ]; then
+            log_message "Update Check: Skipping check, last check was $((time_diff / 3600)) hours ago"
+            return 1
+        fi
+    fi
 
     mkdir -p "$TMP_DIR"
+
+    # Update timestamp for next check
+    date +%s > "$timestamp_file"
 
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
