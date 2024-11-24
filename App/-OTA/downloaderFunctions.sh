@@ -7,6 +7,11 @@ CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
+    # Check if updates are enabled in settings
+    if ! setting_get "checkForUpdates"; then
+        return 1
+    fi
+
     local timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     local check_interval=86400  # 24 hours in seconds
 
