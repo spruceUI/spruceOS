@@ -215,3 +215,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - N64/DC/PSP:
 
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
+
+## News
+The "soon" to happen release of the Miyoo Flip has us excited! We are planning on trying to do something for it but have not gotten ahold of any test units yet.
+[Gogamegeek.com](gogamegeek.com) has kindly offered to send us a few units as soon as they recieve them. Expect updates on our progress "soon"!
