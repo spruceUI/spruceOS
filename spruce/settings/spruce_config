@@ -45,7 +45,7 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent _VALUE_" ""
 
-"" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$|$RECENTS$" ""
+"" "Enable Recents in main menu" "|" "on|off" "$RECENTS$ check" "$RECENTS$ _VALUE_" ""
 
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
 @"For system notifications"

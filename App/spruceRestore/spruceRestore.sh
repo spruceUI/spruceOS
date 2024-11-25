@@ -85,6 +85,14 @@ compare_versions() {
     }'
 }
 
+kill_network_services() {
+    killall -9 dropbear
+    killall -9 smbd
+    killall -9 sftpgo
+    killall -9 syncthing
+}
+
+kill_network_services
 rm -f "$last_update_file"
 
 # Actual restore process
@@ -206,6 +214,13 @@ cd - >/dev/null
 log_message "Upgrade process completed. Current version: $current_version"
 display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
+
+# Apply settings
+
+log_message "Applying recentsTile setting"
+sh /mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh reapply
+
 log_message "----------Restore and Upgrade completed----------"
 
 auto_regen_tmp_update
+exit 0
