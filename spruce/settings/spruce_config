@@ -53,7 +53,7 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
-"" "Automatically check for updates" "|" "on|off" "$HELP$ get checkForUpdates on" "$HELP$ update checkForUpdates _VALUE_" ""
+"" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
 @"Spruce will check periodically on startup"
 
 [Emulators]
