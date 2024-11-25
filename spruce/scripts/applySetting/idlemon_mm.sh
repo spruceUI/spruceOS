@@ -79,54 +79,62 @@ start_idlemon() {
   esac
 }
 
-# If idle_type is not provided, handle both in_menu and in_game
-if [ -z "$idle_type" ]; then
-  # Read timeout_value for in_menu
+# Function to reapply both settings
+reapply_settings() {
+  # Handle in_menu setting
   IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
   if [ "$IDLE_MENU_VALUE" != "Off" ]; then
     timeout_value="$IDLE_MENU_VALUE"
   else
-    timeout_value="Off" 
+    timeout_value="Off"
   fi
-  # Start idlemon for in_menu
   start_idlemon "in_menu" "$timeout_value"
 
-  # Read timeout_value for in_game
+  # Handle in_game setting
   IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
   if [ "$IDLE_GAME_VALUE" != "Off" ]; then
     timeout_value="$IDLE_GAME_VALUE"
   else
     timeout_value="Off"
   fi
-  # Start idlemon for in_game
   start_idlemon "in_game" "$timeout_value"
-else
-  # If idle_type is provided, use the passed value for timeout_value or fetch from corresponding file
-  if [ -z "$timeout_value" ]; then
-    case "$idle_type" in
-      in_menu)
-        IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
-        if [ "$IDLE_MENU_VALUE" != "Off" ]; then
-          timeout_value="$IDLE_MENU_VALUE"
-        else
-          timeout_value="Off"
-        fi
-        ;;
-      in_game)
-        IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
-        if [ "$IDLE_GAME_VALUE" != "Off" ]; then
-          timeout_value="$IDLE_GAME_VALUE"
-        else
-          timeout_value="Off"
-        fi
-        ;;
-      *)
-        echo "Unsupported idle type: $idle_type"
-        exit 1
-        ;;
-    esac
-  fi
+}
 
-  # Start idlemon for the specific idle_type
-  start_idlemon "$idle_type" "$timeout_value"
-fi
+# Main script logic
+case "$1" in
+    "reapply")
+        reapply_settings
+        ;;
+    *)
+        if [ -z "$idle_type" ]; then
+            reapply_settings
+        else
+            # If idle_type is provided but no timeout_value, fetch from settings
+            if [ -z "$timeout_value" ]; then
+                case "$idle_type" in
+                    in_menu)
+                        IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
+                        if [ "$IDLE_MENU_VALUE" != "Off" ]; then
+                            timeout_value="$IDLE_MENU_VALUE"
+                        else
+                            timeout_value="Off"
+                        fi
+                        ;;
+                    in_game)
+                        IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
+                        if [ "$IDLE_GAME_VALUE" != "Off" ]; then
+                            timeout_value="$IDLE_GAME_VALUE"
+                        else
+                            timeout_value="Off"
+                        fi
+                        ;;
+                    *)
+                        echo "Unsupported idle type: $idle_type"
+                        exit 1
+                        ;;
+                esac
+            fi
+            start_idlemon "$idle_type" "$timeout_value"
+        fi
+        ;;
+esac

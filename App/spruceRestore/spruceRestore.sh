@@ -219,6 +219,8 @@ display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 log_message "Applying recentsTile setting"
 sh /mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh reapply
+log_message "Applying idlemon setting"
+sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
 
 log_message "----------Restore and Upgrade completed----------"
 

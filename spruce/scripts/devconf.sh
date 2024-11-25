@@ -12,8 +12,7 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
     update_setting "idlemon_in_game" "Off"
     update_setting "idlemon_in_menu" "Off"
 
-    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh in_menu Off
-    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh in_game Off
+    sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
     
     # Enable certain network services
     update_setting "samba" "on"
