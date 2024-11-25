@@ -116,7 +116,7 @@ case $EMU_NAME in
 	"NDS")
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
 		# so we pause joystickinput and create soft link to serial port
-		killall -STOP joystickinput
+		killall -q -STOP joystickinput
         ln -s /dev/ttyS2 /dev/ttyS0
 
 		cd $EMU_DIR
@@ -140,7 +140,7 @@ case $EMU_NAME in
 
         # remove soft link and resume joystickinput
         rm /dev/ttyS0
-		killall -CONT joystickinput
+		killall -q -CONT joystickinput
 
 		;;
 
@@ -159,7 +159,7 @@ case $EMU_NAME in
 	"PICO8")
         # send signal USR2 to joystickinput to switch to KEYBOARD MODE
         # this allows joystick to be used as DPAD in MainUI
-        killall -USR2 joystickinput
+        killall -q -USR2 joystickinput
 
 		export HOME="$EMU_DIR"
 		export PATH="$HOME"/bin:$PATH
@@ -199,7 +199,7 @@ case $EMU_NAME in
 		sync
 
         # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -USR1 joystickinput
+        killall -q -USR1 joystickinput
 
 		;;
 

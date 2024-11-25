@@ -7,6 +7,7 @@ $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 $F8_PNG=/mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
+$JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
@@ -49,6 +50,8 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
 @"For system notifications"
+
+"" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
 "" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
 @"Spruce will check periodically on startup"
