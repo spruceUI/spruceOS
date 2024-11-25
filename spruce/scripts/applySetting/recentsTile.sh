@@ -39,8 +39,8 @@ set_recents_off() {
 }
 
 reapply_setting() {
-    setting_get "recentsTile"
     killall -9 MainUI
+    setting_get "recentsTile"
     if [ $? -eq 1 ]; then
         set_recents_on
     else
