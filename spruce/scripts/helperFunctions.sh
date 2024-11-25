@@ -443,6 +443,14 @@ flag_add() {
     touch "$FLAGS_DIR/${flag_name}.lock"
 }
 
+# Get the full path to a flag file
+# Usage: flag_path "flag_name"
+# Returns the full path to the flag file (with .lock extension)
+flag_path() {
+    local flag_name="$1"
+    echo "$FLAGS_DIR/${flag_name}.lock"
+}
+
 # Remove a flag
 # Usage: flag_remove "flag_name"
 flag_remove() {

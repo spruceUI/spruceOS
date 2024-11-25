@@ -49,7 +49,7 @@ while [ 1 ]; do
         # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
             flag_remove "low_battery"
         fi
 

@@ -118,4 +118,23 @@ update_checker(){
     check_for_update
 }
 
+UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
+
+# This works with checker to display a notification if an update is available
+# But only on next boot. So if they find the app by themselves it's fine.
+update_notification(){
+    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+    if [ "$wifi_enabled" -eq 0 ]; then
+        exit 1
+    fi
+
+    if flag_check "update_available"; then
+        available_version=$(cat "$(flag_path update_available)")
+        display --icon "$UPDATE_ICON" -t "Update available!
+Version ${available_version} is ready to install
+Go to Apps and look for 'Update Available'" --okay
+        flag_remove "update_available"
+    fi
+}
+
 

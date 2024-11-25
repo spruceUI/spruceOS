@@ -7,8 +7,34 @@ CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
+    # Check if updates are enabled in settings
+    if ! setting_get "checkForUpdates"; then
+        return 1
+    fi
+
+    local timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
+    local check_interval=86400  # 24 hours in seconds
+
+    # If update was previously prompted, check the timestamp
+    if flag_check "update_prompted"; then
+        # Create timestamp file if it doesn't exist
+        [ ! -f "$timestamp_file" ] && date +%s > "$timestamp_file"
+        
+        current_time=$(date +%s)
+        last_check=$(cat "$timestamp_file")
+        time_diff=$((current_time - last_check))
+        
+        # If less than 24 hours have passed, skip the check
+        if [ $time_diff -lt $check_interval ]; then
+            log_message "Update Check: Skipping check, last check was $((time_diff / 3600)) hours ago"
+            return 1
+        fi
+    fi
 
     mkdir -p "$TMP_DIR"
+
+    # Update timestamp for next check
+    date +%s > "$timestamp_file"
 
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
@@ -93,13 +119,43 @@ check_for_update() {
                 s|"label": "[^"]*"|"label": "Update Available"|;
                 s|"description": "[^"]*"|"description": "Version '"$TARGET_VERSION"' is available"|' "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
+
+        # Check if update was previously prompted
+        if ! flag_check "update_prompted"; then
+            # First time seeing this update
+            flag_add "update_available"
+            flag_add "update_prompted"
+            echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+            echo "$TARGET_VERSION" > "$(flag_path update_available)"
+        else
+            # Get version from previous prompt
+            prompted_version=$(cat "$(flag_path update_prompted)")
+            
+            # Compare versions (using same logic as above)
+            prompted_base_version=$(echo "$prompted_version" | cut -d'-' -f1)
+            prompted_date=$(echo "$prompted_version" | cut -d'-' -f2 -s)
+            
+            newer_than_prompted=0
+            if [ "$(echo "$target_base_version $prompted_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$prompted_base_version" ]; then
+                newer_than_prompted=1
+            elif [ -n "$prompted_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$prompted_date" ]; then
+                newer_than_prompted=1
+            fi
+
+            if [ $newer_than_prompted -eq 1 ]; then
+                # New version is newer than previously prompted version
+                flag_add "update_available"
+                echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+                echo "$TARGET_VERSION" > "$(flag_path update_available)"
+            fi
+        fi
         return 0
     else
         log_message "Update Check: Current version is up to date"
         # No update - if app is visible, set label and description back to default
         if grep -q '"label"' "$CONFIG_FILE"; then
             sed -i 's|"label": "[^"]*"|"label": "Check for Updates"|;
-                    s|"description": "[^"]*"|"description": "Check for updates over Wi-Fi"|' "$CONFIG_FILE"
+                    s|"description": "[^"]*"|"description": "Download and install updates over Wi-Fi"|' "$CONFIG_FILE"
         fi
         rm -rf "$TMP_DIR"
         return 1
@@ -183,4 +239,25 @@ $ETA_MSG" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 24
 
         sleep 5
     done
+}
+
+download_release_info() {
+    local url="$1"
+    local output_file="$2"
+    local tmp_dir="$3"
+    
+    # Try to download the file
+    if ! curl -k -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"; then
+        error_msg=$(cat "$tmp_dir/curl_error")
+        log_message "OTA: Failed to download from $url - Error: $error_msg"
+        return 1
+    fi
+    
+    # Verify we got valid content
+    if ! grep -q "RELEASE_VERSION=" "$output_file"; then
+        log_message "OTA: Invalid or empty release info file from $url"
+        return 1
+    fi
+    
+    return 0
 }

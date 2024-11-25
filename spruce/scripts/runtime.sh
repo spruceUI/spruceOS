@@ -169,6 +169,8 @@ update_checker &
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart
 
+update_notification
+
 # start main loop
 log_message "Starting main loop"
 ${SCRIPTS_DIR}/principal.sh

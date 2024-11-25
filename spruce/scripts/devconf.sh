@@ -11,6 +11,8 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
     # Turn off idle monitors
     update_setting "idlemon_in_game" "Off"
     update_setting "idlemon_in_menu" "Off"
+
+    sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
     
     # Enable certain network services
     update_setting "samba" "on"
@@ -24,6 +26,7 @@ if flag_check "developer_mode" || flag_check "designer_mode"; then
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/ShowOutputTest/config.json
+    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/-OTA/config.json
 fi
 
 

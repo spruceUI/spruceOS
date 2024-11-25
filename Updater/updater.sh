@@ -120,10 +120,10 @@ log_update_message "Checking battery level"
 BATTERY_CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
-if [ "$BATTERY_CAPACITY" -lt 30 ] && [ "$CHARGING" -eq 0 ]; then
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
     log_update_message "Battery level too low for update"
     display "Battery too low for update.
-    Please charge to at least 30% or plug in your device." --acknowledge
+    Please charge to at least 20% or plug in your device." --acknowledge
     exit 1
 fi
 
