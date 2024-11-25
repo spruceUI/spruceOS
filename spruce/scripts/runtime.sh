@@ -51,6 +51,8 @@ flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
+flag_remove "emufresh"
+
 if flag_check "forced_shutdown"; then
     flag_remove "forced_shutdown"
     setting_update "skip_shutdown_confirm" off
