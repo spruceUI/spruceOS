@@ -80,6 +80,8 @@ if [ -f /mnt/SDCARD/spruce/settings/gs_max ]; then
     rm /mnt/SDCARD/spruce/settings/gs_max
 fi
 
+setting_update checkForUpdates on
+
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
 if [ $? -eq 0 ]; then
