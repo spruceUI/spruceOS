@@ -7,7 +7,10 @@
 
 connect_services() {
     
-    while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
+	while true; do
+        if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+            break
+        fi
         sleep 0.5
     done
 	  

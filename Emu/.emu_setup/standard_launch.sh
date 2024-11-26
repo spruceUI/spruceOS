@@ -82,11 +82,12 @@ if $syncthing_enabled && $wifi_connected; then
     start_syncthing_process
     /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
     flag_add "syncthing_startup_synced"
+
 fi
 
 # Handle network service disabling
 if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
-    /mnt/SDCARD/spruce/scripts/networkservices.sh off &
+    /mnt/SDCARD/spruce/scripts/networkservices.sh off
     
     if setting_get "disableWifiInGame"; then
         if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
