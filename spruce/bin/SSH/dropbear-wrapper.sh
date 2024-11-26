@@ -12,6 +12,7 @@ if [ "$SSH_ORIGINAL_COMMAND" = "/usr/libexec/sftp-server" ]; then
 elif [ -n "$SSH_ORIGINAL_COMMAND" ]; then
 	exec $SSH_ORIGINAL_COMMAND
 else
-	export PATH=$PATH:/mnt/SDCARD/miyoo/app
+	export LD_LIBRARY_PATH=/mnt/SDCARD/miyoo/lib:
+	export PATH=/mnt/SDCARD/miyoo/app:/usr/sbin:/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin:/sbin:/bin
 	exec /bin/sh
 fi
