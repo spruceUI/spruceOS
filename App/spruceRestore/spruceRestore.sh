@@ -21,7 +21,7 @@ display_message() {
 }
 
 log_message "----------Starting Restore script----------"
-set_performance
+# set_performance
 display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
 
 #-----Main-----
