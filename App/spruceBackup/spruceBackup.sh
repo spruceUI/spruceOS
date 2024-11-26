@@ -13,7 +13,7 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
-set_performance
+# set_performance
 
 # Modify display function to respect silent mode
 display_message() {
