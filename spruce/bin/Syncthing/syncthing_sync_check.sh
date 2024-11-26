@@ -6,28 +6,91 @@
 SYNCTHING_CONFIG_DIR="${SYNCTHING_CONFIG_DIR:-/mnt/SDCARD/spruce/bin/Syncthing/config}"
 API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
-CHECK_INTERVAL=2  # Interval in seconds to wait while Syncthing is syncing
-MAX_API_RETRIES=15 # Give up after this many times waiting for Syncthing API to be available
-API_RETRY_INTERVAL=1 # Interval in seconds
 API_KEY=""
 BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-# Function to start network interface
+
+check_syncthing_status() {
+    if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
+        return 0
+    fi
+    return 1
+}
+
+check_device_connections() {
+    local connected_devices=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/connections" | jq -r '.connections | to_entries[] | select(.value.connected == true) | .key')
+    if [ -n "$connected_devices" ]; then
+        log_message "SyncthingCheck: Devices already connected"
+        return 0
+    fi
+    return 1
+}
+
+wait_for_syncthing_api() {
+    log_message "SyncthingCheck: Checking Syncthing API availability..."
+    local start_time=$(date +%s)
+    local timeout=30  # Maximum wait time in seconds
+    
+    while true; do
+        if check_syncthing_status; then
+            log_message "SyncthingCheck: API is available"
+            return 0
+        fi
+        
+        if [ $(($(date +%s) - start_time)) -gt $timeout ]; then
+            log_message "SyncthingCheck: API timeout after ${timeout}s"
+            return 1
+        fi
+        
+        sleep 1
+    done
+}
+
+smart_device_discovery() {
+    local max_attempts=3
+    local attempt=1
+    local base_timeout=5  # Start with shorter timeouts but try multiple times
+
+    while [ $attempt -le $max_attempts ]; do
+        if check_device_connections; then
+            log_message "SyncthingCheck: Devices connected on attempt $attempt"
+            return 0
+        fi
+        
+        log_message "SyncthingCheck: No devices connected, attempt $attempt of $max_attempts..."
+        force_rediscovery
+        
+        local timeout=$((base_timeout * attempt))  # Increase timeout with each attempt
+        local start_time=$(date +%s)
+        
+        while true; do
+            if check_device_connections; then
+                log_message "SyncthingCheck: Devices connected after rediscovery"
+                return 0
+            fi
+            
+            if [ $(($(date +%s) - start_time)) -gt $timeout ]; then
+                log_message "SyncthingCheck: Timeout after ${timeout}s on attempt $attempt"
+                break
+            fi
+            
+            sleep 1
+        done
+        
+        attempt=$((attempt + 1))
+    done
+    
+    log_message "SyncthingCheck: Failed to connect devices after $max_attempts attempts"
+    return 1
+}
+
 start_network() {
     log_message "SyncthingCheck: Starting network interface..."
     ifconfig lo up
 }
 
-wait_for_syncthing_api() {
-    log_message "SyncthingCheck: Waiting for Syncthing API to become available..."
-    for i in $(seq 1 $MAX_API_RETRIES); do
-        if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
-            log_message "SyncthingCheck: Syncthing API is now available"
-            return 0
-        fi
-        sleep $API_RETRY_INTERVAL
-    done
-    log_message "SyncthingCheck: Syncthing API did not become available within the expected time"
-    return 1
+stop_network() {
+    log_message "SyncthingCheck: Stopping network interface..."
+    ifconfig lo down
 }
 
 get_folders() {
@@ -59,26 +122,8 @@ force_rediscovery() {
     fi
 }
 
-stop_network() {
-    log_message "SyncthingCheck: Stopping network interface..."
-    ifconfig lo down
-}
-
 get_devices() {
     curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/connections" | jq -r '.connections | keys[]'
-}
-
-are_devices_online() {
-    local connected_devices=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/connections" | jq -r '.connections | to_entries[] | select(.value.connected == true) | .key')
-    if [ -n "$connected_devices" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-get_folder_status() {
-    curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/db/status?folder=$1"
 }
 
 get_device_name() {
@@ -88,7 +133,7 @@ get_device_name() {
 
 calculate_folder_completion() {
     local folder_id="$1"
-    local folder_status=$(get_folder_status "$folder_id")
+    local folder_status=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/db/status?folder=$folder_id")
     local global_bytes=$(echo "$folder_status" | jq '.globalBytes // 0')
     local need_bytes=$(echo "$folder_status" | jq '.needBytes // 0')
 
@@ -143,9 +188,8 @@ monitor_sync_status() {
     local folders=$(get_folders)
     local devices=$(get_devices)
 
-    # Check if there are any folders configured
     if [ $? -ne 0 ] || [ -z "$folders" ]; then
-        log_message "SyncthingCheck: No folders are configured. Exiting sync check."
+        log_message "SyncthingCheck: No folders configured. Exiting sync check."
         display -t "Syncthing Check:
 No folders configured" -i "$BG_TREE"
         sleep 1
@@ -153,100 +197,68 @@ No folders configured" -i "$BG_TREE"
     fi
 
     rm -f /tmp/sync_cancelled
-
+    
     log_message "SyncthingCheck: Monitoring sync status in $mode mode"
     display -t "Syncthing Check:
 Press START to cancel" -i "$BG_TREE"
 
     monitor_start_button &
 
-    if [ "$mode" = "shutdown" ]; then
-        force_rescan
-        sleep 2
-    fi
-
-    # Always force rediscovery in case service was not running
-    force_rediscovery
-
-    # Give a few seconds for forced discovery to trigger a rescan
-    sleep 5
-
-    if ! are_devices_online; then
-        log_message "SyncthingCheck: No devices found on first attempt, waiting for second attempt..."
-        sleep 2
-        # Second attempt
-        if ! are_devices_online; then
-            log_message "SyncthingCheck: No devices are online after retry. Exiting sync check."
-            display -t "No devices online" -i "$BG_TREE"
-            sleep 1
-            return 1
-        fi
-    fi
+    force_rescan
+    smart_device_discovery || {
+        log_message "SyncthingCheck: No devices available. Exiting."
+        display -t "No devices online" -i "$BG_TREE"
+        sleep 1
+        return 1
+    }
 
     while true; do
-        local all_synced=true
-        local summary=""
-        local status_lines=""
-
         if [ -f /tmp/sync_cancelled ]; then
             rm -f /tmp/sync_cancelled
-            exit 1
+            return 1
         fi
 
-        # Remove the status files at the beginning of each iteration
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
 
         for device in $devices; do
             local device_name=$(get_device_name "$device")
             local short_id=$(echo "$device" | cut -c1-7)
-            log_message "SyncthingCheck: Device $device_name ($short_id):"
-            summary="${summary}Device $device_name ($short_id):\n"
-
+            
             echo "$folders" | while IFS='|' read -r folder_id folder_label; do
-                # On Startup, we only care about downloading remote files to local device
+                local status=""
+                
                 if [ "$mode" = "startup" ]; then
                     local completion=$(calculate_folder_completion "$folder_id")
                     [ "$completion" != "100" ] && echo "not_synced" > /tmp/sync_status
-                # On Shutdown, we only care about making sure we are done uploading local files to remote device
+                    status="$completion%"
                 elif [ "$mode" = "shutdown" ]; then
                     local completion=$(calculate_total_completion "$device" "$folder_id")
                     [ "$completion" != "100" ] && echo "not_synced" > /tmp/sync_status
-                # This we display both startup/shutdown functionality, used for testing
+                    status="$completion%"
                 elif [ "$mode" = "monitor" ]; then
                     local download_completion=$(calculate_folder_completion "$folder_id")
                     local upload_completion=$(calculate_total_completion "$device" "$folder_id")
-                    completion="${download_completion}/${upload_completion}"
                     [ "$download_completion" != "100" ] || [ "$upload_completion" != "100" ] && echo "not_synced" > /tmp/sync_status
+                    status="${download_completion}/${upload_completion}%"
                 fi
 
-                status_line="$folder_label:\n$completion%"
-                log_message "SyncthingCheck:   $status_line"
-                summary="${summary}  $status_line\n"
-
-                # Append the status line to the display file with an extra blank line
                 echo "$folder_label:" >> /tmp/sync_display.txt
-                echo "$completion%" >> /tmp/sync_display.txt
+                echo "$status" >> /tmp/sync_display.txt
                 echo "" >> /tmp/sync_display.txt
             done
-            summary="${summary}\n"
-            log_message "SyncthingCheck: "
         done
 
-        # Read the contents of the display file for display
         status_content=$(cat /tmp/sync_display.txt)
         display -t "$status_content
 Press START to cancel" -i "$BG_TREE"
 
         if [ ! -f /tmp/sync_status ]; then
-            log_message "SyncthingCheck: All folders on all devices are in sync."
-            if [ "$mode" != "monitor" ]; then
-                return 0
-            fi
+            log_message "SyncthingCheck: All folders synchronized"
+            return 0
         fi
 
-        log_message "SyncthingCheck: ---"
-        sleep $CHECK_INTERVAL
+        sleep 1
     done
 }
 
@@ -266,43 +278,36 @@ set_api_key() {
     fi
 }
 
-# Main script
 main() {
-    start_network
-    
-    # Set the API key
     if ! set_api_key; then
         display -t "Error: Unable to find API key" -i "$BG_TREE"
-        sleep 2
-        stop_network
+        sleep 1
         exit 1
     fi
 
+    start_network
+    
+    if ! check_syncthing_status; then
+        log_message "SyncthingCheck: Syncthing not responsive, waiting for startup..."
+        if ! wait_for_syncthing_api; then
+            display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
+            sleep 1
+            stop_network
+            exit 1
+        fi
+    fi
+
     case "$1" in
-        # This mode is only used for testing, this performs both startup/shutdown at once without exiting
         --monitor)
             monitor_sync_status "monitor"
             ;;
         --startup)
-            if wait_for_syncthing_api; then
-                monitor_sync_status "startup"
-            else
-                display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
-                sleep 1
-            fi
+            monitor_sync_status "startup"
             ;;
         --shutdown)
-            # Kill MainUI and principal so it doesn't clash with my display
             killall -9 MainUI
             killall -9 principal.sh
-
-            if wait_for_syncthing_api; then
-                monitor_sync_status "shutdown"
-            else
-                display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
-                sleep 1
-            fi
-
+            monitor_sync_status "shutdown"
             killall -9 syncthing
             ;;
         *)
@@ -314,11 +319,8 @@ main() {
 
     exit_code=$?
     log_message "SyncthingCheck: Sync check completed with exit code: $exit_code"
-
     stop_network
-
     exit $exit_code
 }
 
-# Call the main function
 main "$@"
