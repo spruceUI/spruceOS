@@ -228,6 +228,9 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
         # MENU key down
         *"key 1 1 1"*)
+            # pause PPSSPP, PICO8 or MainUI if it is running
+            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
+
             # start long press handler
             log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
@@ -238,9 +241,8 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             # capture screenshot
             $BIN_PATH/fbgrab -a "/tmp/capture.png" > /dev/null
 
-            # pause RA, PPSSPP, PICO8 or MainUI if it is running
+            # pause RA after screen capture
             send_virtual_key_R3
-            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
         ;;
         # MENU key up
         *"key 1 1 0"*)
