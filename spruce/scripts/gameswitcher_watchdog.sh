@@ -70,10 +70,8 @@ prepare_game_switcher() {
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
         # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
-        # ensure framebuffer information is set correctly
-        $BIN_PATH/fbfixcolor
-        # capture screenshot
-        $BIN_PATH/fbgrab -a "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        # copy temp capture file to SDCARD
+        cp "/tmp/capture.png" "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         log_message "*** gameswitcher_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -234,6 +232,11 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
+
+            # ensure framebuffer information is set correctly
+            $BIN_PATH/fbfixcolor
+            # capture screenshot
+            $BIN_PATH/fbgrab -a "/tmp/capture.png" > /dev/null
 
             # pause RA, PPSSPP, PICO8 or MainUI if it is running
             send_virtual_key_R3
