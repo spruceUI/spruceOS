@@ -5,7 +5,7 @@
 
 SD_CARD="/mnt/SDCARD"
 
-IMAGE_PATH="$SD_CARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
+IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
