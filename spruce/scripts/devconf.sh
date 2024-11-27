@@ -6,7 +6,7 @@
 
 EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
 
-if flag_check "developer_mode" || flag_check "designer_mode"; then
+if flag_check "developer_mode"; then
    log_message "Developer mode enabled"
     # Turn off idle monitors
     update_setting "idlemon_in_game" "Off"
@@ -39,13 +39,18 @@ if flag_check "designer_mode"; then
     fi
     # Changing the name to break future calls.
     mv "$EMUFRESH" "$EMUFRESH.bak"
+    
+    # Remove @ from Theme Packer label
+    sed -i 's/"@label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi
 
-# Restore if neither mode is enabled
-if ! flag_check "designer_mode" && ! flag_check "developer_mode"; then
-
+# Restore if designer mode is not enabled
+if ! flag_check "designer_mode"; then
     # Restore EMUFRESH if it exists
     if [ -f "$EMUFRESH.bak" ]; then
         mv "$EMUFRESH.bak" "$EMUFRESH"
     fi
+    
+    # Restore @ in Theme Packer label
+    sed -i 's/"label"/"@label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi
