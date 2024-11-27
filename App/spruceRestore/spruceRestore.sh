@@ -87,8 +87,8 @@ compare_versions() {
 
 kill_network_services() {
     killall -9 dropbear
-    killall -9 smbd
-    killall -9 sftpgo
+    #killall -9 smbd
+    #killall -9 sftpgo
     killall -9 syncthing
 }
 
