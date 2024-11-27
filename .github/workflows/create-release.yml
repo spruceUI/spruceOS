@@ -122,35 +122,51 @@ jobs:
           draft: true
           prerelease: true
 
-      - name: Update OTA file
+      - name: Update OTA files
         if: success()
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Clone the OTA repository
+          # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          git clone https://github.com/spruceUI/spruceSource.git mirror_repo
           
           # Calculate file info
           CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
           
-          # Read existing file content
-          CONTENT=$(cat ota_repo/OTA/spruce)
+          # Function to update OTA file
+          update_ota_file() {
+            local file="$1"
+            local content
+            content=$(cat "$file")
+            
+            echo "$content" | grep -v "^RELEASE_" > "$file"
+            echo "RELEASE_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+            echo "RELEASE_CHECKSUM=$CHECKSUM" >> "$file"
+            echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> "$file"
+            echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+            echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+          }
           
-          # Update release information while preserving other content
-          echo "$CONTENT" | grep -v "^RELEASE_" > ota_repo/OTA/spruce
-          echo "RELEASE_VERSION=${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
-          echo "RELEASE_CHECKSUM=$CHECKSUM" >> ota_repo/OTA/spruce
-          echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> ota_repo/OTA/spruce
-          echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> ota_repo/OTA/spruce
-          echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${{ steps.get_version.outputs.version }}" >> ota_repo/OTA/spruce
-
-          # Configure git
+          # Update main OTA file
+          update_ota_file "ota_repo/OTA/spruce"
+          
+          # Update mirror OTA file
+          update_ota_file "mirror_repo/OTA/spruce"
+          
+          # Push changes to main repo
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          
-          # Commit and push changes
           git add OTA/spruce
           git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          
+          # Push changes to mirror repo
+          cd ../mirror_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
