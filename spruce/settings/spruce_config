@@ -74,7 +74,7 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 @"Combine with other keys for quick actions in RetroArch"
 
 "" "Pico-8 Control Profile" "|||" "Doubled|Racing|One-handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ _INDEX_"
-@"A-(x) B-(o) L1-(x) R1-(o)"
+@"A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ"
 
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
 
