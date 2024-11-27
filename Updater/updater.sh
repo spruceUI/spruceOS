@@ -276,9 +276,10 @@ display "Now using spruce $UPDATE_VERSION" 2
 
 DELETE_UPDATE=true
 if [ "$DELETE_UPDATE" = true ]; then
-    log_update_message "Deleting update file"
-    rm "$UPDATE_FILE"
-    log_update_message "Update file deleted"
+    log_update_message "Deleting all update files"
+    # Remove all spruce update files matching the pattern
+    find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
+    log_update_message "All update files deleted"
 fi
 
 # Restore backup
