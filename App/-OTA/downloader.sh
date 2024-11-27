@@ -97,10 +97,9 @@ Public release version: $RELEASE_VERSION" -p 220 --confirm
     fi
 fi
 
+SKIP_VERSION_CHECK=false
 # Set SKIP_VERSION_CHECK to true if developer mode or tester mode is enabled
 if flag_check "developer_mode" || flag_check "tester_mode"; then
-    SKIP_VERSION_CHECK=true
-else
     SKIP_VERSION_CHECK=true
 fi
 
