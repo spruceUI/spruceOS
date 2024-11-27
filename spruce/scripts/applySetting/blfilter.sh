@@ -19,11 +19,11 @@ setHSLValues() {
     intensity=$1
     Contrast=$(getContrastFromDevice) 
 	case "$intensity" in
-		"Low")          Luminance=25; Saturation=45; Hue=55 ;;  # Mild blue-light reduction
-		"Moderate")     Luminance=20; Saturation=40; Hue=60 ;;  # Moderate filter
-		"Strong")       Luminance=15; Saturation=30; Hue=65 ;;  # Strong filter (more noticeable effect)
-		"Very strong")  Luminance=10; Saturation=25; Hue=75 ;;  # Very strong filter (stronger warm tone)
-		*)              Luminance=30; Saturation=50; Hue=50 ;;  # Default (no filter)
+		"Low")          Luminance=30; Contrast=45; Saturation=90; Hue=95 ;;  # Slight warm tint
+		"Moderate")     Luminance=30; Contrast=40; Saturation=90; Hue=95 ;;  # Warmer orange tint
+		"Strong")       Luminance=30; Contrast=35; Saturation=90; Hue=95 ;;  # Strong orange-red tint
+		"Very strong")  Luminance=30; Contrast=30; Saturation=95; Hue=95 ;;  # Maximum warm/red tint
+		*)              Luminance=30; Contrast=50; Saturation=50; Hue=50 ;;  # Default (no filter)
 	esac
 }
 
