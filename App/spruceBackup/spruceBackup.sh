@@ -120,6 +120,14 @@ else
 Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
+# Clean up old backups, keeping only the 7 most recent
+log_message "Cleaning up old backups..."
+cd "$BACKUP_DIR/backups" || exit
+ls -t spruceBackup_*.7z | tail -n +8 | while read -r old_backup; do
+    log_message "Removing old backup: $old_backup"
+    rm "$old_backup"
+done
+
 log_message "Backup process finished running"
 
 
