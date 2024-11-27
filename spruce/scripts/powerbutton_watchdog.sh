@@ -8,7 +8,6 @@ SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
-SLEEP_FILE="/mnt/SDCARD/spruce/settings/sleep_powerdown"
 
 long_press_handler() {
     # setup flag for long pressed event
@@ -63,6 +62,7 @@ while true; do
                 10m) WAKE_ALARM_SEC=600 ;;
                 30m) WAKE_ALARM_SEC=1800 ;;
                 60m) WAKE_ALARM_SEC=3600 ;;
+                *) WAKE_ALARM_SEC=300 ;; # Default to 5m if no match
                 esac
 
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
@@ -99,11 +99,11 @@ while true; do
                     killall -q -19 drastic ||
                     killall -q -19 MainUI
 
-                // kill getevent program, prepare to break inner while loop
+                # kill getevent program, prepare to break inner while loop
                 kill $(pgrep -f "getevent /dev/input/event0 -exclusive")
                 sleep 0.5
 
-                // now break inner while loop
+                # now break inner while loop
                 break
             fi
             ;;
