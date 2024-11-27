@@ -37,6 +37,11 @@ while true; do
     CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
     PERCENT="$(setting_get "low_power_warning_percent")"
 
+    # Set default value if PERCENT is empty or non-numeric
+    case $PERCENT in
+        ''|*[!0-9]*) PERCENT=4 ;;
+    esac
+
     # force a safe shutdown at 1% regardless of settings
     if [ "$CAPACITY" -le 1 ]; then
         if ! setting_get "skip_shutdown_confirm"; then
