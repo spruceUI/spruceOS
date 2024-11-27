@@ -9,6 +9,7 @@ IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
+OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
 TMP_DIR="$SD_CARD/App/-OTA/tmp"
 
 BATTERY_CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
@@ -42,9 +43,12 @@ read_only_check
 if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
     log_message "OTA: Primary URL failed, trying backup URL"
     if ! download_release_info "$OTA_URL_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
-        display --icon "$IMAGE_PATH" -t "Update check failed, could not get valid update info. Please try again later." --okay
-        rm -rf "$TMP_DIR"
-        exit 1
+        log_message "OTA: First backup URL failed, trying second backup URL"
+        if ! download_release_info "$OTA_URL_BACKUP_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
+            display --icon "$IMAGE_PATH" -t "Update check failed, could not get valid update info. Please try again later." --okay
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
     fi
 fi
 
