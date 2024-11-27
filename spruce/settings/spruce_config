@@ -70,7 +70,8 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 "" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
-"" "Use hotkeys in RetroArch" "|" "on|off" "$RAHOTKEY$ check" "$RAHOTKEY$ _VALUE_" ""
+"" "RetroArch hotkey enable key" "|||" "Select|Start|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
+@"Combine with other keys for quick actions in RetroArch"
 
 "" "Pico-8 Control Profile" "|||" "Doubled|Racing|One-handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ _INDEX_"
 @"A-(x) B-(o) L1-(x) R1-(o)"
