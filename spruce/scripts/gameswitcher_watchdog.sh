@@ -68,10 +68,11 @@ prepare_game_switcher() {
         GAME_NAME="${GAME_PATH##*/}"
         SHORT_NAME="${GAME_NAME%.*}"
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+        SCREENSHOT_NAME="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
-        # copy temp capture file to SDCARD
-        cp "/tmp/capture.png" "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        # covert and compress framebuffer to PNG in background 
+        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$SCREENSHOT_NAME" 2> /dev/null &
         log_message "*** gameswitcher_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -228,18 +229,18 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
         # MENU key down
         *"key 1 1 1"*)
-            # pause PPSSPP, PICO8 or MainUI if it is running
-            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
-
             # start long press handler
             log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
 
+            # pause PPSSPP, PICO8 or MainUI if it is running
+            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
+
             # ensure framebuffer information is set correctly
             $BIN_PATH/fbfixcolor
-            # capture screenshot
-            $BIN_PATH/fbgrab -a "/tmp/capture.png" > /dev/null
+            # copy framebuffer to memory temp file
+            $BIN_PATH/fbgrab -x "/tmp/fb0" 2> /dev/null 
 
             # pause RA after screen capture
             send_virtual_key_R3
