@@ -1,212 +1,96 @@
-spruce v3.0.1
-
-Added reset RetroArch task to Advanced Settings (XanXic)
-Added reset Emufresh task to Advanced Settings (XanXic)
-Rudimentary SDCard health checks added to AutoUpdater (XanXic)
-Enabled CHD's in the romlist for PPSSPP (Ry)
-Removed nonfunctional Genesis+GX core (Cobalt)
-Resolved joystick not working in Drastic/NDS (Oscarkcau)
+Changelog Spruce 3.1.0
 
 
-Spruce 3.0.0: The Game Switcher update
+Changes/Additions:
 
+* OTA Updater: (Aka Over the air updates, or Spruce Updater) Added our own updater, this will download and install the latest release from our GitHub releases page. Starting from 3.1.0 on you no longer need to manually update. It will be in your apps under "Check for Updates" or if an update is available.. "Update available". After a fresh install this app will be hidden, you can show it if you like in the Advanced Settings visibility toggles. Combined with the auto-update checker, detailed below, you could go without seeing it until an update is available. But this can be ran at anytime to manually check for new updates. The app will download the newest release and will run the EZUpdater app to install it. You can also choose to download and install later through EZ Updater if you wish. This leverages our previous work so your configs and settings are kept. (XanXic)
+* Auto update checker: A new advanced setting, if you have this, on by default, and wifi on, after a new startup Spruce will check if an update is available occasionally. If so it'll add the updater app to your apps and give you notice next time you reboot. (XanXic)
+* Home key controls: Added new settings to define what tap and hold of the home/menu key does. Now you can make your own setup for what it does. (Oscar)
+* Added new quick exit action to the tap/hold home key options (Oscar)
+* Reduced 'hold' time for the home key to 1.6 seconds from 2, added vibration when hold 'fires' (XanXic)
+* Sleep then shutdown: Added automatic shutdown after x minutes in sleep feature (FragBait)
+* Added new vibration strength/off setting in advanced settings (Ry, XanXic)
+* Fake08: Added enable .png support setting (Ry)
+* Pico 8: Added new controller layouts setting so you can decide how the buttons work, also added a 'full screen' setting for Pico8 (Ry)
+* Added on board QR generator, expect errors to give QR codes directly to wiki topics in the future. For now this is how OTA Updates will link you to the changelogs (FragBait)
+* Added SFTP, over SSH (FragBait)
+* Bluelight Filter: Added in advanced setting, this is our initial attempt, we will dial this in and add sceduling in a future update. It’s manual for now. (FragBait)
+* Changed default Lynx core to Handy (Cobalt)
+* Syncthing: Greatly improved Syncthing Sync Checker times across the board for all scenarios with the total sync process taking anywhere from nearly instant to 5 seconds now, down from 13 seconds. (BaseInfinity)
+* Added QuickNes emulator for NES systems (Cobalt)
+* Added gearcoleco RA core for Colecovision emulation (Thanks jonnyandroid for the suggestion) (Ry)
+* Added an automatic cleanup script to remove apostrophe's (') from sub folder names in roms. These are incompatible with MainUI (Ry)
+* Added automatic save and shutdown when battery hits less than 1%. Both to save your game and prevent an issue with soft bricked battery (Ry)
+* Stick delete: Added an option to disable joystick in settings for stick delete modders (Oscar)
+* Added “designer mode” to show all consoles and give access to our Theme Packer app so theme creators can have an easier time. Check the information for creating themes on our wiki (XanXic)
+* Themed SFTPGo/Wifi file transfer with spruce elements and A30's (Veckia9x)
+* Added and cleaned up icons for new and existing apps (SundownerSport)
+* Some advanced settings options shifted around. We are still feeling this app out as we expand on it, so please bear with us release to release as we find the best setup (Team Effort)
+* Removed genesis+gx core as option from 32x that Ry added erroneously (Cobalt)
+* Added developer_mode for easy toggle of dev-useful settings that differ from the defaults we ship with (fragbait)
+* Added sleep -> shutdown option as a further power-saving measure (FragBait)
+* Reduced default time for vibrate() to reduce intensity (XanXic)
+* Added chd to extlist for PSP (thanks HeyDW!) (Ry)
+* Changed default Lynx core to handy (Cobalt)
+* Added rumble intensity (Strong/Medium/Weak/Off) advanced setting for system notifications (Ry)
+* Added user-customisable actions for tap/long-press of HOME key (game switcher/in-game menu/exit game) (Oscar)
+* Fixed NDS joystick issue (Oscar)
+* Replace keymon with scripts "buttons_watchdog.sh"  this solves the following issues:
+1) update volume and brightness level to config file once they are changed by using hotkey or volune buttons
+2) no brightness and volume flicking when changing them with hotkey or volume buttons
+3) disable original auto sleeping feature (Oscar)
+* Reduced home key long press detection to 1.6 (XanXic)
+* Added vibration when long press of home key is fired (XanXic)
+* Expanded helper methods for working with the spruce.cfg file (XanXic)
+* Moved Idlemon, sleep power down, and rumble settings into the spruce.cfg file and following the established patterns (XanXic)
+* Added a "Rumble preview" when adjusting the vibration setting (XanXic)
+* Expanded developer mode to do a few more things, added a developer mode 'reapply' task to settings when the flag is present (XanXic)
+* Added a designer mode that does all the things dev mode does but will run emufresh in a show all mode (XanXic)
+* Moved Emulator settings into separate tab within Advanced Settings App (Ry)
+* Added toggle to enable .png file support for Fake08; coincidentally sets Fake08 box art to use the cart itself, mimicking our Pico-8 config (Ry)
+*     Added a new Advanced Setting to have different controller profiles for Pico-8. (Ry)
+        Racing - this is the current default since spruce 3.0.0:
+            A-(o) B-(x) L1-(o) R1-(x)
+        Double - this is my personal preference:
+            A-(o) B-(x) Y-(o) X-(x)
+        One-handed - Allows most games to be played with only the left hand:
+            A-(o) B-(x) L1-(o) L2-(x)
+        Steward - Legacy mode from pre-3.0.0; only one set of O and X, but also enables a unique mouse mode and access to the ESC key, which the SDL2 version that enables gamepad mapping does not have access to.
+            A-(o) B-(x) X-(esc) SELECT-(mouse)
+* Fix uae4arm audio sync (Metallic77)
+* Changes in Setting App for simpler and more transparent config file (Oscar)
+* Added new advanced setting to stretch native Pico-8 to fullscreen (Ry)
+* Added fix to automatically rename Roms subfolders with apostrophes in their names (once, on boot before first emufresh) so that MainUI can see them (Ry)
+* Added gearcoleco RA core as option for Colecovision emulation (thanks jonnyandroid for the suggestion) (Ry)
+* Added config override for fake08 core to disable auto save and auto load states, to prevent users from getting locked out of their games if they accidentally hit “reset game” or “exit to menu” inside fake08 (Ry)
+* Added new Advanced Setting: Low power warning percent (Off/4%/8%/12%/16%/20%). Low power warning now also respects the global Rumble Intensity setting (Ry)
+* Added Qrencode for QR code generation (FragBait)
+* Removing AutoRA flag in AutoRa to try and prevent AutoRa loops (XanXic)
+* Added a forced shutdown at or below 1% battery in order to ensure that users' auto save states get created (Ry)
+* Exposed QuickNES emulator core to UI for NES system (Cobalt)
+* Restyled WiFi File App page to match device and SpruceOS icons (Veckia9x)
+* Added Romanian language (VladNerd)
+* Added sftp (over ssh) (fragbait)
+* Added Tester mode, testers skip version checks on OTA's, updates, and upgrades. They can donload the latest nightlies (Dev, and Designer do this as well) (XanXic)
+* Added a restore RetroArch hotkeys task (XanXic)
+* Improved low power warning functionality (XanXic)
+* Changed how recents menu is shown/hidden, made restore compatible with new style (XanXic)
+* Removed a number of unnecessary per-core and per-system RA config overrides, which will make modifying global RA configs easier for users in many situations (Ry)
+* Added Noto.ttf to spruce/Font Files/ for people to use for Cyrillic langs (SundownerSport)
 
- Changes/Additions:
- ● GameSwitcher: This can be used by holding the home key while using a game.
- Currently, the only games available in the Game Switcher will be those that you
- intentionally add to it, which is done by launching the Game Switcher while in-game.
- .(They can also be removed with Y while in GS.) We took this approach so it's not filled
- with games you don't care about, or only those you have recently opened. This is highly
- configurable with a lot of options in the new Advanced Settings app. This is our initial
- version so we'll be looking at feedback for future updates. (Oscar, Ry, Cinethezs)
- ● New'Advanced Settings' app: This has replaced a number of previous standalone
- apps, and is where you can set specific settings for the system, including some
- RetroArch settings, enabling Network apps (Such as Syncthing, Samba, SSH), and
- selecting which apps are visible in your apps folder. (Oscar)
- ● AutoSave/Shutdown/Resume: Moved to holding the power key. Now when holding the
- power key, you will get an autosave and shutdown screen. This is compatible with
- PPSSPP, DraStic and RA emulators. (When the A30 vibrates, it's entering auto save;
- holding it longer will initiate a force shutdown, so let go when it vibrates) (Team Effort)
- ● Syncthing Sync Checker: This is a new approach to Syncthing we are trying out. Our
- hope is this becomes a gold standard for Syncthing implementations. When Syncthing is
- configured and enabled (In Advanced Settings), we will now show a screen and check
- that your Syncthing state is synced, when shutting down, launching games, or resuming
- from shutdown. This will allow you to safely shutdown mid game and be sure the
- save/state is synced with other devices. On auto resume it will also check the sync state
- so you can be sure you’re playing the latest version. (Basecase - Stefan Ayala)
- ● Samba: InAdvanced Settings > Network tab you’ll find Samba. You can connect to this
- by going to your A30’s IP address in a file explorer, like “\\10.0.0.10” Username ‘root’
- Password ‘tina’. (FragBait)
- ● ThemeUnpacker: Going forward themes will come packed to allow a smaller install size
- and faster transfers! If any packed themes are found on startup they'll be automatically
- unpacked for use. (XanXic)
- ● Firmware Update App: This is a new app that will only show to users who aren’t on the
- latest version. If you see this in your apps, that’s you! This should walk you through
- preparing your A30 for the current Miyoo firmware update, which includes vital
- improvements to the A30’s WiFi capabilities. (Ry)
- ● AutoUpdater App: This app will show when you have a proper update file on your SD
- card. This is only going to be useful to you for the next update, but it can be used to
- reinstall much cleaner. This is also a huge hurdle done for future OTA updates. (XanXic)
- ● Multiple Wifi Networks: We now support multiple wifi networks on the A30. There are
- two implementations. One is to predefine them in the multipass.cfg file before startup.
- This will be consumed and deleted on startup. Otherwise setting your wifi through the
- A30’s native settings screen will now save to a list. If this causes issues a “Forget wifi
- networks” task exists in Advanced Settings (Cinethezs, FragBait, Ry)
- ● Battery Percent Display: Toggled in the Settings app. We can now show the
- percentage of the battery in the corner next to the icon (Cinethezs)
-● SyncRTCwithnetwork: This is a new setting in Advanced Settings. It will automatically
- sync your system and RTC time based on your IP’s geolocation. (FragBait, XanXic)
- ● Disabled Wifi/Network apps in game: New in the settings app, you can now set it so
- wifi and/or network apps shutdown automatically while in game and will resume when
- you exit. (FragBait)
- ● ShutdownwhenIdle: This is a setting in the settings app. Set an amount of time when
- idle to save/shutdown the A30 automatically. By default, your A30 will power down when
- inactive for (5) minutes at the main menu, or (30) minutes within a supported emulator
- (adjustable in settings) to conserve battery. (FragBait)
- ● CodeandCPUoptimizations and other under-the-hood Emu changes.
- ● New"Smart" CPU mode- no more need to micromanage clock speeds- the A30 will do
- it for you! This is the new default, spruce-recommended setting for all supported
- systems.(Ry)
- ● Cleaned up Xbutton menu in game list. (Ry)
- ● Addedability to set cores and CPU mode on per-game basis in X button menu. (Ry)
- ● Addedadditional core options for systems and core changes (Ry, Cobalt, KMFDManic,
- Metallic77):
- ○ FDS:Nestopia added
- ○ 32X:Genesis Plus GX added
- ○ N64:KMLudicrousN64 Xtreme Amped, KM Parallel X-A Turbo
- ○ Amigadefault core changed to UAE4ARM
- ○ Atari ST added (Hatari core)
- ○ SG-1000/SMS/GG default core changed to Genesis Plus GX
- ○ PSX:Duckswanstation Xtreme Amped added
- ● MovedSplore (Pico-8) out of Apps and into top of Pico-8 game list. (Ry)
- ● Newunified Hotkeys configured for RetroArch, we updated them to what we would
- consider a 'common' layout and to make them compatible with our new use of the home
- key. (Ry)
- ○ SELECT+A=Screenshot
- ○ SELECT+B=Exit toMainUI
- ○ SELECT+X=OpenMenu
- ○ SELECT+Y=ToggleFPS
- ○ SELECT+L1=LoadState
- ○ SELECT+R1=SaveState
- ○ SELECT+L2=ToggleSlow Motion
- ○ SELECT+R2=ToggleFast Forward
- ○ SELECT+Up/Down=Cycle through shaders
- ○ SELECT+Left/Right = Cycle through state slots
- ● Enabled the ability to download certain things in RetroArch like system files, assets, and
- free content. (Ry)
- ● Automatic Icon refresh: previously this required running an app. This will now happen
- when you change themes; app removed. (XanXic)
-● Automatic EmuFresh: previously this required running an app. When a change is
- detected with your rom set this will refresh the rom and console list automatically. (Ry,
- Oscar, Alpha)
- ● Automatic Install Heal attempt: This is a script that runs in a few places, like launching
- an app or game that will check your install and make an attempt to heal/fix it. This isn’t a
- fix for anything but mostly a fix for clash between the stock firmware and spruce. But
- should help a few people. (Ry)
- ● PPSSPP:Underclock setting updated and disabled anisotropic filtering to improve
- performance. (Cobalt)
- ● SpruceBackup/Restore: updated to move Pico 8 bios and Syncthing configs to their
- new locations. (XanXic)
- ● Dingux/File Manger: Themed to match Spruce’s theme. (Cinethezs)
- ● Italian and Albanian languages added. (369px)
- ● NewShadersadded. (Metallic77)
- ● Addedversion number to translation files that we'll keep up to date hopefully. (Ry)
- ● Logsupdated to make a new log file on boot and keep the last 5 boot cycles. These can
- be helpful for the Spruce team to help you with issues, so be sure to grab them if you
- have problems. General logger improvements. (XanXic)
- ● Credits app added. (App by Cinethezs, Music: Sweater Ass Sounding Ass (Demo) and
- Sir Daniel Bonaduce (Demo) by Our Ghosts, ourghosts.bandcamp.com)
- ● MovedFFPlay & Videos folders to Media, small improvements to FFPlay
- (SundownerSport, XanXic)
- ● Syncthing App removed, code remade, and integrated more deeply into spruce and
- hooks for Syncthing Sync Checker (XanXic)
- ● CosyThemeadded (KyleBing)
- ● Newbinary for showing images (Cinethezs)
- ● Newbinary for file changes (Inotify) (Cinethezs, Oscar)
- ● Unified all our on screen information screens, paving the path for theming them
- dynamically in the next update (Cinethezs, Ry, XanXic)
- ● Newhighresolution icons added and utilized (Sundowner, Ry) (Icons provided by
- Icons8.com, and with official support given to the Spruce team.)
- ● Further reduced spruce's install size (Team effort)
- Bug Fixes/Removals:
- ● Off the bat, tons of under the hood improvements to performance and reliability. You
- should see improved boot and game launch times compared to 2.3.0. In some cases
- drastically improved.
- ● Alotof standalone apps were removed and moved into our new Advanced Settings
- Apps. These include EmuFresh, Expert App Switch, IconFresh, LEDOn, RecentSwitch,
- RetroExpert, SSH, Syncthing, and Wifi File Transfer. (XanXic)
- ● SpruceBackup made self reliant so it can be used in a broken state (XanXic)
- ● Lowpowerwarning: Reduced vibration to just two cycles, LED will continue to blink
- until power is above 4%, a popup will now appear on the main menu after some time
- (XanXic)
-● Fixfor network apps startup being slightly resource intensive and occasionally unreliable
- (FragBait)
- ● Fixed Miyoo interfering with CPU governor. This was more of an issue with 3.0.0’s more
- advanced tweaking of these but this also affected our initial version of this in 2.3.0. (Ry,
- Oscar)
- ● Fixed apps not being able to be added to favorites (Cinethezs)
- ● Fixed analog stick use in PPSSPP, go AngryBirds all you want (Oscar)
- ● Fixed analog stick use in PSX games (Oscar, Cobalt)
- ● Allowing analog stick use in Pico-8 Native (Oscar)
- ● Enable use of Analog Stick within the main menu and applications (Oscar)
- ● Fixed brightness not being consistent across reboots. (FragBait)
- ● Fixed audio not adjusting consistently across modes (FragBait)
- ● Fixed low power warning not working when using auto resume (XanXic)
- ● Fixed Polish translation (S3V3Npl)
- ● Fixed Boxart Scraper app only checking for wifi being turned on and not verifying an
- actual connection. (Fragbait79)
- ● RemovedRetroArch Expert App: With this update we now have a new hotkey layout so
- we no longer have a concept of expert/normal modes with RA. Hotkeys should be
- enabled by default now after a fresh install or restore. Then in settings you can adjust to
- the home key opening the RetroArch menu by changing the setting in Advanced
- Settings (XanXic)
- ● (Re)Moved all ports except DinoJump and 2048 to our new Spruce Ports repo. This was
- done to decrease the initial install size.
- https://github.com/spruceUI/Ports-and-Free-Games (Ry)
- ● Drastic cleanup of the Emu folder and RetroArch folder (Ry)
- ● Removedspare icon packs, fallback icons set to minimalist white set (XanXic,
- Sundowner)
- ● RemovedScummVMBios(These are available in our ports Repo)
- ● Removedmame2003_xtreme and km_mame2003_xtreme libretro cores that weren't
- being used (Ry)
- ● Movedtoour new binary for showing images, and removed all previous calls. Improving
- performance and ease of use on our end. (Ry, XanXic)
+Bugfixes/Removals:
 
-Credits/Thanks
-    
-  - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
-  - All past and present Team Members!
-  - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
-  - Shauninman: Help, support and Bootlogo function (and so much more!).
-  - Rayon and Cinethezs: Boxart Scraper App and tweaks.
-  - Cinethezs, Oscarkcau and tenlevels: Random Game App
-  - Ndguardian, XanXic, and XK9274: Syncthing App.
-  - Basecase (Stefan Ayala): Syncthing sync check on Shutdown/Startup/Resume
-  - Veckia9x and Fragbait79: WiFi File Transfer App.
-  - XanXic: spruceBackup and spruceRestore Apps, AutoUpdater App, organizational wizardry and so much more!
-  - Fragbait79: SSH App, RTC-Sync, network services tweaks and many other optimizations.
-  - Ry: Overhauled Emu folder, LibRetro ports and so much more.
-  - Oscarkcau: GameSwitcher, Advanced Settings App and general debugging, clean up and optimizations to SO MANY things.
-  - Cinethezs: LED App, show-battery-percentage, Credits App and so much more. 
-  - Jim Gray: Retroarch removal from MainUI, sick jams and general inspiration.
-  - Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
-  - Steward: Drastic.
-  - XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
-  - Sky_Walker: Avocado theme.
-  - KyleBing: Cozy theme.
-  - 369px: Theme Guide.
-  - Cobaltdsc4102: Building and enabling the chimerasnes core for SFC and additional cores for other systems.
-  - KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
-  - Onion and Darkhorse: Overlays.
-  - Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
-  - Hoo: Testing and encouragement.
-  - All of out Beta testers!
-  - SundownerSport: Team Lead, Wiki and testing.
-  - Metallic77: Shaders and core adjustments.
-  - Supermodi064: Photos, testing and support.
-  - Aemiii91, tGecko and QuackWalks: Being awesome!
-  - Russ from RGC: His YouTube channel is an inspiration.
-  - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
+* Fix uae4arm audio sync issues (Metallic77)
+* Fixed being locked out of games in Fake08 by adding a core override disabling auto save/load states (Ry)
+* Fixed PPSSPP now emulates inserted Memory Stick (Cobalt)
+* Fixed spruce restore not restoring "Recents" in main menu for those users (XanXic)
+* Fixed a network/wifi broken state issue when disabling WiFi and Network Service in game (BaseInfinity)
+* Fixed background music not playing (We aren't sure who fixed this, just noticed it was fixed)
+* Using select+L1/R1 will no longer control volume. This was interfering with hotkeys for something hardly used. Start+L1/R1 will still control brightness (Oscar)
+* PPSSPP now emulates inserted memorystick (fragbait)
+* Greatly improved Syncthing Sync Checker times across the board for all scenarios with the total sync process taking anywhere from nearly instant to 5 seconds now, down from 13 seconds (BaseInfinity)
+* Fixed a network/wifi broken state issue when disabling WiFi and Network Service in game (BaseInfinity)
+* Made it so backup only keeps the 7 most  recent (XanXic)
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
@@ -218,6 +102,7 @@ The Current Team (Alphabetical order):
    - Cobaltdsc4102
    - Decojon
    - Fragbait79
+   - Metallic77
    - Oscarkcau
    - Ry
    - SundownerSport
