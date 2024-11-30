@@ -7,6 +7,14 @@ BUTTON=$($SCRIPT_PATH/read_button.sh A B X Y)
 echo "Button ${BUTTON} is pressed"
 echo
 
+if [ $BUTTON == 'B' ] ; then
+    # close stdout
+    exec 1<&-
+    sleep 3
+    echo "exit now"
+    return 0
+fi
+
 echo "Please press D-pad to continue:"
 BUTTON=$($SCRIPT_PATH/read_button.sh LEFT RIGHT UP DOWN)
 echo "Button ${BUTTON} is pressed"
