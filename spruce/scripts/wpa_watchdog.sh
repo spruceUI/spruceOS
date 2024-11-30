@@ -18,7 +18,7 @@ append_network_from_multipass() {
     echo "ssid=\"$1\""
     echo "psk=\"$2\""
     if [ "$3" = "1" ]; then
-        echo "scan_ssid=\"$3\""
+        echo "scan_ssid=$3"
     fi
     echo "}"
 }
