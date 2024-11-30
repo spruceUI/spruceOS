@@ -22,7 +22,7 @@ first_time_setup(){
 
 start_dropbear_process(){
     log_message "Starting Dropbear..."
-    $DROPBEAR -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" &
+    $DROPBEAR -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" -c "$SSH_DIR/dropbear-wrapper.sh" &
     flag_add "dropbear"
 }
 

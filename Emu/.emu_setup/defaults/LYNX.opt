@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CORE="mednafen_lynx"
+export CORE="handy"
 export MODE="smart"
 
 export scaling_min_freq=480000

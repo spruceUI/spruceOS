@@ -21,7 +21,7 @@ display_message() {
 }
 
 log_message "----------Starting Restore script----------"
-set_performance
+# set_performance
 display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
 
 #-----Main-----
@@ -85,6 +85,14 @@ compare_versions() {
     }'
 }
 
+kill_network_services() {
+    killall -9 dropbear
+    #killall -9 smbd
+    #killall -9 sftpgo
+    killall -9 syncthing
+}
+
+kill_network_services
 rm -f "$last_update_file"
 
 # Actual restore process
@@ -148,42 +156,52 @@ fi
 
 log_message "Current version: $current_version"
 
-# Upgrade script locations
-upgrade_scripts="
-$UPGRADE_SCRIPTS_DIR/2.3.0.sh
-$UPGRADE_SCRIPTS_DIR/3.0.0.sh
-"
-#/mnt/SDCARD/App/spruceRestore/UpgradeScripts/2.3.1.sh
+# List the contents of the directory for debugging
+log_message "Contents of $UPGRADE_SCRIPTS_DIR: $(ls -l "$UPGRADE_SCRIPTS_DIR")"
 
-for script in $upgrade_scripts; do
-    script_name=$(basename "$script")
+# Use cd and a direct for loop instead of find
+cd "$UPGRADE_SCRIPTS_DIR" || exit 1
+
+# Before the upgrade loop, add check for developer/tester mode
+is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
+is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
+allow_same_version=0
+
+if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+    allow_same_version=1
+    log_message "Dev/Tester mode detected, allowing same version upgrades"
+fi
+
+# Modify the version comparison logic in the upgrade loop
+for script in *.sh; do
+    [ -f "$script" ] || continue  # Skip if no .sh files found
+    
+    script_name="$script"
     script_version=$(echo "$script_name" | cut -d'.' -f1-3)
 
-    # Replace the version comparison logic
-    if [ "$(compare_versions "$current_version" "$script_version")" = "older" ]; then
+    version_compare=$(compare_versions "$current_version" "$script_version")
+    # Run if version is older OR if same version and in developer/tester mode
+    if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
         log_message "Starting upgrade script: $script_name"
         display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
 
-        if [ -f "$script" ]; then
-            log_message "Executing $script_name..."
-            output=$(sh "$script" 2>&1)
-            exit_status=$?
+        log_message "Executing $script_name..."
+        output=$(sh "$script" 2>&1)
+        exit_status=$?
 
-            log_message "Output from $script_name:"
-            echo "$output" >>"$log_file"
+        log_message "Output from $script_name:"
+        echo "$output" >>"$log_file"
 
-            if [ $exit_status -eq 0 ]; then
-                log_message "Successfully completed $script_name"
-                echo "spruce_version=$script_version" >"$last_update_file"
-                current_version=$script_version
-            else
-                log_message "Error running $script_name. Exit status: $exit_status"
-                log_message "Error details: $output"
-                display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
-                exit 1
-            fi
+        if [ $exit_status -eq 0 ]; then
+            log_message "Successfully completed $script_name"
+            echo "spruce_version=$script_version" >"$last_update_file"
+            current_version=$script_version
         else
-            log_message "Warning: Script $script_name not found. Skipping."
+            log_message "Error running $script_name. Exit status: $exit_status"
+            log_message "Error details: $output"
+            display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
+            cd - >/dev/null
+            exit 1
         fi
 
         log_message "Finished processing $script_name"
@@ -191,10 +209,20 @@ for script in $upgrade_scripts; do
         log_message "Skipping $script_name: Current version $current_version is equal to or higher than $script_version"
     fi
 done
+cd - >/dev/null
 
 log_message "Upgrade process completed. Current version: $current_version"
 display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
+
+# Apply settings
+
+log_message "Applying recentsTile setting"
+sh /mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh reapply
+log_message "Applying idlemon setting"
+sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
+
 log_message "----------Restore and Upgrade completed----------"
 
 auto_regen_tmp_update
+exit 0

@@ -12,6 +12,42 @@ TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 MAX_COUNT_FILE="$SETTINGS_PATH/gs_max"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
+CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
+
+kill_emulator() {
+    # kill RA or other emulator or MainUI
+    log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
+
+    if pgrep -x "./drastic" > /dev/null ; then
+        # use sendevent to send MENU + L1 combin buttons to drastic  
+        {
+            #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
+            echo 1 1 1   # MENU down
+            echo 1 15 1  # L1 down
+            echo 1 15 0  # L1 up
+            echo 1 1 0   # MENU up
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event3
+    elif pgrep "PPSSPPSDL" > /dev/null ; then
+        killall -q -CONT PPSSPPSDL
+        # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
+        {
+            # send autosave hot key
+            echo 1 314 1  # SELECT down
+            echo 3 2 255  # L2 down
+            echo 3 2 0    # L2 up
+            echo 1 314 0  # SELECT up
+            echo 0 0 0    # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event4
+        # wait 1 seconds for ensuring saving is started
+        sleep 1
+        # kill PPSSPP with signal 15, it should exit after saving is done
+        killall -15 PPSSPPSDL
+    else
+        killall -q -CONT pico8_dyn
+        killall -q -15 ra32.miyoo retroarch pico8_dyn
+    fi
+}
 
 prepare_game_switcher() {
     # if in game or app now
@@ -32,12 +68,11 @@ prepare_game_switcher() {
         GAME_NAME="${GAME_PATH##*/}"
         SHORT_NAME="${GAME_NAME%.*}"
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+        SCREENSHOT_NAME="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
-        # ensure framebuffer information is set correctly
-        $BIN_PATH/fbfixcolor
-        # capture screenshot
-        $BIN_PATH/fbgrab -a "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        # covert and compress framebuffer to PNG in background 
+        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$SCREENSHOT_NAME" 2> /dev/null &
         log_message "*** gameswitcher_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -88,7 +123,7 @@ prepare_game_switcher() {
         echo "$CMD" >> "$TEMP_FILE"
     done <$LIST_FILE
 
-    # trim the game list to only recent 10 games
+    # trim the game list to only recent 5/10/20 games
     setting_get "maxGamesInGS"
     COUNT=$?
     if [ $COUNT -eq 0 ] ; then
@@ -97,53 +132,44 @@ prepare_game_switcher() {
     tail -$COUNT "$TEMP_FILE" > "$LIST_FILE"
 
     # kill RA or other emulator or MainUI
-    log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
+    kill_emulator
+    killall -q -9 MainUI
 
-    if pgrep -x "./drastic" > /dev/null ; then
-        # use sendevent to send MENU + L1 combin buttons to drastic  
-        {
-            #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            #echo 1 1 1   # MENU down
-            echo 1 15 1  # L1 down
-            echo 1 15 0  # L1 up
-            echo 1 1 0   # MENU up
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event3
-    elif pgrep "PPSSPPSDL" > /dev/null ; then
-        # use sendevent to send SELECT + L2 combin buttons to PPSSPP  
-        {
-            # send autosave hot key
-            echo 1 314 1  # SELECT down
-            echo 3 2 255  # L2 down
-            echo 3 2 0    # L2 up
-            echo 1 314 0  # SELECT up
-            echo 0 0 0    # tell sendevent to exit
-        } | $BIN_PATH/sendevent /dev/input/event4
-        # wait 1 seconds for ensuring saving is started
-        sleep 1
-        # kill PPSSPP with signal 15, it should exit after saving is done
-        killall -15 PPSSPPSDL
-    else
-        killall -q -15 ra32.miyoo || \
-        killall -q -15 retroarch || \
-        killall -q -15 pico8_dyn || \
-        killall -q -9 MainUI
-    fi
-    
     # set flag file for principal.sh to load game switcher later
     flag_add "gs"
     log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
 }
 
-send_virtual_key() {
+# Send L3 and R3 press event, this would toggle in-game and pause in RA
+# or toggle in-game menu in PPSSPP
+send_virtual_key_L3R3() {
     {
         echo 1 316 0   # MENU up
         echo 1 317 1   # L3 down
-        echo 0 0 0   # tell sendevent to exit
-    } | $BIN_PATH/sendevent /dev/input/event4
-    sleep 0.3
-    {
+        echo 1 318 1   # R3 down
+        sleep 0.1
+        echo 1 318 0   # R3 up
         echo 1 317 0   # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4    
+}
+
+send_virtual_key_L3() {
+    {
+        echo 1 316 0   # MENU up
+        echo 1 317 1   # L3 down
+        sleep 0.1
+        echo 1 317 0   # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event4    
+}
+
+# Send R3 press event, this would toggle pause in RA
+send_virtual_key_R3() {
+    {
+        echo 1 318 1   # R3 down
+        sleep 0.1
+        echo 1 318 0   # R3 up
         echo 0 0 0   # tell sendevent to exit
     } | $BIN_PATH/sendevent /dev/input/event4    
 }
@@ -151,52 +177,122 @@ send_virtual_key() {
 long_press_handler() {
     # setup flag for long pressed event
     touch "$TEMP_PATH/gs.longpress"
-    sleep 2
+    sleep 1.6
     rm "$TEMP_PATH/gs.longpress"
 
     # if IS long press
-    if pgrep "MainUI|drastic|pico8_dyn" > /dev/null; then
-        prepare_game_switcher
-
-    elif setting_get "runGSOnTapHome" ; then
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-            send_virtual_key
-        fi
-    else
-        if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
+    vibrate
+    
+    # get setting
+    HOLD_HOME=$(setting_get "hold_home")
+    log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
+    [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
+    
+    case $HOLD_HOME in
+        "Game Switcher")
             prepare_game_switcher
-        fi
-    fi
+        ;;
+        "In-game menu")
+            if pgrep "ra32.miyoo" > /dev/null ; then
+                send_virtual_key_L3
+
+            elif pgrep "retroarch" > /dev/null ; then
+                send_virtual_key_L3R3
+
+            elif pgrep "PPSSPPSDL" > /dev/null ; then
+                send_virtual_key_L3
+                killall -q -CONT PPSSPPSDL
+
+            # PICO8 has no in-game menu and 
+            # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap  
+            else
+                # resume MainUI if it is running
+                # and it will then read menu up event and show popup menu
+                killall -q -CONT  MainUI
+                # or kill NDS or PICO8
+                kill_emulator
+            fi
+        ;;
+        "Exit game")
+            # resume MainUI if it is running
+            # and it will then read menu up event and show popup menu
+            killall -q -CONT  MainUI
+            # or kill any emulator
+            kill_emulator
+        ;;
+    esac    
 }
 
 # listen to log file and handle key press events
 # the keypress logs are generated by keymon
-$BIN_PATH/getevent /dev/input/event3 | while read line; do
+$BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
-        *"key 1 1 1"*) # MENU key down
+        # MENU key down
+        *"key 1 1 1"*)
             # start long press handler
             log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
             long_press_handler &
             PID=$!
+
+            # pause PPSSPP, PICO8 or MainUI if it is running
+            killall -q -STOP PPSSPPSDL pico8_dyn MainUI
+
+            # copy framebuffer to memory temp file
+            cp /dev/fb0 /tmp/fb0
+
+            # pause RA after screen capture
+            send_virtual_key_R3
         ;;
-        *"key 1 1 0"*) # MENU key up
+        # MENU key up
+        *"key 1 1 0"*)
             # if NOT long press
             if [ -f "$TEMP_PATH/gs.longpress" ] ; then
                 rm "$TEMP_PATH/gs.longpress"
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
-                if pgrep "pico8_dyn" > /dev/null ; then
-                    prepare_game_switcher
-                elif setting_get "runGSOnTapHome" ; then
-                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-                        prepare_game_switcher
-                    fi
-                else
-                    if pgrep "ra32.miyoo|retroarch|PPSSPPSDL" > /dev/null ; then
-                        send_virtual_key
-                    fi
+                # skip mainUI and NDS, they need short press for their hotkeys
+                if pgrep "drastic" > /dev/null ; then
+                    continue
                 fi
+
+                # get setting
+                TAP_HOME=$(setting_get "tap_home")
+                [ -z "$TAP_HOME" ] && TAP_HOME="In-game menu"
+
+                # handle short press
+                case $TAP_HOME in
+                    "Game Switcher")
+                        prepare_game_switcher
+                    ;;
+                    "In-game menu")
+                        if pgrep "ra32.miyoo" > /dev/null ; then
+                            send_virtual_key_L3
+
+                        elif pgrep "retroarch" > /dev/null ; then
+                            send_virtual_key_L3R3
+
+                        elif pgrep "PPSSPPSDL" > /dev/null ; then
+                            send_virtual_key_L3
+                            killall -q -CONT PPSSPPSDL
+
+                        # PICO8 has no in-game menu
+                        elif pgrep "pico8_dyn" > /dev/null ; then
+                            kill_emulator
+
+                        # resume MainUI and it will then read menu up event and show popup menu
+                        elif pgrep "MainUI" > /dev/null ; then
+                            killall -q -CONT  MainUI
+                        fi
+                    ;;
+                    "Exit game")
+                        # resume MainUI if it is running
+                        # and it will then read menu up event and show popup menu
+                        killall -q -CONT  MainUI
+                        # or kill any emulator
+                        kill_emulator
+                    ;;
+                esac
             fi
         ;;
     esac

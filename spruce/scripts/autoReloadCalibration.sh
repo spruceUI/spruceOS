@@ -16,15 +16,17 @@ while true; do
     # restart joystickinput if calibration file exists
     if [ -f "$WATCHED_FILE" ]; then
         # kill existing joystickinput process
-        killall -TERM joystickinput
+        killall -q -TERM joystickinput
 
         # start new joystickinput process with new calibration values
-        /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+        if ! setting_get "disableJoystick"; then
+            /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+        fi
 
         if pgrep MainUI >/dev/null; then
             # send signal USR2 to joystickinput to switch to KEYBOARD MODE
             # this allows joystick to be used as DPAD in MainUI
-            killall -USR2 joystickinput
+            killall -q -USR2 joystickinput
         fi
     fi
 

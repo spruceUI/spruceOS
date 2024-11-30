@@ -58,6 +58,7 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
     "input_state_slot_decrease = \"left\"" \
     "input_state_slot_increase = \"right\"" \
     "input_toggle_slowmotion = \"e\"" \
+    "input_toggle_fast_forward = \"t\"" \
     "menu_show_core_updater = \"false\"" \
     "menu_unified_controls = \"true\"" \
     "notification_show_autoconfig = \"false\"" \

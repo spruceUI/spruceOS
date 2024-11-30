@@ -106,7 +106,7 @@ done <$LIST_FILE
 
 # send signal USR2 to joystickinput to switch to KEYBOARD MODE
 # this allows joystick to be used as DPAD in game switcher
-killall -USR2 joystickinput
+killall -q -USR2 joystickinput
 
 # launch the switcher program
 # Usage: switcher image_list title_list [-s speed] [-b on|off] [-m on|off] [-t on|off] [-ts speed] [-n on|off] [-d command]
@@ -152,14 +152,14 @@ while : ; do
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
         cd $BIN_PATH
-        ./easyConfig $SETTINGS_PATH/spruce_config  -p 3
+        ./easyConfig $SETTINGS_PATH/spruce_config  -p 4
     else
         break
     fi
 done
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
-killall -USR1 joystickinput
+killall -q -USR1 joystickinput
 
 # launch game with return index
 if [ $RETURN_INDEX -gt 0 ]; then

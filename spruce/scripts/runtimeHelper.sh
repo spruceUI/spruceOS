@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# Function to check and hide the Update App if necessary
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -10,6 +13,7 @@ check_and_handle_firmware_app() {
     fi
 }
 
+# Function to check and hide the Update App if necessary
 check_and_hide_update_app() {
     . /mnt/SDCARD/Updater/updaterFunctions.sh
     if ! check_for_update_file; then
@@ -18,6 +22,39 @@ check_and_hide_update_app() {
     else
         sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
+    fi
+}
+
+DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
+
+
+developer_mode_task() {
+    if flag_check "developer_mode" || flag_check "designer_mode"; then
+        # Add developer menu option to spruce_config if it doesn't exist
+        if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
+            sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
+        fi
+        
+        if setting_get "samba" || setting_get "dropbear"; then
+            # Loop until WiFi is connected
+            while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
+                sleep 0.5
+            done
+            
+            if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
+                log_message "Dev Mode: Samba starting..."
+                start_samba_process
+            fi
+
+            if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
+                log_message "Dev Mode: Dropbear starting..."
+                start_dropbear_process
+            fi
+            
+        fi
+    else
+        # Remove the line if it exists and no flags are present
+        sed -i '/Reapply Developer\/Designer mode/d' /mnt/SDCARD/spruce/settings/spruce_config
     fi
 }
 
@@ -75,5 +112,29 @@ set_usb_icon_from_theme(){
     fi
 }
 
+
+update_checker(){
+    sleep 20
+    check_for_update
+}
+
+UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
+
+# This works with checker to display a notification if an update is available
+# But only on next boot. So if they find the app by themselves it's fine.
+update_notification(){
+    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+    if [ "$wifi_enabled" -eq 0 ]; then
+        exit 1
+    fi
+
+    if flag_check "update_available"; then
+        available_version=$(cat "$(flag_path update_available)")
+        display --icon "$UPDATE_ICON" -t "Update available!
+Version ${available_version} is ready to install
+Go to Apps and look for 'Update Available'" --okay
+        flag_remove "update_available"
+    fi
+}
 
 

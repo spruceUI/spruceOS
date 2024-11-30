@@ -62,6 +62,8 @@ echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
 echo "Update process started" >"$LOG_LOCATION"
 exec >>"$LOG_LOCATION" 2>&1
 
+read_only_check
+
 # Check SD Card health
 TEST_FILE="/mnt/SDCARD/.sd_test_$$"
 SD_ERROR=false
@@ -118,10 +120,10 @@ log_update_message "Checking battery level"
 BATTERY_CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
-if [ "$BATTERY_CAPACITY" -lt 30 ] && [ "$CHARGING" -eq 0 ]; then
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
     log_update_message "Battery level too low for update"
     display "Battery too low for update.
-    Please charge to at least 30% or plug in your device." --acknowledge
+    Please charge to at least 20% or plug in your device." --acknowledge
     exit 1
 fi
 
@@ -129,7 +131,7 @@ boost_processing
 
 # Extract version from update file
 log_update_message "Extracting version from update file"
-UPDATE_VERSION=$(echo "$UPDATE_FILE" | sed -n 's/.*spruceV\([0-9.]*\)\.7z/\1/p')
+UPDATE_VERSION=$(echo "$UPDATE_FILE" | sed -n 's/.*spruceV\([0-9.]*\)\(-[0-9]*\)\?.7z$/\1/p')
 log_update_message "Extracted update version: $UPDATE_VERSION"
 
 # Check current version
@@ -142,10 +144,30 @@ else
     CURRENT_VERSION="2.3.0"
     log_update_message "Current version file not found, using default: $CURRENT_VERSION"
 fi
+
+#if FLAG_DIR/developer_mode* is found set a value to true
+FLAG_DIR="/mnt/SDCARD/spruce/flags"
+DEVELOPER_MODE=0
+TESTER_MODE=0
+
+if ls "$FLAG_DIR"/developer_mode* >/dev/null 2>&1; then
+    DEVELOPER_MODE=1
+fi
+
+if ls "$FLAG_DIR"/tester_mode* >/dev/null 2>&1; then
+    TESTER_MODE=1
+fi
+
 # Compare versions using awk
-UPDATE_SAME_VERSION=true
+SKIP_VERSION_CHECK=false
+
+if [ "$DEVELOPER_MODE" -eq 1 ] || [ "$TESTER_MODE" -eq 1 ]; then
+    SKIP_VERSION_CHECK=true
+    log_update_message "Version check skipped due to developer/tester mode"
+fi
+
 log_update_message "Comparing versions: $UPDATE_VERSION vs $CURRENT_VERSION"
-if [ "$UPDATE_SAME_VERSION" = true ] || [ "$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
+if [ "$SKIP_VERSION_CHECK" = true ] || [ "$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
     log_update_message "Proceeding with update"
 else
     log_update_message "Current version is up to date"
@@ -222,6 +244,8 @@ cd /mnt/SDCARD
 log_update_message "Current directory: $(pwd)"
 log_update_message "Extracting update file: $UPDATE_FILE"
 
+read_only_check
+
 display "Applying update. This should take around 5 minutes..."
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
@@ -252,14 +276,29 @@ display "Now using spruce $UPDATE_VERSION" 2
 
 DELETE_UPDATE=true
 if [ "$DELETE_UPDATE" = true ]; then
-    log_update_message "Deleting update file"
-    rm "$UPDATE_FILE"
-    log_update_message "Update file deleted"
+    log_update_message "Deleting all update files"
+    # Remove all spruce update files matching the pattern
+    find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
+    log_update_message "All update files deleted"
 fi
 
 # Restore backup
 display "Restoring user data..."
 /mnt/SDCARD/App/spruceRestore/spruceRestore.sh --silent
+
+# Restore dev/test flags
+if [ "$DEVELOPER_MODE" -eq 1 ]; then
+    mkdir -p "$FLAG_DIR"
+    touch "$FLAG_DIR/developer_mode"
+    log_update_message "Restored developer mode flag"
+fi
+
+if [ "$TESTER_MODE" -eq 1 ]; then
+    # Remove any developer flags when test mode was active
+    rm -f "$FLAG_DIR/developer_mode"*
+    touch "$FLAG_DIR/tester_mode"
+    log_update_message "Restored tester mode flag"
+fi
 
 display "Update complete. Shutting down...
 You'll need to manually power back on" 3

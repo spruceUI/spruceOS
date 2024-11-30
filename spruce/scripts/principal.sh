@@ -29,7 +29,7 @@ fi
 while [ 1 ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
-        log_message "***** GAME SWITCHER: flag file detected! Launching! *****"
+        log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
@@ -38,9 +38,7 @@ while [ 1 ]; do
         flag_remove "lastgame"
 
         # check if emu visibility needs a refresh, before entering MainUI
-        log_precise "Checking for emulator visibility refresh"
         /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
-        log_precise "Emulator visibility refresh complete"
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
@@ -51,24 +49,21 @@ while [ 1 ]; do
         # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." -c dbcda7 --okay
+            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
             flag_remove "low_battery"
         fi
 
-        log_precise "Running percentage show script"
         /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
-        log_precise "Power display complete"
 
-        # This is to kill leftover display and show processes that may be running
+        # This is to kill leftover display processes that may be running
         display_kill &
-        kill_images &
 
         # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
         ln -s /dev/ttyS2 /dev/ttyS0
 
         # send signal USR2 to joystickinput to switch to KEYBOARD MODE
         # this allows joystick to be used as DPAD in MainUI
-        killall -USR2 joystickinput
+        killall -q -USR2 joystickinput
 
         flag_add "in_menu"
         cd ${SYSTEM_PATH}/app/
@@ -78,7 +73,7 @@ while [ 1 ]; do
         rm /dev/ttyS0
 
         # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -USR1 joystickinput
+        killall -q -USR1 joystickinput
 
         if flag_check "ra_themes_unpacking"; then
             display -t "Finishing up unpacking RetroArch themes.........."
@@ -91,7 +86,7 @@ while [ 1 ]; do
     fi
 
     if [ -f /tmp/cmd_to_run.sh ]; then
-        set_performance &
+        set_performance
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
@@ -99,7 +94,7 @@ while [ 1 ]; do
 
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
-        set_smart &
+        set_smart
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set

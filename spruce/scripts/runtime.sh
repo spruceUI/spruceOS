@@ -1,4 +1,13 @@
 #!/bin/sh
+
+# mnt "/mnt/SDCARD/spruce/scripts/whte_rbt.obj"
+# >access security
+# access: PERMISSION DENIED.
+# >access security grid
+# access: PERMISSION DENIED.
+# >access main security grid
+# access: PERMISSION DENIED.
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 rotate_logs
@@ -42,6 +51,12 @@ flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
+flag_remove "emufresh"
+
+if flag_check "forced_shutdown"; then
+    flag_remove "forced_shutdown"
+    setting_update "skip_shutdown_confirm" off
+fi
 
 log_message " " -v
 log_message "---------Starting up---------"
@@ -73,7 +88,10 @@ else
     ${SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
-${SCRIPTS_DIR}/emufresh_md5_multi.sh &
+{
+    ${SCRIPTS_DIR}/romdirpostrofix.sh
+    ${SCRIPTS_DIR}/emufresh_md5_multi.sh
+} &
 
 alsactl nrestore &
 
@@ -85,11 +103,15 @@ if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
         echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
     fi
 fi
-${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
 
-# ensure keymon is running first and only listen to event0 for power button & event3 for keyboard events
-# keymon /dev/input/event0 &
-keymon /dev/input/event3 &
+
+# ensure keymon is running first and only listen to event3 for keyboard events
+#keymon /dev/input/event3 &
+# load watchdog for auto adjustment of brightness and volume when hotkey is using
+#${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
+
+# listen hotkeys for brightness adjustment, volume buttons and power button
+${SCRIPTS_DIR}/buttons_watchdog.sh &
 ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
 # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
@@ -135,19 +157,21 @@ else
     log_message "First boot procedures skipped"
 fi
 
-log_precise "Starting swap file activation"
 swapon -p 40 "${SWAPFILE}"
-log_precise "Swap file activated"
 
 # Run scripts for initial setup
 #${SCRIPTS_DIR}/forcedisplay.sh
 ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
 ${SCRIPTS_DIR}/checkfaves.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
+developer_mode_task &
+update_checker &
 
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart
+
+update_notification
 
 # start main loop
 log_message "Starting main loop"

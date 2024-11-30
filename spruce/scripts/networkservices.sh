@@ -7,42 +7,41 @@
 
 connect_services() {
     
-    while true; do
-        if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-            
-            # SFTPGo check
-            if setting_get "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
-                # Flag exists but service is not running, so start it...
-                log_message "Network services: SFTPGo detected not running, starting..."
-                start_sftpgo_process
-            fi
-
-            # SSH check
-            if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
-                # Flag exists but service is not running, so start it...
-                log_message "Network services: Dropbear detected not running, starting..."
-                start_dropbear_process
-            fi
-            
-            # Samba check
-            if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
-                # Flag exists but service is not running, so start it...
-                log_message "Network services: Samba detected not running, starting..."
-                start_samba_process
-            fi
-            
-            # Syncthing check
-            if setting_get "syncthing" && ! pgrep "syncthing" > /dev/null; then
-                # Flag exists but service is not running, so start it...
-                log_message "Network services: Syncthing detected not running, starting..."
-                start_syncthing_process
-            fi
-            
+	while true; do
+        if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
             break
-            
         fi
-        sleep 1
+        sleep 0.5
     done
+	  
+	# Samba check
+	if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: Samba detected not running, starting..."
+		start_samba_process
+	fi
+	
+	# SSH check
+	if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: Dropbear detected not running, starting..."
+		start_dropbear_process
+	fi
+	
+	# SFTPGo check
+	if setting_get "sftpgo" && ! pgrep "sftpgo" > /dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: SFTPGo detected not running, starting..."
+		start_sftpgo_process
+	fi
+
+	# Syncthing check
+	if setting_get "syncthing" && ! pgrep "syncthing" > /dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: Syncthing detected not running, starting..."
+		start_syncthing_process
+	fi
+                
 }
 
 disconnect_services() {

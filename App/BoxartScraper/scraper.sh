@@ -238,12 +238,12 @@ for sys_dir in "$roms_dir"/*/; do
     fi
 
     sys_name="$(basename "$sys_dir")"
-    echo "Scraping box art for $sys_name"
+    log_message "BoxartScraper: Scraping box art for $sys_name"
 
     # Get remote alias name
     get_ra_alias "$sys_name"
     if [ -z "$ra_name" ]; then
-        echo "Remote system name not found, skipping $sys_name"
+        log_message "BoxartScraper: Remote system name not found, skipping $sys_name"
         continue
     fi
 
@@ -252,7 +252,7 @@ for sys_dir in "$roms_dir"/*/; do
     get_extensions "$sys_name"
 
     if [ -z "$extensions" ]; then
-        echo "No supported extensions found for directory $sys_name, skipping"
+        log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
         continue
     fi
 
@@ -262,12 +262,10 @@ for sys_dir in "$roms_dir"/*/; do
 
     for file in "$sys_dir"*; do
         # Check if the user pressed B to exit
-        if tail -n1 "$messages_file" | grep -q "key 1 29 . , postpone dimmed state"; then
-            echo "User pressed B, exiting."
-            display_image "user_exit"
+        if tail -n1 "$messages_file" | grep -q "key 1 29"; then
+            log_message "BoxartScraper: User pressed B, exiting."
+            display_image "user_exit" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            sleep 3
-            killall -9 show
             exit
         fi
 
@@ -282,6 +280,9 @@ for sys_dir in "$roms_dir"/*/; do
         rom_name="${rom_file_name%.*}"
         image_path="${sys_dir}Imgs/$rom_name.png"
 
+        # Create Imgs directory if it doesn't exist
+        mkdir -p "${sys_dir}Imgs"
+
         if [ -f "$image_path" ]; then
             skip_count=$((skip_count + 1))
             continue
@@ -295,8 +296,8 @@ for sys_dir in "$roms_dir"/*/; do
         fi
 
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
-        echo "Downloading $boxart_url"
-        wget -q -O "$image_path" "$boxart_url" 2>&1 || rm -f "$image_path" # Remove image if not found
+        log_message "BoxartScraper: Downloading $boxart_url" -v
+        curl -k -s -o "$image_path" "$boxart_url" || rm -f "$image_path" # Remove image if not found
 
         if [ -f "$image_path" ]; then
             scraped_count=$((scraped_count + 1))
@@ -304,7 +305,7 @@ for sys_dir in "$roms_dir"/*/; do
             non_found_count=$((non_found_count + 1))
         fi
     done
-    echo "$sys_name: Scraped: $scraped_count, Skipped: $skip_count, Not Found: $non_found_count"
+    log_message "BoxartScraper: $sys_name: Scraped: $scraped_count, Skipped: $skip_count, Not Found: $non_found_count"
 done
 
 # Reset CPU governor to ondemand mode

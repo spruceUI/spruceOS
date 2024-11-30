@@ -9,7 +9,7 @@
   "useswap": 0,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "a78|zip",
+  "extlist": "a78|zip|7z",
   "launchlist": [
     {
       "name": "Jump to random Atari 7800 game",

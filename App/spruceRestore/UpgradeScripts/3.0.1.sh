@@ -14,7 +14,7 @@ fi
 # Main execution
 log_message "Starting upgrade to version $TARGET_VERSION"
 
-update_setting "recentsTile" "off"
+setting_update "recentsTile" "off"
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful

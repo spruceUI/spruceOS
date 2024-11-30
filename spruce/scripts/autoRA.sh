@@ -21,6 +21,7 @@ cp "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh
 # load a dummy SDL program and try to initialize GPU and other hardware before loading game
 ./easyConfig &> /dev/null &
 
+flag_remove "save_active"
 log_message "AutoRA: load game to play"
 sleep 5
 nice -n -20 $FLAGS_DIR/lastgame.lock &> /dev/null

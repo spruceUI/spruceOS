@@ -10,11 +10,10 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-log_verbose
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
-set_performance
+# set_performance
 
 # Modify display function to respect silent mode
 display_message() {
@@ -72,9 +71,6 @@ folders="
 /mnt/SDCARD/spruce/bin/SSH/sshkeys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
-/mnt/SDCARD/spruce/settings/gs_max
-/mnt/SDCARD/spruce/settings/idlemon_in_game
-/mnt/SDCARD/spruce/settings/idlemon_in_menu
 /mnt/SDCARD/spruce/settings/spruce.cfg
 "
 
@@ -124,7 +120,15 @@ else
 Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
+# Clean up old backups, keeping only the 7 most recent
+log_message "Cleaning up old backups..."
+cd "$BACKUP_DIR/backups" || exit
+ls -t spruceBackup_*.7z | tail -n +8 | while read -r old_backup; do
+    log_message "Removing old backup: $old_backup"
+    rm "$old_backup"
+done
+
 log_message "Backup process finished running"
-log_verbose
+
 
 auto_regen_tmp_update

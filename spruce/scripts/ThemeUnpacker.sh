@@ -75,6 +75,3 @@ done
 flag_remove "ra_themes_unpacking"
 
 log_message "ThemeUnpacker: Finished running"
-if [ $SILENT_MODE -eq 0 ]; then
-    kill_images
-fi

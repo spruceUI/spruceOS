@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "a52|zip|7z|bin",
+  "extlist": "a52|zip|7z|atr|bin",
   "launchlist": [
     {
       "name": "Jump to random Atari 5200 game",

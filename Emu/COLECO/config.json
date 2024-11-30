@@ -16,6 +16,10 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
+      "name": "Emu Core: (✓BLUEMSX)-gearcoleco",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/gearcoleco.sh"
+    },
+    {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
     },
