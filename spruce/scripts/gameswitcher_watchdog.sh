@@ -237,10 +237,8 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             # pause PPSSPP, PICO8 or MainUI if it is running
             killall -q -STOP PPSSPPSDL pico8_dyn MainUI
 
-            # ensure framebuffer information is set correctly
-            $BIN_PATH/fbfixcolor
             # copy framebuffer to memory temp file
-            $BIN_PATH/fbgrab -x "/tmp/fb0" 2> /dev/null 
+            cp /dev/fb0 /tmp/fb0
 
             # pause RA after screen capture
             send_virtual_key_R3
