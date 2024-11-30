@@ -14,6 +14,9 @@ if [ "$EMU_NAME" = "COLECO" ]; then
 elif [ "$EMU_NAME" = "MSX" ]; then
     sed -i 's|"Emu Core: bluemsx-(✓FMSX)"|"Emu Core: (✓BLUEMSX)-fmsx"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/fmsx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/fmsx.sh"|g' "$CONFIG"
+elif [ "$EMU_NAME" = "SEGASGONE" ]; then
+    sed -i 's|"Emu Core: (✓GENESIS+GX)-bluemsx-gearsystem"|"Emu Core: genesis+gx-(✓BLUEMSX)-gearsystem"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/bluemsx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|g' "$CONFIG"
 fi
 
 sed -i 's|CORE=.*|CORE=\"bluemsx\"|g' "$SYS_OPT"
