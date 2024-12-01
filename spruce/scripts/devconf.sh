@@ -29,6 +29,10 @@ if flag_check "developer_mode"; then
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/-OTA/config.json
 fi
 
+if ! flag_check "developer_mode"; then
+    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh hide /mnt/SDCARD/App/ShowOutputTest/config.json
+fi
+
 
 if flag_check "designer_mode"; then
     log_message "Designer mode enabled"
