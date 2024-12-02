@@ -124,9 +124,8 @@ prepare_game_switcher() {
     done <$LIST_FILE
 
     # trim the game list to only recent 5/10/20 games
-    setting_get "maxGamesInGS"
-    COUNT=$?
-    if [ $COUNT -eq 0 ] ; then
+    COUNT=$(setting_get "maxGamesInGS")
+    if [ -z "$COUNT" ] ; then
         COUNT=10
     fi
     tail -$COUNT "$TEMP_FILE" > "$LIST_FILE"
