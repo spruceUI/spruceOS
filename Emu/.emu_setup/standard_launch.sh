@@ -242,6 +242,20 @@ case $EMU_NAME in
 		;;
 	
 	*)
+
+		# Set up N64 controller profiles
+		if [ $EMU_NAME = "N64" ]; then
+			PROFILE="$(setting_get "n64_control_profile")"
+			SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+			DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+			LUDI="LudicrousN64 Xtreme Amped"
+			PARA="ParaLLEl N64"
+			MUPEN="Mupen64Plus GLES2"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${LUDI}/${LUDI}.rmp"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${PARA}/${PARA}.rmp"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
+		fi
+
 		if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 			export RA_BIN="retroarch"
 		else
@@ -251,6 +265,25 @@ case $EMU_NAME in
 		cd "$RA_DIR"
 
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+
+		# Backup custom N64 controller profile if necessary
+		if [ $EMU_NAME = "N64" ]; then
+			PROFILE="$(setting_get "n64_control_profile")"
+			if [ "$PROFILE" = "Custom" ]; then
+				SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+				DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+				LUDI="LudicrousN64 Xtreme Amped"
+				PARA="ParaLLEl N64"
+				MUPEN="Mupen64Plus GLES2"
+				if [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
+					cp -f "${DST}/${LUDI}/${LUDI}.rmp" "${SRC}/Custom.rmp"
+				elif [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+					cp -f "${DST}/${PARA}/${PARA}.rmp" "${SRC}/Custom.rmp"
+				else # CORE is mupen64plus
+					cp -f "${DST}/${MUPEN}/${MUPEN}.rmp" "${SRC}/Custom.rmp"
+				fi
+			fi
+		fi		
 
 		;;
 		
