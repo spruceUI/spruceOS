@@ -1,0 +1,19 @@
+{
+  "label": "GBA",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/GBA",
+  "imgpath": "../../Roms/GBA/Imgs",
+  "gamelist": "../../Roms/GBA/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "gba|zip|7z|bin",
+  "launchlist": [
+    {
+      "name": "Jump to random GameBoy Advance game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

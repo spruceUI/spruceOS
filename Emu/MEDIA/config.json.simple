@@ -1,0 +1,17 @@
+{
+  "label": "Media",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/MEDIA",
+  "imgpath": "../../Roms/MEDIA/Imgs",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 0,
+  "launchlist": [
+    {
+      "name": "Jump to random media",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

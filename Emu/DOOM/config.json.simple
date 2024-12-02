@@ -1,0 +1,19 @@
+{
+  "label": "DOOM",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/doom.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/doom.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/DOOM",
+  "imgpath": "../../Roms/DOOM/Imgs",
+  "gamelist": "../../Roms/DOOM/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "zip|wad|exe",
+  "launchlist": [
+    {
+      "name": "Jump to random Doom wad",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

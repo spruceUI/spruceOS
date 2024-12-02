@@ -1,0 +1,19 @@
+{
+  "label": "ChaiLove",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/chai.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/chai.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/CHAI",
+  "imgpath": "../../Roms/CHAI/Imgs",
+  "gamelist": "../../Roms/CHAI/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "chailove",
+  "launchlist": [
+    {
+      "name": "Jump to random ChaiLove game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "label": "MAME 03+",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/MAME2003PLUS",
+  "imgpath": "../../Roms/MAME2003PLUS/Imgs",
+  "gamelist": "../../Roms/MAME2003PLUS/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 1,
+  "hidebios": 1,
+  "extlist": "zip",
+  "launchlist": [
+    {
+      "name": "Jump to random MAME game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

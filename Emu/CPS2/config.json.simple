@@ -1,0 +1,19 @@
+{
+  "label": "CPS2",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/CPS2",
+  "imgpath": "../../Roms/CPS2/Imgs",
+  "gamelist": "../../Roms/CPS2/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 1,
+  "hidebios": 1,
+  "extlist": "zip|7z|cue",
+  "launchlist": [
+    {
+      "name": "Jump to random CPS2 game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}
