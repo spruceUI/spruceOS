@@ -656,33 +656,44 @@ read_only_check() {
 }
 
 set_smart() {
-    cores_online
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
-    echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
-    echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
-    echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-    echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-    echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to SMART" -v
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        cores_online
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
+        echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
+        echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
+        echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+        echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+        echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to SMART" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 set_performance() {
-    cores_online
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to PERFORMANCE" -v
-
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        cores_online
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to PERFORMANCE" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 set_overclock() {
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to OVERCLOCK" -v
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to OVERCLOCK" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
