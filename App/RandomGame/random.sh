@@ -13,6 +13,7 @@ get_extensions() {
         ARCADE)             extensions="zip" ;;
         ARDUBOY)            extensions="hex" ;;
         ATARI)              extensions="a26 bin zip 7z" ;;
+        ATARIST)            extensions="st msa stx dim ipf zip 7z" ;;
         CHAI)               extensions="chailove" ;;
         COLECO)             extensions="rom ri mx1 mx2 col dsk cas sg sc m3u zip 7z" ;;
         COMMODORE)          extensions="d64 zip 7z t64 crt prg nib tap" ;;
