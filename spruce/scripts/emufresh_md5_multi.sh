@@ -142,7 +142,7 @@ check_rom_folders() {
 			config_file="$emu_path/$system_name/config.json"
 			if [ -f "$config_file" ]; then
 				# get acceptable extensions
-				types=$(jq -r "$config_file" '.extlist')
+				types=$(jq -r '.extlist' "$config_file")
 
 				if [ -z "$types" ]; then
 					# count files in list
