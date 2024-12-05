@@ -84,7 +84,7 @@ setting_update checkForUpdates on
 
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 
-if [ -f "$CFG_FILE" ] && grep -q "runGSOnTapHome=1" "$CFG_FILE"; then
+if [ -f "$CFG_FILE" ] && grep -q "runGSOnTapHome=0" "$CFG_FILE"; then
     setting_update tap_home "Game Switcher"
     setting_update hold_home "In-game menu"
     sed -i '/runGSOnTapHome=1/d' "$CFG_FILE"
