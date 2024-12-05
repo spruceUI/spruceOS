@@ -174,13 +174,26 @@ case $EMU_NAME in
 			export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
 		fi
 
-		if [ "$CONTROL_PROFILE" = "Doubled" ]; then
-			cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
-		elif [ "$CONTROL_PROFILE" = "One-handed" ]; then
-			cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
-		elif [ "$CONTROL_PROFILE" = "Racing" ]; then
-			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
-		fi
+		case "$CONTROL_PROFILE" in
+			"Doubled") 
+				cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"One-handed")
+				cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Racing")
+				cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Doubled 2") 
+				cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"One-handed 2")
+				cp -f "$P8_DIR/sdl_controllers.onehand_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Racing 2")
+				cp -f "$P8_DIR/sdl_controllers.racing_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+		esac
 
 		if setting_get "pico8_stretch"; then
 			SCALING="-draw_rect 0,0,480,640"

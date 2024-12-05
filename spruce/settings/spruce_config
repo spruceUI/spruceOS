@@ -64,6 +64,7 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Skip version check on next update" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
 @"Only run this if needing to reinstall."
 
+
 [Emulators]
 
 "" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home '_VALUE_'" ""
@@ -81,7 +82,7 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
 @"C Buttons = R2 + A, B, X, Y"
 
-"" "Pico-8 Control Profile" "|||" "Doubled|Racing|One-handed|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ _INDEX_"
+"" "Pico-8 Control Profile" "|||" "Doubled|Doubled 2|Racing|Racing 2|One-handed|One-handed 2|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ '_VALUE_'"
 @"A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ"
 
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
