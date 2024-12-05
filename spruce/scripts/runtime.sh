@@ -135,6 +135,8 @@ check_and_handle_firmware_app &
 
 check_and_hide_update_app &
 
+check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
+
 ${SCRIPTS_DIR}/low_power_warning.sh &
 
 # Load idle monitors before game resume or MainUI
