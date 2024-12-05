@@ -1,0 +1,7 @@
+{
+    "label": "M3U Generator",
+    "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png",
+    "launch": "launch.sh",
+    "description": "Generate M3Us for disc-based systems"
+  }
+  
