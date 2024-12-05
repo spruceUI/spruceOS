@@ -9,7 +9,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "chd|cdi|gdi|cue|iso",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {
       "name": "Jump to random Dreamcast game",
@@ -22,6 +22,10 @@
     {
       "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+    },
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
     },
     {
       "name": "Save current launch settings as per-game override",
