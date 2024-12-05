@@ -9,7 +9,7 @@ LONG_PRESSED=false
 long_press_handler() {
 
     flag_add "credits.longpress"
-    sleep 5
+    sleep 3
     flag_remove "credits.longpress"
 
     if flag_check "in_menu"; then
