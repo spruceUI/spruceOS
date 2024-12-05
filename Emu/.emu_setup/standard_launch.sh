@@ -163,7 +163,7 @@ case $EMU_NAME in
         killall -q -USR2 joystickinput
 
 		export HOME="$EMU_DIR"
-		export PATH="$HOME"/bin:$PATH
+		export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
 		P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
 		CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
