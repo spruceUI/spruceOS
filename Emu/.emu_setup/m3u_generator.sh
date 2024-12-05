@@ -27,7 +27,7 @@ generate_cues() {
     find $SYSTEM -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} +
 }
 
-display --icon "$ICON_PATH" -t "Generating M3Us... this shouldn't take longer than a few seconds" > /dev/pts/1
+display --icon "$ICON_PATH" -t "Generating M3Us... this shouldn't take longer than a few seconds"
 
 generate_cues # generate any missing cue sheets
 
