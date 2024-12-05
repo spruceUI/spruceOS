@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png" # placeholder icon
+ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png"
 ROMS_DIR="/mnt/SDCARD/Roms"
 DISC_EXTS="cue|gdi|chd|pbp|iso|dsk"
 SYSTEM="$(echo "$1" | cut -d'/' -f5)"
