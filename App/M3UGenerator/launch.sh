@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png" # placeholder icon
 ROMS_DIR="/mnt/SDCARD/Roms"
 DISC_SYSTEMS="PS SEGACD NEOCD PCECD DC"
 DISC_EXTS="cue|gdi|chd|pbp|iso|dsk"
@@ -23,6 +26,8 @@ generate_cues() {
 
     find $DISC_SYSTEMS -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} +
 }
+
+display --icon "$ICON_PATH" -t "Generating M3Us... this shouldn't take longer than a few seconds"
 
 generate_cues # generate any missing cue sheets
 
@@ -78,3 +83,6 @@ done
 cd "$ROMS_DIR"
 find $DISC_SYSTEMS -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} +
 sync
+
+display_kill
+auto_regen_tmp_update
