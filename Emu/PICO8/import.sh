@@ -29,7 +29,7 @@ for cart in "$BBS_PATH"/*/*.p8.png ; do
 done
 } &
 
-display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Importing carts from Splore :)" -d 2
+display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Importing carts from Splore" -d 2
 
 rm -f "$ROM_PATH/PICO8_cache6.db"
 log_message "Done importing. Pico-8 romlist refreshed."
