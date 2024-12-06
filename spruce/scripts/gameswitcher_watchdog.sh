@@ -176,50 +176,55 @@ send_virtual_key_R3() {
 long_press_handler() {
     # setup flag for long pressed event
     touch "$TEMP_PATH/gs.longpress"
+    touch "$TEMP_PATH/homeheld"  # flag to track if only menu is pressed
     sleep 1.6
-    rm "$TEMP_PATH/gs.longpress"
-
-    # if IS long press
-    vibrate
     
-    # get setting
-    HOLD_HOME=$(setting_get "hold_home")
-    log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
-    [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
-    
-    case $HOLD_HOME in
-        "Game Switcher")
-            prepare_game_switcher
-        ;;
-        "In-game menu")
-            if pgrep "ra32.miyoo" > /dev/null ; then
-                send_virtual_key_L3
+    # Only proceed if menu was the only key pressed
+    if [ -f "$TEMP_PATH/homeheld" ]; then
+        vibrate
+        
+        # get setting
+        HOLD_HOME=$(setting_get "hold_home")
+        log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
+        [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
+        
+        case $HOLD_HOME in
+            "Game Switcher")
+                prepare_game_switcher
+            ;;
+            "In-game menu")
+                if pgrep "ra32.miyoo" > /dev/null ; then
+                    send_virtual_key_L3
 
-            elif pgrep "retroarch" > /dev/null ; then
-                send_virtual_key_L3R3
+                elif pgrep "retroarch" > /dev/null ; then
+                    send_virtual_key_L3R3
 
-            elif pgrep "PPSSPPSDL" > /dev/null ; then
-                send_virtual_key_L3
-                killall -q -CONT PPSSPPSDL
+                elif pgrep "PPSSPPSDL" > /dev/null ; then
+                    send_virtual_key_L3
+                    killall -q -CONT PPSSPPSDL
 
-            # PICO8 has no in-game menu and 
-            # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap  
-            else
+                # PICO8 has no in-game menu and 
+                # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap  
+                else
+                    # resume MainUI if it is running
+                    # and it will then read menu up event and show popup menu
+                    killall -q -CONT  MainUI
+                    # or kill NDS or PICO8
+                    kill_emulator
+                fi
+            ;;
+            "Exit game")
                 # resume MainUI if it is running
                 # and it will then read menu up event and show popup menu
                 killall -q -CONT  MainUI
-                # or kill NDS or PICO8
+                # or kill any emulator
                 kill_emulator
-            fi
-        ;;
-        "Exit game")
-            # resume MainUI if it is running
-            # and it will then read menu up event and show popup menu
-            killall -q -CONT  MainUI
-            # or kill any emulator
-            kill_emulator
-        ;;
-    esac    
+            ;;
+        esac
+    fi
+    
+    rm -f "$TEMP_PATH/gs.longpress"
+    rm -f "$TEMP_PATH/homeheld"
 }
 
 # listen to log file and handle key press events
@@ -244,9 +249,10 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         ;;
         # MENU key up
         *"key 1 1 0"*)
-            # if NOT long press
-            if [ -f "$TEMP_PATH/gs.longpress" ] ; then
-                rm "$TEMP_PATH/gs.longpress"
+            # if NOT long press and menu was the only key pressed
+            if [ -f "$TEMP_PATH/gs.longpress" ] && [ -f "$TEMP_PATH/homeheld" ]; then
+                rm -f "$TEMP_PATH/gs.longpress"
+                rm -f "$TEMP_PATH/homeheld"
                 kill $PID
                 log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
@@ -292,6 +298,35 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                         kill_emulator
                     ;;
                 esac
+            fi
+        ;;
+        # R1 in menu starts recording
+        *"key 1 14 0"*)
+            if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
+                record_start
+                log_message "Developer recording started"
+                vibrate
+                sleep 0.1
+                vibrate
+            fi
+        ;;
+        # R2 in menu stops recording
+        *"key 1 20 0"*)
+            if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
+                vibrate 200
+                record_stop &
+                log_message "Developer recording stopped"
+            fi
+        ;;
+        # Any other key press while menu is held
+        *"key"*)
+            if [ -f "$TEMP_PATH/gs.longpress" ]; then
+                rm -f "$TEMP_PATH/homeheld"
+                log_message "*** gameswitcher_watchdog.sh: Additional key pressed during menu hold" -v
+                
+                # Resume paused processes
+                killall -q -CONT PPSSPPSDL pico8_dyn MainUI
+                send_virtual_key_R3  # Unpause RetroArch
             fi
         ;;
     esac
