@@ -655,6 +655,46 @@ read_only_check() {
     fi
 }
 
+
+# Start screen recording with audio
+# Usage: record_start [output_file]
+# If no output file is specified, defaults to /mnt/SDCARD/Recordings/recording_YYYY-MM-DD_HH-MM-SS.mp4
+record_start() {
+    local output_file="$1"
+    local date_str=$(date +%Y-%m-%d_%H-%M-%S)
+    
+    # If no output file specified, create one with timestamp
+    if [ -z "$output_file" ]; then
+        # Ensure Recordings directory exists
+        output_file="/mnt/SDCARD/recording_${date_str}.mp4"
+    fi
+    
+    # Start ffmpeg recording
+    ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
+        -c:v libx264 -preset ultrafast -b:v 1500k \
+        -c:a aac -filter:v "transpose=1" -b:a 64k -ac 1 \
+        "$output_file" &
+    
+    # Store PID for later use
+    echo $! > "/tmp/ffmpeg_recording.pid"
+    
+    log_message "Started recording to: $output_file" -v
+}
+
+# Stop current screen recording
+# Usage: record_stop
+record_stop() {
+    if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+        local pid=$(cat "/tmp/ffmpeg_recording.pid")
+        kill $pid 2>/dev/null
+        rm "/tmp/ffmpeg_recording.pid"
+        log_message "Stopped recording" -v
+    else
+        log_message "No active recording found" -v
+    fi
+}
+
+
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
