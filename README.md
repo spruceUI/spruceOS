@@ -98,7 +98,8 @@ Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and cal
 \*Holding POWER after the vibration occurs will cause the A30 to force shutdown (in case of freezes etc.)
 
 ### RetroArch
-![hotkeys](https://github.com/user-attachments/assets/77a68cd0-6e38-4baf-9e61-4c740d0950b7)
+![hotkeyDefaults](https://github.com/user-attachments/assets/7558ecd9-8149-4009-936a-2cd32c9c7ec9)
+
 
 New unified hotkeys configured for RetroArch, updated to what is considered a 'common' layout and what is compatible with our new use of the HOME key
 
