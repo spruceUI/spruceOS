@@ -65,6 +65,7 @@ if [ $ARGUMENT = "apply"]; then
 	# make sure these apps show up
 	check_and_reveal_app "AdvancedSettings"
 	check_and_reveal_app "RandomGame"
+	check_and_reveal_app "spruceHelp"
 
 	# spruceRestore, BoxartScraper and RTC apps unhandled - these will respect how the setting-up user sets them
 
