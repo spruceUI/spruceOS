@@ -66,7 +66,7 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 @"Only run this if needing to reinstall."
 
 "" "Activate Simple Mode" "|" "run|off" "echo -n off" "$SIMPLE_MODE$ apply|" ""
-@"Remove some options to make it harder to break stuff. Konami Code to restore full control."
+@"Remove some options to make it harder to break stuff. Konami Code in menu to restore full control."
 
 [Emulators]
 
