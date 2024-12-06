@@ -20,6 +20,10 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
     },
     {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    },
+    {
       "name": "Save current launch settings as per-game override",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
     },

@@ -25,6 +25,20 @@ check_and_hide_update_app() {
     fi
 }
 
+check_and_move_p8_bins() {
+    [ -f "/mnt/SDCARD/pico8.dat" ] && \
+    [ ! -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && \
+    mv "/mnt/SDCARD/pico8.dat" "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" && \
+    display -d 1.5 -t "pico8.dat found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
+    log_message "pico8.dat found at SD root and moved into place"
+    
+    [ -f "/mnt/SDCARD/pico8_dyn" ] && \
+    [ ! -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] && \
+    mv "/mnt/SDCARD/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" && \
+    display -d 1.5 -t "pico8_dyn found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
+    log_message "pico8_dyn found at SD root and moved into place"
+}
+
 DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
 
 
