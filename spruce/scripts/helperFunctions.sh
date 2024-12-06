@@ -658,7 +658,7 @@ read_only_check() {
 
 # Start screen recording with audio
 # Usage: record_start [output_file] [timeout_minutes]
-# If no output file is specified, defaults to /mnt/SDCARD/recording_YYYY-MM-DD_HH-MM-SS.mp4
+# If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
 # If no timeout is specified, defaults to 5 minutes
 record_start() {
     local output_file="$1"
@@ -667,7 +667,7 @@ record_start() {
     
     # If no output file specified, create one with timestamp
     if [ -z "$output_file" ]; then
-        output_file="/mnt/SDCARD/recording_${date_str}.mp4"
+        output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
     fi
     
     # Start ffmpeg recording
