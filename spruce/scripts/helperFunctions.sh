@@ -657,15 +657,16 @@ read_only_check() {
 
 
 # Start screen recording with audio
-# Usage: record_start [output_file]
-# If no output file is specified, defaults to /mnt/SDCARD/Recordings/recording_YYYY-MM-DD_HH-MM-SS.mp4
+# Usage: record_start [output_file] [timeout_minutes]
+# If no output file is specified, defaults to /mnt/SDCARD/recording_YYYY-MM-DD_HH-MM-SS.mp4
+# If no timeout is specified, defaults to 5 minutes
 record_start() {
     local output_file="$1"
+    local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
     local date_str=$(date +%Y-%m-%d_%H-%M-%S)
     
     # If no output file specified, create one with timestamp
     if [ -z "$output_file" ]; then
-        # Ensure Recordings directory exists
         output_file="/mnt/SDCARD/recording_${date_str}.mp4"
     fi
     
@@ -673,12 +674,20 @@ record_start() {
     ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
         -c:v libx264 -preset ultrafast -b:v 1500k \
         -c:a aac -filter:v "transpose=1" -b:a 64k -ac 1 \
-        "$output_file" &
+        -t $((timeout_minutes * 60)) "$output_file" &
     
     # Store PID for later use
     echo $! > "/tmp/ffmpeg_recording.pid"
     
-    log_message "Started recording to: $output_file" -v
+    log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
+    
+    # Set up automatic stop after timeout
+    (
+        sleep $((timeout_minutes * 60))
+        if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+            record_stop
+        fi
+    ) &
 }
 
 # Stop current screen recording
