@@ -108,6 +108,8 @@ detect_konami_code() {
 
 	if [ $SUM_CORRECT -ge 24 ]; then
 		"$TOGGLE_SIMPLE" remove
+		SUM_CORRECT=0
+		return 0
 	fi
 }
 
