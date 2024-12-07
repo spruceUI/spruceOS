@@ -76,7 +76,7 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
-"" "RetroArch hotkey enable key" "|||" "Select|Start|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
+"" "RetroArch hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
 
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
