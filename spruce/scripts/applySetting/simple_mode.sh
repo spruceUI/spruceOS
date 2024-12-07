@@ -39,6 +39,19 @@ restore_x_menus() {
 	done
 }
 
+sync_simple_json_from_original() {
+	cd "$EMU_DIR"
+	for dir in ./*; do
+		if [ -f "${dir}/config.json.original" ] \
+		&& [ -f "${dir}/config.json" ]; then
+			if grep -q "{{" "${dir}/config.json.original"; then
+				sed -i 's/^{*$/{{/' "${dir}/config.json"
+			else
+				sed -i 's/^{{*$/{/' "${dir}/config.json"
+			fi
+		fi
+	done
+}
 
 ##### MAIN EXECUTION #####
 
@@ -55,6 +68,9 @@ if [ $ARGUMENT = "apply" ]; then
 
 	# remove all X button menu items except aleatorio.sh
 	simplify_x_menus
+
+	# sync emufresh status of both modes' configs
+	sync_simple_json_from_original
 
 	# hide majority of apps
 	check_and_hide_app "-FirmwareUpdate-"
