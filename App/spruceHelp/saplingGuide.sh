@@ -53,7 +53,7 @@ There's plenty of guides and information there!" --qr "$WIKI_QR_CODE" -s 27 --ad
     return 0
 }
 
-record_start
+#record_start
 
 # UPDATE THESE VALUES WHEN YOU ADD OR REMOVE SLIDES
 current_slide=1
@@ -84,7 +84,7 @@ while true; do
             ;;
         "B")
             display_kill
-            record_stop &
+            #record_stop &
             exit 0
             ;;
     esac
