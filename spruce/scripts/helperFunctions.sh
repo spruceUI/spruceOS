@@ -683,7 +683,10 @@ record_start() {
     local output_file="$1"
     local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
     local date_str=$(date +%Y-%m-%d_%H-%M-%S)
-    
+    set_performance
+    # Prevent the CPU from being clocked down while recording
+    flag_add "setting_cpu"
+
     # If no output file specified, create one with timestamp
     if [ -z "$output_file" ]; then
         output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
@@ -716,6 +719,7 @@ record_stop() {
         local pid=$(cat "/tmp/ffmpeg_recording.pid")
         kill $pid 2>/dev/null
         rm "/tmp/ffmpeg_recording.pid"
+        flag_remove "setting_cpu"
         log_message "Stopped recording" -v
     else
         log_message "No active recording found" -v
