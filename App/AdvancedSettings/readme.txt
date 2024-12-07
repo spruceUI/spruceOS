@@ -1,14 +1,16 @@
 ======== CLI ========
 
-Usage: easyConfig config_file [-t title]
+Usage: easyConfig config_file [-o] [-m MODE] [-p index] [-t title]
 
--t:     title of the config window.
 -h,--help       show this help message.
-
+-m:     filter setting items with specified MODE, multiple modes can be specified.
+-o:     generate options only.
+-p:     show i-th group only (first group index = 1).
+-t:     title of the config window.
 
 ======== CONTROL ========
 
-UI control: L1/R1: Select group, Up/Down: Select item, Left/Right: change value, B: Exit & Save
+UI control: L1/R1: Select group, Up/Down: Select item, Left/Right/A: Change value, B: Save and exit, Select: Cancel and exit
 
 
 ======== CONFIG FILE - SETTING ITEM ========
@@ -35,11 +37,18 @@ Example lines of config file:
 "" "Enable SSH" "|" "on|off" "$SSH$ check" "$SSH$ on|$SSH$ off" "$SSH$"
 
 ======== CONFIG FILE - HARDCODED MINOR INFO ========
+
 You can hardcode minor info text for a setting item by add extra line below a setting item.
 The minor info should be in the format @"Minor info". Examples such as:
 
 @"this is hardcoded minor text"
 @"User: root, password: tina"
+
+======== CONFIG FILE - DYNAMIC INFO ========
+
+Dynamic information text can be added as single item, which should be a command to be executed on start. The command should print output to stdout to set the information text. To define an information text add a line with the following format
+
+%"the_commond_to_run_on_start.sh"
 
 ======== CONFIG FILE - ALIAS ========
 
@@ -52,6 +61,7 @@ $CHECK=/mnt/SDCARD/spruce/scripts/checkFlag.sh$
 
 And you can use aliases as part of the commands in CURRENT_VALUE COMMANDS and INFO_COMMAND".
 Example setting item lines with using aliases:
+
 ""    "Run GS on start" "|" "on|off" "$CHECK$ gs.boot" "touch $FLAGS$/gs.boot|rm -f $FLAGS$/gs.boot"
 
 
@@ -64,6 +74,12 @@ Settings can be organized into groups, which displayed as multiple tags in confi
 Note that the square brackets are part of input. Any setting items after the group definition will be assigned to the group. OPTIONAL_OUTPUT_FILENAME is the filename of optional output file. Output option file is generated when program exit, which containing pairs of NAME and VALUE, can be utilized as option list for calling another program. Example output options:
 
 -s 10 -b off -t on -ts 4 -n on
+
+======== CONFIG FILE - MODE TAGS ========
+
+Setting items can be tagged by mode names and filtered with the -m option. A setting item is always shown if no tag is assigned. To tag a setting item, insert the mode names before the setting item with the following format:
+
+<MODE_NAME_1> <MODE_NAME_2> ...
 
 
 
