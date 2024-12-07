@@ -42,7 +42,7 @@ restore_x_menus() {
 
 ##### MAIN EXECUTION #####
 
-if [ $ARGUMENT = "apply"]; then
+if [ $ARGUMENT = "apply" ]; then
 
 	# apply simple_mode flag
 	flag_add "simple_mode"
