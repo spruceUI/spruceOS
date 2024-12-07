@@ -82,6 +82,7 @@ else ##### ARGUMENT is "remove"
 
 	# don't mess with any other app visibility... we don't know what they had visible before they turned on simple mode.
 
-
+	killall -9 MainUI
+	display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -d 2 -t "Exiting Simple Mode!"
 
 fi

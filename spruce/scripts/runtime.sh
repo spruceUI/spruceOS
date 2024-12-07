@@ -131,6 +131,9 @@ ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 # run game switcher watchdog before auto load game is loaded
 ${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
 
+# start watchdog for konami code
+${SCRIPTS_DIR}/simple_mode_watchdog.sh &
+
 # don't hide or unhide apps in simple_mode
 if ! flag_check "simple_mode"; then
     check_and_handle_firmware_app &
