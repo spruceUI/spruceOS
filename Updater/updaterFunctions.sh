@@ -123,6 +123,11 @@ save_app_states() {
         app_dir=$(dirname "$config_file")
         app_name=$(basename "$app_dir")
         
+        # Skip if app_name starts with '-'
+        case "$app_name" in
+            -*) continue ;;
+        esac
+        
         # Check if the app is hidden (#label) or shown (label)
         if grep -q '"#label"' "$config_file"; then
             echo "$app_name:hidden" >> "$states_file"
@@ -143,6 +148,11 @@ restore_app_states() {
     fi
     
     while IFS=: read -r app_name state; do
+        # Skip if app_name starts with '-'
+        case "$app_name" in
+            -*) continue ;;
+        esac
+        
         local config_file="$APP_DIR/$app_name/config.json"
         
         if [ -f "$config_file" ]; then
