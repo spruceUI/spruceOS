@@ -1,3 +1,5 @@
+APP_DIR="/mnt/SDCARD/App"
+
 acknowledge(){
     local messages_file="/var/log/messages"
 	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
@@ -107,4 +109,54 @@ verify_7z_content() {
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') - All required directories found in 7z file"
     return 0
+}
+
+save_app_states() {
+    local states_file="${1:-/tmp/app_states.txt}"
+    
+    # Clear existing states file if it exists
+    : > "$states_file"
+    
+    # Find all config.json files in APP_DIR and process them
+    find "$APP_DIR" -name "config.json" -type f | while read -r config_file; do
+        # Get the parent directory name (app name)
+        app_dir=$(dirname "$config_file")
+        app_name=$(basename "$app_dir")
+        
+        # Check if the app is hidden (#label) or shown (label)
+        if grep -q '"#label"' "$config_file"; then
+            echo "$app_name:hidden" >> "$states_file"
+        else
+            echo "$app_name:shown" >> "$states_file"
+        fi
+    done
+    
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - App states saved to $states_file"
+}
+
+restore_app_states() {
+    local states_file="${1:-/tmp/app_states.txt}"
+    
+    if [ ! -f "$states_file" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - No app states file found"
+        return 1
+    fi
+    
+    while IFS=: read -r app_name state; do
+        local config_file="$APP_DIR/$app_name/config.json"
+        
+        if [ -f "$config_file" ]; then
+            if [ "$state" = "hidden" ]; then
+                # Hide the app by replacing "label" with "#label"
+                sed -i 's/"label"/"#label"/' "$config_file"
+            else
+                # Show the app by replacing "#label" with "label"
+                sed -i 's/"#label"/"label"/' "$config_file"
+            fi
+        fi
+    done < "$states_file"
+    
+    # Clean up the states file
+    rm -f "$states_file"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - App states restored and temporary file removed"
 }

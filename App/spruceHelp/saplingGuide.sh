@@ -82,6 +82,12 @@ while true; do
                 show_slide $current_slide
             fi
             ;;
+        "UP")
+            # Insert fun scripts here
+            ;;
+        "DOWN")
+            # Insert fun scripts here
+            ;;
         "B")
             display_kill
             #record_stop &
