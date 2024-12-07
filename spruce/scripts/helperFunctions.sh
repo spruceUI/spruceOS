@@ -462,34 +462,53 @@ flag_remove() {
 # Returns the name of the button pressed, or "" if no matching button was pressed
 # Returned strings are simplified, so "B_L1" would return "L1"
 get_button_press() {
+    local messages_file="/var/log/messages"
     local button_pressed=""
-    local timeout=500 # Timeout in seconds
-    for i in $(seq 1 $timeout); do
-        local last_line=$(tail -n 1 /var/log/messages)
+    local timeout=${1:-45}  # Default 45 second timeout if not specified
+    local start_time=$(date +%s)
+
+    echo "GET_BUTTON_PRESS $(date +%s)" >>"$messages_file"
+
+    while true; do
+        # Check for timeout
+        local current_time=$(date +%s)
+        local elapsed_time=$((current_time - start_time))
+        if [ $elapsed_time -ge $timeout ]; then
+            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$messages_file"
+            echo ""
+            return 1
+        fi
+
+        # Wait for log message update
+        if ! inotifywait -t 5000 "$messages_file" >/dev/null 2>&1; then
+            continue
+        fi
+
+        # Get the last line of log file
+        local last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-        *"$B_L1 1"*) button_pressed="L1" ;;
-        *"$B_L2 1"*) button_pressed="L2" ;;
-        *"$B_R1 1"*) button_pressed="R1" ;;
-        *"$B_R2 1"*) button_pressed="R2" ;;
-        *"$B_X 1"*) button_pressed="X" ;;
-        *"$B_A 1"*) button_pressed="A" ;;
-        *"$B_B 1"*) button_pressed="B" ;;
-        *"$B_Y 1"*) button_pressed="Y" ;;
-        *"$B_UP 1"*) button_pressed="UP" ;;
-        *"$B_DOWN 1"*) button_pressed="DOWN" ;;
-        *"$B_LEFT 1"*) button_pressed="LEFT" ;;
-        *"$B_RIGHT 1"*) button_pressed="RIGHT" ;;
-        *"$B_START 1"*) button_pressed="START" ;;
-        *"$B_SELECT 1"*) button_pressed="SELECT" ;;
+            *"$B_L1"*) button_pressed="L1" ;;
+            *"$B_L2"*) button_pressed="L2" ;;
+            *"$B_R1"*) button_pressed="R1" ;;
+            *"$B_R2"*) button_pressed="R2" ;;
+            *"$B_X"*) button_pressed="X" ;;
+            *"$B_A"*) button_pressed="A" ;;
+            *"$B_B"*) button_pressed="B" ;;
+            *"$B_Y"*) button_pressed="Y" ;;
+            *"$B_UP"*) button_pressed="UP" ;;
+            *"$B_DOWN"*) button_pressed="DOWN" ;;
+            *"$B_LEFT"*) button_pressed="LEFT" ;;
+            *"$B_RIGHT"*) button_pressed="RIGHT" ;;
+            *"$B_START"*) button_pressed="START" ;;
+            *"$B_SELECT"*) button_pressed="SELECT" ;;
         esac
 
         if [ -n "$button_pressed" ]; then
+            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$messages_file"
             echo "$button_pressed"
             return 0
         fi
-        sleep 0.1
     done
-    echo "B"
 }
 
 get_event() {
