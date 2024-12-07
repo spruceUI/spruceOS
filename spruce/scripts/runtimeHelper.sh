@@ -59,9 +59,8 @@ developer_mode_task() {
                 log_message "Dev Mode: Dropbear starting..."
                 start_dropbear_process
             fi
-            
         fi
-    else
+    fi
 }
 
 rotate_logs() {
