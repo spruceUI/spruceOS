@@ -22,7 +22,7 @@ check_and_reveal_app() {
 simplify_x_menus() {
 	cd "$EMU_DIR"
 	for dir in ./*; do
-		if [ -f "${dir}/config.json" ] && [ -f "${dir}/config.json.simple"]; then
+		if [ -f "${dir}/config.json" ] && [ -f "${dir}/config.json.simple" ]; then
 			mv "${dir}/config.json" "${dir}/config.json.original"
 			cp -f "${dir}/config.json.simple" "${dir}/config.json"
 		fi
@@ -44,8 +44,14 @@ restore_x_menus() {
 
 if [ $ARGUMENT = "apply" ]; then
 
+	if flag_check "simple_mode"; then
+		log_message "WARNING: simple mode tried to apply when already applied"
+		exit 1
+	fi
+
 	# apply simple_mode flag
 	flag_add "simple_mode"
+	log_message "simple_mode activated!"
 
 	# remove all X button menu items except aleatorio.sh
 	simplify_x_menus
@@ -71,13 +77,20 @@ if [ $ARGUMENT = "apply" ]; then
 
 else ##### ARGUMENT is "remove"
 
+	if ! flag_check "simple_mode"; then
+		log_message "WARNING: simple mode tried to remove when not active"
+		exit 1
+	fi
+
 	# remove simple_mode flag
 	flag_remove "simple_mode"
+	log_message "simple_mode deactivated!"
 
 	# re-enable X menu items
 	restore_x_menus
 
-	# reveal RA app because there's no manual toggle for it for them to reveal it themselves
+	# reveal RA app because there's no manual toggle for it for them to reveal it themselves. And Advanced Settings juuuuust in case.
+	check_and_reveal_app "AdvancedSettings"
 	check_and_reveal_app "RetroArch"
 
 	# don't mess with any other app visibility... we don't know what they had visible before they turned on simple mode.

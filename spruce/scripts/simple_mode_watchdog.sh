@@ -2,121 +2,95 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-MESSAGE_FILE="/tmp/log/messages"
 TOGGLE_SIMPLE="/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh"
 
 detect_konami_code() {
 
-	i=1
-	SUM_CORRECT=0
+	log_message "listening for Konami Code"
 
-	LAST_24="$(tail -n 24 $MESSAGE_FILE)"
+	NUM_CORRECT=0
 
-	echo "$LAST_24" | while read line; do
+	/mnt/SDCARD/spruce/bin/getevent /dev/input/event3 | while read line; do
+
+		log_message "number of correct inputs: $NUM_CORRECT"
+
 		case "$line" in
-			1|3) # press up
-				if echo "$line" | grep -q "$B_UP 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_UP 1"*)
+				log_message "+++UP"
+				if [ $NUM_CORRECT -eq 0 ] || [ $NUM_CORRECT -eq 1 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-			2|4) # release up
-				if echo "$line" | grep -q "$B_UP 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_DOWN 1"*)
+				log_message "+++DOWN"
+				if [ $NUM_CORRECT -eq 2 ] || [ $NUM_CORRECT -eq 3 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-
-			5|7) # press down
-				if echo "$line" | grep -q "$B_DOWN 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_LEFT 1"*)
+				log_message "+++LEFT"
+				if [ $NUM_CORRECT -eq 4 ] || [ $NUM_CORRECT -eq 6 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-			6|8) # release down
-				if echo "$line" | grep -q "$B_DOWN 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_RIGHT 1"*)
+				log_message "+++RIGHT"
+				if [ $NUM_CORRECT -eq 5 ] || [ $NUM_CORRECT -eq 7 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-
-			9|13) # press left
-				if echo "$line" | grep -q "$B_LEFT 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_B 1"*)
+				log_message "+++B"
+				if [ $NUM_CORRECT -eq 8 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-			10|14) # release left
-				if echo "$line" | grep -q "$B_LEFT 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_A 1"*)
+				log_message "+++A"
+				if [ $NUM_CORRECT -eq 9 ]; then
+					NUM_CORRECT=$((NUM_CORRECT + 1))
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-
-			11|15) # press right
-				if echo "$line" | grep -q "$B_RIGHT 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
+			*"$B_START 1"*)
+				log_message "+++START"
+				if [ $NUM_CORRECT -eq 10 ]; then
+					log_message "11 correct inputs in a row! removing simple_mode."
+					"$TOGGLE_SIMPLE" remove
+					break
+				else
+					NUM_CORRECT=0
 				fi
 				;;
-			12|16) # release right
-				if echo "$line" | grep -q "$B_RIGHT 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-
-			17) # press B
-				if echo "$line" | grep -q "$B_B 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-			18) # release B
-				if echo "$line" | grep -q "$B_B 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-
-			19) # press A
-				if echo "$line" | grep -q "$B_A 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-			20) # release A
-				if echo "$line" | grep -q "$B_A 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
+			*0)
+				log_message "---button released"
 				;;
 
-			21) # press START
-				if echo "$line" | grep -q "$B_START 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-			22) # duplicate START press log entry
-				if echo "$line" | grep -q "$B_START_2 1"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-
-			23) # release START
-				if echo "$line" | grep -q "$B_START 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
-				;;
-			24) # duplicate START release log entry
-				if echo "$line" | grep -q "$B_START_2 0"; then
-					SUM_CORRECT=$((SUM_CORRECT + 1))
-				fi
+			*)
+				log_message "-+-+- Some other button pressed!"
+				NUM_CORRECT=0
 				;;
 		esac
-
-		i=$((i + 1))
 	done
-
-	if [ $SUM_CORRECT -ge 24 ]; then
-		"$TOGGLE_SIMPLE" remove
-		SUM_CORRECT=0
-		return 0
-	fi
 }
 
 while true; do
 	while flag_check "simple_mode" && pgrep "MainUI" > /dev/null; do
+		log_message "simple_mode active and MainUI detected"
 		detect_konami_code
-		sleep 1
+		sleep 5
 	done
+	log_message "simple_mode OR MainUI not detected"
 	sleep 5
 done &
