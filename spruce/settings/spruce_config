@@ -170,6 +170,8 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
 @"Set the current time and date"
 
+"" "Sapling Guide" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceHelp/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceHelp/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceHelp/config.json" ""
+
 "" "Spruce Update App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/-OTA/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/-OTA/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/-OTA/config.json" ""
 @"Check for updates over Wi-Fi"
 
