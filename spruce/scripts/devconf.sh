@@ -45,7 +45,7 @@ if flag_check "designer_mode"; then
     mv "$EMUFRESH" "$EMUFRESH.bak"
     
     # Remove @ from Theme Packer label
-    sed -i 's/"@label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
+    sed -i 's/"#label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi
 
 # Restore if designer mode is not enabled
@@ -56,5 +56,5 @@ if ! flag_check "designer_mode"; then
     fi
     
     # Restore @ in Theme Packer label
-    sed -i 's/"label"/"@label"/' /mnt/SDCARD/App/ThemePacker/config.json
+    sed -i 's/"label"/"#label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi
