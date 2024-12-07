@@ -36,6 +36,10 @@ if [ -f "$PICO_DIR/pico8.dat" ] && [ -f "$PICO_DIR/pico8_dyn" ]; then
     MODES="$MODES -m Pico"
 fi
 
+if ! flag_check "simple_mode"; then
+    MODES="$MODES -m Hide_if_simple"
+fi
+
 # Easy to add more modes like this:
 # if flag_check "some_other_mode"; then
 #     MODES="$MODES -m other_mode"
