@@ -5,7 +5,7 @@ APP_DIR=/mnt/SDCARD/App/spruceHelp
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 
-ICON_IMAGE="/mnt/SDCARD/Themes/SPRUCE/Icons/App/led.png"
+ICON_IMAGE="/mnt/SDCARD/spruce/imgs/lightbulb.png"
 HOMEKEY_IMAGE="$APP_DIR/imgs/homeKey.png"
 POWERKEY_IMAGE="$APP_DIR/imgs/powerKey.png"
 HOTKEY_IMAGE="$APP_DIR/imgs/hotkeyDefaults.png"
