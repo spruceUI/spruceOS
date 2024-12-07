@@ -131,9 +131,11 @@ ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 # run game switcher watchdog before auto load game is loaded
 ${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
 
-check_and_handle_firmware_app &
-
-check_and_hide_update_app &
+# don't hide or unhide apps in simple_mode
+if ! flag_check "simple_mode"; then
+    check_and_handle_firmware_app &
+    check_and_hide_update_app &
+fi
 
 check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 

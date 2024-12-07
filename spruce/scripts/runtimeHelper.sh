@@ -142,7 +142,7 @@ update_notification(){
         exit 1
     fi
 
-    if flag_check "update_available"; then
+    if flag_check "update_available" && ! flag_check "simple_mode"; then
         available_version=$(cat "$(flag_path update_available)")
         display --icon "$UPDATE_ICON" -t "Update available!
 Version ${available_version} is ready to install
