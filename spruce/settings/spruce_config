@@ -31,7 +31,8 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 
 [System]
-
+<Developer>
+"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "$HELP$ get idlemon_in_menu '5m'" "$HELP$ update idlemon_in_menu '_VALUE_' && $IDLEMON_MM$ in_menu _VALUE_" ""
 
 "" "Shutdown when idle in game" "Off|2m|5m|10m|30m" "Off|2m|5m|10m|30m" "$HELP$ get idlemon_in_game '30m'" "$HELP$ update idlemon_in_game '_VALUE_' && $IDLEMON_MM$ in_game _VALUE_" ""
@@ -82,9 +83,11 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
 @"C Buttons = R2 + A, B, X, Y"
 
+<Pico>
 "" "Pico-8 Control Profile" "||||||" "Doubled|Doubled 2|Racing|Racing 2|One-handed|One-handed 2|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ '_VALUE_'"
 @"A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ"
 
+<Pico>
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
 
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png _VALUE_ && $F8_PNG$ _VALUE_" ""
