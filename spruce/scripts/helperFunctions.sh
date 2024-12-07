@@ -694,8 +694,8 @@ record_start() {
     
     # Start ffmpeg recording
     ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
-        -c:v libx264 -preset ultrafast -b:v 1500k \
-        -c:a aac -filter:v "transpose=1" -b:a 64k -ac 1 \
+        -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
+        -c:a aac -b:a 64k -ac 1 \
         -t $((timeout_minutes * 60)) "$output_file" &
     
     # Store PID for later use
