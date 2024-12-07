@@ -44,11 +44,6 @@ DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt
 
 developer_mode_task() {
     if flag_check "developer_mode" || flag_check "designer_mode"; then
-        # Add developer menu option to spruce_config if it doesn't exist
-        if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
-            sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
-        fi
-        
         if setting_get "samba" || setting_get "dropbear"; then
             # Loop until WiFi is connected
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
@@ -67,9 +62,6 @@ developer_mode_task() {
             
         fi
     else
-        # Remove the line if it exists and no flags are present
-        sed -i '/Reapply Developer\/Designer mode/d' /mnt/SDCARD/spruce/settings/spruce_config
-    fi
 }
 
 rotate_logs() {

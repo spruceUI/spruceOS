@@ -188,8 +188,8 @@ if [ ! -f "$UPDATE_FILE" ]; then
     display "Update file not found" --acknowledge
     exit 1
 fi
-# Verify the content of the 7z starts with /mnt/
 
+# Verify the content of the 7z starts with /mnt/
 if ! verify_7z_content "$UPDATE_FILE"; then
     display "Invalid update file structure, update file corrupt or not a spruce update" --acknowledge
     exit 1
@@ -202,6 +202,8 @@ kill_network_services
 # Creating a backup of current install
 display "Creating a backup of user data and configs..."
 /mnt/SDCARD/App/spruceBackup/spruceBackup.sh --silent
+
+save_app_states
 
 # Delete all folders and files except Updater, update zip, BIOS, Roms, Saves, miyoo/app, and miyoo/lib
 PERFORM_DELETION=true
@@ -281,6 +283,8 @@ if [ "$DELETE_UPDATE" = true ]; then
     find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
     log_update_message "All update files deleted"
 fi
+
+restore_app_states
 
 # Restore backup
 display "Restoring user data..."

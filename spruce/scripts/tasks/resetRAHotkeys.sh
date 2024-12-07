@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ "$1" == "0" ]; then
-    echo -n "Your RetroArch hotkeys will be reset on save and exit."
+    echo -n "Your RetroArch hotkeys will be reset to Spruce defaults on save and exit."
     return 0
 fi
 
