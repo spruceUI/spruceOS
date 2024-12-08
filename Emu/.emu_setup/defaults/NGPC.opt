@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CORE="race"
+export CORE="mednafen_ngp"
 export MODE="smart"
 
-export scaling_min_freq=312000
+export scaling_min_freq=408000

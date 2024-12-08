@@ -8,7 +8,7 @@ SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 display -i "$BG" -t "Core changed to mednafen_ngp"
 
-sed -i 's|"Emu Core: (✓RACE)-mednafen"|"Emu Core: race-(✓MEDNAFEN)"|g' "$CONFIG"
+sed -i 's|"Emu Core: mednafen-(✓RACE)"|"Emu Core: (✓MEDNAFEN)-race"|g' "$CONFIG"
 sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/mednafen_ngp.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/race.sh"|g' "$CONFIG"
 sed -i 's|CORE=.*|CORE=\"mednafen_ngp\"|g' "$SYS_OPT"
 
