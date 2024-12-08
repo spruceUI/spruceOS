@@ -1,0 +1,19 @@
+{
+  "label": "PSP",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/PSP",
+  "imgpath": "../../Roms/PSP/Imgs",
+  "gamelist": "../../Roms/PSP/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "iso|cso|chd",
+  "launchlist": [
+    {
+      "name": "Jump to random PlayStation Portable game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

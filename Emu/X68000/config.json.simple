@@ -1,0 +1,19 @@
+{
+  "label": "X68000",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/x68000.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/x68000.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/X68000",
+  "imgpath": "../../Roms/X68000/Imgs",
+  "gamelist": "../../Roms/X68000/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
+  "launchlist": [
+    {
+      "name": "Jump to random X68000 game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

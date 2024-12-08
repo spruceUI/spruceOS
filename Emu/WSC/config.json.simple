@@ -1,0 +1,19 @@
+{
+  "label": "WndrSwnC",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/WSC",
+  "imgpath": "../../Roms/WSC/Imgs",
+  "gamelist": "../../Roms/WSC/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "ws|wsc|zip|7z|pc2",
+  "launchlist": [
+    {
+      "name": "Jump to random WonderSwan Color game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

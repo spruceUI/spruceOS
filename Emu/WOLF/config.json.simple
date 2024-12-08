@@ -1,0 +1,19 @@
+{
+  "label": "Wolf3D",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wolf.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wolf.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/WOLF",
+  "imgpath": "../../Roms/WOLF/Imgs",
+  "gamelist": "../../Roms/WOLF/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "ecwolf|exe",
+  "launchlist": [
+    {
+      "name": "Jump to random Wolfenstein game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

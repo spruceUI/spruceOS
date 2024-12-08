@@ -1,0 +1,19 @@
+{
+  "label": "Sega MS",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/MS",
+  "imgpath": "../../Roms/MS/Imgs",
+  "gamelist": "../../Roms/MS/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 0,
+  "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",
+  "launchlist": [
+    {
+      "name": "Jump to random Master System game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}
