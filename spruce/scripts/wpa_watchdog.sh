@@ -17,6 +17,9 @@ append_network_from_multipass() {
     echo "network={"
     echo "ssid=\"$1\""
     echo "psk=\"$2\""
+    if [ "$3" = "1" ]; then
+        echo "scan_ssid=$3"
+    fi
     echo "}"
 }
 
@@ -49,6 +52,7 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
     for i in 1 2 3 4 5; do
         eval "ID=\$ID_$i"
         eval "PW=\$PW_$i"
+        eval "HIDDEN=\$HIDDEN_$i"
 
         # SSID and PSK must be non-empty to be evaluated
         if [ -n "$ID" ] && [ -n "$PW" ]; then
@@ -67,7 +71,7 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
                 fi
 
             else ### SSID not found in wpa_supplicant.conf, so we add it
-                append_network_from_multipass "$ID" "$PW" >> "$WPA_FILE"
+                append_network_from_multipass "$ID" "$PW" "$HIDDEN" >> "$WPA_FILE"
                 log_message "Network $ID added to wpa_supplicant.conf"
             fi
 
