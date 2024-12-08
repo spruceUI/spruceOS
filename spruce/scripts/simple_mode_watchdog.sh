@@ -12,11 +12,11 @@ detect_konami_code() {
 
 	/mnt/SDCARD/spruce/bin/getevent /dev/input/event3 | while read line; do
 
-		log_message "number of correct inputs: $NUM_CORRECT"
+		log_message "number of correct inputs: $NUM_CORRECT" -v
 
 		case "$line" in
 			*"$B_UP 1"*)
-				log_message "+++UP"
+				log_message "+++UP" -v
 				if [ $NUM_CORRECT -eq 0 ] || [ $NUM_CORRECT -eq 1 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -24,7 +24,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_DOWN 1"*)
-				log_message "+++DOWN"
+				log_message "+++DOWN" -v
 				if [ $NUM_CORRECT -eq 2 ] || [ $NUM_CORRECT -eq 3 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -32,7 +32,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_LEFT 1"*)
-				log_message "+++LEFT"
+				log_message "+++LEFT" -v
 				if [ $NUM_CORRECT -eq 4 ] || [ $NUM_CORRECT -eq 6 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -40,7 +40,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_RIGHT 1"*)
-				log_message "+++RIGHT"
+				log_message "+++RIGHT" -v
 				if [ $NUM_CORRECT -eq 5 ] || [ $NUM_CORRECT -eq 7 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -48,7 +48,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_B 1"*)
-				log_message "+++B"
+				log_message "+++B" -v
 				if [ $NUM_CORRECT -eq 8 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -56,7 +56,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_A 1"*)
-				log_message "+++A"
+				log_message "+++A" -v
 				if [ $NUM_CORRECT -eq 9 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
 				else
@@ -64,7 +64,7 @@ detect_konami_code() {
 				fi
 				;;
 			*"$B_START 1"*)
-				log_message "+++START"
+				log_message "+++START" -v
 				if [ $NUM_CORRECT -eq 10 ]; then
 					log_message "11 correct inputs in a row! removing simple_mode."
 					"$TOGGLE_SIMPLE" remove
@@ -74,11 +74,11 @@ detect_konami_code() {
 				fi
 				;;
 			*0)
-				log_message "---button released"
+				log_message "---button released" -v
 				;;
 
 			*)
-				log_message "-+-+- Some other button pressed!"
+				log_message "-+-+- Some other button pressed!" -v
 				NUM_CORRECT=0
 				;;
 		esac
@@ -91,6 +91,6 @@ while true; do
 		detect_konami_code
 		sleep 5
 	done
-	log_message "simple_mode OR MainUI not detected"
+	log_message "simple_mode OR MainUI not detected" -v
 	sleep 5
 done &
