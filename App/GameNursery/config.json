@@ -1,0 +1,6 @@
+{
+  "label": "Game Nursery",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
+  "launch": "launch.sh",
+  "description": "Download free games directly to your A30"
+}

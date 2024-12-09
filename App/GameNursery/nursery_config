@@ -1,0 +1,170 @@
+#Generic helpers
+$CHECK=/mnt/SDCARD/spruce/scripts/applySetting/checkFlag.sh$
+$FLAGS=/mnt/SDCARD/spruce/flags$
+$HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
+
+# Function specific scripts
+$F8_PNG=/mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh$
+$GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
+$IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
+$JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
+$LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
+$N64_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/n64_control_profiles.sh$
+$P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
+$RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
+$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
+$RUMBLE=/mnt/SDCARD/spruce/scripts/applySetting/rumbleIntensity.sh$
+$SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
+$SETTINGS=/mnt/SDCARD/spruce/settings$
+$SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
+$SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
+$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
+$SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
+$BLFILTER=/mnt/SDCARD/spruce/scripts/applySetting/blfilter.sh$
+
+# Task Scripts
+$CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh$
+$RESET_EMUFRESH=/mnt/SDCARD/spruce/scripts/tasks/resetEmufresh.sh$
+$RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
+$RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
+$SIMPLE_MODE=/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh$
+$SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
+
+
+[Ports]
+
+"" "2048" "|" "run|off" "echo -n off" "" ""
+@"Already installed"
+
+"" "Anarch" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Cannonball (Outrun)" "|" "run|off" "echo -n off" "" ""
+@"Requires files - not installed"
+
+"" "Cave Story" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Dino Jump" "|" "run|off" "echo -n off" "" ""
+@"Already installed"
+
+"" "Dinothawr" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Hydra Castle Labyrinth" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Jazz Jackrabbit" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "L'Abbaye des Morts" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Mr. Boom" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Planet Merge" "|" "run|off" "echo -n off" "" ""
+@"Already installed"
+
+"" "Pong" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Resonance" "|" "run|off" "echo -n off" "" ""
+@"Files required - not installed"
+
+"" "Rick Dangerous" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Sonic Mania" "|" "run|off" "echo -n off" "" ""
+@"Files required - not installed"
+
+"" "Streets of Rage Remake" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Super Mario War" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "nKaruga" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+
+[Arduboy]
+
+"" "Ardynia" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "CastleBoy" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Catacombs of the Damned" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Dark and Under" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Nineteen44" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+
+[GB(C/A)]
+
+"" "Apotris" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Halo: Combat Devolved" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "The Mayor of Sanctuary" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Sips" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Tobu Tobu Girl Deluxe" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+
+[Easy RPG]
+
+"" "Dandelion" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Dead Again" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Grimm's Hollow" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Ib" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Lavender" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "OFF" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Spring Eternal" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Touhou Mother" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Touhou Mother Return" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "Yume Nikki" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+
+[Doom]
+
+
+"" "Doom (Shareware)" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "FreeDoom 1" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
+
+"" "FreeDoom 2" "|" "run|off" "echo -n off" "" ""
+@"Ready to Run - not installed"
