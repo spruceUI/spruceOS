@@ -111,7 +111,7 @@ New unified hotkeys configured for RetroArch, updated to what is considered a 'c
 * Save state: SELECT + R1
 * Toggle slow-motion: SELECT + L2
 * Toggle fast-forward: SELECT + R2
-* Cycle shaders: SELECT + D-Pad UP/D-Pad DOWN
+* Toggle current shader: SELECT + D-Pad UP
 * Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
 
 Please do not adjust the RetroArch configurations unless you are already familiar with RetroArch's workings: removing or changing settings may cause games and/or controls to not work correctly. The *Default* settings are from Miyoo and will undo any modifications that have been done to the configurations for spruce.
@@ -175,7 +175,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
    - Fragbait79
    - Metallic77
    - Oscarkcau
-   - Ry
+   - Ry - Ryan Sartor
    - SundownerSport
    - Veckia9x
    - XanXic
