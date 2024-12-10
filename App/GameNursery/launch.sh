@@ -2,19 +2,7 @@
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 NURSERY_DIR="/mnt/SDCARD/App/GameNursery"
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 JSON_DIR="/mnt/SDCARD/Saves/nursery"
-
-# Copy of flag_check in helperFunctions.sh
-# Here to keep launch time short
-flag_check() {
-    local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
 
 create_config_from_json() {
 
@@ -31,12 +19,20 @@ create_config_from_json() {
     version="$(jq -r '.version' "$json_file")"
 
 
+    # add tab for grouping if necessary
     if ! grep -q "\[$grouping\]" "$NURSERY_DIR"/nursery_config; then
         echo "\[$grouping\]"
     fi
 
+    # add line for specific game
     echo "\"\" \"$display_name\" \"\|\" \"run\|off\" \"echo -n off\" \"\" \"\""
-    echo "\@$description"
+
+    # check whether game already installed
+    if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
+        echo "\@\"Already installed!\""
+    else
+        echo "\@\"$description\""
+    fi
 
 }
 
