@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 ##### CONSTANTS #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -26,6 +25,13 @@ check_for_connection() {
     fi
 }
 
+get_latest_jsons() {
+
+    true
+
+}
+
+
 
 interpret_json() {
 
@@ -35,7 +41,6 @@ interpret_json() {
     display_name="$(jq -r '.display' "$json_file")"
     file="$(jq -r '.file' "$json_file")"
     system="$(jq -r '.system' "$json_file")"
-    url="$(jq -r '.url' "$json_file")"
     description="$(jq -r '.description' "$json_file")"
     requires_files="$(jq -r '.requires_files' "$json_file")"
     version="$(jq -r '.version' "$json_file")"
@@ -46,7 +51,7 @@ interpret_json() {
     fi
 
     # add line for specific game
-    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\""
+    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\$TOGGLE\$ '_VALUE_' $json_file\""
 
     # check whether game already installed
     if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
@@ -59,8 +64,8 @@ interpret_json() {
 
 construct_config() {
 
-# initialize nursery_config as empty text file
-echo "" > "$NURSERY_DIR"/nursery_config
+# initialize nursery_config with constant definition.
+echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$NURSERY_DIR"/nursery_config
 
 # loop through each folder of game jsons
 for group_dir in "$JSON_DIR"/*; do
