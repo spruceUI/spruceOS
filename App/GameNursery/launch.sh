@@ -18,20 +18,19 @@ create_config_from_json() {
     requires_files="$(jq -r '.requires_files' "$json_file")"
     version="$(jq -r '.version' "$json_file")"
 
-
-    # add tab for grouping if necessary
-    if ! grep -q "\[$grouping\]" "$NURSERY_DIR"/nursery_config; then
-        echo "\[$grouping\]"
+    # add notice that additional files are needed
+    if [ "$requires_files" = "true" ]; then
+        description="$description Requires additional files."
     fi
 
     # add line for specific game
-    echo "\"\" \"$display_name\" \"\|\" \"run\|off\" \"echo -n off\" \"\" \"\""
+    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\""
 
     # check whether game already installed
     if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
-        echo "\@\"Already installed!\""
+        echo "@\"Already installed!\""
     else
-        echo "\@\"$description\""
+        echo "@\"$description\""
     fi
 
 }
@@ -48,14 +47,22 @@ MODES=""
 #     MODES="$MODES -m other_mode"
 # fi
 
+# initialize nursery_config as empty text file
 echo "" > "$NURSERY_DIR"/nursery_config
 
-for filename in "$JSON_DIR"/*/*.json; do
+for group_dir in "$JSON_DIR"/*; do
 
-    create_config_from_json "$filename" >> "$NURSERY_DIR"/nursery_config
+    if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
 
+        # create tab for a given group of games
+        echo "[$group_dir]" >> "$NURSERY_DIR"/nursery_config
+
+        # iterate through each json for the current group
+        for filename in "$group_dir"/*.json; do
+            create_config_from_json "$filename" >> "$NURSERY_DIR"/nursery_config
+        done
+    fi
 done
-
 
 cd $BIN_PATH
 ./easyConfig "$NURSERY_DIR"/nursery_config $MODES
