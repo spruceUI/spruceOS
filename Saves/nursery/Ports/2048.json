@@ -1,0 +1,9 @@
+{
+  "display": "2048",
+  "file": "2048.sh",
+  "system": "PORTS",
+  "url": "",
+  "description": "Smush powers of 2 together in this addictive puzzler!",
+  "requires_files": false,
+  "version": "1.0.0"
+}
