@@ -175,7 +175,7 @@ confirm() {
     echo "CONFIRM $(date +%s)" >>"$messages_file"
 
     while true; do
-        # Check for timeout
+        # Check for timeout first
         if [ $timeout -ne 0 ]; then
             local current_time=$(date +%s)
             local elapsed_time=$((current_time - start_time))
@@ -186,8 +186,8 @@ confirm() {
             fi
         fi
 
-        # Wait for log message update (with a 1-second timeout)
-        if ! inotifywait -t 1000 "$messages_file"; then
+        # Wait for log message update (with a shorter timeout to allow frequent timeout checks)
+        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
             continue
         fi
 
@@ -196,17 +196,13 @@ confirm() {
         case "$last_line" in
         # B button - cancel
         *"key 1 29"*)
-            # dismiss notification screen
             display_kill
-            # exit script
             echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
             return 1
             ;;
         # A button - confirm
         *"key 1 57"*)
-            # dismiss notification screen
             display_kill
-            # exit script
             echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
             return 0
             ;;
@@ -464,7 +460,7 @@ flag_remove() {
 get_button_press() {
     local messages_file="/var/log/messages"
     local button_pressed=""
-    local timeout=${1:-45}  # Default 45 second timeout if not specified
+    local timeout=${1:-180}  # Default 180 second timeout if not specified
     local start_time=$(date +%s)
 
     echo "GET_BUTTON_PRESS $(date +%s)" >>"$messages_file"
@@ -475,12 +471,12 @@ get_button_press() {
         local elapsed_time=$((current_time - start_time))
         if [ $elapsed_time -ge $timeout ]; then
             echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$messages_file"
-            echo ""
+            echo "B"
             return 1
         fi
 
         # Wait for log message update
-        if ! inotifywait -t 5000 "$messages_file" >/dev/null 2>&1; then
+        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
             continue
         fi
 
