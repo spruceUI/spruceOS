@@ -89,9 +89,13 @@ done
 
 ##### MAIN EXECUTION #####
 
+display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Connecting to the spruce Game Nursery. Please wait.........."
+
 check_for_connection
 get_latest_jsons
 construct_config
+
+display_kill
 
 killall -q -USR2 joystickinput # kbd mode
 cd $BIN_PATH
