@@ -30,6 +30,7 @@ $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 $SIMPLE_MODE=/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh$
 $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
+$DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 
 [System]
@@ -75,6 +76,10 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 <Hide_if_simple>
 "" "Skip version check on next update" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
 @"Only run this if needing to reinstall."
+
+<Mac>
+"" "Delete macOS junk files from SD card" "|" "run|off" "echo -n off" "$DELETE_MAC_FILES$|" "$DELETE_MAC_FILES$ _INDEX_"
+@"Use this to delete any junk files created by macOS."
 
 <Hide_if_simple>
 "" "Activate Simple Mode" "|" "run|off" "echo -n off" "$SIMPLE_MODE$ apply|" ""

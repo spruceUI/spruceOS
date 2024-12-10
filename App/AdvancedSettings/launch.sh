@@ -40,6 +40,8 @@ if ! flag_check "simple_mode"; then
     MODES="$MODES -m Hide_if_simple"
 fi
 
+if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi
+
 # Easy to add more modes like this:
 # if flag_check "some_other_mode"; then
 #     MODES="$MODES -m other_mode"
