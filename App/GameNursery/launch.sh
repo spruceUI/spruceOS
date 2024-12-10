@@ -51,7 +51,7 @@ interpret_json() {
     fi
 
     # add line for specific game
-    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\$TOGGLE\$ '_VALUE_' $json_file\""
+    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\$TOGGLE\$ '_VALUE_' '$json_file'\""
 
     # check whether game already installed
     if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
