@@ -55,7 +55,8 @@ for group_dir in "$JSON_DIR"/*; do
     if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
 
         # create tab for a given group of games
-        echo "[$group_dir]" >> "$NURSERY_DIR"/nursery_config
+        tab_name="$(basename "$group_dir")"
+        echo "[$tab_name]" >> "$NURSERY_DIR"/nursery_config
 
         # iterate through each json for the current group
         for filename in "$group_dir"/*.json; do
