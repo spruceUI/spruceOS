@@ -1,14 +1,36 @@
 #!/bin/sh
 
+
+##### CONSTANTS #####
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 NURSERY_DIR="/mnt/SDCARD/App/GameNursery"
 JSON_DIR="/mnt/SDCARD/Saves/nursery"
 
-create_config_from_json() {
+
+##### FUNCTIONS #####
+
+check_for_connection() {
+
+    wifi_enabled="$(jq -r '.wifi' "/config/system.json")"
+    if [ $wifi_enabled -eq 0 ]; then
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Wi-Fi not enabled. You must enable Wi-Fi to download free games."
+        exit 1
+    fi
+
+    if ! ping -c 3 github.com > /dev/null 2>&1; then
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to connect to GitHub repository. Please check your connection and try again."
+        exit 1
+    fi
+}
+
+
+interpret_json() {
 
     json_file="$1"
     grouping="$(basename "$(dirname "$json_file")")"
-
 
     display_name="$(jq -r '.display' "$json_file")"
     file="$(jq -r '.file' "$json_file")"
@@ -35,23 +57,15 @@ create_config_from_json() {
 
 }
 
-# send signal USR2 to joystickinput to switch to KEYBOARD MODE
-# this allows joystick to be used as DPAD in setting app
-killall -q -USR2 joystickinput
-
-# Initialize empty string for modes
-MODES=""
-
-# Easy to add more modes like this:
-# if flag_check "some_other_mode"; then
-#     MODES="$MODES -m other_mode"
-# fi
+construct_config() {
 
 # initialize nursery_config as empty text file
 echo "" > "$NURSERY_DIR"/nursery_config
 
+# loop through each folder of game jsons
 for group_dir in "$JSON_DIR"/*; do
 
+    # make sure it's a non-empty directory before trying to do stuff
     if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
 
         # create tab for a given group of games
@@ -60,15 +74,21 @@ for group_dir in "$JSON_DIR"/*; do
 
         # iterate through each json for the current group
         for filename in "$group_dir"/*.json; do
-            create_config_from_json "$filename" >> "$NURSERY_DIR"/nursery_config
+            interpret_json "$filename" >> "$NURSERY_DIR"/nursery_config
         done
     fi
 done
 
+}
+
+
+##### MAIN EXECUTION #####
+
+check_for_connection
+get_latest_jsons
+construct_config
+
+killall -q -USR2 joystickinput # kbd mode
 cd $BIN_PATH
-./easyConfig "$NURSERY_DIR"/nursery_config $MODES
-
-# send signal USR1 to joystickinput to switch to ANALOG MODE
-killall -q -USR1 joystickinput
-
-auto_regen_tmp_update
+./easyConfig "$NURSERY_DIR"/nursery_config
+killall -q -USR1 joystickinput # analog mode
