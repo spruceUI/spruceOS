@@ -259,9 +259,10 @@ for sys_dir in "$roms_dir"/*/; do
     get_extensions "$sys_name"
 
     amount_games="$(find "$sys_dir" -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$" | wc -l)"
+    sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
     icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
-    display --icon "$icon_path" -t "System: $sys_name 
+    display --icon "$icon_path" -t "System: $sys_label 
     Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
     if [ -z "$extensions" ]; then
