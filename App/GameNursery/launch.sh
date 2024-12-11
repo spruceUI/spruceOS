@@ -7,7 +7,7 @@
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 NURSERY_DIR="/mnt/SDCARD/App/GameNursery"
 JSON_DIR="/mnt/SDCARD/Saves/nursery"
-
+JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/INFO/INFO.7z"
 
 ##### FUNCTIONS #####
 
@@ -27,8 +27,21 @@ check_for_connection() {
 
 get_latest_jsons() {
 
-    true
+    # Download and parse the release info file
+    if ! curl -s -o "$JSON_DIR/" "$JSON_URL"; then
+        log_message "Game Nursery: Failed to download release info from $JSON_URL"
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
+        exit 1
+    fi
 
+    if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to extract latest game info files. Please try again later."
+        rm -f "$JSON_DIR/INFO.7z" >/dev/null 2>&1
+        log_message "Game Nursery: Failed to extract release info from INFO.7z file"
+        exit 1
+    else
+        log_message "Extraction process completed successfully"
+    fi
 }
 
 
