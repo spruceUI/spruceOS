@@ -225,11 +225,14 @@ if ! ping -c 2 8.8.8.8 > /dev/null 2>&1; then
     exit
 fi
 
-# Check if the thumbnails service is accessible
+# Check if the thumbnails service is accessible, if not try to fall back to GitHub libretro-thumbnails
 if ! ping -c 2 thumbnails.libretro.com > /dev/null 2>&1; then
-    log_message "BoxartScraper: Libretro thumbnail service unavailable"
-    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Libretro thumbnail service is currently unavailable. Please try again later." -o
-    exit
+    log_message "BoxartScraper: Libretro thumbnail service unavailable, attempting fallback"
+    if ! ping -c 2 github.com > /dev/null 2>&1; then
+        log_message "BoxartScraper: GitHub unreachable"
+        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Libretro thumbnail service is currently unavailable. Please try again later." -o
+        exit
+    fi
 fi
 
 # Set CPU governor to performance mode
