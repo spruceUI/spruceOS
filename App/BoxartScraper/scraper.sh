@@ -309,8 +309,16 @@ for sys_dir in "$roms_dir"/*/; do
         fi
 
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
+        fallback_url=$(echo "https://raw.githubusercontent.com/libretro-thumbnails/$(echo "$ra_name" | sed 's/ /_/g')/master/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g') 
         log_message "BoxartScraper: Downloading $boxart_url" -v
-        curl -k -s -o "$image_path" "$boxart_url" || rm -f "$image_path" # Remove image if not found
+        if ! curl -k -s -o "$image_path" "$boxart_url"; then
+            log_message "BoxartScraper: failed to scrape $boxart_url, falling back to libretro thumbnails GitHub repo."
+            rm -f "$image_path"
+            if ! curl -k -s -o "$image_path" "$fallback_url"; then
+                log_message "BoxartScraper: failed to scrape $fallback_url."
+                rm -f "$image_path"
+            fi
+        fi
 
         if [ -f "$image_path" ]; then
             scraped_count=$((scraped_count + 1))
