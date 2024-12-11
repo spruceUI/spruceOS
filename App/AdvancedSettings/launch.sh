@@ -37,8 +37,10 @@ if [ -f "$PICO_DIR/pico8.dat" ] && [ -f "$PICO_DIR/pico8_dyn" ]; then
 fi
 
 if ! flag_check "simple_mode"; then
-    MODES="$MODES -m Hide_if_simple"
+    MODES="$MODES -m Not_simple"
 fi
+
+if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac always create a junk file at the sdcard root?
 
 # Easy to add more modes like this:
 # if flag_check "some_other_mode"; then

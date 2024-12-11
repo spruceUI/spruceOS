@@ -49,6 +49,37 @@ kill_emulator() {
     fi
 }
 
+kill_current_app() {
+    # Check if there's a running command
+    if [ -f "/tmp/cmd_to_run.sh" ]; then
+        CMD=$(cat /tmp/cmd_to_run.sh)
+        
+        # If it's an emulator, use emulator killing logic
+        if echo "$CMD" | grep -q '/mnt/SDCARD/Emu' ; then
+            kill_emulator
+        else
+            rm /tmp/cmd_to_run.sh
+            # For non-emulator applications, extract the app name and kill related processes
+            log_message "*** gameswitcher_watchdog.sh: Killing application!" -v
+            
+            # Extract the application path and name from the command
+            APP_PATH=$(echo "$CMD" | grep -o '/mnt/SDCARD/App/[^;]*')
+            APP_NAME=$(basename "$APP_PATH")
+            
+            # Kill any processes related to the app
+            if [ -n "$APP_NAME" ]; then                
+                # Then kill them
+                killall -q -15 "$APP_NAME"
+                killall -q -15 "launch.sh"
+                # If processes persist, force kill after 1 second
+                sleep 1
+                killall -q -9 "$APP_NAME"
+                killall -q -9 "launch.sh"
+            fi
+        fi
+    fi
+}
+
 prepare_game_switcher() {
     # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ] ; then
@@ -298,6 +329,14 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                         kill_emulator
                     ;;
                 esac
+            fi
+        ;;
+        # Start button down
+        *"key 1 28 0"*)
+            if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
+                kill_current_app
+                vibrate
+                log_message "Exit hotkey hit"
             fi
         ;;
         # R1 in menu starts recording

@@ -8,7 +8,7 @@
 # 4. Add any additional upgrade steps as needed.
 
 # Define the target version for this upgrade script
-TARGET_VERSION="3.1.0"  # Replace X.Y.Z with your target version number
+TARGET_VERSION="3.2.0"  # Replace X.Y.Z with your target version number
 
 /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -63,32 +63,6 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
 # mkdir -p /mnt/SDCARD/new_directory
 # cp /path/to/source/file /path/to/destination/file
 # custom_command_or_script
-
-if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_game ]; then
-    value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_game)
-    setting_update idlemon_in_game "$value"
-    rm /mnt/SDCARD/spruce/settings/idlemon_in_game
-fi
-
-if [ -f /mnt/SDCARD/spruce/settings/idlemon_in_menu ]; then
-    value=$(cat /mnt/SDCARD/spruce/settings/idlemon_in_menu)
-    setting_update idlemon_in_menu "$value"
-    rm /mnt/SDCARD/spruce/settings/idlemon_in_menu
-fi
-
-if [ -f /mnt/SDCARD/spruce/settings/gs_max ]; then
-    rm /mnt/SDCARD/spruce/settings/gs_max
-fi
-
-setting_update checkForUpdates on
-
-CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
-
-if [ -f "$CFG_FILE" ] && grep -q "runGSOnTapHome=0" "$CFG_FILE"; then
-    setting_update tap_home "Game Switcher"
-    setting_update hold_home "In-game menu"
-    sed -i '/runGSOnTapHome=1/d' "$CFG_FILE"
-fi
 
 
 # -------------------- UPGRADE COMPLETION --------------------

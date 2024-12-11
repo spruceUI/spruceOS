@@ -23,8 +23,19 @@ if [ "$1" = "check" ]; then
 fi
 
 if [ "$1" = "init" ]; then
-    if [ "$2" = "Custom" ]; then
-        echo -n "Define your own hotkey in RetroArch"
+    case "$2" in
+        "Custom")
+            echo -n "Define your own hotkey in RetroArch"
+            ;;
+        "Start")
+            echo -n "Be aware Start+L1/R1 are hardware level brightness hotkeys"
+            ;;
+        *)
+            echo -n "Combine with other keys for quick actions in RetroArch"
+            ;;
+    esac
+    return 0
+
     else
         echo -n "Combine with other keys for quick actions in RetroArch"
     fi

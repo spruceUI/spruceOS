@@ -219,12 +219,25 @@ display_image() {
 }
 display_image "generic"
 
-# Check for Wi-Fi and active connection
+# Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 thumbnails.libretro.com > /dev/null 2>&1; then
-    log_message "BoxartScraper: No active network connection, exiting."
-	display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No active network connection detected, exiting..."
-    sleep 3
+if [ "$wifi_enabled" -eq 0 ]; then
+    log_message "BoxartScraper: WiFi is disabled in system settings"
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "WiFi is disabled in system settings" -o
+    exit
+fi
+
+# Ping google DNS to check for internet connection
+if ! ping -c 2 8.8.8.8 > /dev/null 2>&1; then
+    log_message "BoxartScraper: No internet connection detected"
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No internet connection detected" -o
+    exit
+fi
+
+# Check if the thumbnails service is accessible
+if ! ping -c 2 thumbnails.libretro.com > /dev/null 2>&1; then
+    log_message "BoxartScraper: Libretro thumbnail service unavailable"
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Libretro thumbnail service is currently unavailable. Please try again later." -o
     exit
 fi
 
