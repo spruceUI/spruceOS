@@ -2,6 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
+
 # ==========================================================
 # Box Art Scraper Script
 # ==========================================================
@@ -208,7 +210,7 @@ messages_file="/var/log/messages"
 system_config_file="/config/system.json"
 roms_dir="/mnt/SDCARD/Roms"
 
-display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Scraping box art..."
+display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Scraping box art..." 
 
 # Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
@@ -256,7 +258,11 @@ for sys_dir in "$roms_dir"/*/; do
 
     get_extensions "$sys_name"
 
-    display --icon "/mnt/SDCARD/RetroArch/.retroarch/assets/xmb/automatic/png/${ra_name}.png" -t "Scraping boxart for $sys_name... Press B to exit"
+    amount_games="$(find "$sys_dir" -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$" | wc -l)"
+    icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
+
+    display --icon "$icon_path" -t "System: $sys_name 
+    Scraping boxart for $amount_games games..." -p 260 --add-image "$IMAGE_EXIT" 1.2 190 middle
 
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
