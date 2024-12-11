@@ -50,18 +50,29 @@ get_latest_jsons() {
 interpret_json() {
 
     json_file="$1"
+    grouping="$(basename "$(dirname "$json_file")")"
+
     display_name="$(jq -r '.display' "$json_file")"
-    # file="$(jq -r '.file' "$json_file")"
-    # system="$(jq -r '.system' "$json_file")"
-    # description="$(jq -r '.description' "$json_file")"
-    # requires_files="$(jq -r '.requires_files' "$json_file")"
-    # version="$(jq -r '.version' "$json_file")"
+    file="$(jq -r '.file' "$json_file")"
+    system="$(jq -r '.system' "$json_file")"
+    description="$(jq -r '.description' "$json_file")"
+    requires_files="$(jq -r '.requires_files' "$json_file")"
+    version="$(jq -r '.version' "$json_file")"
+
+    # add notice that additional files are needed
+    if [ "$requires_files" = "true" ]; then
+        description="$description Requires additional files."
+    fi
 
     # add line for specific game
     echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\$TOGGLE\$ '_VALUE_' '$json_file'\""
 
-    # add placeholder line for dynamic description text
-    echo "@\"\""
+    # check whether game already installed
+    if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
+        echo "@\"Already installed!\""
+    else
+        echo "@\"$description\""
+    fi
 
 }
 
@@ -98,6 +109,9 @@ check_for_connection
 get_latest_jsons
 construct_config
 
+display_kill
+
 killall -q -USR2 joystickinput # kbd mode
-cd $BIN_PATH && ./easyConfig "$NURSERY_DIR"/nursery_config
+cd $BIN_PATH
+./easyConfig "$NURSERY_DIR"/nursery_config
 killall -q -USR1 joystickinput # analog mode
