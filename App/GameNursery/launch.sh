@@ -27,8 +27,11 @@ check_for_connection() {
 
 get_latest_jsons() {
 
+    cd "$JSON_DIR"
+    rm -r ./*
+
     # Download and parse the release info file
-    if ! curl -s -o "$JSON_DIR/" "$JSON_URL"; then
+    if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
         log_message "Game Nursery: Failed to download release info from $JSON_URL"
         display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
         exit 1
@@ -43,8 +46,6 @@ get_latest_jsons() {
         log_message "Extraction process completed successfully"
     fi
 }
-
-
 
 interpret_json() {
 
