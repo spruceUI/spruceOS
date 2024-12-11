@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/Updater/updaterFunctions.sh
 
 ARGUMENT="$1" ### "apply" or "remove"
 APP_DIR="/mnt/SDCARD/App"
@@ -73,6 +74,7 @@ if [ $ARGUMENT = "apply" ]; then
 	sync_simple_json_from_original
 
 	# hide majority of apps
+	save_app_states "/mnt/SDCARD/Saves/spruce/apps.state"
 	check_and_hide_app "-FirmwareUpdate-"
 	check_and_hide_app "-OTA"
 	check_and_hide_app "-Updater"
@@ -105,7 +107,8 @@ else ##### ARGUMENT is "remove"
 	# re-enable X menu items
 	restore_x_menus
 
-	# reveal RA app because there's no manual toggle for it for them to reveal it themselves. And Advanced Settings juuuuust in case.
+	# restore app states to keep XanXic from dying of boredom toggling app visibility back how he had it
+	restore_app_states "/mnt/SDCARD/Saves/spruce/apps.state"
 	check_and_reveal_app "AdvancedSettings"
 	check_and_reveal_app "RetroArch"
 
