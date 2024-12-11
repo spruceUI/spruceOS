@@ -208,16 +208,7 @@ messages_file="/var/log/messages"
 system_config_file="/config/system.json"
 roms_dir="/mnt/SDCARD/Roms"
 
-# Function to show splash screen
-display_image() {
-    local image_path="$status_img_dir/$1.png"
-    if [ -f "$image_path" ]; then
-        display -i "$image_path"
-    else
-        display -i "$status_img_dir/generic.png"
-    fi
-}
-display_image "generic"
+display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Scraping box art..."
 
 # Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
@@ -260,9 +251,9 @@ for sys_dir in "$roms_dir"/*/; do
         continue
     fi
 
-    display_image "$sys_name"
-
     get_extensions "$sys_name"
+
+    display --icon "/mnt/SDCARD/RetroArch/.retroarch/assets/xmb/automatic/png/${ra_name}.png" -t "Scraping boxart for $sys_name... Press B to exit"
 
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
@@ -277,7 +268,7 @@ for sys_dir in "$roms_dir"/*/; do
         # Check if the user pressed B to exit
         if tail -n1 "$messages_file" | grep -q "key 1 29"; then
             log_message "BoxartScraper: User pressed B, exiting."
-            display_image "user_exit" -d 3
+            display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             exit
         fi
