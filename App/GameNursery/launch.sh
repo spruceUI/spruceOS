@@ -6,7 +6,7 @@
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 NURSERY_DIR="/mnt/SDCARD/App/GameNursery"
-JSON_DIR="/mnt/SDCARD/Saves/nursery"
+JSON_DIR="/tmp/nursery"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/INFO/INFO.7z"
 
 ##### FUNCTIONS #####
@@ -26,9 +26,9 @@ check_for_connection() {
 }
 
 get_latest_jsons() {
-
+    mkdir "$JSON_DIR" 2>/dev/null
     cd "$JSON_DIR"
-    rm -r ./*
+    rm -r ./* 2>/dev/null
 
     # Download and parse the release info file
     if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
