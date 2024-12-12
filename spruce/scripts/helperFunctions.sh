@@ -533,6 +533,91 @@ get_current_theme_path() {
     echo "$theme_name"
 }
 
+# To support themes in your apps do         [   eval "$(get_current_theme)"    ]
+# Doing this will unlock dynamic variables that will give you fast access to some
+# common theme files and values. These dynamic variable are: $THEME_PATH, $THEME_BG etc.
+#
+# Code example:
+#
+# eval "$(get_current_theme)"
+# echo "Current theme path:         $THEME_PATH"
+# echo "Background image path:      $THEME_BG"
+# echo "Font path:                  $THEME_FONT"
+# echo "Font size:                  $THEME_FONT_SIZE"
+# echo "Font color:                 $THEME_FONT_COLOR"
+# echo "Left arrow icon:            $THEME_LEFT"
+# echo "Right arrow icon:           $THEME_RIGHT"
+# echo "Logo:                       $THEME_LOGO"
+# echo "OK icon:                    $THEME_OK"
+# echo "Home button icon:           $THEME_HOME"
+# echo "A button icon:              $THEME_A"
+# echo "B button icon:              $THEME_B"
+# echo "L2 button icon:             $THEME_L2"
+# echo "R2 button icon:             $THEME_R2"
+# echo "X button icon:              $THEME_X"
+# echo "Y button icon:              $THEME_Y"
+# echo "START button icon:          $THEME_START"
+# echo "Information icon:           $THEME_INFO"
+# echo "Folder icon:                $THEME_FOLDER"
+# echo "SD/TF card icon:            $THEME_SD"
+# echo "Wifi icon:                  $THEME_WIFI"
+# echo "Shutdown icon:              $THEME_SHUTDOWN"
+# echo "Reset icon:                 $THEME_RESET"
+# echo "Star icon:                  $THEME_STAR"
+# echo "Expert Apps icon:           $THEME_EXPERT_APPS"
+get_current_theme() {
+    # gets current theme path
+    local theme_path
+    theme_path=$(get_current_theme_path)
+    local json_path
+    json_path="$theme_path/config.json"
+
+    # checks if path exists
+    if [ -d "$theme_path" ]; then
+        # Export theme paths
+        echo "THEME_PATH=\"$theme_path\""
+        echo "THEME_BG=\"$theme_path/skin/background.png\""
+        echo "THEME_LEFT=\"$theme_path/skin/icon-left-arrow-24.png\""
+        echo "THEME_RIGHT=\"$theme_path/skin/icon-right-arrow-24.png\""
+        echo "THEME_LOGO=\"$theme_path/skin/app-loading-05.png\"" #need to discuss this
+        echo "THEME_OK=\"$theme_path/skin/icon-OK.png\""
+        echo "THEME_HOME=\"$theme_path/skin/ic-MENU.png\""
+        echo "THEME_A=\"$theme_path/skin/icon-A-54.png\""
+        echo "THEME_B=\"$theme_path/skin/icon-B-54.png\""
+        echo "THEME_L2=\"$theme_path/skin/icon-L2.png\""
+        echo "THEME_R2=\"$theme_path/skin/icon-R2.png\""
+        echo "THEME_X=\"$theme_path/skin/icon-x.png\""
+        echo "THEME_Y=\"$theme_path/skin/icon-y.png\""
+        echo "THEME_START=\"$theme_path/skin/icon-START.png\""
+        echo "THEME_INFO=\"$theme_path/skin/icon-device-info-48.png\""
+        echo "THEME_FOLDER=\"$theme_path/skin/icon-folder.png\""
+        echo "THEME_SD=\"$theme_path/skin/icon-TF.png\""
+        echo "THEME_WIFI=\"$theme_path/skin/icon-setting-wifi.png\""
+        echo "THEME_SHUTDOWN=\"$theme_path/skin/icon-Shutdown.png\""
+        echo "THEME_RESET=\"$theme_path/skin/icon-factory-reset-48.png\""
+        echo "THEME_STAR=\"$theme_path/skin/nav-favorite-f.png\""
+        echo "THEME_EXPERT_APPS=\"$theme_path/icons/App/expertappswitch.png\""
+
+        # Extract values from config JSON using jq
+        if [ -f "$json_path" ]; then
+            THEME_FONT_TITLE=$(jq -r '.list.font' "$json_path")
+            THEME_FONT="$theme_path/$THEME_FONT_TITLE"
+            THEME_FONT_SIZE=$(jq -r '.list.size' "$json_path")
+            THEME_FONT_COLOR=$(jq -r '.list.color' "$json_path")
+
+            echo "THEME_FONT=\"$THEME_FONT\""
+            echo "THEME_FONT_SIZE=\"$THEME_FONT_SIZE\""
+            echo "THEME_FONT_COLOR=\"$THEME_FONT_COLOR\""
+        else
+            echo "Error: JSON config file not found at $json_path."
+            return 1
+        fi
+    else
+        echo "Error: theme located in $theme_path doesn't exist."
+        return 1
+    fi
+}
+
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
 }
