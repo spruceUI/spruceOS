@@ -9,6 +9,7 @@
 # flag_add: Adds a flag
 # flag_remove: Removes a flag
 # get_button_press: Returns the name of the last button pressed
+# get_current_theme: Unlocks dynamic variables for fast access to assets of current theme
 # get_current_theme_path: Returns path of the current theme
 # log_message: Logs a message to a file
 # log_precise: Logs messages with greater precision for performance testing
