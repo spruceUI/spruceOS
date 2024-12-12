@@ -5,11 +5,25 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
-NURSERY_DIR="/mnt/SDCARD/App/GameNursery"
-JSON_DIR="/tmp/nursery"
+CONFIG_DIR="/tmp/nursery-config"
+JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/INFO/INFO.7z"
 
 ##### FUNCTIONS #####
+
+check_battery() {
+    CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
+    CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
+
+    if [ "$CAPACITY" -lt 10 ] && [ "$CHARGING" -eq 0 ]; then
+        log_message "Game Nursery: Device is below 10% battery and is not plugged in. Aborting."
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Cannot use Game Nursery while device battery is below 10%. Please plug in your A30, then try again."
+        exit 1
+    else
+        log_message "Game Nursery: Device has at least 10% battery or is currently plugged in. Proceeding."
+    fi
+}
+
 
 check_for_connection() {
 
@@ -76,26 +90,31 @@ interpret_json() {
 
 construct_config() {
 
-# initialize nursery_config with constant definitions.
-echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$NURSERY_DIR"/nursery_config
-echo "\$DOWNLOAD=\/mnt\/SDCARD\/App\/GameNursery\/download_game.sh\$" >> "$NURSERY_DIR"/nursery_config
 
-# loop through each folder of game jsons
-for group_dir in "$JSON_DIR"/*; do
+    mkdir "$CONFIG_DIR" 2>/dev/null
+    cd "$CONFIG_DIR"
+    rm -r ./* 2>/dev/null
 
-    # make sure it's a non-empty directory before trying to do stuff
-    if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
+    # initialize nursery_config with constant definitions.
+    echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$CONFIG_DIR"/nursery_config
+    echo "\$DOWNLOAD=\/mnt\/SDCARD\/App\/GameNursery\/download_game.sh\$" >> "$CONFIG_DIR"/nursery_config
 
-        # create tab for a given group of games
-        tab_name="$(basename "$group_dir")"
-        echo "[$tab_name]" >> "$NURSERY_DIR"/nursery_config
+    # loop through each folder of game jsons
+    for group_dir in "$JSON_DIR"/*; do
 
-        # iterate through each json for the current group
-        for filename in "$group_dir"/*.json; do
-            interpret_json "$filename" >> "$NURSERY_DIR"/nursery_config
-        done
-    fi
-done
+        # make sure it's a non-empty directory before trying to do stuff
+        if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
+
+            # create tab for a given group of games
+            tab_name="$(basename "$group_dir")"
+            echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
+
+            # iterate through each json for the current group
+            for filename in "$group_dir"/*.json; do
+                interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
+            done
+        fi
+    done
 
 }
 
@@ -104,10 +123,11 @@ done
 
 display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Connecting to the spruce Game Nursery. Please wait.........."
 
+check_battery
 check_for_connection
 get_latest_jsons
 construct_config
 
 killall -q -USR2 joystickinput # kbd mode
-cd $BIN_PATH && ./easyConfig "$NURSERY_DIR"/nursery_config
+cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
 killall -q -USR1 joystickinput # analog mode

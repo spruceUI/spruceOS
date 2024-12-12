@@ -3,11 +3,16 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 JSON_FILE="$1"
-TMP_DIR="/tmp/nursery"
+TMP_DIR="/mnt/SDCARD/App/GameNursery/tmp"
 GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
 GAME_URL="$(jq -r '.url' "$JSON_FILE")"
 ZIP_NAME="$(basename "$GAME_URL")"
 BG_IMG=/mnt/SDCARD/spruce/imgs/bg_tree.png
+
+# initialize temporary nursery file directory
+mkdir "$TMP_DIR" 2>/dev/null
+cd "$TMP_DIR"
+rm -r ./* 2>/dev/null
 
 # attempt to download the game
 log_message "Game Nursery: Attempting to download $GAME_NAME"
