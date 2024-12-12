@@ -1,9 +1,0 @@
-{
-  "display": "Outrun (Cannonball)",
-  "file": "Cannonball.sh",
-  "system": "PORTS",
-  "url": "",
-  "description": "Classic arcade racing game.",
-  "requires_files": true,
-  "version": "1.0.0"
-}

@@ -1,9 +1,0 @@
-{
-  "display": "Anarch",
-  "file": "Anarch.sh",
-  "system": "PORTS",
-  "url": "",
-  "description": "Destroy robots in this suckless public domain Doomlike.",
-  "requires_files": false,
-  "version": "1.0.0"
-}
