@@ -63,7 +63,7 @@ interpret_json() {
     fi
 
     # add line for specific game
-    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\" \"\$TOGGLE\$ '_VALUE_' '$json_file'\""
+    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\$DOWNLOAD\$ '$json_file'|\" \"\$TOGGLE\$ '_VALUE_' '$json_file'\""
 
     # check whether game already installed
     if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
@@ -76,8 +76,9 @@ interpret_json() {
 
 construct_config() {
 
-# initialize nursery_config with constant definition.
+# initialize nursery_config with constant definitions.
 echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$NURSERY_DIR"/nursery_config
+echo "\$DOWNLOAD=\/mnt\/SDCARD\/App\/GameNursery\/download_game.sh\$" >> "$NURSERY_DIR"/nursery_config
 
 # loop through each folder of game jsons
 for group_dir in "$JSON_DIR"/*; do
