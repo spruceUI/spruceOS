@@ -95,7 +95,7 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
-    
+
     # More thorough connection check
     connection_active=0
     if ifconfig wlan0 | grep -qE "inet |inet6 "; then
@@ -109,7 +109,7 @@ check_and_connect_wifi() {
             connection_active=0
         fi
     fi
-    
+
     if [ $connection_active -eq 0 ]; then
         log_message "Attempting to connect to WiFi"
 
@@ -151,7 +151,7 @@ Press START to continue anyway."
             esac
         done
     fi
-    
+
     return 0
 }
 
@@ -332,14 +332,14 @@ display() {
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
-            --icon) 
+            --icon)
                 icon_image="$2"
                 if ! $position_set; then
                     position=$((position + 80))
                 fi
-                shift 
+                shift
                 ;;
-            --add-image) 
+            --add-image)
                 additional_images="$additional_images \"$2\" $3 $4 $5"
                 shift 4
                 ;;
@@ -351,7 +351,7 @@ display() {
                 shift
                 ;;
             *) log_message "Unknown option: $1"; return 1 ;;
-        esac 
+        esac
         shift
     done
     local r="${color:0:2}"
@@ -507,6 +507,31 @@ get_button_press() {
     done
 }
 
+# Returns the path of the current theme
+# Use by doing        theme_path=$(get_current_theme_path)
+# Use files inside themes to make your apps!
+get_current_theme_path() {
+    local config_file="/config/system.json"
+
+    # check if config file exists
+    if [ ! -f "$config_file" ]; then
+        echo "Error: Configuration file not found at $config_file"
+        return 1
+    fi
+
+    # extract "theme" from JSON
+    local theme_name
+    theme_name=$(jq -r '.theme' "$config_file")
+
+    # check if "theme" is empty
+    if [ -z "$theme_name" ]; then
+        echo "Error: Could not retrieve theme name from $config_file"
+        return 1
+    fi
+
+    echo "$theme_name"
+}
+
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
 }
@@ -538,21 +563,21 @@ get_version() {
 
 get_version_nightly() {
     local base_version=$(get_version)
-    
+
     # Ensure we got a valid base version
     if [ -z "$base_version" ] || [ "$base_version" = "0" ]; then
         echo "$base_version"
         return 1
     fi
-    
+
     local nightly_pattern="/mnt/SDCARD/${base_version}-*"
-    
+
     # List all matching files and log them
     local matching_files=$(ls $nightly_pattern 2>/dev/null)
-    
+
     # Find any matching nightly version file
     local nightly_file=$(ls $nightly_pattern 2>/dev/null | head -n 1)
-    
+
     if [ -n "$nightly_file" ]; then
         local nightly_version=$(basename "$nightly_file")
         echo "$nightly_version"
@@ -629,7 +654,7 @@ qr_code() {
     local size=3
     local level="M"
     local output="/mnt/SDCARD/spruce/tmp/qr.png"
-    
+
     # Parse arguments
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -641,13 +666,13 @@ qr_code() {
         esac
         shift
     done
-    
+
     # Ensure text is provided
     if [ -z "$text" ]; then
         log_message "QR Code error: No text provided" -v
         return 1
     fi
-    
+
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
@@ -687,18 +712,18 @@ record_start() {
     if [ -z "$output_file" ]; then
         output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
     fi
-    
+
     # Start ffmpeg recording
     ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
         -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
         -c:a aac -b:a 80k -ac 1 \
         -t $((timeout_minutes * 60)) "$output_file" &
-    
+
     # Store PID for later use
     echo $! > "/tmp/ffmpeg_recording.pid"
-    
+
     log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-    
+
     # Set up automatic stop after timeout
     (
         sleep $((timeout_minutes * 60))
@@ -877,6 +902,3 @@ vibrate() {
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
 }
-
-
-
