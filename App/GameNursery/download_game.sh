@@ -13,9 +13,6 @@ BG_IMG=/mnt/SDCARD/spruce/imgs/bg_tree.png
 download_progress() {
     filepath="$1"
     total_size_mb="$2"
-    # Add start time tracking
-    START_TIME=$(date +%s)
-    prev_size=0
     downloadBar="/mnt/SDCARD/App/-OTA/imgs/downloadBar.png"
     downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
     # Bar slider, 0.15 is 0, 0.85 is 100
@@ -25,7 +22,7 @@ download_progress() {
 
         # Get current size in bytes using POSIX-compliant ls -l
         CURRENT_SIZE=$(ls -ln "$filepath" 2>/dev/null | awk '{print $5}')
-        CURRENT_SIZE_MB=$(($CURRENT_SIZE / 1048576))
+        CURRENT_SIZE_MB=$((CURRENT_SIZE / 1048576))
 
         PERCENTAGE=$(((CURRENT_SIZE_MB * 100) / total_size_mb))
 
@@ -40,9 +37,6 @@ download_progress() {
 
         
 $PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
-
-        # Update previous size for next iteration
-        prev_size=$CURRENT_SIZE
 
         # Exit if download is complete (>= 99%)
         if [ "$PERCENTAGE" -ge 99 ]; then
