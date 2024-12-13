@@ -32,7 +32,7 @@ download_progress() {
         # 0% = 15, 100% = 85, linear interpolation
         fill_scale_int=$((15 + (PERCENTAGE * 70 / 100)))
 
-        display -i "$BG_IMG" -t "Now downloading $GAME_NAME!
+        display -t "Now downloading $GAME_NAME!
         
 
         
