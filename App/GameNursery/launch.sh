@@ -37,6 +37,7 @@ check_for_connection() {
         display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to connect to GitHub repository. Please check your connection and try again."
         exit 1
     fi
+    log_message "Game Nursery: Device is online. Proceeding."
 }
 
 get_latest_jsons() {
@@ -49,6 +50,8 @@ get_latest_jsons() {
         log_message "Game Nursery: Failed to download release info from $JSON_URL"
         display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
         exit 1
+    else
+        log_message "Game Nursery: Info cache downloaded successfully"
     fi
 
     if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
@@ -57,7 +60,7 @@ get_latest_jsons() {
         log_message "Game Nursery: Failed to extract release info from INFO.7z file"
         exit 1
     else
-        log_message "Extraction process completed successfully"
+        log_message "Game Nursery: JSON extraction process completed successfully"
     fi
 }
 
@@ -90,7 +93,6 @@ interpret_json() {
 
 construct_config() {
 
-
     mkdir "$CONFIG_DIR" 2>/dev/null
     cd "$CONFIG_DIR"
     rm -r ./* 2>/dev/null
@@ -115,7 +117,7 @@ construct_config() {
             done
         fi
     done
-
+    log_message "Game Nursery: nursery_config constructed from game info JSONs."
 }
 
 
