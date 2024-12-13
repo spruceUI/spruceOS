@@ -7,7 +7,7 @@
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 CONFIG_DIR="/tmp/nursery-config"
 JSON_DIR="/tmp/nursery-json"
-JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/INFO/INFO.7z"
+JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
 
 ##### FUNCTIONS #####
 
