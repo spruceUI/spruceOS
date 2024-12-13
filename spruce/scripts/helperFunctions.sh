@@ -9,6 +9,8 @@
 # flag_add: Adds a flag
 # flag_remove: Removes a flag
 # get_button_press: Returns the name of the last button pressed
+# get_current_theme: Unlocks dynamic variables for fast access to assets of current theme
+# get_current_theme_path: Returns path of the current theme
 # log_message: Logs a message to a file
 # log_precise: Logs messages with greater precision for performance testing
 # log_verbose: Turns on or off verbose logging for debug purposes
@@ -95,7 +97,7 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
-    
+
     # More thorough connection check
     connection_active=0
     if ifconfig wlan0 | grep -qE "inet |inet6 "; then
@@ -109,7 +111,7 @@ check_and_connect_wifi() {
             connection_active=0
         fi
     fi
-    
+
     if [ $connection_active -eq 0 ]; then
         log_message "Attempting to connect to WiFi"
 
@@ -151,7 +153,7 @@ Press START to continue anyway."
             esac
         done
     fi
-    
+
     return 0
 }
 
@@ -332,14 +334,14 @@ display() {
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
-            --icon) 
+            --icon)
                 icon_image="$2"
                 if ! $position_set; then
                     position=$((position + 80))
                 fi
-                shift 
+                shift
                 ;;
-            --add-image) 
+            --add-image)
                 additional_images="$additional_images \"$2\" $3 $4 $5"
                 shift 4
                 ;;
@@ -351,7 +353,7 @@ display() {
                 shift
                 ;;
             *) log_message "Unknown option: $1"; return 1 ;;
-        esac 
+        esac
         shift
     done
     local r="${color:0:2}"
@@ -507,6 +509,116 @@ get_button_press() {
     done
 }
 
+# Returns the path of the current theme
+# Use by doing        theme_path=$(get_current_theme_path)
+# Use files inside themes to make your apps!
+get_current_theme_path() {
+    local config_file="/config/system.json"
+
+    # check if config file exists
+    if [ ! -f "$config_file" ]; then
+        echo "Error: Configuration file not found at $config_file"
+        return 1
+    fi
+
+    # extract "theme" from JSON
+    local theme_name
+    theme_name=$(jq -r '.theme' "$config_file")
+
+    # check if "theme" is empty
+    if [ -z "$theme_name" ]; then
+        echo "Error: Could not retrieve theme name from $config_file"
+        return 1
+    fi
+
+    echo "$theme_name"
+}
+
+# To support themes in your apps do         [   eval "$(get_current_theme)"    ]
+# Doing this will unlock dynamic variables that will give you fast access to some
+# common theme files and values. These dynamic variable are: $THEME_PATH, $THEME_BG etc.
+#
+# Code example:
+#
+# eval "$(get_current_theme)"
+# echo "Current theme path:         $THEME_PATH"
+# echo "Background image path:      $THEME_BG"
+# echo "Font path:                  $THEME_FONT"
+# echo "Font size:                  $THEME_FONT_SIZE"
+# echo "Font color:                 $THEME_FONT_COLOR"
+# echo "Left arrow icon:            $THEME_LEFT"
+# echo "Right arrow icon:           $THEME_RIGHT"
+# echo "Logo:                       $THEME_LOGO"
+# echo "OK icon:                    $THEME_OK"
+# echo "Home button icon:           $THEME_HOME"
+# echo "A button icon:              $THEME_A"
+# echo "B button icon:              $THEME_B"
+# echo "L2 button icon:             $THEME_L2"
+# echo "R2 button icon:             $THEME_R2"
+# echo "X button icon:              $THEME_X"
+# echo "Y button icon:              $THEME_Y"
+# echo "START button icon:          $THEME_START"
+# echo "Information icon:           $THEME_INFO"
+# echo "Folder icon:                $THEME_FOLDER"
+# echo "SD/TF card icon:            $THEME_SD"
+# echo "Wifi icon:                  $THEME_WIFI"
+# echo "Shutdown icon:              $THEME_SHUTDOWN"
+# echo "Reset icon:                 $THEME_RESET"
+# echo "Star icon:                  $THEME_STAR"
+# echo "Expert Apps icon:           $THEME_EXPERT_APPS"
+get_current_theme() {
+    # gets current theme path
+    local theme_path
+    theme_path=$(get_current_theme_path)
+    local json_path
+    json_path="$theme_path/config.json"
+
+    # checks if path exists
+    if [ -d "$theme_path" ]; then
+        # Export theme paths
+        echo "THEME_PATH=\"$theme_path\""
+        echo "THEME_BG=\"$theme_path/skin/background.png\""
+        echo "THEME_LEFT=\"$theme_path/skin/icon-left-arrow-24.png\""
+        echo "THEME_RIGHT=\"$theme_path/skin/icon-right-arrow-24.png\""
+        echo "THEME_LOGO=\"$theme_path/skin/app-loading-05.png\"" #need to discuss this
+        echo "THEME_OK=\"$theme_path/skin/icon-OK.png\""
+        echo "THEME_HOME=\"$theme_path/skin/ic-MENU.png\""
+        echo "THEME_A=\"$theme_path/skin/icon-A-54.png\""
+        echo "THEME_B=\"$theme_path/skin/icon-B-54.png\""
+        echo "THEME_L2=\"$theme_path/skin/icon-L2.png\""
+        echo "THEME_R2=\"$theme_path/skin/icon-R2.png\""
+        echo "THEME_X=\"$theme_path/skin/icon-x.png\""
+        echo "THEME_Y=\"$theme_path/skin/icon-y.png\""
+        echo "THEME_START=\"$theme_path/skin/icon-START.png\""
+        echo "THEME_INFO=\"$theme_path/skin/icon-device-info-48.png\""
+        echo "THEME_FOLDER=\"$theme_path/skin/icon-folder.png\""
+        echo "THEME_SD=\"$theme_path/skin/icon-TF.png\""
+        echo "THEME_WIFI=\"$theme_path/skin/icon-setting-wifi.png\""
+        echo "THEME_SHUTDOWN=\"$theme_path/skin/icon-Shutdown.png\""
+        echo "THEME_RESET=\"$theme_path/skin/icon-factory-reset-48.png\""
+        echo "THEME_STAR=\"$theme_path/skin/nav-favorite-f.png\""
+        echo "THEME_EXPERT_APPS=\"$theme_path/icons/App/expertappswitch.png\""
+
+        # Extract values from config JSON using jq
+        if [ -f "$json_path" ]; then
+            THEME_FONT_TITLE=$(jq -r '.list.font' "$json_path")
+            THEME_FONT="$theme_path/$THEME_FONT_TITLE"
+            THEME_FONT_SIZE=$(jq -r '.list.size' "$json_path")
+            THEME_FONT_COLOR=$(jq -r '.list.color' "$json_path")
+
+            echo "THEME_FONT=\"$THEME_FONT\""
+            echo "THEME_FONT_SIZE=\"$THEME_FONT_SIZE\""
+            echo "THEME_FONT_COLOR=\"$THEME_FONT_COLOR\""
+        else
+            echo "Error: JSON config file not found at $json_path."
+            return 1
+        fi
+    else
+        echo "Error: theme located in $theme_path doesn't exist."
+        return 1
+    fi
+}
+
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
 }
@@ -538,21 +650,21 @@ get_version() {
 
 get_version_nightly() {
     local base_version=$(get_version)
-    
+
     # Ensure we got a valid base version
     if [ -z "$base_version" ] || [ "$base_version" = "0" ]; then
         echo "$base_version"
         return 1
     fi
-    
+
     local nightly_pattern="/mnt/SDCARD/${base_version}-*"
-    
+
     # List all matching files and log them
     local matching_files=$(ls $nightly_pattern 2>/dev/null)
-    
+
     # Find any matching nightly version file
     local nightly_file=$(ls $nightly_pattern 2>/dev/null | head -n 1)
-    
+
     if [ -n "$nightly_file" ]; then
         local nightly_version=$(basename "$nightly_file")
         echo "$nightly_version"
@@ -629,7 +741,7 @@ qr_code() {
     local size=3
     local level="M"
     local output="/mnt/SDCARD/spruce/tmp/qr.png"
-    
+
     # Parse arguments
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -641,13 +753,13 @@ qr_code() {
         esac
         shift
     done
-    
+
     # Ensure text is provided
     if [ -z "$text" ]; then
         log_message "QR Code error: No text provided" -v
         return 1
     fi
-    
+
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
@@ -687,18 +799,18 @@ record_start() {
     if [ -z "$output_file" ]; then
         output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
     fi
-    
+
     # Start ffmpeg recording
     ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
         -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
         -c:a aac -b:a 80k -ac 1 \
         -t $((timeout_minutes * 60)) "$output_file" &
-    
+
     # Store PID for later use
     echo $! > "/tmp/ffmpeg_recording.pid"
-    
+
     log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-    
+
     # Set up automatic stop after timeout
     (
         sleep $((timeout_minutes * 60))
@@ -877,6 +989,3 @@ vibrate() {
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
 }
-
-
-

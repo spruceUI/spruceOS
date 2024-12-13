@@ -149,18 +149,26 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Not_simple>
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ _VALUE_" "$SAMBA$ _INDEX_"
 @"Network file-sharing"
+<Simple>
+%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh samba"
 
 <Not_simple>
 "" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ _VALUE_" "$SSH$ _INDEX_"
 @"Secure Shell for remote login"
+<Simple>
+%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh dropbear"
 
 <Not_simple>
 "" "Enable Syncthing" "|" "on|off" "$HELP$ check syncthing" "$SYNCTHING$ _VALUE_" "$SYNCTHING$ _INDEX_"
 @"Sync files across devices"
+<Simple>
+%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh syncthing"
 
 <Not_simple>
 "" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ _VALUE_" "$SFTPGO$ _INDEX_"
 @"User: spruce, Password: happygaming"
+<Simple>
+%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh sftpgo"
 
 <Not_simple>
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame _VALUE_" ""
