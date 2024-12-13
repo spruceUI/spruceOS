@@ -1,0 +1,6 @@
+{
+  "label": "Boxart Scraper V2",
+  "icon": "/mnt/SDCARD/Themes/Cosy by KyleBing/Icons/App/scraper.png",
+  "launch": "launch.sh",
+  "description": "Scrape game boxart (v2)"
+}
