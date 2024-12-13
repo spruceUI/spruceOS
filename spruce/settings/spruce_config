@@ -225,6 +225,10 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 @"Manage files on your A30"
 
 <Not_simple>
+"" "Game Nursery" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/GameNursery/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/GameNursery/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/GameNursery/config.json" ""
+@"Download free games directly to your A30"
+
+<Not_simple>
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
 @"Clean up displayed game names"
 

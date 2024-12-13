@@ -80,6 +80,7 @@ if [ $ARGUMENT = "apply" ]; then
 	check_and_hide_app "-Updater"
 	check_and_hide_app "BootLogo"
 	check_and_hide_app "FileManagement"
+	check_and_hide_app "GameNursery"
 	check_and_hide_app "MiyooGamelist"
 	check_and_hide_app "RetroArch"
 	check_and_hide_app "ShowOutputTest"
