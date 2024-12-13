@@ -24,7 +24,6 @@ check_battery() {
     fi
 }
 
-
 check_for_connection() {
 
     wifi_enabled="$(jq -r '.wifi' "/config/system.json")"
@@ -38,6 +37,13 @@ check_for_connection() {
         exit 1
     fi
     log_message "Game Nursery: Device is online. Proceeding."
+}
+
+show_slideshow_if_first_run() {
+    if ! flag_check "nursery_accessed"; then
+        /mnt/SDCARD/App/GameNursery/first_run.sh
+        flag_add "nursery_accessed"
+    fi
 }
 
 get_latest_jsons() {
@@ -127,6 +133,7 @@ display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Connecting to the spruce Ga
 
 check_battery
 check_for_connection
+show_slideshow_if_first_run
 get_latest_jsons
 construct_config
 
