@@ -327,8 +327,8 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     *"key 1 28 0"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
             killall -q -CONT MainUI
-            kill_current_app
             vibrate
+            kill_current_app
             log_message "Exit hotkey hit"
         fi
         ;;
