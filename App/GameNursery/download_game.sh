@@ -17,7 +17,7 @@ download_progress() {
     downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
     # Bar slider, 0.15 is 0, 0.85 is 100
     fill_scale_int=15  # 0.15 * 100
-    sleep 2
+    sleep 5
     while true; do
 
         # Get current size in bytes using POSIX-compliant ls -l
@@ -43,6 +43,7 @@ $PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int
             log_message "Download complete"
             break
         fi
+        sleep 5
     done
 }
 
