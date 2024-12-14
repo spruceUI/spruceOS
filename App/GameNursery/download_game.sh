@@ -4,7 +4,14 @@
 
 JSON_FILE="$1"
 TMP_DIR="/mnt/SDCARD/App/GameNursery/tmp"
-GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
+
+SHORT_NAME="$(jq -r '.shortname' "$JSON_FILE")"
+if [ -n "$SHORT_NAME" ]; then
+    GAME_NAME="$SHORT_NAME"
+else
+    GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
+fi
+
 GAME_URL="$(jq -r '.url' "$JSON_FILE")"
 ZIP_NAME="$(basename "$GAME_URL")"
 BG_IMG=/mnt/SDCARD/spruce/imgs/bg_tree.png
@@ -97,6 +104,6 @@ if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
 	exit 1
 else
 	display -d 2 -i "$BG_IMG" -t "$GAME_NAME installed successfully!"
-	log_message "Game Nursery: Extraction process completed successfully"
+	log_message "Game Nursery: $GAME_NAME extracted successfully"
 	rm -f "$TMP_DIR/$ZIP_NAME" 2>/dev/null
 fi
