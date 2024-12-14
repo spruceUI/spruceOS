@@ -5,15 +5,21 @@
 TOGGLE_SIMPLE="/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh"
 
 detect_konami_code() {
-
 	log_message "listening for Konami Code"
-
+	
+	FIFO="/tmp/konami_fifo"
+	rm -f "$FIFO"
+	mkfifo "$FIFO"
+	
+	# Start getevent in background, writing to the FIFO
+	/mnt/SDCARD/spruce/bin/getevent /dev/input/event3 > "$FIFO" &
+	getevent_pid=$!
+	
 	NUM_CORRECT=0
-
-	/mnt/SDCARD/spruce/bin/getevent /dev/input/event3 | while read line; do
-
+	
+	while read line; do
 		log_message "number of correct inputs: $NUM_CORRECT" -v
-
+		
 		case "$line" in
 			*"$B_UP 1"*)
 				log_message "+++UP" -v
@@ -68,7 +74,10 @@ detect_konami_code() {
 				if [ $NUM_CORRECT -eq 10 ]; then
 					log_message "11 correct inputs in a row! removing simple_mode."
 					"$TOGGLE_SIMPLE" remove
-					break
+					# Kill getevent and clean up
+					kill $getevent_pid
+					rm -f "$FIFO"
+					return 0
 				else
 					NUM_CORRECT=0
 				fi
@@ -76,21 +85,25 @@ detect_konami_code() {
 			*0)
 				log_message "---button released" -v
 				;;
-
 			*)
 				log_message "-+-+- Some other button pressed!" -v
 				NUM_CORRECT=0
 				;;
 		esac
-	done
+	done < "$FIFO"
+	
+	# Clean up if we exit the loop some other way
+	kill $getevent_pid 2>/dev/null
+	rm -f "$FIFO"
 }
 
 while true; do
-	while flag_check "simple_mode" && pgrep "MainUI" > /dev/null; do
+	while flag_check "simple_mode" && flag_check "in_menu"; do
 		log_message "simple_mode active and MainUI detected"
+		
 		detect_konami_code
 		sleep 5
 	done
 	log_message "simple_mode OR MainUI not detected" -v
 	sleep 5
-done &
+done
