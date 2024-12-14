@@ -64,6 +64,7 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
 # cp /path/to/source/file /path/to/destination/file
 # custom_command_or_script
 
+setting_update expert_settings on
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful

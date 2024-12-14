@@ -4,6 +4,8 @@ BIN_PATH="/mnt/SDCARD/spruce/bin"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
+HELPER_PATH="/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh"
+
 # Copy of flag_check in helperFunctions.sh
 # Here to keep launch time short
 flag_check() {
@@ -40,6 +42,10 @@ if flag_check "simple_mode"; then
     MODES="$MODES -m Simple"
 else
     MODES="$MODES -m Not_simple"
+fi
+
+if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mode"; then
+    MODES="$MODES -m Expert"
 fi
 
 if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac always create a junk file at the sdcard root?

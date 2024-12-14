@@ -34,8 +34,12 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 
 [System]
-<Developer>
+<Developer> <Designer>
 "" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
+
+<Not_simple>
+"" "Show Expert Settings" "|" "on|off" "$HELP$ check expert_settings" "$HELP$ update expert_settings _VALUE_" ""
+@"Will apply after save & exit"
 
 <Not_simple>
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "$HELP$ get idlemon_in_menu '5m'" "$HELP$ update idlemon_in_menu '_VALUE_' && $IDLEMON_MM$ in_menu _VALUE_" ""
@@ -48,7 +52,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown '_VALUE_'" ""
 @"Excludes ports
 
-<Not_simple>
+<Expert>
 "" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'" ""
 
 <Not_simple>
