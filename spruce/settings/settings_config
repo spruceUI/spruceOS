@@ -55,7 +55,6 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Expert>
 "" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'" ""
 
-<Not_simple>
 "" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm _VALUE_" ""
 @"While in main menu or native PICO-8"
 
@@ -66,20 +65,20 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Not_simple>
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent _VALUE_" ""
 
-<Not_simple>
+<Expert>
 "" "Enable Recents in main menu" "|" "on|off" "$RECENTS$ check" "$RECENTS$ _VALUE_" ""
 
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
 @"For system notifications"
 
-<Not_simple>
+<Expert>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
 <Not_simple>
 "" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
 @"Spruce will check periodically on startup"
 
-<Not_simple>
+<Expert>
 "" "Skip version check on next update" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
 @"Only run this if needing to reinstall."
 
@@ -101,7 +100,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 "" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home '_VALUE_'" ""
 @"Excludes NDS, PICO8 & ports"
 
-<Not_simple>
+<Expert>
 "" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
@@ -112,7 +111,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Simple>
 "" "RetroArch: Disable hotkeys" "|" "on|off" "$RAHOTKEY$ check_simple" "$RAHOTKEY$ assign _VALUE_" ""
 
-<Not_simple>
+<Expert>
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
 
@@ -127,15 +126,15 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Pico>
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
 
-<Not_simple>
+<Expert>
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png _VALUE_ && $F8_PNG$ _VALUE_" ""
 @"Also uses cart as box art for Fake08"
 
-<Not_simple>
+<Expert>
 "" "Reset RetroArch hotkeys" "|" "run|off" "echo -n off" "$RESET_RAHOTKEY$|" "$RESET_RAHOTKEY$ _INDEX_"
 @"Applies Spruce hotkey layout."
 
-<Not_simple>
+<Expert>
 "" "Reset RetroArch to spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
 @"We recommend backing up first."
 
@@ -185,7 +184,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame _VALUE_" ""
 @"Improves battery life"
 
-<Not_simple>
+<Expert>
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
 
@@ -201,19 +200,19 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 "" "Maximum number of games" "||" "5|10|20" "$HELP$ get maxGamesInGS 10" "$HELP$ update maxGamesInGS _VALUE_" ""
 
-<Not_simple>
+<Expert>
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
-<Not_simple>
+<Expert>
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
-<Not_simple>
+<Expert>
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
-<Not_simple>
+<Expert>
 "-n" "Display item index" "on|off" "on|off" "on" "" ""
-<Not_simple>
+<Expert>
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
-<Not_simple>
+<Expert>
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
-<Not_simple>
+<Expert>
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
 
 

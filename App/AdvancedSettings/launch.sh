@@ -56,7 +56,7 @@ if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac alw
 # fi
 
 cd $BIN_PATH
-./easyConfig $SETTINGS_PATH/spruce_config $MODES
+./easyConfig $SETTINGS_PATH/settings_config $MODES
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
 killall -q -USR1 joystickinput

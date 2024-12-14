@@ -66,6 +66,9 @@ update_file "/mnt/SDCARD/RetroArch/retroarch.cfg" \
 
 setting_update expert_settings on
 
+# We renamed spruce_config to settings_config, delete the old one
+rm -rf /mnt/SDCARD/spruce/settings/spruce_config
+
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
 if [ $? -eq 0 ]; then

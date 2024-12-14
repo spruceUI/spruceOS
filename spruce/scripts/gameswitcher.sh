@@ -128,7 +128,7 @@ while : ; do
     # try to generate option file
     if [ ! -f $OPTIONS_FILE ] ; then
         cd $BIN_PATH
-        ./easyConfig $SETTINGS_PATH/spruce_config -o
+        ./easyConfig $SETTINGS_PATH/settings_config -o
     fi
     # apply option file if file exists
     if [ -f $OPTIONS_FILE ] ; then
@@ -152,7 +152,7 @@ while : ; do
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
         cd $BIN_PATH
-        ./easyConfig $SETTINGS_PATH/spruce_config  -p 4
+        ./easyConfig $SETTINGS_PATH/settings_config  -p 4
     else
         break
     fi
