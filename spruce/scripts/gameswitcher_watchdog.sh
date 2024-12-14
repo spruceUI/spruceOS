@@ -211,6 +211,10 @@ long_press_handler() {
         log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
         [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
 
+        if flag_check "simple_mode" && flag_check "in_menu"; then
+            HOLD_HOME="Game Switcher"
+        fi
+
         case $HOLD_HOME in
         "Game Switcher")
             prepare_game_switcher
@@ -288,6 +292,10 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             TAP_HOME=$(setting_get "tap_home")
             [ -z "$TAP_HOME" ] && TAP_HOME="In-game menu"
 
+            if flag_check "simple_mode" && flag_check "in_menu"; then
+                TAP_HOME="Game Switcher"
+            fi
+
             # handle short press
             case $TAP_HOME in
             "Game Switcher")
@@ -353,12 +361,16 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     # Any other key press while menu is held
     *"key"*)
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
-            rm -f "$TEMP_PATH/homeheld"
-            log_message "*** gameswitcher_watchdog.sh: Additional key pressed during menu hold" -v
-
-            # Resume paused processes
-            killall -q -CONT PPSSPPSDL pico8_dyn MainUI
-            send_virtual_key_R3 # Unpause RetroArch
+            # Only remove homeheld flag if NOT in simple_mode and in_menu
+            if ! { flag_check "simple_mode" && flag_check "in_menu"; }; then
+                rm -f "$TEMP_PATH/homeheld"
+                
+                # Resume paused processes
+                killall -q -CONT PPSSPPSDL pico8_dyn MainUI
+                send_virtual_key_R3 # Unpause RetroArch
+                
+                log_message "*** gameswitcher_watchdog.sh: Additional key pressed during menu hold" -v
+            fi
         fi
         ;;
     esac
