@@ -129,7 +129,7 @@ cd ${BIN_DIR}
 ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
 # run game switcher watchdog before auto load game is loaded
-${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
+${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
 # start watchdog for konami code
 ${SCRIPTS_DIR}/simple_mode_watchdog.sh &

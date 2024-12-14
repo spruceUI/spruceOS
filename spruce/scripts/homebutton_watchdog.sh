@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-log_message "*** gameswitcher_watchdog.sh: helperFunctions imported." -v
+log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
@@ -16,7 +16,7 @@ CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 
 kill_emulator() {
     # kill RA or other emulator or MainUI
-    log_message "*** gameswitcher_watchdog.sh: Killing all Emus and MainUI!" -v
+    log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" -v
 
     if pgrep -x "./drastic" >/dev/null; then
         # use sendevent to send MENU + L1 combin buttons to drastic
@@ -78,7 +78,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** gameswitcher_watchdog.sh: $CMD" -v
+        log_message "*** homebutton_watchdog.sh: $CMD" -v
 
         # check command is emulator
         # exit if not emulator is in command
@@ -96,13 +96,13 @@ prepare_game_switcher() {
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
         $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$SCREENSHOT_NAME" 2>/dev/null &
-        log_message "*** gameswitcher_watchdog.sh: capture screenshot" -v
+        log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
         if [ -f "$LIST_FILE" ]; then
             # if game list file exists
             # get all commands except the current game
-            log_message "*** gameswitcher_watchdog.sh: Appending command to list file" -v
+            log_message "*** homebutton_watchdog.sh: Appending command to list file" -v
             grep -Fxv "$CMD" "$LIST_FILE" >"$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file
@@ -110,7 +110,7 @@ prepare_game_switcher() {
         else
             # if game list file does not exist
             # put command to new game list file
-            log_message "*** gameswitcher_watchdog.sh: Creating new list file" -v
+            log_message "*** homebutton_watchdog.sh: Creating new list file" -v
             echo "$CMD" >"$LIST_FILE"
         fi
 
@@ -132,15 +132,15 @@ prepare_game_switcher() {
     rm -f "$TEMP_FILE"
     while read -r CMD; do
         EMU_PATH=$(echo $CMD | cut -d\" -f2)
-        log_message "*** gameswitcher_watchdog.sh: EMU_PATH = $EMU_PATH" -v
+        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" -v
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
-        log_message "*** gameswitcher_watchdog.sh: GAME_PATH = $GAME_PATH" -v
+        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" -v
         if [ ! -f "$EMU_PATH" ]; then
-            log_message "*** gameswitcher_watchdog.sh: EMU_PATH does not exist!" -v
+            log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" -v
             continue
         fi
         if [ ! -f "$GAME_PATH" ]; then
-            log_message "*** gameswitcher_watchdog.sh: GAME_PATH does not exist!" -v
+            log_message "*** homebutton_watchdog.sh: GAME_PATH does not exist!" -v
             continue
         fi
         echo "$CMD" >>"$TEMP_FILE"
@@ -159,7 +159,7 @@ prepare_game_switcher() {
 
     # set flag file for principal.sh to load game switcher later
     flag_add "gs"
-    log_message "*** gameswitcher_watchdog.sh: flag file created for gs" -v
+    log_message "*** homebutton_watchdog.sh: flag file created for gs" -v
 }
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
@@ -208,7 +208,7 @@ long_press_handler() {
 
         # get setting
         HOLD_HOME=$(setting_get "hold_home")
-        log_message "*** gameswitcher_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
+        log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
         [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
 
         if flag_check "simple_mode" && flag_check "in_menu"; then
@@ -261,7 +261,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     # MENU key down
     *"key 1 1 1"*)
         # start long press handler
-        log_message "*** gameswitcher_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
+        log_message "*** homebutton_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
         long_press_handler &
         PID=$!
 
@@ -281,7 +281,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             rm -f "$TEMP_PATH/gs.longpress"
             rm -f "$TEMP_PATH/homeheld"
             kill $PID
-            log_message "*** gameswitcher_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
+            log_message "*** homebutton_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
 
             # skip mainUI and NDS, they need short press for their hotkeys
             if pgrep "drastic" >/dev/null; then
@@ -369,7 +369,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                 killall -q -CONT PPSSPPSDL pico8_dyn MainUI
                 send_virtual_key_R3 # Unpause RetroArch
                 
-                log_message "*** gameswitcher_watchdog.sh: Additional key pressed during menu hold" -v
+                log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
         ;;
