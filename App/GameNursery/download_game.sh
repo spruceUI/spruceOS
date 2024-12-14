@@ -6,7 +6,7 @@ JSON_FILE="$1"
 TMP_DIR="/mnt/SDCARD/App/GameNursery/tmp"
 
 SHORT_NAME="$(jq -r '.shortname' "$JSON_FILE")"
-if [ -n "$SHORT_NAME" ]; then
+if [ "$SHORT_NAME" != "null" ] && [ -n "$SHORT_NAME" ]; then
     GAME_NAME="$SHORT_NAME"
 else
     GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
