@@ -6,7 +6,7 @@ JSON_FILE="$1"
 TMP_DIR="/mnt/SDCARD/App/GameNursery/tmp"
 
 SHORT_NAME="$(jq -r '.shortname' "$JSON_FILE")"
-if [ -n "$SHORT_NAME" ]; then
+if [ "$SHORT_NAME" != "null" ] && [ -n "$SHORT_NAME" ]; then
     GAME_NAME="$SHORT_NAME"
 else
     GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
@@ -14,8 +14,8 @@ fi
 
 GAME_URL="$(jq -r '.url' "$JSON_FILE")"
 ZIP_NAME="$(basename "$GAME_URL")"
-BG_IMG=/mnt/SDCARD/spruce/imgs/bg_tree.png
-
+BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
 download_progress() {
     filepath="$1"
@@ -69,7 +69,7 @@ log_message "Game Nursery: $REQUIRED_SPACE MiB required to install $GAME_NAME"
 log_message "Game Nursery: $AVAILABLE_SPACE MiB available"
 if [ "$AVAILABLE_SPACE" -lt "$REQUIRED_SPACE" ]; then
 	log_message "Game Nursery: Not enough space. Aborting attempt to download $GAME_NAME"
-	display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "You need at least $REQUIRED_SPACE MiB free to install $GAME_NAME. Please free up some space and try again later."
+	display -d 3 --icon "$BAD_IMG" -t "You need at least $REQUIRED_SPACE MiB free to install $GAME_NAME. Please free up some space and try again later."
 	exit 1
 else
 	log_message "Game Nursery: Available space is sufficient. Proceeding to download $GAME_NAME"
@@ -90,7 +90,7 @@ download_pid=$!
 if ! curl -s -k -L -o "$TMP_DIR/$ZIP_NAME" "$GAME_URL"; then
 	kill $download_pid
 	log_message "Game Nursery: Failed to download $GAME_NAME from $GAME_URL"
-	display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download $GAME_NAME from repository. Please try again later."
+	display -d 3 --icon "$BAD_IMG" -t "Unable to download $GAME_NAME from repository. Please try again later."
 	exit 1
 fi
 kill $download_pid
@@ -101,9 +101,9 @@ log_message "Game Nursery: Download successful. Attempting to extract $GAME_NAME
 display -i "$BG_IMG" -t "Now installing $GAME_NAME!"
 cd "/mnt/SDCARD"
 if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
-	display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to extract latest game info files. Please try again later."
+	display -d 3 --icon "$BAD_IMG" -t "Unable to extract $GAME_NAME. Please try again later."
 	rm -f "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1
-	log_message "Game Nursery: Failed to extract $GAME_NAME from TMP_DIR/$ZIP_NAME"
+	log_message "Game Nursery: Failed to extract $GAME_NAME from $TMP_DIR/$ZIP_NAME"
 	exit 1
 else
 	display -d 2 -i "$BG_IMG" -t "$GAME_NAME installed successfully!"
