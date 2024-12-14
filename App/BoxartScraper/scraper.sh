@@ -210,7 +210,7 @@ messages_file="/var/log/messages"
 system_config_file="/config/system.json"
 roms_dir="/mnt/SDCARD/Roms"
 
-display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
+display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
 # Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
