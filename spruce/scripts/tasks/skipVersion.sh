@@ -16,3 +16,5 @@ OTA_FILE="/mnt/SDCARD/App/-OTA/downloader.sh"
 
 # Update both files to set SKIP_VERSION_CHECK=true
 sed -i 's/SKIP_VERSION_CHECK=false/SKIP_VERSION_CHECK=true/' "$UPDATER_FILE" "$OTA_FILE"
+
+/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/-OTA/config.json

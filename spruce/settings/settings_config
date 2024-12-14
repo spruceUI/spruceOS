@@ -79,8 +79,8 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 @"Spruce will check periodically on startup"
 
 <Expert>
-"" "Skip version check on next update" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
-@"Only run this if needing to reinstall."
+"" "Allow a reinstall" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
+@"Only run this task if needed."
 
 <Mac>
 "" "Delete macOS junk files from SD card" "|" "run|off" "echo -n off" "$DELETE_MAC_FILES$|" "$DELETE_MAC_FILES$ _INDEX_"
