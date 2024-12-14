@@ -60,6 +60,9 @@ TARGET_SIZE_BYTES="$(curl -k -I -L "$GAME_URL" 2>/dev/null | grep -i "Content-Le
 TARGET_SIZE_KILO=$((TARGET_SIZE_BYTES / 1024))
 TARGET_SIZE_MEGA=$((TARGET_SIZE_KILO / 1024))
 REQUIRED_SPACE=$((TARGET_SIZE_MEGA * 3))
+if [ "$REQUIRED_SPACE" -lt 3 ]; then
+    REQUIRED_SPACE=3
+fi
 AVAILABLE_SPACE="$(df -m "/mnt/SDCARD" | awk 'NR==2{print $4}')"
 
 log_message "Game Nursery: $REQUIRED_SPACE MiB required to install $GAME_NAME"
