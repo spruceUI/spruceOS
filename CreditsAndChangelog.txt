@@ -1,96 +1,59 @@
-Changelog Spruce 3.1.0
+Changelog Spruce 3.2.0
 
 
 Changes/Additions:
 
-* OTA Updater: (Aka Over the air updates, or Spruce Updater) Added our own updater, this will download and install the latest release from our GitHub releases page. Starting from 3.1.0 on you no longer need to manually update. It will be in your apps under "Check for Updates" or if an update is available.. "Update available". After a fresh install this app will be hidden, you can show it if you like in the Advanced Settings visibility toggles. Combined with the auto-update checker, detailed below, you could go without seeing it until an update is available. But this can be ran at anytime to manually check for new updates. The app will download the newest release and will run the EZUpdater app to install it. You can also choose to download and install later through EZ Updater if you wish. This leverages our previous work so your configs and settings are kept. (XanXic)
-* Auto update checker: A new advanced setting, if you have this, on by default, and wifi on, after a new startup Spruce will check if an update is available occasionally. If so it'll add the updater app to your apps and give you notice next time you reboot. (XanXic)
-* Home key controls: Added new settings to define what tap and hold of the home/menu key does. Now you can make your own setup for what it does. (Oscar)
-* Added new quick exit action to the tap/hold home key options (Oscar)
-* Reduced 'hold' time for the home key to 1.6 seconds from 2, added vibration when hold 'fires' (XanXic)
-* Sleep then shutdown: Added automatic shutdown after x minutes in sleep feature (FragBait)
-* Added new vibration strength/off setting in advanced settings (Ry, XanXic)
-* Fake08: Added enable .png support setting (Ry)
-* Pico 8: Added new controller layouts setting so you can decide how the buttons work, also added a 'full screen' setting for Pico8 (Ry)
-* Added on board QR generator, expect errors to give QR codes directly to wiki topics in the future. For now this is how OTA Updates will link you to the changelogs (FragBait)
-* Added SFTP, over SSH (FragBait)
-* Bluelight Filter: Added in advanced setting, this is our initial attempt, we will dial this in and add sceduling in a future update. It’s manual for now. (FragBait)
-* Changed default Lynx core to Handy (Cobalt)
-* Syncthing: Greatly improved Syncthing Sync Checker times across the board for all scenarios with the total sync process taking anywhere from nearly instant to 5 seconds now, down from 13 seconds. (BaseInfinity)
-* Added QuickNes emulator for NES systems (Cobalt)
-* Added gearcoleco RA core for Colecovision emulation (Thanks jonnyandroid for the suggestion) (Ry)
-* Added an automatic cleanup script to remove apostrophe's (') from sub folder names in roms. These are incompatible with MainUI (Ry)
-* Added automatic save and shutdown when battery hits less than 1%. Both to save your game and prevent an issue with soft bricked battery (Ry)
-* Stick delete: Added an option to disable joystick in settings for stick delete modders (Oscar)
-* Added “designer mode” to show all consoles and give access to our Theme Packer app so theme creators can have an easier time. Check the information for creating themes on our wiki (XanXic)
-* Themed SFTPGo/Wifi file transfer with spruce elements and A30's (Veckia9x)
-* Added and cleaned up icons for new and existing apps (SundownerSport)
-* Some advanced settings options shifted around. We are still feeling this app out as we expand on it, so please bear with us release to release as we find the best setup (Team Effort)
-* Removed genesis+gx core as option from 32x that Ry added erroneously (Cobalt)
-* Added developer_mode for easy toggle of dev-useful settings that differ from the defaults we ship with (fragbait)
-* Added sleep -> shutdown option as a further power-saving measure (FragBait)
-* Reduced default time for vibrate() to reduce intensity (XanXic)
-* Added chd to extlist for PSP (thanks HeyDW!) (Ry)
-* Changed default Lynx core to handy (Cobalt)
-* Added rumble intensity (Strong/Medium/Weak/Off) advanced setting for system notifications (Ry)
-* Added user-customisable actions for tap/long-press of HOME key (game switcher/in-game menu/exit game) (Oscar)
-* Fixed NDS joystick issue (Oscar)
-* Replace keymon with scripts "buttons_watchdog.sh"  this solves the following issues:
-1) update volume and brightness level to config file once they are changed by using hotkey or volune buttons
-2) no brightness and volume flicking when changing them with hotkey or volume buttons
-3) disable original auto sleeping feature (Oscar)
-* Reduced home key long press detection to 1.6 (XanXic)
-* Added vibration when long press of home key is fired (XanXic)
-* Expanded helper methods for working with the spruce.cfg file (XanXic)
-* Moved Idlemon, sleep power down, and rumble settings into the spruce.cfg file and following the established patterns (XanXic)
-* Added a "Rumble preview" when adjusting the vibration setting (XanXic)
-* Expanded developer mode to do a few more things, added a developer mode 'reapply' task to settings when the flag is present (XanXic)
-* Added a designer mode that does all the things dev mode does but will run emufresh in a show all mode (XanXic)
-* Moved Emulator settings into separate tab within Advanced Settings App (Ry)
-* Added toggle to enable .png file support for Fake08; coincidentally sets Fake08 box art to use the cart itself, mimicking our Pico-8 config (Ry)
-*     Added a new Advanced Setting to have different controller profiles for Pico-8. (Ry)
-        Racing - this is the current default since spruce 3.0.0:
-            A-(o) B-(x) L1-(o) R1-(x)
-        Double - this is my personal preference:
-            A-(o) B-(x) Y-(o) X-(x)
-        One-handed - Allows most games to be played with only the left hand:
-            A-(o) B-(x) L1-(o) L2-(x)
-        Steward - Legacy mode from pre-3.0.0; only one set of O and X, but also enables a unique mouse mode and access to the ESC key, which the SDL2 version that enables gamepad mapping does not have access to.
-            A-(o) B-(x) X-(esc) SELECT-(mouse)
-* Fix uae4arm audio sync (Metallic77)
-* Changes in Setting App for simpler and more transparent config file (Oscar)
-* Added new advanced setting to stretch native Pico-8 to fullscreen (Ry)
-* Added fix to automatically rename Roms subfolders with apostrophes in their names (once, on boot before first emufresh) so that MainUI can see them (Ry)
-* Added gearcoleco RA core as option for Colecovision emulation (thanks jonnyandroid for the suggestion) (Ry)
-* Added config override for fake08 core to disable auto save and auto load states, to prevent users from getting locked out of their games if they accidentally hit “reset game” or “exit to menu” inside fake08 (Ry)
-* Added new Advanced Setting: Low power warning percent (Off/4%/8%/12%/16%/20%). Low power warning now also respects the global Rumble Intensity setting (Ry)
-* Added Qrencode for QR code generation (FragBait)
-* Removing AutoRA flag in AutoRa to try and prevent AutoRa loops (XanXic)
-* Added a forced shutdown at or below 1% battery in order to ensure that users' auto save states get created (Ry)
-* Exposed QuickNES emulator core to UI for NES system (Cobalt)
-* Restyled WiFi File App page to match device and SpruceOS icons (Veckia9x)
-* Added Romanian language (VladNerd)
-* Added sftp (over ssh) (fragbait)
-* Added Tester mode, testers skip version checks on OTA's, updates, and upgrades. They can donload the latest nightlies (Dev, and Designer do this as well) (XanXic)
-* Added a restore RetroArch hotkeys task (XanXic)
-* Improved low power warning functionality (XanXic)
-* Changed how recents menu is shown/hidden, made restore compatible with new style (XanXic)
-* Removed a number of unnecessary per-core and per-system RA config overrides, which will make modifying global RA configs easier for users in many situations (Ry)
-* Added Noto.ttf to spruce/Font Files/ for people to use for Cyrillic langs (SundownerSport)
+    New guide app. The "Sapling Guide" in apps, this is a quick app to show the RA hotkeys, and a few simple features of Spruce. This can be hidden in adv settings. Hopefully this will help out with all those A30's destined to be stocking stuffers this holiday season! We plan to make a more robust separate guide/wiki app in the future. But we wanted to get a quick easy way to see basic info for people ASAP. (XanXic)
+    Game Nursery: (Aka our simpler version of PortMaster) This is our new app to download games directly from our Ports repo on device. For now it just shows the "ready to play" ports and free homebrew we have, but we'll expand its functionality and offerings as we go. The A30 is not compatible with PortMaster, so this is our attempt to fill that void. (Ry)
+    Simple Mode: (a.k.a. Kiosk mode/Kid mode) This is our first pass at a more locked down version of spruce that should be fit for a kid to keep them on rails a bit more. In this mode, the settings tile is hidden, our Advanced Settings app has a much more parsed down set of harmless options, things like x menu and more complicated features are disabled. The spruce default tap (menu)/ hold (gs) setup is used for home key. With this you can pre-configure the device how you think best prior to turning it on, and once ready turn on simple mode. (Located in the 1st tab at the end of Advanced Settings). A wiki page with more details is coming. To exit "Simple mode" perform the Konami code on the main menu. (No extra lives given) (Ry, XanXic)
+    Added M3U generator to the X button menu for disc-based systems. This will allow you to run an automated script to create an M3U playlist for multidisc games and have them present as a single game within spruce. (Cobalt)
+    Boot logo app rework, greatly reduce (if not outright prevent) possibility of bricking, added support for .png files. Automatically rotates, resizes and compresses the logo. (369px)
+    Exposed fmsx core for MSX system. (Cobalt)
+    Exposed bluemsx and gearsystem cores for SG-1000. (Cobalt)
+    Added a check to move Pico8 dat/dyn files at the root in the SDCard to the proper location. (Ry)
+    Added /BIOS foolder as a potential alternative location for Pico8 dat/dyn files. (Ry)
+    Added ffmpeg binary. (Fragbait)
+    Made it so tap/hold actions are cancelled when other buttons are pressed when using home key. This allows the home key to be used as the hotkey enabler in RetroArch and reduces unintended behaviors in DraStic. (XanXic)
+    Added universal exit hotkey combo: press home key + start (in that order). This was a bit of a late addition, so there may be odd edge cases; if so, let us know. (XanXic)
+    Added joystick controls to File Management, Dino Jump, and Planet Merge. (Ry)
+    Added support for hidden networks to multipass.cfg. (Gerard Szulc)
+    Added DraStic config and settings to backup/restore. (thanks cvlnomen for mentioning it) (XanXic)
+
+Advanced Settings Changes:
+
+    "Expert" settings toggle added. In an attempt to help simplify the menu for those possibly intimidated by the many options. This will hide/show some of the more technical settings and tasks. When turning it on/off it'll apply after you save and then open it again. For existing spruce users updating to 3.2.0, this will be on by default to match your current experience; for new users, this will be off out of the box. But no settings have actually been removed. (XanXic)
+    N64 controller profiles added.
+        Classic: This is the legacy default configuration. To use the C buttons, you must hold R2 and press one of the face buttons corresponding to the cardinal direction.
+        Action: This maps each of the C buttons to a single button on your A30. This is good for games like Zelda where the C buttons function as action buttons and you don't want to have to use button combos.
+        Custom: This setting is pre-configured like the Classic setting, but will respect any changes that the user makes. This remap file is backed up whenever the user exits an N64 game while using the Custom profile, and changes to it will persist even if they switch to the other profiles (which are always respected if set) before coming back to Custom. It is also backed up by spruceBackup and so should persist across upgrades.
+    Added "home" as an option for the RetroArch hotkey enable key setting. With the above change to home key behavior, now home key can be set and used as such without being interfered with by the tap/hold actions. (XanXic)
+    Added 3 additional Pico8 controller profiles that swap X/O. (Thanks Thaddeus Gray for suggestion) (Ry)
+    Advanced settings app now allows looping across tabs and vertically across options. (OscarAu)
+    Added Prev/Next labels at the top to help communicate there's other tabs! (OscarAu)
+    Added a 'use Rewind' toggle for RA replacing the slowdown toggle with rewind and turning on the rewind service. Just an FYI this can cause some performance lost, it's why we don't have it on by default but now you can easily turn it on for yourself. (XanXic)
+    Added a few more tasks to help restore errors or bad RA configs. (XanXic)
+    Added a task to cleanup leftover Mac files like DS_Store that will show if they are detected on the SD card. (Cobalt)
+
+Boxart Scraper:
+
+    Added a fallback location for the libretro boxart thumbnails we scrape from, in case the main website stops working again. (We are working on more alternatives for future updates) (Cobalt)
+    Made images dynamically generated, giving improved UI experience, and removing around 150+ prebaked images from Spruce. (Cobalt)
+    Fixed BoxArt Scraper not communicating the errors it was experiencing clearly, now has more error detection and specific messages. (XanXic)
 
 Bugfixes/Removals:
 
-* Fix uae4arm audio sync issues (Metallic77)
-* Fixed being locked out of games in Fake08 by adding a core override disabling auto save/load states (Ry)
-* Fixed PPSSPP now emulates inserted Memory Stick (Cobalt)
-* Fixed spruce restore not restoring "Recents" in main menu for those users (XanXic)
-* Fixed a network/wifi broken state issue when disabling WiFi and Network Service in game (BaseInfinity)
-* Fixed background music not playing (We aren't sure who fixed this, just noticed it was fixed)
-* Using select+L1/R1 will no longer control volume. This was interfering with hotkeys for something hardly used. Start+L1/R1 will still control brightness (Oscar)
-* PPSSPP now emulates inserted memorystick (fragbait)
-* Greatly improved Syncthing Sync Checker times across the board for all scenarios with the total sync process taking anywhere from nearly instant to 5 seconds now, down from 13 seconds (BaseInfinity)
-* Fixed a network/wifi broken state issue when disabling WiFi and Network Service in game (BaseInfinity)
-* Made it so backup only keeps the 7 most  recent (XanXic)
+    Fixed powerdown in sleep not powering down while in game switcher. (Fragbait)
+    Fixed a bug where "max number of games" setting in game switcher wasn't being respected. (OscarAu)
+    Fixed Pico8 carts not reliably importing from the Pico8 import script (Located in the X menu). (Ry) (thanks Thaddeus Gray for the bug report)
+    Fixed updater not restoring what apps were shown/hidden prior to updating. (XanXic)
+    Fixed ZX Spectrum control issues by setting input devices 2-5 to "0" none on fuse core remap file. (Thanks u/Sppire for the tip!) (Ry)
+    Initialized game switcher list file to prevent freezes on first boot if no game has been added yet (Sundowner Sport)
+    Fixed idle monitor never shutting down the device if the Game Switcher is left open. (FragBait79)
+
+Known Bugs:
+
+    Previously thought fixed, we have identified background music is not being allowed to play. We've figured out the culprit and have reproduction steps, just didn't have time to fix it in this release. No known workaround at this time.
+
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
@@ -102,12 +65,15 @@ The Current Team (Alphabetical order):
    - Cobaltdsc4102
    - Decojon
    - Fragbait79
+   - KMFDManic
    - Metallic77
    - Oscarkcau
    - Ry
    - SundownerSport
    - Veckia9x
    - XanXic  
+
+
 
 
 Happy Gaming..........
