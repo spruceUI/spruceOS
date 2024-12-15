@@ -358,6 +358,9 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             log_message "Developer recording stopped"
         fi
         ;;
+    # Don't react to dpad presses
+    *"key 1 105"*|*"key 1 106"*|*"key 1 103"*|*"key 1 108"*)
+        ;;
     # Any other key press while menu is held
     *"key"*)
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
