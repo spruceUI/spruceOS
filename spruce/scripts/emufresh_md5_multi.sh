@@ -68,6 +68,14 @@ show_pico8=$(cat "$config_file" | grep -Fc '{{')
 pico8_updated=false
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
 	[ -f "$emu_path/PICO8/bin/pico8_dyn" ]; then
+	pico_files_present=1
+elif [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] &&
+	[ -f "/mnt/SDCARD/BIOS/pico8_dyn" ]; then
+	pico_files_present=1
+else
+	pico_files_present=0
+fi
+if [ "$pico_files_present" -eq 1 ]; then
 	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
 	if [ ! $show_pico8 = 0 ]; then
 		pico8_updated=true
