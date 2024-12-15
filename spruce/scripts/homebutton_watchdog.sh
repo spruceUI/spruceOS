@@ -204,6 +204,7 @@ long_press_handler() {
 
     # Only proceed if menu was the only key pressed
     if [ -f "$TEMP_PATH/homeheld" ]; then
+        touch "$TEMP_PATH/longpress_activated"
         vibrate
 
         # get setting
@@ -252,6 +253,7 @@ long_press_handler() {
 
     rm -f "$TEMP_PATH/gs.longpress"
     rm -f "$TEMP_PATH/homeheld"
+    rm -f "$TEMP_PATH/longpress_activated"
 }
 
 # listen to log file and handle key press events
@@ -278,10 +280,15 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     *"key 1 1 0"*)
         # if NOT long press and menu was the only key pressed
         if [ -f "$TEMP_PATH/gs.longpress" ] && [ -f "$TEMP_PATH/homeheld" ]; then
-            rm -f "$TEMP_PATH/gs.longpress"
-            rm -f "$TEMP_PATH/homeheld"
-            kill $PID
-            log_message "*** homebutton_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
+            # Only kill the long press handler if vibrate hasn't happened yet
+            if [ ! -f "$TEMP_PATH/longpress_activated" ]; then
+                rm -f "$TEMP_PATH/gs.longpress"
+                rm -f "$TEMP_PATH/homeheld"
+                kill $PID
+                log_message "*** homebutton_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
+            else
+                rm -f "$TEMP_PATH/longpress_activated"
+            fi
 
             # skip mainUI and NDS, they need short press for their hotkeys
             if pgrep "drastic" >/dev/null; then
@@ -357,6 +364,9 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             record_stop &
             log_message "Developer recording stopped"
         fi
+        ;;
+    # Don't react to dpad presses
+    *"key 1 105"*|*"key 1 106"*|*"key 1 103"*|*"key 1 108"*)
         ;;
     # Any other key press while menu is held
     *"key"*)

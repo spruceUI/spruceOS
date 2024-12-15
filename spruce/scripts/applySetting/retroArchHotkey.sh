@@ -47,6 +47,9 @@ if [ "$1" = "init" ]; then
     "Start")
         echo -n "Be aware Start+L1/R1 are hardware level brightness hotkeys"
         ;;
+    "Home")
+        echo -n "Be aware Home+D-Pad presses will still fire tap/hold actions"
+        ;;
     *)
         echo -n "Combine with other keys for quick actions in RetroArch"
         ;;

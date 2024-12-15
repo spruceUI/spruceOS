@@ -24,6 +24,7 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     exit 1
 fi
 
+rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
