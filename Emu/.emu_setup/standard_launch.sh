@@ -102,6 +102,9 @@ flag_add 'emulator_launched'
 
 ##### LAUNCH STUFF #####
 
+# Pause simple mode watchdog so in-game Konami code doesn't break it
+kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null
+
 # we sanitise the rom path
 ROM_FILE="$(readlink -f "$1")"
 
@@ -302,6 +305,8 @@ case $EMU_NAME in
 		
 esac
 
+
+kill -18 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # unpause
 kill -9 $(pgrep -f enforceSmartCPU.sh)
 log_message "-----Closing Emulator-----" -v
 
