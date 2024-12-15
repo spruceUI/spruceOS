@@ -112,7 +112,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Simple>
 "" "RetroArch: Disable hotkeys" "|" "on|off" "$RAHOTKEY$ check_simple" "$RAHOTKEY$ assign _VALUE_" ""
 
-<Expert>
+<Not_simple>
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
 
