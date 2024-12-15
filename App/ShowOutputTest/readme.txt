@@ -12,12 +12,14 @@ echo "Button ${BUTTON} is pressed"
 
 ===== showOutput =====
 
-Usage: showOutput [-d] [-f n] [-h|--help] [-i] [-t title] [-w] [-x n]
+Usage: showOutput [-d] [-f n] [-h|--help] [-i] [-k KEYWORD] [-p] [-t title] [-w] [-x n]
 
 -d:         disable useer interaction.
 -f:         specify font size as n (default is 20).
 -h, --help: show this usage help message.
 -i:         display instruction in the output window.
+-k:         exit when KEYWORD is received from stdin.
+-p:         also print received text to stdout.
 -t:         display title in the output window.
 -w:         word-wrap when a line is overflow.
 -x:         exit after n second when EOF is read.

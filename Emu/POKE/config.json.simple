@@ -1,0 +1,19 @@
+{
+  "label": "Pokemini",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/POKE",
+  "imgpath": "../../Roms/POKE/Imgs",
+  "gamelist": "../../Roms/POKE/miyoogamelist.xml",
+  "useswap": 0,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "min|zip|7z",
+  "launchlist": [
+    {
+      "name": "Jump to random Pokemon Mini game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

@@ -8,6 +8,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
+  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
   "launchlist": [
     {
       "name": "Jump to random media",

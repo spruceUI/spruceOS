@@ -1,0 +1,19 @@
+{
+  "label": "Sufami",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sufami.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sufami.png",
+  "launch": "launch.sh",
+  "rompath": "../../Roms/SUFAMI",
+  "imgpath": "../../Roms/SUFAMI/Imgs",
+  "gamelist": "../../Roms/SUFAMI/miyoogamelist.xml",
+  "useswap": 1,
+  "shortname": 0,
+  "hidebios": 1,
+  "extlist": "smc|zip|7z",
+  "launchlist": [
+    {
+      "name": "Jump to random Sufami game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    }
+  ]
+}

@@ -102,6 +102,9 @@ flag_add 'emulator_launched'
 
 ##### LAUNCH STUFF #####
 
+# Pause simple mode watchdog so in-game Konami code doesn't break it
+kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null
+
 # we sanitise the rom path
 ROM_FILE="$(readlink -f "$1")"
 
@@ -163,7 +166,7 @@ case $EMU_NAME in
         killall -q -USR2 joystickinput
 
 		export HOME="$EMU_DIR"
-		export PATH="$HOME"/bin:$PATH
+		export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
 		P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
 		CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
@@ -174,13 +177,26 @@ case $EMU_NAME in
 			export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
 		fi
 
-		if [ "$CONTROL_PROFILE" = "Doubled" ]; then
-			cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
-		elif [ "$CONTROL_PROFILE" = "One-handed" ]; then
-			cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
-		elif [ "$CONTROL_PROFILE" = "Racing" ]; then
-			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
-		fi
+		case "$CONTROL_PROFILE" in
+			"Doubled") 
+				cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"One-handed")
+				cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Racing")
+				cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Doubled 2") 
+				cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"One-handed 2")
+				cp -f "$P8_DIR/sdl_controllers.onehand_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+			"Racing 2")
+				cp -f "$P8_DIR/sdl_controllers.racing_reverse" "$P8_DIR/sdl_controllers.txt"
+				;;
+		esac
 
 		if setting_get "pico8_stretch"; then
 			SCALING="-draw_rect 0,0,480,640"
@@ -242,6 +258,20 @@ case $EMU_NAME in
 		;;
 	
 	*)
+
+		# Set up N64 controller profiles
+		if [ $EMU_NAME = "N64" ]; then
+			PROFILE="$(setting_get "n64_control_profile")"
+			SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+			DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+			LUDI="LudicrousN64 Xtreme Amped"
+			PARA="ParaLLEl N64"
+			MUPEN="Mupen64Plus GLES2"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${LUDI}/${LUDI}.rmp"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${PARA}/${PARA}.rmp"
+			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
+		fi
+
 		if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 			export RA_BIN="retroarch"
 		else
@@ -252,10 +282,31 @@ case $EMU_NAME in
 
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
 
+		# Backup custom N64 controller profile if necessary
+		if [ $EMU_NAME = "N64" ]; then
+			PROFILE="$(setting_get "n64_control_profile")"
+			if [ "$PROFILE" = "Custom" ]; then
+				SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+				DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+				LUDI="LudicrousN64 Xtreme Amped"
+				PARA="ParaLLEl N64"
+				MUPEN="Mupen64Plus GLES2"
+				if [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
+					cp -f "${DST}/${LUDI}/${LUDI}.rmp" "${SRC}/Custom.rmp"
+				elif [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+					cp -f "${DST}/${PARA}/${PARA}.rmp" "${SRC}/Custom.rmp"
+				else # CORE is mupen64plus
+					cp -f "${DST}/${MUPEN}/${MUPEN}.rmp" "${SRC}/Custom.rmp"
+				fi
+			fi
+		fi		
+
 		;;
 		
 esac
 
+
+kill -18 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # unpause
 kill -9 $(pgrep -f enforceSmartCPU.sh)
 log_message "-----Closing Emulator-----" -v
 

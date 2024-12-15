@@ -25,16 +25,25 @@ check_and_hide_update_app() {
     fi
 }
 
+check_and_move_p8_bins() {
+    [ -f "/mnt/SDCARD/pico8.dat" ] && \
+    [ ! -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && \
+    mv "/mnt/SDCARD/pico8.dat" "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" && \
+    display -d 1.5 -t "pico8.dat found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
+    log_message "pico8.dat found at SD root and moved into place"
+    
+    [ -f "/mnt/SDCARD/pico8_dyn" ] && \
+    [ ! -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] && \
+    mv "/mnt/SDCARD/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" && \
+    display -d 1.5 -t "pico8_dyn found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
+    log_message "pico8_dyn found at SD root and moved into place"
+}
+
 DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
 
 
 developer_mode_task() {
     if flag_check "developer_mode" || flag_check "designer_mode"; then
-        # Add developer menu option to spruce_config if it doesn't exist
-        if ! grep -q "Reapply Developer/Designer mode" /mnt/SDCARD/spruce/settings/spruce_config; then
-            sed -i '/\[System\]/a '"$DEV_TASK"'' /mnt/SDCARD/spruce/settings/spruce_config
-        fi
-        
         if setting_get "samba" || setting_get "dropbear"; then
             # Loop until WiFi is connected
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
@@ -50,11 +59,7 @@ developer_mode_task() {
                 log_message "Dev Mode: Dropbear starting..."
                 start_dropbear_process
             fi
-            
         fi
-    else
-        # Remove the line if it exists and no flags are present
-        sed -i '/Reapply Developer\/Designer mode/d' /mnt/SDCARD/spruce/settings/spruce_config
     fi
 }
 
@@ -128,7 +133,7 @@ update_notification(){
         exit 1
     fi
 
-    if flag_check "update_available"; then
+    if flag_check "update_available" && ! flag_check "simple_mode"; then
         available_version=$(cat "$(flag_path update_available)")
         display --icon "$UPDATE_ICON" -t "Update available!
 Version ${available_version} is ready to install

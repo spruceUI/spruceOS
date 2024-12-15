@@ -11,9 +11,12 @@ display -i "$BG" -t "Core changed to genesis_plus_gx"
 if [ "$EMU_NAME" = "MD" ] || [ "$EMU_NAME" = "SEGACD" ]; then
     sed -i 's|"Emu Core: (✓PICODRIVE)-genesis+gx"|"Emu Core: picodrive-(✓GENESIS+GX)"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"|g' "$CONFIG"
-else
+elif [ "$EMU_NAME" = "MS" ] || [ "$EMU_NAME" = "GG" ]; then
     sed -i 's|"Emu Core: genesis+gx-picodrive-(✓GEARSYSTEM)"|"Emu Core: (✓GENESIS+GX)-picodrive-gearsystem"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"|g' "$CONFIG"
+elif [ "$EMU_NAME" = "SEGASGONE" ]; then
+    sed -i 's|"Emu Core: genesis+gx-bluemsx-(✓GEARSYSTEM)"|"Emu Core: (✓GENESIS+GX)-bluemsx-gearsystem"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/bluemsx.sh"|g' "$CONFIG"
 fi
 
 sed -i 's|CORE=.*|CORE=\"genesis_plus_gx\"|g' "$SYS_OPT"

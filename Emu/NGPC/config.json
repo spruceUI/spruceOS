@@ -16,8 +16,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓RACE)-mednafen",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_ngp.sh"
+      "name": "Emu Core: (✓MEDNAFEN)-race",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/race.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",

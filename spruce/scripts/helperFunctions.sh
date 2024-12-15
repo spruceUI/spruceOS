@@ -9,6 +9,8 @@
 # flag_add: Adds a flag
 # flag_remove: Removes a flag
 # get_button_press: Returns the name of the last button pressed
+# get_current_theme: Unlocks dynamic variables for fast access to assets of current theme
+# get_current_theme_path: Returns path of the current theme
 # log_message: Logs a message to a file
 # log_precise: Logs messages with greater precision for performance testing
 # log_verbose: Turns on or off verbose logging for debug purposes
@@ -95,7 +97,7 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
-    
+
     # More thorough connection check
     connection_active=0
     if ifconfig wlan0 | grep -qE "inet |inet6 "; then
@@ -109,7 +111,7 @@ check_and_connect_wifi() {
             connection_active=0
         fi
     fi
-    
+
     if [ $connection_active -eq 0 ]; then
         log_message "Attempting to connect to WiFi"
 
@@ -151,7 +153,7 @@ Press START to continue anyway."
             esac
         done
     fi
-    
+
     return 0
 }
 
@@ -175,7 +177,7 @@ confirm() {
     echo "CONFIRM $(date +%s)" >>"$messages_file"
 
     while true; do
-        # Check for timeout
+        # Check for timeout first
         if [ $timeout -ne 0 ]; then
             local current_time=$(date +%s)
             local elapsed_time=$((current_time - start_time))
@@ -186,8 +188,8 @@ confirm() {
             fi
         fi
 
-        # Wait for log message update (with a 1-second timeout)
-        if ! inotifywait -t 1000 "$messages_file"; then
+        # Wait for log message update (with a shorter timeout to allow frequent timeout checks)
+        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
             continue
         fi
 
@@ -196,17 +198,13 @@ confirm() {
         case "$last_line" in
         # B button - cancel
         *"key 1 29"*)
-            # dismiss notification screen
             display_kill
-            # exit script
             echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
             return 1
             ;;
         # A button - confirm
         *"key 1 57"*)
-            # dismiss notification screen
             display_kill
-            # exit script
             echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
             return 0
             ;;
@@ -336,14 +334,14 @@ display() {
             -bg|--bg-color) bg_color="$2"; shift ;;
             -bga|--bg-alpha) bg_alpha="$2"; shift ;;
             -is|--image-scaling) image_scaling="$2"; shift ;;
-            --icon) 
+            --icon)
                 icon_image="$2"
                 if ! $position_set; then
                     position=$((position + 80))
                 fi
-                shift 
+                shift
                 ;;
-            --add-image) 
+            --add-image)
                 additional_images="$additional_images \"$2\" $3 $4 $5"
                 shift 4
                 ;;
@@ -355,7 +353,7 @@ display() {
                 shift
                 ;;
             *) log_message "Unknown option: $1"; return 1 ;;
-        esac 
+        esac
         shift
     done
     local r="${color:0:2}"
@@ -462,34 +460,163 @@ flag_remove() {
 # Returns the name of the button pressed, or "" if no matching button was pressed
 # Returned strings are simplified, so "B_L1" would return "L1"
 get_button_press() {
+    local messages_file="/var/log/messages"
     local button_pressed=""
-    local timeout=500 # Timeout in seconds
-    for i in $(seq 1 $timeout); do
-        local last_line=$(tail -n 1 /var/log/messages)
+    local timeout=${1:-180}  # Default 180 second timeout if not specified
+    local start_time=$(date +%s)
+
+    echo "GET_BUTTON_PRESS $(date +%s)" >>"$messages_file"
+
+    while true; do
+        # Check for timeout
+        local current_time=$(date +%s)
+        local elapsed_time=$((current_time - start_time))
+        if [ $elapsed_time -ge $timeout ]; then
+            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$messages_file"
+            echo "B"
+            return 1
+        fi
+
+        # Wait for log message update
+        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
+            continue
+        fi
+
+        # Get the last line of log file
+        local last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-        *"$B_L1 1"*) button_pressed="L1" ;;
-        *"$B_L2 1"*) button_pressed="L2" ;;
-        *"$B_R1 1"*) button_pressed="R1" ;;
-        *"$B_R2 1"*) button_pressed="R2" ;;
-        *"$B_X 1"*) button_pressed="X" ;;
-        *"$B_A 1"*) button_pressed="A" ;;
-        *"$B_B 1"*) button_pressed="B" ;;
-        *"$B_Y 1"*) button_pressed="Y" ;;
-        *"$B_UP 1"*) button_pressed="UP" ;;
-        *"$B_DOWN 1"*) button_pressed="DOWN" ;;
-        *"$B_LEFT 1"*) button_pressed="LEFT" ;;
-        *"$B_RIGHT 1"*) button_pressed="RIGHT" ;;
-        *"$B_START 1"*) button_pressed="START" ;;
-        *"$B_SELECT 1"*) button_pressed="SELECT" ;;
+            *"$B_L1"*) button_pressed="L1" ;;
+            *"$B_L2"*) button_pressed="L2" ;;
+            *"$B_R1"*) button_pressed="R1" ;;
+            *"$B_R2"*) button_pressed="R2" ;;
+            *"$B_X"*) button_pressed="X" ;;
+            *"$B_A"*) button_pressed="A" ;;
+            *"$B_B"*) button_pressed="B" ;;
+            *"$B_Y"*) button_pressed="Y" ;;
+            *"$B_UP"*) button_pressed="UP" ;;
+            *"$B_DOWN"*) button_pressed="DOWN" ;;
+            *"$B_LEFT"*) button_pressed="LEFT" ;;
+            *"$B_RIGHT"*) button_pressed="RIGHT" ;;
+            *"$B_START"*) button_pressed="START" ;;
+            *"$B_SELECT"*) button_pressed="SELECT" ;;
         esac
 
         if [ -n "$button_pressed" ]; then
+            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$messages_file"
             echo "$button_pressed"
             return 0
         fi
-        sleep 0.1
     done
-    echo "B"
+}
+
+# Returns the path of the current theme
+# Use by doing        theme_path=$(get_current_theme_path)
+# Use files inside themes to make your apps!
+get_current_theme_path() {
+    local config_file="/config/system.json"
+
+    # check if config file exists
+    if [ ! -f "$config_file" ]; then
+        echo "Error: Configuration file not found at $config_file"
+        return 1
+    fi
+
+    # extract "theme" from JSON
+    local theme_name
+    theme_name=$(jq -r '.theme' "$config_file")
+
+    # check if "theme" is empty
+    if [ -z "$theme_name" ]; then
+        echo "Error: Could not retrieve theme name from $config_file"
+        return 1
+    fi
+
+    echo "$theme_name"
+}
+
+# To support themes in your apps do         [   eval "$(get_current_theme)"    ]
+# Doing this will unlock dynamic variables that will give you fast access to some
+# common theme files and values. These dynamic variable are: $THEME_PATH, $THEME_BG etc.
+#
+# Code example:
+#
+# eval "$(get_current_theme)"
+# echo "Current theme path:         $THEME_PATH"
+# echo "Background image path:      $THEME_BG"
+# echo "Font path:                  $THEME_FONT"
+# echo "Font size:                  $THEME_FONT_SIZE"
+# echo "Font color:                 $THEME_FONT_COLOR"
+# echo "Left arrow icon:            $THEME_LEFT"
+# echo "Right arrow icon:           $THEME_RIGHT"
+# echo "Logo:                       $THEME_LOGO"
+# echo "OK icon:                    $THEME_OK"
+# echo "Home button icon:           $THEME_HOME"
+# echo "A button icon:              $THEME_A"
+# echo "B button icon:              $THEME_B"
+# echo "L2 button icon:             $THEME_L2"
+# echo "R2 button icon:             $THEME_R2"
+# echo "X button icon:              $THEME_X"
+# echo "Y button icon:              $THEME_Y"
+# echo "START button icon:          $THEME_START"
+# echo "Information icon:           $THEME_INFO"
+# echo "Folder icon:                $THEME_FOLDER"
+# echo "SD/TF card icon:            $THEME_SD"
+# echo "Wifi icon:                  $THEME_WIFI"
+# echo "Shutdown icon:              $THEME_SHUTDOWN"
+# echo "Reset icon:                 $THEME_RESET"
+# echo "Star icon:                  $THEME_STAR"
+# echo "Expert Apps icon:           $THEME_EXPERT_APPS"
+get_current_theme() {
+    # gets current theme path
+    local theme_path
+    theme_path=$(get_current_theme_path)
+    local json_path
+    json_path="$theme_path/config.json"
+
+    # checks if path exists
+    if [ -d "$theme_path" ]; then
+        # Export theme paths
+        echo "THEME_PATH=\"$theme_path\""
+        echo "THEME_BG=\"$theme_path/skin/background.png\""
+        echo "THEME_LEFT=\"$theme_path/skin/icon-left-arrow-24.png\""
+        echo "THEME_RIGHT=\"$theme_path/skin/icon-right-arrow-24.png\""
+        echo "THEME_LOGO=\"$theme_path/skin/app-loading-05.png\"" #need to discuss this
+        echo "THEME_OK=\"$theme_path/skin/icon-OK.png\""
+        echo "THEME_HOME=\"$theme_path/skin/ic-MENU.png\""
+        echo "THEME_A=\"$theme_path/skin/icon-A-54.png\""
+        echo "THEME_B=\"$theme_path/skin/icon-B-54.png\""
+        echo "THEME_L2=\"$theme_path/skin/icon-L2.png\""
+        echo "THEME_R2=\"$theme_path/skin/icon-R2.png\""
+        echo "THEME_X=\"$theme_path/skin/icon-x.png\""
+        echo "THEME_Y=\"$theme_path/skin/icon-y.png\""
+        echo "THEME_START=\"$theme_path/skin/icon-START.png\""
+        echo "THEME_INFO=\"$theme_path/skin/icon-device-info-48.png\""
+        echo "THEME_FOLDER=\"$theme_path/skin/icon-folder.png\""
+        echo "THEME_SD=\"$theme_path/skin/icon-TF.png\""
+        echo "THEME_WIFI=\"$theme_path/skin/icon-setting-wifi.png\""
+        echo "THEME_SHUTDOWN=\"$theme_path/skin/icon-Shutdown.png\""
+        echo "THEME_RESET=\"$theme_path/skin/icon-factory-reset-48.png\""
+        echo "THEME_STAR=\"$theme_path/skin/nav-favorite-f.png\""
+        echo "THEME_EXPERT_APPS=\"$theme_path/icons/App/expertappswitch.png\""
+
+        # Extract values from config JSON using jq
+        if [ -f "$json_path" ]; then
+            THEME_FONT_TITLE=$(jq -r '.list.font' "$json_path")
+            THEME_FONT="$theme_path/$THEME_FONT_TITLE"
+            THEME_FONT_SIZE=$(jq -r '.list.size' "$json_path")
+            THEME_FONT_COLOR=$(jq -r '.list.color' "$json_path")
+
+            echo "THEME_FONT=\"$THEME_FONT\""
+            echo "THEME_FONT_SIZE=\"$THEME_FONT_SIZE\""
+            echo "THEME_FONT_COLOR=\"$THEME_FONT_COLOR\""
+        else
+            echo "Error: JSON config file not found at $json_path."
+            return 1
+        fi
+    else
+        echo "Error: theme located in $theme_path doesn't exist."
+        return 1
+    fi
 }
 
 get_event() {
@@ -523,21 +650,21 @@ get_version() {
 
 get_version_nightly() {
     local base_version=$(get_version)
-    
+
     # Ensure we got a valid base version
     if [ -z "$base_version" ] || [ "$base_version" = "0" ]; then
         echo "$base_version"
         return 1
     fi
-    
+
     local nightly_pattern="/mnt/SDCARD/${base_version}-*"
-    
+
     # List all matching files and log them
     local matching_files=$(ls $nightly_pattern 2>/dev/null)
-    
+
     # Find any matching nightly version file
     local nightly_file=$(ls $nightly_pattern 2>/dev/null | head -n 1)
-    
+
     if [ -n "$nightly_file" ]; then
         local nightly_version=$(basename "$nightly_file")
         echo "$nightly_version"
@@ -614,7 +741,7 @@ qr_code() {
     local size=3
     local level="M"
     local output="/mnt/SDCARD/spruce/tmp/qr.png"
-    
+
     # Parse arguments
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -626,13 +753,13 @@ qr_code() {
         esac
         shift
     done
-    
+
     # Ensure text is provided
     if [ -z "$text" ]; then
         log_message "QR Code error: No text provided" -v
         return 1
     fi
-    
+
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
@@ -655,37 +782,102 @@ read_only_check() {
     fi
 }
 
+
+# Start screen recording with audio
+# Usage: record_start [output_file] [timeout_minutes]
+# If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
+# If no timeout is specified, defaults to 5 minutes
+record_start() {
+    local output_file="$1"
+    local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
+    local date_str=$(date +%Y-%m-%d_%H-%M-%S)
+    set_performance
+    # Prevent the CPU from being clocked down while recording
+    flag_add "setting_cpu"
+
+    # If no output file specified, create one with timestamp
+    if [ -z "$output_file" ]; then
+        output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
+    fi
+
+    # Start ffmpeg recording
+    ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
+        -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
+        -c:a aac -b:a 80k -ac 1 \
+        -t $((timeout_minutes * 60)) "$output_file" &
+
+    # Store PID for later use
+    echo $! > "/tmp/ffmpeg_recording.pid"
+
+    log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
+
+    # Set up automatic stop after timeout
+    (
+        sleep $((timeout_minutes * 60))
+        if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+            record_stop
+        fi
+    ) &
+}
+
+# Stop current screen recording
+# Usage: record_stop
+record_stop() {
+    if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+        local pid=$(cat "/tmp/ffmpeg_recording.pid")
+        kill $pid 2>/dev/null
+        rm "/tmp/ffmpeg_recording.pid"
+        flag_remove "setting_cpu"
+        log_message "Stopped recording" -v
+    else
+        log_message "No active recording found" -v
+    fi
+}
+
+
 set_smart() {
-    cores_online
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
-    echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
-    echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
-    echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-    echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-    echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to SMART" -v
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        cores_online
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
+        echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
+        echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
+        echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
+        echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
+        echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to SMART" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 set_performance() {
-    cores_online
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to PERFORMANCE" -v
-
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        cores_online
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to PERFORMANCE" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 set_overclock() {
-    chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
-    chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    log_message "CPU Mode now locked to OVERCLOCK" -v
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        log_message "CPU Mode now locked to OVERCLOCK" -v
+        flag_remove "setting_cpu"
+    fi
 }
 
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
+SIMPLE_CFG_FILE="/mnt/SDCARD/spruce/settings/simple_mode.cfg"
 
 # For simple settings that use 0/1 putting this in an if statement is the easiest usage
 # For complex values, you can use setting_get and then use the value in your script by capturing it
@@ -694,9 +886,18 @@ CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 #    if [ "$VALUE" = "complex value" ]; then
 #        do complex tasks
 #    fi
+#
+# If simple_mode.lock exists, this function will look to simple_mode.cfg to see if the setting is defined, before looking for that setting in the standard spruce.cfg
 setting_get() {
     [ $# -eq 1 ] || return 1
-    value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2)
+
+    if flag_check "simple_mode" && grep -q "$1" "$SIMPLE_CFG_FILE"; then
+        CFG="$SIMPLE_CFG_FILE"
+    else
+        CFG="$CFG_FILE"
+    fi
+
+    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2)
     if [ -z "$value" ]; then
         echo ""
         return 1
@@ -788,6 +989,3 @@ vibrate() {
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
 }
-
-
-

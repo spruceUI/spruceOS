@@ -2,6 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
+
 # ==========================================================
 # Box Art Scraper Script
 # ==========================================================
@@ -208,24 +210,31 @@ messages_file="/var/log/messages"
 system_config_file="/config/system.json"
 roms_dir="/mnt/SDCARD/Roms"
 
-# Function to show splash screen
-display_image() {
-    local image_path="$status_img_dir/$1.png"
-    if [ -f "$image_path" ]; then
-        display -i "$image_path"
-    else
-        display -i "$status_img_dir/generic.png"
-    fi
-}
-display_image "generic"
+display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
-# Check for Wi-Fi and active connection
+# Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
-if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 thumbnails.libretro.com > /dev/null 2>&1; then
-    log_message "BoxartScraper: No active network connection, exiting."
-	display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No active network connection detected, exiting..."
-    sleep 3
+if [ "$wifi_enabled" -eq 0 ]; then
+    log_message "BoxartScraper: WiFi is disabled in system settings"
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "WiFi is disabled in system settings" -o
     exit
+fi
+
+# Ping google DNS to check for internet connection
+if ! ping -c 2 8.8.8.8 > /dev/null 2>&1; then
+    log_message "BoxartScraper: No internet connection detected"
+    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No internet connection detected" -o
+    exit
+fi
+
+# Check if the thumbnails service is accessible, if not try to fall back to GitHub libretro-thumbnails
+if ! ping -c 2 thumbnails.libretro.com > /dev/null 2>&1; then
+    log_message "BoxartScraper: Libretro thumbnail service unavailable, attempting fallback"
+    if ! ping -c 2 github.com > /dev/null 2>&1; then
+        log_message "BoxartScraper: GitHub unreachable"
+        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Libretro thumbnail service is currently unavailable. Please try again later." -o
+        exit
+    fi
 fi
 
 # Set CPU governor to performance mode
@@ -247,9 +256,14 @@ for sys_dir in "$roms_dir"/*/; do
         continue
     fi
 
-    display_image "$sys_name"
-
     get_extensions "$sys_name"
+
+    amount_games="$(find "$sys_dir" -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$" | wc -l)"
+    sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
+    icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
+
+    display --icon "$icon_path" -t "System: $sys_label 
+    Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
@@ -264,7 +278,7 @@ for sys_dir in "$roms_dir"/*/; do
         # Check if the user pressed B to exit
         if tail -n1 "$messages_file" | grep -q "key 1 29"; then
             log_message "BoxartScraper: User pressed B, exiting."
-            display_image "user_exit" -d 3
+            display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             exit
         fi
@@ -296,8 +310,16 @@ for sys_dir in "$roms_dir"/*/; do
         fi
 
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
+        fallback_url=$(echo "https://raw.githubusercontent.com/libretro-thumbnails/$(echo "$ra_name" | sed 's/ /_/g')/master/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g') 
         log_message "BoxartScraper: Downloading $boxart_url" -v
-        curl -k -s -o "$image_path" "$boxart_url" || rm -f "$image_path" # Remove image if not found
+        if ! curl -k -s -o "$image_path" "$boxart_url"; then
+            log_message "BoxartScraper: failed to scrape $boxart_url, falling back to libretro thumbnails GitHub repo."
+            rm -f "$image_path"
+            if ! curl -k -s -o "$image_path" "$fallback_url"; then
+                log_message "BoxartScraper: failed to scrape $fallback_url."
+                rm -f "$image_path"
+            fi
+        fi
 
         if [ -f "$image_path" ]; then
             scraped_count=$((scraped_count + 1))

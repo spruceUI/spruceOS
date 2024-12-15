@@ -37,7 +37,7 @@ start_idlemon() {
       # Kill all processes with 'idlemon' and 'MainUI' in the name
 	  pgrep -f 'idlemon.*MainUI' | xargs kill -9
 	  # Start idlemon for in_menu with MainUI
-      idlemon -p MainUI -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i > /dev/null &
+      idlemon -p "MainUI,switcher" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i > /dev/null &
       ;;
 
     in_game)

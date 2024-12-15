@@ -8,8 +8,14 @@ SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 display -i "$BG" -t "Core changed to gearsystem"
 
-sed -i 's|"Emu Core: genesis+gx-(✓PICODRIVE)-gearsystem"|"Emu Core: genesis+gx-picodrive-(✓GEARSYSTEM)"|g' "$CONFIG"
-sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|g' "$CONFIG"
+if [ "$EMU_NAME" = "MS" ] || [ "$EMU_NAME" = "GG" ]; then
+    sed -i 's|"Emu Core: genesis+gx-(✓PICODRIVE)-gearsystem"|"Emu Core: genesis+gx-picodrive-(✓GEARSYSTEM)"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|g' "$CONFIG"
+elif [ "$EMU_NAME" = "SEGASGONE" ]; then
+    sed -i 's|"Emu Core: genesis+gx-(✓BLUEMSX)-gearsystem"|"Emu Core: genesis+gx-bluemsx-(✓GEARSYSTEM)"|g' "$CONFIG"
+    sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/core/gearsystem.sh"|"/mnt/SDCARD/Emu/.emu_setup/core/genesis_plus_gx.sh"|g' "$CONFIG"
+fi
+
 sed -i 's|CORE=.*|CORE=\"gearsystem\"|g' "$SYS_OPT"
 
 sleep 2

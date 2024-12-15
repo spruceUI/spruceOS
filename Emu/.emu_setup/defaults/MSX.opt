@@ -3,4 +3,4 @@
 export CORE="bluemsx"
 export MODE="smart"
 
-export scaling_min_freq=480000
+export scaling_min_freq=408000

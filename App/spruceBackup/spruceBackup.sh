@@ -62,9 +62,12 @@ folders="
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/PICO8/bin
+/mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
 /mnt/SDCARD/Emu/.emu_setup/overrides
 /mnt/SDCARD/Emu/NDS/backup
+/mnt/SDCARD/Emu/NDS/config
 /mnt/SDCARD/Emu/NDS/savestates
+/mnt/SDCARD/Emu/NDS/resources/settings.json
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay

@@ -14,8 +14,14 @@ export LD_LIBRARY_PATH=lib:$LD_LIBRARY_PATH
 #    THEME_PATH="${THEME_PATH}/"
 #fi
 
+# set stick to d-pad mode
+killall -q -USR2 joystickinput
+
 cd $HOME
 ./DinguxCommander #--res-dir ${THEME_PATH} || ./DinguxCommander --res-dir /mnt/SDCARD/Themes/SPRUCE
 sync
+
+# set stick to d-pad mode
+killall -q -USR2 joystickinput
 
 auto_regen_tmp_update

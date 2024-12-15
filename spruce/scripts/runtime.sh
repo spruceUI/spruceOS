@@ -129,11 +129,18 @@ cd ${BIN_DIR}
 ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
 # run game switcher watchdog before auto load game is loaded
-${SCRIPTS_DIR}/gameswitcher_watchdog.sh &
+${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
-check_and_handle_firmware_app &
+# start watchdog for konami code
+${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 
-check_and_hide_update_app &
+# don't hide or unhide apps in simple_mode
+if ! flag_check "simple_mode"; then
+    check_and_handle_firmware_app &
+    check_and_hide_update_app &
+fi
+
+check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
 ${SCRIPTS_DIR}/low_power_warning.sh &
 
