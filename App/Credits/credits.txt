@@ -5,6 +5,7 @@ The Current Team (Alphabetical order):
    - Cobaltdsc4102
    - Decojon
    - Fragbait79
+   - KMFDManic
    - Oscarkcau
    - Ry
    - SundownerSport
@@ -16,7 +17,9 @@ The Current Team (Alphabetical order):
 Credits and Thanks:
 
 
-  - Tenlevels: Starting spruce, making kickass themes
+Tenlevels: 
+
+Starting spruce, making kickass themes
 and getting the A30 where it deserves to be! Spruce 
 would never have existed without him, we are eternally 
 grateful to the long hours and dedication he put in. 
@@ -65,6 +68,16 @@ and optimizations to SO MANY things.
 
 Cinethezs: LED App, show-battery-percentage,
 Credits App and so much more. 
+
+Ry: Game Nursery: Aka our simpler version of PortMaster
+
+Ry, XanXic: Simple Mode: Kiosk mode/Kid mode.
+
+XanXic: Sapling Guide.
+
+Cobalt: M3U Generator.
+
+Gerard Szulc: Added support for hidden networks to multipass.cfg. 
 
 Jim Gray: Retroarch removal from MainUI,
 the sick jams your dancing to now 
