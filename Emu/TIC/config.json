@@ -2,7 +2,7 @@
   "label": "TIC-80",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/tic.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/tic.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/TIC",
   "imgpath": "../../Roms/TIC/Imgs",
   "gamelist": "../../Roms/TIC/miyoogamelist.xml",

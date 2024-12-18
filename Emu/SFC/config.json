@@ -2,7 +2,7 @@
   "label": "SNES",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SFC",
   "imgpath": "../../Roms/SFC/Imgs",
   "gamelist": "../../Roms/SFC/miyoogamelist.xml",

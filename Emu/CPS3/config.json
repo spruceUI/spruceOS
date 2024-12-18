@@ -2,7 +2,7 @@
   "label": "CPS3",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps3.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/CPS3",
   "imgpath": "../../Roms/CPS3/Imgs",
   "gamelist": "../../Roms/CPS3/miyoogamelist.xml",

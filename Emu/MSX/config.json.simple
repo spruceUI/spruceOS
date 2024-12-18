@@ -2,7 +2,7 @@
   "label": "MSX",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MSX",
   "imgpath": "../../Roms/MSX/Imgs",
   "gamelist": "../../Roms/MSX/miyoogamelist.xml",

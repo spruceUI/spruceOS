@@ -2,7 +2,7 @@
   "label": "VIC-20",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/VIC20",
   "imgpath": "../../Roms/VIC20/Imgs",
   "gamelist": "../../Roms/VIC20/miyoogamelist.xml",

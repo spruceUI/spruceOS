@@ -2,7 +2,7 @@
   "label": "Sega 32X",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/32x.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/32x.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/THIRTYTWOX",
   "imgpath": "../../Roms/THIRTYTWOX/Imgs",
   "gamelist": "../../Roms/THIRTYTWOX/miyoogamelist.xml",

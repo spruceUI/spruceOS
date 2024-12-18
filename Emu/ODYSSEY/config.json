@@ -2,7 +2,7 @@
   "label": "Odyssey2",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ody.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ody.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/ODYSSEY",
   "imgpath": "../../Roms/ODYSSEY/Imgs",
   "gamelist": "../../Roms/ODYSSEY/miyoogamelist.xml",

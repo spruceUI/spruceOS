@@ -2,7 +2,7 @@
   "label": "Genesis",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/md.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/md.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MD",
   "imgpath": "../../Roms/MD/Imgs",
   "gamelist": "../../Roms/MD/miyoogamelist.xml",

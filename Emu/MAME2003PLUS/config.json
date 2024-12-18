@@ -2,7 +2,7 @@
   "label": "MAME 03+",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MAME2003PLUS",
   "imgpath": "../../Roms/MAME2003PLUS/Imgs",
   "gamelist": "../../Roms/MAME2003PLUS/miyoogamelist.xml",

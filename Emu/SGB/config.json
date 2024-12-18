@@ -2,7 +2,7 @@
   "label": "SGB",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgb.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgb.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SGB",
   "imgpath": "../../Roms/SGB/Imgs",
   "gamelist": "../../Roms/SGB/miyoogamelist.xml",

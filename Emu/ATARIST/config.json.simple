@@ -2,7 +2,7 @@
   "label": "Atari ST",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atarist.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atarist.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/ATARIST",
   "imgpath": "../../Roms/ATARIST/Imgs",
   "gamelist": "../../Roms/ATARIST/miyoogamelist.xml",

@@ -2,7 +2,7 @@
   "label": "MS-DOS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dos.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dos.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/DOS",
   "imgpath": "../../Roms/DOS/Imgs",
   "gamelist": "../../Roms/DOS/miyoogamelist.xml",

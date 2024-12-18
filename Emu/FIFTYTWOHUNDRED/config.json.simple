@@ -2,7 +2,7 @@
   "label": "Atari 5200",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/5200.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/5200.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/FIFTYTWOHUNDRED",
   "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs",
   "gamelist": "../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",

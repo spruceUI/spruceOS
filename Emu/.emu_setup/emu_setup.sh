@@ -15,13 +15,6 @@ else
 	log_message "emu_setup.sh: $OPT_DIR already exists"
 fi
 
-# copy standard RA launch scripts to all Emu subfolders
-for dir in $EMU_DIR/* ; do
-	if [ -d $dir ] && [ ! -f $dir/launch.sh ]; then
-		cp -f "$SETUP_DIR/redirect_launch.sh" "$dir/launch.sh" && log_message "emu_setup.sh: copied launch.sh to $dir"
-	fi
-done
-
 # move .config folder into place at SD root
 if [ ! -d "/mnt/SDCARD/.config" ]; then
 	if [ -d "$SETUP_DIR/.config" ]; then

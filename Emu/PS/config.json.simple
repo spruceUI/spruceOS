@@ -2,7 +2,7 @@
   "label": "PSX",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PS",
   "imgpath": "../../Roms/PS/Imgs",
   "gamelist": "../../Roms/PS/miyoogamelist.xml",
