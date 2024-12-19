@@ -39,9 +39,6 @@ check_and_move_p8_bins() {
     log_message "pico8_dyn found at SD root and moved into place"
 }
 
-DEV_TASK='"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""'
-
-
 developer_mode_task() {
     if flag_check "developer_mode" || flag_check "designer_mode"; then
         if setting_get "samba" || setting_get "dropbear"; then
