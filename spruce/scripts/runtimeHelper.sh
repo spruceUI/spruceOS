@@ -1,9 +1,13 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+
+# Brick doesn't have the required binaries for these yet.
+if [ "$PLATFORM" = "A30" ]; then
+    . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+    . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+    . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+fi
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {

@@ -26,7 +26,7 @@ if setting_get "runGSAtBoot" ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
-while [ 1 ]; do
+while [ "$PLATFORM" = "A30" ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
         log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
