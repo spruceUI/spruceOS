@@ -844,58 +844,58 @@ read_only_check() {
     fi
 }
 
-
-# Start screen recording with audio
-# Usage: record_start [output_file] [timeout_minutes]
+# Toggle screen recording with audio
+# Usage: record_video [output_file] [timeout_minutes]
 # If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
 # If no timeout is specified, defaults to 5 minutes
-record_start() {
-    local output_file="$1"
-    local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
-    local date_str=$(date +%Y-%m-%d_%H-%M-%S)
-    set_performance
-    # Prevent the CPU from being clocked down while recording
-    flag_add "setting_cpu"
-
-    # If no output file specified, create one with timestamp
-    if [ -z "$output_file" ]; then
-        output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
-    fi
-
-    # Start ffmpeg recording
-    ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
-        -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
-        -c:a aac -b:a 80k -ac 1 \
-        -t $((timeout_minutes * 60)) "$output_file" &
-
-    # Store PID for later use
-    echo $! > "/tmp/ffmpeg_recording.pid"
-
-    log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-
-    # Set up automatic stop after timeout
-    (
-        sleep $((timeout_minutes * 60))
-        if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-            record_stop
-        fi
-    ) &
-}
-
-# Stop current screen recording
-# Usage: record_stop
-record_stop() {
+record_video() {
     if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+        # Stop recording if one is in progress
+        vibrate 200
         local pid=$(cat "/tmp/ffmpeg_recording.pid")
         kill $pid 2>/dev/null
         rm "/tmp/ffmpeg_recording.pid"
         flag_remove "setting_cpu"
         log_message "Stopped recording" -v
+        sleep 1
+        display -t "Recording stopped" -d 3
     else
-        log_message "No active recording found" -v
+        # Start new recording
+        local output_file="$1"
+        local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
+        local date_str=$(date +%Y-%m-%d_%H-%M-%S)
+        set_performance
+        # Prevent the CPU from being clocked down while recording
+        flag_add "setting_cpu"
+
+        # If no output file specified, create one with timestamp
+        if [ -z "$output_file" ]; then
+            output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
+        fi
+
+        vibrate
+        sleep 0.1
+        vibrate
+        # Start ffmpeg recording
+        ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
+            -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
+            -c:a aac -b:a 80k -ac 1 \
+            -t $((timeout_minutes * 60)) "$output_file" &
+
+        # Store PID for later use
+        echo $! > "/tmp/ffmpeg_recording.pid"
+
+        log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
+
+        # Set up automatic stop after timeout
+        (
+            sleep $((timeout_minutes * 60))
+            if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+                record_video
+            fi
+        ) &
     fi
 }
-
 
 set_smart() {
     if ! flag_check "setting_cpu"; then
@@ -1050,4 +1050,40 @@ vibrate() {
     else
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
+}
+
+# Takes a screenshot and saves it to the specified path
+# Usage: take_screenshot [output_path] [game_name]
+# If no output_path is provided, saves to /mnt/SDCARD/Saves/screenshots/
+# If game_name is provided, it will be used as the filename (without extension)
+take_screenshot() {
+    local output_path="${1:-/mnt/SDCARD/Saves/screenshots}"
+    local game_name="$2"
+    local screenshot_path
+
+    # Ensure the screenshots directory exists
+    mkdir -p "$output_path"
+
+    # If game name provided, use it for filename
+    if [ -n "$game_name" ]; then
+        screenshot_path="$output_path/${game_name}.png"
+    else
+        # Generate timestamp-based filename if no game name
+        local timestamp=$(date +%Y%m%d_%H%M%S)
+        screenshot_path="$output_path/screenshot_${timestamp}.png"
+    fi
+
+    # Copy framebuffer to temp file
+    cp /dev/fb0 /tmp/fb0
+    vibrate 50
+    # Convert and compress framebuffer to PNG in background
+    # -a: auto detection of framebuffer device
+    # -f: source file
+    # -w: width
+    # -h: height  
+    # -b: bits per pixel
+    # -l: line length in pixels
+    $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$screenshot_path" 2>/dev/null &
+
+    log_message "Screenshot saved to: $screenshot_path" -v
 }
