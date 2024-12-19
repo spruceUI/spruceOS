@@ -48,7 +48,12 @@ if [ "$PLATFORM" = "A30" ]; then
     # Stop NTPD
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 
-elif [ $PLATFORM = "Brick" ]; then
+elif [ "$PLATFORM" = "Brick" ]; then
+
+    SDCARD_PATH="/mnt/SDCARD"
+    export HOME="${SDCARD_PATH}"
+    SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
+    BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
     export PATH="$SYSTEM_PATH/app:${PATH}"

@@ -121,7 +121,7 @@ elif [ "$PLATFORM" = "Brick" ]; then
     export B_VOLUP="key 1 115" # has actual key codes like the buttons
     export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU=""key 1 316""
+    export B_MENU="key 1 316"
 fi
 
 # Call this just by having "acknowledge" in your script
