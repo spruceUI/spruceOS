@@ -66,6 +66,10 @@ elif [ "$PLATFORM" = "Brick" ]; then
     [ ! -d "/mnt/SDCARD/RetroArch/.retroarch/cores" ] && mkdir "/mnt/SDCARD/RetroArch/.retroarch/cores"
     mount --bind "/mnt/SDCARD/RetroArch/.retroarch/cores-a133" "/mnt/SDCARD/RetroArch/.retroarch/cores"
 
+    # mount Brick themes to hide A30 ones
+    [ ! -d "/mnt/SDCARD/trimui/brickThemes" ] && mkdir "/mnt/SDCARD/trimui/brickThemes"
+    mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes"
+
 fi
 
 # Flag cleanup
