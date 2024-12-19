@@ -59,7 +59,7 @@ kill_current_app() {
             kill_emulator
         else
             rm /tmp/cmd_to_run.sh
-            
+
             # Look for any process running with "./" prefix
             for PID in /proc/[0-9]*; do
                 if grep -q "^\./\|^\./" "$PID/cmdline" 2>/dev/null; then
@@ -359,20 +359,24 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             take_screenshot
         fi
         ;;
-    # Don't react to dpad presses
-    *"key 1 105"*|*"key 1 106"*|*"key 1 103"*|*"key 1 108"*)
+    *"key 1 18 0"*)
+        if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "designer_mode" && flag_check "in_menu"; then
+            killall -q -9 MainUI
+        fi
         ;;
+    # Don't react to dpad presses
+    *"key 1 105"* | *"key 1 106"* | *"key 1 103"* | *"key 1 108"*) ;;
     # Any other key press while menu is held
     *"key"*)
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
             # Only remove homeheld flag if NOT in simple_mode and in_menu
             if ! { flag_check "simple_mode" && flag_check "in_menu"; }; then
                 rm -f "$TEMP_PATH/homeheld"
-                
+
                 # Resume paused processes
                 killall -q -CONT PPSSPPSDL pico8_dyn MainUI
                 send_virtual_key_R3 # Unpause RetroArch
-                
+
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
