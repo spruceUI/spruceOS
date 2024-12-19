@@ -47,6 +47,20 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # Stop NTPD
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
+
+elif [ $PLATFORM = "Brick" ]; then
+
+    export SYSTEM_PATH="${SDCARD_PATH}/trimui"
+    export PATH="$SYSTEM_PATH/app:${PATH}"
+
+    # Use same Emu folder for Miyoo and TrimUI devices
+    [ ! -d "/mnt/SDCARD/Emus" ] && mkdir "/mnt/SDCARD/Emus"
+    mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus"
+
+    # Use appropriate RA cores for the Brick
+    [ ! -d "/mnt/SDCARD/RetroArch/.retroarch/cores" ] && mkdir "/mnt/SDCARD/RetroArch/.retroarch/cores"
+    mount --bind "/mnt/SDCARD/RetroArch/.retroarch/cores-a133" "/mnt/SDCARD/RetroArch/.retroarch/cores"
+
 fi
 
 # Flag cleanup
@@ -179,15 +193,79 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/credits_watchdog.sh &
     developer_mode_task &
     update_checker &
+
+    update_notification
+
+elif [ $PLATFORM = "Brick" ]; then
+    export PATH=/usr/trimui/bin:$PATH
+    chmod a+x /usr/bin/notify
+
+    SDCARD_START_SCRIPTS_DIR=/mnt/SDCARD/System/starts
+    INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
+
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+
+    #wait for SDCARD mounted
+    mounted=$(cat /proc/mounts | grep SDCARD)
+    cnt=0
+    while [ "$mounted" == "" ] && [ $cnt -lt 6 ] ; do
+        sleep 0.5
+        cnt=$(expr $cnt + 1)
+        mounted=$(cat /proc/mounts | grep SDCARD)
+    done
+
+    if [ -d $SDCARD_START_SCRIPTS_DIR ] ; then
+    for f in $(ls $SDCARD_START_SCRIPTS_DIR/*.sh) ; do
+        chmod a+x "$f"
+        $f
+    done
+    fi
+
+    mkdir $INPUTD_SETTING_DIR_NAME
+
+    echo 1 > /sys/class/led_anim/effect_enable 
+    echo "FFFFFF" > /sys/class/led_anim/effect_rgb_hex_lr
+    echo 1 > /sys/class/led_anim/effect_cycles_lr
+    echo 1000 > /sys/class/led_anim/effect_duration_lr
+    echo 1 >  /sys/class/led_anim/effect_lr
+
+    syslogd -S
+
+    /etc/bluetooth/bluetoothd start
+
+    usbmode=$(/usr/trimui/bin/systemval usbmode)
+
+    if [ "$usbmode" == "dock" ] ; then
+        /usr/trimui/bin/usb_dock.sh
+    elif [ "$usbmode" == "host" ] ; then
+        /usr/trimui/bin/usb_host.sh
+    else
+        /usr/trimui/bin/usb_device.sh
+    fi
+
+    wifion=$(/usr/trimui/bin/systemval wifi)
+    if [ "$wifion" != "1" ] ; then
+        ifconfig wlan0 down
+        killall -15 wpa_supplicant
+        killall -9 udhcpc    
+    fi
 fi
 
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart
-
-if [ "$PLATFORM" = "A30" ]; then
-    update_notification
-fi
 
 # start main loop
 log_message "Starting main loop"
