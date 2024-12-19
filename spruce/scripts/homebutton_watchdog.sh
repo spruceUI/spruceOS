@@ -347,22 +347,16 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             log_message "Exit hotkey hit"
         fi
         ;;
-    # R1 in menu starts recording
+    # R1 in menu toggles recording
     *"key 1 14 0"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
-            record_start
-            log_message "Developer recording started"
-            vibrate
-            sleep 0.1
-            vibrate
+            record_video &
         fi
         ;;
-    # R2 in menu stops recording
+    # R2 take screenshot
     *"key 1 20 0"*)
-        if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
-            vibrate 200
-            record_stop &
-            log_message "Developer recording stopped"
+        if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode" || flag_check "designer_mode"; }; then
+            take_screenshot
         fi
         ;;
     # Don't react to dpad presses
