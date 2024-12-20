@@ -1,7 +1,11 @@
 {
   "label": "Pokemini",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
+  "background":"",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/POKE",
   "imgpath": "../../Roms/POKE/Imgs",

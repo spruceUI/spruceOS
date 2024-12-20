@@ -5,7 +5,11 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+
+if [ "$PLATFORM" = "A30" ]; then
+	. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+fi
+
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
@@ -53,49 +57,52 @@ if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
-wifi_needed=false
-syncthing_enabled=false
-wifi_connected=false
+if [ "$PLATFORM" = "A30" ]; then
 
-##### RAC Check
-if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-    log_message "Retro Achievements enabled, WiFi connection needed"
-    wifi_needed=true
-fi
+	wifi_needed=false
+	syncthing_enabled=false
+	wifi_connected=false
 
-##### Syncthing Sync Check, perform only once per session #####
-if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
-    log_message "Syncthing is enabled, WiFi connection needed"
-    wifi_needed=true
-    syncthing_enabled=true
-fi
+	##### RAC Check
+	if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+		log_message "Retro Achievements enabled, WiFi connection needed"
+		wifi_needed=true
+	fi
 
-# Connect to WiFi if needed for any service
-if $wifi_needed; then
-    if check_and_connect_wifi; then
-        wifi_connected=true
-    fi
-fi
+	##### Syncthing Sync Check, perform only once per session #####
+	if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
+		log_message "Syncthing is enabled, WiFi connection needed"
+		wifi_needed=true
+		syncthing_enabled=true
+	fi
 
-# Handle Syncthing sync if enabled
-if $syncthing_enabled && $wifi_connected; then
-    start_syncthing_process
-    /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-    flag_add "syncthing_startup_synced"
+	# Connect to WiFi if needed for any service
+	if $wifi_needed; then
+		if check_and_connect_wifi; then
+			wifi_connected=true
+		fi
+	fi
 
-fi
+	# Handle Syncthing sync if enabled
+	if $syncthing_enabled && $wifi_connected; then
+		start_syncthing_process
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+		flag_add "syncthing_startup_synced"
 
-# Handle network service disabling
-if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
-    /mnt/SDCARD/spruce/scripts/networkservices.sh off
-    
-    if setting_get "disableWifiInGame"; then
-        if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
-            ifconfig wlan0 down &
-        fi
-        killall wpa_supplicant
-        killall udhcpc
-    fi
+	fi
+
+	# Handle network service disabling
+	if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
+		/mnt/SDCARD/spruce/scripts/networkservices.sh off
+		
+		if setting_get "disableWifiInGame"; then
+			if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
+				ifconfig wlan0 down &
+			fi
+			killall wpa_supplicant
+			killall udhcpc
+		fi
+	fi
 fi
 
 flag_add 'emulator_launched'
@@ -272,7 +279,9 @@ case $EMU_NAME in
 			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
 		fi
 
-		if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+				export RA_BIN="ra64.trimui"
+		elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 			export RA_BIN="retroarch"
 		else
 			export RA_BIN="ra32.miyoo"

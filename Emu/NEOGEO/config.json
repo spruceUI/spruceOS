@@ -1,7 +1,11 @@
 {
   "label": "NeoGeo",
+	"icontop": "../_theme/ic-neogeo.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neogeo.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neogeo.png",
+ 	"background": "../_theme/bg-neogeo.png",
+	"themecolor": "FFD200",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NEOGEO",
   "imgpath": "../../Roms/NEOGEO/Imgs",

@@ -1,7 +1,11 @@
 {
   "label": "Vectrex",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vectrex.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vectrex.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/VECTREX",
   "imgpath": "../../Roms/VECTREX/Imgs",

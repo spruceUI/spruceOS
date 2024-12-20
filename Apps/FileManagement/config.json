@@ -1,0 +1,9 @@
+{
+"package":"com.retroarch.dummy",
+"label":"File Management",
+"label.ch.lang":"",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"View and edit files on your SD card"
+}

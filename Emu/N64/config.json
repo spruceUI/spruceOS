@@ -1,7 +1,11 @@
 {
   "label": "N64",
+  "icontop":"../_theme/ic-n64.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
+  "background":"../_theme/bg-n64.png",
+  "themecolor":"FFFF88",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/N64",
   "imgpath": "../../Roms/N64/Imgs",

@@ -1,7 +1,11 @@
 {
   "label": "FDS",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fds.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fds.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/FDS",
   "imgpath": "../../Roms/FDS/Imgs",

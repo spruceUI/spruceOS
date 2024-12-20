@@ -1,7 +1,11 @@
 {
   "label": "Media",
+  "icontop":"../_theme/ic-ffmpeg.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
+  "background":"../_theme/bg-ffmpeg.png",
+  "themecolor":"DDEEFF",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MEDIA",
   "imgpath": "../../Roms/MEDIA/Imgs",

@@ -1,7 +1,10 @@
 {
   "label": "Pico-8",
+  "icontop":"../_theme/ic-pico8.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+  "themecolor": "00FF88",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PICO8",
   "imgpath": "../../Roms/PICO8",

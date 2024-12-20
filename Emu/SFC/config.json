@@ -1,7 +1,11 @@
 {
   "label": "SNES",
+  "icontop":"../_theme/ic-sfc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
+  "background":"../_theme/bg-sfc.png",
+  "themecolor":"FF0000",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SFC",
   "imgpath": "../../Roms/SFC/Imgs",

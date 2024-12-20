@@ -1,7 +1,11 @@
 {
   "label": "PSX",
+  "icontop":"../_theme/ic-ps.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
+  "background":"../_theme/bg-ps.png",
+  "themecolor":"00FF00",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PS",
   "imgpath": "../../Roms/PS/Imgs",

@@ -58,13 +58,16 @@ elif [ "$PLATFORM" = "Brick" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
     export PATH="$SYSTEM_PATH/app:${PATH}"
 
-    # Use same Emu folder for Miyoo and TrimUI devices
+    # Use Emu folder for Miyoo and TrimUI devices despite different name schemes
     [ ! -d "/mnt/SDCARD/Emus" ] && mkdir "/mnt/SDCARD/Emus"
     mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus"
 
-    # Use appropriate RA cores for the Brick
-    [ ! -d "/mnt/SDCARD/RetroArch/.retroarch/cores" ] && mkdir "/mnt/SDCARD/RetroArch/.retroarch/cores"
-    mount --bind "/mnt/SDCARD/RetroArch/.retroarch/cores-a133" "/mnt/SDCARD/RetroArch/.retroarch/cores"
+    # Mask Roms/PORTS with Brick version
+    [ ! -d "/mnt/SDCARD/Roms/PORTS-Brick" ] && mkdir "/mnt/SDCARD/Roms/PORTS-Brick"
+    mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS"
+
+    # Use appropriate RA config
+    [ -f "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg"
 
     # mount Brick themes to hide A30 ones
     [ ! -d "/mnt/SDCARD/trimui/brickThemes" ] && mkdir "/mnt/SDCARD/trimui/brickThemes"
