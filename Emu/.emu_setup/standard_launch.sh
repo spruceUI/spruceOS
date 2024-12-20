@@ -253,14 +253,22 @@ case $EMU_NAME in
 			
 			./PPSSPPSDL "$ROM_FILE"
 		else
-			if setting_get "expertRA"; then
+			if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+					export RA_BIN="ra64.trimui"
+			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch"
 			else
 				export RA_BIN="ra32.miyoo"
 			fi
 			RA_DIR="/mnt/SDCARD/RetroArch"
 			cd "$RA_DIR"
-			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+
+			if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+				CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+			else
+				CORE_DIR="$RA_DIR/.retroarch/cores"
+			fi
+			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 		fi
 		;;
 	
@@ -289,7 +297,13 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+			CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+		else
+			CORE_DIR="$RA_DIR/.retroarch/cores"
+		fi
+
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 
 		# Backup custom N64 controller profile if necessary
 		if [ $EMU_NAME = "N64" ]; then
