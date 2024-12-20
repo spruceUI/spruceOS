@@ -1,7 +1,7 @@
 {
     "name":"TRIMUI Spruce",
-    "font":"regular.ttf",
-    "fontascii":"regular.ttf",
+    "font":"nunwen.ttf",
+    "fontascii":"nunwen.ttf",
     "fontsize":{
         "nav_font1":32,
         "nav_font2":24,
