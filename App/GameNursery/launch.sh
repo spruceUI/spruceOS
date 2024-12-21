@@ -8,6 +8,7 @@ BIN_PATH="/mnt/SDCARD/spruce/bin"
 CONFIG_DIR="/tmp/nursery-config"
 JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
+DEV_JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_test.7z"
 
 ##### FUNCTIONS #####
 
@@ -51,13 +52,29 @@ get_latest_jsons() {
     cd "$JSON_DIR"
     rm -r ./* 2>/dev/null
 
-    # Download and parse the release info file
-    if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
-        log_message "Game Nursery: Failed to download release info from $JSON_URL"
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
-        exit 1
+    if [ -f "/mnt/SDCARD/spruce/flags/developer_mode" ]; then
+        # Download and parse the release info file
+        if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$DEV_JSON_URL"; then
+            log_message "Game Nursery: Failed to download release info from $DEV_JSON_URL. Falling back to public release."
+            if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
+                log_message "Game Nursery: Failed to download release info from $JSON_URL"
+                display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
+                exit 1
+            else
+                log_message "Game Nursery: Info cache downloaded successfully"
+            fi
+        else
+            log_message "Game Nursery: Dev-exclusive info cache downloaded"
+        fi
     else
-        log_message "Game Nursery: Info cache downloaded successfully"
+        # Download and parse the release info file
+        if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
+            log_message "Game Nursery: Failed to download release info from $JSON_URL"
+            display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
+            exit 1
+        else
+            log_message "Game Nursery: Info cache downloaded successfully"
+        fi
     fi
 
     if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
