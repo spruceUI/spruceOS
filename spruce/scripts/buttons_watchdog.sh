@@ -2,9 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LOG_FILE="/var/log/messages"
-MAINUI_CONF_FILE="/config/system.json"
-TEMP_FILE="/tmp/tmp.file"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    MAINUI_CONF_FILE="/mnt/UDISK/system.json"
+else # assume A30
+    MAINUI_CONF_FILE="/config/system.json"
+fi
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"

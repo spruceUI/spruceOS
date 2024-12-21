@@ -20,7 +20,6 @@ cores_online &
 if [ "$PLATFORM" = "A30" ]; then
     echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    SETTINGS_FILE="/config/system.json"
     SWAPFILE="/mnt/SDCARD/cachefile"
     SDCARD_PATH="/mnt/SDCARD"
     SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"

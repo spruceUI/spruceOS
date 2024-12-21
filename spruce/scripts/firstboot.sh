@@ -2,7 +2,12 @@
 
 . "$HELPER_FUNCTIONS"
 
-SETTINGS_FILE="/config/system.json"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    SETTINGS_FILE="/mnt/UDISK/system.json"
+else # assume A30
+    SETTINGS_FILE="/config/system.json"
+fi
+
 SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 

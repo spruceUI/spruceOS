@@ -26,7 +26,13 @@ check_battery() {
 
 check_for_connection() {
 
-    wifi_enabled="$(jq -r '.wifi' "/config/system.json")"
+    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+        SYS_JSON="/mnt/UDISK/system.json"
+    else # assume A30
+        SYS_JSON="/config/system.json"
+    fi
+
+    wifi_enabled="$(jq -r '.wifi' "$SYS_JSON")"
     if [ $wifi_enabled -eq 0 ]; then
         display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Wi-Fi not enabled. You must enable Wi-Fi to download free games."
         exit 1

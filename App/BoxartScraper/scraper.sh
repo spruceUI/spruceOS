@@ -207,7 +207,13 @@ find_image_name() {
 # Directories and files
 status_img_dir="/mnt/SDCARD/App/BoxartScraper/Imgs"
 messages_file="/var/log/messages"
-system_config_file="/config/system.json"
+
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    system_config_file="/mnt/UDISK/system.json"
+else # assume A30
+    system_config_file="/config/system.json"
+fi
+
 roms_dir="/mnt/SDCARD/Roms"
 
 display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle

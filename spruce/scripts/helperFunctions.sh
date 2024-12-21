@@ -575,7 +575,12 @@ get_button_press() {
 # Use by doing        theme_path=$(get_current_theme_path)
 # Use files inside themes to make your apps!
 get_current_theme_path() {
-    local config_file="/config/system.json"
+
+    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+        local config_file="/mnt/UDISK/system.json"
+    else # assume A30
+        local config_file="/config/system.json"
+    fi
 
     # check if config file exists
     if [ ! -f "$config_file" ]; then

@@ -15,9 +15,14 @@ fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/app/"
-THEME_JSON_FILE="/config/system.json"
 SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
+
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    THEME_JSON_FILE="/mnt/UDISK/system.json"
+else # assume A30
+    THEME_JSON_FILE="/config/system.json"
+fi
 
 if [ ! -f "$THEME_JSON_FILE" ]; then
     exit 1
