@@ -1,3 +1,5 @@
+#!/bin/sh
+
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
