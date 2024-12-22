@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Function summaries:
 
 # acknowledge: Waits for user to press A, B, or Start button
@@ -30,6 +32,8 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
@@ -55,8 +59,15 @@ case $INFO in
     ;;
 esac
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+# add spruce/bin[64] folder to PATH
+case "$PLATFORM" in
+    "Brick" | "SmartPro" | "Flip" )
+        PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+        ;;
+    "A30" )
+        PATH="/mnt/SDCARD/spruce/bin:$PATH"
+        ;;
+esac
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
