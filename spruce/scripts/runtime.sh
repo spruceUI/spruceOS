@@ -201,10 +201,9 @@ if [ "$PLATFORM" = "A30" ]; then
     update_notification
 
 elif [ $PLATFORM = "Brick" ]; then
-    export PATH=/usr/trimui/bin:$PATH
-    chmod a+x /usr/bin/notify
 
-    SDCARD_START_SCRIPTS_DIR=/mnt/SDCARD/System/starts
+    export PATH="/usr/trimui/bin:$PATH"
+    chmod a+x /usr/bin/notify
     INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
 
     #PD11 pull high for VCC-5v
@@ -220,22 +219,6 @@ elif [ $PLATFORM = "Brick" ]; then
     #DIP Switch PH19
     echo 243 > /sys/class/gpio/export
     echo -n in > /sys/class/gpio/gpio243/direction
-
-    #wait for SDCARD mounted
-    mounted=$(cat /proc/mounts | grep SDCARD)
-    cnt=0
-    while [ "$mounted" == "" ] && [ $cnt -lt 6 ] ; do
-        sleep 0.5
-        cnt=$(expr $cnt + 1)
-        mounted=$(cat /proc/mounts | grep SDCARD)
-    done
-
-    if [ -d $SDCARD_START_SCRIPTS_DIR ] ; then
-    for f in $(ls $SDCARD_START_SCRIPTS_DIR/*.sh) ; do
-        chmod a+x "$f"
-        $f
-    done
-    fi
 
     mkdir $INPUTD_SETTING_DIR_NAME
 
