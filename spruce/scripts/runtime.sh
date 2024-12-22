@@ -29,7 +29,6 @@ if [ "$PLATFORM" = "A30" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
     export HOME="${SDCARD_PATH}"
-    export HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
     # Create directories and mount in parallel
     (
@@ -108,14 +107,14 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # Bring up network and services
     ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
+fi
 
-    # Check for first_boot flag and run ThemeUnpacker accordingly
-    if flag_check "first_boot"; then
-        ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
-        log_message "ThemeUnpacker started silently in background due to firstBoot flag"
-    else
-        ${SCRIPTS_DIR}/ThemeUnpacker.sh
-    fi
+# Check for first_boot flag and run ThemeUnpacker accordingly
+if flag_check "first_boot"; then
+    ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
+    log_message "ThemeUnpacker started silently in background due to firstBoot flag"
+else
+    ${SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
 
 {
@@ -134,12 +133,6 @@ if [ "$PLATFORM" = "A30" ]; then
             echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
         fi
     fi
-
-
-    # ensure keymon is running first and only listen to event3 for keyboard events
-    #keymon /dev/input/event3 &
-    # load watchdog for auto adjustment of brightness and volume when hotkey is using
-    #${SCRIPTS_DIR}/vb_watchdog.sh > /dev/null &
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &

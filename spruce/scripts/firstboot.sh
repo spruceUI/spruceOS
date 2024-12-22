@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$HELPER_FUNCTIONS"
+. "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
 if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     SETTINGS_FILE="/mnt/UDISK/system.json"
