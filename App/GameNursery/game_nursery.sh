@@ -52,29 +52,35 @@ get_latest_jsons() {
     cd "$JSON_DIR"
     rm -r ./* 2>/dev/null
 
+    download_json() {
+        local url="$1"
+        if curl -s -k -L -o "$JSON_DIR/INFO.7z" "$url"; then
+            return 0
+        fi
+        return 1
+    }
+
     if [ -f "/mnt/SDCARD/spruce/flags/developer_mode" ]; then
-        # Download and parse the release info file
-        if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$DEV_JSON_URL"; then
-            log_message "Game Nursery: Failed to download release info from $DEV_JSON_URL. Falling back to public release."
-            if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
+        # Check if dev JSONs exist and try to download them
+        if curl -s -k -L -I "$DEV_JSON_URL" 2>/dev/null | grep -q "200 OK" && download_json "$DEV_JSON_URL"; then
+            log_message "Game Nursery: Dev-exclusive info cache downloaded"
+        else
+            log_message "Game Nursery: Dev JSONs not found, falling back to release JSONs"
+            display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Dev JSON pack not found, falling back to release JSONs"
+            
+            if ! download_json "$JSON_URL"; then
                 log_message "Game Nursery: Failed to download release info from $JSON_URL"
                 display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
                 exit 1
-            else
-                log_message "Game Nursery: Info cache downloaded successfully"
             fi
-        else
-            log_message "Game Nursery: Dev-exclusive info cache downloaded"
         fi
     else
-        # Download and parse the release info file
-        if ! curl -s -k -L -o "$JSON_DIR/INFO.7z" "$JSON_URL"; then
+        if ! download_json "$JSON_URL"; then
             log_message "Game Nursery: Failed to download release info from $JSON_URL"
             display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
             exit 1
-        else
-            log_message "Game Nursery: Info cache downloaded successfully"
         fi
+        log_message "Game Nursery: Info cache downloaded successfully"
     fi
 
     if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
@@ -82,9 +88,8 @@ get_latest_jsons() {
         rm -f "$JSON_DIR/INFO.7z" >/dev/null 2>&1
         log_message "Game Nursery: Failed to extract release info from INFO.7z file"
         exit 1
-    else
-        log_message "Game Nursery: JSON extraction process completed successfully"
     fi
+    log_message "Game Nursery: JSON extraction process completed successfully"
 }
 
 interpret_json() {
