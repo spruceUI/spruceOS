@@ -165,20 +165,17 @@ check_for_update() {
 download_progress() {
     local filepath="$1"
     local total_size_mb="$2"
-    local title="${3:-Downloading update...}"  # New parameter with default value
-    # Add start time tracking
+    local title="${3:-Downloading update...}"
+    local grace_period="${4:-0}"
+    
     START_TIME=$(date +%s)
     local prev_size=0
     local downloadBar="/mnt/SDCARD/App/-OTA/imgs/downloadBar.png"
     local downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
-    # Bar slider, 0.15 is 0, 0.85 is 100
-    local fill_scale_int=15  # 0.15 * 100
-    
+    local fill_scale_int=15
 
-    # Convert MB to bytes (1MB = 1048576 bytes)
-    log_message "OTA: Total size: $total_size_mb MB"
-    log_message "OTA: Filepath: $filepath"
-    sleep 1
+    log_message "Downloader: Total size: $total_size_mb MB"
+    log_message "Downloader: Filepath: $filepath"
 
     # Wait for file to exist (30 second timeout)
     timeout_seconds=30
@@ -189,17 +186,29 @@ download_progress() {
         elapsed=$((current_time - start_time))
         
         if [ $elapsed -ge $timeout_seconds ]; then
-            log_message "OTA: Timeout reached after ${timeout_seconds}s - File not found: $filepath"
+            log_message "Downloader: Timeout reached after ${timeout_seconds}s - File not found: $filepath"
             return 1
         fi
-        
         sleep 1
     done
+
+    # Grace period check - if file completes within grace period, exit successfully
+    sleep "$grace_period"
+    
+    # After grace period, check if download is already complete
+    if [ -f "$filepath" ]; then
+        CURRENT_SIZE=$(ls -ln "$filepath" 2>/dev/null | awk '{print $5}')
+        CURRENT_SIZE_MB=$(($CURRENT_SIZE / 1048576))
+        if [ "$CURRENT_SIZE_MB" -ge "$total_size_mb" ]; then
+            log_message "Downloader: Download completed within grace period, skipping progress display"
+            return 0
+        fi
+    fi
 
     while true; do
         # Check if file exists
         if [ ! -f "$filepath" ]; then
-            log_message "File not found: $filepath"
+            log_message "Downloader: File not found: $filepath"
             return 1
         fi
 

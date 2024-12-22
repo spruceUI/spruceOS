@@ -19,7 +19,7 @@ BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
 
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
-download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" "Now downloading $GAME_NAME!" &
+download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" "Now downloading $GAME_NAME!" 10 &
 
 # Verify enough space to download current game
 
