@@ -179,6 +179,22 @@ download_progress() {
     log_message "OTA: Filepath: $filepath"
     sleep 1
 
+    # Wait for file to exist (30 second timeout)
+    timeout_seconds=30
+    start_time=$(date +%s)
+    
+    while [ ! -f "$filepath" ]; do
+        current_time=$(date +%s)
+        elapsed=$((current_time - start_time))
+        
+        if [ $elapsed -ge $timeout_seconds ]; then
+            log_message "OTA: Timeout reached after ${timeout_seconds}s - File not found: $filepath"
+            return 1
+        fi
+        
+        sleep 1
+    done
+
     while true; do
         # Check if file exists
         if [ ! -f "$filepath" ]; then
