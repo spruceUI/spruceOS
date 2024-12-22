@@ -165,6 +165,7 @@ check_for_update() {
 download_progress() {
     local filepath="$1"
     local total_size_mb="$2"
+    local title="${3:-Downloading update...}"  # New parameter with default value
     # Add start time tracking
     START_TIME=$(date +%s)
     local prev_size=0
@@ -231,18 +232,25 @@ download_progress() {
 
         PERCENTAGE=$(((CURRENT_SIZE_MB * 100) / total_size_mb))
 
-        log_message "OTA: Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
+        log_message "Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
 
         # Calculate fill_scale_int based on percentage (15 to 85 range)
-        # 0% = 15, 100% = 85, linear interpolation
         fill_scale_int=$((15 + (PERCENTAGE * 70 / 100)))
 
-        display -t "Downloading update...
+        if [ -n "$ETA_MSG" ]; then
+            display -t "$title
         
 
         
 $PERCENTAGE%
 $ETA_MSG" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+        else
+            display -t "$title
+        
+
+        
+$PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+        fi
 
         # Update previous size for next iteration
         prev_size=$CURRENT_SIZE
