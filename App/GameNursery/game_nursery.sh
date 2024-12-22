@@ -9,6 +9,7 @@ CONFIG_DIR="/tmp/nursery-config"
 JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
 DEV_JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_test.7z"
+JSON_CACHE_VALID_MINUTES=20
 
 ##### FUNCTIONS #####
 
@@ -50,7 +51,39 @@ show_slideshow_if_first_run() {
 get_latest_jsons() {
     mkdir "$JSON_DIR" 2>/dev/null
     cd "$JSON_DIR"
+    
+    NEEDS_CONFIG_REBUILD=0
+
+    # Dev mode always gets fresh files
+    if [ -f "/mnt/SDCARD/spruce/flags/developer_mode" ]; then
+        log_message "Game Nursery: Developer mode detected, skipping cache check"
+        rm -r ./* 2>/dev/null
+        NEEDS_CONFIG_REBUILD=1
+    # Check if files already exist and are within cache timeout
+    elif [ -f "$JSON_DIR/INFO.7z" ]; then
+        file_age_minutes=$(( ($(date +%s) - $(date -r "$JSON_DIR/INFO.7z" +%s)) / 60 ))
+        
+        if [ "$file_age_minutes" -lt "$JSON_CACHE_VALID_MINUTES" ]; then
+            # Check if we have at least one extracted directory with jsons
+            if [ -d "$JSON_DIR" ] && [ "$(find "$JSON_DIR" -mindepth 1 -type d)" ]; then
+                log_message "Game Nursery: Cache is valid (less than $JSON_CACHE_VALID_MINUTES minutes old)"
+                return 0
+            fi
+            # If no extracted files found, we'll continue to extraction but won't redownload
+            log_message "Game Nursery: Cache exists but needs extraction"
+            if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
+                rm -f "$JSON_DIR/INFO.7z" >/dev/null 2>&1
+                NEEDS_CONFIG_REBUILD=1
+            else
+                NEEDS_CONFIG_REBUILD=1
+                return 0
+            fi
+        fi
+    fi
+
+    # Clear directory only if we need to download new files
     rm -r ./* 2>/dev/null
+    NEEDS_CONFIG_REBUILD=1
 
     download_json() {
         local url="$1"
@@ -120,12 +153,19 @@ interpret_json() {
 }
 
 construct_config() {
-
     mkdir "$CONFIG_DIR" 2>/dev/null
     cd "$CONFIG_DIR"
+    
+    # Only keep existing config if we haven't downloaded new JSONs
+    if [ "$NEEDS_CONFIG_REBUILD" -eq 0 ] && [ -f "$CONFIG_DIR/nursery_config" ] && [ -s "$CONFIG_DIR/nursery_config" ]; then
+        log_message "Game Nursery: Using existing nursery_config"
+        return 0
+    fi
+
+    # Clear and rebuild if we get here
     rm -r ./* 2>/dev/null
 
-    # initialize nursery_config with constant definitions.
+    # initialize nursery_config with constant definitions
     echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$CONFIG_DIR"/nursery_config
     echo "\$DOWNLOAD=\/mnt\/SDCARD\/App\/GameNursery\/download_game.sh\$" >> "$CONFIG_DIR"/nursery_config
 
