@@ -1,9 +1,0 @@
-{
-"package":"com.retroarch.dummy",
-"label":"RetroArch",
-"label.ch.lang":"启动全能模拟器",
-"icontop":"ic-retroarch.png",
-"icon":"",
-"launch":"launch.sh",
-"description":"Boot RetroArch"
-}
