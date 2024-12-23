@@ -1,6 +1,6 @@
 {
   "label": "Random Game",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/Icons/App/random.png",
+  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/random.png",
   "launch": "launch.sh",
   "description": "Launch a random game"
 }

@@ -165,24 +165,50 @@ check_for_update() {
 download_progress() {
     local filepath="$1"
     local total_size_mb="$2"
-    # Add start time tracking
+    local title="${3:-Downloading update...}"
+    local grace_period="${4:-0}"
+    
     START_TIME=$(date +%s)
     local prev_size=0
     local downloadBar="/mnt/SDCARD/App/-OTA/imgs/downloadBar.png"
     local downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
-    # Bar slider, 0.15 is 0, 0.85 is 100
-    local fill_scale_int=15  # 0.15 * 100
-    
+    local fill_scale_int=15
 
-    # Convert MB to bytes (1MB = 1048576 bytes)
-    log_message "OTA: Total size: $total_size_mb MB"
-    log_message "OTA: Filepath: $filepath"
-    sleep 1
+    log_message "Downloader: Total size: $total_size_mb MB"
+    log_message "Downloader: Filepath: $filepath"
+
+    # Wait for file to exist (30 second timeout)
+    timeout_seconds=30
+    start_time=$(date +%s)
+    
+    while [ ! -f "$filepath" ]; do
+        current_time=$(date +%s)
+        elapsed=$((current_time - start_time))
+        
+        if [ $elapsed -ge $timeout_seconds ]; then
+            log_message "Downloader: Timeout reached after ${timeout_seconds}s - File not found: $filepath"
+            return 1
+        fi
+        sleep 1
+    done
+
+    # Grace period check - if file completes within grace period, exit successfully
+    sleep "$grace_period"
+    
+    # After grace period, check if download is already complete
+    if [ -f "$filepath" ]; then
+        CURRENT_SIZE=$(ls -ln "$filepath" 2>/dev/null | awk '{print $5}')
+        CURRENT_SIZE_MB=$(($CURRENT_SIZE / 1048576))
+        if [ "$CURRENT_SIZE_MB" -ge "$total_size_mb" ]; then
+            log_message "Downloader: Download completed within grace period, skipping progress display"
+            return 0
+        fi
+    fi
 
     while true; do
         # Check if file exists
         if [ ! -f "$filepath" ]; then
-            log_message "File not found: $filepath"
+            log_message "Downloader: File not found: $filepath"
             return 1
         fi
 
@@ -215,18 +241,25 @@ download_progress() {
 
         PERCENTAGE=$(((CURRENT_SIZE_MB * 100) / total_size_mb))
 
-        log_message "OTA: Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
+        log_message "Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)$ETA_MSG"
 
         # Calculate fill_scale_int based on percentage (15 to 85 range)
-        # 0% = 15, 100% = 85, linear interpolation
         fill_scale_int=$((15 + (PERCENTAGE * 70 / 100)))
 
-        display -t "Downloading update...
+        if [ -n "$ETA_MSG" ]; then
+            display -t "$title
         
 
         
 $PERCENTAGE%
 $ETA_MSG" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+        else
+            display -t "$title
+        
+
+        
+$PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+        fi
 
         # Update previous size for next iteration
         prev_size=$CURRENT_SIZE
