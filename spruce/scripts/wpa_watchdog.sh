@@ -1,9 +1,17 @@
 #!/bin/sh
 
+##### GENERAL #####
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-WPA_FILE="/config/wpa_supplicant.conf"
-TEMP_FILE="/config/wpa_supplicant_temp.conf"
+if [ "$PLATFORM" = "A30" ]; then
+    WPA_FILE="/config/wpa_supplicant.conf"
+    TEMP_FILE="/config/wpa_supplicant_temp.conf"
+elif [ "$PLATFORM" = "Brick" ]; then
+    WPA_FILE="/etc/wifi/wpa_supplicant.conf"
+    TEMP_FILE="/etc/wifi/wpa_supplicant_temp.conf"
+fi
+
 MULTIPASS="/mnt/SDCARD/multipass.cfg"
 
 # Check if the WPA file exists; create one if not
@@ -11,6 +19,8 @@ if [ ! -f "$WPA_FILE" ]; then
     log_message "Creating new $WPA_FILE"
     echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$WPA_FILE"
 fi
+
+##### MULTIPASS.CFG #####
 
 append_network_from_multipass() {
     echo ""
@@ -85,6 +95,8 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
 else
     log_message "No multipass.cfg file found at SD root. Aborting multipass import"
 fi
+
+##### MAINUI WI-FI GUI #####
 
 # Preserve the original WPA_FILE to TEMP_FILE on startup
 cp "$WPA_FILE" "$TEMP_FILE"
