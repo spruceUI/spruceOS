@@ -17,42 +17,9 @@ ZIP_NAME="$(basename "$GAME_URL")"
 BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
-download_progress() {
-    filepath="$1"
-    total_size_mb="$2"
-    downloadBar="/mnt/SDCARD/App/-OTA/imgs/downloadBar.png"
-    downloadFill="/mnt/SDCARD/App/-OTA/imgs/downloadFill.png"
-    # Bar slider, 0.15 is 0, 0.85 is 100
-    fill_scale_int=15  # 0.15 * 100
-    sleep 5
-    while true; do
 
-        # Get current size in bytes using POSIX-compliant ls -l
-        CURRENT_SIZE=$(ls -ln "$filepath" 2>/dev/null | awk '{print $5}')
-        CURRENT_SIZE_MB=$((CURRENT_SIZE / 1048576))
-
-        PERCENTAGE=$(((CURRENT_SIZE_MB * 100) / total_size_mb))
-
-        log_message "Game Nursery: Download progress: $PERCENTAGE% (Size: $CURRENT_SIZE_MB / $total_size_mb MB)"
-
-        # Calculate fill_scale_int based on percentage (15 to 85 range)
-        # 0% = 15, 100% = 85, linear interpolation
-        fill_scale_int=$((15 + (PERCENTAGE * 70 / 100)))
-
-        display -t "Now downloading $GAME_NAME!
-        
-
-        
-$PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
-
-        # Exit if download is complete (>= 99%)
-        if [ "$PERCENTAGE" -ge 99 ]; then
-            log_message "Download complete"
-            break
-        fi
-        sleep 5
-    done
-}
+. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" "Now downloading $GAME_NAME!" 10 &
 
 # Verify enough space to download current game
 
@@ -85,7 +52,7 @@ rm -r ./* 2>/dev/null
 
 log_message "Game Nursery: Attempting to download $GAME_NAME"
 display -i "$BG_IMG" -t "Now downloading $GAME_NAME!"
-download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" &
+download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" "Now downloading $GAME_NAME!" &
 download_pid=$!
 if ! curl -s -k -L -o "$TMP_DIR/$ZIP_NAME" "$GAME_URL"; then
 	kill $download_pid
