@@ -79,6 +79,12 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 fi
 
+# Disable stock USB file transfer app for Brick
+if [ "$PLATFORM" = "Brick" ]; then
+    USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
+    sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null
+fi
+
 if flag_check "themes_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
     while flag_check "themes_unpacking"; do
