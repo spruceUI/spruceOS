@@ -252,6 +252,14 @@ elif [ $PLATFORM = "Brick" ]; then
         killall -15 wpa_supplicant
         killall -9 udhcpc    
     fi
+
+    # check whether to run first boot procedure
+    if flag_check "first_boot_Brick"; then
+        "${SCRIPTS_DIR}/firstboot.sh"
+    else
+        log_message "First boot procedures skipped"
+    fi
+
 fi
 
 # Initialize CPU settings

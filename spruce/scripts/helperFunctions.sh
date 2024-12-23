@@ -381,6 +381,10 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
+
+    # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
+    [ "$PLATFORM" = "Brick" ] && return 20
+
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
