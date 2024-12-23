@@ -26,7 +26,7 @@ if setting_get "runGSAtBoot" ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 fi
 
-while [ 1 ]; do
+while [ "$PLATFORM" = "A30" ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
         log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
@@ -111,6 +111,51 @@ while [ 1 ]; do
     if flag_check "tmp_update_repair_attempted"; then
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
+    fi
+
+done
+
+runifnecessary(){
+    a=$(pgrep "$1")
+    if [ "$a" = "" ] ; then
+        $2 &
+    fi
+}
+
+while [ "$PLATFORM" = "Brick" ]; do
+
+    tinymix set 9 1
+    tinymix set 1 0
+    export LD_LIBRARY_PATH=/usr/trimui/lib
+    cd /usr/trimui/bin
+    runifnecessary "keymon" keymon
+    runifnecessary "inputd" trimui_inputd
+    runifnecessary "scened" trimui_scened
+    runifnecessary "trimui_btmanager" trimui_btmanager
+    runifnecessary "hardwareservice" hardwareservice
+    premainui.sh
+    MainUI
+    preload.sh
+
+    if [ -f /tmp/trimui_inputd_restart ] ; then
+        #restart before emulator run
+        killall -9 trimui_inputd
+        sleep 0.2
+        runifnecessary "inputd" trimui_inputd
+        rm /tmp/trimui_inputd_restart 
+    fi                                                                                         
+    if [ -f /tmp/cmd_to_run.sh ] ; then
+
+        set_performance
+        chmod a+x /tmp/cmd_to_run.sh
+        udpbcast -f /tmp/host_msg &
+        /tmp/cmd_to_run.sh
+        rm /tmp/cmd_to_run.sh
+        rm /tmp/host_msg
+        killall -9 udpbcast
+        # reset CPU settings to defaults in case an emulator changes anything
+        scaling_min_freq=1008000 ### default value, may be overridden in specific script
+        set_smart
     fi
 
 done

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Function summaries:
 
 # acknowledge: Waits for user to press A, B, or Start button
@@ -30,6 +32,8 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
@@ -55,8 +59,15 @@ case $INFO in
     ;;
 esac
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+# add spruce/bin[64] folder to PATH
+case "$PLATFORM" in
+    "Brick" | "SmartPro" | "Flip" )
+        PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+        ;;
+    "A30" )
+        PATH="/mnt/SDCARD/spruce/bin:$PATH"
+        ;;
+esac
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
@@ -121,7 +132,7 @@ elif [ "$PLATFORM" = "Brick" ]; then
     export B_VOLUP="key 1 115" # has actual key codes like the buttons
     export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU=""key 1 316""
+    export B_MENU="key 1 316"
 fi
 
 # Call this just by having "acknowledge" in your script
@@ -370,6 +381,10 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
+
+    # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
+    [ "$PLATFORM" = "Brick" ] && return 20
+
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
@@ -575,7 +590,12 @@ get_button_press() {
 # Use by doing        theme_path=$(get_current_theme_path)
 # Use files inside themes to make your apps!
 get_current_theme_path() {
-    local config_file="/config/system.json"
+
+    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+        local config_file="/mnt/UDISK/system.json"
+    else # assume A30
+        local config_file="/config/system.json"
+    fi
 
     # check if config file exists
     if [ ! -f "$config_file" ]; then

@@ -1,11 +1,16 @@
 #!/bin/sh
 
-. "$HELPER_FUNCTIONS"
+. "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
-SETTINGS_FILE="/config/system.json"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    SETTINGS_FILE="/mnt/UDISK/system.json"
+    INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Brick.json"
+else # assume A30
+    SETTINGS_FILE="/config/system.json"
+    INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-A30.json"
+fi
+
 SWAPFILE="/mnt/SDCARD/cachefile"
-SDCARD_PATH="/mnt/SDCARD"
-
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
@@ -16,29 +21,32 @@ SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
-cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
+cp "$INITIAL_SETTINGS" "$SETTINGS_FILE" && sync
 
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
-log_message "Running developer mode check" -v
-/mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
+if [ "$PLATFORM" = "A30" ]; then
 
-if [ -f "${SWAPFILE}" ]; then
-    SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
-    MINSIZE=$((128 * 1024))
-    if [ "$SWAPSIZE" -lt "$MINSIZE" ]; then
-        swapoff "${SWAPFILE}"
-        rm "${SWAPFILE}"
-        log_message "Removed undersized swap file"
+    # TODO: unwrap devconf from A30 check once network services are set up on Brick
+    log_message "Running developer mode check" -v
+    /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
+
+    if [ -f "${SWAPFILE}" ]; then
+        SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
+        MINSIZE=$((128 * 1024))
+        if [ "$SWAPSIZE" -lt "$MINSIZE" ]; then
+            swapoff "${SWAPFILE}"
+            rm "${SWAPFILE}"
+            log_message "Removed undersized swap file"
+        fi
     fi
-fi
-
-if [ ! -f "${SWAPFILE}" ]; then
-    dd if=/dev/zero of="${SWAPFILE}" bs=1M count=128
-    mkswap "${SWAPFILE}"
-    sync
-    log_message "Created new swap file"
+    if [ ! -f "${SWAPFILE}" ]; then
+        dd if=/dev/zero of="${SWAPFILE}" bs=1M count=128
+        mkswap "${SWAPFILE}"
+        sync
+        log_message "Created new swap file"
+    fi
 fi
 
 log_message "Running emu_setup.sh"
@@ -61,11 +69,14 @@ sleep 3 # make sure installing spruce logo stays up longer; gives more time for 
 log_message "Displaying wiki image"
 display -d 5 --icon "$WIKI_ICON" -t "Check out the spruce wiki on our GitHub page for tips and FAQs!"
 
-VERSION=$(cat /usr/miyoo/version)
-if [ "$VERSION" -lt 20240713100458 ]; then
-    log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-    sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
-    display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+# A30's firmware check
+if [ "$PLATFORM" = "A30" ]; then
+    VERSION=$(cat /usr/miyoo/version)
+    if [ "$VERSION" -lt 20240713100458 ]; then
+        log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
+        sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
+        display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+    fi
 fi
 
 if flag_check "themes_unpacking"; then
@@ -78,6 +89,6 @@ fi
 log_message "Displaying enjoy image"
 display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 
-flag_remove "first_boot"
+flag_remove "first_boot_A30"
 log_message "Removed first boot flag"
 log_message "Finished firstboot script"

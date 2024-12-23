@@ -3,7 +3,12 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BATTERY_PERCENT="/mnt/SDCARD/spruce/bin/battery_percent.elf"
-THEME_JSON_FILE="/config/system.json"
+
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    THEME_JSON_FILE="/mnt/UDISK/system.json"
+else # assume A30
+    THEME_JSON_FILE="/config/system.json"
+fi
 CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 BATTERY_ICONS="ic-power-charge-0% \
 ic-power-charge-25% \

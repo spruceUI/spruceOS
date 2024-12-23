@@ -1,7 +1,11 @@
 {
   "label": "Arduboy",
+  "icontop": "",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arduboy.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arduboy.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/ARDUBOY",
   "imgpath": "../../Roms/ARDUBOY/Imgs",

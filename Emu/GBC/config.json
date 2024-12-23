@@ -1,7 +1,11 @@
 {
   "label": "GBC",
+  "icontop":"../_theme/ic-gbc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gbc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gbc.png",
+  "background":"../_theme/bg-gbc.png",
+  "themecolor":"FFB800",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GBC",
   "imgpath": "../../Roms/GBC/Imgs",

@@ -1,7 +1,11 @@
 {
   "label": "NGP",
+  "icontop":"../_theme/ic-ngp.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngp.png",
+  "background":"../_theme/bg-ngp.png",
+  "themecolor":"FFFFFF",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NGP",
   "imgpath": "../../Roms/NGP/Imgs",

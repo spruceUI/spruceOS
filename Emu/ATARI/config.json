@@ -1,7 +1,11 @@
 {
   "label": "Atari 2600",
+  "icontop":"../_theme/ic-atari2600.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari.png",
+  "background":"../_theme/bg-atari2600.png",
+  "themecolor":"AF7AC5",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/ATARI",
   "imgpath": "../../Roms/ATARI/Imgs",

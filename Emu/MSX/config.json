@@ -1,7 +1,11 @@
 {
   "label": "MSX",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
+  "background":"",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MSX",
   "imgpath": "../../Roms/MSX/Imgs",

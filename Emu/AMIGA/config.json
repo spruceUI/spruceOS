@@ -1,7 +1,11 @@
 {
   "label": "Amiga",
+  "icontop": "",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/AMIGA",
   "imgpath": "../../Roms/AMIGA/Imgs",

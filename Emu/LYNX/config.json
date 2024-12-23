@@ -1,7 +1,11 @@
 {
   "label": "Atari Lynx",
+  "icontop":"../_theme/ic-lynx.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/lynx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/lynx.png",
+  "background":"../_theme/bg-lynx.png",
+  "themecolor":"88FF88",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/LYNX",
   "imgpath": "../../Roms/LYNX/Imgs",

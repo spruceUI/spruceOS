@@ -5,7 +5,11 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+
+if [ "$PLATFORM" = "A30" ]; then
+	. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+fi
+
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
@@ -53,49 +57,52 @@ if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
 	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 fi
 
-wifi_needed=false
-syncthing_enabled=false
-wifi_connected=false
+if [ "$PLATFORM" = "A30" ]; then
 
-##### RAC Check
-if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-    log_message "Retro Achievements enabled, WiFi connection needed"
-    wifi_needed=true
-fi
+	wifi_needed=false
+	syncthing_enabled=false
+	wifi_connected=false
 
-##### Syncthing Sync Check, perform only once per session #####
-if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
-    log_message "Syncthing is enabled, WiFi connection needed"
-    wifi_needed=true
-    syncthing_enabled=true
-fi
+	##### RAC Check
+	if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+		log_message "Retro Achievements enabled, WiFi connection needed"
+		wifi_needed=true
+	fi
 
-# Connect to WiFi if needed for any service
-if $wifi_needed; then
-    if check_and_connect_wifi; then
-        wifi_connected=true
-    fi
-fi
+	##### Syncthing Sync Check, perform only once per session #####
+	if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
+		log_message "Syncthing is enabled, WiFi connection needed"
+		wifi_needed=true
+		syncthing_enabled=true
+	fi
 
-# Handle Syncthing sync if enabled
-if $syncthing_enabled && $wifi_connected; then
-    start_syncthing_process
-    /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-    flag_add "syncthing_startup_synced"
+	# Connect to WiFi if needed for any service
+	if $wifi_needed; then
+		if check_and_connect_wifi; then
+			wifi_connected=true
+		fi
+	fi
 
-fi
+	# Handle Syncthing sync if enabled
+	if $syncthing_enabled && $wifi_connected; then
+		start_syncthing_process
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+		flag_add "syncthing_startup_synced"
 
-# Handle network service disabling
-if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
-    /mnt/SDCARD/spruce/scripts/networkservices.sh off
-    
-    if setting_get "disableWifiInGame"; then
-        if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
-            ifconfig wlan0 down &
-        fi
-        killall wpa_supplicant
-        killall udhcpc
-    fi
+	fi
+
+	# Handle network service disabling
+	if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
+		/mnt/SDCARD/spruce/scripts/networkservices.sh off
+		
+		if setting_get "disableWifiInGame"; then
+			if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
+				ifconfig wlan0 down &
+			fi
+			killall wpa_supplicant
+			killall udhcpc
+		fi
+	fi
 fi
 
 flag_add 'emulator_launched'
@@ -149,13 +156,19 @@ case $EMU_NAME in
 		;;
 
 	"OPENBOR")
-		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
-		export HOME=$EMU_DIR
-		cd $HOME
-		if [ "$GAME" == "Final Fight LNS.pak" ]; then
-			./OpenBOR_mod "$ROM_FILE"
-		else
-			./OpenBOR_new "$ROM_FILE"
+		if [ "$PLATFORM" = "Brick" ]; then
+			export HOME=$EMU_DIR
+			cd $HOME
+			./OpenBOR_Brick
+		else # assume A30
+			export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
+			export HOME=$EMU_DIR
+			cd $HOME
+			if [ "$GAME" == "Final Fight LNS.pak" ]; then
+				./OpenBOR_mod "$ROM_FILE"
+			else
+				./OpenBOR_new "$ROM_FILE"
+			fi
 		fi
 		sync
 		;;
@@ -246,14 +259,22 @@ case $EMU_NAME in
 			
 			./PPSSPPSDL "$ROM_FILE"
 		else
-			if setting_get "expertRA"; then
+			if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+					export RA_BIN="ra64.trimui"
+			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch"
 			else
 				export RA_BIN="ra32.miyoo"
 			fi
 			RA_DIR="/mnt/SDCARD/RetroArch"
 			cd "$RA_DIR"
-			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+
+			if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+				CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+			else
+				CORE_DIR="$RA_DIR/.retroarch/cores"
+			fi
+			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 		fi
 		;;
 	
@@ -272,7 +293,9 @@ case $EMU_NAME in
 			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
 		fi
 
-		if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+				export RA_BIN="ra64.trimui"
+		elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 			export RA_BIN="retroarch"
 		else
 			export RA_BIN="ra32.miyoo"
@@ -280,7 +303,13 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+			CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+		else
+			CORE_DIR="$RA_DIR/.retroarch/cores"
+		fi
+
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 
 		# Backup custom N64 controller profile if necessary
 		if [ $EMU_NAME = "N64" ]; then

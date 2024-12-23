@@ -1,7 +1,11 @@
 {
   "label": "NDS",
+  "icontop":"../_theme/ic-nds.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/nds.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/nds.png",
+  "background":"../_theme/bg-nds.png",
+  "themecolor":"FF8800",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NDS",
   "imgpath": "../../Roms/NDS/Imgs",

@@ -1,7 +1,11 @@
 {
   "label": "MAME 03+",
+  "icontop":"../_theme/ic-mame2003plus.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
+  "background":"../_theme/bg-mame2003plu.png",
+  "themecolor":"00CCFF",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MAME2003PLUS",
   "imgpath": "../../Roms/MAME2003PLUS/Imgs",

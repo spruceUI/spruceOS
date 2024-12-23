@@ -1,7 +1,11 @@
 {
   "label": "VideoPac",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vdp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vdp.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/VIDEOPAC",
   "imgpath": "../../Roms/VIDEOPAC/Imgs",

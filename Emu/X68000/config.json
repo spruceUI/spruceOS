@@ -1,7 +1,11 @@
 {
   "label": "X68000",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/x68000.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/x68000.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/X68000",
   "imgpath": "../../Roms/X68000/Imgs",

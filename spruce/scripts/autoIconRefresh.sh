@@ -1,9 +1,14 @@
 #!/bin/sh
 
-WATCHED_FILE="/config/system.json"
-ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
-
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    WATCHED_FILE="/mnt/UDISK/system.json"
+else # assume A30
+    WATCHED_FILE="/config/system.json"
+fi
+
+ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 get_theme_path() {
     awk -F'"' '/"theme":/ {print $4}' "$WATCHED_FILE" | sed 's:/*$:/:'

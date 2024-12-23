@@ -1,7 +1,11 @@
 {
   "label": "ColecoVis",
+  "icontop":"",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/col.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/col.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/COLECO",
   "imgpath": "../../Roms/COLECO/Imgs",

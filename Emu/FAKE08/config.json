@@ -1,7 +1,11 @@
 {
   "label": "Fake08",
+  "icontop":"../_theme/ic-pico8.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+  "background": "../_theme/bg-pico8.png",
+  "themecolor": "00FF88",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/FAKE08",
   "imgpath": "../../Roms/FAKE08/Imgs",

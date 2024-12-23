@@ -1,7 +1,11 @@
 {
   "label": "WndrSwnC",
+  "icontop":"../_theme/ic-wsc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
+  "background":"../_theme/bg-wsc.png",
+  "themecolor":"3C4593",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/WSC",
   "imgpath": "../../Roms/WSC/Imgs",

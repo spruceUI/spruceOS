@@ -1,7 +1,11 @@
 {
   "label": "CPS2",
+  "icontop":"../_theme/ic-cps2.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
+  "background":"../_theme/bg-cps2.png",
+  "themecolor":"FFFF00",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/CPS2",
   "imgpath": "../../Roms/CPS2/Imgs",

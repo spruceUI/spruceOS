@@ -1,7 +1,11 @@
 {
   "label": "Sega MS",
+  "icontop":"../_theme/ic-ms.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
+  "background":"../_theme/bg-ms.png",
+  "themecolor":"740009",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MS",
   "imgpath": "../../Roms/MS/Imgs",
