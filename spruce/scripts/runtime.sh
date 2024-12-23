@@ -113,8 +113,8 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 fi
 
-# Check for first_boot flag and run ThemeUnpacker accordingly
-if flag_check "first_boot"; then
+# Check for first_boot flags and run ThemeUnpacker accordingly
+if flag_check "first_boot_A30" || flag_check "first_boot_Brick"; then
     ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
     log_message "ThemeUnpacker started silently in background due to firstBoot flag"
 else
@@ -186,7 +186,7 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
     # check whether to run first boot procedure
-    if flag_check "first_boot"; then
+    if flag_check "first_boot_A30"; then
         "${SCRIPTS_DIR}/firstboot.sh"
     else
         log_message "First boot procedures skipped"

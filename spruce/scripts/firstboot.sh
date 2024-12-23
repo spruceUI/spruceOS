@@ -83,6 +83,6 @@ fi
 log_message "Displaying enjoy image"
 display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 
-flag_remove "first_boot"
+flag_remove "first_boot_A30"
 log_message "Removed first boot flag"
 log_message "Finished firstboot script"
