@@ -253,11 +253,37 @@ case $EMU_NAME in
 				log_message "emu_setup.sh: .config folder already in place at SD card root."
 			fi
 
-			cd $EMU_DIR
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-			export HOME=/mnt/SDCARD
+			PSP_DIR="/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM"
+
+			if [ "$PLATFORM" = "A30" ]; then
+
+				cp -f "$PSP_DIR/controls-A30.ini" "$PSP_DIR/controls.ini"
+				cp -f "$PSP_DIR/ppsspp-A30.ini" "$PSP_DIR/ppsspp.ini"
+
+				cd $EMU_DIR
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+				export HOME=/mnt/SDCARD
+				
+				./PPSSPPSDL "$ROM_FILE"
+
+				cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-A30.ini"
+				cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-A30.ini"
+
+			elif [ "$PLATFORM" = "Brick" ]; then 	
 			
-			./PPSSPPSDL "$ROM_FILE"
+				cp -f "$PSP_DIR/controls-Brick.ini" "$PSP_DIR/controls.ini"
+				cp -f "$PSP_DIR/ppsspp-Brick-Vulkan.ini" "$PSP_DIR/ppsspp.ini"
+
+				cd $EMU_DIR
+				export HOME=/mnt/SDCARD
+				export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
+
+				./PPSSPPSDL_Brick "$ROM_FILE"
+
+				cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-Brick.ini"
+				cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-Brick-Vulkan.ini"
+			fi
+
 		else
 			if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 					export RA_BIN="ra64.trimui"
