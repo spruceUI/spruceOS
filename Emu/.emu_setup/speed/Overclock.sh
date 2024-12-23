@@ -8,7 +8,7 @@ SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
 
 display -i "$BG" -t "CPU Mode changed to Overclock"
 
-if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ]; then
+if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ] || [ "$EMU_NAME" = "SS" ]; then
     sed -i 's|"CPU Mode: (✓PERFORMANCE)-Overclock"|"CPU Mode: Performance-(✓OVERCLOCK)"|g' "$CONFIG"
     sed -i 's|"/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"|"/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"|g' "$CONFIG"
 else
