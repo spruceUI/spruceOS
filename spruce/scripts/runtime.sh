@@ -60,6 +60,10 @@ elif [ "$PLATFORM" = "Brick" ]; then
     [ ! -d "/mnt/SDCARD/Emus" ] && mkdir "/mnt/SDCARD/Emus"
     mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus"
 
+    # Use App folder for Miyoo and TrimUI devices despite different name schemes
+    [ ! -d "/mnt/SDCARD/Apps" ] && mkdir "/mnt/SDCARD/Apps"
+    mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps"
+
     # Mask Roms/PORTS with Brick version
     [ ! -d "/mnt/SDCARD/Roms/PORTS-Brick" ] && mkdir "/mnt/SDCARD/Roms/PORTS-Brick"
     mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS"
