@@ -334,7 +334,12 @@ export ROM_FILE="$(readlink -f "$1")"
 
 case $EMU_NAME in
 	"MEDIA")
-		run_ffplay
+		if [ "$PLATFORM" = "A30" ]; then
+			run_ffplay
+		elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+			export CORE="ffmpeg"
+			run_retroarch
+		fi
 		;;
 	"NDS")
 		run_drastic

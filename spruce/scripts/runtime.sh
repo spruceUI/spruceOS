@@ -75,6 +75,9 @@ elif [ "$PLATFORM" = "Brick" ]; then
     [ ! -d "/mnt/SDCARD/trimui/brickThemes" ] && mkdir "/mnt/SDCARD/trimui/brickThemes"
     mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes"
 
+    # handle extlist differences between ffplay for A30 but ffmpeg LR for Brick
+    [ -f "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" ] && mount --bind "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" "/mnt/SDCARD/Emu/MEDIA/config.json"
+
 fi
 
 # Flag cleanup
