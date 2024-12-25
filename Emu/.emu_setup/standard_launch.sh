@@ -121,33 +121,53 @@ run_ffplay() {
 }
 
 run_drastic() {
-	# the SDL library is hard coded to open ttyS0 for joystick raw input 
-	# so we pause joystickinput and create soft link to serial port
-	killall -q -STOP joystickinput
-	ln -s /dev/ttyS2 /dev/ttyS0
-
-	cd $EMU_DIR
-	if [ ! -f "/tmp/.show_hotkeys" ]; then
-		touch /tmp/.show_hotkeys
-		LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
-	fi
 	export HOME=$EMU_DIR
-	export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
-	export SDL_VIDEODRIVER=mmiyoo
-	export SDL_AUDIODRIVER=mmiyoo
-	export EGL_VIDEODRIVER=mmiyoo
 	cd $EMU_DIR
-	if [ -f 'libs/libEGL.so' ]; then
-		rm -rf libs/libEGL.so
-		rm -rf libs/libGLESv1_CM.so
-		rm -rf libs/libGLESv2.so
-	fi
-	./drastic "$ROM_FILE"
-	sync
 
-	# remove soft link and resume joystickinput
-	rm /dev/ttyS0
-	killall -q -CONT joystickinput
+	if [ "$PLATFORM" = "A30" ]; then
+		# the SDL library is hard coded to open ttyS0 for joystick raw input 
+		# so we pause joystickinput and create soft link to serial port
+		killall -q -STOP joystickinput
+		ln -s /dev/ttyS2 /dev/ttyS0
+
+		cd $EMU_DIR
+		if [ ! -f "/tmp/.show_hotkeys" ]; then
+			touch /tmp/.show_hotkeys
+			LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
+		fi
+		
+		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
+		export SDL_VIDEODRIVER=mmiyoo
+		export SDL_AUDIODRIVER=mmiyoo
+		export EGL_VIDEODRIVER=mmiyoo
+
+		if [ -f 'libs/libEGL.so' ]; then
+			rm -rf libs/libEGL.so
+			rm -rf libs/libGLESv1_CM.so
+			rm -rf libs/libGLESv2.so
+		fi
+		./drastic32 "$ROM_FILE"
+		# remove soft link and resume joystickinput
+		rm /dev/ttyS0
+		killall -q -CONT joystickinput
+
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
+		export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1
+		export SDL_AUDIODRIVER=dsp
+		./drastic64 "$ROM_FILE"
+	fi
+	sync
+}
+
+load_drastic_configs() {
+	DS_DIR="/mnt/SDCARD/Emu/NDS/config"
+	cp -f "$DS_DIR/drastic-$PLATFORM.cfg" "$DS_DIR/drastic.cfg"
+}
+
+save_drastic_configs() {
+	DS_DIR="/mnt/SDCARD/Emu/NDS/config"
+	cp -f "$DS_DIR/drastic.cfg" "$DS_DIR/drastic-$PLATFORM.cfg"
 }
 
 run_openbor() {
@@ -342,7 +362,9 @@ case $EMU_NAME in
 		fi
 		;;
 	"NDS")
+		load_drastic_configs
 		run_drastic
+		save_drastic_configs
 		;;
 	"OPENBOR")
 		run_openbor
