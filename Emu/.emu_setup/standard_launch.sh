@@ -110,7 +110,7 @@ handle_network_services() {
 }
 
 
-##### EMULATOR LAUNCH FUNCTIONS
+##### EMULATOR LAUNCH FUNCTIONS #####
 
 run_ffplay() {
 	export HOME=$EMU_DIR
@@ -153,7 +153,7 @@ run_drastic() {
 
 	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1
+		# export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1
 		export SDL_AUDIODRIVER=dsp
 		./drastic64 "$ROM_FILE"
 	fi
