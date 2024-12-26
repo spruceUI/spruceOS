@@ -17,7 +17,7 @@
     },
     {
       "name": "Emu Core: (✓PCSX_REARMED)-duckswanstation",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/km_duckswanstation_xtreme_amped.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",

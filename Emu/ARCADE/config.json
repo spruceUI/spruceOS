@@ -17,7 +17,7 @@
     },
     {
       "name": "Emu Core: (✓FBNEO)-mame2003+-fbalpha2012",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mame2003_plus.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
