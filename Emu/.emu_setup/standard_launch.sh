@@ -305,6 +305,30 @@ run_retroarch() {
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 }
 
+ready_architecture_dependent_states() {
+	STATES="/mnt/SDCARD/Saves/states"
+	if [ "$PLATFORM" = "A30" ]; then 
+		[ -d "$STATES/RACE-32" ] && mv "$STATES/RACE-32" "$STATES/RACE"
+		[ -d "$STATES/fake-08-32" ] && mv "$STATES/fake-08-32" "$STATES/fake-08"
+
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ];  then
+		[ -d "$STATES/RACE-64" ] && mv "$STATES/RACE-64" "$STATES/RACE"
+		[ -d "$STATES/fake-08-64" ] && mv "$STATES/fake-08-64" "$STATES/fake-08"
+	fi
+}
+
+stash_architecture_dependent_states() {
+	STATES="/mnt/SDCARD/Saves/states"
+	if [ "$PLATFORM" = "A30" ]; then 
+		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-32"
+		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-32"
+
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ];  then
+		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
+		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
+	fi
+}
+
 load_n64_controller_profile() {
 	PROFILE="$(setting_get "n64_control_profile")"
 	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
@@ -388,7 +412,9 @@ case $EMU_NAME in
 		;;
 	*)
 		[ $EMU_NAME = "N64" ] && load_n64_controller_profile
+		ready_architecture_dependent_states
 		run_retroarch
+		stash_architecture_dependent_states
 		[ $EMU_NAME = "N64" ] && save_custom_n64_controller_profile
 		;;
 esac
