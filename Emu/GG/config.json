@@ -17,7 +17,7 @@
     },
     {
       "name": "Emu Core: (✓GENESIS+GX)-picodrive-gearsystem",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
