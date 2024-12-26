@@ -21,7 +21,7 @@
     },
     {
       "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",
