@@ -310,10 +310,14 @@ ready_architecture_dependent_states() {
 	if [ "$PLATFORM" = "A30" ]; then 
 		[ -d "$STATES/RACE-32" ] && mv "$STATES/RACE-32" "$STATES/RACE"
 		[ -d "$STATES/fake-08-32" ] && mv "$STATES/fake-08-32" "$STATES/fake-08"
+		[ -d "$STATES/PCSX-ReARMed-32" ] && mv "$STATES/PCSX-ReARMed-32" "$STATES/PCSX-ReARMed"
+		[ -d "$STATES/ChimeraSNES-32" ] && mv "$STATES/ChimeraSNES-32" "$STATES/ChimeraSNES"
 
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ];  then
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ];  then
 		[ -d "$STATES/RACE-64" ] && mv "$STATES/RACE-64" "$STATES/RACE"
 		[ -d "$STATES/fake-08-64" ] && mv "$STATES/fake-08-64" "$STATES/fake-08"
+		[ -d "$STATES/PCSX-ReARMed-64" ] && mv "$STATES/PCSX-ReARMed-64" "$STATES/PCSX-ReARMed"
+		[ -d "$STATES/ChimeraSNES-64" ] && mv "$STATES/ChimeraSNES-64" "$STATES/ChimeraSNES"
 	fi
 }
 
@@ -322,10 +326,15 @@ stash_architecture_dependent_states() {
 	if [ "$PLATFORM" = "A30" ]; then 
 		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-32"
 		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-32"
+		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
+		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-32"
 
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ];  then
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ];  then
 		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
 		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
+		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
+		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-64"
+
 	fi
 }
 
