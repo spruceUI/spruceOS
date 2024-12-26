@@ -19,11 +19,20 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-
 flag_remove "save_active"
 
-if setting_get "runGSAtBoot" ; then
+BOOT_TO="$(setting_get "boot_to")"
+
+if [ "$BOOT_TO" = "Game Switcher" ] ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
+elif [ "$BOOT_TO" = "Splore" ]; then
+    log_message "Pico-8 Splore selected as boot action."
+    PICO8_DIR="/mnt/SDCARD/Emu/PICO8/bin"
+    if [ -f "$PICO8_DIR/pico8.dat" ] && [ -f "$PICO8_DIR/pico8_dyn" ]; then
+        echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+    else
+        log_message "Pico-8 binaries not found, booting to MainUI instead"
+    fi
 fi
 
 while [ 1 ]; do
@@ -58,22 +67,22 @@ while [ 1 ]; do
         # This is to kill leftover display processes that may be running
         display_kill &
 
-        # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
-        ln -s /dev/ttyS2 /dev/ttyS0
+            # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
+            ln -s /dev/ttyS2 /dev/ttyS0
 
-        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
-        # this allows joystick to be used as DPAD in MainUI
-        killall -q -USR2 joystickinput
+            # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+            # this allows joystick to be used as DPAD in MainUI
+            killall -q -USR2 joystickinput
 
-        flag_add "in_menu"
-        cd ${SYSTEM_PATH}/app/
-        ./MainUI &> /dev/null
+            flag_add "in_menu"
+            cd ${SYSTEM_PATH}/app/
+            ./MainUI &> /dev/null
 
-        # remove soft link
-        rm /dev/ttyS0
+            # remove soft link
+            rm /dev/ttyS0
 
-        # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -q -USR1 joystickinput
+            # send signal USR1 to joystickinput to switch to ANALOG MODE
+            killall -q -USR1 joystickinput
 
         if flag_check "ra_themes_unpacking"; then
             display -t "Finishing up unpacking RetroArch themes.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
