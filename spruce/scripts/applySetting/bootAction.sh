@@ -10,7 +10,7 @@ case "$1" in
         return 0
         ;;
     "2")
-        echo -n "Requires pico8.dat and pico8_dyn in Pico-8 bin folder"
+        echo -n "Requires Pico-8 binaries"
         return 0
         ;;
     *)
