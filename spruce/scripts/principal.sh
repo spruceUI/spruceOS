@@ -67,22 +67,22 @@ while [ 1 ]; do
         # This is to kill leftover display processes that may be running
         display_kill &
 
-            # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
-            ln -s /dev/ttyS2 /dev/ttyS0
+        # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
+        ln -s /dev/ttyS2 /dev/ttyS0
 
-            # send signal USR2 to joystickinput to switch to KEYBOARD MODE
-            # this allows joystick to be used as DPAD in MainUI
-            killall -q -USR2 joystickinput
+        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+        # this allows joystick to be used as DPAD in MainUI
+        killall -q -USR2 joystickinput
 
-            flag_add "in_menu"
-            cd ${SYSTEM_PATH}/app/
-            ./MainUI &> /dev/null
+        flag_add "in_menu"
+        cd ${SYSTEM_PATH}/app/
+        ./MainUI &> /dev/null
 
-            # remove soft link
-            rm /dev/ttyS0
+        # remove soft link
+        rm /dev/ttyS0
 
-            # send signal USR1 to joystickinput to switch to ANALOG MODE
-            killall -q -USR1 joystickinput
+        # send signal USR1 to joystickinput to switch to ANALOG MODE
+        killall -q -USR1 joystickinput
 
         if flag_check "ra_themes_unpacking"; then
             display -t "Finishing up unpacking RetroArch themes.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
