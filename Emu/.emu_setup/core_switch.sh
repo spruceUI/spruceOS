@@ -4,7 +4,21 @@
 BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 CONFIG="/mnt/SDCARD/Emu/${EMU_NAME}/config.json"
+DEF_OPT="/mnt/SDCARD/Emu/.emu_setup/defaults/${EMU_NAME}.opt"
 SYS_OPT="/mnt/SDCARD/Emu/.emu_setup/options/${EMU_NAME}.opt"
+
+# try to create system option file if it doesn't exist
+if [ ! -f "$SYS_OPT" ]; then
+	if [ -f "$DEF_OPT" ]; then
+		mkdir -p "/mnt/SDCARD/Emu/.emu_setup/options" 2>/dev/null
+		cp "$DEF_OPT" "$SYS_OPT"
+		log_message "core_switch.sh: created $SYS_OPT by copying  $DEF_OPT"
+	else
+		log_message "core_switch.sh: ERROR: no system options file nor default options file found for $EMU_NAME"
+		exit 1
+	fi
+fi
+
 . "$SYS_OPT"
 
 case "$EMU_NAME" in
