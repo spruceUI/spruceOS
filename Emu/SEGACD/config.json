@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/segacd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
-  "background":"",
+  "background": "",
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",

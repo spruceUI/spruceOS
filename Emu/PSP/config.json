@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/psp.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
-  "background":"../_theme/bg-ppsspp.png",
+  "background": "",
   "themecolor":"64A8BD",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

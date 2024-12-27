@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ody.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ody.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ody.png",
-  "background":"",
+  "background": "",
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",

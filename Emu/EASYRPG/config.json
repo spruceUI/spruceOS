@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/easyrpg.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/easyrpg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/easyrpg.png",
-  "background":"../_theme/bg-easyrpg.png",
+  "background": "",
   "themecolor":"FFFF88",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

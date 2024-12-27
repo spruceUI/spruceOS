@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gba.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
-  "background":"../_theme/bg-gba.png",
+  "background": "",
   "themecolor":"FF00FF",
   "effectsh":"effect.sh",
   "launch":"launch.sh",

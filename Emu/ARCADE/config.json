@@ -3,7 +3,7 @@
   "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/arcade.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arcade.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
-  "background":"../_theme/bg-arcade.png",
+  "background": "",
   "themecolor":"CD6155",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

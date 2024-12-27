@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/n64.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
-  "background":"../_theme/bg-n64.png",
+  "background": "",
   "themecolor":"FFFF88",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

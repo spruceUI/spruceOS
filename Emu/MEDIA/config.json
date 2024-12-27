@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ffplay.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
-  "background":"../_theme/bg-ffmpeg.png",
+  "background": "",
   "themecolor":"DDEEFF",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

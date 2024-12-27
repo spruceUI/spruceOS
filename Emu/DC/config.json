@@ -4,7 +4,7 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
   "effectsh":"effect.sh",
-  "background":"../_theme/bg-dc.png",
+  "background": "",
   "themecolor":"FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/DC",

@@ -3,7 +3,7 @@
 "icontop": "",
 "icon": "",
 "iconsel": "",
-"background": "../_theme/bg-saturn.png",
+"background": "",
 "themecolor": "E4007F",
 "effectsh": "effect.sh",
 "launch": "../.emu_setup/standard_launch.sh",

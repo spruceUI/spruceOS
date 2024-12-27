@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/mame.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
-  "background":"../_theme/bg-mame2003plu.png",
+  "background": "",
   "themecolor":"00CCFF",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

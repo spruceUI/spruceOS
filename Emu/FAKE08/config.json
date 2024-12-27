@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
-  "background": "../_theme/bg-pico8.png",
+  "background": "",
   "themecolor": "00FF88",
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -3,7 +3,7 @@
   "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/scummvm.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
-  "background":"",
+  "background": "",
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",

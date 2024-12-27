@@ -3,7 +3,7 @@
   "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/cps3.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps3.png",
-  "background":"../_theme/bg-cps3.png",
+  "background": "",
   "themecolor":"FF4400",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
