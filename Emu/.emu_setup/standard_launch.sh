@@ -287,21 +287,27 @@ save_ppsspp_configs() {
 }
 
 run_retroarch() {
+
 	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 		export RA_BIN="ra64.trimui"
+		if [ "$CORE" = "uae4arm" ]; then
+			export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+		fi
 	elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 		export RA_BIN="retroarch"
 	else
 		export RA_BIN="ra32.miyoo"
 	fi
+
 	RA_DIR="/mnt/SDCARD/RetroArch"
 	cd "$RA_DIR"
 
 	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
-	else
+	else # assume A30
 		CORE_DIR="$RA_DIR/.retroarch/cores"
 	fi
+
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
 }
 
