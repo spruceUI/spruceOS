@@ -1,6 +1,6 @@
 {
   "label": "Game Gear",
-  "icontop":"../_theme/ic-gg.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gg.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gg.png",
   "background":"../_theme/bg-gg.png",

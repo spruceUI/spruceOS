@@ -1,6 +1,6 @@
 {
   "label": "Neo CD",
-  "icontop":"",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/neocd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
   "background":"",

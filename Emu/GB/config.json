@@ -1,6 +1,6 @@
 {
   "label": "GB",
-  "icontop":"../_theme/ic-gb.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gb.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gb.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gb.png",
   "background":"../_theme/bg-gb.png",

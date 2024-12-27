@@ -1,6 +1,6 @@
 {
   "label": "TG-16",
-  "icontop":"../_theme/ic-pce.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pce.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pce.png",
   "background":"../_theme/bg-pce.png",

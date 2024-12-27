@@ -1,6 +1,6 @@
 {
   "label": "NES",
-  "icontop":"../_theme/ic-fc.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/fc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fc.png",
   "background":"../_theme/bg-fc.png",

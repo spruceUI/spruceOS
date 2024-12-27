@@ -1,6 +1,6 @@
 {
   "label": "G&W",
-  "icontop":"../_theme/ic-gw.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gw.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gw.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gw.png",
   "background":"../_theme/bg-gw.png",

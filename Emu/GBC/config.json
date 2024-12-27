@@ -1,6 +1,6 @@
 {
   "label": "GBC",
-  "icontop":"../_theme/ic-gbc.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gbc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gbc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gbc.png",
   "background":"../_theme/bg-gbc.png",

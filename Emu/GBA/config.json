@@ -1,6 +1,6 @@
 {
   "label": "GBA",
-  "icontop":"../_theme/ic-gba.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gba.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
   "background":"../_theme/bg-gba.png",

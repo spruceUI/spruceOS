@@ -1,6 +1,6 @@
 {
   "label": "PSX",
-  "icontop":"../_theme/ic-ps.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ps.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
   "background":"../_theme/bg-ps.png",

@@ -1,6 +1,6 @@
 {
   "label": "SNES",
-  "icontop":"../_theme/ic-sfc.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/sfc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
   "background":"../_theme/bg-sfc.png",

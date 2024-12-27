@@ -1,6 +1,6 @@
 {
   "label": "Pico-8",
-  "icontop":"../_theme/ic-pico8.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
   "themecolor": "00FF88",

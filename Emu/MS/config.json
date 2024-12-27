@@ -1,6 +1,6 @@
 {
   "label": "Sega MS",
-  "icontop":"../_theme/ic-ms.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ms.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
   "background":"../_theme/bg-ms.png",

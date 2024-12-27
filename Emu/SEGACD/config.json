@@ -1,6 +1,6 @@
 {
   "label": "Sega CD",
-  "icontop":"",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/segacd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
   "background":"",

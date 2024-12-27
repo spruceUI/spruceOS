@@ -1,6 +1,6 @@
 {
   "label": "Fake08",
-  "icontop":"../_theme/ic-pico8.png",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
   "background": "../_theme/bg-pico8.png",
