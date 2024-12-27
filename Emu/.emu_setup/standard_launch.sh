@@ -125,6 +125,8 @@ run_drastic() {
 	cd $EMU_DIR
 
 	if [ "$PLATFORM" = "A30" ]; then
+
+		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
 		# so we pause joystickinput and create soft link to serial port
 		killall -q -STOP joystickinput
@@ -150,12 +152,16 @@ run_drastic() {
 		# remove soft link and resume joystickinput
 		rm /dev/ttyS0
 		killall -q -CONT joystickinput
+		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"
 
 	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+
+		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		# export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1
 		export SDL_AUDIODRIVER=dsp
 		./drastic64 "$ROM_FILE"
+		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
 	fi
 	sync
 }
