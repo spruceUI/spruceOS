@@ -100,7 +100,8 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 [Emulators]
 
 <Not_simple>
-"" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_ "$PERFECT_OVERLAYS$ _INDEX_"
+"" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_" "$PERFECT_OVERLAYS$ _INDEX_"
+@"Would apply to GB, GBC, and GBA consoles"
 
 <Not_simple>
 "" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home '_VALUE_'" ""
