@@ -1,7 +1,11 @@
 {
   "label": "SG-1000",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/segasgone.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segasgone.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segasgone.png",
+  "background": "",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SEGASGONE",
   "imgpath": "../../Roms/SEGASGONE/Imgs",

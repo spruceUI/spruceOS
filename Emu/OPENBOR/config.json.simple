@@ -1,7 +1,11 @@
 {
   "label": "OpenBOR",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/openbor.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/openbor.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/openbor.png",
+  "background": "",
+  "themecolor":"FFFF00",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/OpenBOR",
   "imgpath": "../../Imgs/OpenBOR/Imgs",

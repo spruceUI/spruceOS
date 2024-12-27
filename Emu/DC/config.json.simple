@@ -1,7 +1,11 @@
 {
   "label": "DC",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/dc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
+  "effectsh":"effect.sh",
+  "background": "",
+  "themecolor":"FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/DC",
   "imgpath": "../../Roms/DC/Imgs",
@@ -9,7 +13,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 1,
-  "extlist": "chd|cdi|gdi|cue|iso",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {
       "name": "Jump to random Dreamcast game",
