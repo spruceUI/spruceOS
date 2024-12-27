@@ -1,5 +1,6 @@
 {
   "#label": "A Firmware Update Is Available",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/App/firmwareupdate.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png",
   "launch": "launch.sh",
   "description": "Run this to get the latest fixes"
