@@ -1,6 +1,6 @@
 {
   "#label": "Boot Logo",
-  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icons/App/bootlogo.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/App/bootlogo.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/bootlogo.png",
   "launch": "launch.sh",
   "description": "Swap the boot logo at start up"
