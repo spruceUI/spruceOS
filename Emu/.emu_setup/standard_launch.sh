@@ -300,15 +300,23 @@ run_retroarch() {
 			export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
 		fi
 	elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		export RA_BIN="retroarch"
+		if [ "$PLATFORM" = "Flip" ]; then
+			export RA_BIN="retroarch-flip"
+		else # assume A30
+			export RA_BIN="retroarch"
+		fi
 	else
-		export RA_BIN="ra32.miyoo"
+		if [ "$PLATFORM" = "Flip" ]; then
+			export RA_BIN="ra64.miyoo"
+		else # assume A30
+			export RA_BIN="ra32.miyoo"
+		fi
 	fi
 
 	RA_DIR="/mnt/SDCARD/RetroArch"
 	cd "$RA_DIR"
 
-	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
 		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
 	else # assume A30
 		CORE_DIR="$RA_DIR/.retroarch/cores"

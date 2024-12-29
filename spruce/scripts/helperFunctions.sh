@@ -35,6 +35,9 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
+# Export for enabling SSL support in CURL
+export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
+
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
@@ -54,6 +57,9 @@ case $INFO in
 *"TG3040"*)
 	export PLATFORM="Brick"
 	;;
+*"0xd05"*)
+    export PLATFORM="Flip"
+    ;;
 *)
     export PLATFORM="A30"
     ;;
@@ -69,12 +75,8 @@ case "$PLATFORM" in
         ;;
 esac
 
-# Export for enabling SSL support in CURL
-export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
-
-
 # Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ]; then
+if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
     export B_LEFT="key 1 105"
     export B_RIGHT="key 1 106"
     export B_UP="key 1 103"
