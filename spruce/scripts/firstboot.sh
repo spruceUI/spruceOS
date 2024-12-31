@@ -2,13 +2,25 @@
 
 . "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    SETTINGS_FILE="/mnt/UDISK/system.json"
-    INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Brick.json"
-else # assume A30
-    SETTINGS_FILE="/config/system.json"
-    INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-A30.json"
-fi
+case "$PLATFORM" in
+    "Brick" | "SmartPro" )
+        SETTINGS_FILE="/mnt/UDISK/system.json"
+        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Brick.json"
+        flag_remove "first_boot_Brick"
+    ;;
+    "Flip" )
+        SETTINGS_FILE="/userdata/system.json"
+        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Flip.json"
+        flag_remove "first_boot_Flip"
+    ;;
+    "A30" )
+        SETTINGS_FILE="/config/system.json"
+        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-A30.json"
+        flag_remove "first_boot_A30"
+    ;;
+esac
+
+log_message "Removed first boot flag for $PLATFORM"
 
 SWAPFILE="/mnt/SDCARD/cachefile"
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
@@ -79,10 +91,12 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 fi
 
-# Disable stock USB file transfer app for Brick
+# Disable stock USB file transfer app and SD formatter for Brick
 if [ "$PLATFORM" = "Brick" ]; then
     USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
-    sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null
+    [ -f "$USB_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null
+    FORMAT_CONFIG="/usr/trimui/apps/zformatter_fat32/config.json"
+    [ -f "$FORMAT_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$FORMAT_CONFIG" 2>/dev/null
 fi
 
 if flag_check "themes_unpacking"; then
@@ -95,6 +109,4 @@ fi
 log_message "Displaying enjoy image"
 display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 
-flag_remove "first_boot_A30"
-log_message "Removed first boot flag"
 log_message "Finished firstboot script"

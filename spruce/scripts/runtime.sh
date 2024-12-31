@@ -262,14 +262,20 @@ elif [ $PLATFORM = "Brick" ]; then
         log_message "First boot procedures skipped"
     fi
 
-fi
-
-if [ "$PLATFORM" = "Flip" ]; then
+elif [ "$PLATFORM" = "Flip" ]; then
 
     # Use appropriate RA config
     [ -f "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
     killall runmiyoo.sh
+
+    # check whether to run first boot procedure
+    if flag_check "first_boot_Flip"; then
+        "${SCRIPTS_DIR}/firstboot.sh"
+    else
+        log_message "First boot procedures skipped"
+    fi
+
 fi
 
 # Initialize CPU settings

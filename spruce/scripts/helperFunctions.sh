@@ -386,6 +386,8 @@ display() {
 
     # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
     [ "$PLATFORM" = "Brick" ] && return 20
+    [ "$PLATFORM" = "SmartPro" ] && return 30
+    [ "$PLATFORM" = "Flip" ] && return 40
 
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
     local use_acknowledge_image=false
