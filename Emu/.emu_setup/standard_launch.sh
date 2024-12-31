@@ -154,7 +154,7 @@ run_drastic() {
 		killall -q -CONT joystickinput
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"
 
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+	else # 64-bit platform
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
@@ -181,6 +181,9 @@ run_openbor() {
 	cd $HOME
 	if [ "$PLATFORM" = "Brick" ]; then
 		./OpenBOR_Brick
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
+		./OpenBOR_Flip
 	else # assume A30
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
 		if [ "$GAME" == "Final Fight LNS.pak" ]; then
@@ -277,6 +280,9 @@ run_ppsspp() {
 	elif [ "$PLATFORM" = "Brick" ]; then 	
 		export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
 		./PPSSPPSDL_Brick "$ROM_FILE"
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+		./PPSSPPSDL_Flip
 	fi
 }
 
@@ -294,32 +300,36 @@ save_ppsspp_configs() {
 
 run_retroarch() {
 
-	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-		export RA_BIN="ra64.trimui"
-		if [ "$CORE" = "uae4arm" ]; then
-			export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-		fi
-	elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		if [ "$PLATFORM" = "Flip" ]; then
-			export RA_BIN="retroarch-flip"
-		else # assume A30
-			export RA_BIN="retroarch"
-		fi
-	else
-		if [ "$PLATFORM" = "Flip" ]; then
-			export RA_BIN="ra64.miyoo"
-		else # assume A30
-			export RA_BIN="ra32.miyoo"
-		fi
-	fi
+	case "$PLATFORM" in
+		"Brick" | "SmartPro" )
+			export RA_BIN="ra64.trimui"
+			if [ "$CORE" = "uae4arm" ]; then
+				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+			fi
+		;;
+		"Flip" )
+			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+				export RA_BIN="retroarch-flip"
+			else
+				export RA_BIN="ra64.miyoo"
+			fi
+		;;
+		"A30" )
+			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+				export RA_BIN="retroarch"
+			else
+				export RA_BIN="ra32.miyoo"
+			fi
+		;;
+	esac
 
 	RA_DIR="/mnt/SDCARD/RetroArch"
 	cd "$RA_DIR"
 
-	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
-	else # assume A30
+	if [ "$PLATFORM" = "A30" ]; then
 		CORE_DIR="$RA_DIR/.retroarch/cores"
+	else # 64-bit device
+		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
 	fi
 
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
@@ -333,7 +343,7 @@ ready_architecture_dependent_states() {
 		[ -d "$STATES/PCSX-ReARMed-32" ] && mv "$STATES/PCSX-ReARMed-32" "$STATES/PCSX-ReARMed"
 		[ -d "$STATES/ChimeraSNES-32" ] && mv "$STATES/ChimeraSNES-32" "$STATES/ChimeraSNES"
 
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ];  then
+	else # 64-bit device
 		[ -d "$STATES/RACE-64" ] && mv "$STATES/RACE-64" "$STATES/RACE"
 		[ -d "$STATES/fake-08-64" ] && mv "$STATES/fake-08-64" "$STATES/fake-08"
 		[ -d "$STATES/PCSX-ReARMed-64" ] && mv "$STATES/PCSX-ReARMed-64" "$STATES/PCSX-ReARMed"
@@ -349,7 +359,7 @@ stash_architecture_dependent_states() {
 		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
 		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-32"
 
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ];  then
+	else # 64-bit device
 		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
 		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
 		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
@@ -409,7 +419,7 @@ case $EMU_NAME in
 	"MEDIA")
 		if [ "$PLATFORM" = "A30" ]; then
 			run_ffplay
-		elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+		else # 64-bit devices
 			export CORE="ffmpeg"
 			run_retroarch
 		fi
