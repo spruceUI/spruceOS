@@ -265,6 +265,11 @@ elif [ $PLATFORM = "Brick" ]; then
 
 fi
 
+if [ "$PLATFORM" = "Flip" ]; then
+    touch /mnt/SDCARD/we_have_liftoff
+    killall -f "runmiyoo.sh"
+fi
+
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
 set_smart

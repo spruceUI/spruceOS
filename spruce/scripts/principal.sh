@@ -159,3 +159,32 @@ while [ "$PLATFORM" = "Brick" ]; do
     fi
 
 done
+
+while [ "$PLATFORM" = "Flip" ]; do
+
+        runifnecessary "keymon" /usr/miyoo/bin/keymon
+        runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+
+    runee=`/usr/miyoo/bin/jsonval runee`
+    if [ "$runee" == "1" ] && [ -f ${EE_DIR}/emulationstation ] && [ -f ${EE_DIR}/emulationstation.sh ] ; then
+
+        cd ${EE_DIR}
+        ./emulationstation.sh
+        runee=`/usr/miyoo/bin/jsonval runee`
+        echo runee $runee  >> /tmp/runee.log
+
+    elif [ ! -f /tmp/cmd_to_run.sh ]; then
+
+        /usr/miyoo/bin/MainUI
+
+    elif [ -f /tmp/cmd_to_run.sh ]; then
+         touch /tmp/miyoo_inputd/enable_turbo_input
+         chmod a+x /tmp/cmd_to_run.sh
+         /tmp/cmd_to_run.sh
+         rm /tmp/cmd_to_run.sh
+         rm /tmp/miyoo_inputd/enable_turbo_input
+    fi
+
+done
+
+
