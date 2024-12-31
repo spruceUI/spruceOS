@@ -3,11 +3,14 @@ export HOME="$(dirname "$0")"
 cd "$HOME"
 
 case "$PLATFORM" in
-    "Brick" | "SmartPro" | "Flip" )
-        export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
+    "Brick" | "SmartPro" )
+        export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH"
         ;;
     "A30" )
         export LD_LIBRARY_PATH="$HOME/lib:$LD_LIBRARY_PATH"
+        ;;
+    "Flip" )
+        export LD_LIBRARY_PATH="$HOME/lib-Flip:$LD_LIBRARY_PATH"
         ;;
 esac
 
@@ -21,7 +24,14 @@ if [ "$PLATFORM" = "A30" ]; then
 elif [ "$PLATFORM" = "Brick" ]; then
 
 	./DinguxCommanderBrick
-	
+
+elif [ "$PLATFORM" = "Flip" ]; then
+
+    ./gptokeyb -k "DinguxCommander" -c "./DinguxCommander.gptk" &
+    sleep 1
+    ./DinguxCommanderFlip
+    kill -9 "$(pidof gptokeyb)" 
+
 fi
 
 
