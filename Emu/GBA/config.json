@@ -6,7 +6,7 @@
   "background": "",
   "themecolor":"FF00FF",
   "effectsh":"effect.sh",
-  "launch":"launch.sh",
+  "launch":"../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GBA",
   "imgpath": "../../Roms/GBA/Imgs",
   "gamelist": "../../Roms/GBA/miyoogamelist.xml",

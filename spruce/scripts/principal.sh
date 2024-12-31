@@ -162,28 +162,62 @@ done
 
 while [ "$PLATFORM" = "Flip" ]; do
 
-        runifnecessary "keymon" /usr/miyoo/bin/keymon
-        runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
-
     runee=`/usr/miyoo/bin/jsonval runee`
     if [ "$runee" == "1" ] && [ -f ${EE_DIR}/emulationstation ] && [ -f ${EE_DIR}/emulationstation.sh ] ; then
-
         cd ${EE_DIR}
         ./emulationstation.sh
         runee=`/usr/miyoo/bin/jsonval runee`
         echo runee $runee  >> /tmp/runee.log
+    else      
 
-    elif [ ! -f /tmp/cmd_to_run.sh ]; then
+        SDRUNNED=0
+        if [ -d ${CUSTOMER_DIR} ]   ; then
+            export LD_LIBRARY_PATH=${CUSTOMER_DIR}/lib 
+            
+            echo run sdcard app LD_LIBRARY_PATH is ${LD_LIBRARY_PATH} `cat /proc/uptime`
+            runifnecessary "keymon" ${CUSTOMER_DIR}/app/keymon 
+            runifnecessary "miyoo_inputd" ${CUSTOMER_DIR}/app/miyoo_inputd   
 
-        /usr/miyoo/bin/MainUI
+            echo run sdcard app `cat /proc/uptime`
+            cd ${CUSTOMER_DIR}/app/
+            if [ ${factory_test_mode} -eq 1 ] ; then
+                ${CUSTOMER_DIR}/app/factory_test
+            else
+                ${CUSTOMER_DIR}/app/MainUI
+            fi
 
-    elif [ -f /tmp/cmd_to_run.sh ]; then
-         touch /tmp/miyoo_inputd/enable_turbo_input
-         chmod a+x /tmp/cmd_to_run.sh
-         /tmp/cmd_to_run.sh
-         rm /tmp/cmd_to_run.sh
-         rm /tmp/miyoo_inputd/enable_turbo_input
-    fi
+            if [ $? -eq 0 ] ; then
+                SDRUNNED=1
+            else
+                SDRUNNED=0
+            fi
+        fi
+
+        if [ ${SDRUNNED} -eq 0 ] ; then
+            export LD_LIBRARY_PATH=/usr/miyoo/lib
+            echo run app LD_LIBRARY_PATH is ${LD_LIBRARY_PATH} `cat /proc/uptime`   
+            runifnecessary "keymon" /usr/miyoo/bin/keymon
+            runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+
+            echo run internal app `cat /proc/uptime`
+            cd /usr/miyoo/bin/
+            if [ ${factory_test_mode} -eq 1 ] ; then
+                /usr/miyoo/bin/factory_test
+            else
+                /usr/miyoo/bin/MainUI
+            fi
+
+        fi #[ ${SDRUNNED} -eq 0 ] 
+
+        if [ -f /tmp/cmd_to_run.sh ] ; then
+            touch /tmp/miyoo_inputd/enable_turbo_input
+            chmod a+x /tmp/cmd_to_run.sh
+            /tmp/cmd_to_run.sh
+            rm /tmp/cmd_to_run.sh
+            rm /tmp/miyoo_inputd/enable_turbo_input
+            echo game finished
+        fi
+  fi
 
 done
 

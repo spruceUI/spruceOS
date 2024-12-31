@@ -11,6 +11,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 rotate_logs
+SDCARD_PATH="/mnt/SDCARD"
+SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
+
 
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
@@ -21,8 +24,6 @@ if [ "$PLATFORM" = "A30" ]; then
     echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     SWAPFILE="/mnt/SDCARD/cachefile"
-    SDCARD_PATH="/mnt/SDCARD"
-    SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
@@ -48,9 +49,7 @@ if [ "$PLATFORM" = "A30" ]; then
 
 elif [ "$PLATFORM" = "Brick" ]; then
 
-    SDCARD_PATH="/mnt/SDCARD"
     export HOME="${SDCARD_PATH}"
-    SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
@@ -267,7 +266,7 @@ fi
 
 if [ "$PLATFORM" = "Flip" ]; then
     touch /mnt/SDCARD/we_have_liftoff
-    killall -f "runmiyoo.sh"
+    killall runmiyoo.sh
 fi
 
 # Initialize CPU settings
