@@ -265,7 +265,10 @@ elif [ $PLATFORM = "Brick" ]; then
 fi
 
 if [ "$PLATFORM" = "Flip" ]; then
-    touch /mnt/SDCARD/we_have_liftoff
+
+    # Use appropriate RA config
+    [ -f "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+
     killall runmiyoo.sh
 fi
 
