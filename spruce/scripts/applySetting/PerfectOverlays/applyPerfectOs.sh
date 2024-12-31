@@ -4,7 +4,7 @@
 # print minor info text with the value index zero (i.e. "on" value in config file )
 # this is placed before loading helping functions for fast checking
 if [ "$1" == "0" ]; then
-    echo -n "Provided by Mugwomp93 and 1PlayerInsertCoin"
+    echo -n "Provided by 1PlayerInsertCoin and Mugwomp93"
     return 0
 fi
 
