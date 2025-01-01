@@ -20,8 +20,8 @@ start_samba_process(){
 	mkdir -p /tmp/samba/run
 
 	# Set the Samba password for the root user
-	PASSWORD="tina"
-	echo -ne "$PASSWORD\n$PASSWORD\n" | /mnt/SDCARD/spruce/bin/Samba/bin/smbpasswd -c /mnt/SDCARD/spruce/bin/Samba/config/smb.conf -s -a root
+	PASSWORD="happygaming"
+	echo -ne "$PASSWORD\n$PASSWORD\n" | /mnt/SDCARD/spruce/bin/Samba/bin/smbpasswd -c /mnt/SDCARD/spruce/bin/Samba/config/smb.conf -s -a spruce
 
 	# Start the Samba daemon
 	rm /tmp/samba/run/smbd-smb.conf.pid

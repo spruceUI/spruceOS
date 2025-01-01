@@ -23,6 +23,7 @@ SWAPFILE="/mnt/SDCARD/cachefile"
 SDCARD_PATH="/mnt/SDCARD"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
 BIN_DIR="${SDCARD_PATH}/spruce/bin"
+SPRUCE_ETC_DIR="${SDCARD_PATH}/miyoo/etc"
 
 export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
 export PATH="$SYSTEM_PATH/app:${PATH}"
@@ -37,7 +38,9 @@ export HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
     mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
     mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
     mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
-    mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
     wait
 )
 
