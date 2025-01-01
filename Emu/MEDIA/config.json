@@ -11,6 +11,10 @@
   "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random media",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
