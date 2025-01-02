@@ -78,7 +78,7 @@ while [ "$NOTOK" -eq 1 ]; do
     tail -n 5 "$PREV_SELECTION_FILE" > "$PREV5_FILE"
     FOLDER_NAME=$(basename "$SELECTED_FOLDER")
     EMU_FOLDER="$EMU_DIR/$FOLDER_NAME"
-    if [ ! -d "$EMU_FOLDER" ] || [ ! -x "$EMU_FOLDER/launch.sh" ]; then
+    if [ ! -d "$EMU_FOLDER" ]; then
         NOTOK=1
         continue
     fi
@@ -91,7 +91,7 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd="\"${EMU_FOLDER}/launch.sh\" \"${SELECTED_GAME}\""
+cmd="\"${EMU_DIR}/.emu_setup/standard_launch.sh\" \"${SELECTED_GAME}\""
 echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"
 
