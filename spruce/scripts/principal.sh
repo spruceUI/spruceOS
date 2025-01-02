@@ -162,30 +162,20 @@ done
 
 while [ "$PLATFORM" = "Flip" ]; do
 
-    runee=`/usr/miyoo/bin/jsonval runee`
-    if [ "$runee" == "1" ] && [ -f ${EE_DIR}/emulationstation ] && [ -f ${EE_DIR}/emulationstation.sh ] ; then
-        cd ${EE_DIR}
+    runee=$(/usr/miyoo/bin/jsonval runee)
+    if [ "$runee" == "1" ] && [ -f "${EE_DIR}"/emulationstation ] && [ -f "${EE_DIR}"/emulationstation.sh ] ; then
+        cd "${EE_DIR}"
         ./emulationstation.sh
-        runee=`/usr/miyoo/bin/jsonval runee`
+        runee=$(/usr/miyoo/bin/jsonval runee)
         echo runee $runee  >> /tmp/runee.log
     else      
 
         SDRUNNED=0
-        if [ -d ${CUSTOMER_DIR} ]   ; then
-            export LD_LIBRARY_PATH=${CUSTOMER_DIR}/lib 
-            
-            echo run sdcard app LD_LIBRARY_PATH is ${LD_LIBRARY_PATH} `cat /proc/uptime`
-            runifnecessary "keymon" ${CUSTOMER_DIR}/app/keymon 
-            runifnecessary "miyoo_inputd" ${CUSTOMER_DIR}/app/miyoo_inputd   
-
-            echo run sdcard app `cat /proc/uptime`
-            cd ${CUSTOMER_DIR}/app/
-            if [ ${factory_test_mode} -eq 1 ] ; then
-                ${CUSTOMER_DIR}/app/factory_test
-            else
-                ${CUSTOMER_DIR}/app/MainUI
-            fi
-
+        if [ -d "${CUSTOMER_DIR}" ]   ; then
+            export LD_LIBRARY_PATH="${CUSTOMER_DIR}"/lib 
+            runifnecessary "keymon" "${CUSTOMER_DIR}"/app/keymon 
+            runifnecessary "miyoo_inputd" "${CUSTOMER_DIR}"/app/miyoo_inputd   
+            "${CUSTOMER_DIR}"/app/MainUI
             if [ $? -eq 0 ] ; then
                 SDRUNNED=1
             else
@@ -195,17 +185,10 @@ while [ "$PLATFORM" = "Flip" ]; do
 
         if [ ${SDRUNNED} -eq 0 ] ; then
             export LD_LIBRARY_PATH=/usr/miyoo/lib
-            echo run app LD_LIBRARY_PATH is ${LD_LIBRARY_PATH} `cat /proc/uptime`   
             runifnecessary "keymon" /usr/miyoo/bin/keymon
             runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
-
-            echo run internal app `cat /proc/uptime`
             cd /usr/miyoo/bin/
-            if [ ${factory_test_mode} -eq 1 ] ; then
-                /usr/miyoo/bin/factory_test
-            else
-                /usr/miyoo/bin/MainUI
-            fi
+            /usr/miyoo/bin/MainUI
 
         fi #[ ${SDRUNNED} -eq 0 ] 
 

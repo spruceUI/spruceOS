@@ -264,6 +264,9 @@ elif [ $PLATFORM = "Brick" ]; then
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
+    # mask stock USB file transfer app
+    mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
+
     # Use appropriate RA config
     [ -f "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
