@@ -19,11 +19,20 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-
 flag_remove "save_active"
 
-if setting_get "runGSAtBoot" ; then
+BOOT_TO="$(setting_get "boot_to")"
+
+if [ "$BOOT_TO" = "Game Switcher" ] ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
+elif [ "$BOOT_TO" = "Splore" ]; then
+    log_message "Pico-8 Splore selected as boot action."
+    PICO8_DIR="/mnt/SDCARD/Emu/PICO8/bin"
+    if [ -f "$PICO8_DIR/pico8.dat" ] && [ -f "$PICO8_DIR/pico8_dyn" ]; then
+        echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+    else
+        log_message "Pico-8 binaries not found, booting to MainUI instead"
+    fi
 fi
 
 while [ "$PLATFORM" = "A30" ]; do

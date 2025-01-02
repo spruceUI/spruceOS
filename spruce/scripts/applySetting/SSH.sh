@@ -5,7 +5,7 @@
 # print minor info text with the value index zero (i.e. "on" value in config file )
 # this is placed before loading helping functions for fast checking
 if [ "$1" == "0" ] ; then
-    echo -n "User: root, Password: tina"
+    echo -n "User: spruce, Password: happygaming"
     return 0
 fi
 
