@@ -163,44 +163,27 @@ done
 while [ "$PLATFORM" = "Flip" ]; do
 
     runee=$(/usr/miyoo/bin/jsonval runee)
-    if [ "$runee" == "1" ] && [ -f "${EE_DIR}"/emulationstation ] && [ -f "${EE_DIR}"/emulationstation.sh ] ; then
-        cd "${EE_DIR}"
+    
+    if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
+        cd /mnt/SDCARD/emulationstation/
         ./emulationstation.sh
         runee=$(/usr/miyoo/bin/jsonval runee)
         echo runee $runee  >> /tmp/runee.log
-    else      
 
-        SDRUNNED=0
-        if [ -d "${CUSTOMER_DIR}" ]   ; then
-            export LD_LIBRARY_PATH="${CUSTOMER_DIR}"/lib 
-            runifnecessary "keymon" "${CUSTOMER_DIR}"/app/keymon 
-            runifnecessary "miyoo_inputd" "${CUSTOMER_DIR}"/app/miyoo_inputd   
-            "${CUSTOMER_DIR}"/app/MainUI
-            if [ $? -eq 0 ] ; then
-                SDRUNNED=1
-            else
-                SDRUNNED=0
-            fi
-        fi
+    elif [ ! -f /tmp/cmd_to_run.sh ] ; then
+        export LD_LIBRARY_PATH=/usr/miyoo/lib
+        runifnecessary "keymon" /usr/miyoo/bin/keymon
+        runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+        cd /usr/miyoo/bin/
+        ./MainUI
 
-        if [ ${SDRUNNED} -eq 0 ] ; then
-            export LD_LIBRARY_PATH=/usr/miyoo/lib
-            runifnecessary "keymon" /usr/miyoo/bin/keymon
-            runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
-            cd /usr/miyoo/bin/
-            /usr/miyoo/bin/MainUI
-
-        fi #[ ${SDRUNNED} -eq 0 ] 
-
-        if [ -f /tmp/cmd_to_run.sh ] ; then
-            touch /tmp/miyoo_inputd/enable_turbo_input
-            chmod a+x /tmp/cmd_to_run.sh
-            /tmp/cmd_to_run.sh
-            rm /tmp/cmd_to_run.sh
-            rm /tmp/miyoo_inputd/enable_turbo_input
-            echo game finished
-        fi
-  fi
+    else
+        touch /tmp/miyoo_inputd/enable_turbo_input
+        chmod a+x /tmp/cmd_to_run.sh
+        /tmp/cmd_to_run.sh
+        rm /tmp/cmd_to_run.sh
+        rm /tmp/miyoo_inputd/enable_turbo_input
+    fi
 
 done
 
