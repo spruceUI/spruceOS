@@ -313,6 +313,9 @@ run_retroarch() {
 			else
 				export RA_BIN="ra64.miyoo"
 			fi
+			if [ "$CORE" = "easyrpg" ]; then
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+			fi
 		;;
 		"A30" )
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
