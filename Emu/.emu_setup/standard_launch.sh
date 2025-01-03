@@ -232,6 +232,7 @@ case $EMU_NAME in
 
 			# move .config folder into place in case emu setup never ran
 			if [ ! -d "/mnt/SDCARD/.config" ]; then
+        SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
 				if [ -d "$SETUP_DIR/.config" ]; then
 					cp -rf "$SETUP_DIR/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: copied .config folder to root of SD card."
 				else
