@@ -30,6 +30,7 @@ $CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh$
 $RESET_EMUFRESH=/mnt/SDCARD/spruce/scripts/tasks/resetEmufresh.sh$
 $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
+$RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
 $SIMPLE_MODE=/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh$
 $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
@@ -147,6 +148,10 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 <Expert>
 "" "Reset RetroArch to spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
+@"We recommend backing up first."
+
+<Expert>
+"" "Reset PPSSPP to spruce defaults" "|" "run|off" "echo -n off" "$RESET_PPSSPP$|" "$RESET_PPSSPP$ _INDEX_"
 @"We recommend backing up first."
 
 "" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$ _INDEX_"
