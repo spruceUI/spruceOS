@@ -4,13 +4,20 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    WPA_FILE="/config/wpa_supplicant.conf"
-    TEMP_FILE="/config/wpa_supplicant_temp.conf"
-elif [ "$PLATFORM" = "Brick" ]; then
-    WPA_FILE="/etc/wifi/wpa_supplicant.conf"
-    TEMP_FILE="/etc/wifi/wpa_supplicant_temp.conf"
-fi
+case "$PLATFORM" in
+    "Brick" | "SmartPro" )
+        WPA_FILE="/etc/wifi/wpa_supplicant.conf"
+        TEMP_FILE="/etc/wifi/wpa_supplicant_temp.conf"
+    ;;
+    "Flip" )
+        WPA_FILE="/userdata/cfg/wpa_supplicant.conf"
+        TEMP_FILE="/userdata/cfg/wpa_supplicant_temp.conf"
+    ;;
+    "A30" )
+        WPA_FILE="/config/wpa_supplicant.conf"
+        TEMP_FILE="/config/wpa_supplicant_temp.conf"
+    ;;
+esac
 
 MULTIPASS="/mnt/SDCARD/multipass.cfg"
 

@@ -12,8 +12,8 @@
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 rotate_logs
 SDCARD_PATH="/mnt/SDCARD"
+export HOME="${SDCARD_PATH}"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
-
 
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
@@ -29,7 +29,6 @@ if [ "$PLATFORM" = "A30" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
     export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
-    export HOME="${SDCARD_PATH}"
 
     # Create directories and mount in parallel
     (
@@ -47,35 +46,31 @@ if [ "$PLATFORM" = "A30" ]; then
     # Stop NTPD
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 
-elif [ "$PLATFORM" = "Brick" ]; then
-
-    export HOME="${SDCARD_PATH}"
-    BIN_DIR="${SDCARD_PATH}/spruce/bin"
+elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
     export PATH="$SYSTEM_PATH/app:${PATH}"
 
-    # Use Emu folder for Miyoo and TrimUI devices despite different name schemes
-    [ ! -d "/mnt/SDCARD/Emus" ] && mkdir "/mnt/SDCARD/Emus"
-    mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus"
-
-    # Use App folder for Miyoo and TrimUI devices despite different name schemes
-    [ ! -d "/mnt/SDCARD/Apps" ] && mkdir "/mnt/SDCARD/Apps"
-    mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps"
-
-    # Mask Roms/PORTS with Brick version
-    [ ! -d "/mnt/SDCARD/Roms/PORTS-Brick" ] && mkdir "/mnt/SDCARD/Roms/PORTS-Brick"
-    mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS"
-
-    # Use appropriate RA config
-    [ -f "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg"
-
-    # mount Brick themes to hide A30 ones
-    [ ! -d "/mnt/SDCARD/trimui/brickThemes" ] && mkdir "/mnt/SDCARD/trimui/brickThemes"
-    mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes"
-
-    # handle extlist differences between ffplay for A30 but ffmpeg LR for Brick
-    [ -f "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" ] && mount --bind "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" "/mnt/SDCARD/Emu/MEDIA/config.json"
+    # Create directories and mount in parallel
+    (
+        # Use Emu folder for Miyoo and TrimUI devices despite different name schemes
+        mkdir -p "/mnt/SDCARD/Emus"
+        mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus" &
+        # Use App folder for Miyoo and TrimUI devices despite different name schemes
+        mkdir -p "/mnt/SDCARD/Apps"
+        mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps" &
+        # Mask Roms/PORTS with Brick version
+        mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
+        mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
+        # Use appropriate RA config
+        [ -f "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-brick.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
+        # mount Brick themes to hide A30 ones
+        mkdir -p "/mnt/SDCARD/trimui/brickThemes"
+        mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
+        # handle extlist differences between ffplay for A30 but ffmpeg LR for Brick
+        [ -f "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" ] && mount --bind "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" "/mnt/SDCARD/Emu/MEDIA/config.json" &
+        wait
+    )
 
 fi
 
@@ -95,9 +90,10 @@ log_message " " -v
 log_message "---------Starting up---------"
 log_message " " -v
 
+# import multipass.cfg and start watchdog for new network additions via MainUI
+nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
+
 if [ "$PLATFORM" = "A30" ]; then
-    # import multipass.cfg and start watchdog for new network additions via MainUI
-    nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
     # Check if WiFi is enabled
     wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
@@ -116,9 +112,9 @@ if [ "$PLATFORM" = "A30" ]; then
 fi
 
 # Check for first_boot flags and run ThemeUnpacker accordingly
-if flag_check "first_boot_A30" || flag_check "first_boot_Brick"; then
+if flag_check "first_boot_${PLATFORM}"; then
     ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
-    log_message "ThemeUnpacker started silently in background due to firstBoot flag"
+    log_message "ThemeUnpacker started silently in background due to first_boot flag"
 else
     ${SCRIPTS_DIR}/ThemeUnpacker.sh
 fi
@@ -187,13 +183,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
     ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
-    # check whether to run first boot procedure
-    if flag_check "first_boot_A30"; then
-        "${SCRIPTS_DIR}/firstboot.sh"
-    else
-        log_message "First boot procedures skipped"
-    fi
-
     swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
@@ -255,13 +244,6 @@ elif [ $PLATFORM = "Brick" ]; then
         killall -9 udhcpc    
     fi
 
-    # check whether to run first boot procedure
-    if flag_check "first_boot_Brick"; then
-        "${SCRIPTS_DIR}/firstboot.sh"
-    else
-        log_message "First boot procedures skipped"
-    fi
-
 elif [ "$PLATFORM" = "Flip" ]; then
 
     # mask stock USB file transfer app
@@ -272,13 +254,13 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     killall runmiyoo.sh
 
-    # check whether to run first boot procedure
-    if flag_check "first_boot_Flip"; then
-        "${SCRIPTS_DIR}/firstboot.sh"
-    else
-        log_message "First boot procedures skipped"
-    fi
+fi
 
+# check whether to run first boot procedure
+if flag_check "first_boot_${PLATFORM}"; then
+    "${SCRIPTS_DIR}/firstboot.sh"
+else
+    log_message "First boot procedures skipped"
 fi
 
 # Initialize CPU settings
