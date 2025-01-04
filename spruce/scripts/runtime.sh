@@ -100,7 +100,7 @@ if [ "$PLATFORM" = "A30" ]; then
     nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
     # Check if WiFi is enabled
-    wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
+    wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
     if [ "$wifi" -eq 0 ]; then
         touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
         log_message "WiFi turned off"

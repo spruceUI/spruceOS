@@ -2,12 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    SETTINGS_FILE="/mnt/UDISK/system.json"
-else # assume A30
-    SETTINGS_FILE="/config/system.json"
-fi
-
 # Settings
 WIFI_INTERFACE="wlan0"
 PING_TARGET="1.1.1.1"      # Use IP that is broadly available globally!
@@ -46,7 +40,7 @@ reset_wifi() {
 check_wifi() {
     
     # Check if the global Wi-Fi option is enabled
-    wifi=$(grep '"wifi"' "$SETTINGS_FILE" | awk -F ':' '{print $2}' | tr -d ' ,')
+    wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
     
     if [ "$wifi" -eq 1 ]; then
         # Check if wlan0 is up and has an IP address
@@ -90,7 +84,7 @@ manage_reconnection() {
 }
 
 # Start network services on first start
-if [ "$(grep '"wifi"' "$SETTINGS_FILE" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
+if [ "$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
 

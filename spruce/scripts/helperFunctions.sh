@@ -68,12 +68,26 @@ esac
 # add spruce/bin[64] folder to PATH
 case "$PLATFORM" in
     "Brick" | "SmartPro" | "Flip" )
-        PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+        export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
         ;;
     "A30" )
-        PATH="/mnt/SDCARD/spruce/bin:$PATH"
+        export PATH="/mnt/SDCARD/spruce/bin:$PATH"
         ;;
 esac
+
+# "global" variable for system.json path for each device
+case "$PLATFORM" in
+    "Brick" | "SmartPro" )
+        export SYSTEM_JSON="/mnt/UDISK/system.json"
+    ;;
+    "Flip" )
+        export SYSTEM_JSON="/userdata/system.json"
+    ;;
+    "A30" )
+        export SYSTEM_JSON="/config/system.json"
+    ;;
+esac
+
 
 # Key exports so we can refer to buttons by more memorable names
 if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
@@ -595,25 +609,19 @@ get_button_press() {
 # Use files inside themes to make your apps!
 get_current_theme_path() {
 
-    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-        local config_file="/mnt/UDISK/system.json"
-    else # assume A30
-        local config_file="/config/system.json"
-    fi
-
     # check if config file exists
-    if [ ! -f "$config_file" ]; then
-        echo "Error: Configuration file not found at $config_file"
+    if [ ! -f "$SYSTEM_JSON" ]; then
+        echo "Error: Configuration file not found at $SYSTEM_JSON"
         return 1
     fi
 
     # extract "theme" from JSON
     local theme_name
-    theme_name=$(jq -r '.theme' "$config_file")
+    theme_name=$(jq -r '.theme' "$SYSTEM_JSON")
 
     # check if "theme" is empty
     if [ -z "$theme_name" ]; then
-        echo "Error: Could not retrieve theme name from $config_file"
+        echo "Error: Could not retrieve theme name from $SYSTEM_JSON"
         return 1
     fi
 

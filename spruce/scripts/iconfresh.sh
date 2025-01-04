@@ -18,17 +18,11 @@ APP_BASE_PATH="/mnt/SDCARD/app/"
 SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    THEME_JSON_FILE="/mnt/UDISK/system.json"
-else # assume A30
-    THEME_JSON_FILE="/config/system.json"
-fi
-
-if [ ! -f "$THEME_JSON_FILE" ]; then
+if [ ! -f "$SYSTEM_JSON" ]; then
     exit 1
 fi
 
-THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
+THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON")
 THEME_PATH="${THEME_PATH%/}/"
 
 if [ "${THEME_PATH: -1}" != "/" ]; then

@@ -4,17 +4,14 @@
 
 case "$PLATFORM" in
     "Brick" | "SmartPro" )
-        SETTINGS_FILE="/mnt/UDISK/system.json"
         INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Brick.json"
         flag_remove "first_boot_Brick"
     ;;
     "Flip" )
-        SETTINGS_FILE="/userdata/system.json"
         INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Flip.json"
         flag_remove "first_boot_Flip"
     ;;
     "A30" )
-        SETTINGS_FILE="/config/system.json"
         INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-A30.json"
         flag_remove "first_boot_A30"
     ;;
@@ -33,7 +30,7 @@ SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
-cp "$INITIAL_SETTINGS" "$SETTINGS_FILE" && sync
+cp "$INITIAL_SETTINGS" "$SYSTEM_JSON" && sync
 
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
@@ -86,7 +83,7 @@ if [ "$PLATFORM" = "A30" ]; then
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-        sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
+        sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
         display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
     fi
 fi

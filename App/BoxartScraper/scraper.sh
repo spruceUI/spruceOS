@@ -208,18 +208,12 @@ find_image_name() {
 status_img_dir="/mnt/SDCARD/App/BoxartScraper/Imgs"
 messages_file="/var/log/messages"
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    system_config_file="/mnt/UDISK/system.json"
-else # assume A30
-    system_config_file="/config/system.json"
-fi
-
 roms_dir="/mnt/SDCARD/Roms"
 
 display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
 # Check if WiFi is enabled in system config
-wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
 if [ "$wifi_enabled" -eq 0 ]; then
     log_message "BoxartScraper: WiFi is disabled in system settings"
     display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "WiFi is disabled in system settings" -o

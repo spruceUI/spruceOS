@@ -2,23 +2,17 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    WATCHED_FILE="/mnt/UDISK/system.json"
-else # assume A30
-    WATCHED_FILE="/config/system.json"
-fi
-
 ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 get_theme_path() {
-    awk -F'"' '/"theme":/ {print $4}' "$WATCHED_FILE" | sed 's:/*$:/:'
+    awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON" | sed 's:/*$:/:'
 }
 
 THEME_PATH=$(get_theme_path)
 
 while true; do
-    inotifywait -e modify "$WATCHED_FILE"
-    log_message "File $WATCHED_FILE has been modified" -v
+    inotifywait -e modify "$SYSTEM_JSON"
+    log_message "File $SYSTEM_JSON has been modified" -v
 
     NEW_THEME_PATH=$(get_theme_path)
 
