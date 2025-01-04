@@ -4,6 +4,11 @@ ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# TODO: re-enable iconfresh for brick and smartpro once theming stuff is worked out more fully
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    exit 10
+fi
+
 # Add silent mode flag
 silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1
@@ -14,8 +19,13 @@ if [ $silent_mode -eq 0 ]; then
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
-APP_BASE_PATH="/mnt/SDCARD/app/"
-SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
+APP_BASE_PATH="/mnt/SDCARD/App/"
+
+if [ "$PLATFORM" = "A30" ]; then
+    SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
+elif [ "$PLATFORM" = "Flip" ]; then
+    SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
+fi
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
 if [ ! -f "$SYSTEM_JSON" ]; then

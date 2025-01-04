@@ -252,6 +252,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Use appropriate RA config
     [ -f "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
+    # use appropriate loading images
+    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
+
+    ${SCRIPTS_DIR}/autoIconRefresh.sh &
+
     killall runmiyoo.sh
 
 fi
