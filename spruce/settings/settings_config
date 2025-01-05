@@ -45,7 +45,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 @"Will apply after save & exit"
 
 <Not_simple>
-"" "Run application on boot:" "MainUI|Game Switcher|Splore" "MainUI|Game Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
+"" "Run application on boot:" "MainUI|Switcher|Splore" "MainUI|Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
 @"Will apply on next boot"
 
 <Not_simple>
