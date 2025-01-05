@@ -147,6 +147,7 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - Onion Team: The heavy lifting finding the best cores to use with Miyoo and inspiration.
   - Steward: Drastic.
   - XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
+  - TomatoOS: Huge resource for 64 bit bins and so much more!
   - Sky_Walker: Avocado theme.
   - KyleBing: Cozy theme.
   - 369px: Theme Guide.
