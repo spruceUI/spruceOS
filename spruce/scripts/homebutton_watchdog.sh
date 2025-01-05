@@ -30,12 +30,12 @@ kill_emulator() {
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" >/dev/null; then
         killall -q -CONT PPSSPPSDL
-        # use sendevent to send SELECT + L2 combin buttons to PPSSPP
+        # use sendevent to send SELECT + R1 combin buttons to PPSSPP
         {
             # send autosave hot key
             echo 1 314 1 # SELECT down
-            echo 3 2 255 # L2 down
-            echo 3 2 0   # L2 up
+            echo 1 311 1 # R1 down
+            echo 1 311 0 # R1 up
             echo 1 314 0 # SELECT up
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event4

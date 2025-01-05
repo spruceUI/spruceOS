@@ -111,12 +111,12 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 fi
 
-# Check for first_boot flags and run ThemeUnpacker accordingly
+# Check for first_boot flags and run Unpacker accordingly
 if flag_check "first_boot_${PLATFORM}"; then
-    ${SCRIPTS_DIR}/ThemeUnpacker.sh --silent &
-    log_message "ThemeUnpacker started silently in background due to first_boot flag"
+    ${SCRIPTS_DIR}/Unpacker.sh --silent &
+    log_message "Unpacker started silently in background due to first_boot flag"
 else
-    ${SCRIPTS_DIR}/ThemeUnpacker.sh
+    ${SCRIPTS_DIR}/Unpacker.sh
 fi
 
 {

@@ -91,6 +91,13 @@ while [ "$PLATFORM" = "A30" ]; do
             done
         fi
 
+        if flag_check "archives_unpacking"; then
+            display -t "Finishing up unpacking other archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            while flag_check "archives_unpacking"; do
+                sleep 0.1
+            done
+        fi
+
         flag_remove "in_menu"
     fi
 
