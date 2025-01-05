@@ -207,8 +207,6 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 
-"" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot _VALUE_" ""
-
 <Not_simple>
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit _VALUE_" ""
 
