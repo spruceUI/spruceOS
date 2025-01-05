@@ -4,6 +4,7 @@
 . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
 . /mnt/SDCARD/spruce/bin/SFTPGo/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/bin/darkhttpd/darkhttpdFunctions.sh
 
 connect_services() {
     
@@ -41,6 +42,12 @@ connect_services() {
 		log_message "Network services: Syncthing detected not running, starting..."
 		start_syncthing_process
 	fi
+
+  if setting_get "darkhttpd" && ! pgrep "darkhttpd" > /dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: Darkhttpd detected not running, starting..."
+		start_darkhttpd_process
+  fi
                 
 }
 
@@ -54,6 +61,7 @@ disconnect_services() {
                 "dropbear") stop_dropbear_process ;;
                 "smbd") stop_samba_process ;;
                 "syncthing") stop_syncthing_process ;;
+                "darkhttpd") stop_darkhttpd_process ;;
             esac
         fi
     done

@@ -1,0 +1,95 @@
+<html>
+<head>Spruce Landing Page</head>
+<body>
+<br />
+<h1>SMB</h1>
+To upload files via SMB, connect to:
+<br />
+<script>
+document.body.innerHTML = document.body.innerHTML + window.location.host
+</script>
+<br />
+<br />
+See <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-samba">here</a> for more detailed instructions.
+<br />
+<h1>SSH</h1>
+To SSH into your device, run the following command and enter the password `happygaming` when prompted:
+<br />
+<script>
+document.body.innerHTML = document.body.innerHTML + "`ssh spruce@" + window.location.host + "`"
+</script>
+<br />
+<br />
+See <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-ssh">here</a> for more detailed instructions.
+<br />
+<h1>Syncthing</h1>
+To access Syncthing, click
+<script>
+document.body.innerHTML = document.body.innerHTML + "<a href=\"" + window.location.origin + ":8384\">here</a>"
+</script>
+<br />
+<br />
+See <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-syncthing">here</a> for more detailed instructions.
+<br />
+<h1>WiFi File Transfer</h1>
+To transfer files via WiFi, click
+<script>
+document.body.innerHTML = document.body.innerHTML + "<a href=\"" + window.location.origin + ":8080\">here</a> and use the following credentials:"
+</script>
+<br />
+Username: `spruce`
+<br />
+Password: `happygaming`
+<br />
+<br />
+See <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-wifi-file-transfer">here</a> for more detailed instructions.
+<h1>FTP</h1>
+To transfer files via FTP, connect to
+<script>
+document.body.innerHTML = document.body.innerHTML + window.location.host + " on port 21 using the following credentials:"
+</script>
+<br />
+Username: `spruce`
+<br />
+Password: `happygaming`
+<br />
+<br />
+See <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#ftp-client">here</a> for more detailed instructions.
+
+<!--
+<br />
+<br />
+<br />
+<br />
+
+<script src="./scripts/settings.js"></script>
+
+this setting =
+<script>document.body.innerHTML = document.body.innerHTML + window.thisSetting</script>
+
+<br />
+<br />
+<br />
+
+<div id="settingsContent" />
+
+<script>
+fetch('../spruce/settings/spruce.cfg').then(response => {
+if (!response.ok) {
+  throw new Error('Could not read settings file');
+}
+return response.text();
+})
+.then(data => {
+  document.getElementById('settingsContent').textContent = data;
+})
+.catch(error => {
+console.error('Error fetching settings file:', error);
+});
+
+document.body.innerHTML = document.body.innerHTML + reader.readAsText(settingsFile);
+</script>
+-->
+
+</body>
+</html>
