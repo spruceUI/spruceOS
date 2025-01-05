@@ -68,9 +68,9 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
 fi
 
-if flag_check "themes_unpacking"; then
+if flag_check "pre_menu_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
-    while flag_check "themes_unpacking"; do
+    while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done
 fi

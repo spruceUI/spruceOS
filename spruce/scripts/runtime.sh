@@ -85,10 +85,10 @@ ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 
 # Check for first_boot flag and run Unpacker accordingly
 if flag_check "first_boot"; then
-    ${SCRIPTS_DIR}/Unpacker.sh --silent &
+    ${SCRIPTS_DIR}/archiveUnpacker.sh --silent &
     log_message "Unpacker started silently in background due to firstBoot flag"
 else
-    ${SCRIPTS_DIR}/Unpacker.sh
+    ${SCRIPTS_DIR}/archiveUnpacker.sh
 fi
 
 {
