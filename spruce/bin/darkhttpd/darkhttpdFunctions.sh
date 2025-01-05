@@ -9,7 +9,19 @@ WWW_DIR=/mnt/SDCARD/spruce/www
 # Should only be used in contexts where firststart has already been called
 start_darkhttpd_process() {
   if pgrep "darkhttpd" >/dev/null; then
-    log_message "darkhttpd: Already running, skipping start"
+    log_message "darkhttpd: Already running, skipping start" -v
+    return
+  fi
+
+  wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
+  if [ "$wifi" -eq 0 ]; then
+    log_message "darkhttpd: WiFi is off, skipping start" -v
+    return
+  fi
+
+  # Check if at least one network service is enabled
+  if ! (setting_get "samba" || setting_get "dropbear" || setting_get "sftpgo" || setting_get "syncthing"); then
+    log_message "darkhttpd: No network services enabled, skipping start" -v
     return
   fi
 

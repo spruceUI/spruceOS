@@ -21,7 +21,6 @@ $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
-$DARKHTTPD=/mnt/SDCARD/spruce/scripts/applySetting/darkhttpd.sh$
 $SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $BLFILTER=/mnt/SDCARD/spruce/scripts/applySetting/blfilter.sh$
@@ -192,12 +191,6 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 @"User: spruce, Password: happygaming"
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh sftpgo"
-
-<Not_simple>
-"" "Enable Web Server" "|" "on|off" "$HELP$ check darkhttpd" "$DARKHTTPD$ _VALUE_" "$DARKHTTPD$ _INDEX_"
-@"Serve Spruce landing page"
-<Simple>
-%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh darkhttpd"
 
 <Not_simple>
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame _VALUE_" ""

@@ -31,3 +31,11 @@ elif [ "$1" == "off" ] ; then
     update_setting "darkhttpd" "off"
     stop_darkhttpd_process &
 fi
+
+
+$DARKHTTPD=/mnt/SDCARD/spruce/scripts/applySetting/darkhttpd.sh$
+<Not_simple>
+"" "Enable Web Server" "|" "on|off" "$HELP$ check darkhttpd" "$DARKHTTPD$ _VALUE_" "$DARKHTTPD$ _INDEX_"
+@"Serve Spruce landing page"
+<Simple>
+%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh darkhttpd"
