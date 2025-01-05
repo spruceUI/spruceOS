@@ -82,6 +82,10 @@ update_file "/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM/controls.ini" \
     "Pause = 10-106" \
     "Hold = 10-4"
 
+if setting_get "runGSAtBoot"; then
+    update_file "/mnt/SDCARD/spruce/settings/spruce.cfg" "bootTo=1"
+fi
+
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
 # Add any additional upgrade steps here, such as:
 # - Creating new directories
