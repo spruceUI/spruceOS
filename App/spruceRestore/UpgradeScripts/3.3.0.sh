@@ -92,6 +92,10 @@ update_file "/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM/controls.ini" \
 # cp /path/to/source/file /path/to/destination/file
 # custom_command_or_script
 
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/Gambatte/Gambatte.rmp"
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/gpSP/gpSP.rmp"
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/mGBA/mGBA.rmp"
+
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
 if [ $? -eq 0 ]; then
