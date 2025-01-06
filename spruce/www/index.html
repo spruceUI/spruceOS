@@ -1,0 +1,172 @@
+<html>
+<head>
+    <title>Spruce Services</title>
+    <link rel="icon" type="image/x-icon" href="/spruce_sd.ico">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #141414;
+            color: #EBDBB2;
+        }
+        
+        h2 {
+            color: #EBDBB2;
+            border-bottom: 2px solid #D7B45F;
+            padding-bottom: 10px;
+        }
+        
+        .service-section {
+            background: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-button {
+            display: inline-block;
+            background-color: #689D6A;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+            transition: background-color 0.2s;
+        }
+        
+        .action-button:hover {
+            background-color: #557f56;
+        }
+        
+        .docs-link {
+            color: #689D6A;
+            text-decoration: none;
+        }
+        
+        .docs-link:hover {
+            text-decoration: underline;
+        }
+        
+        code {
+            background: #141414;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header-container img {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .header-container h1 {
+            margin: 0;
+        }
+    </style>
+    <script>
+    // Function to parse the config file
+    async function loadConfig() {
+        try {
+            const response = await fetch('/sprucecfg.bak');
+            const text = await response.text();
+            
+            // Parse config file (format: key=value)
+            const config = {};
+            text.split('\n').forEach(line => {
+                const [key, value] = line.split('=');
+                if (key && value) {
+                    config[key.trim()] = value.trim();
+                }
+            });
+            
+            // Hide sections based on config
+            const sections = {
+                'samba': document.getElementById('smb-section'),
+                'syncthing': document.getElementById('syncthing-section'),
+                'dropbear': document.getElementById('ssh-section'),
+                'sftpgo': document.getElementById('ftp-section')
+            };
+            
+            for (const [service, element] of Object.entries(sections)) {
+                if (element && config[service] !== '0') {
+                    element.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading config:', error);
+        }
+    }
+    </script>
+</head>
+<body onload="loadConfig()">
+
+<div class="header-container">
+    <img src="/spruce_sd.ico" alt="Spruce Logo">
+    <h1>Spruce Services</h1>
+</div>
+
+<div class="service-section">
+<h2>Wiki</h2>
+For all things spruce be sure to check out the wiki. It's full of useful information!
+<br />
+<a href="https://github.com/spruceUI/spruceOS/wiki" class="action-button" target="_blank">Open Wiki</a>
+</div>
+
+<div id="smb-section" class="service-section">
+    <h2>SMB</h2>
+    To upload files via SMB, connect to:
+    <br />
+    <code><script>document.write("\\\\" +window.location.host)</script></code>
+    <br /><br />
+    <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-samba" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
+    <br />
+</div>
+
+<div id="ssh-section" class="service-section">
+    <h2>SSH</h2>
+    To SSH into your device, run the following command in the appropriate terminal:
+    <br />
+    <code><script>document.write("ssh spruce@" + window.location.host)</script></code>
+    <br />
+    Then enter the password <code>happygaming</code> when prompted.
+    <br /><br />
+    <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-ssh" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
+    <br />
+</div>
+
+<div id="syncthing-section" class="service-section">
+    <h2>Syncthing</h2>
+    <script>document.write("<a href=\"" + window.location.origin + ":8384\" class=\"action-button\" target=\"_blank\">Open Syncthing</a>")</script>
+    <br /><br />
+    <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-syncthing" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
+    <br />
+</div>
+
+<div id="sftp-section" class="service-section">
+    <h2>Wifi File Transfer</h2>
+    <script>document.write("<a href=\"" + window.location.origin + ":8080\" class=\"action-button\" target=\"_blank\">Open File Transfer</a>")</script>
+    <br /><br />
+    Using these credentials:
+    <br />
+    Username: <code>spruce</code>
+    <br />
+    Password: <code>happygaming</code>
+    <br />
+    You can also connect through FTP with an FTP client at: <code><script>document.write(window.location.host + ":21")</script></code>
+    <br /><br />
+    <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#ftp-client" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
+    <br />
+</div>
+
+</body>
+</html>

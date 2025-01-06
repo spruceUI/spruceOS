@@ -22,13 +22,15 @@ export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
 export DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
 export OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
 export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-
+export CUSTOM_DEF_FILE="$EMU_DIR/default.opt"
 
 ##### GENERAL FUNCTIONS #####
 
 import_launch_options() {
 	if [ -f "$DEF_FILE" ]; then
 		. "$DEF_FILE"
+	elif [ -f "$CUSTOM_DEF_FILE" ]; then
+		. "$CUSTOM_DEF_FILE"
 	else
 		log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
 	fi
@@ -214,6 +216,7 @@ run_pico8() {
 	cd "$HOME"
 	sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 	if [ "${GAME##*.}" = "splore" ]; then
+	check_and_connect_wifi &
 		pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 	else
 		pico8_dyn -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
@@ -335,7 +338,13 @@ run_retroarch() {
 		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
 	fi
 
-	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_DIR/${CORE}_libretro.so" "$ROM_FILE"
+	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+	else
+		CORE_PATH="$RA_DIR/.retroarch/cores/${CORE}_libretro.so"
+	fi
+
+	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 
 ready_architecture_dependent_states() {

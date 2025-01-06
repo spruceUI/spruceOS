@@ -32,6 +32,9 @@ log_message "Starting firstboot script"
 # initialize the settings... users can restore their own backup later.
 cp "$INITIAL_SETTINGS" "$SYSTEM_JSON" && sync
 
+# Copy spruce.cfg to www folder so the landing page can read it.
+cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
+
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
@@ -96,9 +99,9 @@ if [ "$PLATFORM" = "Brick" ]; then
     [ -f "$FORMAT_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$FORMAT_CONFIG" 2>/dev/null
 fi
 
-if flag_check "themes_unpacking"; then
+if flag_check "pre_menu_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
-    while flag_check "themes_unpacking"; do
+    while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done
 fi

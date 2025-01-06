@@ -89,17 +89,10 @@ while [ "$PLATFORM" = "A30" ]; do
         # send signal USR1 to joystickinput to switch to ANALOG MODE
         killall -q -USR1 joystickinput
 
-        if flag_check "ra_themes_unpacking"; then
-            display -t "Finishing up unpacking RetroArch themes.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-            while flag_check "ra_themes_unpacking"; do
-                sleep 0.1
-            done
-        fi
-
-        if flag_check "archives_unpacking"; then
-            display -t "Finishing up unpacking other archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-            while flag_check "archives_unpacking"; do
-                sleep 0.1
+        if flag_check "pre_cmd_unpacking"; then
+            display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            while [ -f "$FLAGS_DIR/pre_cmd_unpacking.lock" ]; do
+                : # null operation (no sleep needed)
             done
         fi
 
@@ -120,7 +113,7 @@ while [ "$PLATFORM" = "A30" ]; do
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
     if setting_get "runGSOnGameExit" && \
-       grep -q /mnt/SDCARD/Emu/*/launch.sh "$FLAGS_DIR/lastgame.lock" ; then
+       grep -q /mnt/SDCARD/Emu/*/../.emu_setup/standard_launch.sh "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
     

@@ -45,7 +45,7 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 @"Will apply after save & exit"
 
 <Not_simple>
-"" "Run application on boot:" "MainUI|Game Switcher|Splore" "MainUI|Game Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
+"" "Run application on boot:" "MainUI|Switcher|Splore" "MainUI|Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
 @"Will apply on next boot"
 
 <Not_simple>
@@ -206,8 +206,6 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 
 
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
-
-"" "Boot into Game Switcher" "|" "on|off" "$HELP$ check runGSAtBoot" "$HELP$ update runGSAtBoot _VALUE_" ""
 
 <Not_simple>
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit _VALUE_" ""

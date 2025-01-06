@@ -16,6 +16,10 @@
   "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Atari 800 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

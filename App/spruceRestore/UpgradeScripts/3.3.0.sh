@@ -82,6 +82,10 @@ update_file "/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM/controls.ini" \
     "Pause = 10-106" \
     "Hold = 10-4"
 
+if setting_get "runGSAtBoot"; then
+    update_file "/mnt/SDCARD/spruce/settings/spruce.cfg" "boot_to=Game Switcher"
+fi
+
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
 # Add any additional upgrade steps here, such as:
 # - Creating new directories
@@ -91,6 +95,10 @@ update_file "/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM/controls.ini" \
 # mkdir -p /mnt/SDCARD/new_directory
 # cp /path/to/source/file /path/to/destination/file
 # custom_command_or_script
+
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/Gambatte/Gambatte.rmp"
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/gpSP/gpSP.rmp"
+sed -i '/input_player1_btn_r2 = "-1"/d' "/mnt/SDCARD/RetroArch/.retroarch/config/remaps/mGBA/mGBA.rmp"
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful

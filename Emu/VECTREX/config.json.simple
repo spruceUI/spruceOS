@@ -16,6 +16,10 @@
   "extlist": "vec|zip|7z",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Vectrex game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }
