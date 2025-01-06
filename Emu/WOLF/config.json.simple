@@ -12,6 +12,10 @@
   "extlist": "ecwolf|exe",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Wolfenstein game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

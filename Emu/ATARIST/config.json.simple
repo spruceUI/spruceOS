@@ -12,6 +12,10 @@
   "extlist": "st|msa|stx|dim|ipf|zip|7z",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Atari ST game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

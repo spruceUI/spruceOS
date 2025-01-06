@@ -12,6 +12,10 @@
   "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random X68000 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

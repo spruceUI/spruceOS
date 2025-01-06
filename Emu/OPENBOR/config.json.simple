@@ -12,6 +12,10 @@
   "extlist": "pak",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random OpenBOR game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

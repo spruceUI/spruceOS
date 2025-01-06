@@ -13,6 +13,10 @@
   "extlist": "nds|zip|7z|rar",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Nintendo DS game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

@@ -12,6 +12,10 @@
   "extlist": "zip|7z|n64|z64|v64",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Nintendo 64 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }
