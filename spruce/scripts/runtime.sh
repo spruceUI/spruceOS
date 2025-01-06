@@ -246,6 +246,105 @@ elif [ $PLATFORM = "Brick" ]; then
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
+    echo 3 > /proc/sys/kernel/printk
+    chmod a+x /usr/bin/notify
+
+    if [ -d "/media/sdcard1/miyoo355/" ]; then
+        export CUSTOMER_DIR=/media/sdcard1/miyoo355/
+    else
+        export CUSTOMER_DIR=/media/sdcard0/miyoo355/
+    fi
+
+    export LD_LIBRARY_PATH=/usr/miyoo/lib
+
+    #motor
+    echo 20 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio20/direction
+    echo -n 0 > /sys/class/gpio/gpio20/value
+    # sleep 0.05
+    # echo -n 1 > /sys/class/gpio/gpio20/value
+    # sleep 0.05
+    # echo -n 0 > /sys/class/gpio/gpio20/value
+
+    #joypad
+    echo -1 > /sys/class/miyooio_chr_dev/joy_type
+    #keyboard
+    #echo 0 > /sys/class/miyooio_chr_dev/joy_type
+
+    sleep 0.1
+    hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
+    if [ "$hdmipugin" == "connected" ] ; then
+        /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
+    else
+        /usr/bin/fbdisplay /usr/miyoo/bin/skin/app_loading_bg.png &
+    fi
+
+    mkdir -p /tmp/miyoo_inputd
+
+    if [ "$(/usr/miyoo/bin/jsonval turboA)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_a
+    else
+        unlink /tmp/miyoo_inputd/turbo_a
+    fi
+
+    if [ "$(/usr/miyoo/bin/jsonval turboB)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_b
+    else
+        unlink /tmp/miyoo_inputd/turbo_b
+    fi
+
+    if [ "$(/usr/miyoo/bin/jsonval turboX)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_x
+    else
+        unlink /tmp/miyoo_inputd/turbo_x
+    fi
+
+    if [ "$(/usr/miyoo/bin/jsonval turboY)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_y
+    else
+        unlink /tmp/miyoo_inputd/turbo_y
+    fi
+
+    if [ "$(/usr/miyoo/bin/jsonval turboL)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_l
+    else
+        unlink /tmp/miyoo_inputd/turbo_l
+    fi
+    
+    if [ "$(/usr/miyoo/bin/jsonval turboR)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_r
+    else
+        unlink /tmp/miyoo_inputd/turbo_r
+    fi
+
+    if [ "$(/usr/miyoo/bin/jsonval turboL2)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_l2
+    else
+        unlink /tmp/miyoo_inputd/turbo_l2
+    fi
+    
+    if [ "$(/usr/miyoo/bin/jsonval turboR2)" = "1" ] ; then
+        touch /tmp/miyoo_inputd/turbo_r2
+    else
+        unlink /tmp/miyoo_inputd/turbo_r2
+    fi
+
+    miyoo_fw_update=0
+    miyoo_fw_dir=/media/sdcard0
+    if [ -f /media/sdcard0/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard0
+    elif [ -f /media/sdcard1/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard1
+    fi
+
+    if [ ${miyoo_fw_update} -eq 1 ] ; then
+        export LD_LIBRARY_PATH=${CUSTOMER_DIR}/lib 
+        cd $miyoo_fw_dir
+        /usr/miyoo/apps/fw_update/miyoo_fw_update
+    fi
+
     # mask stock USB file transfer app
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
