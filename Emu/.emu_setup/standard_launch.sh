@@ -17,11 +17,13 @@ export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
 export DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
 export OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
 export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-
+export CUSTOM_DEF_FILE="$EMU_DIR/default.opt"
 ##### IMPORT .OPT FILES #####
 
 if [ -f "$DEF_FILE" ]; then
 	. "$DEF_FILE"
+elif [ -f "$CUSTOM_DEF_FILE" ]; then
+	. "$CUSTOM_DEF_FILE"
 else
 	log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
 fi
@@ -282,7 +284,13 @@ case $EMU_NAME in
 		RA_DIR="/mnt/SDCARD/RetroArch"
 		cd "$RA_DIR"
 
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+		if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+			CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+		else
+			CORE_PATH="$RA_DIR/.retroarch/cores/${CORE}_libretro.so"
+		fi
+
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 
 		# Backup custom N64 controller profile if necessary
 		if [ $EMU_NAME = "N64" ]; then
