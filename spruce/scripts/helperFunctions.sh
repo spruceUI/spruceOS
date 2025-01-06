@@ -35,6 +35,9 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
+# Export for architecture (aarch64 or armv7l)
+export ARCH="$(uname -m)"
+
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
@@ -42,15 +45,8 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
 *"sun8i"*)
-	if [ -d /usr/miyoo ]; then
-		export PLATFORM="A30"
-	else
-		export PLATFORM="Smart"
-	fi
-	;;
-*"SStar"*)
-	export PLATFORM="MiyooMini"
-	;;
+	export PLATFORM="A30"
+    ;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
 	;;
@@ -65,15 +61,11 @@ case $INFO in
     ;;
 esac
 
-# add spruce/bin[64] folder to PATH
-case "$PLATFORM" in
-    "Brick" | "SmartPro" | "Flip" )
-        export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
-        ;;
-    "A30" )
-        export PATH="/mnt/SDCARD/spruce/bin:$PATH"
-        ;;
-esac
+if [ "$ARCH" = "aarch64" ]; then
+    export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
+else
+    export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
+fi
 
 # "global" variable for system.json path for each device
 case "$PLATFORM" in
