@@ -12,6 +12,10 @@
   "extlist": "lnx|zip",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Lynx game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
