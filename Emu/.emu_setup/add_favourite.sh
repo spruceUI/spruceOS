@@ -14,7 +14,7 @@ log_message "--- Adding favorite game chosen by user ---"
 # Construct the new JSON entry
 NEW_ENTRY=$(jq -n \
   --arg label "$GAMENAME ($EMU_NAME)" \
-  --arg launch "/mnt/SDCARD/Emu/$EMU_NAME/launch.sh" \
+  --arg launch "/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh" \
   --arg rompath "/mnt/SDCARD/Emu/$EMU_NAME/../../Roms/$EMU_NAME/$ROMFILENAME" \
   --argjson type "5" \
   '{label: $label, launch: $launch, rompath: $rompath, type: $type}')
