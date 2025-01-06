@@ -83,7 +83,7 @@ update_file "/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM/controls.ini" \
     "Hold = 10-4"
 
 if setting_get "runGSAtBoot"; then
-    update_file "/mnt/SDCARD/spruce/settings/spruce.cfg" "bootTo=Game Switcher"
+    update_file "/mnt/SDCARD/spruce/settings/spruce.cfg" "boot_to=Game Switcher"
 fi
 
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
