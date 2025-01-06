@@ -8,6 +8,7 @@ get_pretty_name() {
         "sftpgo") echo "WiFi File Transfer" ;;
         "syncthing") echo "Syncthing" ;;
         "dropbear") echo "SSH" ;;
+        "darkhttpd") echo "Web Server" ;;
         *) echo "$1" ;;
     esac
 }
