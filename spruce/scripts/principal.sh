@@ -187,11 +187,28 @@ while [ "$PLATFORM" = "Flip" ]; do
         echo runee $runee  >> /tmp/runee.log
 
     elif [ ! -f /tmp/cmd_to_run.sh ] ; then
+
+        # create in menu flag and remove last played game flag
+        flag_remove "lastgame"
+
+        # check if emu visibility needs a refresh, before entering MainUI
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+
+        # Check for the themeChanged flag
+        if flag_check "themeChanged"; then
+            /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
+            flag_remove "themeChanged"
+        fi
+
+        flag_add "in_menu"
+
         export LD_LIBRARY_PATH=/usr/miyoo/lib
         runifnecessary "keymon" /usr/miyoo/bin/keymon
         runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
         cd /usr/miyoo/bin/
         ./MainUI
+
+        flag_remove "in_menu"
 
     else
         touch /tmp/miyoo_inputd/enable_turbo_input
