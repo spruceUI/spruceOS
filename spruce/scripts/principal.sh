@@ -27,8 +27,13 @@ if [ "$BOOT_TO" = "Game Switcher" ] ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 elif [ "$BOOT_TO" = "Splore" ]; then
     log_message "Pico-8 Splore selected as boot action."
-    PICO8_DIR="/mnt/SDCARD/Emu/PICO8/bin"
-    if [ -f "$PICO8_DIR/pico8.dat" ] && [ -f "$PICO8_DIR/pico8_dyn" ]; then
+    if [ "$ARCH" = "aarch64" ]; then
+        PICO8_BINARY="pico8_64"
+    else
+        PICO8_BINARY="pico8_dyn"
+    fi
+    if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/$PICO8_BINARY" ] ) || \
+        ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_BINARY" ] ); then
         echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
     else
         log_message "Pico-8 binaries not found, booting to MainUI instead"
