@@ -211,15 +211,21 @@ run_pico8() {
 		SCALING=""
 	fi
 
+	if [ "$ARCH" = "aarch64" ]; then
+        PICO8_BINARY="pico8_64"
+    else
+        PICO8_BINARY="pico8_dyn"
+    fi
+
 	export SDL_VIDEODRIVER=mali
 	export SDL_JOYSTICKDRIVER=a30
 	cd "$HOME"
 	sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 	if [ "${GAME##*.}" = "splore" ]; then
 	check_and_connect_wifi &
-		pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
+		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 	else
-		pico8_dyn -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
+		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
 	fi
 	sync
 
