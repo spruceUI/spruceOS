@@ -23,7 +23,7 @@ flag_remove "save_active"
 
 BOOT_TO="$(setting_get "boot_to")"
 
-if [ "$BOOT_TO" = "Game Switcher" ] ; then
+if [ "$BOOT_TO" = "Switcher" ] ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
 elif [ "$BOOT_TO" = "Splore" ]; then
     log_message "Pico-8 Splore selected as boot action."
