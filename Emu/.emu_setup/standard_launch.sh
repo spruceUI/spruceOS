@@ -230,37 +230,24 @@ case $EMU_NAME in
 		;;
 
 	"PSP")
-		if [ "$CORE" = "standalone" ]; then
-
-			# move .config folder into place in case emu setup never ran
-			if [ ! -d "/mnt/SDCARD/.config" ]; then
-        SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
-				if [ -d "$SETUP_DIR/.config" ]; then
-					cp -rf "$SETUP_DIR/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: copied .config folder to root of SD card."
-				else
-					log_message "emu_setup.sh: WARNING!!! No .config folder found!"
-				fi
+		# move .config folder into place in case emu setup never ran
+		if [ ! -d "/mnt/SDCARD/.config" ]; then
+			SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
+			if [ -d "$SETUP_DIR/.config" ]; then
+				cp -rf "$SETUP_DIR/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: copied .config folder to root of SD card."
 			else
-				log_message "emu_setup.sh: .config folder already in place at SD card root."
+				log_message "emu_setup.sh: WARNING!!! No .config folder found!"
 			fi
-
-			cd $EMU_DIR
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-			export HOME=/mnt/SDCARD
-			
-			./PPSSPPSDL "$ROM_FILE"
 		else
-			if setting_get "expertRA"; then
-				export RA_BIN="retroarch"
-			else
-				export RA_BIN="ra32.miyoo"
-			fi
-			RA_DIR="/mnt/SDCARD/RetroArch"
-			cd "$RA_DIR"
-			HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$RA_DIR/.retroarch/cores/${CORE}_libretro.so" "$ROM_FILE"
+			log_message "emu_setup.sh: .config folder already in place at SD card root."
 		fi
+
+		cd $EMU_DIR
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+		export HOME=/mnt/SDCARD
+		
+		./PPSSPPSDL "$ROM_FILE"
 		;;
-	
 	*)
 
 		# Set up N64 controller profiles
