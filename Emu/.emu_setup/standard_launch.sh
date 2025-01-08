@@ -188,7 +188,7 @@ run_openbor() {
 		./OpenBOR_Flip
 	else # assume A30
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
-		if [ "$GAME" == "Final Fight LNS.pak" ]; then
+		if [ "$GAME" = "Final Fight LNS.pak" ]; then
 			./OpenBOR_mod "$ROM_FILE"
 		else
 			./OpenBOR_new "$ROM_FILE"
@@ -347,7 +347,7 @@ run_retroarch() {
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
-		CORE_PATH="$RA_DIR/.retroarch/cores/${CORE}_libretro.so"
+		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
@@ -374,13 +374,13 @@ stash_architecture_dependent_states() {
 	if [ "$PLATFORM" = "A30" ]; then 
 		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-32"
 		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-32"
-		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
+		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
 		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-32"
 
 	else # 64-bit device
 		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
 		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
-		[ -d "$STATES/PCSX-ReARMed"] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
+		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
 		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-64"
 
 	fi
