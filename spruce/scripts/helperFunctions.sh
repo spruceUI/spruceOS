@@ -577,17 +577,17 @@ get_button_press() {
 get_current_theme_path() {
     local config_file="/config/system.json"
 
-    # check if config file exists
+    # Check if config file exists
     if [ ! -f "$config_file" ]; then
         echo "Error: Configuration file not found at $config_file"
         return 1
     fi
 
-    # extract "theme" from JSON
+    # Extract "theme" from JSON, ignoring errors
     local theme_name
-    theme_name=$(jq -r '.theme' "$config_file")
+    theme_name=$(jq -r 'if .theme then .theme else "" end' "$config_file")
 
-    # check if "theme" is empty
+    # If "theme" is empty
     if [ -z "$theme_name" ]; then
         echo "Error: Could not retrieve theme name from $config_file"
         return 1
@@ -680,6 +680,27 @@ get_current_theme() {
         return 1
     fi
 }
+
+#
+#       restore_theme()
+#
+# This function returns the user's theme path if it's not the default theme
+# Meant to be used on installations and updates only
+get_theme_path_to_restore(){
+    # Get the current theme path
+    local current_theme_path=$(get_current_theme_path)
+    local spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
+    local default_theme="../res/"
+
+    # if the current theme is equal to the default miyoo theme
+    if [[ "$current_theme_path" == "$default_theme" ]]; then # that's ugly!
+        echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
+
+    else # If not, give back the user his loved theme <3
+        echo "$current_theme_path"
+    fi
+}
+
 
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
@@ -1080,7 +1101,7 @@ take_screenshot() {
     # -a: auto detection of framebuffer device
     # -f: source file
     # -w: width
-    # -h: height  
+    # -h: height
     # -b: bits per pixel
     # -l: line length in pixels
     $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$screenshot_path" 2>/dev/null &

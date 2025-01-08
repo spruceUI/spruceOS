@@ -10,6 +10,7 @@ SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
+USER_THEME=$(get_theme_path_to_restore)
 
 SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 
@@ -17,6 +18,10 @@ log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
 cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
+
+# restore the user's theme in the "theme" field of the config.JSON
+jq --arg new_theme "$USER_THEME" '.theme = $new_theme' "$SETTINGS_FILE" > tmp.json && mv tmp.json "$SETTINGS_FILE"
+
 
 # Copy spruce.cfg to www folder so the landing page can read it.
 cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
