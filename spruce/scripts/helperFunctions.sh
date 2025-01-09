@@ -110,7 +110,7 @@ if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
 
 elif [ "$PLATFORM" = "Brick" ]; then
     export B_LEFT="key 3 16 -1"  # negative for left
-    export B_RIGHT="key 3 17 1"  # positive for right
+    export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
     export B_DOWN="key 3 17 1"   # positive for down
 
@@ -389,13 +389,26 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
+    local screen_width=640 screen_height=480 rotation=0
+    local ld_library_path="$LD_LIBRARY_PATH"
+    local width=600
+    if [ "$PLATFORM" = "Brick" ]; then
+      # TODO: we might want to move these to config files?
+      screen_width=1024
+      screen_height=768
+      rotation=0
+      width=960
+      # TODO: this should go away once profile is wired up for the brick
+      ld_library_path="/usr/trimui/lib:$ld_library_path"
+      # TODO: we might want to make this more generic based on architecture eventually
+      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+    fi
 
     # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
-    [ "$PLATFORM" = "Brick" ] && return 20
     [ "$PLATFORM" = "SmartPro" ] && return 30
     [ "$PLATFORM" = "Flip" ] && return 40
 
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
@@ -456,7 +469,7 @@ display() {
     fi
 
     # Construct the command
-    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE $screen_width $screen_height $rotation \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
@@ -577,8 +590,10 @@ get_button_press() {
             *"$B_R1"*) button_pressed="R1" ;;
             *"$B_R2"*) button_pressed="R2" ;;
             *"$B_X"*) button_pressed="X" ;;
-            *"$B_A"*) button_pressed="A" ;;
-            *"$B_B"*) button_pressed="B" ;;
+	    # this is firing on keydown and keyup, leading to duplicate presses being recognized
+	    # should this be fixed in somewhere else?
+            *"$B_A 1"*) button_pressed="A" ;;
+            *"$B_B 1"*) button_pressed="B" ;;
             *"$B_Y"*) button_pressed="Y" ;;
             *"$B_UP"*) button_pressed="UP" ;;
             *"$B_DOWN"*) button_pressed="DOWN" ;;
