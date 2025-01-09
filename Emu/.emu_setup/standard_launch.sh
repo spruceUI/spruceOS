@@ -116,10 +116,19 @@ handle_network_services() {
 
 run_ffplay() {
 	export HOME=$EMU_DIR
-	export PATH=$EMU_DIR/bin:$PATH
-	export LD_LIBRARY_PATH=$EMU_DIR/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
 	cd $EMU_DIR
-	ffplay -vf transpose=2 -fs -i "$ROM_FILE"
+	if [ "$PLATFORM" = "A30" ]; then
+		export PATH="$EMU_DIR"/bin:"$PATH"
+		export LD_LIBRARY_PATH="$EMU_DIR"/libs:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
+		ffplay -vf transpose=2 -fs -i "$ROM_FILE"
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export PATH="$EMU_DIR"/bin64:"$PATH"
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
+		./bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
+		sleep 1
+		./ffplay -x 640 -y 480 "$ROM_FILE"
+		kill -9 "$(pidof gptokeyb)"
+	fi
 }
 
 run_drastic() {
@@ -435,9 +444,9 @@ export ROM_FILE="$(readlink -f "$1")"
 
 case $EMU_NAME in
 	"MEDIA")
-		if [ "$PLATFORM" = "A30" ]; then
+		if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
 			run_ffplay
-		else # 64-bit devices
+		else # Brick or TSP
 			export CORE="ffmpeg"
 			run_retroarch
 		fi
