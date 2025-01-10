@@ -324,6 +324,8 @@ run_retroarch() {
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
 			fi
+      # TODO: remove this once profile is set up
+      export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
 		;;
 		"Flip" )
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
