@@ -60,7 +60,7 @@ log_message "cpu_switch.sh: changing cpu mode for $EMU_NAME from $MODE to $NEW_M
 
 display -i "$BG" -t "CPU Mode changed to $NEW_MODE"
 
-sed -i "s|\"Emu Core:.*\"|\"Emu Core: $NEW_DISPLAY\"|g" "$CONFIG"
+sed -i "s|\"CPU Mode:.*\"|\"CPU Mode: $NEW_DISPLAY\"|g" "$CONFIG"
 sed -i "s|MODE=.*|MODE=\"$NEW_MODE\"|g" "$SYS_OPT"
 
 sleep 2
