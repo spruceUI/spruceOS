@@ -1,5 +1,5 @@
-{
-  "#label": "Display Name",
+{{
+  "label": "Display Name",
   "icon": "/mnt/SDCARD/path/to/icon/while/not/selected.png",
   "iconsel": "/mnt/SDCARD/path/to/icon/while/selected.png",
   "launch": "../.emu_setup/standard_launch.sh",
