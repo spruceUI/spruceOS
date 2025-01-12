@@ -45,6 +45,10 @@ Changelog Spruce 3.3.0
 - Add HeyDW's Blue Theme(HeyDW)
 - Add PICO8 Theme (369px)
 - Add Hotkey image by XanXic to bootlogo.bmp collection (djaysan)
+- Replaced Flycast April-2022 lr-flycast with lr-flycast of March-2021 (faster on my tests)
+It's a faster-tweaked version with. -Postprocessing disabled -SH4 downclocked to 160mhz -Upscaling textures disabled -Dynarec optimized for low-end (Metallic77)
+
+
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 The Current Team (Alphabetical order):
