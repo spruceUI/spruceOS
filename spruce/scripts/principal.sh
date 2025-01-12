@@ -19,7 +19,6 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-
 BOOT_ACTION="$(setting_get "boot_to")"
 
 if ! flag_check "save_active"; then
@@ -33,8 +32,13 @@ if ! flag_check "save_active"; then
             ;;
         "Splore")
             log_message "Attempting to boot into Pico-8. Checking for binaries"
-            if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] ) || \
-                ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/pico8_dyn" ] ); then
+            if [ "$ARCH" == "aarch64" ]; then
+                PICO8_EXE="pico8_64"
+            else
+                PICO8_EXE="pico8_dyn"
+            fi
+            if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/$PICO8_EXE" ] ) || \
+                ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ] ); then
                 echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
             else
                 log_message "Pico-8 binaries not found, booting to MainUI instead"
