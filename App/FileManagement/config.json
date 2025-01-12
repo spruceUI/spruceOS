@@ -1,5 +1,6 @@
 {
-  "#label": "File Management",
+  "label": "File Management",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/App/file.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/file.png",
   "launch": "launch.sh",
   "description": "View and edit files on your SD card"

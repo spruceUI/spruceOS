@@ -1,7 +1,11 @@
 {
   "label": "Amst CPC",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/cpc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cpc.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/CPC",
   "imgpath": "../../Roms/CPC/Imgs",

@@ -4,7 +4,6 @@
 
 DEVICE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
 SAVED_HSL="/mnt/SDCARD/spruce/settings/saved_hsl"
-MAINUI_CONF="/config/system.json"
 
 getContrastFromDevice() {
     if [ -f "$SAVED_HSL" ]; then
@@ -64,7 +63,7 @@ else
 fi
 
 # Update MainUI Conf    
-sed -i "s/\"lumination\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"lumination\": $((Luminance / 5))/" "$MAINUI_CONF"
-sed -i "s/\"hue\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"hue\": $((Hue / 5))/" "$MAINUI_CONF"
-sed -i "s/\"saturation\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"saturation\": $((Saturation / 5))/" "$MAINUI_CONF"
-sed -i "s/\"contrast\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"contrast\": $((Contrast / 5))/" "$MAINUI_CONF"
+sed -i "s/\"lumination\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"lumination\": $((Luminance / 5))/" "$SYSTEM_JSON"
+sed -i "s/\"hue\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"hue\": $((Hue / 5))/" "$SYSTEM_JSON"
+sed -i "s/\"saturation\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"saturation\": $((Saturation / 5))/" "$SYSTEM_JSON"
+sed -i "s/\"contrast\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"contrast\": $((Contrast / 5))/" "$SYSTEM_JSON"

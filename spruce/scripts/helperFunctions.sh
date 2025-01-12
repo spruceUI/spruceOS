@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Function summaries:
 
 # acknowledge: Waits for user to press A, B, or Start button
@@ -30,40 +32,57 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
+FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+
+# Export for architecture (aarch64 or armv7l)
+export ARCH="$(uname -m)"
+
+# Export for enabling SSL support in CURL
+export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
 *"sun8i"*)
-	if [ -d /usr/miyoo ]; then
-		export PLATFORM="A30"
-	else
-		export PLATFORM="Smart"
-	fi
-	;;
-*"SStar"*)
-	export PLATFORM="MiyooMini"
-	;;
+	export PLATFORM="A30"
+    ;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
 	;;
 *"TG3040"*)
 	export PLATFORM="Brick"
 	;;
+*"0xd05"*)
+    export PLATFORM="Flip"
+    ;;
 *)
     export PLATFORM="A30"
     ;;
 esac
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+if [ "$ARCH" = "aarch64" ]; then
+    export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
+else
+    export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
+fi
 
-# Export for enabling SSL support in CURL
-export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
+# "global" variable for system.json path for each device
+case "$PLATFORM" in
+    "Brick" | "SmartPro" )
+        export SYSTEM_JSON="/mnt/UDISK/system.json"
+    ;;
+    "Flip" )
+        export SYSTEM_JSON="/userdata/system.json"
+    ;;
+    "A30" )
+        export SYSTEM_JSON="/config/system.json"
+    ;;
+esac
 
 
 # Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ]; then
+if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
     export B_LEFT="key 1 105"
     export B_RIGHT="key 1 106"
     export B_UP="key 1 103"
@@ -91,7 +110,7 @@ if [ "$PLATFORM" = "A30" ]; then
 
 elif [ "$PLATFORM" = "Brick" ]; then
     export B_LEFT="key 3 16 -1"  # negative for left
-    export B_RIGHT="key 3 17 1"  # positive for right
+    export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
     export B_DOWN="key 3 17 1"   # positive for down
 
@@ -121,7 +140,7 @@ elif [ "$PLATFORM" = "Brick" ]; then
     export B_VOLUP="key 1 115" # has actual key codes like the buttons
     export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU=""key 1 316""
+    export B_MENU="key 1 316"
 fi
 
 # Call this just by having "acknowledge" in your script
@@ -370,7 +389,26 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" width=600 color="ebdbb2" font=""
+    local screen_width=640 screen_height=480 rotation=0
+    local ld_library_path="$LD_LIBRARY_PATH"
+    local width=600
+    if [ "$PLATFORM" = "Brick" ]; then
+      # TODO: we might want to move these to config files?
+      screen_width=1024
+      screen_height=768
+      rotation=0
+      width=960
+      # TODO: this should go away once profile is wired up for the brick
+      ld_library_path="/usr/trimui/lib:$ld_library_path"
+      # TODO: we might want to make this more generic based on architecture eventually
+      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+    fi
+
+    # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
+    [ "$PLATFORM" = "SmartPro" ] && return 30
+    [ "$PLATFORM" = "Flip" ] && return 40
+
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
@@ -431,7 +469,7 @@ display() {
     fi
 
     # Construct the command
-    local command="$DISPLAY_TEXT_FILE \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE $screen_width $screen_height $rotation \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
@@ -552,8 +590,10 @@ get_button_press() {
             *"$B_R1"*) button_pressed="R1" ;;
             *"$B_R2"*) button_pressed="R2" ;;
             *"$B_X"*) button_pressed="X" ;;
-            *"$B_A"*) button_pressed="A" ;;
-            *"$B_B"*) button_pressed="B" ;;
+	    # this is firing on keydown and keyup, leading to duplicate presses being recognized
+	    # should this be fixed in somewhere else?
+            *"$B_A 1"*) button_pressed="A" ;;
+            *"$B_B 1"*) button_pressed="B" ;;
             *"$B_Y"*) button_pressed="Y" ;;
             *"$B_UP"*) button_pressed="UP" ;;
             *"$B_DOWN"*) button_pressed="DOWN" ;;
@@ -575,21 +615,20 @@ get_button_press() {
 # Use by doing        theme_path=$(get_current_theme_path)
 # Use files inside themes to make your apps!
 get_current_theme_path() {
-    local config_file="/config/system.json"
 
-    # Check if config file exists
-    if [ ! -f "$config_file" ]; then
-        echo "Error: Configuration file not found at $config_file"
+    # check if config file exists
+    if [ ! -f "$SYSTEM_JSON" ]; then
+        echo "Error: Configuration file not found at $SYSTEM_JSON"
         return 1
     fi
 
     # Extract "theme" from JSON, ignoring errors
     local theme_name
-    theme_name=$(jq -r 'if .theme then .theme else "" end' "$config_file")
+    theme_name=$(jq -r '.theme' "$SYSTEM_JSON")
 
     # If "theme" is empty
     if [ -z "$theme_name" ]; then
-        echo "Error: Could not retrieve theme name from $config_file"
+        echo "Error: Could not retrieve theme name from $SYSTEM_JSON"
         return 1
     fi
 

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 ###### PARSE THE JSON #####
 
 json_file="$2"
