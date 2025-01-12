@@ -42,7 +42,8 @@ Changelog Spruce 3.3.0
     If spruce does not ship with the desired RA core, or you wish to use a different version of a spruce-included core, you may optionally add a compatible version of that core with a name matching what you have set in default.opt to the custom system's Emu folder, and it will use that instead of whatever is in spruce's RetroArch cores folder.
 
     Because the names people give to these systems may vary widely, spruce cannot and will not back these emulator configs up. Please keep your own backups for reinstallation after system upgrades.
-
+- Add HeyDW's Blue Theme(HeyDW)
+- Add PICO8 Theme (369px)
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 The Current Team (Alphabetical order):
