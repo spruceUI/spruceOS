@@ -32,7 +32,8 @@ Changelog Spruce 3.3.0
 - Dandon: Add option to reset PPSSPP configuration to Advanced Settings
 - XanXic + Dandon: New network services landing page added to base ip address for the device (dandon, XanXic)
 - Kickbut101: add favorites option added to X menu
-- 369px: [Bugfix] after updating, custom themes won’t get replaced anymore 
+- 369px: [Bugfix] after updating, custom themes won’t get replaced anymore
+- Cobalt: Background WiFi check when launching Splore, lowers boot time as WiFi isn't necessarily needed to browse downloaded carts (Cobalt)
 - Ry: Added a "custom system" Emu folder that advanced users can modify or use as a template for adding additional RA-based systems to the games menu. (One use case might be splitting out Daphne games from Dreamcast, or MSX2 games from MSX.)
 
     Modifying the config.json and config.json.simple will allow them to set things like the display name, the icons being used for the new system, and allowed file extensions to show up in the games list.
