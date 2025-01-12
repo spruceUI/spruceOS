@@ -16,9 +16,9 @@
 # log_message: Logs a message to a file
 # log_precise: Logs messages with greater precision for performance testing
 # log_verbose: Turns on or off verbose logging for debug purposes
-# set_smart: CPU set to conservative gov, max 1344 MHz, sampling 2.5Hz
-# set_performance: CPU set to performance gov @ 1344 MHz
-# set_overclock: CPU set to performance gov @ 1512 MHz
+# set_smart: CPU set to conservative gov, max 1344 MHz for A30, 1800MHz for Flip/Brick, sampling 2.5Hz
+# set_performance: CPU set to performance gov @ 1344 MHz for A30, 1800MHz for Flip/Brick
+# set_overclock: CPU set to performance gov @ 1512 MHz for A30, 1992MHz for Flip/Brick
 # setting_get: get value of key from /mnt/SDCARD/spruce/settings/spruce.cfg
 # setting_update: set value of key in /mnt/SDCARD/spruce/settings/spruce.cfg
 # settings_organize: sort and clean up /mnt/SDCARD/spruce/settings/spruce.cfg
@@ -991,7 +991,15 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+        case "$PLATFORM" in
+            "A30")
+                /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+                ;;
+            "Brick"|"Flip")
+                echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                echo 1992000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                ;;
+        esac
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         log_message "CPU Mode now locked to OVERCLOCK" -v
         flag_remove "setting_cpu"
