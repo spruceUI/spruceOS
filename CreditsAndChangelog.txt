@@ -1,60 +1,47 @@
-Changelog Spruce 3.2.0
+Changelog Spruce 3.3.0
 
 
-Changes/Additions:
 
-    New guide app. The "Sapling Guide" in apps, this is a quick app to show the RA hotkeys, and a few simple features of Spruce. This can be hidden in adv settings. Hopefully this will help out with all those A30's destined to be stocking stuffers this holiday season! We plan to make a more robust separate guide/wiki app in the future. But we wanted to get a quick easy way to see basic info for people ASAP. (XanXic)
-    Game Nursery: (Aka our simpler version of PortMaster) This is our new app to download games directly from our Ports repo on device. For now it just shows the "ready to play" ports and free homebrew we have, but we'll expand its functionality and offerings as we go. The A30 is not compatible with PortMaster, so this is our attempt to fill that void. (Ry)
-    Simple Mode: (a.k.a. Kiosk mode/Kid mode) This is our first pass at a more locked down version of spruce that should be fit for a kid to keep them on rails a bit more. In this mode, the settings tile is hidden, our Advanced Settings app has a much more parsed down set of harmless options, things like x menu and more complicated features are disabled. The spruce default tap (menu)/ hold (gs) setup is used for home key. With this you can pre-configure the device how you think best prior to turning it on, and once ready turn on simple mode. (Located in the 1st tab at the end of Advanced Settings). A wiki page with more details is coming. To exit "Simple mode" perform the Konami code on the main menu. (No extra lives given) (Ry, XanXic)
-    Added M3U generator to the X button menu for disc-based systems. This will allow you to run an automated script to create an M3U playlist for multidisc games and have them present as a single game within spruce. (Cobalt)
-    Boot logo app rework, greatly reduce (if not outright prevent) possibility of bricking, added support for .png files. Automatically rotates, resizes and compresses the logo. (369px)
-    Exposed fmsx core for MSX system. (Cobalt)
-    Exposed bluemsx and gearsystem cores for SG-1000. (Cobalt)
-    Added a check to move Pico8 dat/dyn files at the root in the SDCard to the proper location. (Ry)
-    Added /BIOS foolder as a potential alternative location for Pico8 dat/dyn files. (Ry)
-    Added ffmpeg binary. (Fragbait)
-    Made it so tap/hold actions are cancelled when other buttons are pressed when using home key. This allows the home key to be used as the hotkey enabler in RetroArch and reduces unintended behaviors in DraStic. (XanXic)
-    Added universal exit hotkey combo: press home key + start (in that order). This was a bit of a late addition, so there may be odd edge cases; if so, let us know. (XanXic)
-    Added joystick controls to File Management, Dino Jump, and Planet Merge. (Ry)
-    Added support for hidden networks to multipass.cfg. (Gerard Szulc)
-    Added DraStic config and settings to backup/restore. (thanks cvlnomen for mentioning it) (XanXic)
+- Added SamuraiCowboy/Sky_Walker overlays
+- DariusGG: bugfix for duplicated virtual keyboard inputs in Fuse core
+- DariusGG: Updated Cap32 core to the latest (enables "crop borders" core option)
+- Cobalt: Use path traversal for emu launch script, now directly call standard_launch.sh instead of redirect (removed about 75 small files from repo, for slightly faster file transfer to SD card)
+- Ry: Add automatic device detection to helperFunctions.sh as part of initial framework for one-card-many-devices.
+- Ry+Xan: Add ability to download a _test.7z instead of _info.7z in developer mode, in order to more easily test new additions to Game Nursery without breaking user-facing info cache.
+- Ry: correct default icon paths for apps so they don't require an initial iconfresh to show up correctly
+- Sundowner Sport: removed Planet Merge to save on MB since it can now easily be downloaded via game Nursery
+- Ry: Combined all core switching scripts into one, for clearer code, less code duplication, and easier maintenance. Core switch script now also has better logging and is more resistant to broken states; now it will work even if emu_setup.sh was never run for some reason, or if a system's .opt file or config.json was tampered with.
+- Ry: ditto ^ for CPU speed as well
+- Fengfrw: fixed error in development for CPU clock changes.
+- XanXic: Added a quick restart for the main menu in designer mode (Xan)
+- XanXic: Bugfix: Fixed an interaction when using home as a hotkey that would fire multiple actions (Xan)
+- XanXic: Added caching to the Game Nursery, release info will now be good for 20 minutes when re-opening the nursery (Xan)
+- XanXic: Perfect Overlays: Added a new toggle in Advanced Settings to apply Perfect Overlays provided by 1PlayerInsertCoin and Mugwomp93, with direct input from Mugwomp! With just a toggle your GB, GBC, and GBA will be configured to use these with the exact settings they need. You can then customize it from there if you wish. Can be toggled off just as easily, try them out. (Xan, Mugwomp93, 1PlayerInsertCoin)
+- XanXic: Enabled Fast Foward on R2 while playing GB, GBC, and GBA games. This doesn't affect hotkeys. (Xan)
+- XanXic: Added sharp-shimmerless shader to RetroArch (Xan)
+- XanXic: Excluded PSX from the 'Rewind in RetroArch' setting since it had huge performance issues (Dandon)
+- Cobalt: Added boot into Splore setting (Cobalt)
+- Cobalt: Bugfix: Spruce will now check for wifi before starting Splore (Cobalt)
+- Fragbait: Added a new SD Card error detection and fixing tool (Fragbait)
+- XanXic: Showing OTA app by default
+- Ry: Generalized ThemeUnpacker into just... Unpacker. Users (or we) can now put .7z files containing full paths (/mnt/SDCARD/whatever-you're-packing) in the spruce/archives folder on the SD card, and they will be unpacked on boot.
+- Dandon: Excluded PSX from the 'Rewind in RetroArch' setting since it had huge performance issues
+- Dandon: Update SSH and Samba authentication to match SFTP
+- Dandon: Random.sh now works again
+- Dandon: Update PPSSPP hotkeys to match RetroArch
+- Dandon: Add option to reset PPSSPP configuration to Advanced Settings
+- XanXic + Dandon: New network services landing page added to base ip address for the device (dandon, XanXic)
+- Kickbut101: add favorites option added to X menu
+- 369px: [Bugfix] after updating, custom themes won’t get replaced anymore
+- Cobalt: Background WiFi check when launching Splore, lowers boot time as WiFi isn't necessarily needed to browse downloaded carts (Cobalt)
+- Ry: Added a "custom system" Emu folder that advanced users can modify or use as a template for adding additional RA-based systems to the games menu. (One use case might be splitting out Daphne games from Dreamcast, or MSX2 games from MSX.)
 
-Advanced Settings Changes:
+    Modifying the config.json and config.json.simple will allow them to set things like the display name, the icons being used for the new system, and allowed file extensions to show up in the games list.
 
-    "Expert" settings toggle added. In an attempt to help simplify the menu for those possibly intimidated by the many options. This will hide/show some of the more technical settings and tasks. When turning it on/off it'll apply after you save and then open it again. For existing spruce users updating to 3.2.0, this will be on by default to match your current experience; for new users, this will be off out of the box. But no settings have actually been removed. (XanXic)
-    N64 controller profiles added.
-        Classic: This is the legacy default configuration. To use the C buttons, you must hold R2 and press one of the face buttons corresponding to the cardinal direction.
-        Action: This maps each of the C buttons to a single button on your A30. This is good for games like Zelda where the C buttons function as action buttons and you don't want to have to use button combos.
-        Custom: This setting is pre-configured like the Classic setting, but will respect any changes that the user makes. This remap file is backed up whenever the user exits an N64 game while using the Custom profile, and changes to it will persist even if they switch to the other profiles (which are always respected if set) before coming back to Custom. It is also backed up by spruceBackup and so should persist across upgrades.
-    Added "home" as an option for the RetroArch hotkey enable key setting. With the above change to home key behavior, now home key can be set and used as such without being interfered with by the tap/hold actions. (XanXic)
-    Added 3 additional Pico8 controller profiles that swap X/O. (Thanks Thaddeus Gray for suggestion) (Ry)
-    Advanced settings app now allows looping across tabs and vertically across options. (OscarAu)
-    Added Prev/Next labels at the top to help communicate there's other tabs! (OscarAu)
-    Added a 'use Rewind' toggle for RA replacing the slowdown toggle with rewind and turning on the rewind service. Just an FYI this can cause some performance lost, it's why we don't have it on by default but now you can easily turn it on for yourself. (XanXic)
-    Added a few more tasks to help restore errors or bad RA configs. (XanXic)
-    Added a task to cleanup leftover Mac files like DS_Store that will show if they are detected on the SD card. (Cobalt)
+    Modifying default.opt will allow them to set which RA core they wish to use and the minimum CPU speed while in Smart CPU mode.
+    If spruce does not ship with the desired RA core, or you wish to use a different version of a spruce-included core, you may optionally add a compatible version of that core with a name matching what you have set in default.opt to the custom system's Emu folder, and it will use that instead of whatever is in spruce's RetroArch cores folder.
 
-Boxart Scraper:
-
-    Added a fallback location for the libretro boxart thumbnails we scrape from, in case the main website stops working again. (We are working on more alternatives for future updates) (Cobalt)
-    Made images dynamically generated, giving improved UI experience, and removing around 150+ prebaked images from Spruce. (Cobalt)
-    Fixed BoxArt Scraper not communicating the errors it was experiencing clearly, now has more error detection and specific messages. (XanXic)
-
-Bugfixes/Removals:
-
-    Fixed powerdown in sleep not powering down while in game switcher. (Fragbait)
-    Fixed a bug where "max number of games" setting in game switcher wasn't being respected. (OscarAu)
-    Fixed Pico8 carts not reliably importing from the Pico8 import script (Located in the X menu). (Ry) (thanks Thaddeus Gray for the bug report)
-    Fixed updater not restoring what apps were shown/hidden prior to updating. (XanXic)
-    Fixed ZX Spectrum control issues by setting input devices 2-5 to "0" none on fuse core remap file. (Thanks u/Sppire for the tip!) (Ry)
-    Initialized game switcher list file to prevent freezes on first boot if no game has been added yet (Sundowner Sport)
-    Fixed idle monitor never shutting down the device if the Game Switcher is left open. (FragBait79)
-
-Known Bugs:
-
-    Previously thought fixed, we have identified background music is not being allowed to play. We've figured out the culprit and have reproduction steps, just didn't have time to fix it in this release. No known workaround at this time.
-
-
+    Because the names people give to these systems may vary widely, spruce cannot and will not back these emulator configs up. Please keep your own backups for reinstallation after system upgrades.
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
@@ -63,16 +50,18 @@ The Current Team (Alphabetical order):
    - Basecase - Stefan Ayala
    - Cinethezs
    - Cobaltdsc4102
+   - Dandon
    - Decojon
    - Fragbait79
-   - KMFDManic
+   - Lonko
    - Metallic77
+   - Mike C
    - Oscarkcau
-   - Ry
+   - Ry - Ryan Sartor
+   - SamuraiCowboy
    - SundownerSport
    - Veckia9x
-   - XanXic  
-
+   - XanXic
 
 
 
