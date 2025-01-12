@@ -41,7 +41,7 @@ get_rand_file() {
     extensions="$(jq -r '.extlist' "/mnt/SDCARD/Emu/$sys_name/config.json" | awk '{gsub(/\|/, " "); print $0}')"
     OIFS="$IFS"
     IFS=$'\n'
-    ALL_FILES=$(ls -d -1 "$folder"* | grep -E "\.($(echo "$extensions" | sed -e "s/ /\|/g"))$" | grep -Fxvf "$PREV5_FILE")
+    ALL_FILES=$(ls -d -1 "$folder"* | grep -E "\.($(echo "$extensions" | sed -e "s/ /\|/g"))$" | grep -Fxvf "$PREV5_FILE") # todo: populate all systems with extlists
     SIZE=$(echo "$ALL_FILES" | wc -l)
     if [ $SIZE -gt 0 ]; then
         SEED=$(date +%s%N)
