@@ -19,26 +19,35 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-flag_remove "save_active"
+BOOT_ACTION="$(setting_get "boot_to")"
 
-BOOT_TO="$(setting_get "boot_to")"
-
-if [ "$BOOT_TO" = "Switcher" ] ; then
-    touch /mnt/SDCARD/spruce/flags/gs.lock
-elif [ "$BOOT_TO" = "Splore" ]; then
-    log_message "Pico-8 Splore selected as boot action."
-    if [ "$ARCH" = "aarch64" ]; then
-        PICO8_BINARY="pico8_64"
-    else
-        PICO8_BINARY="pico8_dyn"
-    fi
-    if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/$PICO8_BINARY" ] ) || \
-        ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_BINARY" ] ); then
-        echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
-    else
-        log_message "Pico-8 binaries not found, booting to MainUI instead"
-    fi
+if ! flag_check "save_active"; then
+    case "$BOOT_ACTION" in
+        "Random")
+            log_message "Booting to random game selection"
+            echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
+            ;;
+        "Switcher")
+            touch /mnt/SDCARD/spruce/flags/gs.lock
+            ;;
+        "Splore")
+            log_message "Attempting to boot into Pico-8. Checking for binaries"
+            if [ "$ARCH" == "aarch64" ]; then
+                PICO8_EXE="pico8_64"
+            else
+                PICO8_EXE="pico8_dyn"
+            fi
+            if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/$PICO8_EXE" ] ) || \
+                ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ] ); then
+                echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+            else
+                log_message "Pico-8 binaries not found, booting to MainUI instead"
+            fi
+            ;;
+    esac
 fi
+
+flag_remove "save_active"
 
 while [ "$PLATFORM" = "A30" ]; do
 
