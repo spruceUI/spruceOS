@@ -26,12 +26,14 @@ BOOT_ACTION="$(setting_get "boot_to")"
 # todo: check if spruce is resuming from a quicksave and bypass this to exit to MainUI if that is the case
 case "$BOOT_ACTION" in
     "Random")
+        log_message "Booting to random game selection"
         echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
         ;;
     "Switcher")
         touch /mnt/SDCARD/spruce/flags/gs.lock
         ;;
     "Splore")
+        log_message "Attempting to boot into Pico-8. Checking for binaries"
         if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] ) || \
             ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/pico8_dyn" ] ); then
             echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
