@@ -138,15 +138,16 @@ jobs:
           # Function to update OTA file
           update_ota_file() {
             local file="$1"
+            local nextFile="$1-next"
             local content
             content=$(cat "$file")
             
-            echo "$content" | grep -v "^RELEASE_" > "$file"
-            echo "RELEASE_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
-            echo "RELEASE_CHECKSUM=$CHECKSUM" >> "$file"
-            echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> "$file"
-            echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
-            echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+            echo "$content" | grep -v "^RELEASE_" > "$nextFile"
+            echo "RELEASE_VERSION=${{ steps.get_version.outputs.version }}" >> "$nextFile"
+            echo "RELEASE_CHECKSUM=$CHECKSUM" >> "$nextFile"
+            echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> "$nextFile"
+            echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$nextFile"
+            echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$nextFile"
           }
           
           # Update main OTA file
@@ -159,14 +160,14 @@ jobs:
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add OTA/spruce
-          git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
+          git add OTA/spruce-next
+          git commit -m "Update next release to ${{ steps.get_version.outputs.version }}"
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
           
           # Push changes to mirror repo
           cd ../mirror_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add OTA/spruce
-          git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
+          git add OTA/spruce-next
+          git commit -m "Update next release to ${{ steps.get_version.outputs.version }}"
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main

@@ -1,0 +1,44 @@
+name: Publish Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update OTA files
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone both repositories
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          git clone https://github.com/spruceUI/spruceSource.git mirror_repo
+          
+          # Function to update OTA file
+          update_ota_file() {
+            local file="$1"
+            local nextFile="$1-next"
+
+            git rm $file
+            git mv $nextFile $file
+          }
+          
+          # Push changes to main repo
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          # Update main OTA file
+          update_ota_file "ota_repo/OTA/spruce"
+          git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          
+          # Push changes to mirror repo
+          cd ../mirror_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          # Update mirror OTA file
+          update_ota_file "mirror_repo/OTA/spruce"
+          git commit -m "Update release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
