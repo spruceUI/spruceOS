@@ -44,6 +44,7 @@ Changelog Spruce 3.3.0
     Because the names people give to these systems may vary widely, spruce cannot and will not back these emulator configs up. Please keep your own backups for reinstallation after system upgrades.
 - Add HeyDW's Blue Theme(HeyDW)
 - Add PICO8 Theme (369px)
+- Add Hotkey image by XanXic to bootlogo.bmp collection (djaysan)
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 The Current Team (Alphabetical order):
