@@ -20,6 +20,7 @@
 * Native Pico-8 support with Splore.
 * Built-in boxart scraper app using libretro API.
 * OTA updates over Wi-Fi on device.
+* Advanced Settings App to customize and change the user experience!
 
 Plus many more enhancements over the original stock operating system!
 
@@ -101,7 +102,7 @@ Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and cal
 ![hotkeyDefaults](https://github.com/user-attachments/assets/7558ecd9-8149-4009-936a-2cd32c9c7ec9)
 
 
-New unified hotkeys configured for RetroArch, updated to what is considered a 'common' layout and what is compatible with our new use of the HOME key
+New unified hotkeys configured for RetroArch and PPSSPP, updated to what is considered a 'common' layout and what is compatible with our new use of the HOME key
 
 * Screenshot: SELECT + A
 * Exit to MainUI: SELECT + B
@@ -172,9 +173,12 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
    - Basecase - Stefan Ayala
    - Cinethezs
    - Cobaltdsc4102
+   - Dandon
    - Decojon
    - Fragbait79
+   - Lonko
    - Metallic77
+   - Mike C
    - Oscarkcau
    - Ry - Ryan Sartor
    - SundownerSport
