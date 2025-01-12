@@ -2,7 +2,7 @@
   "label": "N64",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/N64",
   "imgpath": "../../Roms/N64/Imgs",
   "gamelist": "../../Roms/N64/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "zip|7z|n64|z64|v64",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Nintendo 64 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/km_parallel_n64_xtreme_amped_turbo.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

@@ -6,9 +6,9 @@
 if [ "$1" == "0" ]; then
     IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
     if [ -n "$IP" ]; then
-        echo -n "\\\\$IP User: root, Password: tina"
+        echo -n "\\\\$IP User: spruce, Password: happygaming"
     else
-        echo -n "User: root, Password: tina"
+        echo -n "User: spruce, Password: happygaming"
     fi
     return 0
 fi

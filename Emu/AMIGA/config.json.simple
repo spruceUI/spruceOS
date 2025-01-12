@@ -2,7 +2,7 @@
   "label": "Amiga",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/AMIGA",
   "imgpath": "../../Roms/AMIGA/Imgs",
   "gamelist": "../../Roms/AMIGA/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "zip|7z|adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|rp9",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Amiga game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

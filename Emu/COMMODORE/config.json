@@ -2,7 +2,7 @@
   "label": "C64",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/COMMODORE",
   "imgpath": "../../Roms/COMMODORE/Imgs",
   "gamelist": "../../Roms/COMMODORE/miyoogamelist.xml",
@@ -12,12 +12,16 @@
   "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random C64 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

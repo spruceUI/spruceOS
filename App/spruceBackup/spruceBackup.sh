@@ -109,7 +109,7 @@ for item in $folders; do
 done
 
 log_message "Creating 7z archive"
-7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
+7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 rm "$temp_file"
 
 if [ $? -eq 0 ]; then

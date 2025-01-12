@@ -2,7 +2,7 @@
   "label": "Atari 800",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari800.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari800.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/EIGHTHUNDRED",
   "imgpath": "../../Roms/EIGHTHUNDRED/Imgs",
   "gamelist": "../../Roms/EIGHTHUNDRED/miyoogamelist.xml",
@@ -12,12 +12,16 @@
   "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Atari 800 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

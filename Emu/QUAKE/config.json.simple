@@ -2,7 +2,7 @@
   "label": "Quake",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/quake.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/quake.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/QUAKE",
   "imgpath": "../../Roms/QUAKE/Imgs",
   "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 0,
   "extlist": "fbl|pak",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Quake pak",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

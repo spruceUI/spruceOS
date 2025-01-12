@@ -30,37 +30,99 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+
+# Detect device and export to any script sourcing helperFunctions
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+case $INFO in
+*"sun8i"*)
+	if [ -d /usr/miyoo ]; then
+		export PLATFORM="A30"
+	else
+		export PLATFORM="Smart"
+	fi
+	;;
+*"SStar"*)
+	export PLATFORM="MiyooMini"
+	;;
+*"TG5040"*)
+	export PLATFORM="SmartPro"
+	;;
+*"TG3040"*)
+	export PLATFORM="Brick"
+	;;
+*)
+    export PLATFORM="A30"
+    ;;
+esac
+
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
+
 # Key exports so we can refer to buttons by more memorable names
-export B_LEFT="key 1 105"
-export B_RIGHT="key 1 106"
-export B_UP="key 1 103"
-export B_DOWN="key 1 108"
+if [ "$PLATFORM" = "A30" ]; then
+    export B_LEFT="key 1 105"
+    export B_RIGHT="key 1 106"
+    export B_UP="key 1 103"
+    export B_DOWN="key 1 108"
 
-export B_A="key 1 57"
-export B_B="key 1 29"
-export B_X="key 1 42"
-export B_Y="key 1 56"
+    export B_A="key 1 57"
+    export B_B="key 1 29"
+    export B_X="key 1 42"
+    export B_Y="key 1 56"
 
-export B_L1="key 1 15"
-export B_L2="key 1 18"
-export B_R1="key 1 14"
-export B_R2="key 1 20"
+    export B_L1="key 1 15"
+    export B_L2="key 1 18"
+    export B_R1="key 1 14"
+    export B_R2="key 1 20"
 
-export B_START="key 1 28"
-export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-export B_SELECT="key 1 97"
-export B_SELECT_2="rctrl_pressed"
+    export B_START="key 1 28"
+    export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
+    export B_SELECT="key 1 97"
+    export B_SELECT_2="rctrl_pressed"
 
-export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
-export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
-export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-export B_MENU="key 1 1"          # surprisingly functions like a regular button
+    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
+    export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
+    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
+    export B_MENU="key 1 1"          # surprisingly functions like a regular button
+
+elif [ "$PLATFORM" = "Brick" ]; then
+    export B_LEFT="key 3 16 -1"  # negative for left
+    export B_RIGHT="key 3 17 1"  # positive for right
+    export B_UP="key 3 17 -1"    # negative for up
+    export B_DOWN="key 3 17 1"   # positive for down
+
+    export STICK_LEFT="key 3 0 -32767" # negative for left
+    export STICK_RIGHT="key 3 0 32767" # positive for right
+    export STICK_UP="key 3 1 -32767"   # negative for up
+    export STICK_DOWN="key 3 1 32767"  # positive for down
+
+    export B_A="key 1 305"
+    export B_B="key 1 304"
+    export B_X="key 1 308"
+    export B_Y="key 1 307"
+
+    export B_L1="key 1 310"
+    export B_L2="key 3 2 255" # 255 on push, nothing on release...
+    export B_R1="key 1 311"
+    export B_R2="key 3 5 255" # 255 on push, nothing on release...
+
+    export B_L3="key 1 317" # also logs left fnkey stuff
+    export B_R3="key 1 318" # also logs right fnkey stuff
+
+    export B_START="key 1 315"
+    export B_START_2="start_pressed" # only registers 0 on release, no 1.
+    export B_SELECT="key 1 314"
+    export B_SELECT_2="select_pressed" # registers both 1 and 0
+
+    export B_VOLUP="key 1 115" # has actual key codes like the buttons
+    export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
+    export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
+    export B_MENU=""key 1 316""
+fi
 
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
@@ -515,17 +577,17 @@ get_button_press() {
 get_current_theme_path() {
     local config_file="/config/system.json"
 
-    # check if config file exists
+    # Check if config file exists
     if [ ! -f "$config_file" ]; then
         echo "Error: Configuration file not found at $config_file"
         return 1
     fi
 
-    # extract "theme" from JSON
+    # Extract "theme" from JSON, ignoring errors
     local theme_name
-    theme_name=$(jq -r '.theme' "$config_file")
+    theme_name=$(jq -r 'if .theme then .theme else "" end' "$config_file")
 
-    # check if "theme" is empty
+    # If "theme" is empty
     if [ -z "$theme_name" ]; then
         echo "Error: Could not retrieve theme name from $config_file"
         return 1
@@ -618,6 +680,27 @@ get_current_theme() {
         return 1
     fi
 }
+
+#
+#       restore_theme()
+#
+# This function returns the user's theme path if it's not the default theme
+# Meant to be used on installations and updates only
+get_theme_path_to_restore(){
+    # Get the current theme path
+    local current_theme_path=$(get_current_theme_path)
+    local spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
+    local default_theme="../res/"
+
+    # if the current theme is equal to the default miyoo theme
+    if [[ "$current_theme_path" == "$default_theme" ]]; then # that's ugly!
+        echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
+
+    else # If not, give back the user his loved theme <3
+        echo "$current_theme_path"
+    fi
+}
+
 
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
@@ -782,58 +865,58 @@ read_only_check() {
     fi
 }
 
-
-# Start screen recording with audio
-# Usage: record_start [output_file] [timeout_minutes]
+# Toggle screen recording with audio
+# Usage: record_video [output_file] [timeout_minutes]
 # If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
 # If no timeout is specified, defaults to 5 minutes
-record_start() {
-    local output_file="$1"
-    local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
-    local date_str=$(date +%Y-%m-%d_%H-%M-%S)
-    set_performance
-    # Prevent the CPU from being clocked down while recording
-    flag_add "setting_cpu"
-
-    # If no output file specified, create one with timestamp
-    if [ -z "$output_file" ]; then
-        output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
-    fi
-
-    # Start ffmpeg recording
-    ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
-        -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
-        -c:a aac -b:a 80k -ac 1 \
-        -t $((timeout_minutes * 60)) "$output_file" &
-
-    # Store PID for later use
-    echo $! > "/tmp/ffmpeg_recording.pid"
-
-    log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-
-    # Set up automatic stop after timeout
-    (
-        sleep $((timeout_minutes * 60))
-        if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-            record_stop
-        fi
-    ) &
-}
-
-# Stop current screen recording
-# Usage: record_stop
-record_stop() {
+record_video() {
     if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+        # Stop recording if one is in progress
+        vibrate 200
         local pid=$(cat "/tmp/ffmpeg_recording.pid")
         kill $pid 2>/dev/null
         rm "/tmp/ffmpeg_recording.pid"
         flag_remove "setting_cpu"
         log_message "Stopped recording" -v
+        sleep 1
+        display -t "Recording stopped" -d 3
     else
-        log_message "No active recording found" -v
+        # Start new recording
+        local output_file="$1"
+        local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
+        local date_str=$(date +%Y-%m-%d_%H-%M-%S)
+        set_performance
+        # Prevent the CPU from being clocked down while recording
+        flag_add "setting_cpu"
+
+        # If no output file specified, create one with timestamp
+        if [ -z "$output_file" ]; then
+            output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
+        fi
+
+        vibrate
+        sleep 0.1
+        vibrate
+        # Start ffmpeg recording
+        ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
+            -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
+            -c:a aac -b:a 80k -ac 1 \
+            -t $((timeout_minutes * 60)) "$output_file" &
+
+        # Store PID for later use
+        echo $! > "/tmp/ffmpeg_recording.pid"
+
+        log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
+
+        # Set up automatic stop after timeout
+        (
+            sleep $((timeout_minutes * 60))
+            if [ -f "/tmp/ffmpeg_recording.pid" ]; then
+                record_video
+            fi
+        ) &
     fi
 }
-
 
 set_smart() {
     if ! flag_check "setting_cpu"; then
@@ -988,4 +1071,40 @@ vibrate() {
     else
         log_message "this is where I'd put my vibration... IF I HAD ONE"
     fi
+}
+
+# Takes a screenshot and saves it to the specified path
+# Usage: take_screenshot [output_path] [game_name]
+# If no output_path is provided, saves to /mnt/SDCARD/Saves/screenshots/
+# If game_name is provided, it will be used as the filename (without extension)
+take_screenshot() {
+    local output_path="${1:-/mnt/SDCARD/Saves/screenshots}"
+    local game_name="$2"
+    local screenshot_path
+
+    # Ensure the screenshots directory exists
+    mkdir -p "$output_path"
+
+    # If game name provided, use it for filename
+    if [ -n "$game_name" ]; then
+        screenshot_path="$output_path/${game_name}.png"
+    else
+        # Generate timestamp-based filename if no game name
+        local timestamp=$(date +%Y%m%d_%H%M%S)
+        screenshot_path="$output_path/screenshot_${timestamp}.png"
+    fi
+
+    # Copy framebuffer to temp file
+    cp /dev/fb0 /tmp/fb0
+    vibrate 50
+    # Convert and compress framebuffer to PNG in background
+    # -a: auto detection of framebuffer device
+    # -f: source file
+    # -w: width
+    # -h: height
+    # -b: bits per pixel
+    # -l: line length in pixels
+    $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$screenshot_path" 2>/dev/null &
+
+    log_message "Screenshot saved to: $screenshot_path" -v
 }

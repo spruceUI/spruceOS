@@ -2,7 +2,7 @@
   "label": "SNES",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SFC",
   "imgpath": "../../Roms/SFC/Imgs",
   "gamelist": "../../Roms/SFC/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "zip|7z|smc|sfc|fig|gd3|gd7|dx2|bsx|bs|swc|st",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random SNES/SFC game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_supafaust.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

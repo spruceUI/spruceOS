@@ -2,7 +2,7 @@
   "label": "GBA",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GBA",
   "imgpath": "../../Roms/GBA/Imgs",
   "gamelist": "../../Roms/GBA/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "gba|zip|7z|bin",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random GameBoy Advance game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓MGBA)-gpsp",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/gpsp.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

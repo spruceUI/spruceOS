@@ -2,7 +2,7 @@
   "label": "Game Gear",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gg.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GG",
   "imgpath": "../../Roms/GG/Imgs",
   "gamelist": "../../Roms/GG/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "bin|gg|zip|7z",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Game Gear game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

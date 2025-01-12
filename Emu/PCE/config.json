@@ -2,7 +2,7 @@
   "label": "TG-16",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pce.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PCE",
   "imgpath": "../../Roms/PCE/Imgs",
   "gamelist": "../../Roms/PCE/miyoogamelist.xml",
@@ -12,12 +12,16 @@
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random TG16/PCE game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

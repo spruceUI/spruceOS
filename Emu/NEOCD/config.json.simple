@@ -2,7 +2,7 @@
   "label": "Neo CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NEOCD",
   "imgpath": "../../Roms/NEOCD/Imgs",
   "gamelist": "../../Roms/NEOCD/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 0,
   "extlist": "cue|chd|m3u",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Neo CD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

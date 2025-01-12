@@ -2,7 +2,7 @@
   "label": "ChaiLove",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/chai.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/chai.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/CHAI",
   "imgpath": "../../Roms/CHAI/Imgs",
   "gamelist": "../../Roms/CHAI/miyoogamelist.xml",
@@ -12,12 +12,16 @@
   "extlist": "chailove",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random ChaiLove game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

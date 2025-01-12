@@ -42,7 +42,7 @@ You can hardcode minor info text for a setting item by add extra line below a se
 The minor info should be in the format @"Minor info". Examples such as:
 
 @"this is hardcoded minor text"
-@"User: root, password: tina"
+@"User: spruce, password: happygaming"
 
 ======== CONFIG FILE - DYNAMIC INFO ========
 

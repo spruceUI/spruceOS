@@ -2,7 +2,7 @@
   "label": "Intellivis.",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/itv.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/itv.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/INTELLIVISION",
   "imgpath": "../../Roms/INTELLIVISION/Imgs",
   "gamelist": "../../Roms/INTELLIVISION/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "zip|7z|bin|int",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Intellivision game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

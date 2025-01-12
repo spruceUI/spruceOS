@@ -10,13 +10,22 @@ SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
+USER_THEME=$(get_theme_path_to_restore)
 
 SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 
 log_message "Starting firstboot script"
 
 # initialize the settings... users can restore their own backup later.
-cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE" && sync
+cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE"
+
+# restore the user's theme in the "theme" field of the config.JSON
+jq --arg new_theme "$USER_THEME" '.theme = $new_theme' "$SETTINGS_FILE" > tmp.json && mv tmp.json "$SETTINGS_FILE"
+
+sync # Use sync just once to flush all changes of system.json to disk
+
+# Copy spruce.cfg to www folder so the landing page can read it.
+cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
 
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
@@ -68,9 +77,9 @@ if [ "$VERSION" -lt 20240713100458 ]; then
     display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
 fi
 
-if flag_check "themes_unpacking"; then
+if flag_check "pre_menu_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
-    while flag_check "themes_unpacking"; do
+    while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done
 fi

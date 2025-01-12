@@ -62,3 +62,5 @@ cd $BIN_PATH
 killall -q -USR1 joystickinput
 
 auto_regen_tmp_update
+# Copy spruce.cfg to www folder so the landing page can read it.
+cp "$SETTINGS_PATH/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"

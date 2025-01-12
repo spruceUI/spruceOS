@@ -19,11 +19,20 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-
 flag_remove "save_active"
 
-if setting_get "runGSAtBoot" ; then
+BOOT_TO="$(setting_get "boot_to")"
+
+if [ "$BOOT_TO" = "Switcher" ] ; then
     touch /mnt/SDCARD/spruce/flags/gs.lock
+elif [ "$BOOT_TO" = "Splore" ]; then
+    log_message "Pico-8 Splore selected as boot action."
+    if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] ) || \
+        ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/pico8_dyn" ] ); then
+        echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+    else
+        log_message "Pico-8 binaries not found, booting to MainUI instead"
+    fi
 fi
 
 while [ 1 ]; do
@@ -75,10 +84,10 @@ while [ 1 ]; do
         # send signal USR1 to joystickinput to switch to ANALOG MODE
         killall -q -USR1 joystickinput
 
-        if flag_check "ra_themes_unpacking"; then
-            display -t "Finishing up unpacking RetroArch themes.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-            while flag_check "ra_themes_unpacking"; do
-                sleep 0.1
+        if flag_check "pre_cmd_unpacking"; then
+            display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            while [ -f "$FLAGS_DIR/pre_cmd_unpacking.lock" ]; do
+                : # null operation (no sleep needed)
             done
         fi
 
@@ -99,7 +108,7 @@ while [ 1 ]; do
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
     if setting_get "runGSOnGameExit" && \
-       grep -q /mnt/SDCARD/Emu/*/launch.sh "$FLAGS_DIR/lastgame.lock" ; then
+       grep -q /mnt/SDCARD/Emu/*/../.emu_setup/standard_launch.sh "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
     

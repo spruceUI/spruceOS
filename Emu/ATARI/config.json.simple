@@ -2,7 +2,7 @@
   "label": "Atari 2600",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/ATARI",
   "imgpath": "../../Roms/ATARI/Imgs",
   "gamelist": "../../Roms/ATARI/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "a26|zip|7z|bin",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Atari 2600 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

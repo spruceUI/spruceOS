@@ -2,7 +2,7 @@
   "label": "ChannelF",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fairchild.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fairchild.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/FAIRCHILD",
   "imgpath": "../../Roms/FAIRCHILD/Imgs",
   "gamelist": "../../Roms/FAIRCHILD/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "zip|bin|rom|chf",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random Channel F game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

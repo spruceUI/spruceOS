@@ -2,7 +2,7 @@
   "label": "Sega MS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MS",
   "imgpath": "../../Roms/MS/Imgs",
   "gamelist": "../../Roms/MS/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Master System game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓GENESIS+GX)-picodrive-gearsystem",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/picodrive.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

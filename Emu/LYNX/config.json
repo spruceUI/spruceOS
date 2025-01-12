@@ -2,7 +2,7 @@
   "label": "Atari Lynx",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/lynx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/lynx.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/LYNX",
   "imgpath": "../../Roms/LYNX/Imgs",
   "gamelist": "../../Roms/LYNX/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "lnx|zip",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random Lynx game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓HANDY)-mednafen",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/mednafen_lynx.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

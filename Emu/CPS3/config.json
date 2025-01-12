@@ -2,7 +2,7 @@
   "label": "CPS3",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps3.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/CPS3",
   "imgpath": "../../Roms/CPS3/Imgs",
   "gamelist": "../../Roms/CPS3/miyoogamelist.xml",
@@ -12,16 +12,20 @@
   "extlist": "zip|7z|cue",
   "launchlist": [
     {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
+    {
       "name": "Jump to random CPS3 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
       "name": "Emu Core: (✓FBALPHA2012)-fbneo",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core/fbneo.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Performance.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Save current launch settings as per-game override",

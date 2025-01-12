@@ -2,7 +2,7 @@
   "label": "GBC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gbc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gbc.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GBC",
   "imgpath": "../../Roms/GBC/Imgs",
   "gamelist": "../../Roms/GBC/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 0,
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random GameBoy Color game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

@@ -225,4 +225,8 @@ sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
 log_message "----------Restore and Upgrade completed----------"
 
 auto_regen_tmp_update
+
+# Copy spruce.cfg to www folder so the landing page can read it.
+cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
+
 exit 0

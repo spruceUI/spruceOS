@@ -2,7 +2,7 @@
   "label": "MS-DOS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dos.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dos.png",
-  "launch": "launch.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/DOS",
   "imgpath": "../../Roms/DOS/Imgs",
   "gamelist": "../../Roms/DOS/miyoogamelist.xml",
@@ -11,6 +11,10 @@
   "hidebios": 1,
   "extlist": "zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
   "launchlist": [
+    {
+      "name": "Add to Favorites",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+    },
     {
       "name": "Jump to random DOS game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
