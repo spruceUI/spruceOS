@@ -1,7 +1,11 @@
 {
   "label": "NGPC",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ngpc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngpc.png",
+  "background": "",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NGPC",
   "imgpath": "../../Roms/NGPC/Imgs",

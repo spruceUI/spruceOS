@@ -1,7 +1,11 @@
 {
   "label": "DOOM",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/doom.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/doom.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/doom.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/DOOM",
   "imgpath": "../../Roms/DOOM/Imgs",

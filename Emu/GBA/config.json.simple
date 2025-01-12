@@ -1,8 +1,12 @@
 {
   "label": "GBA",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gba.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "background": "",
+  "themecolor":"FF00FF",
+  "effectsh":"effect.sh",
+  "launch":"launch.sh",
   "rompath": "../../Roms/GBA",
   "imgpath": "../../Roms/GBA/Imgs",
   "gamelist": "../../Roms/GBA/miyoogamelist.xml",

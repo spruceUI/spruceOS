@@ -1,0 +1,14 @@
+{
+"label":"MPV",
+"label.ch.lang":"MPV视频播放",
+"icon":"ic-mpv.png",
+"background":"bg.png",
+"themecolor":"DDEEFF",
+"launch":"launch.sh",
+"rompath":"../../Roms/FFMPEG",
+"imgpath":"../../Imgs/FFMPEG",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"mp4|mkv|avi|mpg|mpeg|wmv|asf|rm|rmvb|m4v|ts|mp3|wma|jpg|png|bmp"
+}

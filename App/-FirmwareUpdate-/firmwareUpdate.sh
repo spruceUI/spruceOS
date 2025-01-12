@@ -39,7 +39,7 @@ confirm_update() {
 	fi
 	display -i "$BG_IMAGE" -t "Your A30 will now shut down. Please manually power your device back on while plugged in to complete the Miyoo firmware update. Once started, please be patient, as it will take a few minutes. It will power itself down again once complete." -p 140 -o
 	sed -i 's|"label":|"#label":|' "$CONFIG"
-	flag_add "first_boot"
+	flag_add "first_boot_A30"
 	sync
 	poweroff
 }

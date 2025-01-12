@@ -40,7 +40,7 @@ reset_wifi() {
 check_wifi() {
     
     # Check if the global Wi-Fi option is enabled
-    wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
+    wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
     
     if [ "$wifi" -eq 1 ]; then
         # Check if wlan0 is up and has an IP address
@@ -84,7 +84,7 @@ manage_reconnection() {
 }
 
 # Start network services on first start
-if [ "$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
+if [ "$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
 

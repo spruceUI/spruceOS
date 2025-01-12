@@ -6,7 +6,6 @@ LOG_FILE="/var/log/messages"
 VOLUME_PATTERN="volume change"
 BRIGHTNESS_PATTERN="setLCDBrightness"
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
-MAINUI_CONF="/config/system.json"
 PROCESS_NAME="MainUI"
 LAST_REPORTED_VOLUME=""
 LAST_REPORTED_BRIGHTNESS=""
@@ -72,7 +71,7 @@ tail -F "$LOG_FILE" | while read line; do
             
             #if ! pgrep "$PROCESS_NAME" > /dev/null; then
                 # Update MainUI Conf    
-                sed -i "s/\"vol\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"vol\": $MAINUI_VOLUME/" "$MAINUI_CONF"
+                sed -i "s/\"vol\":\s*\([0-9]\|1[0-9]\|2[0-2]\)/\"vol\": $MAINUI_VOLUME/" "$SYSTEM_JSON"
             #fi
         fi
     fi
@@ -94,7 +93,7 @@ tail -F "$LOG_FILE" | while read line; do
                 echo "$SYSTEM_BRIGHTNESS" > "$SYS_BRIGHTNESS_PATH"
                 
                 # Update MainUI Conf
-                sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $CURRENT_BRIGHTNESS/" "$MAINUI_CONF"
+                sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $CURRENT_BRIGHTNESS/" "$SYSTEM_JSON"
             fi
         fi
     fi

@@ -1,7 +1,11 @@
 {
   "label": "Neo CD",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/neocd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
+  "background": "",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/NEOCD",
   "imgpath": "../../Roms/NEOCD/Imgs",

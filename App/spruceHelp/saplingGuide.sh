@@ -33,7 +33,7 @@ show_slide() {
             display -i "$HOTKEY_IMAGE" -t " " --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
             ;;
         3)
-            display -t "With default settings, holding the home key will open game switcher. Tapping home will open the menu or exit the current app. You can change these settings in the Advanced Settings app." -s 27 -p 240 --add-image "$HOMEKEY_IMAGE" 1.0 210 middle --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
+            display -t "With default settings, holding the home key will open game switcher. Tapping home will open the menu or exit the current app. You can change these settings in the Advanced Settings app." -s 27 -p 170 --add-image "$HOMEKEY_IMAGE" 1.0 210 middle --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
             ;;
         4)
             display -t "Spruce has an auto save and shutdown feature. Hold the power key for 2 seconds and spruce will save your game. Next time you turn it on spruce will automatically resume your game." -s 27 -p 260 --add-image "$POWERKEY_IMAGE" 1.0 210 middle --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle

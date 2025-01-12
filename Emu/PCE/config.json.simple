@@ -1,7 +1,11 @@
 {
   "label": "TG-16",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pce.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pce.png",
+  "background": "",
+  "themecolor":"EA483F",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PCE",
   "imgpath": "../../Roms/PCE/Imgs",

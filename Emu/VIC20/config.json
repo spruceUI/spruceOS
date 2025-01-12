@@ -1,7 +1,11 @@
 {
   "label": "VIC-20",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/c64.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/VIC20",
   "imgpath": "../../Roms/VIC20/Imgs",

@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BATTERY_PERCENT="/mnt/SDCARD/spruce/bin/battery_percent.elf"
-THEME_JSON_FILE="/config/system.json"
+
 CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
 BATTERY_ICONS="ic-power-charge-0% \
 ic-power-charge-25% \
@@ -16,11 +16,11 @@ power-50%-icon \
 power-80%-icon \
 power-full-icon"
 
-if [ ! -f "$THEME_JSON_FILE" ]; then
+if [ ! -f "$SYSTEM_JSON" ]; then
     exit 1
 fi
 
-THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
+THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON")
 THEME_PATH="${THEME_PATH%/}/"
 
 if [ "${THEME_PATH: -1}" != "/" ]; then
