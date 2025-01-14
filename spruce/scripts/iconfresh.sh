@@ -39,7 +39,7 @@ if [ "${THEME_PATH: -1}" != "/" ]; then
     THEME_PATH="${THEME_PATH}/"
 fi
 
-DEFAULT_ICON_PATH="/mnt/SDCARD/icons/default/"
+DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
 DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
 APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/App/"
 APP_THEME_ICON_PATH="${THEME_PATH}Icons/App/"
