@@ -20,7 +20,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BOOT_ACTION="$(setting_get "boot_to")"
-BOOT_ACTION="$(setting_get "boot_to")"
 
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in
@@ -90,8 +89,17 @@ while [ "$PLATFORM" = "A30" ]; do
         killall -q -USR2 joystickinput
 
         flag_add "in_menu"
+
+        if flag_check "simple_mode"; then
+            export PATH="/mnt/SDCARD/miyoo/app/nosettings:$PATH"
+        elif setting_get "recentsTile"; then
+            export PATH="/mnt/SDCARD/miyoo/app/recents:$PATH"
+        else
+            export PATH="/mnt/SDCARD/miyoo/app/norecents:$PATH"
+        fi
+
         cd ${SYSTEM_PATH}/app/
-        ./MainUI &> /dev/null
+        MainUI &> /dev/null
 
         # remove soft link
         rm /dev/ttyS0
