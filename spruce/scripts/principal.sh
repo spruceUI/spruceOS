@@ -211,10 +211,16 @@ while [ "$PLATFORM" = "Flip" ]; do
         flag_add "in_menu"
 
         export LD_LIBRARY_PATH=/usr/miyoo/lib
+        if setting_get recentsTile; then
+            export PATH=/mnt/SDCARD/miyoo355/app/recents:$PATH
+        else
+            export PATH=/mnt/SDCARD/miyoo355/app/norecents:$PATH
+        fi
+
         runifnecessary "keymon" /usr/miyoo/bin/keymon
         runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
         cd /usr/miyoo/bin/
-        ./MainUI
+        MainUI
 
         flag_remove "in_menu"
 
