@@ -51,6 +51,11 @@ smart_device_discovery() {
     local base_timeout=5  # Start with shorter timeouts but try multiple times
 
     while [ $attempt -le $max_attempts ]; do
+        if [ -f /tmp/sync_cancelled ]; then
+            log_message "SyncthingCheck: Discovery cancelled by user"
+            return 1
+        fi
+
         if check_device_connections; then
             log_message "SyncthingCheck: Devices connected on attempt $attempt"
             return 0
@@ -63,6 +68,12 @@ smart_device_discovery() {
         local start_time=$(date +%s)
         
         while true; do
+            # Check for cancellation inside the timeout loop
+            if [ -f /tmp/sync_cancelled ]; then
+                log_message "SyncthingCheck: Discovery cancelled by user"
+                return 1
+            fi
+
             if check_device_connections; then
                 log_message "SyncthingCheck: Devices connected after rediscovery"
                 return 0
@@ -202,12 +213,22 @@ No folders configured" -i "$BG_TREE"
     display -t "Syncthing Check:
 Press START to cancel" -i "$BG_TREE"
 
+    # Start monitoring and save the PID
     monitor_start_button &
+    monitor_pid=$!
 
+    # Add trap to clean up the monitor process
+    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled' EXIT
+    
     force_rescan
     smart_device_discovery || {
-        log_message "SyncthingCheck: No devices available. Exiting."
-        display -t "No devices online" -i "$BG_TREE"
+        # Check if it was cancelled before showing error
+        if [ -f /tmp/sync_cancelled ]; then
+            display -t "Syncthing Check:
+Skipped" -i "$BG_TREE"
+        else
+            display -t "No devices online" -i "$BG_TREE"
+        fi
         sleep 1
         return 1
     }
