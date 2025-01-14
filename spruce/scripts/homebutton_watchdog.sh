@@ -13,6 +13,7 @@ LIST_FILE="$SETTINGS_PATH/gs_list"
 MAX_COUNT_FILE="$SETTINGS_PATH/gs_max"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
+RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 kill_emulator() {
     # kill RA or other emulator or MainUI
@@ -188,22 +189,27 @@ send_virtual_key_L3() {
 
 # Send R3 press event, this would toggle pause in RA
 send_virtual_key_R3() {
-    {
-        echo 1 318 1 # R3 down
-        sleep 0.1
-        echo 1 318 0 # R3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | $BIN_PATH/sendevent /dev/input/event4
+    # Only pause RA if it is running and their hotkey is not 'escape'
+    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
+    if [ "$hotkey_value" != "escape" ]; then
+        {
+            echo 1 318 1 # R3 down
+            sleep 0.1
+            echo 1 318 0 # R3 up
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event4
+    fi
 }
 
 long_press_handler() {
+    HELD_ID="$1"
     # setup flag for long pressed event
     touch "$TEMP_PATH/gs.longpress"
-    touch "$TEMP_PATH/homeheld" # flag to track if only menu is pressed
+    touch "$TEMP_PATH/homeheld.$HELD_ID"
     sleep 1.5
 
-    # Only proceed if menu was the only key pressed
-    if [ -f "$TEMP_PATH/homeheld" ]; then
+    # Only proceed if menu was the only key pressed with our specific ID
+    if [ -f "$TEMP_PATH/homeheld.$HELD_ID" ]; then
         touch "$TEMP_PATH/longpress_activated"
         vibrate
 
@@ -252,7 +258,7 @@ long_press_handler() {
     fi
 
     rm -f "$TEMP_PATH/gs.longpress"
-    rm -f "$TEMP_PATH/homeheld"
+    rm -f "$TEMP_PATH/homeheld.$HELD_ID"
     rm -f "$TEMP_PATH/longpress_activated"
 }
 
@@ -262,9 +268,11 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
     # Home key down
     *"key 1 1 1"*)
-        # start long press handler
+        # Generate random ID for this press
+        HELD_ID="$(date +%s%N)"
+        # start long press handler with ID
         log_message "*** homebutton_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
-        long_press_handler &
+        long_press_handler "$HELD_ID" &
         PID=$!
 
         # pause PPSSPP, PICO8 or MainUI if it is running
@@ -278,13 +286,15 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         ;;
     # Home key up
     *"key 1 1 0"*)
-        # if NOT long press and menu was the only key pressed
-        if [ -f "$TEMP_PATH/gs.longpress" ] && [ -f "$TEMP_PATH/homeheld" ]; then
+        # Clean up ALL homeheld flags
+        rm -f "$TEMP_PATH"/homeheld.*
+        
+        # if NOT long press
+        if [ -f "$TEMP_PATH/gs.longpress" ]; then
             # Only kill the long press handler if vibrate hasn't happened yet
             if [ ! -f "$TEMP_PATH/longpress_activated" ]; then
-                rm -f "$TEMP_PATH/gs.longpress"
-                rm -f "$TEMP_PATH/homeheld"
                 kill $PID
+                rm -f "$TEMP_PATH/gs.longpress"
                 log_message "*** homebutton_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
             else
                 rm -f "$TEMP_PATH/longpress_activated"
@@ -375,7 +385,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             if ! { flag_check "simple_mode" && flag_check "in_menu"; }; then
                 # Clear all long press related flags
                 rm -f "$TEMP_PATH/gs.longpress"
-                rm -f "$TEMP_PATH/homeheld"
+                rm -f "$TEMP_PATH/homeheld.$HELD_ID"
                 rm -f "$TEMP_PATH/longpress_activated"
 
                 # Resume paused processes

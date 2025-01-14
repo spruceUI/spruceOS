@@ -16,8 +16,8 @@
   "extlist": "gb|gbc|gba|zip|7z|bin",
   "launchlist": [
     {
-      "name": "Add to Favorites",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+      "name": "Add/Remove Favorite",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
     },
     {
       "name": "Jump to random Super GameBoy game",

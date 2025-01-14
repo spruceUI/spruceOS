@@ -20,6 +20,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BOOT_ACTION="$(setting_get "boot_to")"
+BOOT_ACTION="$(setting_get "boot_to")"
 
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in

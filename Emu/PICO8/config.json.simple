@@ -15,8 +15,8 @@
   "extlist": "p8|png|splore",
   "launchlist": [
     {
-      "name": "Add to Favorites",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+      "name": "Add/Remove Favorite",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
     },
     {
       "name": "Jump to random Pico-8 game",
