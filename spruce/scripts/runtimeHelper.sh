@@ -105,7 +105,7 @@ update_checker(){
     check_for_update
 }
 
-UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
+UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
 # This works with checker to display a notification if an update is available
 # But only on next boot. So if they find the app by themselves it's fine.

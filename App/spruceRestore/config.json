@@ -1,7 +1,7 @@
 {
 	"#label":        "Spruce Restore",
 	"icontop":	    "/mnt/SDCARD/Themes/SPRUCE/icontop/App/restore.png",
-	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/App/restore.png",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/app/restore.png",
 	"launch":       "launch.sh",
 	"description":  "Restore configs & settings from backup"
 }

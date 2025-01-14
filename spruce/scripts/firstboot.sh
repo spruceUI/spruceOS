@@ -21,7 +21,7 @@ log_message "Removed first boot flag for $PLATFORM"
 
 SWAPFILE="/mnt/SDCARD/cachefile"
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
-FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
+FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 USER_THEME=$(get_theme_path_to_restore)
