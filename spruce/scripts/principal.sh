@@ -224,6 +224,7 @@ while [ "$PLATFORM" = "Flip" ]; do
         /tmp/cmd_to_run.sh
         rm /tmp/cmd_to_run.sh
         rm /tmp/miyoo_inputd/enable_turbo_input
+        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
     fi
 
 done
