@@ -41,8 +41,8 @@ fi
 
 DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
 DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
-APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/App/"
-APP_THEME_ICON_PATH="${THEME_PATH}icons/App/"
+APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/app/"
+APP_THEME_ICON_PATH="${THEME_PATH}icons/app/"
 
 update_emulator_icons() {
     local CONFIG_FILE=$1
