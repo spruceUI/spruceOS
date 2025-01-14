@@ -199,6 +199,15 @@ monitor_sync_status() {
     local folders=$(get_folders)
     local devices=$(get_devices)
 
+    # Check for both folders and devices
+    if [ -z "$devices" ]; then
+        log_message "SyncthingCheck: No devices configured. Exiting sync check."
+        display -t "Syncthing Check:
+No devices configured" -i "$BG_TREE"
+        sleep 1
+        return 1
+    fi
+
     if [ $? -ne 0 ] || [ -z "$folders" ]; then
         log_message "SyncthingCheck: No folders configured. Exiting sync check."
         display -t "Syncthing Check:
