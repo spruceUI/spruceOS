@@ -13,6 +13,7 @@ LIST_FILE="$SETTINGS_PATH/gs_list"
 MAX_COUNT_FILE="$SETTINGS_PATH/gs_max"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
+RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 kill_emulator() {
     # kill RA or other emulator or MainUI
@@ -188,12 +189,16 @@ send_virtual_key_L3() {
 
 # Send R3 press event, this would toggle pause in RA
 send_virtual_key_R3() {
-    {
-        echo 1 318 1 # R3 down
-        sleep 0.1
-        echo 1 318 0 # R3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | $BIN_PATH/sendevent /dev/input/event4
+    # Only pause RA if it is running and their hotkey is not 'escape'
+    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
+    if [ "$hotkey_value" != "escape" ]; then
+        {
+            echo 1 318 1 # R3 down
+            sleep 0.1
+            echo 1 318 0 # R3 up
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event4
+    fi
 }
 
 long_press_handler() {
