@@ -50,6 +50,28 @@ if [ -f "$CONFIG_FILE" ]; then
 fi
 
 
+FAVOURITE_FILE="/mnt/SDCARD/Roms/favourite.json"
+# Update launch paths in favourite.json if it exists
+if [ -f "$FAVOURITE_FILE" ]; then
+    # Create a temporary file
+    TEMP_FILE="${FAVOURITE_FILE}.tmp"
+    
+    # Process the file line by line
+    while IFS= read -r line; do
+        # Check if line contains old launch path pattern
+        if echo "$line" | grep -q '"/mnt/SDCARD/Emu/.*/launch.sh"'; then
+            # Replace the launch path pattern
+            echo "$line" | sed 's|/launch.sh"|/../.emu_setup/standard_launch.sh"|' >> "$TEMP_FILE"
+        else
+            echo "$line" >> "$TEMP_FILE"
+        fi
+    done < "$FAVOURITE_FILE"
+    
+    # Replace original file with updated content
+    mv "$TEMP_FILE" "$FAVOURITE_FILE"
+    log_message "Updated launch paths in favourite.json"
+fi
+
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
 
 
