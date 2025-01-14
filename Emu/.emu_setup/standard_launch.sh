@@ -447,7 +447,9 @@ flag_add 'emulator_launched'
 kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null
 
 # Sanitize the rom path
-export ROM_FILE="$(readlink -f "$1")"
+ROM_FILE="$1"
+ROM_FILE="$(echo "$ROM_FILE" | sed 's|/media/sdcard0/|/mnt/SDCARD/|g')"
+export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
 	"MEDIA")
