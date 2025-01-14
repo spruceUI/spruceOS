@@ -8,7 +8,7 @@ FAVOURITE_FILE="/mnt/SDCARD/Roms/favourite.json"
 EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 ROMFILENAME="$(basename "$1")"
 GAMELIST_FILE="/mnt/SDCARD/Roms/$EMU_NAME/miyoogamelist.xml"
-ROM_PATH="/mnt/SDCARD/Emu/$EMU_NAME/../../Roms/$EMU_NAME/$ROMFILENAME"
+ROM_PATH="$1"
 BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 # Get game name first - we'll need it either way
