@@ -12,8 +12,8 @@
   "extlist": "zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
   "launchlist": [
     {
-      "name": "Add to Favorites",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/add_favourite.sh"
+      "name": "Add/Remove Favorite",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
     },
     {
       "name": "Jump to random DOS game",
