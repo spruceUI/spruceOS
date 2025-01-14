@@ -72,6 +72,10 @@ if [ -f "$FAVOURITE_FILE" ]; then
     log_message "Updated launch paths in favourite.json"
 fi
 
+# update launch paths in Game Switcher list if necessary
+GS_LIST="/mnt/SDCARD/spruce/settings/gs_list"
+sed -i "s|/launch.sh|/../.emu_setup/standard_launch.sh|g" "$GS_LIST"
+
 # -------------------- ADDITIONAL UPGRADE STEPS --------------------
 
 
