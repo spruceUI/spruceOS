@@ -8,6 +8,11 @@ on:
         required: true
         default: 'Development'
         type: string
+      publish:
+        description: 'Update OTA files immediately'
+        required: true
+        default: 'false'
+        type: boolean
 
 jobs:
   create-release:
@@ -123,7 +128,8 @@ jobs:
           prerelease: true
 
       - name: Update OTA files
-        if: success()
+        # Only run this step if the release is published immediately
+        if: success() && github.event.inputs.publish == 'true'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
