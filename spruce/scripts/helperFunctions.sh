@@ -1000,6 +1000,11 @@ set_performance() {
         cores_online
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        case "$PLATFORM" in
+            "A30") scaling_max_freq=1344000 ;;
+            "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
+        esac
+        echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         log_message "CPU Mode now locked to PERFORMANCE" -v
         flag_remove "setting_cpu"
@@ -1014,7 +1019,7 @@ set_overclock() {
             "A30")
                 /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
                 ;;
-            "Brick"|"Flip")
+            "Brick"|"Flip"|"SmartPro")
                 echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
                 echo 2000000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
                 ;;
