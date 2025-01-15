@@ -3,6 +3,8 @@ name: Update OTA on Release Publish
 on:
   release:
     types: [published]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       version:
