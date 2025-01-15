@@ -871,6 +871,7 @@ log_precise() {
 #   QR_CODE=$(qr_code -t "https://www.google.com")
 #   display -i "$QR_CODE" -t "DT: QR Code" -d 5
 QRENCODE_PATH="/mnt/SDCARD/miyoo/app/qrencode"
+QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
 qr_code() {
     local text=""
     local size=3
@@ -898,8 +899,13 @@ qr_code() {
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
+    local qr_bin_path=$QRENCODE_PATH
+    if [ ! "$PLATFORM" = "A30" ]; then
+      qr_bin_path=$QRENCODE64_PATH
+    fi
+
     # Generate QR code
-    if "$QRENCODE_PATH" -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
+    if "$qr_bin_path" -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
         echo "$output"
         return 0
     else
