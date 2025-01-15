@@ -357,7 +357,7 @@ run_retroarch() {
 	if [ "$PLATFORM" = "A30" ]; then
 		CORE_DIR="$RA_DIR/.retroarch/cores"
 	else # 64-bit device
-		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+		CORE_DIR="$RA_DIR/.retroarch/cores64"
 	fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
