@@ -3,8 +3,6 @@ name: Update OTA on Release Publish
 on:
   release:
     types: [published]
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       version:
@@ -18,25 +16,36 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Debug event
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Repository: ${{ github.repository }}"
+
       - name: Checkout main repository
         uses: actions/checkout@v4
         with:
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
 
       - name: Set version
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
             echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           else
-            VERSION=${GITHUB_REF#refs/tags/v}
+            # For release events, get the tag from the release
+            VERSION=${{ github.event.release.tag_name }}
+            VERSION=${VERSION#v}  # Remove 'v' prefix if present
             echo "VERSION=$VERSION" >> $GITHUB_ENV
           fi
+          echo "Using version: $VERSION"
 
       - name: Download release asset
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
+          echo "Downloading release v${VERSION}"
           gh release download "v${VERSION}" -p "*.7z"
 
       - name: Update OTA files
