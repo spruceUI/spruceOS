@@ -12,7 +12,7 @@ HOTKEY_IMAGE="$APP_DIR/imgs/hotkeyDefaults.png"
 IMAGE_CONTINUE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayContinueExit.png"
 IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
 DIRECTION_PROMPTS="/mnt/SDCARD/miyoo/res/imgs/displayLeftRight.png"
-WIKI_QR_CODE=$(qr_code -t "https://github.com/spruceUI/spruceOS/wiki")
+WIKI_QR_CODE="https://github.com/spruceUI/spruceOS/wiki"
 SPRUCE_LOGO_BG="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 SPRUCE_VERSION=$(get_version)
 
