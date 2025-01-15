@@ -4,6 +4,11 @@ ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# TODO: re-enable iconfresh for brick and smartpro once theming stuff is worked out more fully
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    exit 10
+fi
+
 # Add silent mode flag
 silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1
@@ -14,26 +19,30 @@ if [ $silent_mode -eq 0 ]; then
 fi
 
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
-APP_BASE_PATH="/mnt/SDCARD/app/"
-THEME_JSON_FILE="/config/system.json"
-SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
+APP_BASE_PATH="/mnt/SDCARD/App/"
+
+if [ "$PLATFORM" = "A30" ]; then
+    SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
+elif [ "$PLATFORM" = "Flip" ]; then
+    SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
+fi
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
-if [ ! -f "$THEME_JSON_FILE" ]; then
+if [ ! -f "$SYSTEM_JSON" ]; then
     exit 1
 fi
 
-THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
+THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON")
 THEME_PATH="${THEME_PATH%/}/"
 
 if [ "${THEME_PATH: -1}" != "/" ]; then
     THEME_PATH="${THEME_PATH}/"
 fi
 
-DEFAULT_ICON_PATH="/mnt/SDCARD/icons/default/"
+DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
 DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
-APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/App/"
-APP_THEME_ICON_PATH="${THEME_PATH}Icons/App/"
+APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/app/"
+APP_THEME_ICON_PATH="${THEME_PATH}icons/app/"
 
 update_emulator_icons() {
     local CONFIG_FILE=$1

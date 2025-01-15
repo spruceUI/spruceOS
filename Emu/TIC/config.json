@@ -1,7 +1,11 @@
 {
   "label": "TIC-80",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/tic.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/tic.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/tic.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/TIC",
   "imgpath": "../../Roms/TIC/Imgs",

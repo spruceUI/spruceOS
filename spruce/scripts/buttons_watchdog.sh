@@ -2,10 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LOG_FILE="/var/log/messages"
-MAINUI_CONF_FILE="/config/system.json"
-TEMP_FILE="/tmp/tmp.file"
-
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
 START_DOWN=false
@@ -122,7 +118,7 @@ brightness_down() {
         echo "$SYSTEM_BRIGHTNESS" > "$SYS_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$MAINUI_CONF_FILE"
+        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
 
@@ -150,7 +146,7 @@ brightness_up() {
         echo "$SYSTEM_BRIGHTNESS" > "$SYS_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$MAINUI_CONF_FILE"
+        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
     
@@ -227,7 +223,7 @@ save_volume_to_config_file() {
     VOLUME_LV=$(get_volume_level)
 
     # Update MainUI Config file
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$MAINUI_CONF_FILE"
+    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
 }
 
 # scan all button input

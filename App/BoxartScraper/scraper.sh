@@ -207,13 +207,13 @@ find_image_name() {
 # Directories and files
 status_img_dir="/mnt/SDCARD/App/BoxartScraper/Imgs"
 messages_file="/var/log/messages"
-system_config_file="/config/system.json"
+
 roms_dir="/mnt/SDCARD/Roms"
 
 display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
 
 # Check if WiFi is enabled in system config
-wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
 if [ "$wifi_enabled" -eq 0 ]; then
     log_message "BoxartScraper: WiFi is disabled in system settings"
     display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "WiFi is disabled in system settings" -o
@@ -278,7 +278,7 @@ for sys_dir in "$roms_dir"/*/; do
         # Check if the user pressed B to exit
         if tail -n1 "$messages_file" | grep -q "key 1 29"; then
             log_message "BoxartScraper: User pressed B, exiting."
-            display --icon "/mnt/SDCARD/Themes/SPRUCE/Icons/App/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
+            display --icon "/mnt/SDCARD/Themes/SPRUCE/icons/app/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             exit
         fi

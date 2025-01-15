@@ -1,9 +1,13 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+
+# Brick doesn't have the required binaries for these yet.
+if [ "$PLATFORM" = "A30" ]; then
+    . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+    . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+    . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+fi
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -96,31 +100,12 @@ rotate_logs() {
     ) &
 }
 
-set_usb_icon_from_theme(){
-    THEME_JSON_FILE="/config/system.json"
-    USB_ICON_SOURCE="/mnt/SDCARD/Icons/Default/App/usb.png"
-    USB_ICON_DEST="/usr/miyoo/apps/usb_storage/usb_icon_80.png"
-
-    if [ -f "$THEME_JSON_FILE" ]; then
-        THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
-        THEME_PATH="${THEME_PATH%/}/"
-        [ "${THEME_PATH: -1}" != "/" ] && THEME_PATH="${THEME_PATH}/"
-        APP_THEME_ICON_PATH="${THEME_PATH}Icons/App/"
-        if [ -f "${APP_THEME_ICON_PATH}usb.png" ]; then
-            mount -o bind "${APP_THEME_ICON_PATH}usb.png" "$USB_ICON_DEST"
-        else
-            mount -o bind "$USB_ICON_SOURCE" "$USB_ICON_DEST"
-        fi
-    fi
-}
-
-
 update_checker(){
     sleep 20
     check_for_update
 }
 
-UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/Icons/App/firmwareupdate.png"
+UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
 # This works with checker to display a notification if an update is available
 # But only on next boot. So if they find the app by themselves it's fine.

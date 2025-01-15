@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png"
+IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 
 display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes."
 

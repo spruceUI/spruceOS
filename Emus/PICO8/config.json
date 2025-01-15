@@ -1,0 +1,25 @@
+{
+"label":"PICO8",
+"icon":"/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
+"iconsel":"/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/PICO8",
+"imgpath":"../../Roms/PICO8/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"launchlist": [
+    {
+        "name": "Pico8 libretro",
+        "launch": "launch.sh"
+    },
+    {
+        "name": "Pico8 standalone",
+        "launch": "launch1.sh"
+    },
+    {
+        "name": "Pico8 standalone FS",
+        "launch": "launch2.sh"
+    }
+    ]
+}

@@ -7,8 +7,6 @@ ARGUMENT="$1" ### "apply" or "remove"
 APP_DIR="/mnt/SDCARD/App"
 EMU_DIR="/mnt/SDCARD/Emu"
 SHOWHIDE="/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh"
-MAINUI_PATH="/mnt/SDCARD/miyoo/app/mainui"
-NOSETTINGS_MAINUI_PATH="/mnt/SDCARD/miyoo/app/nosettings/mainui"
 
 check_and_hide_app() {
 	APP="$1"
@@ -56,18 +54,6 @@ sync_simple_json_from_original() {
 	done
 }
 
-set_simple_mainui_on() {
-    if [ -f "$MAINUI_PATH" ]; then
-        mv "$MAINUI_PATH" "${MAINUI_PATH}.bak"
-        cp "$NOSETTINGS_MAINUI_PATH" "$MAINUI_PATH"
-        log_message "Set to SIMPLE mode"
-        update_setting "simple_mode" "on"
-        rm "${MAINUI_PATH}.bak"
-    else
-        log_message "MainUI file not found: $MAINUI_PATH"
-    fi
-}
-
 ##### MAIN EXECUTION #####
 
 if [ $ARGUMENT = "apply" ]; then
@@ -106,8 +92,6 @@ if [ $ARGUMENT = "apply" ]; then
 	check_and_reveal_app "RandomGame"
 	check_and_reveal_app "spruceHelp"
 
-	set_simple_mainui_on
-
 	# spruceRestore, BoxartScraper and RTC apps unhandled - these will respect how the setting-up user sets them
 
 else ##### ARGUMENT is "remove"
@@ -128,8 +112,6 @@ else ##### ARGUMENT is "remove"
 	restore_app_states "/mnt/SDCARD/Saves/spruce/apps.state"
 	check_and_reveal_app "AdvancedSettings"
 	check_and_reveal_app "RetroArch"
-
-	sh /mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh reapply
 
 	# don't mess with any other app visibility... we don't know what they had visible before they turned on simple mode.
 

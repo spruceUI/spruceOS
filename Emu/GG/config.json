@@ -1,7 +1,11 @@
 {
   "label": "Game Gear",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gg.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gg.png",
+  "background": "",
+  "themecolor":"FFFFFF",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GG",
   "imgpath": "../../Roms/GG/Imgs",

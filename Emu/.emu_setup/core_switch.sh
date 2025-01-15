@@ -195,10 +195,10 @@ case "$EMU_NAME" in
 			NEW_DISPLAY="(✓LUDICROUSN64)-parallel-mupen64plus"
 
 		elif [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
-			NEW_CORE="km_parallel_n64_xtreme_amped_turbo"
+			NEW_CORE="parallel_n64"
 			NEW_DISPLAY="ludicrousn64-(✓PARALLEL)-mupen64plus"
 
-		else # current core is km_parallel_n64_xtreme_amped_turbo
+		else # current core is parallel_n64
 			NEW_CORE="mupen64plus"
 			NEW_DISPLAY="ludicrousn64-parallel-(✓MUPEN64PLUS)"
 		fi

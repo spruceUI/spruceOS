@@ -1,13 +1,18 @@
 {
   "label": "Media",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ffplay.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
+  "background": "",
+  "themecolor":"DDEEFF",
+  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MEDIA",
   "imgpath": "../../Roms/MEDIA/Imgs",
   "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
+  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
   "launchlist": [
     {
       "name": "Add/Remove Favorite",

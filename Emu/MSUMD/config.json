@@ -1,7 +1,11 @@
 {
   "label": "MSUMD",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/msumd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msumd.png",
+  "background": "",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/MSUMD",
   "imgpath": "../../Roms/MSUMD/Imgs",

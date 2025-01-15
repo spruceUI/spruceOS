@@ -1,7 +1,11 @@
 {
   "label": "SuperGfx",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/sgfx.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgfx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgfx.png",
+  "background": "",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/SGFX",
   "imgpath": "../../Roms/SGFX/Imgs",

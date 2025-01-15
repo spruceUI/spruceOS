@@ -1,7 +1,11 @@
 {
   "label": "G&W",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gw.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gw.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gw.png",
+  "background": "",
+  "themecolor":"FF0000",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GW",
   "imgpath": "../../Roms/GW/Imgs",

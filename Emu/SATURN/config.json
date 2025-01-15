@@ -1,0 +1,35 @@
+{
+"label": "Saturn",
+"icontop": "",
+"icon": "",
+"iconsel": "",
+"background": "",
+"themecolor": "E4007F",
+"effectsh": "effect.sh",
+"launch": "../.emu_setup/standard_launch.sh",
+"rompath": "../../Roms/SATURN",
+"imgpath": "../../Roms/SATURN/Imgs",
+"gamelist": "../../Roms/SATURN/miyoogamelist.xml",
+"useswap": 1,
+"shortname": 0,
+"hidebios": 1,
+"extlist": "chd|zip|mds|ccd|iso|cue",
+"launchlist": [
+    {
+      "name": "Jump to random Saturn game",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    },
+    {
+      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+    },
+    {
+      "name": "Save current launch settings as per-game override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
+    },
+    {
+      "name": "Remove per-game launch setting override",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    }
+  ]
+}

@@ -5,7 +5,12 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+
+# TODO: remove A30 check once Syncthing is implemented on Brick
+if [ "$PLATFORM" = "A30" ]; then
+	. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+fi
+
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
@@ -18,290 +23,476 @@ export DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
 export OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
 export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
 export CUSTOM_DEF_FILE="$EMU_DIR/default.opt"
-##### IMPORT .OPT FILES #####
 
-if [ -f "$DEF_FILE" ]; then
-	. "$DEF_FILE"
-elif [ -f "$CUSTOM_DEF_FILE" ]; then
-	. "$CUSTOM_DEF_FILE"
-else
-	log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
-fi
+##### GENERAL FUNCTIONS #####
 
-if [ -f "$OPT_FILE" ]; then
-	. "$OPT_FILE"
-else
-	log_message "WARNING: System .opt file not found for $EMU_NAME!" -v
-fi
-
-if [ -f "$OVR_FILE" ]; then
-	. "$OVR_FILE";
-	log_message "Launch setting OVR_FILE detected @ $OVR_FILE" -v
-else
-	log_message "No launch OVR_FILE detected. Using current system settings." -v
-fi
-
-##### SET CPU MODE #####
-
-if [ "$MODE" = "overclock" ]; then
-	if [ "$EMU_NAME" = "NDS" ]; then
-		{sleep 33 && set_overclock} &
+import_launch_options() {
+	if [ -f "$DEF_FILE" ]; then
+		. "$DEF_FILE"
+	elif [ -f "$CUSTOM_DEF_FILE" ]; then
+		. "$CUSTOM_DEF_FILE"
 	else
-		set_overclock
+		log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
 	fi
-fi
 
-if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
-	/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
-fi
+	if [ -f "$OPT_FILE" ]; then
+		. "$OPT_FILE"
+	else
+		log_message "WARNING: System .opt file not found for $EMU_NAME!" -v
+	fi
 
-wifi_needed=false
-syncthing_enabled=false
-wifi_connected=false
+	if [ -f "$OVR_FILE" ]; then
+		. "$OVR_FILE";
+		log_message "Launch setting OVR_FILE detected @ $OVR_FILE" -v
+	else
+		log_message "No launch OVR_FILE detected. Using current system settings." -v
+	fi
+}
 
-##### RAC Check
-if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
-    log_message "Retro Achievements enabled, WiFi connection needed"
-    wifi_needed=true
-fi
+set_cpu_mode() {
+	if [ "$MODE" = "overclock" ]; then
+		if [ "$EMU_NAME" = "NDS" ]; then
+			( sleep 33 && set_overclock ) &
+		else
+			set_overclock
+		fi
+	fi
 
-##### Syncthing Sync Check, perform only once per session #####
-if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
-    log_message "Syncthing is enabled, WiFi connection needed"
-    wifi_needed=true
-    syncthing_enabled=true
-fi
+	if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
+		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
+	fi
+}
 
-# Connect to WiFi if needed for any service
-if $wifi_needed; then
-    if check_and_connect_wifi; then
-        wifi_connected=true
-    fi
-fi
+handle_network_services() {
 
-# Handle Syncthing sync if enabled
-if $syncthing_enabled && $wifi_connected; then
-    start_syncthing_process
-    /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
-    flag_add "syncthing_startup_synced"
+	wifi_needed=false
+	syncthing_enabled=false
+	wifi_connected=false
 
-fi
+	##### RAC Check #####
+	if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+		log_message "Retro Achievements enabled, WiFi connection needed"
+		wifi_needed=true
+	fi
 
-# Handle network service disabling
-if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
-    /mnt/SDCARD/spruce/scripts/networkservices.sh off
-    
-    if setting_get "disableWifiInGame"; then
-        if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
-            ifconfig wlan0 down &
-        fi
-        killall wpa_supplicant
-        killall udhcpc
-    fi
-fi
+	##### Syncthing Sync Check, perform only once per session #####
+	if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
+		log_message "Syncthing is enabled, WiFi connection needed"
+		wifi_needed=true
+		syncthing_enabled=true
+	fi
 
-flag_add 'emulator_launched'
+	# Connect to WiFi if needed for any service
+	if $wifi_needed; then
+		if check_and_connect_wifi; then
+			wifi_connected=true
+		fi
+	fi
 
-##### LAUNCH STUFF #####
+	# Handle Syncthing sync if enabled
+	if $syncthing_enabled && $wifi_connected; then
+		start_syncthing_process
+		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+		flag_add "syncthing_startup_synced"
 
-# Pause simple mode watchdog so in-game Konami code doesn't break it
-kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null
+	fi
 
-# we sanitise the rom path
-ROM_FILE="$(readlink -f "$1")"
+	# Handle network service disabling
+	if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
+		/mnt/SDCARD/spruce/scripts/networkservices.sh off
+		
+		if setting_get "disableWifiInGame"; then
+			if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
+				ifconfig wlan0 down &
+			fi
+			killall wpa_supplicant
+			killall udhcpc
+		fi
+	fi
+}
 
-case $EMU_NAME in
-	"MEDIA")
-		export HOME=$EMU_DIR
-		export PATH=$EMU_DIR/bin:$PATH
-		export LD_LIBRARY_PATH=$EMU_DIR/libs:/usr/miyoo/lib:/usr/lib:$LD_LIBRARY_PATH
-		cd $EMU_DIR
+
+##### EMULATOR LAUNCH FUNCTIONS #####
+
+run_ffplay() {
+	export HOME=$EMU_DIR
+	cd $EMU_DIR
+	if [ "$PLATFORM" = "A30" ]; then
+		export PATH="$EMU_DIR"/bin:"$PATH"
+		export LD_LIBRARY_PATH="$EMU_DIR"/libs:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
 		ffplay -vf transpose=2 -fs -i "$ROM_FILE"
-		;;
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export PATH="$EMU_DIR"/bin64:"$PATH"
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
+		./bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
+		sleep 1
+		./ffplay -x 640 -y 480 "$ROM_FILE"
+		kill -9 "$(pidof gptokeyb)"
+	fi
+}
 
-	"NDS")
+run_drastic() {
+	export HOME=$EMU_DIR
+	cd $EMU_DIR
+
+	if [ "$PLATFORM" = "A30" ]; then
+
+		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
 		# so we pause joystickinput and create soft link to serial port
 		killall -q -STOP joystickinput
-        ln -s /dev/ttyS2 /dev/ttyS0
+		ln -s /dev/ttyS2 /dev/ttyS0
 
 		cd $EMU_DIR
 		if [ ! -f "/tmp/.show_hotkeys" ]; then
 			touch /tmp/.show_hotkeys
 			LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
 		fi
-		export HOME=$EMU_DIR
+		
 		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
 		export SDL_VIDEODRIVER=mmiyoo
 		export SDL_AUDIODRIVER=mmiyoo
 		export EGL_VIDEODRIVER=mmiyoo
-		cd $EMU_DIR
+
 		if [ -f 'libs/libEGL.so' ]; then
 			rm -rf libs/libEGL.so
 			rm -rf libs/libGLESv1_CM.so
 			rm -rf libs/libGLESv2.so
 		fi
-		./drastic "$ROM_FILE"
-		sync
-
-        # remove soft link and resume joystickinput
-        rm /dev/ttyS0
+		./drastic32 "$ROM_FILE"
+		# remove soft link and resume joystickinput
+		rm /dev/ttyS0
 		killall -q -CONT joystickinput
+		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"
 
-		;;
+	else # 64-bit platform
 
-	"OPENBOR")
+		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
+		# export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
+		# export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
+		./drastic64 "$ROM_FILE"
+		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
+	fi
+	sync
+}
+
+load_drastic_configs() {
+	DS_DIR="/mnt/SDCARD/Emu/NDS/config"
+	cp -f "$DS_DIR/drastic-$PLATFORM.cfg" "$DS_DIR/drastic.cfg"
+}
+
+save_drastic_configs() {
+	DS_DIR="/mnt/SDCARD/Emu/NDS/config"
+	cp -f "$DS_DIR/drastic.cfg" "$DS_DIR/drastic-$PLATFORM.cfg"
+}
+
+run_openbor() {
+	export HOME=$EMU_DIR
+	cd $HOME
+	if [ "$PLATFORM" = "Brick" ]; then
+		./OpenBOR_Brick
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
+		./OpenBOR_Flip
+	else # assume A30
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
-		export HOME=$EMU_DIR
-		cd $HOME
-		if [ "$GAME" == "Final Fight LNS.pak" ]; then
+		if [ "$GAME" = "Final Fight LNS.pak" ]; then
 			./OpenBOR_mod "$ROM_FILE"
 		else
 			./OpenBOR_new "$ROM_FILE"
 		fi
-		sync
-		;;
-	
-	"PICO8")
-        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
-        # this allows joystick to be used as DPAD in MainUI
-        killall -q -USR2 joystickinput
+	fi
+	sync
+}
 
-		export HOME="$EMU_DIR"
-		export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
+run_pico8() {
+    # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+	# this allows joystick to be used as DPAD in MainUI
+	killall -q -USR2 joystickinput
 
-		P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
-		CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
+	export HOME="$EMU_DIR"
+	export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
-		if [ "$CONTROL_PROFILE" = "Steward" ]; then
-			export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
-		else
-			export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
-		fi
+	if setting_get "pico8_stretch"; then
+		SCALING="-draw_rect 0,0,480,640"
+	else
+		SCALING=""
+	fi
 
-		case "$CONTROL_PROFILE" in
-			"Doubled") 
-				cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
-				;;
-			"One-handed")
-				cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
-				;;
-			"Racing")
-				cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
-				;;
-			"Doubled 2") 
-				cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt"
-				;;
-			"One-handed 2")
-				cp -f "$P8_DIR/sdl_controllers.onehand_reverse" "$P8_DIR/sdl_controllers.txt"
-				;;
-			"Racing 2")
-				cp -f "$P8_DIR/sdl_controllers.racing_reverse" "$P8_DIR/sdl_controllers.txt"
-				;;
-		esac
+	if [ "$ARCH" = "aarch64" ]; then
+        PICO8_BINARY="pico8_64"
+    else
+        PICO8_BINARY="pico8_dyn"
+    fi
 
-		if setting_get "pico8_stretch"; then
-			SCALING="-draw_rect 0,0,480,640"
-		else
-			SCALING=""
-		fi
+	export SDL_VIDEODRIVER=mali
+	export SDL_JOYSTICKDRIVER=a30
+	cd "$HOME"
+	sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+	if [ "${GAME##*.}" = "splore" ]; then
+	check_and_connect_wifi &
+		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
+	else
+		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
+	fi
+	sync
 
-		export SDL_VIDEODRIVER=mali
-		export SDL_JOYSTICKDRIVER=a30
-		cd "$HOME"
-		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
-		if [ "${GAME##*.}" = "splore" ]; then
-			check_and_connect_wifi &
-			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
-		else
-			pico8_dyn -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
-		fi
-		sync
+	# send signal USR1 to joystickinput to switch to ANALOG MODE
+	killall -q -USR1 joystickinput
+}
 
-        # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -q -USR1 joystickinput
+load_pico8_control_profile() {
+	HOME="$EMU_DIR"
+	P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
+	CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
 
-		;;
+	if [ "$CONTROL_PROFILE" = "Steward" ]; then
+		export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
+	else
+		export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
+	fi
 
-	"PORTS")
-		PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-		cd $PORTS_DIR
-		/bin/sh "$ROM_FILE"
-		;;
+	case "$CONTROL_PROFILE" in
+		"Doubled") 
+			cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
+			;;
+		"One-handed")
+			cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
+			;;
+		"Racing")
+			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
+			;;
+		"Doubled 2") 
+			cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt"
+			;;
+		"One-handed 2")
+			cp -f "$P8_DIR/sdl_controllers.onehand_reverse" "$P8_DIR/sdl_controllers.txt"
+			;;
+		"Racing 2")
+			cp -f "$P8_DIR/sdl_controllers.racing_reverse" "$P8_DIR/sdl_controllers.txt"
+			;;
+	esac
+}
 
-	"PSP")
-		# move .config folder into place in case emu setup never ran
-		if [ ! -d "/mnt/SDCARD/.config" ]; then
-			SETUP_DIR="/mnt/SDCARD/Emu/.emu_setup"
-			if [ -d "$SETUP_DIR/.config" ]; then
-				cp -rf "$SETUP_DIR/.config" "/mnt/SDCARD/.config" && log_message "emu_setup.sh: copied .config folder to root of SD card."
-			else
-				log_message "emu_setup.sh: WARNING!!! No .config folder found!"
-			fi
-		else
-			log_message "emu_setup.sh: .config folder already in place at SD card root."
-		fi
+run_port() {
+	PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+	cd $PORTS_DIR
+	/bin/sh "$ROM_FILE"
+}
 
-		cd $EMU_DIR
+move_dotconfig_into_place() {
+	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]; then
+		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/.config" && log_message "Copied .config folder to root of SD card."
+	else
+		log_message "WARNING!!! No .config folder found!"
+	fi
+}
+
+run_ppsspp() {
+	export HOME=/mnt/SDCARD
+	cd $EMU_DIR
+	if [ "$PLATFORM" = "A30" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-		export HOME=/mnt/SDCARD
-		
 		./PPSSPPSDL "$ROM_FILE"
+	elif [ "$PLATFORM" = "Brick" ]; then 	
+		export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
+		./PPSSPPSDL_Brick "$ROM_FILE"
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+		./PPSSPPSDL_Flip
+	fi
+}
+
+load_ppsspp_configs() {
+	PSP_DIR="/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM"
+	cp -f "$PSP_DIR/controls-$PLATFORM.ini" "$PSP_DIR/controls.ini"
+	cp -f "$PSP_DIR/ppsspp-$PLATFORM.ini" "$PSP_DIR/ppsspp.ini"
+}
+
+save_ppsspp_configs() {
+	PSP_DIR="/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM"
+	cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-$PLATFORM.ini"
+	cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-$PLATFORM.ini"
+}
+
+run_retroarch() {
+
+	case "$PLATFORM" in
+		"Brick" | "SmartPro" )
+			export RA_BIN="ra64.trimui"
+			if [ "$CORE" = "uae4arm" ]; then
+				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+			fi
+      # TODO: remove this once profile is set up
+      export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
+		;;
+		"Flip" )
+			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+				export RA_BIN="retroarch-flip"
+			else
+				export RA_BIN="ra64.miyoo"
+			fi
+			if [ "$CORE" = "easyrpg" ]; then
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+			fi
+		;;
+		"A30" )
+			# handle different version of ParaLLEl N64 core for A30
+			if [ "$CORE" = "parallel_n64" ]; then
+				CORE="km_parallel_n64_xtreme_amped_turbo"
+			fi
+
+			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+				export RA_BIN="retroarch"
+			else
+				export RA_BIN="ra32.miyoo"
+			fi
+		;;
+	esac
+
+	RA_DIR="/mnt/SDCARD/RetroArch"
+	cd "$RA_DIR"
+
+	if [ "$PLATFORM" = "A30" ]; then
+		CORE_DIR="$RA_DIR/.retroarch/cores"
+	else # 64-bit device
+		CORE_DIR="$RA_DIR/.retroarch/cores-a133"
+	fi
+
+	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+	else
+		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+	fi
+
+	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
+}
+
+ready_architecture_dependent_states() {
+	STATES="/mnt/SDCARD/Saves/states"
+	if [ "$PLATFORM" = "A30" ]; then 
+		[ -d "$STATES/RACE-32" ] && mv "$STATES/RACE-32" "$STATES/RACE"
+		[ -d "$STATES/fake-08-32" ] && mv "$STATES/fake-08-32" "$STATES/fake-08"
+		[ -d "$STATES/PCSX-ReARMed-32" ] && mv "$STATES/PCSX-ReARMed-32" "$STATES/PCSX-ReARMed"
+		[ -d "$STATES/ChimeraSNES-32" ] && mv "$STATES/ChimeraSNES-32" "$STATES/ChimeraSNES"
+
+	else # 64-bit device
+		[ -d "$STATES/RACE-64" ] && mv "$STATES/RACE-64" "$STATES/RACE"
+		[ -d "$STATES/fake-08-64" ] && mv "$STATES/fake-08-64" "$STATES/fake-08"
+		[ -d "$STATES/PCSX-ReARMed-64" ] && mv "$STATES/PCSX-ReARMed-64" "$STATES/PCSX-ReARMed"
+		[ -d "$STATES/ChimeraSNES-64" ] && mv "$STATES/ChimeraSNES-64" "$STATES/ChimeraSNES"
+	fi
+}
+
+stash_architecture_dependent_states() {
+	STATES="/mnt/SDCARD/Saves/states"
+	if [ "$PLATFORM" = "A30" ]; then 
+		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-32"
+		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-32"
+		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
+		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-32"
+
+	else # 64-bit device
+		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
+		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
+		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
+		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-64"
+
+	fi
+}
+
+load_n64_controller_profile() {
+	PROFILE="$(setting_get "n64_control_profile")"
+	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+	LUDI="LudicrousN64 Xtreme Amped"
+	PARA="ParaLLEl N64"
+	MUPEN="Mupen64Plus GLES2"
+	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${LUDI}/${LUDI}.rmp"
+	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${PARA}/${PARA}.rmp"
+	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
+}
+
+save_custom_n64_controller_profile() {
+	PROFILE="$(setting_get "n64_control_profile")"
+	if [ "$PROFILE" = "Custom" ]; then
+		SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+		DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+		LUDI="LudicrousN64 Xtreme Amped"
+		PARA="ParaLLEl N64"
+		MUPEN="Mupen64Plus GLES2"
+		if [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
+			cp -f "${DST}/${LUDI}/${LUDI}.rmp" "${SRC}/Custom.rmp"
+		elif [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			cp -f "${DST}/${PARA}/${PARA}.rmp" "${SRC}/Custom.rmp"
+		else # CORE is mupen64plus
+			cp -f "${DST}/${MUPEN}/${MUPEN}.rmp" "${SRC}/Custom.rmp"
+		fi
+	fi
+}
+
+##### MAIN EXECUTION #####
+
+import_launch_options
+
+set_cpu_mode
+
+# TODO: remove A30 check once network services implemented on Brick
+[ "$PLATFORM" = "A30" ] && handle_network_services
+
+flag_add 'emulator_launched'
+
+# Pause simple mode watchdog so in-game Konami code doesn't break it
+kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null
+
+# Sanitize the rom path
+ROM_FILE="$1"
+ROM_FILE="$(echo "$ROM_FILE" | sed 's|/media/sdcard0/|/mnt/SDCARD/|g')"
+export ROM_FILE="$(readlink -f "$ROM_FILE")"
+
+case $EMU_NAME in
+	"MEDIA")
+		if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
+			run_ffplay
+		else # Brick or TSP
+			export CORE="ffmpeg"
+			run_retroarch
+		fi
+		;;
+	"NDS")
+		load_drastic_configs
+		run_drastic
+		save_drastic_configs
+		;;
+	"OPENBOR")
+		run_openbor
+		;;
+	"PICO8")
+		load_pico8_control_profile
+		run_pico8
+		;;
+	"PORTS")
+		run_port
+		;;
+	"PSP")
+		if [ "$CORE" = "standalone" ]; then
+			[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
+			load_ppsspp_configs
+			run_ppsspp
+			save_ppsspp_configs
+		else
+			run_retroarch
+		fi
 		;;
 	*)
-
-		# Set up N64 controller profiles
-		if [ $EMU_NAME = "N64" ]; then
-			PROFILE="$(setting_get "n64_control_profile")"
-			SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
-			DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
-			LUDI="LudicrousN64 Xtreme Amped"
-			PARA="ParaLLEl N64"
-			MUPEN="Mupen64Plus GLES2"
-			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${LUDI}/${LUDI}.rmp"
-			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${PARA}/${PARA}.rmp"
-			cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
-		fi
-
-		if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-			export RA_BIN="retroarch"
-		else
-			export RA_BIN="ra32.miyoo"
-		fi
-		RA_DIR="/mnt/SDCARD/RetroArch"
-		cd "$RA_DIR"
-
-		if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
-			CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
-		else
-			CORE_PATH="$RA_DIR/.retroarch/cores/${CORE}_libretro.so"
-		fi
-
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
-
-		# Backup custom N64 controller profile if necessary
-		if [ $EMU_NAME = "N64" ]; then
-			PROFILE="$(setting_get "n64_control_profile")"
-			if [ "$PROFILE" = "Custom" ]; then
-				SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
-				DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
-				LUDI="LudicrousN64 Xtreme Amped"
-				PARA="ParaLLEl N64"
-				MUPEN="Mupen64Plus GLES2"
-				if [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
-					cp -f "${DST}/${LUDI}/${LUDI}.rmp" "${SRC}/Custom.rmp"
-				elif [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-					cp -f "${DST}/${PARA}/${PARA}.rmp" "${SRC}/Custom.rmp"
-				else # CORE is mupen64plus
-					cp -f "${DST}/${MUPEN}/${MUPEN}.rmp" "${SRC}/Custom.rmp"
-				fi
-			fi
-		fi		
-
+		[ $EMU_NAME = "N64" ] && load_n64_controller_profile
+		ready_architecture_dependent_states
+		run_retroarch
+		stash_architecture_dependent_states
+		[ $EMU_NAME = "N64" ] && save_custom_n64_controller_profile
 		;;
-		
 esac
-
 
 kill -18 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # unpause
 kill -9 $(pgrep -f enforceSmartCPU.sh)

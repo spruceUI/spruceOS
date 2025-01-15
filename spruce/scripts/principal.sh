@@ -21,18 +21,24 @@
 
 BOOT_ACTION="$(setting_get "boot_to")"
 
-# only go ahead with boot actions if not resuming from a quicksave
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in
         "Random")
+            log_message "Booting to random game selection"
             echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
             ;;
         "Switcher")
             touch /mnt/SDCARD/spruce/flags/gs.lock
             ;;
         "Splore")
-            if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" ] ) || \
-                ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/pico8_dyn" ] ); then
+            log_message "Attempting to boot into Pico-8. Checking for binaries"
+            if [ "$ARCH" == "aarch64" ]; then
+                PICO8_EXE="pico8_64"
+            else
+                PICO8_EXE="pico8_dyn"
+            fi
+            if ( [ -f "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat" ] && [ -f "/mnt/SDCARD/Emu/PICO8/bin/$PICO8_EXE" ] ) || \
+                ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ] ); then
                 echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
             else
                 log_message "Pico-8 binaries not found, booting to MainUI instead"
@@ -43,7 +49,7 @@ fi
 
 flag_remove "save_active"
 
-while [ 1 ]; do
+while [ "$PLATFORM" = "A30" ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
         log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
@@ -83,8 +89,17 @@ while [ 1 ]; do
         killall -q -USR2 joystickinput
 
         flag_add "in_menu"
+
+        if flag_check "simple_mode"; then
+            export PATH="/mnt/SDCARD/miyoo/app/nosettings:$PATH"
+        elif setting_get "recentsTile"; then
+            export PATH="/mnt/SDCARD/miyoo/app/recents:$PATH"
+        else
+            export PATH="/mnt/SDCARD/miyoo/app/norecents:$PATH"
+        fi
+
         cd ${SYSTEM_PATH}/app/
-        ./MainUI &> /dev/null
+        MainUI &> /dev/null
 
         # remove soft link
         rm /dev/ttyS0
@@ -131,3 +146,101 @@ while [ 1 ]; do
     fi
 
 done
+
+runifnecessary(){
+    a=$(pgrep "$1")
+    if [ "$a" = "" ] ; then
+        $2 &
+    fi
+}
+
+while [ "$PLATFORM" = "Brick" ]; do
+
+    tinymix set 9 1
+    tinymix set 1 0
+    export LD_LIBRARY_PATH=/usr/trimui/lib
+    cd /usr/trimui/bin
+    runifnecessary "keymon" keymon
+    runifnecessary "inputd" trimui_inputd
+    runifnecessary "scened" trimui_scened
+    runifnecessary "trimui_btmanager" trimui_btmanager
+    runifnecessary "hardwareservice" hardwareservice
+    premainui.sh
+    MainUI
+    preload.sh
+
+    if [ -f /tmp/trimui_inputd_restart ] ; then
+        #restart before emulator run
+        killall -9 trimui_inputd
+        sleep 0.2
+        runifnecessary "inputd" trimui_inputd
+        rm /tmp/trimui_inputd_restart 
+    fi                                                                                         
+    if [ -f /tmp/cmd_to_run.sh ] ; then
+
+        set_performance
+        chmod a+x /tmp/cmd_to_run.sh
+        udpbcast -f /tmp/host_msg &
+        /tmp/cmd_to_run.sh
+        rm /tmp/cmd_to_run.sh
+        rm /tmp/host_msg
+        killall -9 udpbcast
+        # reset CPU settings to defaults in case an emulator changes anything
+        scaling_min_freq=1008000 ### default value, may be overridden in specific script
+        set_smart
+    fi
+
+done
+
+while [ "$PLATFORM" = "Flip" ]; do
+
+    runee=$(/usr/miyoo/bin/jsonval runee)
+    
+    if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
+        cd /mnt/SDCARD/emulationstation/
+        ./emulationstation.sh
+        runee=$(/usr/miyoo/bin/jsonval runee)
+        echo runee $runee  >> /tmp/runee.log
+
+    elif [ ! -f /tmp/cmd_to_run.sh ] ; then
+
+        # create in menu flag and remove last played game flag
+        flag_remove "lastgame"
+
+        # check if emu visibility needs a refresh, before entering MainUI
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+
+        # Check for the themeChanged flag
+        if flag_check "themeChanged"; then
+            /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
+            flag_remove "themeChanged"
+        fi
+
+        flag_add "in_menu"
+
+        export LD_LIBRARY_PATH=/usr/miyoo/lib
+        if setting_get recentsTile; then
+            export PATH=/mnt/SDCARD/miyoo355/app/recents:$PATH
+        else
+            export PATH=/mnt/SDCARD/miyoo355/app/norecents:$PATH
+        fi
+
+        runifnecessary "keymon" /usr/miyoo/bin/keymon
+        runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+        cd /usr/miyoo/bin/
+        MainUI
+
+        flag_remove "in_menu"
+
+    else
+        touch /tmp/miyoo_inputd/enable_turbo_input
+        chmod a+x /tmp/cmd_to_run.sh
+        /tmp/cmd_to_run.sh
+        rm /tmp/cmd_to_run.sh
+        rm /tmp/miyoo_inputd/enable_turbo_input
+        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
+    fi
+
+done
+
+

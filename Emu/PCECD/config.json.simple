@@ -1,7 +1,11 @@
 {
   "label": "TG-CD",
+  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pcecd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pcecd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pcecd.png",
+  "background": "",
+  "themecolor":"",
+  "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/PCECD",
   "imgpath": "../../Roms/PCECD/Imgs",

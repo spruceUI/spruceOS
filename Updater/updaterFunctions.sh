@@ -1,5 +1,39 @@
 APP_DIR="/mnt/SDCARD/App"
 
+# Detect device and export to any script sourcing updaterFunctions
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+case $INFO in
+*"sun8i"*)
+	if [ -d /usr/miyoo ]; then
+		export PLATFORM="A30"
+	else
+		export PLATFORM="Smart"
+	fi
+	;;
+*"SStar"*)
+	export PLATFORM="MiyooMini"
+	;;
+*"TG5040"*)
+	export PLATFORM="SmartPro"
+	;;
+*"TG3040"*)
+	export PLATFORM="Brick"
+	;;
+*)
+    export PLATFORM="A30"
+    ;;
+esac
+
+# add spruce/bin[64] folder to PATH
+case "$PLATFORM" in
+    "Brick" | "SmartPro" | "Flip" )
+        PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+        ;;
+    "A30" )
+        PATH="/mnt/SDCARD/spruce/bin:$PATH"
+        ;;
+esac
+
 acknowledge(){
     local messages_file="/var/log/messages"
 	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"

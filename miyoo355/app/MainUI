@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd $(dirname "$0")
+
+if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
+	my355/init.sh
+fi
+
+poweroff
