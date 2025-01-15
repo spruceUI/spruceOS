@@ -82,7 +82,7 @@ esac
 
 
 # Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
+if [ "$PLATFORM" = "A30" ]; then
     export B_LEFT="key 1 105"
     export B_RIGHT="key 1 106"
     export B_UP="key 1 103"
@@ -108,7 +108,7 @@ if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
     export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
     export B_MENU="key 1 1"          # surprisingly functions like a regular button
 
-elif [ "$PLATFORM" = "Brick" ]; then
+elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
     export B_LEFT="key 3 16 -1"  # negative for left
     export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
