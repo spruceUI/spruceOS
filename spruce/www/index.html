@@ -24,6 +24,7 @@
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
         
         .action-button {
@@ -33,8 +34,18 @@
             padding: 12px 24px;
             text-decoration: none;
             border-radius: 4px;
-            margin: 10px 0;
+            margin: 10px auto;
             transition: background-color 0.2s;
+            min-width: 200px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 480px) {
+            .action-button {
+                width: 90%;
+                padding: 15px 20px;
+            }
         }
         
         .action-button:hover {
@@ -128,6 +139,12 @@ For all things spruce be sure to check out the wiki. It's full of useful informa
     <br />
     <code><script>document.write("\\\\" +window.location.host)</script></code>
     <br /><br />
+    Using these credentials:
+    <br />
+    Username: <code>spruce</code>
+    <br />
+    Password: <code>happygaming</code>
+    <br /><br />
     <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-samba" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
     <br />
 </div>
@@ -137,7 +154,7 @@ For all things spruce be sure to check out the wiki. It's full of useful informa
     To SSH into your device, run the following command in the appropriate terminal:
     <br />
     <code><script>document.write("ssh spruce@" + window.location.host)</script></code>
-    <br />
+    <br /><br />
     Then enter the password <code>happygaming</code> when prompted.
     <br /><br />
     <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#-ssh" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
