@@ -37,13 +37,11 @@ jobs:
       - name: Update OTA files
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         run: |
           # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git mirror_repo
-          
-          # Get version from tag
-          VERSION=${GITHUB_REF#refs/tags/v}
           
           # Calculate file info
           CHECKSUM=$(md5sum "spruceV${VERSION}.7z" | cut -d' ' -f1)
