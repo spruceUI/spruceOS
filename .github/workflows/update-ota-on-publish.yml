@@ -16,6 +16,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set version
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
