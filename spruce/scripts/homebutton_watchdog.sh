@@ -116,7 +116,7 @@ prepare_game_switcher() {
         fi
 
     # if in MainUI menu
-    elif pgrep -x "./MainUI" >/dev/null; then
+    elif pgrep "MainUI" >/dev/null; then
 
         # exit if list file does not exist
         if [ ! -f "$LIST_FILE" ]; then
