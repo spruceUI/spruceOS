@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version to update OTA for (without v prefix)'
+        description: 'Release version to update OTA file for (without v prefix)'
         required: true
         type: string
 
