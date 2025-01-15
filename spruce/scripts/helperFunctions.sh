@@ -402,11 +402,18 @@ display() {
       ld_library_path="/usr/trimui/lib:$ld_library_path"
       # TODO: we might want to make this more generic based on architecture eventually
       DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+    elif [ "$PLATFORM" = "Flip" ]; then
+      # TODO: we might want to move these to config files?
+      screen_width=640
+      screen_height=480
+      rotation=0
+      width=600
+      # TODO: we might want to make this more generic based on architecture eventually
+      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
     fi
 
     # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
     [ "$PLATFORM" = "SmartPro" ] && return 30
-    [ "$PLATFORM" = "Flip" ] && return 40
 
     local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" color="ebdbb2" font=""
     local use_acknowledge_image=false
