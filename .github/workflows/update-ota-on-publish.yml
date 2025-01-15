@@ -16,8 +16,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
+      - name: Checkout main repository
         uses: actions/checkout@v4
+        with:
+          repository: spruceUI/spruceOS
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Set version
         run: |
