@@ -468,8 +468,14 @@ display() {
         font="$DEFAULT_FONT"
     fi
 
+
+    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
+    if [ ! "$PLATFORM" = "A30" ]; then
+      command="$command""$screen_width $screen_height $rotation "
+    fi
+
     # Construct the command
-    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE $screen_width $screen_height $rotation \"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
