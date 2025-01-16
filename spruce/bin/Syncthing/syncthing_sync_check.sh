@@ -107,7 +107,6 @@ stop_network() {
 get_folders() {
     local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
     if [ -z "$folders" ]; then
-        log_message "SyncthingCheck: No folders configured"
         return 1
     fi
     echo "$folders"
@@ -187,8 +186,7 @@ monitor_start_button() {
         case $last_line in
             *"$B_START"* | *"$B_START_2"*)
                 log_message "SyncthingCheck: START button pressed - cancelling sync"
-                echo "cancelled" > /tmp/sync_cancelled
-                exit 0
+                touch /tmp/sync_cancelled
                 ;;
         esac
     done
@@ -196,22 +194,27 @@ monitor_start_button() {
 
 monitor_sync_status() {
     local mode="$1"
-    local folders=$(get_folders)
+    local folders
+    folders=$(get_folders)
+    local ret=$?
     local devices=$(get_devices)
+    local timeout=600 # 10 minutes
+    local start_time=$(date +%s)
 
-    # Check for both folders and devices
-    if [ -z "$devices" ]; then
-        log_message "SyncthingCheck: No devices configured. Exiting sync check."
+    # Check folders first
+    if [ $ret -ne 0 ] || [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders configured. Exiting sync check."
         display -t "Syncthing Check:
-No devices configured" -i "$BG_TREE"
+No folders configured" -i "$BG_TREE"
         sleep 1
         return 1
     fi
 
-    if [ $? -ne 0 ] || [ -z "$folders" ]; then
-        log_message "SyncthingCheck: No folders configured. Exiting sync check."
+    # Then check devices
+    if [ -z "$devices" ]; then
+        log_message "SyncthingCheck: No devices configured. Exiting sync check."
         display -t "Syncthing Check:
-No folders configured" -i "$BG_TREE"
+No devices configured" -i "$BG_TREE"
         sleep 1
         return 1
     fi
@@ -222,15 +225,15 @@ No folders configured" -i "$BG_TREE"
     display -t "Syncthing Check:
 Press START to cancel" -i "$BG_TREE"
 
-    # Start monitoring and save the PID
+    # Make sure we clean up properly on any exit
+    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
+
+    # Start the monitor in background
     monitor_start_button &
     monitor_pid=$!
 
-    # Add trap to clean up the monitor process
-    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled' EXIT
-    
     force_rescan
-    smart_device_discovery || {
+    if ! smart_device_discovery; then
         # Check if it was cancelled before showing error
         if [ -f /tmp/sync_cancelled ]; then
             display -t "Syncthing Check:
@@ -240,11 +243,23 @@ Skipped" -i "$BG_TREE"
         fi
         sleep 1
         return 1
-    }
+    fi
 
     while true; do
+        # Check for timeout
+        if [ $(($(date +%s) - start_time)) -gt $timeout ]; then
+            log_message "SyncthingCheck: Sync timed out after ${timeout} seconds"
+            display -t "Sync timed out after ${timeout}s" -i "$BG_TREE"
+            sleep 1
+            return 1
+        fi
+
+        # Check for cancellation
         if [ -f /tmp/sync_cancelled ]; then
-            rm -f /tmp/sync_cancelled
+            log_message "SyncthingCheck: Sync cancelled by user"
+            display -t "Syncthing Check:
+Cancelled" -i "$BG_TREE"
+            sleep 1
             return 1
         fi
 
