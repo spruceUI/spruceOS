@@ -232,7 +232,18 @@ Press START to cancel" -i "$BG_TREE"
     monitor_start_button &
     monitor_pid=$!
 
+    display -t "Syncthing Check:
+Scanning folders...
+
+Press START to cancel" -i "$BG_TREE"
+
     force_rescan
+
+    display -t "Syncthing Check:
+Searching for devices...
+
+Press START to cancel" -i "$BG_TREE"
+
     if ! smart_device_discovery; then
         # Check if it was cancelled before showing error
         if [ -f /tmp/sync_cancelled ]; then
