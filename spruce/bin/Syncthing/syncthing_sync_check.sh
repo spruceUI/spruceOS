@@ -197,7 +197,7 @@ monitor_sync_status() {
     local folders
     folders=$(get_folders)
     local ret=$?
-    local devices=$(get_devices)
+    local devices
     local timeout=600 # 10 minutes
     local start_time=$(date +%s)
 
@@ -210,6 +210,7 @@ No folders configured" -i "$BG_TREE"
         return 1
     fi
 
+    devices=$(get_devices)
     # Then check devices
     if [ -z "$devices" ]; then
         log_message "SyncthingCheck: No devices configured. Exiting sync check."
