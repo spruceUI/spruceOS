@@ -20,9 +20,24 @@ mkdir -p "$ARCHIVE_DIR"
 
 # Download and extract previews if not already present
 setup_previews() {
-    # Check if directory doesn't exist or is empty
-    if [ ! -d "$CACHE_DIR/previews" ] || [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
+    local timestamp_file="$CACHE_DIR/last_update"
+    local max_age=1200  # 20 minutes in seconds
+    local current_time=$(date +%s)
+    local should_update=1
+
+    # Check if timestamp exists and is recent
+    if [ -f "$timestamp_file" ]; then
+        local last_update=$(cat "$timestamp_file")
+        local age=$((current_time - last_update))
+        if [ $age -lt $max_age ]; then
+            should_update=0
+        fi
+    fi
+
+    # Update previews if needed
+    if [ $should_update -eq 1 ] || [ ! -d "$CACHE_DIR/previews" ] || [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
         display -t "Downloading theme previews..." -p 240
+        rm -rf "$CACHE_DIR/previews"
         mkdir -p "$CACHE_DIR/previews"
         
         if ! curl -s -k -L -o "$CACHE_DIR/theme_previews.7z" "$PREVIEW_PACK_URL"; then
@@ -37,6 +52,9 @@ setup_previews() {
             exit 1
         fi
         rm -f "$CACHE_DIR/theme_previews.7z"
+        
+        # Update timestamp
+        echo "$current_time" > "$timestamp_file"
     fi
     
     # Final check if we have any preview files
