@@ -1,0 +1,150 @@
+#!/bin/sh
+
+APP_DIR=/mnt/SDCARD/App/ThemeNursery
+CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
+ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
+IMAGE_CONTINUE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayContinueExit.png"
+IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
+DIRECTION_PROMPTS="/mnt/SDCARD/miyoo/res/imgs/displayLeftRight.png"
+PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/Resources/theme_previews.7z"
+THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/PackedThemes"
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+log_verbose
+
+# Create necessary directories
+mkdir -p "$CACHE_DIR"
+mkdir -p "$ARCHIVE_DIR"
+
+# Download and extract previews if not already present
+setup_previews() {
+    # Check if directory doesn't exist or is empty
+    if [ ! -d "$CACHE_DIR/previews" ] || [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
+        display -t "Downloading theme previews..." -p 240
+        mkdir -p "$CACHE_DIR/previews"
+        
+        if ! curl -s -k -L -o "$CACHE_DIR/theme_previews.7z" "$PREVIEW_PACK_URL"; then
+            display -t "Failed to download theme previews!" -p 240 -d 2
+            exit 1
+        fi
+        
+        if ! 7zr x "$CACHE_DIR/theme_previews.7z" -o"$CACHE_DIR/previews" 2>&1; then
+            display -t "Failed to extract theme previews!" -p 240 -d 2
+            log_message "Theme Nursery: 7z extraction error output: $?"
+            rm -f "$CACHE_DIR/theme_previews.7z"
+            exit 1
+        fi
+        rm -f "$CACHE_DIR/theme_previews.7z"
+    fi
+    
+    # Final check if we have any preview files
+    if [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
+        display -t "No theme previews found!" -p 240 -d 2
+        exit 1
+    fi
+}
+
+# Get list of preview files
+get_theme_list() {
+    find "$CACHE_DIR/previews" -name "*.png" -exec basename {} .png \; | sort
+}
+
+show_theme_preview() {
+    local theme_name="$1"
+    local preview_path="$CACHE_DIR/previews/${theme_name}.png"
+    
+    log_message "Theme Nursery: Showing preview for $theme_name"
+    log_message "Theme Nursery: Preview path: $preview_path"
+    
+    # Check if file exists and log details
+    if [ ! -f "$preview_path" ]; then
+        log_message "Theme Nursery: Preview file not found!"
+        display -t "Preview image not found!" -p 240
+        return 1
+    fi
+    
+    # Log file permissions and size
+    ls -l "$preview_path" | log_message
+    
+    display_kill
+    display -t "$theme_name" -p 20 -s 30 -w 600 -a middle \
+        --add-image "$preview_path" 0.75 240 middle \
+        --add-image "$IMAGE_CONTINUE_EXIT" 1.0 240 middle \
+        --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
+}
+
+download_theme() {
+    local theme_name="$1"
+    local encoded_name=$(echo "$theme_name" | sed 's/ /%20/g' | sed "s/'/%27/g")
+    local theme_url="${THEME_BASE_URL}/${encoded_name}.7z"
+    local output_path="$ARCHIVE_DIR/${theme_name}.7z"
+    
+    display -t "Downloading ${theme_name}..." -p 240
+    
+    # Get file size for progress tracking
+    TARGET_SIZE_BYTES="$(curl -k -I -L "$theme_url" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2)"
+    TARGET_SIZE_KILO=$((TARGET_SIZE_BYTES / 1024))
+    TARGET_SIZE_MEGA=$((TARGET_SIZE_KILO / 1024))
+    
+    . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+    download_progress "$output_path" "$TARGET_SIZE_MEGA" "Now downloading ${theme_name}!" &
+    download_pid=$!
+    
+    if ! curl -s -k -L -o "$output_path" "$theme_url"; then
+        kill $download_pid
+        display -t "Download failed for ${theme_name}!" -p 240 -d 2
+        return 1
+    fi
+    kill $download_pid
+    
+    if [ -f "$output_path" ]; then
+        display -t "Download complete!" -p 240
+        return 0
+    else
+        display -t "Download failed!" -p 240 -d 2
+        return 1
+    fi
+}
+
+# Initial setup
+setup_previews
+
+# Get theme list and count
+THEME_LIST=$(get_theme_list)
+total_themes=$(echo "$THEME_LIST" | wc -l)
+current_theme=1
+
+# Show first theme
+current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
+show_theme_preview "$current_theme_name"
+
+# Main loop
+while true; do
+    action=$(get_button_press)
+    case $action in
+        "RIGHT"|"START")
+            if [ $current_theme -lt $total_themes ]; then
+                current_theme=$((current_theme + 1))
+                current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
+                show_theme_preview "$current_theme_name"
+            fi
+            ;;
+        "LEFT"|"SELECT")
+            if [ $current_theme -gt 1 ]; then
+                current_theme=$((current_theme - 1))
+                current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
+                show_theme_preview "$current_theme_name"
+            fi
+            ;;
+        "A")
+            current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
+            download_theme "$current_theme_name"
+            show_theme_preview "$current_theme_name"
+            ;;
+        "B")
+            display_kill
+            exit 0
+            ;;
+    esac
+done
