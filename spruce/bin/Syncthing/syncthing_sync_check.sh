@@ -8,6 +8,7 @@ API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
 API_KEY=""
 BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+SYNC_TIMEOUT="${SYNC_TIMEOUT:-600}"  # Allow override, default 10 minutes
 
 check_syncthing_status() {
     if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
@@ -194,11 +195,23 @@ monitor_start_button() {
 
 monitor_sync_status() {
     local mode="$1"
+    local timeout
+    
+    case "$mode" in
+        "startup")  timeout="${STARTUP_TIMEOUT:-900}"  ;; # 15 minutes
+        "shutdown") timeout="${SHUTDOWN_TIMEOUT:-900}" ;; # 15 minutes
+        "monitor")  timeout="${MONITOR_TIMEOUT:-1800}"  ;; # 30 minutes
+    esac
+    
+    local start_time=$(date +%s)
+    local last_progress_time=$(date +%s)
+    local previous_status=""
+    local stall_timeout=120  # 2 minutes timeout for stalled sync
+
     local folders
     folders=$(get_folders)
     local ret=$?
     local devices
-    local timeout=600 # 10 minutes
     local start_time=$(date +%s)
 
     # Check folders first
@@ -233,50 +246,38 @@ Press START to cancel" -i "$BG_TREE"
     monitor_start_button &
     monitor_pid=$!
 
-    display -t "Syncthing Check:
-Scanning folders...
-
-Press START to cancel" -i "$BG_TREE"
-
-    force_rescan
-
-    display -t "Syncthing Check:
-Searching for devices...
-
-Press START to cancel" -i "$BG_TREE"
-
-    if ! smart_device_discovery; then
-        # Check if it was cancelled before showing error
-        if [ -f /tmp/sync_cancelled ]; then
-            display -t "Syncthing Check:
-Skipped" -i "$BG_TREE"
-        else
-            display -t "No devices online" -i "$BG_TREE"
-        fi
-        sleep 1
-        return 1
-    fi
-
     while true; do
-        # Check for timeout
-        if [ $(($(date +%s) - start_time)) -gt $timeout ]; then
+        # Check for manual cancellation
+        if [ -f /tmp/sync_cancelled ]; then
+            log_message "SyncthingCheck: Sync cancelled by user"
+            display -t "Sync cancelled" -i "$BG_TREE"
+            sleep 1
+            return 1
+        fi
+
+        local elapsed=$(($(date +%s) - start_time))
+        local stall_time=$(($(date +%s) - last_progress_time))
+        
+        # Check for overall timeout
+        if [ $elapsed -gt $timeout ]; then
             log_message "SyncthingCheck: Sync timed out after ${timeout} seconds"
             display -t "Sync timed out after ${timeout}s" -i "$BG_TREE"
             sleep 1
             return 1
         fi
 
-        # Check for cancellation
-        if [ -f /tmp/sync_cancelled ]; then
-            log_message "SyncthingCheck: Sync cancelled by user"
-            display -t "Syncthing Check:
-Cancelled" -i "$BG_TREE"
+        # Check for stall timeout
+        if [ $stall_time -gt $stall_timeout ]; then
+            log_message "SyncthingCheck: Sync stalled - no progress for ${stall_timeout} seconds"
+            display -t "Sync stalled
+No progress for ${stall_timeout}s" -i "$BG_TREE"
             sleep 1
             return 1
         fi
 
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
+        current_status=""
 
         for device in $devices; do
             local device_name=$(get_device_name "$device")
@@ -300,11 +301,19 @@ Cancelled" -i "$BG_TREE"
                     status="${download_completion}/${upload_completion}%"
                 fi
 
+                current_status="${current_status}${status}"
                 echo "$folder_label:" >> /tmp/sync_display.txt
                 echo "$status" >> /tmp/sync_display.txt
                 echo "" >> /tmp/sync_display.txt
             done
         done
+
+        # Check if status has changed
+        if [ "$current_status" != "$previous_status" ] && [ -n "$previous_status" ]; then
+            last_progress_time=$(date +%s)
+            log_message "SyncthingCheck: Sync progress detected, resetting stall timer"
+        fi
+        previous_status="$current_status"
 
         status_content=$(cat /tmp/sync_display.txt)
         display -t "$status_content
