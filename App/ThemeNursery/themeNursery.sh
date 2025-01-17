@@ -2,8 +2,9 @@
 
 APP_DIR=/mnt/SDCARD/App/ThemeNursery
 CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
-ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
-IMAGE_CONTINUE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayContinueExit.png"
+UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+ARCHIVE_DIR=/mnt/SDCARD/spruce/archives/preMenu
+IMAGE_CONFIRM_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayConfirmExit.png"
 IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
 DIRECTION_PROMPTS="/mnt/SDCARD/miyoo/res/imgs/displayLeftRight.png"
 PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/Resources/theme_previews.7z"
@@ -53,9 +54,15 @@ get_theme_list() {
 show_theme_preview() {
     local theme_name="$1"
     local preview_path="$CACHE_DIR/previews/${theme_name}.png"
+    local display_name="$theme_name"
     
     log_message "Theme Nursery: Showing preview for $theme_name"
     log_message "Theme Nursery: Preview path: $preview_path"
+    
+    # Check if theme is installed
+    if [ -d "/mnt/SDCARD/Themes/${theme_name}" ]; then
+        display_name="${theme_name} - Installed"
+    fi
     
     # Check if file exists and log details
     if [ ! -f "$preview_path" ]; then
@@ -68,9 +75,9 @@ show_theme_preview() {
     ls -l "$preview_path" | log_message
     
     display_kill
-    display -t "$theme_name" -p 20 -s 30 -w 600 -a middle \
-        --add-image "$preview_path" 0.75 240 middle \
-        --add-image "$IMAGE_CONTINUE_EXIT" 1.0 240 middle \
+    display -t "$display_name" -p 20 -s 30 -w 600 -a middle \
+        --add-image "$preview_path" 0.73 240 middle \
+        --add-image "$IMAGE_CONFIRM_EXIT" 1.0 240 middle \
         --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
 }
 
@@ -123,14 +130,14 @@ show_theme_preview "$current_theme_name"
 while true; do
     action=$(get_button_press)
     case $action in
-        "RIGHT"|"START")
+        "RIGHT")
             if [ $current_theme -lt $total_themes ]; then
                 current_theme=$((current_theme + 1))
                 current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
                 show_theme_preview "$current_theme_name"
             fi
             ;;
-        "LEFT"|"SELECT")
+        "LEFT")
             if [ $current_theme -gt 1 ]; then
                 current_theme=$((current_theme - 1))
                 current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
@@ -142,8 +149,9 @@ while true; do
             download_theme "$current_theme_name"
             show_theme_preview "$current_theme_name"
             ;;
-        "B")
+        "B"|"START")
             display_kill
+            sh "$UNPACKER"
             exit 0
             ;;
     esac
