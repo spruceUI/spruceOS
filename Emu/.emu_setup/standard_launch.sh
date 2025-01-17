@@ -336,7 +336,7 @@ run_retroarch() {
 			if [ "$CORE" = "easyrpg" ]; then
 				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			elif [ "$CORE" = "yabasanshiro" ]; then
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			fi
 		;;
 		"A30" )
