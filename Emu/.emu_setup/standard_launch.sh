@@ -323,6 +323,8 @@ run_retroarch() {
 			export RA_BIN="ra64.trimui"
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+			elif [ "$CORE" = "yabasanshiro" ]; then
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
 			fi
       # TODO: remove this once profile is set up
       export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
