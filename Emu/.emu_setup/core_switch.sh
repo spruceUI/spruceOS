@@ -226,6 +226,17 @@ case "$EMU_NAME" in
 		fi
 	;;
 
+	"SATURN" )
+		if [ "$CORE" = "standalone" ]; then
+			NEW_CORE="yabasanshiro"
+			NEW_DISPLAY="(✓LIBRETRO)-standalone"
+
+		else # current core is yabasanshiro (libretro)
+			NEW_CORE="standalone"
+			NEW_DISPLAY="libretro-(✓STANDALONE)"
+		fi
+	;;
+
 	"SEGASGONE" )
 		if [ "$CORE" = "genesis_plus_gx" ]; then
 			NEW_CORE="bluemsx"

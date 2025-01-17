@@ -434,6 +434,18 @@ save_custom_n64_controller_profile() {
 	fi
 }
 
+run_yabasanshiro() {
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+	export HOME="$EMU_DIR"
+	cd "$HOME"
+	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
+	if [ -f "$SATURN_BIOS" ]; then
+		./yabasanshiro -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
+	else
+		./yabasanshiro -r 3 -i "$ROM_FILE" >./log.txt 2>&1
+	fi
+}
+
 ##### MAIN EXECUTION #####
 
 import_launch_options
@@ -487,6 +499,14 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
+	"SATURN")
+		if [ "$CORE" = "standalone" ]; then
+			run_yabasanshiro
+		else
+			run_retroarch
+		fi
+		;;
+	
 	*)
 		[ $EMU_NAME = "N64" ] && load_n64_controller_profile
 		ready_architecture_dependent_states
