@@ -108,10 +108,10 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 
     killall -9 main ### SUPER important in preventing .tmp_update suicide
-
-    # Bring up network and services
-    ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 fi
+
+# Bring up network and services
+${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 
 # Check for first_boot flags and run Unpacker accordingly
 if flag_check "first_boot_${PLATFORM}"; then
