@@ -33,10 +33,12 @@ if [ "$PLATFORM" = "A30" ]; then
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
+        mkdir -p /tmp/SATURN
         mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
         mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
+        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
         mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile &
         wait
     )
