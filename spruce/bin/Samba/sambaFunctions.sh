@@ -27,7 +27,7 @@ start_samba_process(){
 
 	# Set the Samba password for the root user
 	PASSWORD="happygaming"
-	echo -ne "$PASSWORD\n$PASSWORD\n" | $SMB_DIR/bin/smbpasswd -c /mnt/SDCARD/spruce/bin/Samba/config/smb.conf -s -a spruce
+	echo -ne "$PASSWORD\n$PASSWORD\n" | $SMB_DIR/bin/smbpasswd -c $SMB_DIR/config/smb.conf -s -a spruce
 
 	# Start the Samba daemon
 	rm /tmp/samba/run/smbd-smb.conf.pid

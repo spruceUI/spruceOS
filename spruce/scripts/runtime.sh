@@ -192,10 +192,6 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
-    developer_mode_task &
-    update_checker &
-
-    update_notification
 
 elif [ $PLATFORM = "Brick" ]; then
 
@@ -361,6 +357,10 @@ elif [ "$PLATFORM" = "Flip" ]; then
     killall runmiyoo.sh
 
 fi
+
+developer_mode_task &
+update_checker &
+update_notification
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
