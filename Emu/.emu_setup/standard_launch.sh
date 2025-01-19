@@ -215,7 +215,20 @@ run_pico8() {
 	export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
 	if setting_get "pico8_stretch"; then
-		SCALING="-draw_rect 0,0,480,640"
+		case "$PLATFORM" in
+			"A30" )
+				SCALING="-draw_rect 0,0,480,640"
+				;;
+			"Flip" )
+				SCALING="-draw_rect 0,0,640,480"
+				;;
+			"Brick" )
+				SCALING="-draw_rect 0,0,1024,768"
+				;;
+			"SmartPro" )
+				SCALING="-draw_rect 0,0,1280,720"
+				;;
+		esac
 	else
 		SCALING=""
 	fi
@@ -229,9 +242,15 @@ run_pico8() {
 	export SDL_VIDEODRIVER=mali
 	export SDL_JOYSTICKDRIVER=a30
 	cd "$HOME"
-	sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+
+	if [ "$PLATFORM" = "A30" ]; then
+		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+	else
+		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
+	fi
+
 	if [ "${GAME##*.}" = "splore" ]; then
-	check_and_connect_wifi &
+		check_and_connect_wifi
 		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 	else
 		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
