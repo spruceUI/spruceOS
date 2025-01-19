@@ -2,10 +2,15 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
+if [ "$PLATFORM" = "A30" ]; then
+  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
+else
+  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
+fi
+
 WWW_DIR=/mnt/SDCARD/spruce/www
 
-# Generic Statup
+# Generic Startup
 # Should only be used in contexts where firststart has already been called
 start_darkhttpd_process() {
   if pgrep "darkhttpd" >/dev/null; then

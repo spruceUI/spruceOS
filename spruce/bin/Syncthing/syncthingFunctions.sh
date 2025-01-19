@@ -2,9 +2,16 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+
 SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 
-# Generic Statup
+if [ "$PLATFORM" = "A30" ]; then
+    ST_BIN=$SYNCTHING_DIR/bin/syncthing
+else
+    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
+fi
+
+# Generic Startup
 # Should only be used in contexts where firststart has already been called
 start_syncthing_process(){
     if pgrep "syncthing" >/dev/null; then
@@ -13,7 +20,7 @@ start_syncthing_process(){
     fi
     
     log_message "Syncthing: Starting Syncthing..."
-    $SYNCTHING_DIR/bin/syncthing serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
+    $ST_BIN serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
 }
 
 
@@ -40,7 +47,7 @@ firststart() {
         sleep 5
         ifconfig lo up
         sleep 5
-        $SYNCTHING_DIR/bin/syncthing generate --no-default-folder --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/generate.log 2>&1 &
+        $ST_BIN generate --no-default-folder --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/generate.log 2>&1 &
         sleep 5
 
         repair_config # check if the config was generated correctly
