@@ -2,8 +2,13 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
-SSH_KEYS="$SSH_DIR/sshkeys"
+if [ "$PLATFORM" = "A30" ]; then
+    SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
+else
+    SSH_DIR="/mnt/SDCARD/spruce/bin64/SSH"
+fi
+
+SSH_KEYS="/mnt/SDCARD/spruce/bin/SSH/sshkeys"
 DROPBEAR="$SSH_DIR/bin/dropbear"
 DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
 
