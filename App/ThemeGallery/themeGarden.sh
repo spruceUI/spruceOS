@@ -18,7 +18,11 @@ log_verbose
 mkdir -p "$CACHE_DIR"
 mkdir -p "$ARCHIVE_DIR"
 
-# Download and extract previews if not already present
+# Add new variables for tracking seen themes
+SEEN_THEMES_FILE="$CACHE_DIR/seen_themes.txt"
+touch "$SEEN_THEMES_FILE"
+
+# Modified setup_previews to handle first-time downloads
 setup_previews() {
     local timestamp_file="$CACHE_DIR/last_update"
     local max_age=1200  # 20 minutes in seconds
@@ -62,24 +66,56 @@ setup_previews() {
         display -t "No theme previews found!" -p 240 -d 2
         exit 1
     fi
+
+    # After successful preview extraction, mark new themes
+    if [ $should_update -eq 1 ]; then
+        # Create temporary file of current themes
+        find "$CACHE_DIR/previews" -name "*.png" -exec basename {} .png \; > "$CACHE_DIR/current_themes.txt"
+        
+        # Only mark new themes if this isn't first run (seen_themes file has content)
+        if [ -s "$SEEN_THEMES_FILE" ]; then
+            while read -r theme; do
+                if ! grep -q "^${theme}$" "$SEEN_THEMES_FILE"; then
+                    mv "$CACHE_DIR/previews/${theme}.png" "$CACHE_DIR/previews/${theme}.new.png"
+                    echo "$theme" >> "$SEEN_THEMES_FILE"
+                fi
+            done < "$CACHE_DIR/current_themes.txt"
+        else
+            # First time run - just populate seen_themes file without marking as new
+            cat "$CACHE_DIR/current_themes.txt" > "$SEEN_THEMES_FILE"
+        fi
+        
+        rm -f "$CACHE_DIR/current_themes.txt"
+    fi
 }
 
-# Get list of preview files
+# Modified get_theme_list to prioritize new themes
 get_theme_list() {
-    find "$CACHE_DIR/previews" -name "*.png" -exec basename {} .png \; | sort
+    # First list new themes
+    find "$CACHE_DIR/previews" -name "*.new.png" -exec basename {} .new.png \; | sort > "$CACHE_DIR/theme_list.txt"
+    # Then list regular themes
+    find "$CACHE_DIR/previews" -name "*.png" ! -name "*.new.png" -exec basename {} .png \; | sort >> "$CACHE_DIR/theme_list.txt"
+    cat "$CACHE_DIR/theme_list.txt"
+    rm -f "$CACHE_DIR/theme_list.txt"
 }
 
+# Modified show_theme_preview to handle new themes
 show_theme_preview() {
     local theme_name="$1"
-    local preview_path="$CACHE_DIR/previews/${theme_name}.png"
+    local preview_path
     local display_name="$theme_name"
     
-    log_message "Theme Nursery: Showing preview for $theme_name"
-    log_message "Theme Nursery: Preview path: $preview_path"
+    # Check if it's a new theme
+    if [ -f "$CACHE_DIR/previews/${theme_name}.new.png" ]; then
+        preview_path="$CACHE_DIR/previews/${theme_name}.new.png"
+        display_name="${theme_name} - New!"
+    else
+        preview_path="$CACHE_DIR/previews/${theme_name}.png"
+    fi
     
     # Check if theme is installed
     if [ -d "/mnt/SDCARD/Themes/${theme_name}" ]; then
-        display_name="${theme_name} - Installed"
+        display_name="${display_name} - Installed"
     fi
     
     # Check if file exists and log details
