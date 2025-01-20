@@ -99,7 +99,7 @@ get_theme_list() {
     rm -f "$CACHE_DIR/theme_list.txt"
 }
 
-# Modified show_theme_preview to handle new themes
+# Modified show_theme_preview to include index with proper newlines
 show_theme_preview() {
     local theme_name="$1"
     local preview_path
@@ -129,7 +129,17 @@ show_theme_preview() {
     ls -l "$preview_path" | log_message
     
     display_kill
-    display -t "$display_name" -p 20 -s 30 -w 600 -a middle \
+    display -t "$display_name
+
+
+
+
+
+
+
+
+
+${current_theme}/${total_themes}" -p 10 -s 30 -w 600 -a middle \
         --add-image "$preview_path" 0.73 240 middle \
         --add-image "$IMAGE_CONFIRM_EXIT" 1.0 240 middle \
         --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
