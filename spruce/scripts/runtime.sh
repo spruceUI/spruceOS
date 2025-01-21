@@ -193,7 +193,7 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
 
-elif [ $PLATFORM = "Brick" ]; then
+elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
     chmod a+x /usr/bin/notify
