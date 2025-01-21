@@ -5,12 +5,12 @@
 RA_DIR=/mnt/SDCARD/RetroArch
 cd $RA_DIR/
 
-if [ "$PLATFORM" = "Brick" ]; then
-	HOME=$RA_DIR/ $RA_DIR/ra64.trimui -v
-elif [ "$PLATFORM" = "A30" ]; then
-	HOME=$RA_DIR/ $RA_DIR/ra32.miyoo -v
-elif [ "$PLATFORM" = "Flip" ]; then
-	HOME=$RA_DIR/ $RA_DIR/ra64.miyoo -v
-fi
+case "$PLATFORM" in
+	"A30") RA_BIN="ra32.miyoo" ;;
+	"Flip") RA_BIN="ra64.miyoo" ;;
+	"Brick"|"SmartPro") RA_BIN="ra64.trimui_$PLATFORM" ;;
+esac
+
+HOME=$RA_DIR/ $RA_DIR/$RA_BIN -v
 
 auto_regen_tmp_update

@@ -154,7 +154,7 @@ runifnecessary(){
     fi
 }
 
-while [ "$PLATFORM" = "Brick" ]; do
+while [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; do
 
     tinymix set 9 1
     tinymix set 1 0

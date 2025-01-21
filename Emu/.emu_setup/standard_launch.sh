@@ -346,7 +346,7 @@ run_retroarch() {
 
 	case "$PLATFORM" in
 		"Brick" | "SmartPro" )
-			export RA_BIN="ra64.trimui"
+			export RA_BIN="ra64.trimui_$PLATFORM"
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
 			fi

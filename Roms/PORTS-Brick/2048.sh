@@ -1,8 +1,10 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 ROM_DIR="$(dirname "$0")"
 RA_DIR="/mnt/SDCARD/RetroArch"
 CORE_DIR="$ROM_DIR/2048"
 
 cd "$RA_DIR"
-./ra64.trimui -v -L "$CORE_DIR/2048_libretro.so"
+"./ra64.trimui_$PLATFORM" -v -L "$CORE_DIR/2048_libretro.so"
