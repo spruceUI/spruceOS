@@ -65,7 +65,11 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
         mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
         # Use appropriate RA config
-        [ -f "/mnt/SDCARD/RetroArch/retroarch-$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]').cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]').cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
+        case "$PLATFORM" in
+            "Brick") RA_CFG="/mnt/SDCARD/RetroArch/retroarch-brick.cfg" ;;
+            "SmartPro") RA_CFG="/mnt/SDCARD/RetroArch/retroarch-smartpro.cfg" ;;
+        esac
+        [ -f "$RA_CFG" ] && mount --bind "$RA_CFG" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
         mkdir -p "/mnt/SDCARD/trimui/brickThemes"
         mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
