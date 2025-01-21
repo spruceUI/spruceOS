@@ -311,16 +311,23 @@ move_dotconfig_into_place() {
 run_ppsspp() {
 	export HOME=/mnt/SDCARD
 	cd $EMU_DIR
-	if [ "$PLATFORM" = "A30" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-		./PPSSPPSDL "$ROM_FILE"
-	elif [ "$PLATFORM" = "Brick" ]; then 	
-		export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
-		./PPSSPPSDL_Brick "$ROM_FILE"
-	elif [ "$PLATFORM" = "Flip" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-		./PPSSPPSDL_Flip
-	fi
+	case "$PLATFORM" in
+		"A30")
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+			./PPSSPPSDL "$ROM_FILE"
+			;;
+		"Flip")
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
+			./PPSSPPSDL_Flip "$ROM_FILE"
+			;;
+		"Brick")
+			export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
+			./PPSSPPSDL_Brick "$ROM_FILE"
+			;;
+		"SmartPro")
+			./PPSSPPSDL_SmartPro "$ROM_FILE"
+			;;
+	esac
 }
 
 load_ppsspp_configs() {
