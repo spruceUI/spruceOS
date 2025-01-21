@@ -110,7 +110,7 @@ UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 # This works with checker to display a notification if an update is available
 # But only on next boot. So if they find the app by themselves it's fine.
 update_notification(){
-    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
     if [ "$wifi_enabled" -eq 0 ]; then
         exit 1
     fi
