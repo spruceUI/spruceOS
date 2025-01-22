@@ -98,7 +98,7 @@ if [ "$PLATFORM" = "A30" ]; then
 fi
 
 # Disable stock USB file transfer app and SD formatter for Brick
-if [ "$PLATFORM" = "Brick" ]; then
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
     [ -f "$USB_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null
     FORMAT_CONFIG="/usr/trimui/apps/zformatter_fat32/config.json"
