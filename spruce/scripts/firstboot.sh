@@ -4,8 +4,8 @@
 
 case "$PLATFORM" in
     "Brick" | "SmartPro" )
-        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Brick.json"
-        flag_remove "first_boot_Brick"
+        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-$PLATFORM.json"
+        flag_remove "first_boot_$PLATFORM"
     ;;
     "Flip" )
         INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Flip.json"
