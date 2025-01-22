@@ -366,7 +366,7 @@ fi
 
 developer_mode_task &
 update_checker &
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+if ! ( [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] ); then
     update_notification
 fi
 
