@@ -366,7 +366,9 @@ fi
 
 developer_mode_task &
 update_checker &
-update_notification
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    update_notification
+fi
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
