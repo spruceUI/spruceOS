@@ -117,6 +117,8 @@ fi
 # Bring up network and services
 ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 
+unstage_archives_$PLATFORM
+
 # Check for first_boot flags and run Unpacker accordingly
 if flag_check "first_boot_${PLATFORM}"; then
     ${SCRIPTS_DIR}/archiveUnpacker.sh --silent &

@@ -1,13 +1,9 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-
-# Brick doesn't have the required binaries for these yet.
-if [ "$PLATFORM" = "A30" ]; then
-    . /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-    . /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-    . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
-fi
+. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
+. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 # Define the function to check and unhide the firmware update app
 check_and_handle_firmware_app() {
@@ -98,6 +94,36 @@ rotate_logs() {
             mv "$log_target.tmp" "$log_dir/spruce1.log"
         fi
     ) &
+}
+
+unstage_archive() {
+    ARC_DIR="/mnt/SDCARD/spruce/archives"
+    STAGED_ARCHIVE="$1"
+    TARGET="$2"
+    if [ -z "$TARGET_FOLDER" ] || [ "$TARGET_FOLDER" != "preCmd" ]; then TARGET="preMenu"; fi
+
+    if [ -f "$ARC_DIR/staging/$STAGED_ARCHIVE" ]; then
+        log_message "$STAGED_ARCHIVE detected in spruce/archives/staging. Moving into place!"
+        mv -f "$ARC_DIR/staging/$STAGED_ARCHIVE" "$ARC_DIR/$TARGET/$STAGED_ARCHIVE"
+    fi
+}
+
+
+unstage_archives_A30() {
+    unstage_archive "Overlays.7z" "preCmd"
+}
+
+unstage_archives_Brick() {
+    unstage_archive "autoconfig.7z" "preCmd"
+}
+
+unstage_archives_SmartPro() {
+    unstage_archive "autoconfig.7z" "preCmd"
+}
+
+unstage_archives_Flip() {
+    unstage_archive "Overlays.7z" "preCmd"
+    unstage_archive "autoconfig.7z" "preCmd"
 }
 
 update_checker(){
