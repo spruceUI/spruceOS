@@ -122,11 +122,13 @@ case "$EMU_NAME" in
 	"GB" | "GBC" )
 		if [ "$CORE" = "gambatte" ]; then
 			NEW_CORE="mgba"
-			NEW_DISPLAY="gambatte-(✓MGBA)"
-
-		else # current core is mgba
+			NEW_DISPLAY="gambatte-(✓MGBA)-tgbdual"
+		elif [ "$CORE" = "mgba" ]; then
+			NEW_CORE="tgbdual"
+			NEW_DISPLAY="gambatte-mgba-(✓TGBDUAL)"
+		else # current core is tgbdual
 			NEW_CORE="gambatte"
-			NEW_DISPLAY="(✓GAMBATTE)-mgba"
+			NEW_DISPLAY="(✓GAMBATTE)-mgba-tgbdual"
 		fi
 	;;
 
