@@ -21,7 +21,7 @@ if [ "$PLATFORM" = "A30" ]; then
 	sync
 	killall -q -USR2 joystickinput   # set stick to d-pad mode
 
-elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "Flip" ]; then
     ./gptokeyb -k "DinguxCommander" -c "./DinguxCommander.gptk" &
     sleep 1
 	  ./"DinguxCommander$PLATFORM"
