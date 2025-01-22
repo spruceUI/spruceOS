@@ -304,8 +304,12 @@ if [ "$TESTER_MODE" -eq 1 ]; then
     log_update_message "Restored tester mode flag"
 fi
 
-display "Update complete. Shutting down...
-You'll need to manually power back on" 3
+if [ "$PLATFORM" = "A30" ]; then
+    display "Update complete. Shutting down...
+    You'll need to manually power back on" 3
+else
+    display "Update complete. Rebooting..." 3
+fi
 echo 100 >/sys/devices/virtual/timed_output/vibrator/enable
 
 # Reboot device
@@ -314,4 +318,8 @@ killall -9 principal.sh
 killall -9 MainUI
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-poweroff
+if [ "$PLATFORM" = "A30" ]; then
+    poweroff
+else
+    reboot
+fi
