@@ -8,6 +8,7 @@ API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
 API_KEY=""
 BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+SYNC_TIMEOUT="${SYNC_TIMEOUT:-600}"  # Allow override, default 10 minutes
 
 check_syncthing_status() {
     if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
@@ -107,7 +108,6 @@ stop_network() {
 get_folders() {
     local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
     if [ -z "$folders" ]; then
-        log_message "SyncthingCheck: No folders configured"
         return 1
     fi
     echo "$folders"
@@ -187,8 +187,7 @@ monitor_start_button() {
         case $last_line in
             *"$B_START"* | *"$B_START_2"*)
                 log_message "SyncthingCheck: START button pressed - cancelling sync"
-                echo "cancelled" > /tmp/sync_cancelled
-                exit 0
+                touch /tmp/sync_cancelled
                 ;;
         esac
     done
@@ -196,22 +195,40 @@ monitor_start_button() {
 
 monitor_sync_status() {
     local mode="$1"
-    local folders=$(get_folders)
-    local devices=$(get_devices)
+    local timeout
+    
+    case "$mode" in
+        "startup")  timeout="${STARTUP_TIMEOUT:-900}"  ;; # 15 minutes
+        "shutdown") timeout="${SHUTDOWN_TIMEOUT:-900}" ;; # 15 minutes
+        "monitor")  timeout="${MONITOR_TIMEOUT:-1800}"  ;; # 30 minutes
+    esac
+    
+    local start_time=$(date +%s)
+    local last_progress_time=$(date +%s)
+    local previous_status=""
+    local stall_timeout=120  # 2 minutes timeout for stalled sync
 
-    # Check for both folders and devices
-    if [ -z "$devices" ]; then
-        log_message "SyncthingCheck: No devices configured. Exiting sync check."
+    local folders
+    folders=$(get_folders)
+    local ret=$?
+    local devices
+    local start_time=$(date +%s)
+
+    # Check folders first
+    if [ $ret -ne 0 ] || [ -z "$folders" ]; then
+        log_message "SyncthingCheck: No folders configured. Exiting sync check."
         display -t "Syncthing Check:
-No devices configured" -i "$BG_TREE"
+No folders configured" -i "$BG_TREE"
         sleep 1
         return 1
     fi
 
-    if [ $? -ne 0 ] || [ -z "$folders" ]; then
-        log_message "SyncthingCheck: No folders configured. Exiting sync check."
+    devices=$(get_devices)
+    # Then check devices
+    if [ -z "$devices" ]; then
+        log_message "SyncthingCheck: No devices configured. Exiting sync check."
         display -t "Syncthing Check:
-No folders configured" -i "$BG_TREE"
+No devices configured" -i "$BG_TREE"
         sleep 1
         return 1
     fi
@@ -222,34 +239,45 @@ No folders configured" -i "$BG_TREE"
     display -t "Syncthing Check:
 Press START to cancel" -i "$BG_TREE"
 
-    # Start monitoring and save the PID
+    # Make sure we clean up properly on any exit
+    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
+
+    # Start the monitor in background
     monitor_start_button &
     monitor_pid=$!
 
-    # Add trap to clean up the monitor process
-    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled' EXIT
-    
-    force_rescan
-    smart_device_discovery || {
-        # Check if it was cancelled before showing error
-        if [ -f /tmp/sync_cancelled ]; then
-            display -t "Syncthing Check:
-Skipped" -i "$BG_TREE"
-        else
-            display -t "No devices online" -i "$BG_TREE"
-        fi
-        sleep 1
-        return 1
-    }
-
     while true; do
+        # Check for manual cancellation
         if [ -f /tmp/sync_cancelled ]; then
-            rm -f /tmp/sync_cancelled
+            log_message "SyncthingCheck: Sync cancelled by user"
+            display -t "Sync cancelled" -i "$BG_TREE"
+            sleep 1
+            return 1
+        fi
+
+        local elapsed=$(($(date +%s) - start_time))
+        local stall_time=$(($(date +%s) - last_progress_time))
+        
+        # Check for overall timeout
+        if [ $elapsed -gt $timeout ]; then
+            log_message "SyncthingCheck: Sync timed out after ${timeout} seconds"
+            display -t "Sync timed out after ${timeout}s" -i "$BG_TREE"
+            sleep 1
+            return 1
+        fi
+
+        # Check for stall timeout
+        if [ $stall_time -gt $stall_timeout ]; then
+            log_message "SyncthingCheck: Sync stalled - no progress for ${stall_timeout} seconds"
+            display -t "Sync stalled
+No progress for ${stall_timeout}s" -i "$BG_TREE"
+            sleep 1
             return 1
         fi
 
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
+        current_status=""
 
         for device in $devices; do
             local device_name=$(get_device_name "$device")
@@ -273,11 +301,19 @@ Skipped" -i "$BG_TREE"
                     status="${download_completion}/${upload_completion}%"
                 fi
 
+                current_status="${current_status}${status}"
                 echo "$folder_label:" >> /tmp/sync_display.txt
                 echo "$status" >> /tmp/sync_display.txt
                 echo "" >> /tmp/sync_display.txt
             done
         done
+
+        # Check if status has changed
+        if [ "$current_status" != "$previous_status" ] && [ -n "$previous_status" ]; then
+            last_progress_time=$(date +%s)
+            log_message "SyncthingCheck: Sync progress detected, resetting stall timer"
+        fi
+        previous_status="$current_status"
 
         status_content=$(cat /tmp/sync_display.txt)
         display -t "$status_content
