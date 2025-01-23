@@ -88,6 +88,7 @@ if flag_check "developer_mode"; then
     # Developer mode: offer nightly -> beta -> release
     display --icon "$IMAGE_PATH" -t "Developer mode detected. Would you like to use the latest nightly build?
 Latest nightly: $NIGHTLY_VERSION
+$([ -n "$BETA_VERSION" ] && echo "Beta release: $BETA_VERSION")
 Public release: $RELEASE_VERSION" -p 220 --confirm
     if confirm; then
         TARGET_VERSION="$NIGHTLY_VERSION"
