@@ -1,6 +1,6 @@
 {
 	"label":        "Theme Garden",
-	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/App/expertappswitch.png",
+	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/App/themegallery.png",
 	"launch":       "launch.sh",
 	"description":  "Check out the latest themes for your device!"
 }
