@@ -74,7 +74,7 @@ jobs:
 
       - name: Create 7z archive
         run: |
-          7z a -t7z -mx=9 "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+          7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
             -xr!.git \
             -xr!.github \
             -x!.gitignore \
