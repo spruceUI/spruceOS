@@ -721,8 +721,9 @@ get_version() {
         return 1
     fi
 
-    # Check if the returned version is in the correct format
-    if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then
+    # Updated regex to handle both beta and nightly versions
+    # e.g., 3.3.2-Beta or 3.3.1-20250123
+    if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*(-([A-Za-z]+|[0-9]{8}))?$'; then
         echo "$version"
         return 0
     else
