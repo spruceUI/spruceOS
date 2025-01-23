@@ -30,6 +30,7 @@ if [ "$PLATFORM" = "A30" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 
+    SPRUCE_ETC_DIR="${SDCARD_PATH}/miyoo/etc"
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
@@ -39,7 +40,9 @@ if [ "$PLATFORM" = "A30" ]; then
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
         mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
-        mount -o bind "/mnt/SDCARD/miyoo/etc/profile" /etc/profile &
+        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
         wait
     )
 
