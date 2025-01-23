@@ -1,6 +1,6 @@
 #!/bin/ash
 
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SYNCTHING_CONFIG_DIR="${SYNCTHING_CONFIG_DIR:-/mnt/SDCARD/spruce/bin/Syncthing/config}"

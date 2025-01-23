@@ -3,16 +3,26 @@
 # Set the working directory to /mnt/SDCARD for all commands
 cd /mnt/SDCARD
 
+# TODO: this probably doesn't work outside the a30?
 if [ "$SSH_ORIGINAL_COMMAND" = "/usr/libexec/sftp-server" ]; then
-    if [ -x "/mnt/SDCARD/miyoo/app/gesftpserver" ]; then
-		exec /mnt/SDCARD/miyoo/app/gesftpserver
-    else
-        exit 1
-    fi
+  if [ -x "/mnt/SDCARD/miyoo/app/gesftpserver" ]; then
+    exec /mnt/SDCARD/miyoo/app/gesftpserver
+  else
+    exit 1
+  fi
 elif [ -n "$SSH_ORIGINAL_COMMAND" ]; then
-	exec $SSH_ORIGINAL_COMMAND
+  exec $SSH_ORIGINAL_COMMAND
 else
-	export LD_LIBRARY_PATH=/mnt/SDCARD/miyoo/lib:
-	export PATH=/mnt/SDCARD/miyoo/app:/usr/sbin:/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin:/sbin:/bin
-	exec /bin/sh
+  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    export LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+  elif [ "$PLATFORM" = "Flip" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+  fi
+  case "$PLATFORM" in
+    "A30") APP_PATH="/mnt/SDCARD/miyoo/app" ;;
+    "Flip") APP_PATH="/mnt/SDCARD/my355/app" ;;
+    "Brick"|"SmartPro") APP_PATH="/mnt/SDCARD/trimui/app" ;;
+  esac
+  export PATH="$APP_PATH:/usr/sbin:/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  exec /bin/sh
 fi

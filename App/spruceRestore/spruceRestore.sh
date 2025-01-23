@@ -10,7 +10,7 @@ BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 ICON_PATH="/mnt/SDCARD/spruce/imgs/restore.png"
 

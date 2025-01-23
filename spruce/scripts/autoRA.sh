@@ -1,6 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 messages_file="/var/log/messages"

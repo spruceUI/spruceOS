@@ -1,8 +1,8 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 # Define the function to check and unhide the firmware update app

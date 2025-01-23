@@ -1,10 +1,10 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
-. /mnt/SDCARD/spruce/bin/Samba/sambaFunctions.sh
-. /mnt/SDCARD/spruce/bin/SFTPGo/sftpgoFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
-. /mnt/SDCARD/spruce/bin/darkhttpd/darkhttpdFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 
 connect_services() {
 

@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
 EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
 

@@ -17,7 +17,7 @@ if [ "$1" == "1" ] ; then
 fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/SSH/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
 if [ "$1" == "on" ] ; then
     update_setting "dropbear" "on"

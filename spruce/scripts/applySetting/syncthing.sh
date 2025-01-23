@@ -22,7 +22,7 @@ if [ "$1" == "1" ] ; then
 fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 if [ "$1" == "on" ] ; then
     update_setting "syncthing" "on"
