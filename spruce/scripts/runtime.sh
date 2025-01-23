@@ -14,6 +14,7 @@ rotate_logs
 SDCARD_PATH="/mnt/SDCARD"
 export HOME="${SDCARD_PATH}"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
+SPRUCE_ETC_DIR="${SDCARD_PATH}/miyoo/etc"
 
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
@@ -30,7 +31,6 @@ if [ "$PLATFORM" = "A30" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 
-    SPRUCE_ETC_DIR="${SDCARD_PATH}/miyoo/etc"
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
@@ -79,6 +79,11 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # handle extlist differences between ffplay for A30 but ffmpeg LR for Brick
         [ -f "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" ] && mount --bind "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" "/mnt/SDCARD/Emu/MEDIA/config.json" &
         wait
+
+        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+
     )
 
 fi
