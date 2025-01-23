@@ -37,7 +37,7 @@ check_for_update() {
     date +%s > "$timestamp_file"
 
     # Check for Wi-Fi enabled status first
-    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+    wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
     if [ "$wifi_enabled" -eq 0 ]; then
         log_message "Update Check: WiFi is disabled, exiting."
         rm -rf "$TMP_DIR"
