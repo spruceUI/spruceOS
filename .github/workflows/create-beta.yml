@@ -1,0 +1,164 @@
+name: Create Beta Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch to create beta from'
+        required: true
+        default: 'Development'
+        type: string
+
+jobs:
+  create-7z:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.target_branch }}
+          fetch-depth: 0
+
+      - name: Install 7zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Get version and date
+        id: get_version
+        run: |
+          if [ ! -f "spruce/spruce" ]; then
+            echo "Error: spruce/spruce file not found"
+            exit 1
+          fi
+          VERSION="$(< spruce/spruce)"
+          echo "version=${VERSION}-Beta" >> "$GITHUB_OUTPUT"
+          {
+            echo "Last commit: $(git rev-parse HEAD)"
+            echo ""
+            echo "Beta release from branch: ${{ github.event.inputs.target_branch }}"
+            echo ""
+            echo "Changes since last beta:"
+            git log --pretty=format:'- %s (%an)'
+          } > commits_beta.txt
+
+      - name: Check for commits
+        id: check_commits
+        run: |
+          # Get all commits
+          COMMITS=$(git log --pretty=format:'- %s (%an)%n')
+          if [ -z "$COMMITS" ]; then
+            echo "No commits found"
+            exit 1
+          fi
+          {
+            echo "commits<<EOF"
+            echo "$COMMITS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update version in language files
+        run: |
+          # Get the version-date string
+          VERSION="${{ steps.get_version.outputs.version }}"
+          
+          # Find and update all .lang files
+          find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
+            for file do
+              # Create temp file
+              tmp=$(mktemp)
+              # Replace version string, preserving the v prefix
+              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
+              mv "$tmp" "$file"
+            done
+          ' sh "$VERSION" {} +
+
+      - name: Create 7z archive
+        run: |
+          7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh \
+            -x!commits_beta.txt
+          # Add the commits file separately to place it at the root
+          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_beta.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: success() && steps.check_commits.outcome == 'success'
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          body: ${{ steps.check_commits.outputs.commits }}
+          repository: spruceUI/spruceOSNightlies
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: false
+          prerelease: false
+
+      - name: Update OTA files
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone both repositories
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          git clone https://github.com/spruceUI/spruceSource.git source_repo
+          
+          # Calculate file info
+          CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
+          SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
+          
+          # Function to update OTA file
+          update_ota_file() {
+            local file="$1"
+            local content
+            content=$(cat "$file")
+            
+            echo "$content" | grep -v "^BETA_" > "$file"
+            echo "BETA_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+            echo "BETA_CHECKSUM=$CHECKSUM" >> "$file"
+            echo "BETA_SIZE_IN_MB=$SIZE_MB" >> "$file"
+            echo "BETA_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+            echo "BETA_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+          }
+          
+          # Update both OTA files
+          update_ota_file "ota_repo/OTA/spruce"
+          update_ota_file "source_repo/OTA/spruce"
+          
+          # Update primary OTA repo
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Update beta release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          
+          # Update backup OTA repo
+          cd ../source_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Update beta release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+
+      - name: Delete old releases
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Get all releases sorted by created date (newest first)
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[].id')
+          
+          # Convert to array and keep only releases after the first 3
+          COUNT=0
+          for RELEASE_ID in $RELEASES; do
+            COUNT=$((COUNT + 1))
+            if [ $COUNT -gt 3 ]; then
+              gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
+            fi
+          done
