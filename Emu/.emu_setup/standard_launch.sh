@@ -8,7 +8,7 @@
 
 # TODO: remove A30 check once Syncthing is implemented on Brick
 if [ "$PLATFORM" = "A30" ]; then
-	. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+	. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
 fi
 
 log_message "-----Launching Emulator-----" -v
@@ -169,7 +169,7 @@ run_drastic() {
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		# export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
+		export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
 		# export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
 		./drastic64 "$ROM_FILE"
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
@@ -211,8 +211,13 @@ run_pico8() {
 	# this allows joystick to be used as DPAD in MainUI
 	killall -q -USR2 joystickinput
 
+	# set 64-bit wget for BBS
+	if ! [ "$PLATFORM" = "A30" ]; then
+		WGET_PATH="$HOME"/bin64:
+	fi
+
 	export HOME="$EMU_DIR"
-	export PATH="$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
+	export PATH=$WGET_PATH"$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
 	if setting_get "pico8_stretch"; then
 		case "$PLATFORM" in
@@ -246,10 +251,10 @@ run_pico8() {
 	fi
 
 	if [ "${GAME##*.}" = "splore" ]; then
-		check_and_connect_wifi
-		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
+		check_and_connect_wifi &
+		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > /mnt/SDCARD/P8.log 2>&1
 	else
-		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
+		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING > /mnt/SDCARD/P8.log 2>&1
 	fi
 	sync
 
@@ -264,6 +269,8 @@ load_pico8_control_profile() {
 
 	if [ "$CONTROL_PROFILE" = "Steward" ]; then
 		export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
+	elif [ "$PLATFORM" = "Flip" ]; then
+		export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
 	else
 		export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
 	fi
@@ -457,14 +464,18 @@ save_custom_n64_controller_profile() {
 }
 
 run_yabasanshiro() {
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
 	export HOME="$EMU_DIR"
 	cd "$HOME"
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
+	case "$PLATFORM" in
+		"Flip") YABASANSHIRO="./yabasanshiro" ;;
+		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;;
+	esac
 	if [ -f "$SATURN_BIOS" ]; then
-		./yabasanshiro -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
+		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
-		./yabasanshiro -r 3 -i "$ROM_FILE" >./log.txt 2>&1
+		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
 	fi
 }
 
