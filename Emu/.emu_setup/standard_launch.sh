@@ -8,7 +8,7 @@
 
 # TODO: remove A30 check once Syncthing is implemented on Brick
 if [ "$PLATFORM" = "A30" ]; then
-	. /mnt/SDCARD/spruce/bin/Syncthing/syncthingFunctions.sh
+	. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 fi
 
 log_message "-----Launching Emulator-----" -v
