@@ -233,19 +233,15 @@ run_pico8() {
 		SCALING=""
 	fi
 
-	if [ "$ARCH" = "aarch64" ]; then
-        PICO8_BINARY="pico8_64"
-    else
-        PICO8_BINARY="pico8_dyn"
-    fi
-
-	export SDL_VIDEODRIVER=mali
-	export SDL_JOYSTICKDRIVER=a30
 	cd "$HOME"
 
 	if [ "$PLATFORM" = "A30" ]; then
+		export SDL_VIDEODRIVER=mali
+		export SDL_JOYSTICKDRIVER=a30
+		PICO8_BINARY="pico8_dyn"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 	else
+		PICO8_BINARY="pico8_64"
 		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
 	fi
 
