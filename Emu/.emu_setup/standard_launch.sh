@@ -271,6 +271,8 @@ load_pico8_control_profile() {
 		export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
 	elif [ "$PLATFORM" = "Flip" ]; then
 		export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
+	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+		export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
 	else
 		export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
 	fi
