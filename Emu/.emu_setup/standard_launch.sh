@@ -267,15 +267,21 @@ load_pico8_control_profile() {
 	P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
 	CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
 
-	if [ "$CONTROL_PROFILE" = "Steward" ]; then
-		export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
-	elif [ "$PLATFORM" = "Flip" ]; then
-		export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
-	elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-		export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
-	else
-		export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
-	fi
+	case "$PLATFORM" in
+		"A30")
+			if [ "$CONTROL_PROFILE" = "Steward" ]; then
+				export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
+			else
+				export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
+			fi
+			;;
+		"Flip")
+			export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
+			;;
+		"Brick" | "SmartPro")
+			export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
+			;;
+	esac
 
 	case "$CONTROL_PROFILE" in
 		"Doubled") 
