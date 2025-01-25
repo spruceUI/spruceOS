@@ -257,9 +257,9 @@ run_pico8() {
 
 	if [ "${GAME##*.}" = "splore" ]; then
 		check_and_connect_wifi &
-		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > /mnt/SDCARD/P8.log 2>&1
+		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 	else
-		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING > /mnt/SDCARD/P8.log 2>&1
+		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
 	fi
 	sync
 
