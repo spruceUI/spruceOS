@@ -483,7 +483,7 @@ run_yabasanshiro() {
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
 	case "$PLATFORM" in
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
-		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;;
+		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
 	if [ -f "$SATURN_BIOS" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
