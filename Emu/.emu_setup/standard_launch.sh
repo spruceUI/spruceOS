@@ -121,12 +121,17 @@ run_ffplay() {
 		export PATH="$EMU_DIR"/bin:"$PATH"
 		export LD_LIBRARY_PATH="$EMU_DIR"/libs:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
 		ffplay -vf transpose=2 -fs -i "$ROM_FILE"
-	elif [ "$PLATFORM" = "Flip" ]; then
+	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
-		./bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
+		case "$PLATFORM" in
+			"Flip") X=640 Y=480 ;;
+			"Brick") X=1024 Y=768 ;;
+			"SmartPro") X=1280 Y=720 ;;
+		esac
+		gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
-		./ffplay -x 640 -y 480 "$ROM_FILE"
+		ffplay -x $X -y $Y -fs -i "$ROM_FILE"
 		kill -9 "$(pidof gptokeyb)"
 	fi
 }
@@ -508,12 +513,7 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
 	"MEDIA")
-		if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
-			run_ffplay
-		else # Brick or TSP
-			export CORE="ffmpeg"
-			run_retroarch
-		fi
+		run_ffplay
 		;;
 	"NDS")
 		load_drastic_configs
