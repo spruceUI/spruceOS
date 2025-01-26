@@ -80,7 +80,6 @@ while true; do
 
     # Add battery logging
     CURRENT_TIME=$(date +%s)
-    log_message "Current time: $CURRENT_TIME, Last log: $LAST_LOG, Interval: $LOG_INTERVAL" -v
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
         log_battery
         LAST_LOG=$(date +%s)  # Keep this as Unix timestamp
