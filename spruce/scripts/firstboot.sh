@@ -79,6 +79,7 @@ fi
 
 if flag_check "pre_menu_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
+    flag_add "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done

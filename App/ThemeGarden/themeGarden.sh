@@ -3,7 +3,7 @@
 APP_DIR=/mnt/SDCARD/App/ThemeNursery
 CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
 UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-ARCHIVE_DIR=/mnt/SDCARD/spruce/archives/preMenu
+ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
 IMAGE_CONFIRM_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayConfirmExit.png"
 IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
 DIRECTION_PROMPTS="/mnt/SDCARD/miyoo/res/imgs/displayLeftRight.png"
@@ -11,8 +11,6 @@ PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/Resourc
 THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/PackedThemes"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-
-log_verbose
 
 # Create necessary directories
 mkdir -p "$CACHE_DIR"
@@ -149,7 +147,8 @@ download_theme() {
     local theme_name="$1"
     local encoded_name=$(echo "$theme_name" | sed 's/ /%20/g' | sed "s/'/%27/g")
     local theme_url="${THEME_BASE_URL}/${encoded_name}.7z"
-    local output_path="$ARCHIVE_DIR/${theme_name}.7z"
+    local temp_path="$ARCHIVE_DIR/temp_${theme_name}.7z"
+    local final_path="$ARCHIVE_DIR/preMenu/${theme_name}.7z"
     
     display -t "Downloading ${theme_name}..." -p 240
     
@@ -159,21 +158,26 @@ download_theme() {
     TARGET_SIZE_MEGA=$((TARGET_SIZE_KILO / 1024))
     
     . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
-    download_progress "$output_path" "$TARGET_SIZE_MEGA" "Now downloading ${theme_name}!" &
+    download_progress "$temp_path" "$TARGET_SIZE_MEGA" "Now downloading ${theme_name}!" &
     download_pid=$!
     
-    if ! curl -s -k -L -o "$output_path" "$theme_url"; then
+    if ! curl -s -k -L -o "$temp_path" "$theme_url"; then
         kill $download_pid
-        display -t "Download failed for ${theme_name}!" -p 240 -d 2
+        rm -f "$temp_path"
+        display -t "Download failed for ${theme_name}! Please try again." -p 240 -o
         return 1
     fi
     kill $download_pid
     
-    if [ -f "$output_path" ]; then
+    if [ -f "$temp_path" ]; then
+        # Create preMenu directory if it doesn't exist
+        mkdir -p "$ARCHIVE_DIR/preMenu"
+        # Move the completed download to the final location
+        mv "$temp_path" "$final_path"
         display -t "Download complete!" -p 240
         return 0
     else
-        display -t "Download failed!" -p 240 -d 2
+        display -t "Download failed! Please try again." -p 240 -o
         return 1
     fi
 }
@@ -211,10 +215,12 @@ while true; do
         "A")
             current_theme_name=$(echo "$THEME_LIST" | sed -n "${current_theme}p")
             download_theme "$current_theme_name"
+            sh "$UNPACKER" --silent
             show_theme_preview "$current_theme_name"
             ;;
         "B"|"START")
             display_kill
+            flag_remove "silentUnpacker"
             sh "$UNPACKER"
             exit 0
             ;;
