@@ -1,7 +1,7 @@
 #!/bin/sh
 
 APP_DIR=/mnt/SDCARD/App/ThemeNursery
-ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/App/themegallery.png"
+ICON_PATH="/mnt/SDCARD/spruce/imgs/themegarden.png"
 CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
 UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
