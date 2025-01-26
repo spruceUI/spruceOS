@@ -78,8 +78,8 @@ if [ "$VERSION" -lt 20240713100458 ]; then
 fi
 
 if flag_check "pre_menu_unpacking"; then
-    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
-    flag_add "silentUnpacker"
+    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes and files.........."
+    flag_remove "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done
