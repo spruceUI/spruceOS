@@ -560,7 +560,9 @@ get_button_press() {
             *"$B_LEFT"*) button_pressed="LEFT" ;;
             *"$B_RIGHT"*) button_pressed="RIGHT" ;;
             *"$B_START"*) button_pressed="START" ;;
+            *"$B_START_2"*) button_pressed="START" ;;
             *"$B_SELECT"*) button_pressed="SELECT" ;;
+            *"$B_SELECT_2"*) button_pressed="SELECT" ;;
         esac
 
         if [ -n "$button_pressed" ]; then
