@@ -1,6 +1,7 @@
 #!/bin/sh
 
 APP_DIR=/mnt/SDCARD/App/ThemeNursery
+ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/App/themegallery.png"
 CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
 UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
@@ -38,17 +39,17 @@ setup_previews() {
 
     # Update previews if needed
     if [ $should_update -eq 1 ] || [ ! -d "$CACHE_DIR/previews" ] || [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
-        display -t "Downloading theme previews..." -p 240
+        display --icon "$ICON_PATH" -t "Downloading theme previews..." -p 240
         rm -rf "$CACHE_DIR/previews"
         mkdir -p "$CACHE_DIR/previews"
         
         if ! curl -s -k -L -o "$CACHE_DIR/theme_previews.7z" "$PREVIEW_PACK_URL"; then
-            display -t "Failed to download theme previews!" -p 240 -d 2
+            display --icon "$ICON_PATH" -t "Failed to download theme previews!" -p 240 -d 2
             exit 1
         fi
         
         if ! 7zr x "$CACHE_DIR/theme_previews.7z" -o"$CACHE_DIR/previews" 2>&1; then
-            display -t "Failed to extract theme previews!" -p 240 -d 2
+            display --icon "$ICON_PATH" -t "Failed to extract theme previews!" -p 240 -d 2
             log_message "Theme Nursery: 7z extraction error output: $?"
             rm -f "$CACHE_DIR/theme_previews.7z"
             exit 1
@@ -61,7 +62,7 @@ setup_previews() {
     
     # Final check if we have any preview files
     if [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
-        display -t "No theme previews found!" -p 240 -d 2
+        display --icon "$ICON_PATH" -t "No theme previews found!" -p 240 -d 2
         exit 1
     fi
 
@@ -150,7 +151,7 @@ download_theme() {
     local temp_path="$ARCHIVE_DIR/temp_${theme_name}.7z"
     local final_path="$ARCHIVE_DIR/preMenu/${theme_name}.7z"
     
-    display -t "Downloading ${theme_name}..." -p 240
+    display --icon "$ICON_PATH" -t "Downloading ${theme_name}..." -p 240
     
     # Get file size for progress tracking
     TARGET_SIZE_BYTES="$(curl -k -I -L "$theme_url" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2)"
@@ -164,7 +165,7 @@ download_theme() {
     if ! curl -s -k -L -o "$temp_path" "$theme_url"; then
         kill $download_pid
         rm -f "$temp_path"
-        display -t "Download failed for ${theme_name}! Please try again." -p 240 -o
+        display --icon "$ICON_PATH" -t "Download failed for ${theme_name}! Please try again." -p 240 -o
         return 1
     fi
     kill $download_pid
@@ -174,10 +175,10 @@ download_theme() {
         mkdir -p "$ARCHIVE_DIR/preMenu"
         # Move the completed download to the final location
         mv "$temp_path" "$final_path"
-        display -t "Download complete!" -p 240
+        display --icon "$ICON_PATH" -t "Download complete!" -p 240
         return 0
     else
-        display -t "Download failed! Please try again." -p 240 -o
+        display --icon "$ICON_PATH" -t "Download failed! Please try again." -p 240 -o
         return 1
     fi
 }
