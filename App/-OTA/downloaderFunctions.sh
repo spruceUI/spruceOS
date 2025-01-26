@@ -61,8 +61,8 @@ check_for_update() {
     done
 
     # Get current version based on mode
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
-        CURRENT_VERSION=$(get_version_nightly)
+    if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
+        CURRENT_VERSION=$(get_version_complex)
     else
         CURRENT_VERSION=$(get_version)
     fi
@@ -90,26 +90,62 @@ check_for_update() {
     NIGHTLY_LINK=$(sed -n 's/NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_SIZE=$(sed -n 's/NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
+    # Extract beta info
+    BETA_VERSION=$(sed -n 's/BETA_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    BETA_CHECKSUM=$(sed -n 's/BETA_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    BETA_LINK=$(sed -n 's/BETA_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    BETA_SIZE=$(sed -n 's/BETA_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    BETA_INFO=$(sed -n 's/BETA_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+
     # Set target version based on developer/tester mode
     TARGET_VERSION="$RELEASE_VERSION"
+    if flag_check "beta"; then
+        TARGET_VERSION="$BETA_VERSION"
+    fi
+
     if flag_check "developer_mode" || flag_check "tester_mode"; then
         TARGET_VERSION="$NIGHTLY_VERSION"
     fi
 
-    # Compare versions, handling nightly date format
+    # Compare versions, handling nightly date format and beta versions
     log_message "Update Check: Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
     
-    # Extract base version and date for nightly builds
+    # Extract base version, date, and beta status
     current_base_version=$(echo "$CURRENT_VERSION" | cut -d'-' -f1)
-    current_date=$(echo "$CURRENT_VERSION" | cut -d'-' -f2 -s)
+    current_suffix=$(echo "$CURRENT_VERSION" | cut -d'-' -f2 -s)
+    current_is_beta=$(echo "$current_suffix" | grep -q "Beta" && echo "1" || echo "0")
+    current_date=$(echo "$current_suffix" | grep -qE "^[0-9]{8}$" && echo "$current_suffix" || echo "")
+
     target_base_version=$(echo "$TARGET_VERSION" | cut -d'-' -f1)
-    target_date=$(echo "$TARGET_VERSION" | cut -d'-' -f2 -s)
+    target_suffix=$(echo "$TARGET_VERSION" | cut -d'-' -f2 -s)
+    target_is_beta=$(echo "$target_suffix" | grep -q "Beta" && echo "1" || echo "0")
+    target_date=$(echo "$target_suffix" | grep -qE "^[0-9]{8}$" && echo "$target_suffix" || echo "")
 
     update_available=0
-    if [ "$(echo "$target_base_version $current_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$current_base_version" ]; then
+    
+    # Compare base versions first
+    version_higher=$(echo "$target_base_version $current_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print "0"; exit} else if (a[i]>b[i]) {print "1"; exit}} print "0"}')
+    
+    if [ "$version_higher" = "1" ]; then
+        # Target version is higher, always consider it an update
         update_available=1
-    elif [ -n "$current_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$current_date" ]; then
-        update_available=1
+    elif [ "$version_higher" = "0" ] && [ "$target_base_version" = "$current_base_version" ]; then
+        # Same base version, check suffixes
+        if flag_check "developer_mode" || flag_check "tester_mode"; then
+            # For testers/developers, nightlies are updates
+            if [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
+                update_available=1
+            fi
+        elif flag_check "beta"; then
+            # Beta mode logic
+            if [ "$current_is_beta" = "1" ]; then
+                # Currently on beta, only higher base versions are updates
+                update_available=0
+            elif [ "$target_is_beta" = "1" ]; then
+                # Not on beta, but target is beta - consider it an update
+                update_available=1
+            fi
+        fi
     fi
 
     if [ $update_available -eq 1 ]; then
