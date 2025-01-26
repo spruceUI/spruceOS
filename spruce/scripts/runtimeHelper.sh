@@ -112,23 +112,26 @@ unstage_archive() {
 unstage_archives_A30() {
     unstage_archive "Overlays.7z" "preCmd"
     unstage_archive "cores32.7z" "preCmd"
+    unstage_archive "bluemsx.7z" "preCmd"
 }
 
 unstage_archives_Brick() {
     unstage_archive "autoconfig.7z" "preCmd"
     unstage_archive "cores64.7z" "preCmd"
+    unstage_archive "bluemsx.7z" "preCmd"
 }
 
 unstage_archives_SmartPro() {
     unstage_archive "autoconfig.7z" "preCmd"
     unstage_archive "cores64.7z" "preCmd"
+    unstage_archive "bluemsx.7z" "preCmd"
 }
 
 unstage_archives_Flip() {
     unstage_archive "Overlays.7z" "preCmd"
     unstage_archive "autoconfig.7z" "preCmd"
     unstage_archive "cores64.7z" "preCmd"
-
+    unstage_archive "bluemsx.7z" "preCmd"
 }
 
 update_checker(){
