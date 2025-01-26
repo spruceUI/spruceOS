@@ -103,23 +103,24 @@ jobs:
             - Fixed some bugs
 
             ******
-
-            ## Updating
-
-            *****
-
-            [Fresh Install instructions](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
+            ## Downloads:
 
             *****
+            [Fresh Install click here](https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.zip)
 
-            [Update from 3.0.0 or newer instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce-vversions-300-and-above)
-
-            *****
-
-            [Update from pre-3.0.0 instructions](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release#ez-updater-for-spruce--versions-230-and-below)
+            [Wiki instructions](https://github.com/spruceUI/spruceOS/wiki/01.-Installation-Instructions)
 
             *****
+            [Update from 3.0.0 or newer click here](https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z)
 
+            [Wiki instructions](https://github.com/spruceUI/spruceOS/wiki/02.-Updating-to-the-Latest-Release#ez-updater-for-spruce-versions-300-and-above)
+
+            *****
+            [Update from pre-3.0.0 click here](https://github.com/spruceUI/spruceOS/releases/download/v${{ steps.get_version.outputs.version }}/EZ.Updater.spruceV${{ steps.get_version.outputs.version }}.zip)
+
+            [Wiki instructions](https://github.com/spruceUI/spruceOS/wiki/02.-Updating-to-the-Latest-Release#ez-updater-for-spruce--versions-230-and-below)
+
+            *****
 
             Credits/Thanks
           repository: spruceUI/spruceOS

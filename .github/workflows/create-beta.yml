@@ -92,7 +92,9 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!commits_beta.txt
+            -x!commits_beta.txt \
+            -x!spruce/flags/developer_mode \
+            -x!spruce/flags/developer_mode.lock
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_beta.txt
 
