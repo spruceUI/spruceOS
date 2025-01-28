@@ -37,6 +37,12 @@ check_and_move_p8_bins() {
     mv "/mnt/SDCARD/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn" && \
     display -d 1.5 -t "pico8_dyn found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
     log_message "pico8_dyn found at SD root and moved into place"
+
+    [ -f "/mnt/SDCARD/pico8_64" ] && \
+    [ ! -f "/mnt/SDCARD/Emu/PICO8/bin/pico8_64" ] && \
+    mv "/mnt/SDCARD/pico8_64" "/mnt/SDCARD/Emu/PICO8/bin/pico8_64" && \
+    display -d 1.5 -t "pico8_64 found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
+    log_message "pico8_64 found at SD root and moved into place"
 }
 
 developer_mode_task() {
