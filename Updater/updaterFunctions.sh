@@ -6,12 +6,7 @@ case $INFO in
 *"sun8i"*)
 	if [ -d /usr/miyoo ]; then
 		export PLATFORM="A30"
-	else
-		export PLATFORM="Smart"
 	fi
-	;;
-*"SStar"*)
-	export PLATFORM="MiyooMini"
 	;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
