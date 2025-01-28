@@ -5,9 +5,15 @@ MOUNT_MODE=$(mount | grep SDCARD | cut -d'(' -f 2 | cut -d',' -f 1)
 
 # Check if the mount mode is 'ro'
 if [ "$MOUNT_MODE" = "ro" ]; then #set to rw for testing
+
+	if [ "$(uname -m)" = "aarch64" ]; then
+		FSCK_FAT="/mnt/SDCARD/spruce/bin64/fsck.fat"
+	else
+		FSCK_FAT="/mnt/SDCARD/miyoo/app/fsck.fat" # move to spruce/bin?
+	fi	
     
 	cp /mnt/SDCARD/spruce/scripts/sdfix.sh /tmp
-	cp /mnt/SDCARD/miyoo/app/fsck.fat /tmp
+	cp $FSCK_FAT /tmp
 	cp /mnt/SDCARD/spruce/bin/showOutput /tmp
 	mkdir -p /tmp/res
 	cp /mnt/SDCARD/spruce/bin/res/SourceCodePro-Regular.ttf /tmp/res
