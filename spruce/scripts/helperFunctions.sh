@@ -984,6 +984,8 @@ set_smart() {
         flag_add "setting_cpu"
         cores_online
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
         echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
@@ -991,7 +993,15 @@ set_smart() {
         echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
         echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
         echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        # reset max frequencies to defaults
+        case "$PLATFORM" in
+            "A30") scaling_max_freq=1344000 ;;
+            "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
+        esac
+        echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         log_message "CPU Mode now locked to SMART" -v
         flag_remove "setting_cpu"
     fi
