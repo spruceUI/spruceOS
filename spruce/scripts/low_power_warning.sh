@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 SLEEP=30
@@ -49,7 +50,7 @@ log_battery() {
     CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 
     # Check charging status
-    CHARGING=$(cat /sys/class/power_supply/battery/status)
+    CHARGING=$(cat $BATTERY/status)
 
     # Append new log entry with appropriate status
     if [ "$CHARGING" = "Charging" ]; then
@@ -65,7 +66,7 @@ log_battery() {
 }
 
 # Log boot entry
-CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+CAPACITY=$(cat $BATTERY/capacity)
 CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
 echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
@@ -75,7 +76,7 @@ fi
 LAST_LOG=$(date +%s)
 
 while true; do
-    CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+    CAPACITY=$(cat $BATTERY/capacity)
     PERCENT="$(setting_get "low_power_warning_percent")"
 
     # Add battery logging
@@ -125,7 +126,7 @@ while true; do
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
             fi
 
-            CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+            CAPACITY=$(cat $BATTERY/capacity)
             PERCENT="$(setting_get "low_power_warning_percent")"
 
             # force a safe shutdown at 1% regardless of settings

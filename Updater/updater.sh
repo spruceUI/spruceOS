@@ -9,6 +9,7 @@ LOG_LOCATION="/mnt/SDCARD/Updater/updater.log"
 CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
 
 . /mnt/SDCARD/Updater/updaterFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 # Function to log messages
 log_update_message() {
@@ -117,7 +118,7 @@ UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{pr
 
 # Check battery level
 log_update_message "Checking battery level"
-BATTERY_CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+BATTERY_CAPACITY=$(cat $BATTERY/capacity)
 log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then

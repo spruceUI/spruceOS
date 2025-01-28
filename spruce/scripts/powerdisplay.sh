@@ -4,7 +4,7 @@
 
 BATTERY_PERCENT="/mnt/SDCARD/spruce/bin/battery_percent.elf"
 
-CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+CAPACITY=$(cat $BATTERY/capacity)
 BATTERY_ICONS="ic-power-charge-0% \
 ic-power-charge-25% \
 ic-power-charge-50% \
