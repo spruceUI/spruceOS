@@ -80,6 +80,7 @@ if [ "$pico_files_present" -eq 1 ]; then
 	if [ ! $show_pico8 = 0 ]; then
 		pico8_updated=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
+		rm -f "$roms_path/PICO8/PICO8_cache7.db"
  		rm -f "$roms_path/PICO8/miyoogamelist.xml"
  		sed -i 's/^{{*$/{/' "$config_file"
 		echo "show system PICO8" && log_message "emufresh: revealing PICO8 system"
@@ -130,7 +131,7 @@ check_rom_folders() {
 		system_name=$(basename "$folder")
 
 		# get all file names except known non-rom files
-		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | sed '/^\s*$/d')
+		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
 
 		# get old md5 value
 		md5=$(cat "$md5_path/$system_name.md5" 2>/dev/null)
@@ -173,7 +174,7 @@ check_rom_folders() {
 				sed -i 's/^{*$/{{/' "$config_file"
 				echo "hide system $system_name" && log_message "emufresh: Hiding $system_name"
 			else
-				rm -f "$roms_path/$system_name/${system_name}_cache6.db"
+				rm -f "$roms_path/$system_name/${system_name}_cache6.db" "$roms_path/$system_name/${system_name}_cache7.db"
 				[ "$system_name" = "ARCADE" ] || rm -f "$roms_path/$system_name/miyoogamelist.xml"
 				[ "$system_name" = "PICO8" ] || sed -i 's/^{{*$/{/' "$config_file"
 				echo "show system $system_name" && log_message "emufresh: Revealing $system_name"

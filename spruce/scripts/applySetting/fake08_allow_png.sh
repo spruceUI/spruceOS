@@ -3,7 +3,8 @@
 CONFIG="/mnt/SDCARD/Emu/FAKE08/config.json"
 IMG_SHOWN="/mnt/SDCARD/Roms/FAKE08/Imgs"
 IMG_HIDDEN="/mnt/SDCARD/Roms/FAKE08/.Imgs"
-CACHE="/mnt/SDCARD/Roms/FAKE08/FAKE08_cache6.db"
+CACHE6="/mnt/SDCARD/Roms/FAKE08/FAKE08_cache6.db"
+CACHE7="/mnt/SDCARD/Roms/FAKE08/FAKE08_cache7.db"
 MGL="/mnt/SDCARD/Roms/FAKE08/miyoogamelist.xml"
 
 if [ "$1" = "on" ]; then
@@ -17,8 +18,7 @@ if [ "$1" = "on" ]; then
 	sed -i 's%\"extlist\": \"p8\",%\"extlist\": \"p8|png\",%' "$CONFIG"
 
 	# remove db and xml files to refresh game list
-	rm "$CACHE"
-	rm "$MGL"
+	rm -f "$CACHE6" "$CACHE7" "$MGL"
 else
 	# use Imgs folder for box art
 	sed -i 's%\"imgpath\": \"../../Roms/FAKE08\",%\"imgpath\": \"../../Roms/FAKE08/Imgs\",%' "$CONFIG"
@@ -30,6 +30,5 @@ else
 	sed -i 's%\"extlist\": \"p8|png\",%\"extlist\": \"p8\",%' "$CONFIG"
 
 	# remove db and xml files to refresh game list
-	rm "$CACHE"
-	rm "$MGL"
+	rm -f "$CACHE6" "$CACHE7" "$MGL"
 fi

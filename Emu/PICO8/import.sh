@@ -31,5 +31,5 @@ done
 
 display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Importing carts from Splore" -d 2
 
-rm -f "$ROM_PATH/PICO8_cache6.db"
+rm -f "$ROM_PATH/PICO8_cache6.db" "$ROM_PATH/PICO8_cache7.db"
 log_message "Done importing. Pico-8 romlist refreshed."
