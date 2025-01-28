@@ -311,6 +311,7 @@ cores_online() {
 
     # Always keep CPU0 online
     echo 1 >/sys/devices/system/cpu/cpu0/online
+    chmod a-w /sys/devices/system/cpu/cpu0/online
 
     # Set the state for CPU1-3 based on num_cores
     for i in 1 2 3; do
@@ -319,6 +320,7 @@ cores_online() {
         else
             echo 0 >/sys/devices/system/cpu/cpu$i/online
         fi
+        chmod a-w /sys/devices/system/cpu/cpu$i/online
     done
 }
 
@@ -999,6 +1001,7 @@ set_performance() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         case "$PLATFORM" in
@@ -1006,6 +1009,7 @@ set_performance() {
             "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
         esac
         echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         log_message "CPU Mode now locked to PERFORMANCE" -v
         flag_remove "setting_cpu"
@@ -1015,6 +1019,7 @@ set_performance() {
 set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
+        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         case "$PLATFORM" in
             "A30")
@@ -1025,6 +1030,7 @@ set_overclock() {
                 echo 1992000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
                 ;;
         esac
+        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         log_message "CPU Mode now locked to OVERCLOCK" -v
         flag_remove "setting_cpu"
