@@ -239,6 +239,9 @@ while [ "$PLATFORM" = "Flip" ]; do
         rm /tmp/cmd_to_run.sh
         rm /tmp/miyoo_inputd/enable_turbo_input
         rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
+        # reset CPU settings to defaults in case an emulator changes anything
+        scaling_min_freq=1008000 ### default value, may be overridden in specific script
+        set_smart
     fi
 
 done
