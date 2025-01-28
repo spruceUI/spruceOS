@@ -5,6 +5,7 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 # TODO: remove A30 check once Syncthing is implemented on Brick
 if [ "$PLATFORM" = "A30" ]; then
@@ -124,14 +125,9 @@ run_ffplay() {
 	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
-		case "$PLATFORM" in
-			"Flip") X=640 Y=480 ;;
-			"Brick") X=1024 Y=768 ;;
-			"SmartPro") X=1280 Y=720 ;;
-		esac
 		gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
-		ffplay -x $X -y $Y -fs -i "$ROM_FILE" > ffplay.log 2>&1 # trimui devices crash after about 30 seconds when not outputting to a log???
+		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -i "$ROM_FILE" > ffplay.log 2>&1 # trimui devices crash after about 30 seconds when not outputting to a log???
 		kill -9 "$(pidof gptokeyb)"
 	fi
 }
@@ -226,18 +222,8 @@ run_pico8() {
 
 	if setting_get "pico8_stretch"; then
 		case "$PLATFORM" in
-			"A30" )
-				SCALING="-draw_rect 0,0,480,640"
-				;;
-			"Flip" )
-				SCALING="-draw_rect 0,0,640,480"
-				;;
-			"Brick" )
-				SCALING="-draw_rect 0,0,1024,768"
-				;;
-			"SmartPro" )
-				SCALING="-draw_rect 0,0,1280,720"
-				;;
+			"A30") SCALING="-draw_rect 0,0,$DISPLAY_HEIGHT,$DISPLAY_WIDTH" ;; # handle A30's rotated screen
+			*) SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT" ;;
 		esac
 	else
 		SCALING=""
@@ -257,9 +243,9 @@ run_pico8() {
 
 	if [ "${GAME##*.}" = "splore" ]; then
 		check_and_connect_wifi &
-		$PICO8_BINARY -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
+		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 	else
-		$PICO8_BINARY -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
+		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING
 	fi
 	sync
 
