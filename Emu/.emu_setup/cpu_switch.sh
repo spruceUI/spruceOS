@@ -28,7 +28,7 @@ fi
 
 case "$EMU_NAME" in
 
-	"DC" | "N64" )
+	"DC" | "SATURN" )
 		if [ "$MODE" = "performance" ]; then
 			NEW_MODE="overclock"
 			NEW_DISPLAY="Performance-(✓OVERCLOCK)"
