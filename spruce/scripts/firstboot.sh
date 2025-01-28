@@ -2,20 +2,8 @@
 
 . "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
-case "$PLATFORM" in
-    "Brick" | "SmartPro" )
-        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-$PLATFORM.json"
-        flag_remove "first_boot_$PLATFORM"
-    ;;
-    "Flip" )
-        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-Flip.json"
-        flag_remove "first_boot_Flip"
-    ;;
-    "A30" )
-        INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/system-A30.json"
-        flag_remove "first_boot_A30"
-    ;;
-esac
+INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/platform/system-$PLATFORM.json"
+flag_remove "first_boot_$PLATFORM"
 
 log_message "Removed first boot flag for $PLATFORM"
 

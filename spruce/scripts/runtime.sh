@@ -68,16 +68,10 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
         mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
         # Use appropriate RA config
-        case "$PLATFORM" in
-            "Brick") RA_CFG="/mnt/SDCARD/RetroArch/retroarch-brick.cfg" ;;
-            "SmartPro") RA_CFG="/mnt/SDCARD/RetroArch/retroarch-smartpro.cfg" ;;
-        esac
-        [ -f "$RA_CFG" ] && mount --bind "$RA_CFG" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
+        [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
         mkdir -p "/mnt/SDCARD/trimui/brickThemes"
         mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
-        # handle extlist differences between ffplay for A30 but ffmpeg LR for Brick
-        [ -f "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" ] && mount --bind "/mnt/SDCARD/Emu/MEDIA/ffmpeg.json" "/mnt/SDCARD/Emu/MEDIA/config.json" &
         wait
 
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
@@ -361,7 +355,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
     # Use appropriate RA config
-    [ -f "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" ] && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && mount --bind "/mnt/SDCARD/RetroArch/retroarch-flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+    [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && \
+        mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
