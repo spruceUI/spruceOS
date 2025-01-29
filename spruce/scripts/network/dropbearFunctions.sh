@@ -8,7 +8,7 @@ else
     SSH_DIR="/mnt/SDCARD/spruce/bin64/SSH"
 fi
 
-SSH_KEYS="/mnt/SDCARD/spruce/bin/SSH/sshkeys"
+SSH_KEYS="/mnt/SDCARD/spruce/etc/ssh/keys"
 DROPBEAR="$SSH_DIR/bin/dropbear"
 DROPBEARKEY="$SSH_DIR/bin/dropbearkey"
 

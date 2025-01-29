@@ -14,7 +14,12 @@ rotate_logs
 SDCARD_PATH="/mnt/SDCARD"
 export HOME="${SDCARD_PATH}"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
-SPRUCE_ETC_DIR="${SDCARD_PATH}/miyoo/etc"
+
+case "$PLATFORM" in
+    "A30") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
+    "Flip") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
+    "Brick" | "SmartPro") SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;; # todo
+esac
 
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
@@ -262,6 +267,12 @@ elif [ "$PLATFORM" = "Flip" ]; then
     fi
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib
+
+    (
+        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    )
 
     #motor
     echo 20 > /sys/class/gpio/export
