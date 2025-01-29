@@ -972,18 +972,18 @@ set_smart() {
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 35 >/sys/devices/system/cpu/cpufreq/conservative/down_threshold
-        echo 70 >/sys/devices/system/cpu/cpufreq/conservative/up_threshold
-        echo 3 >/sys/devices/system/cpu/cpufreq/conservative/freq_step
-        echo 1 >/sys/devices/system/cpu/cpufreq/conservative/sampling_down_factor
-        echo 400000 >/sys/devices/system/cpu/cpufreq/conservative/sampling_rate
-        echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-        # reset max frequencies to defaults
         case "$PLATFORM" in
-            "A30") scaling_max_freq=1344000 ;;
-            "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
+            "A30") scaling_max_freq=1344000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative";;
+            "Flip") scaling_max_freq=1800000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/policy0/conservative";;
+            "Brick" | "SmartPro") scaling_max_freq=1800000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative";;
         esac
+        echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo 35 >$CONSERVATIVE_POLICY_DIR/down_threshold
+        echo 70 >$CONSERVATIVE_POLICY_DIR/up_threshold
+        echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
+        echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
+        echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
+        echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
         echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
