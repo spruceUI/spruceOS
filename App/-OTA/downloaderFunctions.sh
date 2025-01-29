@@ -1,4 +1,5 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 SD_CARD="/mnt/SDCARD"
 OTA_URL="https://spruceui.github.io/OTA/spruce"

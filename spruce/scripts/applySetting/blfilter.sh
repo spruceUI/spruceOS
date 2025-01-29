@@ -1,6 +1,7 @@
 #!/bin/ash
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 DEVICE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
 SAVED_HSL="/mnt/SDCARD/spruce/settings/saved_hsl"

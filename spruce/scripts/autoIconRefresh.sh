@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 

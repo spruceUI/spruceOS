@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/platform/system-$PLATFORM.json"
 flag_remove "first_boot_$PLATFORM"

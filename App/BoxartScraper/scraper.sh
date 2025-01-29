@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
 
