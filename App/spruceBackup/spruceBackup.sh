@@ -9,6 +9,7 @@ BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
@@ -54,7 +55,7 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
-/config/system.json
+$SYSTEM_JSON
 /config/joypad.config
 /mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE

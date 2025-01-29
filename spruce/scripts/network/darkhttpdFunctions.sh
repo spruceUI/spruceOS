@@ -1,6 +1,7 @@
 #! /bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ "$PLATFORM" = "A30" ]; then
   DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
@@ -18,7 +19,7 @@ start_darkhttpd_process() {
     return
   fi
 
-  wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
+  wifi=$(grep '"wifi"' $SYSTEM_JSON | awk -F ':' '{print $2}' | tr -d ' ,')
   if [ "$wifi" -eq 0 ]; then
     log_message "darkhttpd: WiFi is off, skipping start" -v
     return

@@ -67,20 +67,6 @@ else
     export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
 fi
 
-# "global" variable for system.json path for each device
-case "$PLATFORM" in
-    "Brick" | "SmartPro" )
-        export SYSTEM_JSON="/mnt/UDISK/system.json"
-    ;;
-    "Flip" )
-        export SYSTEM_JSON="/userdata/system.json"
-    ;;
-    "A30" )
-        export SYSTEM_JSON="/config/system.json"
-    ;;
-esac
-
-
 # Key exports so we can refer to buttons by more memorable names
 if [ "$PLATFORM" = "A30" ]; then
     export B_LEFT="key 1 105"
