@@ -108,7 +108,7 @@
 	"105":  "Off",
 	"106":  "Native Menu",
 	"107":  "Apps",
-	"108":  "Are you sure you want to\nturn off your Flip?",
+	"108":  "Are you sure you want to turn off your Flip?",
     "109":  "IO Test",
     "110":  "Key Setting",
     "111":  "Exit",
@@ -161,7 +161,7 @@
     "158":  "Step: %d/%d",
     "159":  "Press A to calibrate",
     "160":  "Start Calibration",
-    "161":  "Rotate the joystick\nin a few circles\nas far as possible."
+    "161":  "Rotate the joystick\nin a few circles\nas far as possible.",
     "162":  "Release the joystick and\nlet it sit still for a while.\nMove the joystick a little if stuck on this\nscreen for longer than 30 seconds.",
     "163":  "Calibration finished\nPress B to exit",        
     "164":  "Quit",

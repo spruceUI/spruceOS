@@ -360,6 +360,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
+    [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
 
     ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
