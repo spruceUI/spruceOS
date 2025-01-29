@@ -1157,7 +1157,7 @@ vibrate() {
                 timer=$(($timer + 6))
             done &
             ;;
-        "Brick" | "SmartPro") # stopgap implementation, need to figure out intensity?
+        "Brick" | "SmartPro") # todo: map intensity to rumblelevel key in system.json
             timer=0
             while [ $timer -lt $duration ]; do
                 echo -n 1 > /sys/class/gpio/gpio227/value
