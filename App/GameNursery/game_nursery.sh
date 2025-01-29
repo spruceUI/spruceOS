@@ -3,6 +3,7 @@
 ##### CONSTANTS #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 CONFIG_DIR="/tmp/nursery-config"
@@ -14,8 +15,8 @@ JSON_CACHE_VALID_MINUTES=20
 ##### FUNCTIONS #####
 
 check_battery() {
-    CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
-    CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
+    CHARGING="$(cat $BATTERY/online)"
+    CAPACITY="$(cat $BATTERY/capacity)"
 
     if [ "$CAPACITY" -lt 10 ] && [ "$CHARGING" -eq 0 ]; then
         log_message "Game Nursery: Device is below 10% battery and is not plugged in. Aborting."

@@ -6,10 +6,11 @@ DISPLAY="/mnt/SDCARD/Updater/bin/display_text.elf"
 APP_DIR="/mnt/SDCARD/App/-Updater"
 UPDATE_FILE=""
 LOG_LOCATION="/mnt/SDCARD/Updater/updater.log"
-CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
 
 . /mnt/SDCARD/Updater/updaterFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
+
+CHARGING="$(cat $BATTERY/online)"
 
 # Function to log messages
 log_update_message() {

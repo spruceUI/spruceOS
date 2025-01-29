@@ -2,6 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 SD_CARD="/mnt/SDCARD"
 
@@ -12,8 +13,8 @@ OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/re
 OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
 TMP_DIR="$SD_CARD/App/-OTA/tmp"
 
-BATTERY_CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
-CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
+BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
+CHARGING="$(cat $BATTERY/online)"
 
 display --icon "$IMAGE_PATH" -t "Checking for updates..."
 
