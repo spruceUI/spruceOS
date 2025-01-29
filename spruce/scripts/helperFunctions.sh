@@ -1122,29 +1122,42 @@ vibrate() {
     done
 
     # If no intensity was specified, get from settings
-    if [ -z "$intensity" ]; then
-        intensity="$(setting_get "rumble_intensity")"
-    fi
+    case "$PLATFORM" in
+        "A30")
+            if [ -z "$intensity" ]; then
+                intensity="$(setting_get "rumble_intensity")"
+            fi
 
-    if [ "$intensity" = "Strong" ]; then
-        echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
-    elif [ "$intensity" = "Medium" ]; then
-        timer=0
-        while [ $timer -lt $duration ]; do
-            echo 5 >/sys/devices/virtual/timed_output/vibrator/enable
-            sleep 0.006
-            timer=$(($timer + 6))
-        done &
-    elif [ "$intensity" = "Weak" ]; then
-        timer=0
-        while [ $timer -lt $duration ]; do
-            echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
-            sleep 0.004
-            timer=$(($timer + 4))
-        done &
-    else
-        log_message "this is where I'd put my vibration... IF I HAD ONE"
-    fi
+            if [ "$intensity" = "Strong" ]; then
+                echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
+            elif [ "$intensity" = "Medium" ]; then
+                timer=0
+                while [ $timer -lt $duration ]; do
+                    echo 5 >/sys/devices/virtual/timed_output/vibrator/enable
+                    sleep 0.006
+                    timer=$(($timer + 6))
+                done &
+            elif [ "$intensity" = "Weak" ]; then
+                timer=0
+                while [ $timer -lt $duration ]; do
+                    echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
+                    sleep 0.004
+                    timer=$(($timer + 4))
+                done &
+            else
+                log_message "this is where I'd put my vibration... IF I HAD ONE"
+            fi
+            ;;
+        "Flip") # stopgap implementation
+            timer=0
+            while [ $timer -lt $duration ]; do
+                echo -n 1 > /sys/class/gpio/gpio20/value
+                sleep 0.006
+                echo -n 0 > /sys/class/gpio/gpio20/value
+                timer=$(($timer + 6))
+            done &
+            ;;
+    esac
 }
 
 # Takes a screenshot and saves it to the specified path
