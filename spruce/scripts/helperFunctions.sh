@@ -1148,12 +1148,21 @@ vibrate() {
                 log_message "this is where I'd put my vibration... IF I HAD ONE"
             fi
             ;;
-        "Flip") # stopgap implementation
+        "Flip") # stopgap implementation, need to figure out intensity?
             timer=0
             while [ $timer -lt $duration ]; do
                 echo -n 1 > /sys/class/gpio/gpio20/value
                 sleep 0.006
                 echo -n 0 > /sys/class/gpio/gpio20/value
+                timer=$(($timer + 6))
+            done &
+            ;;
+        "Brick" | "SmartPro") # stopgap implementation, need to figure out intensity?
+            timer=0
+            while [ $timer -lt $duration ]; do
+                echo -n 1 > /sys/class/gpio/gpio227/value
+                sleep 0.006
+                echo -n 0 > /sys/class/gpio/gpio227/value
                 timer=$(($timer + 6))
             done &
             ;;
