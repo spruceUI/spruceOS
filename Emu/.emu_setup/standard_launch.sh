@@ -516,14 +516,10 @@ case $EMU_NAME in
 		run_port
 		;;
 	"PSP")
-		if [ "$CORE" = "standalone" ]; then
-			[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
-			load_ppsspp_configs
-			run_ppsspp
-			save_ppsspp_configs
-		else
-			run_retroarch
-		fi
+		[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
+		load_ppsspp_configs
+		run_ppsspp
+		save_ppsspp_configs
 		;;
 	"SATURN")
 		if [ "$CORE" = "standalone" ]; then
