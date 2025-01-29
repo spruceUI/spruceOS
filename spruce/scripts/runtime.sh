@@ -16,9 +16,8 @@ export HOME="${SDCARD_PATH}"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
 
 case "$PLATFORM" in
-    "A30") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
+    "A30" | "Brick" | "SmartPro" ) SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
     "Flip") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
-    "Brick" | "SmartPro") SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;; # todo
 esac
 
 # Resetting log file location
@@ -209,6 +208,7 @@ if [ "$PLATFORM" = "A30" ]; then
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
+    export LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
     chmod a+x /usr/bin/notify
     INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
 
