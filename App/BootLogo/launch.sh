@@ -1,17 +1,14 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
+ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
 LOGO_NAME="bootlogo"
 PROCESSED_NAME="bootlogo_processed.bmp"
 TEMP_BMP="temp_logo.bmp"
 MAX_SIZE=62234
 DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
-
-# Function for user messages
-display_message() {
-    display -i "$DIR/res/$1.png" -d 1
-}
 
 display_logo() {
     display -i "$DIR/$1.png" -d 1
@@ -25,7 +22,7 @@ elif [ -f "${LOGO_PATH}.png" ]; then
     LOGO_PATH="${LOGO_PATH}.png"
 else
     echo "Error: Neither $LOGO_NAME.bmp nor $LOGO_NAME.png exist in the directory: $DIR"
-    display_message "missing"
+    display --icon "$ERROR_IMAGE_PATH" -t "Boot logo not found. Cancelling boot logo swap." -d 1
     exit 1
 fi
 
@@ -36,7 +33,7 @@ if [ "$EXTENSION" != "bmp" ]; then
     ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,640/480),640,-1)':'if(gt(iw/ih,640/480),-1,480)',pad=640:480:(640-iw)/2:(480-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
-        display_message "error"
+        display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
         exit 1
     fi
     LOGO_PATH="$TEMP_BMP"
@@ -47,7 +44,7 @@ echo "Processing image..."
 ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Unable to process image with FFmpeg."
-    display_message "error"
+    display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
     exit 1
 fi
 
@@ -59,7 +56,7 @@ LOGO_SIZE=$(wc -c < "$PROCESSED_PATH")
 # Check dimensions of compressed image
 if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
     echo "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
-    display_message "simplify"
+    display --icon "$ERROR_IMAGE_PATH" -t "Image is too large. Cancelling boot logo swap." -d 1
     rm "$PROCESSED_PATH" boot0 boot0-suffix
     rm -f "$TEMP_BMP" "$PROCESSED_NAME"
     exit 1
@@ -78,7 +75,7 @@ VERSION=$(cat /usr/miyoo/version)
 OFFSET_PATH="res/offset-$VERSION"
 if [ ! -f "$OFFSET_PATH" ]; then
     echo "Error: Offset not found for firmware version ($VERSION)."
-    display_message "abort"
+    display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
     rm "$PROCESSED_PATH" boot0
     exit 1
 fi
@@ -86,7 +83,7 @@ OFFSET=$(cat "$OFFSET_PATH")
 
 # Display update image
 echo "Displaying update image..."
-display_message "updating"
+display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
 
 # Update bootlogo in memory
 echo "Updating BootLogo..."
@@ -99,7 +96,7 @@ echo "Writing updated partition..."
 mtd write "$DIR/boot0" boot > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Error: Unable to write updated partition."
-    display_message "error"
+    display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
     rm "$PROCESSED_PATH" boot0 boot0-suffix
     exit 1
 fi
@@ -108,7 +105,7 @@ fi
 rm "$PROCESSED_PATH" boot0 boot0-suffix
 rm -f "$TEMP_BMP" "$PROCESSED_NAME"
 echo "Bootlogo updated successfully!"
-display_message "done"
+display --icon "$IMAGE_PATH" -t "Boot logo updated successfully!" -d 1
 
 # Visualizza immagine finale
 display_logo "$LOGO_NAME"
