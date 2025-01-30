@@ -108,11 +108,22 @@ case "$PLATFORM" in
         rm -f "$TEMP_BMP" "$PROCESSED_NAME"
         ;;
     "Brick" | "SmartPro")
+        if [ $(stat -c "%s" "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
+            display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
+            Cancelling boot logo swap." -d 1
+            exit 1
+        fi
+
+        
+
         display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
         BOOT_PATH="/mnt/boot"
         [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
         mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
-        cp $LOGO_PATH $BOOT_PATH
+        if ! cp $LOGO_PATH $BOOT_PATH; then
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
         sync
         umount $BOOT_PATH
         ;;
