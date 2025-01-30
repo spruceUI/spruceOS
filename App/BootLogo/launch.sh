@@ -1,5 +1,6 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
 ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -30,7 +31,7 @@ fi
 EXTENSION="${LOGO_PATH##*.}"
 if [ "$EXTENSION" != "bmp" ]; then
     echo "Converting image to BMP format..."
-    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,640/480),640,-1)':'if(gt(iw/ih,640/480),-1,480)',pad=640:480:(640-iw)/2:(480-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
+    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$WIDTH/$HEIGHT),$WIDTH,-1)':'if(gt(iw/ih,$WIDTH/$HEIGHT),-1,$HEIGHT)',pad=$WIDTH:$HEIGHT:($WIDTH-iw)/2:($HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
         display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
@@ -39,71 +40,85 @@ if [ "$EXTENSION" != "bmp" ]; then
     LOGO_PATH="$TEMP_BMP"
 fi
 
-# Image conversion: rotation, resizing, compression
-echo "Processing image..."
-ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to process image with FFmpeg."
-    display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
-    exit 1
-fi
+case "$PLATFORM" in
+    A30)
+        # Image conversion: rotation, resizing, compression
+        echo "Processing image..."
+        ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to process image with FFmpeg."
+            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
 
-# Compress image
-gzip -k "$PROCESSED_NAME"
-PROCESSED_PATH="$PROCESSED_NAME.gz"
-LOGO_SIZE=$(wc -c < "$PROCESSED_PATH")
+        # Compress image
+        gzip -k "$PROCESSED_NAME"
+        PROCESSED_PATH="$PROCESSED_NAME.gz"
+        LOGO_SIZE=$(wc -c < "$PROCESSED_PATH")
 
-# Check dimensions of compressed image
-if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
-    echo "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
-    display --icon "$ERROR_IMAGE_PATH" -t "Image is too large. Cancelling boot logo swap." -d 1
-    rm "$PROCESSED_PATH" boot0 boot0-suffix
-    rm -f "$TEMP_BMP" "$PROCESSED_NAME"
-    exit 1
-fi
+        # Check dimensions of compressed image
+        if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
+            echo "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
+            display --icon "$ERROR_IMAGE_PATH" -t "Image is too large. Cancelling boot logo swap." -d 1
+            rm "$PROCESSED_PATH" boot0 boot0-suffix
+            rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+            exit 1
+        fi
 
-# Backup partition
-echo "Creating backup of original partition..."
-cp /dev/mtdblock0 boot0
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to create a backup of the partition."
-    exit 1
-fi
+        # Backup partition
+        echo "Creating backup of original partition..."
+        cp /dev/mtdblock0 boot0
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to create a backup of the partition."
+            exit 1
+        fi
 
-# Recover offset from firmware version
-VERSION=$(cat /usr/miyoo/version)
-OFFSET_PATH="res/offset-$VERSION"
-if [ ! -f "$OFFSET_PATH" ]; then
-    echo "Error: Offset not found for firmware version ($VERSION)."
-    display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
-    rm "$PROCESSED_PATH" boot0
-    exit 1
-fi
-OFFSET=$(cat "$OFFSET_PATH")
+        # Recover offset from firmware version
+        VERSION=$(cat /usr/miyoo/version)
+        OFFSET_PATH="res/offset-$VERSION"
+        if [ ! -f "$OFFSET_PATH" ]; then
+            echo "Error: Offset not found for firmware version ($VERSION)."
+            display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
+            rm "$PROCESSED_PATH" boot0
+            exit 1
+        fi
+        OFFSET=$(cat "$OFFSET_PATH")
 
-# Display update image
-echo "Displaying update image..."
-display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        # Display update image
+        echo "Displaying update image..."
+        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
 
-# Update bootlogo in memory
-echo "Updating BootLogo..."
-OFFSET_PART=$((OFFSET + LOGO_SIZE))
-dd if=boot0 of=boot0-suffix bs=1 skip=$OFFSET_PART > /dev/null 2>&1
-dd if="$PROCESSED_PATH" of=boot0 bs=1 seek=$OFFSET > /dev/null 2>&1
-dd if=boot0-suffix of=boot0 bs=1 seek=$OFFSET_PART > /dev/null 2>&1
+        # Update bootlogo in memory
+        echo "Updating BootLogo..."
+        OFFSET_PART=$((OFFSET + LOGO_SIZE))
+        dd if=boot0 of=boot0-suffix bs=1 skip=$OFFSET_PART > /dev/null 2>&1
+        dd if="$PROCESSED_PATH" of=boot0 bs=1 seek=$OFFSET > /dev/null 2>&1
+        dd if=boot0-suffix of=boot0 bs=1 seek=$OFFSET_PART > /dev/null 2>&1
 
-echo "Writing updated partition..."
-mtd write "$DIR/boot0" boot > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to write updated partition."
-    display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
-    rm "$PROCESSED_PATH" boot0 boot0-suffix
-    exit 1
-fi
+        echo "Writing updated partition..."
+        mtd write "$DIR/boot0" boot > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to write updated partition."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
+            rm "$PROCESSED_PATH" boot0 boot0-suffix
+            exit 1
+        fi
+
+        rm "$PROCESSED_PATH" boot0 boot0-suffix
+        rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+        ;;
+    "Brick" | "SmartPro")
+        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        BOOT_PATH="/mnt/boot"
+        [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
+        mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
+        cp $LOGO_PATH $BOOT_PATH
+        sync
+        umount $BOOT_PATH
+esac
 
 # Clean up temporary files
-rm "$PROCESSED_PATH" boot0 boot0-suffix
-rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+
 echo "Bootlogo updated successfully!"
 display --icon "$IMAGE_PATH" -t "Boot logo updated successfully!" -d 1
 
