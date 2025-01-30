@@ -115,6 +115,7 @@ case "$PLATFORM" in
         cp $LOGO_PATH $BOOT_PATH
         sync
         umount $BOOT_PATH
+        ;;
 esac
 
 # Clean up temporary files
