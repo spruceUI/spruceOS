@@ -12,6 +12,7 @@ $JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
 $N64_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/n64_control_profiles.sh$
 $PERFECT_OVERLAYS=/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh$
+$PPSSPP_PAUSE_EXIT=/mnt/SDCARD/spruce/scripts/applySetting/ppssppPauseExit.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RAREWIND=/mnt/SDCARD/spruce/scripts/applySetting/retroArchRewind.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
@@ -130,6 +131,10 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Not_simple>
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
 @"C Buttons = R2 + A, B, X, Y"
+
+<Not_simple>
+"" "PPSSPP: Exit from pause menu" "|" "on|off" "$HELP$ check ppsspp_pause_exit" "$PPSSPP_PAUSE_EXIT$ _VALUE_" "$PPSSPP_PAUSE_EXIT$ _INDEX_"
+@"PPSSPP will return to the emulator menu when exiting from the pause menu"
 
 <Pico>
 "" "Pico-8 Control Profile" "||||||" "Doubled|Doubled 2|Racing|Racing 2|One-handed|One-handed 2|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ '_VALUE_'"

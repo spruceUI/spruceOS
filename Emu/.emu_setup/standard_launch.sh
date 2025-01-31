@@ -313,23 +313,15 @@ move_dotconfig_into_place() {
 run_ppsspp() {
 	export HOME=/mnt/SDCARD
 	cd $EMU_DIR
-	case "$PLATFORM" in
-		"A30")
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-			./PPSSPPSDL "$ROM_FILE"
-			;;
-		"Flip")
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR
-			./PPSSPPSDL_Flip "$ROM_FILE"
-			;;
-		"Brick")
-			export SDL_GAMECONTROLLERCONFIG_FILE=/mnt/SDCARD/Emus/PPSSPP/assets/gamecontrollerdb.txt
-			./PPSSPPSDL_Brick "$ROM_FILE"
-			;;
-		"SmartPro")
-			./PPSSPPSDL_SmartPro "$ROM_FILE"
-			;;
-	esac
+
+	PPSSPP_CMDLINE="$ROM_FILE"
+	if setting_get "ppsspp_pause_exit"; then
+		PPSSPP_CMDLINE="--pause-menu-exit $ROM_FILE"
+	fi
+
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
+	[ "$PLATFORM" = "A30" ] && PPSSPPSDL="./PPSSPPSDL" || PPSSPPSDL="./PPSSPPSDL_$PLATFORM"
+	"$PPSSPPSDL" "$PPSSPP_CMDLINE"
 }
 
 load_ppsspp_configs() {
