@@ -72,7 +72,7 @@ $SYSTEM_JSON
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
-/mnt/SDCARD/spruce/bin/SSH/sshkeys
+/mnt/SDCARD/spruce/etc/SSH/keys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
 /mnt/SDCARD/spruce/settings/spruce.cfg
