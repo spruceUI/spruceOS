@@ -104,6 +104,7 @@ while [ 1 ]; do
 
     if [ -f /tmp/cmd_to_run.sh ]; then
         set_performance
+        kill -19 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # Pause simple mode watchdog
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
@@ -112,6 +113,7 @@ while [ 1 ]; do
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart
+        kill -18 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # unpause simple mode watchdog
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
