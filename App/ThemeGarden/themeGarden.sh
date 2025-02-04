@@ -1,8 +1,8 @@
 #!/bin/sh
 
-APP_DIR=/mnt/SDCARD/App/ThemeNursery
+APP_DIR=/mnt/SDCARD/App/ThemeGarden
 ICON_PATH="/mnt/SDCARD/spruce/imgs/themegallery.png"
-CACHE_DIR=/mnt/SDCARD/spruce/cache/themenursery
+CACHE_DIR=/mnt/SDCARD/spruce/cache/themegarden
 UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
 IMAGE_CONFIRM_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayConfirmExit.png"

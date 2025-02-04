@@ -278,3 +278,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 <Not_simple>
 "" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
 @"Restore spruce from a backup file"
+
+<Not_simple>
+"" "Theme Garden" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/ThemeGarden/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/ThemeGarden/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/ThemeGarden/config.json" ""
+@"Download and install themes from our theme repo"
