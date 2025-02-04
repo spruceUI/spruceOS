@@ -7,6 +7,7 @@ $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 $F8_PNG=/mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh$
 $BOOT_TO=/mnt/SDCARD/spruce/scripts/applySetting/bootAction.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
+$GENESIS_PLUS_GX_WIDE=/mnt/SDCARD/spruce/scripts/applySetting/genesisPlusGXWide.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
 $JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
 $LCD=/mnt/SDCARD/spruce/scripts/applySetting/LEDon.sh$
@@ -127,6 +128,10 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 <Not_simple>
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
+
+<Not_simple>
+"" "Genesis Plus GX: Enable widescreen" "|" "on|off" "$HELP$ check genesis_plus_gx_wide" "$GENESIS_PLUS_GX_WIDE$ _VALUE_" "$GENESIS_PLUS_GX_WIDE$ _INDEX_"
+@"Use Genesis Plus GX Wide core when available"
 
 <Not_simple>
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
