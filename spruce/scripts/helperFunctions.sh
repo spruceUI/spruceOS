@@ -164,6 +164,8 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
+    local timeout=30  # Think about making this configurable
+    local start_time=$(date +%s)
 
     # More thorough connection check
     connection_active=0
@@ -196,6 +198,13 @@ check_and_connect_wifi() {
 Press START to continue anyway."
         {
             while true; do
+                # Check for timeout
+                current_time=$(date +%s)
+                if [ $((current_time - start_time)) -ge $timeout ]; then
+                    echo "WiFi connection timed out" >> "$messages_file"
+                    break
+                fi
+
                 if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
                     echo "Successfully connected to WiFi" >> "$messages_file"
                     break
@@ -216,6 +225,11 @@ Press START to continue anyway."
                 log_message "Successfully connected to WiFi"
                 display_kill
                 return 0
+                ;;
+            *"WiFi connection timed out"*)
+                log_message "WiFi connection timed out after $timeout seconds"
+                display_kill
+                return 1
                 ;;
             esac
         done
