@@ -149,8 +149,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases sorted by created date (newest first)
-          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[].id')
+          # Get all releases and filter out beta releases
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
+            jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
           
           # Convert to array and keep only releases after the first 3
           COUNT=0
