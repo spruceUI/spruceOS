@@ -234,6 +234,8 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     echo 1000 > /sys/class/led_anim/effect_duration_lr
     echo 1 >  /sys/class/led_anim/effect_lr
 
+    [ -d "/mnt/SDCARD/trimui/res/lang" ] && mount --bind /mnt/SDCARD/trimui/res/lang /usr/trimui/res/lang
+
     syslogd -S
 
     /etc/bluetooth/bluetoothd start
