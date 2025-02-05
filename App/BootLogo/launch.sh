@@ -30,11 +30,7 @@ fi
 # Convert image to BMP if not already
 EXTENSION="${LOGO_PATH##*.}"
 BOOTLOGO_IMAGE_INFO="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,pix_fmt -of compact=p=0:nk=1 -i "$LOGO_PATH")"
-BOOTLOGO_WIDTH="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $1}')"
-BOOTLOGO_HEIGHT="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $2}')"
-BOOTLOGO_PIX_FMT="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $3}')"
-if [ "$EXTENSION" != "bmp" ] || [ "$BOOTLOGO_WIDTH" -ne "$DISPLAY_WIDTH" ] || \
-    [ "$BOOTLOGO_HEIGHT" -ne "$DISPLAY_HEIGHT" ] || [ "$BOOTLOGO_PIX_FMT" != "bgr24" ]; then
+if [ "$EXTENSION" != "bmp" ] || [ "$BOOTLOGO_IMAGE_INFO" != "$DISPLAY_WIDTH|$DISPLAY_HEIGHT|bgr24" ] then
     echo "Converting image to BMP format with resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}..."
     ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
