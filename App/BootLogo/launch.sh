@@ -27,13 +27,36 @@ else
     exit 1
 fi
 
-ffmpeg -y -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to convert image BMP with valid resolution. Ensure FFmpeg is installed and the image path is correct."
-    display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
-    exit 1
+# Convert image to BMP if not already
+EXTENSION="${LOGO_PATH##*.}"
+if [ "$EXTENSION" != "bmp" ]; then
+    echo "Converting image to BMP format..."
+    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
+        display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+        exit 1
+    fi
+    LOGO_PATH="$TEMP_BMP"
 fi
-LOGO_PATH="$TEMP_BMP"
+
+RESOLUTION="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of compact=p=0:nk=1 -i "$LOGO_PATH")"
+BOOTLOGO_WIDTH="$(echo "$RESOLUTION" | awk -F '|' '{print $1}')"
+BOOTLOGO_HEIGHT="$(echo "$RESOLUTION" | awk -F '|' '{print $2}')"
+
+if [ "$BOOTLOGO_WIDTH" -gt "$DISPLAY_WIDTH" ] || [ "$BOOTLOGO_HEIGHT" -gt "$DISPLAY_HEIGHT" ]; then
+    echo "Input logo width or height greater than display bounds. Downscaling boot logo."
+    mv "$LOGO_PATH" temp.bmp
+    if ! ffmpeg -i "temp.bmp" \
+          -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" \
+          -pix_fmt bgr24 "$LOGO_PATH" > /dev/null 2>&1; then
+        mv temp.bmp "$LOGO_PATH"
+        echo "Error: Unable to downscale image to appropriate resolution. Ensure FFmpeg is installed and the image path is correct."
+        display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+        exit 1
+    fi
+    rm temp.bmp
+fi
 
 case "$PLATFORM" in
     A30)
@@ -104,8 +127,11 @@ case "$PLATFORM" in
         ;;
     "Brick" | "SmartPro")
         # A much faster and more simple implementation than Miyoo's devices
+        # Scale bootlogo to resolution of device (1024x768 or 1280x720). 4:3 boot logos (i.e. the default) have pillar boxing on the Smart Pro
+        ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$PROCESSED_NAME"
+
         # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
-        if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
+        if [ $(wc -c < "$PROCESSED_NAME") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
             exit 1
@@ -121,7 +147,6 @@ case "$PLATFORM" in
         fi
         sync
         umount $BOOT_PATH
-        rm -f "$TEMP_BMP" "/mnt/boot"
         ;;
 esac
 
