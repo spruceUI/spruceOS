@@ -114,8 +114,6 @@ case "$PLATFORM" in
             exit 1
         fi
 
-        
-
         display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
         BOOT_PATH="/mnt/boot"
         [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
