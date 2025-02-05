@@ -208,7 +208,7 @@ case $EMU_NAME in
 		cd "$HOME"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
 		if [ "${GAME##*.}" = "splore" ]; then
-			check_and_connect_wifi &
+			check_and_connect_wifi
 			pico8_dyn -splore -width 640 -height 480 -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
 		else
 			pico8_dyn -width 640 -height 480 -scancodes -run "$ROM_FILE" $SCALING
