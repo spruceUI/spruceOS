@@ -31,7 +31,7 @@ fi
 EXTENSION="${LOGO_PATH##*.}"
 if [ "$EXTENSION" != "bmp" ]; then
     echo "Converting image to BMP format..."
-    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$WIDTH/$HEIGHT),$WIDTH,-1)':'if(gt(iw/ih,$WIDTH/$HEIGHT),-1,$HEIGHT)',pad=$WIDTH:$HEIGHT:($WIDTH-iw)/2:($HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
+    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
         display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
