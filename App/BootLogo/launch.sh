@@ -29,8 +29,13 @@ fi
 
 # Convert image to BMP if not already
 EXTENSION="${LOGO_PATH##*.}"
-if [ "$EXTENSION" != "bmp" ]; then
-    echo "Converting image to BMP format..."
+BOOTLOGO_IMAGE_INFO="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,pix_fmt -of compact=p=0:nk=1 -i "$LOGO_PATH")"
+BOOTLOGO_WIDTH="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $1}')"
+BOOTLOGO_HEIGHT="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $2}')"
+BOOTLOGO_PIX_FMT="$(echo "$BOOTLOGO_IMAGE_INFO" | awk -F '|' '{print $3}')"
+if [ "$EXTENSION" != "bmp" ] || [ "$BOOTLOGO_WIDTH" -ne "$DISPLAY_WIDTH" ] || \
+    [ "$BOOTLOGO_HEIGHT" -ne "$DISPLAY_HEIGHT" ] || [ "$BOOTLOGO_PIX_FMT" != "bgr24" ]; then
+    echo "Converting image to BMP format with resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}..."
     ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
@@ -38,24 +43,6 @@ if [ "$EXTENSION" != "bmp" ]; then
         exit 1
     fi
     LOGO_PATH="$TEMP_BMP"
-fi
-
-RESOLUTION="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of compact=p=0:nk=1 -i "$LOGO_PATH")"
-BOOTLOGO_WIDTH="$(echo "$RESOLUTION" | awk -F '|' '{print $1}')"
-BOOTLOGO_HEIGHT="$(echo "$RESOLUTION" | awk -F '|' '{print $2}')"
-
-if [ "$BOOTLOGO_WIDTH" -gt "$DISPLAY_WIDTH" ] || [ "$BOOTLOGO_HEIGHT" -gt "$DISPLAY_HEIGHT" ]; then
-    echo "Input logo width or height greater than display bounds. Downscaling boot logo."
-    mv "$LOGO_PATH" temp.bmp
-    if ! ffmpeg -i "temp.bmp" \
-          -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" \
-          -pix_fmt bgr24 "$LOGO_PATH" > /dev/null 2>&1; then
-        mv temp.bmp "$LOGO_PATH"
-        echo "Error: Unable to downscale image to appropriate resolution. Ensure FFmpeg is installed and the image path is correct."
-        display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
-        exit 1
-    fi
-    rm temp.bmp
 fi
 
 case "$PLATFORM" in
@@ -127,11 +114,8 @@ case "$PLATFORM" in
         ;;
     "Brick" | "SmartPro")
         # A much faster and more simple implementation than Miyoo's devices
-        # Scale bootlogo to resolution of device (1024x768 or 1280x720). 4:3 boot logos (i.e. the default) have pillar boxing on the Smart Pro
-        ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$PROCESSED_NAME"
-
         # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
-        if [ $(wc -c < "$PROCESSED_NAME") -ge $((6 * 1024 * 1024)) ]; then
+        if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
             exit 1
@@ -141,13 +125,13 @@ case "$PLATFORM" in
         BOOT_PATH="/mnt/boot"
         [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
         mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
-        if ! cp $PROCESSED_NAME $BOOT_PATH/bootlogo.bmp; then
+        if ! cp $LOGO_PATH $BOOT_PATH/bootlogo.bmp; then
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
             exit 1
         fi
         sync
         umount $BOOT_PATH
-        rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+        rm -rf "$TEMP_BMP" "$PROCESSED_NAME" "$BOOT_PATH"
         ;;
 esac
 
