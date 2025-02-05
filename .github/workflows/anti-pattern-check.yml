@@ -1,0 +1,71 @@
+name: Anti-pattern Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.sh'
+  push:
+    branches:
+      - 'main'
+      - 'Development'
+    paths:
+      - '**/*.sh'
+
+jobs:
+  check-sync-execution:
+    name: Check Synchronous Function Execution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for background execution of sync-required functions
+        run: |
+          # List of functions that must be executed synchronously (never in background)
+          # These functions require completion before the script continues
+          SYNC_REQUIRED_FUNCTIONS=(
+            'check_and_connect_wifi'  # Requires WiFi connection to be established
+            'set_smart'              # System performance setting must complete
+            'set_performance'        # System performance setting must complete
+            # Add more sync-required functions here as needed
+          )
+          
+          # Generate background execution patterns to check against
+          generate_background_patterns() {
+            local func="$1"
+            echo "${func} &"     # Space before &
+            echo "${func}&"      # No space before &
+            echo "${func} &)"    # Inside subshell with space
+            echo "${func}&)"     # Inside subshell without space
+          }
+          
+          # Initialize error flag
+          HAS_ERRORS=0
+          
+          # Use portable find command and handle different OS behaviors
+          while IFS= read -r -d '' file; do
+            for func in "${SYNC_REQUIRED_FUNCTIONS[@]}"; do
+              while IFS= read -r pattern; do
+                # Store grep results in a variable to avoid subshell issues
+                matches=$(grep -n "$pattern" "$file" 2>/dev/null || true)
+                if [ -n "$matches" ]; then
+                  while IFS=: read -r line_num line_content; do
+                    echo "Error: Function '$func' found running in background"
+                    echo "File: $file"
+                    echo "Line: $line_num"
+                    echo "Content: $line_content"
+                    echo "This function requires synchronous execution - remove the '&' operator."
+                    echo "----------------------------------------"
+                  done <<< "$matches"
+                  HAS_ERRORS=1
+                fi
+              done < <(generate_background_patterns "$func")
+            done
+          done < <(find . -type f -name "*.sh" -print0 2>/dev/null)
+          
+          # Exit with error if any sync violations were found
+          if [ $HAS_ERRORS -eq 1 ]; then
+            echo "❌ Found sync execution violations that need to be fixed!"
+            exit 1
+          fi
+          
+          echo "✅ No sync execution violations found."
