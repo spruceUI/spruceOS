@@ -40,6 +40,24 @@ if [ "$EXTENSION" != "bmp" ]; then
     LOGO_PATH="$TEMP_BMP"
 fi
 
+RESOLUTION="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of compact=p=0:nk=1 -i "$LOGO_PATH")"
+BOOTLOGO_WIDTH="$(echo "$RESOLUTION" | awk -F '|' '{print $1}')"
+BOOTLOGO_HEIGHT="$(echo "$RESOLUTION" | awk -F '|' '{print $2}')"
+
+if [ "$BOOTLOGO_WIDTH" -gt "$DISPLAY_WIDTH" ] || [ "$BOOTLOGO_HEIGHT" -gt "$DISPLAY_HEIGHT" ]; then
+    echo "Input logo width or height greater than display bounds. Downscaling boot logo."
+    mv "$LOGO_PATH" temp.bmp
+    if ! ffmpeg -i "temp.bmp" \
+          -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" \
+          -pix_fmt bgr24 "$LOGO_PATH" > /dev/null 2>&1; then
+        mv temp.bmp "$LOGO_PATH"
+        echo "Error: Unable to downscale image to appropriate resolution. Ensure FFmpeg is installed and the image path is correct."
+        display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+        exit 1
+    fi
+    rm temp.bmp
+fi
+
 case "$PLATFORM" in
     A30)
         # Image conversion: rotation, resizing, compression
