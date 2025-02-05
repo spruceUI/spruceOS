@@ -147,6 +147,7 @@ case "$PLATFORM" in
         fi
         sync
         umount $BOOT_PATH
+        rm -f "$TEMP_BMP" "$PROCESSED_NAME"
         ;;
 esac
 
