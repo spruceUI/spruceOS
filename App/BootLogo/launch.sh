@@ -121,7 +121,7 @@ case "$PLATFORM" in
         fi
         sync
         umount $BOOT_PATH
-        rm -f "$TEMP_BMP"
+        rm -f "$TEMP_BMP" "/mnt/boot"
         ;;
 esac
 
