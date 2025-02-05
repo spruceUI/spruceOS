@@ -105,7 +105,7 @@ case "$PLATFORM" in
     "Brick" | "SmartPro")
         # A much faster and more simple implementation than Miyoo's devices
         # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
-        if [ $(wc -c < "$PROCESSED_NAME") -ge $((6 * 1024 * 1024)) ]; then
+        if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
             exit 1
