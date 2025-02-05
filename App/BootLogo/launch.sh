@@ -108,7 +108,12 @@ case "$PLATFORM" in
         rm -f "$TEMP_BMP" "$PROCESSED_NAME"
         ;;
     "Brick" | "SmartPro")
-        if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
+        # A much faster and more simple implementation than Miyoo's devices
+        # Scale bootlogo to resolution of device (1024x768 or 1280x720). 4:3 boot logos (i.e. the default) have pillar boxing on the Smart Pro
+        ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$PROCESSED_NAME"
+
+        # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
+        if [ $(wc -c < "$PROCESSED_NAME") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
             exit 1
@@ -118,7 +123,7 @@ case "$PLATFORM" in
         BOOT_PATH="/mnt/boot"
         [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
         mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
-        if ! cp $LOGO_PATH $BOOT_PATH; then
+        if ! cp $PROCESSED_NAME $BOOT_PATH/bootlogo.bmp; then
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
             exit 1
         fi
