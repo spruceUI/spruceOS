@@ -2,6 +2,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
+export PATH=/tmp/bin:$PATH
+export LD_LIBRARY_PATH=/tmp/lib:$LD_LIBRARY_PATH
+
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
 ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
 LOGO_NAME="bootlogo"
@@ -107,6 +110,68 @@ case "$PLATFORM" in
 
         rm "$PROCESSED_PATH" boot0 boot0-suffix
         rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+        ;;
+    "Flip")
+        # Setting up environment
+        echo "Preparing system..."
+        DIR="$(cd "$(dirname "$0")" && pwd)"
+        cd "$DIR" || exit 1
+        cp -r payload/* /tmp
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to write to disk."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
+        cd /tmp
+
+        # Extracting Boot Image
+        echo "Extracting Boot files..."
+        dd if=/dev/mtd2ro of=boot.img bs=131072
+
+        # Unpacking Boot Image
+        echo "Unpacking Boot files..."
+        mkdir -p bootimg
+        unpackbootimg -i boot.img -o bootimg
+
+        # Unpacking Resources
+        echo "Unpacking Boot resources..."
+        mkdir -p bootres
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to write to disk."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
+        cp bootimg/boot.img-second bootres/
+        cd bootres
+        rsce_tool -u boot.img-second
+
+        # Replacing logo
+        echo "Replacing Boot logo..."
+        cp -f "$LOGO_PATH" ./logo.bmp
+        cp -f "$LOGO_PATH" ./logo_kernel.bmp
+
+        # Packing Resources
+        echo "Packing updated Boot resources..."
+        for file in *; do
+            [ "$(basename "$file")" != "boot.img-second" ] && set -- "$@" -p "$file"
+        done
+        rsce_tool "$@"
+
+        # Packing Boot Image
+        echo "Packing updated Boot files..."
+        cp -f boot-second ../bootimg
+        cd ../
+        rm boot.img
+        mkbootimg --kernel bootimg/boot.img-kernel --second bootimg/boot-second --base 0x10000000 --kernel_offset 0x00008000 --ramdisk_offset 0xf0000000 --second_offset 0x00f00000 --pagesize 2048 --hashtype sha1 -o boot.img
+
+        # Flash new Boot Image
+        echo "Flashing updated Boot files..."
+        flashcp boot.img /dev/mtd2 && sync
+
+        # Clean up
+        echo "Cleaning temporal files..."
+        cd ../
+        rm -r /tmp
         ;;
     "Brick" | "SmartPro")
         # A much faster and more simple implementation than Miyoo's devices
