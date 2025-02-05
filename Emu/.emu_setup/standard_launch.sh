@@ -314,14 +314,13 @@ run_ppsspp() {
 	export HOME=/mnt/SDCARD
 	cd $EMU_DIR
 
-	PPSSPP_CMDLINE="$ROM_FILE"
 	if setting_get "ppsspp_pause_exit"; then
-		PPSSPP_CMDLINE="--pause-menu-exit $ROM_FILE"
+		PPSSPP_CMDLINE="--pause-menu-exit"
 	fi
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 	[ "$PLATFORM" = "A30" ] && PPSSPPSDL="./PPSSPPSDL" || PPSSPPSDL="./PPSSPPSDL_$PLATFORM"
-	"$PPSSPPSDL" "$PPSSPP_CMDLINE"
+	"$PPSSPPSDL" "$PPSSPP_CMDLINE" "$ROM_FILE"
 }
 
 load_ppsspp_configs() {
