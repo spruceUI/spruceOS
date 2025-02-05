@@ -108,7 +108,7 @@ case "$PLATFORM" in
         rm -f "$TEMP_BMP" "$PROCESSED_NAME"
         ;;
     "Brick" | "SmartPro")
-        if [ $(stat -c "%s" "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
+        if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
             exit 1
