@@ -314,8 +314,9 @@ run_ppsspp() {
 	export HOME=/mnt/SDCARD
 	cd $EMU_DIR
 
+	PPSSPP_CMDLINE="--fullscreen"
 	if setting_get "ppsspp_pause_exit"; then
-		PPSSPP_CMDLINE="--pause-menu-exit"
+		PPSSPP_CMDLINE="$PPSSPP_CMDLINE --pause-menu-exit"
 	fi
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
