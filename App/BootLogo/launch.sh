@@ -9,7 +9,7 @@ IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
 ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
 LOGO_NAME="bootlogo"
 PROCESSED_NAME="bootlogo_processed.bmp"
-TEMP_BMP="temp_logo.bmp"
+TEMP_BMP="/mnt/SDCARD/App/BootLogo/temp_logo.bmp"
 MAX_SIZE=62234
 DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
@@ -32,10 +32,10 @@ fi
 
 # Convert image to BMP if not already
 EXTENSION="${LOGO_PATH##*.}"
-BOOTLOGO_IMAGE_INFO="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,pix_fmt -of compact=p=0:nk=1 -i "$LOGO_PATH")"
+BOOTLOGO_IMAGE_INFO="$(/mnt/SDCARD/spruce/bin/ffprobe -v error -select_streams v:0 -show_entries stream=width,height,pix_fmt -of compact=p=0:nk=1 -i "$LOGO_PATH")"
 if [ "$EXTENSION" != "bmp" ] || [ "$BOOTLOGO_IMAGE_INFO" != "$DISPLAY_WIDTH|$DISPLAY_HEIGHT|bgr24" ]; then
     echo "Converting image to BMP format with resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}..."
-    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
+    ffmpeg -y -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
         display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
@@ -172,6 +172,7 @@ case "$PLATFORM" in
         echo "Cleaning temporal files..."
         cd ../
         rm -r /tmp
+        rm -f "$TEMP_BMP"
         ;;
     "Brick" | "SmartPro")
         # A much faster and more simple implementation than Miyoo's devices
