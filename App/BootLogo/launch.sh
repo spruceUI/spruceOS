@@ -105,12 +105,11 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to write updated partition."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
-            rm "$PROCESSED_PATH" boot0 boot0-suffix
+            rm "$PROCESSED_PATH" "$PROCESSED_NAME" "$TEMP_BMP" boot0 boot0-suffix
             exit 1
         fi
 
-        rm "$PROCESSED_PATH" boot0 boot0-suffix
-        rm -f "$TEMP_BMP" "$PROCESSED_NAME"
+        rm -f "$PROCESSED_PATH" "$PROCESSED_NAME" "$TEMP_BMP" boot0 boot0-suffix
         ;;
     "Flip")
         # Setting up environment
@@ -121,6 +120,7 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to write to disk."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP"
             exit 1
         fi
         cd /tmp
@@ -140,6 +140,7 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to write to disk."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP"
             exit 1
         fi
         cp bootimg/boot.img-second bootres/
@@ -167,6 +168,7 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to create new boot image."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't pack new boot image. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP"
             exit 1
         fi
 
@@ -186,6 +188,7 @@ case "$PLATFORM" in
         if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
             Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP"
             exit 1
         fi
 
@@ -195,11 +198,13 @@ case "$PLATFORM" in
         mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
         if ! cp $LOGO_PATH $BOOT_PATH/bootlogo.bmp; then
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
+            umount "$BOOT_PATH" 2>/dev/null
+            rm -f "$TEMP_BMP" "$BOOT_PATH"
             exit 1
         fi
         sync
         umount $BOOT_PATH
-        rm -rf "$TEMP_BMP" "$PROCESSED_NAME" "$BOOT_PATH"
+        rm -rf "$TEMP_BMP" "$BOOT_PATH"
         ;;
 esac
 
