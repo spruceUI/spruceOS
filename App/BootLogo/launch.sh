@@ -74,6 +74,7 @@ case "$PLATFORM" in
         cp /dev/mtdblock0 boot0
         if [ $? -ne 0 ]; then
             echo "Error: Unable to create a backup of the partition."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't back up boot partition. Cancelling boot logo swap." -d 1
             exit 1
         fi
 
@@ -163,6 +164,11 @@ case "$PLATFORM" in
         cd ../
         rm boot.img
         mkbootimg --kernel bootimg/boot.img-kernel --second bootimg/boot-second --base 0x10000000 --kernel_offset 0x00008000 --ramdisk_offset 0xf0000000 --second_offset 0x00f00000 --pagesize 2048 --hashtype sha1 -o boot.img
+        if [ $? -ne 0 ]; then
+            echo "Error: Unable to create new boot image."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't pack new boot image. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
 
         # Flash new Boot Image
         echo "Flashing updated Boot files..."
