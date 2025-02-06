@@ -52,6 +52,7 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to process image with FFmpeg."
             display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
         fi
 
@@ -75,6 +76,7 @@ case "$PLATFORM" in
         if [ $? -ne 0 ]; then
             echo "Error: Unable to create a backup of the partition."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't back up boot partition. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
         fi
 
@@ -84,6 +86,7 @@ case "$PLATFORM" in
         if [ ! -f "$OFFSET_PATH" ]; then
             echo "Error: Offset not found for firmware version ($VERSION)."
             display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
+            rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             rm "$PROCESSED_PATH" boot0
             exit 1
         fi
