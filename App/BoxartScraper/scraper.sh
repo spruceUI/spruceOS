@@ -59,6 +59,7 @@ get_ra_alias() {
         PSP)                 ra_name="Sony - PlayStation Portable" ;;
         QUAKE)               ra_name="Quake" ;;
         SATELLAVIEW)         ra_name="Nintendo - Satellaview" ;;
+        SATURN)              ra_name="Sega - Saturn" ;; # todo: handle saturn mask on A30
         SCUMMVM)             ra_name="ScummVM" ;;
         SEGACD)              ra_name="Sega - Mega-CD - Sega CD" ;;
         SEGASGONE)           ra_name="Sega SG-1000" ;;
