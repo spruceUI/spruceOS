@@ -3,4 +3,4 @@
 export CORE="mgba"
 export MODE="smart"
 
-export scaling_min_freq=1008000
+export scaling_min_freq=816000
