@@ -108,7 +108,8 @@ while [ "$PLATFORM" = "A30" ]; do
         killall -q -USR1 joystickinput
 
         if flag_check "pre_cmd_unpacking"; then
-            display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            display -t "Finishing up unpacking archives.........." -i "$BG_TREE"
             while [ -f "$FLAGS_DIR/pre_cmd_unpacking.lock" ]; do
                 : # null operation (no sleep needed)
             done

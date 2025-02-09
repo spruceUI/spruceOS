@@ -4,7 +4,8 @@
 
 CONFIG="/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 FW_FILE="/mnt/SDCARD/spruce/FIRMWARE_UPDATE/miyoo282_fw.img"
-BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+
+[ "$PLATFORM" = "SmartPro" ] && BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 # get the free space on the SD card in MiB
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"

@@ -9,7 +9,7 @@ EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 ROMFILENAME="$(basename "$1")"
 GAMELIST_FILE="/mnt/SDCARD/Roms/$EMU_NAME/miyoogamelist.xml"
 ROM_PATH="$1"
-BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$PLATFORM" = "SmartPro" ] && BG="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 # Get game name first - we'll need it either way
 if [ -f "$GAMELIST_FILE" ]; then

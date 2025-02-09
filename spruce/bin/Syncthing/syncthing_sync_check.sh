@@ -7,8 +7,8 @@ SYNCTHING_CONFIG_DIR="${SYNCTHING_CONFIG_DIR:-/mnt/SDCARD/spruce/bin/Syncthing/c
 API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
 API_KEY=""
-BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 SYNC_TIMEOUT="${SYNC_TIMEOUT:-600}"  # Allow override, default 10 minutes
+[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 check_syncthing_status() {
     if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then

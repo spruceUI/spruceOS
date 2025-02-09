@@ -5,6 +5,8 @@
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
+[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
     ppid=$pid
@@ -35,7 +37,7 @@ if pgrep -f gameswitcher.sh > /dev/null ; then
     # add flag to load game switcher after next boot
     flag_add "gs"
     # display blank tree screen while shutting down
-    display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+    display -i "$BG_TREE"
     dim_screen &
 fi
 
@@ -44,7 +46,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
     if setting_get "skip_shutdown_confirm"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
         rm "${FLAGS_DIR}/lastgame.lock"
-        display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+        display -i "$BG_TREE"
         dim_screen &
     else
         # Pause MainUI or pico8_dyn
@@ -53,12 +55,12 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 
         if ! flag_check "sleep.powerdown"; then
             # Show confirmation screen
-            display --text "Are you sure you want to shutdown?" --image "/mnt/SDCARD/spruce/imgs/bg_tree.png" --confirm
+            display --text "Are you sure you want to shutdown?" --image "$BG_TREE" --confirm
 
             # Wait for user confirmation
             if confirm 30 0; then
                 rm "${FLAGS_DIR}/lastgame.lock"
-                display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+                display -i "$BG_TREE"
                 dim_screen &
             else
                 display_kill

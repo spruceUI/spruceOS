@@ -7,6 +7,7 @@ ARGUMENT="$1" ### "apply" or "remove"
 APP_DIR="/mnt/SDCARD/App"
 EMU_DIR="/mnt/SDCARD/Emu"
 SHOWHIDE="/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh"
+[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 check_and_hide_app() {
 	APP="$1"
@@ -116,6 +117,6 @@ else ##### ARGUMENT is "remove"
 	# don't mess with any other app visibility... we don't know what they had visible before they turned on simple mode.
 
 	killall -9 MainUI
-	display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -d 2 -t "Exiting Simple Mode!"
+	display -i "$BG_TREE" -d 2 -t "Exiting Simple Mode!"
 
 fi

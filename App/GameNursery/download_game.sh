@@ -14,7 +14,7 @@ fi
 
 GAME_URL="$(jq -r '.url' "$JSON_FILE")"
 ZIP_NAME="$(basename "$GAME_URL")"
-BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$PLATFORM" = "SmartPro" ] && BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
 

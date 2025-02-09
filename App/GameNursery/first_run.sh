@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$PLATFORM" = "SmartPro" ] && BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 
 display --okay -i "$BG_IMG" -t "Welcome to the spruce Game Nursery! This is where we grow our curated collection of ports and free homebrew games for your enjoyment." -p 180

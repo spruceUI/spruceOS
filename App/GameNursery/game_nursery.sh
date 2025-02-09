@@ -11,6 +11,7 @@ JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
 DEV_JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_test.7z"
 JSON_CACHE_VALID_MINUTES=20
+[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 ##### FUNCTIONS #####
 
@@ -192,7 +193,7 @@ construct_config() {
 
 ##### MAIN EXECUTION #####
 
-display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Connecting to the spruce Game Nursery. Please wait.........."
+display -i "$BG_TREE" -t "Connecting to the spruce Game Nursery. Please wait.........."
 
 check_battery
 check_for_connection
