@@ -358,7 +358,7 @@ dim_screen() {
     done
 }
 
-DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
+[ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
 ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
 CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
 DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
