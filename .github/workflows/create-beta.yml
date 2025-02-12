@@ -3,9 +3,17 @@ name: Create Beta Release
 on:
   workflow_dispatch:
     inputs:
+      action_type:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - create
+          - delete
+        default: 'create'
       target_branch:
         description: 'Branch to create beta from'
-        required: true
+        required: false
         default: 'Development'
         type: string
 
@@ -14,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    if: github.event.inputs.action_type == 'create'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,10 +55,10 @@ jobs:
       - name: Check for commits
         id: check_commits
         run: |
-          # Get all commits
-          COMMITS=$(git log --pretty=format:'- %s (%an)%n')
+          # Get commits from last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
           if [ -z "$COMMITS" ]; then
-            echo "No commits found"
+            echo "No commits found in the last 24 hours"
             exit 1
           fi
           {
@@ -83,7 +92,9 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!commits_beta.txt
+            -x!commits_beta.txt \
+            -x!spruce/flags/developer_mode \
+            -x!spruce/flags/developer_mode.lock
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_beta.txt
 
@@ -151,14 +162,68 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases sorted by created date (newest first)
-          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[].id')
+          # Get all beta releases
+          BETA_RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[] | select(.tag_name | contains("-beta")) | .id')
           
-          # Convert to array and keep only releases after the first 3
+          # Convert to array and keep only the newest beta
           COUNT=0
-          for RELEASE_ID in $RELEASES; do
+          for RELEASE_ID in $BETA_RELEASES; do
             COUNT=$((COUNT + 1))
-            if [ $COUNT -gt 3 ]; then
+            if [ $COUNT -gt 1 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done
+
+  delete-beta:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event.inputs.action_type == 'delete'
+    steps:
+      - name: Delete beta releases
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Get and delete all beta releases
+          BETA_RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[] | select(.tag_name | contains("-Beta")) | .id')
+          for RELEASE_ID in $BETA_RELEASES; do
+            gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
+          done
+
+      - name: Clone and update OTA repos
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone both repositories
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          git clone https://github.com/spruceUI/spruceSource.git source_repo
+          
+          # Function to update OTA file
+          update_ota_file() {
+            local file="$1"
+            local content
+            content=$(cat "$file")
+            
+            # Remove BETA_ lines while preserving others
+            echo "$content" | grep -v "^BETA_" > "$file"
+          }
+          
+          # Update both OTA files
+          update_ota_file "ota_repo/OTA/spruce"
+          update_ota_file "source_repo/OTA/spruce"
+          
+          # Update primary OTA repo
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Remove beta release information"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          
+          # Update backup OTA repo
+          cd ../source_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Remove beta release information"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main

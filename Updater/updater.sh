@@ -162,24 +162,46 @@ fi
 
 # Compare versions using awk
 SKIP_VERSION_CHECK=false
+BETA_UPDATE=false
 
 if [ "$DEVELOPER_MODE" -eq 1 ] || [ "$TESTER_MODE" -eq 1 ]; then
     SKIP_VERSION_CHECK=true
     log_update_message "Version check skipped due to developer/tester mode"
 fi
 
+# Check if update file contains '-beta' flag
+if echo "$UPDATE_FILE" | grep -q -- "-beta"; then
+    BETA_UPDATE=true
+    log_update_message "Beta update detected"
+fi
+
 log_update_message "Comparing versions: $UPDATE_VERSION vs $CURRENT_VERSION"
-if [ "$SKIP_VERSION_CHECK" = true ] || [ "$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
-    log_update_message "Proceeding with update"
-else
-    log_update_message "Current version is up to date"
-    if ! check_installation_validity; then
-        log_update_message "Bad installation detected"
-        display "Detected current installation is invalid.
-Allowing reinstall." 5
-    else
+if [ "$SKIP_VERSION_CHECK" = true ]; then
+    log_update_message "Proceeding with update (version check skipped)"
+elif [ "$BETA_UPDATE" = true ]; then
+    # For beta updates, only proceed if version is same or greater
+    VERSION_COMPARE=$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print "lower"; exit} else if (a[i]>b[i]) {print "higher"; exit}} print "same"}')
+    if [ "$VERSION_COMPARE" = "lower" ]; then
+        log_update_message "Beta version is lower than current version, update declined"
         display "Current version is up to date"
         exit 0
+    else
+        log_update_message "Proceeding with beta update"
+    fi
+else
+    # Regular update - only proceed if version is higher
+    if [ "$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" = "$CURRENT_VERSION" ]; then
+        log_update_message "Current version is up to date"
+        if ! check_installation_validity; then
+            log_update_message "Bad installation detected"
+            display "Detected current installation is invalid.
+Allowing reinstall." 5
+        else
+            display "Current version is up to date"
+            exit 0
+        fi
+    else
+        log_update_message "Proceeding with update"
     fi
 fi
 
@@ -304,6 +326,11 @@ if [ "$TESTER_MODE" -eq 1 ]; then
     rm -f "$FLAG_DIR/developer_mode"*
     touch "$FLAG_DIR/tester_mode"
     log_update_message "Restored tester mode flag"
+fi
+
+if [ "$BETA_UPDATE" -eq 1 ]; then
+    touch "$FLAG_DIR/beta"
+    log_update_message "Restored beta update flag"
 fi
 
 if [ "$PLATFORM" = "A30" ]; then

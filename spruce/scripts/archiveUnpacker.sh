@@ -10,13 +10,28 @@ ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 # Since some files need to be available before the menu is displayed, we need to unpack them before the menu is displayed so that's one mode.
 # The other mode is to unpack archives needed before the command_to_run, this is used for the preCmd folder.
 
-# This can be called with a pre_cmd to run a check and unpack over the preCmd folder.
+# This can be called with a "pre_cmd" argument to run a check and unpack over the preCmd folder only.
+# Typically you'd use that for any unpacking process since we don't want extraction to happen in the background.
+# It's rather resource heavy and we don't want leave it running in the background.
+
+#  If a silentUnpacker flag is present another script is running and we don't want to run this one.
+if flag_check "silentUnpacker"; then
+    log_message "Unpacker: Another silent unpacker is running, exiting" -v
+    exit 0
+fi
+
+
+cleanup() {
+    flag_remove "silentUnpacker"
+}
+
+# Set trap for script exit
+trap cleanup EXIT
 
 # Process command line arguments
-SILENT_MODE=0
 RUN_MODE="all"
 if [ "$1" = "--silent" ]; then
-    SILENT_MODE=1
+    flag_add "silentUnpacker"
     [ -n "$2" ] && RUN_MODE="$2"
 elif [ -n "$1" ]; then
     RUN_MODE="$1"
@@ -24,7 +39,7 @@ fi
 
 # Function to display text if not in silent mode
 display_if_not_silent() {
-    [ $SILENT_MODE -eq 0 ] && display "$@"
+    flag_check "silentUnpacker" || display "$@"
 }
 
 # Function to unpack archives from a specified directory
@@ -75,7 +90,7 @@ case "$RUN_MODE" in
     if flag_check "save_active"; then
         unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
     else
-        SILENT_MODE=1
+        flag_add "silentUnpacker"
         unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" &
     fi
     ;;

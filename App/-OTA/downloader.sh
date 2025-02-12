@@ -77,6 +77,21 @@ BETA_LINK=$(sed -n 's/BETA_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 BETA_SIZE=$(sed -n 's/BETA_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 BETA_INFO=$(sed -n 's/BETA_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
+# Function to offer version choice
+offer_version() {
+    local prompt="$1"
+    local version1="$2"
+    local version1_name="$3"
+    local version2="$4"
+    local version2_name="$5"
+    
+    display --icon "$IMAGE_PATH" -t "$prompt
+$version1_name: $version1
+$version2_name: $version2" -p 220 --confirm
+    confirm
+    return $?
+}
+
 # Set default target to release
 TARGET_VERSION="$RELEASE_VERSION"
 TARGET_CHECKSUM="$RELEASE_CHECKSUM"
@@ -84,73 +99,56 @@ TARGET_LINK="$RELEASE_LINK"
 TARGET_SIZE="$RELEASE_SIZE"
 TARGET_INFO="$RELEASE_INFO"
 
-# Handle developer and tester mode selections
+# Function to set target version
+set_target() {
+    local version="$1"
+    local checksum="$2"
+    local link="$3"
+    local size="$4"
+    local info="$5"
+    
+    TARGET_VERSION="$version"
+    TARGET_CHECKSUM="$checksum"
+    TARGET_LINK="$link"
+    TARGET_SIZE="$size"
+    TARGET_INFO="$info"
+}
+
+# Handle version selection based on flags
 if flag_check "developer_mode"; then
     # Developer mode: offer nightly -> beta -> release
-    display --icon "$IMAGE_PATH" -t "Developer mode detected. Would you like to use the latest nightly build?
-Latest nightly: $NIGHTLY_VERSION
-$([ -n "$BETA_VERSION" ] && echo "Beta release: $BETA_VERSION")
-Public release: $RELEASE_VERSION" -p 220 --confirm
-    if confirm; then
-        TARGET_VERSION="$NIGHTLY_VERSION"
-        TARGET_CHECKSUM="$NIGHTLY_CHECKSUM"
-        TARGET_LINK="$NIGHTLY_LINK"
-        TARGET_SIZE="$NIGHTLY_SIZE"
-        TARGET_INFO="$NIGHTLY_INFO"
+    if offer_version "Developer mode detected. Would you like to use the latest nightly build?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
+        set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     elif [ -n "$BETA_VERSION" ]; then
-        display --icon "$IMAGE_PATH" -t "Would you like to use the beta build instead?
-Beta version: $BETA_VERSION
-Public release: $RELEASE_VERSION" -p 220 --confirm
-        if confirm; then
-            TARGET_VERSION="$BETA_VERSION"
-            TARGET_CHECKSUM="$BETA_CHECKSUM"
-            TARGET_LINK="$BETA_LINK"
-            TARGET_SIZE="$BETA_SIZE"
-            TARGET_INFO="$BETA_INFO"
+        if offer_version "Would you like to use the beta build instead?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
+        fi
+    fi
+elif flag_check "beta"; then
+    # Beta mode: offer beta (if exists) -> release
+    if [ -n "$BETA_VERSION" ]; then
+        if offer_version "Beta mode detected. Would you like to use the beta build?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
     fi
 elif flag_check "tester_mode"; then
     # Tester mode: offer beta (if exists) -> nightly -> release
     if [ -n "$BETA_VERSION" ]; then
-        display --icon "$IMAGE_PATH" -t "Tester mode detected. Would you like to use the beta build?
-Beta version: $BETA_VERSION
-Public release: $RELEASE_VERSION" -p 220 --confirm
-        if confirm; then
-            TARGET_VERSION="$BETA_VERSION"
-            TARGET_CHECKSUM="$BETA_CHECKSUM"
-            TARGET_LINK="$BETA_LINK"
-            TARGET_SIZE="$BETA_SIZE"
-            TARGET_INFO="$BETA_INFO"
-        else
-            display --icon "$IMAGE_PATH" -t "Would you like to use the latest nightly instead?
-Latest nightly: $NIGHTLY_VERSION
-Public release: $RELEASE_VERSION" -p 220 --confirm
-            if confirm; then
-                TARGET_VERSION="$NIGHTLY_VERSION"
-                TARGET_CHECKSUM="$NIGHTLY_CHECKSUM"
-                TARGET_LINK="$NIGHTLY_LINK"
-                TARGET_SIZE="$NIGHTLY_SIZE"
-                TARGET_INFO="$NIGHTLY_INFO"
-            fi
+        if offer_version "Tester mode detected. Would you like to use the beta build?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
+        elif offer_version "Would you like to use the latest nightly instead?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
+            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
         fi
     else
-        # No beta available, offer nightly
-        display --icon "$IMAGE_PATH" -t "Tester mode detected. Would you like to use the latest nightly build?
-Latest nightly: $NIGHTLY_VERSION
-Public release: $RELEASE_VERSION" -p 220 --confirm
-        if confirm; then
-            TARGET_VERSION="$NIGHTLY_VERSION"
-            TARGET_CHECKSUM="$NIGHTLY_CHECKSUM"
-            TARGET_LINK="$NIGHTLY_LINK"
-            TARGET_SIZE="$NIGHTLY_SIZE"
-            TARGET_INFO="$NIGHTLY_INFO"
+        if offer_version "Tester mode detected. Would you like to use the latest nightly build?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
+            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
         fi
     fi
 fi
 
 SKIP_VERSION_CHECK=false
 # Set SKIP_VERSION_CHECK to true if developer mode or tester mode is enabled
-if flag_check "developer_mode" || flag_check "tester_mode"; then
+if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
     SKIP_VERSION_CHECK=true
 fi
 

@@ -172,9 +172,6 @@ if ! ping -c 2 thumbnails.libretro.com > /dev/null 2>&1; then
     fi
 fi
 
-# Set CPU governor to performance mode
-set_performance
-
 # Process each system directory
 for sys_dir in "$roms_dir"/*/; do
     if [ ! -d "$sys_dir" ]; then
@@ -196,7 +193,7 @@ for sys_dir in "$roms_dir"/*/; do
     sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
     icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
-    display --icon "\"$icon_path\"" -t "System: $sys_label 
+    display -d 1 --icon "\"$icon_path\"" -t "System: $sys_label 
     Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.15 195 middle
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
@@ -262,8 +259,5 @@ for sys_dir in "$roms_dir"/*/; do
     done
     log_message "BoxartScraper: $sys_name: Scraped: $scraped_count, Skipped: $skip_count, Not Found: $non_found_count"
 done
-
-# Reset CPU governor to ondemand mode
-echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 auto_regen_tmp_update

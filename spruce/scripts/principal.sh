@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Principal Script for Miyoo A30
-# 
+#
 # This script serves as the main control loop for the system. It operates as follows:
-# 
+#
 # Initializes by ensuring keymon is running
 # Enters an infinite loop that:
 #    a. Checks for and handles game switching if necessary
@@ -13,7 +13,7 @@
 #       - Or executes a custom command
 # Then the loop repeats, returning to the main UI
 #
-# Throughout this process, it monitors various system flags and 
+# Throughout this process, it monitors various system flags and
 # responds accordingly, managing the overall system state.
 
 # Source the helper functions
@@ -51,12 +51,12 @@ flag_remove "save_active"
 
 while [ "$PLATFORM" = "A30" ]; do
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ] ; then
+    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ]; then
         log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
-    if [ ! -f /tmp/cmd_to_run.sh ] ; then
+    if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"
 
@@ -77,6 +77,14 @@ while [ "$PLATFORM" = "A30" ]; do
         fi
 
         /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
+
+        if flag_check "pre_menu_unpacking"; then
+            display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+            flag_remove "silentUnpacker"
+            while [ -f "$FLAGS_DIR/pre_menu_unpacking.lock" ]; do
+                : # null operation (no sleep needed)
+            done
+        fi
 
         # This is to kill leftover display processes that may be running
         display_kill &
@@ -110,6 +118,7 @@ while [ "$PLATFORM" = "A30" ]; do
         if flag_check "pre_cmd_unpacking"; then
             [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
             display -t "Finishing up unpacking archives.........." -i "$BG_TREE"
+            flag_remove "silentUnpacker"
             while [ -f "$FLAGS_DIR/pre_cmd_unpacking.lock" ]; do
                 : # null operation (no sleep needed)
             done
@@ -120,6 +129,7 @@ while [ "$PLATFORM" = "A30" ]; do
 
     if [ -f /tmp/cmd_to_run.sh ]; then
         set_performance
+        kill -9 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # Kill simple mode watchdog
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
@@ -128,6 +138,7 @@ while [ "$PLATFORM" = "A30" ]; do
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart
+        /mnt/SDCARD/spruce/scripts/simple_mode_watchdog.sh &
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
@@ -135,8 +146,8 @@ while [ "$PLATFORM" = "A30" ]; do
        grep -q /mnt/SDCARD/Emu/*/../.emu_setup/standard_launch.sh "$FLAGS_DIR/lastgame.lock" ; then
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
-    
-    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ] ; then
+
+    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ]; then
         /mnt/SDCARD/App/Credits/launch.sh
         rm /mnt/SDCARD/spruce/flags/credits.lock
     fi

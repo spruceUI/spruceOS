@@ -65,6 +65,15 @@ log_battery() {
     fi
 }
 
+hard_shutdown() {
+    CAPACITY=$1
+    if [ "$CAPACITY" -le 1 ]; then
+        flag_add "forced_shutdown"
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh
+        exit
+    fi
+}
+
 # Log boot entry
 CAPACITY=$(cat $BATTERY/capacity)
 CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
@@ -81,10 +90,9 @@ while true; do
 
     # Add battery logging
     CURRENT_TIME=$(date +%s)
-    log_message "Current time: $CURRENT_TIME, Last log: $LAST_LOG, Interval: $LOG_INTERVAL" -v
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
         log_battery
-        LAST_LOG=$(date +%s)  # Keep this as Unix timestamp
+        LAST_LOG=$(date +%s) # Keep this as Unix timestamp
     fi
 
     # Set default value if PERCENT is empty or non-numeric
@@ -93,15 +101,7 @@ while true; do
     esac
 
     # force a safe shutdown at 1% regardless of settings
-    if [ "$CAPACITY" -le 1 ]; then
-        if ! setting_get "skip_shutdown_confirm"; then
-            setting_update "skip_shutdown_confirm" on
-            flag_add "forced_shutdown"
-        fi
-        display -d 2 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
-        /mnt/SDCARD/spruce/scripts/save_poweroff.sh
-        exit
-    fi
+    hard_shutdown $CAPACITY
 
     # disable script if turned off in spruce.cfg
     [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
@@ -129,16 +129,7 @@ while true; do
             CAPACITY=$(cat $BATTERY/capacity)
             PERCENT="$(setting_get "low_power_warning_percent")"
 
-            # force a safe shutdown at 1% regardless of settings
-            if [ "$CAPACITY" -le 1 ]; then
-                if ! setting_get "skip_shutdown_confirm"; then
-                    setting_update "skip_shutdown_confirm" on
-                    flag_add "forced_shutdown"
-                fi
-                display -d 2 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
-                /mnt/SDCARD/spruce/scripts/save_poweroff.sh
-                exit
-            fi
+            hard_shutdown $CAPACITY
 
             # disable script if turned off in spruce.cfg
             [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue

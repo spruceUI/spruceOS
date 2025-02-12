@@ -615,7 +615,9 @@ get_button_press() {
             *"$B_LEFT"*) button_pressed="LEFT" ;;
             *"$B_RIGHT"*) button_pressed="RIGHT" ;;
             *"$B_START"*) button_pressed="START" ;;
+            *"$B_START_2"*) button_pressed="START" ;;
             *"$B_SELECT"*) button_pressed="SELECT" ;;
+            *"$B_SELECT_2"*) button_pressed="SELECT" ;;
         esac
 
         if [ -n "$button_pressed" ]; then
@@ -786,7 +788,7 @@ get_version() {
     fi
 }
 
-get_version_nightly() {
+get_version_complex() {
     local base_version=$(get_version)
 
     # Ensure we got a valid base version
@@ -795,17 +797,14 @@ get_version_nightly() {
         return 1
     fi
 
-    local nightly_pattern="/mnt/SDCARD/${base_version}-*"
+    local version_pattern="/mnt/SDCARD/${base_version}-*"
+    
+    # Find any matching version file (beta or nightly)
+    local test_file=$(ls $version_pattern 2>/dev/null | head -n 1)
 
-    # List all matching files and log them
-    local matching_files=$(ls $nightly_pattern 2>/dev/null)
-
-    # Find any matching nightly version file
-    local nightly_file=$(ls $nightly_pattern 2>/dev/null | head -n 1)
-
-    if [ -n "$nightly_file" ]; then
-        local nightly_version=$(basename "$nightly_file")
-        echo "$nightly_version"
+    if [ -n "$test_file" ]; then
+        local test_version=$(basename "$test_file")
+        echo "$test_version"
     else
         echo "$base_version"
     fi

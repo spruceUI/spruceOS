@@ -71,6 +71,9 @@ if [ -d "/mnt/SDCARD/Themes/DONTTOUCH" ]; then
     rm -rf /mnt/SDCARD/Themes/DONTTOUCH
 fi
 
+log_message "Sorting themes"
+sh /mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh
+
 sleep 3 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Displaying wiki image"
@@ -95,7 +98,8 @@ if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 fi
 
 if flag_check "pre_menu_unpacking"; then
-    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes.........."
+    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes and files.........."
+    flag_remove "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
         sleep 0.3
     done

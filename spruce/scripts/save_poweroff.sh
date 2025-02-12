@@ -26,10 +26,10 @@ vibrate
 if flag_check "sleep.powerdown"; then
     cp /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level /mnt/SDCARD/spruce/settings/sys_brightness_level
 else
-    cat /sys/devices/virtual/disp/disp/attr/lcdbl > /mnt/SDCARD/spruce/settings/sys_brightness_level
+    cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/sys_brightness_level
 fi
 
-if pgrep -f gameswitcher.sh > /dev/null ; then
+if pgrep -f gameswitcher.sh >/dev/null; then
     # pause game switcher
     killall -q -19 switcher
     # remove lastgame flag to prevent loading any App after next boot
@@ -43,10 +43,15 @@ fi
 
 # Check if MainUI or PICO8 is running and skip_shutdown_confirm is not set
 if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
-    if setting_get "skip_shutdown_confirm"; then
+    if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
         rm "${FLAGS_DIR}/lastgame.lock"
-        display -i "$BG_TREE"
+        if flag_check "forced_shutdown"; then
+            display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
+            flag_remove "forced_shutdown"
+        else
+            display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+        fi
         dim_screen &
     else
         # Pause MainUI or pico8_dyn
@@ -135,7 +140,11 @@ while killall -q -0 ra32.miyoo ||
 done
 
 # show saving screen
-if ! pgrep "display_text.elf" >/dev/null && ! flag_check "sleep.powerdown"; then
+if flag_check "forced_shutdown"; then
+    display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
+    flag_remove "forced_shutdown"
+    dim_screen &
+elif ! pgrep "display_text.elf" >/dev/null && ! flag_check "sleep.powerdown"; then
     display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
     dim_screen &
 fi
@@ -152,15 +161,16 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
 
     # Restore brightness and sound if sleep->powerdown for syncthing
     if flag_check "sleep.powerdown"; then
-        cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level > /sys/devices/virtual/disp/disp/attr/lcdbl
+        cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
         amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
-	if check_and_connect_wifi; then
-		start_syncthing_process
-		# Dimming screen before syncthing sync check
-		dim_screen &
-		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
-	fi
+    
+    if check_and_connect_wifi; then
+        start_syncthing_process
+        # Dimming screen before syncthing sync check
+        dim_screen &
+        /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
+    fi
 
     flag_remove "syncthing_startup_synced"
 fi
