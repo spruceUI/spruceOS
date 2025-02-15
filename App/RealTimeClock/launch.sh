@@ -4,7 +4,7 @@
 if [ "$PLATFORM" = "A30" ]; then
 	./rtc
 elif [ "$PLATFORM" = "Flip" ]; then
-	gptokeyb -k "rtc" -c "./rtc.gptk" &
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "rtc" -c "./rtc.gptk" &
 	sleep 1
 	./rtc-Flip
 	kill -9 $(pidof gptokeyb)
