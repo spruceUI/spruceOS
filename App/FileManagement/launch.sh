@@ -23,8 +23,8 @@ if [ "$PLATFORM" = "A30" ]; then
 
 elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "Flip" ]; then
     /mnt/SDCARD/spruce/bin64/gptokeyb -k "DinguxCommander" -c "./DinguxCommander.gptk" &
-    sleep 1
-	  ./"DinguxCommander$PLATFORM"
+    sleep 0.3
+	./"DinguxCommander$PLATFORM"
     kill -9 "$(pidof gptokeyb)" 
     sync
 fi
