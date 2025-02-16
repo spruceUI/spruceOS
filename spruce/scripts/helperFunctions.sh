@@ -61,6 +61,8 @@ case $INFO in
     ;;
 esac
 
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
+
 if [ "$ARCH" = "aarch64" ]; then
     export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
 else
@@ -1215,7 +1217,8 @@ take_screenshot() {
     # -h: height
     # -b: bits per pixel
     # -l: line length in pixels
-    $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$screenshot_path" 2>/dev/null &
+    [ "$PLATFORM" = "A30" ] && WIDTH=$DISPLAY_HEIGHT HEIGHT=$DISPLAY_WIDTH || WIDTH=$DISPLAY_WIDTH HEIGHT=$DISPLAY_HEIGHT # handle A30 rotation
+    $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $WIDTH -h $HEIGHT -b 32 -l $WIDTH "$screenshot_path" 2>/dev/null &
 
     log_message "Screenshot saved to: $screenshot_path" -v
 }
