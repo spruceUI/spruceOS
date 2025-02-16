@@ -310,11 +310,13 @@ cores_online() {
     echo "Setting $num_cores CPU core(s) online"
 
     # Always keep CPU0 online
+    chmod a+w /sys/devices/system/cpu/cpu0/online
     echo 1 >/sys/devices/system/cpu/cpu0/online
     chmod a-w /sys/devices/system/cpu/cpu0/online
 
     # Set the state for CPU1-3 based on num_cores
     for i in 1 2 3; do
+        chmod a+w /sys/devices/system/cpu/cpu$i/online
         if [ "$i" -lt "$num_cores" ]; then
             echo 1 >/sys/devices/system/cpu/cpu$i/online
         else
