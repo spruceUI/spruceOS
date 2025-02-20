@@ -48,7 +48,7 @@ kill_emulator() {
         killall -15 PPSSPPSDL
     else
         killall -q -CONT pico8_dyn
-        killall -q -15 ra32.miyoo retroarch pico8_dyn ra64.trimui_Brick
+        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn
     fi
 }
 
@@ -165,6 +165,17 @@ prepare_game_switcher() {
     log_message "*** homebutton_watchdog.sh: flag file created for gs" -v
 }
 
+send_virtual_key_MENUX() {
+    {
+        echo 1 316 1 # MENU down
+        echo 1 308 1 # X down
+        sleep 0.1
+        echo 1 308 0 # X up
+        echo 1 316 0 # MENU up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent /dev/input/event3
+}
+
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
 # or toggle in-game menu in PPSSPP
 send_virtual_key_L3R3() {
@@ -231,7 +242,9 @@ long_press_handler() {
         "In-game menu")
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
-
+            elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+                log_message "*** homebutton_watchdog.sh: Trimui RA" -v
+                  send_virtual_key_MENUX
             elif pgrep "retroarch" >/dev/null; then
                 send_virtual_key_L3R3
 
@@ -318,29 +331,39 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             # handle short press
             case $TAP_HOME in
             "Game Switcher")
+              log_message "*** homebutton_watchdog.sh: Game Switcher" -v
                 prepare_game_switcher
                 ;;
             "In-game menu")
-                if pgrep "ra32.miyoo" >/dev/null; then
+              log_message "*** homebutton_watchdog.sh: In-game menu" -v
+                if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: Miyoo RA32/RA64" -v
                     send_virtual_key_L3
-
+                elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: Trimui RA" -v
+                    send_virtual_key_MENUX
                 elif pgrep "retroarch" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: RetroArch" -v
                     send_virtual_key_L3R3
 
                 elif pgrep "PPSSPPSDL" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: PPSSPPSDL" -v
                     send_virtual_key_L3
                     killall -q -CONT PPSSPPSDL
 
                 # PICO8 has no in-game menu
                 elif pgrep "pico8_dyn" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: PICO8" -v
                     kill_emulator
 
                 # resume MainUI and it will then read menu up event and show popup menu
                 elif pgrep "MainUI" >/dev/null; then
+                  log_message "*** homebutton_watchdog.sh: MainUI" -v
                     killall -q -CONT MainUI
                 fi
                 ;;
             "Exit game")
+              log_message "*** homebutton_watchdog.sh: Exit game" -v
                 # resume MainUI if it is running
                 # and it will then read menu up event and show popup menu
                 killall -q -CONT MainUI
