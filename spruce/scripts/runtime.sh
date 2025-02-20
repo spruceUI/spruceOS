@@ -253,7 +253,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     fi
 
 
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
     # start all the trimui things and sleep long enough for the input devices to get
     # registered correctly before creating the virtual joypad on /dev/input/event4
