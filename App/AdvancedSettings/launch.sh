@@ -1,6 +1,10 @@
 #!/bin/sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "A30" ]; then
+  BIN_PATH="/mnt/SDCARD/spruce/bin"
+else
+  BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
@@ -55,8 +59,15 @@ if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac alw
 #     MODES="$MODES -m other_mode"
 # fi
 
+if [ ! "$PLATFORM" = "A30" ]; then
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "as" -c "./as.gptk" &
+	sleep 1
+fi
+
 cd $BIN_PATH
 ./easyConfig $SETTINGS_PATH/settings_config $MODES
+
+kill -9 "$(pidof gptokeyb)"
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
 killall -q -USR1 joystickinput
