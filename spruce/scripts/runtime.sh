@@ -56,9 +56,9 @@ if [ "$PLATFORM" = "A30" ]; then
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 
 elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
     export PATH="$SYSTEM_PATH/app:${PATH}"
+    BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
     # Create directories and mount in parallel
     (
@@ -251,6 +251,23 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
         killall -15 wpa_supplicant
         killall -9 udhcpc    
     fi
+
+
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+
+    # start all the trimui things and sleep long enough for the input devices to get
+    # registered correctly before creating the virtual joypad on /dev/input/event4
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_inputd &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
+    sleep 0.3 ### wait long enough to create the virtual joypad
+
+
+    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+    # TODO: verify that we can call this via absolute path
+    cd ${BIN_DIR}
+    ./joypad /dev/input/event3 &
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
