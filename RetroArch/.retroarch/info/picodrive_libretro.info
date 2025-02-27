@@ -1,11 +1,11 @@
 # Software Information
-display_name = "Sega - MS/MD/CD/32X (PicoDrive)"
+display_name = "Sega - MS/GG/MD/CD/32X (PicoDrive)"
 authors = "notaz|fdave|irixxxx"
-supported_extensions = "bin|gen|smd|md|32x|chd|cue|iso|sms|68k|m3u"
+supported_extensions = "bin|gen|smd|md|32x|cue|iso|chd|sms|gg|sg|sc|m3u|68k|sgd|pco"
 corename = "PicoDrive"
 license = "MAME"
 permissions = "dynarec_optional"
-display_version = "1.91"
+display_version = "1.99"
 categories = "Emulator"
 
 # Hardware Information
@@ -14,7 +14,7 @@ systemname = "Sega 8/16-bit + 32X (Various)"
 systemid = "mega_drive"
 
 # Libretro Features
-database = "Sega - Master System - Mark III|Sega - Mega-CD - Sega CD|Sega - Mega Drive - Genesis|Sega - PICO|Sega - 32X"
+database = "Sega - Master System - Mark III|Sega - Game Gear|Sega - Mega-CD - Sega CD|Sega - Mega Drive - Genesis|Sega - PICO|Sega - 32X"
 supports_no_game = "false"
 savestate = "true"
 savestate_features = "deterministic"

@@ -15,8 +15,8 @@ systemid = "fb_alpha"
 
 # Libretro Features
 supports_no_game = "false"
-notes = "(!) The BIOS files must be inside the ROM directory."
 savestate = "true"
-savestate_features = "deterministic"
-cheats = "true"
+savestate_features = "serialized"
+notes = "(!) The BIOS files must be inside the ROM directory."
+
 description = "Based on a snapshot of the Final Burn Alpha codebase from circa 2012, 'FB Alpha 2012' is compatible with FB Alpha v0.2.97.29 ROM sets. Most users should use up-to-date FBNeo instead and should only fall back to this core if their device is not capable of running that core."

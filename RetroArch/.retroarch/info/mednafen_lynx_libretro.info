@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Atari - Lynx (Beetle Lynx)"
 authors = "K. Wilkins|Mednafen Team"
-supported_extensions = "lnx|o"
+supported_extensions = "lnx|lyx|o"
 corename = "Beetle Lynx"
 license = "Zlib|GPLv2"
 permissions = ""

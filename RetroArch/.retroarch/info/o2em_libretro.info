@@ -1,9 +1,9 @@
 # Software Information
-display_name = "Magnavox - Odyssey2 / Phillips Videopac+ (O2EM)"
+display_name = "Magnavox - Odyssey2 / Philips Videopac+ (O2EM)"
 authors = "Daniel Boris|Andre de la Rocha|Arlindo M. de Oliveira"
 supported_extensions = "bin"
 corename = "O2EM"
-database = "Magnavox - Odyssey2|Phillips - Videopac+"
+database = "Magnavox - Odyssey2|Philips - Videopac+"
 license = "Artistic License"
 permissions = ""
 display_version = "1.18"
@@ -11,18 +11,20 @@ categories = "Emulator"
 
 # Hardware Information
 manufacturer = "Magnavox|Philips"
-systemname = "Magnavox Odyssey2 / Phillips Videopac+"
+systemname = "Magnavox Odyssey2 / Philips Videopac+"
 systemid = "odyssey2"
 
 # Libretro Features
 supports_no_game = "false"
+savestate = "true"
+savestate_features = "basic"
 
 # Firmware / BIOS
 firmware_count = 4
 firmware0_desc = "o2rom.bin (Odyssey2 BIOS - G7000 model)"
 firmware0_path = "o2rom.bin"
 firmware0_opt = "false"
-firmware1_desc = "c52.bin (Videopac+ French BIOS - G7000 model)"
+firmware1_desc = "c52.bin (Videopac French BIOS - G7000 model)"
 firmware1_path = "c52.bin"
 firmware1_opt = "false"
 firmware2_desc = "g7400.bin (Videopac+ European BIOS - G7400 model)"

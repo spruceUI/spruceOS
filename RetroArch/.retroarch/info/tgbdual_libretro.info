@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Nintendo - Game Boy / Color (TGB Dual)"
 authors = "GIGO|Hii"
-supported_extensions = "gb|gbc|sgb"
+supported_extensions = "cgb|dmg|gb|gbc|sgb"
 corename = "TGB Dual"
 license = "GPLv2"
 permissions = ""

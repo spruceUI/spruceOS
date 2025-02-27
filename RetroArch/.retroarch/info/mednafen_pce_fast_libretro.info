@@ -1,7 +1,7 @@
 # Software Information
 display_name = "NEC - PC Engine / CD (Beetle PCE FAST)"
 authors = "Mednafen Team"
-supported_extensions = "pce|cue|ccd|iso|img|bin|chd"
+supported_extensions = "pce|cue|ccd|chd|toc|m3u"
 corename = "Beetle PCE Fast"
 license = "GPLv2"
 permissions = ""
@@ -16,6 +16,8 @@ systemid = "pc_engine"
 # Libretro Features
 supports_no_game = "false"
 database = "NEC - PC Engine - TurboGrafx 16|NEC - PC Engine CD - TurboGrafx-CD"
+savestate = "true"
+savestate_features = "deterministic"
 
 # Firmware / BIOS
 firmware_count = 4

@@ -13,7 +13,7 @@ manufacturer = "Fairchild"
 systemname = "FreeChaF"
 
 # Libretro Features
-database = "FreeChaF"
+database = "Fairchild - Channel F"
 supports_no_game = "false"
 
 # BIOS / Firmware

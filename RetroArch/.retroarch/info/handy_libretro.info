@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Atari - Lynx (Handy)"
 authors = "K. Wilkins"
-supported_extensions = "lnx|o"
+supported_extensions = "lnx|lyx|o"
 corename = "Handy"
 
 # Hardware Information

@@ -30,4 +30,4 @@ needs_fullpath = "false"
 disk_control = "false"
 is_experimental = "false"
 
-description = "A port of the vecx vectrex emulator to libretro. This core is hardware-rendered by default using OpenGL but also includes a software renderer. The software renderer defaults to a low resolution, but there is a core option to make the core render to a higher resolution multiplier, which will give a smoother, more vector-like image."
+description = "A port of the vecx Vectrex emulator to libretro. This core is hardware-rendered by default using OpenGL but also includes a software renderer. The software renderer defaults to a low resolution, but there is a core option to make the core render to a higher resolution multiplier, which will give a smoother, more vector-like image."

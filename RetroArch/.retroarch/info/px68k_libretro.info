@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Sharp - X68000 (PX68k)"
 authors = "hissorii"
-supported_extensions = "dim|zip|img|d88|88d|hdm|dup|2hd|xdf|hdf|cmd|m3u"
+supported_extensions = "dim|img|d88|88d|hdm|dup|2hd|xdf|hdf|cmd|m3u"
 corename = "PX68k"
 license = "Custom Non-Commercial"
 permissions = ""
@@ -16,7 +16,7 @@ systemid = "sharp_x68000"
 # Libretro Features
 supports_no_game = "true"
 database = "Sharp - X68000"
-savestate = "false"
+savestate = "true"
 cheats = "false"
 input_descriptors = "true"
 memory_descriptors = "false"

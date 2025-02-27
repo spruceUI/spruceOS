@@ -16,5 +16,7 @@ systemid = "neo_geo_pocket"
 # Libretro Features
 supports_no_game = "false"
 database = "SNK - Neo Geo Pocket|SNK - Neo Geo Pocket Color"
+savestate = "true"
+savestate_features = "deterministic"
 
 description = "An older fork of Mednafen's Neo Geo Pocket / Color core, which is itself a fork of the NeoPop emulator. While this core is quite fast, users who run into performance issues can try the performance-focused RACE core."

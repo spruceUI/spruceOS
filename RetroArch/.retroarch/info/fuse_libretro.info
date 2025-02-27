@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Sinclair - ZX Spectrum (Fuse)"
 authors = "Team Fuse"
-supported_extensions = "tzx|tap|z80|rzx|scl|trd|dsk"
+supported_extensions = "tzx|tap|z80|rzx|scl|trd|dsk|dck|sna|szx|zip"
 corename = "Fuse"
 categories = "Emulator"
 license = "GPLv3"
@@ -14,7 +14,7 @@ systemname = "ZX Spectrum (various)"
 systemid = "zx_spectrum"
 
 # Libretro Features
-supports_no_game = "false"
+supports_no_game = "true"
 database = "Sinclair - ZX Spectrum +3|Sinclair - ZX Spectrum"
 
 # BIOS / Firmware
