@@ -457,6 +457,35 @@ save_custom_n64_controller_profile() {
 	fi
 }
 
+run_mupen_standalone() {
+
+	export HOME="$EMU_DIR/mupen64plus"
+	export XDG_CONFIG_HOME="$HOME"
+	export XDG_DATA_HOME="$HOME"
+	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
+
+	cd "$HOME"
+
+	case "$ROM_FILE" in
+	*.n64 | *.v64 | *.z64)
+		ROM_PATH="$ROM_FILE"
+		;;
+	*.zip | *.7z)
+		TEMP_ROM=$(mktemp)
+		ROM_PATH="$TEMP_ROM"
+		./7zz e "$ROM_FILE" -so >"$TEMP_ROM"
+		;;
+	esac
+
+	./gptokeyb2 -c "./defkeys.gptk" &
+	sleep 0.3
+
+	./mupen64plus "$ROM_PATH"
+
+	rm -f "TEMP_ROM"
+	kill -9 $(pidof gptokeyb2)
+}
+
 run_yabasanshiro() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
 	export HOME="$EMU_DIR"
@@ -473,10 +502,11 @@ run_yabasanshiro() {
 	fi
 }
 
+ ########################
 ##### MAIN EXECUTION #####
+ ########################
 
 import_launch_options
-
 set_cpu_mode
 
 # TODO: remove A30 check once network services implemented on Brick
@@ -520,13 +550,21 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
-	
+	"N64")
+			if [ "$CORE" = "mupen64plus" ] && { [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; }; then
+				run_mupen_standalone
+			else
+				load_n64_controller_profile
+				ready_architecture_dependent_states
+				run_retroarch
+				stash_architecture_dependent_states
+				save_custom_n64_controller_profile
+			fi
+		;;
 	*)
-		[ $EMU_NAME = "N64" ] && load_n64_controller_profile
 		ready_architecture_dependent_states
 		run_retroarch
 		stash_architecture_dependent_states
-		[ $EMU_NAME = "N64" ] && save_custom_n64_controller_profile
 		;;
 esac
 
