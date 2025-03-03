@@ -481,8 +481,8 @@ run_mupen_standalone() {
 	sleep 0.3
 	./mupen64plus "$ROM_PATH"
 
-	rm -f "$TEMP_ROM"
 	kill -9 $(pidof gptokeyb2)
+	rm -f "$TEMP_ROM"
 }
 
 run_yabasanshiro() {
