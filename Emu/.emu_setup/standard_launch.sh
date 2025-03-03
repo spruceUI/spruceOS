@@ -466,6 +466,9 @@ run_mupen_standalone() {
 
 	cd "$HOME"
 
+	sed -i "s|ScreenWidth=.*|ScreenWidth=$DISPLAY_WIDTH|" "mupen64plus.cfg"
+	sed -i "s|ScreenHeight=.*|ScreenHeight=$DISPLAY_HEIGHT|" "mupen64plus.cfg"
+
 	case "$ROM_FILE" in
 	*.n64 | *.v64 | *.z64)
 		ROM_PATH="$ROM_FILE"
