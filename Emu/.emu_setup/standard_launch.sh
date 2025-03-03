@@ -473,16 +473,15 @@ run_mupen_standalone() {
 	*.zip | *.7z)
 		TEMP_ROM=$(mktemp)
 		ROM_PATH="$TEMP_ROM"
-		./7zz e "$ROM_FILE" -so >"$TEMP_ROM"
+		7zr e "$ROM_FILE" -so >"$TEMP_ROM"
 		;;
 	esac
 
-	./gptokeyb2 -c "./defkeys.gptk" &
+	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 	sleep 0.3
-
 	./mupen64plus "$ROM_PATH"
 
-	rm -f "TEMP_ROM"
+	rm -f "$TEMP_ROM"
 	kill -9 $(pidof gptokeyb2)
 }
 
