@@ -363,9 +363,11 @@ run_retroarch() {
 			fi
 		;;
 		"A30" )
-			# handle different version of ParaLLEl N64 core for A30
+			# handle different version of ParaLLEl N64 core and flycast xtreme core for A30
 			if [ "$CORE" = "parallel_n64" ]; then
 				CORE="km_parallel_n64_xtreme_amped_turbo"
+			elif [ "$CORE" = "flycast_xtreme" ]; then
+				CORE="km_flycast_xtreme"
 			fi
 
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
