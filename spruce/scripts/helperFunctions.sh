@@ -487,6 +487,11 @@ display() {
       command="$command""$screen_width $screen_height $rotation "
     fi
 
+    # Hack to ensure text displays on screen instead of falling off the bottom
+    if [ $PLATFORM = "Flip" ]; then
+        position=$((position - 160))
+    fi  
+
     # Construct the command
     local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
