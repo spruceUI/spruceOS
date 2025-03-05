@@ -206,6 +206,10 @@ done
 
 while [ "$PLATFORM" = "Flip" ]; do
 
+    # clear the FB to get rid of residual Loading screen if present
+    touch /tmp/fbdisplay_exit
+    cat /dev/zero > /dev/fb0
+
     runee=$(/usr/miyoo/bin/jsonval runee)
     
     if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
