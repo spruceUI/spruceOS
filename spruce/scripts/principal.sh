@@ -206,10 +206,6 @@ done
 
 while [ "$PLATFORM" = "Flip" ]; do
 
-    # clear the FB to get rid of residual Loading screen if present
-    touch /tmp/fbdisplay_exit
-    cat /dev/zero > /dev/fb0
-
     runee=$(/usr/miyoo/bin/jsonval runee)
     
     if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
@@ -259,6 +255,10 @@ while [ "$PLATFORM" = "Flip" ]; do
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart
     fi
+
+    # clear the FB to get rid of residual Loading screen if present
+    touch /tmp/fbdisplay_exit
+    cat /dev/zero > /dev/fb0
 
 done
 
