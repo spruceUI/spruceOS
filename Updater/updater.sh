@@ -238,6 +238,10 @@ if [ "$PERFORM_DELETION" = true ]; then
     display "Cleaning up your SD card..."
     cd /mnt/SDCARD
 
+    # Back up 64-bit 7zr
+    mkdir /tmp/bin
+    cp spruce/bin64/7zr /tmp/bin
+    
     # Explicitly delete .config and .tmp_update folders
     log_update_message "Deleting .config folder"
     rm -rf .config
@@ -273,6 +277,11 @@ log_update_message "Extracting update file: $UPDATE_FILE"
 read_only_check
 
 display "Applying update. This should take around 5 minutes..."
+
+# On 64-bit systems add the backed up copy of 7zr to the path
+if [ "$ARCH" = "aarch64" ]; then
+    export PATH="/tmp/bin:$PATH"
+fi
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."

@@ -280,13 +280,13 @@ confirm() {
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
         # B button - cancel
-        *"key 1 29"*)
+        *"$B_B"*)
             display_kill
             echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
             return 1
             ;;
         # A button - confirm
-        *"key 1 57"*)
+        *"$B_A"*)
             display_kill
             echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
             return 0
