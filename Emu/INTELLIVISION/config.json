@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/INTELLIVISION",
+    "imgpath": "../../Roms/INTELLIVISION/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/INTELLIVISION",
+    "imgpath": "../../../../media/sdcard1/Roms/INTELLIVISION/Imgs"}],
   "rompath": "../../Roms/INTELLIVISION",
   "imgpath": "../../Roms/INTELLIVISION/Imgs",
   "gamelist": "../../Roms/INTELLIVISION/miyoogamelist.xml",

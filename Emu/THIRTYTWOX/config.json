@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/THIRTYWOX",
+    "imgpath": "../../Roms/THIRTYWOX/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/THIRTYWOX",
+    "imgpath": "../../../../media/sdcard1/Roms/THIRTYWOX/Imgs"}],
   "rompath": "../../Roms/THIRTYTWOX",
   "imgpath": "../../Roms/THIRTYTWOX/Imgs",
   "gamelist": "../../Roms/THIRTYTWOX/miyoogamelist.xml",

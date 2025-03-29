@@ -7,6 +7,11 @@
 "themecolor": "E4007F",
 "effectsh": "effect.sh",
 "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/SATURN",
+    "imgpath": "../../Roms/SATURN/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/SATURN",
+    "imgpath": "../../../../media/sdcard1/Roms/SATURN/Imgs"}],
 "rompath": "../../Roms/SATURN",
 "imgpath": "../../Roms/SATURN/Imgs",
 "gamelist": "../../Roms/SATURN/miyoogamelist.xml",

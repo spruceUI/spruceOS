@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/ARDUBOY",
+    "imgpath": "../../Roms/ARDUBOY/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/ARDUBOY",
+    "imgpath": "../../../../media/sdcard1/Roms/ARDUBOY/Imgs"}],
   "rompath": "../../Roms/ARDUBOY",
   "imgpath": "../../Roms/ARDUBOY/Imgs",
   "gamelist": "../../Roms/ARDUBOY/miyoogamelist.xml",

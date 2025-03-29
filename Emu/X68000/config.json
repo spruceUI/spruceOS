@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/X68000",
+    "imgpath": "../../Roms/X68000/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/X68000",
+    "imgpath": "../../../../media/sdcard1/Roms/X68000/Imgs"}],
   "rompath": "../../Roms/X68000",
   "imgpath": "../../Roms/X68000/Imgs",
   "gamelist": "../../Roms/X68000/miyoogamelist.xml",

@@ -7,6 +7,11 @@
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/QUAKE",
+    "imgpath": "../../Roms/QUAKE/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/QUAKE",
+    "imgpath": "../../../../media/sdcard1/Roms/QUAKE/Imgs"}],
   "rompath": "../../Roms/QUAKE",
   "imgpath": "../../Roms/QUAKE/Imgs",
   "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",
