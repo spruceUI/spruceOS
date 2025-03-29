@@ -63,6 +63,13 @@ log_message " " -v
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
+# Sanitize system JSON if needed
+if ! jq '.' "$SETTINGS_FILE" > /dev/null 2>&1; then
+    log_message "Runtime: Invalid System JSON detected, sanitizing..."
+    jq '.' "$SETTINGS_FILE" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
+    mv /tmp/system.json.clean "$SETTINGS_FILE"
+fi
+
 # Check if WiFi is enabled
 wifi=$(grep '"wifi"' /config/system.json | awk -F ':' '{print $2}' | tr -d ' ,')
 if [ "$wifi" -eq 0 ]; then
