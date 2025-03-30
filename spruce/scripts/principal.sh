@@ -168,6 +168,16 @@ runifnecessary(){
 
 while [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; do
 
+    if [ "$PLATFORM" = Brick ]; then
+        if flag_check "simple_mode"; then
+            export PATH="/mnt/SDCARD/trimui/app/nosettings-Brick:$PATH"
+        elif setting_get "recentsTile"; then
+            export PATH="/mnt/SDCARD/trimui/app/recents-Brick:$PATH"
+        else
+            export PATH="/mnt/SDCARD/trimui/app/norecents-Brick:$PATH"
+        fi
+    fi
+
     tinymix set 9 1
     tinymix set 1 0
     export LD_LIBRARY_PATH=/usr/trimui/lib
