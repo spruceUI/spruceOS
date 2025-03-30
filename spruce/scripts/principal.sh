@@ -231,10 +231,12 @@ while [ "$PLATFORM" = "Flip" ]; do
         flag_add "in_menu"
 
         export LD_LIBRARY_PATH=/usr/miyoo/lib
-        if setting_get recentsTile; then
-            export PATH=/mnt/SDCARD/miyoo355/app/recents:$PATH
+        if flag_check "simple_mode"; then
+            export PATH="/mnt/SDCARD/miyoo355/app/nosettings:$PATH"
+        elif setting_get "recentsTile"; then
+            export PATH="/mnt/SDCARD/miyoo355/app/recents:$PATH"
         else
-            export PATH=/mnt/SDCARD/miyoo355/app/norecents:$PATH
+            export PATH="/mnt/SDCARD/miyoo355/app/norecents:$PATH"
         fi
 
         runifnecessary "keymon" /usr/miyoo/bin/keymon
