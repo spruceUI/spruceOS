@@ -375,7 +375,7 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position in pixels from the top of the screen
+#   -p, --position <pos>  Text position as percentage from the top of the screen
 #   (Text is offset from it's center, images are offset from the top of the image)
 #   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
@@ -416,12 +416,14 @@ display() {
       width=600
       # TODO: we might want to make this more generic based on architecture eventually
       DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+    elif [ "$PLATFORM" = "A30" ]; then
+      screen_width=640
+      screen_height=480
+      rotation=270
+      width=600
     fi
 
-    # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
-    [ "$PLATFORM" = "SmartPro" ] && return 30
-
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" color="ebdbb2" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
@@ -461,7 +463,7 @@ display() {
             --qr)
                 qr_url="$2"
                 if ! $position_set; then
-                    position=$((position + 85))
+                    position=89
                 fi
                 shift
                 ;;
@@ -483,14 +485,7 @@ display() {
 
 
     local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
-    if [ ! "$PLATFORM" = "A30" ]; then
-      command="$command""$screen_width $screen_height $rotation "
-    fi
-
-    # Hack to ensure text displays on screen instead of falling off the bottom
-    if [ $PLATFORM = "Flip" ]; then
-        position=$((position - 160))
-    fi  
+    command="$command""$screen_width $screen_height $rotation "
 
     # Construct the command
     local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
