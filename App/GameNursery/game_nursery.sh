@@ -179,12 +179,14 @@ construct_config() {
 
             # create tab for a given group of games
             tab_name="$(basename "$group_dir")"
-            echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
+            if ! { [ "$tab_name" = "Ports" ] && [ "$PLATFORM" != "A30" ]; }; then
+                echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
 
-            # iterate through each json for the current group
-            for filename in "$group_dir"/*.json; do
-                interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
-            done
+                # iterate through each json for the current group
+                for filename in "$group_dir"/*.json; do
+                    interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
+                done
+            fi
         fi
     done
     log_message "Game Nursery: nursery_config constructed from game info JSONs."
@@ -201,11 +203,6 @@ show_slideshow_if_first_run
 get_latest_jsons
 construct_config
 
-MODES=""
-if [ "$PLATFORM" = "A30" ]; then
-    MODES="-m A30" # todo: make ports section A30-exclusive
-fi
-
 killall -q -USR2 joystickinput # kbd mode
-cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config $MODES
+cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
 killall -q -USR1 joystickinput # analog mode
