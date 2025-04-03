@@ -6,6 +6,7 @@
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+[ "$(uname -m)" = "aarch64" ] && BIN_PATH="${BIN_PATH}64"
 CONFIG_DIR="/tmp/nursery-config"
 JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
