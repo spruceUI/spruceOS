@@ -407,6 +407,15 @@ display() {
       # TODO: this should go away once profile is wired up for the brick
       ld_library_path="/usr/trimui/lib:$ld_library_path"
       # TODO: we might want to make this more generic based on architecture eventually
+    elif [ "$PLATFORM" = "SmartPro" ]; then
+      # TODO: we might want to move these to config files?
+      screen_width=1280
+      screen_height=720
+      rotation=0
+      width=1200
+      # TODO: this should go away once profile is wired up for the brick
+      ld_library_path="/usr/trimui/lib:$ld_library_path"
+      # TODO: we might want to make this more generic based on architecture eventually
       DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
     elif [ "$PLATFORM" = "Flip" ]; then
       # TODO: we might want to move these to config files?
