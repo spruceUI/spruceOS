@@ -30,7 +30,7 @@ if [ "$1" = "run" ]; then
 else
 	if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
 		echo -n "Already installed!"
-		retun 0
+		return 0
 	else
 		echo -n "$description"
 		return 0
