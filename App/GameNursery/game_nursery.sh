@@ -201,6 +201,11 @@ show_slideshow_if_first_run
 get_latest_jsons
 construct_config
 
+MODES=""
+if [ "$PLATFORM" = "A30" ]; then
+    MODES="-m A30" # todo: make ports section A30-exclusive
+fi
+
 killall -q -USR2 joystickinput # kbd mode
-cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
+cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config $MODES
 killall -q -USR1 joystickinput # analog mode
