@@ -392,6 +392,13 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
+    
+	# PortMaster ports location
+    mkdir -p /mnt/sdcard/MIYOO_EX/ports/ 
+    mkdir -p /mnt/sdcard/.local/share/
+    mount --bind /mnt/SDCARD/ROMS/PORTS/ /mnt/sdcard/MIYOO_EX/ports/ 
+    mount --bind /mnt/sdcard/MIYOO_EX/PortMaster /root 
+    mount --bind /mnt/sdcard/MIYOO_EX/PortMaster /mnt/sdcard/.local/share/
 
     ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
