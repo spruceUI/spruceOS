@@ -61,6 +61,7 @@ case $INFO in
     ;;
 esac
 
+
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ "$ARCH" = "aarch64" ]; then
@@ -129,6 +130,12 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
     export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
     export B_MENU="key 1 316"
+fi
+
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+    export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
+    export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
+    export HOME="/mnt/sdcard"
 fi
 
 # Call this just by having "acknowledge" in your script

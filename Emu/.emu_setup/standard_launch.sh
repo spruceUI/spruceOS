@@ -297,9 +297,16 @@ load_pico8_control_profile() {
 }
 
 run_port() {
-	PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-	cd $PORTS_DIR
-	/bin/sh "$ROM_FILE"
+    if [ "$PLATFORM" = "Flip" ]; then
+        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+        cd $PORTS_DIR
+        export HOME="/mnt/sdcard"
+        "$ROM_FILE"
+    else
+        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+        cd $PORTS_DIR
+        /bin/sh "$ROM_FILE" 
+    fi
 }
 
 move_dotconfig_into_place() {
