@@ -1,0 +1,44 @@
+./PortMaster.txt: line 134: pm_message: command not found
+/mnt/sdcard/MIYOO_EX/PortMaster/runtimes/love_11.5/love.aarch64: error while loading shared libraries: libtheoradec.so.1: cannot open shared object file: No such file or directory
+2025-04-04 19:09:23.851 | DEBUG    | harbourmaster.config:<module>:151 - HM_DEFAULT_TOOLS_DIR:   /mnt/SDCARD/MIYOO_EX/PortMaster
+2025-04-04 19:09:23.854 | DEBUG    | harbourmaster.config:<module>:152 - HM_DEFAULT_PORTS_DIR:   /mnt/SDCARD/MIYOO_EX/ports
+2025-04-04 19:09:23.856 | DEBUG    | harbourmaster.config:<module>:153 - HM_DEFAULT_SCRIPTS_DIR: /mnt/SDCARD/MIYOO_EX/ports
+2025-04-04 19:09:31.178 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda-mysteryofsolarusdx.zip: missing.
+2025-04-04 19:09:31.180 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda-mysteryofsolarusxd.zip: missing.
+2025-04-04 19:09:31.183 | WARNING  | harbourmaster.source:_load_images:739 - Port image am2r.zip: missing.
+2025-04-04 19:09:31.185 | WARNING  | harbourmaster.source:_load_images:739 - Port image pokewilds.zip: missing.
+2025-04-04 19:09:31.187 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda_roth.zip: missing.
+2025-04-04 19:09:31.189 | WARNING  | harbourmaster.source:_load_images:739 - Port image gtavc.zip: missing.
+2025-04-04 19:09:31.191 | WARNING  | harbourmaster.source:_load_images:739 - Port image soh.zip: missing.
+2025-04-04 19:09:31.194 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda-mercurischest.zip: missing.
+2025-04-04 19:09:31.196 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldoschallenge2.zip: missing.
+2025-04-04 19:09:31.198 | WARNING  | harbourmaster.source:_load_images:739 - Port image sm.zip: missing.
+2025-04-04 19:09:31.200 | WARNING  | harbourmaster.source:_load_images:739 - Port image loderunneronline.zip: missing.
+2025-04-04 19:09:31.202 | WARNING  | harbourmaster.source:_load_images:739 - Port image rejuvenation.zip: missing.
+2025-04-04 19:09:31.204 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda-roth-se.zip: missing.
+2025-04-04 19:09:31.207 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda3.zip: missing.
+2025-04-04 19:09:31.209 | WARNING  | harbourmaster.source:_load_images:739 - Port image ziiaol.zip: missing.
+2025-04-04 19:09:31.211 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldaxd-mercurischess.zip: missing.
+2025-04-04 19:09:31.213 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldadoi.zip: missing.
+2025-04-04 19:09:31.216 | WARNING  | harbourmaster.source:_load_images:739 - Port image wipeout.zip: missing.
+2025-04-04 19:09:31.220 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldansq.zip: missing.
+2025-04-04 19:09:31.223 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldaolb.zip: missing.
+2025-04-04 19:09:31.227 | WARNING  | harbourmaster.source:_load_images:739 - Port image soh2.zip: missing.
+2025-04-04 19:09:31.230 | WARNING  | harbourmaster.source:_load_images:739 - Port image smworld.zip: missing.
+2025-04-04 19:09:31.233 | WARNING  | harbourmaster.source:_load_images:739 - Port image vdrift.zip: missing.
+2025-04-04 19:09:31.236 | WARNING  | harbourmaster.source:_load_images:739 - Port image render96ex.zip: missing.
+2025-04-04 19:09:31.240 | WARNING  | harbourmaster.source:_load_images:739 - Port image pocketcrystalleague.zip: missing.
+2025-04-04 19:09:31.243 | WARNING  | harbourmaster.source:_load_images:739 - Port image reborn.zip: missing.
+2025-04-04 19:09:31.246 | WARNING  | harbourmaster.source:_load_images:739 - Port image gta3.zip: missing.
+2025-04-04 19:09:31.249 | WARNING  | harbourmaster.source:_load_images:739 - Port image thextech.zip: missing.
+2025-04-04 19:09:31.253 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda3t.zip: missing.
+2025-04-04 19:09:31.258 | WARNING  | harbourmaster.source:_load_images:739 - Port image zeldoschallenge.zip: missing.
+2025-04-04 19:09:31.263 | WARNING  | harbourmaster.source:_load_images:739 - Port image tunics.zip: missing.
+2025-04-04 19:09:31.269 | WARNING  | harbourmaster.source:_load_images:739 - Port image super.mario.war.zip: missing.
+2025-04-04 19:09:31.274 | WARNING  | harbourmaster.source:_load_images:739 - Port image zelda-bookofmudora.zip: missing.
+arm_release_ver: g13p0-01eac0, rk_so_ver: 3
+arm_release_ver: g13p0-01eac0, rk_so_ver: 3
+arm_release_ver: g13p0-01eac0, rk_so_ver: 3
+0: 1
+{'name': 'Miyoo', 'version': '20250228101926', 'device': 'miyoo-flip', 'resolution': (640, 480), 'analogsticks': 2, 'cpu': 'rk3566', 'capabilities': ['power', 'aarch64', 'restore', '4:3', '640x480', 'Miyoo', 'miyoo-flip', 'analog_0', 'analog_1', 'analog_2', '1gb', 'en_US'], 'ram': 1024, 'primary_arch': 'aarch64', 'glibc': '2.36'}
+XBOX FIXER
