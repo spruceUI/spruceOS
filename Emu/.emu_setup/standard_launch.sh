@@ -301,7 +301,7 @@ run_port() {
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
         export HOME="/mnt/sdcard"
-        "$ROM_FILE"
+        "$ROM_FILE" > port.log
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
