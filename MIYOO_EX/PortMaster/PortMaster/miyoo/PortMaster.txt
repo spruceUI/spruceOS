@@ -4,8 +4,9 @@
 #
 
 ## HRMMM
-export HOME="/mnt/sdcard/home"
-export PATH="/mnt/sdcard/home/bin/:$PATH"
+export HOME="/mnt/sdcard"
+export PATH="/mnt/sdcard/bin/:$PATH"
+export LD_LIBRARY_PATH="/mnt/sdcard/lib:$LD_LIBRARY_PATH"
 export LD_PRELOAD=""
 export PYSDL2_DLL_PATH="/mnt/sdcard/home/lib/python3.10/site-packages/sdl2dll/dll"
 

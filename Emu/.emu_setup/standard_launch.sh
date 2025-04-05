@@ -301,7 +301,7 @@ run_port() {
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
         export HOME="/mnt/sdcard"
-        export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib/:$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="/mnt/sdcard/lib/:$LD_LIBRARY_PATH"
         "$ROM_FILE" > port.log
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
