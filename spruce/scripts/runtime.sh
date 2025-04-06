@@ -68,9 +68,9 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Use App folder for Miyoo and TrimUI devices despite different name schemes
         mkdir -p "/mnt/SDCARD/Apps"
         mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps" &
-        # Mask Roms/PORTS with Brick version
-        mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
-        mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
+        # Mask Roms/PORTS with non-A30 version
+        mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+        mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
         # Use appropriate RA config
         [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
@@ -393,6 +393,10 @@ elif [ "$PLATFORM" = "Flip" ]; then
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
     
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+
 	# PortMaster ports location
 	# Portmaster installs ports to MIYOO_EX/ports whereas spruceOS wants it in /Roms/PORTS
     mkdir -p /mnt/sdcard/MIYOO_EX/ports/ 
