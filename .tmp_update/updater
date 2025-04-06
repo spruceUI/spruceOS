@@ -31,4 +31,4 @@ fi
 
 cd /mnt/SDCARD/spruce/scripts
 mkdir -p /mnt/SDCARD/spruce/logs/
-./runtime.sh > /mnt/SDCARD/spruce/logs/runtime.log
+./runtime.sh &> /mnt/SDCARD/spruce/logs/runtime.log
