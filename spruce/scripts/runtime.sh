@@ -139,6 +139,12 @@ fi
     ${SCRIPTS_DIR}/emufresh_md5_multi.sh
 } &
 
+    # don't hide or unhide apps in simple_mode
+    if ! flag_check "simple_mode"; then
+        [ "$PLATFORM" = "A30" ] && check_and_handle_firmware_app &
+        check_and_hide_update_app &
+    fi
+
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
 
@@ -174,12 +180,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # start watchdog for konami code
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
-
-    # don't hide or unhide apps in simple_mode
-    if ! flag_check "simple_mode"; then
-        check_and_handle_firmware_app &
-        check_and_hide_update_app &
-    fi
 
     check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
