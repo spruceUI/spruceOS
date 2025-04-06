@@ -394,11 +394,18 @@ elif [ "$PLATFORM" = "Flip" ]; then
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
     
 	# PortMaster ports location
+	# Portmaster installs ports to MIYOO_EX/ports whereas spruceOS wants it in /Roms/PORTS
     mkdir -p /mnt/sdcard/MIYOO_EX/ports/ 
-    mkdir -p /mnt/sdcard/.local/share/
-    mount --bind /mnt/SDCARD/ROMS/PORTS/ /mnt/sdcard/MIYOO_EX/ports/ 
-    mount --bind /mnt/sdcard/MIYOO_EX/PortMaster /root 
-    mount --bind /mnt/sdcard/MIYOO_EX/PortMaster /mnt/sdcard/.local/share/
+    mount --bind /mnt/SDCARD/Roms/PORTS/ /mnt/sdcard/MIYOO_EX/ports/
+
+	# Unsure why PortMaster seems to need itself duplicated
+	# probably some setup that needs to be fixed
+    mkdir -p /mnt/sdcard/MIYOO_EX/PortMaster/PortMaster
+    mount --bind /mnt/sdcard/MIYOO_EX/PortMaster /mnt/sdcard/MIYOO_EX/PortMaster/PortMaster
+	
+	# Treat /spruce/flip/ as the 'root' for any application that needs it.
+	# (i.e. PortMaster looks here for config information which is device specific)
+    mount --bind /mnt/sdcard/spruce/flip/ /root 
 
     ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
