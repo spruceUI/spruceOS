@@ -80,9 +80,8 @@ else
 	pico_files_present=0
 fi
 
-
 if [ "$pico_files_present" -eq 1 ]; then
-	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
+	log_message "emufresh: pico8.dat and pico8_dyn or pico8_64 detected" -v
 	if [ ! $show_pico8 = 0 ]; then
 		pico8_updated=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
@@ -93,7 +92,7 @@ if [ "$pico_files_present" -eq 1 ]; then
 	fi
 else
 	if [ $show_pico8 = 0 ]; then
-		log_message "emufresh: pico8.dat and pico8_dyn not detected"
+		log_message "emufresh: pico8.dat and pico8_dyn or pico8_64 not detected"
 		pico8_updated=true
 		sed -i 's/^{*$/{{/' "$config_file"
 		echo "hide system PICO8" && log_message "emufresh: hiding PICO8 system"
@@ -108,7 +107,7 @@ fi
 
 # compute new md5 value for files under Roms
 # except known non-rom files
-new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | md5sum)
 echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is $all_md5" -v
 
 # if no update and no force option is used, exit with 0
