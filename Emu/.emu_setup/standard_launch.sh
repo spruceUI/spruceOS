@@ -303,7 +303,7 @@ run_port() {
         export HOME="/mnt/sdcard/spruce/flip/home"
         export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:$LD_LIBRARY_PATH"
         export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-        "$ROM_FILE" > port.log
+        "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
