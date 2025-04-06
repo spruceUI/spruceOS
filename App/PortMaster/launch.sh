@@ -5,3 +5,6 @@ export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:$LD_LIBRARY_PATH"
 export HOME="/mnt/sdcard/spruce/flip/home"
 cd /sdcard/MIYOO_EX/PortMaster/PortMaster/miyoo
 ./PortMaster.txt > portmaster.log
+/mnt/sdcard/App/PortMaster/update_images.sh
+
+
