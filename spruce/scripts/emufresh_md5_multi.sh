@@ -39,7 +39,7 @@ if [ "$1" = "-clearall" ]; then
 	flag_remove "emufresh"
 
 	# exit with 0
-	return 0
+	exit 0
 fi
 
 # handle show all option
@@ -102,23 +102,27 @@ fi
 
 # compute new md5 value for files under Roms
 # except known non-rom files
-new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
-echo "$new_all_md5" && log_message "emufresh: new MD5 sum of all Roms folders is $all_md5" -v
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 
 # if no update and no force option is used, exit with 0
-if [ "$new_all_md5" = "$all_md5" ] && [ $pico8_updated = false ] && [ ! "$1" = "-force" ]; then
+if [ ! "$new_all_md5" = "$all_md5" ]; then
+    echo [All] MD5 Changed : was $all_md5 but is now $new_all_md5 so refreshing
+elif [ ! $pico8_updated ]; then
+    echo [All] pico8 updated so refreshing
+elif [ "$1" = "-force" ]; then
+    echo [All] force arg passed so refreshing
+else
 	echo "no update" && log_message "emufresh: no update needed. Exiting!"
 
 	# remove flag before exit
 	flag_remove "emufresh"
 
-	return 0
+	exit 0
+fi
 
 # otherwise update md5 file and continue
-else
-	echo "need update" && log_message "emufresh: update needed!"
-	echo "$new_all_md5" >"$md5_path/all.md5"
-fi
+echo Writing $new_all_md5 to $md5_path/all.md5
+echo "$new_all_md5" > "$md5_path/all.md5"
 
 # get all rom folders
 rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d)
@@ -131,7 +135,7 @@ check_rom_folders() {
 		system_name=$(basename "$folder")
 
 		# get all file names except known non-rom files
-		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name *.xml ! -name *.txt ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
+		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
 
 		# get old md5 value
 		md5=$(cat "$md5_path/$system_name.md5" 2>/dev/null)
@@ -143,6 +147,7 @@ check_rom_folders() {
 		if [ ! "$new_md5" = "$md5" ]; then
 
 			# store new md5 value
+			echo [$system_name] Writing $new_md5 to $md5_path/$system_name.md5
 			echo "$new_md5" >"$md5_path/$system_name.md5"
 
 			log_message "emufresh: MD5 for $system_name has changed. Update required"
@@ -150,11 +155,12 @@ check_rom_folders() {
 			# if config file exists
 			config_file="$emu_path/$system_name/config.json"
 			if [ -f "$config_file" ]; then
+				echo [$system_name] using config file $config_file
 				# get acceptable extensions
 				types=$(jq -r '.extlist' "$config_file")
 
 				if [ -z "$types" ]; then
-					# count files in list
+					# count files in list					
 					count=$(echo "$file_list" | sed '/^\s*$/d' | wc -l)
 				else
 					# count files with acceptable extension
@@ -165,19 +171,22 @@ check_rom_folders() {
 
 			# if config file does not exist
 			else
+				echo [$system_name] $config_file does not exist
 				# count files in list
 				count=$(echo "$file_list" | wc -l)
 			fi
 
+			echo [$system_name] found $count files
+
 			# hide / show system in MainUI
 			if [ $count = 0 ]; then
 				sed -i 's/^{*$/{{/' "$config_file"
-				echo "hide system $system_name" && log_message "emufresh: Hiding $system_name"
+				echo "[$system_name] hide system $system_name" && log_message "emufresh: Hiding $system_name"
 			else
 				rm -f "$roms_path/$system_name/${system_name}_cache6.db" "$roms_path/$system_name/${system_name}_cache7.db"
 				[ "$system_name" = "ARCADE" ] || rm -f "$roms_path/$system_name/miyoogamelist.xml"
 				[ "$system_name" = "PICO8" ] || sed -i 's/^{{*$/{/' "$config_file"
-				echo "show system $system_name" && log_message "emufresh: Revealing $system_name"
+				echo "[$system_name] show system $system_name" && log_message "emufresh: Revealing $system_name"
 			fi
 		fi
 	done
@@ -191,7 +200,7 @@ check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;p;n')
 check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
-check_rom_folders "$folders"
+check_rom_folders "$folders" 
 
 # wait all process to finish
 wait
