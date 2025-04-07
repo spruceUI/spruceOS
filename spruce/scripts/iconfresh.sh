@@ -17,7 +17,7 @@ EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/App/"
 
 case "$PLATFORM" in
-    "$A30" ) SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" ;;
+    "A30" ) SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" ;;
     "Flip" ) SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin" ;;
     "Brick" ) SKIN_PATH="/mnt/SDCARD/trimui/brickThemes/SPRUCE/skin" ;;
     "SmartPro" ) SKIN_PATH="/mnt/SDCARD/trimui/smartProThemes/SPRUCE/skin" ;;
