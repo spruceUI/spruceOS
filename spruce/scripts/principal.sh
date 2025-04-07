@@ -168,6 +168,40 @@ runifnecessary(){
 
 while [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; do
 
+    # create in menu flag and remove last played game flag
+    flag_remove "lastgame"
+
+    # check if emu visibility needs a refresh, before entering MainUI
+    /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+
+    # Check for the themeChanged flag
+    if flag_check "themeChanged"; then
+        /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
+        flag_remove "themeChanged"
+    fi
+
+    # Check for the low_battery flag
+    if flag_check "low_battery"; then
+        CAPACITY=$(cat /sys/class/power_supply/axp2202-battery/capacity)
+        display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
+        flag_remove "low_battery"
+    fi
+
+    /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
+
+    if flag_check "pre_menu_unpacking"; then
+        display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
+        flag_remove "silentUnpacker"
+        while [ -f "$FLAGS_DIR/pre_menu_unpacking.lock" ]; do
+            : # null operation (no sleep needed)
+        done
+    fi
+
+    # This is to kill leftover display processes that may be running
+    display_kill &
+
+    flag_add "in_menu"
+
     if [ "$PLATFORM" = Brick ]; then
         if flag_check "simple_mode"; then
             export PATH="/mnt/SDCARD/trimui/app/nosettings-Brick:$PATH"
