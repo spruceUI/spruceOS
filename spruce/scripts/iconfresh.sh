@@ -17,10 +17,23 @@ EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/App/"
 
 case "$PLATFORM" in
-    "A30" ) SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" ;;
-    "Flip" ) SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin" ;;
-    "Brick" ) SKIN_PATH="/mnt/SDCARD/trimui/brickThemes/SPRUCE/skin" ;;
-    "SmartPro" ) SKIN_PATH="/mnt/SDCARD/trimui/smartProThemes/SPRUCE/skin" ;;
+    "A30" )
+        SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" 
+        ICONS="icons"
+        ;;
+    "Flip" )
+        SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
+        ICONS="icons"
+        ;;
+    "Brick" )
+        SKIN_PATH="/mnt/SDCARD/trimui/brickThemes/SPRUCE/skin" 
+        ICONS="icontop"
+        ;;
+        
+    "SmartPro" )
+        SKIN_PATH="/mnt/SDCARD/trimui/smartProThemes/SPRUCE/skin"
+        ICONS="icontop"
+        ;;
 esac
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
@@ -43,7 +56,7 @@ APP_THEME_ICON_PATH="${THEME_PATH}${ICONS}/app/"
 update_emulator_icons() {
     local CONFIG_FILE=$1
 
-if [ "$PLATFORM" = "Brick" ]|| [ "$PLATFORM" = "SmartPro" ]; then
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
 else
     OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
@@ -75,7 +88,7 @@ fi
 update_app_icons() {
     local CONFIG_FILE=$1
 
-if [ "$PLATFORM" = "Brick" ]|| [ "$PLATFORM" = "SmartPro" ]; then
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
 else
     OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
