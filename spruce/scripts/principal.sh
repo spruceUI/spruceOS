@@ -187,8 +187,6 @@ while [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; do
         flag_remove "low_battery"
     fi
 
-    /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
-
     if flag_check "pre_menu_unpacking"; then
         display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
         flag_remove "silentUnpacker"
