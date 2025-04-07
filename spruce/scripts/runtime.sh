@@ -409,6 +409,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
 	# (i.e. PortMaster looks here for config information which is device specific)
     mount --bind /mnt/sdcard/spruce/flip/ /root 
 
+    # Bind the correct version of retroarch so it can be accessed by PM
+    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
+
     killall runmiyoo.sh
 
 fi
