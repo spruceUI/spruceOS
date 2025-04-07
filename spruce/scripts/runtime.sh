@@ -419,7 +419,7 @@ fi
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
-#update_notification
+update_notification
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then

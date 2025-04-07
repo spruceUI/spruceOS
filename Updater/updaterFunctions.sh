@@ -49,7 +49,35 @@ if [ "$PLATFORM" = "A30" ]; then
     export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
     export B_MENU="key 1 1"          # surprisingly functions like a regular button
 
-elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+elif [ "$PLATFORM" = "Flip" ]; then
+    export B_LEFT="key 1 105"
+    export B_RIGHT="key 1 106"
+    export B_UP="key 1 103"
+    export B_DOWN="key 1 108"
+
+    export B_A="key 1 29"
+    export B_B="key 1 57"
+    export B_X="key 1 56"
+    export B_Y="key 1 42"
+
+    export B_L1="key 1 104"
+    export B_L2="key 3 2 255" # 255 on push, 0 on release
+    export B_R1="key 1 109"
+    export B_R2="key 3 5 255" #  255 on push, 0 on release
+
+    export B_START="key 1 28"
+    export B_START_2="key 1 315"
+    export B_SELECT="key 1 97"
+    export B_SELECT_2="key 1 314"
+
+    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
+    export B_VOLUP_2="key 1 115"
+    export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
+    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
+    export B_MENU="key 1 316"        # surprisingly functions like a regular button
+    export B_POWER="key 116, value"  # 1 for press, 0 for release
+
+elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     export B_LEFT="key 3 16 -1"  # negative for left
     export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
