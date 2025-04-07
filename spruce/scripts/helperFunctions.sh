@@ -43,6 +43,8 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
+log_message "[helperFunctions.sh] $INFO"
+
 case $INFO in
 *"sun8i"*)
 	export PLATFORM="A30"
@@ -60,6 +62,8 @@ case $INFO in
     export PLATFORM="A30"
     ;;
 esac
+
+log_message "[helperFunctions.sh] Platform is $PLATFORM"
 
 
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
