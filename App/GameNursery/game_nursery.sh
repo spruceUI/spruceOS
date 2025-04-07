@@ -204,6 +204,12 @@ show_slideshow_if_first_run
 get_latest_jsons
 construct_config
 
+[ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
+if [ ! "$PLATFORM" = "A30" ]; then
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "nursery" -c "./nursery.gptk" &
+	sleep 0.5
+fi
 killall -q -USR2 joystickinput # kbd mode
 cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
 killall -q -USR1 joystickinput # analog mode
+kill -9 "$(pidof gptokeyb)"

@@ -68,9 +68,9 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Use App folder for Miyoo and TrimUI devices despite different name schemes
         mkdir -p "/mnt/SDCARD/Apps"
         mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps" &
-        # Mask Roms/PORTS with Brick version
-        mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
-        mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
+        # Mask Roms/PORTS with non-A30 version
+        mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+        mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
         # Use appropriate RA config
         [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
@@ -139,6 +139,12 @@ fi
     ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
 } &
 
+    # don't hide or unhide apps in simple_mode
+    if ! flag_check "simple_mode"; then
+        [ "$PLATFORM" = "A30" ] && check_and_handle_firmware_app &
+        check_and_hide_update_app &
+    fi
+
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
 
@@ -174,12 +180,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # start watchdog for konami code
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
-
-    # don't hide or unhide apps in simple_mode
-    if ! flag_check "simple_mode"; then
-        check_and_handle_firmware_app &
-        check_and_hide_update_app &
-    fi
 
     check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
@@ -393,6 +393,10 @@ elif [ "$PLATFORM" = "Flip" ]; then
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
     
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+
 	# PortMaster ports location
 	# Portmaster installs ports to MIYOO_EX/ports whereas spruceOS wants it in /Roms/PORTS
     mkdir -p /mnt/sdcard/MIYOO_EX/ports/ 

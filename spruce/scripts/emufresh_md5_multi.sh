@@ -66,17 +66,22 @@ fi
 config_file="$emu_path/PICO8/config.json"
 show_pico8=$(cat "$config_file" | grep -Fc '{{')
 pico8_updated=false
+
+DYN_OR_64="pico8_64"
+[ "$PLATFORM" = "A30" ] && DYN_OR_64="pico8_dyn"
+
 if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
-	[ -f "$emu_path/PICO8/bin/pico8_dyn" ]; then
+	[ -f "$emu_path/PICO8/bin/$DYN_OR_64" ]; then
 	pico_files_present=1
 elif [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] &&
-	[ -f "/mnt/SDCARD/BIOS/pico8_dyn" ]; then
+	[ -f "/mnt/SDCARD/BIOS/$DYN_OR_64" ]; then
 	pico_files_present=1
 else
 	pico_files_present=0
 fi
+
 if [ "$pico_files_present" -eq 1 ]; then
-	log_message "emufresh: pico8.dat and pico8_dyn detected" -v
+	log_message "emufresh: pico8.dat and pico8_dyn or pico8_64 detected" -v
 	if [ ! $show_pico8 = 0 ]; then
 		pico8_updated=true
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
@@ -87,7 +92,7 @@ if [ "$pico_files_present" -eq 1 ]; then
 	fi
 else
 	if [ $show_pico8 = 0 ]; then
-		log_message "emufresh: pico8.dat and pico8_dyn not detected"
+		log_message "emufresh: pico8.dat and pico8_dyn or pico8_64 not detected"
 		pico8_updated=true
 		sed -i 's/^{*$/{{/' "$config_file"
 		echo "hide system PICO8" && log_message "emufresh: hiding PICO8 system"
