@@ -26,12 +26,12 @@ case "$PLATFORM" in
         ICONS="icons"
         ;;
     "Brick" )
-        SKIN_PATH="/mnt/SDCARD/trimui/brickThemes/SPRUCE/skin" 
+        SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin" 
         ICONS="icontop"
         ;;
         
     "SmartPro" )
-        SKIN_PATH="/mnt/SDCARD/trimui/smartProThemes/SPRUCE/skin"
+        SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin"
         ICONS="icontop"
         ;;
 esac

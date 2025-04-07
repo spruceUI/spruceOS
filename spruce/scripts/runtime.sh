@@ -196,8 +196,6 @@ if [ "$PLATFORM" = "A30" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    ${SCRIPTS_DIR}/autoIconRefresh.sh &
-
     swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
@@ -411,17 +409,14 @@ elif [ "$PLATFORM" = "Flip" ]; then
 	# (i.e. PortMaster looks here for config information which is device specific)
     mount --bind /mnt/sdcard/spruce/flip/ /root 
 
-    ${SCRIPTS_DIR}/autoIconRefresh.sh &
-
     killall runmiyoo.sh
 
 fi
 
+${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
-if [ "$PLATFORM" = "A30" ]; then
-    update_notification
-fi
+update_notification
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
