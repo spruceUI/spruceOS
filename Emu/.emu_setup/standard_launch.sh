@@ -296,14 +296,41 @@ load_pico8_control_profile() {
 	esac
 }
 
+is_32bit_port() {
+  
+    # long-term come up with better method.
+    # this is short term for testing
+    gamedir_line=$(grep "^GAMEDIR=" "$ROM_FILE")
+    # If gamedir_name ends with a slash, remove the slash
+    gamedir_line="${gamedir_line%/}"
+    # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
+    game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
+    # If game_dir ends with a quote, remove the quote
+    game_dir="${game_dir%\"}"
+    # If gmloader or box86 exist then its 32-bit
+    if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ]; then
+        return 1;
+    else
+        return 0;
+    fi
+}
+
 run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
-        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-        cd $PORTS_DIR
-        export HOME="/mnt/sdcard/spruce/flip/home"
-        export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:$LD_LIBRARY_PATH"
-        export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-        "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+	 
+	    is_32bit_port
+	    if [[ $? -eq 1 ]]; then
+		    echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+			cd /mnt/sdcard/Emu/PORT32/
+		    /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port32.log
+		else
+            PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+            cd $PORTS_DIR
+            export HOME="/mnt/sdcard/spruce/flip/home"
+            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
+            "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+		fi
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR

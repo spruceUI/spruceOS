@@ -1,0 +1,14 @@
+{
+"label":"Port32",
+"label.ch.lang":"Port32",
+"icon":"/mnt/SDCARD/Icons/Default/port32.png",
+"background":"bg.png",
+"themecolor":"DDEEFF",
+"launch":"launch.sh",
+"rompath":"../../Roms/PORT32",
+"imgpath":"../../Imgs/PORT32",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"sh"
+}
