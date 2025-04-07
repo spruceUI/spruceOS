@@ -322,7 +322,7 @@ run_port() {
 	    if [[ $? -eq 1 ]]; then
 		    echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
 			cd /mnt/sdcard/Emu/PORT32/
-		    /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE &> /mnt/sdcard/spruce/logs/port32.log
+		    /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port32.log
 		else
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd $PORTS_DIR
