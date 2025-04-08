@@ -278,6 +278,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
+    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/keymon &
+    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
+
     if [ -d "/media/sdcard1/miyoo355/" ]; then
         export CUSTOMER_DIR=/media/sdcard1/miyoo355/
     else
