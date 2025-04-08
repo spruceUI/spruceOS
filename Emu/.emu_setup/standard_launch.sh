@@ -308,7 +308,7 @@ is_32bit_port() {
     # If game_dir ends with a quote, remove the quote
     game_dir="${game_dir%\"}"
     # If gmloader or box86 exist then its 32-bit
-    if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ]; then
+    if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ] || [ -f "$game_dir/gmloadernext.armhf" ]; then
         return 1;
     else
         return 0;
