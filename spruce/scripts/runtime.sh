@@ -44,6 +44,8 @@ if [ "$PLATFORM" = "A30" ]; then
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
         mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
+        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/PORT32 &
+        mount -o bind /tmp/SATURN /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
