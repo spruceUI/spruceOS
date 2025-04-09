@@ -321,53 +321,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     mkdir -p /tmp/miyoo_inputd
 
-    if [ "$(/usr/miyoo/bin/jsonval turboA)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_a
-    else
-        unlink /tmp/miyoo_inputd/turbo_a
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboB)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_b
-    else
-        unlink /tmp/miyoo_inputd/turbo_b
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboX)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_x
-    else
-        unlink /tmp/miyoo_inputd/turbo_x
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboY)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_y
-    else
-        unlink /tmp/miyoo_inputd/turbo_y
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboL)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_l
-    else
-        unlink /tmp/miyoo_inputd/turbo_l
-    fi
-    
-    if [ "$(/usr/miyoo/bin/jsonval turboR)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_r
-    else
-        unlink /tmp/miyoo_inputd/turbo_r
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboL2)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_l2
-    else
-        unlink /tmp/miyoo_inputd/turbo_l2
-    fi
-    
-    if [ "$(/usr/miyoo/bin/jsonval turboR2)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_r2
-    else
-        unlink /tmp/miyoo_inputd/turbo_r2
-    fi
+    for btn in A B X Y L R L2 R2; do
+        val=$(/usr/miyoo/bin/jsonval turbo$btn)
+        file="/tmp/miyoo_inputd/turbo_$(echo $btn | tr '[:upper:]' '[:lower:]')"
+        [ "$val" = "1" ] && touch "$file" || unlink "$file"
+    done
 
     miyoo_fw_update=0
     miyoo_fw_dir=/media/sdcard0
