@@ -1,5 +1,3 @@
 #!/bin/sh
-echo pwd : $(pwd)
 
-echo "Executing exec_chroot.sh $1"
-./exec_chroot.sh "$1" &> /mnt/sdcard/spruce/logs/exec_chroot.log
+chroot  /mnt/sdcard/spruce/32bit_chroot /bin/sh -c "/mnt/sdcard/Emu/PORT32/run_port.sh \"$1\""
