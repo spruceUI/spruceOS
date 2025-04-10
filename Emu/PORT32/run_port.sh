@@ -9,5 +9,5 @@ export PATH="/mnt/sdcard/spruce/flip/muOS/usr/bin:$PATH"
 echo executing $1 > /mnt/sdcard/spruce/logs/run_port.log
 "$1" &> /mnt/sdcard/spruce/logs/port32.log
 
-/mnt/sdcard/spruce/flip/umout_muOS.sh
+/mnt/sdcard/spruce/flip/umount_muOS.sh
 
