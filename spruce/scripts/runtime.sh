@@ -375,6 +375,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
+
     killall runmiyoo.sh
 
 fi
