@@ -107,7 +107,7 @@ fi
 
 # compute new md5 value for files under Roms
 # except known non-rom files
-new_all_md5=$(find "$roms_path" -mindepth 2 -maxdepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
 
 # if no update and no force option is used, exit with 0
 if [ ! "$new_all_md5" = "$all_md5" ]; then
@@ -140,7 +140,7 @@ check_rom_folders() {
 		system_name=$(basename "$folder")
 
 		# get all file names except known non-rom files
-		file_list=$(find "$folder" -mindepth 1 -maxdepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
+		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
 
 		# get old md5 value
 		md5=$(cat "$md5_path/$system_name.md5" 2>/dev/null)
