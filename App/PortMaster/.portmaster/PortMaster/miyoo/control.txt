@@ -6,9 +6,20 @@
 # TODO: check this
 CUR_TTY=/dev/null
 
-controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
+if [ -d "/mnt/sdcard/spruce" ]; then
+  controlfolder="/mnt/sdcard/Roms/.portmaster/PortMaster"
+  directory="/mnt/sdcard/Roms/PORTS64/"
+  export PATH="/mnt/sdcard/Roms/.portmaster/bin:$PATH"
+  export LD_LIBRARY_PATH="/mnt/sdcard/Roms/.portmaster/lib:$LD_LIBRARY_PATH"
+else
+  controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
+  directory="/mnt/sdcard/MIYOO_EX/"
+  # MIYOO_EXtra shit i need.
+  export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
+  export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
 
-directory="/mnt/sdcard/MIYOO_EX/"
+fi
+
 
 ## Python 3 runtime.
 mkdir -p $HOME/python3
@@ -19,10 +30,6 @@ fi
 
 mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
 source $HOME/python3/bin/activate
-
-# MIYOO_EXtra shit i need.
-export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
-export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
 
 ESUDO=""
 ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
