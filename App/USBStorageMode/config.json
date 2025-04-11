@@ -1,0 +1,6 @@
+{
+	"label":        "Usb Storage Mode",
+	"icon":	        "",
+	"launch":       "launch.sh",
+	"description":  "Only for Brick and A30 currently"
+}
