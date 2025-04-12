@@ -9,5 +9,5 @@ case "$PLATFORM" in
     "A30" ) ./launch_A30.sh ;;
     "Brick" ) ./launch_Brick.sh ;;
     "SmartPro" ) exit 20 ;;
-    "Flip" ) exit 30 ;;
+    "Flip" ) ./launch_Flip.sh ;;
 esac
