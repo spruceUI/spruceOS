@@ -23,7 +23,7 @@ while true; do
 			if [[ -n "$pid" ]]; then
 				echo "The first PID with 'box86' (excluding grep) is: $pid. Killing..."
 				kill -9 $pid
-				exit 0
+				# exit 0
 			else
 				echo "No process with 'box86' found."
 				exit 0
