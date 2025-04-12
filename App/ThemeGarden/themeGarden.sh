@@ -151,7 +151,7 @@ download_theme() {
     display --icon "$ICON_PATH" -t "Downloading ${theme_name}..."
 
     # Get file size for progress tracking
-    TARGET_SIZE_BYTES="$(curl -k -I -L "$theme_url" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2)"
+    TARGET_SIZE_BYTES="$(curl -k -I -L "$theme_url" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2 | tr -d '\r\n')"
     TARGET_SIZE_KILO=$((TARGET_SIZE_BYTES / 1024))
     TARGET_SIZE_MEGA=$((TARGET_SIZE_KILO / 1024))
 
