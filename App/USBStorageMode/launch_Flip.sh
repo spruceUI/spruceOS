@@ -4,16 +4,20 @@ cd "$DIR"
 
 STORAGE_DEVICE="/dev/mmcblk1p1"
 MOUNT_POINT="/mnt/SDCARD"
-AC_POWER_PATH="/sys/class/power_supply/ac"
 USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
 USB_UDC_CONTROLLER="fcc00000.dwc3"
 USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
+UDC_STATE_FILE="/sys/class/udc/fcc00000.dwc3/state"
 
 check_usb_connection() {
-    if [ -f "$AC_POWER_PATH/online" ]; then
-        ac_online=$(cat "$AC_POWER_PATH/online" 2>/dev/null || echo "0")
-        [ "$ac_online" = "1" ] && return 0
-    fi
+    local retries=3
+    for i in $(seq 1 $retries); do
+        state=$(cat "$UDC_STATE_FILE" 2>/dev/null || echo "")
+        if [ "$state" = "configured" ]; then
+            return 0
+        fi
+        sleep 0.3
+    done
     return 1
 }
 
@@ -92,10 +96,7 @@ setup_usb() {
     echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
     sleep 1
 
-    echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-    sleep 1
-    echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-    sleep 1
+    # Set UDC only once to initialize the connection.
     echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
 
     kill $notif_pid 2>/dev/null

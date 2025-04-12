@@ -2,5 +2,5 @@
 	"label":        "USB Storage Mode",
 	"icon":	        "",
 	"launch":       "launch.sh",
-	"description":  "Only for Brick and A30 currently"
+	"description":  "Transfer files over USB"
 }

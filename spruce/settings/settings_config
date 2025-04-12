@@ -297,6 +297,6 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Theme Garden" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/ThemeGarden/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/ThemeGarden/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/ThemeGarden/config.json" ""
 @"Download and install themes from our theme repo"
 
-<A30> <Brick>
+<A30> <Brick> <Flip>
 "" "USB Storage Mode" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/USBStorageMode/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/USBStorageMode/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/USBStorageMode/config.json" ""
 @"Transfer files safely over USB"
