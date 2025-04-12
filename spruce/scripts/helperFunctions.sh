@@ -43,7 +43,7 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
-log_message "[helperFunctions.sh] $INFO"
+log_message "[helperFunctions.sh] $INFO" -v
 
 case $INFO in
 *"sun8i"*)
