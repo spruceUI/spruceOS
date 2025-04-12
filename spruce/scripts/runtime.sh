@@ -24,9 +24,9 @@ esac
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
 cores_online &
+echo mmc0 > "$LED_PATH"/trigger
 
 if [ "$PLATFORM" = "A30" ]; then
-    echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     SWAPFILE="/mnt/SDCARD/cachefile"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
@@ -184,8 +184,6 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 
     check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
-
-    ${SCRIPTS_DIR}/low_power_warning.sh &
 
     # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
@@ -376,6 +374,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
 fi
 
+${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &

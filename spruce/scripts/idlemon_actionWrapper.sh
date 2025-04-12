@@ -11,7 +11,7 @@ process_name=$1
 # Handle different process names....
 case "$process_name" in
     MainUI)
-	    echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
+	    echo heartbeat > "$LED_PATH"/trigger
 		killall -q -0 MainUI
         alsactl store
 		vibrate

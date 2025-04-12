@@ -82,7 +82,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
 fi
 
 # notify user with led
-echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger
+echo heartbeat > "$LED_PATH"/trigger
 
 # kill principle and runtime first so no new app / MainUI will be loaded anymore
 killall -q -15 runtime.sh

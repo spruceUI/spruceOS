@@ -10,9 +10,9 @@ log_message "AutoRA: Save active flag detected"
 
 #Set the LED
 if flag_check "ledon"; then
-	echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+	echo 1 > "$LED_PATH"/brightness
 else
-	echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+	echo 0 > "$LED_PATH"/brightness
 fi
 
 # move command to cmd_to_run.sh so game switcher can work correctly
