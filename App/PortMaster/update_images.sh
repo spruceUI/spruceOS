@@ -1,6 +1,8 @@
 #Directory to search in
 directory="/mnt/sdcard/Roms/PORTS"
 
+mkdir -p "$directory/Imgs"
+
 # Loop through each file in the directory
 for file in "$directory"/*; do
   # Check if it is a regular file

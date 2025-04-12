@@ -6,7 +6,7 @@
 # TODO: check this
 CUR_TTY=/dev/null
 
-if [ -d "/mnt/SDCARD/spruce" ]; then
+if [ -d "/mnt/sdcard/spruce" ]; then
   controlfolder="/mnt/sdcard/Roms/.portmaster/PortMaster"
   directory="/mnt/sdcard/Roms/PORTS64/"
   export PATH="/mnt/sdcard/Roms/.portmaster/bin:$PATH"
