@@ -87,6 +87,7 @@ if [ $ARGUMENT = "apply" ]; then
 	check_and_hide_app "ShowOutputTest"
 	check_and_hide_app "spruceBackup"
 	check_and_hide_app "ThemePacker"
+	check_and_hide_app "USBStorageMode"
 
 	# make sure these apps show up
 	check_and_reveal_app "AdvancedSettings"
