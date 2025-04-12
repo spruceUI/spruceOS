@@ -52,6 +52,9 @@ if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mo
     MODES="$MODES -m Expert"
 fi
 
+# Add a mode based on which device spruce is running on
+MODES="$MODES -m $PLATFORM"
+
 if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac always create a junk file at the sdcard root?
 
 # Easy to add more modes like this:
