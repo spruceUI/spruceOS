@@ -64,8 +64,6 @@ case $INFO in
 esac
 
 log_message "[helperFunctions.sh] Platform is $PLATFORM"
-
-
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ "$ARCH" = "aarch64" ]; then
@@ -771,11 +769,13 @@ get_theme_path_to_restore(){
     local current_theme_path=$(get_current_theme_path)
     local spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
     local default_theme="../res/"
+    local default_theme_2="./"
 
     # if the current theme is equal to the default miyoo theme
     if [[ "$current_theme_path" == "$default_theme" ]]; then # that's ugly!
         echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
-
+    elif [[ "$current_theme_path" == "$default_theme_2" ]]; then # that's ugly!
+        echo "$spruce_theme"                                     # Switch to the spruce theme ASAP
     else # If not, give back the user his loved theme <3
         echo "$current_theme_path"
     fi

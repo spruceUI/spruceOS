@@ -33,11 +33,10 @@ cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.ba
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
-if [ "$PLATFORM" = "A30" ]; then
+log_message "Running developer mode check" -v
+/mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
 
-    # TODO: unwrap devconf from A30 check once network services are set up on Brick
-    log_message "Running developer mode check" -v
-    /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
+if [ "$PLATFORM" = "A30" ]; then
 
     if [ -f "${SWAPFILE}" ]; then
         SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
@@ -89,7 +88,7 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 fi
 
-# Disable stock USB file transfer app and SD formatter for Brick
+# Disable stock USB file transfer app and SD formatter for Brick & SmartPro
 if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
     [ -f "$USB_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null

@@ -374,18 +374,18 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
 fi
 
-${SCRIPTS_DIR}/low_power_warning.sh &
-${SCRIPTS_DIR}/autoIconRefresh.sh &
-developer_mode_task &
-update_checker &
-#update_notification
-
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
 else
     log_message "First boot procedures skipped"
 fi
+
+${SCRIPTS_DIR}/low_power_warning.sh &
+${SCRIPTS_DIR}/autoIconRefresh.sh &
+developer_mode_task &
+update_checker &
+# update_notification
 
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script
