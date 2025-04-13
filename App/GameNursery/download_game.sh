@@ -23,7 +23,7 @@ download_progress "$TMP_DIR/$ZIP_NAME" "$TARGET_SIZE_MEGA" "Now downloading $GAM
 
 # Verify enough space to download current game
 
-TARGET_SIZE_BYTES="$(curl -k -I -L "$GAME_URL" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2)"
+TARGET_SIZE_BYTES="$(curl -k -I -L "$GAME_URL" 2>/dev/null | grep -i "Content-Length" | tail -n1 | cut -d' ' -f 2 | tr -d '\r\n')"
 TARGET_SIZE_KILO=$((TARGET_SIZE_BYTES / 1024))
 TARGET_SIZE_MEGA=$((TARGET_SIZE_KILO / 1024))
 REQUIRED_SPACE=$((TARGET_SIZE_MEGA * 3))
