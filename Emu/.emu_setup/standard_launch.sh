@@ -453,6 +453,8 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
+	#Swap below if debugging new cores
+	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/sdcard/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 
