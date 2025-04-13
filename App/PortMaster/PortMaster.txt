@@ -23,19 +23,19 @@ else
   export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
   export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/lib/"
+  ## Python 3 runtime.
+  mkdir -p $HOME/python3
+
+  if [ -d $HOME/python3/bin ]; then
+    umount $HOME/python3
+  fi
+
+  mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
+  source $HOME/python3/bin/activate
+
 fi
 
 
-
-## Python 3 runtime.
-mkdir -p $HOME/python3
-
-if [ -d $HOME/python3/bin ]; then
-  umount $HOME/python3
-fi
-
-mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
-source $HOME/python3/bin/activate
 
 ESUDO=""
 ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
