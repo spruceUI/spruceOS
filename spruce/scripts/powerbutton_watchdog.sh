@@ -4,6 +4,9 @@
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
@@ -133,9 +136,12 @@ while true; do
             cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
             ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
             echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+            
         fi
 
+        if [ $PLATFORM = "A30"]; then
+            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        fi
     fi
 
     # wait long enough to ensure wakeup task is finished
