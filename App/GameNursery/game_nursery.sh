@@ -202,10 +202,12 @@ check_battery
 check_for_connection
 show_slideshow_if_first_run
 get_latest_jsons
+
 construct_config
 
 [ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
 if [ ! "$PLATFORM" = "A30" ]; then
+    cd /mnt/SDCARD/App/GameNursery
 	/mnt/SDCARD/spruce/bin64/gptokeyb -k "nursery" -c "./nursery.gptk" &
 	sleep 0.5
 fi
