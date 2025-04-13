@@ -4,6 +4,9 @@
 # Please DO NOT PRINT ANYTHING ELSE TO STDOUT for logging !!
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
 
 if [ "$#" -eq 0 ]; then
     A=true

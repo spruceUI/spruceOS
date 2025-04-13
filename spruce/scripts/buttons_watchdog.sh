@@ -4,6 +4,9 @@
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
 START_DOWN=false
 

@@ -3,6 +3,10 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
+
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
@@ -113,6 +117,15 @@ if pgrep "ra32.miyoo" >/dev/null; then
     # } | $BIN_PATH/sendevent /dev/input/event3
     # sleep 0.3
     killall -q -15 ra32.miyoo
+elif pgrep "ra64.miyoo" >/dev/null; then
+    # {
+    #     echo 1 1 0   # MENU up
+    #     echo 1 57 1  # A down
+    #     echo 1 57 0  # A up
+    #     echo 0 0 0   # tell sendevent to exit
+    # } | $BIN_PATH/sendevent /dev/input/event3
+    # sleep 0.3
+    killall -q -15 ra64.miyoo
 elif pgrep "PPSSPPSDL" >/dev/null; then
     {
         # send autosave hot key
@@ -132,6 +145,7 @@ fi
 
 # wait until emulator or MainUI exit
 while killall -q -0 ra32.miyoo ||
+    killall -q -0 ra64.miyoo ||
     killall -q -0 retroarch ||
     killall -q -0 PPSSPPSDL ||
     killall -q -0 drastic ||
