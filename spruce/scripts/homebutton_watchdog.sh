@@ -9,6 +9,9 @@ if [ "$PLATFORM" = "A30" ]; then
 elif [ "$PLATFORM" = "Brick" ]; then
     log_message "*** homebutton_watchdog.sh: PLATFORM = Brick" -v
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
+elif [ "$PLATFORM" = "Flip" ]; then
+    log_message "*** homebutton_watchdog.sh: PLATFORM = Flip" -v
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
 fi
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
@@ -240,14 +243,13 @@ long_press_handler() {
             prepare_game_switcher
             ;;
         "In-game menu")
-            if pgrep "ra32.miyoo" >/dev/null; then
+            if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
                 log_message "*** homebutton_watchdog.sh: Trimui RA" -v
                   send_virtual_key_MENUX
             elif pgrep "retroarch" >/dev/null; then
                 send_virtual_key_L3R3
-
             elif pgrep "PPSSPPSDL" >/dev/null; then
                 send_virtual_key_L3
                 killall -q -CONT PPSSPPSDL
@@ -344,7 +346,6 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                 elif pgrep "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v
                     send_virtual_key_L3R3
-
                 elif pgrep "PPSSPPSDL" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: PPSSPPSDL" -v
                     send_virtual_key_L3
@@ -378,7 +379,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
             killall -q -CONT MainUI
             # TODO: need to fix vibrate for Brick
-            if [ "$PLATFORM" = "A30" ]; then
+            if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
               vibrate
             fi
             kill_current_app
@@ -389,7 +390,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
     case $line in
     # Home key down
     *"key 1 1 1"*)
-        if [ "$PLATFORM" = "A30" ]; then
+        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             home_key_down
         fi
         ;;
@@ -400,7 +401,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         ;;
     # Home key up
     *"key 1 1 0"*)
-        if [ "$PLATFORM" = "A30" ]; then
+        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             home_key_up
         fi
         ;;
@@ -411,7 +412,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         ;;
     # Start button down
     *"key 1 28 1"*)
-        if [ "$PLATFORM" = "A30" ]; then
+        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             start_button_down
         fi
         ;;

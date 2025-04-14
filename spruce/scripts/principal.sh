@@ -89,10 +89,7 @@ while [ 1 ]; do
 
         # Check for the low_battery flag
         if flag_check "low_battery"; then
-            case "$PLATFORM" in
-                "A30" | "Flip" ) CAPACITY=$(cat /sys/class/power_supply/battery/capacity) ;;
-                "Brick" | "SmartPro" ) CAPACITY=$(cat /sys/class/power_supply/axp2202-battery/capacity) ;;
-            esac
+            CAPACITY=$(cat $BATTERY/capacity)
             display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
             flag_remove "low_battery"
         fi

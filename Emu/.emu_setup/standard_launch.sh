@@ -170,8 +170,8 @@ run_drastic() {
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		[ ! "$PLATFORM" = "Flip" ] || export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
-		[ ! "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
+		[ "$PLATFORM" = "Flip" ] || export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
+		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
 		./drastic64 "$ROM_FILE"
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
 	fi
@@ -325,10 +325,19 @@ is_retroarch_port() {
     fi
 }
 
+set_port_mode() {
+	rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	if [ "$PORT_CONTROL" = "X360" ]; then
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	else
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	fi
+	
+}
 
 run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
-     
+        set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
             echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
@@ -453,6 +462,8 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
+	#Swap below if debugging new cores
+	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/sdcard/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 
