@@ -33,6 +33,10 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
+      "name": "Controls: (✓X360)-Nintendo",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/control_switch.sh"
+    },
+    {
       "name": "Save current launch settings as per-game override",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
     },
