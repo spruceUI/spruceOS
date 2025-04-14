@@ -368,8 +368,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
-    ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    #${SCRIPTS_DIR}/buttons_watchdog.sh &
+    #${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
