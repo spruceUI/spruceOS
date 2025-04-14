@@ -3,10 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-fi
-
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
