@@ -85,7 +85,19 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
     )
-
+elif [ "$PLATFORM" = "Flip" ]; then
+    if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        mkdir /mnt/sdcard/Saves/userdata-flip
+        cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bluetooth
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/cfg
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/localtime
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/timezone
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
+    fi
+    mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
 fi
 
 # Flag cleanup
