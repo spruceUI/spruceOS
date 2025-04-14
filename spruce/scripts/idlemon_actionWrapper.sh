@@ -18,7 +18,7 @@ case "$process_name" in
         sync
         poweroff
         ;;
-    ra32.miyoo|drastic|PPSSPP|switcher)
+    ra32.miyoo|ra64.miyoo|drastic|PPSSPP|switcher)
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         ;;
     *)

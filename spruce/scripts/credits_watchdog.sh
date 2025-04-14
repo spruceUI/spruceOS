@@ -3,6 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
 
 LONG_PRESSED=false
 

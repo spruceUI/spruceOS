@@ -66,7 +66,7 @@ while true; do
                 esac
 
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
-                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
                         cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
                         CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
@@ -78,7 +78,7 @@ while true; do
                 fi
 
                 if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
-                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         flag_add "sleep.powerdown"
                         cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
                         CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
@@ -94,6 +94,7 @@ while true; do
 
                 # PAUSE any other running emulator or MainUI
                 killall -q -19 ra32.miyoo ||
+                    killall -q -19 ra64.miyoo ||
                     killall -q -19 retroarch ||
                     killall -q -19 PPSSPPSDL ||
                     killall -q -19 drastic ||
@@ -132,9 +133,12 @@ while true; do
             cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
             ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
             echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+            
         fi
 
+        if [ $PLATFORM = "A30"]; then
+            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        fi
     fi
 
     # wait long enough to ensure wakeup task is finished
@@ -142,6 +146,7 @@ while true; do
 
     # RESUME any running emulator or MainUI
     killall -q -18 ra32.miyoo ||
+        killall -q -18 ra64.miyoo ||
         killall -q -18 retroarch ||
         killall -q -18 PPSSPPSDL ||
         killall -q -18 drastic ||
@@ -163,7 +168,7 @@ while true; do
             flag_remove "wake.alarm"
             flag_add "sleep.powerdown"
 
-            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
             fi
 

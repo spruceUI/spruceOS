@@ -379,6 +379,23 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
+    # listen hotkeys for brightness adjustment, volume buttons and power button
+    #${SCRIPTS_DIR}/buttons_watchdog.sh &
+    #${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+
+     # Load idle monitors before game resume or MainUI
+    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+
+    # check whether to auto-resume into a game
+    if flag_check "save_active"; then
+        ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
+        log_message "Auto Resume executed"
+    else
+        log_message "Auto Resume skipped (no save_active flag)"
+    fi
+
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
