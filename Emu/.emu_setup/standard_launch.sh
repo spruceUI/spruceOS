@@ -325,10 +325,19 @@ is_retroarch_port() {
     fi
 }
 
+set_port_mode() {
+	rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	if [ "$PORT_CONTROL" = "X360" ]; then
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	else
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	fi
+	
+}
 
 run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
-     
+        set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
             echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
