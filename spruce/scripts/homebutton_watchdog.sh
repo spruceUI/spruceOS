@@ -244,7 +244,7 @@ long_press_handler() {
             ;;
         "In-game menu")
             if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                send_virtual_key_L3R3
+                send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
                 log_message "*** homebutton_watchdog.sh: Trimui RA" -v
                   send_virtual_key_MENUX
@@ -339,7 +339,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
               log_message "*** homebutton_watchdog.sh: In-game menu" -v
                 if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: Miyoo RA32/RA64" -v
-                    send_virtual_key_L3R3
+                    send_virtual_key_L3
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: Trimui RA" -v
                     send_virtual_key_MENUX
