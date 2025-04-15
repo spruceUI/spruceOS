@@ -1,10 +1,11 @@
 #!/bin/sh
 
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+total_start_time=$(date +%s)
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 # check flag to avoid reenter
 if flag_check "emufresh"; then
-	return 0
+	exit 0
 fi
 
 # setup flag to avoid reenter
@@ -99,47 +100,28 @@ else
 	fi
 fi
 
-# read old md5 value for Roms folder
-if [ -f "$md5_path/all.md5" ]; then
-	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
-	log_message "emufresh: previous MD5 sum of all Roms folders is $all_md5" -v
-fi
-
-# compute new md5 value for files under Roms
-# except known non-rom files
-new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
-
-# if no update and no force option is used, exit with 0
-if [ ! "$new_all_md5" = "$all_md5" ]; then
-    echo [All] MD5 Changed : was $all_md5 but is now $new_all_md5 so refreshing
-elif [ ! $pico8_updated ]; then
-    echo [All] pico8 updated so refreshing
-elif [ "$1" = "-force" ]; then
-    echo [All] force arg passed so refreshing
-else
-	echo "no update" && log_message "emufresh: no update needed. Exiting!"
-
-	# remove flag before exit
-	flag_remove "emufresh"
-
-	exit 0
-fi
-
-# otherwise update md5 file and continue
-echo Writing $new_all_md5 to $md5_path/all.md5
-echo "$new_all_md5" > "$md5_path/all.md5"
-
 # get all rom folders
 rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d)
+new_roms=false
 
 # function to check list of rom folders
 check_rom_folders() {
 	# loop for all rom folders
 	echo "$1" | while read -r folder; do
+		start_time=$(date +%s)
+		
 		# get system name
 		system_name=$(basename "$folder")
 
 		# get all file names except known non-rom files
+		if [[ "$system_name" == "PORTS" ]]; then
+			file_list=$(find "$folder" -mindepth 1 -maxdepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
+		elif [[ "$system_name" == .* || "$system_name" == "PORTS64" ]]; then
+			continue
+		else
+			file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
+		fi
+
 		file_list=$(find "$folder" -mindepth 1 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" ! -name "*cache7.db" | sed '/^\s*$/d')
 
 		# get old md5 value
@@ -150,7 +132,7 @@ check_rom_folders() {
 
 		# check rom updates if md5 is different
 		if [ ! "$new_md5" = "$md5" ]; then
-
+			new_roms = true
 			# store new md5 value
 			echo [$system_name] Writing $new_md5 to $md5_path/$system_name.md5
 			echo "$new_md5" >"$md5_path/$system_name.md5"
@@ -194,9 +176,14 @@ check_rom_folders() {
 				echo "[$system_name] show system $system_name" && log_message "emufresh: Revealing $system_name"
 			fi
 		fi
+		end_time=$(date +%s)
+		duration=$((end_time - start_time))
+		echo $system_name took $duration seconds
+
 	done
 }
 
+# split the folder list into 4 sub-lists and check them parallelly in 4 processes
 # split the folder list into 4 sub-lists and check them parallelly in 4 processes
 folders=$(echo "$rom_folders" | sed -n 'p;n;n;n')
 check_rom_folders "$folders" &
@@ -207,12 +194,17 @@ check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
 check_rom_folders "$folders" 
 
-# wait all process to finish
 wait
-echo "all processes finished" && log_message "emufresh complete!"
+
+
+end_time=$(date +%s)
+duration=$((end_time - total_start_time))
+
+
+echo "all processes finished in $duration seconds" && log_message "emufresh complete!"
 
 # notify user to confirm restarting MainUI
-if pgrep "MainUI" > /dev/null; then
+if pgrep "MainUI" > /dev/null && [[ new_roms == true ]]; then
 	# pause MainUI
 	killall -STOP MainUI
 
