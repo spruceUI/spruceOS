@@ -4,6 +4,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+    log_message "wpa_watchdog disabled due to existence of /mnt/sdcard/Saves/.disablesprucewifi"
+    exit 0
+fi
+
 case "$PLATFORM" in
     "Brick" | "SmartPro" )
         WPA_FILE="/etc/wifi/wpa_supplicant.conf"

@@ -2,6 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+    log_message "wifi_watchdog disabled due to existence of /mnt/sdcard/Saves/.disablesprucewifi"
+    exit 0
+fi
+
 # Settings
 WIFI_INTERFACE="wlan0"
 PING_TARGET="1.1.1.1"      # Use IP that is broadly available globally!
