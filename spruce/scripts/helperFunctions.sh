@@ -196,15 +196,19 @@ check_and_connect_wifi() {
         log_message "Attempting to connect to WiFi"
 
         # Bring the existing interface down cleanly if its running
-        ifconfig wlan0 down
-        killall wpa_supplicant
-        killall udhcpc
+        if [ ! -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+            ifconfig wlan0 down
+            killall wpa_supplicant
+            killall udhcpc
 
-        # Restart the interface and try to connect
-        ifconfig wlan0 up
-        wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
-        udhcpc -i wlan0 &
-
+            # Restart the interface and try to connect
+            ifconfig wlan0 up
+            wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
+            udhcpc -i wlan0 &
+        else
+            log_message "Letting stock OS restart wifi due to existance of /mnt/sdcard/Saves/.disablesprucewifi"
+        fi
+		
         display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
 Press START to continue anyway."
         {
