@@ -180,7 +180,7 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    ./joypad $EVENT_PATH_KEYBOARD &
 
     # read joystick raw data from serial input and apply calibration,
     # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
@@ -283,7 +283,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     # TODO: verify that we can call this via absolute path
     cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    ./joypad $EVENT_PATH_KEYBOARD &
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
@@ -399,11 +399,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
-    sleep 0.2
-    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-    # TODO: verify that we can call this via absolute path
     cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    ./joypad $EVENT_PATH_KEYBOARD &
 
     killall runmiyoo.sh
 
