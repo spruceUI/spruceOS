@@ -30,5 +30,4 @@ if [ "$MOUNT_MODE" = "ro" ]; then #set to rw for testing
 fi
 
 cd /mnt/SDCARD/spruce/scripts
-mkdir -p /mnt/SDCARD/spruce/logs/
-./runtime.sh &> /mnt/SDCARD/spruce/logs/runtime.log
+./runtime.sh
