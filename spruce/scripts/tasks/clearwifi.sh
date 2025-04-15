@@ -2,6 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+    log_message "clearwifi disabled due to existence of /mnt/sdcard/Saves/.disablesprucewifi"
+    exit 0
+fi
+
 # Bring the Wi-Fi interface down
 ifconfig wlan0 down
 sleep 2  
