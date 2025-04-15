@@ -1240,7 +1240,7 @@ vibrate() {
                     sleep 0.003
                     echo -n 0 > /sys/class/gpio/gpio20/value
                     sleep 0.001
-                    timer=$(($timer + 3))
+                    timer=$(($timer + 4))
                 done &
             fi
             ;;
