@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spurce/settings/$PLATFORM.cfg
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
 if [ "$PLATFORM" = "A30" ]; then
@@ -104,7 +105,7 @@ prepare_game_switcher() {
         # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
-        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DEVICE_WIDTH -h $DEVICE_HEIGHT -b 32 -l $DEVICE_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
+        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DISPLAY_WIDTH -h $DISPLAY_HEIGHT -b 32 -l $DISPLAY_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -264,7 +265,7 @@ long_press_handler() {
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                log_message "*** homebutton_watchdog.sh: Trimui RA" -v
+                log_message "*** homebutton_watchdog.sh: Trimui/Flip RA" -v
                   send_virtual_key_MENUX
             elif pgrep "retroarch" >/dev/null; then
                 send_virtual_key_L3R3
@@ -359,7 +360,7 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                   log_message "*** homebutton_watchdog.sh: Miyoo RA32/RA64" -v
                     send_virtual_key_L3
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                  log_message "*** homebutton_watchdog.sh: Trimui RA" -v
+                  log_message "*** homebutton_watchdog.sh: Trimui/Flip RA" -v
                     send_virtual_key_MENUX
                 elif pgrep "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v

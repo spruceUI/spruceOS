@@ -399,6 +399,12 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
+    sleep 0.2
+    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+    # TODO: verify that we can call this via absolute path
+    cd ${BIN_DIR}
+    ./joypad /dev/input/event3 &
+
     killall runmiyoo.sh
 
 fi
