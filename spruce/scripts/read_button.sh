@@ -6,11 +6,16 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-if [ ! "$PLATFORM" = "A30"]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+BIN_PATH="/mnt/SDCARD/spruce/bin64"
+if [ "$PLATFORM" = "A30"]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
+    TRIGGER_DOWN="1"
+else
+    TRIGGER_DOWN="255"
 fi
 
+DOWN=1
+if [ $PLATFORM]
 if [ "$#" -eq 0 ]; then
     A=true
     B=true
@@ -56,27 +61,27 @@ done
 
 ( $BIN_PATH/getevent /dev/input/event3 -pid $$ & ) | while read line; do
     case $line in
-        *"$B_A 1"*) [ ! -z "$A" ] && echo -n "A" && break ;;
-        *"$B_B 1"*) [ ! -z "$B" ] && echo -n "B" && break ;;
-        *"$B_X 1"*) [ ! -z "$X" ] && echo -n "X" && break ;;
-        *"$B_Y 1"*) [ ! -z "$Y" ] && echo -n "Y" && break ;;
+        *"key $B_A 1"*) [ ! -z "$A" ] && echo -n "A" && break ;;
+        *"key $B_B 1"*) [ ! -z "$B" ] && echo -n "B" && break ;;
+        *"key $B_X 1"*) [ ! -z "$X" ] && echo -n "X" && break ;;
+        *"key$B_Y 1"*) [ ! -z "$Y" ] && echo -n "Y" && break ;;
 
-        *"$B_L1 "*) [ ! -z "$L1" ] && echo -n "L1" && break ;;
-        *"$B_L2"*) [ ! -z "$L2" ] && echo -n "L2" && break ;;
-        *"$B_R1"*) [ ! -z "$R1" ] && echo -n "R1" && break ;;
-        *"$B_R2"*) [ ! -z "$R2" ] && echo -n "R2" && break ;;
+        *"key $B_L1 1"*) [ ! -z "$L1" ] && echo -n "L1" && break ;;
+        *"key $B_L2 $DOWN"*) [ ! -z "$L2" ] && echo -n "L2" && break ;;
+        *"key $B_R1 1"*) [ ! -z "$R1" ] && echo -n "R1" && break ;;
+        *"key $B_R2 $DOWN"*) [ ! -z "$R2" ] && echo -n "R2" && break ;;
 
-        *"$B_LEFT"*) [ ! -z "$LEFT" ] && echo -n "LEFT" && break ;;
-        *"$B_RIGHT"*) [ ! -z "$RIGHT" ] && echo -n "RIGHT" && break ;;
-        *"$B_UP"*) [ ! -z "$UP" ] && echo -n "UP" && break ;;
-        *"$B_DOWN"*) [ ! -z "$DOWN" ] && echo -n "DOWN" && break ;;
+        *"key $B_LEFT"*) [ ! -z "$LEFT" ] && echo -n "LEFT" && break ;;
+        *"key $B_RIGHT"*) [ ! -z "$RIGHT" ] && echo -n "RIGHT" && break ;;
+        *"key $B_UP"*) [ ! -z "$UP" ] && echo -n "UP" && break ;;
+        *"key $B_DOWN"*) [ ! -z "$DOWN" ] && echo -n "DOWN" && break ;;
 
-        *"$B_START 1"*) [ ! -z "$START" ] && echo -n "START" && break ;;
-        *"$B_SELECT 1"*) [ ! -z "$SELECT" ] && echo -n "SELECT" && break ;;
+        *"key $B_START 1"*) [ ! -z "$START" ] && echo -n "START" && break ;;
+        *"key $B_SELECT 1"*) [ ! -z "$SELECT" ] && echo -n "SELECT" && break ;;
 
-        *"$B_MENU 1"*) [ ! -z "$MENU" ] && echo -n "MENU" && break ;;
-        *"$B_VOLUP 1"*) [ ! -z "$VOLUMN_UP" ] && echo -n "VOLUMN_UP" && break ;;
-        *"$B_VOLDOWN 1"*) [ ! -z "$VOLUMN_DOWN" ] && echo -n "VOLUMN_DOWN" && break ;;
+        *"key $B_MENU 1"*) [ ! -z "$MENU" ] && echo -n "MENU" && break ;;
+        *"key $B_VOLUP 1"*) [ ! -z "$VOLUMN_UP" ] && echo -n "VOLUMN_UP" && break ;;
+        *"key $B_VOLDOWN 1"*) [ ! -z "$VOLUMN_DOWN" ] && echo -n "VOLUMN_DOWN" && break ;;
     esac
 done
 

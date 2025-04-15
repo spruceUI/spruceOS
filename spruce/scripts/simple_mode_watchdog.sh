@@ -21,7 +21,7 @@ detect_konami_code() {
 		log_message "number of correct inputs: $NUM_CORRECT" -v
 		
 		case "$line" in
-			*"$B_UP 1"*)
+			*"key $B_UP"*)
 				log_message "+++UP" -v
 				if [ $NUM_CORRECT -eq 0 ] || [ $NUM_CORRECT -eq 1 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -29,7 +29,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_DOWN 1"*)
+			*"key $B_DOWN"*)
 				log_message "+++DOWN" -v
 				if [ $NUM_CORRECT -eq 2 ] || [ $NUM_CORRECT -eq 3 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -37,7 +37,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_LEFT 1"*)
+			*"key $B_LEFT"*)
 				log_message "+++LEFT" -v
 				if [ $NUM_CORRECT -eq 4 ] || [ $NUM_CORRECT -eq 6 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -45,7 +45,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_RIGHT 1"*)
+			*"key $B_RIGHT"*)
 				log_message "+++RIGHT" -v
 				if [ $NUM_CORRECT -eq 5 ] || [ $NUM_CORRECT -eq 7 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -53,7 +53,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_B 1"*)
+			*"key $B_B 1"*)
 				log_message "+++B" -v
 				if [ $NUM_CORRECT -eq 8 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -61,7 +61,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_A 1"*)
+			*"key $B_A 1"*)
 				log_message "+++A" -v
 				if [ $NUM_CORRECT -eq 9 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -69,7 +69,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"$B_START 1"*)
+			*"key $B_START 1"*)
 				log_message "+++START" -v
 				if [ $NUM_CORRECT -eq 10 ]; then
 					log_message "11 correct inputs in a row! removing simple_mode."

@@ -23,6 +23,8 @@ check_and_hide_update_app() {
         sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
     fi
+    # override updaterFunctions keycodes
+    . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 }
 
 check_and_move_p8_bins() {

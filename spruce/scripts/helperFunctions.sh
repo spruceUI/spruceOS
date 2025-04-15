@@ -35,9 +35,6 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-# Export for architecture (aarch64 or armv7l)
-export ARCH="$(uname -m)"
-
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
@@ -48,122 +45,28 @@ log_message "[helperFunctions.sh] $INFO" -v
 case $INFO in
 *"sun8i"*)
 	export PLATFORM="A30"
-    export DEVICE_WIDTH=480
-    export DEVICE_HEIGHT=640
     ;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
-    export DEVICE_WIDTH=1280
-    export DEVICE_HEIGHT=720
 	;;
 *"TG3040"*)
 	export PLATFORM="Brick"
-    export DEVICE_WIDTH=1024
-    export DEVICE_HEIGHT=768
 	;;
 *"0xd05"*)
     export PLATFORM="Flip"
-    export DEVICE_WIDTH=640
-    export DEVICE_HEIGHT=480
     ;;
 *)
     export PLATFORM="A30"
-    export DEVICE_WIDTH=480
-    export DEVICE_HEIGHT=640
     ;;
 esac
 
 log_message "[helperFunctions.sh] Platform is $PLATFORM"
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-if [ "$ARCH" = "aarch64" ]; then
+if [ ! "$PLATFORM" = "A30" ]; then
     export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
 else
     export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
-fi
-
-# Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ]; then
-    export B_POWER="key 1 116"
-
-    export B_LEFT="key 1 105"
-    export B_RIGHT="key 1 106"
-    export B_UP="key 1 103"
-    export B_DOWN="key 1 108"
-
-    export B_A="key 1 57"
-    export B_B="key 1 29"
-    export B_X="key 1 42"
-    export B_Y="key 1 56"
-
-    export B_L1="key 1 15"
-    export B_L2="key 1 18"
-    export B_R1="key 1 14"
-    export B_R2="key 1 20"
-
-    export B_START="key 1 28"
-    export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-    export B_SELECT="key 1 97"
-    export B_SELECT_2="rctrl_pressed"
-
-    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
-    export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-    export B_MENU="key 1 1"          # surprisingly functions like a regular button
-
-elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-    export B_POWER="key 1 116"
-    
-    export B_LEFT="key 3 16 -1"  # negative for left
-    export B_RIGHT="key 3 16 1"  # positive for right
-    export B_UP="key 3 17 -1"    # negative for up
-    export B_DOWN="key 3 17 1"   # positive for down
-
-    export B_A="key 1 305"
-    export B_B="key 1 304"
-    export B_X="key 1 308"
-    export B_Y="key 1 307"
-
-    export B_L1="key 1 310"
-    export B_L2="key 3 2 255" # 255 on push, 0 on release
-    export B_R1="key 1 311"
-    export B_R2="key 3 5 255" # 255 on push, 0 on release
-
-    export B_L3="key 1 317" # also logs left fnkey stuff
-    export B_R3="key 1 318" # also logs right fnkey stuff
-
-    export B_START="key 1 315"
-    export B_START_2="start_pressed" # only registers 0 on release, no 1.
-    export B_SELECT="key 1 314"
-    export B_SELECT_2="select_pressed" # registers both 1 and 0
-
-    export B_VOLUP="key 1 115" # has actual key codes like the buttons
-    export B_VOLUP_2="volume up" # only registers 0 on release, no 1.
-    export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU="key 1 316"
-
-    export STICK_LEFT="key 3 0 -32767" # negative for left
-    export STICK_RIGHT="key 3 0 32767" # positive for right
-    export STICK_UP="key 3 1 -32767"   # negative for up
-    export STICK_DOWN="key 3 1 32767"  # positive for down
-
-    export STICK_LEFT_2="key 3 4 -32767" # negative for left
-    export STICK_RIGHT_2="key 3 4 32767" # positive for right
-    export STICK_UP_2="key 3 3 -32767"   # negative for up
-    export STICK_DOWN_2="key 3 3 32767"  # positive for down
-
-    if [ ! "$PLATFORM" = "SmartPro" ]; then
-        export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
-        export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
-        export HOME="/mnt/sdcard"
-    fi
-
-    if [ "$PLATFORM" = "Flip" ]; then
-        export B_START="key 1 315"
-        export B_SELECT="key 1 314"
-    fi
-
 fi
 
 # Call this just by having "acknowledge" in your script
@@ -177,7 +80,7 @@ acknowledge() {
         inotifywait "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-        *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
+        *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
             log_message "last_line: $last_line" -vS
             break

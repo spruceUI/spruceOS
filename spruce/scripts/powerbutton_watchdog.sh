@@ -3,9 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-if [ ! "$PLATFORM" = "A30"]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+BIN_PATH="/mnt/SDCARD/spruce/bin64"
+if [ "$PLATFORM" = "A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
 fi
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
@@ -44,7 +44,7 @@ while true; do
                 PID=$!
             fi
             ;;
-        *"key 1 $B_POWER 0"*) # Power key up
+        *"key $B_POWER 0"*) # Power key up
             # if NOT long press
             if flag_check "pb.longpress"; then
                 # kill long press handler and remove flag

@@ -1,7 +1,6 @@
 #!/bin/sh
-
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/Updater/updaterFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 ARGUMENT="$1" ### "apply" or "remove"
 APP_DIR="/mnt/SDCARD/App"

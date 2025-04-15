@@ -1,22 +1,13 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spurce/settings/$PLATFORM.cfg
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
-if [ "$PLATFORM" = "A30" ]; then
-    log_message "*** homebutton_watchdog.sh: PLATFORM = A30" -v
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
-elif [ "$PLATFORM" = "Brick" ]; then
-    log_message "*** homebutton_watchdog.sh: PLATFORM = Brick" -v
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-elif [ "$PLATFORM" = "SmartPro" ]; then
-    log_message "*** homebutton_watchdog.sh: PLATFORM = SmartPro" -v
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-elif [ "$PLATFORM" = "Flip" ]; then
-    log_message "*** homebutton_watchdog.sh: PLATFORM = Flip" -v
+BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ ! "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
 fi
+log_message "*** homebutton_watchdog.sh: PLATFORM = $PLATFORM" -v
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 TEMP_PATH="/tmp"
@@ -32,10 +23,10 @@ kill_emulator() {
         # use sendevent to send MENU + L1 combin buttons to drastic
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            echo 1 1 1  # MENU down
-            echo 1 15 1 # L1 down
-            echo 1 15 0 # L1 up
-            echo 1 1 0  # MENU up
+            echo $B_MENU 1  # MENU down
+            echo $B_L1 1 # L1 down
+            echo $B_L1 0 # L1 up
+            echo $B_MENU 0  # MENU up
             echo 0 0 0  # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
     elif pgrep "PPSSPPSDL" >/dev/null; then
@@ -43,10 +34,10 @@ kill_emulator() {
         # use sendevent to send SELECT + R1 combin buttons to PPSSPP
         {
             # send autosave hot key
-            echo 1 314 1 # SELECT down
-            echo 1 311 1 # R1 down
-            echo 1 311 0 # R1 up
-            echo 1 314 0 # SELECT up
+            echo $B_SELECT 1 # SELECT down
+            echo $B_R1 1 # R1 down
+            echo $B_R1 0 # R1 up
+            echo $B_SELECT 0 # SELECT up
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event4
         # wait 1 seconds for ensuring saving is started
@@ -176,22 +167,22 @@ send_virtual_key_MENUX() {
     
     if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         {
-        echo 1 316 1 # MENU down
-        echo 1 308 1 # X down
+        echo $B_MENU 1 # MENU down
+        echo $B_X 1 # X down
         sleep 0.1
-        echo 1 308 0 # X up
-        echo 1 316 0 # MENU up
+        echo $B_X 0 # X up
+        echo $B_MENU 0 # MENU up
         echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
     fi
 
     if [ "$PLATFORM" = "Flip" ]; then
         {
-        echo 1 314 1 # SELECT down
-        echo 1 308 1 # X down
+        echo $B_SELECT 1 # SELECT down
+        echo $B_X 1 # X down
         sleep 0.1
-        echo 1 308 0 # X up
-        echo 1 316 0 # SELECT up
+        echo $B_X 0 # X up
+        echo $B_SELECT 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event3
     fi
@@ -202,22 +193,22 @@ send_virtual_key_MENUX() {
 # or toggle in-game menu in PPSSPP
 send_virtual_key_L3R3() {
     {
-        echo 1 316 0 # MENU up
-        echo 1 317 1 # L3 down
-        echo 1 318 1 # R3 down
+        echo $B_MENU 0 # MENU up
+        echo $B_L3 1 # L3 down
+        echo $B_R3 1 # R3 down
         sleep 0.1
-        echo 1 318 0 # R3 up
-        echo 1 317 0 # L3 up
+        echo $B_R3 0 # R3 up
+        echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
     } | $BIN_PATH/sendevent /dev/input/event4
 }
 
 send_virtual_key_L3() {
     {
-        echo 1 316 0 # MENU up
-        echo 1 317 1 # L3 down
+        echo $B_MENU 0 # MENU up
+        echo $B_L3 1 # L3 down
         sleep 0.1
-        echo 1 317 0 # L3 up
+        echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
     } | $BIN_PATH/sendevent /dev/input/event4
 }
@@ -228,9 +219,9 @@ send_virtual_key_R3() {
     hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
     if [ "$hotkey_value" != "escape" ]; then
         {
-            echo 1 318 1 # R3 down
+            echo $B_R3 1 # R3 down
             sleep 0.1
-            echo 1 318 0 # R3 up
+            echo $B_R3 0 # R3 up
             echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent /dev/input/event4
     fi
@@ -265,7 +256,6 @@ long_press_handler() {
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                log_message "*** homebutton_watchdog.sh: Trimui/Flip RA" -v
                   send_virtual_key_MENUX
             elif pgrep "retroarch" >/dev/null; then
                 send_virtual_key_L3R3
@@ -357,10 +347,10 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
             "In-game menu")
               log_message "*** homebutton_watchdog.sh: In-game menu" -v
                 if pgrep "ra32.miyoo" >/dev/null; then
-                  log_message "*** homebutton_watchdog.sh: Miyoo RA32/RA64" -v
+                  log_message "*** homebutton_watchdog.sh: Miyoo RA32" -v
                     send_virtual_key_L3
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                  log_message "*** homebutton_watchdog.sh: Trimui/Flip RA" -v
+                  log_message "*** homebutton_watchdog.sh: $PLATFORM RA" -v
                     send_virtual_key_MENUX
                 elif pgrep "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v
@@ -408,31 +398,31 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
 
     case $line in
     # Home key down
-    *"$B_MENU 1"*)
+    *"key $B_MENU 1"*)
             home_key_down
         ;;
     # Home key up
-    *"$B_MENU 0"*)
+    *"key $B_MENU 0"*)
             home_key_up
         ;;
     # Start button down
-    *"$B_START 1"*)
+    *"key $B_START 1"*)
             start_button_down
         ;;
     # R1 in menu toggles recording
-    *"$B_R1 1"*)
+    *"key $B_R1 1"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
             record_video &
         fi
         ;;
     # R2 take screenshot
-    *"$B_R2 1"*)
+    *"key $B_R2 1"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode" || flag_check "designer_mode"; }; then
             take_screenshot
         fi
         ;;
     # Don't react to dpad presses
-    *"$B_LEFT"* | *"$B_RIGHT"* | *"$B_UP"* | *"$B_DOWN"*) ;;
+    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*) ;;
     # Any other key press while menu is held
     *"key"*)
         log_message "*** Catch-all key case matched: $line" -v
