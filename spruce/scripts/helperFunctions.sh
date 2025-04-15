@@ -69,12 +69,6 @@ else
     export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
 fi
 
-if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
-    export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
-    export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
-    export HOME="/mnt/sdcard"
-fi
-
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
