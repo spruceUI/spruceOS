@@ -79,7 +79,7 @@ while [ 1 ]; do
         flag_remove "lastgame"
 
         # check if emu visibility needs a refresh, before entering MainUI
-        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then

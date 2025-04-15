@@ -33,9 +33,9 @@ fi
 if flag_check "designer_mode"; then
     log_message "Designer mode enabled"
     if [ -f "$EMUFRESH" ]; then
-        "$EMUFRESH" -showall  &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+        "$EMUFRESH" -showall  &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
     elif [ -f "$EMUFRESH.bak" ]; then
-        "$EMUFRESH.bak" -showall  &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+        "$EMUFRESH.bak" -showall  &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
     fi
     # Changing the name to break future calls.
     mv "$EMUFRESH" "$EMUFRESH.bak"
