@@ -20,7 +20,7 @@ while true; do
 
         # start new joystickinput process with new calibration values
         if ! setting_get "disableJoystick"; then
-            /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis /dev/input/event4 -key /dev/input/event3 &
+            /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis $EVENT_PATH_JOYPAD -key $EVENT_PATH_KEYBOARD &
         fi
 
         if pgrep MainUI >/dev/null; then
