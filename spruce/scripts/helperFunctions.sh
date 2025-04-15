@@ -129,6 +129,16 @@ elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = 
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
     export B_MENU="key 1 316"
 
+    export STICK_LEFT="key 3 0 -32767" # negative for left
+    export STICK_RIGHT="key 3 0 32767" # positive for right
+    export STICK_UP="key 3 1 -32767"   # negative for up
+    export STICK_DOWN="key 3 1 32767"  # positive for down
+
+    export STICK_LEFT_2="key 3 4 -32767" # negative for left
+    export STICK_RIGHT_2="key 3 4 32767" # positive for right
+    export STICK_UP_2="key 3 3 -32767"   # negative for up
+    export STICK_DOWN_2="key 3 3 32767"  # positive for down
+
     if [ ! "$PLATFORM" = "SmartPro" ]; then
         export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
         export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
@@ -138,16 +148,6 @@ elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = 
     if [ "$PLATFORM" = "Flip" ]; then
         export B_START="key 1 315"
         export B_SELECT="key 1 314"
-
-        export STICK_LEFT="key 3 0 -32767" # negative for left
-        export STICK_RIGHT="key 3 0 32767" # positive for right
-        export STICK_UP="key 3 1 -32767"   # negative for up
-        export STICK_DOWN="key 3 1 32767"  # positive for down
-
-        export STICK_LEFT_2="key 3 4 -32767" # negative for left
-        export STICK_RIGHT_2="key 3 4 32767" # positive for right
-        export STICK_UP_2="key 3 3 -32767"   # negative for up
-        export STICK_DOWN_2="key 3 3 32767"  # positive for down
     fi
 
 fi
