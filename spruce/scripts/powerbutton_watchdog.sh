@@ -4,6 +4,10 @@
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ ! "$PLATFORM" = "A30"]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
+
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
