@@ -8,7 +8,7 @@ CUR_TTY=/dev/null
 
 if [ -d "/mnt/sdcard/spruce" ]; then
   controlfolder="/mnt/sdcard/Roms/.portmaster/PortMaster"
-  directory="/mnt/sdcard/Roms/PORTS/"
+  directory="/mnt/sdcard/Roms/PORTS64/"
   export PATH="/mnt/sdcard/Roms/.portmaster/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/sdcard/Roms/.portmaster/lib:$LD_LIBRARY_PATH"
 else
@@ -18,18 +18,17 @@ else
   export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
 
+  ## Python 3 runtime.
+  mkdir -p $HOME/python3
+
+  if [ -d $HOME/python3/bin ]; then
+    umount $HOME/python3
+  fi
+
+  mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
+  source $HOME/python3/bin/activate
 fi
 
-
-## Python 3 runtime.
-mkdir -p $HOME/python3
-
-if [ -d $HOME/python3/bin ]; then
-  umount $HOME/python3
-fi
-
-mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
-source $HOME/python3/bin/activate
 
 ESUDO=""
 ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
