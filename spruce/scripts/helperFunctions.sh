@@ -1211,7 +1211,7 @@ vibrate() {
                 log_message "this is where I'd put my vibration... IF I HAD ONE"
             fi
             ;;
-        "Flip")  # todo: figure out how to make lengths equal across intensity
+        "Flip") # todo: figure out how to make lengths equal across intensity
             if [ -z "$intensity" ]; then
                 intensity="$(setting_get "rumble_intensity")"
             fi
@@ -1237,7 +1237,7 @@ vibrate() {
                 timer=0
                 while [ $timer -lt $duration ]; do
                     echo -n 1 > /sys/class/gpio/gpio20/value
-                    sleep 0.002
+                    sleep 0.003
                     echo -n 0 > /sys/class/gpio/gpio20/value
                     sleep 0.001
                     timer=$(($timer + 3))
