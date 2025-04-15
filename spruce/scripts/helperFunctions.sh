@@ -48,18 +48,28 @@ log_message "[helperFunctions.sh] $INFO" -v
 case $INFO in
 *"sun8i"*)
 	export PLATFORM="A30"
+    export DEVICE_WIDTH=480
+    export DEVICE_HEIGHT=640
     ;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
+    export DEVICE_WIDTH=1280
+    export DEVICE_HEIGHT=720
 	;;
 *"TG3040"*)
 	export PLATFORM="Brick"
+    export DEVICE_WIDTH=1024
+    export DEVICE_HEIGHT=768
 	;;
 *"0xd05"*)
     export PLATFORM="Flip"
+    export DEVICE_WIDTH=640
+    export DEVICE_HEIGHT=480
     ;;
 *)
     export PLATFORM="A30"
+    export DEVICE_WIDTH=480
+    export DEVICE_HEIGHT=640
     ;;
 esac
 
@@ -74,6 +84,8 @@ fi
 
 # Key exports so we can refer to buttons by more memorable names
 if [ "$PLATFORM" = "A30" ]; then
+    export B_POWER="key 1 116"
+
     export B_LEFT="key 1 105"
     export B_RIGHT="key 1 106"
     export B_UP="key 1 103"
@@ -100,6 +112,8 @@ if [ "$PLATFORM" = "A30" ]; then
     export B_MENU="key 1 1"          # surprisingly functions like a regular button
 
 elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
+    export B_POWER="key 1 116"
+    
     export B_LEFT="key 3 16 -1"  # negative for left
     export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
