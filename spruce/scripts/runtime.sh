@@ -24,9 +24,9 @@ esac
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
 cores_online &
+echo mmc0 > "$LED_PATH"/trigger
 
 if [ "$PLATFORM" = "A30" ]; then
-    echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     SWAPFILE="/mnt/SDCARD/cachefile"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
@@ -44,6 +44,8 @@ if [ "$PLATFORM" = "A30" ]; then
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
         mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
+        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/PORT32 &
+        mount -o bind /tmp/SATURN /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -68,9 +70,9 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Use App folder for Miyoo and TrimUI devices despite different name schemes
         mkdir -p "/mnt/SDCARD/Apps"
         mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps" &
-        # Mask Roms/PORTS with Brick version
-        mkdir -p "/mnt/SDCARD/Roms/PORTS-Brick"
-        mount --bind "/mnt/SDCARD/Roms/PORTS-Brick" "/mnt/SDCARD/Roms/PORTS" &
+        # Mask Roms/PORTS with non-A30 version
+        mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+        mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
         # Use appropriate RA config
         [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
@@ -83,7 +85,19 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
     )
-
+elif [ "$PLATFORM" = "Flip" ]; then
+    if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        mkdir /mnt/sdcard/Saves/userdata-flip
+        cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bluetooth
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/cfg
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/localtime
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/timezone
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
+    fi
+    mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
 fi
 
 # Flag cleanup
@@ -100,8 +114,14 @@ log_message " " -v
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
-if [ "$PLATFORM" = "A30" ]; then
+# Sanitize system JSON if needed
+if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
+    log_message "Runtime: Invalid System JSON detected, sanitizing..."
+    jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
+    mv /tmp/system.json.clean "$SYSTEM_JSON"
+fi
 
+if [ "$PLATFORM" = "A30" ]; then
     # Check if WiFi is enabled
     wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
     if [ "$wifi" -eq 0 ]; then
@@ -130,8 +150,14 @@ fi
 
 {
     ${SCRIPTS_DIR}/romdirpostrofix.sh
-    ${SCRIPTS_DIR}/emufresh_md5_multi.sh
+    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
 } &
+
+    # don't hide or unhide apps in simple_mode
+    if ! flag_check "simple_mode"; then
+        [ "$PLATFORM" = "A30" ] && check_and_handle_firmware_app &
+        check_and_hide_update_app &
+    fi
 
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
@@ -169,15 +195,7 @@ if [ "$PLATFORM" = "A30" ]; then
     # start watchdog for konami code
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 
-    # don't hide or unhide apps in simple_mode
-    if ! flag_check "simple_mode"; then
-        check_and_handle_firmware_app &
-        check_and_hide_update_app &
-    fi
-
     check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
-
-    ${SCRIPTS_DIR}/low_power_warning.sh &
 
     # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
@@ -189,8 +207,6 @@ if [ "$PLATFORM" = "A30" ]; then
     else
         log_message "Auto Resume skipped (no save_active flag)"
     fi
-
-    ${SCRIPTS_DIR}/autoIconRefresh.sh &
 
     swapon -p 40 "${SWAPFILE}"
 
@@ -274,6 +290,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
+    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/keymon &
+    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
+
     if [ -d "/media/sdcard1/miyoo355/" ]; then
         export CUSTOMER_DIR=/media/sdcard1/miyoo355/
     else
@@ -312,53 +331,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     mkdir -p /tmp/miyoo_inputd
 
-    if [ "$(/usr/miyoo/bin/jsonval turboA)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_a
-    else
-        unlink /tmp/miyoo_inputd/turbo_a
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboB)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_b
-    else
-        unlink /tmp/miyoo_inputd/turbo_b
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboX)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_x
-    else
-        unlink /tmp/miyoo_inputd/turbo_x
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboY)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_y
-    else
-        unlink /tmp/miyoo_inputd/turbo_y
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboL)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_l
-    else
-        unlink /tmp/miyoo_inputd/turbo_l
-    fi
-    
-    if [ "$(/usr/miyoo/bin/jsonval turboR)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_r
-    else
-        unlink /tmp/miyoo_inputd/turbo_r
-    fi
-
-    if [ "$(/usr/miyoo/bin/jsonval turboL2)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_l2
-    else
-        unlink /tmp/miyoo_inputd/turbo_l2
-    fi
-    
-    if [ "$(/usr/miyoo/bin/jsonval turboR2)" = "1" ] ; then
-        touch /tmp/miyoo_inputd/turbo_r2
-    else
-        unlink /tmp/miyoo_inputd/turbo_r2
-    fi
+    for btn in A B X Y L R L2 R2; do
+        val=$(/usr/miyoo/bin/jsonval turbo$btn)
+        file="/tmp/miyoo_inputd/turbo_$(echo $btn | tr '[:upper:]' '[:lower:]')"
+        [ "$val" = "1" ] && touch "$file" || unlink "$file"
+    done
 
     miyoo_fw_update=0
     miyoo_fw_dir=/media/sdcard0
@@ -386,17 +363,50 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
+    
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
 
-    ${SCRIPTS_DIR}/autoIconRefresh.sh &
+	# PortMaster ports location
+    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+	
+	# Treat /spruce/flip/ as the 'root' for any application that needs it.
+	# (i.e. PortMaster looks here for config information which is device specific)
+    mount --bind /mnt/sdcard/spruce/flip/ /root 
+
+    # Bind the correct version of retroarch so it can be accessed by PM
+    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
+
+    # listen hotkeys for brightness adjustment, volume buttons and power button
+    #${SCRIPTS_DIR}/buttons_watchdog.sh &
+    #${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+
+     # Load idle monitors before game resume or MainUI
+    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+
+    # check whether to auto-resume into a game
+    if flag_check "save_active"; then
+        ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
+        log_message "Auto Resume executed"
+    else
+        log_message "Auto Resume skipped (no save_active flag)"
+    fi
+
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
+    /mnt/sdcard/spruce/flip/mount_muOS.sh
+
+    sleep 0.2
+    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+    # TODO: verify that we can call this via absolute path
+    cd ${BIN_DIR}
+    ./joypad /dev/input/event3 &
 
     killall runmiyoo.sh
 
-fi
-
-developer_mode_task &
-update_checker &
-if [ "$PLATFORM" = "A30" ]; then
-    update_notification
 fi
 
 # check whether to run first boot procedure
@@ -405,6 +415,12 @@ if flag_check "first_boot_${PLATFORM}"; then
 else
     log_message "First boot procedures skipped"
 fi
+
+${SCRIPTS_DIR}/low_power_warning.sh &
+${SCRIPTS_DIR}/autoIconRefresh.sh &
+developer_mode_task &
+update_checker &
+# update_notification
 
 # Initialize CPU settings
 scaling_min_freq=1008000 ### default value, may be overridden in specific script

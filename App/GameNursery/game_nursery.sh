@@ -6,6 +6,7 @@
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+[ "$(uname -m)" = "aarch64" ] && BIN_PATH="${BIN_PATH}64"
 CONFIG_DIR="/tmp/nursery-config"
 JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
@@ -179,12 +180,14 @@ construct_config() {
 
             # create tab for a given group of games
             tab_name="$(basename "$group_dir")"
-            echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
+            if ! { [ "$tab_name" = "Ports" ] && [ "$PLATFORM" != "A30" ]; }; then
+                echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
 
-            # iterate through each json for the current group
-            for filename in "$group_dir"/*.json; do
-                interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
-            done
+                # iterate through each json for the current group
+                for filename in "$group_dir"/*.json; do
+                    interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
+                done
+            fi
         fi
     done
     log_message "Game Nursery: nursery_config constructed from game info JSONs."
@@ -199,8 +202,16 @@ check_battery
 check_for_connection
 show_slideshow_if_first_run
 get_latest_jsons
+
 construct_config
 
+[ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
+if [ ! "$PLATFORM" = "A30" ]; then
+    cd /mnt/SDCARD/App/GameNursery
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "nursery" -c "./nursery.gptk" &
+	sleep 0.5
+fi
 killall -q -USR2 joystickinput # kbd mode
 cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
 killall -q -USR1 joystickinput # analog mode
+kill -9 "$(pidof gptokeyb)"

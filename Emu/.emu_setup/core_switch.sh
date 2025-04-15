@@ -84,10 +84,10 @@ case "$EMU_NAME" in
 
 	"DC" )
 		if [ "$CORE" = "flycast" ]; then
-			NEW_CORE="km_flycast_xtreme"
+			NEW_CORE="flycast_xtreme"
 			NEW_DISPLAY="(✓FCXTREME)-flycast"
 
-		else # current core is km_flycast_xtreme
+		else # current core is flycast_xtreme
 			NEW_CORE="flycast"
 			NEW_DISPLAY="fcxtreme-(✓FLYCAST)"
 		fi

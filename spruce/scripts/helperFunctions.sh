@@ -35,14 +35,13 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-# Export for architecture (aarch64 or armv7l)
-export ARCH="$(uname -m)"
-
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
+log_message "[helperFunctions.sh] $INFO" -v
+
 case $INFO in
 *"sun8i"*)
 	export PLATFORM="A30"
@@ -61,74 +60,13 @@ case $INFO in
     ;;
 esac
 
+log_message "[helperFunctions.sh] Platform is $PLATFORM"
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-if [ "$ARCH" = "aarch64" ]; then
+if [ ! "$PLATFORM" = "A30" ]; then
     export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
 else
     export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
-fi
-
-# Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ]; then
-    export B_LEFT="key 1 105"
-    export B_RIGHT="key 1 106"
-    export B_UP="key 1 103"
-    export B_DOWN="key 1 108"
-
-    export B_A="key 1 57"
-    export B_B="key 1 29"
-    export B_X="key 1 42"
-    export B_Y="key 1 56"
-
-    export B_L1="key 1 15"
-    export B_L2="key 1 18"
-    export B_R1="key 1 14"
-    export B_R2="key 1 20"
-
-    export B_START="key 1 28"
-    export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-    export B_SELECT="key 1 97"
-    export B_SELECT_2="rctrl_pressed"
-
-    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
-    export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-    export B_MENU="key 1 1"          # surprisingly functions like a regular button
-
-elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
-    export B_LEFT="key 3 16 -1"  # negative for left
-    export B_RIGHT="key 3 16 1"  # positive for right
-    export B_UP="key 3 17 -1"    # negative for up
-    export B_DOWN="key 3 17 1"   # positive for down
-
-    export STICK_LEFT="key 3 0 -32767" # negative for left
-    export STICK_RIGHT="key 3 0 32767" # positive for right
-    export STICK_UP="key 3 1 -32767"   # negative for up
-    export STICK_DOWN="key 3 1 32767"  # positive for down
-
-    export B_A="key 1 305"
-    export B_B="key 1 304"
-    export B_X="key 1 308"
-    export B_Y="key 1 307"
-
-    export B_L1="key 1 310"
-    export B_L2="key 3 2 255" # 255 on push, nothing on release...
-    export B_R1="key 1 311"
-    export B_R2="key 3 5 255" # 255 on push, nothing on release...
-
-    export B_L3="key 1 317" # also logs left fnkey stuff
-    export B_R3="key 1 318" # also logs right fnkey stuff
-
-    export B_START="key 1 315"
-    export B_START_2="start_pressed" # only registers 0 on release, no 1.
-    export B_SELECT="key 1 314"
-    export B_SELECT_2="select_pressed" # registers both 1 and 0
-
-    export B_VOLUP="key 1 115" # has actual key codes like the buttons
-    export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU="key 1 316"
 fi
 
 # Call this just by having "acknowledge" in your script
@@ -142,7 +80,7 @@ acknowledge() {
         inotifywait "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
-        *"$B_START_2"* | *"$B_A"* | *"$B_B"*)
+        *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
             log_message "last_line: $last_line" -vS
             break
@@ -166,7 +104,7 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
-    local timeout=30  # Think about making this configurable
+    local timeout=60  # Think about making this configurable
     local start_time=$(date +%s)
 
     # More thorough connection check
@@ -187,15 +125,19 @@ check_and_connect_wifi() {
         log_message "Attempting to connect to WiFi"
 
         # Bring the existing interface down cleanly if its running
-        ifconfig wlan0 down
-        killall wpa_supplicant
-        killall udhcpc
+        if [ ! -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+            ifconfig wlan0 down
+            killall wpa_supplicant
+            killall udhcpc
 
-        # Restart the interface and try to connect
-        ifconfig wlan0 up
-        wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
-        udhcpc -i wlan0 &
-
+            # Restart the interface and try to connect
+            ifconfig wlan0 up
+            wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
+            udhcpc -i wlan0 &
+        else
+            log_message "Letting stock OS restart wifi due to existance of /mnt/sdcard/Saves/.disablesprucewifi"
+        fi
+		
         display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
 Press START to continue anyway."
         {
@@ -280,13 +222,13 @@ confirm() {
         last_line=$(tail -n 1 "$messages_file")
         case "$last_line" in
         # B button - cancel
-        *"key 1 29"*)
+        *"$B_B"*)
             display_kill
             echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
             return 1
             ;;
         # A button - confirm
-        *"key 1 57"*)
+        *"$B_A"*)
             display_kill
             echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
             return 0
@@ -375,7 +317,7 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 #   -t, --text <text>     Text to display
 #   -d, --delay <seconds> Delay in seconds (default: 0)
 #   -s, --size <size>     Text size (default: 36)
-#   -p, --position <pos>  Text position in pixels from the top of the screen
+#   -p, --position <pos>  Text position as percentage from the top of the screen
 #   (Text is offset from it's center, images are offset from the top of the image)
 #   -a, --align <align>   Text alignment (left, middle, right) (default: middle)
 #   -w, --width <width>   Text width (default: 600)
@@ -407,6 +349,15 @@ display() {
       # TODO: this should go away once profile is wired up for the brick
       ld_library_path="/usr/trimui/lib:$ld_library_path"
       # TODO: we might want to make this more generic based on architecture eventually
+    elif [ "$PLATFORM" = "SmartPro" ]; then
+      # TODO: we might want to move these to config files?
+      screen_width=1280
+      screen_height=720
+      rotation=0
+      width=1200
+      # TODO: this should go away once profile is wired up for the brick
+      ld_library_path="/usr/trimui/lib:$ld_library_path"
+      # TODO: we might want to make this more generic based on architecture eventually
       DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
     elif [ "$PLATFORM" = "Flip" ]; then
       # TODO: we might want to move these to config files?
@@ -416,12 +367,14 @@ display() {
       width=600
       # TODO: we might want to make this more generic based on architecture eventually
       DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+    elif [ "$PLATFORM" = "A30" ]; then
+      screen_width=640
+      screen_height=480
+      rotation=270
+      width=600
     fi
 
-    # dirty hack to keep display calls from breaking stuff too much in absence of display_text.elf
-    [ "$PLATFORM" = "SmartPro" ] && return 30
-
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=210 align="middle" color="ebdbb2" font=""
+    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
     local use_acknowledge_image=false
     local use_confirm_image=false
     local run_acknowledge=false
@@ -461,7 +414,7 @@ display() {
             --qr)
                 qr_url="$2"
                 if ! $position_set; then
-                    position=$((position + 85))
+                    position=89
                 fi
                 shift
                 ;;
@@ -483,9 +436,7 @@ display() {
 
 
     local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
-    if [ ! "$PLATFORM" = "A30" ]; then
-      command="$command""$screen_width $screen_height $rotation "
-    fi
+    command="$command""$screen_width $screen_height $rotation "
 
     # Construct the command
     local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
@@ -751,11 +702,13 @@ get_theme_path_to_restore(){
     local current_theme_path=$(get_current_theme_path)
     local spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
     local default_theme="../res/"
+    local default_theme_2="./"
 
     # if the current theme is equal to the default miyoo theme
     if [[ "$current_theme_path" == "$default_theme" ]]; then # that's ugly!
         echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
-
+    elif [[ "$current_theme_path" == "$default_theme_2" ]]; then # that's ugly!
+        echo "$spruce_theme"                                     # Switch to the spruce theme ASAP
     else # If not, give back the user his loved theme <3
         echo "$current_theme_path"
     fi

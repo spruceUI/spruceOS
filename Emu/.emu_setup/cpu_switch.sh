@@ -31,26 +31,26 @@ case "$EMU_NAME" in
 	"DC" | "SATURN" )
 		if [ "$MODE" = "performance" ]; then
 			NEW_MODE="overclock"
-			NEW_DISPLAY="Performance-(✓OVERCLOCK)"
+			NEW_DISPLAY="Perf-(✓MAX)"
 
 		else # current mode is overclock
 			NEW_MODE="performance"
-			NEW_DISPLAY="(✓PERFORMANCE)-Overclock"
+			NEW_DISPLAY="(✓PERF)-Max"
 		fi
 	;;
 
 	*)
 		if [ "$MODE" = "smart" ]; then
 			NEW_MODE="performance"
-			NEW_DISPLAY="Smart-(✓PERFORMANCE)-Overclock"
+			NEW_DISPLAY="Smart-(✓PERF)-Max"
 
 		elif [ "$MODE" = "performance" ]; then
 			NEW_MODE="overclock"
-			NEW_DISPLAY="Smart-Performance-(✓OVERCLOCK)"
+			NEW_DISPLAY="Smart-Perf-(✓MAX)"
 
 		else # current mode is overclock
 			NEW_MODE="smart"
-			NEW_DISPLAY="(✓SMART)-Performance-Overclock"
+			NEW_DISPLAY="(✓SMART)-Perf-Max"
 		fi
 	;;
 
@@ -60,7 +60,7 @@ log_message "cpu_switch.sh: changing cpu mode for $EMU_NAME from $MODE to $NEW_M
 
 display -i "$BG" -t "CPU Mode changed to $NEW_MODE"
 
-sed -i "s|\"CPU Mode:.*\"|\"CPU Mode: $NEW_DISPLAY\"|g" "$CONFIG"
+sed -i "s|\"CPU:.*\"|\"CPU: $NEW_DISPLAY\"|g" "$CONFIG"
 sed -i "s|MODE=.*|MODE=\"$NEW_MODE\"|g" "$SYS_OPT"
 
 sleep 2

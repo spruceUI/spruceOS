@@ -1,0 +1,5 @@
+SDL2 License Info
+---
+
+SDL2, SDL2_mixer, SDL2_ttf, SDL2_image, and SDL2_gfx are all distributed
+under the terms of the zlib license: http://www.zlib.net/zlib_license.html

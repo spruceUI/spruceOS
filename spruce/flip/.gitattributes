@@ -1,0 +1,1 @@
+muOS-pixie-reduced.sqsh filter=lfs diff=lfs merge=lfs -text

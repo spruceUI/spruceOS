@@ -7,6 +7,11 @@
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/NGPC",
+    "imgpath": "../../Roms/NGPC/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/NGPC",
+    "imgpath": "../../../../media/sdcard1/Roms/NGPC/Imgs"}],
   "rompath": "../../Roms/NGPC",
   "imgpath": "../../Roms/NGPC/Imgs",
   "gamelist": "../../Roms/NGPC/miyoogamelist.xml",
@@ -28,7 +33,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

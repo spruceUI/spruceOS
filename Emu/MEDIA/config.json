@@ -7,6 +7,11 @@
   "themecolor":"DDEEFF",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/MEDIA",
+    "imgpath": "../../Roms/MEDIA/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/MEDIA",
+    "imgpath": "../../../../media/sdcard1/Roms/MEDIA/Imgs"}],
   "rompath": "../../Roms/MEDIA",
   "imgpath": "../../Roms/MEDIA/Imgs",
   "useswap": 1,
@@ -23,7 +28,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

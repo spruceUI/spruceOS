@@ -29,7 +29,7 @@ rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
-wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$system_config_file")
+wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
 if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io >/dev/null 2>&1; then
     log_message "OTA: No active network connection, exiting."
     display --icon "$IMAGE_PATH" -t "No active network connection detected, please turn on WiFi and try again." --okay

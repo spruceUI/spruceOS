@@ -7,6 +7,11 @@
   "background": "",
   "themecolor":"FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/DC",
+    "imgpath": "../../Roms/DC/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/DC",
+    "imgpath": "../../../../media/sdcard1/Roms/DC/Imgs"}],
   "rompath": "../../Roms/DC",
   "imgpath": "../../Roms/DC/Imgs",
   "gamelist": "../../Roms/DC/miyoogamelist.xml",
@@ -28,7 +33,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
-      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
+      "name": "CPU: (✓PERF)-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

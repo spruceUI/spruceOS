@@ -24,7 +24,7 @@ display_message() {
 }
 
 display_message --icon "$ICON_PATH" -t "Backing up your spruce configs and files.........."
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo mmc0 > "$LED_PATH"/trigger &
 
 # Create the 'spruce' directory and 'backups' subdirectory if they don't exist
 mkdir -p "$BACKUP_DIR/backups"

@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/FDS",
+    "imgpath": "../../Roms/FDS/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/FDS",
+    "imgpath": "../../../../media/sdcard1/Roms/FDS/Imgs"}],
   "rompath": "../../Roms/FDS",
   "imgpath": "../../Roms/FDS/Imgs",
   "gamelist": "../../Roms/FDS/miyoogamelist.xml",
@@ -28,7 +33,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

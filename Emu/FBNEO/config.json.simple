@@ -7,6 +7,11 @@
   "themecolor":"EC7063",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/FBNEO",
+    "imgpath": "../../Roms/FBNEO/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/FBNEO",
+    "imgpath": "../../../../media/sdcard1/Roms/FBNEO/Imgs"}],
   "rompath": "../../Roms/FBNEO",
   "imgpath": "../../Roms/FBNEO/Imgs",
   "gamelist": "../../Roms/FBNEO/miyoogamelist.xml",

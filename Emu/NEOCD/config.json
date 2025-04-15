@@ -7,6 +7,11 @@
   "themecolor":"",
   "effectsh":"",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/NEOCD",
+    "imgpath": "../../Roms/NEOCD/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/NEOCD",
+    "imgpath": "../../../../media/sdcard1/Roms/NEOCD/Imgs"}],
   "rompath": "../../Roms/NEOCD",
   "imgpath": "../../Roms/NEOCD/Imgs",
   "gamelist": "../../Roms/NEOCD/miyoogamelist.xml",
@@ -24,7 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

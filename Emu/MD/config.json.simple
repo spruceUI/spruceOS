@@ -7,6 +7,11 @@
   "themecolor":"0088CF",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/MD",
+    "imgpath": "../../Roms/MD/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/MD",
+    "imgpath": "../../../../media/sdcard1/Roms/MD/Imgs"}],
   "rompath": "../../Roms/MD",
   "imgpath": "../../Roms/MD/Imgs",
   "gamelist": "../../Roms/MD/miyoogamelist.xml",

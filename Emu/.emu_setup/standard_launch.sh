@@ -170,8 +170,8 @@ run_drastic() {
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
-		# export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
+		[ "$PLATFORM" = "Flip" ] || export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
+		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
 		./drastic64 "$ROM_FILE"
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
 	fi
@@ -296,10 +296,79 @@ load_pico8_control_profile() {
 	esac
 }
 
+is_32bit_port() {
+  
+    # long-term come up with better method.
+    # this is short term for testing
+    gamedir_line=$(grep "^GAMEDIR=" "$ROM_FILE")
+    # If gamedir_name ends with a slash, remove the slash
+    gamedir_line="${gamedir_line%/}"
+    # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
+    game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
+    # If game_dir ends with a quote, remove the quote
+    game_dir="${game_dir%\"}"
+    # If gmloader or box86 exist then its 32-bit
+    if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ] || [ -f "$game_dir/gmloadernext.armhf" ]; then
+        return 1;
+    else
+        return 0;
+    fi
+}
+
+
+is_retroarch_port() {
+    # Check if the file contains "retroarch"
+    if grep -q "retroarch" "$ROM_FILE"; then
+        return 1;
+    else
+        return 0;
+    fi
+}
+
+set_port_mode() {
+	rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	if [ "$PORT_CONTROL" = "X360" ]; then
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	else
+		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+	fi
+	
+}
+
 run_port() {
-	PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-	cd $PORTS_DIR
-	/bin/sh "$ROM_FILE"
+    if [ "$PLATFORM" = "Flip" ]; then
+        set_port_mode
+        is_32bit_port
+        if [[ $? -eq 1 ]]; then
+            echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+            cd /mnt/sdcard/Emu/PORT32/
+            /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port32.log
+        else
+        
+            is_retroarch_port
+            if [[ $? -eq 1 ]]; then
+                PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+                cd /mnt/sdcard/RetroArch/
+                export HOME="/mnt/sdcard/spruce/flip/home"
+                export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
+                export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
+                "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+            else
+                PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+                cd $PORTS_DIR
+                export HOME="/mnt/sdcard/spruce/flip/home"
+                export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
+                export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
+                "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+
+            fi
+        
+        fi
+    else
+        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+        cd $PORTS_DIR
+        /bin/sh "$ROM_FILE" 
+    fi
 }
 
 move_dotconfig_into_place() {
@@ -363,9 +432,11 @@ run_retroarch() {
 			fi
 		;;
 		"A30" )
-			# handle different version of ParaLLEl N64 core for A30
+			# handle different version of ParaLLEl N64 core and flycast xtreme core for A30
 			if [ "$CORE" = "parallel_n64" ]; then
 				CORE="km_parallel_n64_xtreme_amped_turbo"
+			elif [ "$CORE" = "flycast_xtreme" ]; then
+				CORE="km_flycast_xtreme"
 			fi
 
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
@@ -391,6 +462,8 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
+	#Swap below if debugging new cores
+	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/sdcard/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 

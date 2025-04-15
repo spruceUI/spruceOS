@@ -185,7 +185,7 @@ monitor_start_button() {
         inotifywait "$messages_file"
         last_line=$(tail -n 1 "$messages_file")
         case $last_line in
-            *"$B_START"* | *"$B_START_2"*)
+            *"key $B_START"* | *"key $B_START_2"*)
                 log_message "SyncthingCheck: START button pressed - cancelling sync"
                 touch /tmp/sync_cancelled
                 ;;

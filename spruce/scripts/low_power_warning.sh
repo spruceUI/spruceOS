@@ -3,7 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 SLEEP=30
 
 dot_duration=0.2

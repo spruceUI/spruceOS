@@ -7,6 +7,11 @@
   "themecolor":"FFB800",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/GBC",
+    "imgpath": "../../Roms/GBC/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/GBC",
+    "imgpath": "../../../../media/sdcard1/Roms/GBC/Imgs"}],
   "rompath": "../../Roms/GBC",
   "imgpath": "../../Roms/GBC/Imgs",
   "gamelist": "../../Roms/GBC/miyoogamelist.xml",

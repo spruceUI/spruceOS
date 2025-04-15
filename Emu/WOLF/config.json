@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/WOLF",
+    "imgpath": "../../Roms/WOLF/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/WOLF",
+    "imgpath": "../../../../media/sdcard1/Roms/WOLF/Imgs"}],
   "rompath": "../../Roms/WOLF",
   "imgpath": "../../Roms/WOLF/Imgs",
   "gamelist": "../../Roms/WOLF/miyoogamelist.xml",
@@ -24,7 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

@@ -7,7 +7,7 @@ RA_THEME_DIR="/mnt/SDCARD/RetroArch/.retroarch/assets"
 
 cores_online 4
 display -t "Packing themes into 7z archives.........." -c dbcda7
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo mmc0 > "$LED_PATH"/trigger &
 
 # Pack themes into 7z archives
 for dir in "$THEME_DIR"/*; do

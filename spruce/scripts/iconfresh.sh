@@ -4,11 +4,6 @@ ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# TODO: re-enable iconfresh for brick and smartpro once theming stuff is worked out more fully
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    exit 10
-fi
-
 # Add silent mode flag
 silent_mode=0
 [ "$1" = "--silent" ] && silent_mode=1
@@ -21,11 +16,25 @@ fi
 EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 APP_BASE_PATH="/mnt/SDCARD/App/"
 
-if [ "$PLATFORM" = "A30" ]; then
-    SKIN_PATH="/mnt/SDCARD/miyoo/res/skin"
-elif [ "$PLATFORM" = "Flip" ]; then
-    SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
-fi
+case "$PLATFORM" in
+    "A30" )
+        SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" 
+        ICONS="icons"
+        ;;
+    "Flip" )
+        SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
+        ICONS="icons"
+        ;;
+    "Brick" )
+        SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin" 
+        ICONS="icontop"
+        ;;
+        
+    "SmartPro" )
+        SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin"
+        ICONS="icontop"
+        ;;
+esac
 DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
 if [ ! -f "$SYSTEM_JSON" ]; then
@@ -42,19 +51,23 @@ fi
 DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
 DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
 APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/app/"
-APP_THEME_ICON_PATH="${THEME_PATH}icons/app/"
+APP_THEME_ICON_PATH="${THEME_PATH}${ICONS}/app/"
 
 update_emulator_icons() {
     local CONFIG_FILE=$1
 
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
+else
     OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
+fi
     OLD_ICON_SEL_PATH=$(awk -F'"' '/"iconsel":/ {print $4}' "$CONFIG_FILE")
 
     ICON_FILE_NAME=$(basename "$OLD_ICON_PATH")
     ICON_SEL_FILE_NAME=$(basename "$OLD_ICON_SEL_PATH")
 
-    THEME_ICON_PATH="${THEME_PATH}icons/${ICON_FILE_NAME}"
-    THEME_ICON_SEL_PATH="${THEME_PATH}icons/sel/${ICON_SEL_FILE_NAME}"
+    THEME_ICON_PATH="${THEME_PATH}${ICONS}/${ICON_FILE_NAME}"
+    THEME_ICON_SEL_PATH="${THEME_PATH}${ICONS}/sel/${ICON_SEL_FILE_NAME}"
 
     if [ -f "$THEME_ICON_PATH" ]; then
         NEW_ICON_PATH="$THEME_ICON_PATH"
@@ -75,7 +88,11 @@ update_emulator_icons() {
 update_app_icons() {
     local CONFIG_FILE=$1
 
+if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+    OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
+else
     OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
+fi
     ICON_FILE_NAME=$(basename "$OLD_ICON_PATH")
 
     THEME_APP_ICON_PATH="${APP_THEME_ICON_PATH}${ICON_FILE_NAME}"

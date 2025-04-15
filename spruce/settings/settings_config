@@ -68,7 +68,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm _VALUE_" ""
 @"While in main menu or native PICO-8"
 
-"" "Blue LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
+"" "Status LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 
 "" "Blue Light Filter" "Off|Low|Moderate|Strong|Very strong" "Off|Low|Moderate|Strong|Very strong" "$HELP$ get blf_intensity 'Off'" "$HELP$ update blf_intensity '_VALUE_'" "$BLFILTER$ '_VALUE_'"
 
@@ -266,6 +266,10 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
 @"Clean up displayed game names"
 
+<Flip>
+"" "PortMaster" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PortMaster/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PortMaster/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PortMaster/config.json" ""
+@"The ultimate Linux ports manager"
+
 <Not_simple>
 "" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
 @"Launch a random game"
@@ -292,3 +296,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 <Not_simple>
 "" "Theme Garden" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/ThemeGarden/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/ThemeGarden/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/ThemeGarden/config.json" ""
 @"Download and install themes from our theme repo"
+
+<A30> <Brick> <Flip>
+"" "USB Storage Mode" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/USBStorageMode/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/USBStorageMode/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/USBStorageMode/config.json" ""
+@"Transfer files safely over USB"

@@ -7,6 +7,11 @@
 "themecolor": "E4007F",
 "effectsh": "effect.sh",
 "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/SATURN",
+    "imgpath": "../../Roms/SATURN/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/SATURN",
+    "imgpath": "../../../../media/sdcard1/Roms/SATURN/Imgs"}],
 "rompath": "../../Roms/SATURN",
 "imgpath": "../../Roms/SATURN/Imgs",
 "gamelist": "../../Roms/SATURN/miyoogamelist.xml",
@@ -24,7 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
-      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
+      "name": "CPU: (✓PERF)-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
     },
     {

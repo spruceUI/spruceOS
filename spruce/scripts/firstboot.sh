@@ -33,11 +33,10 @@ cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.ba
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
-if [ "$PLATFORM" = "A30" ]; then
+log_message "Running developer mode check" -v
+/mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
 
-    # TODO: unwrap devconf from A30 check once network services are set up on Brick
-    log_message "Running developer mode check" -v
-    /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
+if [ "$PLATFORM" = "A30" ]; then
 
     if [ -f "${SWAPFILE}" ]; then
         SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
@@ -60,7 +59,7 @@ log_message "Running emu_setup.sh"
 /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
 
 log_message "Running emufresh.sh"
-/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
 
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
@@ -89,7 +88,7 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 fi
 
-# Disable stock USB file transfer app and SD formatter for Brick
+# Disable stock USB file transfer app and SD formatter for Brick & SmartPro
 if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
     [ -f "$USB_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null

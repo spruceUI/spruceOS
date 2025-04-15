@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/ATARIST",
+    "imgpath": "../../Roms/ATARIST/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/ATARIST",
+    "imgpath": "../../../../media/sdcard1/Roms/ATARIST/Imgs"}],
   "rompath": "../../Roms/ATARIST",
   "imgpath": "../../Roms/ATARIST/Imgs",
   "gamelist": "../../Roms/ATARIST/miyoogamelist.xml",
@@ -24,7 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

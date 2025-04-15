@@ -52,6 +52,9 @@ if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mo
     MODES="$MODES -m Expert"
 fi
 
+# Add a mode based on which device spruce is running on
+MODES="$MODES -m $PLATFORM"
+
 if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac always create a junk file at the sdcard root?
 
 # Easy to add more modes like this:
@@ -59,9 +62,11 @@ if [ -f "/mnt/SDCARD/.DS_Store" ]; then MODES="$MODES -m Mac"; fi # will mac alw
 #     MODES="$MODES -m other_mode"
 # fi
 
+[ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
+
 if [ ! "$PLATFORM" = "A30" ]; then
 	/mnt/SDCARD/spruce/bin64/gptokeyb -k "as" -c "./as.gptk" &
-	sleep 1
+	sleep 0.5
 fi
 
 cd $BIN_PATH

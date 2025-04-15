@@ -16,11 +16,18 @@
 # Throughout this process, it monitors various system flags and
 # responds accordingly, managing the overall system state.
 
+runifnecessary(){
+    a=$(pgrep "$1")
+    if [ "$a" = "" ] ; then
+        $2 &
+    fi
+}
+
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Set up the boot_to action prior to getting into the principal loop
 BOOT_ACTION="$(setting_get "boot_to")"
-
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in
         "Random")
@@ -49,11 +56,22 @@ fi
 
 flag_remove "save_active"
 
-while [ "$PLATFORM" = "A30" ]; do
+while [ 1 ]; do
 
     if [ -f /mnt/SDCARD/spruce/flags/gs.lock ]; then
         log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
+    fi
+
+    # Check whether to launch into EmulationStation (only for Flip!)
+    if [ "$PLATFORM" = "Flip" ]; then
+        runee=$(/usr/miyoo/bin/jsonval runee)
+        if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
+            cd /mnt/SDCARD/emulationstation/
+            ./emulationstation.sh
+            runee=$(/usr/miyoo/bin/jsonval runee)
+            echo runee $runee  >> /tmp/runee.log
+        fi
     fi
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
@@ -61,7 +79,7 @@ while [ "$PLATFORM" = "A30" ]; do
         flag_remove "lastgame"
 
         # check if emu visibility needs a refresh, before entering MainUI
-        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
+        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
 
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
@@ -71,12 +89,12 @@ while [ "$PLATFORM" = "A30" ]; do
 
         # Check for the low_battery flag
         if flag_check "low_battery"; then
-            CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+            CAPACITY=$(cat $BATTERY/capacity)
             display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
             flag_remove "low_battery"
         fi
 
-        /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
+        [ "$PLATFORM" = "A30" ] && /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
 
         if flag_check "pre_menu_unpacking"; then
             display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
@@ -89,31 +107,89 @@ while [ "$PLATFORM" = "A30" ]; do
         # This is to kill leftover display processes that may be running
         display_kill &
 
-        # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
-        ln -s /dev/ttyS2 /dev/ttyS0
-
-        # send signal USR2 to joystickinput to switch to KEYBOARD MODE
-        # this allows joystick to be used as DPAD in MainUI
-        killall -q -USR2 joystickinput
-
         flag_add "in_menu"
 
-        if flag_check "simple_mode"; then
-            export PATH="/mnt/SDCARD/miyoo/app/nosettings:$PATH"
-        elif setting_get "recentsTile"; then
-            export PATH="/mnt/SDCARD/miyoo/app/recents:$PATH"
-        else
-            export PATH="/mnt/SDCARD/miyoo/app/norecents:$PATH"
-        fi
+        # Choose which MainUI to put into PATH depending on PLATFORM, simple mode, and recents tile.
+        case "$PLATFORM" in
+            "A30" )
+                if flag_check "simple_mode"; then
+                    export PATH="/mnt/SDCARD/miyoo/app/nosettings:$PATH"
+                elif setting_get "recentsTile"; then
+                    export PATH="/mnt/SDCARD/miyoo/app/recents:$PATH"
+                else
+                    export PATH="/mnt/SDCARD/miyoo/app/norecents:$PATH"
+                fi
+                ;;
+            "Brick" )
+                if flag_check "simple_mode"; then
+                    export PATH="/mnt/SDCARD/trimui/app/nosettings-Brick:$PATH"
+                elif setting_get "recentsTile"; then
+                    export PATH="/mnt/SDCARD/trimui/app/recents-Brick:$PATH"
+                else
+                    export PATH="/mnt/SDCARD/trimui/app/norecents-Brick:$PATH"
+                fi
+                ;;
+            "Flip" )
+                # export LD_LIBRARY_PATH=/usr/miyoo/lib
+                if flag_check "simple_mode"; then
+                    export PATH="/mnt/SDCARD/miyoo355/app/nosettings:$PATH"
+                elif setting_get "recentsTile"; then
+                    export PATH="/mnt/SDCARD/miyoo355/app/recents:$PATH"
+                else
+                    export PATH="/mnt/SDCARD/miyoo355/app/norecents:$PATH"
+                fi
+                ;;
+        esac
 
-        cd ${SYSTEM_PATH}/app/
-        MainUI &> /dev/null
+        # Launch (and subsequently close) MainUI with various quirks depending on PLATFORM
+        case "$PLATFORM" in
+            "A30" )
+                # make soft link to serial port with original device name, so MainUI can use it to calibrate joystick
+                ln -s /dev/ttyS2 /dev/ttyS0
 
-        # remove soft link
-        rm /dev/ttyS0
+                # send signal USR2 to joystickinput to switch to KEYBOARD MODE
+                # this allows joystick to be used as DPAD in MainUI
+                killall -q -USR2 joystickinput
 
-        # send signal USR1 to joystickinput to switch to ANALOG MODE
-        killall -q -USR1 joystickinput
+                cd ${SYSTEM_PATH}/app/
+                MainUI &> /dev/null
+
+                # remove soft link
+                rm /dev/ttyS0
+
+                # send signal USR1 to joystickinput to switch to ANALOG MODE
+                killall -q -USR1 joystickinput
+                ;;
+            "Brick" | "SmartPro" )
+                tinymix set 9 1
+                tinymix set 1 0
+                export LD_LIBRARY_PATH=/usr/trimui/lib:$LD_LIBRARY_PATH
+                cd /usr/trimui/bin
+                runifnecessary "keymon" keymon
+                runifnecessary "inputd" trimui_inputd
+                runifnecessary "scened" trimui_scened
+                runifnecessary "trimui_btmanager" trimui_btmanager
+                runifnecessary "hardwareservice" hardwareservice
+                premainui.sh
+                MainUI
+                preload.sh
+
+                if [ -f /tmp/trimui_inputd_restart ] ; then
+                    #restart before emulator run
+                    killall -9 trimui_inputd
+                    sleep 0.2
+                    runifnecessary "inputd" trimui_inputd
+                    rm /tmp/trimui_inputd_restart 
+                fi
+                ;;
+            "Flip" )
+                export LD_LIBRARY_PATH=/usr/miyoo/lib:$LD_LIBRARY_PATH
+                runifnecessary "keymon" /usr/miyoo/bin/keymon
+                runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+                cd /usr/miyoo/bin/
+                MainUI
+                ;;
+        esac
 
         if flag_check "pre_cmd_unpacking"; then
             [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
@@ -127,13 +203,23 @@ while [ "$PLATFORM" = "A30" ]; do
         flag_remove "in_menu"
     fi
 
+    # clear the FB to get rid of residual Loading screen if present
+    touch /tmp/fbdisplay_exit
+    cat /dev/zero > /dev/fb0
+
     if [ -f /tmp/cmd_to_run.sh ]; then
         set_performance
         kill -9 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # Kill simple mode watchdog
+        udpbcast -f /tmp/host_msg 2>/dev/null &
+        touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
         /tmp/cmd_to_run.sh &>/dev/null
         rm /tmp/cmd_to_run.sh
+        rm /tmp/host_msg 2>/dev/null
+        rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null
+        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
+        killall -9 udpbcast 2>/dev/null
 
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
@@ -158,104 +244,3 @@ while [ "$PLATFORM" = "A30" ]; do
     fi
 
 done
-
-runifnecessary(){
-    a=$(pgrep "$1")
-    if [ "$a" = "" ] ; then
-        $2 &
-    fi
-}
-
-while [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; do
-
-    tinymix set 9 1
-    tinymix set 1 0
-    export LD_LIBRARY_PATH=/usr/trimui/lib
-    cd /usr/trimui/bin
-    runifnecessary "keymon" keymon
-    runifnecessary "inputd" trimui_inputd
-    runifnecessary "scened" trimui_scened
-    runifnecessary "trimui_btmanager" trimui_btmanager
-    runifnecessary "hardwareservice" hardwareservice
-    premainui.sh
-    MainUI
-    preload.sh
-
-    if [ -f /tmp/trimui_inputd_restart ] ; then
-        #restart before emulator run
-        killall -9 trimui_inputd
-        sleep 0.2
-        runifnecessary "inputd" trimui_inputd
-        rm /tmp/trimui_inputd_restart 
-    fi                                                                                         
-    if [ -f /tmp/cmd_to_run.sh ] ; then
-
-        set_performance
-        chmod a+x /tmp/cmd_to_run.sh
-        udpbcast -f /tmp/host_msg &
-        /tmp/cmd_to_run.sh
-        rm /tmp/cmd_to_run.sh
-        rm /tmp/host_msg
-        killall -9 udpbcast
-        # reset CPU settings to defaults in case an emulator changes anything
-        scaling_min_freq=1008000 ### default value, may be overridden in specific script
-        set_smart
-    fi
-
-done
-
-while [ "$PLATFORM" = "Flip" ]; do
-
-    runee=$(/usr/miyoo/bin/jsonval runee)
-    
-    if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
-        cd /mnt/SDCARD/emulationstation/
-        ./emulationstation.sh
-        runee=$(/usr/miyoo/bin/jsonval runee)
-        echo runee $runee  >> /tmp/runee.log
-
-    elif [ ! -f /tmp/cmd_to_run.sh ] ; then
-
-        # create in menu flag and remove last played game flag
-        flag_remove "lastgame"
-
-        # check if emu visibility needs a refresh, before entering MainUI
-        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
-
-        # Check for the themeChanged flag
-        if flag_check "themeChanged"; then
-            /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
-            flag_remove "themeChanged"
-        fi
-
-        flag_add "in_menu"
-
-        export LD_LIBRARY_PATH=/usr/miyoo/lib
-        if setting_get recentsTile; then
-            export PATH=/mnt/SDCARD/miyoo355/app/recents:$PATH
-        else
-            export PATH=/mnt/SDCARD/miyoo355/app/norecents:$PATH
-        fi
-
-        runifnecessary "keymon" /usr/miyoo/bin/keymon
-        runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
-        cd /usr/miyoo/bin/
-        MainUI
-
-        flag_remove "in_menu"
-
-    else
-        touch /tmp/miyoo_inputd/enable_turbo_input
-        chmod a+x /tmp/cmd_to_run.sh
-        /tmp/cmd_to_run.sh
-        rm /tmp/cmd_to_run.sh
-        rm /tmp/miyoo_inputd/enable_turbo_input
-        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
-        # reset CPU settings to defaults in case an emulator changes anything
-        scaling_min_freq=1008000 ### default value, may be overridden in specific script
-        set_smart
-    fi
-
-done
-
-

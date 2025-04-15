@@ -7,6 +7,11 @@
   "themecolor": "",
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/COMMODORE",
+    "imgpath": "../../Roms/COMMODORE/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/COMMODORE",
+    "imgpath": "../../../../media/sdcard1/Roms/COMMODORE/Imgs"}],
   "rompath": "../../Roms/COMMODORE",
   "imgpath": "../../Roms/COMMODORE/Imgs",
   "gamelist": "../../Roms/COMMODORE/miyoogamelist.xml",

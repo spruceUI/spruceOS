@@ -1,0 +1,6 @@
+{
+	"label":        "USB Storage Mode",
+	"icon":	        "",
+	"launch":       "launch.sh",
+	"description":  "Transfer files over USB"
+}

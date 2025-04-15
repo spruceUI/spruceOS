@@ -4,6 +4,10 @@
 log_message "***** gameswitcher.sh: helperFunctions imported" -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
+if [ ! "$PLATFORM" = "A30"]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+fi
+
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 TEMP_PATH="/tmp"

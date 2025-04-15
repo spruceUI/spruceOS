@@ -6,6 +6,11 @@
   "themecolor": "00FF88",
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "rompathlist": [
+    {"rompath": "../../Roms/PICO8",
+    "imgpath": "../../Roms/PICO8/Imgs"},
+    {"rompath": "../../../../media/sdcard1/Roms/PICO8",
+    "imgpath": "../../../../media/sdcard1/Roms/PICO8/Imgs"}],
   "rompath": "../../Roms/PICO8",
   "imgpath": "../../Roms/PICO8",
   "gamelist": "../../Roms/PICO8/miyoogamelist.xml",
@@ -27,7 +32,7 @@
       "launch": "import.sh"
     },
     {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
+      "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {

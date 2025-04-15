@@ -1,7 +1,6 @@
 #!/bin/sh
-
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/Updater/updaterFunctions.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 ARGUMENT="$1" ### "apply" or "remove"
 APP_DIR="/mnt/SDCARD/App"
@@ -87,6 +86,7 @@ if [ $ARGUMENT = "apply" ]; then
 	check_and_hide_app "ShowOutputTest"
 	check_and_hide_app "spruceBackup"
 	check_and_hide_app "ThemePacker"
+	check_and_hide_app "USBStorageMode"
 
 	# make sure these apps show up
 	check_and_reveal_app "AdvancedSettings"

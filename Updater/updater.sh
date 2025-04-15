@@ -58,7 +58,7 @@ display() {
 # Start
 log_update_message "Update process started"
 display "Checking for update file..."
-echo mmc0 >/sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo mmc0 > "$LED_PATH"/trigger &
 
 # Create fresh updater.log and start logging
 echo "Update process started" >"$LOG_LOCATION"
@@ -231,13 +231,17 @@ save_app_states
 
 # Delete all folders and files except Updater, update zip, BIOS, Roms, Saves, miyoo/app, and miyoo/lib
 PERFORM_DELETION=true
-echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo heartbeat > "$LED_PATH"/trigger &
 
 if [ "$PERFORM_DELETION" = true ]; then
     log_update_message "Deleting unnecessary folders and files"
     display "Cleaning up your SD card..."
     cd /mnt/SDCARD
 
+    # Back up 64-bit 7zr
+    mkdir /tmp/bin
+    cp spruce/bin64/7zr /tmp/bin
+    
     # Explicitly delete .config and .tmp_update folders
     log_update_message "Deleting .config folder"
     rm -rf .config
@@ -265,7 +269,7 @@ fi
 
 # Extract update file
 log_update_message "Extracting update file."
-echo heartbeat >/sys/devices/platform/sunxi-led/leds/led1/trigger &
+echo heartbeat > "$LED_PATH"/trigger &
 cd /mnt/SDCARD
 log_update_message "Current directory: $(pwd)"
 log_update_message "Extracting update file: $UPDATE_FILE"
@@ -273,6 +277,11 @@ log_update_message "Extracting update file: $UPDATE_FILE"
 read_only_check
 
 display "Applying update. This should take around 5 minutes..."
+
+# On 64-bit systems add the backed up copy of 7zr to the path
+if [ "$ARCH" = "aarch64" ]; then
+    export PATH="/tmp/bin:$PATH"
+fi
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."

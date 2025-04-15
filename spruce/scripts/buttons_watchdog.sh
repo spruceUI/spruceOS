@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 BIN_PATH="/mnt/SDCARD/spruce/bin"
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
@@ -235,50 +234,50 @@ $BIN_PATH/getevent /dev/input/event3 | while read line; do
 
     # handle hotkeys and volume buttons
     case $line in
-        *"key 1 28 1"*) # START key down
+        *"key $B_START 1"*) # START key down
             START_DOWN=true
             logger -p 15 -t "keymon[$$]" "enter_pressed 1"
         ;;
-        *"key 1 28 0"*) # START key up
+        *"key $B_START 0"*) # START key up
             START_DOWN=false
             logger -p 15 -t "keymon[$$]" "enter_pressed 0"
         ;;
-        *"key 1 97 1"*) # SELECT key down
+        *"key $B_SELECT 1"*) # SELECT key down
             logger -p 15 -t "keymon[$$]" "rctrl_pressed 1"
         ;;
-        *"key 1 97 0"*) # SELECT key up
+        *"key $B_SELECT 0"*) # SELECT key up
             logger -p 15 -t "keymon[$$]" "rctrl_pressed 0"
         ;;
-        *"key 1 15 1"*) # L1 key down
+        *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] ; then
                 brightness_down
             fi
         ;;
-        *"key 1 14 1"*) # R1 key down
+        *"key $B_R1 1"*) # R1 key down
             if [ "$START_DOWN" = true ] ; then
                 brightness_up
             fi
         ;;
-        *"key 1 114 1"*) # VOLUMEDOWN key down
+        *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
             volume_down # ensure fire the first run
             volume_down_bg &
             PID_DOWN=$!
         ;;
-        *"key 1 114 0"*) # VOLUMEDOWN key up
+        *"key $B_VOLDOWN 0"*) # VOLUMEDOWN key up
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
             save_volume_to_config_file
         ;;
-        *"key 1 115 1"*) # VOLUMEUP key down
+        *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
             PID_DOWN=""
             volume_up # ensure fire the first run
             volume_up_bg &
             PID_UP=$!
         ;;
-        *"key 1 115 0"*) # VOLUMEUP key up
+        *"key $B_VOLUP 0"*) # VOLUMEUP key up
             kill $PID_UP 2&> /dev/null
             PID_UP=""
             save_volume_to_config_file

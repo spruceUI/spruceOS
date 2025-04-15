@@ -18,14 +18,14 @@ fi
 
 if [ "$1" == "on" ] ; then
     flag_remove "tlon"
-    echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+    echo 1 > "$LED_PATH"/brightness
     flag_add "ledon"
 elif [ "$1" == "off" ] ; then
     flag_remove "tlon"
-    echo 0 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+    echo 0 > "$LED_PATH"/brightness
     flag_remove "ledon"
 elif [ "$1" == "menu" ] ; then
     flag_add "tlon"
-    echo 1 > /sys/devices/platform/sunxi-led/leds/led1/brightness
+    echo 1 > "$LED_PATH"/brightness
     flag_remove "ledon"
 fi
