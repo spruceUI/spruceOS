@@ -34,7 +34,7 @@ while true; do
     # listen to event0 and handle key press events
     $BIN_PATH/getevent /dev/input/event0 -exclusive | while read line; do
         case $line in
-        *"key 1 116 1"*) # Power key down
+        *"key $B_POWER 1"*) # Power key down
             # not in previous sleep event
             if ! flag_check "pb.sleep" && ! flag_check "pb.longpress"; then
                 # start long press handler
@@ -43,7 +43,7 @@ while true; do
                 PID=$!
             fi
             ;;
-        *"key 1 116 0"*) # Power key up
+        *"key 1 $B_POWER 0"*) # Power key up
             # if NOT long press
             if flag_check "pb.longpress"; then
                 # kill long press handler and remove flag

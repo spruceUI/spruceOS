@@ -9,6 +9,9 @@ if [ "$PLATFORM" = "A30" ]; then
 elif [ "$PLATFORM" = "Brick" ]; then
     log_message "*** homebutton_watchdog.sh: PLATFORM = Brick" -v
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
+elif [ "$PLATFORM" = "SmartPro" ]; then
+    log_message "*** homebutton_watchdog.sh: PLATFORM = SmartPro" -v
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
 elif [ "$PLATFORM" = "Flip" ]; then
     log_message "*** homebutton_watchdog.sh: PLATFORM = Flip" -v
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
@@ -101,7 +104,7 @@ prepare_game_switcher() {
         # ensure folder exists
         mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
-        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w 480 -h 640 -b 32 -l 480 "$SCREENSHOT_NAME" 2>/dev/null &
+        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DEVICE_WIDTH -h $DEVICE_HEIGHT -b 32 -l $DEVICE_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -169,14 +172,29 @@ prepare_game_switcher() {
 }
 
 send_virtual_key_MENUX() {
-    {
+    
+    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
+        {
         echo 1 316 1 # MENU down
         echo 1 308 1 # X down
         sleep 0.1
         echo 1 308 0 # X up
         echo 1 316 0 # MENU up
         echo 0 0 0   # tell sendevent to exit
-    } | $BIN_PATH/sendevent /dev/input/event3
+        } | $BIN_PATH/sendevent /dev/input/event3
+    fi
+
+    if [ "$PLATFORM" = "Flip" ]; then
+        {
+        echo 1 314 1 # SELECT down
+        echo 1 308 1 # X down
+        sleep 0.1
+        echo 1 308 0 # X up
+        echo 1 316 0 # SELECT up
+        echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent /dev/input/event3
+    fi
+    
 }
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
@@ -243,9 +261,9 @@ long_press_handler() {
             prepare_game_switcher
             ;;
         "In-game menu")
-            if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+            if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
-            elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+            elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                 log_message "*** homebutton_watchdog.sh: Trimui RA" -v
                   send_virtual_key_MENUX
             elif pgrep "retroarch" >/dev/null; then
@@ -337,10 +355,10 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
                 ;;
             "In-game menu")
               log_message "*** homebutton_watchdog.sh: In-game menu" -v
-                if pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+                if pgrep "ra32.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: Miyoo RA32/RA64" -v
                     send_virtual_key_L3
-                elif pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+                elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: Trimui RA" -v
                     send_virtual_key_MENUX
                 elif pgrep "retroarch" >/dev/null; then
@@ -394,15 +412,11 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
         ;;
     # Home key up
     *"$B_MENU 0"*)
-        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             home_key_up
-        fi
         ;;
     # Start button down
     *"$B_START 1"*)
-        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             start_button_down
-        fi
         ;;
     # R1 in menu toggles recording
     *"$B_R1 1"*)
