@@ -12,6 +12,7 @@ SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI"
 
 long_press_handler() {
     # setup flag for long pressed event
@@ -97,12 +98,9 @@ while true; do
                 killall -q -19 enforceSmartCPU.sh
 
                 # PAUSE any other running emulator or MainUI
-                killall -q -19 ra32.miyoo ||
-                    killall -q -19 ra64.miyoo ||
-                    killall -q -19 retroarch ||
-                    killall -q -19 PPSSPPSDL ||
-                    killall -q -19 drastic ||
-                    killall -q -19 MainUI
+                for EMU in $EMULATORS; do
+                    killall -q -19 $EMU && break
+                done
 
                 # kill getevent program, prepare to break inner while loop
                 kill $(pgrep -f "getevent /dev/input/event0 -exclusive")
@@ -149,12 +147,9 @@ while true; do
     # sleep 2
 
     # RESUME any running emulator or MainUI
-    killall -q -18 ra32.miyoo ||
-        killall -q -18 ra64.miyoo ||
-        killall -q -18 retroarch ||
-        killall -q -18 PPSSPPSDL ||
-        killall -q -18 drastic ||
-        killall -q -18 MainUI
+    for EMU in $EMULATORS; do
+        killall -q -18 $EMU && break
+    done
 
     # RESUME any process that may crash the system during wakeup
     killall -q -18 enforceSmartCPU.sh
@@ -172,7 +167,7 @@ while true; do
             flag_remove "wake.alarm"
             flag_add "sleep.powerdown"
 
-            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic*" >/dev/null || pgrep "PPSSPP*" >/dev/null; then
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
             fi
 
