@@ -104,7 +104,7 @@ check_and_connect_wifi() {
     # ########################################################################
 
     messages_file="/var/log/messages"
-    local timeout=30  # Think about making this configurable
+    local timeout=60  # Think about making this configurable
     local start_time=$(date +%s)
 
     # More thorough connection check
