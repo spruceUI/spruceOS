@@ -12,6 +12,7 @@ flag_add "emufresh"
 
 emu_path="/mnt/SDCARD/Emu"
 roms_path="/mnt/SDCARD/Roms"
+roms2_path="/media/sdcard1/Roms"
 md5_path="/mnt/SDCARD/Emu/.emu_setup/md5"
 
 log_message "emufresh: checking if emufresh required"
@@ -30,6 +31,13 @@ if [ "$1" = "-clearall" ]; then
 		config_file="$emu_path/$system_name/config.json"
 		sed -i 's/^{*$/{{/' "$config_file"
 	done
+	if [ -d "$roms2_path" ]; then
+		find "$roms2_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
+			system_name=$(basename "$folder")
+			config_file="$emu_path/$system_name/config.json"
+			sed -i 's/^{*$/{{/' "$config_file"
+		done
+	fi
 	log_message "emufresh: hid all systems by breaking their config.json"
 
 	# kill MainUI
@@ -50,6 +58,13 @@ if [ "$1" = "-showall" ]; then
 		config_file="$emu_path/$system_name/config.json"
 		sed -i 's/^{{*$/{/' "$config_file"
 	done
+	if [ -d "$roms2_path" ]; then
+		find "$roms2_path" -mindepth 1 -maxdepth 1 -type d | while read -r folder; do
+			system_name=$(basename "$folder")
+			config_file="$emu_path/$system_name/config.json"
+			sed -i 's/^{{*$/{/' "$config_file"
+		done
+	fi
 	log_message "emufresh: showed all systems by fixing their config.json"
 
 	# kill MainUI
@@ -76,6 +91,9 @@ if [ -f "$emu_path/PICO8/bin/pico8.dat" ] &&
 elif [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] &&
 	[ -f "/mnt/SDCARD/BIOS/$DYN_OR_64" ]; then
 	pico_files_present=1
+elif [ -f "/media/sdcard1/BIOS/pico8.dat" ] &&
+	[ -f "/media/sdcard1/BIOS/$DYN_OR_64" ]; then
+	pico_files_present=1
 else
 	pico_files_present=0
 fi
@@ -87,6 +105,11 @@ if [ "$pico_files_present" -eq 1 ]; then
 		rm -f "$roms_path/PICO8/PICO8_cache6.db"
 		rm -f "$roms_path/PICO8/PICO8_cache7.db"
  		rm -f "$roms_path/PICO8/miyoogamelist.xml"
+		if [ -d "$roms2_path" ]; then
+			rm -f "$roms2_path/PICO8/PICO8_cache6.db"
+			rm -f "$roms2_path/PICO8/PICO8_cache7.db"
+			rm -f "$roms2_path/PICO8/miyoogamelist.xml"
+		fi
  		sed -i 's/^{{*$/{/' "$config_file"
 		echo "show system PICO8" && log_message "emufresh: revealing PICO8 system"
 	fi
@@ -104,14 +127,23 @@ if [ -f "$md5_path/all.md5" ]; then
 	all_md5=$(cat "$md5_path/all.md5" 2>/dev/null)
 	log_message "emufresh: previous MD5 sum of all Roms folders is $all_md5" -v
 fi
+if [ -f "$md5_path/all2.md5" ]; then
+	all2_md5=$(cat "$md5_path/all2.md5" 2>/dev/null)
+	log_message "emufresh: previous MD5 sum of all SDCARD 2 Roms folders is $all2_md5" -v
+fi
 
 # compute new md5 value for files under Roms
 # except known non-rom files
 new_all_md5=$(find "$roms_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+if [ -d "$roms2_path" ]; then
+	new_all2_md5=$(find "$roms2_path" -mindepth 2 -type f ! -path "*/.*" ! -path "*/Imgs/*" ! -path ".portmaster/*" ! -path ".32bit_chroot/*" ! -path "*/ports/*" ! -name "*.xml" ! -name "*.txt" ! -name ".gitkeep" ! -name "*cache6.db" | md5sum)
+fi
 
 # if no update and no force option is used, exit with 0
 if [ ! "$new_all_md5" = "$all_md5" ]; then
     echo [All] MD5 Changed : was $all_md5 but is now $new_all_md5 so refreshing
+elif [ ! "$new_all2_md5" = "$all2_md5" ]; then
+    echo [All] MD5 Changed : was $all2_md5 but is now $new_all2_md5 so refreshing
 elif [ ! $pico8_updated ]; then
     echo [All] pico8 updated so refreshing
 elif [ "$1" = "-force" ]; then
@@ -128,9 +160,14 @@ fi
 # otherwise update md5 file and continue
 echo Writing $new_all_md5 to $md5_path/all.md5
 echo "$new_all_md5" > "$md5_path/all.md5"
+if [ -d "$roms2_path" ]; then
+	echo Writing $new_all2_md5 to $md5_path/all2.md5
+	echo "$new_all2_md5" > "$md5_path/all2.md5"
+fi
 
 # get all rom folders
 rom_folders=$(find "$roms_path" -mindepth 1 -maxdepth 1 -type d)
+rom2_folders=$(find "$roms2_path" -mindepth 1 -maxdepth 1 -type d)
 
 # function to check list of rom folders
 check_rom_folders() {
@@ -192,6 +229,12 @@ check_rom_folders() {
 				[ "$system_name" = "ARCADE" ] || rm -f "$roms_path/$system_name/miyoogamelist.xml"
 				[ "$system_name" = "PICO8" ] || sed -i 's/^{{*$/{/' "$config_file"
 				echo "[$system_name] show system $system_name" && log_message "emufresh: Revealing $system_name"
+				if [ -d "$roms2_path" ]; then
+					rm -f "$roms2_path/$system_name/${system_name}_cache6.db" "$roms2_path/$system_name/${system_name}_cache7.db"
+					[ "$system_name" = "ARCADE" ] || rm -f "$roms2_path/$system_name/miyoogamelist.xml"
+					[ "$system_name" = "PICO8" ] || sed -i 's/^{{*$/{/' "$config_file"
+					echo "[$system_name] show system $system_name" && log_message "emufresh: Revealing $system_name"
+				fi
 			fi
 		fi
 	done
@@ -205,7 +248,22 @@ check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;p;n')
 check_rom_folders "$folders" &
 folders=$(echo "$rom_folders" | sed -n 'n;n;n;p')
-check_rom_folders "$folders" 
+check_rom_folders "$folders"
+
+# wait all process to finish
+wait
+
+# check for SDCARD 2 folders
+if [ -d "$roms2_path" ]; then
+	folders=$(echo "$rom2_folders" | sed -n 'p;n;n;n')
+	check_rom_folders "$folders" &
+	folders=$(echo "$rom2_folders" | sed -n 'n;p;n;n')
+	check_rom_folders "$folders" &
+	folders=$(echo "$rom2_folders" | sed -n 'n;n;p;n')
+	check_rom_folders "$folders" &
+	folders=$(echo "$rom2_folders" | sed -n 'n;n;n;p')
+	check_rom_folders "$folders" 
+fi
 
 # wait all process to finish
 wait
