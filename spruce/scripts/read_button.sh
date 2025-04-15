@@ -3,7 +3,7 @@
 # This script read button input and print to STDOUT
 # Please DO NOT PRINT ANYTHING ELSE TO STDOUT for logging !!
 
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/settings/helperFunctions.sh
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin64"

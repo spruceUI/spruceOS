@@ -35,9 +35,6 @@
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-# Export for architecture (aarch64 or armv7l)
-export ARCH="$(uname -m)"
-
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
@@ -66,94 +63,16 @@ esac
 log_message "[helperFunctions.sh] Platform is $PLATFORM"
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-if [ "$ARCH" = "aarch64" ]; then
+if [ ! "$PLATFORM" = "A30" ]; then
     export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
 else
     export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
 fi
 
-# Key exports so we can refer to buttons by more memorable names
-if [ "$PLATFORM" = "A30" ]; then
-    export B_POWER="1 116"
-
-    export B_LEFT="1 105 1"
-    export B_RIGHT="1 106 1"
-    export B_UP="1 103 1"
-    export B_DOWN="1 108 1"
-
-    export B_A="1 57"
-    export B_B="1 29"
-    export B_X="1 42"
-    export B_Y="1 56"
-
-    export B_L1="1 15"
-    export B_L2="1 18"
-    export B_R1="1 14"
-    export B_R2="1 20"
-
-    export B_START="1 28"
-    export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-    export B_SELECT="1 97"
-    export B_SELECT_2="rctrl_pressed"
-
-    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
-    export B_VOLDOWN="1 114"     # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-    export B_MENU="1 1"          # surprisingly functions like a regular button
-
-elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-    export B_POWER="1 116"
-    
-    export B_LEFT="3 16 -1"  # negative for left
-    export B_RIGHT="3 16 1"  # positive for right
-    export B_UP="3 17 -1"    # negative for up
-    export B_DOWN="3 17 1"   # positive for down
-
-    export B_A="1 305"
-    export B_B="1 304"
-    export B_X="1 308"
-    export B_Y="1 307"
-
-    export B_L1="1 310"
-    export B_L2="3 2 2" # 255 on push, 0 on release
-    export B_R1="1 311"
-    export B_R2="3 5" # 255 on push, 0 on release
-
-    export B_L3="1 317" # also logs left fnkey stuff
-    export B_R3="1 318" # also logs right fnkey stuff
-
-    export B_START="1 315"
-    export B_START_2="start_pressed" # only registers 0 on release, no 1.
-    export B_SELECT="1 314"
-    export B_SELECT_2="select_pressed" # registers both 1 and 0
-
-    export B_VOLUP="1 115" # has actual key codes like the buttons
-    export B_VOLUP_2="volume up" # only registers 0 on release, no 1.
-    export B_VOLDOWN="1 114" # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU="1 316"
-
-    export STICK_LEFT="3 0 -32767" # negative for left
-    export STICK_RIGHT="3 0 32767" # positive for right
-    export STICK_UP="3 1 -32767"   # negative for up
-    export STICK_DOWN="3 1 32767"  # positive for down
-
-    export STICK_LEFT_2="3 4 -32767" # negative for left
-    export STICK_RIGHT_2="3 4 32767" # positive for right
-    export STICK_UP_2="3 3 -32767"   # negative for up
-    export STICK_DOWN_2="3 3 32767"  # positive for down
-
-    if [ ! "$PLATFORM" = "SmartPro" ]; then
-        export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
-        export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
-        export HOME="/mnt/sdcard"
-    fi
-
-    if [ "$PLATFORM" = "Flip" ]; then
-        export B_START="1 315"
-        export B_SELECT="1 314"
-    fi
-
+if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+    export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
+    export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
+    export HOME="/mnt/sdcard"
 fi
 
 # Call this just by having "acknowledge" in your script
