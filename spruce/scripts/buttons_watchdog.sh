@@ -2,7 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
+BIN_PATH="/mnt/SDCARD/spruce/bin64"
+if [ "$PLATFORM"="A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
+fi
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
 START_DOWN=false
 
