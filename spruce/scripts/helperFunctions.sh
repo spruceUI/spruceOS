@@ -99,16 +99,11 @@ if [ "$PLATFORM" = "A30" ]; then
     export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
     export B_MENU="key 1 1"          # surprisingly functions like a regular button
 
-elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
+elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ]  || [ "$PLATFORM" = "Flip" ]; then
     export B_LEFT="key 3 16 -1"  # negative for left
     export B_RIGHT="key 3 16 1"  # positive for right
     export B_UP="key 3 17 -1"    # negative for up
     export B_DOWN="key 3 17 1"   # positive for down
-
-    export STICK_LEFT="key 3 0 -32767" # negative for left
-    export STICK_RIGHT="key 3 0 32767" # positive for right
-    export STICK_UP="key 3 1 -32767"   # negative for up
-    export STICK_DOWN="key 3 1 32767"  # positive for down
 
     export B_A="key 1 305"
     export B_B="key 1 304"
@@ -116,9 +111,9 @@ elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = 
     export B_Y="key 1 307"
 
     export B_L1="key 1 310"
-    export B_L2="key 3 2 255" # 255 on push, nothing on release...
+    export B_L2="key 3 2 255" # 255 on push, 0 on release
     export B_R1="key 1 311"
-    export B_R2="key 3 5 255" # 255 on push, nothing on release...
+    export B_R2="key 3 5 255" # 255 on push, 0 on release
 
     export B_L3="key 1 317" # also logs left fnkey stuff
     export B_R3="key 1 318" # also logs right fnkey stuff
@@ -129,15 +124,32 @@ elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = 
     export B_SELECT_2="select_pressed" # registers both 1 and 0
 
     export B_VOLUP="key 1 115" # has actual key codes like the buttons
+    export B_VOLUP_2="volume up" # only registers 0 on release, no 1.
     export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
     export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
     export B_MENU="key 1 316"
-fi
 
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "Flip" ]; then
-    export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
-    export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
-    export HOME="/mnt/sdcard"
+    if [ ! "$PLATFORM" = "SmartPro" ]; then
+        export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/site-packages/sdl2dll/dll"
+        export PATH="/mnt/sdcard/MIYOO_EX/bin/:$PATH"
+        export HOME="/mnt/sdcard"
+    fi
+
+    if [ "$PLATFORM" = "Flip" ]; then
+        export B_START="key 1 315"
+        export B_SELECT="key 1 314"
+
+        export STICK_LEFT="key 3 0 -32767" # negative for left
+        export STICK_RIGHT="key 3 0 32767" # positive for right
+        export STICK_UP="key 3 1 -32767"   # negative for up
+        export STICK_DOWN="key 3 1 32767"  # positive for down
+
+        export STICK_LEFT_2="key 3 4 -32767" # negative for left
+        export STICK_RIGHT_2="key 3 4 32767" # positive for right
+        export STICK_UP_2="key 3 3 -32767"   # negative for up
+        export STICK_DOWN_2="key 3 3 32767"  # positive for down
+    fi
+
 fi
 
 # Call this just by having "acknowledge" in your script

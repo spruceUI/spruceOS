@@ -389,57 +389,35 @@ $BIN_PATH/getevent /dev/input/event3 -pid $$ | while read line; do
 
     case $line in
     # Home key down
-    *"key 1 1 1"*)
-        if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
+    *"$B_MENU 1"*)
             home_key_down
-        fi
-        ;;
-    *"key 1 316 1"*)
-        if [ "$PLATFORM" = "Brick" ]; then
-            home_key_down
-        fi
         ;;
     # Home key up
-    *"key 1 1 0"*)
+    *"$B_MENU 0"*)
         if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
-            home_key_up
-        fi
-        ;;
-    *"key 1 316 0"*)
-        if [ "$PLATFORM" = "Brick" ]; then
             home_key_up
         fi
         ;;
     # Start button down
-    *"key 1 28 1"*)
+    *"$B_START 1"*)
         if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
             start_button_down
         fi
         ;;
-    *"key 1 315 1"*)
-        if [ "$PLATFORM" = "Brick" ]; then
-            start_button_down
-        fi
-        ;;
     # R1 in menu toggles recording
-    *"key 1 14 1"*)
+    *"$B_R1 1"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
             record_video &
         fi
         ;;
     # R2 take screenshot
-    *"key 1 20 1"*)
+    *"$B_R2 1"*)
         if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode" || flag_check "designer_mode"; }; then
             take_screenshot
         fi
         ;;
-    *"key 1 18 1"*)
-        if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "designer_mode" && flag_check "in_menu"; then
-            killall -q -9 MainUI
-        fi
-        ;;
     # Don't react to dpad presses
-    *"key 1 105"* | *"key 1 106"* | *"key 1 103"* | *"key 1 108"*) ;;
+    *"$B_LEFT"* | *"$B_RIGHT"* | *"$B_UP"* | *"$B_DOWN"*) ;;
     # Any other key press while menu is held
     *"key"*)
         log_message "*** Catch-all key case matched: $line" -v
