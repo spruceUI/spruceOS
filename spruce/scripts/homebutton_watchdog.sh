@@ -60,7 +60,7 @@ kill_current_app() {
         CMD=$(cat /tmp/cmd_to_run.sh)
 
         # If it's an emulator (but not Ports or Media), use emulator killing logic
-        if echo "$CMD" | grep -q "$SD_FOLDER_PATH" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/\(PORTS\|MEDIA\)"; then
+        if echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu/\(PORTS\|MEDIA\)"; then
             kill_emulator
         else
             rm /tmp/cmd_to_run.sh
