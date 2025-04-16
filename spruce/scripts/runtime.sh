@@ -150,7 +150,7 @@ fi
 
 {
     ${SCRIPTS_DIR}/romdirpostrofix.sh
-    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 } &
 
     # don't hide or unhide apps in simple_mode
