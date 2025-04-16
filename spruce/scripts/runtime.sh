@@ -399,9 +399,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
-    sleep 0.3
-    cd ${BIN_DIR}
-    ./joypad $EVENT_PATH_KEYBOARD &
+    # sleep 0.3
+    # cd ${BIN_DIR}
+    # ./joypad $EVENT_PATH_KEYBOARD &
 
     killall runmiyoo.sh
 
