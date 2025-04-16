@@ -3,13 +3,16 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "***** gameswitcher.sh: helperFunctions imported" -v
 
+SD_FOLDER_PATH="/mnt/SDCARD"
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
-if [ "$PLATFORM" = "A30"]; then
+if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
+elif [ "$PLATFORM" = "Flip" ]; then
+    SD_FOLDER_PATH="/media/sdcard0"
 fi
 
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
-SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
+FLAG_PATH="$SD_FOLDER_PATH/spruce/flags"
+SETTINGS_PATH="$SD_FOLDER_PATH/spruce/settings"
 TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 OPTIONS_FILE="$FLAG_PATH/gs_options"
@@ -57,17 +60,17 @@ while read -r CMD; do
     # try get screenshot file path only if boxart flag does not exist
     if [ $USEBOXART -eq 1 ]; then
         # try get our screenshot
-        OWN_SCREENSHOT_PATH="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        OWN_SCREENSHOT_PATH="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         log_message "***** gameswitcher.sh: OWN_SCREENSHOT_PATH: $OWN_SCREENSHOT_PATH" -v
 
         # try get RA screenshot if our screenshot does not exist
         if [ ! -f "${OWN_SCREENSHOT_PATH}" ]; then
 
             LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-            EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-            DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
-            OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
-            OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
+            EMU_DIR="$SD_FOLDER_PATH/Emu/${EMU_NAME}"
+            DEF_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/defaults"
+            OPT_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/options"
+            OVR_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/overrides"
             DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
             OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
             OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
@@ -79,7 +82,7 @@ while read -r CMD; do
             core_info="$INFO_DIR/${CORE}_libretro.info"
             core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
             core_name="$(echo ${core_name} | tr -d '"')"
-            state_dir="/mnt/SDCARD/Saves/states/$core_name"
+            state_dir="$SD_FOLDER_PATH/Saves/states/$core_name"
             SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
             log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
         fi
@@ -100,7 +103,7 @@ while read -r CMD; do
         echo "$GAME_PATH" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using Pico-8 cart as artwork for $GAME_NAME" -v
     elif [ "${GAME_PATH##*.}" = "splore" ]; then
-        echo "/mnt/SDCARD/spruce/imgs/splore.png" >> "$IMAGES_FILE"
+        echo "$SD_FOLDER_PATH/spruce/imgs/splore.png" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using Pico-8 banner for $GAME_NAME" -v
     else
         echo "$DEFAULT_IMG" >> "$IMAGES_FILE"
@@ -110,7 +113,7 @@ done <$LIST_FILE
 
 # send signal USR2 to joystickinput to switch to KEYBOARD MODE
 # this allows joystick to be used as DPAD in game switcher
-if [ ! "$PLATFORM"="Flip" ]; then
+if [ ! "$PLATFORM" = "Flip" ]; then
     killall -q -USR2 joystickinput
 fi
 # launch the switcher program
@@ -164,7 +167,7 @@ while : ; do
 done
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
-if [ ! "$PLATFORM"="Flip" ]
+if [ ! "$PLATFORM" = "Flip" ]
     killall -q -USR1 joystickinput
 fi
 # launch game with return index
