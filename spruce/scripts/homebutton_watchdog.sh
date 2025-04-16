@@ -14,13 +14,14 @@ TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+HOTKEY_FLG=false
 
 kill_emulator() {
     # kill RA or other emulator or MainUI
     log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" -v
 
     if pgrep -x "./drastic" >/dev/null; then
-        # use sendevent to send MENU + L1 combin buttons to drastic
+        # use sendevent to send MENU + L1 combo buttons to drastic
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
             echo $B_MENU 1  # MENU down
@@ -31,7 +32,7 @@ kill_emulator() {
         } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
     elif pgrep "PPSSPPSDL" >/dev/null; then
         killall -q -CONT PPSSPPSDL
-        # use sendevent to send SELECT + R1 combin buttons to PPSSPP
+        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
         {
             # send autosave hot key
             echo $B_SELECT 1 # SELECT down
@@ -44,9 +45,19 @@ kill_emulator() {
         sleep 1
         # kill PPSSPP with signal 15, it should exit after saving is done
         killall -15 PPSSPPSDL
+    elif pgrep "ra64.miyoo" >/dev/null; then
+        # use sendevent to send SELECT + B combo buttons to Retroarch (Flip)
+        {
+            echo $B_SELECT 1 # SELECT down
+            sleep 0.1
+            echo $B_B 1 # B down
+            echo 0 0 0   # tell sendevent to exit
+        } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
+        sleep 1
+        killall -q -15 ra64.miyoo
     else
         killall -q -CONT pico8_dyn
-        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn
+        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM pico8_dyn
     fi
 }
 
@@ -180,7 +191,7 @@ send_virtual_key_MENUX() {
         {
         echo $B_SELECT 1 # SELECT down
         echo $B_X 1 # X down
-        sleep 0.2
+        sleep 0.1
         echo $B_X 0 # X up
         echo $B_SELECT 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
@@ -307,7 +318,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
         cp /dev/fb0 /tmp/fb0
 
         # pause RA after screen capture
-        if [ "$PLATFORM"="A30" ];then
+        if [ "$PLATFORM" = "A30" ]; then
             send_virtual_key_R3
         fi
     }
@@ -393,7 +404,9 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
               vibrate
             fi
+            HOTKEY_FLG=true
             kill_current_app
+            HOTKEY_FLG=false
             log_message "Exit hotkey hit"
         fi
     }
@@ -423,10 +436,16 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             take_screenshot
         fi
         ;;
-    # Don't react to dpad presses
-    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*) ;;
+    # Don't react to dpad presses or ananlog sticks
+    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* | *"key 3"*) ;;
     # Any other key press while menu is held
     *"key"*)
+        if [ "$HOTKEY" = true ]; then
+            rm -f "$TEMP_PATH/gs.longpress"
+            rm -f "$TEMP_PATH/homeheld.$HELD_ID"
+            rm -f "$TEMP_PATH/longpress_activated"
+            log_message "*** homebutton_watchdog.sh: Hotkey pressed, ignoring long press" -v
+        fi
         log_message "*** Catch-all key case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
             # Only remove homeheld flag if NOT in simple_mode and in_menu
@@ -438,7 +457,9 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
 
                 # Resume paused processes
                 killall -q -CONT PPSSPPSDL pico8_dyn MainUI
-                send_virtual_key_R3 # Unpause RetroArch
+                if [ "$PLATFORM" = "A30" ]; then
+                    send_virtual_key_R3
+                fi
 
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
