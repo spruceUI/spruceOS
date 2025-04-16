@@ -86,6 +86,10 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 
     )
 elif [ "$PLATFORM" = "Flip" ]; then
+    export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
+    export PATH="$SYSTEM_PATH/app:${PATH}"
+    BIN_DIR="${SDCARD_PATH}/spruce/bin64"
+
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
@@ -321,7 +325,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
-    sleep 0.1
+    sleep 0.2
     hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
     if [ "$hdmipugin" == "connected" ] ; then
         /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
@@ -402,6 +406,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # sleep 0.3
     # cd ${BIN_DIR}
     # ./joypad $EVENT_PATH_KEYBOARD &
+    swapon -p 40 "${SWAPFILE}"
 
     killall runmiyoo.sh
 
