@@ -3,9 +3,13 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
+SD_FOLDER_PATH="/mnt/SDCARD"
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
+    
+elif [ "$PLATFORM" = "Flip" ]; then
+    SD_FOLDER_PATH="/media/sdcard0"
 fi
 log_message "*** homebutton_watchdog.sh: PLATFORM = $PLATFORM" -v
 
@@ -14,7 +18,6 @@ TEMP_PATH="/tmp"
 LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
-HOTKEY_FLG=false
 
 kill_emulator() {
     # kill RA or other emulator or MainUI
@@ -45,19 +48,9 @@ kill_emulator() {
         sleep 1
         # kill PPSSPP with signal 15, it should exit after saving is done
         killall -15 PPSSPPSDL
-    elif pgrep "ra64.miyoo" >/dev/null; then
-        # use sendevent to send SELECT + B combo buttons to Retroarch (Flip)
-        {
-            echo $B_SELECT 1 # SELECT down
-            sleep 0.1
-            echo $B_B 1 # B down
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-        sleep 1
-        killall -q -15 ra64.miyoo
     else
         killall -q -CONT pico8_dyn
-        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM pico8_dyn
+        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn
     fi
 }
 
@@ -67,7 +60,7 @@ kill_current_app() {
         CMD=$(cat /tmp/cmd_to_run.sh)
 
         # If it's an emulator (but not Ports or Media), use emulator killing logic
-        if echo "$CMD" | grep -q '/mnt/SDCARD/Emu' && ! echo "$CMD" | grep -q '/mnt/SDCARD/Emu/\(PORTS\|MEDIA\)'; then
+        if echo "$CMD" | grep -q "$SD_FOLDER_PATH" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/\(PORTS\|MEDIA\)"; then
             kill_emulator
         else
             rm /tmp/cmd_to_run.sh
@@ -94,7 +87,7 @@ prepare_game_switcher() {
 
         # check command is emulator
         # exit if not emulator is in command
-        if echo "$CMD" | grep -q -v '/mnt/SDCARD/Emu'; then
+        if echo "$CMD" | grep -q -v "$SD_FOLDER_PATH/Emu"; then
             return 0
         fi
 
@@ -103,9 +96,9 @@ prepare_game_switcher() {
         GAME_NAME="${GAME_PATH##*/}"
         SHORT_NAME="${GAME_NAME%.*}"
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
-        SCREENSHOT_NAME="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        SCREENSHOT_NAME="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         # ensure folder exists
-        mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
+        mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
         $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DISPLAY_WIDTH -h $DISPLAY_HEIGHT -b 32 -l $DISPLAY_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
@@ -404,9 +397,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
               vibrate
             fi
-            HOTKEY_FLG=true
             kill_current_app
-            HOTKEY_FLG=false
             log_message "Exit hotkey hit"
         fi
     }
@@ -440,12 +431,6 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
     *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* | *"key 3"*) ;;
     # Any other key press while menu is held
     *"key"*)
-        if [ "$HOTKEY" = true ]; then
-            rm -f "$TEMP_PATH/gs.longpress"
-            rm -f "$TEMP_PATH/homeheld.$HELD_ID"
-            rm -f "$TEMP_PATH/longpress_activated"
-            log_message "*** homebutton_watchdog.sh: Hotkey pressed, ignoring long press" -v
-        fi
         log_message "*** Catch-all key case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
             # Only remove homeheld flag if NOT in simple_mode and in_menu
