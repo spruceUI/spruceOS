@@ -3,9 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-if [ ! "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+BIN_PATH="/mnt/SDCARD/spruce/bin64"
+if [ "$PLATFORM" = "A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
 fi
 log_message "*** homebutton_watchdog.sh: PLATFORM = $PLATFORM" -v
 
