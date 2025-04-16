@@ -71,7 +71,7 @@ kill_current_app() {
         CMD=$(cat /tmp/cmd_to_run.sh)
 
         # If it's an emulator (but not Ports or Media), use emulator killing logic
-        if echo "$CMD" | grep -q "$SD_FOLDER_PATH" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/\(PORTS\|MEDIA\)"; then
+        if echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu/\(PORTS\|MEDIA\)"; then
             kill_emulator
         else
             rm /tmp/cmd_to_run.sh
@@ -403,6 +403,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
     start_button_down () {
         log_message "*** Start button case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
+            log_message "Exit hotkey hit"
             killall -q -CONT MainUI
             # TODO: need to fix vibrate for Brick
             if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
@@ -411,7 +412,6 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             HOTKEY_FLG=true
             kill_current_app
             HOTKEY_FLG=false
-            log_message "Exit hotkey hit"
         fi
     }
 
