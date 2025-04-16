@@ -62,7 +62,7 @@ get_ra_alias() {
         SATURN)              ra_name="Sega - Saturn" ;; # todo: handle saturn mask on A30
         SCUMMVM)             ra_name="ScummVM" ;;
         SEGACD)              ra_name="Sega - Mega-CD - Sega CD" ;;
-        SEGASGONE)           ra_name="Sega SG-1000" ;;
+        SEGASGONE)           ra_name="Sega - SG-1000" ;;
         SEVENTYEIGHTHUNDRED) ra_name="Atari - 7800" ;;
         SFC)                 ra_name="Nintendo - Super Nintendo Entertainment System" ;;
         SGB)                 ra_name="Nintendo - Game Boy" ;;
