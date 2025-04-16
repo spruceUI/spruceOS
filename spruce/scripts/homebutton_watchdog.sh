@@ -3,9 +3,13 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
 
+SD_FOLDER_PATH="/mnt/SDCARD"
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
+    
+elif [ "$PLATFORM" = "Flip" ]; then
+    SD_FOLDER_PATH="/media/sdcard0"
 fi
 log_message "*** homebutton_watchdog.sh: PLATFORM = $PLATFORM" -v
 
@@ -67,7 +71,7 @@ kill_current_app() {
         CMD=$(cat /tmp/cmd_to_run.sh)
 
         # If it's an emulator (but not Ports or Media), use emulator killing logic
-        if echo "$CMD" | grep -q '/mnt/SDCARD/Emu' && ! echo "$CMD" | grep -q '/mnt/SDCARD/Emu/\(PORTS\|MEDIA\)'; then
+        if echo "$CMD" | grep -q "$SD_FOLDER_PATH" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/\(PORTS\|MEDIA\)"; then
             kill_emulator
         else
             rm /tmp/cmd_to_run.sh
@@ -94,7 +98,7 @@ prepare_game_switcher() {
 
         # check command is emulator
         # exit if not emulator is in command
-        if echo "$CMD" | grep -q -v '/mnt/SDCARD/Emu'; then
+        if echo "$CMD" | grep -q -v "$SD_FOLDER_PATH/Emu"; then
             return 0
         fi
 
@@ -103,9 +107,9 @@ prepare_game_switcher() {
         GAME_NAME="${GAME_PATH##*/}"
         SHORT_NAME="${GAME_NAME%.*}"
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
-        SCREENSHOT_NAME="/mnt/SDCARD/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        SCREENSHOT_NAME="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         # ensure folder exists
-        mkdir -p "/mnt/SDCARD/Saves/screenshots/${EMU_NAME}"
+        mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
         $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DISPLAY_WIDTH -h $DISPLAY_HEIGHT -b 32 -l $DISPLAY_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
