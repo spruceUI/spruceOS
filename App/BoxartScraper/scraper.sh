@@ -62,7 +62,7 @@ get_ra_alias() {
         SATURN)              ra_name="Sega - Saturn" ;; # todo: handle saturn mask on A30
         SCUMMVM)             ra_name="ScummVM" ;;
         SEGACD)              ra_name="Sega - Mega-CD - Sega CD" ;;
-        SEGASGONE)           ra_name="Sega SG-1000" ;;
+        SEGASGONE)           ra_name="Sega - SG-1000" ;;
         SEVENTYEIGHTHUNDRED) ra_name="Atari - 7800" ;;
         SFC)                 ra_name="Nintendo - Super Nintendo Entertainment System" ;;
         SGB)                 ra_name="Nintendo - Game Boy" ;;
@@ -242,10 +242,10 @@ for sys_dir in "$roms_dir"/*/; do
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
         fallback_url=$(echo "https://raw.githubusercontent.com/libretro-thumbnails/$(echo "$ra_name" | sed 's/ /_/g')/master/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g') 
         log_message "BoxartScraper: Downloading $boxart_url" -v
-        if ! curl -k -s -o "$image_path" "$boxart_url"; then
+        if ! curl -f -g -k -s -o "$image_path" "$boxart_url"; then
             log_message "BoxartScraper: failed to scrape $boxart_url, falling back to libretro thumbnails GitHub repo."
             rm -f "$image_path"
-            if ! curl -k -s -o "$image_path" "$fallback_url"; then
+            if ! curl -f -g -k -s -o "$image_path" "$fallback_url"; then
                 log_message "BoxartScraper: failed to scrape $fallback_url."
                 rm -f "$image_path"
             fi
