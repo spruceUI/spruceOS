@@ -32,6 +32,40 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Call this like:
+# log_message "Your message here"
+# To output to a custom log file, set the variable within your script:
+# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
+# This will log the message to the spruce.log file in the Saves/spruce folder
+#
+# Usage examples:
+# Log a regular message:
+#    log_message "This is a regular log message"
+# Log a verbose message (only logged if log_verbose was called):
+#    log_message "This is a verbose log message" -v
+# Log to a custom file:
+#    log_message "Custom file log message" "" "/path/to/custom/log.file"
+# Log a verbose message to a custom file:
+#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
+log_message() {
+    local message="$1"
+    local verbose_flag="$2"
+    local custom_log_file="${3:-$log_file}"
+
+    # Check if it's a verbose message and if verbose logging is not enabled
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
+    fi
+
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
+}
+
+
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
@@ -781,39 +815,6 @@ log_verbose() {
         flag_add "log_verbose"
         log_message "Verbose logging enabled in script: $calling_script"
     fi
-}
-
-# Call this like:
-# log_message "Your message here"
-# To output to a custom log file, set the variable within your script:
-# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
-# This will log the message to the spruce.log file in the Saves/spruce folder
-#
-# Usage examples:
-# Log a regular message:
-#    log_message "This is a regular log message"
-# Log a verbose message (only logged if log_verbose was called):
-#    log_message "This is a verbose log message" -v
-# Log to a custom file:
-#    log_message "Custom file log message" "" "/path/to/custom/log.file"
-# Log a verbose message to a custom file:
-#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-log_message() {
-    local message="$1"
-    local verbose_flag="$2"
-    local custom_log_file="${3:-$log_file}"
-
-    # Check if it's a verbose message and if verbose logging is not enabled
-    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
-
-    # Handle custom log file
-    if [ "$custom_log_file" != "$log_file" ]; then
-        mkdir -p "$(dirname "$custom_log_file")"
-        touch "$custom_log_file"
-    fi
-
-    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
 log_precise() {
