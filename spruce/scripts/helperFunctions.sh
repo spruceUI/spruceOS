@@ -716,7 +716,7 @@ get_theme_path_to_restore(){
 
 
 get_event() {
-    "/mnt/SDCARD/spruce/bin/getevent" /dev/input/event3
+    "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_KEYBOARD
 }
 
 get_version() {

@@ -150,7 +150,7 @@ fi
 
 {
     ${SCRIPTS_DIR}/romdirpostrofix.sh
-    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/SDCARD/spruce/logs/emufresh_md5_multi.log
+    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 } &
 
     # don't hide or unhide apps in simple_mode
@@ -180,7 +180,7 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    ./joypad $EVENT_PATH_KEYBOARD &
 
     # read joystick raw data from serial input and apply calibration,
     # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
@@ -283,7 +283,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     # TODO: verify that we can call this via absolute path
     cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    ./joypad $EVENT_PATH_KEYBOARD &
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
@@ -317,7 +317,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # echo -n 0 > /sys/class/gpio/gpio20/value
 
     #joypad
-    echo -1 > /sys/class/miyooio_chr_dev/joy_type
+    #echo -1 > /sys/class/miyooio_chr_dev/joy_type
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
@@ -380,8 +380,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
-    #${SCRIPTS_DIR}/buttons_watchdog.sh &
-    #${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
@@ -399,11 +399,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
-    sleep 0.2
-    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-    # TODO: verify that we can call this via absolute path
-    cd ${BIN_DIR}
-    ./joypad /dev/input/event3 &
+    # sleep 0.3
+    # cd ${BIN_DIR}
+    # ./joypad $EVENT_PATH_KEYBOARD &
 
     killall runmiyoo.sh
 

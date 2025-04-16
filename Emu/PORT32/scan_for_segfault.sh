@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to the log file
-LOG_FILE="/mnt/sdcard/spruce/logs/port32.log"
+LOG_FILE="/mnt/sdcard/Saves/spruce/port32.log"
 
 # Check if the file exists
 while true; do

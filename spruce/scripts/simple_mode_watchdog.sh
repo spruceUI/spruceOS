@@ -12,7 +12,7 @@ detect_konami_code() {
 	mkfifo "$FIFO"
 	
 	# Start getevent in background, writing to the FIFO
-	/mnt/SDCARD/spruce/bin/getevent /dev/input/event3 > "$FIFO" &
+	/mnt/SDCARD/spruce/bin/getevent $EVENT_PATH_KEYBOARD > "$FIFO" &
 	getevent_pid=$!
 	
 	NUM_CORRECT=0

@@ -340,9 +340,9 @@ run_port() {
         set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
-            echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+            echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
             cd /mnt/sdcard/Emu/PORT32/
-            /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port32.log
+            /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port32.log
         else
         
             is_retroarch_port
@@ -352,14 +352,14 @@ run_port() {
                 export HOME="/mnt/sdcard/spruce/flip/home"
                 export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
                 export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-                "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+                "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
             else
                 PORTS_DIR=/mnt/SDCARD/Roms/PORTS
                 cd $PORTS_DIR
                 export HOME="/mnt/sdcard/spruce/flip/home"
                 export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
                 export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-                "$ROM_FILE" &> /mnt/sdcard/spruce/logs/port.log
+                "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
 
             fi
         
