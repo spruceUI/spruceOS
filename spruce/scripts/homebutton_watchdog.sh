@@ -180,7 +180,7 @@ send_virtual_key_MENUX() {
         {
         echo $B_SELECT 1 # SELECT down
         echo $B_X 1 # X down
-        sleep 0.1
+        sleep 0.2
         echo $B_X 0 # X up
         echo $B_SELECT 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
@@ -307,7 +307,9 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
         cp /dev/fb0 /tmp/fb0
 
         # pause RA after screen capture
-        send_virtual_key_R3
+        if [ "$PLATFORM"="A30" ];then
+            send_virtual_key_R3
+        fi
     }
 
     home_key_up () {
