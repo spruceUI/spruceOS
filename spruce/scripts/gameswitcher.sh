@@ -146,9 +146,10 @@ while : ; do
     # run switcher
     log_message "***** gameswitcher.sh: launching actual switcher executable" -v
     cd $BIN_PATH
+    /mnt/SDCARD/spruce/bin64/gptokeyb -k "switcher" -c "./switcher.gptk" &
     ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
     -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
-
+    kill -9 "$(pidof gptokeyb)"
     # get return value
     RETURN_INDEX=$?
 
