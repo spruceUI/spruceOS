@@ -94,7 +94,7 @@ case $INFO in
     ;;
 esac
 
-log_message "[helperFunctions.sh] Platform is $PLATFORM"
+log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ ! "$PLATFORM" = "A30" ]; then
