@@ -3,8 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
-if [ "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
+[ "$PLATFORM" = "A30" ] && BIN_PATH="/mnt/SDCARD/spruce/bin"
 START_DOWN=false
 
 # Map the System Value to MainUI Volume level 
