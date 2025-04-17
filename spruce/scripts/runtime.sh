@@ -385,13 +385,16 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    # ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-
+    ${SCRIPTS_DIR}/checkfaves.sh &
+    ${SCRIPTS_DIR}/credits_watchdog.sh &
+    
     # check whether to auto-resume into a game
     if flag_check "save_active"; then
         ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
