@@ -2,15 +2,9 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
-
-elif [ "$PLATFORM" = "Flip" ]
-    SYS_BRIGHTNESS_PATH="/sys/class/backlight/backlight/brightness"
-fi
-
 START_DOWN=false
 
 # Map the System Value to MainUI Volume level 
@@ -122,7 +116,7 @@ brightness_down() {
         
         # update screen brightness
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$SYS_BRIGHTNESS_PATH"
+        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
         sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
@@ -150,7 +144,7 @@ brightness_up() {
 
         # update screen brightness
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$SYS_BRIGHTNESS_PATH"
+        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
         sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
@@ -234,7 +228,7 @@ save_volume_to_config_file() {
 }
 
 # scan all button input
-$BIN_PATH/getevent /dev/input/event3 | while read line; do
+$BIN_PATH/getevent $EVENT_PATH_KEYBOARD | while read line; do
 
     # first print event code to log file
     logger -p 15 -t "keymon[$$]" $line

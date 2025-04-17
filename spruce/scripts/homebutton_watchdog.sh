@@ -190,9 +190,8 @@ send_virtual_key_MENUX() {
         echo $B_MENU 0 # MENU up
         echo 0 0 0   # tell sendevent to exit
         } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-    fi
 
-    if [ "$PLATFORM" = "Flip" ]; then
+    elif [ "$PLATFORM" = "Flip" ]; then
         {
         echo $B_SELECT 1 # SELECT down
         echo $B_X 1 # X down

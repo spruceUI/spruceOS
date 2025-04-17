@@ -73,11 +73,11 @@ while true; do
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
                     if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
-                        cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
+                        cat $DEVICE_BRIGHTNESS_PATH >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
                         CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
-                        echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
-                        amixer set 'Soft Volume Master' 0
+                        echo 0 > $DEVICE_BRIGHTNESS_PATH
+                        amixer cset 'Soft Volume Master' 0
                         flag_add "wake.alarm"
                     fi
                 fi
@@ -85,11 +85,11 @@ while true; do
                 if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
                     if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         flag_add "sleep.powerdown"
-                        cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
+                        cat $DEVICE_BRIGHTNESS_PATH >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
                         CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
-                        echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
-                        amixer set 'Soft Volume Master' 0
+                        echo 0 > $DEVICE_BRIGHTNESS_PATH
+                        amixer cset 'Soft Volume Master' 0
                         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                     fi
                 fi
@@ -132,15 +132,13 @@ while true; do
 
         if ! [ -z "$CURRENT_ALARM" ]; then
             # update display and volume setting after wakeup
-            cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
+            cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level > $DEVICE_BRIGHTNESS_PATH
             ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
             echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
             
         fi
 
-        if [ $PLATFORM = "A30"]; then
-            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
-        fi
+        amixer cset 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
 
     # wait long enough to ensure wakeup task is finished
