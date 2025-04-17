@@ -68,7 +68,7 @@ map_mainui_volume_to_system_value() {
 
 # Map the System Value to MainUI brightness level 
 get_brightness_level() {
-    value=$(cat "$SYS_BRIGHTNESS_PATH")
+    value=$(cat "$DEVICE_BRIGHTNESS_PATH")
     case $value in
         2) echo 0 ;;
         8) echo 1 ;;
