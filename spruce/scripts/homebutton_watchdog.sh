@@ -105,7 +105,13 @@ prepare_game_switcher() {
         # ensure folder exists
         mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
-        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DISPLAY_WIDTH -h $DISPLAY_HEIGHT -b 32 -l $DISPLAY_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
+        WIDTH="$DISPLAY_WIDTH"
+        HEIGHT="$DISPLAY_HEIGHT"
+        if [ "$PLATFORM" = "A30" ]; then # A30 is rotated 270 degrees, swap width and height
+            WIDTH=$DISPLAY_HEIGHT
+            HEIGHT=$DISPLAY_WIDTH
+        fi
+        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         # update switcher game list

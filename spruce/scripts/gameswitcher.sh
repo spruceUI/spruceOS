@@ -21,7 +21,7 @@ GAMENAMES_FILE="$TEMP_PATH/gs_names"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 log_message "***** gameswitcher.sh: gs lock, list, images, names, options and temp list paths defined." -v
 
-INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/info"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 
 # get setting always use box art 
@@ -83,7 +83,16 @@ while read -r CMD; do
             core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
             core_name="$(echo ${core_name} | tr -d '"')"
             state_dir="$SD_FOLDER_PATH/Saves/states/$core_name"
+            # default path for non-architecture-dependent states
             SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
+            # arch-dependent state paths for race, fake08, pcsx-r, and chimera
+            if [ ! -f "$SCREENSHOT_PATH" ]; then
+                if [ "$PLATFORM" = "A30" ]; then
+                    SCREENSHOT_PATH="${state_dir}-32/${SHORT_NAME}.state.auto.png"
+                else ### 64-bit platform
+                    SCREENSHOT_PATH="${state_dir}-64/${SHORT_NAME}.state.auto.png"
+                fi
+            fi
             log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
         fi
     fi
