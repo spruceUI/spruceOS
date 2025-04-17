@@ -44,7 +44,7 @@ rm -f "$GAMENAMES_FILE"
 log_message "***** gameswitcher.sh: cleared out previous images and game names files" -v
 while read -r CMD; do
     # get and store game name to file
-    GAME_PATH=$(echo $CMD | cut -d\" -f4)
+    GAME_PATH=$(echo $CMD | cut -d'\' -f4)
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
     EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
@@ -145,17 +145,11 @@ while : ; do
 
     # run switcher
     log_message "***** gameswitcher.sh: launching actual switcher executable" -v
-    if [ "$PLATFORM" = "A30" ]; then
-        cd $BIN_PATH
-        ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
-        -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
-    else
-        cd $BIN_PATH
-        /mnt/SDCARD/spruce/bin64/gptokeyb -k "switcher" -c "./switcher.gptk" &
-        ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
-        -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
-        kill -9 "$(pidof gptokeyb)"
-    fi
+    # Use X-box controller for Gameswitcher input
+    [ "$PLATFORM" = "Flip" ] && echo 1 > /sys/class/miyooio_chr_dev/joy_type
+    cd $BIN_PATH
+    ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
+    -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
     # get return value
     RETURN_INDEX=$?
 
