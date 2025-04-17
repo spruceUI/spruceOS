@@ -167,7 +167,7 @@ while : ; do
 done
 
 # send signal USR1 to joystickinput to switch to ANALOG MODE
-if [ ! "$PLATFORM" = "Flip" ]
+if [ ! "$PLATFORM" = "Flip" ]; then
     killall -q -USR1 joystickinput
 fi
 # launch game with return index
