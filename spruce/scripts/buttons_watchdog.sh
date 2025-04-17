@@ -4,6 +4,9 @@
 
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 [ "$PLATFORM" = "A30" ] && BIN_PATH="/mnt/SDCARD/spruce/bin"
+SET_OR_CSET="cset"
+[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
+
 START_DOWN=false
 
 # Map the System Value to MainUI Volume level 
@@ -186,7 +189,7 @@ volume_down() {
 
         # update screen brightness
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
-        amixer cset 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
+        amixer $SET_OR_CSET 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
 
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
@@ -208,7 +211,7 @@ volume_up() {
 
         # update screen brightness
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
-        amixer cset 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
+        amixer $SET_OR_CSET 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
 
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
