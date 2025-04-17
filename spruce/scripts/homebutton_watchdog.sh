@@ -243,6 +243,14 @@ send_virtual_key_R3() {
     fi
 }
 
+send_pause_key() {
+    if [ "$PLATFORM" = "Flip" ]; then
+        # TODO: Maybe add pause here (if needed) for clear screenshots
+    else
+        send_virtual_key_R3
+    fi
+}
+
 long_press_handler() {
     HELD_ID="$1"
     # setup flag for long pressed event
@@ -323,9 +331,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
         cp /dev/fb0 /tmp/fb0
 
         # pause RA after screen capture
-        if [ "$PLATFORM" = "A30" ]; then
-            send_virtual_key_R3
-        fi
+        send_pause_key
     }
 
     home_key_up () {
@@ -456,9 +462,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
 
                 # Resume paused processes
                 killall -q -CONT PPSSPPSDL pico8_dyn MainUI
-                if [ "$PLATFORM" = "A30" ]; then
-                    send_virtual_key_R3
-                fi
+                send_pause_key
 
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
