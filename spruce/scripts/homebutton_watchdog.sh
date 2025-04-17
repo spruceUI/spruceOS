@@ -94,7 +94,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** homebutton_watchdog.sh: $CMD" -v
+        log_message "*** homebutton_watchdog.sh: 'CMD': $CMD" -v
 
         # check command is emulator
         # exit if not emulator is in command
@@ -104,10 +104,15 @@ prepare_game_switcher() {
 
         # capture screenshot
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        log_message "*** homebutton_watchdog.sh: 'GAME_PATH': $GAME_PATH" -v
         GAME_NAME="${GAME_PATH##*/}"
+        log_message "*** homebutton_watchdog.sh: 'GAME_NAME': $GAME_NAME" -v
         SHORT_NAME="${GAME_NAME%.*}"
+        log_message "*** homebutton_watchdog.sh: 'SHORT_NAME': $SHORT_NAME" -v
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
+        log_message "*** homebutton_watchdog.sh: 'EMU_NAME': $EMU_NAME" -v
         SCREENSHOT_NAME="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+        log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" -v
         # ensure folder exists
         mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
@@ -162,6 +167,7 @@ prepare_game_switcher() {
         echo "$CMD" >>"$TEMP_FILE"
     done <$LIST_FILE
 
+    # TODO: i don't think this works anymore, TEMP_FILE is long gone
     # trim the game list to only recent 5/10/20 games
     COUNT=$(setting_get "maxGamesInGS")
     if [ -z "$COUNT" ]; then
@@ -403,6 +409,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
     start_button_down () {
         log_message "*** Start button case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
+            log_message "Exit hotkey hit"
             killall -q -CONT MainUI
             # TODO: need to fix vibrate for Brick
             if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
@@ -411,7 +418,6 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             HOTKEY_FLG=true
             kill_current_app
             HOTKEY_FLG=false
-            log_message "Exit hotkey hit"
         fi
     }
 
