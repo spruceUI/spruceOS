@@ -2,11 +2,15 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin64"
-if [ "$PLATFORM"="A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
-fi
 SYS_BRIGHTNESS_PATH="/sys/devices/virtual/disp/disp/attr/lcdbl"
+BIN_PATH="/mnt/SDCARD/spruce/bin64"
+if [ "$PLATFORM" = "A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
+
+elif [ "$PLATFORM" = "Flip" ]
+    SYS_BRIGHTNESS_PATH="/sys/class/backlight/backlight/brightness"
+fi
+
 START_DOWN=false
 
 # Map the System Value to MainUI Volume level 
@@ -189,7 +193,7 @@ volume_down() {
 
         # update screen brightness
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
-        amixer set 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
+        amixer cset 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
 
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
@@ -211,7 +215,7 @@ volume_up() {
 
         # update screen brightness
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
-        amixer set 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
+        amixer cset 'Soft Volume Master' $SYSTEM_VOLUME > /dev/null
 
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
