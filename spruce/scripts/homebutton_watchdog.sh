@@ -92,7 +92,8 @@ prepare_game_switcher() {
         fi
 
         # capture screenshot
-        GAME_PATH=$(echo $CMD | cut -d'/' -f4)
+        GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d'/' -f4)
         log_message "*** homebutton_watchdog.sh: 'GAME_PATH': $GAME_PATH" -v
         GAME_NAME="${GAME_PATH##*/}"
         log_message "*** homebutton_watchdog.sh: 'GAME_NAME': $GAME_NAME" -v
