@@ -32,6 +32,19 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Check if a flag exists
+# Usage: flag_check "flag_name"
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+flag_check() {
+    local flag_name="$1"
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
 # Call this like:
 # log_message "Your message here"
 # To output to a custom log file, set the variable within your script:
@@ -524,18 +537,6 @@ display() {
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
     kill -9 $(pgrep display)
-}
-
-# Check if a flag exists
-# Usage: flag_check "flag_name"
-# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-flag_check() {
-    local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
-        return 0
-    else
-        return 1
-    fi
 }
 
 # Add a flag
