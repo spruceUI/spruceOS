@@ -24,6 +24,9 @@ cp /mnt/sdcard/App/PortMaster/control.txt /mnt/sdcard/spruce/flip/home/.local/sh
 
 #Launch port master
 cd /sdcard/Roms/.portmaster/PortMaster/miyoo/
+
+cp "/mnt/sdcard/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/sdcard/spruce/flip/home/device_info_Miyoo_Miyoo Flip.txt"
+
 ./PortMaster.txt &> /mnt/sdcard/Saves/spruce/portmaster.log
 
 # Fix images to be spruce compatible
