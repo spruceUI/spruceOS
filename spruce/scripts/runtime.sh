@@ -353,12 +353,15 @@ elif [ "$PLATFORM" = "Flip" ]; then
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
 	
-    # fix keys map image
-    if [ -f "/mnt/sdcard/Themes/SPRUCE/skin/bg-io-testing-Flip.png" ]; then
-        mount --bind /mnt/sdcard/Themes/SPRUCE/skin/bg-io-testing-Flip.png /mnt/sdcard/Themes/SPRUCE/skin/bg-io-testing.png
-        mount --bind /mnt/sdcard/Themes/SPRUCE/skin/bg-keysetting-Flip.png /mnt/sdcard/Themes/SPRUCE/skin/bg-keysetting.png
-    fi
-	
+    # fix keys map image for each theme folder
+    for theme_dir in /mnt/sdcard/Themes/*/; do
+        skin_dir="${theme_dir}skin"
+        if [ -f "$skin_dir/bg-io-testing-Flip.png" ]; then
+            mount --bind "$skin_dir/bg-io-testing-Flip.png" "$skin_dir/bg-io-testing.png"
+            mount --bind "$skin_dir/bg-keysetting-Flip.png" "$skin_dir/bg-keysetting.png"
+        fi
+    done
+
     # mask stock USB file transfer app
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
