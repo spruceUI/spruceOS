@@ -6,6 +6,7 @@ case $INFO in
 *"sun8i"*)
 	if [ -d /usr/miyoo ]; then
 		export PLATFORM="A30"
+        export SD_DEV="/dev/mmcblk0p1"
 	fi
 	;;
 *"TG5040"*)
@@ -16,6 +17,7 @@ case $INFO in
 	;;
 *"0xd05"*)
     export PLATFORM="Flip"
+    export SD_DEV="/dev/mmcblk1p1"
     ;;
 *)
     export PLATFORM="A30"
@@ -162,8 +164,14 @@ kill_network_services() {
 }
 
 read_only_check() {
-    if [ $(mount | grep SDCARD | cut -d"(" -f 2 | cut -d"," -f1 ) == "ro" ]; then
-        mount -o remount,rw /dev/mmcblk0p1 /mnt/SDCARD
+    SD_or_sd=$(mount | grep -q SDCARD && echo "SDCARD" || echo "sdcard")
+    MNT_LINE=$(mount | grep "$SD_or_sd")
+
+    if [ -n "$MNT_LINE" ]; then
+        MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
+        if [ "$MNT_STATUS" = "ro" ] && [ -n "$SD_DEV" ]; then
+            mount -o remount,rw "$SD_DEV" /mnt/"$SD_or_sd"
+        fi
     fi
 }
 
@@ -263,4 +271,32 @@ restore_app_states() {
     # Clean up the states file
     rm -f "$states_file"
     echo "$(date '+%Y-%m-%d %H:%M:%S') - App states restored and temporary file removed"
+}
+
+unmount_binds() {
+    PRESERVE="/mnt/sdcard /userdata"
+    echo "[INFO] Scanning /proc/self/mountinfo for bind mounts from $SD_DEV..."
+    cat /proc/self/mountinfo | while read -r line; do
+    # Extract everything after the last " - ", then get the device (6th field overall)
+    DEVICE=$(echo "$line" | awk -F ' - ' '{print $2}' | awk '{print $2}')
+    TARGET=$(echo "$line" | awk '{print $5}')
+
+    if [ "$DEVICE" = "$SD_DEV" ]; then
+        echo "[FOUND] $TARGET mounted from $DEVICE"
+
+        SKIP=0
+        for p in $PRESERVE; do
+        if [ "$TARGET" = "$p" ]; then
+            SKIP=1
+            echo "[SKIP] Preserved target: $TARGET"
+            break
+        fi
+        done
+
+        if [ "$SKIP" -eq 0 ]; then
+        echo "[UMOUNT] Attempting to unmount $TARGET"
+        umount "$TARGET" || echo "[ERROR] Failed to unmount $TARGET"
+        fi
+    fi
+    done
 }
