@@ -17,8 +17,7 @@ for file in "$directory"/*; do
   # Check if it is a regular file
   if [ -f "$file" ]; then
     # Get the line starting with "GAMEDIR=" and assign it to a variable
-    gamedir_line=$(grep "^GAMEDIR=" "$file")
-
+	gamedir_line=$(grep -iE '^GAMEDIR=|^export[[:space:]]+gamedir=' "$file")
     # Check if a line was found
     if [ -n "$gamedir_line" ]; then
       # Extract the file_name without extension
@@ -45,7 +44,9 @@ for file in "$directory"/*; do
 				break
 			fi
 		done
-
+		
+		found=false
+		
 		# Loop through the list again to copy the first existing png to the target location
 		for name in "${image_names[@]}"; do
 			png_path="$directory/$dir_name/${name}.png"
@@ -54,8 +55,16 @@ for file in "$directory"/*; do
 				break
 			fi
 		done
+		
+		if [ ! found ]; then
+			echo Unable to find image for $file_name in $dir_name
+		else 
+			echo Updated image for $file_name
+		fi
       fi
     
-    fi
+    elif [[ "$file" == *.sh ]]; then
+		echo Unable to find gamedir_line for $file
+	fi
   fi
 done

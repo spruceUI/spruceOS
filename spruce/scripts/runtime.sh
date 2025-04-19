@@ -38,14 +38,14 @@ if [ "$PLATFORM" = "A30" ]; then
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
-        mkdir -p /tmp/SATURN
+        mkdir -p /mnt/SDCARD/spruce/dummy
         mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
         mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/PORT32 &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/App/PortMaster &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/SATURN &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/PORT32 &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -215,7 +215,6 @@ if [ "$PLATFORM" = "A30" ]; then
     swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
-    #${SCRIPTS_DIR}/forcedisplay.sh
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
@@ -356,6 +355,15 @@ elif [ "$PLATFORM" = "Flip" ]; then
         cd $miyoo_fw_dir
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
+	
+    # fix keys map image for each theme folder
+    for theme_dir in /mnt/sdcard/Themes/*/; do
+        skin_dir="${theme_dir}skin"
+        if [ -f "$skin_dir/bg-io-testing-Flip.png" ]; then
+            mount --bind "$skin_dir/bg-io-testing-Flip.png" "$skin_dir/bg-io-testing.png"
+            mount --bind "$skin_dir/bg-keysetting-Flip.png" "$skin_dir/bg-keysetting.png"
+        fi
+    done
 
     # mask stock USB file transfer app
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
