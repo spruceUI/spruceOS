@@ -16,4 +16,5 @@ screenshot_location="$1"
   -i - \
   -vf 'hwdownload,format=bgr0' \
   -frames:v 1 \
+  -y \
   "$screenshot_location"

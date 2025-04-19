@@ -45,7 +45,7 @@ log_message "***** gameswitcher.sh: cleared out previous images and game names f
 while read -r CMD; do
     # get and store game name to file
     GAME_PATH=$(echo $CMD | cut -d\" -f4)
-    [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d'\' -f4)
+    [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
     EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"

@@ -112,7 +112,13 @@ prepare_game_switcher() {
             WIDTH=$DISPLAY_HEIGHT
             HEIGHT=$DISPLAY_WIDTH
         fi
-        $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
+
+        if [ "$PLATFORM" = "A30"]; then
+            $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
+        else
+            $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
+        fi
+       
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         # update switcher game list
@@ -151,6 +157,7 @@ prepare_game_switcher() {
         EMU_PATH=$(echo $CMD | cut -d\" -f2)
         log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" -v
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f4)
         log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" -v
         if [ ! -f "$EMU_PATH" ]; then
             log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" -v
@@ -411,9 +418,7 @@ $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ | while read line; do
             if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
               vibrate
             fi
-            HOTKEY_FLG=true
             kill_current_app
-            HOTKEY_FLG=false
         fi
     }
 
