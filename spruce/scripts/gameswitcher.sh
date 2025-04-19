@@ -171,7 +171,9 @@ while : ; do
     if [ $RETURN_INDEX -eq 255 ]; then
         # start setting program
         cd $BIN_PATH
+        [ ! "$PLATFORM" = "A30" ] && ./gptokeyb -k "gss" -c "./easyConfig.gptk" &
         ./easyConfig $SETTINGS_PATH/settings_config  -p 4
+        [ ! "$PLATFORM" = "A30" ] && kill -9 "$(pidof gptokeyb)"
     else
         break
     fi
