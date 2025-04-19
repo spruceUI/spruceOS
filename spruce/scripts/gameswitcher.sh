@@ -100,7 +100,7 @@ while read -r CMD; do
 
     # store screenshot / box art / default image to file
     if [ -f "$OWN_SCREENSHOT_PATH" ] ; then
-        echo "__NO_ROTATE__" >> "$IMAGES_FILE"
+        [ ! "$PLATFORM" = "A30"] && echo "__NO_ROTATE__" >> "$IMAGES_FILE"
         echo "$OWN_SCREENSHOT_PATH" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME" -v
     elif [ -f "$SCREENSHOT_PATH" ] ; then
