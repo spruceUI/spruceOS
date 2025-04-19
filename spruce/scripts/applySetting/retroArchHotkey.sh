@@ -6,7 +6,7 @@ RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 if [ "$1" = "check" ]; then
-    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
+    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2 | tr -d '\r\n')
 
     case "$hotkey_value" in
     "nul" | "z")
@@ -28,7 +28,7 @@ if [ "$1" = "check" ]; then
 fi
 
 if [ "$1" = "check_simple" ]; then
-    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
+    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2 | tr -d '\r\n')
 
     case "$hotkey_value" in
     "nul" | "z")

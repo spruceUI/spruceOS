@@ -149,7 +149,7 @@ display_message --icon "$ICON_PATH" -t "Applying upgrades to your system..."
 
 # Read the current version from .lastUpdate file
 if [ -f "$last_update_file" ]; then
-    current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2)
+    current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
 else
     current_version="2.0.0"
 fi

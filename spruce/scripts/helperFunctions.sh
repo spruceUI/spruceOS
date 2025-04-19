@@ -1026,7 +1026,7 @@ setting_get() {
         CFG="$CFG_FILE"
     fi
 
-    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2)
+value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo ""
         return 1
