@@ -215,7 +215,6 @@ if [ "$PLATFORM" = "A30" ]; then
     swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
-    #${SCRIPTS_DIR}/forcedisplay.sh
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
