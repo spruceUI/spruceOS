@@ -4,10 +4,8 @@ APP_DIR="/mnt/SDCARD/App"
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
 *"sun8i"*)
-	if [ -d /usr/miyoo ]; then
-		export PLATFORM="A30"
-        export SD_DEV="/dev/mmcblk0p1"
-	fi
+	export PLATFORM="A30"
+    export SD_DEV="/dev/mmcblk0p1"
 	;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
@@ -24,77 +22,20 @@ case $INFO in
     ;;
 esac
 
-# Key exports so we can refer to buttons by more memorable names
+# Key exports so we can refer to buttons by more memorable names and add spruce/bin[64] folder to PATH
 if [ "$PLATFORM" = "A30" ]; then
-    export B_LEFT="key 1 105"
-    export B_RIGHT="key 1 106"
-    export B_UP="key 1 103"
-    export B_DOWN="key 1 108"
-
+    export PATH="/mnt/SDCARD/spruce/bin:$PATH"
     export B_A="key 1 57"
     export B_B="key 1 29"
-    export B_X="key 1 42"
-    export B_Y="key 1 56"
-
-    export B_L1="key 1 15"
-    export B_L2="key 1 18"
-    export B_R1="key 1 14"
-    export B_R2="key 1 20"
-
     export B_START="key 1 28"
     export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-    export B_SELECT="key 1 97"
-    export B_SELECT_2="rctrl_pressed"
-
-    export B_VOLUP="volume up"       # only registers on press and on change, not on release. No 1 or 0.
-    export B_VOLDOWN="key 1 114"     # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers on change. No 1 or 0.
-    export B_MENU="key 1 1"          # surprisingly functions like a regular button
-
 elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-    export B_LEFT="key 3 16 -1"  # negative for left
-    export B_RIGHT="key 3 16 1"  # positive for right
-    export B_UP="key 3 17 -1"    # negative for up
-    export B_DOWN="key 3 17 1"   # positive for down
-
-    export STICK_LEFT="key 3 0 -32767" # negative for left
-    export STICK_RIGHT="key 3 0 32767" # positive for right
-    export STICK_UP="key 3 1 -32767"   # negative for up
-    export STICK_DOWN="key 3 1 32767"  # positive for down
-
+    export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
     export B_A="key 1 305"
     export B_B="key 1 304"
-    export B_X="key 1 308"
-    export B_Y="key 1 307"
-
-    export B_L1="key 1 310"
-    export B_L2="key 3 2 255" # 255 on push, nothing on release...
-    export B_R1="key 1 311"
-    export B_R2="key 3 5 255" # 255 on push, nothing on release...
-
-    export B_L3="key 1 317" # also logs left fnkey stuff
-    export B_R3="key 1 318" # also logs right fnkey stuff
-
     export B_START="key 1 315"
     export B_START_2="start_pressed" # only registers 0 on release, no 1.
-    export B_SELECT="key 1 314"
-    export B_SELECT_2="select_pressed" # registers both 1 and 0
-
-    export B_VOLUP="key 1 115" # has actual key codes like the buttons
-    export B_VOLDOWN="key 1 114" # has actual key codes like the buttons
-    export B_VOLDOWN_2="volume down" # only registers 0 on release, no 1.
-    export B_MENU="key 1 316"
 fi
-
-# add spruce/bin[64] folder to PATH
-case "$PLATFORM" in
-    "Brick" | "SmartPro" | "Flip" )
-        PATH="/mnt/SDCARD/spruce/bin64:$PATH"
-        ;;
-    "A30" )
-        PATH="/mnt/SDCARD/spruce/bin:$PATH"
-        ;;
-esac
 
 acknowledge(){
     local messages_file="/var/log/messages"
@@ -115,12 +56,12 @@ acknowledge(){
 }
 
 boost_processing() {
-    /mnt/SDCARD/miyoo/utils/utils "performance" 4 1344 384 1080 1
     echo "CPU Mode set to PERFORMANCE"
-    echo 1 >/sys/devices/system/cpu/cpu0/online 2>/dev/null
-    echo 1 >/sys/devices/system/cpu/cpu1/online 2>/dev/null
-    echo 1 >/sys/devices/system/cpu/cpu2/online 2>/dev/null
-    echo 1 >/sys/devices/system/cpu/cpu3/online 2>/dev/null
+    for i in 0 1 2 3; do
+        chmod a+w /sys/devices/system/cpu/cpu$i/online
+        echo 1 >/sys/devices/system/cpu/cpu$i/online
+        chmod a-w /sys/devices/system/cpu/cpu$i/online
+    done
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
@@ -161,16 +102,22 @@ kill_network_services() {
     killall -9 smbd
     killall -9 sftpgo
     killall -9 syncthing
+    killall -9 darkhttpd
 }
 
 read_only_check() {
+    echo "Performing read-only check"
     SD_or_sd=$(mount | grep -q SDCARD && echo "SDCARD" || echo "sdcard")
+    echo "Device uses /mnt/$SD_or_sd for its SD card path"
     MNT_LINE=$(mount | grep "$SD_or_sd")
-
     if [ -n "$MNT_LINE" ]; then
+        echo "mount line for SD card: $MNT_LINE"
         MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
         if [ "$MNT_STATUS" = "ro" ] && [ -n "$SD_DEV" ]; then
+            echo "SD card is mounted as RO. Attempting to remount."
             mount -o remount,rw "$SD_DEV" /mnt/"$SD_or_sd"
+        else
+            echo "SD card is not read-only."
         fi
     fi
 }
