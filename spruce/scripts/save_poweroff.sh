@@ -110,25 +110,7 @@ if pgrep "pico8_dyn" >/dev/null; then
 fi
 
 # trigger auto save and send kill signal
-if pgrep "ra32.miyoo" >/dev/null; then
-    # {
-    #     echo 1 1 0   # MENU up
-    #     echo 1 57 1  # A down
-    #     echo 1 57 0  # A up
-    #     echo 0 0 0   # tell sendevent to exit
-    # } | $BIN_PATH/sendevent /dev/input/event3
-    # sleep 0.3
-    killall -q -15 ra32.miyoo
-elif pgrep "ra64.miyoo" >/dev/null; then
-    # {
-    #     echo 1 1 0   # MENU up
-    #     echo 1 57 1  # A down
-    #     echo 1 57 0  # A up
-    #     echo 0 0 0   # tell sendevent to exit
-    # } | $BIN_PATH/sendevent /dev/input/event3
-    # sleep 0.3
-    killall -q -15 ra64.miyoo
-elif pgrep "PPSSPPSDL" >/dev/null; then
+if pgrep -f "PPSSPPSDL" >/dev/null; then
     {
         # send autosave hot key
         echo 1 314 1 # SELECT down
@@ -139,9 +121,15 @@ elif pgrep "PPSSPPSDL" >/dev/null; then
     } | $BIN_PATH/sendevent /dev/input/event4
     sleep 1
     killall -q -15 PPSSPPSDL
+    killall -q -15 PPSSPPSDL_$PLATFORM
 else
+    killall -q -15 ra64.miyoo
+    killall -q -15 ra32.miyoo
     killall -q -15 retroarch
-    killall -q -15 drastic
+    killall -q -15 retroarch-flip
+    killall -q -15 ra64.trimui_$PLATFORM
+    killall -q -15 drastic32
+    killall -q -15 drastic64
     killall -q -9 MainUI
 fi
 
@@ -149,10 +137,14 @@ fi
 while killall -q -0 ra32.miyoo ||
     killall -q -0 ra64.miyoo ||
     killall -q -0 retroarch ||
+    killall -q -0 retroarch-flip ||
+    killall -q -0 ra64.trimui_$PLATFORM ||
     killall -q -0 PPSSPPSDL ||
-    killall -q -0 drastic ||
+    killall -q -0 PPSSPPSDL_$PLATFORM ||
+    killall -q -0 drastic32 ||
+    killall -q -0 drastic64 ||
     killall -q -0 MainUI; do
-    sleep 0.5
+    sleep 0.3
 done
 
 # show saving screen
