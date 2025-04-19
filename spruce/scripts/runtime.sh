@@ -38,14 +38,14 @@ if [ "$PLATFORM" = "A30" ]; then
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
-        mkdir -p /tmp/SATURN
+        mkdir -p /mnt/SDCARD/spruce/dummy
         mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
         mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/PORT32 &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/App/PortMaster &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/SATURN &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/PORT32 &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
