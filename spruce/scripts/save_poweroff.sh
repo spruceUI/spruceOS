@@ -45,7 +45,7 @@ if pgrep -f gameswitcher.sh >/dev/null; then
 fi
 
 # Check if MainUI or PICO8 is running and skip_shutdown_confirm is not set
-if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
+if flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null; then
     if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
         rm "${FLAGS_DIR}/lastgame.lock"
@@ -57,9 +57,10 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
         fi
         dim_screen &
     else
-        # Pause MainUI or pico8_dyn
+        # Pause MainUI or pico8
         killall -q -19 MainUI
         killall -q -19 pico8_dyn
+        killall -q -19 pico8_64
 
         if ! flag_check "sleep.powerdown"; then
             # Show confirmation screen
@@ -75,6 +76,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
                 # Resume MainUI or pico8_dyn
                 killall -q -18 MainUI
                 killall -q -18 pico8_dyn
+                killall -q -18 pico8_64
                 return 0
             fi
         else
@@ -104,6 +106,7 @@ fi
 # kill PICO8 if PICO8 is running
 if pgrep "pico8_dyn" >/dev/null; then
     killall -q -15 pico8_dyn
+    killall -q -15 pico8_64
 fi
 
 # trigger auto save and send kill signal
