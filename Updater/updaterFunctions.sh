@@ -221,7 +221,7 @@ restore_app_states() {
 }
 
 unmount_binds() {
-    PRESERVE="/mnt/sdcard /userdata"
+    PRESERVE="/mnt/sdcard /userdata /mnt/SDCARD"
     echo "[INFO] Scanning /proc/self/mountinfo for bind mounts from $SD_DEV..."
     cat /proc/self/mountinfo | while read -r line; do
     # Extract everything after the last " - ", then get the device (6th field overall)
