@@ -93,7 +93,7 @@ prepare_game_switcher() {
 
         # capture screenshot
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
-        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d'/' -f4)
+        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
         log_message "*** homebutton_watchdog.sh: 'GAME_PATH': $GAME_PATH" -v
         GAME_NAME="${GAME_PATH##*/}"
         log_message "*** homebutton_watchdog.sh: 'GAME_NAME': $GAME_NAME" -v
@@ -157,7 +157,7 @@ prepare_game_switcher() {
         EMU_PATH=$(echo $CMD | cut -d\" -f2)
         log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" -v
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
-        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
         log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" -v
         if [ ! -f "$EMU_PATH" ]; then
             log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" -v
