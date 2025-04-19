@@ -97,7 +97,7 @@ killall -q -15 principal.sh
 killall -q -15 enforceSmartCPU.sh
 
 # kill app if not emulator is running
-if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu'; then
+if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
     kill_current_process
     # remove lastgame flag to prevent loading any App after next boot
     rm "${FLAGS_DIR}/lastgame.lock"
