@@ -30,10 +30,13 @@ long_press_handler() {
 flag_remove "pb.longpress"
 flag_remove "pb.sleep"
 
+POWER_EVENT="/dev/input/event0"
+[ "$PLATFORM" = "Flip" ] && POWER_EVENT="/dev/input/event2"
+
 while true; do
 
     # listen to event0 and handle key press events
-    $BIN_PATH/getevent /dev/input/event0 -exclusive | while read line; do
+    $BIN_PATH/getevent $POWER_EVENT -exclusive | while read line; do
         case $line in
         *"key $B_POWER 1"*) # Power key down
             # not in previous sleep event
@@ -103,7 +106,7 @@ while true; do
                 done
 
                 # kill getevent program, prepare to break inner while loop
-                kill $(pgrep -f "getevent /dev/input/event0 -exclusive")
+                kill $(pgrep -f "getevent $POWER_EVENT -exclusive")
                 sleep 0.5
 
                 # now break inner while loop
