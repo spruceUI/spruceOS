@@ -337,6 +337,7 @@ set_port_mode() {
 
 run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
+        /mnt/sdcard/spruce/flip/bind-new-libmali.sh
         set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
@@ -364,6 +365,7 @@ run_port() {
             fi
         
         fi
+        /mnt/sdcard/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
