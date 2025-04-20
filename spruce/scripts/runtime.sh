@@ -102,6 +102,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
+    mkdir -p /run/bluetooth_fix
+    mount --bind /run/bluetooth_fix /userdata/bluetooth
 fi
 
 # Flag cleanup
