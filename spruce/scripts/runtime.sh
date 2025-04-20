@@ -401,7 +401,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
-    ${SCRIPTS_DIR}/credits_watchdog.sh &
+    # ${SCRIPTS_DIR}/credits_watchdog.sh & #### we don't have the credits bin for this device
     
     # check whether to auto-resume into a game
     if flag_check "save_active"; then

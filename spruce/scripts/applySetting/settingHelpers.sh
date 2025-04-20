@@ -4,7 +4,7 @@ CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
 
 quick_check() {
     [ $# -eq 1 ] || return 1
-    value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2)
+    value=$(grep "^$1=" "$CFG_FILE" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         return 1
     else
@@ -39,7 +39,7 @@ if [ $# -eq 2 ] && [ "$1" = "check" ]; then
         echo -n "off"
     fi
 elif [ $# -eq 3 ] && [ "$1" = "get" ]; then
-    value=$(grep "^$2=" "$CFG_FILE" | cut -d'=' -f2)
+    value=$(grep "^$2=" "$CFG_FILE" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo -n "$3"
     else
