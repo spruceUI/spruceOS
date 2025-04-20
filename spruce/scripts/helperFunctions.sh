@@ -44,7 +44,6 @@ flag_check() {
     fi
 }
 
-
 # Call this like:
 # log_message "Your message here"
 # To output to a custom log file, set the variable within your script:
@@ -129,7 +128,7 @@ acknowledge() {
         case "$last_line" in
         *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
-            log_message "last_line: $last_line" -vS
+            log_message "last_line: $last_line" -v
             break
             ;;
         esac
