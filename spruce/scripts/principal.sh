@@ -184,7 +184,6 @@ while [ 1 ]; do
                 ;;
             "Flip" )
                 export LD_LIBRARY_PATH=/usr/miyoo/lib:$LD_LIBRARY_PATH
-                runifnecessary "keymon" /usr/miyoo/bin/keymon
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
                 MainUI

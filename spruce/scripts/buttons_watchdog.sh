@@ -230,7 +230,9 @@ save_volume_to_config_file() {
 }
 
 # scan all button input
-$BIN_PATH/getevent $EVENT_PATH_KEYBOARD | while read line; do
+EVENTS="$EVENT_PATH_KEYBOARD"
+[ "$PLATFORM" = "Flip" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
+$BIN_PATH/getevent "$EVENTS" | while read line; do
 
     # first print event code to log file
     logger -p 15 -t "keymon[$$]" $line
