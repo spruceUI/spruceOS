@@ -6,11 +6,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
-
-# TODO: remove A30 check once Syncthing is implemented on Brick
-if [ "$PLATFORM" = "A30" ]; then
-	. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
-fi
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
@@ -555,7 +551,7 @@ import_launch_options
 set_cpu_mode
 
 # TODO: remove A30 check once network services implemented on Brick
-[ "$PLATFORM" = "A30" ] && handle_network_services
+handle_network_services
 
 flag_add 'emulator_launched'
 
