@@ -17,7 +17,6 @@ if [ "$1" = "-clearall" ]; then
 fi
 
 prompt_main_ui_restart() {
-	echo "prompt_main_ui_restart()"
 	# notify user to confirm restarting MainUI
 	if pgrep "MainUI" > /dev/null; then
 		# pause MainUI
@@ -33,9 +32,8 @@ prompt_main_ui_restart() {
 }
 
 if [ "$PLATFORM" = "Flip" ]; then
-	rom_change=$(/mnt/sdcard/App/PortMaster/.portmaster/bin/python3 /mnt/sdcard/spruce/scripts/emufresh.py)
+	rom_change=$(/mnt/sdcard/spruce/flip/bin/python3 /mnt/sdcard/spruce/scripts/emufresh.py)
 	if [ "$rom_change" = "True" ]; then
-		echo "rom change detected"
 		prompt_main_ui_restart
 	fi
 else
