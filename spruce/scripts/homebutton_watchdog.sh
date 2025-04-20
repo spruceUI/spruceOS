@@ -23,7 +23,7 @@ kill_emulator() {
     # kill RA or other emulator or MainUI
     log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" -v
 
-    if pgrep -x "./drastic" >/dev/null; then
+    if pgrep -f "drastic" >/dev/null; then
         # use sendevent to send MENU + L1 combo buttons to drastic
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
@@ -33,8 +33,9 @@ kill_emulator() {
             echo $B_MENU 0  # MENU up
             echo 0 0 0  # tell sendevent to exit
         } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-    elif pgrep "PPSSPPSDL" >/dev/null; then
+    elif pgrep -f "PPSSPPSDL" >/dev/null; then
         killall -q -CONT PPSSPPSDL
+        killall -q -CONT PPSSPPSDL_$PLATFORM
         # use sendevent to send SELECT + R1 combo buttons to PPSSPP
         {
             # send autosave hot key
@@ -47,10 +48,12 @@ kill_emulator() {
         # wait 1 seconds for ensuring saving is started
         sleep 1
         # kill PPSSPP with signal 15, it should exit after saving is done
-        killall -15 PPSSPPSDL
+        killall -q -15 PPSSPPSDL
+        killall -q -15 PPSSPPSDL_$PLATFORM
+
     else
-        killall -q -CONT pico8_dyn
-        killall -q -15 ra32.miyoo retroarch ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn
+        killall -q -CONT pico8_dyn pico8_64
+        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64
     fi
 }
 
@@ -281,9 +284,9 @@ long_press_handler() {
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   send_virtual_key_MENUX
-            elif pgrep "retroarch" >/dev/null; then
+            elif pgrep -f "retroarch" >/dev/null; then
                 send_virtual_key_L3R3
-            elif pgrep "PPSSPPSDL" >/dev/null; then
+            elif pgrep -f "PPSSPPSDL" >/dev/null; then
                 send_virtual_key_L3
                 killall -q -CONT PPSSPPSDL
 
@@ -325,7 +328,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         PID=$!
 
         # pause PPSSPP, PICO8 or MainUI if it is running
-        killall -q -STOP PPSSPPSDL pico8_dyn MainUI
+        killall -q -STOP PPSSPPSDL PPSSPPSDL_$PLATFORM pico8_dyn pico8_64 MainUI
 
         # copy framebuffer to memory temp file
         cp /dev/fb0 /tmp/fb0
@@ -378,16 +381,17 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: $PLATFORM RA" -v
                     send_virtual_key_MENUX
-                elif pgrep "retroarch" >/dev/null; then
+                elif pgrep -f "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v
                     send_virtual_key_L3R3
-                elif pgrep "PPSSPPSDL" >/dev/null; then
+                elif pgrep -f "PPSSPPSDL" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: PPSSPPSDL" -v
                     send_virtual_key_L3
                     killall -q -CONT PPSSPPSDL
+                    killall -q -CONT PPSSPPSDL_$PLATFORM
 
                 # PICO8 has no in-game menu
-                elif pgrep "pico8_dyn" >/dev/null; then
+                elif pgrep -f "pico8" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: PICO8" -v
                     kill_emulator
 
