@@ -38,10 +38,24 @@ def calculate_checksum(file_names):
     concatenated = ''.join(sorted(file_names)).encode('utf-8')
     return hashlib.md5(concatenated).hexdigest()
 
-def main():
-    base_rom_path = "/mnt/sdcard/Roms/"
-    checksum_base_path = "/mnt/sdcard/Emu/.emu_setup/md5/"
-    romset_changed = False
+def check_checksum(folder_path, collected_files, checksum_base_path, romset_changed)
+        checksum = calculate_checksum(collected_files)
+        checksum_file = os.path.join(checksum_base_path, f"{folder_name}.md5")
+
+        existing_checksum = None
+        if os.path.exists(checksum_file):
+            with open(checksum_file, 'r') as f:
+                existing_checksum = f.read().strip()
+
+        if checksum != existing_checksum:
+            os.makedirs(os.path.dirname(checksum_file), exist_ok=True)
+            with open(checksum_file, 'w') as f:
+                f.write(checksum)
+            update_config(folder_path, collected_files)
+            romset_changed = True
+
+def scan_dirs(base_rom_path, checksum_base_path):
+    romset_status = False
 
     for folder_name in os.listdir(base_rom_path):
         if folder_name.startswith('.'):
@@ -66,21 +80,24 @@ def main():
                     continue
                 collected_files.append(sub_name)
 
-        checksum = calculate_checksum(collected_files)
-        checksum_file = os.path.join(checksum_base_path, f"{folder_name}.md5")
+        if check_checksum(folder_path, collected_files, checksum_base_path, romset_status):
+            romset_status = True
+    return romset_status
 
-        existing_checksum = None
-        if os.path.exists(checksum_file):
-            with open(checksum_file, 'r') as f:
-                existing_checksum = f.read().strip()
-
-        if checksum != existing_checksum:
-            os.makedirs(os.path.dirname(checksum_file), exist_ok=True)
-            with open(checksum_file, 'w') as f:
-                f.write(checksum)
-            update_config(folder_path, collected_files)
-            romset_changed = True
-    print(f"{romset_changed}")
+def main():
+    first_rom_path = "/mnt/sdcard/Roms/"
+    second_rom_path = "/media/sdcard1/Roms"
+    checksum_base_path_sd1 = "/mnt/sdcard/Emu/.emu_setup/md5/flip/sd1"
+    checksum_base_path_sd2 = "/mnt/sdcard/Emu/.emu_setup/md5/flip/sd2"
+    first_romset_changed = scan_dirs(first_rom_path, checksum_base_path_sd1)
+    second_romset_changed = scan_dirs(second_rom_path, checksum_base_path_sd2)
     
+    if first_romset_changed or second_romset_changed:
+        romset_changed = True
+    else
+        romset_changed = False
+    
+    print(f"{romset_changed}")
+
 if __name__ == "__main__":
     main()
