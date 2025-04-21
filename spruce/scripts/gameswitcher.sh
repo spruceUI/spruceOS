@@ -3,12 +3,11 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 log_message "***** gameswitcher.sh: helperFunctions imported" -v
 
-SD_FOLDER_PATH="/mnt/SDCARD"
+SD_FOLDER_PATH="/media/sdcard0"
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
-elif [ "$PLATFORM" = "Flip" ]; then
-    SD_FOLDER_PATH="/media/sdcard0"
+    SD_FOLDER_PATH="/mnt/SDCARD"
 fi
 
 FLAG_PATH="$SD_FOLDER_PATH/spruce/flags"
@@ -23,7 +22,8 @@ log_message "***** gameswitcher.sh: gs lock, list, images, names, options and te
 
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/info"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
-EMPTY_IMG="$SD_FOLDER_PATH/spruce/imgs/notfound.png"
+# changing this needs the binary to also update this path in the source code
+EMPTY_IMG="/mnt/sdcard/spruce/settings/gs_empty.png"
 
 # get setting always use box art 
 setting_get "alwaysUseBoxartInGS"
@@ -43,13 +43,6 @@ fi
 rm -f "$IMAGES_FILE"
 rm -f "$GAMENAMES_FILE"
 log_message "***** gameswitcher.sh: cleared out previous images and game names files" -v
-
-# Default case for GS where no games are in the list
-if [ -e "$LIST_FILE" ] && [ ! -s "$LIST_FILE" ]; then
-    log_message "***** gameswitcher.sh: gameswitcher opened without any entries" -v
-    echo "No games in list" >> "$GAMENAMES_FILE"
-    echo "$EMPTY_IMG" >> "$IMAGES_FILE"
-fi
 
 while read -r CMD; do
     # get and store game name to file
@@ -109,7 +102,7 @@ while read -r CMD; do
 
     # store screenshot / box art / default image to file
     if [ -f "$OWN_SCREENSHOT_PATH" ] ; then
-        [ ! "$PLATFORM" = "A30"] && echo "__NO_ROTATE__" >> "$IMAGES_FILE"
+        [ "$PLATFORM" = "A30"] && echo "__NO_ROTATE__" >> "$IMAGES_FILE"
         echo "$OWN_SCREENSHOT_PATH" >> "$IMAGES_FILE"
         log_message "***** gameswitcher.sh: using screenshot for $GAME_NAME" -v
     elif [ -f "$SCREENSHOT_PATH" ] ; then
@@ -169,11 +162,14 @@ while : ; do
     cd $BIN_PATH
     if [ -e "$LIST_FILE" ] && [ ! -s "$LIST_FILE" ]; then
     log_message "***** gameswitcher.sh: launching executable in empty mode" -v
-        ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" -n off -d off
-    else
-        ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
-        -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
+        rm -rf "$GAMENAMES_FILE"
+        rm -rf "$IMAGES_FILE"
+        echo "No games in list" >> "$GAMENAMES_FILE"
+        echo "$EMPTY_IMG" >> "$IMAGES_FILE"
     fi
+    ./switcher "$IMAGES_FILE" "$GAMENAMES_FILE" $OPTIONS \
+    -dc "sed -i 'INDEXs/.*/removed/' $LIST_FILE"
+   
     # get return value
     RETURN_INDEX=$?
 
