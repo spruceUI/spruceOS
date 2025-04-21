@@ -70,6 +70,7 @@ else
     MODES="$MODES -m Not_simple"
 fi
 
+# Not currently in use, but leaving it here in case we wanna bring it back eventually
 if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mode"; then
     MODES="$MODES -m Expert"
 fi
