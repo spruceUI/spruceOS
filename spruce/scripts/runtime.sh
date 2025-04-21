@@ -359,10 +359,16 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
         skin_dir="${theme_dir}skin"
-        if [ -f "$skin_dir/bg-io-testing-Flip.png" ]; then
-            mount --bind "$skin_dir/bg-io-testing-Flip.png" "$skin_dir/bg-io-testing.png"
-            mount --bind "$skin_dir/bg-keysetting-Flip.png" "$skin_dir/bg-keysetting.png"
-        fi
+        for flip_file in "$skin_dir"/*-Flip.png; do
+            # Check if any files matched the pattern
+            [ -e "$flip_file" ] || continue
+
+            # Remove -Flip from the filename to get the target
+            base_file="${flip_file%-Flip.png}.png"
+
+            # Bind mount the flipped file to the base name
+            mount --bind "$flip_file" "$base_file"
+        done
     done
 
     # mask stock USB file transfer app
