@@ -102,6 +102,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
+    mkdir -p /run/bluetooth_fix
+    mount --bind /run/bluetooth_fix /userdata/bluetooth
 fi
 
 # Flag cleanup
@@ -293,7 +295,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
-    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/keymon &
     LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
 
     if [ -d "/media/sdcard1/miyoo355/" ]; then
@@ -359,10 +360,16 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
         skin_dir="${theme_dir}skin"
-        if [ -f "$skin_dir/bg-io-testing-Flip.png" ]; then
-            mount --bind "$skin_dir/bg-io-testing-Flip.png" "$skin_dir/bg-io-testing.png"
-            mount --bind "$skin_dir/bg-keysetting-Flip.png" "$skin_dir/bg-keysetting.png"
-        fi
+        for flip_file in "$skin_dir"/*-Flip.png; do
+            # Check if any files matched the pattern
+            [ -e "$flip_file" ] || continue
+
+            # Remove -Flip from the filename to get the target
+            base_file="${flip_file%-Flip.png}.png"
+
+            # Bind mount the flipped file to the base name
+            mount --bind "$flip_file" "$base_file"
+        done
     done
 
     # mask stock USB file transfer app

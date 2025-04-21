@@ -35,8 +35,8 @@ POWER_EVENT="/dev/input/event0"
 
 while true; do
 
-    # listen to event0 and handle key press events
-    $BIN_PATH/getevent $POWER_EVENT -exclusive | while read line; do
+    # listen to power event device and handle key press events
+    $BIN_PATH/getevent -exclusive $POWER_EVENT | while read line; do
         case $line in
         *"key $B_POWER 1"*) # Power key down
             # not in previous sleep event
@@ -106,7 +106,7 @@ while true; do
                 done
 
                 # kill getevent program, prepare to break inner while loop
-                kill $(pgrep -f "getevent $POWER_EVENT -exclusive")
+                kill $(pgrep -f "getevent -exclusive $POWER_EVENT")
                 sleep 0.5
 
                 # now break inner while loop

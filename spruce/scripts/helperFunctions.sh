@@ -44,7 +44,6 @@ flag_check() {
     fi
 }
 
-
 # Call this like:
 # log_message "Your message here"
 # To output to a custom log file, set the variable within your script:
@@ -87,7 +86,8 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
-log_message "[helperFunctions.sh] $INFO" -v
+# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
+# log_message "[helperFunctions.sh] $INFO" -v
 
 case $INFO in
 *"sun8i"*)
@@ -107,7 +107,8 @@ case $INFO in
     ;;
 esac
 
-log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
+# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
+# log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ ! "$PLATFORM" = "A30" ]; then
@@ -129,7 +130,7 @@ acknowledge() {
         case "$last_line" in
         *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
-            log_message "last_line: $last_line" -vS
+            log_message "last_line: $last_line" -v
             break
             ;;
         esac

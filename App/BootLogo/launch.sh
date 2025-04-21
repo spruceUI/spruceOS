@@ -115,6 +115,9 @@ case "$PLATFORM" in
         rm -f "$PROCESSED_PATH" "$PROCESSED_NAME" "$TEMP_BMP" boot0 boot0-suffix
         ;;
     "Flip")
+
+        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+
         # Setting up environment
         echo "Preparing system..."
         DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -125,7 +128,7 @@ case "$PLATFORM" in
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP"
             exit 1
-        fi
+        fi        
         cd /tmp
 
         # Extracting Boot Image

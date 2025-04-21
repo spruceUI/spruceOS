@@ -61,21 +61,30 @@ $SYSTEM_JSON
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
+/mnt/SDCARD/Roms/favourite.json
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
 /mnt/SDCARD/Emu/.emu_setup/overrides
 /mnt/SDCARD/Emu/NDS/backup
+/mnt/SDCARD/Emu/NDS/backup-32
+/mnt/SDCARD/Emu/NDS/backup-64
 /mnt/SDCARD/Emu/NDS/config
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings.json
 /mnt/SDCARD/RetroArch/retroarch.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
+/mnt/SDCARD/RetroArch/.retroarch/shaders
+/mnt/SDCARD/RetroArch/.retroarch/cheats
 /mnt/SDCARD/spruce/etc/SSH/keys
 /mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/spruce/settings/gs_list
 /mnt/SDCARD/spruce/settings/spruce.cfg
+/mnt/SDCARD/spruce/settings/platform/retroarch-A30.cfg
+/mnt/SDCARD/spruce/settings/platform/retroarch-Brick.cfg
+/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg
+/mnt/SDCARD/spruce/settings/platform/retroarch-SmartPro.cfg
 "
 
 log_message "Folders to backup: $folders"
