@@ -133,7 +133,7 @@ prepare_game_switcher() {
             HEIGHT=$DISPLAY_WIDTH
         fi
 
-        if [ "$PLATFORM" = "A30"]; then
+        if [ "$PLATFORM" = "A30" ]; then
             $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
         else
             $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
@@ -207,32 +207,6 @@ prepare_game_switcher() {
     log_message "*** homebutton_watchdog.sh: flag file created for gs" -v
 }
 
-send_virtual_key_MENUX() {
-    
-    if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-        {
-        echo $B_MENU 1 # MENU down
-        echo $B_X 1 # X down
-        sleep 0.1
-        echo $B_X 0 # X up
-        echo $B_MENU 0 # MENU up
-        echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-
-    elif [ "$PLATFORM" = "Flip" ]; then
-        {
-        echo $B_SELECT 1 # SELECT down
-        sleep 0.1
-        echo $B_X 1 # X down
-        sleep 0.1
-        echo $B_X 0 # X up
-        echo $B_SELECT 0 # SELECT up
-        echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-    fi
-    
-}
-
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
 # or toggle in-game menu in PPSSPP
 send_virtual_key_L3R3() {
@@ -300,9 +274,13 @@ long_press_handler() {
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                  send_virtual_key_MENUX
+                echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
             elif pgrep -f "retroarch" >/dev/null; then
-                send_virtual_key_L3R3
+                if [ "$PLATFORM" = "A30" ]; then
+                    send_virtual_key_L3R3
+                else
+                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1
+                fi
             elif pgrep -f "PPSSPPSDL" >/dev/null; then
                 send_virtual_key_L3
                 killall -q -CONT PPSSPPSDL
@@ -352,7 +330,9 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
 
         # pause RA after screen capture
         if [ "$PLATFORM" = "A30" ]; then
-            send_virtual_key_R3
+          send_virtual_key_R3
+        else
+          echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
         fi
 
         # fallback to stop ports
@@ -400,10 +380,14 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                     send_virtual_key_L3
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: $PLATFORM RA" -v
-                    send_virtual_key_MENUX
+                  echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
                 elif pgrep -f "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v
+                  if [ "$PLATFORM" = "A30" ]; then
                     send_virtual_key_L3R3
+                  else
+                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                  fi 
                 elif pgrep -f "PPSSPPSDL" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: PPSSPPSDL" -v
                     send_virtual_key_L3
@@ -493,6 +477,12 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
+                  paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
+                  # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
+                  if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
+                    log_message "*** RA is paused, unpausing" -v
+                    echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                  fi
         ;;
     esac
 done
