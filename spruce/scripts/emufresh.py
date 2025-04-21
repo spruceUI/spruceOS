@@ -38,7 +38,7 @@ def calculate_checksum(file_names):
     concatenated = ''.join(sorted(file_names)).encode('utf-8')
     return hashlib.md5(concatenated).hexdigest()
 
-def check_checksum(folder_path, collected_files, checksum_base_path, romset_changed)
+def check_checksum(folder_path, collected_files, checksum_base_path, romset_changed):
         checksum = calculate_checksum(collected_files)
         checksum_file = os.path.join(checksum_base_path, f"{folder_name}.md5")
 
@@ -94,7 +94,7 @@ def main():
     
     if first_romset_changed or second_romset_changed:
         romset_changed = True
-    else
+    else:
         romset_changed = False
     
     print(f"{romset_changed}")
