@@ -80,7 +80,7 @@ def scan_dirs(base_rom_path, checksum_base_path):
                     continue
                 collected_files.append(sub_name)
 
-        if check_checksum(folder_path, collected_files, checksum_base_path, romset_status):
+        if check_checksum(folder_name, collected_files, checksum_base_path, romset_status):
             romset_status = True
     return romset_status
 
