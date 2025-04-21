@@ -206,7 +206,7 @@ for sys_dir in "$roms_dir"/*/; do
 
     for file in "$sys_dir"*; do
         # Check if the user pressed B to exit
-        if tail -n1 "$messages_file" | grep -q "key 1 29"; then
+        if tail -n1 "$messages_file" | grep -q "key $B_B"; then
             log_message "BoxartScraper: User pressed B, exiting."
             display --icon "/mnt/SDCARD/Themes/SPRUCE/icons/app/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
