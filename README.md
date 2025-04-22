@@ -194,5 +194,5 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
 
 ## News
-The "soon" to happen release of the Miyoo Flip has us excited! We are planning on trying to do something for it but have not gotten ahold of any test units yet.
-[Gogamegeek.com](https://www.gogamegeek.com/) has kindly offered to send us a few units as soon as they recieve them. Expect updates on our progress "soon"!
+The release of the Miyoo Flip has us excited! We are working on spruceOS 4.0 that will be multi platform! One SD card with our software will boot/play on the Miyoo A30, Flip, Trimui Brick and Smart Pro. 
+[Gogamegeek.com](https://www.gogamegeek.com/) as well as Miyoo themselves has kindly sent us a few units. Expect updates on our progress "soon"!
