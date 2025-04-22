@@ -3,25 +3,31 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 TOGGLE_SIMPLE="/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh"
+GETEVENT=/mnt/SDCARD/spruce/bin64/getevent
+[ "$PLATFORM" = "A30" ] && GETEVENT=/mnt/SDCARD/spruce/bin/getevent
+
+FIFO="/tmp/konami_fifo"
+rm -f $FIFO 2>/dev/null
+mkfifo $FIFO
+log_message "simple_mode_watchdog.sh: created $FIFO"
 
 detect_konami_code() {
-	log_message "listening for Konami Code"
-	
-	FIFO="/tmp/konami_fifo"
-	rm -f "$FIFO"
-	mkfifo "$FIFO"
+	log_message "simple_mode_watchdog.sh: Started listening for Konami Code"
 	
 	# Start getevent in background, writing to the FIFO
-	/mnt/SDCARD/spruce/bin/getevent $EVENT_PATH_KEYBOARD > "$FIFO" &
-	getevent_pid=$!
-	
+	log_message "GETEVENT = $GETEVENT" -v
+	log_message "EVENT_PATH_KEYBOARD = $EVENT_PATH_KEYBOARD" -v
+	log_message "FIFO = $FIFO" -v
+	$GETEVENT $EVENT_PATH_KEYBOARD > "$FIFO" &
+	export konami_pid=$!
+	log_message "konami_pid = $konami_pid" -v
 	NUM_CORRECT=0
 	
 	while read line; do
 		log_message "number of correct inputs: $NUM_CORRECT" -v
 		
 		case "$line" in
-			*"key $B_UP"*)
+			*"$B_UP"*)
 				log_message "+++UP" -v
 				if [ $NUM_CORRECT -eq 0 ] || [ $NUM_CORRECT -eq 1 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -29,7 +35,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_DOWN"*)
+			*"$B_DOWN"*)
 				log_message "+++DOWN" -v
 				if [ $NUM_CORRECT -eq 2 ] || [ $NUM_CORRECT -eq 3 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -37,7 +43,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_LEFT"*)
+			*"$B_LEFT"*)
 				log_message "+++LEFT" -v
 				if [ $NUM_CORRECT -eq 4 ] || [ $NUM_CORRECT -eq 6 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -45,7 +51,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_RIGHT"*)
+			*"$B_RIGHT"*)
 				log_message "+++RIGHT" -v
 				if [ $NUM_CORRECT -eq 5 ] || [ $NUM_CORRECT -eq 7 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -53,7 +59,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_B 1"*)
+			*"$B_B 1"*)
 				log_message "+++B" -v
 				if [ $NUM_CORRECT -eq 8 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -61,7 +67,7 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_A 1"*)
+			*"$B_A 1"*)
 				log_message "+++A" -v
 				if [ $NUM_CORRECT -eq 9 ]; then
 					NUM_CORRECT=$((NUM_CORRECT + 1))
@@ -69,13 +75,14 @@ detect_konami_code() {
 					NUM_CORRECT=0
 				fi
 				;;
-			*"key $B_START 1"*)
+			*"$B_START 1"*)
 				log_message "+++START" -v
-				if [ $NUM_CORRECT -eq 10 ]; then
+				if [ $NUM_CORRECT -eq 10 ] && flag_check "in_menu"; then
 					log_message "11 correct inputs in a row! removing simple_mode."
 					"$TOGGLE_SIMPLE" remove
 					# Kill getevent and clean up
-					kill $getevent_pid
+					kill $konami_pid 2>/dev/null
+					unset konami_pid 2>/dev/null
 					rm -f "$FIFO"
 					return 0
 				else
@@ -93,17 +100,18 @@ detect_konami_code() {
 	done < "$FIFO"
 	
 	# Clean up if we exit the loop some other way
-	kill $getevent_pid 2>/dev/null
+	kill $konami_pid 2>/dev/null
+	unset konami_pid 2>/dev/null
 	rm -f "$FIFO"
 }
 
 while true; do
 	while flag_check "simple_mode" && flag_check "in_menu"; do
-		log_message "simple_mode active and MainUI detected"
+		log_message "simple_mode_watchdog.sh: simple_mode active and MainUI detected"
 		
-		detect_konami_code
+		[ -z "$konami_pid" ] && detect_konami_code
 		sleep 5
 	done
-	log_message "simple_mode OR MainUI not detected" -v
+	log_message "simple_mode_watchdog.sh: simple_mode OR MainUI not detected" -v
 	sleep 5
 done

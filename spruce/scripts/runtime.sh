@@ -400,6 +400,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    $(SCRIPTS_DIR)/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
@@ -418,6 +419,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 

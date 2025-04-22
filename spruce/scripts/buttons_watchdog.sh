@@ -4,6 +4,9 @@
 
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
 [ "$PLATFORM" = "A30" ] && BIN_PATH="/mnt/SDCARD/spruce/bin"
+# TODO: maybe rename these to setsharedmem-$PLATFORM if we need brick/tsp ones?
+SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
+[ "$PLATFORM" = "A30" ] && SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
 SET_OR_CSET="cset"
 [ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
 NAME_QUALIFIER="name="
@@ -132,7 +135,7 @@ brightness_down() {
 
         # write both level value to shared memory for MainUI to update its UI
         VOLUME_LV=$(get_volume_level)
-        $BIN_PATH/setsharedmem "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
     fi
 }
 
@@ -160,7 +163,7 @@ brightness_up() {
     
         # write both level value to shared memory for MainUI to update its UI
         VOLUME_LV=$(get_volume_level)
-        $BIN_PATH/setsharedmem "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
     fi
 }
 
@@ -196,11 +199,12 @@ volume_down() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
+        # TODO should this be 'volume down ...'?
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)
-        $BIN_PATH/setsharedmem "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
     fi
 }
 
@@ -222,7 +226,7 @@ volume_up() {
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)
-        $BIN_PATH/setsharedmem "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
     fi
 }
 

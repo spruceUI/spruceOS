@@ -458,7 +458,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
     # Don't react to dpad presses or ananlog sticks
     *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* | *"key 3"*) ;;
     # Any other key press while menu is held
-    *"key"*)
+    *"key"*"0")
         log_message "*** Catch-all key case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
             # Only remove homeheld flag if NOT in simple_mode and in_menu
@@ -477,12 +477,14 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
-                  paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
-                  # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
-                  if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
-                    log_message "*** RA is paused, unpausing" -v
-                    echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-                  fi
+        {
+          paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
+          # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
+          if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
+            log_message "*** RA is paused, unpausing" -v
+            echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+          fi
+        } &
         ;;
     esac
 done
