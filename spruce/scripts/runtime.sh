@@ -405,6 +405,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
+    ${SCRIPTS_DIR}/lid_watchdog.sh &
 
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
