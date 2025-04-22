@@ -81,7 +81,6 @@ Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and cal
 ### Global
 
 * Brightness: START + L1/R1 (to lower/increase brightness respectively)
-* Volume: SELECT + L1/R1 (to lower/increase volume respectively)
 
 ### Main Menu
 
