@@ -325,13 +325,12 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-	rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	if [ "$PORT_CONTROL" = "X360" ]; then
-		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	else
-		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	fi
-	
+    rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    if [ "$PORT_CONTROL" = "X360" ]; then
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    else
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    fi
 }
 
 run_port() {
@@ -340,17 +339,17 @@ run_port() {
         set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
-		    game_dir=$(extract_game_dir)
-			# Look for the first file ending with .gptk in the game_dir
-			gptk_file=$(find "$game_dir" -type f -name "*.gptk" | head -n 1)
-    		/mnt/sdcard/Roms/.portmaster/PortMaster/gptokeyb "gmloader" -c "$gptk_file" &
-    		gptokeyb_pid=$!
+            game_dir=$(extract_game_dir)
+            # Look for the first file ending with .gptk in the game_dir
+            gptk_file=$(find "$game_dir" -type f -name "*.gptk" | head -n 1)
+            /mnt/sdcard/Roms/.portmaster/PortMaster/gptokeyb "gmloader" -c "$gptk_file" &
+            gptokeyb_pid=$!
 
             echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
             cd /mnt/sdcard/Emu/PORT32/
 
             /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port32.log
-			kill "$gptokeyb_pid"
+            kill "$gptokeyb_pid"
         else
         
             is_retroarch_port
