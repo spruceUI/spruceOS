@@ -7,6 +7,12 @@ BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
 fi
+SET_OR_CSET="cset"
+[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
+NAME_QUALIFIER="name="
+[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
+AMIXER_CONTROL="'SPK Volume'"
+[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
@@ -80,7 +86,7 @@ while true; do
                         CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
-                        amixer cset 'Soft Volume Master' 0
+                        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" 0
                         flag_add "wake.alarm"
                     fi
                 fi
@@ -89,10 +95,10 @@ while true; do
                     if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         flag_add "sleep.powerdown"
                         cat $DEVICE_BRIGHTNESS_PATH >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
-                        CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                        CURRENT_VOLUME=$(amixer get $NAME_QUALIFIER"$AMIXER_CONTROL" | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
-                        amixer cset 'Soft Volume Master' 0
+                        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" 0
                         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                     fi
                 fi
@@ -123,6 +129,7 @@ while true; do
     sync
 
     # suspend to memory
+    [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
 
     # wait long enough to ensure device enter sleep mode
@@ -141,7 +148,7 @@ while true; do
             
         fi
 
-        amixer cset 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
 
     # wait long enough to ensure wakeup task is finished

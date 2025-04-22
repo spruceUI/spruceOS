@@ -6,6 +6,12 @@ BIN_PATH="/mnt/SDCARD/spruce/bin"
 if [ ! "$PLATFORM" = "A30"]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
 fi
+SET_OR_CSET="cset"
+[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
+NAME_QUALIFIER="name="
+[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
+AMIXER_CONTROL="'SPK Volume'"
+[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
@@ -29,7 +35,7 @@ vibrate
 if flag_check "sleep.powerdown"; then
     cp /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level /mnt/SDCARD/spruce/settings/sys_brightness_level
 else
-    cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/sys_brightness_level
+    cat "$DEVICE_BRIGHTNESS_PATH" >/mnt/SDCARD/spruce/settings/sys_brightness_level
 fi
 
 if pgrep -f gameswitcher.sh >/dev/null; then
@@ -170,7 +176,7 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
     # Restore brightness and sound if sleep->powerdown for syncthing
     if flag_check "sleep.powerdown"; then
         cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
-        amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
     
     if check_and_connect_wifi; then
@@ -187,7 +193,7 @@ flag_remove "emulator_launched"
 
 # Save current sound settings
 if flag_check "sleep.powerdown"; then
-    amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+    amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
 fi
 alsactl store
 
