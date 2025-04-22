@@ -292,8 +292,7 @@ load_pico8_control_profile() {
 	esac
 }
 
-is_32bit_port() {
-  
+extract_game_dir(){
     # long-term come up with better method.
     # this is short term for testing
     gamedir_line=$(grep "^GAMEDIR=" "$ROM_FILE")
@@ -302,7 +301,11 @@ is_32bit_port() {
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
     game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
-    game_dir="${game_dir%\"}"
+    echo "${game_dir%\"}"
+}
+
+is_32bit_port() {
+    game_dir=$(extract_game_dir)
     # If gmloader or box86 exist then its 32-bit
     if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ] || [ -f "$game_dir/gmloadernext.armhf" ]; then
         return 1;
@@ -337,9 +340,17 @@ run_port() {
         set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
+		    game_dir=$(extract_game_dir)
+			# Look for the first file ending with .gptk in the game_dir
+			gptk_file=$(find "$game_dir" -type f -name "*.gptk" | head -n 1)
+    		/mnt/sdcard/Roms/.portmaster/PortMaster/gptokeyb "gmloader" -c "$gptk_file" &
+    		gptokeyb_pid=$!
+
             echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
             cd /mnt/sdcard/Emu/PORT32/
+
             /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port32.log
+			kill "$gptokeyb_pid"
         else
         
             is_retroarch_port
