@@ -400,6 +400,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    $(SCRIPTS_DIR)/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &

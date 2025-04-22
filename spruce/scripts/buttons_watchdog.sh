@@ -199,6 +199,7 @@ volume_down() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
+        # TODO should this be 'volume down ...'?
         logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
 
         # write both level value to shared memory for MainUI to update its UI
