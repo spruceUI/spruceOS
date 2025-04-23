@@ -199,7 +199,16 @@ volume_down() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
-        logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        if [ "$PLATFORM" = "A30" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        elif [ "$PLATFORM" = "Flip" ] ; then
+          # attempt to tell mainui what we're setting volume too- this is what keymon does, but it doesn't seem to be helping
+          # get graphical notifications on volume change
+          logger -p 15 -t "keymon[$$]" "volume down 0ms, sleeped -1"
+          logger -p 15 -t "keymon[$$]" "set volume $VOLUME_LV, $SYSTEM_VOLUME"
+        else
+          logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        fi
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)
@@ -221,7 +230,14 @@ volume_up() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
-        logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        if [ "$PLATFORM" = "A30" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        elif [ "$PLATFORM" = "Flip" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume up 0ms"
+          logger -p 15 -t "keymon[$$]" "set volume $VOLUME_LV, $SYSTEM_VOLUME"
+        else
+          logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        fi
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)

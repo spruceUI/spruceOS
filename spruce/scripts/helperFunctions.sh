@@ -537,7 +537,7 @@ display() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    kill -9 $(pgrep display)
+    kill -9 $(pgrep display) 2> /dev/null
 }
 
 # Add a flag
