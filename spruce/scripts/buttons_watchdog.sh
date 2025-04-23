@@ -259,7 +259,7 @@ EVENTS="$EVENT_PATH_KEYBOARD"
 $BIN_PATH/getevent $EVENTS | while read line; do
 
     # first print event code to log file
-    logger -p 15 -t "keymon[$$]" $line
+    logger -p 15 -t "keymon[$$]" "$line"
 
     # handle hotkeys and volume buttons
     case $line in
