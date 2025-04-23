@@ -78,17 +78,17 @@ map_mainui_volume_to_system_value() {
 get_brightness_level() {
     value=$(cat "$DEVICE_BRIGHTNESS_PATH")
     case $value in
-        2) echo 0 ;;
-        8) echo 1 ;;
-        18) echo 2 ;;
-        32) echo 3 ;;
-        50) echo 4 ;;
-        72) echo 5 ;;
-        98) echo 6 ;;
-        128) echo 7 ;;
-        162) echo 8 ;;
-        200) echo 9 ;;
-        255) echo 10 ;;
+        $SYSTEM_BRIGHTNESS_0) echo 0 ;;
+        $SYSTEM_BRIGHTNESS_1) echo 1 ;;
+        $SYSTEM_BRIGHTNESS_2) echo 2 ;;
+        $SYSTEM_BRIGHTNESS_3) echo 3 ;;
+        $SYSTEM_BRIGHTNESS_4) echo 4 ;;
+        $SYSTEM_BRIGHTNESS_5) echo 5 ;;
+        $SYSTEM_BRIGHTNESS_6) echo 6 ;;
+        $SYSTEM_BRIGHTNESS_7) echo 7 ;;
+        $SYSTEM_BRIGHTNESS_8) echo 8 ;;
+        $SYSTEM_BRIGHTNESS_9) echo 9 ;;
+        $SYSTEM_BRIGHTNESS_10) echo 10 ;;
         *) echo 5 ;;
     esac
 }
@@ -96,17 +96,17 @@ get_brightness_level() {
 # Map the MainUI brightness level to System Value
 map_brightness_to_system_value() {
     case $1 in
-        0) echo 2 ;;
-        1) echo 8 ;;
-        2) echo 18 ;;
-        3) echo 32 ;;
-        4) echo 50 ;;
-        5) echo 72 ;;
-        6) echo 98 ;;
-        7) echo 128 ;;
-        8) echo 162 ;;
-        9) echo 200 ;;
-        10) echo 255 ;;
+        0) echo $SYSTEM_BRIGHTNESS_0 ;;
+        1) echo $SYSTEM_BRIGHTNESS_1 ;;
+        2) echo $SYSTEM_BRIGHTNESS_2 ;;
+        3) echo $SYSTEM_BRIGHTNESS_3 ;;
+        4) echo $SYSTEM_BRIGHTNESS_4 ;;
+        5) echo $SYSTEM_BRIGHTNESS_5 ;;
+        6) echo $SYSTEM_BRIGHTNESS_6 ;;
+        7) echo $SYSTEM_BRIGHTNESS_7 ;;
+        8) echo $SYSTEM_BRIGHTNESS_8 ;;
+        9) echo $SYSTEM_BRIGHTNESS_9 ;;
+        10) echo $SYSTEM_BRIGHTNESS_10 ;;
         *) ;;
     esac
 }
