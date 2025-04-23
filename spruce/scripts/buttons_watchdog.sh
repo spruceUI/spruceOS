@@ -74,10 +74,37 @@ map_mainui_volume_to_system_value() {
     esac
 }
 
+nearest_system_brightness() {
+    local input=$1
+    local -a levels=(1 20 35 45 60 80 100 120 150 180 220)
+    local nearest=${levels[0]}
+    local min_diff=$((input - levels[0]))
+    min_diff=${min_diff#-}  # absolute value
+
+    for level in "${levels[@]}"; do
+        local diff=$((input - level))
+        diff=${diff#-}
+        if (( diff < min_diff )); then
+            min_diff=$diff
+            nearest=$level
+        fi
+    done
+
+    # Output the matching SYSTEM_BRIGHTNESS_X value
+    for i in "${!levels[@]}"; do
+        if [[ ${levels[i]} -eq $nearest ]]; then
+            var="SYSTEM_BRIGHTNESS_$i"
+            echo "${!var}"
+            return
+        fi
+    done
+}
+
 # Map the System Value to MainUI brightness level 
 get_brightness_level() {
     value=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    case $value in
+    nearest=$(nearest_system_brightness "$value")
+    case $nearest in
         $SYSTEM_BRIGHTNESS_0) echo 0 ;;
         $SYSTEM_BRIGHTNESS_1) echo 1 ;;
         $SYSTEM_BRIGHTNESS_2) echo 2 ;;
