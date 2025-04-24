@@ -42,18 +42,19 @@ def updates_detected(folder_path, collected_files):
         except Exception as e:
             print(f"Skipping {file_path}: {e}")
 
-    # Delete cache6.db and cache7.db files from rom directories
+    # Delete specific cache6.db and cache7.db files from rom directories
     for root_path in ROM_PATHS:
         target_folder = os.path.join(root_path, folder_name)
         if not os.path.isdir(target_folder):
             continue
 
-        for file_name in os.listdir(target_folder):
-            if file_name.endswith("cache6.db") or file_name.endswith("cache7.db"):
+        for suffix in ["_cache6.db", "_cache7.db"]:
+            cache_file = os.path.join(target_folder, folder_name + suffix)
+            if os.path.exists(cache_file):
                 try:
-                    os.remove(os.path.join(target_folder, file_name))
+                    os.remove(cache_file)
                 except Exception as e:
-                    print(f"Failed to delete {file_name}: {e}")
+                    print(f"Failed to delete {cache_file}: {e}")
 
 def calculate_checksum(file_names):
     concatenated = ''.join(sorted(file_names)).encode('utf-8')
