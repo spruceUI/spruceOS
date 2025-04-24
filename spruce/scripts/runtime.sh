@@ -73,8 +73,6 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Mask Roms/PORTS with non-A30 version
         mkdir -p "/mnt/SDCARD/Roms/PORTS64"
         mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
-        # Use appropriate RA config
-        [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
         mkdir -p "/mnt/SDCARD/trimui/brickThemes"
         mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
@@ -126,6 +124,9 @@ if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
     jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
     mv /tmp/system.json.clean "$SYSTEM_JSON"
 fi
+
+# Use appropriate RA config per platform
+[ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
 
 if [ "$PLATFORM" = "A30" ]; then
     # Check if WiFi is enabled
@@ -374,9 +375,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # mask stock USB file transfer app
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
-    # Use appropriate RA config
-    [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && \
-        mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+    # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
+    mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
