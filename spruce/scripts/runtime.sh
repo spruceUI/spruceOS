@@ -160,11 +160,12 @@ fi
     ${SCRIPTS_DIR}/emufresh_md5_multi.sh # &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 } &
 
-    # don't hide or unhide apps in simple_mode
-    if ! flag_check "simple_mode"; then
-        check_and_handle_firmware_app &
-        check_and_hide_update_app &
-    fi
+check_and_handle_firmware_app &
+
+# don't hide or unhide apps in simple_mode
+if ! flag_check "simple_mode"; then
+    check_and_hide_update_app &
+fi
 
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
