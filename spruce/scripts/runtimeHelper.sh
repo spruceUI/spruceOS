@@ -5,12 +5,41 @@
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
-# Define the function to check and unhide the firmware update app
+# Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
-    VERSION="$(cat /usr/miyoo/version)"
-    if [ "$VERSION" -lt 20240713100458 ]; then
-        sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
-    fi
+
+    case "$PLATFORM" in
+        "A30" )
+            VERSION="$(cat /usr/miyoo/version)"
+            if [ "$VERSION" -ge 20240713100458 ]; then
+                mount -o bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+            fi
+            ;;
+        "Flip" )
+            VERSION="$(cat /usr/miyoo/version)"
+            if [ "$VERSION" -ge 20250228101926 ]; then
+                mount --bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+            fi
+            ;;
+        "Brick" )
+            VERSION="$(cat /etc/version)"
+            v_major="$(cut -d '.' -f 1 "$VERSION")"
+            # v_minor="$(cut -d '.' -f 2 "$VERSION")"
+            v_bug="$(cut -d '.' -f 3 "$VERSION")"
+            if [ "$v_major" -ge 1 ] && [ "$v_bug" -ge 6 ]; then
+                mount --bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+            fi
+            ;;
+        "SmartPro" )
+            VERSION="$(cat /etc/version)"
+            v_major="$(cut -d '.' -f 1 "$VERSION")"
+            # v_minor="$(cut -d '.' -f 2 "$VERSION")"
+            v_bug="$(cut -d '.' -f 3 "$VERSION")"
+            if [ "$v_major" -ge 1 ] && [ "$v_bug" -ge 4 ]; then
+                mount --bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+            fi
+            ;;
+    esac
 }
 
 # Function to check and hide the Update App if necessary

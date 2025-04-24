@@ -162,7 +162,7 @@ fi
 
     # don't hide or unhide apps in simple_mode
     if ! flag_check "simple_mode"; then
-        [ "$PLATFORM" = "A30" ] && check_and_handle_firmware_app &
+        check_and_handle_firmware_app &
         check_and_hide_update_app &
     fi
 
