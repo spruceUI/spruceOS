@@ -74,21 +74,48 @@ map_mainui_volume_to_system_value() {
     esac
 }
 
+nearest_system_brightness() {
+    local input=$1
+    local -a levels=(1 20 35 45 60 80 100 120 150 180 220)
+    local nearest=${levels[0]}
+    local min_diff=$((input - levels[0]))
+    min_diff=${min_diff#-}  # absolute value
+
+    for level in "${levels[@]}"; do
+        local diff=$((input - level))
+        diff=${diff#-}
+        if (( diff < min_diff )); then
+            min_diff=$diff
+            nearest=$level
+        fi
+    done
+
+    # Output the matching SYSTEM_BRIGHTNESS_X value
+    for i in "${!levels[@]}"; do
+        if [[ ${levels[i]} -eq $nearest ]]; then
+            var="SYSTEM_BRIGHTNESS_$i"
+            echo "${!var}"
+            return
+        fi
+    done
+}
+
 # Map the System Value to MainUI brightness level 
 get_brightness_level() {
     value=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    case $value in
-        2) echo 0 ;;
-        8) echo 1 ;;
-        18) echo 2 ;;
-        32) echo 3 ;;
-        50) echo 4 ;;
-        72) echo 5 ;;
-        98) echo 6 ;;
-        128) echo 7 ;;
-        162) echo 8 ;;
-        200) echo 9 ;;
-        255) echo 10 ;;
+    nearest=$(nearest_system_brightness "$value")
+    case $nearest in
+        $SYSTEM_BRIGHTNESS_0) echo 0 ;;
+        $SYSTEM_BRIGHTNESS_1) echo 1 ;;
+        $SYSTEM_BRIGHTNESS_2) echo 2 ;;
+        $SYSTEM_BRIGHTNESS_3) echo 3 ;;
+        $SYSTEM_BRIGHTNESS_4) echo 4 ;;
+        $SYSTEM_BRIGHTNESS_5) echo 5 ;;
+        $SYSTEM_BRIGHTNESS_6) echo 6 ;;
+        $SYSTEM_BRIGHTNESS_7) echo 7 ;;
+        $SYSTEM_BRIGHTNESS_8) echo 8 ;;
+        $SYSTEM_BRIGHTNESS_9) echo 9 ;;
+        $SYSTEM_BRIGHTNESS_10) echo 10 ;;
         *) echo 5 ;;
     esac
 }
@@ -96,17 +123,17 @@ get_brightness_level() {
 # Map the MainUI brightness level to System Value
 map_brightness_to_system_value() {
     case $1 in
-        0) echo 2 ;;
-        1) echo 8 ;;
-        2) echo 18 ;;
-        3) echo 32 ;;
-        4) echo 50 ;;
-        5) echo 72 ;;
-        6) echo 98 ;;
-        7) echo 128 ;;
-        8) echo 162 ;;
-        9) echo 200 ;;
-        10) echo 255 ;;
+        0) echo $SYSTEM_BRIGHTNESS_0 ;;
+        1) echo $SYSTEM_BRIGHTNESS_1 ;;
+        2) echo $SYSTEM_BRIGHTNESS_2 ;;
+        3) echo $SYSTEM_BRIGHTNESS_3 ;;
+        4) echo $SYSTEM_BRIGHTNESS_4 ;;
+        5) echo $SYSTEM_BRIGHTNESS_5 ;;
+        6) echo $SYSTEM_BRIGHTNESS_6 ;;
+        7) echo $SYSTEM_BRIGHTNESS_7 ;;
+        8) echo $SYSTEM_BRIGHTNESS_8 ;;
+        9) echo $SYSTEM_BRIGHTNESS_9 ;;
+        10) echo $SYSTEM_BRIGHTNESS_10 ;;
         *) ;;
     esac
 }
@@ -199,7 +226,16 @@ volume_down() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
-        logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        if [ "$PLATFORM" = "A30" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        elif [ "$PLATFORM" = "Flip" ] ; then
+          # attempt to tell mainui what we're setting volume too- this is what keymon does, but it doesn't seem to be helping
+          # get graphical notifications on volume change
+          logger -p 15 -t "keymon[$$]" "volume down 0ms, sleeped -1"
+          logger -p 15 -t "keymon[$$]" "set volume $VOLUME_LV, $SYSTEM_VOLUME"
+        else
+          logger -p 15 -t "keymon[$$]" "volume down $VOLUME_LV"
+        fi
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)
@@ -221,7 +257,14 @@ volume_up() {
         SYSTEM_VOLUME=$(map_mainui_volume_to_system_value "$VOLUME_LV")
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $SYSTEM_VOLUME > /dev/null
 
-        logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        if [ "$PLATFORM" = "A30" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        elif [ "$PLATFORM" = "Flip" ] ; then
+          logger -p 15 -t "keymon[$$]" "volume up 0ms"
+          logger -p 15 -t "keymon[$$]" "set volume $VOLUME_LV, $SYSTEM_VOLUME"
+        else
+          logger -p 15 -t "keymon[$$]" "volume up $VOLUME_LV"
+        fi
 
         # write both level value to shared memory for MainUI to update its UI
         BRIGHTNESS_LV=$(get_brightness_level)
@@ -243,7 +286,7 @@ EVENTS="$EVENT_PATH_KEYBOARD"
 $BIN_PATH/getevent $EVENTS | while read line; do
 
     # first print event code to log file
-    logger -p 15 -t "keymon[$$]" $line
+    logger -p 15 -t "keymon[$$]" "$line"
 
     # handle hotkeys and volume buttons
     case $line in

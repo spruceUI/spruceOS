@@ -220,7 +220,6 @@ if [ "$PLATFORM" = "A30" ]; then
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
-
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
@@ -400,7 +399,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    $(SCRIPTS_DIR)/mixer_watchdog.sh &
+    ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
@@ -411,7 +410,17 @@ elif [ "$PLATFORM" = "Flip" ]; then
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     # ${SCRIPTS_DIR}/credits_watchdog.sh & #### we don't have the credits bin for this device
-    
+
+    # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
+    GPIO=150
+
+    if [ ! -d /sys/class/gpio/gpio$GPIO ]; then
+        echo $GPIO > /sys/class/gpio/export
+        sleep 0.1
+    fi
+
+    echo in > /sys/class/gpio/gpio$GPIO/direction
+
     # check whether to auto-resume into a game
     if flag_check "save_active"; then
         ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
@@ -427,7 +436,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     swapon -p 40 "${SWAPFILE}"
 
     killall runmiyoo.sh
-
 fi
 
 # check whether to run first boot procedure

@@ -1,6 +1,8 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/audioFunctions.sh
+
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
 BIN_PATH="/mnt/SDCARD/spruce/bin64"
@@ -83,7 +85,8 @@ while true; do
                     if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
                         cat $DEVICE_BRIGHTNESS_PATH >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
-                        CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                        [ "$PLATFORM" = "A30" ] && CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                        [ "$PLATFORM" = "Flip" ] && CURRENT_VOLUME=$(amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" 0
@@ -95,7 +98,8 @@ while true; do
                     if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
                         flag_add "sleep.powerdown"
                         cat $DEVICE_BRIGHTNESS_PATH >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
-                        CURRENT_VOLUME=$(amixer get $NAME_QUALIFIER"$AMIXER_CONTROL" | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                        [ "$PLATFORM" = "A30" ] && CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
+                        [ "$PLATFORM" = "Flip" ] && CURRENT_VOLUME=$(amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%')
                         echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" 0
@@ -145,10 +149,11 @@ while true; do
             cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level > $DEVICE_BRIGHTNESS_PATH
             ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
             echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-            
         fi
 
+        # shouldn't this be in the if?
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        [ "$PLATFORM" = "Flip" ] && reset_playback_pack
     fi
 
     # wait long enough to ensure wakeup task is finished

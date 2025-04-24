@@ -333,7 +333,7 @@ dim_screen() {
     fi
 
     # Get current brightness
-    local current_brightness=$(cat /sys/devices/virtual/disp/disp/attr/lcdbl)
+    local current_brightness=$(cat $DEVICE_BRIGHTNESS_PATH)
 
     # Check if we're already at target brightness
     if [ "$current_brightness" -eq "$end_brightness" ]; then
@@ -346,7 +346,7 @@ dim_screen() {
     local current=$start_brightness
 
     while [ $current -gt $end_brightness ]; do
-        echo $current >/sys/devices/virtual/disp/disp/attr/lcdbl
+        echo $current > $DEVICE_BRIGHTNESS_PATH
         current=$((current - 1))
         sleep $delay
     done
@@ -537,7 +537,7 @@ display() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    kill -9 $(pgrep display)
+    kill -9 $(pgrep display) 2> /dev/null
 }
 
 # Add a flag
