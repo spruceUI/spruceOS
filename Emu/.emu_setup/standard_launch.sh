@@ -539,7 +539,7 @@ save_custom_n64_controller_profile() {
 }
 
 run_yabasanshiro() {
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	export HOME="$EMU_DIR"
 	cd "$HOME"
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
