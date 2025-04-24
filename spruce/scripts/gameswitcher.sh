@@ -23,7 +23,7 @@ log_message "***** gameswitcher.sh: gs lock, list, images, names, options and te
 INFO_DIR="/mnt/SDCARD/RetroArch/.retroarch/info"
 DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 # changing this needs the binary to also update this path in the source code
-EMPTY_IMG="/mnt/sdcard/spruce/settings/gs_empty.png"
+EMPTY_IMG="res/gs_empty.png"
 
 # get setting always use box art 
 setting_get "alwaysUseBoxartInGS"
