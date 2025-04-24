@@ -258,11 +258,11 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 <Not_simple>
 "" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
-@"Manage files on your A30"
+@"Manage files on your device"
 
 <Not_simple>
 "" "Game Nursery" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/GameNursery/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/GameNursery/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/GameNursery/config.json" ""
-@"Download free games directly to your A30"
+@"Download free games directly to your device"
 
 <Not_simple>
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
