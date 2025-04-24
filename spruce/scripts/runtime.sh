@@ -38,14 +38,14 @@ if [ "$PLATFORM" = "A30" ]; then
     # Create directories and mount in parallel
     (
         mkdir -p /var/lib/alsa
-        mkdir -p /tmp/SATURN
+        mkdir -p /mnt/SDCARD/spruce/dummy
         mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
         mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/SATURN &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/Emu/PORT32 &
-        mount -o bind /tmp/SATURN /mnt/SDCARD/App/PortMaster &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/SATURN &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/PORT32 &
+        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -73,8 +73,6 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Mask Roms/PORTS with non-A30 version
         mkdir -p "/mnt/SDCARD/Roms/PORTS64"
         mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
-        # Use appropriate RA config
-        [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
         # mount Brick themes to hide A30 ones
         mkdir -p "/mnt/SDCARD/trimui/brickThemes"
         mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
@@ -86,6 +84,10 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 
     )
 elif [ "$PLATFORM" = "Flip" ]; then
+    export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
+    export PATH="$SYSTEM_PATH/app:${PATH}"
+    BIN_DIR="${SDCARD_PATH}/spruce/bin64"
+
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
@@ -98,6 +100,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
+    mkdir -p /run/bluetooth_fix
+    mount --bind /run/bluetooth_fix /userdata/bluetooth
 fi
 
 # Flag cleanup
@@ -120,6 +124,9 @@ if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
     jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
     mv /tmp/system.json.clean "$SYSTEM_JSON"
 fi
+
+# Use appropriate RA config per platform
+[ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
 
 if [ "$PLATFORM" = "A30" ]; then
     # Check if WiFi is enabled
@@ -150,7 +157,7 @@ fi
 
 {
     ${SCRIPTS_DIR}/romdirpostrofix.sh
-    ${SCRIPTS_DIR}/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
+    ${SCRIPTS_DIR}/emufresh_md5_multi.sh # &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 } &
 
     # don't hide or unhide apps in simple_mode
@@ -211,11 +218,9 @@ if [ "$PLATFORM" = "A30" ]; then
     swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
-    #${SCRIPTS_DIR}/forcedisplay.sh
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
-
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
@@ -290,7 +295,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
-    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/keymon &
     LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
 
     if [ -d "/media/sdcard1/miyoo355/" ]; then
@@ -321,7 +325,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
-    sleep 0.1
+    sleep 0.2
     hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
     if [ "$hdmipugin" == "connected" ] ; then
         /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
@@ -352,13 +356,27 @@ elif [ "$PLATFORM" = "Flip" ]; then
         cd $miyoo_fw_dir
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
+	
+    # fix keys map image for each theme folder
+    for theme_dir in /mnt/sdcard/Themes/*/; do
+        skin_dir="${theme_dir}skin"
+        for flip_file in "$skin_dir"/*-Flip.png; do
+            # Check if any files matched the pattern
+            [ -e "$flip_file" ] || continue
+
+            # Remove -Flip from the filename to get the target
+            base_file="${flip_file%-Flip.png}.png"
+
+            # Bind mount the flipped file to the base name
+            mount --bind "$flip_file" "$base_file"
+        done
+    done
 
     # mask stock USB file transfer app
     mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
-    # Use appropriate RA config
-    [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" && \
-        mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+    # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
+    mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
@@ -381,12 +399,27 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
+    ${SCRIPTS_DIR}/lid_watchdog.sh &
 
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+    ${SCRIPTS_DIR}/checkfaves.sh &
+    # ${SCRIPTS_DIR}/credits_watchdog.sh & #### we don't have the credits bin for this device
+
+    # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
+    GPIO=150
+
+    if [ ! -d /sys/class/gpio/gpio$GPIO ]; then
+        echo $GPIO > /sys/class/gpio/export
+        sleep 0.1
+    fi
+
+    echo in > /sys/class/gpio/gpio$GPIO/direction
 
     # check whether to auto-resume into a game
     if flag_check "save_active"; then
@@ -396,15 +429,13 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
 
-    # sleep 0.3
-    # cd ${BIN_DIR}
-    # ./joypad $EVENT_PATH_KEYBOARD &
+    swapon -p 40 "${SWAPFILE}"
 
     killall runmiyoo.sh
-
 fi
 
 # check whether to run first boot procedure

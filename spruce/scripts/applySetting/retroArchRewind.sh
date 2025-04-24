@@ -4,8 +4,8 @@ SWANSTATION_CFG="/mnt/SDCARD/RetroArch/.retroarch/config/SwanStation/SwanStation
 
 if [ "$1" = "check" ]; then
     # Check if all rewind settings match the "On" configuration
-    rewind_enabled=$(grep '^rewind_enable = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
-    rewind_key=$(grep '^input_rewind = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
+    rewind_enabled=$(grep '^rewind_enable = ' "$RETROARCH_CFG" | cut -d '"' -f 2 | tr -d '\r\n')
+    rewind_key=$(grep '^input_rewind = ' "$RETROARCH_CFG" | cut -d '"' -f 2 | tr -d '\r\n')
 
     if [ "$rewind_enabled" = "true" ] && \
        [ "$rewind_key" = "e" ]; then

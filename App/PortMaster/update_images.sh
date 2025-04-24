@@ -3,13 +3,21 @@ directory="/mnt/sdcard/Roms/PORTS"
 
 mkdir -p "$directory/Imgs"
 
+# Define the list of image base names
+image_names=("cover" "screenshot" "splash")
+
+# Ensure pillow is installed 
+if [ ! -d "/sdcard/Roms/.portmaster/site-packages/PIL/" ] ; then
+    /mnt/sdcard/Roms/.portmaster/bin/python3 -m pip install --no-index --find-links=/mnt/sdcard/App/PortMaster/pillow_offline Pillow
+fi
+
+
 # Loop through each file in the directory
 for file in "$directory"/*; do
   # Check if it is a regular file
   if [ -f "$file" ]; then
     # Get the line starting with "GAMEDIR=" and assign it to a variable
-    gamedir_line=$(grep "^GAMEDIR=" "$file")
-
+	gamedir_line=$(grep -iE '^GAMEDIR=|^export[[:space:]]+gamedir=' "$file")
     # Check if a line was found
     if [ -n "$gamedir_line" ]; then
       # Extract the file_name without extension
@@ -23,23 +31,40 @@ for file in "$directory"/*; do
 
       # If dir_name ends with a quote, remove the quote
       dir_name="${dir_name%\"}"
-
-      echo Directory for [$file_name] is [$dir_name] which was extracted from [$gamedir_line]
       
       # If an image for the game doesn't already exist
-      if [ ! -f "$directory/Imgs/$file_name.png" ]; then
-          # Copy the cover if it exists, otherwise just copy the screenshot
-          if [ -f "$directory/$dir_name/cover.png" ]; then
-              cp "$directory/${dir_name}/cover.png" "$directory/Imgs/$file_name.png"         
-          elif [ -f "$directory/$dir_name/screenshot.png" ]; then
-              cp "$directory/${dir_name}/screenshot.png" "$directory/Imgs/$file_name.png"
-          else
-              echo No cover or screenshot found in $directory/$dir_name
-          fi
-      else
-          echo $directory/Imgs/$file_name.png already exists
+      if [ ! -f "$directory/Imgs/$file_name.png" ]; then				  
+
+		# Loop through the list to convert jpg to png
+		for name in "${image_names[@]}"; do
+			jpg_path="$directory/$dir_name/${name}.jpg"
+			if [ -f "$jpg_path" ]; then
+				echo "Converting $jpg_path to png"
+				/mnt/sdcard/Roms/.portmaster/bin/python3 /mnt/sdcard/App/PortMaster/jpg_to_png.py "$jpg_path"
+				break
+			fi
+		done
+		
+		found=false
+		
+		# Loop through the list again to copy the first existing png to the target location
+		for name in "${image_names[@]}"; do
+			png_path="$directory/$dir_name/${name}.png"
+			if [ -f "$png_path" ]; then
+				cp "$png_path" "$directory/Imgs/$file_name.png"
+				break
+			fi
+		done
+		
+		if [ ! found ]; then
+			echo Unable to find image for $file_name in $dir_name
+		else 
+			echo Updated image for $file_name
+		fi
       fi
     
-    fi
+    elif [[ "$file" == *.sh ]]; then
+		echo Unable to find gamedir_line for $file
+	fi
   fi
 done

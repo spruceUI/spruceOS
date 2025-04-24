@@ -21,6 +21,28 @@ flag_check() {
     fi
 }
 
+# Copy of platform detection from helperFunctions.sh
+# Detect device and export to any script sourcing helperFunctions
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+
+case $INFO in
+*"sun8i"*)
+	export PLATFORM="A30"
+    ;;
+*"TG5040"*)
+	export PLATFORM="SmartPro"
+	;;
+*"TG3040"*)
+	export PLATFORM="Brick"
+	;;
+*"0xd05"*)
+    export PLATFORM="Flip"
+    ;;
+*)
+    export PLATFORM="A30"
+    ;;
+esac
+
 # send signal USR2 to joystickinput to switch to KEYBOARD MODE
 # this allows joystick to be used as DPAD in setting app
 killall -q -USR2 joystickinput
@@ -48,6 +70,7 @@ else
     MODES="$MODES -m Not_simple"
 fi
 
+# Not currently in use, but leaving it here in case we wanna bring it back eventually
 if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mode"; then
     MODES="$MODES -m Expert"
 fi
@@ -77,6 +100,7 @@ kill -9 "$(pidof gptokeyb)"
 # send signal USR1 to joystickinput to switch to ANALOG MODE
 killall -q -USR1 joystickinput
 
-auto_regen_tmp_update
+# bring this back if we ever decide to import helperFunctions.sh
+# auto_regen_tmp_update
 # Copy spruce.cfg to www folder so the landing page can read it.
 cp "$SETTINGS_PATH/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"

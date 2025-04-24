@@ -10,7 +10,6 @@ if [ ! -d "/sdcard/Roms/.portmaster" ] ; then
   cp -R /mnt/sdcard/App/PortMaster/.portmaster /sdcard/Roms/.portmaster
 fi
 
-
 # Until PM-GUI is updated we need to override where spruce stores things
 # Just replacing the entire file. This should go away soon
 rm /sdcard/Roms/.portmaster/PortMaster/miyoo/PortMaster.txt
@@ -25,9 +24,12 @@ cp /mnt/sdcard/App/PortMaster/control.txt /mnt/sdcard/spruce/flip/home/.local/sh
 
 #Launch port master
 cd /sdcard/Roms/.portmaster/PortMaster/miyoo/
+
+cp "/mnt/sdcard/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/sdcard/spruce/flip/home/device_info_Miyoo_Miyoo Flip.txt"
+
 ./PortMaster.txt &> /mnt/sdcard/Saves/spruce/portmaster.log
 
 # Fix images to be spruce compatible
-/mnt/sdcard/App/PortMaster/update_images.sh
+/mnt/sdcard/App/PortMaster/update_images.sh &> /mnt/sdcard/Saves/spruce/updated_images.log
 
 

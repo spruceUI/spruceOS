@@ -241,12 +241,16 @@ if [ "$PERFORM_DELETION" = true ]; then
     # Back up 64-bit 7zr
     mkdir /tmp/bin
     cp spruce/bin64/7zr /tmp/bin
+    chmod 777 /tmp/bin/7zr
     
     # Explicitly delete .config and .tmp_update folders
     log_update_message "Deleting .config folder"
     rm -rf .config
     log_update_message "Deleting .tmp_update folder"
     rm -rf .tmp_update
+
+    # unmount all the binds so that the deletion process can complete successfully
+    unmount_binds
 
     for item in *; do
         if [ "$item" != "Updater" ] && [ "$item" != "$(basename "$UPDATE_FILE")" ] &&
@@ -279,7 +283,7 @@ read_only_check
 display "Applying update. This should take around 5 minutes..."
 
 # On 64-bit systems add the backed up copy of 7zr to the path
-if [ "$ARCH" = "aarch64" ]; then
+if [ ! "$PLATFORM" = "A30" ]; then
     export PATH="/tmp/bin:$PATH"
 fi
 

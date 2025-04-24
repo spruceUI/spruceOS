@@ -15,6 +15,7 @@ $N64_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/n64_control_profiles.sh$
 $PERFECT_OVERLAYS=/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh$
 $PPSSPP_PAUSE_EXIT=/mnt/SDCARD/spruce/scripts/applySetting/ppssppPauseExit.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
+$RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
 $RAREWIND=/mnt/SDCARD/spruce/scripts/applySetting/retroArchRewind.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
 $RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
@@ -43,8 +44,8 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
 
 <Not_simple>
-"" "Show Expert Settings" "|" "on|off" "$HELP$ check expert_settings" "$HELP$ update expert_settings _VALUE_" ""
-@"Will apply after save & exit"
+"" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
+@"Spruce will check periodically on startup"
 
 <Not_simple>
 "" "Run application on boot:" "MainUI|Random|Switcher|Splore" "MainUI|Random|Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
@@ -61,7 +62,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown '_VALUE_'" ""
 @"Excludes ports
 
-<Expert>
+<Not_simple>
 "" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'" ""
 
 <Not_simple>
@@ -70,29 +71,26 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 "" "Status LED mode" "||" "Always on|On in menu only|Always off" "$LCD$ check" "$LCD$ on|$LCD$ menu|$LCD$ off" ""
 
+<Not_simple>
 "" "Blue Light Filter" "Off|Low|Moderate|Strong|Very strong" "Off|Low|Moderate|Strong|Very strong" "$HELP$ get blf_intensity 'Off'" "$HELP$ update blf_intensity '_VALUE_'" "$BLFILTER$ '_VALUE_'"
 
 <Not_simple>
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent _VALUE_" ""
 
-<Expert>
+<Not_simple>
 "" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$ _VALUE_" ""
 
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
 @"For system notifications"
 
-<Expert>
+<A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
-<Expert>
+<Not_simple>
 "" "Sort Themes" "|" "run|off" "echo -n off" "$SORT_THEMES$|" "$SORT_THEMES$ _INDEX_"
 @"Use this to re-sort themes alphabetically."
 
 <Not_simple>
-"" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
-@"Spruce will check periodically on startup"
-
-<Expert>
 "" "Allow a reinstall" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
 @"Only run this task if needed."
 
@@ -114,13 +112,17 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home '_VALUE_'" ""
 @"Excludes NDS, PICO8 & ports"
 
-<Expert>
+<Not_simple>
 "" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
 <Not_simple>
 "" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_" "$PERFECT_OVERLAYS$ _INDEX_"
 @"Would apply to GB, GBC, and GBA consoles"
+
+<Not_simple>
+"" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
+@"Automatically save and load states on game exit/start"
 
 <Not_simple>
 "" "RetroArch: Use Rewind" "|" "on|off" "$RAREWIND$ check" "$RAREWIND$ assign _VALUE_" "$RAREWIND$ hint _VALUE_"
@@ -142,7 +144,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 @"C Buttons = R2 + A, B, X, Y"
 
 <Not_simple>
-"" "PPSSPP: Exit from pause menu" "|" "on|off" "$HELP$ check ppsspp_pause_exit" "$PPSSPP_PAUSE_EXIT$ _VALUE_" "$PPSSPP_PAUSE_EXIT$ _INDEX_"
+"" "PPSSPP: Exit when game closed" "|" "on|off" "$HELP$ check ppsspp_pause_exit" "$PPSSPP_PAUSE_EXIT$ _VALUE_" "$PPSSPP_PAUSE_EXIT$ _INDEX_"
 @"PPSSPP will return to the emulator menu when exiting from the pause menu"
 
 <Pico>
@@ -152,19 +154,19 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 <Pico>
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
 
-<Expert>
+<Not_simple>
 "" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png _VALUE_ && $F8_PNG$ _VALUE_" ""
 @"Also uses cart as box art for Fake08"
 
-<Expert>
+<Not_simple>
 "" "Reset RetroArch hotkeys" "|" "run|off" "echo -n off" "$RESET_RAHOTKEY$|" "$RESET_RAHOTKEY$ _INDEX_"
 @"Applies Spruce hotkey layout."
 
-<Expert>
+<Not_simple>
 "" "Reset RetroArch to spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
 @"We recommend backing up first."
 
-<Expert>
+<Not_simple>
 "" "Reset PPSSPP to spruce defaults" "|" "run|off" "echo -n off" "$RESET_PPSSPP$|" "$RESET_PPSSPP$ _INDEX_"
 @"We recommend backing up first."
 
@@ -214,7 +216,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame _VALUE_" ""
 @"Improves battery life"
 
-<Expert>
+<Not_simple>
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
 
@@ -228,19 +230,19 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 "" "Maximum number of games" "||" "5|10|20" "$HELP$ get maxGamesInGS 10" "$HELP$ update maxGamesInGS _VALUE_" ""
 
-<Expert>
+<Not_simple>
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
-<Expert>
+<Not_simple>
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
-<Expert>
+<Not_simple>
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
-<Expert>
+<Not_simple>
 "-n" "Display item index" "on|off" "on|off" "on" "" ""
-<Expert>
+<Not_simple>
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
-<Expert>
+<Not_simple>
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
-<Expert>
+<Not_simple>
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
 
 
@@ -256,11 +258,11 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 <Not_simple>
 "" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
-@"Manage files on your A30"
+@"Manage files on your device"
 
 <Not_simple>
 "" "Game Nursery" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/GameNursery/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/GameNursery/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/GameNursery/config.json" ""
-@"Download free games directly to your A30"
+@"Download free games directly to your device"
 
 <Not_simple>
 "" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""

@@ -32,6 +32,52 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Check if a flag exists
+# Usage: flag_check "flag_name"
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+flag_check() {
+    local flag_name="$1"
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Call this like:
+# log_message "Your message here"
+# To output to a custom log file, set the variable within your script:
+# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
+# This will log the message to the spruce.log file in the Saves/spruce folder
+#
+# Usage examples:
+# Log a regular message:
+#    log_message "This is a regular log message"
+# Log a verbose message (only logged if log_verbose was called):
+#    log_message "This is a verbose log message" -v
+# Log to a custom file:
+#    log_message "Custom file log message" "" "/path/to/custom/log.file"
+# Log a verbose message to a custom file:
+#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
+log_message() {
+    local message="$1"
+    local verbose_flag="$2"
+    local custom_log_file="${3:-$log_file}"
+
+    # Check if it's a verbose message and if verbose logging is not enabled
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
+    fi
+
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
+}
+
+
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
@@ -40,7 +86,8 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
-log_message "[helperFunctions.sh] $INFO" -v
+# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
+# log_message "[helperFunctions.sh] $INFO" -v
 
 case $INFO in
 *"sun8i"*)
@@ -60,7 +107,8 @@ case $INFO in
     ;;
 esac
 
-log_message "[helperFunctions.sh] Platform is $PLATFORM"
+# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
+# log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ ! "$PLATFORM" = "A30" ]; then
@@ -82,7 +130,7 @@ acknowledge() {
         case "$last_line" in
         *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
             echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
-            log_message "last_line: $last_line" -vS
+            log_message "last_line: $last_line" -v
             break
             ;;
         esac
@@ -285,7 +333,7 @@ dim_screen() {
     fi
 
     # Get current brightness
-    local current_brightness=$(cat /sys/devices/virtual/disp/disp/attr/lcdbl)
+    local current_brightness=$(cat $DEVICE_BRIGHTNESS_PATH)
 
     # Check if we're already at target brightness
     if [ "$current_brightness" -eq "$end_brightness" ]; then
@@ -298,7 +346,7 @@ dim_screen() {
     local current=$start_brightness
 
     while [ $current -gt $end_brightness ]; do
-        echo $current >/sys/devices/virtual/disp/disp/attr/lcdbl
+        echo $current > $DEVICE_BRIGHTNESS_PATH
         current=$((current - 1))
         sleep $delay
     done
@@ -489,19 +537,7 @@ display() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    kill -9 $(pgrep display)
-}
-
-# Check if a flag exists
-# Usage: flag_check "flag_name"
-# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-flag_check() {
-    local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
-        return 0
-    else
-        return 1
-    fi
+    kill -9 $(pgrep display) 2> /dev/null
 }
 
 # Add a flag
@@ -783,39 +819,6 @@ log_verbose() {
     fi
 }
 
-# Call this like:
-# log_message "Your message here"
-# To output to a custom log file, set the variable within your script:
-# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
-# This will log the message to the spruce.log file in the Saves/spruce folder
-#
-# Usage examples:
-# Log a regular message:
-#    log_message "This is a regular log message"
-# Log a verbose message (only logged if log_verbose was called):
-#    log_message "This is a verbose log message" -v
-# Log to a custom file:
-#    log_message "Custom file log message" "" "/path/to/custom/log.file"
-# Log a verbose message to a custom file:
-#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-log_message() {
-    local message="$1"
-    local verbose_flag="$2"
-    local custom_log_file="${3:-$log_file}"
-
-    # Check if it's a verbose message and if verbose logging is not enabled
-    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
-
-    # Handle custom log file
-    if [ "$custom_log_file" != "$log_file" ]; then
-        mkdir -p "$(dirname "$custom_log_file")"
-        touch "$custom_log_file"
-    fi
-
-    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
-}
-
 log_precise() {
     local message="$1"
     local date_part=$(date '+%Y-%m-%d %H:%M:%S')
@@ -1024,7 +1027,7 @@ setting_get() {
         CFG="$CFG_FILE"
     fi
 
-    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2)
+value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo ""
         return 1

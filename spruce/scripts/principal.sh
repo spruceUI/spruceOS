@@ -184,7 +184,9 @@ while [ 1 ]; do
                 ;;
             "Flip" )
                 export LD_LIBRARY_PATH=/usr/miyoo/lib:$LD_LIBRARY_PATH
-                runifnecessary "keymon" /usr/miyoo/bin/keymon
+                insmod /lib/modules/rtk_btusb.ko
+                runifnecessary "btmanager" /usr/miyoo/bin/btmanager
+                runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
                 MainUI

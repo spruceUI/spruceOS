@@ -62,7 +62,7 @@ get_ra_alias() {
         SATURN)              ra_name="Sega - Saturn" ;; # todo: handle saturn mask on A30
         SCUMMVM)             ra_name="ScummVM" ;;
         SEGACD)              ra_name="Sega - Mega-CD - Sega CD" ;;
-        SEGASGONE)           ra_name="Sega SG-1000" ;;
+        SEGASGONE)           ra_name="Sega - SG-1000" ;;
         SEVENTYEIGHTHUNDRED) ra_name="Atari - 7800" ;;
         SFC)                 ra_name="Nintendo - Super Nintendo Entertainment System" ;;
         SGB)                 ra_name="Nintendo - Game Boy" ;;
@@ -193,7 +193,7 @@ for sys_dir in "$roms_dir"/*/; do
     sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
     icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
-    display -d 1 --icon "\"$icon_path\"" -t "System: $sys_label 
+    display --icon "\"$icon_path\"" -t "System: $sys_label 
     Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.15 195 middle
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
@@ -206,7 +206,7 @@ for sys_dir in "$roms_dir"/*/; do
 
     for file in "$sys_dir"*; do
         # Check if the user pressed B to exit
-        if tail -n1 "$messages_file" | grep -q "key 1 29"; then
+        if tail -n1 "$messages_file" | grep -q "key $B_B"; then
             log_message "BoxartScraper: User pressed B, exiting."
             display --icon "/mnt/SDCARD/Themes/SPRUCE/icons/app/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -242,10 +242,10 @@ for sys_dir in "$roms_dir"/*/; do
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
         fallback_url=$(echo "https://raw.githubusercontent.com/libretro-thumbnails/$(echo "$ra_name" | sed 's/ /_/g')/master/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g') 
         log_message "BoxartScraper: Downloading $boxart_url" -v
-        if ! curl -k -s -o "$image_path" "$boxart_url"; then
+        if ! curl -f -g -k -s -o "$image_path" "$boxart_url"; then
             log_message "BoxartScraper: failed to scrape $boxart_url, falling back to libretro thumbnails GitHub repo."
             rm -f "$image_path"
-            if ! curl -k -s -o "$image_path" "$fallback_url"; then
+            if ! curl -f -g -k -s -o "$image_path" "$fallback_url"; then
                 log_message "BoxartScraper: failed to scrape $fallback_url."
                 rm -f "$image_path"
             fi

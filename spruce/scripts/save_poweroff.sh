@@ -6,6 +6,12 @@ BIN_PATH="/mnt/SDCARD/spruce/bin"
 if [ ! "$PLATFORM" = "A30"]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
 fi
+SET_OR_CSET="cset"
+[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
+NAME_QUALIFIER="name="
+[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
+AMIXER_CONTROL="'SPK Volume'"
+[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
@@ -29,7 +35,7 @@ vibrate
 if flag_check "sleep.powerdown"; then
     cp /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level /mnt/SDCARD/spruce/settings/sys_brightness_level
 else
-    cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/sys_brightness_level
+    cat "$DEVICE_BRIGHTNESS_PATH" >/mnt/SDCARD/spruce/settings/sys_brightness_level
 fi
 
 if pgrep -f gameswitcher.sh >/dev/null; then
@@ -45,7 +51,7 @@ if pgrep -f gameswitcher.sh >/dev/null; then
 fi
 
 # Check if MainUI or PICO8 is running and skip_shutdown_confirm is not set
-if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
+if flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null; then
     if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
         rm "${FLAGS_DIR}/lastgame.lock"
@@ -57,9 +63,10 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
         fi
         dim_screen &
     else
-        # Pause MainUI or pico8_dyn
+        # Pause MainUI or pico8
         killall -q -19 MainUI
         killall -q -19 pico8_dyn
+        killall -q -19 pico8_64
 
         if ! flag_check "sleep.powerdown"; then
             # Show confirmation screen
@@ -75,6 +82,7 @@ if flag_check "in_menu" || pgrep "pico8_dyn" >/dev/null; then
                 # Resume MainUI or pico8_dyn
                 killall -q -18 MainUI
                 killall -q -18 pico8_dyn
+                killall -q -18 pico8_64
                 return 0
             fi
         else
@@ -95,7 +103,7 @@ killall -q -15 principal.sh
 killall -q -15 enforceSmartCPU.sh
 
 # kill app if not emulator is running
-if cat /tmp/cmd_to_run.sh | grep -q -v '/mnt/SDCARD/Emu'; then
+if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
     kill_current_process
     # remove lastgame flag to prevent loading any App after next boot
     rm "${FLAGS_DIR}/lastgame.lock"
@@ -104,28 +112,11 @@ fi
 # kill PICO8 if PICO8 is running
 if pgrep "pico8_dyn" >/dev/null; then
     killall -q -15 pico8_dyn
+    killall -q -15 pico8_64
 fi
 
 # trigger auto save and send kill signal
-if pgrep "ra32.miyoo" >/dev/null; then
-    # {
-    #     echo 1 1 0   # MENU up
-    #     echo 1 57 1  # A down
-    #     echo 1 57 0  # A up
-    #     echo 0 0 0   # tell sendevent to exit
-    # } | $BIN_PATH/sendevent /dev/input/event3
-    # sleep 0.3
-    killall -q -15 ra32.miyoo
-elif pgrep "ra64.miyoo" >/dev/null; then
-    # {
-    #     echo 1 1 0   # MENU up
-    #     echo 1 57 1  # A down
-    #     echo 1 57 0  # A up
-    #     echo 0 0 0   # tell sendevent to exit
-    # } | $BIN_PATH/sendevent /dev/input/event3
-    # sleep 0.3
-    killall -q -15 ra64.miyoo
-elif pgrep "PPSSPPSDL" >/dev/null; then
+if pgrep -f "PPSSPPSDL" >/dev/null; then
     {
         # send autosave hot key
         echo 1 314 1 # SELECT down
@@ -136,9 +127,15 @@ elif pgrep "PPSSPPSDL" >/dev/null; then
     } | $BIN_PATH/sendevent /dev/input/event4
     sleep 1
     killall -q -15 PPSSPPSDL
+    killall -q -15 PPSSPPSDL_$PLATFORM
 else
+    killall -q -15 ra64.miyoo
+    killall -q -15 ra32.miyoo
     killall -q -15 retroarch
-    killall -q -15 drastic
+    killall -q -15 retroarch-flip
+    killall -q -15 ra64.trimui_$PLATFORM
+    killall -q -15 drastic32
+    killall -q -15 drastic64
     killall -q -9 MainUI
 fi
 
@@ -146,10 +143,14 @@ fi
 while killall -q -0 ra32.miyoo ||
     killall -q -0 ra64.miyoo ||
     killall -q -0 retroarch ||
+    killall -q -0 retroarch-flip ||
+    killall -q -0 ra64.trimui_$PLATFORM ||
     killall -q -0 PPSSPPSDL ||
-    killall -q -0 drastic ||
+    killall -q -0 PPSSPPSDL_$PLATFORM ||
+    killall -q -0 drastic32 ||
+    killall -q -0 drastic64 ||
     killall -q -0 MainUI; do
-    sleep 0.5
+    sleep 0.3
 done
 
 # show saving screen
@@ -175,7 +176,7 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
     # Restore brightness and sound if sleep->powerdown for syncthing
     if flag_check "sleep.powerdown"; then
         cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
-        amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
     
     if check_and_connect_wifi; then
@@ -192,7 +193,7 @@ flag_remove "emulator_launched"
 
 # Save current sound settings
 if flag_check "sleep.powerdown"; then
-    amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
+    amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
 fi
 alsactl store
 

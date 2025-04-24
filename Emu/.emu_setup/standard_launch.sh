@@ -6,11 +6,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
-
-# TODO: remove A30 check once Syncthing is implemented on Brick
-if [ "$PLATFORM" = "A30" ]; then
-	. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
-fi
+. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
@@ -296,8 +292,7 @@ load_pico8_control_profile() {
 	esac
 }
 
-is_32bit_port() {
-  
+extract_game_dir(){
     # long-term come up with better method.
     # this is short term for testing
     gamedir_line=$(grep "^GAMEDIR=" "$ROM_FILE")
@@ -306,7 +301,11 @@ is_32bit_port() {
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
     game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
-    game_dir="${game_dir%\"}"
+    echo "${game_dir%\"}"
+}
+
+is_32bit_port() {
+    game_dir=$(extract_game_dir)
     # If gmloader or box86 exist then its 32-bit
     if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ] || [ -f "$game_dir/gmloadernext.armhf" ]; then
         return 1;
@@ -326,23 +325,31 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-	rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	if [ "$PORT_CONTROL" = "X360" ]; then
-		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	else
-		cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
-	fi
-	
+    rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    if [ "$PORT_CONTROL" = "X360" ]; then
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    else
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    fi
 }
 
 run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
+        /mnt/sdcard/spruce/flip/bind-new-libmali.sh
         set_port_mode
         is_32bit_port
         if [[ $? -eq 1 ]]; then
+            game_dir=$(extract_game_dir)
+            # Look for the first file ending with .gptk in the game_dir
+            gptk_file=$(find "$game_dir" -type f -name "*.gptk" | head -n 1)
+            /mnt/sdcard/Roms/.portmaster/PortMaster/gptokeyb "gmloader" -c "$gptk_file" &
+            gptokeyb_pid=$!
+
             echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
             cd /mnt/sdcard/Emu/PORT32/
+
             /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port32.log
+            kill "$gptokeyb_pid"
         else
         
             is_retroarch_port
@@ -364,6 +371,7 @@ run_port() {
             fi
         
         fi
+        /mnt/sdcard/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
@@ -420,7 +428,10 @@ run_retroarch() {
 			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
 		;;
 		"Flip" )
-			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			if [ "$CORE" = "yabasanshiro" ]; then
+				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
+				export RA_BIN="ra64.miyoo"
+			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch-flip"
 			else
 				export RA_BIN="ra64.miyoo"
@@ -428,7 +439,7 @@ run_retroarch() {
 			if [ "$CORE" = "easyrpg" ]; then
 				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			elif [ "$CORE" = "yabasanshiro" ]; then
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 			fi
 		;;
 		"A30" )
@@ -562,7 +573,7 @@ run_mupen_standalone() {
 }
 
 run_yabasanshiro() {
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	export HOME="$EMU_DIR"
 	cd "$HOME"
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
@@ -585,7 +596,7 @@ import_launch_options
 set_cpu_mode
 
 # TODO: remove A30 check once network services implemented on Brick
-[ "$PLATFORM" = "A30" ] && handle_network_services
+handle_network_services
 
 flag_add 'emulator_launched'
 

@@ -10,7 +10,7 @@ if [ "$1" == "check" ] ; then
     else
         echo -n "Always off"
     fi
-    return 0
+    exit 0
 fi
 
 # Source the helper functions

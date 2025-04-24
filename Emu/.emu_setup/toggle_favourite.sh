@@ -37,7 +37,7 @@ else
     log_message "Added $GAMENAME ($EMU_NAME) to favourite.json via X menu"
 
     # Construct the new JSON entry
-    NEW_ENTRY=$(jq \
+    NEW_ENTRY=$(jq -n \
       --arg label "$GAMENAME ($EMU_NAME)" \
       --arg launch "/mnt/SDCARD/Emu/$EMU_NAME/../.emu_setup/standard_launch.sh" \
       --arg rompath "$ROM_PATH" \

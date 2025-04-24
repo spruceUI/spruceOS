@@ -59,7 +59,7 @@ do
     esac
 done
 
-( $BIN_PATH/getevent $EVENT_PATH_KEYBOARD -pid $$ & ) | while read line; do
+( $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD & ) | while read line; do
     case $line in
         *"key $B_A 1"*) [ ! -z "$A" ] && echo -n "A" && break ;;
         *"key $B_B 1"*) [ ! -z "$B" ] && echo -n "B" && break ;;
