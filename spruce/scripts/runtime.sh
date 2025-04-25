@@ -410,7 +410,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
-    # ${SCRIPTS_DIR}/credits_watchdog.sh & #### we don't have the credits bin for this device
+    ${SCRIPTS_DIR}/credits_watchdog.sh &
 
     # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
     GPIO=150
