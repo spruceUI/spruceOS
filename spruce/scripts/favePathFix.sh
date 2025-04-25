@@ -18,10 +18,10 @@ if [ "$PLATFORM" = "Flip" ]; then
     sed -i "s|$MNT_PATH|$MEDIA_PATH|g" "$JSON_PATH"
     if [ -d "$TF2_PATH/Roms" ]; then
         log_message "Second Roms card detected - revealing any favorites on this card"
-        sed -i "\|$TF2_PATH| s|\"type\":[ ]*[0-9]\+|\"type\": null|" "$JSON_PATH"
+        sed -i "\|$TF2_PATH| s|\"type\"[ ]*:[ ]*null|\"type\": 5|" "$JSON_PATH"
     else
         log_message "Second Roms card absent - hiding any favorites from this card"
-        sed -i "\|$TF2_PATH| s|\"type\"[ ]*:[ ]*null|\"type\": 5|" "$JSON_PATH"
+        sed -i "\|$TF2_PATH| s|\"type\":[ ]*[0-9]\+|\"type\": null|" "$JSON_PATH"
     fi
 else
     log_message "Non-Flip detected - translating Favorites paths from /media/sdcard0 to /mnt/SDCARD"
