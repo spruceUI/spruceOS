@@ -432,6 +432,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/recombine_large_files.sh
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
 
     swapon -p 40 "${SWAPFILE}"
 

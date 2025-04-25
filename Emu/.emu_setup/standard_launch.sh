@@ -304,17 +304,6 @@ extract_game_dir(){
     echo "${game_dir%\"}"
 }
 
-is_32bit_port() {
-    game_dir=$(extract_game_dir)
-    # If gmloader or box86 exist then its 32-bit
-    if [ -f "$game_dir/gmloader" ] || [ -f "$game_dir/box86" ] || [ -d "$game_dir/box86" ] || [ -f "$game_dir/gmloadernext.armhf" ]; then
-        return 1;
-    else
-        return 0;
-    fi
-}
-
-
 is_retroarch_port() {
     # Check if the file contains "retroarch"
     if grep -q "retroarch" "$ROM_FILE"; then
@@ -337,40 +326,24 @@ run_port() {
     if [ "$PLATFORM" = "Flip" ]; then
         /mnt/sdcard/spruce/flip/bind-new-libmali.sh
         set_port_mode
-        is_32bit_port
+
+        is_retroarch_port
         if [[ $? -eq 1 ]]; then
-            game_dir=$(extract_game_dir)
-            # Look for the first file ending with .gptk in the game_dir
-            gptk_file=$(find "$game_dir" -type f -name "*.gptk" | head -n 1)
-            /mnt/sdcard/Roms/.portmaster/PortMaster/gptokeyb "gmloader" -c "$gptk_file" &
-            gptokeyb_pid=$!
-
-            echo "executing /mnt/sdcard/Emu/PORT32/port32.sh $ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
-            cd /mnt/sdcard/Emu/PORT32/
-
-            /mnt/sdcard/Emu/PORT32/port32.sh "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port32.log
-            kill "$gptokeyb_pid"
+            PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+            cd /mnt/sdcard/RetroArch/
+            export HOME="/mnt/sdcard/spruce/flip/home"
+            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
+             "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
         else
-        
-            is_retroarch_port
-            if [[ $? -eq 1 ]]; then
-                PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-                cd /mnt/sdcard/RetroArch/
-                export HOME="/mnt/sdcard/spruce/flip/home"
-                export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
-                export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-                "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
-            else
-                PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-                cd $PORTS_DIR
-                export HOME="/mnt/sdcard/spruce/flip/home"
-                export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:$LD_LIBRARY_PATH"
-                export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-                "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
-
-            fi
-        
+            PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+            cd $PORTS_DIR
+            export HOME="/mnt/sdcard/spruce/flip/home"
+            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
+            "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
         fi
+        
         /mnt/sdcard/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
