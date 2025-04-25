@@ -446,6 +446,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
+${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &

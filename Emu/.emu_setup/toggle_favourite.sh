@@ -10,6 +10,7 @@ ROMFILENAME="$(basename "$1")"
 GAMELIST_FILE="/mnt/SDCARD/Roms/$EMU_NAME/miyoogamelist.xml"
 ROM_PATH="$1"
 [ "$PLATFORM" = "SmartPro" ] && BG="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$PLATFORM" = "Flip" ] && MNT_OR_MEDIA=/media/sdcard0 || MNT_OR_MEDIA=/mnt/SDCARD
 
 # Get game name first - we'll need it either way
 if [ -f "$GAMELIST_FILE" ]; then
@@ -39,7 +40,7 @@ else
     # Construct the new JSON entry
     NEW_ENTRY=$(jq -n \
       --arg label "$GAMENAME ($EMU_NAME)" \
-      --arg launch "/mnt/SDCARD/Emu/$EMU_NAME/../.emu_setup/standard_launch.sh" \
+      --arg launch "$MNT_OR_MEDIA/Emu/$EMU_NAME/../.emu_setup/standard_launch.sh" \
       --arg rompath "$ROM_PATH" \
       --argjson type "5" \
       '{label: $label, launch: $launch, rompath: $rompath, type: $type}')
