@@ -428,7 +428,10 @@ run_retroarch() {
 			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
 		;;
 		"Flip" )
-			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			if [ "$CORE" = "yabasanshiro" ]; then
+				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
+				export RA_BIN="ra64.miyoo"
+			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch-flip"
 			else
 				export RA_BIN="ra64.miyoo"
@@ -436,7 +439,7 @@ run_retroarch() {
 			if [ "$CORE" = "easyrpg" ]; then
 				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			elif [ "$CORE" = "yabasanshiro" ]; then
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 			fi
 		;;
 		"A30" )
@@ -539,7 +542,7 @@ save_custom_n64_controller_profile() {
 }
 
 run_yabasanshiro() {
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	export HOME="$EMU_DIR"
 	cd "$HOME"
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
