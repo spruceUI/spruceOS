@@ -293,6 +293,11 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
+    /mnt/sdcard/spruce/flip/mount_muOS.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
+
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
@@ -429,11 +434,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     else
         log_message "Auto Resume skipped (no save_active flag)"
     fi
-
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
 
     swapon -p 40 "${SWAPFILE}"
 
