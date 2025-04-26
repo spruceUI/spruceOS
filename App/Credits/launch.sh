@@ -17,7 +17,7 @@ else
     /mnt/SDCARD/App/Credits/credits.txt \
     "/mnt/SDCARD/App/Credits/Sweater Ass Sounding Ass.mp3" \
     /mnt/SDCARD/Themes/SPRUCE/nunwen.ttf 22 
-
+    
     [ "$PLATFORM" = "Flip" ] && kill -9 "$(pidpf gptokeyb)"
 
 fi
