@@ -163,15 +163,40 @@ brightness_down() {
         # write both level value to shared memory for MainUI to update its UI
         VOLUME_LV=$(get_volume_level)
         $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
+
+    elif [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness"; then   ### also, brightness is less than 0 from failing previous condition
+
+        # if brightness is already at minimum, start tweaking contrast
+        CURRENT_CONTRAST=$(jq -r '.contrast' "$SYSTEM_JSON")
+        if [ "$CURRENT_CONTRAST" -ge 2 ]; then # never let contrast go down to 0
+
+            # update system.json
+            NEW_CONTRAST=$((CURRENT_CONTRAST - 1))
+            jq ".contrast = $NEW_CONTRAST" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
+
+            # system.json uses 0-20 but modetest expects 0-100
+            NEW_INTERNAL_CONTRAST=$((NEW_CONTRAST * 5))
+            modetest -M rockchip -a -w 179:contrast:$NEW_INTERNAL_CONTRAST
+        fi
     fi
 }
 
 brightness_up() {
     # get current brightness level
     BRIGHTNESS_LV=$(get_brightness_level)
-    
-    # if value larger than zero
-    if [ $BRIGHTNESS_LV -lt 10 ] ; then
+    CURRENT_CONTRAST=$(jq -r '.contrast' "$SYSTEM_JSON")
+
+    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness" && [ "$CURRENT_CONTRAST" -le 9 ]; then
+
+        # update system.json
+        NEW_CONTRAST=$((CURRENT_CONTRAST + 1))
+        jq ".contrast = $NEW_CONTRAST" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
+
+        # system.json uses 0-20 but modetest expects 0-100
+        NEW_INTERNAL_CONTRAST=$((NEW_CONTRAST * 5))
+        modetest -M rockchip -a -w 179:contrast:$NEW_INTERNAL_CONTRAST
+
+    elif [ $BRIGHTNESS_LV -lt 10 ] ; then  # if value larger than zero
 
         # update brightness level
         BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
