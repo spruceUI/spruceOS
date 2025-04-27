@@ -293,21 +293,10 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
-
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
     LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
-
-    if [ -d "/media/sdcard1/miyoo355/" ]; then
-        export CUSTOMER_DIR=/media/sdcard1/miyoo355/
-    else
-        export CUSTOMER_DIR=/media/sdcard0/miyoo355/
-    fi
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib
 
@@ -327,11 +316,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # echo -n 0 > /sys/class/gpio/gpio20/value
 
     #joypad
-    #echo -1 > /sys/class/miyooio_chr_dev/joy_type
+    echo -1 > /sys/class/miyooio_chr_dev/joy_type
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
-    sleep 0.2
+    sleep 0.1
     hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
     if [ "$hdmipugin" == "connected" ] ; then
         /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
@@ -358,11 +347,15 @@ elif [ "$PLATFORM" = "Flip" ]; then
     fi
 
     if [ ${miyoo_fw_update} -eq 1 ] ; then
-        export LD_LIBRARY_PATH=${CUSTOMER_DIR}/lib 
         cd $miyoo_fw_dir
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
 	
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
+    /mnt/sdcard/spruce/flip/mount_muOS.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
+
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
         skin_dir="${theme_dir}skin"
