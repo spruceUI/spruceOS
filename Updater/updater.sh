@@ -254,7 +254,7 @@ if [ "$PERFORM_DELETION" = true ]; then
 
     for item in *; do
         if [ "$item" != "Updater" ] && [ "$item" != "$(basename "$UPDATE_FILE")" ] &&
-            [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ]; then
+            [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ] && [ "$item" != "Persistent" ]; then
             if [ "$item" = "miyoo" ]; then
                 log_update_message "Handling miyoo folder"
                 find "$item" -mindepth 1 -maxdepth 1 ! -name "app" ! -name "lib" -exec rm -rf {} +
