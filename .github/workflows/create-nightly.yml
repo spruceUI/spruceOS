@@ -72,6 +72,15 @@ jobs:
             done
           ' sh "$VERSION" {} +
 
+      - name: Recombine large files
+        run: |
+          rm spruce/flip/miyoo355_rootfs_32.img
+          cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
+          rm spruce/flip/miyoo355_rootfs_32.img_part*
+          rm spruce/flip/muOS-pixie-reduced.sqsh
+          cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
+          rm spruce/flip/muOS-pixie-reduced.sqsh-part*
+
       - name: Create 7z archive
         run: |
           7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
