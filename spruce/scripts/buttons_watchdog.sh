@@ -138,11 +138,23 @@ map_brightness_to_system_value() {
     esac
 }
 
+get_contrast() {
+    jq -r '.contrast' "$SYSTEM_JSON"
+}
+
 brightness_down() {
-    # get current brightness level
+    # get current brightness and volume level
     BRIGHTNESS_LV=$(get_brightness_level)
-    
-    # if value larger than zero
+    VOLUME_LV=$(get_volume_level)
+
+    # setsharedmem binary on A30 does not accept a contrast argument (yet?)
+    if [ "$PLATFORM" = "Flip" ]; then
+        CONTRAST_LV=$(get_contrast)
+    else
+        unset CONTRAST_LV
+    fi
+
+    # if brightness value larger than zero
     if [ $BRIGHTNESS_LV -gt 0 ] ; then
 
         # update brightness level
@@ -160,43 +172,47 @@ brightness_down() {
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
 
-        # write both level value to shared memory for MainUI to update its UI
-        VOLUME_LV=$(get_volume_level)
-        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
-
-    elif [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness"; then   ### also, brightness is less than 0 from failing previous condition
-
+    elif [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness"; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
-        CURRENT_CONTRAST=$(jq -r '.contrast' "$SYSTEM_JSON")
-        if [ "$CURRENT_CONTRAST" -ge 2 ]; then # never let contrast go down to 0
+        if [ "$CONTRAST_LV" -ge 2 ]; then # never let contrast go down to 0
 
             # update system.json
-            NEW_CONTRAST=$((CURRENT_CONTRAST - 1))
-            jq ".contrast = $NEW_CONTRAST" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
+            CONTRAST_LV=$((CONTRAST_LV - 1))
+            jq ".contrast = $CONTRAST_LV" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
 
             # system.json uses 0-20 but modetest expects 0-100
-            NEW_INTERNAL_CONTRAST=$((NEW_CONTRAST * 5))
-            modetest -M rockchip -a -w 179:contrast:$NEW_INTERNAL_CONTRAST
+            INTERNAL_CONTRAST=$((CONTRAST_LV * 5))
+            modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
         fi
     fi
+
+    # write volume + brightness [+ contrast] values to shared memory for MainUI to update its UI
+    $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
 }
 
 brightness_up() {
-    # get current brightness level
+    # get current brightness and volume levels
     BRIGHTNESS_LV=$(get_brightness_level)
-    CURRENT_CONTRAST=$(jq -r '.contrast' "$SYSTEM_JSON")
+    VOLUME_LV=$(get_volume_level)
 
-    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness" && [ "$CURRENT_CONTRAST" -le 9 ]; then
+    # setsharedmem binary on A30 does not accept a contrast argument (yet?)
+    if [ "$PLATFORM" = "Flip" ]; then
+        CONTRAST_LV=$(get_contrast)
+    else
+        unset CONTRAST_LV
+    fi
+
+    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness" && [ "$CONTRAST_LV" -le 9 ]; then
 
         # update system.json
-        NEW_CONTRAST=$((CURRENT_CONTRAST + 1))
-        jq ".contrast = $NEW_CONTRAST" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
+        CONTRAST_LV=$((CONTRAST_LV + 1))
+        jq ".contrast = $CONTRAST_LV" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
 
         # system.json uses 0-20 but modetest expects 0-100
-        NEW_INTERNAL_CONTRAST=$((NEW_CONTRAST * 5))
-        modetest -M rockchip -a -w 179:contrast:$NEW_INTERNAL_CONTRAST
+        INTERNAL_CONTRAST=$((CONTRAST_LV * 5))
+        modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
 
-    elif [ $BRIGHTNESS_LV -lt 10 ] ; then  # if value larger than zero
+    elif [ $BRIGHTNESS_LV -lt 10 ] ; then  # if extended brightness setting not on, or contrast is at least 10
 
         # update brightness level
         BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
@@ -214,9 +230,10 @@ brightness_up() {
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
     
         # write both level value to shared memory for MainUI to update its UI
-        VOLUME_LV=$(get_volume_level)
-        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
+
     fi
+
+    $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
 }
 
 volume_down_bg() {
@@ -238,8 +255,16 @@ volume_up_bg() {
 }
 
 volume_down() {
-    # get current volume level
+    # get current brightness and volume levels
+    BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
+
+    # setsharedmem binary on A30 does not accept a contrast argument (yet?)
+    if [ "$PLATFORM" = "Flip" ]; then
+        CONTRAST_LV=$(get_contrast)
+    else
+        unset CONTRAST_LV
+    fi
 
     # if value larger than zero
     if [ $VOLUME_LV -gt 0 ] ; then
@@ -263,14 +288,21 @@ volume_down() {
         fi
 
         # write both level value to shared memory for MainUI to update its UI
-        BRIGHTNESS_LV=$(get_brightness_level)
-        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
     fi
 }
 
 volume_up() {
-    # get current volume level
+    # get current brightness and volume levels
+    BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
+
+    # setsharedmem binary on A30 does not accept a contrast argument (yet?)
+    if [ "$PLATFORM" = "Flip" ]; then
+        CONTRAST_LV=$(get_contrast)
+    else
+        unset CONTRAST_LV
+    fi
     
     # if value larger than zero
     if [ $VOLUME_LV -lt 20 ] ; then
@@ -292,8 +324,7 @@ volume_up() {
         fi
 
         # write both level value to shared memory for MainUI to update its UI
-        BRIGHTNESS_LV=$(get_brightness_level)
-        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV"
+        $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
     fi
 }
 
@@ -353,7 +384,7 @@ $BIN_PATH/getevent $EVENTS | while read line; do
         ;;
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
-            PID_DOWN=""
+            PID_UP=""
             volume_up # ensure fire the first run
             volume_up_bg &
             PID_UP=$!
