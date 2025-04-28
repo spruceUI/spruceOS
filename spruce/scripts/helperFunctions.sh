@@ -951,8 +951,8 @@ set_smart() {
             "Brick" | "SmartPro") scaling_max_freq=1800000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative";;
         esac
         echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 35 >$CONSERVATIVE_POLICY_DIR/down_threshold
-        echo 70 >$CONSERVATIVE_POLICY_DIR/up_threshold
+        echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
+        echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
         echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
         echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
         echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
@@ -1027,7 +1027,7 @@ setting_get() {
         CFG="$CFG_FILE"
     fi
 
-value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
+    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo ""
         return 1
