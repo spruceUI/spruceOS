@@ -75,28 +75,34 @@ map_mainui_volume_to_system_value() {
 }
 
 nearest_system_brightness() {
-    local input=$1
-    local -a levels=(1 20 35 45 60 80 100 120 150 180 220)
-    local nearest=${levels[0]}
-    local min_diff=$((input - levels[0]))
-    min_diff=${min_diff#-}  # absolute value
+    input=$1
+    levels="$SYSTEM_BRIGHTNESS_0 $SYSTEM_BRIGHTNESS_1 $SYSTEM_BRIGHTNESS_2 $SYSTEM_BRIGHTNESS_3 $SYSTEM_BRIGHTNESS_4 $SYSTEM_BRIGHTNESS_5 $SYSTEM_BRIGHTNESS_6 $SYSTEM_BRIGHTNESS_7 $SYSTEM_BRIGHTNESS_8 $SYSTEM_BRIGHTNESS_9 $SYSTEM_BRIGHTNESS_10"
 
-    for level in "${levels[@]}"; do
-        local diff=$((input - level))
-        diff=${diff#-}
-        if (( diff < min_diff )); then
+    nearest=""
+    min_diff=""
+
+    for level in $levels; do
+        diff=$((input - level))
+        # absolute value
+        if [ "$diff" -lt 0 ]; then
+            diff=$(( -diff ))
+        fi
+
+        if [ -z "$min_diff" ] || [ "$diff" -lt "$min_diff" ]; then
             min_diff=$diff
             nearest=$level
         fi
     done
 
-    # Output the matching SYSTEM_BRIGHTNESS_X value
-    for i in "${!levels[@]}"; do
-        if [[ ${levels[i]} -eq $nearest ]]; then
-            var="SYSTEM_BRIGHTNESS_$i"
-            echo "${!var}"
+    # Find the index of the nearest level
+    idx=0
+    for level in $levels; do
+        if [ "$level" -eq "$nearest" ]; then
+            var="SYSTEM_BRIGHTNESS_$idx"
+            eval "echo \${$var}"
             return
         fi
+        idx=$((idx + 1))
     done
 }
 
