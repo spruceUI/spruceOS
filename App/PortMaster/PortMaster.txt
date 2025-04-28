@@ -6,13 +6,13 @@
 ## HRMMM
 if [ -d "/mnt/sdcard/spruce" ]; then
   export HOME="/mnt/sdcard"
-  export PATH="/mnt/sdcard/Roms/.portmaster/bin/:$PATH"
-  export LD_LIBRARY_PATH="/mnt/sdcard/Roms/.portmaster/lib:$LD_LIBRARY_PATH"
+  export PATH="/mnt/sdcard/Persistent/portmaster/bin/:$PATH"
+  export LD_LIBRARY_PATH="/mnt/sdcard/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
   export LD_PRELOAD=""
-  export PYSDL2_DLL_PATH="/mnt/sdcard/Roms/.portmaster/site-packages/sdl2dll/dll"
-  controlfolder="/mnt/sdcard/Roms/.portmaster/PortMaster"
+  export PYSDL2_DLL_PATH="/mnt/sdcard/Persistent/portmaster/site-packages/sdl2dll/dll"
+  controlfolder="/mnt/sdcard/Persistent/portmaster/PortMaster"
   directory="/mnt/sdcard/Roms/PORTS64/"
-  export PYSDL2_DLL_PATH="/mnt/sdcard/Roms/.portmaster/lib/"
+  export PYSDL2_DLL_PATH="/mnt/sdcard/Persistent/portmaster/lib/"
 else
   export HOME="/root"
   export LD_PRELOAD=""
