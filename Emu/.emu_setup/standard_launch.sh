@@ -314,11 +314,11 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-    rm "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+    rm "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     if [ "$PORT_CONTROL" = "X360" ]; then
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     else
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Roms/.portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     fi
 }
 
@@ -331,14 +331,14 @@ run_port() {
         if [[ $? -eq 1 ]]; then
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd /mnt/sdcard/RetroArch/
-            export HOME="/mnt/sdcard/spruce/flip/home"
+            export HOME="/mnt/sdcard/Saves/flip/home"
             export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
             export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
              "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
         else
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd $PORTS_DIR
-            export HOME="/mnt/sdcard/spruce/flip/home"
+            export HOME="/mnt/sdcard/Saves/flip/home"
             export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
             export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
             "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
