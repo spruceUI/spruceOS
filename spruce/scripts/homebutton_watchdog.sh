@@ -453,8 +453,10 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             take_screenshot
         fi
         ;;
-    # Don't react to dpad presses or ananlog sticks
-    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* | *"key 3"*) ;;
+    # Don't react to dpad presses or analog sticks
+    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*| \
+    *"key $STICK_LEFT"*| *"key $STICK_RIGHT"*| *"key $STICK_UP"*| *"key $STICK_DOWN"*| \
+    *"key $STICK_LEFT_2"*| *"key $STICK_RIGHT_2"*| *"key $STICK_UP_2"*| *"key $STICK_DOWN_2"*) ;;
     # Any other key press while menu is held
     *"key"*"0")
         log_message "*** Catch-all key case matched: $line" -v
