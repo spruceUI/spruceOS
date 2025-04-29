@@ -245,4 +245,11 @@ while [ 1 ]; do
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
     fi
 
+    # Needed to handle Flip's "Remove SDCARD" in Settings for live unmounting of TF2
+    if [ -f /tmp/system/umount_sdcards ] ; then          
+        chmod a+x /usr/miyoo/bin/umount_sdcards.sh
+        /usr/miyoo/bin/umount_sdcards.sh
+        rm /tmp/system/umount_sdcards          
+    fi
+
 done
