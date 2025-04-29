@@ -331,8 +331,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         # pause RA after screen capture
         if [ "$PLATFORM" = "A30" ]; then
           send_virtual_key_R3
-        else
-          echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
         fi
 
         # fallback to stop ports
@@ -477,14 +475,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
-        {
-          paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
-          # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
-          if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
-            log_message "*** RA is paused, unpausing" -v
-            echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-          fi
-        } &
         ;;
     esac
 done
