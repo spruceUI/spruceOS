@@ -109,6 +109,10 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 @"Excludes NDS, PICO8 & ports"
 
 <Not_simple>
+"" "Tap home key RA64 action" "|" "network|L3_R3" "$HELP$ get ra64_menu_button 'Network Call'" "$HELP$ update ra64_menu_button '_VALUE_'" ""
+@"Applies to 64-bit devices"
+
+<Not_simple>
 "" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home '_VALUE_'" ""
 @"Excludes NDS, PICO8 & ports"
 

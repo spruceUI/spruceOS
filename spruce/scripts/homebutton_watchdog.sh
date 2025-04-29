@@ -274,7 +274,12 @@ long_press_handler() {
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                RA64_MENU_BUTTON=$(setting_get "ra64_menu_button")
+                if [[ "$RA64_MENU_BUTTON" == "L3_R3" ]]; then
+                    send_virtual_key_L3R3
+                else
+                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                fi
             elif pgrep -f "retroarch" >/dev/null; then
                 if [ "$PLATFORM" = "A30" ]; then
                     send_virtual_key_L3R3
@@ -332,7 +337,10 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         if [ "$PLATFORM" = "A30" ]; then
           send_virtual_key_R3
         else
-          echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+          RA64_MENU_BUTTON=$(setting_get "ra64_menu_button")
+          if [[ "$RA64_MENU_BUTTON" == "network" ]]; then
+            echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+          fi
         fi
 
         # fallback to stop ports
@@ -380,7 +388,12 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                     send_virtual_key_L3
                 elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: $PLATFORM RA" -v
-                  echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                  RA64_MENU_BUTTON=$(setting_get "ra64_menu_button")
+                  if [[ "$RA64_MENU_BUTTON" == "L3_R3" ]]; then
+                    send_virtual_key_L3R3
+                  else
+                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                  fi
                 elif pgrep -f "retroarch" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: RetroArch" -v
                   if [ "$PLATFORM" = "A30" ]; then
@@ -478,12 +491,15 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             fi
         fi
         {
-          paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
-          # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
-          if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
-            log_message "*** RA is paused, unpausing" -v
-            echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-          fi
+            RA64_MENU_BUTTON=$(setting_get "ra64_menu_button")
+            if [[ "$RA64_MENU_BUTTON" == "network" ]]; then
+                paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
+                # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
+                if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
+                    log_message "*** RA is paused, unpausing" -v
+                    echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+                fi
+            fi
         } &
         ;;
     esac
