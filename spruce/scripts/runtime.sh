@@ -102,6 +102,13 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
+
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
+    /mnt/sdcard/spruce/flip/mount_muOS.sh
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
+    /mnt/sdcard/spruce/flip/bind_glibc.sh
+
 fi
 
 # Flag cleanup
@@ -351,11 +358,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
 	
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
-
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
         skin_dir="${theme_dir}skin"
