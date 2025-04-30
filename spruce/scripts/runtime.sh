@@ -398,10 +398,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
-    # listen hotkeys for brightness adjustment, volume buttons and power button
+    # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
