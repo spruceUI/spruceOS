@@ -107,7 +107,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
     /mnt/sdcard/spruce/flip/mount_muOS.sh
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
-    /mnt/sdcard/spruce/flip/bind_glibc.sh
+    #/mnt/sdcard/spruce/flip/bind_glibc.sh
 
 fi
 
