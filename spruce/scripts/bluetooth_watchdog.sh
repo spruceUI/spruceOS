@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/$PLATFORM.cfg
+. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 while true; do
     inotifywait -e modify "$SYSTEM_JSON"
