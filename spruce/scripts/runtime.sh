@@ -89,6 +89,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
         mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
@@ -99,16 +100,17 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
+
+    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
 
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
-    #/mnt/sdcard/spruce/flip/bind_glibc.sh
-
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh && log_message "recombine_large_files.sh complete"
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh && log_message "setup+32bit_chroot.sh complete"
+    /mnt/sdcard/spruce/flip/mount_muOS.sh && log_message "mount_muOS.sh complete"
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh && log_message "setup_32bit_libs.sh complete"
+    #/mnt/sdcard/spruce/flip/bind_glibc.sh && log_message "bind_glibc.sh complete"
 fi
 
 # Flag cleanup
