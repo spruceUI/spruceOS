@@ -57,7 +57,7 @@ connect_services() {
 disconnect_services() {
 
 	log_message "Network services: Stopping all network services..."
-	for service in "sftpgo" "dropbear" "smbd" "syncthing" "darkhttpd"; do
+	for service in $SFTP_SERVICE_NAME "dropbear" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in
 			$SFTP_SERVICE_NAME) stop_sftpgo_process ;;
