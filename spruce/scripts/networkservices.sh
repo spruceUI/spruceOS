@@ -30,7 +30,7 @@ connect_services() {
 	fi
 
 	# SFTPGo check
-	if setting_get "sftpgo" && ! pgrep "sftpgo" >/dev/null; then
+	if setting_get "sftpgo" && ! pgrep "sftp-server" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: SFTPGo detected not running, starting..."
 		start_sftpgo_process
