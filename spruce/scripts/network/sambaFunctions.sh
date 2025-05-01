@@ -19,7 +19,7 @@ start_samba_process(){
 	
 	#add Flip libraries
 	if [ $PLATFORM = "Flip" ]; then
-		LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib
+		LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
 	fi
     
 	# Set the LD_LIBRARY_PATH
