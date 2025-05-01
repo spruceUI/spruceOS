@@ -56,6 +56,8 @@ while true; do
         reset_playback_pack
     fi
 
+    # TODO: switch to something that watches getevent, inotifywait doesn't work on GPIO and the hall sensor doesn't trigger interrupts
+    # so we can't use gpiowait
     /mnt/SDCARD/spruce/bin64/inotifywait "$GPIO_PATH" -e modify -t 1 >/dev/null 2>&1
 done
 

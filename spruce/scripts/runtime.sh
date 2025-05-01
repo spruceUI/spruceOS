@@ -89,6 +89,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
         mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
@@ -99,6 +100,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
+
+    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
@@ -398,10 +401,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
-    # listen hotkeys for brightness adjustment, volume buttons and power button
+    # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &

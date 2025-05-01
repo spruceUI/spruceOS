@@ -16,20 +16,18 @@ reset_playback_pack() {
   amixer sset 'SPK' "$SYSTEM_VOLUME_${!current_vol_name}"% > /dev/null
 }
 
+# TODO: just pull this into mixer? tbd on if this needs to be used anywhere else
 set_playback_path() {
-  # TODO: pull count out of here
-  count=$1
-
   volume_lv=$(amixer cget name='SPK Volume' | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
-  (( count % 10 == 0)) && log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
+  log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
 
   jack_status=$(cat /sys/class/gpio/gpio150/value) # 0 connected, 1 disconnected
-  (( count % 10 == 0)) && log_message "*** audioFunctions.sh: Jack status: $jack_status" -v
+  log_message "*** audioFunctions.sh: Jack status: $jack_status" -v
 
   # 0 OFF, 2 SPK, 3 HP
   playback_path=$([ $jack_status -eq 1 ] && echo 2 || echo 3)
   [ "$volume_lv" = 0 ] && [ "$playback_path" = 2 ] && playback_path=0
-  (( count % 10 == 0)) && log_message "*** audioFunctions.sh: Playback path: $playback_path" -v
+  log_message "*** audioFunctions.sh: Playback path: $playback_path" -v
 
   current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
 
