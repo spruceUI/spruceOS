@@ -11,12 +11,8 @@ mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libblkid.so.1 /usr/lib/libblkid.so
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libblkid.so.1.1.0 /usr/lib/libblkid.so.1.1.0
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libcrypt.so.1 /usr/lib/libcrypt.so.1
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libdl.so.2 /usr/lib/libdl.so.2
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libfdisk.so.1 /usr/lib/libfdisk.so.1
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libfdisk.so.1.1.0 /usr/lib/libfdisk.so.1.1.0
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libgcc_s.so /usr/lib/libgcc_s.so
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libgcc_s.so.1 /usr/lib/libgcc_s.so.1
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libiw.so /usr/lib/libiw.so
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libiw.so.30 /usr/lib/libiw.so.30
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libm.so.6 /usr/lib/libm.so.6
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libmount.so.1 /usr/lib/libmount.so.1
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libmount.so.1.1.0 /usr/lib/libmount.so.1.1.0
@@ -25,8 +21,6 @@ mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libnss_files.so.2 /usr/lib/libnss_
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libpthread.so.0 /usr/lib/libpthread.so.0
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libresolv.so.2 /usr/lib/libresolv.so.2
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/librt.so.1 /usr/lib/librt.so.1
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libsmartcols.so.1 /usr/lib/libsmartcols.so.1
-mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libsmartcols.so.1.1.0 /usr/lib/libsmartcols.so.1.1.0
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libudev.so.1 /usr/lib/libudev.so.1
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libudev.so.1.6.3 /usr/lib/libudev.so.1.6.3
 mount --bind /mnt/sdcard/spruce/flip/muOS/lib/libutil.so.1 /usr/lib/libutil.so.1
