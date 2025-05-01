@@ -16,6 +16,11 @@ samba_check(){
 
 start_samba_process(){
     log_message "Starting Samba..."
+	
+	#add Flip libraries
+	if [ $PLATFORM = "Flip" ]; then
+		LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
+	fi
     
 	# Set the LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH="$SMB_DIR/lib:$LD_LIBRARY_PATH"
