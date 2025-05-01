@@ -36,7 +36,7 @@ connect_services() {
 	fi
 
 	# SFTPGo check
-	if setting_get "sftpgo" && ! pgrep $SFTP_SERVICE_NAME >/dev/null; then
+	if setting_get "sftpgo" && ! pgrep "$SFTP_SERVICE_NAME" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: SFTPGo detected not running, starting..."
 		start_sftpgo_process
@@ -57,10 +57,10 @@ connect_services() {
 disconnect_services() {
 
 	log_message "Network services: Stopping all network services..."
-	for service in $SFTP_SERVICE_NAME "dropbear" "smbd" "syncthing" "darkhttpd"; do
+	for service in "$SFTP_SERVICE_NAME" "dropbear" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in
-			$SFTP_SERVICE_NAME) stop_sftpgo_process ;;
+			"$SFTP_SERVICE_NAME") stop_sftpgo_process ;;
 			"dropbear") stop_dropbear_process ;;
 			"smbd") stop_samba_process ;;
 			"syncthing") stop_syncthing_process ;;
