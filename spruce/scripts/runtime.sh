@@ -106,11 +106,12 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
 
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh && log_message "recombine_large_files.sh complete"
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh && log_message "setup+32bit_chroot.sh complete"
-    /mnt/sdcard/spruce/flip/mount_muOS.sh && log_message "mount_muOS.sh complete"
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh && log_message "setup_32bit_libs.sh complete"
-    #/mnt/sdcard/spruce/flip/bind_glibc.sh && log_message "bind_glibc.sh complete"
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+    /mnt/sdcard/spruce/flip/mount_muOS.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+    #/mnt/sdcard/spruce/flip/bind_glibc.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+
 fi
 
 # Flag cleanup
