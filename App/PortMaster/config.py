@@ -52,7 +52,7 @@ if (Path().cwd() / '.git').is_dir():
     
 elif Path("/mnt/sdcard/spruce").is_dir():
     ## Spruce (Miyoo Flip)
-    HM_DEFAULT_TOOLS_DIR   = Path("/mnt/SDCARD/Roms/.portmaster")
+    HM_DEFAULT_TOOLS_DIR   = Path("/mnt/sdcard/Persistent/portmaster")
     HM_DEFAULT_PORTS_DIR   = Path("/mnt/SDCARD/Roms/PORTS")
     HM_DEFAULT_SCRIPTS_DIR = Path("/mnt/SDCARD/Roms/PORTS")
 

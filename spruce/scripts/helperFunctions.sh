@@ -32,51 +32,7 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Check if a flag exists
-# Usage: flag_check "flag_name"
-# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-flag_check() {
-    local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Call this like:
-# log_message "Your message here"
-# To output to a custom log file, set the variable within your script:
-# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
-# This will log the message to the spruce.log file in the Saves/spruce folder
-#
-# Usage examples:
-# Log a regular message:
-#    log_message "This is a regular log message"
-# Log a verbose message (only logged if log_verbose was called):
-#    log_message "This is a verbose log message" -v
-# Log to a custom file:
-#    log_message "Custom file log message" "" "/path/to/custom/log.file"
-# Log a verbose message to a custom file:
-#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-log_message() {
-    local message="$1"
-    local verbose_flag="$2"
-    local custom_log_file="${3:-$log_file}"
-
-    # Check if it's a verbose message and if verbose logging is not enabled
-    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
-
-    # Handle custom log file
-    if [ "$custom_log_file" != "$log_file" ]; then
-        mkdir -p "$(dirname "$custom_log_file")"
-        touch "$custom_log_file"
-    fi
-
-    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
-}
-
+# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!!
 
 DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
@@ -86,8 +42,6 @@ export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
-# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
-# log_message "[helperFunctions.sh] $INFO" -v
 
 case $INFO in
 *"sun8i"*)
@@ -107,8 +61,6 @@ case $INFO in
     ;;
 esac
 
-# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
-# log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ ! "$PLATFORM" = "A30" ]; then
@@ -547,6 +499,18 @@ flag_add() {
     touch "$FLAGS_DIR/${flag_name}.lock"
 }
 
+# Check if a flag exists
+# Usage: flag_check "flag_name"
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+flag_check() {
+    local flag_name="$1"
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Get the full path to a flag file
 # Usage: flag_path "flag_name"
 # Returns the full path to the flag file (with .lock extension)
@@ -803,6 +767,39 @@ get_version_complex() {
     fi
 }
 
+# Call this like:
+# log_message "Your message here"
+# To output to a custom log file, set the variable within your script:
+# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
+# This will log the message to the spruce.log file in the Saves/spruce folder
+#
+# Usage examples:
+# Log a regular message:
+#    log_message "This is a regular log message"
+# Log a verbose message (only logged if log_verbose was called):
+#    log_message "This is a verbose log message" -v
+# Log to a custom file:
+#    log_message "Custom file log message" "" "/path/to/custom/log.file"
+# Log a verbose message to a custom file:
+#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
+log_message() {
+    local message="$1"
+    local verbose_flag="$2"
+    local custom_log_file="${3:-$log_file}"
+
+    # Check if it's a verbose message and if verbose logging is not enabled
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
+    fi
+
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
+}
+
 # Call this to toggle verbose logging
 # After this is called, any log_message calls will output to the log file if -v is passed
 # USE THIS ONLY WHEN DEBUGGING, IT WILL GENERATE A LOT OF LOG FILE ENTRIES
@@ -951,8 +948,8 @@ set_smart() {
             "Brick" | "SmartPro") scaling_max_freq=1800000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative";;
         esac
         echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 35 >$CONSERVATIVE_POLICY_DIR/down_threshold
-        echo 70 >$CONSERVATIVE_POLICY_DIR/up_threshold
+        echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
+        echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
         echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
         echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
         echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
@@ -1027,7 +1024,7 @@ setting_get() {
         CFG="$CFG_FILE"
     fi
 
-value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
+    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo ""
         return 1

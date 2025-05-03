@@ -89,6 +89,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
         mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
@@ -99,9 +100,19 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
+
+    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
+
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    #/mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+
+
 fi
 
 # Flag cleanup
@@ -160,11 +171,12 @@ fi
     ${SCRIPTS_DIR}/emufresh_md5_multi.sh # &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
 } &
 
-    # don't hide or unhide apps in simple_mode
-    if ! flag_check "simple_mode"; then
-        check_and_handle_firmware_app &
-        check_and_hide_update_app &
-    fi
+check_and_handle_firmware_app &
+
+# don't hide or unhide apps in simple_mode
+if ! flag_check "simple_mode"; then
+    check_and_hide_update_app &
+fi
 
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
@@ -297,12 +309,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
 
-    if [ -d "/media/sdcard1/miyoo355/" ]; then
-        export CUSTOMER_DIR=/media/sdcard1/miyoo355/
-    else
-        export CUSTOMER_DIR=/media/sdcard0/miyoo355/
-    fi
-
     export LD_LIBRARY_PATH=/usr/miyoo/lib
 
     (
@@ -321,11 +327,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # echo -n 0 > /sys/class/gpio/gpio20/value
 
     #joypad
-    #echo -1 > /sys/class/miyooio_chr_dev/joy_type
+    echo -1 > /sys/class/miyooio_chr_dev/joy_type
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
-    sleep 0.2
+    sleep 0.1
     hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
     if [ "$hdmipugin" == "connected" ] ; then
         /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
@@ -352,7 +358,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     fi
 
     if [ ${miyoo_fw_update} -eq 1 ] ; then
-        export LD_LIBRARY_PATH=${CUSTOMER_DIR}/lib 
         cd $miyoo_fw_dir
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
@@ -397,10 +402,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
-    # listen hotkeys for brightness adjustment, volume buttons and power button
+    # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
@@ -409,7 +415,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/checkfaves.sh &
-    # ${SCRIPTS_DIR}/credits_watchdog.sh & #### we don't have the credits bin for this device
+    ${SCRIPTS_DIR}/credits_watchdog.sh &
 
     # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
     GPIO=150
@@ -429,10 +435,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-
     swapon -p 40 "${SWAPFILE}"
 
     killall runmiyoo.sh
@@ -445,6 +447,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
+${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &

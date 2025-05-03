@@ -8,6 +8,12 @@
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
 
+    # Always hide firmware app in simple mode; don't bother checking platform
+    if flag_check "simple_mode"; then
+        mount -o bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+        return 0
+    fi
+
     case "$PLATFORM" in
         "A30" )
             VERSION="$(cat /usr/miyoo/version)"

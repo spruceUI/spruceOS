@@ -9,8 +9,8 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
   export PATH="/mnt/sdcard/bin/:$PATH"
   export LD_LIBRARY_PATH="/mnt/sdcard/lib:$LD_LIBRARY_PATH"
   export LD_PRELOAD=""
-  export PYSDL2_DLL_PATH="/mnt/sdcard/Roms/.portmaster/site-packages/sdl2dll/dll"
-  controlfolder="/mnt/sdcard/Roms/.portmaster/PortMaster"
+  export PYSDL2_DLL_PATH="/mnt/sdcard/Persistent/portmaster/site-packages/sdl2dll/dll"
+  controlfolder="/mnt/sdcard/Persistent/portmaster/PortMaster"
   directory="/mnt/sdcard/Roms/PORTS/"
 else
   export HOME="/root"
