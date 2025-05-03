@@ -15,8 +15,13 @@ else
 	echo 0 > "$LED_PATH"/brightness
 fi
 
+# moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
+# copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
+MOVE_OR_COPY=cp
+if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
+
 # move command to cmd_to_run.sh so game switcher can work correctly
-mv "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh && sync
+$MOVE_OR_COPY "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh && sync
 
 # load a dummy SDL program and try to initialize GPU and other hardware before loading game
 ./easyConfig &> /dev/null &
@@ -26,5 +31,5 @@ sleep 5
 nice -n -20 /tmp/cmd_to_run.sh &> /dev/null
 
 # remove tmp command file after game exit
-# otherwise the game will load again in principle.sh later
+# otherwise the game will load again in principal.sh later
 rm -f /tmp/cmd_to_run.sh
