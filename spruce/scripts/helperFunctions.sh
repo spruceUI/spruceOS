@@ -303,10 +303,6 @@ dim_screen() {
     done
 }
 
-[ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
-ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
-CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
-DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
 # It's possible to leave a display process running
@@ -336,16 +332,19 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    ld_library_path="$LD_LIBRARY_PATH"
+    [ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
+    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
+    CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
+    DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 
     if [ "$PLATFORM" = "Brick" ]; then
         width=960
-        ld_library_path="/usr/trimui/lib:$ld_library_path"
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
         DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
 
     elif [ "$PLATFORM" = "SmartPro" ]; then
         width=1200
-        ld_library_path="/usr/trimui/lib:$ld_library_path"
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
         DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
 
     elif [ "$PLATFORM" = "Flip" ]; then
@@ -367,7 +366,7 @@ display() {
     position_set=false
     qr_url=""
 
-    while [[ $# -gt 0 ]]; do
+    while [ $# -gt 0 ]; do
         case $1 in
             -i|--image) image="$2"; shift ;;
             -t|--text) text="$2"; shift ;;
@@ -385,7 +384,7 @@ display() {
             -is|--image-scaling) image_scaling="$2"; shift ;;
             --icon)
                 icon_image="$2"
-                if ! $position_set; then
+                if [ "$position_set" = false ]; then
                     position=$((position + 80))
                 fi
                 shift
@@ -396,7 +395,7 @@ display() {
                 ;;
             --qr)
                 qr_url="$2"
-                if ! $position_set; then
+                if [ "$position_set" = false ]; then
                     position=89
                 fi
                 shift
@@ -405,20 +404,19 @@ display() {
         esac
         shift
     done
-    r="${color:0:2}"
-    g="${color:2:2}"
-    b="${color:4:2}"
-    bg_r="${bg_color:0:2}"
-    bg_g="${bg_color:2:2}"
-    bg_b="${bg_color:4:2}"
+    r=$(echo "$color" | cut -c1-2)
+    g=$(echo "$color" | cut -c3-4)
+    b=$(echo "$color" | cut -c5-6)
+    bg_r=$(echo "$bg_color" | cut -c1-2)
+    bg_g=$(echo "$bg_color" | cut -c3-4)
+    bg_b=$(echo "$bg_color" | cut -c5-6)
 
     # Set font to DEFAULT_FONT if it's empty
     if [ -z "$font" ]; then
         font="$DEFAULT_FONT"
     fi
 
-
-    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
+    command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" $DISPLAY_TEXT_FILE "
     command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "
 
     # Construct the command
@@ -430,10 +428,10 @@ display() {
     fi
 
     # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
-    if [[ "$use_confirm_image" = true ]]; then
+    if [ "$use_confirm_image" = true ]; then
         command="$command \"$CONFIRM_IMAGE\" 1.0 240 middle"
         delay=0
-    elif [[ "$use_acknowledge_image" = true ]]; then
+    elif [ "$use_acknowledge_image" = true ]; then
         command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 240 middle"
     fi
 
@@ -455,17 +453,17 @@ display() {
     display_kill
 
     # Execute the command in the background if delay is 0
-    if [[ "$delay" -eq 0 ]]; then
+    if [ "$delay" -eq 0 ]; then
         eval "$command" &
-        log_message "display command: $command" -v
+        log_message "display command: $command"
         # Run acknowledge if -o or --okay was used and --confirm was not used
-        if [[ "$run_acknowledge" = true && "$use_confirm_image" = false ]]; then
+        if [ "$run_acknowledge" = true ] && [ "$use_confirm_image" = false ]; then
             acknowledge
         fi
     else
         # Execute the command and capture its output
         eval "$command"
-        log_message "display command: $command" -v
+        log_message "display command: $command"
     fi
 }
 
