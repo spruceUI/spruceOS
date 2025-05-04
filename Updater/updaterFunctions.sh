@@ -9,9 +9,11 @@ case $INFO in
 	;;
 *"TG5040"*)
 	export PLATFORM="SmartPro"
+    export SD_DEV="/dev/mmcblk1p1"
 	;;
 *"TG3040"*)
 	export PLATFORM="Brick"
+    export SD_DEV="/dev/mmcblk1p1"
 	;;
 *"0xd05"*)
     export PLATFORM="Flip"
