@@ -34,7 +34,6 @@
 
 # !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!!
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 # Export for enabling SSL support in CURL
@@ -337,54 +336,36 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    local screen_width=640 screen_height=480 rotation=0
-    local ld_library_path="$LD_LIBRARY_PATH"
-    local width=600
+    ld_library_path="$LD_LIBRARY_PATH"
+
     if [ "$PLATFORM" = "Brick" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=1024
-      screen_height=768
-      rotation=0
-      width=960
-      # TODO: this should go away once profile is wired up for the brick
-      ld_library_path="/usr/trimui/lib:$ld_library_path"
-      # TODO: we might want to make this more generic based on architecture eventually
-      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+        width=960
+        ld_library_path="/usr/trimui/lib:$ld_library_path"
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
 
     elif [ "$PLATFORM" = "SmartPro" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=1280
-      screen_height=720
-      rotation=0
-      width=1200
-      # TODO: this should go away once profile is wired up for the brick
-      ld_library_path="/usr/trimui/lib:$ld_library_path"
-      # TODO: we might want to make this more generic based on architecture eventually
-      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+        width=1200
+        ld_library_path="/usr/trimui/lib:$ld_library_path"
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+
     elif [ "$PLATFORM" = "Flip" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=640
-      screen_height=480
-      rotation=0
-      width=600
-      # TODO: we might want to make this more generic based on architecture eventually
-      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+        width=600
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+
     elif [ "$PLATFORM" = "A30" ]; then
-      screen_width=640
-      screen_height=480
-      rotation=270
-      width=600
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
+        width=600
     fi
 
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
-    local use_acknowledge_image=false
-    local use_confirm_image=false
-    local run_acknowledge=false
-    local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
-    local icon_image=""
-    local additional_images=""
-    local position_set=false
-    local qr_url=""
+    image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
+    use_acknowledge_image=false
+    use_confirm_image=false
+    run_acknowledge=false
+    bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
+    icon_image=""
+    additional_images=""
+    position_set=false
+    qr_url=""
 
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -424,12 +405,12 @@ display() {
         esac
         shift
     done
-    local r="${color:0:2}"
-    local g="${color:2:2}"
-    local b="${color:4:2}"
-    local bg_r="${bg_color:0:2}"
-    local bg_g="${bg_color:2:2}"
-    local bg_b="${bg_color:4:2}"
+    r="${color:0:2}"
+    g="${color:2:2}"
+    b="${color:4:2}"
+    bg_r="${bg_color:0:2}"
+    bg_g="${bg_color:2:2}"
+    bg_b="${bg_color:4:2}"
 
     # Set font to DEFAULT_FONT if it's empty
     if [ -z "$font" ]; then
@@ -438,10 +419,10 @@ display() {
 
 
     local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
-    command="$command""$screen_width $screen_height $rotation "
+    command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "
 
     # Construct the command
-    local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
