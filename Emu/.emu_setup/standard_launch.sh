@@ -131,20 +131,35 @@ calculate_current_session_duration() {
 }
 
 update_gtt() {
-
     GTT_GAME_NAME="$GAME ($EMU_NAME)"
     SESSION_DURATION=$(cat "$DURATION_PATH")
+    END_TIME=$(cat "$END_TIME_PATH")
+
     PREVIOUS_PLAYTIME=$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].playtime_seconds // 0' "$TRACKER_JSON_PATH")
     NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+
+    OLD_NUM_SESSIONS=$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].sessions_played // 0' "$TRACKER_JSON_PATH")
+    NEW_NUM_SESSIONS=$((OLD_NUM_SESSIONS + 1))
 
     # Initialize JSON if needed
     if [ ! -f "$TRACKER_JSON_PATH" ] || [ -z "$(cat "$TRACKER_JSON_PATH")" ]; then
         jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
     fi
 
-    jq --arg game "$GTT_GAME_NAME" --argjson newTime "$NEW_PLAYTIME" \
-        '.games[$game].playtime_seconds = $newTime' \
-        "$TRACKER_JSON_PATH" > /tmp/gtt.tmp.json && mv /tmp/gtt.tmp.json "$TRACKER_JSON_PATH"
+    jq --arg game "$GTT_GAME_NAME" \
+       --argjson newTime "$NEW_PLAYTIME" \
+       --argjson numPlays "$NEW_NUM_SESSIONS" \
+       --arg emu "$EMU_NAME" \
+       --argjson lastPlayed "$END_TIME" \
+       '.games[$game] += {
+           console: $emu,
+           playtime_seconds: $newTime,
+           sessions_played: $numPlays,
+           last_played: $lastPlayed
+       }' "$TRACKER_JSON_PATH" > /tmp/gtt.tmp.json && mv /tmp/gtt.tmp.json "$TRACKER_JSON_PATH"
+
+	# clean up temp files to prevent accidental cross-pollination
+	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" /tmp/gtt.tmp.json 2>/dev/null
 }
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
