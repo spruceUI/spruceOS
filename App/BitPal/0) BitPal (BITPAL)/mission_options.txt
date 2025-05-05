@@ -1,0 +1,2 @@
+View Progress|view_mission
+Cancel Mission|cancel_mission
