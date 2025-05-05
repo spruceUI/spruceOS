@@ -108,6 +108,44 @@ handle_network_services() {
 	fi
 }
 
+##### TIME TRACHKING FUNCTIONS #####
+
+export START_TIME_PATH="/tmp/start_time"
+export END_TIME_PATH="/tmp/end_time"
+export DURATION_PATH="/tmp/session_duration"
+export TRACKER_JSON_PATH="/mnt/SDCARD/Saves/spruce/gtt.json"
+
+record_session_start_time() {
+    date +%s > "$START_TIME_PATH"
+}
+
+record_session_end_time() {
+    date +%s > "$END_TIME_PATH"
+}
+
+calculate_current_session_duration() {
+    START_TIME=$(cat "$START_TIME_PATH")
+    END_TIME=$(cat "$END_TIME_PATH")
+    DURATION=$(( END_TIME - START_TIME ))
+    echo "$DURATION" > "$DURATION_PATH"
+}
+
+update_gtt() {
+
+    GTT_GAME_NAME="$GAME ($EMU_NAME)"
+    SESSION_DURATION=$(cat "$DURATION_PATH")
+    PREVIOUS_PLAYTIME=$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].playtime_seconds // 0' "$TRACKER_JSON_PATH")
+    NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+
+    # Initialize JSON if needed
+    if [ ! -f "$TRACKER_JSON_PATH" ] || [ -z "$(cat "$TRACKER_JSON_PATH")" ]; then
+        jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
+    fi
+
+    jq --arg game "$GTT_GAME_NAME" --argjson newTime "$NEW_PLAYTIME" \
+        '.games[$game].playtime_seconds = $newTime' \
+        "$TRACKER_JSON_PATH" > /tmp/gtt.tmp.json && mv /tmp/gtt.tmp.json "$TRACKER_JSON_PATH"
+}
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
@@ -535,8 +573,7 @@ run_yabasanshiro() {
 import_launch_options
 
 set_cpu_mode
-
-# TODO: remove A30 check once network services implemented on Brick
+record_session_start_time
 handle_network_services
 
 flag_add 'emulator_launched'
@@ -588,6 +625,9 @@ case $EMU_NAME in
 esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh)
+record_session_end_time
+calculate_current_session_duration
+update_gtt
 log_message "-----Closing Emulator-----" -v
 
 auto_regen_tmp_update
