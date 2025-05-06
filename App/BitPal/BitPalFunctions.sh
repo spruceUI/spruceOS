@@ -27,6 +27,25 @@ initialize_bitpal_data() {
     } }' > "$BITPAL_JSON"
 }
 
+display_bitpal_stats() {
+    face="$(get_face)"
+    name="$(jq -r '.bitpal.name' "$BITPAL_JSON")"
+    level="$(jq -r '.bitpal.level' "$BITPAL_JSON")"
+    xp="$(jq -r '.bitpal.xp' "$BITPAL_JSON")"
+    xp_next="$(jq -r '.bitpal.xp_next' "$BITPAL_JSON")"
+    mood="$(jq -r '.bitpal.mood' "$BITPAL_JSON")"
+    missions_completed="$(jq '.bitpal.missions_completed' "$BITPAL_JSON")"
+    missions_active="$(jq '.missions // [] | length' "$MISSION_JSON")"
+
+    display --okay -s 36 -p 50 -t "$name Lv.$level - Status
+ 
+$face
+ 
+XP: $xp/$xp_next
+Mood: $mood
+Missions Completed: $missions_completed
+$missions_active Active Missions"
+}
 
 ##### MOOD-RELATED FUNCTIONS #####
 
