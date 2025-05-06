@@ -1,0 +1,241 @@
+from display.font_purpose import FontPurpose
+from display.loaded_font import LoadedFont
+from display.render_mode import RenderMode
+from display.x_render_option import XRenderOption
+from display.y_render_option import YRenderOption
+from menus.common.bottom_bar import BottomBar
+from menus.common.top_bar import TopBar
+import sdl2
+import sdl2.ext
+import sdl2.sdlttf
+from themes.theme import Theme
+from devices.device import Device
+
+class Display:
+    def __init__(self, theme: Theme, device: Device):
+        self.debug = False
+        self.theme = theme
+        self.device = device
+        self._init_display()
+        self.init_fonts()
+        self.bg_path = ""
+        self._check_for_bg_change()
+        self.top_bar = TopBar(self,device,theme)
+        self.bottom_bar = BottomBar(self,device,theme)
+        self.clear("init")
+        self.present()
+
+
+    def init_fonts(self):
+        self.fonts = {
+            purpose: self._load_font(purpose)
+            for purpose in FontPurpose
+        }        
+
+
+    def _init_display(self):
+        sdl2.ext.init(controller=True)
+        sdl2.SDL_InitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        display_mode = sdl2.SDL_DisplayMode()
+        if sdl2.SDL_GetCurrentDisplayMode(0, display_mode) != 0:
+            print("Failed to get display mode, using fallback 640x480")
+            width, height = self.device.screen_width(), self.device.screen_height()
+        else:
+            width, height = display_mode.w, display_mode.h
+            print(f"Display size: {width}x{height}")
+
+        self.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
+        self.window.show()
+
+        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
+        # Use default renderer flags
+        self.renderer = sdl2.ext.Renderer(self.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
+
+    def _deinit_display(self):
+        sdl2.SDL_DestroyRenderer(self.renderer.sdlrenderer)
+        self.renderer = None
+        sdl2.SDL_DestroyWindow(self.window.window)
+        self.window = None
+        sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
+
+    def reinitialize(self):
+        self._deinit_display()
+        self._init_display()
+        self.clear("reinitialize")
+        self.present()
+
+    def _check_for_bg_change(self):
+        if(self.bg_path != self.theme.background):
+            surf = sdl2.ext.load_image(self.theme.background)
+            self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.sdlrenderer, surf)
+            sdl2.SDL_FreeSurface(surf)
+
+
+    def _load_font(self, font_purpose):
+        if sdl2.sdlttf.TTF_Init() == -1:
+            raise RuntimeError("Failed to initialize SDL_ttf")
+
+        # Load the TTF font
+        # font_path = "/mnt/sdcard/spruce/Font Files/Noto.ttf"
+        font_path = self.theme.get_font(font_purpose)
+        font_size = self.theme.get_font_size(font_purpose)
+        
+        font = sdl2.sdlttf.TTF_OpenFont(font_path.encode('utf-8'), font_size)
+        if not font:
+            raise RuntimeError(f"Could not load font {font_path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+        line_height = sdl2.sdlttf.TTF_FontHeight(font)
+        return LoadedFont(font,line_height)
+        
+    def clear(self, screen):
+        self.screen = screen
+        self._check_for_bg_change()
+        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
+    
+    def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height):
+        # Maintain aspect ratio
+        if target_width and target_height:
+            scale = min(target_width / orig_w, target_height / orig_h)
+            render_w = int(orig_w * scale)
+            render_h = int(orig_h * scale)
+        elif target_width:
+            scale = target_width / orig_w
+            render_w = int(orig_w * scale)
+            render_h = orig_h
+        elif target_height:
+            render_w = orig_w
+            scale = target_height / orig_h
+            render_h = int(orig_h * scale)
+        else:
+            render_w = orig_w
+            render_h = orig_h
+        
+        return render_w, render_h
+
+    def _log(self, msg):
+        if(self.debug):
+            print(msg)
+
+    def _render_surface_texture(self, x, y, texture, surface, render_mode : RenderMode, target_width=None, target_height=None, debug=""):
+        render_w, render_h = self._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, target_width, target_height)
+
+        # Adjust position based on render mode
+        adj_x = x
+        adj_y = y
+        
+        
+        if(XRenderOption.CENTER == render_mode.x_mode):
+            adj_x = x - render_w // 2
+            self._log(f"XRenderOption.CENTER : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
+        elif(XRenderOption.RIGHT == render_mode.x_mode):
+            adj_x = x - render_w
+            self._log(f"XRenderOption.RIGHT : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
+
+        if(YRenderOption.CENTER == render_mode.y_mode):
+            adj_y = y - render_h // 2
+            self._log(f"YRenderOption.CENTER : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
+        elif(YRenderOption.BOTTOM == render_mode.y_mode):
+            adj_y = y - render_h
+            self._log(f"YRenderOption.BOTTOM : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
+
+        self._log(f"Rendering {debug} at {adj_x}, {adj_y}")
+        # Create destination rect with adjusted position and scaled size
+        rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
+
+        # Copy the texture to the renderer
+        sdl2.SDL_RenderCopy(self.renderer.renderer, texture, None, rect)
+
+        # Clean up
+        sdl2.SDL_DestroyTexture(texture)
+        sdl2.SDL_FreeSurface(surface)
+
+        return render_w, render_h
+    
+    def render_text(self,text, x, y, color, purpose : FontPurpose, render_mode = RenderMode.TOP_LEFT_ALIGNED):
+        # Create an SDL_Color
+        sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
+        
+        # Render the text to a surface
+        surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(self.fonts[purpose].font, text.encode('utf-8'), sdl_color)
+        if not surface:
+            print(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            return 0,0
+        
+        # Create a texture from the surface
+        texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
+        if not texture:
+            sdl2.SDL_FreeSurface(surface)
+            print(f"FaiFailed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            return 0,0
+
+        return self._render_surface_texture(x, y, texture, surface, render_mode, debug=text)
+
+    def render_text_centered(self,text, x, y, color, purpose : FontPurpose):
+        self.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
+
+    def render_image(self, image_path: str, x: int, y: int, render_mode = RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None):
+        # Load the image into an SDL_Surface
+        surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+        if not surface:
+            print(f"Failed to load image: {image_path}")
+            return 0,0
+
+        # Create a texture from the surface
+        texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
+        if not texture:
+            sdl2.SDL_FreeSurface(surface)
+            print(f"Failed to create texture from surface")
+            return 0,0
+
+        return self._render_surface_texture(x, y, texture, surface, render_mode, target_width, target_height, debug=image_path)
+    
+    def render_image_centered(self, image_path: str, x: int, y: int, target_width=None, target_height=None):
+        return self.render_image(image_path,x,y,RenderMode.TOP_CENTER_ALIGNED, target_width, target_height)
+
+    def get_line_height(self, purpose : FontPurpose):
+        return self.fonts[purpose].line_height;
+        
+    def present(self):
+        self.top_bar.render_top_bar(self.screen)
+        self.bottom_bar.render_bottom_bar()
+        self.renderer.present()
+
+    def get_top_bar_height(self):
+        return self.top_bar.get_top_bar_height()
+    
+    def get_bottom_bar_height(self):
+        return self.bottom_bar.get_bottom_bar_height()
+    
+    def get_usable_screen_height(self):
+        return self.device.screen_height - self.get_bottom_bar_height() - self.get_top_bar_height()
+    
+    def get_center_of_usable_screen_height(self):
+        return ((self.device.screen_height - self.get_bottom_bar_height() - self.get_top_bar_height()) // 2) + self.get_top_bar_height() 
+
+    def get_image_dimensions(self, img):        
+        contents = sdl2.sdlimage.IMG_Load(img.encode('utf-8')).contents
+        return contents.w, contents.h
+
+    def add_index_text(self, index, total):
+        # TODO don't hard code these
+        # TODO why is it divide by 4 and not divide by 2?
+        y_padding = max(5,self.get_bottom_bar_height() // 4)
+        y_value = self.device.screen_height - y_padding
+        x_padding = 10 
+
+        total_text_x = self.device.screen_width - x_padding
+        total_text_w, total_text_h = self.render_text(
+            str(total),
+            total_text_x,
+            y_value, 
+            self.theme.text_color(FontPurpose.LIST_TOTAL), 
+            FontPurpose.LIST_TOTAL, 
+            RenderMode.BOTTOM_RIGHT_ALIGNED)
+
+        index_text_x = self.device.screen_width - x_padding - total_text_w
+        index_text_w, index_text_y = self.render_text(
+            str(index)+"/",
+            index_text_x,
+            y_value, 
+            self.theme.text_color(FontPurpose.LIST_INDEX), 
+            FontPurpose.LIST_INDEX, 
+            RenderMode.BOTTOM_RIGHT_ALIGNED)
