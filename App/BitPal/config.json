@@ -1,5 +1,5 @@
 {
-  "label": "#BitPal",
+  "#label": "BitPal",
   "icontop": "/mnt/SDCARD/Updater/imgs/recents.png",
   "icon": "/mnt/SDCARD/Updater/imgs/recents.png",
   "launch": "launch.sh",

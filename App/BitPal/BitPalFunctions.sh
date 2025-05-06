@@ -52,7 +52,7 @@ complete_mission() {
 
     # Append mission to completed_missions.json
     tmpfile=$(mktemp)
-    echo "$MISSION" | jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
+    echo "$MISSION"   jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
 }
 
 initialize_bitpal_data() {
@@ -81,55 +81,55 @@ get_random_greeting() {
         2) echo "$face
  
  It's dangerous to go alone! Take BitPal!" ;;
-        3) echo "$face 
+        3) echo "$face
  
  Hi there! Your high score quest continues!" ;;
-        4) echo "$face 
+        4) echo "$face
  
  Power up! Grab that mushroom!" ;;
-        5) echo "$face 
+        5) echo "$face
  
  Hey, champion! Ready to beat the final boss?" ;;
-        6) echo "$face 
+        6) echo "$face
  
  HADOUKEN! Let's get gaming!" ;;
-        7) echo "$face 
+        7) echo "$face
  
  Good to see you! Extra lives collected!" ;;
-        8) echo "$face 
+        8) echo "$face
  
  Insert coin to continue? The arcade is calling!" ;;
-        9) echo "$face 
+        9) echo "$face
  
  Welcome back, legend! A new challenger appears!" ;;
-        10) echo "$face 
+        10) echo "$face
  
  Game time! BitPal has entered the game!" ;;
-        11) echo "$face 
+        11) echo "$face
  
  Konami Code activated! Gaming powers unlocked!" ;;
-        12) echo "$face 
+        12) echo "$face
  
  Player One detected! Press START!" ;;
-        13) echo "$face 
+        13) echo "$face
  
  Waka Waka Waka! Time to play!" ;;
-        14) echo "$face 
+        14) echo "$face
  
  Game cartridge inserted! Blow on it first!" ;;
-        15) echo "$face 
+        15) echo "$face
  
  Coins inserted! No lag detected!" ;;
-        16) echo "$face 
+        16) echo "$face
  
  New high score potential detected! Let's go!" ;;
-        17) echo "$face 
+        17) echo "$face
  
  Controller connected! Ready to rumble!" ;;
-        18) echo "$face 
+        18) echo "$face
  
  Pixels powered up! 8-bit mode activated!" ;;
-        19) echo "$face 
+        19) echo "$face
  
  FINISH HIM! ...I mean, let's play some games!" ;;
     esac
@@ -222,6 +222,73 @@ get_random_fact() {
         82) echo "Tamagotchi virtual pets were banned in many schools in the 90s for being too distracting to students." ;;
         83) echo "The NES Power Pad exercise mat was originally developed by Bandai as the 'Family Trainer' in Japan." ;;
         84) echo "The year 1984 saw the release of Tetris, one of the most enduring and addictive puzzlers of all time!" ;;
+    esac
+}
+
+get_random_guilt_trip() {
+    face=$(get_face)
+    guilt_trip=$((RANDOM % 20))
+    case $guilt_trip in
+        0) echo "$face
+ 
+ Don't quit now! You haven't saved your progress! Princess is in another castle!" ;;
+        1) echo "$face
+ 
+ GAME OVER? NOT YET! Insert coin to continue? One more level awaits!" ;;
+        2) echo "$face
+ 
+ Keep your quarters ready! BitPal needs a Player 1. Just one more game?" ;;
+        3) echo "$face
+ 
+ Boss battle is loading! You can't pause now! Ready your power-ups?" ;;
+        4) echo "$face
+ 
+ EXIT? WAIT A MINUTE! You're so close to high score. One more try?" ;;
+        5) echo "$face
+ 
+ No Konami Code for exit! You must defeat Sheng Long to stand a chance!" ;;
+        6) echo "$face
+ 
+ You still have 1UP left! Hidden stages await. Will you continue?" ;;
+        7) echo "$face
+ 
+ Your star power is fading! BitPal needs your help. Save the 8-bit kingdom?" ;;
+        8) echo "$face
+ 
+ PAUSE NOT AVAILABLE! The final dungeon awaits. Stay for treasure?" ;;
+        9) echo "$face
+ 
+ Achievement unlocked: \"Almost quit BitPal\" Want to earn more?" ;;
+        10) echo "$face
+ 
+ LEVEL 99 NOT REACHED! Are you sure you want to abandon your quest?" ;;
+        11) echo "$face
+ 
+ FATALITY: BitPal sadness! BitPal is counting on you. FINISH THE GAME!" ;;
+        12) echo "$face
+ 
+ NO SAVE POINTS HERE! Your progress will be lost. Continue adventure?" ;;
+        13) echo "$face
+ 
+ PRESS START TO PLAY! Secret bosses await. Controller disconnected?" ;;
+        14) echo "$face
+ 
+ THIS ISN'T GAME OVER! The water level is next. Brave enough to stay?" ;;
+        15) echo "$face
+ 
+ RAGE QUIT DETECTED! Have you tried the Konami Code? UUDDLRLRBA?" ;;
+        16) echo "$face
+ 
+ CREDITS NOT EARNED YET! True ending requires 100% completion!" ;;
+        17) echo "$face
+ 
+ CHEAT ACTIVATED: Fun mode! Your high score is climbing. Leave the arcade now?" ;;
+        18) echo "$face
+ 
+ 1UP ACQUIRED! BitPal needs you to defeat the final boss!" ;;
+        19) echo "$face
+ 
+ EXIT? THINK AGAIN! All your base are belong to us! You have no chance to survive!" ;;
     esac
 }
 
