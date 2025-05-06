@@ -1,3 +1,0 @@
-BitPal Status|bitpal_status
-Start New Mission|start_mission
-Mission History|mission_history
