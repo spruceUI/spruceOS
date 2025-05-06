@@ -13,6 +13,16 @@ export GTT_JSON=/mnt/SDCARD/Saves/spruce/gtt.json
 # ensure later referenced json paths in this dir are valid
 mkdir -p "$BITPAL_DATA_DIR"
 
+call_menu() {
+    title="$1"
+    menu="$2"
+
+    /mnt/SDCARD/spruce/flip/bin/python3 \
+    /mnt/SDCARD/App/PyUI/main-ui/OptionSelectUI.py \
+    "$title" /mnt/SDCARD/App/BitPal/menus/$menu
+}
+
+
 # resets bitpal to level 1
 initialize_bitpal_data() {
     DATETIME=$(date +%s)
@@ -330,6 +340,78 @@ get_random_thanks() {
     esac
 }
 
+
+##### OTHER RANDOMNESS FUNCTIONS #####
+
+get_random_system() {
+
+    # first get ALL systems with a Roms subdir
+    ROMS_DIR="/mnt/SDCARD/Roms"
+    systems_list=""
+    for d in "$ROMS_DIR"/*; do
+        [ -d "$d" ] && systems_list="${systems_list}$d "
+    done
+
+    # next filter by whether they have Roms
+    systems_with_roms=""
+    count=0
+    for d in $systems_list; do
+        has_roms="false"
+        for file in "$d"/*; do
+            file="$(basename $file)"
+            case "$file" in
+                Imgs|imgs|IMGS|IMGs|*.db|*.json|*.txt|*.xml) continue ;;
+                *) has_roms="true"; count=$((count + 1)); break ;;
+            esac
+        done
+        if [ "$has_roms" = "true" ]; then
+            systems_with_roms="${systems_with_roms}$d\n"
+        fi
+    done
+
+    # now pick and echo a random one of those non-empty romdirs
+    random_system="$(echo -e "$systems_with_roms" | sed -n "$((RANDOM % count + 1))p")"
+    random_system="$(basename $random_system)"
+    echo "$random_system"
+}
+
+is_valid_rom() {
+    local file="$1"
+    if echo "$file" | grep -qiE '\.png$'; then
+        folder=$(dirname "$file")
+        if echo "$folder" | grep -Eiq "pico|fake"; then
+            return 0
+        fi
+    fi
+    if echo "$file" | grep -qiE '\.(txt|log|cfg|ini)$'; then
+        return 1
+    fi
+    if echo "$file" | grep -qiE '\.(jpg|jpeg|png|bmp|gif|tiff|webp)$'; then
+        return 1
+    fi
+    if echo "$file" | grep -qiE '\.(xml|json|md|html|css|js|map)$'; then
+        return 1
+    fi
+    return 0
+}
+
+get_random_game() {
+    ROMS_DIR=/mnt/SDCARD/Roms
+    console="$1"
+
+    roms_list=""
+    count=0
+    for f in "$ROMS_DIR/$console"/*; do
+        if [ -f "$f" ] && is_valid_rom "$f"; then
+            roms_list="${roms_list}$f\n"
+            count=$((count + 1))
+        fi
+    done
+    if [ $count -eq 0 ]; then echo ""; return 1; fi
+    random_rom=$(echo -e "$roms_list" | sed -n "$((RANDOM % count + 1))p")
+    echo "$random_rom"
+}
+
 ##### MISSION MANAGEMENT #####
 
 # creates or overwrites active missions file with blank copy
@@ -339,15 +421,22 @@ initialize_mission_data() {
 
 generate_random_mission() {
 
+    # index for which mission slot to use
+    i="$1"
+    tmpfile=/tmp/new_mission$i
+
     # randomly choose which mission type to generate
     type_num=$((RANDOM % 5))
     case $type_num in
-        0) type=discover ;;
-        1) type=rediscover ;;
-        2) type=system ;;
-        3) type=surprise ;;
+        0) type=surprise ;;
+        1) type=discover ;;
+        2) type=rediscover ;;
+        3) type=system ;;
         4) type=any ;;
     esac
+
+    # random duration between 5 and 25 minutes
+    duration=$((RANDOM % 15 + 10))
 
     # if nothing in GTT json yet, don't give rediscover missions
     if [ ! -f "$GTT_JSON" ] || grep -q "games: {}" "$GTT_JSON"; then
@@ -356,29 +445,128 @@ generate_random_mission() {
         fi
     fi
 
-    # random duration between 5 and 25 minutes
-    duration=$((RANDOM % 15 + 10))
-
-    # get xp multiplier for given mission type
-    case "$2" in
-        discover) mult=7 ;;
-        rediscover) mult=7 ;;
-        system) mult=6 ;;
-        surprise) mult=8 ;;
-        any) mult=5 ;;
+    case "$type" in
+        surprise)
+            console="$(get_random_system)"
+            rompath="$(get_random_game "$console")"
+            game="$(basename "${rompath%.*}") ($console)"
+            mult=8
+            display_text="SURPRISE GAME!"
+            ;;
+        discover)
+            console="$(get_random_system)"
+            rompath="$(get_random_game "$console")"
+            game="$(basename "${rompath%.*}") ($console)"
+            mult=7
+            display_text="Try out $game for the first time!"
+            ;;
+        rediscover)
+            console="$(get_random_system)"
+            # need to change to only get random game from GTT json
+            rompath="$(get_random_game "$console")"
+            game="$(basename "${rompath%.*}") ($console)"
+            mult=7
+            display_text="Rediscover $game!"
+            ;;
+        system)
+            console="$(get_random_system)"
+            unset rompath
+            unset game
+            mult=6
+            display_text="Play a $console game!"
+            ;;
+        any) 
+            unset console
+            unset rompath
+            unset game
+            mult=5
+            display_text="Play any game you want!"
+            ;;
     esac
 
     # calculate xp reward
     xp_reward=$((mult * duration))
 
-
+    # construct temp file to hold unconfirmed mission info
+    echo "export type=$type" > "$tmpfile"
+    echo "export display_text=\"$display_text\"" >> "$tmpfile"
+    echo "export rompath=\"$rompath\"" >> "$tmpfile"
+    echo "export game=\"$game\"" >> "$tmpfile"
+    echo "export console=$console" >> "$tmpfile"
+    echo "export duration=$duration" >> "$tmpfile"
+    echo "export xp_reward=$xp_reward" >> "$tmpfile"
 }
 
+generate_3_missions() {
+    generate_random_mission 1
+    generate_random_mission 2
+    generate_random_mission 3
+}
 
+construct_new_mission_menu() {
+    MISSION_MENU=/mnt/SDCARD/App/BitPal/menus/new_mission.json
+    rm -f "$MISSION_MENU" 2>/dev/null
+
+    . /tmp/new_mission1
+    display_text_1="$display_text"
+    . /tmp/new_mission2
+    display_text_2="$display_text"
+    . /tmp/new_mission3
+    display_text_3="$display_text"
+
+    echo "[" > "$MISSION_MENU"
+    echo "  {" >> "$MISSION_MENU"
+    echo "    \"primary_text\": \"$display_text_1\"," >> "$MISSION_MENU"
+    echo "    \"value\": \"/mnt/SDCARD/App/BitPal/menus/main.sh accept 1\"" >> "$MISSION_MENU"
+    echo "  }," >> "$MISSION_MENU"
+    echo "  {" >> "$MISSION_MENU"
+    echo "    \"primary_text\": \"$display_text_2\"," >> "$MISSION_MENU"
+    echo "    \"value\": \"/mnt/SDCARD/App/BitPal/menus/main.sh accept 2\"" >> "$MISSION_MENU"
+    echo "  }," >> "$MISSION_MENU"
+    echo "  {" >> "$MISSION_MENU"
+    echo "    \"primary_text\": \"$display_text_3\"," >> "$MISSION_MENU"
+    echo "    \"value\": \"/mnt/SDCARD/App/BitPal/menus/main.sh accept 3\"" >> "$MISSION_MENU"
+    echo "  }" >> "$MISSION_MENU"
+    echo "]" >> "$MISSION_MENU"
+}
+
+accept_mission() {
+    selected_mission="$1"
+    . "$selected_mission"
+
+    for i in 1 2 3 4 5; do
+        if mission_exists "$i"; then
+            continue
+        else
+            index="$i"
+            break
+        fi
+    done
+
+    case "$type" in
+        discover|rediscover|surprise)
+            add_mission_to_active_json "$index" \
+            "$type" "$display_text" "$game" "$console" \
+            "$rompath" "$duration" "$xp_reward"
+            ;;
+        system)
+            select_game_from_system
+            ;;
+        any)
+            select_system
+            ;;
+    esac
+}
+
+mission_exists() {
+    index="$1"
+    [ ! -f "$MISSION_JSON" ] && return 1
+    jq -e --argjson index "$index" '.missions[$index] != null' "$MISSION_JSON" >/dev/null
+}
 
 # adds a mission with the specified details to your active missions file
 # example:
-# add_mission_to_active_json 1 surprise "SURPRISE GAME!" "Adventure Island (GB)" "/mnt/SDCARD/Roms/GB/Adventure Island.zip" 10 80 "$(date +%s)"
+# add_mission_to_active_json 1 surprise "SURPRISE GAME!" "Adventure Island (GB)" "GB" "/mnt/SDCARD/Roms/GB/Adventure Island.zip" 10 80
 add_mission_to_active_json() {
     tmpfile=$(mktemp)
     [ ! -f "$MISSION_JSON" ] && initialize_mission_data
@@ -387,14 +575,16 @@ add_mission_to_active_json() {
        --arg type "$2" \
        --arg display_text "$3" \
        --arg game "$4" \
-       --arg rompath "$5" \
-       --argjson duration "$6" \
-       --argjson xp_reward "$7" \
-       --argjson startdate "$8" \
+       --arg console "$5" \
+       --arg rompath "$6" \
+       --argjson duration "$7" \
+       --argjson xp_reward "$8" \
+       --argjson startdate "$(date +%s)" \
        '.missions[$index] = {
             type: $type,
             display_text: $display_text,
             game: $game,
+            console: $console,
             rompath: $rompath,
             duration: $duration,
             xp_reward: $xp_reward,

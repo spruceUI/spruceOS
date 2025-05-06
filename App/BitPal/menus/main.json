@@ -3,32 +3,24 @@
     "primary_text": "BitPal Status",
     "image_path": "",
     "image_path_selected": "",
-    "description": "",
-    "icon": null,
-    "value": "/mnt/SDCARD/App/BitPal/main.sh status"
+    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh status"
   },
   {
     "primary_text": "Start New Mission",
     "image_path": "",
     "image_path_selected": "",
-    "description": "",
-    "icon": null,
-    "value": ""
+    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh new"
   },
   {
     "primary_text": "Manage Missions",
     "image_path": "",
     "image_path_selected": "",
-    "description": "",
-    "icon": null,
     "value": ""
   },
   {
     "primary_text": "Mission History",
     "image_path": "",
     "image_path_selected": "",
-    "description": "",
-    "icon": null,
     "value": ""
   }
 ]

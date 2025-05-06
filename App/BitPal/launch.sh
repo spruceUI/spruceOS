@@ -23,10 +23,7 @@ sleep 0.1
 # Launch main BitPal menu
 export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/miyoo/lib"
-/mnt/SDCARD/spruce/flip/bin/python3 \
-/mnt/SDCARD/App/PyUI/main-ui/OptionSelectUI.py \
-"BitPal" "/mnt/SDCARD/App/BitPal/menus/main.json"
-
+call_menu "BitPal - Main" "main.json"
 
 set_random_negative_mood
 GUILT_TRIP="$(get_random_guilt_trip)"
