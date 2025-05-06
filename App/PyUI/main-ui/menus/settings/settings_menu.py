@@ -1,0 +1,176 @@
+
+import os
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
+from devices.device import Device
+from display.display import Display
+from display.on_screen_keyboard import OnScreenKeyboard
+from menus.settings.wifi_menu import WifiMenu
+from themes.theme import Theme
+from utils.py_ui_config import PyUiConfig
+from views.descriptive_list_view import DescriptiveListView
+from views.grid_or_list_entry import GridOrListEntry
+from views.selection import Selection
+
+
+class SettingsMenu:
+    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, config: PyUiConfig):
+        self.display = display
+        self.controller = controller
+        self.device = device
+        self.theme = theme
+        self.config : PyUiConfig = config 
+        self.on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
+        self.wifi_menu = WifiMenu(display,controller,device,theme)
+
+    def shutdown(self, input: ControllerInput):
+        if(ControllerInput.A == input):
+           self.device.run_app(self.device.power_off_cmd)
+    
+    def reboot(self, input: ControllerInput):
+        if(ControllerInput.A == input):
+            self.device.run_app(self.device.power_off_cmd)
+    
+    def brightness_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            self.device.lower_brightness()
+        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            self.device.raise_brightness()
+    
+    def volume_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input):
+            self.device.change_volume(-10)
+        elif(ControllerInput.L1 == input):
+            self.device.change_volume(-1)
+        elif(ControllerInput.DPAD_RIGHT == input):
+            self.device.change_volume(+10)
+        elif(ControllerInput.R1 == input):
+            self.device.change_volume(+1)
+
+    def show_on_screen_keyboard(self, input):
+        print(self.on_screen_keyboard.get_input())
+
+    def show_wifi_menu(self, input):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
+            if(self.device.is_wifi_enabled()):
+                self.device.disable_wifi()
+            else:
+                self.device.enable_wifi()
+        else:
+            self.wifi_menu.show_wifi_menu()
+
+    def get_theme_folders(self):
+        theme_dir = self.config["theme_dir"]
+        return sorted(
+            [name for name in os.listdir(theme_dir)
+            if os.path.isdir(os.path.join(theme_dir, name))]
+        )    
+    
+    def change_theme(self, input):
+        theme_folders = self.get_theme_folders()
+        selected_index = theme_folders.index(self.config["theme"])
+
+        if(ControllerInput.DPAD_LEFT == input):
+            selected_index-=1
+            if(selected_index < 0):
+                selected_index = len(theme_folders) -1
+        elif(ControllerInput.DPAD_RIGHT == input):
+            selected_index+=1
+            if(selected_index == len(theme_folders)):
+                selected_index = 0
+
+        self.config["theme"] = theme_folders[selected_index]
+        self.config.save()
+        self.theme.set_theme_path(os.path.join(self.config["theme_dir"], theme_folders[selected_index]))
+        self.display.init_fonts()   
+
+    def show_menu(self) :
+        selected = Selection(None, None, 0)
+
+        while(selected is not None):
+            option_list = []
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Brightness",
+                        value_text="<    " + str(self.device.brightness) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.brightness_adjust
+                    )
+            )
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Volume",
+                        value_text="<    " + str(self.device.volume) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.volume_adjust
+                    )
+            )
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="WiFi",
+                        value_text="<    " + ("On" if self.device.is_wifi_enabled() else "Off") + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.show_wifi_menu
+                    )
+            )
+            
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Theme",
+                        value_text="<    " + self.config["theme"] + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.change_theme
+                    )
+            )
+
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="On Screen Keyboard",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.show_on_screen_keyboard
+                    )
+            )
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Power Off",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.shutdown
+                    )
+            )
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Reboot",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.reboot
+                    )
+            )
+            list_view = DescriptiveListView(self.display,self.controller,self.device,self.theme, 
+                                              "Settings", option_list, self.theme.get_list_small_selected_bg(),
+                                              selected.get_index())
+            selected = list_view.get_selection([ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
+                                                  ControllerInput.L1, ControllerInput.R1])
+
+            if(selected is not None):
+                selected.get_selection().get_value()(selected.get_input())
