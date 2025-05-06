@@ -146,6 +146,8 @@ update_gtt() {
         jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
     fi
 
+	tmpfile=$(mktemp)
+	
     jq --arg game "$GTT_GAME_NAME" \
        --argjson newTime "$NEW_PLAYTIME" \
        --argjson numPlays "$NEW_NUM_SESSIONS" \
@@ -156,7 +158,7 @@ update_gtt() {
            playtime_seconds: $newTime,
            sessions_played: $numPlays,
            last_played: $lastPlayed
-       }' "$TRACKER_JSON_PATH" > /tmp/gtt.tmp.json && mv /tmp/gtt.tmp.json "$TRACKER_JSON_PATH"
+       }' "$TRACKER_JSON_PATH" > "$tmpfile" && mv "$tmpfile" "$TRACKER_JSON_PATH"
 
 	# clean up temp files to prevent accidental cross-pollination
 	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" /tmp/gtt.tmp.json 2>/dev/null

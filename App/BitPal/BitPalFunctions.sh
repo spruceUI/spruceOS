@@ -1,21 +1,63 @@
 #!/bin/sh
 
-BITPAL_APP_DIR=/mnt/SDCARD/App/BitPal
-FACE_DIR=$BITPAL_APP_DIR/bitpal_faces
+export BITPAL_APP_DIR=/mnt/SDCARD/App/BitPal
+export FACE_DIR=$BITPAL_APP_DIR/bitpal_faces
 
-BITPAL_DATA_DIR=/mnt/SDCARD/Saves/spruce/bitpal_data
-BITPAL_JSON=$BITPAL_DATA_DIR/bitpal.json
-MISSION_DIR=$BITPAL_DATA_DIR/active_missions
-COMPLETED_FILE=$BITPAL_DATA_DIR/completed.txt
+export BITPAL_DATA_DIR=/mnt/SDCARD/Saves/spruce/bitpal_data
+export BITPAL_JSON=$BITPAL_DATA_DIR/bitpal.json
+export MISSION_JSON=$BITPAL_DATA_DIR/active_missions.json
+export COMPLETED_JSON=$BITPAL_DATA_DIR/completed_missions.json
 
-GTT_JSON=/mnt/SDCARD/Saves/spruce/gtt.json
+export GTT_JSON=/mnt/SDCARD/Saves/spruce/gtt.json
 
-mkdir -p "$BITPAL_DIR"
-touch "$BITPAL_JSON"
+# ensure later referenced json paths in this dir are valid
+mkdir -p "$BITPAL_DATA_DIR"
+
+initialize_mission_data() {
+    jq -n '{ missions: {} }' > "$MISSION_JSON"
+}
+
+construct_mission() {
+    tmpfile=$(mktemp)
+    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
+    jq --argjson index "$1" \
+       --arg type "$2" \
+       --arg display_text "$3" \
+       --arg game "$4" \
+       --argjson duration "$5" \
+       --argjson startdate "$6" \
+       '.missions[$index] = {
+            type: $type,
+            display_text: $display_text,
+            game: $game,
+            duration: $duration,
+            startdate: $startdate,
+            time_spent: 0,
+            enddate: 0
+       }' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
+}
+
+complete_mission() {
+    INDEX="$1"
+
+    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
+    [ ! -f "$COMPLETED_JSON" ] && echo "[]" > "$COMPLETED_JSON"
+
+    # Extract mission from active_missions
+    MISSION=$(jq --argjson i "$INDEX" '.missions[$i]' "$MISSION_JSON")
+
+    # Remove it from active_missions.json
+    tmpfile=$(mktemp)
+    jq --argjson i "$INDEX" 'del(.missions[$i])' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
+
+    # Append mission to completed_missions.json
+    tmpfile=$(mktemp)
+    echo "$MISSION" | jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
+}
 
 initialize_bitpal_data() {
     DATETIME=$(date +%s)
-    jq -n --argjson datetime=$DATETIME '{ bitpal: {
+    jq -n --argjson datetime $DATETIME '{ bitpal: {
         name: "BitPal",
         level: 1,
         xp: 0,

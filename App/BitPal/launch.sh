@@ -3,6 +3,12 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
+if [ "$PLATFORM" = "A30" ]; then
+	BIN_DIR=/mnt/SDCARD/spruce/bin
+else
+	BIN_DIR=/mnt/SDCARD/spruce/bin64
+fi
+
 FACE="$(get_face)"
 GREETING="$(get_random_greeting)"
 FACT="$(get_random_fact)"
@@ -14,3 +20,5 @@ sleep 0.1
 
 display --okay -t "$FACT" -s 36 -p 50
 sleep 0.1
+
+cd "$BIN_DIR"
