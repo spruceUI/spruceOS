@@ -5,7 +5,7 @@
     "image_path_selected": "",
     "description": "",
     "icon": null,
-    "value": "/mnt/SDCARD/App/BitPal/view_status.sh"
+    "value": "/mnt/SDCARD/App/BitPal/main.sh status"
   },
   {
     "primary_text": "Start New Mission",

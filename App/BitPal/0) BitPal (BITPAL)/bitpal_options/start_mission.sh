@@ -26,43 +26,6 @@ get_clean_rom_name() {
     echo "$clean_name"
 }
 
-disable_game_switcher() {
-    local rom_path="$1"
-    local rom_platform="$2"
-    if [ -z "$rom_path" ] || [ -z "$rom_platform" ]; then
-        return 1
-    fi
-    local rom_name
-    rom_name=$(basename "$rom_path")
-    local rom_name_clean="${rom_name%.*}"
-    local game_config_dir="/mnt/SDCARD/Emus/$PLATFORM/$rom_platform.pak/game_settings"
-    local game_config="$game_config_dir/$rom_name_clean.conf"
-    if [ ! -d "$game_config_dir" ]; then
-        mkdir -p "$game_config_dir"
-    fi
-    if [ -f "$game_config" ]; then
-        if grep -q "^gameswitcher=.*#BitPal" "$game_config"; then
-            return 0
-        fi
-        if grep -q "^gameswitcher=" "$game_config"; then
-            local original_setting
-            original_setting=$(grep "^gameswitcher=" "$game_config" | cut -d'=' -f2)
-            if [ "$original_setting" != "OFF" ]; then
-                sed -i "s|^gameswitcher=.*|gameswitcher=OFF #BitPal original=$original_setting|" "$game_config"
-            fi
-        else
-            echo "gameswitcher=OFF #BitPal original=NONE" >> "$game_config"
-        fi
-    else
-        echo "gameswitcher=OFF #BitPal original=NONE_FILE" > "$game_config"
-    fi
-    if [ -f "$game_config" ] && grep -q "gameswitcher=OFF" "$game_config"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 check_mission_slots() {
     mission_count=$(find "$ACTIVE_MISSIONS_DIR" -type f -name "mission_*.txt" | wc -l)
     if [ "$mission_count" -ge 5 ]; then
@@ -178,37 +141,6 @@ find_completely_random_game() {
     return 1
 }
 
-restore_game_switcher() {
-    local rom_path="$1"
-    CURRENT_PATH=$(dirname "$rom_path")
-    ROM_FOLDER_NAME=$(basename "$CURRENT_PATH")
-    ROM_PLATFORM=""
-    while [ -z "$ROM_PLATFORM" ]; do
-         [ "$ROM_FOLDER_NAME" = "Roms" ] && { ROM_PLATFORM="UNK"; break; }
-         ROM_PLATFORM=$(echo "$ROM_FOLDER_NAME" | sed -n 's/.*(\(.*\)).*/\1/p')
-         [ -z "$ROM_PLATFORM" ] && { CURRENT_PATH=$(dirname "$CURRENT_PATH"); ROM_FOLDER_NAME=$(basename "$CURRENT_PATH"); }
-    done
-    local rom_name
-    rom_name=$(basename "$rom_path")
-    local rom_name_clean="${rom_name%.*}"
-    local game_config_dir="/mnt/SDCARD/Emus/$PLATFORM/$ROM_PLATFORM.pak/game_settings"
-    local game_config="$game_config_dir/$rom_name_clean.conf"
-    if [ -f "$game_config" ] && grep -q "#BitPal original=" "$game_config"; then
-        local original_setting
-        original_setting=$(grep "#BitPal original=" "$game_config" | sed -E 's/.*#BitPal original=([^ ]*).*/\1/')
-        if [ "$original_setting" = "NONE" ]; then
-            grep -v "^gameswitcher=" "$game_config" > "$game_config.tmp"
-            mv "$game_config.tmp" "$game_config"
-            if [ ! -s "$game_config" ]; then
-                rm -f "$game_config"
-            fi
-        elif [ "$original_setting" = "NONE_FILE" ]; then
-            rm -f "$game_config"
-        else
-            sed -i "s|^gameswitcher=OFF #BitPal original=$original_setting|gameswitcher=$original_setting|" "$game_config"
-        fi
-    fi
-}
 
 finalize_mission() {
     mission_file="$1"

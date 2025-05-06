@@ -337,23 +337,67 @@ initialize_mission_data() {
     jq -n '{ missions: {} }' > "$MISSION_JSON"
 }
 
+generate_random_mission() {
+
+    # randomly choose which mission type to generate
+    type_num=$((RANDOM % 5))
+    case $type_num in
+        0) type=discover ;;
+        1) type=rediscover ;;
+        2) type=system ;;
+        3) type=surprise ;;
+        4) type=any ;;
+    esac
+
+    # if nothing in GTT json yet, don't give rediscover missions
+    if [ ! -f "$GTT_JSON" ] || grep -q "games: {}" "$GTT_JSON"; then
+        if [ "$type" = "rediscover" ]; then
+            type=discover
+        fi
+    fi
+
+    # random duration between 5 and 25 minutes
+    duration=$((RANDOM % 15 + 10))
+
+    # get xp multiplier for given mission type
+    case "$2" in
+        discover) mult=7 ;;
+        rediscover) mult=7 ;;
+        system) mult=6 ;;
+        surprise) mult=8 ;;
+        any) mult=5 ;;
+    esac
+
+    # calculate xp reward
+    xp_reward=$((mult * duration))
+
+
+}
+
+
+
 # adds a mission with the specified details to your active missions file
 # example:
-# construct_mission 1 surprise "SURPRISE GAME!" "Adventure Island.zip (GB)" 660 "$(date +%s)"
-construct_mission() {
+# add_mission_to_active_json 1 surprise "SURPRISE GAME!" "Adventure Island (GB)" "/mnt/SDCARD/Roms/GB/Adventure Island.zip" 10 80 "$(date +%s)"
+add_mission_to_active_json() {
     tmpfile=$(mktemp)
     [ ! -f "$MISSION_JSON" ] && initialize_mission_data
+
     jq --argjson index "$1" \
        --arg type "$2" \
        --arg display_text "$3" \
        --arg game "$4" \
-       --argjson duration "$5" \
-       --argjson startdate "$6" \
+       --arg rompath "$5" \
+       --argjson duration "$6" \
+       --argjson xp_reward "$7" \
+       --argjson startdate "$8" \
        '.missions[$index] = {
             type: $type,
             display_text: $display_text,
             game: $game,
+            rompath: $rompath,
             duration: $duration,
+            xp_reward: $xp_reward,
             startdate: $startdate,
             time_spent: 0,
             enddate: 0
@@ -361,7 +405,7 @@ construct_mission() {
 }
 
 # moves a mission out of active missions and into completed missions
-complete_mission() {
+move_mission_to_completed_json() {
     INDEX="$1"
 
     [ ! -f "$MISSION_JSON" ] && initialize_mission_data

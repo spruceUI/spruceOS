@@ -131,7 +131,7 @@ calculate_current_session_duration() {
 }
 
 update_gtt() {
-    GTT_GAME_NAME="$GAME ($EMU_NAME)"
+    GTT_GAME_NAME="${GAME%.*} ($EMU_NAME)"
     SESSION_DURATION=$(cat "$DURATION_PATH")
     END_TIME=$(cat "$END_TIME_PATH")
 
@@ -149,11 +149,13 @@ update_gtt() {
 	tmpfile=$(mktemp)
 	
     jq --arg game "$GTT_GAME_NAME" \
+	   --arg rompath "$ROM_FILE" \
        --argjson newTime "$NEW_PLAYTIME" \
        --argjson numPlays "$NEW_NUM_SESSIONS" \
        --arg emu "$EMU_NAME" \
        --argjson lastPlayed "$END_TIME" \
        '.games[$game] += {
+	   	   rompath: $rompath,
            console: $emu,
            playtime_seconds: $newTime,
            sessions_played: $numPlays,
@@ -161,7 +163,7 @@ update_gtt() {
        }' "$TRACKER_JSON_PATH" > "$tmpfile" && mv "$tmpfile" "$TRACKER_JSON_PATH"
 
 	# clean up temp files to prevent accidental cross-pollination
-	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" /tmp/gtt.tmp.json 2>/dev/null
+	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" 2>/dev/null
 }
 
 ##### EMULATOR LAUNCH FUNCTIONS #####

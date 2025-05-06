@@ -3,7 +3,12 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
-display_bitpal_stats
+
+case "$1" in
+    status | stats) display_bitpal_stats ;;
+esac
+
+
 
 # return to main BitPal menu
 /mnt/SDCARD/spruce/flip/bin/python3 \
