@@ -2,7 +2,7 @@ import json
 
 class GameSystemConfig:
     def __init__(self, system_name):
-        config_path = f"/mnt/sdcard/Emu/{system_name}/config.json"
+        config_path = f"/mnt/SDCARD/Emu/{system_name}/config.json"
         with open(config_path, 'r', encoding='utf-8') as f:
             self._data = json.load(f)
 

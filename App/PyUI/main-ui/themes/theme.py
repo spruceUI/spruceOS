@@ -217,7 +217,7 @@ class Theme():
         if os.path.exists(font):
             return font 
         else:
-            return "/mnt/sdcard/Themes/SPRUCE/nunwen.ttf"
+            return "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
     
     def get_font_size(self, font_purpose : FontPurpose):
         match font_purpose:
@@ -306,13 +306,16 @@ class Theme():
         return (R, G, B)
 
     def get_descriptive_list_icon_offset_x(self):
-        return 10
-    
+        return getattr(self, "showBottomBar", None)
+
     def get_descriptive_list_icon_offset_y(self):
-        return 10
+        return getattr(self, "descriptiveListIconOffsetY", 10)
     
     def get_descriptive_list_text_offset_y(self):
-        return 15
+        return getattr(self, "descriptiveListTextOffsetY", 15)
     
     def get_descriptive_list_text_from_icon_offset(self):
-        return 20
+        return getattr(self, "descriptiveListTextFromIconOffset", 20)
+    
+    def get_grid_multirow_text_offset_y(self):
+        return getattr(self, "gridMultirowTextOffsetY", -25)

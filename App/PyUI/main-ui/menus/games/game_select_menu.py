@@ -15,7 +15,7 @@ from views.grid_or_list_entry import GridOrListEntry
 class GameSelectMenu(RomsMenuCommon):
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme):
         super().__init__(display,controller,device,theme)
-        self.roms_path = "/mnt/sdcard/Roms/"
+        self.roms_path = "/mnt/SDCARD/Roms/"
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
 
     def _is_favorite(self, favorites: list[GameEntry], rom_file_path):
