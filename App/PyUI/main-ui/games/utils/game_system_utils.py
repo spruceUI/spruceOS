@@ -4,8 +4,8 @@ import os
 
 class GameSystemUtils:
     def __init__(self):
-        self.roms_path = "/mnt/sdcard/Roms/"
-        self.emu_path = "/mnt/sdcard/Emu/"
+        self.roms_path = "/mnt/SDCARD/Roms/"
+        self.emu_path = "/mnt/SDCARD/Emu/"
 
 
     def is_system_active(self, folder):

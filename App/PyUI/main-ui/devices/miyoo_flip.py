@@ -193,8 +193,8 @@ class MiyooFlip(Device):
             return 0 # ???
 
     def run_game(self, file_path):
-        print(f"About to launch /mnt/sdcard/Emu/.emu_setup/standard_launch.sh {file_path}")
-        subprocess.run(["/mnt/sdcard/Emu/.emu_setup/standard_launch.sh",file_path])
+        print(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path}")
+        subprocess.run(["/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh",file_path])
 
     def run_app(self, args):
         print(f"About to launch app {args}")

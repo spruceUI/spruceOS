@@ -52,7 +52,7 @@ class GameConfigMenu:
 
             if(selected is not None):
                 # Miyoo handles this strangley
-                # Example rom /mnt/sdcard/Roms/PORTS/PokeMMO.sh               
+                # Example rom /mnt/SDCARD/Roms/PORTS/PokeMMO.sh               
                 # example arg /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
                 #/media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
                 miyoo_game_path = os.path.join("/media/sdcard0/Emu", self.game_system, "../../Roms", self.game_system, self.game)

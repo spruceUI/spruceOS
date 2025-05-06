@@ -35,11 +35,9 @@ class GridView:
         if(rows > 1):
             self.font_purpose = FontPurpose.GRID_MULTI_ROW
             self.font_bg_pad = 12
-            self.font_pad = 0
         else:
             self.font_purpose = FontPurpose.GRID_ONE_ROW
             self.font_bg_pad = 0
-            self.font_pad = 15
 
         self.selected_bg = selected_bg
      
@@ -81,18 +79,15 @@ class GridView:
             if(self.rows == 1) : 
                 y_icon_offset = self.display.get_center_of_usable_screen_height()
                 render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
-                # TODO this is just for legacy miyoo skins, otherwise we should calculate
-                # this some other way
-                y_text_offset = int(usable_height / 3) + y_pad + 50
             else :
                 y_index = int(visible_index / self.cols) 
-                y_icon_offset = int(y_pad + y_index * (icon_height + y_gap))
-                render_mode = RenderMode.TOP_CENTER_ALIGNED
-                y_text_offset = int(y_pad + y_index * (icon_height + y_gap))
+                row_spacing = self.display.get_usable_screen_height() / self.rows
+                row_start_y = y_index * row_spacing
+                row_mid_y = row_start_y + row_spacing /2
+                y_icon_offset = int(row_mid_y + self.display.get_top_bar_height())
+                render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
 
-            font_bg_pad = 0
             if(self.selected_bg is not None):
-                font_bg_pad = self.font_bg_pad
                 if(actual_index == self.selected):
                     self.display.render_image(self.selected_bg, 
                                             x_offset, 
@@ -108,7 +103,7 @@ class GridView:
             if(self.rows == 1) : 
                 real_y_text_offset = 325
             else:
-                real_y_text_offset = int(y_text_offset+actual_height - font_bg_pad + self.font_pad)
+                real_y_text_offset = y_icon_offset + actual_width//2 + self.theme.get_grid_multirow_text_offset_y()
 
             self.display.render_text_centered(imageTextPair.get_primary_text(), 
                                     x_offset,

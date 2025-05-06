@@ -26,6 +26,7 @@ class RomUtils:
             
             # Add valid file to the list
             valid_files.append(filepath)
+            print(f"Added {filepath}")
         
         valid_files.sort()
         

@@ -6,7 +6,7 @@ from apps.miyoo.miyoo_app_config import MiyooAppConfig
 class MiyooAppFinder:
 
     def __init__(self):
-        self.app_dir = "/mnt/sdcard/App/"
+        self.app_dir = "/mnt/SDCARD/App/"
 
     def get_apps(self):
         app_configs = []

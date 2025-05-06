@@ -76,7 +76,7 @@ class Display:
             raise RuntimeError("Failed to initialize SDL_ttf")
 
         # Load the TTF font
-        # font_path = "/mnt/sdcard/spruce/Font Files/Noto.ttf"
+        # font_path = "/mnt/SDCARD/spruce/Font Files/Noto.ttf"
         font_path = self.theme.get_font(font_purpose)
         font_size = self.theme.get_font_size(font_purpose)
         

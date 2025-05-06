@@ -9,10 +9,10 @@ class MiyooGamesFileParser:
         pass
 
     def parse_recents(self):
-        return self._parse('/mnt/sdcard/Roms/recentlist.json')
+        return self._parse('/mnt/SDCARD/Roms/recentlist.json')
 
     def parse_favorites(self):
-        return self._parse('/mnt/sdcard/Roms/favourite.json')
+        return self._parse('/mnt/SDCARD/Roms/favourite.json')
 
     def _parse(self, file_path):
         # List to hold the parsed JSON objects

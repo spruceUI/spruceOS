@@ -6,10 +6,10 @@ class PyUiConfig:
         self._data = initial_data or {}
 
     def save(self):
-        self._write_to_file("/mnt/sdcard/App/PyUI/main-ui/config.json")
+        self._write_to_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
 
     def load(self):
-        self._read_from_file("/mnt/sdcard/App/PyUI/main-ui/config.json")
+        self._read_from_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
 
     def _write_to_file(self, filepath):
         try:
