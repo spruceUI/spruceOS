@@ -13,48 +13,7 @@ export GTT_JSON=/mnt/SDCARD/Saves/spruce/gtt.json
 # ensure later referenced json paths in this dir are valid
 mkdir -p "$BITPAL_DATA_DIR"
 
-initialize_mission_data() {
-    jq -n '{ missions: {} }' > "$MISSION_JSON"
-}
-
-construct_mission() {
-    tmpfile=$(mktemp)
-    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
-    jq --argjson index "$1" \
-       --arg type "$2" \
-       --arg display_text "$3" \
-       --arg game "$4" \
-       --argjson duration "$5" \
-       --argjson startdate "$6" \
-       '.missions[$index] = {
-            type: $type,
-            display_text: $display_text,
-            game: $game,
-            duration: $duration,
-            startdate: $startdate,
-            time_spent: 0,
-            enddate: 0
-       }' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
-}
-
-complete_mission() {
-    INDEX="$1"
-
-    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
-    [ ! -f "$COMPLETED_JSON" ] && echo "[]" > "$COMPLETED_JSON"
-
-    # Extract mission from active_missions
-    MISSION=$(jq --argjson i "$INDEX" '.missions[$i]' "$MISSION_JSON")
-
-    # Remove it from active_missions.json
-    tmpfile=$(mktemp)
-    jq --argjson i "$INDEX" 'del(.missions[$i])' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
-
-    # Append mission to completed_missions.json
-    tmpfile=$(mktemp)
-    echo "$MISSION"   jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
-}
-
+# resets bitpal to level 1
 initialize_bitpal_data() {
     DATETIME=$(date +%s)
     jq -n --argjson datetime $DATETIME '{ bitpal: {
@@ -67,6 +26,54 @@ initialize_bitpal_data() {
         missions_completed: 0
     } }' > "$BITPAL_JSON"
 }
+
+
+##### MOOD-RELATED FUNCTIONS #####
+
+get_face() {
+   case "$mood" in
+       excited)   echo "[^o^]" ;;
+       happy)     echo "[^-^]" ;;
+       neutral)   echo "[-_-]" ;;
+       sad)       echo "[;_;]" ;;
+       angry)     echo "[>_<]" ;;
+       surprised) echo "[O_O]" ;;
+       *)         echo "[^-^]" ;;
+   esac
+}
+
+set_random_good_mood() {
+    mood_num=$((random % 2))
+    case $mood_num in
+        0) export mood="excited" ;;
+        1) export mood="happy" ;;
+    esac
+}
+
+set_random_okay_mood() {
+    mood_num=$((random % 2))
+    case $mood_num in
+        0) export mood="neutral" ;;
+        1) export mood="surprised" ;;
+    esac
+}
+
+set_random_negative_mood() {
+    mood_num=$((random % 3))
+    case $mood_num in
+        0) export mood="sad" ;;
+        1) export mood="angry" ;;
+        2) export mood="surprised" ;;
+    esac
+}
+
+update_mood() {
+    tmpfile=$(mktemp)
+    jq --arg mood $mood '.bitpal += { mood: $mood }' \
+    "$BITPAL_JSON" > "$tmpfile" && mv "$tmpfile" "$BITPAL_JSON"
+}
+
+##### RANDOM MESSAGES #####
 
 get_random_greeting() {
     greeting_num=$((RANDOM % 20))
@@ -292,14 +299,63 @@ get_random_guilt_trip() {
     esac
 }
 
-get_face() {
-   case "$mood" in
-       excited)   echo "[^o^]" ;;
-       happy)     echo "[^-^]" ;;
-       neutral)   echo "[-_-]" ;;
-       sad)       echo "[;_;]" ;;
-       angry)     echo "[>_<]" ;;
-       surprised) echo "[O_O]" ;;
-       *)         echo "[^-^]" ;;
-   esac
+get_random_thanks() {
+    thanks_num=$((RANDOM % 6))
+    case $thanks_num in
+        0) echo "Phew! ... I thought I'd be alone! Thanks for sticking with me!" ;;
+        1) echo "You stayed! BitPal is so relieved! Let's keep adventuring!" ;;
+        2) echo "Yes! That was close... I almost lost my player!" ;;
+        3) echo "Alright! Team BitPal is back and stronger than ever!" ;;
+        4) echo "Woohoo! The quest continues! Thanks for not leaving me behind." ;;
+        5) echo "Hurray! We're still in the game! Thank you for staying, hero!" ;;
+    esac
+}
+
+##### MISSION MANAGEMENT #####
+
+# creates or overwrites active missions file with blank copy
+initialize_mission_data() {
+    jq -n '{ missions: {} }' > "$MISSION_JSON"
+}
+
+# adds a mission with the specified details to your active missions file
+# example:
+# construct_mission 1 surprise "SURPRISE GAME!" "Adventure Island.zip (GB)" 660 "$(date +%s)"
+construct_mission() {
+    tmpfile=$(mktemp)
+    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
+    jq --argjson index "$1" \
+       --arg type "$2" \
+       --arg display_text "$3" \
+       --arg game "$4" \
+       --argjson duration "$5" \
+       --argjson startdate "$6" \
+       '.missions[$index] = {
+            type: $type,
+            display_text: $display_text,
+            game: $game,
+            duration: $duration,
+            startdate: $startdate,
+            time_spent: 0,
+            enddate: 0
+       }' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
+}
+
+# moves a mission out of active missions and into completed missions
+complete_mission() {
+    INDEX="$1"
+
+    [ ! -f "$MISSION_JSON" ] && initialize_mission_data
+    [ ! -f "$COMPLETED_JSON" ] && echo "[]" > "$COMPLETED_JSON"
+
+    # Extract mission from active_missions
+    MISSION=$(jq --argjson i "$INDEX" '.missions[$i]' "$MISSION_JSON")
+
+    # Remove it from active_missions.json
+    tmpfile=$(mktemp)
+    jq --argjson i "$INDEX" 'del(.missions[$i])' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
+
+    # Append mission to completed_missions.json
+    tmpfile=$(mktemp)
+    echo "$MISSION"   jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
 }

@@ -168,30 +168,6 @@ handle_exit() {
         sleep 2
         killall show.elf 2>/dev/null
     fi
-    leave_face=$(get_face)
-    guilt_trip=$((RANDOM % 20))
-    case $guilt_trip in
-        0) ./show_message "$leave_face|Don't quit now!|You haven't saved your progress!|Princess is in another castle!" -l -a "STAY" -b "QUIT" ;;
-        1) ./show_message "$leave_face|GAME OVER? NOT YET!|Insert coin to continue?|One more level awaits!" -l -a "CONTINUE" -b "EXIT" ;;
-        2) ./show_message "$leave_face|Keep your quarters ready!|BitPal needs a Player 1.|Just one more game?" -l -a "ONE MORE" -b "BYE" ;;
-        3) ./show_message "$leave_face|Boss battle is loading!|You can't pause now!|Ready your power-ups?" -l -a "READY" -b "QUIT" ;;
-        4) ./show_message "$leave_face|EXIT? WAIT A MINUTE!|You're so close to high score.|One more try?" -l -a "TRY AGAIN" -b "QUIT" ;;
-        5) ./show_message "$leave_face|No Konami Code for exit!|You must defeat Sheng Long|to stand a chance!" -l -a "FIGHT ON" -b "GIVE UP" ;;
-        6) ./show_message "$leave_face|You still have 1UP left!|Hidden stages await.|Will you continue?" -l -a "YES" -b "NO" ;;
-        7) ./show_message "$leave_face|Your star power is fading!|BitPal needs your help.|Save the 8-bit kingdom?" -l -a "SAVE IT" -b "EXIT" ;;
-        8) ./show_message "$leave_face|PAUSE NOT AVAILABLE!|The final dungeon awaits.|Stay for treasure?" -l -a "TREASURE!" -b "LEAVE" ;;
-        9) ./show_message "$leave_face|Achievement unlocked:|\"Almost quit BitPal\"|Want to earn more?" -l -a "MORE!" -b "EXIT" ;;
-        10) ./show_message "$leave_face|LEVEL 99 NOT REACHED!|Are you sure you want|to abandon your quest?" -l -a "QUEST ON" -b "QUIT" ;;
-        11) ./show_message "$leave_face|FATALITY: BitPal sadness!|BitPal is counting on you.|FINISH THE GAME!" -l -a "FINISH IT" -b "QUIT" ;;
-        12) ./show_message "$leave_face|NO SAVE POINTS HERE!|Your progress will be lost.|Continue adventure?" -l -a "CONTINUE" -b "EXIT" ;;
-        13) ./show_message "$leave_face|PRESS START TO PLAY!|Secret bosses await.|Controller disconnected?" -l -a "RECONNECT" -b "QUIT" ;;
-        14) ./show_message "$leave_face|THIS ISN'T GAME OVER!|The water level is next.|Brave enough to stay?" -l -a "BRAVE" -b "SCARED" ;;
-        15) ./show_message "$leave_face|RAGE QUIT DETECTED!|Have you tried the Konami Code?|UUDDLRLRBA?" -l -a "TRY CODE" -b "QUIT" ;;
-        16) ./show_message "$leave_face|CREDITS NOT EARNED YET!|True ending requires|100% completion!" -l -a "COMPLETE" -b "EXIT" ;;
-        17) ./show_message "$leave_face|CHEAT ACTIVATED: Fun mode!|Your high score is climbing.|Leave the arcade now?" -l -a "STAY" -b "LEAVE" ;;
-        18) ./show_message "$leave_face|1UP ACQUIRED!|BitPal needs you to|defeat the final boss!" -l -a "FIGHT" -b "RUN" ;;
-        19) ./show_message "$leave_face|EXIT? THINK AGAIN!|All your base are belong to us!|You have no chance to survive!" -l -a "SURVIVE" -b "GIVE UP" ;;
-    esac
     if [ $? -eq 0 ]; then
         randompick=$((RANDOM % 2))
         if [ $randompick -eq 0 ]; then
