@@ -66,6 +66,18 @@ class Device(ABC):
         pass
 
     @abstractmethod
+    def is_bluetooth_enabled(self):
+        pass
+
+    @abstractmethod
+    def disable_bluetooth(self):
+        pass
+
+    @abstractmethod
+    def enable_bluetooth(self):
+        pass
+
+    @abstractmethod
     def disable_wifi(self):
         pass
 
@@ -82,7 +94,7 @@ class Device(ABC):
         pass
 
     @abstractmethod
-    def run_app(self, args):
+    def run_app(self, args, dir = None):
         pass
 
     @abstractmethod
@@ -112,4 +124,18 @@ class Device(ABC):
     @property
     @abstractmethod
     def volume(self):
+        pass
+
+    @property
+    @abstractmethod
+    def power_off_cmd(self):
+        pass
+    
+    @property
+    @abstractmethod
+    def reboot_cmd(self):
+        pass
+
+    @abstractmethod
+    def get_rom_utils(self):
         pass

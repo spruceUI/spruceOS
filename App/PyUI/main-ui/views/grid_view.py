@@ -14,7 +14,8 @@ from views.selection import Selection
 class GridView:
 
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme,
-                  top_bar_text, options: List[GridOrListEntry], cols : int, rows: int,selected_bg : str = None):
+                  top_bar_text, options: List[GridOrListEntry], cols : int, rows: int,selected_bg : str = None,
+                  selected_index=0):
         self.display : Display = display
         self.controller : Controller = controller
         self.device : Device = device
@@ -22,7 +23,7 @@ class GridView:
         self.top_bar_text = top_bar_text
         self.options : List[GridOrListEntry] = options 
 
-        self.selected = 0
+        self.selected = selected_index
         self.toggles = [False] * len(options)
 
         self.current_left = 0

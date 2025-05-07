@@ -5,12 +5,15 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
+from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
 from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
+from views.view_creator import ViewCreator
+from views.view_type import ViewType
 
 
 class SettingsMenu:
@@ -22,6 +25,8 @@ class SettingsMenu:
         self.config : PyUiConfig = config 
         self.on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
         self.wifi_menu = WifiMenu(display,controller,device,theme)
+        self.bt_menu = BluetoothMenu(display,controller,device,theme)
+        self.view_creator = ViewCreator(display,controller,device,theme)
 
     def shutdown(self, input: ControllerInput):
         if(ControllerInput.A == input):
@@ -29,7 +34,7 @@ class SettingsMenu:
     
     def reboot(self, input: ControllerInput):
         if(ControllerInput.A == input):
-            self.device.run_app(self.device.power_off_cmd)
+            self.device.run_app(self.device.reboot_cmd)
     
     def brightness_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
@@ -58,6 +63,17 @@ class SettingsMenu:
                 self.device.enable_wifi()
         else:
             self.wifi_menu.show_wifi_menu()
+
+    def show_bt_menu(self, input):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
+            if(self.device.is_bluetooth_enabled()):
+                self.device.disable_bluetooth()
+            else:
+                self.device.enable_bluetooth()
+        else:
+            self.bt_menu.show_bluetooth_menu()
+
+
 
     def get_theme_folders(self):
         theme_dir = self.config["theme_dir"]
@@ -122,6 +138,17 @@ class SettingsMenu:
                         value=self.show_wifi_menu
                     )
             )
+            option_list.append(
+                GridOrListEntry(
+                        primary_text="Bluetooth",
+                        value_text="<    " + ("On" if self.device.is_bluetooth_enabled() else "Off") + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.show_bt_menu
+                    )
+            )
             
             option_list.append(
                 GridOrListEntry(
@@ -166,9 +193,12 @@ class SettingsMenu:
                         value=self.reboot
                     )
             )
-            list_view = DescriptiveListView(self.display,self.controller,self.device,self.theme, 
-                                              "Settings", option_list, self.theme.get_list_small_selected_bg(),
-                                              selected.get_index())
+            list_view = self.view_creator.create_view(
+                view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
+                top_bar_text="Settings", 
+                options=option_list,
+                selected_index=selected.get_index())
+
             selected = list_view.get_selection([ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1])
 

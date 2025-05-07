@@ -8,6 +8,9 @@ from menus.games.game_system_config import GameSystemConfig
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
+from views.selection import Selection
+from views.view_creator import ViewCreator
+from views.view_type import ViewType
 
 
 class GameSystemSelectMenu:
@@ -19,9 +22,10 @@ class GameSystemSelectMenu:
         self.game_utils : GameSystemUtils = GameSystemUtils()
         self.rom_select_menu : GameSelectMenu = GameSelectMenu(display,controller,device,theme)
         self.use_emu_cfg = False
+        self.view_creator = ViewCreator(display,controller,device,theme)
 
     def run_system_selection(self) :
-        selected = "new"
+        selected = Selection(None,None,0)
         systems_list = []
         for system in self.game_utils.get_active_systems():
             sysConfig = GameSystemConfig(system)
@@ -48,7 +52,13 @@ class GameSystemSelectMenu:
                     )                
                 )
 
-        options_list = GridView(self.display,self.controller,self.device,self.theme, "Game", systems_list, 4, 2,
-                                self.theme.system_selected_bg())
-        while((selected := options_list.get_selection()) is not None):
+        view = self.view_creator.create_view(
+            view_type=self.theme.get_view_type_for_system_select_menu(),
+            top_bar_text="Game", 
+            options=systems_list, 
+            cols=4, 
+            rows=2,
+            selected_index=selected.get_index())
+
+        while((selected := view.get_selection()) is not None):
             self.rom_select_menu.run_rom_selection(selected.get_selection().get_primary_text())
