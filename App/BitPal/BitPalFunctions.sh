@@ -530,13 +530,13 @@ construct_new_mission_menu() {
 }
 
 construct_active_missions_menu() {
-    MANAGE_MENU=/mnt/SDCARD/App/BitPal/menus/active_missions.json
+    ACTIVE_MENU=/mnt/SDCARD/App/BitPal/menus/active_missions.json
     tmpfile="$(mktemp)"
     echo "[]" > "$tmpfile"
     for mission in 1 2 3 4 5; do
         if mission_exists "$mission"; then
             primary_text="$mission) $(jq -r ".missions[\"$mission\"].display_text" "$MISSION_JSON")"
-            value="/mnt/SDCARD/App/BitPal/menus/main.sh view_mission_details $mission"
+            value="/mnt/SDCARD/App/BitPal/menus/main.sh manage_mission $mission"
             jq --arg primary_text "$primary_text" \
                --arg value "$value" \
                 '. += [{ 
@@ -547,6 +547,41 @@ construct_active_missions_menu() {
                 }]' "$tmpfile" > "${tmpfile}.new" && mv "${tmpfile}.new" "$tmpfile"
         fi
     done
+    mv "$tmpfile" "$ACTIVE_MENU"
+}
+
+construct_individual_mission_menu() {
+    mission_index="$1"
+    MANAGE_MENU=/mnt/SDCARD/App/BitPal/menus/manage_mission.json
+    tmpfile="$(mktemp)"
+    echo "[]" > "$tmpfile"
+
+    value="/mnt/SDCARD/App/BitPal/menus/main.sh view_mission_details $mission_index"
+    jq --arg value "$value" \
+        '. += [{
+            primary_text: "View Progress",
+            image_path: "",
+            image_path_selected: "",
+            value: $value
+        }]'  "$tmpfile" > "${tmpfile}.new" && mv "${tmpfile}.new" "$tmpfile"
+
+    value="/mnt/SDCARD/App/BitPal/menus/main.sh queue_game $mission_index"
+    jq --arg value "$value" \
+        '. += [{
+            primary_text: "Resume Mission",
+            image_path: "",
+            image_path_selected: "",
+            value: $value
+        }]'  "$tmpfile" > "${tmpfile}.new" && mv "${tmpfile}.new" "$tmpfile"
+
+    value="/mnt/SDCARD/App/BitPal/menus/main.sh cancel_mission $mission_index"
+    jq --arg value "$value" \
+        '. += [{
+            primary_text: "Cancel Mission",
+            image_path: "",
+            image_path_selected: "",
+            value: $value
+        }]'  "$tmpfile" > "${tmpfile}.new" && mv "${tmpfile}.new" "$tmpfile"
     mv "$tmpfile" "$MANAGE_MENU"
 }
 
@@ -582,7 +617,14 @@ $display_text
  
 $time_spent_string
 Reward: $xp_reward XP"
+}
 
+launch_mission() {
+    mission_index="$1"
+    rompath="$(jq -r --arg mission_index "$mission_index" \
+        '.missions[$mission_index].rompath' "$MISSION_JSON")"
+    cmd="/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh \"$rompath\""
+    echo "$cmd" > "/tmp/cmd_to_run.sh"
 }
 
 accept_mission() {

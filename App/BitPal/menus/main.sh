@@ -38,6 +38,17 @@ case "$1" in
     view_mission_details)
         display_mission_details "$2"
         call_menu "BitPal - Current Missions" "active_missions.json"
+        ;;
+    manage_mission)
+        construct_individual_mission_menu "$2"
+        display_mission_details "$2"
+        call_menu "BitPal - Mission $2" "manage_mission.json"
+        ;;
+    queue_game)
+        launch_mission "$2"
+        ;;
+    cancel_mission)
+        return
 
         ;;
     history)

@@ -63,6 +63,11 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
+    if [ -f /mnt/SDCARD/spruce/flags/bitpal.lock ]; then
+        /mnt/SDCARD/App/BitPal/bitpal.sh
+        rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
+    fi
+
     # Check whether to launch into EmulationStation (only for Flip!)
     if [ "$PLATFORM" = "Flip" ]; then
         runee=$(/usr/miyoo/bin/jsonval runee)
