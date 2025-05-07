@@ -189,7 +189,12 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                MainUI
+                if [ -f /mnt/sdcard/App/PyUI/.enabled ]; then
+                    export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py &> /dev/null
+                else
+                    MainUI
+                fi
                 ;;
         esac
 
