@@ -561,7 +561,7 @@ accept_mission() {
 mission_exists() {
     index="$1"
     [ ! -f "$MISSION_JSON" ] && return 1
-    jq -e --argjson index "$index" '.missions[$index] != null' "$MISSION_JSON" >/dev/null
+    jq -e --arg index "$index" '.missions[$index] != null' "$MISSION_JSON" >/dev/null
 }
 
 # adds a mission with the specified details to your active missions file
@@ -571,27 +571,27 @@ add_mission_to_active_json() {
     tmpfile=$(mktemp)
     [ ! -f "$MISSION_JSON" ] && initialize_mission_data
 
-    jq --argjson index "$1" \
-       --arg type "$2" \
-       --arg display_text "$3" \
-       --arg game "$4" \
-       --arg console "$5" \
-       --arg rompath "$6" \
-       --argjson duration "$7" \
-       --argjson xp_reward "$8" \
-       --argjson startdate "$(date +%s)" \
-       '.missions[$index] = {
+    jq --arg index "$1" \
+    --arg type "$2" \
+    --arg display_text "$3" \
+    --arg game "$4" \
+    --arg console "$5" \
+    --arg rompath "$6" \
+    --arg duration "$7" \
+    --arg xp_reward "$8" \
+    --arg startdate "$(date +%s)" \
+    '.missions[$index] = {
             type: $type,
             display_text: $display_text,
             game: $game,
             console: $console,
             rompath: $rompath,
-            duration: $duration,
-            xp_reward: $xp_reward,
-            startdate: $startdate,
+            duration: ($duration|tonumber),
+            xp_reward: ($xp_reward|tonumber),
+            startdate: ($startdate|tonumber),
             time_spent: 0,
             enddate: 0
-       }' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
+    }' "$MISSION_JSON" > "$tmpfile" && mv "$tmpfile" "$MISSION_JSON"
 }
 
 # moves a mission out of active missions and into completed missions

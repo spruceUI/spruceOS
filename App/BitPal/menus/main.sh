@@ -15,7 +15,7 @@ case "$1" in
         construct_new_mission_menu
         call_menu "BitPal - New Mission" "new_mission.json" ;;
     accept)
-        selected_mission="/tmp/new_mission$2"
+        selected_mission="/tmp/new_mission${2}"
         accept_mission "$selected_mission"
         display -p 50 -d 2 -s 36 -t "Mission accepted!"
 
