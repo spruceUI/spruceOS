@@ -71,6 +71,10 @@ kill_emulator() {
     else
         killall -q -CONT pico8_dyn pico8_64
         killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64
+        pid=$(ps -f | grep -E "MainUI.py" | grep -v "grep" | awk 'NR==1 {print $1}')
+        if [[ -n "$pid" ]]; then
+            kill -9 $pid
+        fi
     fi
 }
 
