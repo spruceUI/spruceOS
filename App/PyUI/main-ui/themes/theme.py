@@ -3,6 +3,7 @@ import os
 
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
+from views.view_type import ViewType
 
 class Theme():
     
@@ -10,6 +11,7 @@ class Theme():
         self.set_theme_path(path)
 
     def set_theme_path(self,path):
+        self.__dict__.clear()
         self.path = path
         self.load_defaults_for_values_not_in_miyoo_theme()
         self.load_from_file(os.path.join(path,"config.json"))
@@ -24,6 +26,10 @@ class Theme():
         # Store top-level keys as attributes
         for key, value in data.items():
             setattr(self, key, value)
+
+        description = getattr(self, "description", "UNKNOWN")
+        print(f"Loaded Theme : {description}")
+     
 
     @property
     def background(self):
@@ -171,7 +177,7 @@ class Theme():
     def system_selected(self, system):
         return os.path.join(self.path,"icons","sel",system.lower() +".png")
     
-    def system_selected_bg(self):
+    def _grid_4_x_2_selected_bg(self):
         return os.path.join(self.path,"skin","bg-game-item-f.png")
     
     def get_system_icon_name(self,system):
@@ -319,3 +325,26 @@ class Theme():
     
     def get_grid_multirow_text_offset_y(self):
         return getattr(self, "gridMultirowTextOffsetY", -25)
+
+    def get_grid_bg(self, rows, cols):
+        if(rows > 1):
+            #TODO better handle this dynamically
+            return self._grid_4_x_2_selected_bg()
+        else:
+            return None
+        
+    def get_view_type_for_main_menu(self):
+        view_type_str = getattr(self, "mainMenuViewType", "GRID_VIEW")
+        view_type = getattr(ViewType, view_type_str, ViewType.GRID_VIEW)
+        return view_type
+            
+    def get_view_type_for_system_select_menu(self):
+        view_type_str = getattr(self, "systemSelectViewType", "GRID_VIEW")
+        view_type = getattr(ViewType, view_type_str, ViewType.GRID_VIEW)
+        return view_type
+            
+    def get_view_type_for_app_menu(self):
+        view_type_str = getattr(self, "appMenuViewType", "DESCRIPTIVE_LIST_VIEW")
+        view_type = getattr(ViewType, view_type_str, ViewType.DESCRIPTIVE_LIST_VIEW)
+        return view_type
+    

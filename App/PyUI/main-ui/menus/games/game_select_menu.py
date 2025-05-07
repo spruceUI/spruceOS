@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import subprocess
+import time
 from controller.controller import Controller
 from devices.device import Device
 from display.display import Display
@@ -21,13 +22,25 @@ class GameSelectMenu(RomsMenuCommon):
     def _is_favorite(self, favorites: list[GameEntry], rom_file_path):
         return any(Path(rom_file_path).resolve() == Path(fav.rom_path).resolve() for fav in favorites)
 
+    def _build_favorites_dict(self):
+        favorites = self.device.parse_favorites()
+        favorite_paths = []
+        for favorite in favorites:
+            favorite_paths.append(str(Path(favorite.rom_path).resolve()))
+
+        return favorite_paths
+
     def _get_rom_list(self) -> list[GridOrListEntry]:
         rom_list = []
-        favorites = self.device.parse_favorites()
+        favorites = self._build_favorites_dict()
+        start_time = time.time()
+
         for rom_file_path in self.rom_utils.get_roms(self.game_system):
             rom_file_name = os.path.basename(rom_file_path)
             img_path = self._get_image_path(rom_file_path)
-            icon=self.theme.favorite_icon if self._is_favorite(favorites, rom_file_path) else None
+            resolved_folder = str(Path(os.path.dirname(rom_file_path)).resolve())
+            resolved_file_path = resolved_folder+"/"+rom_file_name
+            icon=self.theme.favorite_icon if resolved_file_path in favorites else None
             rom_list.append(
                 GridOrListEntry(
                     primary_text=self._remove_extension(rom_file_name),
@@ -37,6 +50,8 @@ class GameSelectMenu(RomsMenuCommon):
                     icon=icon,
                     value=rom_file_path)
             )
+        elapsed = time.time() - start_time
+
         return rom_list
 
     def run_rom_selection(self,game_system) :

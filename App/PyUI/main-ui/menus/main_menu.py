@@ -11,6 +11,9 @@ from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
+from views.selection import Selection
+from views.view_creator import ViewCreator
+from views.view_type import ViewType
 
 
 class MainMenu:
@@ -24,9 +27,10 @@ class MainMenu:
         self.favorites_menu = FavoritesMenu(display,controller,device,theme)
         self.recents_menu = RecentsMenu(display,controller,device,theme)
         self.settings_menu = SettingsMenu(display,controller,device,theme, config)
+        self.view_creator = ViewCreator(display,controller,device,theme)
 
     def run_main_menu_selection(self):
-        selected = "new"
+        selected = Selection(None,None,0)
 
         while(selected is not None):        
 
@@ -39,7 +43,7 @@ class MainMenu:
                             image_path=self.theme.favorite,
                             image_path_selected=self.theme.favorite_selected,
                             description=first_entry,
-                            icon=self.theme.favorite_selected,
+                            icon=self.theme.favorite,
                             value=first_entry
                 ),                    
                 GridOrListEntry(
@@ -47,7 +51,7 @@ class MainMenu:
                             image_path=self.theme.game,
                             image_path_selected=self.theme.game_selected,
                             description="Your games",
-                            icon=self.theme.game_selected,
+                            icon=self.theme.game,
                             value="Game"
                 ),
                 GridOrListEntry(
@@ -55,7 +59,7 @@ class MainMenu:
                             image_path=self.theme.app,
                             image_path_selected=self.theme.app_selected,
                             description="Your Apps",
-                            icon=self.theme.app_selected,
+                            icon=self.theme.app,
                             value="App"
                 ),      
                 GridOrListEntry(
@@ -63,13 +67,19 @@ class MainMenu:
                             image_path=self.theme.settings,
                             image_path_selected=self.theme.settings_selected,
                             description="Your Apps",
-                            icon=self.theme.settings_selected,
+                            icon=self.theme.settings,
                             value="Setting"
                 ),            
             ]
 
-            options_list = GridView(self.display,self.controller,self.device,self.theme, "SPRUCE", image_text_list, 4, 1)
-            if((selected := options_list.get_selection()) is not None):        
+            view = self.view_creator.create_view(
+                view_type=self.theme.get_view_type_for_main_menu(),
+                top_bar_text="SPRUCE", 
+                options=image_text_list, 
+                cols=4, 
+                rows=1,
+                selected_index=selected.get_index())
+            if((selected := view.get_selection()) is not None):        
                 if(selected.get_selection().get_primary_text() == "Game"):
                     self.system_select_menu.run_system_selection()
                 elif(selected.get_selection().get_primary_text() == "App"):

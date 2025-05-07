@@ -10,7 +10,7 @@ from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 
-class ImageListView(NonDescriptiveListView):
+class TextListView(NonDescriptiveListView):
     SHOW_ICONS = True
     DONT_SHOW_ICONS = False
 
@@ -39,33 +39,24 @@ class ImageListView(NonDescriptiveListView):
             actual_index = self.current_top + visible_index
            
             x_value = 20 #TODO get this from somewhere
-            y_value = (self.base_y_offset + visible_index * self.line_height)  + self.line_height//2
-            render_mode=RenderMode.MIDDLE_LEFT_ALIGNED
+            y_value = self.base_y_offset + visible_index * self.line_height
+
             if actual_index == self.selected:
                 color = self.theme.text_color_selected(FontPurpose.LIST)
                 if(self.selected_bg is not None):
-                    self.display.render_image(self.selected_bg,0, y_value, render_mode)
+                    self.display.render_image(self.selected_bg,0, y_value)
             else:
                 color = self.theme.text_color(FontPurpose.LIST)
 
             if(self.show_icons and imageTextPair.get_icon() is not None):
-                icon_width, icon_height = self.display.render_image(imageTextPair.get_icon(),x_value, y_value, render_mode)
+                icon_width, icon_height = self.display.render_image(imageTextPair.get_icon(),x_value, y_value)
                 x_value += icon_width
             else:
                 pass
 
-            self.display.render_text(imageTextPair.get_primary_text(), x_value, y_value, color, FontPurpose.LIST,
-                                    render_mode)
+            self.display.render_text(imageTextPair.get_primary_text(), x_value, y_value + self.line_height//2, color, FontPurpose.LIST,
+                                    RenderMode.MIDDLE_LEFT_ALIGNED)
 
 
     def _render_image(self, visible_options):
-        for visible_index, (imageTextPair) in enumerate(visible_options):
-            actual_index = self.current_top + visible_index
-            imagePath = imageTextPair.get_image_path_selected() if actual_index == self.selected else imageTextPair.get_image_path()
-            if(actual_index == self.selected and imagePath is not None):
-                self.display.render_image(imagePath, 
-                                     self.img_offset_x, 
-                                     self.img_offset_y,
-                                     self.image_render_mode,
-                                     self.img_width,
-                                     self.img_height)
+        pass
