@@ -51,15 +51,17 @@ class Display:
         # Use default renderer flags
         self.renderer = sdl2.ext.Renderer(self.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
 
-    def _deinit_display(self):
-        sdl2.SDL_DestroyRenderer(self.renderer.sdlrenderer)
-        self.renderer = None
-        sdl2.SDL_DestroyWindow(self.window.window)
-        self.window = None
+    def deinit_display(self):
+        if(self.renderer is not None):
+            sdl2.SDL_DestroyRenderer(self.renderer.sdlrenderer)
+            self.renderer = None
+        if(self.window is not None):
+            sdl2.SDL_DestroyWindow(self.window.window)
+            self.window = None
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
 
     def reinitialize(self):
-        self._deinit_display()
+        self.deinit_display()
         self._init_display()
         self.clear("reinitialize")
         self.present()
@@ -90,7 +92,9 @@ class Display:
         self.screen = screen
         self._check_for_bg_change()
         sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
-    
+        self.top_bar.render_top_bar(self.screen)
+        self.bottom_bar.render_bottom_bar()
+
     def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height):
         # Maintain aspect ratio
         if target_width and target_height:
@@ -195,8 +199,6 @@ class Display:
         return self.fonts[purpose].line_height;
         
     def present(self):
-        self.top_bar.render_top_bar(self.screen)
-        self.bottom_bar.render_bottom_bar()
         self.renderer.present()
 
     def get_top_bar_height(self):

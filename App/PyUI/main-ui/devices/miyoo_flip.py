@@ -9,6 +9,7 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.wifi.wifi_status import WifiStatus
 from games.utils.game_entry import GameEntry
+from games.utils.rom_utils import RomUtils
 import sdl2
 from utils import throttle
 
@@ -24,12 +25,15 @@ class MiyooFlip(Device):
             sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
             sdl2.SDL_CONTROLLER_BUTTON_X: ControllerInput.Y,
             sdl2.SDL_CONTROLLER_BUTTON_Y: ControllerInput.X,
+            sdl2.SDL_CONTROLLER_BUTTON_GUIDE: ControllerInput.MENU,
             sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP: ControllerInput.DPAD_UP,
             sdl2.SDL_CONTROLLER_BUTTON_DPAD_DOWN: ControllerInput.DPAD_DOWN,
             sdl2.SDL_CONTROLLER_BUTTON_DPAD_LEFT: ControllerInput.DPAD_LEFT,
             sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT: ControllerInput.DPAD_RIGHT,
             sdl2.SDL_CONTROLLER_BUTTON_LEFTSHOULDER: ControllerInput.L1,
             sdl2.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: ControllerInput.R1,
+            sdl2.SDL_CONTROLLER_BUTTON_LEFTSTICK: ControllerInput.L3,
+            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSTICK: ControllerInput.R3,
             sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
@@ -196,9 +200,12 @@ class MiyooFlip(Device):
         print(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path}")
         subprocess.run(["/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh",file_path])
 
-    def run_app(self, args):
+    def run_app(self, args, dir = None):
         print(f"About to launch app {args}")
-        subprocess.run(args)
+        if(dir is not None):
+            subprocess.run(args, cwd = dir)
+        else:
+            subprocess.run(args, cwd = dir)
 
     #TODO untested
     def map_analog_axis(self,sdl_input, value, threshold=16000):
@@ -225,8 +232,11 @@ class MiyooFlip(Device):
         return None
     
     def map_input(self, sdl_input):
-        return self.sdl_button_to_input[sdl_input]
-    
+        mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
+        if(ControllerInput.UNKNOWN == mapping):
+            print(f"Unknown input {sdl_input}")
+        return mapping
+
     def get_wifi_link_quality_level(self):
         try:
             output = subprocess.check_output(
@@ -263,8 +273,7 @@ class MiyooFlip(Device):
     def is_wifi_enabled(self, interface="wlan0"):
         result = subprocess.run(["ip", "link", "show", interface], capture_output=True, text=True)
         return "UP" in result.stdout
-    
-    
+
     def disable_wifi(self,interface="wlan0"):
         subprocess.run(["ip", "link", "set", interface, "down"], capture_output=True, text=True)
         self.get_wifi_status.force_refresh()
@@ -301,3 +310,28 @@ class MiyooFlip(Device):
     
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
+
+    def get_rom_utils(self):
+        return RomUtils("/mnt/SDCARD/Roms/")
+    
+    
+    def is_bluetooth_enabled(self):
+        try:
+            # Run 'ps' to check for bluetoothd process
+            result = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            # Check if bluetoothd is in the process list
+            return 'bluetoothd' in result.stdout
+        except Exception as e:
+            print(f"Error checking bluetoothd status: {e}")
+            return False
+    
+    
+    def disable_bluetooth(self):
+        subprocess.run(["killall","-9","bluetoothd"])
+
+    def enable_bluetooth(self):
+        if(not self.is_bluetooth_enabled()):
+            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
+                            cwd='/usr/libexec/bluetooth/',
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
