@@ -26,18 +26,18 @@ case "$1" in
         display -p 50 -d 2 -s 36 -t "Mission accepted!"
         call_menu "BitPal - Main" "main.json"
         ;;
-    manage)
+    view_active)
         if missions_empty; then
             display -p 50 --okay -s 36 -t "You don't currently have any missions! You must accept one or more missions before you can manage them."
             call_menu "BitPal - Main" "main.json"
         else
-            construct_manage_mission_menu
-            call_menu "BitPal - Current Missions" "manage_missions.json"
+            construct_active_missions_menu
+            call_menu "BitPal - Active Missions" "active_missions.json"
         fi
         ;;
     view_mission_details)
         display_mission_details "$2"
-        call_menu "BitPal - Current Missions" "manage_missions.json"
+        call_menu "BitPal - Current Missions" "active_missions.json"
 
         ;;
     history)

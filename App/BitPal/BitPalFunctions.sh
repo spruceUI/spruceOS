@@ -529,8 +529,8 @@ construct_new_mission_menu() {
     echo "]" >> "$MISSION_MENU"
 }
 
-construct_manage_mission_menu() {
-    MANAGE_MENU=/mnt/SDCARD/App/BitPal/menus/manage_missions.json
+construct_active_missions_menu() {
+    MANAGE_MENU=/mnt/SDCARD/App/BitPal/menus/active_missions.json
     tmpfile="$(mktemp)"
     echo "[]" > "$tmpfile"
     for mission in 1 2 3 4 5; do

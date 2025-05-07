@@ -12,10 +12,10 @@
     "value": "/mnt/SDCARD/App/BitPal/menus/main.sh new"
   },
   {
-    "primary_text": "Manage Missions",
+    "primary_text": "Active Missions",
     "image_path": "",
     "image_path_selected": "",
-    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh manage"
+    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh view_active"
   },
   {
     "primary_text": "Mission History",
