@@ -15,12 +15,12 @@
     "primary_text": "Manage Missions",
     "image_path": "",
     "image_path_selected": "",
-    "value": ""
+    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh manage"
   },
   {
     "primary_text": "Mission History",
     "image_path": "",
     "image_path_selected": "",
-    "value": ""
+    "value": "/mnt/SDCARD/App/BitPal/menus/main.sh history"
   }
 ]

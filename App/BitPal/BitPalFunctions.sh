@@ -22,7 +22,6 @@ call_menu() {
     "$title" /mnt/SDCARD/App/BitPal/menus/$menu
 }
 
-
 # resets bitpal to level 1
 initialize_bitpal_data() {
     DATETIME=$(date +%s)
@@ -360,7 +359,7 @@ get_random_system() {
         for file in "$d"/*; do
             file="$(basename $file)"
             case "$file" in
-                Imgs|imgs|IMGS|IMGs|*.db|*.json|*.txt|*.xml) continue ;;
+                Imgs|imgs|IMGS|IMGs|*.db|*.json|*.txt|*.xml|.gitkeep) continue ;;
                 *) has_roms="true"; count=$((count + 1)); break ;;
             esac
         done
@@ -383,7 +382,7 @@ is_valid_rom() {
             return 0
         fi
     fi
-    if echo "$file" | grep -qiE '\.(txt|log|cfg|ini)$'; then
+    if echo "$file" | grep -qiE '\.(txt|log|cfg|ini|gitkeep)$'; then
         return 1
     fi
     if echo "$file" | grep -qiE '\.(jpg|jpeg|png|bmp|gif|tiff|webp)$'; then
@@ -530,6 +529,27 @@ construct_new_mission_menu() {
     echo "]" >> "$MISSION_MENU"
 }
 
+construct_manage_mission_menu() {
+    MANAGE_MENU=/mnt/SDCARD/App/BitPal/menus/manage_missions.json
+    tmpfile="$(mktemp)"
+    echo "[]" > "$tmpfile"
+    for mission in 1 2 3 4 5; do
+        if mission_exists "$mission"; then
+            primary_text="$mission) $(jq -r ".missions[\"$mission\"].display_text" "$MISSION_JSON")"
+            value="/mnt/SDCARD/App/BitPal/menus/main.sh view_mission $mission"
+            jq --arg primary_text "$primary_text" \
+               --arg value "$value" \
+                '. += [{ 
+                    primary_text: $primary_text,
+                    image_path: "", 
+                    image_path_selected: "", 
+                    value: $value 
+                }]' "$tmpfile" > "${tmpfile}.new" && mv "${tmpfile}.new" "$tmpfile"
+        fi
+    done
+    mv "$tmpfile" "$MANAGE_MENU"
+}
+
 accept_mission() {
     selected_mission="$1"
     . "$selected_mission"
@@ -562,6 +582,34 @@ mission_exists() {
     index="$1"
     [ ! -f "$MISSION_JSON" ] && return 1
     jq -e --arg index "$index" '.missions[$index] != null' "$MISSION_JSON" >/dev/null
+}
+
+missions_full() {
+    num_missions=0
+    for i in 1 2 3 4 5; do
+        if mission_exists "$i"; then
+            num_missions=$((num_missions+1))
+        fi
+    done
+    if [ "$num_missions" -ge 5 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+missions_empty() {
+    num_missions=0
+    for i in 1 2 3 4 5; do
+        if mission_exists "$i"; then
+            num_missions=$((num_missions+1))
+        fi
+    done
+    if [ "$num_missions" -le 0 ]; then
+        return 0
+    else
+        return 1
+    fi  
 }
 
 # adds a mission with the specified details to your active missions file
