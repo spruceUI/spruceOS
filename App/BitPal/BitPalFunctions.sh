@@ -536,7 +536,7 @@ construct_manage_mission_menu() {
     for mission in 1 2 3 4 5; do
         if mission_exists "$mission"; then
             primary_text="$mission) $(jq -r ".missions[\"$mission\"].display_text" "$MISSION_JSON")"
-            value="/mnt/SDCARD/App/BitPal/menus/main.sh view_mission $mission"
+            value="/mnt/SDCARD/App/BitPal/menus/main.sh view_mission_details $mission"
             jq --arg primary_text "$primary_text" \
                --arg value "$value" \
                 '. += [{ 
@@ -548,6 +548,41 @@ construct_manage_mission_menu() {
         fi
     done
     mv "$tmpfile" "$MANAGE_MENU"
+}
+
+display_mission_details() {
+    mission="$1"
+
+    face=$(get_face)
+    xp_reward="$(jq -r ".missions[\"mission\"].xp_reward" "$MISSION_JSON")"
+    display_text="$(jq -r ".missions[\"$mission\"].display_text" "$MISSION_JSON")"
+
+    duration="$(jq -r ".missions[\"$mission\"].duration" "$MISSION_JSON")"
+    duration_seconds=$((duration * 60))
+    time_spent_seconds_total="$(jq -r ".missions[\"$mission\"].time_spent" "$MISSION_JSON")"
+    time_spent_seconds_display=$((time_spent_seconds_total % 60))
+    time_spent_minutes_total=$((time_spent_seconds_total / 60))
+    time_spent_minutes_display=$((time_spent_minutes_total % 60))
+    time_spent_hours=$((time_spent_seconds_total / 3600))
+
+    if [ "$time_spent_seconds_total" -eq 0 ]; then
+        percent_complete=0
+    else
+        percent_complete=$((100 * time_spent_seconds_total / duration_seconds))
+    fi
+    
+    time_spent_string="${time_spent_minutes_display}m ${time_spent_seconds_display}s of ${duration}m ($percent_complete%)"
+    [ "$time_spent_hours" -ge 1 ] && time_spent_string="${time_spent_hours}h ${time_spent_string}"
+    time_spent_string="Progress: $time_spent_string"
+
+    display -p 50 --okay -s 36 -t "$face
+ 
+Mission Progress:
+$display_text
+ 
+$time_spent_string
+Reward: $xp_reward XP"
+
 }
 
 accept_mission() {

@@ -35,6 +35,11 @@ case "$1" in
             call_menu "BitPal - Current Missions" "manage_missions.json"
         fi
         ;;
+    view_mission_details)
+        display_mission_details "$2"
+        call_menu "BitPal - Current Missions" "manage_missions.json"
+
+        ;;
     history)
         return
         ;;
