@@ -36,8 +36,8 @@
 
 
 # variables used in multiple different helperFunctions:
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-MESSAGES_FILE="/var/log/messages"
+export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+export MESSAGES_FILE="/var/log/messages"
 
 
 # Export for enabling SSL support in CURL
@@ -460,7 +460,7 @@ display_kill() {
 # Add a flag
 # Usage: flag_add "flag_name"
 flag_add() {
-    flag_name="$1"
+    local flag_name="$1"
     touch "$FLAGS_DIR/${flag_name}.lock"
 }
 
@@ -468,7 +468,7 @@ flag_add() {
 # Usage: flag_check "flag_name"
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
-    flag_name="$1"
+    local flag_name="$1"
     if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
         return 0
     else
@@ -480,14 +480,14 @@ flag_check() {
 # Usage: flag_path "flag_name"
 # Returns the full path to the flag file (with .lock extension)
 flag_path() {
-    flag_name="$1"
+    local flag_name="$1"
     echo "$FLAGS_DIR/${flag_name}.lock"
 }
 
 # Remove a flag
 # Usage: flag_remove "flag_name"
 flag_remove() {
-    flag_name="$1"
+    local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
 }
 
