@@ -2,7 +2,6 @@
 
 # Spruce updater: checks for an update file and applies them if found
 
-DISPLAY="/mnt/SDCARD/Updater/bin/display_text.elf"
 APP_DIR="/mnt/SDCARD/App/-Updater"
 UPDATE_FILE=""
 LOG_LOCATION="/mnt/SDCARD/Updater/updater.log"
@@ -19,45 +18,65 @@ log_update_message() {
 
 # Simplified display function
 display() {
-    local text="$1"
-    local delay="${2:-0}"
-    local size="${3:-30}"
-    local position="${4:-center}"
-    local align="${5:-middle}"
-    local width="${6:-600}"
-    local color="${7:-dbcda7}"
-    local image="/mnt/SDCARD/Updater/imgs/back.png"
-    local acknowledge_mode=false
+    DISPLAY="$BIN_DIR/display_text.elf"
+    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
 
-    # Parse arguments to handle --acknowledge flag
-    for arg in "$@"; do
-        if [ "$arg" = "--acknowledge" ]; then
-            acknowledge_mode=true
-            delay=0
-            image="/mnt/SDCARD/Updater/imgs/acknowledge.png"
-            break
-        fi
-    done
-
-    # Kill any existing display processes more safely
-    ps | grep display_text.elf | grep -v grep | while read pid rest; do
-        kill "$pid" 2>/dev/null
-    done
-
-    if [ "$delay" = "0" ]; then
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null &
-    else
-        $DISPLAY "$image" "$text" "$delay" "$size" "$position" "$align" "$width" "${color:0:2}" "${color:2:2}" "${color:4:2}" "/mnt/SDCARD/Updater/bin/nunwen.ttf" 7f 7f 7f 0 2>/dev/null
+    if [ "$PLATFORM" = "Brick" ]; then
+        width=960
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+    elif [ "$PLATFORM" = "SmartPro" ]; then
+        width=1200
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+    else 
+        width=600
     fi
 
-    if [ "$acknowledge_mode" = true ]; then
-        acknowledge
+    image="/mnt/SDCARD/Updater/imgs/back.png"
+    text=" " 
+            delay=0
+    size=30 
+    position=50 
+    align="middle" 
+    font="$BIN_DIR/nunwen.ttf"
+    use_acknowledge_image=false
+    use_confirm_image=false
+    run_acknowledge=false
+    r="eb" g="db" b="b2"
+    bg_r="7f" bg_g="7f" bg_b="7f" bg_alpha=0 
+    image_scaling=1.0
+
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -t|--text) text="$2"; shift ;;
+            -d|--delay) delay="$2"; shift ;;
+            -s|--size) size="$2"; shift ;;
+            -o|--okay|--acknowledge) use_acknowledge=true ;;
+            *) return 1 ;;
+        esac
+        shift
+    done
+
+    [ "$use_acknowledge" = true ] && image=/mnt/SDCARD/Updater/imgs/acknowledge.png
+
+    command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" $DISPLAY "
+    command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "
+    command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+
+    kill -9 $(pgrep display) 2> /dev/null
+
+    # Execute the command in the background if delay is 0
+    if [ "$delay" -eq 0 ]; then
+        eval "$command" &
+        [ "$use_acknowledge" = true ] && acknowledge
+    else
+        # Execute the command and capture its output
+        eval "$command"
     fi
 }
 
 # Start
 log_update_message "Update process started"
-display "Checking for update file..."
+display -t "Checking for update file..."
 echo mmc0 > "$LED_PATH"/trigger &
 
 # Create fresh updater.log and start logging
@@ -73,13 +92,13 @@ SD_ERROR=false
 # Test write capability
 if ! echo "test" > "$TEST_FILE" 2>/dev/null; then
     log_update_message "ERROR: Cannot write to SD card"
-    display "SD card error: Write failed" --acknowledge
+    display -t "SD card error: Write failed" --acknowledge
     SD_ERROR=true
 else
     # Test read capability
     if ! read_test=$(cat "$TEST_FILE" 2>/dev/null) || [ "$read_test" != "test" ]; then
         log_update_message "ERROR: Cannot read from SD card or data mismatch"
-        display "SD card error: Read failed" --acknowledge
+        display -t "SD card error: Read failed" --acknowledge
         SD_ERROR=true
     fi
     # Clean up test file
@@ -90,14 +109,14 @@ fi
 df_output=$(df /mnt/SDCARD 2>/dev/null)
 if [ $? -ne 0 ]; then
     log_update_message "ERROR: Cannot get filesystem information"
-    display "SD card error: Cannot check space" --acknowledge
+    display -t "SD card error: Cannot check space" --acknowledge
     SD_ERROR=true
 else
     # Get available space percentage (using last line in case of wrapped output)
     avail_space=$(echo "$df_output" | tail -n1 | awk '{ print $4 }')
     if [ "$avail_space" -lt 1024 ]; then  # Less than 1MB free
         log_update_message "ERROR: Insufficient space on SD card"
-        display "SD card error: No free space" --acknowledge
+        display -t "SD card error: No free space" --acknowledge
         SD_ERROR=true
     fi
 fi
@@ -110,7 +129,7 @@ fi
 
 # Find update 7z file
 if ! check_for_update_file; then
-    display "No update file found" --acknowledge
+    display -t "No update file found" --acknowledge
     sed -i 's|"label"|"#label"|' "$APP_DIR/config.json"
     exit 1
 fi
@@ -124,7 +143,7 @@ log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
     log_update_message "Battery level too low for update"
-    display "Battery too low for update.
+    display -t "Battery too low for update.
     Please charge to at least 20% or plug in your device." --acknowledge
     exit 1
 fi
@@ -183,7 +202,7 @@ elif [ "$BETA_UPDATE" = true ]; then
     VERSION_COMPARE=$(echo "$UPDATE_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print "lower"; exit} else if (a[i]>b[i]) {print "higher"; exit}} print "same"}')
     if [ "$VERSION_COMPARE" = "lower" ]; then
         log_update_message "Beta version is lower than current version, update declined"
-        display "Current version is up to date"
+        display -t "Current version is up to date"
         exit 0
     else
         log_update_message "Proceeding with beta update"
@@ -194,10 +213,10 @@ else
         log_update_message "Current version is up to date"
         if ! check_installation_validity; then
             log_update_message "Bad installation detected"
-            display "Detected current installation is invalid.
-Allowing reinstall." 5
+            display -t "Detected current installation is invalid.
+Allowing reinstall." -d 5
         else
-            display "Current version is up to date"
+            display -t "Current version is up to date"
             exit 0
         fi
     else
@@ -209,13 +228,13 @@ fi
 log_update_message "Verifying update file contents"
 if [ ! -f "$UPDATE_FILE" ]; then
     log_update_message "Update file not found: $UPDATE_FILE"
-    display "Update file not found" --acknowledge
+    display -t "Update file not found" --acknowledge
     exit 1
 fi
 
 # Verify the content of the 7z starts with /mnt/
 if ! verify_7z_content "$UPDATE_FILE"; then
-    display "Invalid update file structure, update file corrupt or not a spruce update" --acknowledge
+    display -t "Invalid update file structure, update file corrupt or not a spruce update" --acknowledge
     exit 1
 fi
 
@@ -235,13 +254,8 @@ echo heartbeat > "$LED_PATH"/trigger &
 
 if [ "$PERFORM_DELETION" = true ]; then
     log_update_message "Deleting unnecessary folders and files"
-    display "Cleaning up your SD card..."
+    display -t "Cleaning up your SD card..."
     cd /mnt/SDCARD
-
-    # Back up 64-bit 7zr
-    mkdir /tmp/bin
-    cp spruce/bin64/7zr /tmp/bin
-    chmod 777 /tmp/bin/7zr
     
     # Explicitly delete .config and .tmp_update folders
     log_update_message "Deleting .config folder"
@@ -250,6 +264,7 @@ if [ "$PERFORM_DELETION" = true ]; then
     rm -rf .tmp_update
 
     # unmount all the binds so that the deletion process can complete successfully
+    log_update_message "unmounting binds"
     unmount_binds
 
     for item in *; do
@@ -265,10 +280,10 @@ if [ "$PERFORM_DELETION" = true ]; then
         fi
     done
     log_update_message "Deletion process completed"
-    display "SD card cleaned up..." 2
+    display -t "SD card cleaned up..." -d 2
 else
     log_update_message "Skipping deletion process"
-    display "Skipping file deletion..." 5
+    display -t "Skipping file deletion..." -d 5
 fi
 
 # Extract update file
@@ -280,38 +295,34 @@ log_update_message "Extracting update file: $UPDATE_FILE"
 
 read_only_check
 
-display "Applying update. This should take around 5 minutes..."
+display -t "Applying update. This should take around 5 minutes..."
 
-# On 64-bit systems add the backed up copy of 7zr to the path
-if [ ! "$PLATFORM" = "A30" ]; then
-    export PATH="/tmp/bin:$PATH"
-fi
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
-    display "Update completed with warnings. Check the update log for details." 5
+    display -t "Update completed with warnings. Check the update log for details." -d 5
 else
     log_update_message "Extraction process completed successfully"
-    display "Update completed" 5
+    display -t "Update completed" -d 5
 fi
 
 # Verify extraction success
 for dir in .tmp_update spruce miyoo; do
     if [ ! -d "$dir" ]; then
         log_update_message "Extraction verification failed: $dir missing"
-        display "Update extraction incomplete: $dir" --acknowledge
+        display -t "Update extraction incomplete: $dir" --acknowledge
         exit 1
     fi
 
     if [ -z "$(ls -A "$dir")" ]; then
         log_update_message "Extraction verification failed: $dir is empty"
-        display "Update extraction incomplete: $dir empty" --acknowledge
+        display -t "Update extraction incomplete: $dir empty" --acknowledge
         exit 1
     fi
 done
 
 log_update_message "Update file extracted successfully"
-display "Now using spruce $UPDATE_VERSION" 2
+display -t "Now using spruce $UPDATE_VERSION" -d 2
 
 DELETE_UPDATE=true
 if [ "$DELETE_UPDATE" = true ]; then
@@ -324,7 +335,7 @@ fi
 restore_app_states
 
 # Restore backup
-display "Restoring user data..."
+display -t "Restoring user data..."
 /mnt/SDCARD/App/spruceRestore/spruceRestore.sh --silent
 
 # Restore dev/test flags
@@ -347,17 +358,17 @@ if [ "$BETA_UPDATE" -eq 1 ]; then
 fi
 
 if [ "$PLATFORM" = "A30" ]; then
-    display "Update complete. Shutting down...
-    You'll need to manually power back on" 3
+    display -t "Update complete. Shutting down...
+    You'll need to manually power back on" -d 3
+    echo 100 >/sys/devices/virtual/timed_output/vibrator/enable
+
 else
-    display "Update complete. Rebooting..." 3
+    display -t "Update complete. Rebooting..." -d 3
+    # todo: add vibration for other devices
 fi
-echo 100 >/sys/devices/virtual/timed_output/vibrator/enable
 
 # Reboot device
-killall -9 runtime.sh
-killall -9 principal.sh
-killall -9 MainUI
+killall -9 runtime.sh principal.sh MainUI PyUI emulationstation
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then

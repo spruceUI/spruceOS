@@ -5,37 +5,28 @@ APP_DIR="/mnt/SDCARD/App"
 # Detect device and export to any script sourcing updaterFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
-*"sun8i"*)
-	export PLATFORM="A30"
-    export SD_DEV="/dev/mmcblk0p1"
-	;;
-*"TG5040"*)
-	export PLATFORM="SmartPro"
-    export SD_DEV="/dev/mmcblk1p1"
-	;;
-*"TG3040"*)
-	export PLATFORM="Brick"
-    export SD_DEV="/dev/mmcblk1p1"
-	;;
-*"0xd05"*)
-    export PLATFORM="Flip"
-    export SD_DEV="/dev/mmcblk1p1"
-    ;;
-*)
-    export PLATFORM="A30"
-    export SD_DEV="/dev/mmcblk0p1"
-    ;;
+    *"sun8i"*) export PLATFORM="A30" ;;
+    *"TG5040"*)	export PLATFORM="SmartPro" ;;
+    *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"0xd05"*) export PLATFORM="Flip" ;;
+    *) export PLATFORM="A30" ;;
 esac
 
-# Key exports so we can refer to buttons by more memorable names and add spruce/bin[64] folder to PATH
 if [ "$PLATFORM" = "A30" ]; then
-    export PATH="/mnt/SDCARD/spruce/bin:$PATH"
+    export BIN_DIR=/mnt/SDCARD/Updater/bin
+    export PATH="/mnt/SDCARD/spruce/bin:$BIN_DIR:$PATH"
+    export SD_DEV="/dev/mmcblk0p1"
+
     export B_A="key 1 57"
     export B_B="key 1 29"
     export B_START="key 1 28"
     export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
-elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-    export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+
+else # if [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
+    export BIN_DIR=/mnt/SDCARD/Updater/bin64
+    export PATH="/mnt/SDCARD/spruce/bin64:$BIN_DIR:$PATH"
+    export SD_DEV="/dev/mmcblk1p1"
+
     export B_A="key 1 305"
     export B_B="key 1 304"
     export B_START="key 1 315"
@@ -43,7 +34,7 @@ elif [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = 
 fi
 
 acknowledge(){
-    local messages_file="/var/log/messages"
+    messages_file="/var/log/messages"
 	echo "ACKNOWLEDGE $(date +%s)" >> "$messages_file"
 
     while true; do

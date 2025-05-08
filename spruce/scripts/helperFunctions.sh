@@ -340,7 +340,7 @@ display() {
         width=600
     fi
 
-    image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
+    image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=50 align="middle" color="ebdbb2" font=""
     use_acknowledge_image=false
     use_confirm_image=false
     run_acknowledge=false
