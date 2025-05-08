@@ -89,26 +89,31 @@ class MiyooFlip(Device):
     def reboot_cmd(self):
         return "reboot"
     
+    @property
+    def input_timeout_default(self):
+        return 1/60
+    
+    
     def _map_system_brightness_to_miyoo_scale(self, true_brightness):
-        if(true_brightness >= 220):
+        if(true_brightness >= 255):
             return 10
-        elif(true_brightness >= 180):
+        elif(true_brightness >= 225):
             return 9
-        elif(true_brightness >= 150):
+        elif(true_brightness >= 200):
             return 8
-        elif(true_brightness >= 120):
+        elif(true_brightness >= 175):
             return 7
-        elif(true_brightness >= 100):
+        elif(true_brightness >= 150):
             return 6
-        elif(true_brightness >= 80):
+        elif(true_brightness >= 125):
             return 5
-        elif(true_brightness >= 60):
+        elif(true_brightness >= 100):
             return 4
-        elif(true_brightness >= 45):
+        elif(true_brightness >= 75):
             return 3
-        elif(true_brightness >= 35):
+        elif(true_brightness >= 50):
             return 2
-        elif(true_brightness >= 20):
+        elif(true_brightness >= 25):
             return 1
         else:
             return 0
@@ -336,6 +341,8 @@ class MiyooFlip(Device):
         subprocess.run(['killall', '-15', 'wpa_supplicant'], capture_output=True, text=True)
         time.sleep(0.1)  
         subprocess.run(['killall', '-9', 'wpa_supplicant'], capture_output=True, text=True)
+        print("Stopping wpa_supplicant")
+
 
     def start_wpa_supplicant(self):
         try:
@@ -359,6 +366,7 @@ class MiyooFlip(Device):
 
     def is_wifi_enabled(self, interface="wlan0"):
         result = subprocess.run(["ip", "link", "show", interface], capture_output=True, text=True)
+        print("Running ip link show")
         return "UP" in result.stdout
 
     def disable_wifi(self,interface="wlan0"):
@@ -366,6 +374,7 @@ class MiyooFlip(Device):
         self.system_config.set_wifi(0)
         self.system_config.save_config()
         subprocess.run(["ifconfig",interface,"down"], capture_output=True, text=True)
+        print("Running ifconfig wlan0 down")
         self.stop_wpa_supplicant_running()
         self.get_wifi_status.force_refresh()
 
@@ -374,13 +383,14 @@ class MiyooFlip(Device):
         self.system_config.set_wifi(1)
         self.system_config.save_config()
         subprocess.run(["ifconfig",interface,"up"], capture_output=True, text=True)
+        print("Running ifconfig wlan0 up")
         self.start_wpa_supplicant()
         self.get_wifi_status.force_refresh()
 
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(5)
     def get_charge_status(self):
         output = subprocess.check_output(
-            ["cat", "/sys/class/power_supply/usb/online"],
+            ["cat", "/sys/class/power_supply/ac/online"],
             text=True
         )
 

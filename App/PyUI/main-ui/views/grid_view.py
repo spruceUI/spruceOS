@@ -141,5 +141,5 @@ class GridView:
                     return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
                 elif self.controller.last_input() == ControllerInput.B:
                     return None
-
-                self._render()
+                
+            self._render()

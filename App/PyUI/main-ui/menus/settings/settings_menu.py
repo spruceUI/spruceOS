@@ -95,10 +95,10 @@ class SettingsMenu:
             if(selected_index == len(theme_folders)):
                 selected_index = 0
 
-        self.config["theme"] = theme_folders[selected_index]
-        self.config.save()
         self.theme.set_theme_path(os.path.join(self.config["theme_dir"], theme_folders[selected_index]))
         self.display.init_fonts()   
+        self.config["theme"] = theme_folders[selected_index]
+        self.config.save()
 
     def show_menu(self) :
         selected = Selection(None, None, 0)
@@ -203,8 +203,9 @@ class SettingsMenu:
             else:
                 list_view.set_options(option_list)
 
-            selected = list_view.get_selection([ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
-                                                  ControllerInput.L1, ControllerInput.R1])
+            control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
+                                                  ControllerInput.L1, ControllerInput.R1]
+            selected = list_view.get_selection(control_options)
 
-            if(selected is not None):
+            if(selected is not None and selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
