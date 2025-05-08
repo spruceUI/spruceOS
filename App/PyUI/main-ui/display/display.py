@@ -58,20 +58,39 @@ class Display:
         if(self.window is not None):
             sdl2.SDL_DestroyWindow(self.window.window)
             self.window = None
+        self.deinit_fonts()
+        self._unload_bg_texture()
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
+
+    def deinit_fonts(self):
+        for loaded_font in self.fonts.values():
+            sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
+        self.fonts.clear()
 
     def reinitialize(self):
         self.deinit_display()
+        self._unload_bg_texture()
         self._init_display()
+        self.init_fonts()
+        self._load_bg_texture()
         self.clear("reinitialize")
         self.present()
 
-    def _check_for_bg_change(self):
-        if(self.bg_path != self.theme.background):
-            surf = sdl2.ext.load_image(self.theme.background)
-            self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.sdlrenderer, surf)
-            sdl2.SDL_FreeSurface(surf)
+    def _unload_bg_texture(self):
+        if hasattr(self, 'background_texture') and self.background_texture:
+            sdl2.SDL_DestroyTexture(self.background_texture)
+            print("Destroying bg texture")
 
+    def _load_bg_texture(self):
+        self.bg_path = self.theme.background
+        surf = sdl2.ext.load_image(self.theme.background)
+        self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.sdlrenderer, surf)
+        sdl2.SDL_FreeSurface(surf)
+
+    def _check_for_bg_change(self):
+        if self.bg_path != self.theme.background:
+            self._unload_bg_texture()
+            self._load_bg_texture()
 
     def _load_font(self, font_purpose):
         if sdl2.sdlttf.TTF_Init() == -1:
@@ -168,7 +187,7 @@ class Display:
         texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
         if not texture:
             sdl2.SDL_FreeSurface(surface)
-            print(f"FaiFailed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            print(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
             return 0,0
 
         return self._render_surface_texture(x, y, texture, surface, render_mode, debug=text)

@@ -49,6 +49,11 @@ class Device(ABC):
     def brightness(self):
         pass
 
+    @property
+    @abstractmethod
+    def input_timeout_default(self):
+        pass
+
     @abstractmethod
     def get_app_finder(self):
         pass

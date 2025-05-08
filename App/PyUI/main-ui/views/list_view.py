@@ -34,7 +34,7 @@ class ListView(ABC):
                 elif self.controller.last_input() == ControllerInput.B:
                     return None
 
-                self._render_common()
+            self._render_common()
 
     def _render_common(self):
         self.display.clear(self.top_bar_text)
