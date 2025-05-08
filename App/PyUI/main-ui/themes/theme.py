@@ -181,21 +181,11 @@ class Theme():
     def _grid_4_x_2_selected_bg(self):
         return os.path.join(self.path,"skin","bg-game-item-f.png")
     
-    def get_system_icon_name(self,system):
-        if("32X" == system):
-            return "32X"
-        elif("FAKE08" == system):
-            return "pico"
-        elif("MEDIA" == system):
-            return "ffplay"
-        else:
-            return system.lower()
-
     def get_system_icon(self, system):
-        return os.path.join(self.path,"icons",self.get_system_icon_name(system)+".png")
+        return os.path.join(self.path,"icons",system+".png")
     
     def get_system_icon_selected(self, system):
-        return os.path.join(self.path,"icons","sel",self.get_system_icon_name(system)+".png")
+        return os.path.join(self.path,"icons","sel",system+".png")
     
     
     def get_font(self, font_purpose : FontPurpose):
