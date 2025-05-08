@@ -1,4 +1,5 @@
 
+import os
 from controller.controller import Controller
 from devices.device import Device
 from display.display import Display
@@ -24,29 +25,33 @@ class GameSystemSelectMenu:
         self.use_emu_cfg = False
         self.view_creator = ViewCreator(display,controller,device,theme)
 
+    def get_system_name_for_icon(self, sys_config):        
+        return os.path.splitext(os.path.basename(sys_config.get_icon()))[0]
+
     def run_system_selection(self) :
         selected = Selection(None,None,0)
         systems_list = []
         view = None
         for system in self.game_utils.get_active_systems():
-            sysConfig = GameSystemConfig(system)
+            sys_config = GameSystemConfig(system)
             if(self.use_emu_cfg):
                 systems_list.append(
                     GridOrListEntry(
                         primary_text=system,
-                        image_path=sysConfig.get_icon(),
-                        image_path_selected=sysConfig.get_icon_selected(),
+                        image_path=sys_config.get_icon(),
+                        image_path_selected=sys_config.get_icon_selected(),
                         description="Game System",
-                        icon=sysConfig.get_icon_selected(),
+                        icon=sys_config.get_icon_selected(),
                         value=system
                     ) 
                 )
             else:
+                icon_system_name = self.get_system_name_for_icon(sys_config)
                 systems_list.append(
                     GridOrListEntry(
                         primary_text=system,
-                        image_path=self.theme.get_system_icon(system),
-                        image_path_selected=self.theme.get_system_icon_selected(system),
+                        image_path=self.theme.get_system_icon(icon_system_name),
+                        image_path_selected=self.theme.get_system_icon_selected(icon_system_name),
                         description="Game System",
                         icon=self.theme.get_system_icon_selected(system),
                         value=system
