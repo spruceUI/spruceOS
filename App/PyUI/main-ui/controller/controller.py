@@ -14,6 +14,7 @@ class Controller:
         self._init_controller()
         self.event = sdl2.SDL_Event()
         self.device = device
+        self.last_input_time = 0
 
 
     def _init_controller(self):
@@ -41,10 +42,24 @@ class Controller:
             sdl2.SDL_GameControllerClose(self.controller)
             self.controller = None
             
+
+    def still_held_down(self):
+        return sdl2.SDL_GameControllerGetButton(self.controller, self.event.cbutton.button)
+    
     def get_input(self):
-        self._last_event().type = 0
-        while(self._last_event().type != sdl2.SDL_CONTROLLERBUTTONDOWN):
-            sdl2.SDL_WaitEvent(byref(self.event))
+        sdl2.SDL_PumpEvents()
+        start_time = time.time()
+
+        while(self.still_held_down() and time.time() - start_time < 0.12):
+            sdl2.SDL_PumpEvents()
+            
+
+        if(not self.still_held_down()):
+            self._last_event().type = 0
+            while(self._last_event().type != sdl2.SDL_CONTROLLERBUTTONDOWN):
+                sdl2.SDL_WaitEvent(byref(self.event))
+
+        self.last_input_time = time.time()
         return self.last_event_was_controller()        
 
     def clear_input_queue(self):
