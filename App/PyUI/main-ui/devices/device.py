@@ -139,3 +139,7 @@ class Device(ABC):
     @abstractmethod
     def get_rom_utils(self):
         pass
+
+    @abstractmethod
+    def perform_startup_tasks(self):
+        pass

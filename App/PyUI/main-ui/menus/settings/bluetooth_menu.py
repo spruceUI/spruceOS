@@ -27,15 +27,17 @@ class BluetoothMenu:
         self.view_creator = ViewCreator(display,controller,device,theme)
 
     def bluetooth_adjust(self):
-        if self.device.is_bluetooth_enabled:
+        if self.device.is_bluetooth_enabled():
             self.device.disable_bluetooth()
         else:
             self.device.enable_bluetooth()
+            self.should_scan_for_bluetooth = True
 
     def toggle_pairing_device(self, device):
         self.bluetooth_scanner.connect_to_device(device.address)
 
     def scan_for_devices(self):
+        print(f"scan_for_devices start")
         self.display.clear("Bluetooth")
         self.display.render_text(
             text = "Scanning for Bluetooth Devices (~10s)",
@@ -46,15 +48,17 @@ class BluetoothMenu:
             render_mode=RenderMode.MIDDLE_CENTER_ALIGNED
         )
         self.display.present()
-        return self.bluetooth_scanner.scan_devices()
-
+        devices = self.bluetooth_scanner.scan_devices()
+        print(f"scan_for_devices end")
+        return devices
 
     def show_bluetooth_menu(self):
-        bluetooth_enabled = self.device.is_bluetooth_enabled()
         selected = Selection(None, None, 0)
-        first_loop = True
+        self.should_scan_for_bluetooth = True
         devices = []
         while(selected is not None):
+            print(f"Waiting for bt selection")
+            bluetooth_enabled = self.device.is_bluetooth_enabled()
             option_list = []
             option_list.append(
                 GridOrListEntry(
@@ -70,8 +74,8 @@ class BluetoothMenu:
             
 
             if(bluetooth_enabled):
-                if(first_loop):
-                    first_loop = False
+                if(self.should_scan_for_bluetooth):
+                    self.should_scan_for_bluetooth = False
                     devices = self.scan_for_devices()
 
                 for device in devices:
@@ -89,16 +93,18 @@ class BluetoothMenu:
 
             list_view = self.view_creator.create_view(
                     view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
-                    top_bar_text="WiFi Configuration", 
+                    top_bar_text="Bluetooth Configuration", 
                     options=option_list,
                     selected_index=selected.get_index())
 
-            selected = list_view.get_selection([ControllerInput.A,ControllerInput.X, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
-                                                ControllerInput.L1, ControllerInput.R1])
+            selected = list_view.get_selection([ControllerInput.A,ControllerInput.X, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT])
 
             if(selected is not None):
-                if(ControllerInput.X == selected.get_input()):
+                print(f"bluetooth_enabled={bluetooth_enabled}")
+                if(ControllerInput.X == selected.get_input() and bluetooth_enabled):
                     devices = self.scan_for_devices()
-                else:
+                elif(ControllerInput.A == selected.get_input() 
+                     or ControllerInput.DPAD_LEFT == selected.get_input() 
+                     or ControllerInput.DPAD_RIGHT == selected.get_input()):
                     selected.get_selection().value()
 

@@ -41,6 +41,9 @@ class SystemConfig:
     def set_volume(self, value):
         self.config["vol"] = value
 
+    def set_wifi(self, value):
+        self.config["wifi"] = value
+
     def get_language(self):
         return self.config.get("language")
 

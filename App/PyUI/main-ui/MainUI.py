@@ -1,4 +1,5 @@
 import os
+import threading
 import sdl2
 import sdl2.ext
 
@@ -23,5 +24,8 @@ display = Display(theme, device)
 controller = Controller(device)
 
 main_menu = MainMenu(display, controller, device, theme, config)
+
+startup_thread = threading.Thread(target=device.perform_startup_tasks())
+startup_thread.start()
 
 main_menu.run_main_menu_selection()

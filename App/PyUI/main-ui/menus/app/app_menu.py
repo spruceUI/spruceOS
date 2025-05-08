@@ -27,6 +27,7 @@ class AppMenu:
     def run_app_selection(self) :
         selected = Selection(None,None,0)
         app_list = []
+        view = None
         for app in self.appFinder.get_apps():
             if(app.get_label() is not None):
                 app_list.append(
@@ -39,12 +40,14 @@ class AppMenu:
                         value=app.get_launch()
                     )
                 )
-
-        view = self.view_creator.create_view(
-            view_type=self.theme.get_view_type_for_app_menu(),
-            top_bar_text="Apps", 
-            options=app_list,
-            selected_index=selected.get_index())
+        if(view is None):
+            view = self.view_creator.create_view(
+                view_type=self.theme.get_view_type_for_app_menu(),
+                top_bar_text="Apps", 
+                options=app_list,
+                selected_index=selected.get_index())
+        else:
+            view.set_options(app_list)
         
         while((selected := view.get_selection()) is not None):
             filepath = selected.get_selection().get_value()

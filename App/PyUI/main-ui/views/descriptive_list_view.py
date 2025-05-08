@@ -29,6 +29,9 @@ class DescriptiveListView(ListView):
         self.current_top = 0
         self.current_bottom = min(self.max_rows,len(options))
 
+    def set_options(self, options):
+        self.options = options
+
     def _render(self):
         visible_options: List[GridOrListEntry] = self.options[self.current_top:self.current_bottom]
 

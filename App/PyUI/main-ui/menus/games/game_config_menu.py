@@ -26,6 +26,7 @@ class GameConfigMenu:
 
     def show_config(self) :
         selected = Selection(None, None, 0)
+        view = None
         #Loop is weird here due to how these options are handled.
         # We essentially need to re-read the game system config every time
         # an option is selected
@@ -44,12 +45,14 @@ class GameConfigMenu:
                         value=config_option.get('launch')
                     )
                 )
-                        
-            view = self.view_creator.create_view(
-                view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
-                top_bar_text=self.game_system + " Configuration", 
-                options=config_list,
-                selected_index=selected.get_index())
+            if(view is None):        
+                view = self.view_creator.create_view(
+                    view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
+                    top_bar_text=self.game_system + " Configuration", 
+                    options=config_list,
+                    selected_index=selected.get_index())
+            else:
+                view.set_options(config_list)
 
             selected = view.get_selection()
 

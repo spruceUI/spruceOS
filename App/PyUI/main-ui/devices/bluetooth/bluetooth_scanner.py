@@ -53,7 +53,7 @@ class BluetoothScanner:
                 rlist, _, _ = select.select([process.stdout], [], [], 0.1)
                 if rlist:
                     line = process.stdout.readline().strip()
-                    #print(f"{line}")  # Debug line read
+                    print(f"{line}")  # Debug line read
                     line = self.remove_ansi_escape_sequences(line)  # Remove escape sequences
                     if line.startswith('[NEW] Device '):
                         parts = line.split(' ', 3)

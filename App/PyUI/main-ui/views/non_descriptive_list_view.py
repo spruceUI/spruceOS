@@ -37,7 +37,9 @@ class NonDescriptiveListView(ListView):
         self.max_rows = self.display.get_usable_screen_height() // self.line_height
         self.current_bottom = min(self.max_rows,len(options))
 
-    
+    def set_options(self, options):
+        self.options = options
+
     def _calculate_line_height(self):
         text_line_height = self.display.get_line_height(FontPurpose.LIST) + 10  # add 10px padding between lines
         icon_line_height = 0
