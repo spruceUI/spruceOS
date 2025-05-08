@@ -42,6 +42,9 @@ class GridView:
 
         self.selected_bg = selected_bg
      
+    def set_options(self, options):
+        self.options = options
+
     def _render(self):
         self.display.clear(self.top_bar_text)
         self.selected = max(0, self.selected)

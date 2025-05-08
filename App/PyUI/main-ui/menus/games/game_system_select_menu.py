@@ -27,6 +27,7 @@ class GameSystemSelectMenu:
     def run_system_selection(self) :
         selected = Selection(None,None,0)
         systems_list = []
+        view = None
         for system in self.game_utils.get_active_systems():
             sysConfig = GameSystemConfig(system)
             if(self.use_emu_cfg):
@@ -51,14 +52,16 @@ class GameSystemSelectMenu:
                         value=system
                     )                
                 )
-
-        view = self.view_creator.create_view(
-            view_type=self.theme.get_view_type_for_system_select_menu(),
-            top_bar_text="Game", 
-            options=systems_list, 
-            cols=4, 
-            rows=2,
-            selected_index=selected.get_index())
+        if(view is None):
+            view = self.view_creator.create_view(
+                view_type=self.theme.get_view_type_for_system_select_menu(),
+                top_bar_text="Game", 
+                options=systems_list, 
+                cols=4, 
+                rows=2,
+                selected_index=selected.get_index())
+        else:
+            view.set_options(systems_list)
 
         while((selected := view.get_selection()) is not None):
             self.rom_select_menu.run_rom_selection(selected.get_selection().get_primary_text())

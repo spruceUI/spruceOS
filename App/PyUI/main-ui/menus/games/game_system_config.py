@@ -52,7 +52,7 @@ class GameSystemConfig:
         return self._data.get('hidebios')
 
     def get_extlist(self):
-        return self._data.get('extlist')
+        return {f".{ext}" for ext in self._data.get('extlist').lower().split("|")}
 
     def get_launchlist(self):
         return self._data.get('launchlist', [])

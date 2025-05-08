@@ -102,7 +102,7 @@ class SettingsMenu:
 
     def show_menu(self) :
         selected = Selection(None, None, 0)
-
+        list_view = None
         while(selected is not None):
             option_list = []
             option_list.append(
@@ -193,11 +193,15 @@ class SettingsMenu:
                         value=self.reboot
                     )
             )
-            list_view = self.view_creator.create_view(
-                view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
-                top_bar_text="Settings", 
-                options=option_list,
-                selected_index=selected.get_index())
+
+            if(list_view is None):
+                list_view = self.view_creator.create_view(
+                    view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
+                    top_bar_text="Settings", 
+                    options=option_list,
+                    selected_index=selected.get_index())
+            else:
+                list_view.set_options(option_list)
 
             selected = list_view.get_selection([ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1])

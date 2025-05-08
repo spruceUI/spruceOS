@@ -61,15 +61,19 @@ class RomsMenuCommon(ABC):
 
     def _run_rom_selection(self, page_name) :
         selected = Selection(None,None,0)
+        view = None
         # Regenerate as part of while loop in case the options menu changes anything
         while(selected is not None):
             rom_list = self._get_rom_list()
+            if(view is None):
+                view = self.view_creator.create_view(
+                    view_type=ViewType.TEXT_AND_IMAGE_LIST_VIEW,
+                    top_bar_text=page_name,
+                    options=rom_list,
+                    selected_index=selected.get_index())
+            else:
+                view.set_options(rom_list)
 
-            view = self.view_creator.create_view(
-                view_type=ViewType.TEXT_AND_IMAGE_LIST_VIEW,
-                top_bar_text=page_name,
-                options=rom_list,
-                selected_index=selected.get_index())
             selected = view.get_selection([ControllerInput.A, ControllerInput.X])
             if(selected is not None):
                 if(ControllerInput.A == selected.get_input()):

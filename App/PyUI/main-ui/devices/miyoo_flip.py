@@ -1,5 +1,6 @@
 import re
 import subprocess
+import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
@@ -7,6 +8,7 @@ from devices.device import Device
 import os
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
 from games.utils.game_entry import GameEntry
 from games.utils.rom_utils import RomUtils
@@ -41,7 +43,10 @@ class MiyooFlip(Device):
         #Idea is if something were to change from he we can reload it
         #so it always has the more accurate data
         self.system_config = SystemConfig("/userdata/system.json")
-        self.miyoo_games_file_parser = MiyooGamesFileParser()
+        self.miyoo_games_file_parser = MiyooGamesFileParser()        
+        self.start_wpa_supplicant()
+        subprocess.run(["ifconfig","wlan0","up"], capture_output=True, text=True)
+        self._set_brightness_to_config()
 
     @property
     def screen_width(self):
@@ -110,44 +115,46 @@ class MiyooFlip(Device):
 
     def _map_miyoo_scale_to_system_brightness(self, brightness_level):
         if brightness_level == 10:
-            return 220
+            return 255
         elif brightness_level == 9:
-            return 180
+            return 225
         elif brightness_level == 8:
-            return 150
+            return 200
         elif brightness_level == 7:
-            return 120
+            return 175
         elif brightness_level == 6:
-            return 100
+            return 150
         elif brightness_level == 5:
-            return 80
+            return 125
         elif brightness_level == 4:
-            return 60
+            return 100
         elif brightness_level == 3:
-            return 45
+            return 75
         elif brightness_level == 2:
-            return 35
+            return 50
         elif brightness_level == 1:
-            return 20
+            return 25
         else: 
             return 1
     
-    def lower_brightness(self):
+    def _set_brightness_to_config(self):
+        with open("/sys/class/backlight/backlight/brightness", "w") as f:
+            f.write(str(self._map_miyoo_scale_to_system_brightness(self.system_config.brightness)))
 
-        if(self.brightness > 0):
-            self.system_config.reload_config()
-            self.system_config.set_brightness(self.brightness-1)
+
+    def lower_brightness(self):
+        self.system_config.reload_config()
+        if(self.system_config.brightness > 0):
+            self.system_config.set_brightness(self.system_config.brightness - 1)
             self.system_config.save_config()
-            with open("/sys/class/backlight/backlight/brightness", "w") as f:
-                f.write(str(self._map_miyoo_scale_to_system_brightness(self.brightness - 1)))
+            self._set_brightness_to_config()
 
     def raise_brightness(self):
-        if(self.brightness < 10):
-            self.system_config.reload_config()
-            self.system_config.set_brightness(self.brightness+1)
+        self.system_config.reload_config()
+        if(self.system_config.brightness < 10):
+            self.system_config.set_brightness(self.system_config.brightness + 1)
             self.system_config.save_config()
-            with open("/sys/class/backlight/backlight/brightness", "w") as f:
-                f.write(str(self._map_miyoo_scale_to_system_brightness(self.brightness + 1)))
+            self._set_brightness_to_config()
 
     @property
     def brightness(self):
@@ -195,10 +202,45 @@ class MiyooFlip(Device):
         except subprocess.CalledProcessError as e:
             print(f"Command failed: {e}")
             return 0 # ???
+        
+    def convert_game_path_to_miyoo_path(self,original_path):
+        # Define the part of the path to be replaced
+        base_dir = "/mnt/SDCARD/Roms/"
+
+        # Check if the original path starts with the base directory
+        if original_path.startswith(base_dir):
+            # Extract the subdirectory after Roms/
+            subdirectory = original_path[len(base_dir):].split(os.sep, 1)[0]
+            
+            # Construct the new path using the desired format
+            new_path = original_path.replace(f"Roms{os.sep}{subdirectory}", f"Emu{os.sep}{subdirectory}{os.sep}..{os.sep}..{os.sep}Roms{os.sep}{subdirectory}")
+            new_path = new_path.replace("/mnt/SDCARD/", "/media/sdcard0/")
+            return new_path
+        else:
+            print(f"Unable to convert {original_path} to miyoo path")
+            return original_path
+        
+    def write_cmd_to_run(self, command):
+        with open('/tmp/cmd_to_run.sh', 'w') as file:
+            file.write(command)
+
+    def delete_cmd_to_run(self):
+        try:
+            os.remove('/tmp/cmd_to_run.sh')
+        except FileNotFoundError:
+            pass  # File doesn't exist, no action needed
+        except Exception as e:
+            print(f"Failed to delete file: {e}")
 
     def run_game(self, file_path):
-        print(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path}")
+        #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8
+        #miyoo maps it to /media/sdcard0/Emu/FAKE08/../../Roms/FAKE08/Alpine Alpaca.p8
+        miyoo_app_path = self.convert_game_path_to_miyoo_path(file_path)
+        self.write_cmd_to_run(f'''chmod a+x "/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh";"/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh" "{miyoo_app_path}"''')
+
+        print(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path} | {miyoo_app_path}")
         subprocess.run(["/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh",file_path])
+        self.delete_cmd_to_run()
 
     def run_app(self, args, dir = None):
         print(f"About to launch app {args}")
@@ -237,7 +279,9 @@ class MiyooFlip(Device):
             print(f"Unknown input {sdl_input}")
         return mapping
 
-    def get_wifi_link_quality_level(self):
+
+
+    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
             output = subprocess.check_output(
                 ["cat", "/proc/net/wireless"],
@@ -249,37 +293,88 @@ class MiyooFlip(Device):
                 data_line = output[2]
                 parts = data_line.split()
                 
-                # parts[2] is the link quality, parts[3] is the level
-                link_level = float(parts[3].strip('.'))  # Remove trailing dot
-                return int(link_level)
+                # According to the standard format:
+                # parts[2] = link quality (float ending in '.')
+                # parts[3] = signal level
+                # parts[4] = noise level
+                link_quality = int(float(parts[2].strip('.')))
+                signal_level = int(float(parts[3].strip('.')))
+                noise_level = int(float(parts[4].strip('.')))
+
+                return WiFiConnectionQualityInfo(
+                    noise_level=noise_level,
+                    signal_level=signal_level,
+                    link_quality=link_quality
+                )
         except Exception as e:
-            return 0
-    
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+        
     @throttle.limit_refresh(15)
     def get_wifi_status(self):
         if(self.is_wifi_enabled()):
-            link_quality_level = self.get_wifi_link_quality_level()
-            if(link_quality_level >= 70):
+            wifi_connection_quality_info = self.get_wifi_connection_quality_info()
+            # Composite score out of 100 based on weighted contribution
+            # Adjust weights as needed based on empirical testing
+            score = (
+                (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
+                (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
+                ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
+            ) * 100
+
+            if score >= 80:
                 return WifiStatus.GREAT
-            elif(link_quality_level >= 50):
+            elif score >= 60:
                 return WifiStatus.GOOD
-            elif(link_quality_level >= 30):
+            elif score >= 40:
                 return WifiStatus.OKAY
             else:
                 return WifiStatus.BAD
         else:            
             return WifiStatus.OFF
-        
+
+    def stop_wpa_supplicant_running(self):
+        subprocess.run(['killall', '-15', 'wpa_supplicant'], capture_output=True, text=True)
+        time.sleep(0.1)  
+        subprocess.run(['killall', '-9', 'wpa_supplicant'], capture_output=True, text=True)
+
+    def start_wpa_supplicant(self):
+        try:
+            # Check if wpa_supplicant is running using ps -f
+            result = subprocess.run(['ps', '-f'], capture_output=True, text=True)
+            if 'wpa_supplicant' in result.stdout:
+                return
+
+            # If not running, start it in the background
+            subprocess.Popen([
+                'wpa_supplicant',
+                '-B',
+                '-D', 'nl80211',
+                '-i', 'wlan0',
+                '-c', '/userdata/cfg/wpa_supplicant.conf'
+            ])
+            time.sleep(0.5)  # Wait for it to initialize
+            print("wpa_supplicant started.")
+        except Exception as e:
+            print(f"Error: {e}")
+
     def is_wifi_enabled(self, interface="wlan0"):
         result = subprocess.run(["ip", "link", "show", interface], capture_output=True, text=True)
         return "UP" in result.stdout
 
     def disable_wifi(self,interface="wlan0"):
-        subprocess.run(["ip", "link", "set", interface, "down"], capture_output=True, text=True)
+        self.system_config.reload_config()
+        self.system_config.set_wifi(0)
+        self.system_config.save_config()
+        subprocess.run(["ifconfig",interface,"down"], capture_output=True, text=True)
+        self.stop_wpa_supplicant_running()
         self.get_wifi_status.force_refresh()
 
     def enable_wifi(self,interface="wlan0"):
-        subprocess.run(["ip", "link", "set", interface, "up"], capture_output=True, text=True)
+        self.system_config.reload_config()
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
+        subprocess.run(["ifconfig",interface,"up"], capture_output=True, text=True)
+        self.start_wpa_supplicant()
         self.get_wifi_status.force_refresh()
 
     @throttle.limit_refresh(15)
@@ -327,6 +422,8 @@ class MiyooFlip(Device):
     
     
     def disable_bluetooth(self):
+        subprocess.run(["killall","-15","bluetoothd"])
+        time.sleep(0.1)  
         subprocess.run(["killall","-9","bluetoothd"])
 
     def enable_bluetooth(self):
@@ -335,3 +432,6 @@ class MiyooFlip(Device):
                             cwd='/usr/libexec/bluetooth/',
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
+            
+    def perform_startup_tasks(self):
+        pass

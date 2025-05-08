@@ -1,6 +1,7 @@
 import json
 import os
 
+from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from views.view_type import ViewType
@@ -134,7 +135,7 @@ class Theme():
         return os.path.join(self.path,"skin","bg-list-s.png")
     
     def get_battery_icon(self,charging,battery_percent):
-        if(charging):
+        if(ChargeStatus.CHARGING == charging):
             if(battery_percent > 97):
                 return os.path.join(self.path,"skin","ic-power-charge-100%.png")
             elif(battery_percent >= 75):
@@ -198,110 +199,127 @@ class Theme():
     
     
     def get_font(self, font_purpose : FontPurpose):
-        match font_purpose:
-            case FontPurpose.TOP_BAR_TEXT:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.BATTERY_PERCENT:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.ON_SCREEN_KEYBOARD:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.GRID_ONE_ROW:
-                font = os.path.join(self.path,self.grid["font"]) 
-            case FontPurpose.GRID_MULTI_ROW:
-                font = os.path.join(self.path,self.grid["font"]) 
-            case FontPurpose.LIST:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.MESSAGE:
-                font = os.path.join(self.path,self.list["font"]) 
-            case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                font = os.path.join(self.path,self.list["font"]) 
-            case _:
-                font = os.path.join(self.path,self.list["font"]) 
-            
-        if os.path.exists(font):
-            return font 
-        else:
+        try:
+            match font_purpose:
+                case FontPurpose.TOP_BAR_TEXT:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.BATTERY_PERCENT:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.ON_SCREEN_KEYBOARD:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.GRID_ONE_ROW:
+                    font = os.path.join(self.path,self.grid["font"]) 
+                case FontPurpose.GRID_MULTI_ROW:
+                    font = os.path.join(self.path,self.grid["font"]) 
+                case FontPurpose.LIST:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.MESSAGE:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    font = os.path.join(self.path,self.list["font"]) 
+                case _:
+                    font = os.path.join(self.path,self.list["font"]) 
+                
+            if os.path.exists(font):
+                return font 
+            else:
+                return "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+        except Exception as e:
+            print(f"get_font error occurred: {e}")
             return "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+
     
     def get_font_size(self, font_purpose : FontPurpose):
-        match font_purpose:
-            case FontPurpose.TOP_BAR_TEXT:
-                return self.list.get("size", 24)
-            case FontPurpose.BATTERY_PERCENT:
-                return self.list.get("size", 24)
-            case FontPurpose.ON_SCREEN_KEYBOARD:
-                return self.list.get("size", 24)
-            case FontPurpose.GRID_ONE_ROW:
-                return self.grid.get("grid1x4", self.grid.get("size",25))
-            case FontPurpose.GRID_MULTI_ROW:
-                return self.grid.get("grid3x4", self.grid.get("size",18))
-            case FontPurpose.LIST:
-                return self.list.get("size", 24)
-            case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                return self.list.get("size", 24)
-            case FontPurpose.MESSAGE:
-                return self.list.get("size", 24)
-            case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                return self.grid.get("grid3x4", self.grid.get("size",18))
-            case FontPurpose.LIST_INDEX:
-                return self.currentpage.get("size", 22)
-            case FontPurpose.LIST_TOTAL:
-                return self.total.get("size", 22)
-            case _:
-                return self.list["font"]
+        try:
+            match font_purpose:
+                case FontPurpose.TOP_BAR_TEXT:
+                    return self.list.get("size", 24)
+                case FontPurpose.BATTERY_PERCENT:
+                    return self.list.get("size", 24)
+                case FontPurpose.ON_SCREEN_KEYBOARD:
+                    return self.list.get("size", 24)
+                case FontPurpose.GRID_ONE_ROW:
+                    return self.grid.get("grid1x4", self.grid.get("size",25))
+                case FontPurpose.GRID_MULTI_ROW:
+                    return self.grid.get("grid3x4", self.grid.get("size",18))
+                case FontPurpose.LIST:
+                    return self.list.get("size", 24)
+                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
+                    return self.list.get("size", 24)
+                case FontPurpose.MESSAGE:
+                    return self.list.get("size", 24)
+                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    return self.grid.get("grid3x4", self.grid.get("size",18))
+                case FontPurpose.LIST_INDEX:
+                    return self.currentpage.get("size", 22)
+                case FontPurpose.LIST_TOTAL:
+                    return self.total.get("size", 22)
+                case _:
+                    return self.list["font"]
+        except Exception as e:
+            print(f"get_font_size error occurred: {e}")
+            return 20
 
     def text_color(self, font_purpose : FontPurpose):
-        match font_purpose:
-            case FontPurpose.TOP_BAR_TEXT:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.BATTERY_PERCENT:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.ON_SCREEN_KEYBOARD:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.GRID_ONE_ROW:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.GRID_MULTI_ROW:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.LIST:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.MESSAGE:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                return self.hex_to_color(self.grid["color"])
-            case FontPurpose.LIST_INDEX:
-                return self.hex_to_color(self.currentpage["color"])
-            case FontPurpose.LIST_TOTAL:
-                return self.hex_to_color(self.total["color"])
-            case _:
-                return self.hex_to_color(self.grid["color"])
+        try:
+            match font_purpose:
+                case FontPurpose.TOP_BAR_TEXT:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.BATTERY_PERCENT:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.ON_SCREEN_KEYBOARD:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.GRID_ONE_ROW:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.GRID_MULTI_ROW:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.LIST:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.MESSAGE:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    return self.hex_to_color(self.grid["color"])
+                case FontPurpose.LIST_INDEX:
+                    return self.hex_to_color(self.currentpage["color"])
+                case FontPurpose.LIST_TOTAL:
+                    return self.hex_to_color(self.total["color"])
+                case _:
+                    return self.hex_to_color(self.grid["color"])
+        except Exception as e:
+            print(f"text_color error occurred: {e}")
+            return self.hex_to_color("#808080")
       
     def text_color_selected(self, font_purpose : FontPurpose):
-        match font_purpose:
-            case FontPurpose.GRID_ONE_ROW:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.GRID_MULTI_ROW:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.LIST:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.MESSAGE:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case FontPurpose.LIST_INDEX:
-                return self.hex_to_color(self.currentpage["selectedcolor"])
-            case FontPurpose.LIST_TOTAL:
-                return self.hex_to_color(self.total["color"])
-            case FontPurpose.ON_SCREEN_KEYBOARD:
-                return self.hex_to_color(self.grid["selectedcolor"])
-            case _:
-                return self.hex_to_color(self.grid["selectedcolor"])
-    
+        try:
+            match font_purpose:
+                case FontPurpose.GRID_ONE_ROW:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.GRID_MULTI_ROW:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.LIST:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.MESSAGE:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case FontPurpose.LIST_INDEX:
+                    return self.hex_to_color(self.currentpage["selectedcolor"])
+                case FontPurpose.LIST_TOTAL:
+                    return self.hex_to_color(self.total["color"])
+                case FontPurpose.ON_SCREEN_KEYBOARD:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+                case _:
+                    return self.hex_to_color(self.grid["selectedcolor"])
+        except Exception as e:
+            print(f"text_color error occurred: {e}")
+            return self.text_color(font_purpose)
+
     def hex_to_color(self,hex_string):
         hex_string = hex_string.lstrip('#')
         if len(hex_string) != 6:
