@@ -1,3 +1,5 @@
+#!/bin/sh
+
 APP_DIR="/mnt/SDCARD/App"
 
 # Detect device and export to any script sourcing updaterFunctions
@@ -21,6 +23,7 @@ case $INFO in
     ;;
 *)
     export PLATFORM="A30"
+    export SD_DEV="/dev/mmcblk0p1"
     ;;
 esac
 
