@@ -289,13 +289,13 @@ download_progress() {
 
         
 $PERCENTAGE%
-$ETA_MSG" --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+$ETA_MSG" -p 55 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
         else
             display -t "$title
         
 
         
-$PERCENTAGE%" -p 135 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
+$PERCENTAGE%" -p 55 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int) 240 left --add-image $downloadBar 1.0 240 middle
         fi
 
         # Update previous size for next iteration

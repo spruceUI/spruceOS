@@ -74,6 +74,23 @@ display() {
     fi
 }
 
+# Execute this section prior to reboot (if applicable). Skip it if reboot has already occurred.
+if [ ! "$PLATFORM" = "A30" ] && [ ! -f /mnt/SDCARD/spruce/flags/reboot-update.lock ]; then
+    mkdir -p /mnt/SDCARD/spruce/flags
+    touch /mnt/SDCARD/spruce/flags/reboot-update.lock
+    display -t "Your $PLATFORM will now reboot to allow for a safe update. Please wait!" -d 5
+    log_update_message "Initial checks complete. Rebooting device to allow update to occur before mounting over important system files."
+    reboot
+    while true; do true; done
+fi
+
+# remove reboot-update flag after rebooting so that we don't skip the above section if a failure occurs
+# further into the update script.
+if [ -f /mnt/SDCARD/spruce/flags/reboot-update.lock ]; then
+    log_update_message "Update continuing post-reboot!"
+    rm -f /mnt/SDCARD/spruce/flags/reboot-update.lock 2>/dev/null
+fi
+
 # Start
 log_update_message "Update process started"
 display -t "Checking for update file..."
@@ -243,7 +260,7 @@ ls -l "$UPDATE_FILE" >>"$LOG_LOCATION"
 kill_network_services
 
 # Creating a backup of current install
-display "Creating a backup of user data and configs..."
+display -t "Creating a backup of user data and configs..."
 /mnt/SDCARD/App/spruceBackup/spruceBackup.sh --silent
 
 save_app_states
@@ -296,7 +313,6 @@ log_update_message "Extracting update file: $UPDATE_FILE"
 read_only_check
 
 display -t "Applying update. This should take around 5 minutes..."
-
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."

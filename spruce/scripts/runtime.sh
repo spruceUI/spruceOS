@@ -26,6 +26,11 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
 
+if flag_check "reboot-update"; then
+    log_message "Updater continuing!"
+    /mnt/SDCARD/Updater/updater.sh
+fi
+
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     SWAPFILE="/mnt/SDCARD/cachefile"
@@ -110,8 +115,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-    #/mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-
+    /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
 fi
 
