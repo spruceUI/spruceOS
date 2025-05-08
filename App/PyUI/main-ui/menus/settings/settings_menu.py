@@ -78,8 +78,11 @@ class SettingsMenu:
     def get_theme_folders(self):
         theme_dir = self.config["theme_dir"]
         return sorted(
-            [name for name in os.listdir(theme_dir)
-            if os.path.isdir(os.path.join(theme_dir, name))]
+            [
+                name for name in os.listdir(theme_dir)
+                if os.path.isdir(os.path.join(theme_dir, name)) and
+                os.path.isfile(os.path.join(theme_dir, name, "config.json"))
+            ]
         )    
     
     def change_theme(self, input):
