@@ -16,6 +16,8 @@ class Theme():
         self.path = path
         self.load_defaults_for_values_not_in_miyoo_theme()
         self.load_from_file(os.path.join(path,"config.json"))
+        #Reload path incase a theme tried to set it
+        self.path = path
 
     def load_defaults_for_values_not_in_miyoo_theme(self):
         setattr(self, "showBottomBar", True)
@@ -34,6 +36,7 @@ class Theme():
 
     @property
     def background(self):
+        print(f"self.path = {self.path}")
         return os.path.join(self.path,"skin","background.png")
 
     @property
