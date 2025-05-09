@@ -1,3 +1,4 @@
+from multiprocessing import get_logger
 import os
 import threading
 import sdl2
@@ -8,20 +9,24 @@ from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
 from devices.miyoo_flip import MiyooFlip
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+
+
+PyUiLogger.init()
 
 config = PyUiConfig()
 config.load()
 
 selected_theme = os.path.join(config["theme_dir"],config["theme"])
                               
-print(f"{selected_theme}")
+PyUiLogger.info(f"{selected_theme}")
 
 theme = Theme(os.path.join(config["theme_dir"],config["theme"]))
 
 device = MiyooFlip()
 display = Display(theme, device)
-controller = Controller(device)
+controller = Controller(device, config)
 
 main_menu = MainMenu(display, controller, device, theme, config)
 

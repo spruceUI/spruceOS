@@ -90,7 +90,7 @@ network={{
                     purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE,
                     render_mode=RenderMode.MIDDLE_CENTER_ALIGNED)
                 self.display.present()
-                networks = self.wifi_scanner.scan_networks()
+                networks = self.wifi_scanner.scan_networks(self.device)
                 connected_ssid, connected_freq = self.wifi_scanner.get_connected_ssid()
                 connected_is_5ghz = False
                 if(connected_freq is not None and connected_freq >= 5000 and connected_freq <= 6000):
