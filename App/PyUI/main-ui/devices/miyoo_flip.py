@@ -331,6 +331,9 @@ class MiyooFlip(Device):
                     signal_level=signal_level,
                     link_quality=link_quality
                 )
+            else:
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+
         except Exception as e:
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
