@@ -97,9 +97,11 @@ class BluetoothMenu:
                     options=option_list,
                     selected_index=selected.get_index())
 
-            selected = list_view.get_selection([ControllerInput.A,ControllerInput.X, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT])
+            accepted_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
+                                                ControllerInput.L1, ControllerInput.R1]
+            selected = list_view.get_selection(accepted_inputs)
 
-            if(selected is not None):
+            if(selected.get_input() in accepted_inputs):
                 print(f"bluetooth_enabled={bluetooth_enabled}")
                 if(ControllerInput.X == selected.get_input() and bluetooth_enabled):
                     devices = self.scan_for_devices()
@@ -107,4 +109,6 @@ class BluetoothMenu:
                      or ControllerInput.DPAD_LEFT == selected.get_input() 
                      or ControllerInput.DPAD_RIGHT == selected.get_input()):
                     selected.get_selection().value()
+            elif(ControllerInput.B == selected.get_input()):
+                selected = None
 

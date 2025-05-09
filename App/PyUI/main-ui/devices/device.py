@@ -126,9 +126,8 @@ class Device(ABC):
     def change_volume(self, amount):
         pass
 
-    @property
     @abstractmethod
-    def volume(self):
+    def get_volume(self):
         pass
 
     @property

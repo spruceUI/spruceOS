@@ -45,8 +45,7 @@ class GridView:
     def set_options(self, options):
         self.options = options
 
-    def _render(self):
-        self.display.clear(self.top_bar_text)
+    def correct_selected_for_off_list(self):
         self.selected = max(0, self.selected)
         self.selected = min(len(self.options)-1, self.selected)
         
@@ -57,6 +56,10 @@ class GridView:
         while(self.selected >= self.current_right):
             self.current_left += (self.cols*2)
             self.current_right += (self.cols*2)
+
+    def _render(self):
+        self.display.clear(self.top_bar_text)
+        self.correct_selected_for_off_list()
 
         visible_options: List[GridOrListEntry] = self.options[self.current_left:self.current_right]
 
@@ -121,25 +124,29 @@ class GridView:
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render()
-        running = True
         
-        while running:
-            if(self.controller.get_input()):
-                if self.controller.last_input() == ControllerInput.DPAD_LEFT:
-                    self.selected-=1
-                elif self.controller.last_input() == ControllerInput.DPAD_RIGHT:
-                    self.selected+=1
-                elif self.controller.last_input() == ControllerInput.L1:
-                    self.selected-=1
-                elif self.controller.last_input() == ControllerInput.R1:
-                    self.selected+=1
-                if self.controller.last_input() == ControllerInput.DPAD_UP:
-                    self.selected-=self.cols
-                elif self.controller.last_input() == ControllerInput.DPAD_DOWN:
-                    self.selected+=self.cols
-                elif self.controller.last_input() in select_controller_inputs:
-                    return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
-                elif self.controller.last_input() == ControllerInput.B:
-                    return None
+        if(self.controller.get_input()):
+            if self.controller.last_input() == ControllerInput.DPAD_LEFT:
+                self.selected-=1
+                self.correct_selected_for_off_list()
+            elif self.controller.last_input() == ControllerInput.DPAD_RIGHT:
+                self.selected+=1
+                self.correct_selected_for_off_list()
+            elif self.controller.last_input() == ControllerInput.L1:
+                self.selected-=1
+                self.correct_selected_for_off_list()
+            elif self.controller.last_input() == ControllerInput.R1:
+                self.selected+=1
+                self.correct_selected_for_off_list()
+            if self.controller.last_input() == ControllerInput.DPAD_UP:
+                self.selected-=self.cols
+                self.correct_selected_for_off_list()
+            elif self.controller.last_input() == ControllerInput.DPAD_DOWN:
+                self.selected+=self.cols
+                self.correct_selected_for_off_list()
+            elif self.controller.last_input() in select_controller_inputs:
+                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
+            elif self.controller.last_input() == ControllerInput.B:
+                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
                 
-            self._render()
+        return Selection(self.options[self.selected],None, self.selected)

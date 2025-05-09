@@ -1,6 +1,7 @@
 
 import os
 from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from menus.games.game_system_config import GameSystemConfig
@@ -56,7 +57,7 @@ class GameConfigMenu:
 
             selected = view.get_selection()
 
-            if(selected is not None):
+            if(ControllerInput.A == selected.get_input()):
                 # Miyoo handles this strangley
                 # Example rom /mnt/SDCARD/Roms/PORTS/PokeMMO.sh               
                 # example arg /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
@@ -67,3 +68,5 @@ class GameConfigMenu:
                 # TODO Once we remove the display_kill and popups from launch.sh we can remove this
                 # For a good speedup
                 self.display.reinitialize()
+            elif(ControllerInput.B == selected.get_input()):
+                selected = None

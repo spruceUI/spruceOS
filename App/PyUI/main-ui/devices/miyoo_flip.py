@@ -209,16 +209,16 @@ class MiyooFlip(Device):
 
 
     def change_volume(self, amount):
-        self._set_volume(self.volume + amount)
+        self._set_volume(self.get_volume() + amount)
 
-    @property
-    def volume(self):
+    def get_volume(self):
         try:
             output = subprocess.check_output(
                 ["amixer", "cget", "name='SPK Volume'"],
                 text=True
             )
             match = re.search(r": values=(\d+)", output)
+            print(f"Volume is {output}")
             if match:
                 return int(match.group(1))
             else:

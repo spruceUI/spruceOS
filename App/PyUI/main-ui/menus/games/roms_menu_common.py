@@ -85,3 +85,5 @@ class RomsMenuCommon(ABC):
                     GameConfigMenu(self.display, self.controller, self.device, self.theme, 
                                    self._extract_game_system(selected.get_selection().get_value()), 
                                    selected.get_selection().get_value()).show_config()
+                elif(ControllerInput.B == selected.get_input()):
+                    selected = None

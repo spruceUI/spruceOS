@@ -103,12 +103,9 @@ class SettingsMenu:
         self.config["theme"] = theme_folders[selected_index]
         self.config.save()
 
-    def show_menu(self) :
-        selected = Selection(None, None, 0)
-        list_view = None
-        while(selected is not None):
-            option_list = []
-            option_list.append(
+    def build_options_list(self):
+        option_list = []
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Brightness",
                         value_text="<    " + str(self.device.brightness) + "    >",
@@ -119,10 +116,11 @@ class SettingsMenu:
                         value=self.brightness_adjust
                     )
             )
-            option_list.append(
+
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Volume",
-                        value_text="<    " + str(self.device.volume) + "    >",
+                        value_text="<    " + str(self.device.get_volume()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -130,7 +128,7 @@ class SettingsMenu:
                         value=self.volume_adjust
                     )
             )
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="WiFi",
                         value_text="<    " + ("On" if self.device.is_wifi_enabled() else "Off") + "    >",
@@ -141,7 +139,7 @@ class SettingsMenu:
                         value=self.show_wifi_menu
                     )
             )
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Bluetooth",
                         value_text="<    " + ("On" if self.device.is_bluetooth_enabled() else "Off") + "    >",
@@ -153,7 +151,7 @@ class SettingsMenu:
                     )
             )
             
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Theme",
                         value_text="<    " + self.config["theme"] + "    >",
@@ -165,7 +163,7 @@ class SettingsMenu:
                     )
             )
 
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="On Screen Keyboard",
                         value_text=None,
@@ -176,7 +174,7 @@ class SettingsMenu:
                         value=self.show_on_screen_keyboard
                     )
             )
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Power Off",
                         image_path=None,
@@ -186,7 +184,7 @@ class SettingsMenu:
                         value=self.shutdown
                     )
             )
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
                         primary_text="Reboot",
                         image_path=None,
@@ -194,8 +192,19 @@ class SettingsMenu:
                         description=None,
                         icon=None,
                         value=self.reboot
-                    )
-            )
+                )
+        )
+        
+        return option_list
+
+
+    def show_menu(self) :
+        selected = Selection(None, None, 0)
+        list_view = None
+        while(selected is not None):
+            print("build_options_list")
+            option_list = self.build_options_list()
+            
 
             if(list_view is None):
                 list_view = self.view_creator.create_view(
@@ -209,6 +218,10 @@ class SettingsMenu:
             control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)
+            print("bottom while")
 
-            if(selected is not None and selected.get_input() in control_options):
+            if(selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
+            elif(ControllerInput.B == selected.get_input()):
+                selected = None
+

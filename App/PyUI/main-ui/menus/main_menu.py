@@ -1,5 +1,6 @@
 
 from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from menus.app.app_menu import AppMenu
@@ -32,8 +33,7 @@ class MainMenu:
     def run_main_menu_selection(self):
         selected = Selection(None,None,0)
 
-        while(selected is not None):        
-
+        while(selected.get_input() != ControllerInput.B):        
             #TODO make this user config driven
             first_entry = "Favorite"
 
@@ -79,14 +79,15 @@ class MainMenu:
                 cols=4, 
                 rows=1,
                 selected_index=selected.get_index())
-            if((selected := view.get_selection()) is not None):        
-                if(selected.get_selection().get_primary_text() == "Game"):
-                    self.system_select_menu.run_system_selection()
-                elif(selected.get_selection().get_primary_text() == "App"):
-                    self.app_menu.run_app_selection()
-                elif(selected.get_selection().get_primary_text() == "Favorite"):
-                    self.favorites_menu.run_rom_selection()
-                elif(selected.get_selection().get_primary_text() == "Recent"):
-                    self.recents_menu.run_rom_selection()
-                elif(selected.get_selection().get_primary_text() == "Setting"):
-                    self.settings_menu.show_menu()
+            if((selected := view.get_selection()) is not None):       
+                if(ControllerInput.A == selected.get_input()): 
+                    if("Game" == selected.get_selection().get_primary_text()):
+                        self.system_select_menu.run_system_selection()
+                    elif("App" == selected.get_selection().get_primary_text()):
+                        self.app_menu.run_app_selection()
+                    elif("Favorite" == selected.get_selection().get_primary_text()):
+                        self.favorites_menu.run_rom_selection()
+                    elif("Recent" == selected.get_selection().get_primary_text()):
+                        self.recents_menu.run_rom_selection()
+                    elif("Setting" == selected.get_selection().get_primary_text()):
+                        self.settings_menu.show_menu()

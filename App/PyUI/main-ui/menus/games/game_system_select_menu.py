@@ -1,6 +1,7 @@
 
 import os
 from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from games.utils.game_system_utils import GameSystemUtils
@@ -68,5 +69,10 @@ class GameSystemSelectMenu:
         else:
             view.set_options(systems_list)
 
-        while((selected := view.get_selection()) is not None):
-            self.rom_select_menu.run_rom_selection(selected.get_selection().get_primary_text())
+        exit = False
+        while(not exit):
+            selected = view.get_selection()
+            if(ControllerInput.A == selected.get_input()):
+                self.rom_select_menu.run_rom_selection(selected.get_selection().get_primary_text())
+            elif(ControllerInput.B == selected.get_input()):
+                exit = True

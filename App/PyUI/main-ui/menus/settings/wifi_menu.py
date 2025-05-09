@@ -64,6 +64,11 @@ network={{
 
     def show_wifi_menu(self):
         selected = Selection(None, None, 0)
+        should_scan_for_wifi = True
+        networks = []
+        connected_ssid = ""
+        connected_freq = 0
+        connected_is_5ghz = False
         while(selected is not None):
             wifi_enabled = self.device.is_wifi_enabled()
             option_list = []
@@ -90,11 +95,13 @@ network={{
                     purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE,
                     render_mode=RenderMode.MIDDLE_CENTER_ALIGNED)
                 self.display.present()
-                networks = self.wifi_scanner.scan_networks(self.device)
-                connected_ssid, connected_freq = self.wifi_scanner.get_connected_ssid()
-                connected_is_5ghz = False
-                if(connected_freq is not None and connected_freq >= 5000 and connected_freq <= 6000):
-                    connected_is_5ghz = True
+                if(should_scan_for_wifi):
+                    should_scan_for_wifi = False
+                    networks = self.wifi_scanner.scan_networks(self.device)
+                    connected_ssid, connected_freq = self.wifi_scanner.get_connected_ssid()
+                    connected_is_5ghz = False
+                    if(connected_freq is not None and connected_freq >= 5000 and connected_freq <= 6000):
+                        connected_is_5ghz = True
 
                 for net in networks:
                     network_name = net.ssid
@@ -125,9 +132,15 @@ network={{
                     options=option_list,
                     selected_index=selected.get_index())
 
-            selected = list_view.get_selection([ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
-                                                ControllerInput.L1, ControllerInput.R1])
+            accepted_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
+                                                ControllerInput.L1, ControllerInput.R1]
+            
+            selected = Selection(None, None, 0)
+            while(selected is not None and selected.get_input() not in accepted_inputs):
+                selected = list_view.get_selection(accepted_inputs)
 
-            if(selected is not None):
-                selected.get_selection().value()
-
+                if(selected.get_input() in accepted_inputs):
+                    selected.get_selection().value()
+                    should_scan_for_wifi = True
+                elif(ControllerInput.B == selected.get_input()):
+                    selected = None

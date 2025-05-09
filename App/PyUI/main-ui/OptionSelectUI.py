@@ -31,7 +31,7 @@ theme = Theme(os.path.join(config["theme_dir"],config["theme"]))
 
 device = MiyooFlip()
 display = Display(theme, device)
-controller = Controller(device)
+controller = Controller(device, config)
 view_creator = ViewCreator(display,controller,device,theme)
 
 title = sys.argv[1]
@@ -56,18 +56,19 @@ for entry in data:
         )
     )
 
-while(selected is not None):
-    view = view_creator.create_view(
-                view_type=ViewType.TEXT_AND_IMAGE_LIST_VIEW,
-                top_bar_text=title,
-                options=option_list, 
-                selected_index=selected.get_index())
+view = view_creator.create_view(
+        view_type=ViewType.TEXT_AND_IMAGE_LIST_VIEW,
+        top_bar_text=title,
+        options=option_list, 
+        selected_index=selected.get_index())
 
+while(True):
     selected = view.get_selection([ControllerInput.A])
     if(selected is not None):
         if(ControllerInput.A == selected.get_input()):
             subprocess.run(selected.get_selection().get_value(), shell=True)
             selected = None
             sys.exit(0)
+        elif(ControllerInput.B == selected.get_input()):
+            sys.exit(1)
 
-sys.exit(1)
