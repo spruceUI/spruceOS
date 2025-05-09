@@ -51,6 +51,16 @@ class Device(ABC):
 
     @property
     @abstractmethod
+    def contrast(self):
+        pass
+
+    @property
+    @abstractmethod
+    def saturation(self):
+        pass
+
+    @property
+    @abstractmethod
     def input_timeout_default(self):
         pass
 
@@ -120,6 +130,22 @@ class Device(ABC):
 
     @abstractmethod
     def raise_brightness(self):
+        pass
+
+    @abstractmethod
+    def lower_contrast(self):
+        pass
+
+    @abstractmethod
+    def raise_contrast(self):
+        pass
+
+    @abstractmethod
+    def lower_saturation(self):
+        pass
+
+    @abstractmethod
+    def raise_saturation(self):
         pass
 
     @abstractmethod
