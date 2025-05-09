@@ -5,8 +5,10 @@ import ctypes
 from ctypes import byref
 import time
 
+from utils.py_ui_config import PyUiConfig
+
 class Controller:
-    def __init__(self, device: Device):
+    def __init__(self, device: Device, config: PyUiConfig):
         self.controller = None
         self.index = None
         self.name = None
@@ -15,6 +17,7 @@ class Controller:
         self.event = sdl2.SDL_Event()
         self.device = device
         self.last_input_time = 0
+        self.config = config
 
 
     def _init_controller(self):
@@ -46,30 +49,37 @@ class Controller:
     def still_held_down(self):
         return sdl2.SDL_GameControllerGetButton(self.controller, self.event.cbutton.button)
     
-    def get_input(self, timeout = -2):
-        if(-2 == timeout):
+    def get_input(self, timeout=-2):
+        if timeout == -2:
             timeout = self.device.input_timeout_default
 
         sdl2.SDL_PumpEvents()
         start_time = time.time()
 
-        #TODO move the time delay to the caller
-        while(self.still_held_down() and time.time() - start_time < 0.12):
+        # Optional: delay if input is still being held from a prior press
+        while self.still_held_down() and (time.time() - start_time < 0.12):
             sdl2.SDL_PumpEvents()
-            
+            time.sleep(0.005)  # Prevent tight CPU loop
 
-        if(not self.still_held_down()):
-            self._last_event().type = 0
+        if not self.still_held_down():
+            self._last_event().type = 0  # Clear last event
             reached_timeout = False
-            while(self._last_event().type != sdl2.SDL_CONTROLLERBUTTONDOWN and not reached_timeout):
-                poll_result = 0
-                while(0 == poll_result and not reached_timeout):
-                    poll_result = sdl2.SDL_PollEvent(byref(self.event))
-                    if(time.time() - start_time > timeout):
-                        reached_timeout = True
+
+            while not reached_timeout:
+                elapsed = time.time() - start_time
+                remaining_time = timeout - elapsed
+                if remaining_time <= 0:
+                    reached_timeout = True
+                    break
+
+                ms_remaining = int(remaining_time * 1000)
+                event_available = sdl2.SDL_WaitEventTimeout(byref(self.event), ms_remaining)
+
+                if event_available and self._last_event().type == sdl2.SDL_CONTROLLERBUTTONDOWN:
+                    break
 
         self.last_input_time = time.time()
-        return self.last_event_was_controller()        
+        return self.last_event_was_controller() 
 
     def clear_input_queue(self):
         # SDL is super weird on the flip, disabling and clearing do not work
