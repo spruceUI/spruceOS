@@ -49,6 +49,8 @@ class MiyooFlip(Device):
         self.system_config = SystemConfig("/userdata/system.json")
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_brightness_to_config()
+        self._set_contrast_to_config()
+        self._set_saturation_to_config()
         self.ensure_wpa_supplicant_conf()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
 
@@ -164,7 +166,14 @@ class MiyooFlip(Device):
     def _set_brightness_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
             f.write(str(self._map_miyoo_scale_to_system_brightness(self.system_config.brightness)))
-
+    
+    def _set_contrast_to_config(self):
+        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+                                     "179:contrast:"+str(self.system_config.contrast * 5)])
+    
+    def _set_saturation_to_config(self):
+        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+                                     "179:saturation:"+str(self.system_config.saturation * 5)])
 
     def lower_brightness(self):
         self.system_config.reload_config()
@@ -187,6 +196,42 @@ class MiyooFlip(Device):
                 text=True
             ).strip()
         return self._map_system_brightness_to_miyoo_scale(int(true_brightness))
+
+    def lower_contrast(self):
+        self.system_config.reload_config()
+        if(self.system_config.contrast > 1): # don't allow 0 contrast
+            self.system_config.set_contrast(self.system_config.contrast - 1)
+            self.system_config.save_config()
+            self._set_contrast_to_config()
+
+    def raise_contrast(self):
+        self.system_config.reload_config()
+        if(self.system_config.contrast < 20):
+            self.system_config.set_contrast(self.system_config.contrast + 1)
+            self.system_config.save_config()
+            self._set_contrast_to_config()
+
+    @property
+    def contrast(self):
+        return self.system_config.get_contrast()
+
+    def lower_saturation(self):
+        self.system_config.reload_config()
+        if(self.system_config.saturation > 0):
+            self.system_config.set_saturation(self.system_config.saturation - 1)
+            self.system_config.save_config()
+            self._set_saturation_to_config()
+
+    def raise_saturation(self):
+        self.system_config.reload_config()
+        if(self.system_config.saturation < 20):
+            self.system_config.set_saturation(self.system_config.saturation + 1)
+            self.system_config.save_config()
+            self._set_saturation_to_config()
+
+    @property
+    def saturation(self):
+        return self.system_config.get_saturation()
 
     def _set_volume(self, volume):
         if(volume < 0):

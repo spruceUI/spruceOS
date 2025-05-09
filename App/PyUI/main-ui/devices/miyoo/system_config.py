@@ -38,6 +38,12 @@ class SystemConfig:
     def set_brightness(self, value):
         self.config["brightness"] = value
     
+    def set_contrast(self, value):
+        self.config["contrast"] = value
+    
+    def set_saturation(self, value):
+        self.config["saturation"] = value
+    
     def set_volume(self, value):
         self.config["vol"] = value
 
@@ -56,8 +62,16 @@ class SystemConfig:
     def get_hue(self):
         return self.config.get("hue")
 
+    @property
+    def saturation(self):
+        return self.config.get("saturation")
+
     def get_saturation(self):
         return self.config.get("saturation")
+
+    @property
+    def contrast(self):
+        return self.config.get("contrast")
 
     def get_contrast(self):
         return self.config.get("contrast")

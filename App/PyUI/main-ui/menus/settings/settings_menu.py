@@ -42,6 +42,18 @@ class SettingsMenu:
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
             self.device.raise_brightness()
     
+    def contrast_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            self.device.lower_contrast()
+        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            self.device.raise_contrast()
+
+    def saturation_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            self.device.lower_saturation()
+        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            self.device.raise_saturation()
+    
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
             self.device.change_volume(-10)
@@ -116,7 +128,28 @@ class SettingsMenu:
                         value=self.brightness_adjust
                     )
             )
-
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Contrast",
+                        value_text="<    " + str(self.device.contrast) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.contrast_adjust
+                    )
+            )
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Saturation",
+                        value_text="<    " + str(self.device.saturation) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.saturation_adjust
+                    )
+            )
         option_list.append(
                 GridOrListEntry(
                         primary_text="Volume",
@@ -202,7 +235,6 @@ class SettingsMenu:
         selected = Selection(None, None, 0)
         list_view = None
         while(selected is not None):
-            print("build_options_list")
             option_list = self.build_options_list()
             
 
@@ -218,7 +250,6 @@ class SettingsMenu:
             control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)
-            print("bottom while")
 
             if(selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
