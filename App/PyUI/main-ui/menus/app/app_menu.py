@@ -2,6 +2,7 @@
 
 import os
 from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from themes.theme import Theme
@@ -49,10 +50,15 @@ class AppMenu:
         else:
             view.set_options(app_list)
         
-        while((selected := view.get_selection()) is not None):
-            filepath = selected.get_selection().get_value()
-            directory = os.path.dirname(filepath)
-            self.display.deinit_display()
-            self.device.run_app([filepath], directory)
-            self.controller.clear_input_queue()
-            self.display.reinitialize()
+        running = True
+        while(running):
+            selected = view.get_selection()
+            if(ControllerInput.A == selected.get_input()):
+                filepath = selected.get_selection().get_value()
+                directory = os.path.dirname(filepath)
+                self.display.deinit_display()
+                self.device.run_app([filepath], directory)
+                self.controller.clear_input_queue()
+                self.display.reinitialize()
+            elif(ControllerInput.B == selected.get_input()):
+                running = False
