@@ -36,7 +36,6 @@ class Theme():
 
     @property
     def background(self):
-        print(f"self.path = {self.path}")
         return os.path.join(self.path,"skin","background.png")
 
     @property

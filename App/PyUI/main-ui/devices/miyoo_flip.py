@@ -349,16 +349,52 @@ class MiyooFlip(Device):
     def wifi_error_detected(self):
         self.wifi_error = True
         
+    
+    def connection_seems_up(self):
+        try:
+            result = ProcessRunner.run_and_print(
+                ["ping", "-c", "1", "1.1.1.1"],
+                timeout=1)
+            
+            return not ("Network is unreachable") in result.stderr
+
+        except subprocess.TimeoutExpired:
+            return False
+    
     def monitor_wifi(self):
         self.wifi_error = False
+        self.last_successful_ping_time = time.time()
+        fail_count = 0
+        restart_count = 0
         while True:
             if self.is_wifi_enabled():
                 if self.wifi_error or not self.is_wifi_up():
                     self.wifi_error = False
+                    fail_count = 0
                     PyUiLogger.error("Detected wlan0 disappeared, restarting wifi services")
                     self.restart_wifi_services()
                 else:
                     PyUiLogger.debug("WiFi is up")
+                    if time.time() - self.last_successful_ping_time > 30:
+                        if(self.connection_seems_up()):
+                            PyUiLogger.debug("Connection seems up")
+                            self.last_successful_ping_time = time.time()
+                            fail_count = 0
+                            restart_count = 0
+                        else:
+                            PyUiLogger.error("WiFi connection looks to be down")
+                            fail_count+=1
+                            if(fail_count > 3):
+                                if(restart_count > 5):
+                                    PyUiLogger.error("Cannot get WiFi connection so disabling WiFi")
+                                    self.disable_wifi()
+                                else:
+                                    PyUiLogger.error("Going to reinitialize WiFi")
+                                    restart_count += 1
+                                    self.wifi_error = True
+                    else:
+                        PyUiLogger.debug(f"{int(30 - (time.time() - self.last_successful_ping_time))}s until next connection check")
+
 
             time.sleep(10)
 
