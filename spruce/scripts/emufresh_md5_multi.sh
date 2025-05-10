@@ -32,10 +32,17 @@ prompt_main_ui_restart() {
 }
 
 if [ "$PLATFORM" = "Flip" ]; then
-	rom_change=$(/mnt/sdcard/spruce/flip/bin/python3 /mnt/sdcard/spruce/scripts/emufresh.py)
+	rom_change=$(/mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/scripts/emufresh.py)
 	if [ "$rom_change" = "True" ]; then
 		prompt_main_ui_restart
 	fi
+
+elif [ "$PLATFORM" = "A30" ]; then
+	rom_change=$(/mnt/SDCARD/spruce/bin/Python3/bin/python3 /mnt/SDCARD/spruce/scripts/emufresh.py)
+	if [ "$rom_change" = "True" ]; then
+		prompt_main_ui_restart
+	fi
+
 else
 
 
