@@ -243,8 +243,26 @@ class Display:
         return ((self.device.screen_height - self.get_bottom_bar_height() - self.get_top_bar_height()) // 2) + self.get_top_bar_height() 
 
     def get_image_dimensions(self, img):        
-        contents = sdl2.sdlimage.IMG_Load(img.encode('utf-8')).contents
-        return contents.w, contents.h
+        surface = sdl2.sdlimage.IMG_Load(img.encode('utf-8'))
+        if not surface:
+            return 0,0
+        width = surface.contents.w
+        height = surface.contents.h
+        sdl2.SDL_FreeSurface(surface)
+        return width, height
+    
+    def get_text_dimensions(self, purpose):
+        text = "A"        
+        sdl_color = sdl2.SDL_Color(0,0,0)
+        surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(self.fonts[purpose].font, text.encode('utf-8'), sdl_color)
+        if not surface:
+            return 0,0
+        
+        width = surface.contents.w
+        height = surface.contents.h
+        sdl2.SDL_FreeSurface(surface)
+        return width, height
+
 
     def add_index_text(self, index, total):
         # TODO don't hard code these
