@@ -69,6 +69,27 @@ class MiyooFlip(Device):
         else:
             print("wpa_supplicant.conf already exists.")
 
+    #Untested
+    @throttle.limit_refresh(10)
+    def is_hdmi_connected(self):
+        try:
+            # Read the HDMI status from the file
+            with open('/sys/class/drm/card0-HDMI-A-1/status', 'r') as f:
+                status = f.read().strip()
+
+            # Check if the status is 'disconnected'
+            if status.lower() == 'disconnected':
+                return False
+            else:
+                print(f"HDMI Connected")
+                return True
+        except FileNotFoundError:
+            print("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
+            return False
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
+
     @property
     def screen_width(self):
         return 640
@@ -76,6 +97,12 @@ class MiyooFlip(Device):
     @property
     def screen_height(self):
         return 480
+
+    def get_scale_factor(self):
+        if(self.is_hdmi_connected()):
+            return 2.25
+        else:
+            return 1
 
     @property
     def font_size_small(self):
@@ -191,10 +218,8 @@ class MiyooFlip(Device):
 
     @property
     def brightness(self):
-        true_brightness = subprocess.check_output(
-                ["cat", "/sys/class/backlight/backlight/brightness"],
-                text=True
-            ).strip()
+        with open("/sys/class/backlight/backlight/brightness", "r") as f:
+            true_brightness = f.read().strip()
         return self._map_system_brightness_to_miyoo_scale(int(true_brightness))
 
     def lower_contrast(self):
@@ -353,11 +378,9 @@ class MiyooFlip(Device):
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
-            output = subprocess.check_output(
-                ["cat", "/proc/net/wireless"],
-                text=True
-            ).strip().splitlines()
-            
+            with open("/proc/net/wireless", "r"):
+                output = [line.strip() for line in f.readlines()]
+
             if len(output) >= 3:
                 # The 3rd line contains the actual wireless stats
                 data_line = output[2]
@@ -388,6 +411,7 @@ class MiyooFlip(Device):
         return "UP" in result.stdout
     
     def restart_wifi_services(self):
+        print("Restarting WiFi services")
         self.stop_wifi_services()
         self.start_wifi_services()
 
@@ -478,10 +502,12 @@ class MiyooFlip(Device):
         return result
 
     def set_wifi_power(self, value):
+        print(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
         with open('/sys/class/rkwifi/wifi_power', 'w') as f:
             f.write(str(value))
 
     def stop_wifi_services(self):
+        print("Stopping WiFi Services")
         ProcessRunner.run_and_print(['killall', '-15', 'wpa_supplicant'])
         time.sleep(0.1)  
         ProcessRunner.run_and_print(['killall', '-9', 'wpa_supplicant'])
@@ -535,6 +561,7 @@ class MiyooFlip(Device):
 
 
     def start_wifi_services(self):
+        print("Starting WiFi Services")
         self.set_wifi_power(0)
         time.sleep(1)  
         self.set_wifi_power(1)
@@ -565,24 +592,20 @@ class MiyooFlip(Device):
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        output = subprocess.check_output(
-            ["cat", "/sys/class/power_supply/ac/online"],
-            text=True
-        )
-
-        if(1 == int(output.strip())):
+        with open("/sys/class/power_supply/ac/online", "r") as f:
+            ac_online = int(f.read().strip())
+            
+        if(ac_online):
            return ChargeStatus.CHARGING
         else:
             return ChargeStatus.DISCONNECTED
     
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
-        output = subprocess.check_output(
-            ["cat", "/sys/class/power_supply/battery/capacity"],
-            text=True
-        )
-        return int(output.strip()) 
-    
+        with open("/sys/class/power_supply/battery/capacity", "r") as f:
+            return int(f.read().strip()) 
+        return 0
+        
     def get_app_finder(self):
         return MiyooAppFinder()
     

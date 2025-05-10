@@ -83,9 +83,14 @@ class Display:
 
     def _load_bg_texture(self):
         self.bg_path = self.theme.background
-        surf = sdl2.ext.load_image(self.theme.background)
-        self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.sdlrenderer, surf)
-        sdl2.SDL_FreeSurface(surf)
+        # Load the image into an SDL_Surface
+        surface = sdl2.sdlimage.IMG_Load(self.bg_path.encode('utf-8'))
+        if not surface:
+            print(f"Failed to load image: {self.bg_path}")
+        self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
+        if not self.background_texture:
+            sdl2.SDL_FreeSurface(surface)
+            print(f"Failed to create texture from surface")
 
     def _check_for_bg_change(self):
         if self.bg_path != self.theme.background:
@@ -110,11 +115,12 @@ class Display:
     def clear(self, screen):
         self.screen = screen
         self._check_for_bg_change()
-        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
+        if(self.background_texture is not None):
+            sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
         self.top_bar.render_top_bar(self.screen)
         self.bottom_bar.render_bottom_bar()
 
-    def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height):
+    def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height, scale_factor):
         # Maintain aspect ratio
         if target_width and target_height:
             scale = min(target_width / orig_w, target_height / orig_h)
@@ -132,19 +138,20 @@ class Display:
             render_w = orig_w
             render_h = orig_h
         
-        return render_w, render_h
+        
+        return int(render_w * scale_factor), int(render_h * scale_factor)
 
     def _log(self, msg):
         if(self.debug):
             print(msg)
 
     def _render_surface_texture(self, x, y, texture, surface, render_mode : RenderMode, target_width=None, target_height=None, debug=""):
-        render_w, render_h = self._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, target_width, target_height)
+        scale_factor = self.device.get_scale_factor()
+        render_w, render_h = self._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, target_width, target_height, 1.0)
 
         # Adjust position based on render mode
         adj_x = x
         adj_y = y
-        
         
         if(XRenderOption.CENTER == render_mode.x_mode):
             adj_x = x - render_w // 2
@@ -159,6 +166,9 @@ class Display:
         elif(YRenderOption.BOTTOM == render_mode.y_mode):
             adj_y = y - render_h
             self._log(f"YRenderOption.BOTTOM : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
+
+        adj_x = int(adj_x * scale_factor)
+        adj_y = int(adj_y * scale_factor)
 
         self._log(f"Rendering {debug} at {adj_x}, {adj_y}")
         # Create destination rect with adjusted position and scaled size
