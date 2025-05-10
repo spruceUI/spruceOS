@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import re
 import select
 import subprocess
+import threading
 import time
 from typing import List, Set
 
@@ -14,9 +15,8 @@ class BluetoothDevice:
         self.name = name
 
 class BluetoothScanner:
-    def __init__(self, delay=2, max_idle_scans=3):
-        self.delay = delay
-        self.max_idle_scans = max_idle_scans
+    def __init__(self):
+        pass
 
     def remove_ansi_escape_sequences(self,text):
         # Remove ANSI escape sequences (for coloring and formatting in terminal)
@@ -77,35 +77,62 @@ class BluetoothScanner:
         print("Starting Bluetooth Scan")
         return self.scan_once()
     
-            
-    def connect_to_device(self,device_address):
+                
+    def connect_to_device(self, device_address):
         print(f"Attempting to connect to {device_address}")
+
         try:
-            # Start bluetoothctl as a subprocess
             process = subprocess.Popen(
                 ['bluetoothctl'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                bufsize=1
             )
 
-            # Send the necessary commands to pair and connect to the device
-            process.stdin.write('power on\n')
-            time.sleep(1)
-            process.stdin.write('agent on\n')
-            time.sleep(1)
-            process.stdin.write(f'pair {device_address}\n')
+            output_lines = []
+
+            def read_output():
+                while True:
+                    line = process.stdout.readline()
+                    if not line:
+                        break
+                    print(f"[BTCTL] {line.strip()}")
+                    output_lines.append(line)
+                    if "Connection successful" in line or "Failed to connect" in line or "Authentication Failed" in line:
+                        break
+
+            thread = threading.Thread(target=read_output)
+            thread.start()
+
+            # Send commands
+            cmds = [
+                'power on\n',
+                'agent on\n',
+                'default-agent\n',
+                f'pair {device_address}\n',
+                f'trust {device_address}\n',
+                f'connect {device_address}\n'
+            ]
+            for cmd in cmds:
+                process.stdin.write(cmd)
+                process.stdin.flush()
+                time.sleep(2)  # allow time for each step to complete
+
+            thread.join(timeout=20)  # wait up to 20 seconds for output reading
+
+            # Stop the process
+            process.stdin.write('quit\n')
             process.stdin.flush()
+            process.terminate()
 
-            # Read the output to ensure it's connected
-            output, error = process.communicate()
-
-            # Check if the connection was successful by looking at the output
-            if "Connection successful" in output:
+            # Check if connection succeeded
+            all_output = ''.join(output_lines)
+            if "Connection successful" in all_output:
                 print(f"Successfully connected to {device_address}")
             else:
-                print(f"Failed to connect to {device_address}. Output: {output}, Error: {error}")
+                print(f"Failed to connect to {device_address}. Output:\n{all_output}")
 
         except Exception as e:
             print(f"Error while connecting to the device: {str(e)}")

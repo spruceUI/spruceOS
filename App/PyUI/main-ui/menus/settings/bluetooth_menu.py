@@ -35,6 +35,7 @@ class BluetoothMenu:
 
     def toggle_pairing_device(self, device):
         self.bluetooth_scanner.connect_to_device(device.address)
+        self.controller.new_bt_device_paired()
 
     def scan_for_devices(self):
         print(f"scan_for_devices start")
@@ -77,6 +78,7 @@ class BluetoothMenu:
                 if(self.should_scan_for_bluetooth):
                     self.should_scan_for_bluetooth = False
                     devices = self.scan_for_devices()
+                    selected.index = 0
 
                 for device in devices:
                     option_list.append(
@@ -95,16 +97,16 @@ class BluetoothMenu:
                     view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
                     top_bar_text="Bluetooth Configuration", 
                     options=option_list,
-                    selected_index=selected.get_index())
+                    selected_index=selected.get_index()) #always reset to the top in case devices change during a scan
 
             accepted_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
-                                                ControllerInput.L1, ControllerInput.R1]
+                                                ControllerInput.L1, ControllerInput.R1, ControllerInput.X]
             selected = list_view.get_selection(accepted_inputs)
 
             if(selected.get_input() in accepted_inputs):
                 print(f"bluetooth_enabled={bluetooth_enabled}")
                 if(ControllerInput.X == selected.get_input() and bluetooth_enabled):
-                    devices = self.scan_for_devices()
+                    self.should_scan_for_bluetooth = True
                 elif(ControllerInput.A == selected.get_input() 
                      or ControllerInput.DPAD_LEFT == selected.get_input() 
                      or ControllerInput.DPAD_RIGHT == selected.get_input()):

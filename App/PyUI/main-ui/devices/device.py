@@ -13,6 +13,11 @@ class Device(ABC):
     @abstractmethod
     def screen_height(self):
         pass
+
+    @abstractmethod
+    def get_scale_factor(self):
+        pass
+
     
     @property
     @abstractmethod

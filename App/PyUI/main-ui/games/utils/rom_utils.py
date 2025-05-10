@@ -15,8 +15,11 @@ class RomUtils:
         game_system_config = GameSystemConfig(system)
         return game_system_config.get_extlist()
 
+    def get_system_rom_directory(self, system):
+        return os.path.join(self.roms_path, system)
+    
     def get_roms(self, system):
-        directory = os.path.join(self.roms_path, system)
+        directory = self.get_system_rom_directory(system)
         valid_suffix_set = self._get_valid_suffix(system)
         if(len(valid_suffix_set) == 0):
             valid_files = sorted(

@@ -35,10 +35,10 @@ class GameSelectMenu(RomsMenuCommon):
         favorites = self._build_favorites_dict()
         start_time = time.time()
 
+        resolved_folder = str(Path(self.rom_utils.get_system_rom_directory(self.game_system)).resolve())
         for rom_file_path in self.rom_utils.get_roms(self.game_system):
             rom_file_name = os.path.basename(rom_file_path)
             img_path = self._get_image_path(rom_file_path)
-            resolved_folder = str(Path(os.path.dirname(rom_file_path)).resolve())
             resolved_file_path = resolved_folder+"/"+rom_file_name
             icon=self.theme.favorite_icon if resolved_file_path in favorites else None
             rom_list.append(

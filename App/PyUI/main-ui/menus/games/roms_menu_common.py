@@ -62,9 +62,8 @@ class RomsMenuCommon(ABC):
     def _run_rom_selection(self, page_name) :
         selected = Selection(None,None,0)
         view = None
-        # Regenerate as part of while loop in case the options menu changes anything
+        rom_list = self._get_rom_list()
         while(selected is not None):
-            rom_list = self._get_rom_list()
             if(view is None):
                 view = self.view_creator.create_view(
                     view_type=ViewType.TEXT_AND_IMAGE_LIST_VIEW,
@@ -85,5 +84,7 @@ class RomsMenuCommon(ABC):
                     GameConfigMenu(self.display, self.controller, self.device, self.theme, 
                                    self._extract_game_system(selected.get_selection().get_value()), 
                                    selected.get_selection().get_value()).show_config()
+                    # Regenerate as game config menu might've changed something
+                    rom_list = self._get_rom_list()
                 elif(ControllerInput.B == selected.get_input()):
                     selected = None
