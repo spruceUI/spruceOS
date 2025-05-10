@@ -7,6 +7,7 @@ from menus.app.app_menu import AppMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
 from menus.games.recents_menu import RecentsMenu
+from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.settings_menu import SettingsMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
@@ -32,7 +33,7 @@ class MainMenu:
 
     def run_main_menu_selection(self):
         selected = Selection(None,None,0)
-
+        expected_inputs = [ControllerInput.A, ControllerInput.MENU]
         while(selected.get_input() != ControllerInput.B):        
             #TODO make this user config driven
             first_entry = "Favorite"
@@ -79,7 +80,7 @@ class MainMenu:
                 cols=4, 
                 rows=1,
                 selected_index=selected.get_index())
-            if((selected := view.get_selection()) is not None):       
+            if((selected := view.get_selection(expected_inputs)) is not None):       
                 if(ControllerInput.A == selected.get_input()): 
                     if("Game" == selected.get_selection().get_primary_text()):
                         self.system_select_menu.run_system_selection()
@@ -91,3 +92,6 @@ class MainMenu:
                         self.recents_menu.run_rom_selection()
                     elif("Setting" == selected.get_selection().get_primary_text()):
                         self.settings_menu.show_menu()
+                elif(ControllerInput.MENU == selected.get_input()):
+                    print("Running SearchedRomsMenu")
+                    SearchedRomsMenu(self.display,self.controller,self.device,self.theme).run_rom_selection()

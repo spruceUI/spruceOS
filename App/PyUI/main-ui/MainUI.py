@@ -13,7 +13,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 
-PyUiLogger.init()
+PyUiLogger.init("/mnt/SDCARD/Saves/spruce/pyui.log", "PyUI")
 
 config = PyUiConfig()
 config.load()

@@ -20,9 +20,10 @@ class TopBar:
         wifi_icon = self.theme.get_wifi_icon(wifi_status)
         #TODO Improve padding to not just be 10
         self.top_bar_w, self.top_bar_h = self.display.render_image(top_bar_bg,0,0)
-        text_w, text_h = self.display.get_text_dimensions(FontPurpose.TOP_BAR_TEXT)
-        self.top_bar_w = max(self.top_bar_w, text_w)
-        self.top_bar_h = max(self.top_bar_h, text_h)
+        if(self.theme.show_top_bar_text()):
+            text_w, text_h = self.display.get_text_dimensions(FontPurpose.TOP_BAR_TEXT)
+            self.top_bar_w = max(self.top_bar_w, text_w)
+            self.top_bar_h = max(self.top_bar_h, text_h)
 
         wifi_w, wifi_h = self.display.get_image_dimensions(wifi_icon)
         self.top_bar_w = max(self.top_bar_w, wifi_w)
@@ -40,7 +41,8 @@ class TopBar:
             battery_icon ,battery_icon_x,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
         wifi_icon_x = self.device.screen_width - battery_icon_w - battery_text_w - (padding*4)
         self.display.render_image(wifi_icon,wifi_icon_x,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
-        self.display.render_text(title,int(self.device.screen_width/2), center_of_bar, self.theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
+        if(self.theme.show_top_bar_text()):
+            self.display.render_text(title,int(self.device.screen_width/2), center_of_bar, self.theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
         
     def get_top_bar_height(self):
         return self.top_bar_h

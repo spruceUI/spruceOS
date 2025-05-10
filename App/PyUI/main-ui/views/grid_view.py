@@ -32,13 +32,10 @@ class GridView:
         self.rows = rows
         self.cols = cols
 
-        #TODO Get padding from theme
         if(rows > 1):
             self.font_purpose = FontPurpose.GRID_MULTI_ROW
-            self.font_bg_pad = 12
         else:
             self.font_purpose = FontPurpose.GRID_ONE_ROW
-            self.font_bg_pad = 0
 
         self.selected_bg = selected_bg
      
@@ -50,12 +47,12 @@ class GridView:
         self.selected = min(len(self.options)-1, self.selected)
         
         while(self.selected < self.current_left):
-            self.current_left -= (self.cols*2)
-            self.current_right -= (self.cols*2)
+            self.current_left -= (self.cols*self.rows)
+            self.current_right -= (self.cols*self.rows)
 
         while(self.selected >= self.current_right):
-            self.current_left += (self.cols*2)
-            self.current_right += (self.cols*2)
+            self.current_left += (self.cols*self.rows)
+            self.current_right += (self.cols*self.rows)
 
     def _render(self):
         self.display.clear(self.top_bar_text)
@@ -67,12 +64,6 @@ class GridView:
         x_pad = 9 * self.cols
         usable_width = self.device.screen_width - (2 * x_pad)
         icon_width = usable_width / self.cols  # Initial icon width
-
-        y_pad = self.display.get_top_bar_height() + 5
-        usable_height = self.device.screen_height - (2 * y_pad)
-        icon_height = usable_height / self.rows  # Initial icon width
-        total_gap_height =  (self.rows - 1) * 10 if self.rows > 1 else 0
-        y_gap = total_gap_height / (self.rows - 1)  if self.rows > 1 else 0
         
         for visible_index, imageTextPair in enumerate(visible_options):
 
@@ -122,6 +113,12 @@ class GridView:
             self.display.add_index_text(self.selected+1, len(self.options))            
         self.display.present()
 
+    def get_selected_option(self):
+        if 0 <= self.selected < len(self.options):
+            return self.options[self.selected]
+        else:
+            return None
+
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render()
         
@@ -133,10 +130,10 @@ class GridView:
                 self.selected+=1
                 self.correct_selected_for_off_list()
             elif self.controller.last_input() == ControllerInput.L1:
-                self.selected-=1
+                self.selected-=self.cols*self.rows
                 self.correct_selected_for_off_list()
             elif self.controller.last_input() == ControllerInput.R1:
-                self.selected+=1
+                self.selected+=self.cols*self.rows
                 self.correct_selected_for_off_list()
             if self.controller.last_input() == ControllerInput.DPAD_UP:
                 self.selected-=self.cols
@@ -145,8 +142,8 @@ class GridView:
                 self.selected+=self.cols
                 self.correct_selected_for_off_list()
             elif self.controller.last_input() in select_controller_inputs:
-                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
+                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
             elif self.controller.last_input() == ControllerInput.B:
-                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
+                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
                 
-        return Selection(self.options[self.selected],None, self.selected)
+        return Selection(self.get_selected_option(),None, self.selected)

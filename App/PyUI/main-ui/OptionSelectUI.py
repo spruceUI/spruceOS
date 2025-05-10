@@ -12,6 +12,7 @@ from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
 from devices.miyoo_flip import MiyooFlip
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.image_list_view import ImageListView
@@ -21,6 +22,7 @@ from views.view_type import ViewType
 
 # Really quickly written just a proof of concept for testing
 
+PyUiLogger.init("/mnt/SDCARD/Saves/spruce/OptionSelectUI.log", "OptionSelectUI")
 
 config = PyUiConfig()
 config.load()

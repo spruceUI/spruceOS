@@ -54,7 +54,7 @@ network={{
     def switch_network(self, net: WiFiNetwork):
         print(f"Selected {net.ssid}!")
         if(net.requires_password):
-            password = self.on_screen_keyboard.get_input()
+            password = self.on_screen_keyboard.get_input("WiFi Password")
             self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
         else:   
             self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")

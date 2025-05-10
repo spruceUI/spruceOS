@@ -7,6 +7,7 @@ from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
 from menus.games.game_config_menu import GameConfigMenu
+from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.image_list_view import ImageListView
@@ -24,26 +25,14 @@ class RomsMenuCommon(ABC):
         self.device : Device= device
         self.theme : Theme= theme
         self.view_creator = ViewCreator(display,controller,device,theme)
+        self.rom_select_options_builder = RomSelectOptionsBuilder(device, theme)
 
     def _remove_extension(self,file_name):
         return os.path.splitext(file_name)[0]
     
     def _get_image_path(self, rom_path):
         # Get the base filename without extension (e.g., "DKC")
-        base_name = os.path.splitext(os.path.basename(rom_path))[0]
-        
-        # Get the parent directory of the ROM file
-        parent_dir = os.path.dirname(rom_path)
-        
-        # Construct the path to the Imgs directory
-        imgs_dir = os.path.join(parent_dir, "Imgs")
-        
-        # Construct the full path to the PNG image
-        image_path = os.path.join(imgs_dir, base_name + ".png")
-        if os.path.exists(image_path):
-            return image_path
-        else:
-            return None
+        return self.rom_select_options_builder.get_image_path(rom_path)
         
     def _extract_game_system(self, rom_path):
         rom_path = os.path.abspath(os.path.normpath(rom_path))
