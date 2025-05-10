@@ -51,7 +51,7 @@ class Device(ABC):
     
     @property
     @abstractmethod
-    def brightness(self):
+    def lumination(self):
         pass
 
     @property
@@ -127,6 +127,14 @@ class Device(ABC):
 
     @abstractmethod
     def parse_recents(self) -> list[GameEntry]:
+        pass
+
+    @abstractmethod
+    def lower_lumination(self):
+        pass
+
+    @abstractmethod
+    def raise_lumination(self):
         pass
 
     @abstractmethod
