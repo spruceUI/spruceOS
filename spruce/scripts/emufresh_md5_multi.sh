@@ -31,20 +31,13 @@ prompt_main_ui_restart() {
 	fi
 }
 
-if [ "$PLATFORM" = "Flip" ]; then
-	rom_change=$(/mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/scripts/emufresh.py)
+if [ ! -z "$DEVICE_PYTHON3_PATH" ]; then
+	rom_change=$("$DEVICE_PYTHON3_PATH" /mnt/SDCARD/spruce/scripts/emufresh.py)
 	if [ "$rom_change" = "True" ]; then
 		prompt_main_ui_restart
 	fi
 
-elif [ "$PLATFORM" = "A30" ]; then
-	rom_change=$(/mnt/SDCARD/spruce/bin/Python3/bin/python3 /mnt/SDCARD/spruce/scripts/emufresh.py)
-	if [ "$rom_change" = "True" ]; then
-		prompt_main_ui_restart
-	fi
-
-else
-
+else ### if Python3 path not defined in PLATFORM.cfg file
 
 	emu_path="/mnt/SDCARD/Emu"
 	roms_path="/mnt/SDCARD/Roms"
