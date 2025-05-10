@@ -405,9 +405,11 @@ class MiyooFlip(Device):
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
-            with open("/proc/net/wireless", "r"):
-                output = [line.strip() for line in f.readlines()]
+            with open("/proc/net/wireless", "r") as f:
+                output = f.read().strip().splitlines()
 
+            print("/proc/net/wireless")
+            print(f"{output}")
             if len(output) >= 3:
                 # The 3rd line contains the actual wireless stats
                 data_line = output[2]
@@ -430,6 +432,7 @@ class MiyooFlip(Device):
                 return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
         except Exception as e:
+            PyUiLogger.error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
 
@@ -501,6 +504,7 @@ class MiyooFlip(Device):
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
+            print(f"WiFi [link_quality={wifi_connection_quality_info.link_quality},signal_level={wifi_connection_quality_info.signal_level},noise={wifi_connection_quality_info.noise_level}]")
             score = (
                 (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
                 (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
