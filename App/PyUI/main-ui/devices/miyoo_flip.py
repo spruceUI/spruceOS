@@ -48,9 +48,10 @@ class MiyooFlip(Device):
         #so it always has the more accurate data
         self.system_config = SystemConfig("/userdata/system.json")
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self._set_brightness_to_config()
+        self._set_lumination_to_config()
         self._set_contrast_to_config()
         self._set_saturation_to_config()
+        self._set_brightness_to_config()
         self.ensure_wpa_supplicant_conf()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
 
@@ -142,57 +143,57 @@ class MiyooFlip(Device):
         return 2 # 2 seconds
     
     
-    def _map_system_brightness_to_miyoo_scale(self, true_brightness):
-        if(true_brightness >= 255):
+    def _map_system_lumination_to_miyoo_scale(self, true_lumination):
+        if(true_lumination >= 255):
             return 10
-        elif(true_brightness >= 225):
+        elif(true_lumination >= 225):
             return 9
-        elif(true_brightness >= 200):
+        elif(true_lumination >= 200):
             return 8
-        elif(true_brightness >= 175):
+        elif(true_lumination >= 175):
             return 7
-        elif(true_brightness >= 150):
+        elif(true_lumination >= 150):
             return 6
-        elif(true_brightness >= 125):
+        elif(true_lumination >= 125):
             return 5
-        elif(true_brightness >= 100):
+        elif(true_lumination >= 100):
             return 4
-        elif(true_brightness >= 75):
+        elif(true_lumination >= 75):
             return 3
-        elif(true_brightness >= 50):
+        elif(true_lumination >= 50):
             return 2
-        elif(true_brightness >= 25):
+        elif(true_lumination >= 25):
             return 1
         else:
             return 0
 
-    def _map_miyoo_scale_to_system_brightness(self, brightness_level):
-        if brightness_level == 10:
+    def _map_miyoo_scale_to_system_lumination(self, lumination_level):
+        if lumination_level == 10:
             return 255
-        elif brightness_level == 9:
+        elif lumination_level == 9:
             return 225
-        elif brightness_level == 8:
+        elif lumination_level == 8:
             return 200
-        elif brightness_level == 7:
+        elif lumination_level == 7:
             return 175
-        elif brightness_level == 6:
+        elif lumination_level == 6:
             return 150
-        elif brightness_level == 5:
+        elif lumination_level == 5:
             return 125
-        elif brightness_level == 4:
+        elif lumination_level == 4:
             return 100
-        elif brightness_level == 3:
+        elif lumination_level == 3:
             return 75
-        elif brightness_level == 2:
+        elif lumination_level == 2:
             return 50
-        elif brightness_level == 1:
+        elif lumination_level == 1:
             return 25
         else: 
             return 1
     
-    def _set_brightness_to_config(self):
+    def _set_lumination_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self._map_miyoo_scale_to_system_brightness(self.system_config.brightness)))
+            f.write(str(self._map_miyoo_scale_to_system_lumination(self.system_config.lumination)))
     
     def _set_contrast_to_config(self):
         ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
@@ -202,25 +203,31 @@ class MiyooFlip(Device):
         ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:saturation:"+str(self.system_config.saturation * 5)])
 
-    def lower_brightness(self):
-        self.system_config.reload_config()
-        if(self.system_config.brightness > 0):
-            self.system_config.set_brightness(self.system_config.brightness - 1)
-            self.system_config.save_config()
-            self._set_brightness_to_config()
+    def _set_brightness_to_config(self):
+        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+                                     "179:brightness:"+str(self.system_config.brightness * 5)])
 
-    def raise_brightness(self):
+
+
+    def lower_lumination(self):
         self.system_config.reload_config()
-        if(self.system_config.brightness < 10):
-            self.system_config.set_brightness(self.system_config.brightness + 1)
+        if(self.system_config.lumination > 0):
+            self.system_config.set_lumination(self.system_config.lumination - 1)
             self.system_config.save_config()
-            self._set_brightness_to_config()
+            self._set_lumination_to_config()
+
+    def raise_lumination(self):
+        self.system_config.reload_config()
+        if(self.system_config.lumination < 10):
+            self.system_config.set_lumination(self.system_config.lumination + 1)
+            self.system_config.save_config()
+            self._set_lumination_to_config()
 
     @property
-    def brightness(self):
+    def lumination(self):
         with open("/sys/class/backlight/backlight/brightness", "r") as f:
-            true_brightness = f.read().strip()
-        return self._map_system_brightness_to_miyoo_scale(int(true_brightness))
+            true_lumination = f.read().strip()
+        return self._map_system_lumination_to_miyoo_scale(int(true_lumination))
 
     def lower_contrast(self):
         self.system_config.reload_config()
@@ -239,6 +246,26 @@ class MiyooFlip(Device):
     @property
     def contrast(self):
         return self.system_config.get_contrast()
+    
+    
+    def lower_brightness(self):
+        self.system_config.reload_config()
+        if(self.system_config.brightness > 0): 
+            self.system_config.set_brightness(self.system_config.brightness - 1)
+            self.system_config.save_config()
+            self._set_brightness_to_config()
+
+    def raise_brightness(self):
+        self.system_config.reload_config()
+        if(self.system_config.brightness < 20):
+            self.system_config.set_brightness(self.system_config.brightness + 1)
+            self.system_config.save_config()
+            self._set_brightness_to_config()
+
+    @property
+    def brightness(self):
+        return self.system_config.get_brightness()
+
 
     def lower_saturation(self):
         self.system_config.reload_config()
@@ -378,9 +405,11 @@ class MiyooFlip(Device):
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
-            with open("/proc/net/wireless", "r"):
-                output = [line.strip() for line in f.readlines()]
+            with open("/proc/net/wireless", "r") as f:
+                output = f.read().strip().splitlines()
 
+            print("/proc/net/wireless")
+            print(f"{output}")
             if len(output) >= 3:
                 # The 3rd line contains the actual wireless stats
                 data_line = output[2]
@@ -403,6 +432,7 @@ class MiyooFlip(Device):
                 return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
         except Exception as e:
+            PyUiLogger.error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
 
@@ -474,6 +504,7 @@ class MiyooFlip(Device):
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
+            print(f"WiFi [link_quality={wifi_connection_quality_info.link_quality},signal_level={wifi_connection_quality_info.signal_level},noise={wifi_connection_quality_info.noise_level}]")
             score = (
                 (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
                 (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight

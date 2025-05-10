@@ -34,7 +34,10 @@ class SystemConfig:
     @property
     def brightness(self):
         return self.config.get("brightness")
-    
+
+    def get_brightness(self):
+        return self.config.get("brightness")
+
     def set_brightness(self, value):
         self.config["brightness"] = value
     
@@ -56,6 +59,13 @@ class SystemConfig:
     def get_hibernate(self):
         return self.config.get("hibernate")
 
+    @property
+    def lumination(self):
+        return self.config.get("lumination")
+    
+    def set_lumination(self, value):
+        self.config["lumination"] = value
+    
     def get_lumination(self):
         return self.config.get("lumination")
 
