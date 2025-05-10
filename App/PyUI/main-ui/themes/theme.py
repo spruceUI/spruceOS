@@ -90,6 +90,15 @@ class Theme():
     def show_bottom_bar(self):
         return getattr(self, "showBottomBar", None) is not False
 
+    def ignore_top_and_bottom_bar_for_layout(self):
+        return getattr(self, "ignoreTopAndBottomBarForLayout", False)
+    
+    def show_top_bar_text(self):
+        return getattr(self, "showTopBarText", True)
+    
+    def render_top_and_bottom_bar_last(self):
+        return getattr(self, "renderTopAndBottomBarLast", False)
+
     @property
     def bottom_bar_bg(self):
         return os.path.join(self.path,"skin","tips-bar-bg.png")
@@ -358,3 +367,8 @@ class Theme():
         view_type = getattr(ViewType, view_type_str, ViewType.DESCRIPTIVE_LIST_VIEW)
         return view_type
     
+    def get_game_system_select_col_count(self):
+        return getattr(self, "gameSystemSelectColCount", 4)
+    
+    def get_game_system_select_row_count(self):
+        return getattr(self, "gameSystemSelectRowCount", 2)

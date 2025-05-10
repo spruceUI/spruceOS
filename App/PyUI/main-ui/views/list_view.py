@@ -14,7 +14,13 @@ class ListView(ABC):
     @abstractmethod
     def _render(self):
         pass
-    
+
+    def get_selected_option(self):
+        if 0 <= self.selected < len(self.options):
+            return self.options[self.selected]
+        else:
+            return None
+
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render_common()
         
@@ -24,18 +30,19 @@ class ListView(ABC):
             elif self.controller.last_input() == ControllerInput.DPAD_DOWN:
                 self.adjust_selected(1)
             elif self.controller.last_input() in select_controller_inputs: #requested inputs have priority over the rest
-                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
+                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
             elif self.controller.last_input() == ControllerInput.L1:
                 self.adjust_selected(-1*self.max_rows+1)
             elif self.controller.last_input() == ControllerInput.R1:
                 self.adjust_selected(self.max_rows-1)
             elif self.controller.last_input() == ControllerInput.B:
-                return Selection(self.options[self.selected],self.controller.last_input(), self.selected)
+                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
 
             self._render_common()
-        
-        return Selection(self.options[self.selected],None, self.selected)
 
+
+        return Selection(self.get_selected_option(), None, self.selected)
+    
     def _render_common(self):
         self.display.clear(self.top_bar_text)
         

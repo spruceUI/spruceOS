@@ -32,7 +32,7 @@ class OnScreenKeyboard:
             [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "] 
         ]
 
-    def get_input(self):
+    def get_input(self, title_text):
         self.shifted = False
         self.caps = False
 
@@ -53,26 +53,38 @@ class OnScreenKeyboard:
                 target_width=self.device.screen_width, 
                 target_height=self.device.screen_height)
 
+            next_y = self.display.get_top_bar_height()
+            if(title_text is not None):
+                title_w, title_h = self.display.render_text(text=title_text,
+                    x = 10,
+                    y = next_y, 
+                    purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
+                    color=self.theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
+                    render_mode = RenderMode.TOP_LEFT_ALIGNED)
+                next_y += title_h
+
             entry_bar_w, entry_bar_h = self.display.render_image(
                 image_path = self.theme.keyboard_entry_bg,
                 x = 0,
-                y = self.display.get_top_bar_height(), 
+                y = next_y, 
                 render_mode = RenderMode.TOP_LEFT_ALIGNED, 
                 target_width=None, 
                 target_height=key_h)
+
             if(self.entered_text):
                 self.display.render_text(text=self.entered_text,
                     x = 0,
-                    y = self.display.get_top_bar_height(), 
+                    y = next_y, 
                     purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                     color=self.theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
                     render_mode = RenderMode.TOP_LEFT_ALIGNED)
 
             keys = self.shifted_keys if self.shifted or self.caps else self.normal_keys
             x_pad = 10
-
+            next_y += entry_bar_h
+            
             for row_index, key_row in enumerate(keys):
-                y = self.display.get_top_bar_height() + entry_bar_h + (row_index * key_h)
+                y = next_y
                 for key_index, key in enumerate(key_row):
                     x = x_pad + key_w_offset * key_index
                     
@@ -101,6 +113,8 @@ class OnScreenKeyboard:
                                             purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                                             color=color,
                                             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED)
+                next_y += key_h
+                
             self.display.present()
             if(self.controller.get_input()):
                 if self.controller.last_input() == ControllerInput.DPAD_UP:

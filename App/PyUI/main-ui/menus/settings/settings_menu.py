@@ -71,7 +71,7 @@ class SettingsMenu:
             self.device.change_volume(+1)
 
     def show_on_screen_keyboard(self, input):
-        print(self.on_screen_keyboard.get_input())
+        print(self.on_screen_keyboard.get_input("On Screen Keyboard Test"))
 
     def show_wifi_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
@@ -119,7 +119,8 @@ class SettingsMenu:
         self.theme.set_theme_path(os.path.join(self.config["theme_dir"], theme_folders[selected_index]))
         self.display.init_fonts()   
         self.config["theme"] = theme_folders[selected_index]
-        self.config.save()
+        self.config.save()      
+        self.theme_changed = True
 
     def build_options_list(self):
         option_list = []
@@ -251,16 +252,18 @@ class SettingsMenu:
     def show_menu(self) :
         selected = Selection(None, None, 0)
         list_view = None
+        self.theme_changed = False
         while(selected is not None):
             option_list = self.build_options_list()
             
 
-            if(list_view is None):
+            if(list_view is None or self.theme_changed):
                 list_view = self.view_creator.create_view(
                     view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
                     top_bar_text="Settings", 
                     options=option_list,
                     selected_index=selected.get_index())
+                self.theme_changed = False
             else:
                 list_view.set_options(option_list)
 

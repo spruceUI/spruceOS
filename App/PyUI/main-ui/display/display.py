@@ -117,8 +117,9 @@ class Display:
         self._check_for_bg_change()
         if(self.background_texture is not None):
             sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
-        self.top_bar.render_top_bar(self.screen)
-        self.bottom_bar.render_bottom_bar()
+        if(not self.theme.render_top_and_bottom_bar_last()):
+            self.top_bar.render_top_bar(self.screen)
+            self.bottom_bar.render_bottom_bar()
 
     def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height, scale_factor):
         # Maintain aspect ratio
@@ -138,7 +139,6 @@ class Display:
             render_w = orig_w
             render_h = orig_h
         
-        
         return int(render_w * scale_factor), int(render_h * scale_factor)
 
     def _log(self, msg):
@@ -155,24 +155,20 @@ class Display:
         
         if(XRenderOption.CENTER == render_mode.x_mode):
             adj_x = x - render_w // 2
-            self._log(f"XRenderOption.CENTER : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
         elif(XRenderOption.RIGHT == render_mode.x_mode):
             adj_x = x - render_w
-            self._log(f"XRenderOption.RIGHT : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
 
         if(YRenderOption.CENTER == render_mode.y_mode):
             adj_y = y - render_h // 2
-            self._log(f"YRenderOption.CENTER : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
         elif(YRenderOption.BOTTOM == render_mode.y_mode):
             adj_y = y - render_h
-            self._log(f"YRenderOption.BOTTOM : Adjusting {debug} from {x}, {y} to {adj_x}, {adj_y} ")
 
         adj_x = int(adj_x * scale_factor)
         adj_y = int(adj_y * scale_factor)
 
-        self._log(f"Rendering {debug} at {adj_x}, {adj_y}")
         # Create destination rect with adjusted position and scaled size
         rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
+        self._log(f"Rendered {debug} at {adj_x}, {adj_y} with dimenons {render_w}x{render_h}")
 
         # Copy the texture to the renderer
         sdl2.SDL_RenderCopy(self.renderer.renderer, texture, None, rect)
@@ -219,6 +215,7 @@ class Display:
             print(f"Failed to create texture from surface")
             return 0,0
 
+        sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
         return self._render_surface_texture(x, y, texture, surface, render_mode, target_width, target_height, debug=image_path)
     
     def render_image_centered(self, image_path: str, x: int, y: int, target_width=None, target_height=None):
@@ -228,13 +225,22 @@ class Display:
         return self.fonts[purpose].line_height;
         
     def present(self):
+        if(self.theme.render_top_and_bottom_bar_last()):
+            self.top_bar.render_top_bar(self.screen)
+            self.bottom_bar.render_bottom_bar()
         self.renderer.present()
 
     def get_top_bar_height(self):
-        return self.top_bar.get_top_bar_height()
+        if(self.theme.ignore_top_and_bottom_bar_for_layout()):
+            return 0
+        else:
+            return self.top_bar.get_top_bar_height()
     
     def get_bottom_bar_height(self):
-        return self.bottom_bar.get_bottom_bar_height()
+        if(self.theme.ignore_top_and_bottom_bar_for_layout()):
+            return 0
+        else:
+            return self.bottom_bar.get_bottom_bar_height()
     
     def get_usable_screen_height(self):
         return self.device.screen_height - self.get_bottom_bar_height() - self.get_top_bar_height()

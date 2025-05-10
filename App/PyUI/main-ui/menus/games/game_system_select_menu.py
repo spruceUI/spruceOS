@@ -33,29 +33,29 @@ class GameSystemSelectMenu:
         selected = Selection(None,None,0)
         systems_list = []
         view = None
-        for system in self.game_utils.get_active_systems():
-            sys_config = GameSystemConfig(system)
+        for game_system in self.game_utils.get_active_systems():
+            sys_config = game_system.game_system_config
             if(self.use_emu_cfg):
                 systems_list.append(
                     GridOrListEntry(
-                        primary_text=system,
+                        primary_text=game_system.display_name,
                         image_path=sys_config.get_icon(),
                         image_path_selected=sys_config.get_icon_selected(),
                         description="Game System",
                         icon=sys_config.get_icon_selected(),
-                        value=system
+                        value=game_system
                     ) 
                 )
             else:
                 icon_system_name = self.get_system_name_for_icon(sys_config)
                 systems_list.append(
                     GridOrListEntry(
-                        primary_text=system,
+                        primary_text=game_system.display_name,
                         image_path=self.theme.get_system_icon(icon_system_name),
                         image_path_selected=self.theme.get_system_icon_selected(icon_system_name),
                         description="Game System",
-                        icon=self.theme.get_system_icon_selected(system),
-                        value=system
+                        icon=self.theme.get_system_icon_selected(game_system.folder_name),
+                        value=game_system
                     )                
                 )
         if(view is None):
@@ -63,8 +63,8 @@ class GameSystemSelectMenu:
                 view_type=self.theme.get_view_type_for_system_select_menu(),
                 top_bar_text="Game", 
                 options=systems_list, 
-                cols=4, 
-                rows=2,
+                cols=self.theme.get_game_system_select_col_count(), 
+                rows=self.theme.get_game_system_select_row_count(),
                 selected_index=selected.get_index())
         else:
             view.set_options(systems_list)
@@ -73,6 +73,7 @@ class GameSystemSelectMenu:
         while(not exit):
             selected = view.get_selection()
             if(ControllerInput.A == selected.get_input()):
-                self.rom_select_menu.run_rom_selection(selected.get_selection().get_primary_text())
+                print(f"selected.get_selection() = {selected.get_selection()}")
+                self.rom_select_menu.run_rom_selection(selected.get_selection().get_value())
             elif(ControllerInput.B == selected.get_input()):
                 exit = True
