@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 export BITPAL_APP_DIR=/mnt/SDCARD/App/BitPal
 export FACE_DIR=$BITPAL_APP_DIR/bitpal_faces
 
@@ -17,7 +19,7 @@ call_menu() {
     title="$1"
     menu="$2"
 
-    /mnt/SDCARD/spruce/flip/bin/python3 \
+    "$DEVICE_PYTHON3_PATH" \
     /mnt/SDCARD/App/PyUI/main-ui/OptionSelectUI.py \
     "$title" /mnt/SDCARD/App/BitPal/menus/$menu
 }
@@ -38,13 +40,13 @@ initialize_bitpal_data() {
 
 display_bitpal_stats() {
     face="$(get_face)"
-    name="$(jq -r '.bitpal.name' "$BITPAL_JSON")"
-    level="$(jq -r '.bitpal.level' "$BITPAL_JSON")"
-    xp="$(jq -r '.bitpal.xp' "$BITPAL_JSON")"
-    xp_next="$(jq -r '.bitpal.xp_next' "$BITPAL_JSON")"
-    mood="$(jq -r '.bitpal.mood' "$BITPAL_JSON")"
-    missions_completed="$(jq '.bitpal.missions_completed' "$BITPAL_JSON")"
-    missions_active="$(jq '.missions // [] | length' "$MISSION_JSON")"
+    name="$(get_bitpal_name)"
+    level="$(get_bitpal_level)"
+    xp="$(get_bitpal_xp)"
+    xp_next="$(get_bitpal_xp_next)"
+    mood="$(get_bitpal_mood)"
+    missions_completed="$(get_num_missions_completed)"
+    missions_active="$(get_num_missions_active)"
 
     display --okay -s 36 -p 50 -t "$name Lv.$level - Status
  
@@ -56,49 +58,81 @@ Missions Completed: $missions_completed
 $missions_active Active Missions"
 }
 
+
+##### GET BITPAL STATS #####
+
+get_bitpal_name() { jq -r '.bitpal.name' "$BITPAL_JSON"; }
+get_bitpal_level() { jq -r '.bitpal.level' "$BITPAL_JSON"; }
+get_bitpal_xp() { jq -r '.bitpal.xp' "$BITPAL_JSON"; }
+get_bitpal_xp_next() { jq -r '.bitpal.xp_next' "$BITPAL_JSON"; }
+get_bitpal_mood() { jq -r '.bitpal.mood' "$BITPAL_JSON"; }
+
+##### SET BITPAL STATS #####
+
+set_bitpal_name() {
+    jq --arg val "$1" '.bitpal.name = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
+}
+set_bitpal_level() {
+    jq --argjson val "$1" '.bitpal.level = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
+}
+set_bitpal_xp() {
+    jq --argjson val "$1" '.bitpal.xp = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
+}
+set_bitpal_xp_next() {
+    jq --argjson val "$1" '.bitpal.xp_next = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
+}
+set_bitpal_mood() {
+    jq --arg val "$1" '.bitpal.mood = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
+}
+
+##### GET MISSION STATS #####
+
+get_num_missions_completed() { jq '.bitpal.missions_completed' "$BITPAL_JSON"; }
+get_num_missions_active() { jq '.missions // [] | length' "$MISSION_JSON"; }
+
+
+
 ##### MOOD-RELATED FUNCTIONS #####
 
 get_face() {
-   case "$mood" in
-       excited)   echo "[^o^]" ;;
-       happy)     echo "[^-^]" ;;
-       neutral)   echo "[-_-]" ;;
-       sad)       echo "[;_;]" ;;
-       angry)     echo "[>_<]" ;;
-       surprised) echo "[O_O]" ;;
-       *)         echo "[^-^]" ;;
-   esac
+    mood="$(get_bitpal_mood)"
+    case "$mood" in
+        excited)   echo "[^o^]" ;;
+        happy)     echo "[^-^]" ;;
+        neutral)   echo "[-_-]" ;;
+        sad)       echo "[;_;]" ;;
+        angry)     echo "[>_<]" ;;
+        surprised) echo "[O_O]" ;;
+        *)         echo "[^-^]" ;;
+    esac
 }
 
 set_random_good_mood() {
     mood_num=$((random % 2))
     case $mood_num in
-        0) export mood="excited" ;;
-        1) export mood="happy" ;;
+        0) mood="excited" ;;
+        1) mood="happy" ;;
     esac
+    set_bitpal_mood "$mood"
 }
 
 set_random_okay_mood() {
     mood_num=$((random % 2))
     case $mood_num in
-        0) export mood="neutral" ;;
-        1) export mood="surprised" ;;
+        0) mood="neutral" ;;
+        1) mood="surprised" ;;
     esac
+    set_bitpal_mood "$mood"
 }
 
 set_random_negative_mood() {
     mood_num=$((random % 3))
     case $mood_num in
-        0) export mood="sad" ;;
-        1) export mood="angry" ;;
-        2) export mood="surprised" ;;
+        0) mood="sad" ;;
+        1) mood="angry" ;;
+        2) mood="surprised" ;;
     esac
-}
-
-update_mood() {
-    tmpfile=$(mktemp)
-    jq --arg mood $mood '.bitpal += { mood: $mood }' \
-    "$BITPAL_JSON" > "$tmpfile" && mv "$tmpfile" "$BITPAL_JSON"
+    set_bitpal_mood "$mood"
 }
 
 ##### RANDOM MESSAGES #####
