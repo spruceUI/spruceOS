@@ -87,9 +87,17 @@ set_bitpal_mood() {
 
 ##### GET MISSION STATS #####
 
-get_num_missions_completed() { jq '.bitpal.missions_completed' "$BITPAL_JSON"; }
-get_num_missions_active() { jq '.missions // [] | length' "$MISSION_JSON"; }
+get_num_missions_completed() { jq -r '.bitpal.missions_completed' "$BITPAL_JSON"; }
+get_num_missions_active() { jq -r '.missions // [] | length' "$MISSION_JSON"; }
 
+# these take a numeric string (1-5) indicating mission index
+get_mission_type() { jq -r --arg mission_num "$1" '.missions[$mission_num].type' "$MISSION_JSON"; }
+get_mission_display_text() { jq -r --arg mission_num "$1" '.missions[$mission_num].display_text' "$MISSION_JSON"; }
+get_mission_rompath() { jq -r --arg mission_num "$1" '.missions[$mission_num].rompath' "$MISSION_JSON"; }
+get_mission_game() { jq -r --arg mission_num "$1" '.missions[$mission_num].game' "$MISSION_JSON"; }
+get_mission_console() { jq -r --arg mission_num "$1" '.missions[$mission_num].console' "$MISSION_JSON"; }
+get_mission_duration() { jq -r --arg mission_num "$1" '.missions[$mission_num].duration' "$MISSION_JSON"; }
+get_mission_xp_reward() { jq -r --arg mission_num "$1" '.missions[$mission_num].xp_reward' "$MISSION_JSON"; }
 
 
 ##### MOOD-RELATED FUNCTIONS #####
@@ -135,243 +143,6 @@ set_random_negative_mood() {
     set_bitpal_mood "$mood"
 }
 
-##### RANDOM MESSAGES #####
-
-get_random_greeting() {
-    greeting_num=$((RANDOM % 20))
-    face=$(get_face)
-    case $greeting_num in
-        0) echo "$face
- 
- Hello, gamer! Ready to level up?" ;;
-        1) echo "$face
- 
- Welcome back, hero! Adventure awaits!" ;;
-        2) echo "$face
- 
- It's dangerous to go alone! Take BitPal!" ;;
-        3) echo "$face
- 
- Hi there! Your high score quest continues!" ;;
-        4) echo "$face
- 
- Power up! Grab that mushroom!" ;;
-        5) echo "$face
- 
- Hey, champion! Ready to beat the final boss?" ;;
-        6) echo "$face
- 
- HADOUKEN! Let's get gaming!" ;;
-        7) echo "$face
- 
- Good to see you! Extra lives collected!" ;;
-        8) echo "$face
- 
- Insert coin to continue? The arcade is calling!" ;;
-        9) echo "$face
- 
- Welcome back, legend! A new challenger appears!" ;;
-        10) echo "$face
- 
- Game time! BitPal has entered the game!" ;;
-        11) echo "$face
- 
- Konami Code activated! Gaming powers unlocked!" ;;
-        12) echo "$face
- 
- Player One detected! Press START!" ;;
-        13) echo "$face
- 
- Waka Waka Waka! Time to play!" ;;
-        14) echo "$face
- 
- Game cartridge inserted! Blow on it first!" ;;
-        15) echo "$face
- 
- Coins inserted! No lag detected!" ;;
-        16) echo "$face
- 
- New high score potential detected! Let's go!" ;;
-        17) echo "$face
- 
- Controller connected! Ready to rumble!" ;;
-        18) echo "$face
- 
- Pixels powered up! 8-bit mode activated!" ;;
-        19) echo "$face
- 
- FINISH HIM! ...I mean, let's play some games!" ;;
-    esac
-}
-
-get_random_fact() {
-    fact_num=$((RANDOM % 84 + 1))
-    case $fact_num in
-        1) echo "The Nintendo Game Boy was released in 1989 and sold over 118 million units!" ;;
-        2) echo "The Atari 2600 was the first widely successful home console with over 30 million sold." ;;
-        3) echo "Super Mario Bros. was created by Shigeru Miyamoto and released for the NES in 1985." ;;
-        4) echo "Tetris was created in 1984 by Russian engineer Alexey Pajitnov." ;;
-        5) echo "The first video game console, the Magnavox Odyssey, was released in 1972." ;;
-        6) echo "The highest-grossing arcade game of all time is Pac-Man, released in 1980." ;;
-        7) echo "The Game Boy's most popular game, Tetris, sold over 35 million copies!" ;;
-        8) echo "Pong, released by Atari in 1972, was the first commercially successful video game." ;;
-        9) echo "The term 'Easter egg' for hidden game content comes from Adventure on the Atari 2600." ;;
-        10) echo "You must earn 2,700 XP to reach tenlevels in BitPal" ;;
-        11) echo "Sonic the Hedgehog was created to give SEGA a mascot to compete with Mario." ;;
-        12) echo "The Legend of Zelda was inspired by creator Miyamoto's childhood explorations in the countryside." ;;
-        13) echo "The PlayStation was originally going to be a Nintendo CD add-on until the deal fell through." ;;
-        14) echo "Pac-Man's design was inspired by a pizza with a slice removed, according to its creator." ;;
-        15) echo "The name 'SEGA' is an abbreviation of 'Service Games,' its original company name." ;;
-        16) echo "The Legend of Zelda was the first console game that allowed players to save their progress without passwords!" ;;
-        17) echo "Mortal Kombat's blood code 'ABACABB' on Genesis is a reference to the band Genesis's album 'Abacab'!" ;;
-        18) echo "The term 'Easter egg' for hidden game content comes from Adventure on the Atari 2600." ;;
-        19) echo "The Konami Code (UUDDLRLRBA) first appeared in Gradius for the NES in 1986." ;;
-        20) echo "GoldenEye 007 for N64 was developed by only 9 people, most as their first game." ;;
-        21) echo "Space Invaders was so popular in Japan that it caused a temporary coin shortage!" ;;
-        22) echo "The Game & Watch's dual screen design later inspired the Nintendo DS." ;;
-        23) echo "The entire Doom engine was written by John Carmack while secluded in a cabin in the mountains for 6 weeks!" ;;
-        24) echo "Mario was originally called 'Jumpman' in the arcade game Donkey Kong." ;;
-        25) echo "The Neo Geo home console cost 650 usd in 1990, equivalent to over 1,400 usd in today's money!" ;;
-        26) echo "The NES Zapper doesn't work on modern TVs due to their different refresh rates." ;;
-        27) echo "E.T. for Atari 2600 flopped so badly that thousands of cartridges were buried in a landfill." ;;
-        28) echo "The term 'boss fight' comes from a mistranslation of the Japanese word for 'master.'" ;;
-        29) echo "The PlayStation controller's symbols have meanings: circle (yes), cross (no), triangle (viewpoint), square (menu)." ;;
-        30) echo "The Game Boy survived a bombing during the Gulf War and still works at Nintendo NY!" ;;
-        31) echo "The first Easter egg in a video game was developer Warren Robinett hiding his name in Adventure (1979)." ;;
-        32) echo "The SNES's rounded corners were designed to prevent parents from putting drinks on top of it." ;;
-        33) echo "Street Fighter II's combos were actually a glitch that developers decided to keep in the game." ;;
-        34) echo "Donkey Kong was almost named 'Monkey Kong' but got mistranslated during development." ;;
-        35) echo "Final Fantasy was so named because creator Hironobu Sakaguchi thought it would be his last game." ;;
-        36) echo "In the original Pokemon Red/Blue, Missingno wasn't a glitch but a deliberate debug placeholder Nintendo forgot!" ;;
-        37) echo "The Turbografx-16 was actually an 8-bit console, despite what its name suggests." ;;
-        38) echo "The Atari 2600 joystick was designed to survive being thrown against a wall in frustration." ;;
-        39) echo "The original Metal Gear was released on the MSX2 computer in 1987, not the NES version most know." ;;
-        40) echo "Keith Courage in Alpha Zones was a TurboGrafx-16 launch title where Keith transforms into a mecha warrior!" ;;
-        41) echo "Bubble Bobble has 100 levels and a special ending only shown when two players complete it together." ;;
-        42) echo "The original Mortal Kombat arcade cabinet used 8 megabytes of graphics data, which was huge for 1992." ;;
-        43) echo "The Vectrex console from 1982 came with its own built-in vector display screen!" ;;
-        44) echo "In Pac-Man, each ghost has a unique personality and hunting style programmed into its AI." ;;
-        45) echo "The Virtual Boy, Nintendo's 1995 3D console, is considered one of their rare commercial failures." ;;
-        46) echo "Super Mario 64 was the first game where Mario could triple jump, wall jump, and ground pound." ;;
-        47) echo "The SNES had a secret 'Sound Test' menu that could only be accessed with a special music studio cartridge!" ;;
-        48) echo "Contra's famous 30-life code was originally created by developers for testing but accidentally left in!" ;;
-        49) echo "The NES version of Contra was actually censored - the original arcade enemies were human soldiers!" ;;
-        50) echo "The PlayStation memory card could store 15 save files across multiple games." ;;
-        51) echo "The Atari Jaguar was marketed as the first 64-bit console, but actually combined two 32-bit CPUs." ;;
-        52) echo "Nintendo's first electronic game was the 1975 Laser Clay Shooting System, a skeet shooting simulator." ;;
-        53) echo "The Famicom (Japanese NES) had a built-in microphone on the second controller for certain games." ;;
-        54) echo "Polybius is a mythical arcade game that supposedly caused psychoactive effects but never actually existed." ;;
-        55) echo "Sega Channel, launched in 1994, was a cable service that let users download Genesis games via cable TV." ;;
-        56) echo "Nintendo patented the D-pad in 1985, forcing competitors to create alternative directional controls." ;;
-        57) echo "Action 52 for the NES cost 199 usd and contained 52 games, most of which were unplayable due to glitches." ;;
-        58) echo "The first home video game console, the Odyssey, used plastic overlays on the TV screen instead of graphics." ;;
-        59) echo "Galaga's iconic 'dual ship' feature was originally a programming bug that developers turned into a feature." ;;
-        60) echo "The inventor of the Game Boy, Gunpei Yokoi, started at Nintendo fixing assembly line machines." ;;
-        61) echo "Castlevania's iconic whip was originally going to be a gun until the team switched to a horror theme." ;;
-        62) echo "Some arcade game PCBs contain suicide batteries that erase the ROM if removed, preventing copying." ;;
-        63) echo "The Apple Pippin console was Steve Jobs' first failed attempt at entering the gaming market." ;;
-        64) echo "Early SNES development kits were actually modified NES systems with special cartridges." ;;
-        65) echo "The 'invincibility star' in Mario was created because designer Miyamoto loved listening to music." ;;
-        66) echo "The original Zelda cartridge is gold colored because Miyamoto wanted it to look like buried treasure." ;;
-        67) echo "The Game Boy was so durable that one survived a bombing in the Gulf War and still works at Nintendo's NY store!" ;;
-        68) echo "The 3DO console required developers to pay just 3 usd in royalties, compared to Nintendo's 10 usd per game." ;;
-        69) echo "The very first Game & Watch device, Ball, was inspired by a businessman Yokoi saw playing with a calculator." ;;
-        70) echo "The Power Glove's technology was later used in medical devices and virtual reality equipment." ;;
-        71) echo "Earthbound (Mother 2) cost over 200,000 usd to translate to English, an enormous sum in 1995." ;;
-        72) echo "The Pioneer LaserActive could play both Sega Genesis and TurboGrafx-16 games with special modules." ;;
-        73) echo "Tengen, an Atari subsidiary, bypassed Nintendo's security to release unlicensed NES games with black cartridges." ;;
-        74) echo "In Karateka (1984), if you approach the princess in fighting stance, she knocks you out and the game ends." ;;
-        75) echo "The Gameboy printer used thermal paper to print screenshots from games like Pokemon and Zelda." ;;
-        76) echo "R.O.B. (Robotic Operating Buddy) was created to help sell the NES as a toy rather than a video game." ;;
-        77) echo "Sonic was originally a rabbit who could grab objects with extendable ears before becoming a hedgehog." ;;
-        78) echo "Duck Hunt's light gun success helped save the early NES when many retailers were skeptical." ;;
-        79) echo "Nintendo was founded in 1889 as a playing card company before moving to video games." ;;
-        80) echo "The Sega Nomad could play Genesis cartridges on the go but ate six AA batteries in about 2 hours." ;;
-        81) echo "Chrono Trigger's dream team dev squad included creators from Final Fantasy and Dragon Quest." ;;
-        82) echo "Tamagotchi virtual pets were banned in many schools in the 90s for being too distracting to students." ;;
-        83) echo "The NES Power Pad exercise mat was originally developed by Bandai as the 'Family Trainer' in Japan." ;;
-        84) echo "The year 1984 saw the release of Tetris, one of the most enduring and addictive puzzlers of all time!" ;;
-    esac
-}
-
-get_random_guilt_trip() {
-    face=$(get_face)
-    guilt_trip=$((RANDOM % 20))
-    case $guilt_trip in
-        0) echo "$face
- 
- Don't quit now! You haven't saved your progress! Princess is in another castle!" ;;
-        1) echo "$face
- 
- GAME OVER? NOT YET! Insert coin to continue? One more level awaits!" ;;
-        2) echo "$face
- 
- Keep your quarters ready! BitPal needs a Player 1. Just one more game?" ;;
-        3) echo "$face
- 
- Boss battle is loading! You can't pause now! Ready your power-ups?" ;;
-        4) echo "$face
- 
- EXIT? WAIT A MINUTE! You're so close to high score. One more try?" ;;
-        5) echo "$face
- 
- No Konami Code for exit! You must defeat Sheng Long to stand a chance!" ;;
-        6) echo "$face
- 
- You still have 1UP left! Hidden stages await. Will you continue?" ;;
-        7) echo "$face
- 
- Your star power is fading! BitPal needs your help. Save the 8-bit kingdom?" ;;
-        8) echo "$face
- 
- PAUSE NOT AVAILABLE! The final dungeon awaits. Stay for treasure?" ;;
-        9) echo "$face
- 
- Achievement unlocked: \"Almost quit BitPal\" Want to earn more?" ;;
-        10) echo "$face
- 
- LEVEL 99 NOT REACHED! Are you sure you want to abandon your quest?" ;;
-        11) echo "$face
- 
- FATALITY: BitPal sadness! BitPal is counting on you. FINISH THE GAME!" ;;
-        12) echo "$face
- 
- NO SAVE POINTS HERE! Your progress will be lost. Continue adventure?" ;;
-        13) echo "$face
- 
- PRESS START TO PLAY! Secret bosses await. Controller disconnected?" ;;
-        14) echo "$face
- 
- THIS ISN'T GAME OVER! The water level is next. Brave enough to stay?" ;;
-        15) echo "$face
- 
- RAGE QUIT DETECTED! Have you tried the Konami Code? UUDDLRLRBA?" ;;
-        16) echo "$face
- 
- CREDITS NOT EARNED YET! True ending requires 100% completion!" ;;
-        17) echo "$face
- 
- CHEAT ACTIVATED: Fun mode! Your high score is climbing. Leave the arcade now?" ;;
-        18) echo "$face
- 
- 1UP ACQUIRED! BitPal needs you to defeat the final boss!" ;;
-        19) echo "$face
- 
- EXIT? THINK AGAIN! All your base are belong to us! You have no chance to survive!" ;;
-    esac
-}
-
-get_random_thanks() {
-    thanks_num=$((RANDOM % 6))
-    case $thanks_num in
-        0) echo "Phew! ... I thought I'd be alone! Thanks for sticking with me!" ;;
-        1) echo "You stayed! BitPal is so relieved! Let's keep adventuring!" ;;
-        2) echo "Yes! That was close... I almost lost my player!" ;;
-        3) echo "Alright! Team BitPal is back and stronger than ever!" ;;
-        4) echo "Woohoo! The quest continues! Thanks for not leaving me behind." ;;
-        5) echo "Hurray! We're still in the game! Thank you for staying, hero!" ;;
-    esac
-}
 
 
 ##### OTHER RANDOMNESS FUNCTIONS #####
@@ -770,4 +541,245 @@ move_mission_to_completed_json() {
     # Append mission to completed_missions.json
     tmpfile=$(mktemp)
     echo "$MISSION"   jq --slurpfile m /dev/stdin '. += $m' "$COMPLETED_JSON" > "$tmpfile" && mv "$tmpfile" "$COMPLETED_JSON"
+}
+
+
+
+
+##### RANDOM MESSAGES #####
+
+get_random_greeting() {
+    greeting_num=$((RANDOM % 20))
+    face=$(get_face)
+    case $greeting_num in
+        0) echo "$face
+ 
+ Hello, gamer! Ready to level up?" ;;
+        1) echo "$face
+ 
+ Welcome back, hero! Adventure awaits!" ;;
+        2) echo "$face
+ 
+ It's dangerous to go alone! Take BitPal!" ;;
+        3) echo "$face
+ 
+ Hi there! Your high score quest continues!" ;;
+        4) echo "$face
+ 
+ Power up! Grab that mushroom!" ;;
+        5) echo "$face
+ 
+ Hey, champion! Ready to beat the final boss?" ;;
+        6) echo "$face
+ 
+ HADOUKEN! Let's get gaming!" ;;
+        7) echo "$face
+ 
+ Good to see you! Extra lives collected!" ;;
+        8) echo "$face
+ 
+ Insert coin to continue? The arcade is calling!" ;;
+        9) echo "$face
+ 
+ Welcome back, legend! A new challenger appears!" ;;
+        10) echo "$face
+ 
+ Game time! BitPal has entered the game!" ;;
+        11) echo "$face
+ 
+ Konami Code activated! Gaming powers unlocked!" ;;
+        12) echo "$face
+ 
+ Player One detected! Press START!" ;;
+        13) echo "$face
+ 
+ Waka Waka Waka! Time to play!" ;;
+        14) echo "$face
+ 
+ Game cartridge inserted! Blow on it first!" ;;
+        15) echo "$face
+ 
+ Coins inserted! No lag detected!" ;;
+        16) echo "$face
+ 
+ New high score potential detected! Let's go!" ;;
+        17) echo "$face
+ 
+ Controller connected! Ready to rumble!" ;;
+        18) echo "$face
+ 
+ Pixels powered up! 8-bit mode activated!" ;;
+        19) echo "$face
+ 
+ FINISH HIM! ...I mean, let's play some games!" ;;
+    esac
+}
+
+get_random_fact() {
+    fact_num=$((RANDOM % 84 + 1))
+    case $fact_num in
+        1) echo "The Nintendo Game Boy was released in 1989 and sold over 118 million units!" ;;
+        2) echo "The Atari 2600 was the first widely successful home console with over 30 million sold." ;;
+        3) echo "Super Mario Bros. was created by Shigeru Miyamoto and released for the NES in 1985." ;;
+        4) echo "Tetris was created in 1984 by Russian engineer Alexey Pajitnov." ;;
+        5) echo "The first video game console, the Magnavox Odyssey, was released in 1972." ;;
+        6) echo "The highest-grossing arcade game of all time is Pac-Man, released in 1980." ;;
+        7) echo "The Game Boy's most popular game, Tetris, sold over 35 million copies!" ;;
+        8) echo "Pong, released by Atari in 1972, was the first commercially successful video game." ;;
+        9) echo "The term 'Easter egg' for hidden game content comes from Adventure on the Atari 2600." ;;
+        10) echo "You must earn 2,700 XP to reach tenlevels in BitPal" ;;
+        11) echo "Sonic the Hedgehog was created to give SEGA a mascot to compete with Mario." ;;
+        12) echo "The Legend of Zelda was inspired by creator Miyamoto's childhood explorations in the countryside." ;;
+        13) echo "The PlayStation was originally going to be a Nintendo CD add-on until the deal fell through." ;;
+        14) echo "Pac-Man's design was inspired by a pizza with a slice removed, according to its creator." ;;
+        15) echo "The name 'SEGA' is an abbreviation of 'Service Games,' its original company name." ;;
+        16) echo "The Legend of Zelda was the first console game that allowed players to save their progress without passwords!" ;;
+        17) echo "Mortal Kombat's blood code 'ABACABB' on Genesis is a reference to the band Genesis's album 'Abacab'!" ;;
+        18) echo "The term 'Easter egg' for hidden game content comes from Adventure on the Atari 2600." ;;
+        19) echo "The Konami Code (UUDDLRLRBA) first appeared in Gradius for the NES in 1986." ;;
+        20) echo "GoldenEye 007 for N64 was developed by only 9 people, most as their first game." ;;
+        21) echo "Space Invaders was so popular in Japan that it caused a temporary coin shortage!" ;;
+        22) echo "The Game & Watch's dual screen design later inspired the Nintendo DS." ;;
+        23) echo "The entire Doom engine was written by John Carmack while secluded in a cabin in the mountains for 6 weeks!" ;;
+        24) echo "Mario was originally called 'Jumpman' in the arcade game Donkey Kong." ;;
+        25) echo "The Neo Geo home console cost 650 usd in 1990, equivalent to over 1,400 usd in today's money!" ;;
+        26) echo "The NES Zapper doesn't work on modern TVs due to their different refresh rates." ;;
+        27) echo "E.T. for Atari 2600 flopped so badly that thousands of cartridges were buried in a landfill." ;;
+        28) echo "The term 'boss fight' comes from a mistranslation of the Japanese word for 'master.'" ;;
+        29) echo "The PlayStation controller's symbols have meanings: circle (yes), cross (no), triangle (viewpoint), square (menu)." ;;
+        30) echo "The Game Boy survived a bombing during the Gulf War and still works at Nintendo NY!" ;;
+        31) echo "The first Easter egg in a video game was developer Warren Robinett hiding his name in Adventure (1979)." ;;
+        32) echo "The SNES's rounded corners were designed to prevent parents from putting drinks on top of it." ;;
+        33) echo "Street Fighter II's combos were actually a glitch that developers decided to keep in the game." ;;
+        34) echo "Donkey Kong was almost named 'Monkey Kong' but got mistranslated during development." ;;
+        35) echo "Final Fantasy was so named because creator Hironobu Sakaguchi thought it would be his last game." ;;
+        36) echo "In the original Pokemon Red/Blue, Missingno wasn't a glitch but a deliberate debug placeholder Nintendo forgot!" ;;
+        37) echo "The Turbografx-16 was actually an 8-bit console, despite what its name suggests." ;;
+        38) echo "The Atari 2600 joystick was designed to survive being thrown against a wall in frustration." ;;
+        39) echo "The original Metal Gear was released on the MSX2 computer in 1987, not the NES version most know." ;;
+        40) echo "Keith Courage in Alpha Zones was a TurboGrafx-16 launch title where Keith transforms into a mecha warrior!" ;;
+        41) echo "Bubble Bobble has 100 levels and a special ending only shown when two players complete it together." ;;
+        42) echo "The original Mortal Kombat arcade cabinet used 8 megabytes of graphics data, which was huge for 1992." ;;
+        43) echo "The Vectrex console from 1982 came with its own built-in vector display screen!" ;;
+        44) echo "In Pac-Man, each ghost has a unique personality and hunting style programmed into its AI." ;;
+        45) echo "The Virtual Boy, Nintendo's 1995 3D console, is considered one of their rare commercial failures." ;;
+        46) echo "Super Mario 64 was the first game where Mario could triple jump, wall jump, and ground pound." ;;
+        47) echo "The SNES had a secret 'Sound Test' menu that could only be accessed with a special music studio cartridge!" ;;
+        48) echo "Contra's famous 30-life code was originally created by developers for testing but accidentally left in!" ;;
+        49) echo "The NES version of Contra was actually censored - the original arcade enemies were human soldiers!" ;;
+        50) echo "The PlayStation memory card could store 15 save files across multiple games." ;;
+        51) echo "The Atari Jaguar was marketed as the first 64-bit console, but actually combined two 32-bit CPUs." ;;
+        52) echo "Nintendo's first electronic game was the 1975 Laser Clay Shooting System, a skeet shooting simulator." ;;
+        53) echo "The Famicom (Japanese NES) had a built-in microphone on the second controller for certain games." ;;
+        54) echo "Polybius is a mythical arcade game that supposedly caused psychoactive effects but never actually existed." ;;
+        55) echo "Sega Channel, launched in 1994, was a cable service that let users download Genesis games via cable TV." ;;
+        56) echo "Nintendo patented the D-pad in 1985, forcing competitors to create alternative directional controls." ;;
+        57) echo "Action 52 for the NES cost 199 usd and contained 52 games, most of which were unplayable due to glitches." ;;
+        58) echo "The first home video game console, the Odyssey, used plastic overlays on the TV screen instead of graphics." ;;
+        59) echo "Galaga's iconic 'dual ship' feature was originally a programming bug that developers turned into a feature." ;;
+        60) echo "The inventor of the Game Boy, Gunpei Yokoi, started at Nintendo fixing assembly line machines." ;;
+        61) echo "Castlevania's iconic whip was originally going to be a gun until the team switched to a horror theme." ;;
+        62) echo "Some arcade game PCBs contain suicide batteries that erase the ROM if removed, preventing copying." ;;
+        63) echo "The Apple Pippin console was Steve Jobs' first failed attempt at entering the gaming market." ;;
+        64) echo "Early SNES development kits were actually modified NES systems with special cartridges." ;;
+        65) echo "The 'invincibility star' in Mario was created because designer Miyamoto loved listening to music." ;;
+        66) echo "The original Zelda cartridge is gold colored because Miyamoto wanted it to look like buried treasure." ;;
+        67) echo "The Game Boy was so durable that one survived a bombing in the Gulf War and still works at Nintendo's NY store!" ;;
+        68) echo "The 3DO console required developers to pay just 3 usd in royalties, compared to Nintendo's 10 usd per game." ;;
+        69) echo "The very first Game & Watch device, Ball, was inspired by a businessman Yokoi saw playing with a calculator." ;;
+        70) echo "The Power Glove's technology was later used in medical devices and virtual reality equipment." ;;
+        71) echo "Earthbound (Mother 2) cost over 200,000 usd to translate to English, an enormous sum in 1995." ;;
+        72) echo "The Pioneer LaserActive could play both Sega Genesis and TurboGrafx-16 games with special modules." ;;
+        73) echo "Tengen, an Atari subsidiary, bypassed Nintendo's security to release unlicensed NES games with black cartridges." ;;
+        74) echo "In Karateka (1984), if you approach the princess in fighting stance, she knocks you out and the game ends." ;;
+        75) echo "The Gameboy printer used thermal paper to print screenshots from games like Pokemon and Zelda." ;;
+        76) echo "R.O.B. (Robotic Operating Buddy) was created to help sell the NES as a toy rather than a video game." ;;
+        77) echo "Sonic was originally a rabbit who could grab objects with extendable ears before becoming a hedgehog." ;;
+        78) echo "Duck Hunt's light gun success helped save the early NES when many retailers were skeptical." ;;
+        79) echo "Nintendo was founded in 1889 as a playing card company before moving to video games." ;;
+        80) echo "The Sega Nomad could play Genesis cartridges on the go but ate six AA batteries in about 2 hours." ;;
+        81) echo "Chrono Trigger's dream team dev squad included creators from Final Fantasy and Dragon Quest." ;;
+        82) echo "Tamagotchi virtual pets were banned in many schools in the 90s for being too distracting to students." ;;
+        83) echo "The NES Power Pad exercise mat was originally developed by Bandai as the 'Family Trainer' in Japan." ;;
+        84) echo "The year 1984 saw the release of Tetris, one of the most enduring and addictive puzzlers of all time!" ;;
+    esac
+}
+
+get_random_guilt_trip() {
+    face=$(get_face)
+    guilt_trip=$((RANDOM % 20))
+    case $guilt_trip in
+        0) echo "$face
+ 
+ Don't quit now! You haven't saved your progress! Princess is in another castle!" ;;
+        1) echo "$face
+ 
+ GAME OVER? NOT YET! Insert coin to continue? One more level awaits!" ;;
+        2) echo "$face
+ 
+ Keep your quarters ready! BitPal needs a Player 1. Just one more game?" ;;
+        3) echo "$face
+ 
+ Boss battle is loading! You can't pause now! Ready your power-ups?" ;;
+        4) echo "$face
+ 
+ EXIT? WAIT A MINUTE! You're so close to high score. One more try?" ;;
+        5) echo "$face
+ 
+ No Konami Code for exit! You must defeat Sheng Long to stand a chance!" ;;
+        6) echo "$face
+ 
+ You still have 1UP left! Hidden stages await. Will you continue?" ;;
+        7) echo "$face
+ 
+ Your star power is fading! BitPal needs your help. Save the 8-bit kingdom?" ;;
+        8) echo "$face
+ 
+ PAUSE NOT AVAILABLE! The final dungeon awaits. Stay for treasure?" ;;
+        9) echo "$face
+ 
+ Achievement unlocked: \"Almost quit BitPal\" Want to earn more?" ;;
+        10) echo "$face
+ 
+ LEVEL 99 NOT REACHED! Are you sure you want to abandon your quest?" ;;
+        11) echo "$face
+ 
+ FATALITY: BitPal sadness! BitPal is counting on you. FINISH THE GAME!" ;;
+        12) echo "$face
+ 
+ NO SAVE POINTS HERE! Your progress will be lost. Continue adventure?" ;;
+        13) echo "$face
+ 
+ PRESS START TO PLAY! Secret bosses await. Controller disconnected?" ;;
+        14) echo "$face
+ 
+ THIS ISN'T GAME OVER! The water level is next. Brave enough to stay?" ;;
+        15) echo "$face
+ 
+ RAGE QUIT DETECTED! Have you tried the Konami Code? UUDDLRLRBA?" ;;
+        16) echo "$face
+ 
+ CREDITS NOT EARNED YET! True ending requires 100% completion!" ;;
+        17) echo "$face
+ 
+ CHEAT ACTIVATED: Fun mode! Your high score is climbing. Leave the arcade now?" ;;
+        18) echo "$face
+ 
+ 1UP ACQUIRED! BitPal needs you to defeat the final boss!" ;;
+        19) echo "$face
+ 
+ EXIT? THINK AGAIN! All your base are belong to us! You have no chance to survive!" ;;
+    esac
+}
+
+get_random_thanks() {
+    thanks_num=$((RANDOM % 6))
+    case $thanks_num in
+        0) echo "Phew! ... I thought I'd be alone! Thanks for sticking with me!" ;;
+        1) echo "You stayed! BitPal is so relieved! Let's keep adventuring!" ;;
+        2) echo "Yes! That was close... I almost lost my player!" ;;
+        3) echo "Alright! Team BitPal is back and stronger than ever!" ;;
+        4) echo "Woohoo! The quest continues! Thanks for not leaving me behind." ;;
+        5) echo "Hurray! We're still in the game! Thank you for staying, hero!" ;;
+    esac
 }
