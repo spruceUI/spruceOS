@@ -35,7 +35,6 @@ class OnScreenKeyboard:
     def get_input(self, title_text):
         self.shifted = False
         self.caps = False
-
         running = True  
         self.selected_row_index = 0
         self.selected_key_index = 0
@@ -45,6 +44,7 @@ class OnScreenKeyboard:
         key_h = key_w
 
         while running:
+            self.display.clear("Keyboard")
             self.display.render_image(
                 image_path = self.theme.keyboard_bg,
                 x = 0,

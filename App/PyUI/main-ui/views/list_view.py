@@ -10,6 +10,7 @@ class ListView(ABC):
         self.controller = controller
         self.current_top = 0
         self.current_bottom = 0
+        self.clear_display_each_render_cycle = True
 
     @abstractmethod
     def _render(self):
@@ -44,7 +45,8 @@ class ListView(ABC):
         return Selection(self.get_selected_option(), None, self.selected)
     
     def _render_common(self):
-        self.display.clear(self.top_bar_text)
+        if(self.clear_display_each_render_cycle):
+            self.display.clear(self.top_bar_text)
         
         self.adjust_selected_top_bottom_for_overflow()
 

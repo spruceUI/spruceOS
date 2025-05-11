@@ -66,8 +66,6 @@ class ViewCreator():
                     selected_bg=self.theme.get_list_small_selected_bg()
                 )            
             case ViewType.TEXT_LIST_VIEW:
-                img_offset_x = self.device.screen_width - 10
-                img_offset_y = (self.device.screen_height - self.display.get_top_bar_height() + self.display.get_bottom_bar_height())//2 + self.display.get_top_bar_height() - self.display.get_bottom_bar_height()
                 return TextListView(
                     display=self.display, 
                     controller=self.controller, 
@@ -75,10 +73,6 @@ class ViewCreator():
                     theme=self.theme,
                     top_bar_text=top_bar_text,
                     options=options,
-                    img_offset_x=img_offset_x,
-                    img_offset_y=img_offset_y,
-                    img_width=self.theme.rom_image_width,
-                    img_height=self.theme.rom_image_height,
                     selected_index=selected_index,
                     show_icons=ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
