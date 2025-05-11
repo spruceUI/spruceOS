@@ -56,6 +56,11 @@ class Controller:
         if timeout == -2:
             timeout = self.device.input_timeout_default
 
+        #If a long render occurred, clear the input queue
+        if time.time() - self.last_input_time > 0.2:
+            sdl2.SDL_PumpEvents()
+            self.clear_input_queue()
+
         sdl2.SDL_PumpEvents()
         start_time = time.time()
 
