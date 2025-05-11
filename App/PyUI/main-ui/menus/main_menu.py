@@ -3,9 +3,11 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from display.render_mode import RenderMode
 from menus.app.app_menu import AppMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
+from menus.games.pop_menu import PopupMenu
 from menus.games.recents_menu import RecentsMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.settings_menu import SettingsMenu
@@ -30,6 +32,52 @@ class MainMenu:
         self.recents_menu = RecentsMenu(display,controller,device,theme)
         self.settings_menu = SettingsMenu(display,controller,device,theme, config)
         self.view_creator = ViewCreator(display,controller,device,theme)
+
+    def run_popup_menu_selection(self):
+        popup_options = []
+        popup_options.append(GridOrListEntry(
+            primary_text="Rom Search",
+            image_path=self.theme.settings,
+            image_path_selected=self.theme.settings_selected,
+            description="",
+            icon=self.theme.settings,
+            value="Rom Search"
+        ))
+
+        popup_options.append(GridOrListEntry(
+            primary_text="Future Option 2",
+            image_path=self.theme.settings,
+            image_path_selected=self.theme.settings_selected,
+            description="",
+            icon=self.theme.settings,
+            value="Future Option 2"
+        ))
+        popup_options.append(GridOrListEntry(
+            primary_text="Future Option 3",
+            image_path=self.theme.settings,
+            image_path_selected=self.theme.settings_selected,
+            description="",
+            icon=self.theme.settings,
+            value="Future Option 3"
+        ))
+        popup_view = PopupMenu(display=self.display,
+              controller=self.controller,
+              device=self.device,
+              theme=self.theme,
+              options=popup_options,
+              selected_index=0,
+              show_icons=False,
+              image_render_mode=RenderMode.TOP_LEFT_ALIGNED,
+              selected_bg=None)
+        
+        while (popup_selection := popup_view.get_selection()):
+            if(popup_selection.get_input() is not None):
+                break
+        
+        print(f"popup_selection={popup_selection}")
+        if(ControllerInput.A == popup_selection.get_input()): 
+            if("Rom Search" == popup_selection.get_selection().get_primary_text()):
+                SearchedRomsMenu(self.display,self.controller,self.device,self.theme).run_rom_selection()
 
     def run_main_menu_selection(self):
         selected = Selection(None,None,0)
@@ -93,5 +141,4 @@ class MainMenu:
                     elif("Setting" == selected.get_selection().get_primary_text()):
                         self.settings_menu.show_menu()
                 elif(ControllerInput.MENU == selected.get_input()):
-                    print("Running SearchedRomsMenu")
-                    SearchedRomsMenu(self.display,self.controller,self.device,self.theme).run_rom_selection()
+                    self.run_popup_menu_selection()

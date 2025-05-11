@@ -1,3 +1,4 @@
+import time
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
@@ -18,6 +19,13 @@ class Display:
         self.device = device
         self._init_display()
         self.init_fonts()
+        self.render_canvas = sdl2.SDL_CreateTexture(self.renderer.renderer,
+                                        sdl2.SDL_PIXELFORMAT_ARGB8888,
+                                        sdl2.SDL_TEXTUREACCESS_TARGET,
+                                        self.device.screen_width, self.device.screen_height)
+        print(f"{sdl2.SDL_GetError()}")
+        sdl2.SDL_SetRenderTarget(self.renderer.renderer, self.render_canvas)
+        print(f"{sdl2.SDL_GetError()}")
         self.bg_path = ""
         self._check_for_bg_change()
         self.top_bar = TopBar(self,device,theme)
@@ -113,7 +121,8 @@ class Display:
         return LoadedFont(font,line_height)
         
     def clear(self, screen):
-        self.screen = screen
+        self.screen = screen       
+
         self._check_for_bg_change()
         if(self.background_texture is not None):
             sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
@@ -221,13 +230,26 @@ class Display:
     def render_image_centered(self, image_path: str, x: int, y: int, target_width=None, target_height=None):
         return self.render_image(image_path,x,y,RenderMode.TOP_CENTER_ALIGNED, target_width, target_height)
 
+    def render_box(self, color, x, y, w, h):
+        # RGB (0,0,0) for black, Alpha 255 (fully opaque)
+        sdl2.SDL_SetRenderDrawColor(self.renderer.renderer, color[0], color[1], color[2], 255)  
+        # Define the rectangle's position and size (320x240 at position 160x120)
+        rect = sdl2.SDL_Rect(x, y, w, h)
+        # Draw the filled rectangle
+        sdl2.SDL_RenderFillRect(self.renderer.renderer, rect)
+
     def get_line_height(self, purpose : FontPurpose):
-        return self.fonts[purpose].line_height;
+        return self.fonts[purpose].line_height
         
     def present(self):
         if(self.theme.render_top_and_bottom_bar_last()):
             self.top_bar.render_top_bar(self.screen)
             self.bottom_bar.render_bottom_bar()
+
+        sdl2.SDL_SetRenderTarget(self.renderer.renderer, None)
+        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.render_canvas, None, None)
+        sdl2.SDL_SetRenderTarget(self.renderer.renderer, self.render_canvas)
+
         self.renderer.present()
 
     def get_top_bar_height(self):
