@@ -7,7 +7,7 @@ from display.render_mode import RenderMode
 from menus.app.app_menu import AppMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
-from menus.games.pop_menu import PopupMenu
+from views.pop_text_list_view import PopupTextListView
 from menus.games.recents_menu import RecentsMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.settings_menu import SettingsMenu
@@ -60,15 +60,13 @@ class MainMenu:
             icon=self.theme.settings,
             value="Future Option 3"
         ))
-        popup_view = PopupMenu(display=self.display,
-              controller=self.controller,
-              device=self.device,
-              theme=self.theme,
-              options=popup_options,
-              selected_index=0,
-              show_icons=False,
-              image_render_mode=RenderMode.TOP_LEFT_ALIGNED,
-              selected_bg=None)
+        popup_view = self.view_creator.create_view(
+            view_type=ViewType.POPUP_TEXT_LIST_VIEW,
+            options=popup_options,
+            top_bar_text="Main Menu Sub Options",
+            selected_index=0,
+            cols=4,
+            rows=1)
         
         while (popup_selection := popup_view.get_selection()):
             if(popup_selection.get_input() is not None):

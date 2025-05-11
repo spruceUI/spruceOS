@@ -11,6 +11,7 @@ class ListView(ABC):
         self.current_top = 0
         self.current_bottom = 0
         self.clear_display_each_render_cycle = True
+        self.include_index_text = True
 
     @abstractmethod
     def _render(self):
@@ -51,7 +52,8 @@ class ListView(ABC):
         self.adjust_selected_top_bottom_for_overflow()
 
         self._render()
-        self.display.add_index_text(self.selected+1, len(self.options))
+        if(self.include_index_text):
+            self.display.add_index_text(self.selected+1, len(self.options))
         self.display.present()
 
     def adjust_selected_top_bottom_for_overflow(self):

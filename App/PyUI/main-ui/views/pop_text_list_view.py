@@ -9,7 +9,7 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.text_list_view import TextListView
 
 
-class PopupMenu(TextListView):
+class PopupTextListView(TextListView):
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme,
                  options: List[GridOrListEntry], 
                  selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):
@@ -29,6 +29,8 @@ class PopupMenu(TextListView):
         self.device : Device= device
         self.theme : Theme= theme
         self.clear_display_each_render_cycle = False
+        self.include_index_text = False
+
         self.starting_x_offset = device.screen_width//4 + 20 #TODO get 20 from somewhere
         self.base_y_offset = device.screen_height//4
         self.device.screen_width//4
