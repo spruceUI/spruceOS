@@ -27,7 +27,7 @@ case "$1" in
         else
             generate_3_missions
             construct_new_mission_menu
-            call_menu "BitPal - New Mission" "new_mission.json"
+            call_menu "BitPal - New Mission" "new_mission.json" || call_menu "BitPal - Main" "main.json"
         fi
         ;;
 
@@ -38,7 +38,7 @@ case "$1" in
             call_menu "BitPal - Main" "main.json"
         else
             construct_active_missions_menu
-            call_menu "BitPal - Active Missions" "active_missions.json"
+            call_menu "BitPal - Current Missions" "active_missions.json" || call_menu "BitPal - Main" "main.json"
         fi
         ;;
 
@@ -53,23 +53,22 @@ case "$1" in
         accept_mission "$selected_mission"
         display -p 50 -d 2 -s 36 -t "Mission accepted!"
         display_mission_details "$2"
-        call_menu "BitPal - Current Missions" "active_missions.json"
+        call_menu "BitPal - Current Missions" "active_missions.json" || call_menu "BitPal - Main" "main.json"
         ;;
 
     # Active mission menu items 1-5; $2 should be 1,2,3,4,5
     manage_mission)
         construct_individual_mission_menu "$2"
         display_mission_details "$2"
-        call_menu "BitPal - Mission $2" "manage_mission.json"
+        call_menu "BitPal - Mission $2" "manage_mission.json" || call_menu "BitPal - Current Missions" "active_missions.json"
         ;;
 
     # Manage (individual) mission menu item 1; $2 should
     # be 1,2,3,4,5 passed from manage_mission above
     view_mission_details)
         display_mission_details "$2"
-        call_menu "BitPal - Current Missions" "active_missions.json"
+        call_menu "BitPal - Current Missions" "active_missions.json" || call_menu "BitPal - Main" "main.json"
         ;;
-
 
 
     queue_game)
