@@ -5,3 +5,4 @@ class ViewType(Enum):
     GRID_VIEW = auto()
     TEXT_AND_IMAGE_LIST_VIEW = auto()
     TEXT_LIST_VIEW = auto()
+    POPUP_TEXT_LIST_VIEW = auto()

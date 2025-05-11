@@ -9,7 +9,7 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.text_list_view import TextListView
 
 
-class PopupMenu(TextListView):
+class PopupTextListView(TextListView):
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme,
                  options: List[GridOrListEntry], 
                  selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):

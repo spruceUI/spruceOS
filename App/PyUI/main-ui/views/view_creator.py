@@ -9,6 +9,7 @@ from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
 from views.image_list_view import ImageListView
+from views.pop_text_list_view import PopupTextListView
 from views.text_list_view import TextListView
 from views.view_type import ViewType
 
@@ -77,6 +78,18 @@ class ViewCreator():
                     show_icons=ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
                     selected_bg=self.theme.get_list_small_selected_bg()
+                )   
+            case ViewType.POPUP_TEXT_LIST_VIEW:
+                return PopupTextListView(
+                    display=self.display, 
+                    controller=self.controller, 
+                    device=self.device, 
+                    theme=self.theme,
+                    options=options,
+                    selected_index=selected_index,
+                    show_icons=ImageListView.DONT_SHOW_ICONS,
+                    image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
+                    selected_bg=None
                 )
             case ViewType.GRID_VIEW:
                 return GridView(
