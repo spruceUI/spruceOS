@@ -17,7 +17,7 @@ class NonDescriptiveListView(ListView):
 
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, top_bar_text,
                  options: List[GridOrListEntry],
-                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):
+                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None):
         super().__init__(controller)
         self.display = display
         self.device = device
@@ -33,8 +33,11 @@ class NonDescriptiveListView(ListView):
         self.show_icons = show_icons
         self.image_render_mode = image_render_mode
         self.selected_bg = selected_bg
-        self.line_height = self._calculate_line_height()            
-        self.max_rows = self.display.get_usable_screen_height() // self.line_height
+        self.line_height = self._calculate_line_height()   
+        if(usable_height is None):
+            usable_height = self.display.get_usable_screen_height()
+        print(f"usable_height = {usable_height}")
+        self.max_rows = usable_height // self.line_height
         self.current_bottom = min(self.max_rows,len(options))
 
     def set_options(self, options):

@@ -1,3 +1,4 @@
+import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
@@ -9,9 +10,11 @@ class TopBar:
         self.display= display
         self.device : Device= device
         self.theme : Theme= theme
+        self.title = ""
 
 
     def render_top_bar(self, title) :
+        self.title = title
         top_bar_bg = self.theme.get_title_bar_bg
         battery_percent = self.device.get_battery_percent()
         charging = self.device.get_charge_status()
@@ -46,3 +49,6 @@ class TopBar:
         
     def get_top_bar_height(self):
         return self.top_bar_h
+    
+    def get_current_title(self):
+        return self.title

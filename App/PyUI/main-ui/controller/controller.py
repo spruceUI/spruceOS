@@ -18,7 +18,7 @@ class Controller:
         self.device = device
         self.last_input_time = 0
         self.config = config
-
+        self.hold_delay = config.get_turbo_delay_ms()
 
     def _init_controller(self):
         #Force new connection to be processed byt SDL by polling it off the queue
@@ -65,11 +65,13 @@ class Controller:
         start_time = time.time()
 
         # Optional: delay if input is still being held from a prior press
-        while self.still_held_down() and (time.time() - start_time < 0.12):
+        print(f"Hold delay is {self.hold_delay}")
+        while self.still_held_down() and (time.time() - start_time < self.hold_delay):
             sdl2.SDL_PumpEvents()
             time.sleep(0.005)  # Prevent tight CPU loop
 
         if not self.still_held_down():
+            self.hold_delay = self.config.get_turbo_delay_ms()
             self._last_event().type = 0  # Clear last event
             reached_timeout = False
 
@@ -88,6 +90,8 @@ class Controller:
                 elif(event_available and self._last_event().type == sdl2.SDL_CONTROLLERDEVICEADDED):
                     print("New controller detected")
                     self._init_controller()
+        else:
+            self.hold_delay = 0.0
 
         self.last_input_time = time.time()
         return self.last_event_was_controller() 

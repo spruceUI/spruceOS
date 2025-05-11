@@ -18,11 +18,11 @@ PyUiLogger.init("/mnt/SDCARD/Saves/spruce/pyui.log", "PyUI")
 config = PyUiConfig()
 config.load()
 
-selected_theme = os.path.join(config["theme_dir"],config["theme"])
+selected_theme = os.path.join(config["themeDir"],config["theme"])
                               
 PyUiLogger.info(f"{selected_theme}")
 
-theme = Theme(os.path.join(config["theme_dir"],config["theme"]))
+theme = Theme(os.path.join(config["themeDir"],config["theme"]))
 
 device = MiyooFlip()
 display = Display(theme, device)

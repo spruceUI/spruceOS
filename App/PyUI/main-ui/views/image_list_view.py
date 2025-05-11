@@ -16,7 +16,7 @@ class ImageListView(NonDescriptiveListView):
 
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, top_bar_text,
                  options: List[GridOrListEntry], img_offset_x : int, img_offset_y : int, img_width : int, img_height: int,
-                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):
+                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None):
         super().__init__(display=display,
                          controller=controller,
                          device=device,
@@ -26,7 +26,8 @@ class ImageListView(NonDescriptiveListView):
                          selected_index=selected_index,
                          show_icons=show_icons,
                          image_render_mode=image_render_mode,
-                         selected_bg=selected_bg)
+                         selected_bg=selected_bg,
+                         usable_height=usable_height)
 
         self.img_offset_x = img_offset_x
         self.img_offset_y = img_offset_y

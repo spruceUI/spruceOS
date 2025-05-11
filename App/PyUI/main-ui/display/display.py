@@ -19,6 +19,7 @@ class Display:
         self.device = device
         self._init_display()
         self.init_fonts()
+        self.bg_canvas = None
         self.render_canvas = sdl2.SDL_CreateTexture(self.renderer.renderer,
                                         sdl2.SDL_PIXELFORMAT_ARGB8888,
                                         sdl2.SDL_TEXTUREACCESS_TARGET,
@@ -120,12 +121,29 @@ class Display:
         line_height = sdl2.sdlttf.TTF_FontHeight(font)
         return LoadedFont(font,line_height)
         
+
+    def lock_current_image_as_bg(self):
+        self.bg_canvas = self.render_canvas
+        self.render_canvas = sdl2.SDL_CreateTexture(self.renderer.renderer,
+                                sdl2.SDL_PIXELFORMAT_ARGB8888,
+                                sdl2.SDL_TEXTUREACCESS_TARGET,
+                                self.device.screen_width, self.device.screen_height)
+        sdl2.SDL_SetRenderTarget(self.renderer.renderer, self.render_canvas)
+        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.bg_canvas, None, None)
+
+    def unlock_current_image_as_bg(self):
+        sdl2.SDL_DestroyTexture(self.bg_canvas)
+        self.bg_canvas = None
+
     def clear(self, screen):
         self.screen = screen       
-
         self._check_for_bg_change()
-        if(self.background_texture is not None):
+
+        if(self.bg_canvas is not None):
+            sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.bg_canvas, None, None)
+        elif(self.background_texture is not None):
             sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.background_texture, None, None)
+
         if(not self.theme.render_top_and_bottom_bar_last()):
             self.top_bar.render_top_bar(self.screen)
             self.bottom_bar.render_bottom_bar()
@@ -316,3 +334,6 @@ class Display:
             self.theme.text_color(FontPurpose.LIST_INDEX), 
             FontPurpose.LIST_INDEX, 
             RenderMode.BOTTOM_RIGHT_ALIGNED)
+
+    def get_current_top_bar_title(self):
+        return self.top_bar.get_current_title()

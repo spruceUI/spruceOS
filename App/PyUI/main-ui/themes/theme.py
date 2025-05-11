@@ -149,6 +149,9 @@ class Theme():
     def get_list_small_selected_bg(self):
         return os.path.join(self.path,"skin","bg-list-s.png")
     
+    def get_popup_menu_selected_bg(self):
+        return os.path.join(self.path,"skin","bg-list-s2.png")
+    
     def get_battery_icon(self,charging,battery_percent):
         if(ChargeStatus.CHARGING == charging):
             if(battery_percent > 97):
@@ -376,3 +379,27 @@ class Theme():
     
     def get_game_system_select_row_count(self):
         return getattr(self, "gameSystemSelectRowCount", 2)
+    
+    @property
+    def pop_menu_x_offset(self):
+        return getattr(self, "popupMenuXOffsetPercent", 0)/100
+    
+    @property
+    def pop_menu_y_offset(self):
+        return getattr(self, "popupMenuYOffsetPercent", 0)/100
+        
+    @property
+    def pop_menu_add_top_bar_height_to_y_offset(self):
+        return getattr(self, "addTopBarHeightToYOffset", True)
+        
+    @property
+    def pop_menu_text_padding(self):
+        return getattr(self, "popupMenuTextPad", 20)
+
+    @property
+    def popup_menu_cols(self):
+        return getattr(self, "popupMenuCols", 4)
+
+    @property
+    def popup_menu_rows(self):
+        return getattr(self, "popupMenuRows", 1)

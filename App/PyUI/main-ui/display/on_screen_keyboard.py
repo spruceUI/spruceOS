@@ -54,9 +54,10 @@ class OnScreenKeyboard:
                 target_height=self.device.screen_height)
 
             next_y = self.display.get_top_bar_height()
+            entry_bar_text_x_offset = 10 #TODO get somewhere better
             if(title_text is not None):
                 title_w, title_h = self.display.render_text(text=title_text,
-                    x = 10,
+                    x = entry_bar_text_x_offset,
                     y = next_y, 
                     purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                     color=self.theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
@@ -73,7 +74,7 @@ class OnScreenKeyboard:
 
             if(self.entered_text):
                 self.display.render_text(text=self.entered_text,
-                    x = 0,
+                    x = entry_bar_text_x_offset,
                     y = next_y, 
                     purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                     color=self.theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
