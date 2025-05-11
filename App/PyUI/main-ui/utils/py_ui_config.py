@@ -7,6 +7,7 @@ class PyUiConfig:
 
     def save(self):
         self._write_to_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
+        self.load()
 
     def load(self):
         self._read_from_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
@@ -52,3 +53,9 @@ class PyUiConfig:
 
     def clear(self):
         self._data.clear()
+
+    def get_turbo_delay_ms(self):
+        return self._data.get("turboDelayMs", 120)/1000
+
+    def set_turbo_delay_ms(self, delay):
+        self._data["turboDelayMs"] = delay

@@ -10,12 +10,14 @@ from controller.controller import Controller
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
+from views.view import View
 
-class GridView:
+class GridView(View):
 
     def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme,
                   top_bar_text, options: List[GridOrListEntry], cols : int, rows: int,selected_bg : str = None,
                   selected_index=0):
+        super().__init__()
         self.display : Display = display
         self.controller : Controller = controller
         self.device : Device = device

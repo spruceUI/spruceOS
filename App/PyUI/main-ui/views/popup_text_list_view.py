@@ -1,4 +1,5 @@
 
+import time
 from typing import List
 from controller.controller import Controller
 from devices.device import Device
@@ -17,12 +18,13 @@ class PopupTextListView(TextListView):
                         controller=controller,
                          device=device,
                          theme=theme,
-                         top_bar_text="",
+                         top_bar_text=display.get_current_top_bar_title(),
                          options=options,
                          selected_index=selected_index,
                          show_icons=show_icons,
                          image_render_mode=image_render_mode,
-                         selected_bg=selected_bg)
+                         selected_bg=selected_bg,
+                         usable_height=int(display.get_image_dimensions(theme.menu_popup_bg_large)[1]))
 
         self.display : Display= display
         self.controller : Controller = controller
@@ -31,13 +33,23 @@ class PopupTextListView(TextListView):
         self.clear_display_each_render_cycle = False
         self.include_index_text = False
 
-        self.starting_x_offset = device.screen_width//4 + 20 #TODO get 20 from somewhere
-        self.base_y_offset = device.screen_height//4
-        self.device.screen_width//4
-        self.display.render_box(
-            color=(0,0,0), 
-            x=device.screen_width//4, 
-            y=device.screen_height//4, 
-            w=device.screen_width//4 * 2, 
-            h=device.screen_height//4 * 2)
 
+        self.view_x = int(theme.pop_menu_x_offset * device.screen_width)
+        self.view_y = int(theme.pop_menu_y_offset * device.screen_height)
+        if(theme.pop_menu_add_top_bar_height_to_y_offset):
+            self.view_y += display.get_top_bar_height()
+
+        self.starting_x_offset = self.view_x + self.theme.pop_menu_text_padding
+        self.base_y_offset = self.view_y
+        self.device.screen_width//4
+        self.display.render_image(
+            image_path=self.theme.menu_popup_bg_large,
+            x=self.view_x,
+            y=self.view_y,
+            render_mode=RenderMode.TOP_LEFT_ALIGNED
+        )
+        self.display.present()
+        self.display.lock_current_image_as_bg()
+
+    def view_finished(self):
+        self.display.unlock_current_image_as_bg()
