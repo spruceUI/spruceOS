@@ -67,23 +67,17 @@ get_bitpal_xp() { jq -r '.bitpal.xp' "$BITPAL_JSON"; }
 get_bitpal_xp_next() { jq -r '.bitpal.xp_next' "$BITPAL_JSON"; }
 get_bitpal_mood() { jq -r '.bitpal.mood' "$BITPAL_JSON"; }
 
+
+
 ##### SET BITPAL STATS #####
 
-set_bitpal_name() {
-    jq --arg val "$1" '.bitpal.name = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
-}
-set_bitpal_level() {
-    jq --argjson val "$1" '.bitpal.level = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
-}
-set_bitpal_xp() {
-    jq --argjson val "$1" '.bitpal.xp = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
-}
-set_bitpal_xp_next() {
-    jq --argjson val "$1" '.bitpal.xp_next = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
-}
-set_bitpal_mood() {
-    jq --arg val "$1" '.bitpal.mood = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"
-}
+set_bitpal_name() { jq --arg val "$1" '.bitpal.name = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"; }
+set_bitpal_level() { jq --argjson val "$1" '.bitpal.level = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"; }
+set_bitpal_xp() { jq --argjson val "$1" '.bitpal.xp = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"; }
+set_bitpal_xp_next() { jq --argjson val "$1" '.bitpal.xp_next = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"; }
+set_bitpal_mood() { jq --arg val "$1" '.bitpal.mood = $val' "$BITPAL_JSON" > "$BITPAL_JSON.tmp" && mv "$BITPAL_JSON.tmp" "$BITPAL_JSON"; }
+
+
 
 ##### GET MISSION STATS #####
 
@@ -98,6 +92,26 @@ get_mission_game() { jq -r --arg mission_num "$1" '.missions[$mission_num].game'
 get_mission_console() { jq -r --arg mission_num "$1" '.missions[$mission_num].console' "$MISSION_JSON"; }
 get_mission_duration() { jq -r --arg mission_num "$1" '.missions[$mission_num].duration' "$MISSION_JSON"; }
 get_mission_xp_reward() { jq -r --arg mission_num "$1" '.missions[$mission_num].xp_reward' "$MISSION_JSON"; }
+get_mission_startdate() { jq -r --arg mission_num "$1" '.missions[$mission_num].startdate' "$MISSION_JSON"; }
+get_mission_enddate() { jq -r --arg mission_num "$1" '.missions[$mission_num].enddate' "$MISSION_JSON"; }
+get_mission_time_spent() { jq -r --arg mission_num "$1" '.missions[$mission_num].time_spent' "$MISSION_JSON"; }
+
+
+
+##### SET MISSION STATS #####
+
+# these take arg 1 as the index (1-5) of the mission, and arg 2 as the value to be passed into that field.
+set_mission_type() { jq --arg idx "$1" --arg val "$2" '.missions[$idx].type = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_display_text() { jq --arg idx "$1" --arg val "$2" '.missions[$idx].display_text = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_rompath() { jq --arg idx "$1" --arg val "$2" '.missions[$idx].rompath = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_game() { jq --arg idx "$1" --arg val "$2" '.missions[$idx].game = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_console() { jq --arg idx "$1" --arg val "$2" '.missions[$idx].console = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_duration() { jq --arg idx "$1" --argjson val "$2" '.missions[$idx].duration = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_xp_reward() { jq --arg idx "$1" --argjson val "$2" '.missions[$idx].xp_reward = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_startdate() { jq --arg idx "$1" --argjson val "$2" '.missions[$idx].startdate = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_enddate() { jq --arg idx "$1" --argjson val "$2" '.missions[$idx].enddate = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+set_mission_time_spent() { jq --arg idx "$1" --argjson val "$2" '.missions[$idx].time_spent = $val' "$MISSION_JSON" > tmp && mv tmp "$MISSION_JSON"; }
+
 
 
 ##### MOOD-RELATED FUNCTIONS #####
@@ -144,8 +158,7 @@ set_random_negative_mood() {
 }
 
 
-
-##### OTHER RANDOMNESS FUNCTIONS #####
+##### RANDOM GAME CHOICE #####
 
 get_random_system() {
 
@@ -215,6 +228,7 @@ get_random_game() {
     random_rom=$(echo -e "$roms_list" | sed -n "$((RANDOM % count + 1))p")
     echo "$random_rom"
 }
+
 
 ##### MISSION MANAGEMENT #####
 
@@ -393,13 +407,13 @@ construct_individual_mission_menu() {
 display_mission_details() {
     mission="$1"
 
-    face=$(get_face)
-    xp_reward="$(jq -r ".missions[\"mission\"].xp_reward" "$MISSION_JSON")"
-    display_text="$(jq -r ".missions[\"$mission\"].display_text" "$MISSION_JSON")"
+    face="$(get_face)"
+    xp_reward="$(get_mission_xp_reward "$mission")"
+    display_text="$(get_mission_display_text "$mission")"
 
-    duration="$(jq -r ".missions[\"$mission\"].duration" "$MISSION_JSON")"
+    duration="$(get_mission_duration "$mission")"
     duration_seconds=$((duration * 60))
-    time_spent_seconds_total="$(jq -r ".missions[\"$mission\"].time_spent" "$MISSION_JSON")"
+    time_spent_seconds_total="$(get_mission_time_spent "$mission")"
     time_spent_seconds_display=$((time_spent_seconds_total % 60))
     time_spent_minutes_total=$((time_spent_seconds_total / 60))
     time_spent_minutes_display=$((time_spent_minutes_total % 60))

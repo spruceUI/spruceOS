@@ -53,6 +53,7 @@ case "$1" in
         accept_mission "$selected_mission"
         display -p 50 -d 2 -s 36 -t "Mission accepted!"
         display_mission_details "$2"
+        construct_active_missions_menu
         call_menu "BitPal - Current Missions" "active_missions.json" || call_menu "BitPal - Main" "main.json"
         ;;
 
@@ -67,9 +68,9 @@ case "$1" in
     # be 1,2,3,4,5 passed from manage_mission above
     view_mission_details)
         display_mission_details "$2"
+        construct_active_missions_menu
         call_menu "BitPal - Current Missions" "active_missions.json" || call_menu "BitPal - Main" "main.json"
         ;;
-
 
     queue_game)
         launch_mission "$2"
