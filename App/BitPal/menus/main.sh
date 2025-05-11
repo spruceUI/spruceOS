@@ -29,7 +29,7 @@ case "$1" in
             construct_new_mission_menu
             call_menu "BitPal - New Mission" "new_mission.json"
         fi
-        ;
+        ;;
 
     # Main menu item 3
     view_active)
