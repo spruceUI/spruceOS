@@ -29,6 +29,8 @@ class PopupMenu(TextListView):
         self.device : Device= device
         self.theme : Theme= theme
         self.clear_display_each_render_cycle = False
+        self.include_index_text = False
+
         self.starting_x_offset = device.screen_width//4 + 20 #TODO get 20 from somewhere
         self.base_y_offset = device.screen_height//4
         self.device.screen_width//4
