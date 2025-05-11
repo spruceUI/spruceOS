@@ -127,6 +127,10 @@ class Theme():
         return os.path.join(self.path,"skin","bg-list-l.png")
 
     @property
+    def menu_popup_bg_large(self):
+        return os.path.join(self.path,"skin","bg-pop-menu-4.png")
+
+    @property
     def keyboard_bg(self):
         return os.path.join(self.path,"skin","bg-grid-s.png")
 
