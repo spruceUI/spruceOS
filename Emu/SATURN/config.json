@@ -1,8 +1,8 @@
 {
 "label": "Saturn",
 "icontop": "",
-"icon": "",
-"iconsel": "",
+"icon": "/mnt/SDCARD/Themes/SPRUCE/icons/saturn.png",
+"iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/saturn.png",
 "background": "",
 "themecolor": "E4007F",
 "effectsh": "effect.sh",
