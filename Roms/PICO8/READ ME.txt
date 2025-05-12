@@ -1,6 +1,4 @@
-You need to place your Pico-8 dat and dyn files in the bin folder of the Pico Emu for Pico-8 games to launch using native Pico-8.
-
-/Emu/PICO8/bin/
+You need to place your Pico8.dat, pico8_64 and pico8_dyn files in the BIOS folder for Pico-8 games to launch using native Pico-8.
 
 We strongly encourage you to buy and support Pico-8. https://www.lexaloffle.com/pico-8.php?#getpico8
 
