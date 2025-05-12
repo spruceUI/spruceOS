@@ -6,6 +6,8 @@ import threading
 import time
 from typing import List, Set
 
+from utils.logger import PyUiLogger
+
 @dataclass
 class BluetoothDevice:
     address: str
@@ -43,7 +45,7 @@ class BluetoothScanner:
         time.sleep(1)
         send('scan on')
 
-        print(f"Scanning for {duration} seconds...")
+        PyUiLogger.get_logger().info(f"Scanning for {duration} seconds...")
         start_time = time.time()
         seen_devices = {}
 
@@ -53,7 +55,7 @@ class BluetoothScanner:
                 rlist, _, _ = select.select([process.stdout], [], [], 0.1)
                 if rlist:
                     line = process.stdout.readline().strip()
-                    print(f"{line}")  # Debug line read
+                    PyUiLogger.get_logger().info(f"{line}")  # Debug line read
                     line = self.remove_ansi_escape_sequences(line)  # Remove escape sequences
                     if line.startswith('[NEW] Device '):
                         parts = line.split(' ', 3)
@@ -63,9 +65,9 @@ class BluetoothScanner:
                             #print(f"Parsed addr: {addr}, name: {name}")  # Debug parsed output
                             if addr not in seen_devices:
                                 seen_devices[addr] = BluetoothDevice(address=addr, name=name)
-                                print(f"Found: {seen_devices[addr]}")
+                                PyUiLogger.get_logger().error(f"Found: {seen_devices[addr]}")
                             else:
-                                print(f"Device {addr} already seen.")  # Debug already seen device
+                                PyUiLogger.get_logger().error(f"Device {addr} already seen.")  # Debug already seen device
         finally:
             send('scan off')
             send('exit')
@@ -74,12 +76,12 @@ class BluetoothScanner:
         return list(seen_devices.values())
     
     def scan_devices(self) -> List[BluetoothDevice]:
-        print("Starting Bluetooth Scan")
+        PyUiLogger.get_logger().info("Starting Bluetooth Scan")
         return self.scan_once()
     
                 
     def connect_to_device(self, device_address):
-        print(f"Attempting to connect to {device_address}")
+        PyUiLogger.get_logger().info(f"Attempting to connect to {device_address}")
 
         try:
             process = subprocess.Popen(
@@ -98,7 +100,7 @@ class BluetoothScanner:
                     line = process.stdout.readline()
                     if not line:
                         break
-                    print(f"[BTCTL] {line.strip()}")
+                    PyUiLogger.get_logger().info(f"[BTCTL] {line.strip()}")
                     output_lines.append(line)
                     if "Connection successful" in line or "Failed to connect" in line or "Authentication Failed" in line:
                         break
@@ -130,9 +132,9 @@ class BluetoothScanner:
             # Check if connection succeeded
             all_output = ''.join(output_lines)
             if "Connection successful" in all_output:
-                print(f"Successfully connected to {device_address}")
+                PyUiLogger.get_logger().info(f"Successfully connected to {device_address}")
             else:
-                print(f"Failed to connect to {device_address}. Output:\n{all_output}")
+                PyUiLogger.get_logger().info(f"Failed to connect to {device_address}. Output:\n{all_output}")
 
         except Exception as e:
-            print(f"Error while connecting to the device: {str(e)}")
+            PyUiLogger.get_logger().error(f"Error while connecting to the device: {str(e)}")

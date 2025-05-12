@@ -69,12 +69,10 @@ class ListView(View):
         self.selected = min(len(self.options)-1, self.selected)
         
         while(self.selected < self.current_top):
-            #print(f"    Selected is higher than current_top, moving all down by 1")
             self.current_top -= 1
             self.current_bottom -=1
 
         while(self.selected >= self.current_bottom):
-            #print(f"    Selected is lower than current_bottom, moving all down by 1")
             self.current_top += 1
             self.current_bottom +=1
 

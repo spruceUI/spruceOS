@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from typing import List, Set
@@ -23,16 +24,16 @@ class WiFiScanner:
         self.max_idle_scans = max_idle_scans
 
     def scan_once(self, device) -> List[WiFiNetwork]:
-        result = ProcessRunner.run_and_print(["wpa_cli", "-i", self.interface, "scan"])
+        result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         if "Failed to connect to" in result.stderr:
-            PyUiLogger.error("wlan0 seems broken, restarting and retrying")
+            PyUiLogger.get_logger().error("wlan0 seems broken, restarting and retrying")
             device.wifi_error_detected()
             time.sleep(15)
-            ProcessRunner.run_and_print(["wpa_cli", "-i", self.interface, "scan"])
+            ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         
         time.sleep(self.delay)
 
-        result = ProcessRunner.run_and_print(["wpa_cli", "-i", self.interface, "scan_results"])
+        result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan_results"])
 
         lines = result.stdout.strip().splitlines()
         networks = []
@@ -53,7 +54,7 @@ class WiFiScanner:
         return networks
 
     def scan_networks(self, device) -> List[WiFiNetwork]:
-        print("Starting WiFi Scan")
+        PyUiLogger.get_logger().info("Starting WiFi Scan")
         known_ssids: Set[str] = set()
         known_bssids: Set[str] = set()
         all_networks: List[WiFiNetwork] = []
@@ -63,7 +64,7 @@ class WiFiScanner:
         scan_count = 0
         while idle_count < self.max_idle_scans:
             scan_count+=1
-            print(f"    Scan # {scan_count}")
+            PyUiLogger.get_logger().info(f"    Scan # {scan_count}")
             new_networks = self.scan_once(device)
             added = False
 
@@ -86,7 +87,7 @@ class WiFiScanner:
         freq = None
         try:
             
-            result = ProcessRunner.run_and_print(["wpa_cli", "status"])
+            result = ProcessRunner.run(["wpa_cli", "status"])
             for line in result.stdout.splitlines():
                 if line.startswith("ssid="):
                     ssid = line.split("=", 1)[1]
@@ -94,15 +95,15 @@ class WiFiScanner:
                     freq = int(line.split("=", 1)[1])
         
         except subprocess.CalledProcessError as e:
-            print(f"Failed to get Wi-Fi details: {e}")        
+            PyUiLogger.get_logger().error(f"Failed to get Wi-Fi details: {e}")        
 
         return ssid, freq
     
     def reload_wpa_supplicant_config(self):
         try:
             # Trigger the reconfiguration to reload wpa_supplicant.conf
-            ProcessRunner.run_and_print(["wpa_cli", "reconfigure"])
-            print("wpa_supplicant.conf reloaded successfully.")
+            ProcessRunner.run(["wpa_cli", "reconfigure"])
+            PyUiLogger.get_logger().info("wpa_supplicant.conf reloaded successfully.")
         except subprocess.CalledProcessError as e:
-            print(f"Error reloading wpa_supplicant.conf: {e}")
+            PyUiLogger.get_logger().error(f"Error reloading wpa_supplicant.conf: {e}")
             

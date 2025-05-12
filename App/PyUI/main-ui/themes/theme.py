@@ -4,6 +4,8 @@ import os
 from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
+from display.render_mode import RenderMode
+from utils.logger import PyUiLogger
 from views.view_type import ViewType
 
 class Theme():
@@ -31,7 +33,7 @@ class Theme():
             setattr(self, key, value)
 
         description = getattr(self, "description", "UNKNOWN")
-        print(f"Loaded Theme : {description}")
+        PyUiLogger.get_logger().info(f"Loaded Theme : {description}")
      
 
     @property
@@ -69,18 +71,6 @@ class Theme():
     @property
     def settings_selected(self):
         return os.path.join(self.path,"skin","ic-setting-f.png")
-
-    @property
-    def rom_image_width(self):
-        return 294 #TODO make percentage of device
-    
-    @property
-    def rom_image_height(self):
-        if(self.show_bottom_bar) :
-           return 300  #TODO make percentage of device
-        else:
-            return 340  #TODO make percentage of device
-
 
     @property
     def get_title_bar_bg(self):
@@ -235,7 +225,7 @@ class Theme():
             else:
                 return "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
         except Exception as e:
-            print(f"get_font error occurred: {e}")
+            PyUiLogger.get_logger().error(f"get_font error occurred: {e}")
             return "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 
     
@@ -267,7 +257,7 @@ class Theme():
                 case _:
                     return self.list["font"]
         except Exception as e:
-            print(f"get_font_size error occurred: {e}")
+            PyUiLogger.get_logger().error(f"get_font_size error occurred: {e}")
             return 20
 
     def text_color(self, font_purpose : FontPurpose):
@@ -298,7 +288,7 @@ class Theme():
                 case _:
                     return self.hex_to_color(self.grid["color"])
         except Exception as e:
-            print(f"text_color error occurred: {e}")
+            PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
             return self.hex_to_color("#808080")
       
     def text_color_selected(self, font_purpose : FontPurpose):
@@ -325,7 +315,7 @@ class Theme():
                 case _:
                     return self.hex_to_color(self.grid["selectedcolor"])
         except Exception as e:
-            print(f"text_color error occurred: {e}")
+            PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
             return self.text_color(font_purpose)
 
     def hex_to_color(self,hex_string):
@@ -403,3 +393,18 @@ class Theme():
     @property
     def popup_menu_rows(self):
         return getattr(self, "popupMenuRows", 1)
+    
+    @property
+    def rom_image_width(self):
+        return 294 #TODO make percentage of device
+
+    @property
+    def rom_image_height(self):
+        if(self.show_bottom_bar) :
+           return 300  #TODO make percentage of device
+        else:
+            return 340  #TODO make percentage of device
+
+    @property
+    def text_and_image_list_view_mode(self):
+        return getattr(self, "textAndImageListViewMode", "TEXT_RIGHT_IMAGE_LEFT")

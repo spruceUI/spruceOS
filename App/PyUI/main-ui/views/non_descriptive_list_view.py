@@ -36,7 +36,6 @@ class NonDescriptiveListView(ListView):
         self.line_height = self._calculate_line_height()   
         if(usable_height is None):
             usable_height = self.display.get_usable_screen_height()
-        print(f"usable_height = {usable_height}")
         self.max_rows = usable_height // self.line_height
         self.current_bottom = min(self.max_rows,len(options))
 

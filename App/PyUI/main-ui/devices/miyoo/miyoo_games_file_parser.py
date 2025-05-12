@@ -2,6 +2,7 @@ import json
 import os
 
 from games.utils.game_entry import GameEntry
+from utils.logger import PyUiLogger
 
 class MiyooGamesFileParser:
 
@@ -33,7 +34,7 @@ class MiyooGamesFileParser:
                                 )
                                 entries.append(entry)
                         except (json.JSONDecodeError, UnicodeDecodeError) as e:
-                            print(f"Error parsing line: {line}\n{e}")
+                            PyUiLogger.get_logger().error(f"Error parsing line: {line}\n{e}")
         except (FileNotFoundError, IOError) as e:
-            print(f"Could not read favorites file: {e}")
+            PyUiLogger.get_logger().error(f"Could not read favorites file: {e}")
         return entries

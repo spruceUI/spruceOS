@@ -8,6 +8,7 @@ from games.utils.game_system import GameSystem
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
@@ -47,9 +48,9 @@ class GameSystemSelectMenuPopup:
                         
 
         while (popup_selection := popup_view.get_selection()):
-            print(f"Waiting for input")
+            PyUiLogger.get_logger().info(f"Waiting for input")
             if(popup_selection.get_input() is not None):
-                print(f"Received {popup_selection.get_input()}")
+                PyUiLogger.get_logger().info(f"Received {popup_selection.get_input()}")
                 break
         
         if(popup_selection.get_input() is not None):

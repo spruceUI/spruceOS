@@ -20,7 +20,7 @@ config.load()
 
 selected_theme = os.path.join(config["themeDir"],config["theme"])
                               
-PyUiLogger.info(f"{selected_theme}")
+PyUiLogger.get_logger().info(f"{selected_theme}")
 
 theme = Theme(os.path.join(config["themeDir"],config["theme"]))
 

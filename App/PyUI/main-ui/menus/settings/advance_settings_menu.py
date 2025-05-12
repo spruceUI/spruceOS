@@ -9,6 +9,7 @@ from menus.settings import settings_menu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
@@ -52,7 +53,7 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
     
 
     def show_on_screen_keyboard(self, input):
-        print(self.on_screen_keyboard.get_input("On Screen Keyboard Test"))
+        PyUiLogger.get_logger().info(self.on_screen_keyboard.get_input("On Screen Keyboard Test"))
 
     def change_hold_delay(self, input):
         current_delay = self.config.get_turbo_delay_ms() * 1000

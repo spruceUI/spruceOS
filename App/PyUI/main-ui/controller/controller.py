@@ -5,6 +5,7 @@ import ctypes
 from ctypes import byref
 import time
 
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class Controller:
@@ -23,10 +24,10 @@ class Controller:
     def _init_controller(self):
         #Force new connection to be processed byt SDL by polling it off the queue
         self.clear_input_queue()
-        print("Checking for a controller")
+        PyUiLogger.get_logger().info("Checking for a controller")
         count = sdl2.SDL_NumJoysticks()
         for index in range(count):
-            print(f"Checking index {index}")
+            PyUiLogger.get_logger().info(f"Checking index {index}")
             if sdl2.SDL_IsGameController(index):
                 controller = sdl2.SDL_GameControllerOpen(index)
                 if controller:
@@ -34,8 +35,8 @@ class Controller:
                     self.index = index
                     self.name = sdl2.SDL_GameControllerName(controller).decode()
                     self.mapping = sdl2.SDL_GameControllerMapping(controller).decode()
-                    print(f"Opened GameController {index}: {self.name}")
-                    print(f" {self.mapping}")
+                    PyUiLogger.get_logger().info(f"Opened GameController {index}: {self.name}")
+                    PyUiLogger.get_logger().info(f" {self.mapping}")
 
     def new_bt_device_paired(self):
         self._init_controller()
@@ -65,7 +66,6 @@ class Controller:
         start_time = time.time()
 
         # Optional: delay if input is still being held from a prior press
-        print(f"Hold delay is {self.hold_delay}")
         while self.still_held_down() and (time.time() - start_time < self.hold_delay):
             sdl2.SDL_PumpEvents()
             time.sleep(0.005)  # Prevent tight CPU loop
@@ -88,7 +88,7 @@ class Controller:
                 if event_available and self._last_event().type == sdl2.SDL_CONTROLLERBUTTONDOWN:
                     break
                 elif(event_available and self._last_event().type == sdl2.SDL_CONTROLLERDEVICEADDED):
-                    print("New controller detected")
+                    PyUiLogger.get_logger().info("New controller detected")
                     self._init_controller()
         else:
             self.hold_delay = 0.0
