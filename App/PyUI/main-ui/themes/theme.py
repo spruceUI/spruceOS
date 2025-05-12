@@ -408,3 +408,7 @@ class Theme():
     @property
     def text_and_image_list_view_mode(self):
         return getattr(self, "textAndImageListViewMode", "TEXT_RIGHT_IMAGE_LEFT")
+    
+    @property
+    def scroll_rom_selection_text(self):
+        return getattr(self, "scrollRomSelectionText", True)

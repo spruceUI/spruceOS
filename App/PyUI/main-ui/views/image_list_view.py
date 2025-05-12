@@ -1,3 +1,4 @@
+import time
 from typing import List
 from controller.controller_inputs import ControllerInput
 from display.display import Display
@@ -8,6 +9,7 @@ import sdl2
 from devices.device import Device
 from controller.controller import Controller
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
@@ -37,11 +39,25 @@ class ImageListView(NonDescriptiveListView):
         self.img_width = img_width
         self.img_height = img_height
         self.text_to_image_relationship = text_to_image_relationship
+        self.prev_index = -1
+        self.scroll_text_amount = 0
+        self.selected_same_entry_time = time.time()
 
+    def rotate_string(self,text, amt):
+        if(self.theme.scroll_rom_selection_text):
+            if not text:
+                return text
+            text = text + " " # space so it doesnt look weird
+            amt = amt % len(text)  # Ensure n is within the string length
+            return text[amt:] + text[:amt]
+        else:
+            return text
+    
     def _render_text(self, visible_options):
         for visible_index, (imageTextPair) in enumerate(visible_options):
             offset_text_for_image = False
             actual_index = self.current_top + visible_index
+            
             if(TextToImageRelationship.LEFT_OF_IMAGE == self.text_to_image_relationship):
                 x_value = 0 
                 y_value = self.base_y_offset + self.line_height//2
@@ -69,21 +85,30 @@ class ImageListView(NonDescriptiveListView):
             text_x_value = x_value + text_pad
 
             render_mode=RenderMode.MIDDLE_LEFT_ALIGNED
+            scroll_amt = 0
 
             if actual_index == self.selected:
                 color = self.theme.text_color_selected(FontPurpose.LIST)
                 if(self.selected_bg is not None):
                     self.display.render_image(self.selected_bg,x_value, y_value, render_mode)
+                if(self.prev_index == self.selected):
+                    scroll_amt = self.scroll_text_amount
+                    if(time.time() - self.selected_same_entry_time > 1):
+                        self.scroll_text_amount += 1
+                else:
+                    self.scroll_text_amount = 0
+                    self.selected_same_entry_time = time.time()
             else:
                 color = self.theme.text_color(FontPurpose.LIST)
 
             if(self.show_icons and imageTextPair.get_icon() is not None):
                 icon_width, icon_height = self.display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
                 text_x_value += icon_width
-            else:
-                pass
-            self.display.render_text(imageTextPair.get_primary_text(), text_x_value, y_value, color, FontPurpose.LIST,
+
+
+            self.display.render_text(self.rotate_string(imageTextPair.get_primary_text(),scroll_amt), text_x_value, y_value, color, FontPurpose.LIST,
                                     render_mode)
+        self.prev_index = self.selected
 
     def is_y_coord_in_img_box(self, y):
         img_y_min = self.img_offset_y

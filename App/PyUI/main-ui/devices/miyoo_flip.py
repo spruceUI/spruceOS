@@ -141,7 +141,7 @@ class MiyooFlip(Device):
     
     @property
     def input_timeout_default(self):
-        return 2 # 2 seconds
+        return 0.125 # 0.125 seconds
     
     
     def _map_system_lumination_to_miyoo_scale(self, true_lumination):
