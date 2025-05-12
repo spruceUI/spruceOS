@@ -3,12 +3,12 @@ import json
 class SystemConfig:
     def __init__(self, filepath):
         self.filepath = filepath
-        self.config = self.reload_config()
-
+        self.reload_config()
+        
     def reload_config(self):
         try:
             with open(self.filepath, 'r') as f:
-                return json.load(f)
+                self.config = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to load config: {e}")
 
