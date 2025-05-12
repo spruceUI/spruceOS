@@ -7,7 +7,7 @@ from display.render_mode import RenderMode
 from menus.app.app_menu import AppMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
-from menus.popup.main_menu_popup import MainMenuPopup
+from menus.main_menu_popup import MainMenuPopup
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from views.popup_text_list_view import PopupTextListView
 from menus.games.recents_menu import RecentsMenu

@@ -7,7 +7,7 @@ from display.display import Display
 from games.utils.game_system_utils import GameSystemUtils
 from menus.games.game_select_menu import GameSelectMenu
 from menus.games.game_system_config import GameSystemConfig
-from menus.popup.game_system_select_menu_popup import GameSystemSelectMenuPopup
+from menus.games.game_system_select_menu_popup import GameSystemSelectMenuPopup
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
