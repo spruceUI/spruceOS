@@ -9,6 +9,7 @@ from display.font_purpose import FontPurpose
 from display.on_screen_keyboard import OnScreenKeyboard
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -38,7 +39,7 @@ class BluetoothMenu:
         self.controller.new_bt_device_paired()
 
     def scan_for_devices(self):
-        print(f"scan_for_devices start")
+        PyUiLogger.get_logger().info(f"scan_for_devices start")
         self.display.clear("Bluetooth")
         self.display.render_text(
             text = "Scanning for Bluetooth Devices (~10s)",
@@ -50,7 +51,7 @@ class BluetoothMenu:
         )
         self.display.present()
         devices = self.bluetooth_scanner.scan_devices()
-        print(f"scan_for_devices end")
+        PyUiLogger.get_logger().info(f"scan_for_devices end")
         return devices
 
     def show_bluetooth_menu(self):
@@ -58,7 +59,7 @@ class BluetoothMenu:
         self.should_scan_for_bluetooth = True
         devices = []
         while(selected is not None):
-            print(f"Waiting for bt selection")
+            PyUiLogger.get_logger().info(f"Waiting for bt selection")
             bluetooth_enabled = self.device.is_bluetooth_enabled()
             option_list = []
             option_list.append(
@@ -104,7 +105,7 @@ class BluetoothMenu:
             selected = list_view.get_selection(accepted_inputs)
 
             if(selected.get_input() in accepted_inputs):
-                print(f"bluetooth_enabled={bluetooth_enabled}")
+                PyUiLogger.get_logger().info(f"bluetooth_enabled={bluetooth_enabled}")
                 if(ControllerInput.X == selected.get_input() and bluetooth_enabled):
                     self.should_scan_for_bluetooth = True
                 elif(ControllerInput.A == selected.get_input() 

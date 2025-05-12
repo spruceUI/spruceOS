@@ -9,6 +9,7 @@ from menus.games.game_select_menu import GameSelectMenu
 from menus.games.game_system_config import GameSystemConfig
 from menus.games.game_system_select_menu_popup import GameSystemSelectMenuPopup
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
 from views.selection import Selection
@@ -75,7 +76,6 @@ class GameSystemSelectMenu:
         while(not exit):
             selected = view.get_selection([ControllerInput.A, ControllerInput.MENU])
             if(ControllerInput.A == selected.get_input()):
-                print(f"selected.get_selection() = {selected.get_selection()}")
                 self.rom_select_menu.run_rom_selection(selected.get_selection().get_value())
             elif(ControllerInput.MENU == selected.get_input()):
                 self.game_system_select_menu_popup.run_popup_menu_selection(selected.get_selection().get_value())

@@ -8,6 +8,7 @@ from display.font_purpose import FontPurpose
 from display.on_screen_keyboard import OnScreenKeyboard
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -46,13 +47,13 @@ network={{
             # Open the file in write mode and write the config
             with open(file_path, "w") as f:
                 f.write(config.strip())
-            print(f"Configuration written to {file_path}")
+            PyUiLogger.get_logger().info(f"Configuration written to {file_path}")
         except IOError as e:
-            print(f"Error writing to {file_path}: {e}")
+            PyUiLogger.get_logger().error(f"Error writing to {file_path}: {e}")
 
 
     def switch_network(self, net: WiFiNetwork):
-        print(f"Selected {net.ssid}!")
+        PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password):
             password = self.on_screen_keyboard.get_input("WiFi Password")
             self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")

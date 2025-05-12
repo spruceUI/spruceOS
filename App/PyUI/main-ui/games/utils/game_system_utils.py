@@ -3,6 +3,7 @@
 import os
 from games.utils.game_system import GameSystem 
 from menus.games.game_system_config import GameSystemConfig
+from utils.logger import PyUiLogger
 
 class GameSystemUtils:
     def __init__(self):
@@ -30,7 +31,6 @@ class GameSystemUtils:
             if(game_system_config is not None):
                 display_name = game_system_config.get_label()
                 active_systems.append(GameSystem(folder,display_name, game_system_config))
-                print(f"Added system {folder} w/ display name {display_name}")
 
         # Step 4: Sort the list alphabetically
         active_systems.sort(key=lambda system: system.display_name)

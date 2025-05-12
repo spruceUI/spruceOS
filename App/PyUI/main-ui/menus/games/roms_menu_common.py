@@ -9,6 +9,7 @@ from display.render_mode import RenderMode
 from menus.games.game_config_menu import GameConfigMenu
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.image_list_view import ImageListView
 from views.selection import Selection
@@ -41,7 +42,7 @@ class RomsMenuCommon(ABC):
             roms_index = parts.index("Roms")
             return parts[roms_index + 1]
         except (ValueError, IndexError) as e:
-            print(f"Error extracting subdirectory after 'Roms' for {rom_path}: {e}")
+            PyUiLogger.get_logger().error(f"Error extracting subdirectory after 'Roms' for {rom_path}: {e}")
         return None  # "Roms" not found or no subdirectory after it
     
     @abstractmethod

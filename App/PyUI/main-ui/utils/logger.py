@@ -35,7 +35,7 @@ class PyUiLogger:
 
         if not logger.handlers:
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s"
             )
 
             # Console handler
@@ -84,23 +84,3 @@ class PyUiLogger:
     def get_logger(cls):
         return cls._logger
     
-    
-    @classmethod
-    def info(cls, msg):
-        return cls._logger.info(msg)
-    
-    
-    @classmethod
-    def error(cls, msg):
-        return cls._logger.error(msg)
-    
-    
-    @classmethod
-    def debug(cls, msg):
-        return cls._logger.debug(msg)
-    
-    
-    @classmethod
-    def warning(cls, msg):
-        return cls._logger.warning(msg)
-

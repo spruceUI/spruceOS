@@ -11,6 +11,7 @@ import sdl2.ext
 import sdl2.sdlttf
 from themes.theme import Theme
 from devices.device import Device
+from utils.logger import PyUiLogger
 
 class Display:
     def __init__(self, theme: Theme, device: Device):
@@ -24,9 +25,9 @@ class Display:
                                         sdl2.SDL_PIXELFORMAT_ARGB8888,
                                         sdl2.SDL_TEXTUREACCESS_TARGET,
                                         self.device.screen_width, self.device.screen_height)
-        print(f"{sdl2.SDL_GetError()}")
+        PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         sdl2.SDL_SetRenderTarget(self.renderer.renderer, self.render_canvas)
-        print(f"{sdl2.SDL_GetError()}")
+        PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         self.bg_path = ""
         self._check_for_bg_change()
         self.top_bar = TopBar(self,device,theme)
@@ -47,11 +48,11 @@ class Display:
         sdl2.SDL_InitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
         display_mode = sdl2.SDL_DisplayMode()
         if sdl2.SDL_GetCurrentDisplayMode(0, display_mode) != 0:
-            print("Failed to get display mode, using fallback 640x480")
+            PyUiLogger.get_logger().error("Failed to get display mode, using fallback 640x480")
             width, height = self.device.screen_width(), self.device.screen_height()
         else:
             width, height = display_mode.w, display_mode.h
-            print(f"Display size: {width}x{height}")
+            PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
 
         self.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
         self.window.show()
@@ -88,18 +89,18 @@ class Display:
     def _unload_bg_texture(self):
         if hasattr(self, 'background_texture') and self.background_texture:
             sdl2.SDL_DestroyTexture(self.background_texture)
-            print("Destroying bg texture")
+            PyUiLogger.get_logger().debug("Destroying bg texture")
 
     def _load_bg_texture(self):
         self.bg_path = self.theme.background
         # Load the image into an SDL_Surface
         surface = sdl2.sdlimage.IMG_Load(self.bg_path.encode('utf-8'))
         if not surface:
-            print(f"Failed to load image: {self.bg_path}")
+            PyUiLogger.get_logger().error(f"Failed to load image: {self.bg_path}")
         self.background_texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
         if not self.background_texture:
             sdl2.SDL_FreeSurface(surface)
-            print(f"Failed to create texture from surface")
+            PyUiLogger.get_logger().error(f"Failed to create texture from surface")
 
     def _check_for_bg_change(self):
         if self.bg_path != self.theme.background:
@@ -170,7 +171,7 @@ class Display:
 
     def _log(self, msg):
         if(self.debug):
-            print(msg)
+            PyUiLogger.get_logger().info(msg)
 
     def _render_surface_texture(self, x, y, texture, surface, render_mode : RenderMode, target_width=None, target_height=None, debug=""):
         scale_factor = self.device.get_scale_factor()
@@ -213,14 +214,14 @@ class Display:
         # Render the text to a surface
         surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(self.fonts[purpose].font, text.encode('utf-8'), sdl_color)
         if not surface:
-            print(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
             return 0,0
         
         # Create a texture from the surface
         texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
         if not texture:
             sdl2.SDL_FreeSurface(surface)
-            print(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
             return 0,0
 
         return self._render_surface_texture(x, y, texture, surface, render_mode, debug=text)
@@ -232,14 +233,14 @@ class Display:
         # Load the image into an SDL_Surface
         surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
         if not surface:
-            print(f"Failed to load image: {image_path}")
+            PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
             return 0,0
 
         # Create a texture from the surface
         texture = sdl2.SDL_CreateTextureFromSurface(self.renderer.renderer, surface)
         if not texture:
             sdl2.SDL_FreeSurface(surface)
-            print(f"Failed to create texture from surface")
+            PyUiLogger.get_logger().error(f"Failed to create texture from surface")
             return 0,0
 
         sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)

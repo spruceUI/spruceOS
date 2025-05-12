@@ -1,6 +1,8 @@
 import json
 import os
 
+from utils.logger import PyUiLogger
+
 class PyUiConfig:
     def __init__(self, initial_data=None):
         self._data = initial_data or {}
@@ -17,20 +19,20 @@ class PyUiConfig:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             with open(filepath, 'w') as f:
                 json.dump(self._data, f, indent=4)
-            print(f"Settings saved to {filepath}")
+            PyUiLogger.get_logger().info(f"Settings saved to {filepath}")
         except Exception as e:
-            print(f"Failed to write settings to {filepath}: {e}")
+            PyUiLogger.get_logger().error(f"Failed to write settings to {filepath}: {e}")
 
     def _read_from_file(self, filepath):
         try:
             with open(filepath, 'r') as f:
                 self._data = json.load(f)
-                print(f"Settings loaded from {filepath}")
+                PyUiLogger.get_logger().info(f"Settings loaded from {filepath}")
         except FileNotFoundError:
-            print(f"Settings file not found: {filepath}, using defaults.")
+            PyUiLogger.get_logger().error(f"Settings file not found: {filepath}, using defaults.")
             self._data = {}
         except json.JSONDecodeError:
-            print(f"Invalid JSON in settings file: {filepath}, using defaults.")
+            PyUiLogger.get_logger().error(f"Invalid JSON in settings file: {filepath}, using defaults.")
             self._data = {}
 
     def __contains__(self, key):

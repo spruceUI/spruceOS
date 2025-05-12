@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 import subprocess
+import sys
 import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -66,9 +67,9 @@ class MiyooFlip(Device):
             )
             with conf_path.open("w") as f:
                 f.write(conf_content)
-            print("Created missing wpa_supplicant.conf.")
+            PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
         else:
-            print("wpa_supplicant.conf already exists.")
+            PyUiLogger.get_logger().info("wpa_supplicant.conf already exists.")
 
     #Untested
     @throttle.limit_refresh(10)
@@ -82,13 +83,13 @@ class MiyooFlip(Device):
             if status.lower() == 'disconnected':
                 return False
             else:
-                print(f"HDMI Connected")
+                PyUiLogger.get_logger().info(f"HDMI Connected")
                 return True
         except FileNotFoundError:
-            print("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
+            PyUiLogger.get_logger().errpr("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
             return False
         except Exception as e:
-            print(f"An error occurred: {e}")
+            PyUiLogger.get_logger().error(f"An error occurred: {e}")
             return False
 
     @property
@@ -196,15 +197,15 @@ class MiyooFlip(Device):
             f.write(str(self._map_miyoo_scale_to_system_lumination(self.system_config.lumination)))
     
     def _set_contrast_to_config(self):
-        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:contrast:"+str(self.system_config.contrast * 5)])
     
     def _set_saturation_to_config(self):
-        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:saturation:"+str(self.system_config.saturation * 5)])
 
     def _set_brightness_to_config(self):
-        ProcessRunner.run_and_print(["modetest", "-M", "rockchip", "-a", "-w", 
+        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:brightness:"+str(self.system_config.brightness * 5)])
 
 
@@ -290,12 +291,12 @@ class MiyooFlip(Device):
 
         try:
             
-            ProcessRunner.run_and_print(
+            ProcessRunner.run(
                 ["amixer", "cset", f"name='SPK Volume'", str(volume)],
                 check=True
             )
         except subprocess.CalledProcessError as e:
-            print(f"Failed to set volume: {e}")
+            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
         self.system_config.set_volume(volume // 5)
@@ -312,14 +313,13 @@ class MiyooFlip(Device):
                 text=True
             )
             match = re.search(r": values=(\d+)", output)
-            print(f"Volume is {output}")
             if match:
                 return int(match.group(1))
             else:
-                print("Volume value not found in amixer output.")
+                PyUiLogger.get_logger().info("Volume value not found in amixer output.")
                 return 0 # ???
         except subprocess.CalledProcessError as e:
-            print(f"Command failed: {e}")
+            PyUiLogger.get_logger().error(f"Command failed: {e}")
             return 0 # ???
         
     def convert_game_path_to_miyoo_path(self,original_path):
@@ -336,7 +336,7 @@ class MiyooFlip(Device):
             new_path = new_path.replace("/mnt/SDCARD/", "/media/sdcard0/")
             return new_path
         else:
-            print(f"Unable to convert {original_path} to miyoo path")
+            PyUiLogger.get_logger().error(f"Unable to convert {original_path} to miyoo path")
             return original_path
         
     def write_cmd_to_run(self, command):
@@ -349,14 +349,14 @@ class MiyooFlip(Device):
         except FileNotFoundError:
             pass  # File doesn't exist, no action needed
         except Exception as e:
-            print(f"Failed to delete file: {e}")
+            PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     def fix_sleep_sound_bug(self):
         self.system_config.reload_config()
         proper_volume = self.system_config.get_volume()
-        ProcessRunner.run_and_print(["amixer", "cset","numid=5", "0"])
+        ProcessRunner.run(["amixer", "cset","numid=5", "0"])
         time.sleep(0.2)  
-        ProcessRunner.run_and_print(["amixer", "cset","numid=5", str(proper_volume*5)])
+        ProcessRunner.run(["amixer", "cset","numid=5", str(proper_volume*5)])
 
 
     def run_game(self, file_path):
@@ -366,13 +366,13 @@ class MiyooFlip(Device):
         self.write_cmd_to_run(f'''chmod a+x "/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh";"/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh" "{miyoo_app_path}"''')
 
         self.fix_sleep_sound_bug()
-        print(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path} | {miyoo_app_path}")
+        PyUiLogger.get_logger().debug(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path} | {miyoo_app_path}")
         subprocess.run(["/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh",file_path])
 
         self.delete_cmd_to_run()
 
     def run_app(self, args, dir = None):
-        print(f"About to launch app {args}")
+        PyUiLogger.get_logger().debug(f"About to launch app {args}")
         self.fix_sleep_sound_bug()
         if(dir is not None):
             subprocess.run(args, cwd = dir)
@@ -406,7 +406,7 @@ class MiyooFlip(Device):
     def map_input(self, sdl_input):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
-            print(f"Unknown input {sdl_input}")
+            PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
         return mapping
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
@@ -414,8 +414,6 @@ class MiyooFlip(Device):
             with open("/proc/net/wireless", "r") as f:
                 output = f.read().strip().splitlines()
 
-            print("/proc/net/wireless")
-            print(f"{output}")
             if len(output) >= 3:
                 # The 3rd line contains the actual wireless stats
                 data_line = output[2]
@@ -438,16 +436,16 @@ class MiyooFlip(Device):
                 return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
         except Exception as e:
-            PyUiLogger.error(f"An error occurred {e}")
+            PyUiLogger.get_logger().error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
 
     def is_wifi_up(self):
-        result = ProcessRunner.run_and_print(["ip", "link", "show", "wlan0"])
+        result = ProcessRunner.run(["ip", "link", "show", "wlan0"], print=False)
         return "UP" in result.stdout
     
     def restart_wifi_services(self):
-        print("Restarting WiFi services")
+        PyUiLogger.get_logger().info("Restarting WiFi services")
         self.stop_wifi_services()
         self.start_wifi_services()
 
@@ -457,9 +455,10 @@ class MiyooFlip(Device):
     
     def connection_seems_up(self):
         try:
-            result = ProcessRunner.run_and_print(
+            result = ProcessRunner.run(
                 ["ping", "-c", "1", "1.1.1.1"],
-                timeout=1)
+                timeout=1,
+                print=False)
             
             return not ("Network is unreachable") in result.stderr
 
@@ -476,29 +475,25 @@ class MiyooFlip(Device):
                 if self.wifi_error or not self.is_wifi_up():
                     self.wifi_error = False
                     fail_count = 0
-                    PyUiLogger.error("Detected wlan0 disappeared, restarting wifi services")
+                    PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
                     self.restart_wifi_services()
                 else:
-                    PyUiLogger.debug("WiFi is up")
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
-                            PyUiLogger.debug("Connection seems up")
                             self.last_successful_ping_time = time.time()
                             fail_count = 0
                             restart_count = 0
                         else:
-                            PyUiLogger.error("WiFi connection looks to be down")
+                            PyUiLogger.get_logger().error("WiFi connection looks to be down")
                             fail_count+=1
                             if(fail_count > 3):
                                 if(restart_count > 5):
-                                    PyUiLogger.error("Cannot get WiFi connection so disabling WiFi")
+                                    PyUiLogger.get_logger().error("Cannot get WiFi connection so disabling WiFi")
                                     self.disable_wifi()
                                 else:
-                                    PyUiLogger.error("Going to reinitialize WiFi")
+                                    PyUiLogger.get_logger().error("Going to reinitialize WiFi")
                                     restart_count += 1
                                     self.wifi_error = True
-                    else:
-                        PyUiLogger.debug(f"{int(30 - (time.time() - self.last_successful_ping_time))}s until next connection check")
 
 
             time.sleep(10)
@@ -510,7 +505,6 @@ class MiyooFlip(Device):
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
-            print(f"WiFi [link_quality={wifi_connection_quality_info.link_quality},signal_level={wifi_connection_quality_info.signal_level},noise={wifi_connection_quality_info.noise_level}]")
             score = (
                 (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
                 (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
@@ -529,29 +523,29 @@ class MiyooFlip(Device):
             return WifiStatus.OFF
 
     def run_and_print(self, args, check = False):
-        PyUiLogger.debug(f"Executing {args}")
+        PyUiLogger.get_logger().debug(f"Executing {args}")
         result = subprocess.run(args, capture_output=True, text=True, check=check)
         if result.stdout:
-            PyUiLogger.debug(f"stdout: {result.stdout.strip()}")
+            PyUiLogger.get_logger().debug(f"stdout: {result.stdout.strip()}")
         if result.stderr:
-            PyUiLogger.error(f"stderr: {result.stderr.strip()}")
+            PyUiLogger.get_logger().error(f"stderr: {result.stderr.strip()}")
 
         return result
 
     def set_wifi_power(self, value):
-        print(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
+        PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
         with open('/sys/class/rkwifi/wifi_power', 'w') as f:
             f.write(str(value))
 
     def stop_wifi_services(self):
-        print("Stopping WiFi Services")
-        ProcessRunner.run_and_print(['killall', '-15', 'wpa_supplicant'])
+        PyUiLogger.get_logger().info("Stopping WiFi Services")
+        ProcessRunner.run(['killall', '-15', 'wpa_supplicant'])
         time.sleep(0.1)  
-        ProcessRunner.run_and_print(['killall', '-9', 'wpa_supplicant'])
+        ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
         time.sleep(0.1)  
-        ProcessRunner.run_and_print(['killall', '-15', 'udhcpc'])
+        ProcessRunner.run(['killall', '-15', 'udhcpc'])
         time.sleep(0.1)  
-        ProcessRunner.run_and_print(['killall', '-9', 'udhcpc'])
+        ProcessRunner.run(['killall', '-9', 'udhcpc'])
         time.sleep(0.1)  
         self.set_wifi_power(0)
 
@@ -575,9 +569,9 @@ class MiyooFlip(Device):
                 '-c', '/userdata/cfg/wpa_supplicant.conf'
             ])
             time.sleep(0.5)  # Wait for it to initialize
-            print("wpa_supplicant started.")
+            PyUiLogger.get_logger().info("wpa_supplicant started.")
         except Exception as e:
-            print(f"Error starting wpa_supplicant: {e}")
+            PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
 
     def start_udhcpc(self):
         try:
@@ -592,13 +586,13 @@ class MiyooFlip(Device):
                 '-i', 'wlan0'
             ])
             time.sleep(0.5)  # Wait for it to initialize
-            print("udhcpc started.")
+            PyUiLogger.get_logger().info("udhcpc started.")
         except Exception as e:
-            print(f"Error starting udhcpc: {e}")
+            PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
 
 
     def start_wifi_services(self):
-        print("Starting WiFi Services")
+        PyUiLogger.get_logger().info("Starting WiFi Services")
         self.set_wifi_power(0)
         time.sleep(1)  
         self.set_wifi_power(1)
@@ -613,8 +607,7 @@ class MiyooFlip(Device):
         self.system_config.reload_config()
         self.system_config.set_wifi(0)
         self.system_config.save_config()
-        ProcessRunner.run_and_print(["ifconfig","wlan0","down"])
-        print("Running ifconfig wlan0 down")
+        ProcessRunner.run(["ifconfig","wlan0","down"])
         self.stop_wifi_services()
         self.get_wifi_status.force_refresh()
 
@@ -622,8 +615,7 @@ class MiyooFlip(Device):
         self.system_config.reload_config()
         self.system_config.set_wifi(1)
         self.system_config.save_config()
-        ProcessRunner.run_and_print(["ifconfig","wlan0","up"])
-        print("Running ifconfig wlan0 up")
+        ProcessRunner.run(["ifconfig","wlan0","up"])
         self.start_wifi_services()
         self.get_wifi_status.force_refresh()
 
@@ -663,14 +655,14 @@ class MiyooFlip(Device):
             # Check if bluetoothd is in the process list
             return 'bluetoothd' in result.stdout
         except Exception as e:
-            print(f"Error checking bluetoothd status: {e}")
+            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
             return False
     
     
     def disable_bluetooth(self):
-        ProcessRunner.run_and_print(["killall","-15","bluetoothd"])
+        ProcessRunner.run(["killall","-15","bluetoothd"])
         time.sleep(0.1)  
-        ProcessRunner.run_and_print(["killall","-9","bluetoothd"])
+        ProcessRunner.run(["killall","-9","bluetoothd"])
 
     def enable_bluetooth(self):
         if(not self.is_bluetooth_enabled()):
