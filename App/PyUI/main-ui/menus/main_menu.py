@@ -11,7 +11,6 @@ from menus.main_menu_popup import MainMenuPopup
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from views.popup_text_list_view import PopupTextListView
 from menus.games.recents_menu import RecentsMenu
-from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.settings_menu import SettingsMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig

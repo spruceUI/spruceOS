@@ -136,7 +136,10 @@ class OnScreenKeyboard:
                     self.caps = not self.caps
                     self.shifted = False
                 elif self.controller.last_input() == ControllerInput.B:
-                    self.entered_text = self.entered_text[:-1] if self.entered_text else self.entered_text
+                    if self.entered_text:
+                        self.entered_text = self.entered_text[:-1]
+                    else:
+                        return None
                 elif self.controller.last_input() == ControllerInput.START:
                     return self.entered_text
                 elif self.controller.last_input() == ControllerInput.A:

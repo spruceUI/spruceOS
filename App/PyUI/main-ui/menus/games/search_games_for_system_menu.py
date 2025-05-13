@@ -13,12 +13,11 @@ from views.grid_or_list_entry import GridOrListEntry
 
 
 class SearchGamesForSystemMenu(RomsMenuCommon):
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, game_system : GameSystem):
+    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, game_system : GameSystem, search_str):
         super().__init__(display,controller,device,theme)
         self.rom_select_options_builder = RomSelectOptionsBuilder(device, theme)
         self.game_system = game_system
-        on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
-        self.search_str = on_screen_keyboard.get_input(f"{game_system.display_name} Search:").upper()
+        self.search_str = search_str
 
     def include_rom(self,rom_file_path):
         rom_file_name = os.path.splitext(os.path.basename(rom_file_path))[0]

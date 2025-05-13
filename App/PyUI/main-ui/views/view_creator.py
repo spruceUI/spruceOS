@@ -57,15 +57,15 @@ class ViewCreator():
                 img_height = self.theme.rom_image_height
 
                 if("TEXT_LEFT_IMAGE_RIGHT" == text_and_image_list_view_mode):
-                    img_offset_x = self.device.screen_width - 10
+                    img_offset_x = self.device.screen_width - 10 - img_width//2
                     img_offset_y = (self.device.screen_height - self.display.get_top_bar_height() + self.display.get_bottom_bar_height())//2 + self.display.get_top_bar_height() - self.display.get_bottom_bar_height()
-                    image_render = RenderMode.MIDDLE_RIGHT_ALIGNED
+                    image_render = RenderMode.MIDDLE_CENTER_ALIGNED
                     text_to_image_relationship = TextToImageRelationship.LEFT_OF_IMAGE
                     usable_height = None # auto-determine
                 elif("TEXT_RIGHT_IMAGE_LEFT" == text_and_image_list_view_mode):
-                    img_offset_x = 10
+                    img_offset_x = 10 + img_width//2
                     img_offset_y = (self.device.screen_height - self.display.get_top_bar_height() + self.display.get_bottom_bar_height())//2 + self.display.get_top_bar_height() - self.display.get_bottom_bar_height()
-                    image_render = RenderMode.MIDDLE_LEFT_ALIGNED
+                    image_render = RenderMode.MIDDLE_CENTER_ALIGNED
                     text_to_image_relationship = TextToImageRelationship.RIGHT_OF_IMAGE
                     usable_height = None  # auto-determine
                 elif("TEXT_BELOW_IMAGE" == text_and_image_list_view_mode):
@@ -83,12 +83,17 @@ class ViewCreator():
                     text_to_image_relationship = TextToImageRelationship.ABOVE_IMAGE
                     usable_height = self.get_usable_height_for_text_above_or_below_image(img_height, y_pad)
                 elif("TEXT_AROUND_LEFT_IMAGE" == text_and_image_list_view_mode):
-                    img_offset_x = 10
+                    img_offset_x = 10 + img_width//2
                     img_offset_y = (self.device.screen_height - self.display.get_top_bar_height() + self.display.get_bottom_bar_height())//2 + self.display.get_top_bar_height() - self.display.get_bottom_bar_height()
-                    image_render = RenderMode.MIDDLE_LEFT_ALIGNED
+                    image_render = RenderMode.MIDDLE_CENTER_ALIGNED
                     text_to_image_relationship = TextToImageRelationship.TEXT_AROUND_LEFT_IMAGE
                     usable_height = None  # auto-determine
-
+                elif("TEXT_AROUND_RIGHT_IMAGE" == text_and_image_list_view_mode):
+                    img_offset_x = self.device.screen_width - 10 - img_width//2
+                    img_offset_y = (self.device.screen_height - self.display.get_top_bar_height() + self.display.get_bottom_bar_height())//2 + self.display.get_top_bar_height() - self.display.get_bottom_bar_height()
+                    image_render = RenderMode.MIDDLE_CENTER_ALIGNED
+                    text_to_image_relationship = TextToImageRelationship.TEXT_AROUND_RIGHT_IMAGE
+                    usable_height = None # auto-determine
                     
                 return ImageListView(
                     display=self.display, 

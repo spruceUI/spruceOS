@@ -149,7 +149,7 @@ class Display:
             self.top_bar.render_top_bar(self.screen)
             self.bottom_bar.render_bottom_bar()
 
-    def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height, scale_factor):
+    def _calculate_scaled_width_and_height(self, orig_w, orig_h, target_width, target_height):
         # Maintain aspect ratio
         if target_width and target_height:
             scale = min(target_width / orig_w, target_height / orig_h)
@@ -167,15 +167,15 @@ class Display:
             render_w = orig_w
             render_h = orig_h
         
-        return int(render_w * scale_factor), int(render_h * scale_factor)
+        return int(render_w), int(render_h)
 
     def _log(self, msg):
         if(self.debug):
             PyUiLogger.get_logger().info(msg)
 
-    def _render_surface_texture(self, x, y, texture, surface, render_mode : RenderMode, target_width=None, target_height=None, debug=""):
-        scale_factor = self.device.get_scale_factor()
-        render_w, render_h = self._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, target_width, target_height, 1.0)
+    def _render_surface_texture(self, x, y, texture, surface, render_mode : RenderMode, scale_width=None, scale_height=None, debug="",
+                                crop_w=None, crop_h=None):
+        render_w, render_h = self._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, scale_width, scale_height)
 
         # Adjust position based on render mode
         adj_x = x
@@ -191,15 +191,34 @@ class Display:
         elif(YRenderOption.BOTTOM == render_mode.y_mode):
             adj_y = y - render_h
 
-        adj_x = int(adj_x * scale_factor)
-        adj_y = int(adj_y * scale_factor)
+        adj_x = int(adj_x)
+        adj_y = int(adj_y)
 
         # Create destination rect with adjusted position and scaled size
-        rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
-        self._log(f"Rendered {debug} at {adj_x}, {adj_y} with dimenons {render_w}x{render_h}")
+        if(crop_w is None and crop_h is None):            
+            rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
+            self._log(f"Rendered {debug} at {adj_x}, {adj_y} with dimenons {render_w}x{render_h}")
+            # Copy the texture to the renderer
+            sdl2.SDL_RenderCopy(self.renderer.renderer, texture, None, rect)
+        else:
+            if crop_w is None or crop_w > surface.contents.w:
+                crop_w = surface.contents.w
+            if crop_h is None or crop_h > surface.contents.h:
+                crop_h = surface.contents.h
 
-        # Copy the texture to the renderer
-        sdl2.SDL_RenderCopy(self.renderer.renderer, texture, None, rect)
+            # Source rectangle: crop from top-left of texture (unscaled)
+            src_rect = sdl2.SDL_Rect(0, 0, crop_w, crop_h)
+
+            # Destination rectangle: where to draw on screen, scaled
+            dst_rect = sdl2.SDL_Rect(
+                adj_x,
+                adj_y,
+                int(crop_w),
+                int(crop_h)
+            )
+
+            # Draw the cropped and scaled texture
+            sdl2.SDL_RenderCopy(self.renderer.renderer, texture, src_rect, dst_rect)
 
         # Clean up
         sdl2.SDL_DestroyTexture(texture)
@@ -207,7 +226,8 @@ class Display:
 
         return render_w, render_h
     
-    def render_text(self,text, x, y, color, purpose : FontPurpose, render_mode = RenderMode.TOP_LEFT_ALIGNED):
+    def render_text(self,text, x, y, color, purpose : FontPurpose, render_mode = RenderMode.TOP_LEFT_ALIGNED,
+                    crop_w=None, crop_h=None):
         # Create an SDL_Color
         sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
         
@@ -224,7 +244,7 @@ class Display:
             PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
             return 0,0
 
-        return self._render_surface_texture(x, y, texture, surface, render_mode, debug=text)
+        return self._render_surface_texture(x, y, texture, surface, render_mode, debug=text, crop_w=crop_w, crop_h=crop_h)
 
     def render_text_centered(self,text, x, y, color, purpose : FontPurpose):
         self.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
@@ -260,13 +280,80 @@ class Display:
     def get_line_height(self, purpose : FontPurpose):
         return self.fonts[purpose].line_height
         
+    def scale_texture_to_fit(self, src_texture: sdl2.SDL_Texture, target_width: int, target_height: int) -> sdl2.SDL_Texture:
+        # Get the original size of the texture
+        width = sdl2.c_int()
+        height = sdl2.c_int()
+        sdl2.SDL_QueryTexture(src_texture, None, None, width, height)
+
+        src_w = width.value
+        src_h = height.value
+
+        # Compute scale factor to fit while preserving aspect ratio
+        scale_w = target_width / src_w
+        scale_h = target_height / src_h
+        scale = min(scale_w, scale_h)
+
+        # Calculate scaled size
+        new_width = int(src_w * scale)
+        new_height = int(src_h * scale)
+
+        # Center the scaled image in the target canvas
+        offset_x = (target_width - new_width) // 2
+        offset_y = (target_height - new_height) // 2
+
+        # Create the target texture (canvas) to render onto
+        scaled_texture = sdl2.SDL_CreateTexture(
+            self.renderer.sdlrenderer,
+            sdl2.SDL_PIXELFORMAT_ARGB8888,
+            sdl2.SDL_TEXTUREACCESS_TARGET,
+            target_width,
+            target_height
+        )
+
+        if not scaled_texture:
+            raise RuntimeError("Failed to create scaled texture")
+
+        # Save current render target
+        old_target = sdl2.SDL_GetRenderTarget(self.renderer.sdlrenderer)
+
+        # Set blend modes (if needed)
+        sdl2.SDL_SetTextureBlendMode(src_texture, sdl2.SDL_BLENDMODE_BLEND)
+        sdl2.SDL_SetTextureBlendMode(scaled_texture, sdl2.SDL_BLENDMODE_BLEND)
+
+        # Render to the new texture
+        sdl2.SDL_SetRenderTarget(self.renderer.sdlrenderer, scaled_texture)
+
+        # Clear the canvas with transparent black
+        sdl2.SDL_SetRenderDrawColor(self.renderer.sdlrenderer, 0, 0, 0, 0)
+        sdl2.SDL_RenderClear(self.renderer.sdlrenderer)
+
+        # Destination rect for the scaled and centered texture
+        dest_rect = sdl2.SDL_Rect(offset_x, offset_y, new_width, new_height)
+
+        # Render the source into the new canvas
+        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, src_texture, None, dest_rect)
+
+        # Restore previous render target
+        sdl2.SDL_SetRenderTarget(self.renderer.sdlrenderer, old_target)
+
+        return scaled_texture
+
+        
     def present(self):
         if(self.theme.render_top_and_bottom_bar_last()):
             self.top_bar.render_top_bar(self.screen)
             self.bottom_bar.render_bottom_bar()
 
         sdl2.SDL_SetRenderTarget(self.renderer.renderer, None)
-        sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.render_canvas, None, None)
+
+        if(self.device.should_scale_screen()):
+            scaled_canvas = self.scale_texture_to_fit(self.render_canvas, self.device.output_screen_width, self.device.output_screen_height)
+            sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, scaled_canvas, None, None)
+            sdl2.SDL_DestroyTexture(scaled_canvas)  # Clean up temporary scaled texture
+        else:
+            sdl2.SDL_RenderCopy(self.renderer.sdlrenderer, self.render_canvas, None, None)
+
         sdl2.SDL_SetRenderTarget(self.renderer.renderer, self.render_canvas)
 
         self.renderer.present()
@@ -298,8 +385,8 @@ class Display:
         sdl2.SDL_FreeSurface(surface)
         return width, height
     
-    def get_text_dimensions(self, purpose):
-        text = "A"        
+    def get_text_dimensions(self, purpose, text = "A"):
+              
         sdl_color = sdl2.SDL_Color(0,0,0)
         surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(self.fonts[purpose].font, text.encode('utf-8'), sdl_color)
         if not surface:

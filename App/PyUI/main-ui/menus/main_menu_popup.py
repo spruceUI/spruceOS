@@ -4,6 +4,7 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from display.on_screen_keyboard import OnScreenKeyboard
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
@@ -97,4 +98,6 @@ class MainMenuPopup:
 
         if(ControllerInput.A == popup_selection.get_input()): 
             if("Rom Search" == popup_selection.get_selection().get_primary_text()):
-                SearchedRomsMenu(self.display,self.controller,self.device,self.theme).run_rom_selection()
+                search_txt = OnScreenKeyboard(self.display,self.controller,self.device,self.theme).get_input("Game Search:")
+                if(search_txt is not None):
+                    SearchedRomsMenu(self.display,self.controller,self.device,self.theme, search_txt.upper()).run_rom_selection()
