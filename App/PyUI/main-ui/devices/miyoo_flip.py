@@ -72,7 +72,7 @@ class MiyooFlip(Device):
             PyUiLogger.get_logger().info("wpa_supplicant.conf already exists.")
 
     #Untested
-    @throttle.limit_refresh(10)
+    @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
         try:
             # Read the HDMI status from the file
@@ -92,6 +92,9 @@ class MiyooFlip(Device):
             PyUiLogger.get_logger().error(f"An error occurred: {e}")
             return False
 
+    def should_scale_screen(self):
+        return self.is_hdmi_connected()
+
     @property
     def screen_width(self):
         return 640
@@ -99,6 +102,21 @@ class MiyooFlip(Device):
     @property
     def screen_height(self):
         return 480
+    
+    
+    @property
+    def output_screen_width(self):
+        if(self.should_scale_screen()):
+            return 1920
+        else:
+            return 640
+        
+    @property
+    def output_screen_height(self):
+        if(self.should_scale_screen()):
+            return 1080
+        else:
+            return 480
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
@@ -141,7 +159,7 @@ class MiyooFlip(Device):
     
     @property
     def input_timeout_default(self):
-        return 0.125 # 0.125 seconds
+        return 1/12 # 12 fps
     
     
     def _map_system_lumination_to_miyoo_scale(self, true_lumination):
@@ -194,7 +212,7 @@ class MiyooFlip(Device):
     
     def _set_lumination_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self._map_miyoo_scale_to_system_lumination(self.system_config.lumination)))
+            f.write(str(self._map_miyoo_scale_to_system_lumination(self.system_config.backlight)))
     
     def _set_contrast_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
@@ -212,21 +230,21 @@ class MiyooFlip(Device):
 
     def lower_lumination(self):
         self.system_config.reload_config()
-        if(self.system_config.lumination > 0):
-            self.system_config.set_lumination(self.system_config.lumination - 1)
+        if(self.system_config.backlight > 0):
+            self.system_config.set_backlight(self.system_config.backlight - 1)
             self.system_config.save_config()
             self._set_lumination_to_config()
 
     def raise_lumination(self):
         self.system_config.reload_config()
-        if(self.system_config.lumination < 10):
-            self.system_config.set_lumination(self.system_config.lumination + 1)
+        if(self.system_config.backlight < 10):
+            self.system_config.set_backlight(self.system_config.backlight + 1)
             self.system_config.save_config()
             self._set_lumination_to_config()
 
     @property
     def lumination(self):
-        return self.system_config.lumination
+        return self.system_config.backlight
 
     def lower_contrast(self):
         self.system_config.reload_config()

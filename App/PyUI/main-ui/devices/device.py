@@ -15,10 +15,17 @@ class Device(ABC):
         pass
 
     @abstractmethod
-    def get_scale_factor(self):
+    def output_screen_width(self):
         pass
 
-    
+    @abstractmethod
+    def output_screen_height(self):
+        pass
+
+    @abstractmethod
+    def should_scale_screen(self):
+        pass
+
     @property
     @abstractmethod
     def font_size_small(self):

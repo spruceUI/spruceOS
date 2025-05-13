@@ -6,7 +6,6 @@ from devices.device import Device
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from display.display import Display
 from display.font_purpose import FontPurpose
-from display.on_screen_keyboard import OnScreenKeyboard
 from display.render_mode import RenderMode
 from themes.theme import Theme
 from utils.logger import PyUiLogger
@@ -24,7 +23,6 @@ class BluetoothMenu:
         self.device : Device= device
         self.theme : Theme= theme
         self.bluetooth_scanner = BluetoothScanner()
-        self.on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
         self.view_creator = ViewCreator(display,controller,device,theme)
 
     def bluetooth_adjust(self):

@@ -4,7 +4,6 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
-from display.on_screen_keyboard import OnScreenKeyboard
 from menus.settings import settings_menu
 from menus.settings.advance_settings_menu import AdvanceSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
