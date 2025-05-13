@@ -33,7 +33,6 @@ fi
 
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    SWAPFILE="/mnt/SDCARD/cachefile"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
@@ -231,7 +230,6 @@ if [ "$PLATFORM" = "A30" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
@@ -439,8 +437,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
-
     killall runmiyoo.sh
 fi
 
@@ -451,6 +447,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
+${SCRIPTS_DIR}/set_up_swap.sh
 ${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
