@@ -1,5 +1,5 @@
 #Directory to search in
-directory="/mnt/sdcard/Roms/PORTS"
+directory="/mnt/SDCARD/Roms/PORTS"
 
 mkdir -p "$directory/Imgs"
 
@@ -7,8 +7,8 @@ mkdir -p "$directory/Imgs"
 image_names=("cover" "screenshot" "splash")
 
 # Ensure pillow is installed 
-if [ ! -d "/mnt/sdcard/Persistent/portmaster/site-packages/PIL/" ] ; then
-    /mnt/sdcard/Persistent/portmaster/bin/python3 -m pip install --no-index --find-links=/mnt/sdcard/App/PortMaster/pillow_offline Pillow
+if [ ! -d "/mnt/SDCARD/Persistent/portmaster/site-packages/PIL/" ] ; then
+    /mnt/SDCARD/Persistent/portmaster/bin/python3 -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
 fi
 
 
@@ -40,7 +40,7 @@ for file in "$directory"/*; do
 			jpg_path="$directory/$dir_name/${name}.jpg"
 			if [ -f "$jpg_path" ]; then
 				echo "Converting $jpg_path to png"
-				/mnt/sdcard/Persistent/portmaster/bin/python3 /mnt/sdcard/App/PortMaster/jpg_to_png.py "$jpg_path"
+				/mnt/SDCARD/Persistent/portmaster/bin/python3 /mnt/SDCARD/App/PortMaster/jpg_to_png.py "$jpg_path"
 				break
 			fi
 		done
