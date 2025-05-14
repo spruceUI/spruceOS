@@ -8,7 +8,6 @@ flag_remove "first_boot_$PLATFORM"
 
 log_message "Removed first boot flag for $PLATFORM"
 
-SWAPFILE="/mnt/SDCARD/cachefile"
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
@@ -35,25 +34,6 @@ log_message "First boot flag detected"
 
 log_message "Running developer mode check" -v
 /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
-
-if [ "$PLATFORM" = "A30" ]; then
-
-    if [ -f "${SWAPFILE}" ]; then
-        SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
-        MINSIZE=$((128 * 1024))
-        if [ "$SWAPSIZE" -lt "$MINSIZE" ]; then
-            swapoff "${SWAPFILE}"
-            rm "${SWAPFILE}"
-            log_message "Removed undersized swap file"
-        fi
-    fi
-    if [ ! -f "${SWAPFILE}" ]; then
-        dd if=/dev/zero of="${SWAPFILE}" bs=1M count=128
-        mkswap "${SWAPFILE}"
-        sync
-        log_message "Created new swap file"
-    fi
-fi
 
 log_message "Running emu_setup.sh"
 /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh

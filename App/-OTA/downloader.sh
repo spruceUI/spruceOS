@@ -270,7 +270,7 @@ if [ "$goto_install" != "true" ]; then
     kill $download_pid # Kill the progress display after successful download
 
     # Verify checksum
-    display --icon "$IMAGE_PATH" -t "Download complete! Verifying..." -d 3
+    display --icon "$IMAGE_PATH" -t "Download complete! Verifying..."
     if ! verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
         display --icon "$IMAGE_PATH" -t "File downloaded but not verified. Try again..." --okay
         rm -rf "$TMP_DIR"

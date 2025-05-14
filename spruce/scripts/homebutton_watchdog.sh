@@ -27,7 +27,7 @@ kill_port(){
         pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader" | grep -v "grep" | awk 'NR==1 {print $1}')
 
         # Check if a PID was found
-        if [[ -n "$pid" ]]; then
+        if [ -n "$pid" ]; then
             log_message "Killing $pid ..." -v
             kill -9 $pid
         else
@@ -70,15 +70,13 @@ kill_emulator() {
         killall -q -15 PPSSPPSDL_$PLATFORM
 
     else
-	    log_message "*** homebutton_watchdog.sh: MainUI.py!" 
+	    log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" 
         pid=$(ps -f | grep -E "MainUI.py" | grep -v "grep" | awk 'NR==1 {print $1}')
-        if [[ -n "$pid" ]]; then
+        if [ -n "$pid" ]; then
             log_message "Killing MainUI.py with PID: $pid"
             kill -9 $pid
-            sleep 1
         fi
-		
-	    log_message "*** homebutton_watchdog.sh: Killing all Emus!" 
+
         killall -q -CONT pico8_dyn pico8_64
         killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64
     fi
@@ -185,10 +183,10 @@ prepare_game_switcher() {
     rm -f "$TEMP_FILE"
     while read -r CMD; do
         EMU_PATH=$(echo $CMD | cut -d\" -f2)
-        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" -v
+        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" 
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
         [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" -v
+        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" 
         if [ ! -f "$EMU_PATH" ]; then
             log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" 
             continue

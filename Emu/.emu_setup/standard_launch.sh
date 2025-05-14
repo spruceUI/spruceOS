@@ -5,8 +5,8 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
@@ -108,6 +108,95 @@ handle_network_services() {
 	fi
 }
 
+##### TIME TRACHKING FUNCTIONS #####
+
+export START_TIME_PATH="/tmp/start_time"
+export END_TIME_PATH="/tmp/end_time"
+export DURATION_PATH="/tmp/session_duration"
+export TRACKER_JSON_PATH="/mnt/SDCARD/Saves/spruce/gtt.json"
+export MISSION_JSON_PATH="/mnt/SDCARD/Saves/spruce/bitpal_data/active_missions.json"
+
+record_session_start_time() {
+    date +%s > "$START_TIME_PATH"
+}
+
+record_session_end_time() {
+    date +%s > "$END_TIME_PATH"
+}
+
+calculate_current_session_duration() {
+    START_TIME=$(cat "$START_TIME_PATH")
+    END_TIME=$(cat "$END_TIME_PATH")
+    DURATION=$(( END_TIME - START_TIME ))
+    echo "$DURATION" > "$DURATION_PATH"
+}
+
+update_gtt_and_bp() {
+    # Initialize GTT JSON if needed
+    if [ ! -f "$TRACKER_JSON_PATH" ] || [ -z "$(cat "$TRACKER_JSON_PATH")" ]; then
+        jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
+    fi
+
+	# take care of pesky SDCARD vs sdcard
+	ROM_FILE="$(echo "$ROM_FILE" | sed 's|/mnt/sdcard|/mnt/SDCARD|')"
+
+    GTT_GAME_NAME="${GAME%.*} ($EMU_NAME)"
+    SESSION_DURATION="$(cat "$DURATION_PATH")"
+    END_TIME="$(cat "$END_TIME_PATH")"
+
+    PREVIOUS_PLAYTIME="$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].playtime_seconds // 0' "$TRACKER_JSON_PATH")"
+    NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+
+    OLD_NUM_SESSIONS="$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].sessions_played // 0' "$TRACKER_JSON_PATH")"
+    NEW_NUM_SESSIONS=$((OLD_NUM_SESSIONS + 1))
+
+	# update Game Time Tracker
+	tmpfile=$(mktemp)
+    jq --arg game "$GTT_GAME_NAME" \
+	   --arg rompath "$ROM_FILE" \
+       --argjson newTime "$NEW_PLAYTIME" \
+       --argjson numPlays "$NEW_NUM_SESSIONS" \
+       --arg emu "$EMU_NAME" \
+       --argjson lastPlayed "$END_TIME" \
+       '.games[$game] += {
+	   	   rompath: $rompath,
+           console: $emu,
+           playtime_seconds: $newTime,
+           sessions_played: $numPlays,
+           last_played: $lastPlayed
+       }' "$TRACKER_JSON_PATH" > "$tmpfile" && mv "$tmpfile" "$TRACKER_JSON_PATH"
+
+	# update any BitPal missions for the given rompath
+	for i in $(jq -r --arg path "$ROM_FILE" '
+		.missions
+		| to_entries[]
+		| select(.value.rompath == $path)
+		| .key
+	' "$MISSION_JSON"); do
+
+		PREVIOUS_PLAYTIME="$(get_mission_time_spent "$i")"
+    	NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+		set_mission_time_spent "$i" "$NEW_PLAYTIME"
+
+		MISSION_DURATION="$(get_mission_duration "$i")"
+		MISSION_DURATION_SECONDS=$((60 * MISSION_DURATION))
+		if [ "$NEW_PLAYTIME" -ge "$MISSION_DURATION_SECONDS" ]; then
+
+			current_xp=$(get_bitpal_xp)
+			gained_xp=$(get_mission_xp_reward "$i")
+			new_current_xp=$((current_xp + gained_xp))
+			set_bitpal_xp "$new_current_xp"
+
+			set_mission_enddate "$i" "$(date +%s)"
+			move_mission_to_completed_json "$i"
+		fi
+
+	done
+
+	# clean up temp files to prevent accidental cross-pollination
+	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" 2>/dev/null
+}
+
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
@@ -188,10 +277,10 @@ run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
 	if [ "$PLATFORM" = "Brick" ]; then
-		./OpenBOR_Brick
+		./OpenBOR_Brick "$ROM_FILE"
 	elif [ "$PLATFORM" = "Flip" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
-		./OpenBOR_Flip
+		./OpenBOR_Flip "$ROM_FILE"
 	else # assume A30
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
@@ -535,8 +624,7 @@ run_yabasanshiro() {
 import_launch_options
 
 set_cpu_mode
-
-# TODO: remove A30 check once network services implemented on Brick
+record_session_start_time
 handle_network_services
 
 flag_add 'emulator_launched'
@@ -588,6 +676,9 @@ case $EMU_NAME in
 esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh)
+record_session_end_time
+calculate_current_session_duration
+update_gtt_and_bp
 log_message "-----Closing Emulator-----" -v
 
 auto_regen_tmp_update

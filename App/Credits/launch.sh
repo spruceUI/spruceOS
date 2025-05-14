@@ -1,6 +1,9 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+HERE="$(dirname "$0")"
+cd "$HERE"
+
 if [ "$PLATFORM" = "A30" ]; then
     /mnt/SDCARD/App/Credits/credits_app.elf \
     /mnt/SDCARD/App/Credits/sprucepixelbg43.png \
@@ -19,6 +22,5 @@ else
     "/mnt/SDCARD/App/Credits/Sweater Ass Sounding Ass.mp3" \
     "/mnt/SDCARD/App/Credits/3 - Sir Daniel Bonaduce.mp3" 
 
-    [ "$PLATFORM" = "Flip" ] && kill -9 "$(pidpf gptokeyb)"
-
+    [ "$PLATFORM" = "Flip" ] && kill -9 "$(pidof gptokeyb)"
 fi

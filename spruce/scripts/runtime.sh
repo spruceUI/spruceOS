@@ -26,9 +26,13 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
 
+if flag_check "reboot-update"; then
+    log_message "Updater continuing!"
+    /mnt/SDCARD/Updater/updater.sh
+fi
+
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    SWAPFILE="/mnt/SDCARD/cachefile"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
@@ -106,11 +110,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
 
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
-    /mnt/sdcard/spruce/flip/mount_muOS.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
-    #/mnt/sdcard/spruce/flip/bind_glibc.sh &>> /mnt/sdcard/Saves/spruce/spruce.log
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
 fi
 
@@ -226,7 +230,6 @@ if [ "$PLATFORM" = "A30" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
@@ -434,8 +437,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
-
     killall runmiyoo.sh
 fi
 
@@ -446,6 +447,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
+${SCRIPTS_DIR}/set_up_swap.sh
 ${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
