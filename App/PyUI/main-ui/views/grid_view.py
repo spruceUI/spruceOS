@@ -101,7 +101,7 @@ class GridView(View):
             color = self.theme.text_color_selected(self.font_purpose) if actual_index == self.selected else self.theme.text_color(self.font_purpose)
 
             if(self.rows == 1) : 
-                real_y_text_offset = 325
+                real_y_text_offset = int(self.device.screen_height * 325/480)
             else:
                 real_y_text_offset = y_icon_offset + actual_width//2 + self.theme.get_grid_multirow_text_offset_y()
 

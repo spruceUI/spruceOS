@@ -10,16 +10,40 @@ from views.view_type import ViewType
 
 class Theme():
     
-    def __init__(self, path):
-        self.set_theme_path(path)
+    def __init__(self, path, width, height):
+        self.set_theme_path(path, width, height)
 
-    def set_theme_path(self,path):
+    def set_theme_path(self,path, width = 0, height = 0):
         self.__dict__.clear()
         self.path = path
         self.load_defaults_for_values_not_in_miyoo_theme()
-        self.load_from_file(os.path.join(path,"config.json"))
+        
+        resolution_specific_config = f"config_{width}x{height}.json"
+        resolution_specific_config_path = os.path.join(self.path, resolution_specific_config)
+        if(os.path.exists(resolution_specific_config_path)):
+            self.load_from_file(resolution_specific_config_path)
+            PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
+        else:
+            self.load_from_file(os.path.join(path,"config.json"))
+            PyUiLogger.get_logger().info(f"No resolution specific config {resolution_specific_config_path} found, using config.json")
+
         #Reload path incase a theme tried to set it
         self.path = path
+        self.skin_folder = self.get_asset_folder("skin",width,height)
+        self.icon_folder = self.get_asset_folder("icons",width,height)
+
+    def get_asset_folder(self, base_folder, width, height):
+        # Construct the resolution-specific folder name
+        resolution_specific_folder = f"{base_folder}_{width}x{height}"
+        resolution_specific_path = os.path.join(self.path, resolution_specific_folder)
+        
+        # Check if the resolution-specific folder exists
+        if os.path.isdir(resolution_specific_path):
+            PyUiLogger.get_logger().info(f"Resolution specific assets found, using  {resolution_specific_folder}")
+            return resolution_specific_folder
+        else:
+            PyUiLogger.get_logger().info(f"No resolution specific assets {resolution_specific_folder} found, using  {base_folder}")
+            return base_folder
 
     def load_defaults_for_values_not_in_miyoo_theme(self):
         setattr(self, "showBottomBar", True)
@@ -38,43 +62,55 @@ class Theme():
 
     @property
     def background(self):
-        return os.path.join(self.path,"skin","background.png")
+        return os.path.join(self.path,self.skin_folder,"background.png")
 
     @property
     def favorite(self):
-        return os.path.join(self.path,"skin","ic-favorite-n.png")
+        return os.path.join(self.path,self.skin_folder,"ic-favorite-n.png")
 
     @property
     def favorite_selected(self):
-        return os.path.join(self.path,"skin","ic-favorite-f.png")
+        return os.path.join(self.path,self.skin_folder,"ic-favorite-f.png")
 
     @property
     def game(self):
-        return os.path.join(self.path,"skin","ic-game-n.png")
+        return os.path.join(self.path,self.skin_folder,"ic-game-n.png")
 
     @property
     def game_selected(self):
-        return os.path.join(self.path,"skin","ic-game-f.png")
+        return os.path.join(self.path,self.skin_folder,"ic-game-f.png")
 
     @property
     def app(self):
-        return os.path.join(self.path,"skin","ic-app-n.png")
+        return os.path.join(self.path,self.skin_folder,"ic-app-n.png")
     
     @property
     def app_selected(self):
-        return os.path.join(self.path,"skin","ic-app-f.png")
+        return os.path.join(self.path,self.skin_folder,"ic-app-f.png")
 
     @property
     def settings(self):
-        return os.path.join(self.path,"skin","ic-setting-n.png")
+        return os.path.join(self.path,self.skin_folder,"ic-setting-n.png")
 
     @property
     def settings_selected(self):
-        return os.path.join(self.path,"skin","ic-setting-f.png")
+        return os.path.join(self.path,self.skin_folder,"ic-setting-f.png")
 
     @property
     def get_title_bar_bg(self):
-        return os.path.join(self.path,"skin","bg-title.png")
+        return os.path.join(self.path,self.skin_folder,"bg-title.png")
+
+    @property
+    def bottom_bar_bg(self):
+        return os.path.join(self.path,self.skin_folder,"tips-bar-bg.png")
+
+    @property
+    def confirm_icon(self):
+        return os.path.join(self.path,self.skin_folder,"icon-A-54.png")
+
+    @property
+    def back_icon(self):
+        return os.path.join(self.path,self.skin_folder,"icon-B-54.png")
 
     @property
     def show_bottom_bar(self):
@@ -90,18 +126,6 @@ class Theme():
         return getattr(self, "renderTopAndBottomBarLast", False)
 
     @property
-    def bottom_bar_bg(self):
-        return os.path.join(self.path,"skin","tips-bar-bg.png")
-
-    @property
-    def confirm_icon(self):
-        return os.path.join(self.path,"skin","icon-A-54.png")
-
-    @property
-    def back_icon(self):
-        return os.path.join(self.path,"skin","icon-B-54.png")
-
-    @property
     def confirm_text(self):
         return "Okay"
     
@@ -111,89 +135,89 @@ class Theme():
 
     @property
     def favorite_icon(self):
-        return os.path.join(self.path,"skin","ic-favorite-mark.png")
+        return os.path.join(self.path,self.skin_folder,"ic-favorite-mark.png")
 
     def get_list_large_selected_bg(self):
-        return os.path.join(self.path,"skin","bg-list-l.png")
+        return os.path.join(self.path,self.skin_folder,"bg-list-l.png")
 
     @property
     def menu_popup_bg_large(self):
-        return os.path.join(self.path,"skin","bg-pop-menu-4.png")
+        return os.path.join(self.path,self.skin_folder,"bg-pop-menu-4.png")
 
     @property
     def keyboard_bg(self):
-        return os.path.join(self.path,"skin","bg-grid-s.png")
+        return os.path.join(self.path,self.skin_folder,"bg-grid-s.png")
 
     @property
     def keyboard_entry_bg(self):
-        return os.path.join(self.path,"skin","bg-list-l.png")
+        return os.path.join(self.path,self.skin_folder,"bg-list-l.png")
 
     @property
     def key_bg(self):
-        return os.path.join(self.path,"skin","bg-btn-01-n.png")
+        return os.path.join(self.path,self.skin_folder,"bg-btn-01-n.png")
 
     @property
     def key_selected_bg(self):
-        return os.path.join(self.path,"skin","bg-btn-01-f.png")
+        return os.path.join(self.path,self.skin_folder,"bg-btn-01-f.png")
 
     def get_list_small_selected_bg(self):
-        return os.path.join(self.path,"skin","bg-list-s.png")
+        return os.path.join(self.path,self.skin_folder,"bg-list-s.png")
     
     def get_popup_menu_selected_bg(self):
-        return os.path.join(self.path,"skin","bg-list-s2.png")
+        return os.path.join(self.path,self.skin_folder,"bg-list-s2.png")
     
     def get_battery_icon(self,charging,battery_percent):
         if(ChargeStatus.CHARGING == charging):
             if(battery_percent > 97):
-                return os.path.join(self.path,"skin","ic-power-charge-100%.png")
+                return os.path.join(self.path,self.skin_folder,"ic-power-charge-100%.png")
             elif(battery_percent >= 75):
-                return os.path.join(self.path,"skin","ic-power-charge-75%.png")
+                return os.path.join(self.path,self.skin_folder,"ic-power-charge-75%.png")
             elif(battery_percent >= 50):
-                return os.path.join(self.path,"skin","ic-power-charge-50%.png")
+                return os.path.join(self.path,self.skin_folder,"ic-power-charge-50%.png")
             elif(battery_percent >= 25):
-                return os.path.join(self.path,"skin","ic-power-charge-25%.png")
+                return os.path.join(self.path,self.skin_folder,"ic-power-charge-25%.png")
             else:
-                return os.path.join(self.path,"skin","ic-power-charge-0%.png")
+                return os.path.join(self.path,self.skin_folder,"ic-power-charge-0%.png")
         else:
             if(battery_percent >= 97):
-                return os.path.join(self.path,"skin","power-full-icon.png")
+                return os.path.join(self.path,self.skin_folder,"power-full-icon.png")
             elif(battery_percent >= 80):
-                return os.path.join(self.path,"skin","power-80%-icon.png")
+                return os.path.join(self.path,self.skin_folder,"power-80%-icon.png")
             elif(battery_percent >= 50):
-                return os.path.join(self.path,"skin","power-50%-icon.png")
+                return os.path.join(self.path,self.skin_folder,"power-50%-icon.png")
             elif(battery_percent >= 20):
-                return os.path.join(self.path,"skin","power-20%-icon.png")
+                return os.path.join(self.path,self.skin_folder,"power-20%-icon.png")
             else:
-                return os.path.join(self.path,"skin","power-0%-icon.png")
+                return os.path.join(self.path,self.skin_folder,"power-0%-icon.png")
 
     def get_wifi_icon(self,status):
         if status == WifiStatus.OFF:
-            return os.path.join(self.path,"skin","icon-wifi-locked.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-locked.png")
         elif status == WifiStatus.BAD:
-            return os.path.join(self.path,"skin","icon-wifi-signal-01.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-signal-01.png")
         elif status == WifiStatus.OKAY:
-            return os.path.join(self.path,"skin","icon-wifi-signal-02.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-signal-02.png")
         elif status == WifiStatus.GOOD:
-            return os.path.join(self.path,"skin","icon-wifi-signal-03.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-signal-03.png")
         elif status == WifiStatus.GREAT:
-            return os.path.join(self.path,"skin","icon-wifi-signal-04.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-signal-04.png")
         else:
-            return os.path.join(self.path,"skin","icon-wifi-locked.png")
+            return os.path.join(self.path,self.skin_folder,"icon-wifi-locked.png")
 
     def system(self, system):
-        return os.path.join(self.path,"icons",system.lower() +".png")
+        return os.path.join(self.path,self.icon_folder,system.lower() +".png")
     
     def system_selected(self, system):
-        return os.path.join(self.path,"icons","sel",system.lower() +".png")
+        return os.path.join(self.path,self.icon_folder,"sel",system.lower() +".png")
     
     def _grid_4_x_2_selected_bg(self):
-        return os.path.join(self.path,"skin","bg-game-item-f.png")
+        return os.path.join(self.path,self.skin_folder,"bg-game-item-f.png")
     
     def get_system_icon(self, system):
-        return os.path.join(self.path,"icons",system+".png")
+        return os.path.join(self.path,self.icon_folder,system+".png")
     
     def get_system_icon_selected(self, system):
-        return os.path.join(self.path,"icons","sel",system+".png")
+        return os.path.join(self.path,self.icon_folder,"sel",system+".png")
     
     
     def get_font(self, font_purpose : FontPurpose):
@@ -394,16 +418,14 @@ class Theme():
     def popup_menu_rows(self):
         return getattr(self, "popupMenuRows", 1)
     
-    @property
-    def rom_image_width(self):
-        return 294 #TODO make percentage of device
+    def rom_image_width(self, device_width):
+        return int(device_width * 294/640)
 
-    @property
-    def rom_image_height(self):
+    def rom_image_height(self, device_height):
         if(self.show_bottom_bar) :
-           return 300  #TODO make percentage of device
+            return int(device_height * 300/640)
         else:
-            return 340  #TODO make percentage of device
+            return int(device_height * 340/640)
 
     @property
     def text_and_image_list_view_mode(self):

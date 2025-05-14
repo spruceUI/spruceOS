@@ -1,3 +1,6 @@
+import array
+import ctypes
+import fcntl
 from pathlib import Path
 import re
 import subprocess
@@ -6,7 +9,6 @@ import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
-from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
 import os
@@ -21,7 +23,7 @@ import sdl2
 from utils import throttle
 from utils.logger import PyUiLogger
 
-class MiyooFlip(Device):
+class TrimUIBrick(Device):
     
     def __init__(self):
         self.path = self
@@ -42,13 +44,11 @@ class MiyooFlip(Device):
             sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
-        os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
-        os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
 
         #Idea is if something were to change from he we can reload it
         #so it always has the more accurate data
-        self.system_config = SystemConfig("/userdata/system.json")
-        
+        self.system_config = SystemConfig("/mnt/UDISK/system.json")
+
 
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_lumination_to_config()
@@ -76,49 +76,27 @@ class MiyooFlip(Device):
     #Untested
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
-        try:
-            # Read the HDMI status from the file
-            with open('/sys/class/drm/card0-HDMI-A-1/status', 'r') as f:
-                status = f.read().strip()
-
-            # Check if the status is 'disconnected'
-            if status.lower() == 'disconnected':
-                return False
-            else:
-                PyUiLogger.get_logger().info(f"HDMI Connected")
-                return True
-        except FileNotFoundError:
-            PyUiLogger.get_logger().error("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
-            return False
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred: {e}")
-            return False
+        return False
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
     @property
     def screen_width(self):
-        return 640
+        return 1024
 
     @property
     def screen_height(self):
-        return 480
+        return 768
     
     
     @property
     def output_screen_width(self):
-        if(self.should_scale_screen()):
-            return 1920
-        else:
-            return 640
-        
+        return 1920
+
     @property
     def output_screen_height(self):
-        if(self.should_scale_screen()):
-            return 1080
-        else:
-            return 480
+        return 1080
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
@@ -213,22 +191,29 @@ class MiyooFlip(Device):
             return 1
     
     def _set_lumination_to_config(self):
-        with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self._map_miyoo_scale_to_system_lumination(self.system_config.backlight)))
-    
+        val = self._map_miyoo_scale_to_system_lumination(self.system_config.backlight)
+        try:
+            DISP_LCD_SET_BRIGHTNESS = 0x102 
+            fd = os.open("/dev/disp", os.O_RDWR)
+            if fd > 0:
+                # Create a ctypes array equivalent to: unsigned long param[4] = {0, val, 0, 0};
+                param = (ctypes.c_ulong * 4)(0, val, 0, 0)
+                # Perform ioctl with pointer to param
+                fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+                os.close(fd)
+        except PermissionError:
+            print("Permission denied: try running as root.")
+        except Exception as e:
+            print(f"Error setting brightness: {e}")
+
     def _set_contrast_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:contrast:"+str(self.system_config.contrast * 5)])
+        pass
     
     def _set_saturation_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:saturation:"+str(self.system_config.saturation * 5)])
+        pass
 
     def _set_brightness_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:brightness:"+str(self.system_config.brightness * 5)])
-
-
+        pass
 
     def lower_lumination(self):
         self.system_config.reload_config()
@@ -250,58 +235,60 @@ class MiyooFlip(Device):
 
     def lower_contrast(self):
         self.system_config.reload_config()
-        if(self.system_config.contrast > 1): # don't allow 0 contrast
-            self.system_config.set_contrast(self.system_config.contrast - 1)
+        if(self.system_config.get("colorcontrast") > 1):
+            self.system_config.set("colorcontrast",self.system_config.get("colorcontrast") - 1)
             self.system_config.save_config()
             self._set_contrast_to_config()
 
     def raise_contrast(self):
         self.system_config.reload_config()
-        if(self.system_config.contrast < 20):
-            self.system_config.set_contrast(self.system_config.contrast + 1)
+        if(self.system_config.get("colorcontrast") < 10): 
+            self.system_config.set("colorcontrast",self.system_config.get("colorcontrast") + 1)
             self.system_config.save_config()
             self._set_contrast_to_config()
 
     @property
     def contrast(self):
-        return self.system_config.get_contrast()
+        return self.system_config.get("colorcontrast")
     
+
     def lower_brightness(self):
         self.system_config.reload_config()
-        if(self.system_config.brightness > 0): 
-            self.system_config.set_brightness(self.system_config.brightness - 1)
+        if(self.system_config.get("colorbrightness") > 1):
+            self.system_config.set("colorbrightness",self.system_config.get("colorbrightness") - 1)
             self.system_config.save_config()
             self._set_brightness_to_config()
 
     def raise_brightness(self):
         self.system_config.reload_config()
-        if(self.system_config.brightness < 20):
-            self.system_config.set_brightness(self.system_config.brightness + 1)
+        if(self.system_config.get("colorbrightness") < 10): 
+            self.system_config.set("colorbrightness",self.system_config.get("colorbrightness") + 1)
             self.system_config.save_config()
             self._set_brightness_to_config()
 
+
     @property
     def brightness(self):
-        return self.system_config.get_brightness()
+        return self.system_config.get("colorbrightness")
 
 
     def lower_saturation(self):
         self.system_config.reload_config()
-        if(self.system_config.saturation > 0):
-            self.system_config.set_saturation(self.system_config.saturation - 1)
+        if(self.system_config.get("colorsaturation") > 1): 
+            self.system_config.set("colorsaturation",self.system_config.get("colorsaturation") - 1)
             self.system_config.save_config()
             self._set_saturation_to_config()
 
     def raise_saturation(self):
         self.system_config.reload_config()
-        if(self.system_config.saturation < 20):
-            self.system_config.set_saturation(self.system_config.saturation + 1)
+        if(self.system_config.get("colorsaturation") < 10): 
+            self.system_config.set("colorsaturation",self.system_config.get("colorsaturation") + 1)
             self.system_config.save_config()
-            self._set_saturation_to_config()
+            self._set_brightness_to_config()
 
     @property
     def saturation(self):
-        return self.system_config.get_saturation()
+        return self.system_config.get("colorsaturation")
 
     def _set_volume(self, volume):
         if(volume < 0):
@@ -312,9 +299,10 @@ class MiyooFlip(Device):
         try:
             
             ProcessRunner.run(
-                ["amixer", "cset", f"name='SPK Volume'", str(volume)],
+                ["amixer", "cset", f"name='Soft Volume Master'", str(volume)],
                 check=True
             )
+
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
@@ -329,7 +317,7 @@ class MiyooFlip(Device):
     def get_volume(self):
         try:
             output = subprocess.check_output(
-                ["amixer", "cget", "name='SPK Volume'"],
+                ["amixer", "cget", "name='Soft Volume Master'"],
                 text=True
             )
             match = re.search(r": values=(\d+)", output)
@@ -338,6 +326,7 @@ class MiyooFlip(Device):
             else:
                 PyUiLogger.get_logger().info("Volume value not found in amixer output.")
                 return 0 # ???
+            pass
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Command failed: {e}")
             return 0 # ???
@@ -372,11 +361,7 @@ class MiyooFlip(Device):
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     def fix_sleep_sound_bug(self):
-        self.system_config.reload_config()
-        proper_volume = self.system_config.get_volume()
-        ProcessRunner.run(["amixer", "cset","numid=5", "0"])
-        time.sleep(0.2)  
-        ProcessRunner.run(["amixer", "cset","numid=5", str(proper_volume*5)])
+        pass
 
 
     def run_game(self, file_path):
@@ -429,35 +414,47 @@ class MiyooFlip(Device):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
         return mapping
 
+
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
-            with open("/proc/net/wireless", "r") as f:
-                output = f.read().strip().splitlines()
+            result = subprocess.run(
+                ["iw", "dev", "wlan0", "link"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            output = result.stdout.strip()
 
-            if len(output) >= 3:
-                # The 3rd line contains the actual wireless stats
-                data_line = output[2]
-                parts = data_line.split()
-                
-                # According to the standard format:
-                # parts[2] = link quality (float ending in '.')
-                # parts[3] = signal level
-                # parts[4] = noise level
-                link_quality = int(float(parts[2].strip('.')))
-                signal_level = int(float(parts[3].strip('.')))
-                noise_level = int(float(parts[4].strip('.')))
-
-                return WiFiConnectionQualityInfo(
-                    noise_level=noise_level,
-                    signal_level=signal_level,
-                    link_quality=link_quality
-                )
-            else:
+            if "Not connected." in output or result.returncode != 0:
                 return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+
+            signal_level = 0
+            link_quality = 0  # This won't be available directly via iw, unless you derive it
+
+            # Extract signal level (in dBm)
+            signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
+            if signal_match:
+                signal_level = int(signal_match.group(1))
+
+            # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
+            # Example rough mapping:
+            if signal_level <= -100:
+                link_quality = 0
+            elif signal_level >= -50:
+                link_quality = 70
+            else:
+                link_quality = int((signal_level + 100) * 1.4)  # Maps -100..-50 dBm to 0..70
+
+            return WiFiConnectionQualityInfo(
+                noise_level=0,  # Not available via `iw`
+                signal_level=signal_level,
+                link_quality=link_quality
+            )
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+        
         
 
     def is_wifi_up(self):
@@ -553,9 +550,7 @@ class MiyooFlip(Device):
         return result
 
     def set_wifi_power(self, value):
-        PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
-        with open('/sys/class/rkwifi/wifi_power', 'w') as f:
-            f.write(str(value))
+        pass
 
     def stop_wifi_services(self):
         PyUiLogger.get_logger().info("Stopping WiFi Services")
@@ -641,7 +636,8 @@ class MiyooFlip(Device):
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        with open("/sys/class/power_supply/ac/online", "r") as f:
+        #Probably need to find the power and not just usb
+        with open("/sys/class/power_supply/axp2202-usb/online", "r") as f:
             ac_online = int(f.read().strip())
             
         if(ac_online):
@@ -651,7 +647,7 @@ class MiyooFlip(Device):
     
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
-        with open("/sys/class/power_supply/battery/capacity", "r") as f:
+        with open("/sys/class/power_supply/axp2202-battery/capacity", "r") as f:
             return int(f.read().strip()) 
         return 0
         
@@ -667,32 +663,18 @@ class MiyooFlip(Device):
     def get_rom_utils(self):
         return RomUtils("/mnt/SDCARD/Roms/")
     
-    
     def is_bluetooth_enabled(self):
-        try:
-            # Run 'ps' to check for bluetoothd process
-            result = self.get_running_processes()
-            # Check if bluetoothd is in the process list
-            return 'bluetoothd' in result.stdout
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
-            return False
+        return False
     
     
     def disable_bluetooth(self):
-        ProcessRunner.run(["killall","-15","bluetoothd"])
-        time.sleep(0.1)  
-        ProcessRunner.run(["killall","-9","bluetoothd"])
+        pass
 
     def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/libexec/bluetooth/',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-            
+        pass
+
     def perform_startup_tasks(self):
         pass
 
     def get_bluetooth_scanner(self):
-        return BluetoothScanner()
+        return None
