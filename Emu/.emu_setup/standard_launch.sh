@@ -299,7 +299,7 @@ extract_game_dir(){
     # If gamedir_name ends with a slash, remove the slash
     gamedir_line="${gamedir_line%/}"
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
-    game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
+    game_dir="/mnt/SDCARD/Roms/PORTS/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
     echo "${game_dir%\"}"
 }
@@ -314,37 +314,37 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-    rm "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+    rm "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     if [ "$PORT_CONTROL" = "X360" ]; then
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     else
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     fi
 }
 
 run_port() {
-    if [ "$PLATFORM" = "Flip" ]; then
-        /mnt/sdcard/spruce/flip/bind-new-libmali.sh
+	if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+        /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
         set_port_mode
 
         is_retroarch_port
         if [[ $? -eq 1 ]]; then
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-            cd /mnt/sdcard/RetroArch/
-            export HOME="/mnt/sdcard/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-             "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
+            cd /mnt/SDCARD/RetroArch/
+            export HOME="/mnt/SDCARD/Saves/flip/home"
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+             "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
         else
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd $PORTS_DIR
-            export HOME="/mnt/sdcard/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-            "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
+            export HOME="/mnt/SDCARD/Saves/flip/home"
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+            "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
         fi
         
-        /mnt/sdcard/spruce/flip/unbind-new-libmali.sh
+        /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
@@ -447,7 +447,7 @@ run_retroarch() {
 	fi
 
 	#Swap below if debugging new cores
-	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/sdcard/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
+	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 
@@ -542,7 +542,7 @@ handle_network_services
 flag_add 'emulator_launched'
 
 # Sanitize the rom path
-ROM_FILE="$(echo "$1" | sed 's|/media/sdcard0/|/mnt/SDCARD/|g')"
+ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
