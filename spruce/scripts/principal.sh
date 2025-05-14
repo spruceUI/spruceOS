@@ -171,7 +171,16 @@ while [ 1 ]; do
                 runifnecessary "trimui_btmanager" trimui_btmanager
                 runifnecessary "hardwareservice" hardwareservice
                 premainui.sh
-                MainUI
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+					umount /mnt/SDCARD/Themes
+					touch /tmp/fbdisplay_exit
+					cat /dev/zero > /dev/fb0
+                    export PYSDL2_DLL_PATH="/usr/lib"
+					export LD_LIBRARY_PATH="/usr/trimui/lib"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py >> /dev/null 2>&1
+                else
+                    MainUI
+                fi
                 preload.sh
 
                 if [ -f /tmp/trimui_inputd_restart ] ; then
@@ -189,7 +198,7 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                if [ -f /mnt/sdcard/App/PyUI/.enabled ]; then
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
                     export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
                     /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py &> /dev/null
                 else
