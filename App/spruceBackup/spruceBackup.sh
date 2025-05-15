@@ -72,6 +72,7 @@ $SYSTEM_JSON
 /mnt/SDCARD/Emu/NDS/config
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings.json
+/mnt/SDCARD/Emu/SATURN/.yabasanshiro
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/RetroArch/.retroarch/shaders
