@@ -1,0 +1,44 @@
+{
+    "name": "Spruce",
+    "author": "Miyoo",
+    "description": "Miyoo Stock Theme",
+    "batteryPercentage": {
+        "color": "#FFFFFF",
+        "font": "nunwen.ttf",
+        "size": 29
+    },
+    "title": {
+        "font": "nunwen.ttf",
+        "size": 40,
+        "color": "#FFFFFF"
+    },
+    "hint": {
+        "font": "nunwen.ttf",
+        "size": 40,
+        "color": "#FFFFFF"
+    },
+    "currentpage": {
+        "font": "nunwen.ttf",
+        "size": 35,
+        "color": "#FFFFFF"
+    },
+    "total": {
+        "font": "nunwen.ttf",
+        "size": 35,
+        "color": "#FFFFFF"
+    },
+    "grid": {
+        "font": "nunwen.ttf",
+        "grid1x4": 40,
+        "grid3x4": 29,
+        "color": "#FFFFFF",
+        "selectedcolor": "#FFFFFF"
+    },
+    "list": {
+        "font": "nunwen.ttf",
+        "size": 38,
+        "color": "#FFFFFF",
+        "selectedcolor": "#FFFFFF"
+
+    }
+}

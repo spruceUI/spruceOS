@@ -53,8 +53,8 @@ class ViewCreator():
                 )
             case ViewType.TEXT_AND_IMAGE_LIST_VIEW:
                 text_and_image_list_view_mode = self.theme.text_and_image_list_view_mode
-                img_width = self.theme.rom_image_width
-                img_height = self.theme.rom_image_height
+                img_width = self.theme.rom_image_width(self.device.screen_width)
+                img_height = self.theme.rom_image_height(self.device.screen_height)
 
                 if("TEXT_LEFT_IMAGE_RIGHT" == text_and_image_list_view_mode):
                     img_offset_x = self.device.screen_width - 10 - img_width//2

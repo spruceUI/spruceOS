@@ -6,6 +6,7 @@ import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
 import os
@@ -19,9 +20,6 @@ from games.utils.rom_utils import RomUtils
 import sdl2
 from utils import throttle
 from utils.logger import PyUiLogger
-
-os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
-os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
 
 class MiyooFlip(Device):
     
@@ -44,10 +42,14 @@ class MiyooFlip(Device):
             sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
+        os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
+        os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
 
         #Idea is if something were to change from he we can reload it
         #so it always has the more accurate data
         self.system_config = SystemConfig("/userdata/system.json")
+        
+
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_lumination_to_config()
         self._set_contrast_to_config()
@@ -86,7 +88,7 @@ class MiyooFlip(Device):
                 PyUiLogger.get_logger().info(f"HDMI Connected")
                 return True
         except FileNotFoundError:
-            PyUiLogger.get_logger().errpr("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
+            PyUiLogger.get_logger().error("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
             return False
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred: {e}")
@@ -691,3 +693,6 @@ class MiyooFlip(Device):
             
     def perform_startup_tasks(self):
         pass
+
+    def get_bluetooth_scanner(self):
+        return BluetoothScanner()

@@ -51,7 +51,6 @@ class SystemConfig:
     def get_backlight(self):
         return self.config.get("brightness")
 
-    
     def set_contrast(self, value):
         self.config["contrast"] = value
     
@@ -128,3 +127,9 @@ class SystemConfig:
 
     def is_bluetooth_enabled(self):
         return self.config.get("bluetooth") == 1
+
+    def get(self, property):
+        return self.config.get(property)
+    
+    def set(self, property, value):
+        self.config[property] = value

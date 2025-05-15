@@ -1,6 +1,7 @@
 from multiprocessing import get_logger
 import os
 import threading
+from devices.trimui.trim_ui_brick import TrimUIBrick
 import sdl2
 import sdl2.ext
 
@@ -12,7 +13,12 @@ from devices.miyoo_flip import MiyooFlip
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
-
+num = sdl2.SDL_GetNumRenderDrivers()
+for i in range(num):
+    info = sdl2.SDL_RendererInfo()
+    sdl2.SDL_GetRenderDriverInfo(i, info)
+    print(f"Renderer {i}: {info.name.decode()}")
+    
 PyUiLogger.init("/mnt/SDCARD/Saves/spruce/pyui.log", "PyUI")
 
 config = PyUiConfig()
@@ -22,9 +28,14 @@ selected_theme = os.path.join(config["themeDir"],config["theme"])
                               
 PyUiLogger.get_logger().info(f"{selected_theme}")
 
-theme = Theme(os.path.join(config["themeDir"],config["theme"]))
 
-device = MiyooFlip()
+if os.path.exists("/userdata/system.json"):
+    device = MiyooFlip()
+elif os.path.exists("/mnt/UDISK/system.json"):
+    device = TrimUIBrick()
+
+theme = Theme(os.path.join(config["themeDir"],config["theme"]), device.screen_width, device.screen_height)
+
 display = Display(theme, device)
 controller = Controller(device, config)
 

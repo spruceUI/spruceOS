@@ -79,7 +79,7 @@ class MainMenu:
 
             view = self.view_creator.create_view(
                 view_type=self.theme.get_view_type_for_main_menu(),
-                top_bar_text="SPRUCE", 
+                top_bar_text="PyUI", 
                 options=image_text_list, 
                 cols=4, 
                 rows=1,
