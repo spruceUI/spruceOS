@@ -1,5 +1,6 @@
 #!/bin/sh
 # One Emu launch.sh to rule them all!
+# This svript is Ry's baby, please treat her well -Sun
 # Ry 2024-09-24
 
 ##### DEFINE BASE VARIABLES #####
