@@ -4,25 +4,25 @@
 #
 
 ## HRMMM
-if [ -d "/mnt/sdcard/spruce" ]; then
-  export HOME="/mnt/sdcard"
-  export PATH="/mnt/sdcard/Persistent/portmaster/bin/:$PATH"
-  export LD_LIBRARY_PATH="/mnt/sdcard/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
+if [ -d "/mnt/SDCARD/spruce" ]; then
+  export HOME="/mnt/SDCARD"
+  export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
+  export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
   export LD_PRELOAD=""
-  export PYSDL2_DLL_PATH="/mnt/sdcard/Persistent/portmaster/site-packages/sdl2dll/dll"
-  controlfolder="/mnt/sdcard/Persistent/portmaster/PortMaster"
-  directory="/mnt/sdcard/Roms/PORTS64/"
-  export PYSDL2_DLL_PATH="/mnt/sdcard/Persistent/portmaster/lib/"
+  export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
+  controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+  directory="/mnt/SDCARD/Roms/PORTS64/"
+  export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
 else
   export HOME="/root"
   export LD_PRELOAD=""
-  controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
-  directory="/mnt/sdcard/MIYOO_EX"
+  controlfolder="/mnt/SDCARD/MIYOO_EX/PortMaster"
+  directory="/mnt/SDCARD/MIYOO_EX"
   
   # MIYOO_EXtra shit i need.
-  export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
-  export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
-  export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/lib/"
+  export PATH="/mnt/SDCARD/MIYOO_EX/bin:$PATH"
+  export LD_LIBRARY_PATH="/mnt/SDCARD/MIYOO_EX/lib:$LD_LIBRARY_PATH"
+  export PYSDL2_DLL_PATH="/mnt/SDCARD/MIYOO_EX/lib/"
   ## Python 3 runtime.
   mkdir -p $HOME/python3
 
@@ -30,7 +30,7 @@ else
     umount $HOME/python3
   fi
 
-  mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
+  mount /mnt/SDCARD/MIYOO_EX/python_3.11.squashfs $HOME/python3
   source $HOME/python3/bin/activate
 
 fi

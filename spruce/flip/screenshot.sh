@@ -6,11 +6,11 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-export LD_LIBRARY_PATH=/mnt/sdcard/spruce/flip/lib:/usr/lib:/lib/:/mnt/sdcard/spruce/flip/arm64-ffmpeg/bin
+export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/flip/lib:/usr/lib:/lib/:/mnt/SDCARD/spruce/flip/arm64-ffmpeg/bin
 
 screenshot_location="$1"
 
-/mnt/sdcard/spruce/flip/arm64-ffmpeg/bin/ffmpeg \
+/mnt/SDCARD/spruce/flip/arm64-ffmpeg/bin/ffmpeg \
   -f kmsgrab \
   -device /dev/dri/card0 \
   -i - \

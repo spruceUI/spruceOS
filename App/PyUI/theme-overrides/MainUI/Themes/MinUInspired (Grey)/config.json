@@ -1,0 +1,44 @@
+{
+    "name": "MinUInspired (Grey)",
+    "author": "tenlevels",
+    "description": "MinUI inspired theme for a30",
+    "batteryPercentage": {
+        "color": "#EBEBEB",
+        "font": "nunwen.ttf",
+        "size": 18
+    },
+    "title": {
+        "font": "nunwen.ttf",
+        "size": 32,
+        "color": "#EBEBEB"
+    },
+    "hint": {
+        "font": "nunwen.ttf",
+        "size": 25,
+        "color": "#EBEBEB"
+    },
+    "currentpage": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#EBEBEB"
+    },
+    "total": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#EBEBEB"
+    },
+    "grid": {
+        "font": "AdobeBlank.ttc",
+        "grid1x4": 28,
+        "grid3x4": 24,
+        "color": "#EBEBEB",
+        "selectedcolor": "#EBEBEB"
+    },
+    "list": {
+        "font": "nunwen.ttf",
+        "size": 28,
+        "color": "#EBEBEB",
+        "selectedcolor": "#EBEBEB"
+
+    }
+}

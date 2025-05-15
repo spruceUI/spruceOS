@@ -9,6 +9,7 @@
     },
     "setstat_mode": 0,
     "rename_mode": 0,
+    "resume_max_size": 0,
     "temp_path": "",
     "proxy_protocol": 0,
     "proxy_allowed": [],
@@ -21,6 +22,11 @@
     "max_per_host_connections": 20,
     "allowlist_status": 0,
     "allow_self_connections": 0,
+    "umask": "",
+    "server_version": "",
+    "metadata": {
+      "read": 0
+    },
     "defender": {
       "enabled": false,
       "driver": "memory",
@@ -33,7 +39,11 @@
       "score_no_auth": 0,
       "observation_time": 30,
       "entries_soft_limit": 100,
-      "entries_hard_limit": 150
+      "entries_hard_limit": 150,
+      "login_delay": {
+        "success": 0,
+        "password_failed": 1000
+      }
     },
     "rate_limiters": [
       {
@@ -51,7 +61,10 @@
         "entries_soft_limit": 100,
         "entries_hard_limit": 150
       }
-    ]
+    ],
+    "event_manager": {
+      "enabled_commands": []
+    }
   },
   "acme": {
     "domains": [],
@@ -78,14 +91,14 @@
       }
     ],
     "max_auth_tries": 0,
-    "banner": "",
     "host_keys": [],
     "host_certificates": [],
     "host_key_algorithms": [],
-    "moduli": [],
     "kex_algorithms": [],
+    "min_dh_group_exchange_key_size": 2048,
     "ciphers": [],
     "macs": [],
+    "public_key_algorithms": [],
     "trusted_user_ca_keys": [],
     "revoked_user_certs_file": "",
     "login_banner_file": "",
@@ -109,6 +122,7 @@
         "address": "",
         "apply_proxy_config": true,
         "tls_mode": 0,
+        "tls_session_reuse": 0,
         "certificate_file": "",
         "certificate_key_file": "",
         "min_tls_version": 12,
@@ -119,10 +133,10 @@
         "tls_cipher_suites": [],
         "passive_connections_security": 0,
         "active_connections_security": 0,
+        "ignore_ascii_transfer_type": 0,
         "debug": false
       }
     ],
-    "banner": "",
     "banner_file": "",
     "active_transfers_port_non_20": true,
     "passive_port_range": {
@@ -149,6 +163,7 @@
         "min_tls_version": 12,
         "client_auth_type": 0,
         "tls_cipher_suites": [],
+        "tls_protocols": [],
         "prefix": "",
         "proxy_allowed": [],
         "client_ip_proxy_header": "",
@@ -251,7 +266,7 @@
       {
         "port": 8080,
         "address": "",
-        "enable_web_admin": false,
+        "enable_web_admin": true,
         "enable_web_client": true,
         "enable_rest_api": true,
         "enabled_login_methods": 0,
@@ -261,15 +276,16 @@
         "min_tls_version": 12,
         "client_auth_type": 0,
         "tls_cipher_suites": [],
+        "tls_protocols": [],
         "proxy_allowed": [],
         "client_ip_proxy_header": "",
         "client_ip_header_depth": 0,
         "hide_login_url": 0,
         "render_openapi": true,
-        "web_client_integrations": [],
         "oidc": {
           "client_id": "",
           "client_secret": "",
+          "client_secret_file": "",
           "config_url": "",
           "redirect_base_url": "",
           "scopes": [
@@ -299,7 +315,7 @@
           "content_security_policy": "",
           "permissions_policy": "",
           "cross_origin_opener_policy": "",
-          "expect_ct_header": ""
+          "cache_control": ""
         },
         "branding": {
           "web_admin": {
@@ -307,10 +323,9 @@
             "short_name": "",
             "favicon_path": "",
             "logo_path": "",
-            "login_image_path": "",
             "disclaimer_name": "",
             "disclaimer_path": "",
-            "default_css": "",
+            "default_css": [],
             "extra_css": []
           },
           "web_client": {
@@ -318,10 +333,9 @@
             "short_name": "",
             "favicon_path": "",
             "logo_path": "",
-            "login_image_path": "",
             "disclaimer_name": "",
             "disclaimer_path": "",
-            "default_css": "",
+            "default_css": [],
             "extra_css": []
           }
         }
@@ -336,6 +350,7 @@
     "ca_certificates": [],
     "ca_revocation_lists": [],
     "signing_passphrase": "",
+    "signing_passphrase_file": "",
     "token_validation": 0,
     "max_upload_file_size": 0,
     "cors": {
@@ -364,7 +379,8 @@
     "certificate_file": "",
     "certificate_key_file": "",
     "min_tls_version": 12,
-    "tls_cipher_suites": []
+    "tls_cipher_suites": [],
+    "tls_protocols": []
   },
   "http": {
     "timeout": 20,
@@ -399,7 +415,7 @@
   },
   "smtp": {
     "host": "",
-    "port": 25,
+    "port": 587,
     "from": "",
     "user": "",
     "password": "",

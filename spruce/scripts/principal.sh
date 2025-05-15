@@ -63,6 +63,11 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
+    if [ -f /mnt/SDCARD/spruce/flags/bitpal.lock ]; then
+        /mnt/SDCARD/App/BitPal/bitpal.sh
+        rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
+    fi
+
     # Check whether to launch into EmulationStation (only for Flip!)
     if [ "$PLATFORM" = "Flip" ]; then
         runee=$(/usr/miyoo/bin/jsonval runee)
@@ -174,14 +179,24 @@ while [ 1 ]; do
                 runifnecessary "scened" trimui_scened
                 runifnecessary "trimui_btmanager" trimui_btmanager
                 runifnecessary "hardwareservice" hardwareservice
-
+             
                 # the next two lines are the contents of /usr/trimui/bin/premainui.sh. I moved them
                 # here for greater transparency and control (e.g. what if another CSW modified those
                 # files since NAND is writeable on the TrimUI devices?)
                 rm -f /tmp/trimui_inputd/input_no_dpad
                 rm -f /tmp/trimui_inputd/input_dpad_to_joystick
-
-                MainUI
+             
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+					umount /mnt/SDCARD/Themes
+					touch /tmp/fbdisplay_exit
+					cat /dev/zero > /dev/fb0
+                    export PYSDL2_DLL_PATH="/usr/lib"
+					export LD_LIBRARY_PATH="/usr/trimui/lib"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py >> /dev/null 2>&1
+                else
+                    MainUI
+                fi
+                preload.sh
 
                 if [ -f /tmp/trimui_inputd_restart ] ; then
                     #restart before emulator run
@@ -199,7 +214,12 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                MainUI
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+                    export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py &> /dev/null
+                else
+                    MainUI
+                fi
                 ;;
         esac
 

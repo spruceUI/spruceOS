@@ -1,17 +1,17 @@
 #!/bin/sh
-mkdir -p /mnt/sdcard/Persistent/.32bit_chroot
-mkdir -p /mnt/sdcard/Persistent/.32bit_chroot/mnt
-mkdir -p /mnt/sdcard/Persistent/.32bit_chroot/mnt/sdcard
+mkdir -p /mnt/SDCARD/Persistent/.32bit_chroot
+mkdir -p /mnt/SDCARD/Persistent/.32bit_chroot/mnt
+mkdir -p /mnt/SDCARD/Persistent/.32bit_chroot/mnt/sdcard
 
-mount -t squashfs /mnt/sdcard/spruce/flip/miyoo355_rootfs_32.img /mnt/sdcard/Persistent/.32bit_chroot
+mount -t squashfs /mnt/SDCARD/spruce/flip/miyoo355_rootfs_32.img /mnt/SDCARD/Persistent/.32bit_chroot
 
-mount --bind /sys /mnt/sdcard/Persistent/.32bit_chroot/sys
-mount --bind /dev /mnt/sdcard/Persistent/.32bit_chroot/dev
-mount --bind /proc /mnt/sdcard/Persistent/.32bit_chroot/proc
-mount --bind /var/run /mnt/sdcard/Persistent/.32bit_chroot/var/run
-mount --bind /mnt/sdcard /mnt/sdcard/Persistent/.32bit_chroot/sdcard
-mount --bind /mnt/sdcard /mnt/sdcard/Persistent/.32bit_chroot/mnt/sdcard
-mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Persistent/.32bit_chroot/sdcard/Roms/PORTS/
-mount --bind /mnt/sdcard/Persistent/.32bit_chroot/sdcard/Roms/PORTS64/ /mnt/sdcard/Persistent/.32bit_chroot/mnt/sdcard/Roms/PORTS64/ports/
+mount --bind /sys /mnt/SDCARD/Persistent/.32bit_chroot/sys
+mount --bind /dev /mnt/SDCARD/Persistent/.32bit_chroot/dev
+mount --bind /proc /mnt/SDCARD/Persistent/.32bit_chroot/proc
+mount --bind /var/run /mnt/SDCARD/Persistent/.32bit_chroot/var/run
+mount --bind /mnt/sdcard /mnt/SDCARD/Persistent/.32bit_chroot/sdcard
+mount --bind /mnt/sdcard /mnt/SDCARD/Persistent/.32bit_chroot/mnt/sdcard
+mount --bind /mnt/SDCARD/Roms/PORTS64/ /mnt/SDCARD/Persistent/.32bit_chroot/SDCARD/Roms/PORTS/
+mount --bind /mnt/SDCARD/Persistent/.32bit_chroot/SDCARD/Roms/PORTS64/ /mnt/SDCARD/Persistent/.32bit_chroot/mnt/SDCARD/Roms/PORTS64/ports/
 
-chroot /mnt/sdcard/Persistent/.32bit_chroot /bin/sh -c "/mnt/sdcard/spruce/flip/mount_muOS.sh"
+chroot /mnt/SDCARD/Persistent/.32bit_chroot /bin/sh -c "/mnt/SDCARD/spruce/flip/mount_muOS.sh"
