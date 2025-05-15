@@ -459,7 +459,11 @@ run_ppsspp() {
 	fi
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
-	[ "$PLATFORM" = "A30" ] && PPSSPPSDL="./PPSSPPSDL" || PPSSPPSDL="./PPSSPPSDL_$PLATFORM"
+	case "$PLATFORM" in
+		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
+		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
+		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
+	esac
 	"$PPSSPPSDL" "$ROM_FILE" "$PPSSPP_CMDLINE"
 }
 
