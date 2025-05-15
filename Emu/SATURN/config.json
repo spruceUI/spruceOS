@@ -30,7 +30,7 @@
     },
     {
       "name": "CPU: (✓PERF)-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Generate M3U playlists for multi-disc games",
