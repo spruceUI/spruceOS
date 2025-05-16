@@ -637,11 +637,12 @@ run_mupen_standalone() {
 		;;
 	esac
 
+	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 	sleep 0.3
 	./mupen64plus "$ROM_PATH"
-
 	kill -9 $(pidof gptokeyb2)
+
 	rm -f "$TEMP_ROM"
 }
 

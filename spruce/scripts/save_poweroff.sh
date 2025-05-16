@@ -139,6 +139,7 @@ else
     killall -q -15 flycast
     killall -q -15 yabasanshiro
     killall -q -15 yabasanshiro.trimui
+    killall -q -15 mupen64plus
     killall -q -9 MainUI
 fi
 
@@ -155,6 +156,7 @@ while killall -q -0 ra32.miyoo ||
     killall -q -0 flycast ||
     killall -q -0 yabasanshiro ||
     killall -q -0 yabasanshiro.trimui ||
+    killall -q -0 mupen64plus||
     killall -q -0 MainUI; do
     sleep 0.3
 done
