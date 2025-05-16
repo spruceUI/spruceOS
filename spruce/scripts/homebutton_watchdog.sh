@@ -78,7 +78,7 @@ kill_emulator() {
         fi
 
         killall -q -CONT pico8_dyn pico8_64
-        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64
+        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui
     fi
 }
 
