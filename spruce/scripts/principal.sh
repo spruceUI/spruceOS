@@ -190,7 +190,7 @@ while [ 1 ]; do
 					umount /mnt/SDCARD/Themes
 					touch /tmp/fbdisplay_exit
 					cat /dev/zero > /dev/fb0
-                    export PYSDL2_DLL_PATH="/usr/lib"
+                    export PYSDL2_DLL_PATH="/usr/trimui/lib"
 					export LD_LIBRARY_PATH="/usr/trimui/lib"
                     /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py >> /dev/null 2>&1
                 else
