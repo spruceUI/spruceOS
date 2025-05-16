@@ -660,7 +660,8 @@ run_flycast_standalone() {
 	export HOME="$EMU_DIR"
 
 	mkdir -p "$EMU_DIR/.local/share/flycast"
-	mount --bind /mnt/SDCARD/BIOS $EMU_DIR/.local/share/flycast
+	mkdir -p "/mnt/SDCARD/BIOS/dc"
+	mount --bind /mnt/SDCARD/BIOS/dc $EMU_DIR/.local/share/flycast
 
 	cd "$EMU_DIR"
 	./flycast "$ROM_FILE"
