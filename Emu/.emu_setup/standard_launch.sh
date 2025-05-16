@@ -655,6 +655,19 @@ run_yabasanshiro() {
 	fi
 }
 
+run_flycast_standalone() {
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64"
+	export HOME="$EMU_DIR"
+
+	mkdir -p "$EMU_DIR/.local/share/flycast"
+	mount --bind /mnt/SDCARD/BIOS $EMU_DIR/.local/share/flycast
+
+	cd "$EMU_DIR"
+	./flycast "$ROM_FILE"
+
+	umount $EMU_DIR/.local/share/flycast
+}
+
  ########################
 ##### MAIN EXECUTION #####
  ########################
@@ -671,6 +684,13 @@ ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
+	"DC")
+		if [ "$CORE" = "flycast_xtreme" ] && [ ! "$PLATFORM" = "A30" ]; then
+			run_flycast_standalone
+		else
+			run_retroarch
+		fi
+		;;
 	"MEDIA")
 		run_ffplay
 		;;
