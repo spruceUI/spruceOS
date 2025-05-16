@@ -257,7 +257,7 @@ run_drastic() {
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
-		if [ "$PLATFORM" = "Flip" || "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
+		if [ "$PLATFORM" = "Brick" || "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
 		
 			export LD_PRELOAD=./lib64_a133p/libSDL2-2.0.so.0 ### this option affects screen layouts and may be beneficial for the TSP
 		
