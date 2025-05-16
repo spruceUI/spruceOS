@@ -648,7 +648,7 @@ run_yabasanshiro() {
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
 		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
-	if [ -f "$SATURN_BIOS" ]; then
+	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "sa_bios" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
@@ -696,7 +696,7 @@ case $EMU_NAME in
 		save_ppsspp_configs
 		;;
 	"SATURN")
-		if [ "$CORE" = "standalone" ]; then
+		if [ "$CORE" = "sa_hle" ] || [ "$CORE" = "sa_bios" ]; then
 			run_yabasanshiro
 		else
 			run_retroarch
