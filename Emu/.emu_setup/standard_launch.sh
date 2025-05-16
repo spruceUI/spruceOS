@@ -256,8 +256,17 @@ run_drastic() {
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		[ "$PLATFORM" != "Flip" ] || export LD_PRELOAD=./lib64_a133p/libSDL2-2.0.so.0 ### this option affects screen layouts and may be beneficial for the TSP
-		[ "$PLATFORM" = "Flip" ] || export LD_PRELOAD=./lib64_rk3566/libSDL2-2.0.so.0
+		
+		if [ "$PLATFORM" = "Flip" || "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
+		
+			export LD_PRELOAD=./lib64_a133p/libSDL2-2.0.so.0 ### this option affects screen layouts and may be beneficial for the TSP
+		
+		elif [ "$PLATFORM" = "Flip" ]; then
+		
+			export LD_PRELOAD=./lib64_rk3566/libSDL2-2.0.so.0
+			
+		fi
+		
 		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
 		./drastic64 "$ROM_FILE"
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
