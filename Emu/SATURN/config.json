@@ -25,7 +25,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓LIBRETRO)-standalone",
+      "name": "Emu Core: (✓LIBRETRO)-sa_bios-sa_hle",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {

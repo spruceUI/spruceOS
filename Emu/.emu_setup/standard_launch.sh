@@ -1,5 +1,6 @@
 #!/bin/sh
 # One Emu launch.sh to rule them all!
+# This svript is Ry's baby, please treat her well -Sun
 # Ry 2024-09-24
 
 ##### DEFINE BASE VARIABLES #####
@@ -647,11 +648,25 @@ run_yabasanshiro() {
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
 		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
-	if [ -f "$SATURN_BIOS" ]; then
+	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "sa_bios" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
 	fi
+}
+
+run_flycast_standalone() {
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64"
+	export HOME="$EMU_DIR"
+
+	mkdir -p "$EMU_DIR/.local/share/flycast"
+	mkdir -p "/mnt/SDCARD/BIOS/dc"
+	mount --bind /mnt/SDCARD/BIOS/dc $EMU_DIR/.local/share/flycast
+
+	cd "$EMU_DIR"
+	./flycast "$ROM_FILE"
+
+	umount $EMU_DIR/.local/share/flycast
 }
 
  ########################
@@ -670,6 +685,13 @@ ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
+	"DC")
+		if [ "$CORE" = "flycast_xtreme" ] && [ ! "$PLATFORM" = "A30" ]; then
+			run_flycast_standalone
+		else
+			run_retroarch
+		fi
+		;;
 	"MEDIA")
 		run_ffplay
 		;;
@@ -695,7 +717,7 @@ case $EMU_NAME in
 		save_ppsspp_configs
 		;;
 	"SATURN")
-		if [ "$CORE" = "standalone" ]; then
+		if [ "$CORE" = "sa_hle" ] || [ "$CORE" = "sa_bios" ]; then
 			run_yabasanshiro
 		else
 			run_retroarch
