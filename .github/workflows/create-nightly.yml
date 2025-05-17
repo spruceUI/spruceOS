@@ -4,8 +4,6 @@ on:
   schedule:
     - cron: '10 10 * * *'
   workflow_dispatch:
-#  push:
-#    branches: [ Development ]
 
 jobs:
   create-7z:
@@ -32,7 +30,6 @@ jobs:
           fi
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-          # Get last commit hash and commits, save to file
           {
             echo "Last commit: $(git rev-parse HEAD)"
             echo ""
@@ -43,13 +40,11 @@ jobs:
       - name: Check for commits
         id: check_commits
         run: |
-          # Get all commits from last 24 hours
           COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
           fi
-          # Write commits to output
           {
             echo "commits<<EOF"
             echo "$COMMITS"
@@ -58,15 +53,10 @@ jobs:
 
       - name: Update version in language files
         run: |
-          # Get the version-date string
           VERSION="${{ steps.get_version.outputs.version }}"
-          
-          # Find and update all .lang files
           find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
             for file do
-              # Create temp file
               tmp=$(mktemp)
-              # Replace version string, preserving the v prefix
               sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
               mv "$tmp" "$file"
             done
@@ -91,7 +81,6 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
             -x!commits_nightly.txt
-          # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
       - name: Create Release
@@ -111,20 +100,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git source_repo
-          
-          # Calculate file info
           CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
-          
-          # Function to update OTA file
           update_ota_file() {
             local file="$1"
             local content
             content=$(cat "$file")
-            
             echo "$content" | grep -v "^NIGHTLY_" > "$file"
             echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
             echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
@@ -132,20 +115,14 @@ jobs:
             echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
             echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
           }
-          
-          # Update both OTA files
           update_ota_file "ota_repo/OTA/spruce"
           update_ota_file "source_repo/OTA/spruce"
-          
-          # Update primary OTA repo
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
           git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
-          
-          # Update backup OTA repo
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
@@ -158,11 +135,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases and filter out beta releases
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
             jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
-          
-          # Convert to array and keep only releases after the first 3
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
@@ -170,3 +144,16 @@ jobs:
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done
+
+      - name: Send Discord notification
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          VERSION="v${{ steps.get_version.outputs.version }}"
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{
+              \"content\": \"🚀 A new nightly build \`$VERSION\` has been released!\n<https://github.com/spruceUI/spruceOSNightlies/releases/tag/$VERSION>\"
+            }" \
+            $DISCORD_WEBHOOK
