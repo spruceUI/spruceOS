@@ -1044,7 +1044,6 @@ settings_organize() {
 # If no intensity is provided, gets value from settings
 vibrate() {
     duration=50
-    intensity
 
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
@@ -1099,7 +1098,7 @@ vibrate() {
                 while [ $timer -lt $duration ]; do
                     sleep 0.002
                     timer=$(($timer + 2))
-                done &
+                done
                 echo -n 0 > /sys/class/gpio/gpio20/value
             elif [ "$intensity" = "Medium" ]; then
                 timer=0
