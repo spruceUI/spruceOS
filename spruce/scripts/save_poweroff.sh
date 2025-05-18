@@ -92,6 +92,9 @@ if flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null; the
     fi
 fi
 
+# kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
+pgrep -f "lid_watchdog.sh" | xargs -r kill
+
 # notify user with led
 echo heartbeat > "$LED_PATH"/trigger
 
