@@ -1,21 +1,18 @@
 
 import os
-from controller.controller import Controller
+import subprocess
 from devices.device import Device
-from display.display import Display
-from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
-from games.utils.game_system_utils import GameSystemUtils
 from menus.games.roms_menu_common import RomsMenuCommon
+from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
-from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 
 
 class SearchGamesForSystemMenu(RomsMenuCommon):
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, game_system : GameSystem, search_str):
-        super().__init__(display,controller,device,theme)
-        self.rom_select_options_builder = RomSelectOptionsBuilder(device, theme)
+    def __init__(self, game_system : GameSystem, search_str):
+        super().__init__()
+        self.rom_select_options_builder = RomSelectOptionsBuilder()
         self.game_system = game_system
         self.search_str = search_str
 

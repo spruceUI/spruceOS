@@ -6,24 +6,33 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from themes.theme import Theme
-from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
-from views.view_type import ViewType
 
 
 class AppMenu:
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme):
-        self.display : Display= display
-        self.controller : Controller = controller
-        self.device : Device= device
-        self.theme : Theme= theme
-        self.appFinder = device.get_app_finder()
-        self.view_creator = ViewCreator(display,controller,device,theme)
+    def __init__(self):
+        self.appFinder = Device.get_app_finder()
 
     def _convert_to_theme_version_of_icon(self, icon_path):
-        return os.path.join(self.theme.path,"icons","app",os.path.basename(icon_path))
+        return os.path.join(Theme.get_theme_path(),"icons","app",os.path.basename(icon_path))
+
+    def get_first_existing_path(self,file_priority_list):
+        for path in file_priority_list:
+            try:
+                if path and os.path.isfile(path):
+                    return path
+            except Exception:
+                pass
+        return None 
+
+    def get_icon(self, app_folder, icon_path_from_config):
+        icon_priority = []
+        icon_priority.append(os.path.join(Theme.get_theme_path(),"icons","app",os.path.basename(icon_path_from_config)))
+        icon_priority.append(icon_path_from_config)
+        icon_priority.append(os.path.join(app_folder,icon_path_from_config))
+        return self.get_first_existing_path(icon_priority)
 
     def run_app_selection(self) :
         selected = Selection(None,None,0)
@@ -31,19 +40,21 @@ class AppMenu:
         view = None
         for app in self.appFinder.get_apps():
             if(app.get_label() is not None):
+                icon = self.get_icon(app.get_folder(),app.get_icon())
+                print(f"Adding app: {app.get_label()} with icon: {icon}")
                 app_list.append(
                     GridOrListEntry(
                         primary_text=app.get_label(),
-                        image_path=app.get_icon(),
-                        image_path_selected=app.get_icon(),
+                        image_path=icon,
+                        image_path_selected=icon,
                         description=app.get_description(),
-                        icon=self._convert_to_theme_version_of_icon(app.get_icon()),
+                        icon=icon,
                         value=app.get_launch()
                     )
                 )
         if(view is None):
-            view = self.view_creator.create_view(
-                view_type=self.theme.get_view_type_for_app_menu(),
+            view = ViewCreator.create_view(
+                view_type=Theme.get_view_type_for_app_menu(),
                 top_bar_text="Apps", 
                 options=app_list,
                 selected_index=selected.get_index())
@@ -56,9 +67,9 @@ class AppMenu:
             if(ControllerInput.A == selected.get_input()):
                 filepath = selected.get_selection().get_value()
                 directory = os.path.dirname(filepath)
-                self.display.deinit_display()
-                self.device.run_app([filepath], directory)
-                self.controller.clear_input_queue()
-                self.display.reinitialize()
+                Display.deinit_display()
+                Device.run_app([filepath], directory)
+                Controller.clear_input_queue()
+                Display.reinitialize()
             elif(ControllerInput.B == selected.get_input()):
                 running = False

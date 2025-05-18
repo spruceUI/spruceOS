@@ -1,15 +1,16 @@
 from pathlib import Path
 import re
 import subprocess
-import sys
 import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from controller.key_watcher import KeyWatcher
 from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
-from devices.device import Device
+from devices.device_common import DeviceCommon
 import os
+from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.utils.process_runner import ProcessRunner
@@ -17,11 +18,15 @@ from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
 from games.utils.game_entry import GameEntry
 from games.utils.rom_utils import RomUtils
+from menus.games.utils.recents_manager import RecentsManager
+from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
+from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
-class MiyooFlip(Device):
+class MiyooFlip(DeviceCommon):
     
     def __init__(self):
         self.path = self
@@ -44,19 +49,59 @@ class MiyooFlip(Device):
         }
         os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
         os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
-
-        #Idea is if something were to change from he we can reload it
-        #so it always has the more accurate data
+        
+        script_dir = Path(__file__).resolve().parent
+        source = script_dir / 'system.json'
+        ConfigCopier.ensure_config("/userdata/system.json", source)
         self.system_config = SystemConfig("/userdata/system.json")
         
-
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_lumination_to_config()
         self._set_contrast_to_config()
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self.ensure_wpa_supplicant_conf()
+        self.init_gpio()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
+        self.hardware_poller = MiyooFlipPoller(self)
+        threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+        if(PyUiConfig.enable_button_watchers()):
+            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+            self.power_key_watcher = KeyWatcher("/dev/input/event2")
+            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+            power_key_polling_thread.start()
+
+    def init_gpio(self):
+        try:
+            if not os.path.exists("/sys/class/gpio150"):
+                with open("/sys/class/gpio/export", "w") as f:
+                    f.write("150")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error exportiing gpio150 {e}")
+
+    def are_headphones_plugged_in(self):
+        try:
+            with open("/sys/class/gpio/gpio150/value", "r") as f:
+                value = f.read().strip()
+                return "0" == value 
+        except (FileNotFoundError, IOError) as e:
+            return False
+        
+    def is_lid_closed(self):
+        try:
+            with open("/sys/devices/platform/hall-mh248/hallvalue", "r") as f:
+                value = f.read().strip()
+                return "0" == value 
+        except (FileNotFoundError, IOError) as e:
+            return False
+
+    def sleep(self):
+        with open("/sys/power/mem_sleep", "w") as f:
+            f.write("deep")
+        with open("/sys/power/state", "w") as f:
+            f.write("mem")  
 
     def ensure_wpa_supplicant_conf(self):
         conf_path = Path("/userdata/cfg/wpa_supplicant.conf")
@@ -311,10 +356,22 @@ class MiyooFlip(Device):
 
         try:
             
-            ProcessRunner.run(
-                ["amixer", "cset", f"name='SPK Volume'", str(volume)],
-                check=True
-            )
+            if(0 == volume):
+                ProcessRunner.run(["amixer","sset","Playback Path","OFF"], print=False)
+            else:
+                if(self.are_headphones_plugged_in()):
+                    ProcessRunner.run(["amixer","sset","Playback Path","HP"], print=False)
+                else:
+                    ProcessRunner.run(["amixer","sset","Playback Path","SPK"], print=False)
+
+                PyUiLogger.get_logger().info(f"Setting volume to {volume}")
+
+                ProcessRunner.run(
+                    ["amixer", "cset", f"name='SPK Volume'", str(volume)],
+                    check=True,
+                    print=False
+                )
+            
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
@@ -379,25 +436,27 @@ class MiyooFlip(Device):
         ProcessRunner.run(["amixer", "cset","numid=5", str(proper_volume*5)])
 
 
-    def run_game(self, file_path):
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+        RecentsManager.add_game(rom_info)
+        launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
+        
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8
         #miyoo maps it to /media/sdcard0/Emu/FAKE08/../../Roms/FAKE08/Alpine Alpaca.p8
-        miyoo_app_path = self.convert_game_path_to_miyoo_path(file_path)
-        self.write_cmd_to_run(f'''chmod a+x "/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh";"/media/sdcard0/Emu/FC/../.emu_setup/standard_launch.sh" "{miyoo_app_path}"''')
+        miyoo_app_path = self.convert_game_path_to_miyoo_path(rom_info.rom_file_path)
+        self.write_cmd_to_run(f'''chmod a+x "{launch_path}";"{launch_path}" "{miyoo_app_path}"''')
 
         self.fix_sleep_sound_bug()
-        PyUiLogger.get_logger().debug(f"About to launch /mnt/SDCARD/Emu/.emu_setup/standard_launch.sh {file_path} | {miyoo_app_path}")
-        subprocess.run(["/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh",file_path])
-
-        self.delete_cmd_to_run()
+        try:
+            return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
+                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to launch game {rom_info.rom_file_path}: {e}")
+            return None
 
     def run_app(self, args, dir = None):
-        PyUiLogger.get_logger().debug(f"About to launch app {args}")
         self.fix_sleep_sound_bug()
-        if(dir is not None):
-            subprocess.run(args, cwd = dir)
-        else:
-            subprocess.run(args, cwd = dir)
+        PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
+        subprocess.run(args, cwd = dir)
 
     #TODO untested
     def map_analog_axis(self,sdl_input, value, threshold=16000):
@@ -423,11 +482,34 @@ class MiyooFlip(Device):
                 return ControllerInput.RIGHT_STICK_DOWN
         return None
     
-    def map_input(self, sdl_input):
+    def map_digital_input(self, sdl_input):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
         return mapping
+
+    def map_analog_input(self, sdl_axis, sdl_value):
+        if(5 == sdl_axis and 32767 == sdl_value):
+            return ControllerInput.R2
+        elif(4 == sdl_axis and 32767 == sdl_value):
+            return ControllerInput.L2
+        else:
+            #PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
+            return None
+
+    def key_down(self, key_code):
+        if(116 == key_code):
+            self.sleep()
+            return ControllerInput.POWER_BUTTON
+        if(115 == key_code):
+            self.change_volume(10)
+            return ControllerInput.VOLUME_UP
+        elif(114 == key_code):
+            self.change_volume(-10)
+            return ControllerInput.VOLUME_DOWN
+        else:
+            PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
@@ -696,3 +778,9 @@ class MiyooFlip(Device):
 
     def get_bluetooth_scanner(self):
         return BluetoothScanner()
+
+    def get_favorites_path(self):
+        return "/mnt/SDCARD/Saves/pyui-favorites.json"
+    
+    def get_recents_path(self):
+        return "/mnt/SDCARD/Saves/pyui-recents.json"

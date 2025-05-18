@@ -192,7 +192,7 @@ while [ 1 ]; do
 					cat /dev/zero > /dev/fb0
                     export PYSDL2_DLL_PATH="/usr/lib"
 					export LD_LIBRARY_PATH="/usr/trimui/lib"
-                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py >> /dev/null 2>&1
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 else
                     MainUI
                 fi
@@ -216,7 +216,7 @@ while [ 1 ]; do
                 cd /usr/miyoo/bin/
                 if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
                     export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
-                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/MainUI.py &> /dev/null
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 else
                     MainUI
                 fi

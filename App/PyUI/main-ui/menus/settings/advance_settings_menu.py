@@ -1,62 +1,48 @@
 
 import os
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.settings import settings_menu
-from menus.settings.bluetooth_menu import BluetoothMenu
-from menus.settings.wifi_menu import WifiMenu
-from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
-from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
-from views.selection import Selection
-from views.view_creator import ViewCreator
-from views.view_type import ViewType
 
 
 class AdvanceSettingsMenu(settings_menu.SettingsMenu):
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, config: PyUiConfig):
-        super().__init__(
-            display=display,
-            controller=controller,
-            device=device,
-            theme=theme,
-            config=config)
-        self.on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
+    def __init__(self):
+        super().__init__()
+        self.on_screen_keyboard = OnScreenKeyboard()
 
     def reboot(self, input: ControllerInput):
         if(ControllerInput.A == input):
-            self.device.run_app(self.device.reboot_cmd)
+            Device.run_app(Device.reboot_cmd())
     
     
     def brightness_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            self.device.lower_brightness()
+            Device.lower_brightness()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            self.device.raise_brightness()
+            Device.raise_brightness()
 
     def contrast_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            self.device.lower_contrast()
+            Device.lower_contrast()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            self.device.raise_contrast()
+            Device.raise_contrast()
 
     def saturation_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            self.device.lower_saturation()
+            Device.lower_saturation()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            self.device.raise_saturation()
+            Device.raise_saturation()
     
 
     def show_on_screen_keyboard(self, input):
         PyUiLogger.get_logger().info(self.on_screen_keyboard.get_input("On Screen Keyboard Test"))
 
     def change_hold_delay(self, input):
-        current_delay = self.config.get_turbo_delay_ms() * 1000
+        current_delay = PyUiConfig.get_turbo_delay_ms() * 1000
 
         if(ControllerInput.DPAD_LEFT == input):
             if(current_delay > 0):
@@ -71,8 +57,8 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
             if(current_delay < 1000):
                 current_delay+=100
 
-        self.config.set_turbo_delay_ms(current_delay)
-        self.config.save()
+        PyUiConfig.set_turbo_delay_ms(current_delay)
+        PyUiConfig.save()
 
 
     def build_options_list(self):
@@ -81,7 +67,7 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Brightness",
-                        value_text="<    " + str(self.device.brightness) + "    >",
+                        value_text="<    " + str(Device.get_brightness()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -92,7 +78,7 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Contrast",
-                        value_text="<    " + str(self.device.contrast) + "    >",
+                        value_text="<    " + str(Device.get_contrast()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -103,7 +89,7 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Saturation",
-                        value_text="<    " + str(self.device.saturation) + "    >",
+                        value_text="<    " + str(Device.get_saturation()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -115,7 +101,7 @@ class AdvanceSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Menu Turbo Delay (mS)",
-                        value_text="<    " + str(int(self.config.get_turbo_delay_ms()*1000)) + "    >",
+                        value_text="<    " + str(int(PyUiConfig.get_turbo_delay_ms()*1000)) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,

@@ -1,9 +1,9 @@
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
 from typing import List, Set
 
+from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from utils.logger import PyUiLogger
 
@@ -23,11 +23,11 @@ class WiFiScanner:
         self.delay = delay
         self.max_idle_scans = max_idle_scans
 
-    def scan_once(self, device) -> List[WiFiNetwork]:
+    def scan_once(self) -> List[WiFiNetwork]:
         result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         if "Failed to connect to" in result.stderr:
             PyUiLogger.get_logger().error("wlan0 seems broken, restarting and retrying")
-            device.wifi_error_detected()
+            Device.wifi_error_detected()
             time.sleep(15)
             ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         
@@ -53,7 +53,7 @@ class WiFiScanner:
 
         return networks
 
-    def scan_networks(self, device) -> List[WiFiNetwork]:
+    def scan_networks(self) -> List[WiFiNetwork]:
         PyUiLogger.get_logger().info("Starting WiFi Scan")
         known_ssids: Set[str] = set()
         known_bssids: Set[str] = set()
@@ -65,7 +65,7 @@ class WiFiScanner:
         while idle_count < self.max_idle_scans:
             scan_count+=1
             PyUiLogger.get_logger().info(f"    Scan # {scan_count}")
-            new_networks = self.scan_once(device)
+            new_networks = self.scan_once()
             added = False
 
             for net in new_networks:

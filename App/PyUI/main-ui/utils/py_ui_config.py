@@ -4,60 +4,83 @@ import os
 from utils.logger import PyUiLogger
 
 class PyUiConfig:
-    def __init__(self, initial_data=None):
-        self._data = initial_data or {}
+    _data = {}
+    _config_path = None
 
-    def save(self):
-        self._write_to_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
-        self.load()
+    @classmethod
+    def init(cls, config_path, initial_data=None):
+        cls._config_path = config_path
+        cls._data = initial_data or {}
+        cls.load()
 
-    def load(self):
-        self._read_from_file("/mnt/SDCARD/App/PyUI/main-ui/config.json")
+    @classmethod
+    def save(cls):
+        cls._write_to_file(cls._config_path)
+        cls.load()
 
-    def _write_to_file(self, filepath):
+    @classmethod
+    def load(cls):
+        cls._read_from_file(cls._config_path)
+
+    @classmethod
+    def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             with open(filepath, 'w') as f:
-                json.dump(self._data, f, indent=4)
+                json.dump(cls._data, f, indent=4)
             PyUiLogger.get_logger().info(f"Settings saved to {filepath}")
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write settings to {filepath}: {e}")
 
-    def _read_from_file(self, filepath):
+    @classmethod
+    def _read_from_file(cls, filepath):
         try:
             with open(filepath, 'r') as f:
-                self._data = json.load(f)
+                cls._data = json.load(f)
                 PyUiLogger.get_logger().info(f"Settings loaded from {filepath}")
         except FileNotFoundError:
             PyUiLogger.get_logger().error(f"Settings file not found: {filepath}, using defaults.")
-            self._data = {}
+            cls._data = {}
         except json.JSONDecodeError:
             PyUiLogger.get_logger().error(f"Invalid JSON in settings file: {filepath}, using defaults.")
-            self._data = {}
+            cls._data = {}
 
-    def __contains__(self, key):
-        return key in self._data
+    @classmethod
+    def __contains__(cls, key):
+        return key in cls._data
 
-    def get(self, key, default=None):
-        return self._data.get(key, default)
+    @classmethod
+    def get(cls, key, default=None):
+        return cls._data.get(key, default)
 
-    def set(self, key, value):
-        self._data[key] = value
+    @classmethod
+    def set(cls, key, value):
+        cls._data[key] = value
 
-    def __getitem__(self, key):
-        return self._data.get(key)
+    @classmethod
+    def __getitem__(cls, key):
+        return cls._data.get(key)
 
-    def __setitem__(self, key, value):
-        self._data[key] = value
+    @classmethod
+    def __setitem__(cls, key, value):
+        cls._data[key] = value
 
-    def to_dict(self):
-        return self._data.copy()
+    @classmethod
+    def to_dict(cls):
+        return cls._data.copy()
 
-    def clear(self):
-        self._data.clear()
+    @classmethod
+    def clear(cls):
+        cls._data.clear()
 
-    def get_turbo_delay_ms(self):
-        return self._data.get("turboDelayMs", 120)/1000
+    @classmethod
+    def get_turbo_delay_ms(cls):
+        return cls._data.get("turboDelayMs", 120) / 1000
 
-    def set_turbo_delay_ms(self, delay):
-        self._data["turboDelayMs"] = delay
+    @classmethod
+    def set_turbo_delay_ms(cls, delay):
+        cls._data["turboDelayMs"] = delay
+
+    @classmethod
+    def enable_button_watchers(cls):
+        return cls._data.get("enableButtonWatchers", True)

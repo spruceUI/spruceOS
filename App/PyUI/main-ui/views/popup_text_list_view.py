@@ -1,7 +1,5 @@
 
-import time
 from typing import List
-from controller.controller import Controller
 from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
@@ -11,45 +9,36 @@ from views.text_list_view import TextListView
 
 
 class PopupTextListView(TextListView):
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme,
-                 options: List[GridOrListEntry], 
+    def __init__(self, options: List[GridOrListEntry], 
                  selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):
-        super().__init__(display=display,
-                        controller=controller,
-                         device=device,
-                         theme=theme,
-                         top_bar_text=display.get_current_top_bar_title(),
+        super().__init__(top_bar_text=Display.get_current_top_bar_title(),
                          options=options,
                          selected_index=selected_index,
                          show_icons=show_icons,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
-                         usable_height=int(display.get_image_dimensions(theme.menu_popup_bg_large)[1]))
+                         usable_height=int(Display.get_image_dimensions(Theme.menu_popup_bg_large())[1]))
 
-        self.display : Display= display
-        self.controller : Controller = controller
-        self.device : Device= device
-        self.theme : Theme= theme
         self.clear_display_each_render_cycle = False
         self.include_index_text = False
 
 
-        self.view_x = int(theme.pop_menu_x_offset * device.screen_width)
-        self.view_y = int(theme.pop_menu_y_offset * device.screen_height)
-        if(theme.pop_menu_add_top_bar_height_to_y_offset):
-            self.view_y += display.get_top_bar_height()
+        self.view_x = int(Theme.pop_menu_x_offset() * Device.screen_width())
+        self.view_y = int(Theme.pop_menu_y_offset() * Device.screen_height())
+        if(Theme.pop_menu_add_top_bar_height_to_y_offset()):
+            self.view_y += Display.get_top_bar_height()
 
-        self.starting_x_offset = self.view_x + self.theme.pop_menu_text_padding
+        self.starting_x_offset = self.view_x + Theme.pop_menu_text_padding()
         self.base_y_offset = self.view_y
-        self.device.screen_width//4
-        self.display.render_image(
-            image_path=self.theme.menu_popup_bg_large,
+        Device.screen_width()//4
+        Display.render_image(
+            image_path=Theme.menu_popup_bg_large(),
             x=self.view_x,
             y=self.view_y,
             render_mode=RenderMode.TOP_LEFT_ALIGNED
         )
-        self.display.present()
-        self.display.lock_current_image_as_bg()
+        Display.present()
+        Display.lock_current_image_as_bg()
 
     def view_finished(self):
-        self.display.unlock_current_image_as_bg()
+        Display.unlock_current_image_as_bg()

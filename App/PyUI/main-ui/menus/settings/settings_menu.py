@@ -1,15 +1,4 @@
-
-import os
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
-from devices.device import Device
-from display.display import Display
-from menus.settings.bluetooth_menu import BluetoothMenu
-from menus.settings.wifi_menu import WifiMenu
-from themes.theme import Theme
-from utils.py_ui_config import PyUiConfig
-from views.descriptive_list_view import DescriptiveListView
-from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
@@ -17,13 +6,8 @@ from abc import ABC, abstractmethod
 
 
 class SettingsMenu(ABC):
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, config: PyUiConfig):
-        self.display = display
-        self.controller = controller
-        self.device = device
-        self.theme = theme
-        self.config : PyUiConfig = config 
-        self.view_creator = ViewCreator(display,controller,device,theme)
+    def __init__(self):
+        pass
 
     @abstractmethod
     def build_options_list(self):
@@ -38,8 +22,8 @@ class SettingsMenu(ABC):
             
 
             if(list_view is None or self.theme_changed):
-                list_view = self.view_creator.create_view(
-                    view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
+                list_view = ViewCreator.create_view(
+                    view_type=ViewType.ICON_AND_DESC,
                     top_bar_text="Settings", 
                     options=option_list,
                     selected_index=selected.get_index())
