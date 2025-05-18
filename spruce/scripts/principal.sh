@@ -292,4 +292,6 @@ while [ 1 ]; do
         rm /tmp/system/umount_sdcards          
     fi
 
+    sanitize_system_json
+
 done

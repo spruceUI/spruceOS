@@ -20,6 +20,9 @@ case "$PLATFORM" in
     "Flip") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
 esac
 
+# Sanitize system JSON if needed
+sanitize_system_json
+
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
@@ -131,13 +134,6 @@ log_message " " -v
 
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
-
-# Sanitize system JSON if needed
-if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
-    log_message "Runtime: Invalid System JSON detected, sanitizing..."
-    jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
-    mv /tmp/system.json.clean "$SYSTEM_JSON"
-fi
 
 # Use appropriate RA config per platform
 [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
