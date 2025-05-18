@@ -13,10 +13,10 @@ class MiyooAppConfig:
         self.icontop = data.get("icontop")
         self.icon = data.get("icon")
         self.launch = data.get("launch")
-        
+        self.folder = os.path.dirname(json_path)
+
         if(self.launch == "launch.sh"):
-            folder = os.path.dirname(json_path)
-            self.launch = os.path.join(folder,self.launch)
+            self.launch = os.path.join(self.folder,self.launch)
 
         self.description = data.get("description")
 
@@ -34,3 +34,6 @@ class MiyooAppConfig:
 
     def get_description(self):
         return self.description
+    
+    def get_folder(self):
+        return self.folder

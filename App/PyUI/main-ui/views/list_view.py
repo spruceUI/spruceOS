@@ -2,14 +2,14 @@ from abc import ABC, abstractmethod
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
+from display.display import Display
 from views.selection import Selection
 from views.view import View
 
 
 class ListView(View):
-    def __init__(self, controller: Controller):
+    def __init__(self):
         super().__init__()
-        self.controller = controller
         self.current_top = 0
         self.current_bottom = 0
         self.clear_display_each_render_cycle = True
@@ -32,21 +32,21 @@ class ListView(View):
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render_common()
         
-        if(self.controller.get_input()):
-            if self.controller.last_input() == ControllerInput.DPAD_UP:
+        if(Controller.get_input()):
+            if Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(-1)
-            elif self.controller.last_input() == ControllerInput.DPAD_DOWN:
+            elif Controller.last_input() == ControllerInput.DPAD_DOWN:
                 self.adjust_selected(1)
-            elif self.controller.last_input() in select_controller_inputs: #requested inputs have priority over the rest
+            elif Controller.last_input() in select_controller_inputs: #requested inputs have priority over the rest
                 self.selection_made()
-                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
-            elif self.controller.last_input() == ControllerInput.L1:
+                return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.L1:
                 self.adjust_selected(-1*self.max_rows+1)
-            elif self.controller.last_input() == ControllerInput.R1:
+            elif Controller.last_input() == ControllerInput.R1:
                 self.adjust_selected(self.max_rows-1)
-            elif self.controller.last_input() == ControllerInput.B:
+            elif Controller.last_input() == ControllerInput.B:
                 self.selection_made()
-                return Selection(self.get_selected_option(),self.controller.last_input(), self.selected)
+                return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
 
             self._render_common()
 
@@ -55,14 +55,14 @@ class ListView(View):
     
     def _render_common(self):
         #if(self.clear_display_each_render_cycle):
-        self.display.clear(self.top_bar_text)
+        Display.clear(self.top_bar_text)
         
         self.adjust_selected_top_bottom_for_overflow()
 
         self._render()
         if(self.include_index_text):
-            self.display.add_index_text(self.selected+1, len(self.options))
-        self.display.present()
+            Display.add_index_text(self.selected+1, len(self.options))
+        Display.present()
 
     def adjust_selected_top_bottom_for_overflow(self):
         self.selected = max(0, self.selected)

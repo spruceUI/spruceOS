@@ -1,12 +1,10 @@
 
 import os
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
-from menus.games.game_system_config import GameSystemConfig
-from themes.theme import Theme
-from views.descriptive_list_view import DescriptiveListView
+from games.utils.game_system import GameSystem
+from menus.games.utils.rom_info import RomInfo
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -16,14 +14,9 @@ from views.view_type import ViewType
 # Would like this to be generic in the future but this is so Miyoo specific right now 
 # Due to the oddities in how its handled
 class GameConfigMenu:
-    def __init__(self, display: Display, controller: Controller, device: Device, theme: Theme, game_system: str, game : str):
-        self.display = display
-        self.controller = controller
-        self.device = device
-        self.theme = theme
+    def __init__(self, game_system: GameSystem, game : RomInfo):
         self.game_system = game_system
         self.game = game
-        self.view_creator = ViewCreator(display,controller,device,theme)
 
     def show_config(self) :
         selected = Selection(None, None, 0)
@@ -32,10 +25,9 @@ class GameConfigMenu:
         # We essentially need to re-read the game system config every time
         # an option is selected
         while(selected is not None):
-            game_system_config = GameSystemConfig(self.game_system)
 
             config_list = []
-            for config_option in game_system_config.get_launchlist():
+            for config_option in self.game_system.game_system_config.get_launchlist():
                 config_list.append(
                     GridOrListEntry(
                         primary_text=config_option.get('name'),
@@ -47,9 +39,9 @@ class GameConfigMenu:
                     )
                 )
             if(view is None):        
-                view = self.view_creator.create_view(
-                    view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
-                    top_bar_text=self.game_system + " Configuration", 
+                view = ViewCreator.create_view(
+                    view_type=ViewType.ICON_AND_DESC,
+                    top_bar_text=self.game_system.display_name + " Configuration", 
                     options=config_list,
                     selected_index=selected.get_index())
             else:
@@ -62,11 +54,18 @@ class GameConfigMenu:
                 # Example rom /mnt/SDCARD/Roms/PORTS/PokeMMO.sh               
                 # example arg /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
                 #/media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
-                miyoo_game_path = os.path.join("/media/sdcard0/Emu", self.game_system, "../../Roms", self.game_system, self.game)
-                self.display.deinit_display()
-                self.device.run_app([selected.get_selection().get_value(), miyoo_game_path])
+                game_file_name = os.path.basename(self.game.rom_file_path)
+                miyoo_game_path = os.path.join("/media/sdcard0/Emu", self.game_system.folder_name, "../../Roms", self.game_system.folder_name, game_file_name)
+                Display.deinit_display()
+
+                app_path = selected.get_selection().get_value()
+                if(not os.path.isfile(app_path)):
+                    app_path = os.path.join("/media/sdcard0/Emu", self.game_system.folder_name, selected.get_selection().get_value())
+
+                Device.run_app(["sh",app_path, miyoo_game_path], dir=os.path.join("/media/sdcard0/Emu", self.game_system.folder_name))
                 # TODO Once we remove the display_kill and popups from launch.sh we can remove this
                 # For a good speedup
-                self.display.reinitialize()
+                Display.reinitialize()
+                self.game_system.game_system_config.reload_config()
             elif(ControllerInput.B == selected.get_input()):
                 selected = None

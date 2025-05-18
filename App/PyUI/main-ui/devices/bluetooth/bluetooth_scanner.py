@@ -4,7 +4,7 @@ import select
 import subprocess
 import threading
 import time
-from typing import List, Set
+from typing import List
 
 from utils.logger import PyUiLogger
 

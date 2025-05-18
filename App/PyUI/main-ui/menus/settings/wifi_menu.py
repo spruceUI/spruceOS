@@ -1,5 +1,4 @@
 
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
@@ -9,7 +8,6 @@ from display.on_screen_keyboard import OnScreenKeyboard
 from display.render_mode import RenderMode
 from themes.theme import Theme
 from utils.logger import PyUiLogger
-from views.descriptive_list_view import DescriptiveListView
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -17,20 +15,15 @@ from views.view_type import ViewType
 
 
 class WifiMenu:
-    def __init__(self, display : Display, controller: Controller, device: Device, theme: Theme):
-        self.display : Display = display
-        self.controller : Controller = controller
-        self.device : Device= device
-        self.theme : Theme= theme
+    def __init__(self):
         self.wifi_scanner = WiFiScanner()
-        self.on_screen_keyboard = OnScreenKeyboard(display,controller,device,theme)
-        self.view_creator = ViewCreator(display,controller,device,theme)
+        self.on_screen_keyboard = OnScreenKeyboard()
 
     def wifi_adjust(self):
-        if self.device.is_wifi_enabled():
-            self.device.disable_wifi()
+        if Device.is_wifi_enabled():
+            Device.disable_wifi()
         else:
-            self.device.enable_wifi()
+            Device.enable_wifi()
 
     def write_wpa_supplicant_conf(self,ssid, pw_line, file_path="/userdata/cfg/wpa_supplicant.conf"):
         # WPA configuration template
@@ -73,7 +66,7 @@ network={{
         connected_freq = 0
         connected_is_5ghz = False
         while(selected is not None):
-            wifi_enabled = self.device.is_wifi_enabled()
+            wifi_enabled = Device.is_wifi_enabled()
             option_list = []
             option_list.append(
                 GridOrListEntry(
@@ -89,18 +82,18 @@ network={{
             
 
             if(wifi_enabled):
-                self.display.clear("WiFi")
-                self.display.render_text(
+                Display.clear("WiFi")
+                Display.render_text(
                     text = "Scanning for Networks (~10s)",
-                    x = self.device.screen_width // 2,
-                    y = self.display.get_usable_screen_height() // 2,
-                    color = self.theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
+                    x = Device.screen_width() // 2,
+                    y = Display.get_usable_screen_height() // 2,
+                    color = Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
                     purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE,
                     render_mode=RenderMode.MIDDLE_CENTER_ALIGNED)
-                self.display.present()
+                Display.present()
                 if(should_scan_for_wifi):
                     should_scan_for_wifi = False
-                    networks = self.wifi_scanner.scan_networks(self.device)
+                    networks = self.wifi_scanner.scan_networks()
                     connected_ssid, connected_freq = self.wifi_scanner.get_connected_ssid()
                     connected_is_5ghz = False
                     if(connected_freq is not None and connected_freq >= 5000 and connected_freq <= 6000):
@@ -129,8 +122,8 @@ network={{
                             )
                     )
 
-            list_view = self.view_creator.create_view(
-                    view_type=ViewType.DESCRIPTIVE_LIST_VIEW,
+            list_view = ViewCreator.create_view(
+                    view_type=ViewType.ICON_AND_DESC,
                     top_bar_text="WiFi Configuration", 
                     options=option_list,
                     selected_index=selected.get_index())

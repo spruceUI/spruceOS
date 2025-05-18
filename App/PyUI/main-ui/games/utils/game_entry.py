@@ -1,6 +1,4 @@
 
-from pathlib import Path
-
 
 class GameEntry:
     def __init__(self, label, launch, rom_path, type):

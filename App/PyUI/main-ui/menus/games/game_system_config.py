@@ -2,9 +2,19 @@ import json
 
 class GameSystemConfig:
     def __init__(self, system_name):
-        config_path = f"/mnt/SDCARD/Emu/{system_name}/config.json"
-        with open(config_path, 'r', encoding='utf-8') as f:
+        self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
+        self.config_path = f"{self.emu_folder}/config.json"
+        self.reload_config()
+
+    def reload_config(self):
+        with open(self.config_path, 'r', encoding='utf-8') as f:
             self._data = json.load(f)
+
+    def __str__(self):
+        return f"GameSystemConfig(GameSystemConfig='{self.emu_folder}')"
+    
+    def get_emu_folder(self):
+        return self.emu_folder
 
     def get_label(self):
         return self._data.get('label')
@@ -52,7 +62,10 @@ class GameSystemConfig:
         return self._data.get('hidebios')
 
     def get_extlist(self):
-        return {f".{ext}" for ext in self._data.get('extlist').lower().split("|")}
+        return {f".{ext}" for ext in (self._data.get('extlist') or '').lower().split("|") if ext}
 
     def get_launchlist(self):
         return self._data.get('launchlist', [])
+    
+    def run_in_game_menu(self):
+        return bool(self._data.get('ingamemenu', 0))

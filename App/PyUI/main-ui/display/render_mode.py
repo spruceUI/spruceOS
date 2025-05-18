@@ -1,5 +1,3 @@
-from enum import Enum, auto
-
 from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 

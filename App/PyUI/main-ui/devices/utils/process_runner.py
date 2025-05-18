@@ -3,7 +3,6 @@
 import inspect
 import os
 import subprocess
-import sys
 from utils.logger import PyUiLogger
 
 def get_caller_info(skip=2):
