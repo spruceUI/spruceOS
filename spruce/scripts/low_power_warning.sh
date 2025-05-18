@@ -137,14 +137,17 @@ while true; do
     elif flag_check "ledon"; then
         echo 1 >${LED_PATH}/brightness
         flag_remove "low_battery"
+        SLEEP=30
 
     elif flag_check "tlon" && flag_check "in_menu"; then
         echo 1 >${LED_PATH}/brightness
         flag_remove "low_battery"
+        SLEEP=10
 
     else
         echo 0 >${LED_PATH}/brightness
         flag_remove "low_battery"
+        SLEEP=30
     fi
 
     sleep $SLEEP
