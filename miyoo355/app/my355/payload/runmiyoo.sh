@@ -1,4 +1,5 @@
 #!/bin/sh
+# PAYLOAD_VERSION 20250518
 
 # becomes /usr/miyoo/bin/runmiyoo.sh on my355
 
@@ -11,7 +12,7 @@ while [ "$mounted" == "" ] && [ $cnt -lt 6 ] ; do
    mounted=`cat /proc/mounts | grep /mnt/sdcard`
 done
 
-if [ ! -f "/mnt/SDCARD/.tmp_update/updater" ]; then
+if [ -f "/media/sdcard1/.tmp_update/updater" ]; then
     DEV_SD_CARD_A="$(mount | grep /mnt/sdcard | awk '{print $1}')"
     DEV_SD_CARD_B="$(mount | grep /media/sdcard1 | awk '{print $1}')"
     PATH_SD_CARD_A="$(mount | grep /mnt/sdcard | awk '{print $3}')"

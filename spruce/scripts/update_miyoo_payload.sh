@@ -4,7 +4,12 @@
 set -x
 
 # get path of script
-DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -d /mnt/SDCARD/miyoo355/app/my355 ]; then
+	DIR="/mnt/SDCARD/miyoo355/app/my355"
+else
+	echo "Unknown environiment"
+	exit 0
+fi
 
 # File locations
 # New payload 				$DIR/payload/runmiyoo.sh
@@ -16,7 +21,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Get new payload version
 NEW_PAYLOAD_VERSION=$(cat $DIR/payload/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
-echo "New payload version $NEW_PAYLOAD_VERSION"
+echo "NEW $NEW_PAYLOAD_VERSION"
 
 # debug delay
 sleep 5s
@@ -24,7 +29,8 @@ sleep 5s
 # Check for existing install
 if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
 	# Payload not installed
-	INSTALLED_PAYLOAD_VERSION=0
+	echo "Original not found"
+	exit 0	
 else
 	# Check if payload has version string. Returns number of lines with PAYLOAD_VERSION in it
 	PAYLOAD_HAS_VERSION=$(cat /usr/miyoo/bin/runmiyoo.sh | grep -c PAYLOAD_VERSION)
@@ -32,11 +38,11 @@ else
 	if [[ PAYLOAD_HAS_VERSION -eq 0 ]]; then
 		# Payload installed but has no version.
 		INSTALLED_PAYLOAD_VERSION=1
-		echo "Old payload has no version"
+		echo "OLD NO VERSION"
 	else
 		# Get old payload version
 		OLD_PAYLOAD_VERSION=$(cat /usr/miyoo/bin/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
-		echo "Old payload $OLD_PAYLOAD_VERSION"
+		echo "OLD $OLD_PAYLOAD_VERSION"
 
 		# Compare payload versions
 		if [[ $NEW_PAYLOAD_VERSION -le $OLD_PAYLOAD_VERSION ]]; then
@@ -86,14 +92,8 @@ echo "unpacking rootfs"
 unsquashfs old_rootfs.squashfs
 
 show "inject-hook.png"
-if [[ PAYLOAD_HAS_VERSION -eq 0 ]]; then
-	echo "swapping runmiyoo.sh"
-	mv squashfs-root/usr/miyoo/bin/runmiyoo.sh squashfs-root/usr/miyoo/bin/runmiyoo-original.sh
-	mv runmiyoo.sh squashfs-root/usr/miyoo/bin/
-else
-	echo "updating runmiyoo.sh"
-	mv -f runmiyoo.sh squashfs-root/usr/miyoo/bin/
-fi
+echo "updating runmiyoo.sh"
+mv -f runmiyoo.sh squashfs-root/usr/miyoo/bin/
 
 show "pack-root.png"
 echo "packing updated rootfs"
