@@ -1,13 +1,17 @@
 
 
 from controller.controller_inputs import ControllerInput
+from display.display import Display
+from menus.settings.theme.theme_settings_fonts import ThemeSettingsFonts
 from menus.settings.theme.theme_settings_game_select_menu import ThemeSettingsGameSelectMenu
+from menus.settings.theme.theme_settings_grid_view import ThemeSettingsGridView
 from menus.settings.theme.theme_settings_main_menu import ThemeSettingsMainMenu
+from menus.settings.theme.theme_settings_system_select_menu import ThemeSettingsSystemSelectMenu
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
-from views.view_type import ViewType, get_next_view_type
+from views.view_type import ViewType
 
 
 class ThemeSettingsMenu():
@@ -21,6 +25,20 @@ class ThemeSettingsMenu():
     def launch_game_select_menu_theme_options(self, input):
         if (input == ControllerInput.A):
             ThemeSettingsGameSelectMenu().show_theme_options_menu()
+
+    def launch_system_select_menu_theme_options(self, input):
+        if (input == ControllerInput.A):
+            ThemeSettingsSystemSelectMenu().show_theme_options_menu()
+
+    def launch_font_menu_theme_options(self, input):
+        if (input == ControllerInput.A):
+            ThemeSettingsFonts().show_theme_options_menu()
+
+
+    def launch_grid_view_menu_theme_options(self, input):
+        if (input == ControllerInput.A):
+            ThemeSettingsGridView().show_theme_options_menu()
+
 
     def build_options_list(self):
         option_list = []
@@ -39,6 +57,19 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
+                primary_text="System Select Theme Options",
+                value_text="",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.launch_system_select_menu_theme_options
+            )
+        )
+
+
+        option_list.append(
+            GridOrListEntry(
                 primary_text="Game Select Menu Theme Options",
                 value_text="",
                 image_path=None,
@@ -48,6 +79,32 @@ class ThemeSettingsMenu():
                 value=self.launch_game_select_menu_theme_options
             )
         )
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Fonts",
+                value_text="",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.launch_font_menu_theme_options
+            )
+        )
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Grid View Theme Options",
+                value_text="",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.launch_grid_view_menu_theme_options
+            )
+        )
+
+        
 
         return option_list
 

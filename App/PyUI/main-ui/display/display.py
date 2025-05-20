@@ -1,7 +1,10 @@
+from dataclasses import dataclass
+from enum import Enum, auto
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
+from display.resize_type import ResizeType
 from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
@@ -12,6 +15,56 @@ import sdl2.sdlttf
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 
+@dataclass
+class CachedImageTexture:
+    def __init__(self, surface, texture):
+        self.surface = surface
+        self.texture = texture
+
+class ImageTextureCache:
+    def __init__(self):
+        self.cache = {} 
+
+    def get_texture(self, texture_id) -> CachedImageTexture:
+        return self.cache.get(texture_id)
+
+    def add_texture(self, texture_id, surface, texture):
+        self.cache[texture_id] = CachedImageTexture(surface,texture)
+    
+    def clear_cache(self):
+        for entry in self.cache.values():
+            sdl2.SDL_DestroyTexture(entry.texture)
+            sdl2.SDL_FreeSurface(entry.surface)
+        self.cache.clear()
+
+@dataclass(frozen=True)
+class TextTextureKey:
+    texture_id : str
+    font : object
+    color : tuple
+
+@dataclass
+class CachedTextTexture:
+    def __init__(self, surface, texture):
+        self.surface = surface
+        self.texture = texture
+
+class TextTextureCache:
+    def __init__(self):
+        self.cache = {} 
+
+    def get_texture(self, texture_id, font, color) -> CachedTextTexture:
+        return self.cache.get(TextTextureKey(texture_id, font, color))
+
+    def add_texture(self, texture_id, font, color, surface, texture):
+        self.cache[TextTextureKey(texture_id, font, color)] = CachedTextTexture(surface,texture)
+    
+    def clear_cache(self):
+        for entry in self.cache.values():
+            sdl2.SDL_DestroyTexture(entry.texture)
+            sdl2.SDL_FreeSurface(entry.surface)
+        self.cache.clear()
+        
 class Display:
     debug = False
     renderer = None
@@ -24,10 +77,15 @@ class Display:
     window = None
     background_texture = None
     screen = None
+    _image_texture_cache = ImageTextureCache()
+    _text_texture_cache = TextTextureCache()
 
     @classmethod
     def init(cls):
         cls._init_display()
+        #Outside init_fonts as it should only ever be called once
+        if sdl2.sdlttf.TTF_Init() == -1:
+            raise RuntimeError("Failed to initialize SDL_ttf")
         cls.init_fonts()
         cls.render_canvas = sdl2.SDL_CreateTexture(
             cls.renderer.renderer,
@@ -74,6 +132,12 @@ class Display:
 
     @classmethod
     def deinit_display(cls):
+        if cls.render_canvas:
+            sdl2.SDL_DestroyTexture(cls.render_canvas)
+            cls.render_canvas = None
+        if cls.bg_canvas:
+            sdl2.SDL_DestroyTexture(cls.bg_canvas)
+            cls.bg_canvas = None
         if cls.renderer is not None:
             sdl2.SDL_DestroyRenderer(cls.renderer.sdlrenderer)
             cls.renderer = None
@@ -82,7 +146,26 @@ class Display:
             cls.window = None
         cls.deinit_fonts()
         cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
+
+    @classmethod
+    def clear_text_cache(cls):
+        PyUiLogger.get_logger().debug("Clearing text cache")    
+        cls._text_texture_cache.clear_cache()
+        cls.deinit_fonts()
+        cls.init_fonts()
+
+    @classmethod
+    def clear_image_cache(cls):
+        PyUiLogger.get_logger().debug("Clearing image cache")    
+        cls._image_texture_cache.clear_cache()
+
+    @classmethod
+    def clear_cache(cls):
+        cls.clear_image_cache()
+        cls.clear_text_cache()
 
     @classmethod
     def deinit_fonts(cls):
@@ -131,9 +214,6 @@ class Display:
 
     @classmethod
     def _load_font(cls, font_purpose):
-        if sdl2.sdlttf.TTF_Init() == -1:
-            raise RuntimeError("Failed to initialize SDL_ttf")
-
         font_path = Theme.get_font(font_purpose)
         font_size = Theme.get_font_size(font_purpose)
 
@@ -144,12 +224,16 @@ class Display:
             )
 
         line_height = sdl2.sdlttf.TTF_FontHeight(font)
-        return LoadedFont(font, line_height)
+        return LoadedFont(font, line_height, font_path)
 
 
 
     @classmethod
     def lock_current_image_as_bg(cls):
+        if cls.bg_canvas:
+            sdl2.SDL_DestroyTexture(cls.bg_canvas)
+            cls.bg_canvas = None
+    
         cls.bg_canvas = cls.render_canvas
         cls.render_canvas = sdl2.SDL_CreateTexture(
             cls.renderer.renderer,
@@ -168,7 +252,7 @@ class Display:
             cls.bg_canvas = None
 
     @classmethod
-    def clear(cls, screen):
+    def clear(cls, screen, hide_top_bar_icons = False):
         cls.screen = screen
         cls._check_for_bg_change()
 
@@ -178,114 +262,190 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
 
         if not Theme.render_top_and_bottom_bar_last():
-            cls.top_bar.render_top_bar(cls.screen)
+            cls.top_bar.render_top_bar(cls.screen,hide_top_bar_icons)
             cls.bottom_bar.render_bottom_bar()
-
-    @staticmethod
-    def _calculate_scaled_width_and_height(orig_w, orig_h, target_width, target_height):
-        # Maintain aspect ratio
-        if target_width and target_height:
-            scale = min(target_width / orig_w, target_height / orig_h)
-            render_w = int(orig_w * scale)
-            render_h = int(orig_h * scale)
-        elif target_width:
-            scale = target_width / orig_w
-            render_w = int(orig_w * scale)
-            render_h = orig_h
-        elif target_height:
-            render_w = orig_w
-            scale = target_height / orig_h
-            render_h = int(orig_h * scale)
-        else:
-            render_w = orig_w
-            render_h = orig_h
-
-        return int(render_w), int(render_h)
 
     @classmethod
     def _log(cls, msg):
         if cls.debug:
             PyUiLogger.get_logger().info(msg)
 
+    @staticmethod
+    def _calculate_scaled_width_and_height(orig_w, orig_h, target_width, target_height, resize_type):
+        if resize_type == ResizeType.FIT:
+            if target_width and target_height:
+                scale = min(target_width / orig_w, target_height / orig_h)
+            elif target_width:
+                scale = target_width / orig_w
+            elif target_height:
+                scale = target_height / orig_h
+            else:
+                scale = 1.0
+            render_w = int(orig_w * scale)
+            render_h = int(orig_h * scale)
+
+        elif resize_type == ResizeType.ZOOM:
+            if target_width and target_height:
+                scale = max(target_width / orig_w, target_height / orig_h)
+                render_w = int(orig_w * scale)
+                render_h = int(orig_h * scale)
+            else:
+                render_w = orig_w
+                render_h = orig_h
+        else:
+            render_w = orig_w
+            render_h = orig_h
+
+        return render_w, render_h
+
+
     @classmethod
-    def _render_surface_texture(cls, x, y, texture, surface, render_mode: RenderMode, scale_width=None, scale_height=None, debug="",
-                                crop_w=None, crop_h=None):
-        render_w, render_h = cls._calculate_scaled_width_and_height(surface.contents.w, surface.contents.h, scale_width, scale_height)
+    def _render_surface_texture(cls, x, y, texture, surface, render_mode: RenderMode, texture_id,
+                                scale_width=None, scale_height=None, crop_w=None, crop_h=None,
+                                resize_type=ResizeType.FIT):
+        #If resize_type is none set it to fit for now,
+        #Need to push this further up stream though
+        if(resize_type is None):
+            resize_type=ResizeType.FIT
+        
+        orig_w = surface.contents.w
+        orig_h = surface.contents.h
+        render_w, render_h = cls._calculate_scaled_width_and_height(orig_w, orig_h, scale_width, scale_height, resize_type)
 
         # Adjust position based on render mode
         adj_x = x
         adj_y = y
-        
-        if XRenderOption.CENTER == render_mode.x_mode:
-            adj_x = x - render_w // 2
-        elif XRenderOption.RIGHT == render_mode.x_mode:
-            adj_x = x - render_w
+                
+        if resize_type == ResizeType.ZOOM and scale_width and scale_height:
 
-        if YRenderOption.CENTER == render_mode.y_mode:
-            adj_y = y - render_h // 2
-        elif YRenderOption.BOTTOM == render_mode.y_mode:
-            adj_y = y - render_h
+            if XRenderOption.CENTER == render_mode.x_mode:
+                adj_x = x - (scale_width or render_w) // 2
+            elif XRenderOption.RIGHT == render_mode.x_mode:
+                adj_x = x - (scale_width or render_w)
 
-        adj_x = int(adj_x)
-        adj_y = int(adj_y)
+            if YRenderOption.CENTER == render_mode.y_mode:
+                adj_y = y - (scale_height or render_h) // 2
+            elif YRenderOption.BOTTOM == render_mode.y_mode:
+                adj_y = y - (scale_height or render_h)
 
-        if crop_w is None and crop_h is None:            
-            rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
-            cls._log(f"Rendered {debug} at {adj_x}, {adj_y} with dimensions {render_w}x{render_h}")
-            sdl2.SDL_RenderCopy(cls.renderer.renderer, texture, None, rect)
-        else:
-            if crop_w is None or crop_w > surface.contents.w:
-                crop_w = surface.contents.w
-            if crop_h is None or crop_h > surface.contents.h:
-                crop_h = surface.contents.h
+            adj_x = int(adj_x)
+            adj_y = int(adj_y)
+            # Calculate cropping to center the zoomed image
+            src_w = int(scale_width * (orig_w / render_w))
+            src_h = int(scale_height * (orig_h / render_h))
+            src_x = max(0, (orig_w - src_w) // 2)
+            src_y = max(0, (orig_h - src_h) // 2)
 
-            src_rect = sdl2.SDL_Rect(0, 0, crop_w, crop_h)
-            dst_rect = sdl2.SDL_Rect(adj_x, adj_y, int(crop_w), int(crop_h))
+            src_rect = sdl2.SDL_Rect(src_x, src_y, src_w, src_h)
+            dst_rect = sdl2.SDL_Rect(adj_x, adj_y, scale_width, scale_height)
+
             sdl2.SDL_RenderCopy(cls.renderer.renderer, texture, src_rect, dst_rect)
 
-        sdl2.SDL_DestroyTexture(texture)
-        sdl2.SDL_FreeSurface(surface)
+            return scale_width, scale_height
+        else:
+                
+            if XRenderOption.CENTER == render_mode.x_mode:
+                adj_x = x - (render_w) // 2
+            elif XRenderOption.RIGHT == render_mode.x_mode:
+                adj_x = x - (render_w)
 
-        return render_w, render_h
+            if YRenderOption.CENTER == render_mode.y_mode:
+                adj_y = y - (render_h) // 2
+            elif YRenderOption.BOTTOM == render_mode.y_mode:
+                adj_y = y - (render_h)
+
+            adj_x = int(adj_x)
+            adj_y = int(adj_y)
+
+            # Handle regular FIT or uncropped draw
+            if crop_w is None and crop_h is None:
+                rect = sdl2.SDL_Rect(adj_x, adj_y, render_w, render_h)
+                sdl2.SDL_RenderCopy(cls.renderer.renderer, texture, None, rect)
+            else:
+                if crop_w is None or crop_w > orig_w:
+                    crop_w = orig_w
+                if crop_h is None or crop_h > orig_h:
+                    crop_h = orig_h
+
+                src_rect = sdl2.SDL_Rect(0, 0, crop_w, crop_h)
+                dst_rect = sdl2.SDL_Rect(adj_x, adj_y, crop_w, crop_h)
+                sdl2.SDL_RenderCopy(cls.renderer.renderer, texture, src_rect, dst_rect)
+
+            return render_w, render_h
+
 
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None):
-        sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
-        surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(cls.fonts[purpose].font, text.encode('utf-8'), sdl_color)
-        if not surface:
-            PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
-            return 0, 0
+        loaded_font = cls.fonts[purpose]
+        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, loaded_font.font_path, color)
+        
+        if cache:
+            surface = cache.surface
+            texture = cache.texture
+        else:
+            sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
+            surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
+            if not surface:
+                PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+                return 0, 0
 
-        texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
-        if not texture:
-            sdl2.SDL_FreeSurface(surface)
-            PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
-            return 0, 0
+            texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
+            if not texture:
+                sdl2.SDL_FreeSurface(surface)
+                PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+                return 0, 0
 
-        return cls._render_surface_texture(x, y, texture, surface, render_mode, debug=text, crop_w=crop_w, crop_h=crop_h)
+            cls._text_texture_cache.add_texture(text, loaded_font.font_path, color, surface, texture)
+
+        return cls._render_surface_texture(
+                x=x,
+                y=y, 
+                texture=texture, 
+                surface=surface, 
+                render_mode=render_mode, 
+                texture_id=text, 
+                crop_w=crop_w, 
+                crop_h=crop_h)
 
     @classmethod
     def render_text_centered(cls, text, x, y, color, purpose: FontPurpose):
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
     @classmethod
-    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None):
+    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):
         if(image_path is None):
             return 0, 0
-        surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
-        if not surface:
-            PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
-            return 0, 0
 
-        texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
-        if not texture:
-            sdl2.SDL_FreeSurface(surface)
-            PyUiLogger.get_logger().error("Failed to create texture from surface")
-            return 0, 0
+        cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
+        
+        if cache:
+            surface = cache.surface
+            texture = cache.texture
+        else:
+            surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+            if not surface:
+                PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
+                return 0, 0
 
-        sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
-        return cls._render_surface_texture(x, y, texture, surface, render_mode, target_width, target_height, debug=image_path)
+            texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
+            if not texture:
+                sdl2.SDL_FreeSurface(surface)
+                PyUiLogger.get_logger().error("Failed to create texture from surface")
+                return 0, 0
+
+            sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
+            cls._image_texture_cache.add_texture(image_path,surface, texture)
+
+        return cls._render_surface_texture(x=x, 
+                                           y=y, 
+                                           texture=texture, 
+                                           surface=surface, 
+                                           render_mode=render_mode, 
+                                           scale_width=target_width, 
+                                           scale_height=target_height,
+                                           resize_type=resize_type, 
+                                           texture_id=image_path)
 
     @classmethod
     def render_image_centered(cls, image_path: str, x: int, y: int, target_width=None, target_height=None):
@@ -362,9 +522,10 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
 
+    #TODO make default false and fix everywhere
     @classmethod
-    def get_top_bar_height(cls):
-        return 0 if Theme.ignore_top_and_bottom_bar_for_layout() else cls.top_bar.get_top_bar_height()
+    def get_top_bar_height(cls, force_include_top_bar = True):
+        return 0 if Theme.ignore_top_and_bottom_bar_for_layout() and not force_include_top_bar else cls.top_bar.get_top_bar_height()
 
     @classmethod
     def get_bottom_bar_height(cls):
@@ -375,8 +536,8 @@ class Display:
         return Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()
 
     @classmethod
-    def get_center_of_usable_screen_height(cls):
-        return ((Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()) // 2) + cls.get_top_bar_height()
+    def get_center_of_usable_screen_height(cls, force_include_top_bar = False):
+        return ((Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height(force_include_top_bar)) // 2) + cls.get_top_bar_height(force_include_top_bar)
 
     @classmethod
     def get_image_dimensions(cls, img):

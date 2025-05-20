@@ -10,7 +10,7 @@ class TopBar:
         self.title = ""
 
 
-    def render_top_bar(self, title) :
+    def render_top_bar(self, title, hide_top_bar_icons = False) :
         from display.display import Display
         self.title = title
         top_bar_bg = Theme.get_title_bar_bg()
@@ -36,12 +36,15 @@ class TopBar:
         
         padding = 10
         center_of_bar = self.top_bar_h //2
-        battery_text_w, battery_text_h = Display.render_text(str(battery_percent),Device.screen_width() - padding*2, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-        battery_icon_x = Device.screen_width() - battery_text_w - (padding*3)
-        battery_icon_w, battery_icon_h = Display.render_image(
-            battery_icon ,battery_icon_x,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
-        wifi_icon_x = Device.screen_width() - battery_icon_w - battery_text_w - (padding*4)
-        Display.render_image(wifi_icon,wifi_icon_x,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+
+        if(not hide_top_bar_icons):
+            battery_text_w, battery_text_h = Display.render_text(str(battery_percent),Device.screen_width() - padding*2, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            battery_icon_x = Device.screen_width() - battery_text_w - (padding*3)
+            battery_icon_w, battery_icon_h = Display.render_image(
+                battery_icon ,battery_icon_x,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
+            wifi_icon_x = Device.screen_width() - battery_icon_w - battery_text_w - (padding*4)
+            Display.render_image(wifi_icon,wifi_icon_x,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+        
         if(Theme.show_top_bar_text()):
             Display.render_text(title,int(Device.screen_width()/2), center_of_bar, Theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
         

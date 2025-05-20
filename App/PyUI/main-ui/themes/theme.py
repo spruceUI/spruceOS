@@ -4,6 +4,7 @@ import os
 from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
+from display.resize_type import ResizeType
 from utils.logger import PyUiLogger
 from views.view_type import ViewType
 
@@ -73,6 +74,8 @@ class Theme():
         with open(cls._loaded_file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         PyUiLogger.get_logger().info(f"Wrote Theme : {cls._data.get('description', 'UNKNOWN')}")
+        from display.display import Display
+        Display.clear_cache()
 
     @classmethod
     def _asset(cls, *parts):
@@ -215,12 +218,22 @@ class Theme():
     @classmethod
     def system(cls, system):
         return os.path.join(cls._path, cls._icon_folder, system.lower() + ".png")
+    
     @classmethod
     def system_selected(cls, system):
         return os.path.join(cls._path, cls._icon_folder, "sel", system.lower() + ".png")
+    
     @classmethod
-    def _grid_4_x_2_selected_bg(cls):
+    def _grid_multi_row_selected_bg(cls):
         return cls._asset("bg-game-item-f.png")
+
+    @classmethod
+    def _grid_single_row_selected_bg(cls):
+        return cls._asset("bg-game-item-single-f.png")
+
+    @classmethod
+    def get_grid_game_selected_bg(cls):
+        return cls._asset("grid-game-selected.png")
 
     @classmethod
     def get_system_icon(cls, system):
@@ -268,32 +281,69 @@ class Theme():
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data.get("topBarFontSize", cls._data["list"].get("size", 24))
                 case FontPurpose.BATTERY_PERCENT:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data.get("batteryPercentFontSize", cls._data["list"].get("size", 24))
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     return cls._data["list"].get("size", 24)
                 case FontPurpose.GRID_ONE_ROW:
-                    return cls._data["grid"].get("grid1x4", cls._data["grid"].get("size",25))
+                    return cls._data.get("gridSingleRowFontSize", cls._data["grid"].get("grid1x4", cls._data["grid"].get("size",25)))
                 case FontPurpose.GRID_MULTI_ROW:
-                    return cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18))
+                    return cls._data.get("gridMultiRowFontSize", cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18)))
                 case FontPurpose.LIST:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data.get("listFontSize",cls._data["list"].get("size", 24))
                 case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data.get("descListFontSize",cls._data["list"].get("size", 24))
                 case FontPurpose.MESSAGE:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data.get("messageFontSize",cls._data["list"].get("size", 24))
                 case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                    return cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18))
+                    return cls._data.get("descriptionFontSize",cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18)))
                 case FontPurpose.LIST_INDEX:
-                    return cls._data.currentpage.get("size", 22)
+                    return cls._data.get("indexSelectedFontSize",cls._data["list"].get("size", 20))
                 case FontPurpose.LIST_TOTAL:
-                    return cls._data.total.get("size", 22)
+                    return cls._data.get("indexTotalSize",cls._data["list"].get("size", 20))
                 case _:
                     return cls._data["list"]["font"]
         except Exception as e:
             PyUiLogger.get_logger().error(f"get_font_size error occurred: {e}")
             return 20
+
+
+    @classmethod
+    def set_font_size(cls, font_purpose: FontPurpose, size):
+        PyUiLogger.get_logger().debug(f"set_font_size: {font_purpose} {size}")
+        try:
+            match font_purpose:
+                case FontPurpose.TOP_BAR_TEXT:
+                    cls._data["topBarFontSize"] = size
+                case FontPurpose.BATTERY_PERCENT:
+                    cls._data["batteryPercentFontSize"] = size
+                case FontPurpose.ON_SCREEN_KEYBOARD:
+                    pass
+                case FontPurpose.GRID_ONE_ROW:
+                    cls._data["gridSingleRowFontSize"] = size
+                case FontPurpose.GRID_MULTI_ROW:
+                    cls._data["gridMultiRowFontSize"] = size
+                case FontPurpose.LIST:
+                    cls._data["listFontSize"] = size
+                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
+                    cls._data["descListFontSize"] = size
+                case FontPurpose.MESSAGE:
+                    cls._data["messageFontSize"] = size
+                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    cls._data["descriptionFontSize"] = size
+                case FontPurpose.LIST_INDEX:
+                    cls._data["indexSelectedFontSize"] = size
+                case FontPurpose.LIST_TOTAL:
+                    cls._data["indexTotalSize"] = size
+                case _:
+                    PyUiLogger.get_logger().error(
+                        f"set_font_size: Unknown font purpose {font_purpose}")
+                
+            cls.save_changes()
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"get_font_size error occurred: {e}")
+
 
     @classmethod
     def text_color(cls, font_purpose : FontPurpose):
@@ -391,12 +441,64 @@ class Theme():
         return cls._data.get("gridMultirowTextOffsetY", -25)
 
     @classmethod
-    def get_grid_bg(cls, rows, cols):
+    def get_system_select_show_sel_bg_grid_mode(cls):
+        return cls._data.get("systemSelectShowSelectedBgGridMode", True)
+    
+    @classmethod
+    def set_system_select_show_sel_bg_grid_mode(cls, value):
+        cls._data["systemSelectShowSelectedBgGridMode"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_system_select_show_text_grid_mode(cls):
+        return cls._data.get("systemSelectShowTextGridMode", True)
+    
+    @classmethod
+    def set_system_select_show_text_grid_mode(cls, value):
+        cls._data["systemSelectShowTextGridMode"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_show_text_grid_mode(cls):
+        return cls._data.get("gameSelectShowTextGridMode", True)
+    
+    @classmethod
+    def set_game_select_show_text_grid_mode(cls, value):
+        cls._data["gameSelectShowTextGridMode"] = value
+        cls.save_changes()
+
+
+    @classmethod
+    def get_game_select_show_sel_bg_grid_mode(cls):
+        return cls._data.get("gameSelectShowSelectedBgGridMode", True)
+    
+    @classmethod
+    def set_game_select_show_sel_bg_grid_mode(cls, value):
+        cls._data["gameSelectShowSelectedBgGridMode"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_main_menu_show_text_grid_mode(cls):
+        return cls._data.get("mainMenuShowTextGridMode", True)
+    
+    @classmethod
+    def set_main_menu_show_text_grid_mode(cls, value):
+        cls._data["mainMenuShowTextGridMode"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_bg(cls, rows, cols, use_multi_row_select_as_backup = False):
+        # TODO better handle this dynamically
         if rows > 1:
-            # TODO better handle this dynamically
-            return cls._grid_4_x_2_selected_bg()
+            return cls._grid_multi_row_selected_bg()
         else:
-            return None
+            single_row_bg = cls._grid_single_row_selected_bg()
+            if single_row_bg and os.path.exists(single_row_bg):
+                return single_row_bg
+            elif use_multi_row_select_as_backup:
+                return cls._grid_multi_row_selected_bg()
+            else:
+                return None
 
     @classmethod
     def get_view_type_for_main_menu(cls):
@@ -414,6 +516,22 @@ class Theme():
         return getattr(ViewType, view_type_str, ViewType.GRID)
 
     @classmethod
+    def set_view_type_for_system_select_menu(cls, view_type):
+        cls._data["systemSelectViewType"] = view_type.name
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_game_selected_resize_type(cls):
+        view_type_str = cls._data.get("gameSelectGridResizeType", "FIT")
+        return getattr(ResizeType, view_type_str, ResizeType.FIT)
+
+    @classmethod
+    def set_grid_game_selected_resize_type(cls, view_type):
+        cls._data["gameSelectGridResizeType"] = view_type.name
+        cls.save_changes()
+
+
+    @classmethod
     def get_view_type_for_app_menu(cls):
         view_type_str = cls._data.get("appMenuViewType", "DESCRIPTIVE_LIST_VIEW")
         return getattr(ViewType, view_type_str, ViewType.ICON_AND_DESC)
@@ -425,6 +543,16 @@ class Theme():
     @classmethod
     def get_game_system_select_row_count(cls):
         return cls._data.get("gameSystemSelectRowCount", 2)
+
+    @classmethod
+    def set_game_system_select_col_count(cls, count):
+        cls._data["gameSystemSelectColCount"] = count
+        cls.save_changes()
+
+    @classmethod
+    def set_game_system_select_row_count(cls, count):
+        cls._data["gameSystemSelectRowCount"] = count
+        cls.save_changes()
     
     @classmethod
     def pop_menu_x_offset(cls):
@@ -451,17 +579,6 @@ class Theme():
         return cls._data.get("popupMenuRows", 1)
 
     @classmethod
-    def rom_image_width(cls, device_width):
-        return int(device_width * 294 / 640)
-
-    @classmethod
-    def rom_image_height(cls, device_height):
-        if cls._data.get("showBottomBar", False):
-            return int(device_height * 300 / 640)
-        else:
-            return int(device_height * 340 / 640)
-
-    @classmethod
     def text_and_image_list_view_mode(cls):
         return cls._data.get("textAndImageListViewMode", "TEXT_LEFT_IMAGE_RIGHT")
 
@@ -474,10 +591,6 @@ class Theme():
         return cls._data.get("showIndexText", True)
 
     @classmethod
-    def get_main_menu_column_count(cls):
-        return cls._data.get("mainMenuColCount", 4)
-
-    @classmethod
     def get_game_selection_view_type(cls):
         view_type_str = cls._data.get("gameSelectionViewType", "TEXT_AND_IMAGE")
         return getattr(ViewType, view_type_str, ViewType.TEXT_AND_IMAGE)
@@ -488,8 +601,136 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_main_menu_column_count(cls):
+        return cls._data.get("mainMenuColCount", 4)
+
+    @classmethod
     def set_main_menu_column_count(cls, count):
         cls._data["mainMenuColCount"] = count
         cls.save_changes()
+
+    @classmethod
+    def get_recents_enabled(cls):
+        return cls._data.get("recentsEnabled", True)
+
+    @classmethod
+    def set_recents_enabled(cls, value):
+        cls._data["recentsEnabled"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_favorites_enabled(cls):
+        return cls._data.get("favoritesEnabled", True)
+
+    @classmethod
+    def set_favorites_enabled(cls, value):
+        cls._data["favoritesEnabled"] = value
+        cls.save_changes()
+    
+    @classmethod
+    def get_apps_enabled(cls):
+        return cls._data.get("appsEnabled", True)
+
+    @classmethod
+    def set_apps_enabled(cls, value):
+        cls._data["appsEnabled"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_settings_enabled(cls):
+        return cls._data.get("settingsEnabled", True)
+
+    @classmethod
+    def set_settings_enabled(cls, value):
+        cls._data["settingsEnabled"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_main_menu_option_ordering(cls):
+        return cls._data.get("mainMenuOrdering", ["Recent", "Favorite", "Game", "App", "Setting"])
+
+    @classmethod
+    def get_game_select_row_count(cls):
+        return cls._data.get("gameSelectRowCount", 2)
+
+    @classmethod
+    def set_game_select_row_count(cls, value):
+        cls._data["gameSelectRowCount"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_col_count(cls):
+        return cls._data.get("gameSelectColCount", 4)
+
+    @classmethod
+    def set_game_select_col_count(cls, value):
+        cls._data["gameSelectColCount"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_img_width(cls):
+        from devices.device import Device
+        return cls._data.get("gameSelectImgWidth", int(Device.screen_width() * 294 / 640))
+    
+    @classmethod
+    def set_game_select_img_width(cls, value):
+        cls._data["gameSelectImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_img_height(cls):
+        from devices.device import Device
+        return cls._data.get("gameSelectImgHeight", int(Device.screen_height() * 300 / 640))
+    
+    @classmethod
+    def set_game_select_img_height(cls, value):
+        cls._data["gameSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_set_top_bar_text_to_game_selection(cls):
+        return cls._data.get("setTopBarTextToGameSelection", False)
+    
+    @classmethod
+    def set_set_top_bar_text_to_game_selection(cls, value):
+        cls._data["setTopBarTextToGameSelection"] = value
+        cls.save_changes()
+
+    @classmethod
+    def skip_main_menu(cls):
+        return cls._data.get("skipMainMenu", False)
+    
+    @classmethod
+    def set_skip_main_menu(cls, value):
+        cls._data["skipMainMenu"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_multi_row_extra_y_pad(cls):
+        return cls._data.get("gridMultiRowExtraYPad", 17)
+    
+    @classmethod
+    def set_grid_multi_row_extra_y_pad(cls, value):
+        cls._data["gridMultiRowExtraYPad"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_multi_row_sel_bg_resize_pad_width(cls):
+        return cls._data.get("gridMultiRowSelBgResizePadWidth", 20)
+    
+    @classmethod
+    def set_grid_multi_row_sel_bg_resize_pad_width(cls, value):
+        cls._data["gridMultiRowSelBgResizePadWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_multi_row_sel_bg_resize_pad_height(cls):
+        return cls._data.get("gridMultiRowSelBgResizePadHeight", 20)
+    
+    @classmethod
+    def set_grid_multi_row_sel_bg_resize_pad_height(cls, value):
+        cls._data["gridMultiRowSelBgResizePadHeight"] = value
+        cls.save_changes()
+
 
     

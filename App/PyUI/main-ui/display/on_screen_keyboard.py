@@ -117,15 +117,23 @@ class OnScreenKeyboard:
                 if Controller.last_input() == ControllerInput.DPAD_UP:
                     if self.selected_row_index > 0:
                         self.selected_row_index -=1
+                    else:
+                        self.selected_row_index = len(self.normal_keys)-1
                 elif Controller.last_input() == ControllerInput.DPAD_DOWN:
                     if self.selected_row_index < len(self.normal_keys)-1:
                         self.selected_row_index +=1
+                    else:
+                        self.selected_row_index = 0
                 if Controller.last_input() == ControllerInput.DPAD_LEFT:
                     if self.selected_key_index > 0:
                         self.selected_key_index -=1
+                    else:
+                        self.selected_key_index = len(self.normal_keys[0])-1
                 elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
                     if self.selected_key_index < len(self.normal_keys[0])-1:
                         self.selected_key_index +=1
+                    else:
+                        self.selected_key_index = 0
                 elif Controller.last_input() == ControllerInput.L1:
                     self.shifted = not self.shifted
                 elif Controller.last_input() == ControllerInput.R1:

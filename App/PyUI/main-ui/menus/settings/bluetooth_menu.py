@@ -72,16 +72,16 @@ class BluetoothMenu:
                     devices = self.scan_for_devices()
                     selected.index = 0
 
-                for device in devices:
+                for bt_device in devices:
                     option_list.append(
                         GridOrListEntry(
-                                primary_text=Device.name,
-                                value_text=Device.address,
+                                primary_text=bt_device.name,
+                                value_text=bt_device.address,
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
                                 icon=None,
-                                value=lambda device=device: self.toggle_pairing_device(device)  
+                                value=lambda device=bt_device: self.toggle_pairing_device(device)  
                             )
                     )
 

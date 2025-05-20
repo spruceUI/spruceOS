@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import socket
 import subprocess
 import threading
 import time
@@ -25,10 +26,12 @@ from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+import psutil
 
 class MiyooFlip(DeviceCommon):
     
     def __init__(self):
+        PyUiLogger.get_logger().info("Initializing Miyoo Flip")
         self.path = self
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -65,7 +68,10 @@ class MiyooFlip(DeviceCommon):
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+
         if(PyUiConfig.enable_button_watchers()):
+            #/dev/miyooio if we want to get rid of miyoo_inputd
+            # debug in terminal: hexdump  /dev/miyooio
             self.volume_key_watcher = KeyWatcher("/dev/input/event0")
             volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
             volume_key_polling_thread.start()
@@ -712,6 +718,7 @@ class MiyooFlip(DeviceCommon):
         ProcessRunner.run(["ifconfig","wlan0","down"])
         self.stop_wifi_services()
         self.get_wifi_status.force_refresh()
+        self.get_ip_addr_text.force_refresh()
 
     def enable_wifi(self):
         self.system_config.reload_config()
@@ -720,6 +727,7 @@ class MiyooFlip(DeviceCommon):
         ProcessRunner.run(["ifconfig","wlan0","up"])
         self.start_wifi_services()
         self.get_wifi_status.force_refresh()
+        self.get_ip_addr_text.force_refresh()
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
@@ -784,3 +792,23 @@ class MiyooFlip(DeviceCommon):
     
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
+    
+    @throttle.limit_refresh(15)
+    def get_ip_addr_text(self):
+        if self.is_wifi_enabled():
+            try:
+                addrs = psutil.net_if_addrs().get("wlan0")
+                if addrs:
+                    for addr in addrs:
+                        if addr.family == socket.AF_INET:
+                            return addr.address
+                    return "Connecting"
+                else:
+                    return "Connecting"
+            except Exception:
+                return "Error"
+        
+        return "None"
+    
+    def launch_stock_os_menu(self):
+        self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")

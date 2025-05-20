@@ -17,7 +17,7 @@ class RecentsMenu(RomsMenuCommon):
         favorites : list[RomInfo] = RecentsManager.get_recents()
         for rom_info in favorites:
             rom_file_name = os.path.basename(rom_info.rom_file_path)
-            img_path = self._get_image_path(rom_info.rom_file_path)
+            img_path = self._get_image_path(rom_info)
             rom_list.append(
                 GridOrListEntry(
                     primary_text=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",

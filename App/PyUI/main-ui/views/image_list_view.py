@@ -8,6 +8,7 @@ from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 import sdl2
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship

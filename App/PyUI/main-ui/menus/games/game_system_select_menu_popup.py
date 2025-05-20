@@ -3,8 +3,10 @@
 from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
+from menus.app.app_menu import AppMenu
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
+from menus.settings.basic_settings_menu import BasicSettingsMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -26,8 +28,40 @@ class GameSystemSelectMenuPopup:
         if(search_txt is not None):
             SearchedRomsMenu(search_txt.upper()).run_rom_selection()
 
+    def open_settings(self, input):
+        if (ControllerInput.A == input):
+            BasicSettingsMenu().show_menu()
+
+    def open_apps(self, input):
+        if (ControllerInput.A == input):
+            AppMenu().run_app_selection()
+
     def run_popup_menu_selection(self, game_system : GameSystem):
         popup_options = []
+
+        if (Theme.skip_main_menu()):
+            popup_options.append(
+                GridOrListEntry(
+                    primary_text="Apps",
+                    image_path=None,
+                    image_path_selected=None,
+                    description="",
+                    icon=None,
+                    value=self.open_apps
+                )
+            )
+            popup_options.append(
+                GridOrListEntry(
+                    primary_text="Settings",
+                    image_path=None,
+                    image_path_selected=None,
+                    description="",
+                    icon=None,
+                    value=self.open_settings
+                )
+            )
+
+
         popup_options.append(GridOrListEntry(
             primary_text=f"{game_system.display_name} Game Search",
             image_path=Theme.settings(),

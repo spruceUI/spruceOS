@@ -22,14 +22,16 @@ class MainMenu:
         self.settings_menu = BasicSettingsMenu()
         self.popup_menu = MainMenuPopup()
 
+    def reorder_options(self,ordering, objects):
+        # Create a lookup map for ordering priority
+        order_map = {text: index for index, text in enumerate(ordering)}
+        
+        # Sort objects based on the index of their primary text in the ordering list
+        return sorted(objects, key=lambda obj: order_map.get(obj.get_primary_text(), float('inf')))
+
     def build_options(self):
-        #TODO make this user config driven
-        #first_entry = "Favorite"
-        show_favorite = True
-        show_recents = True
-            
         image_text_list = []
-        if(show_recents):
+        if (Theme.get_recents_enabled()):
             image_text_list.append(
                 GridOrListEntry(
                     primary_text="Recent",
@@ -41,8 +43,8 @@ class MainMenu:
                 )
             )
 
-        if(show_favorite):
-             image_text_list.append(
+        if (Theme.get_favorites_enabled()):
+            image_text_list.append(
                 GridOrListEntry(
                     primary_text="Favorite",
                     image_path=Theme.favorite(),
@@ -52,7 +54,7 @@ class MainMenu:
                     value="Favorite"
                 )
             )
-             
+
         image_text_list.append(
             GridOrListEntry(
                 primary_text="Game",
@@ -63,27 +65,34 @@ class MainMenu:
                 value="Game"
             )
         )
-        image_text_list.append(
-             GridOrListEntry(
-                 primary_text="App",
-                image_path=Theme.app(),
-                image_path_selected=Theme.app_selected(),
-                description="Your Apps",
-                icon=None,
-                value="App"
+
+        if (Theme.get_apps_enabled()):
+
+            image_text_list.append(
+                GridOrListEntry(
+                    primary_text="App",
+                    image_path=Theme.app(),
+                    image_path_selected=Theme.app_selected(),
+                    description="Your Apps",
+                    icon=None,
+                    value="App"
+                )
             )
-        )
-        image_text_list.append(
-             GridOrListEntry(
-                primary_text="Setting",
-                image_path=Theme.settings(),
-                image_path_selected=Theme.settings_selected(),
-                description="Your Apps",
-                icon=None,
-                value="Setting"
+
+        if (Theme.get_settings_enabled()):
+            image_text_list.append(
+                GridOrListEntry(
+                    primary_text="Setting",
+                    image_path=Theme.settings(),
+                    image_path_selected=Theme.settings_selected(),
+                    description="Your Apps",
+                    icon=None,
+                    value="Setting"
+                )
             )
-        )
-        return image_text_list
+
+            
+        return self.reorder_options(Theme.get_main_menu_option_ordering(),image_text_list)
 
     def build_main_menu_view(self, options, selected):
         return ViewCreator.create_view(
@@ -92,32 +101,37 @@ class MainMenu:
             options=options, 
             cols=Theme.get_main_menu_column_count(), 
             rows=1,
-            selected_index=selected.get_index())
+            selected_index=selected.get_index(),
+            show_grid_text=Theme.get_main_menu_show_text_grid_mode())
 
     def run_main_menu_selection(self):
-        selected = Selection(None,None,0)
+        
+        if(Theme.skip_main_menu()):
+            self.system_select_menu.run_system_selection()
+        else:
+            selected = Selection(None,None,0)
 
-        image_text_list = self.build_options()
-        view =  self.build_main_menu_view(image_text_list, selected)        
-            
-        expected_inputs = [ControllerInput.A, ControllerInput.MENU]
-        while(selected.get_input() != ControllerInput.B):      
-            view.set_options(self.build_options())  
+            image_text_list = self.build_options()
+            view =  self.build_main_menu_view(image_text_list, selected)        
+                
+            expected_inputs = [ControllerInput.A, ControllerInput.MENU]
+            while(selected.get_input() != ControllerInput.B):      
 
-            if((selected := view.get_selection(expected_inputs)) is not None):       
-                if(ControllerInput.A == selected.get_input()): 
-                    if("Game" == selected.get_selection().get_primary_text()):
-                        self.system_select_menu.run_system_selection()
-                    elif("App" == selected.get_selection().get_primary_text()):
-                        self.app_menu.run_app_selection()
-                    elif("Favorite" == selected.get_selection().get_primary_text()):
-                        self.favorites_menu.run_rom_selection()
-                    elif("Recent" == selected.get_selection().get_primary_text()):
-                        self.recents_menu.run_rom_selection()
-                    elif("Setting" == selected.get_selection().get_primary_text()):
-                        theme_updated = self.settings_menu.show_menu()
-                        if(theme_updated):
-                            view =  self.build_main_menu_view(image_text_list, selected)        
+                if((selected := view.get_selection(expected_inputs)) is not None):       
+                    if(ControllerInput.A == selected.get_input()): 
+                        if("Game" == selected.get_selection().get_primary_text()):
+                            self.system_select_menu.run_system_selection()
+                        elif("App" == selected.get_selection().get_primary_text()):
+                            self.app_menu.run_app_selection()
+                        elif("Favorite" == selected.get_selection().get_primary_text()):
+                            self.favorites_menu.run_rom_selection()
+                        elif("Recent" == selected.get_selection().get_primary_text()):
+                            self.recents_menu.run_rom_selection()
+                        elif("Setting" == selected.get_selection().get_primary_text()):
+                            self.settings_menu.show_menu()
+                    elif(ControllerInput.MENU == selected.get_input()):
+                        self.popup_menu.run_popup_menu_selection()
 
-                elif(ControllerInput.MENU == selected.get_input()):
-                    self.popup_menu.run_popup_menu_selection()
+                    if(selected.get_input() is not None):
+                        image_text_list = self.build_options()
+                        view =  self.build_main_menu_view(image_text_list, selected)        

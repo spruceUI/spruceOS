@@ -219,3 +219,7 @@ class DeviceCommon(ABC):
     @abstractmethod
     def get_bluetooth_scanner(self):
         pass
+
+    @abstractmethod
+    def get_ip_addr_text(self):
+        pass
