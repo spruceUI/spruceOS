@@ -62,8 +62,18 @@ class RomsMenuCommon(ABC):
                     top_bar_text=page_name,
                     options=rom_list,
                     selected_index=selected.get_index(),
-                    rows=2,
-                    cols=4)
+                    rows=Theme.get_game_select_row_count(),
+                    cols=Theme.get_game_select_col_count(),
+                    grid_resized_width=Theme.get_game_select_img_width(),
+                    grid_resized_height=Theme.get_game_select_img_height(),
+                    use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),
+                    hide_grid_bg=not Theme.get_game_select_show_sel_bg_grid_mode(),
+                    show_grid_text=Theme.get_game_select_show_text_grid_mode(),
+                    set_top_bar_text_to_selection=Theme.get_set_top_bar_text_to_game_selection(),
+                    grid_selected_bg=Theme.get_grid_game_selected_bg(),
+                    grid_resize_type=Theme.get_grid_game_selected_resize_type()
+                    )
+
             else:
                 view.set_options(rom_list)
 

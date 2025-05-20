@@ -1,10 +1,7 @@
 
 from pathlib import Path
-import subprocess
-from devices.device import Device
 from games.utils.game_entry import GameEntry
 from menus.games.roms_menu_common import RomsMenuCommon
-from menus.games.utils.rom_info import RomInfo
 from views.grid_or_list_entry import GridOrListEntry
 from games.utils.game_system import GameSystem 
 

@@ -54,7 +54,8 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 Device.disable_wifi()
             else:
                 Device.enable_wifi()
-        else:
+
+        if(ControllerInput.A == input):
             self.wifi_menu.show_wifi_menu()
 
     def show_bt_menu(self, input):
@@ -101,6 +102,11 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             self.advance_settings_menu.show_menu()
 
+
+    def launch_stock_os_menu(self,input):
+        if(ControllerInput.A == input):
+            Device.launch_stock_os_menu()
+
     def build_options_list(self):
         option_list = []
         option_list.append(
@@ -139,7 +145,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="WiFi",
-                        value_text="<    " + ("On" if Device.is_wifi_enabled() else "Off") + "    >",
+                        value_text="<    " + (Device.get_ip_addr_text()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -175,6 +181,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             
         option_list.append(
                 GridOrListEntry(
+                        primary_text="Stock OS Menu",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_stock_os_menu
+                    )
+            )
+            
+        option_list.append(
+                GridOrListEntry(
                         primary_text="Advanced Settings",
                         value_text=None,
                         image_path=None,
@@ -198,11 +216,13 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             
 
             if(list_view is None or self.theme_changed):
+                Display.clear_text_cache()
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
                     top_bar_text="Settings", 
                     options=option_list,
                     selected_index=selected.get_index())
+                    
                 self.theme_changed = False
             else:
                 list_view.set_options(option_list)

@@ -108,6 +108,11 @@ class Device:
     @staticmethod
     def enable_wifi():
         return Device._impl.enable_wifi()
+    
+    @staticmethod
+    def wifi_error_detected():
+        return Device._impl.enable_wifi()
+
 
     @staticmethod
     def get_battery_percent():
@@ -224,3 +229,13 @@ class Device:
     @staticmethod
     def get_bluetooth_scanner():
         return Device._impl.get_bluetooth_scanner()
+
+    @staticmethod  
+    def get_ip_addr_text():
+        return Device._impl.get_ip_addr_text()
+    
+    @staticmethod  
+    def launch_stock_os_menu():
+        return Device._impl.launch_stock_os_menu()
+    
+    
