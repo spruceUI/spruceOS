@@ -258,9 +258,9 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
-			export LD_PRELOAD=./lib64_a133p/libSDL2-2.0.so.0 ### this option affects screen layouts and may be beneficial for the TSP
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64_a133p ### this option affects screen layouts and may be beneficial for the TSP
 		elif [ "$PLATFORM" = "Flip" ]; then
-			export LD_PRELOAD=./lib64_rk3566/libSDL2-2.0.so.0
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64_rk3566
 		fi
 		
 		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
