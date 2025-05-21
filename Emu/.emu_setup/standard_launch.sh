@@ -258,7 +258,7 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
-			export LD_LIBRARY_PATH="$HOME/lib64_a133p:$LD_LIBRARY_PATH" ### this option affects screen layouts and may be beneficial for the TSP
+			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
 			export SDL_AUDIODRIVER=dsp
 			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
 
