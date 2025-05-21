@@ -1,6 +1,6 @@
 {
   "label": "PixelReader",
-  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/app/menuswitch.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/app/pixelreader.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/menuswitch.png",
   "launch": "launch.sh",
   "description": "PixelReader v0.6"
