@@ -258,13 +258,16 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64_a133p ### this option affects screen layouts and may be beneficial for the TSP
+			export LD_LIBRARY_PATH="$HOME/lib64_a133p:$LD_LIBRARY_PATH" ### this option affects screen layouts and may be beneficial for the TSP
+			export SDL_AUDIODRIVER=dsp
+			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+
 		elif [ "$PLATFORM" = "Flip" ]; then
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64_rk3566
+			export SDL_VIDEODRIVER=NDS
+			export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
+			./drastic32 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
 		fi
 		
-		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
-		./drastic64 "$ROM_FILE"
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
 	fi
 	sync
