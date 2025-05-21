@@ -32,104 +32,44 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Check if a flag exists
-# Usage: flag_check "flag_name"
-# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-flag_check() {
-    local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Call this like:
-# log_message "Your message here"
-# To output to a custom log file, set the variable within your script:
-# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
-# This will log the message to the spruce.log file in the Saves/spruce folder
-#
-# Usage examples:
-# Log a regular message:
-#    log_message "This is a regular log message"
-# Log a verbose message (only logged if log_verbose was called):
-#    log_message "This is a verbose log message" -v
-# Log to a custom file:
-#    log_message "Custom file log message" "" "/path/to/custom/log.file"
-# Log a verbose message to a custom file:
-#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
-log_message() {
-    local message="$1"
-    local verbose_flag="$2"
-    local custom_log_file="${3:-$log_file}"
-
-    # Check if it's a verbose message and if verbose logging is not enabled
-    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
-
-    # Handle custom log file
-    if [ "$custom_log_file" != "$log_file" ]; then
-        mkdir -p "$(dirname "$custom_log_file")"
-        touch "$custom_log_file"
-    fi
-
-    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
-}
+# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!!
 
 
-DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
-FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+# variables used in multiple different helperFunctions:
+export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+export MESSAGES_FILE="/var/log/messages"
+
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
-# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
-# log_message "[helperFunctions.sh] $INFO" -v
-
 case $INFO in
-*"sun8i"*)
-	export PLATFORM="A30"
-    ;;
-*"TG5040"*)
-	export PLATFORM="SmartPro"
-	;;
-*"TG3040"*)
-	export PLATFORM="Brick"
-	;;
-*"0xd05"*)
-    export PLATFORM="Flip"
-    ;;
-*)
-    export PLATFORM="A30"
-    ;;
+    *"sun8i"*) export PLATFORM="A30" ;;
+    *"TG5040"*)	export PLATFORM="SmartPro" ;;
+    *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"0xd05"*) export PLATFORM="Flip" ;;
+    *) export PLATFORM="A30" ;;
 esac
 
-# TODO: this breaks easyConfig for any script that imports helperFunctions, can we wrap this in a function or spit it out somewhere else?
-# log_message "[helperFunctions.sh] Platform is $PLATFORM" -v
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-if [ ! "$PLATFORM" = "A30" ]; then
-    export PATH="/mnt/SDCARD/spruce/bin64:$PATH" # 64-bit
-else
-    export PATH="/mnt/SDCARD/spruce/bin:$PATH" # 32-bit
-fi
+[ "$PLATFORM" = "A30" ] && export PATH="/mnt/SDCARD/spruce/bin:$PATH" || \
+                           export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
 
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
-    # These echo's are needed to seperate the events in the key press log file
-    local messages_file="/var/log/messages"
-    echo "ACKNOWLEDGE $(date +%s)" >>"$messages_file"
+    # These echoes are needed to seperate the events in the key press log file
+    echo "ACKNOWLEDGE $(date +%s)" >> "$MESSAGES_FILE"
 
     while true; do
-        inotifywait "$messages_file"
-        last_line=$(tail -n 1 "$messages_file")
+        inotifywait "$MESSAGES_FILE"
+        last_line=$(tail -n 1 "$MESSAGES_FILE")
         case "$last_line" in
         *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
-            echo "ACKNOWLEDGED $(date +%s)" >>"$messages_file"
+            echo "ACKNOWLEDGED $(date +%s)" >>"$MESSAGES_FILE"
             log_message "last_line: $last_line" -v
             break
             ;;
@@ -151,9 +91,8 @@ check_and_connect_wifi() {
     # WARNING: Avoid running this function in-game, it will lead to stuttters!
     # ########################################################################
 
-    messages_file="/var/log/messages"
-    local timeout=60  # Think about making this configurable
-    local start_time=$(date +%s)
+    timeout=60  # Think about making this configurable
+    start_time=$(date +%s)
 
     # More thorough connection check
     connection_active=0
@@ -193,36 +132,36 @@ Press START to continue anyway."
                 # Check for timeout
                 current_time=$(date +%s)
                 if [ $((current_time - start_time)) -ge $timeout ]; then
-                    echo "WiFi connection timed out" >> "$messages_file"
+                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
                     break
                 fi
 
                 if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-                    echo "Successfully connected to WiFi" >> "$messages_file"
+                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
                     break
                 fi
                 sleep 0.5
             done
         } &
         while true; do
-            inotifywait "$messages_file"
-            last_line=$(tail -n 1 "$messages_file")
+            inotifywait "$MESSAGES_FILE"
+            last_line=$(tail -n 1 "$MESSAGES_FILE")
             case $last_line in
-            *"$B_START"* | *"$B_START_2"*)
-                log_message "WiFi connection cancelled by user"
-                display_kill
-                return 1
-                ;;
-            *"Successfully connected to WiFi"*)
-                log_message "Successfully connected to WiFi"
-                display_kill
-                return 0
-                ;;
-            *"WiFi connection timed out"*)
-                log_message "WiFi connection timed out after $timeout seconds"
-                display_kill
-                return 1
-                ;;
+                *"$B_START"* | *"$B_START_2"*)
+                    log_message "WiFi connection cancelled by user"
+                    display  --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -d 2 -t "Proceeding before connected to wifi."
+                    return 1
+                    ;;
+                *"Successfully connected to WiFi"*)
+                    log_message "Successfully connected to WiFi"
+                    display_kill
+                    return 0
+                    ;;
+                *"WiFi connection timed out"*)
+                    log_message "WiFi connection timed out after $timeout seconds"
+                    display_kill
+                    return 1
+                    ;;
             esac
         done
     fi
@@ -242,43 +181,42 @@ Press START to continue anyway."
 #     display -t "You did not confirm the action" -d 3
 # fi
 confirm() {
-    local messages_file="/var/log/messages"
-    local timeout=${1:-0}        # Default to 0 (no timeout) if not provided
-    local timeout_return=${2:-1} # Default to 1 if not provided
-    local start_time=$(date +%s)
+    timeout=${1:-0}        # Default to 0 (no timeout) if not provided
+    timeout_return=${2:-1} # Default to 1 if not provided
+    start_time=$(date +%s)
 
-    echo "CONFIRM $(date +%s)" >>"$messages_file"
+    echo "CONFIRM $(date +%s)" >>"$MESSAGES_FILE"
 
     while true; do
         # Check for timeout first
-        if [ $timeout -ne 0 ]; then
-            local current_time=$(date +%s)
-            local elapsed_time=$((current_time - start_time))
+        if [ "$timeout" -ne 0 ]; then
+            current_time=$(date +%s)
+            elapsed_time=$((current_time - start_time))
             if [ $elapsed_time -ge $timeout ]; then
                 display_kill
-                echo "CONFIRM TIMEOUT $(date +%s)" >>"$messages_file"
+                echo "CONFIRM TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
                 return $timeout_return
             fi
         fi
 
         # Wait for log message update (with a shorter timeout to allow frequent timeout checks)
-        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
+        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
             continue
         fi
 
         # Get the last line of log file
-        last_line=$(tail -n 1 "$messages_file")
+        last_line=$(tail -n 1 "$MESSAGES_FILE")
         case "$last_line" in
         # B button - cancel
         *"$B_B"*)
             display_kill
-            echo "CONFIRM CANCELLED $(date +%s)" >>"$messages_file"
+            echo "CONFIRM CANCELLED $(date +%s)" >>"$MESSAGES_FILE"
             return 1
             ;;
         # A button - confirm
         *"$B_A"*)
             display_kill
-            echo "CONFIRM CONFIRMED $(date +%s)" >>"$messages_file"
+            echo "CONFIRM CONFIRMED $(date +%s)" >>"$MESSAGES_FILE"
             return 0
             ;;
         esac
@@ -289,8 +227,8 @@ confirm() {
 # Usage: cores_online [number of cores]
 # Default is 4 cores (all cores online)
 cores_online() {
-    local min_cores=4                # Minimum number of cores to keep online
-    local num_cores=${1:-$min_cores} # Default to min_cores if no argument is provided
+    min_cores=4                # Minimum number of cores to keep online
+    num_cores=${1:-$min_cores} # Default to min_cores if no argument is provided
 
     # Ensure the input is between min_cores and 4
     if [ "$num_cores" -lt "$min_cores" ]; then
@@ -321,10 +259,9 @@ cores_online() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    local start_brightness=40
-    local end_brightness=10
-    local steps=90   # Total number of steps for the transition
-    local delay=0.01 # 50ms delay between each step
+    start_brightness="$SYSTEM_BRIGHTNESS_4"
+    end_brightness="$SYSTEM_BRIGHTNESS_0"
+    delay=0.01 # 50ms delay between each step
 
     # Check if another dim_screen is running
     if pgrep -f "dim_screen" | grep -v $$ >/dev/null; then
@@ -333,29 +270,23 @@ dim_screen() {
     fi
 
     # Get current brightness
-    local current_brightness=$(cat $DEVICE_BRIGHTNESS_PATH)
+    current_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
 
     # Check if we're already at target brightness
-    if [ "$current_brightness" -eq "$end_brightness" ]; then
+    if [ "$current_brightness" -le "$end_brightness" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
 
-    # Calculate the brightness decrease per step
-    local brightness_range=$((start_brightness - end_brightness))
-    local current=$start_brightness
+    current=$start_brightness
 
-    while [ $current -gt $end_brightness ]; do
-        echo $current > $DEVICE_BRIGHTNESS_PATH
+    while [ "$current" -gt "$end_brightness" ]; do
+        echo "$current" > "$DEVICE_BRIGHTNESS_PATH"
         current=$((current - 1))
-        sleep $delay
+        sleep "$delay"
     done
 }
 
-[ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
-ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
-CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
-DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Call this to display text on the screen
 # IF YOU CALL THIS YOUR SCRIPT NEEDS TO CALL display_kill()
 # It's possible to leave a display process running
@@ -385,54 +316,41 @@ DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    local screen_width=640 screen_height=480 rotation=0
-    local ld_library_path="$LD_LIBRARY_PATH"
-    local width=600
+    [ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
+    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
+    CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
+    DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+
     if [ "$PLATFORM" = "Brick" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=1024
-      screen_height=768
-      rotation=0
-      width=960
-      # TODO: this should go away once profile is wired up for the brick
-      ld_library_path="/usr/trimui/lib:$ld_library_path"
-      # TODO: we might want to make this more generic based on architecture eventually
+        width=960
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+
     elif [ "$PLATFORM" = "SmartPro" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=1280
-      screen_height=720
-      rotation=0
-      width=1200
-      # TODO: this should go away once profile is wired up for the brick
-      ld_library_path="/usr/trimui/lib:$ld_library_path"
-      # TODO: we might want to make this more generic based on architecture eventually
-      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+        width=1200
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+
     elif [ "$PLATFORM" = "Flip" ]; then
-      # TODO: we might want to move these to config files?
-      screen_width=640
-      screen_height=480
-      rotation=0
-      width=600
-      # TODO: we might want to make this more generic based on architecture eventually
-      DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+        width=600
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
+
     elif [ "$PLATFORM" = "A30" ]; then
-      screen_width=640
-      screen_height=480
-      rotation=270
-      width=600
+        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
+        width=600
     fi
 
-    local image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=70 align="middle" color="ebdbb2" font=""
-    local use_acknowledge_image=false
-    local use_confirm_image=false
-    local run_acknowledge=false
-    local bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
-    local icon_image=""
-    local additional_images=""
-    local position_set=false
-    local qr_url=""
+    image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=50 align="middle" color="ebdbb2" font=""
+    use_acknowledge_image=false
+    use_confirm_image=false
+    run_acknowledge=false
+    bg_color="7f7f7f" bg_alpha=0 image_scaling=1.0
+    icon_image=""
+    additional_images=""
+    position_set=false
+    qr_url=""
 
-    while [[ $# -gt 0 ]]; do
+    while [ $# -gt 0 ]; do
         case $1 in
             -i|--image) image="$2"; shift ;;
             -t|--text) text="$2"; shift ;;
@@ -450,8 +368,8 @@ display() {
             -is|--image-scaling) image_scaling="$2"; shift ;;
             --icon)
                 icon_image="$2"
-                if ! $position_set; then
-                    position=$((position + 80))
+                if [ "$position_set" = false ]; then
+                    position=80
                 fi
                 shift
                 ;;
@@ -461,7 +379,7 @@ display() {
                 ;;
             --qr)
                 qr_url="$2"
-                if ! $position_set; then
+                if [ "$position_set" = false ]; then
                     position=89
                 fi
                 shift
@@ -470,35 +388,34 @@ display() {
         esac
         shift
     done
-    local r="${color:0:2}"
-    local g="${color:2:2}"
-    local b="${color:4:2}"
-    local bg_r="${bg_color:0:2}"
-    local bg_g="${bg_color:2:2}"
-    local bg_b="${bg_color:4:2}"
+    r=$(echo "$color" | cut -c1-2)
+    g=$(echo "$color" | cut -c3-4)
+    b=$(echo "$color" | cut -c5-6)
+    bg_r=$(echo "$bg_color" | cut -c1-2)
+    bg_g=$(echo "$bg_color" | cut -c3-4)
+    bg_b=$(echo "$bg_color" | cut -c5-6)
 
     # Set font to DEFAULT_FONT if it's empty
     if [ -z "$font" ]; then
         font="$DEFAULT_FONT"
     fi
 
-
-    local command="LD_LIBRARY_PATH=\"$ld_library_path\" $DISPLAY_TEXT_FILE "
-    command="$command""$screen_width $screen_height $rotation "
+    command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" $DISPLAY_TEXT_FILE "
+    command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "
 
     # Construct the command
-    local command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
+    command="$command""\"$image\" \"$text\" $delay $size $position $align $width $r $g $b \"$font\" $bg_r $bg_g $bg_b $bg_alpha $image_scaling"
 
     # Add icon image if specified
     if [ -n "$icon_image" ]; then
-        command="$command \"$icon_image\" 0.20 160 middle"
+        command="$command \"$icon_image\" 0.20 center middle"
     fi
 
     # Add CONFIRM_IMAGE if --confirm flag is used, otherwise use ACKNOWLEDGE_IMAGE if --okay flag is used
-    if [[ "$use_confirm_image" = true ]]; then
+    if [ "$use_confirm_image" = true ]; then
         command="$command \"$CONFIRM_IMAGE\" 1.0 240 middle"
         delay=0
-    elif [[ "$use_acknowledge_image" = true ]]; then
+    elif [ "$use_acknowledge_image" = true ]; then
         command="$command \"$ACKNOWLEDGE_IMAGE\" 1.0 240 middle"
     fi
 
@@ -511,7 +428,7 @@ display() {
     if [ -n "$qr_url" ]; then
         qr_image=$(qr_code -t "$qr_url")
         if [ -n "$qr_image" ]; then
-            command="$command \"$qr_image\" 0.50 140 middle"
+            command="$command \"$qr_image\" 0.50 top middle"
         else
             log_message "Failed to generate QR code for URL: $qr_url" -v
         fi
@@ -520,17 +437,17 @@ display() {
     display_kill
 
     # Execute the command in the background if delay is 0
-    if [[ "$delay" -eq 0 ]]; then
+    if [ "$delay" -eq 0 ]; then
         eval "$command" &
-        log_message "display command: $command" -v
+        log_message "display command: $command"
         # Run acknowledge if -o or --okay was used and --confirm was not used
-        if [[ "$run_acknowledge" = true && "$use_confirm_image" = false ]]; then
+        if [ "$run_acknowledge" = true ] && [ "$use_confirm_image" = false ]; then
             acknowledge
         fi
     else
         # Execute the command and capture its output
         eval "$command"
-        log_message "display command: $command" -v
+        log_message "display command: $command"
     fi
 }
 
@@ -545,6 +462,18 @@ display_kill() {
 flag_add() {
     local flag_name="$1"
     touch "$FLAGS_DIR/${flag_name}.lock"
+}
+
+# Check if a flag exists
+# Usage: flag_check "flag_name"
+# Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+flag_check() {
+    local flag_name="$1"
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # Get the full path to a flag file
@@ -566,30 +495,29 @@ flag_remove() {
 # Returns the name of the button pressed, or "" if no matching button was pressed
 # Returned strings are simplified, so "B_L1" would return "L1"
 get_button_press() {
-    local messages_file="/var/log/messages"
-    local button_pressed=""
-    local timeout=${1:-180}  # Default 180 second timeout if not specified
-    local start_time=$(date +%s)
+    button_pressed=""
+    timeout=${1:-180}  # Default 180 second timeout if not specified
+    start_time=$(date +%s)
 
-    echo "GET_BUTTON_PRESS $(date +%s)" >>"$messages_file"
+    echo "GET_BUTTON_PRESS $(date +%s)" >>"$MESSAGES_FILE"
 
     while true; do
         # Check for timeout
-        local current_time=$(date +%s)
-        local elapsed_time=$((current_time - start_time))
+        current_time=$(date +%s)
+        elapsed_time=$((current_time - start_time))
         if [ $elapsed_time -ge $timeout ]; then
-            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$messages_file"
+            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
             echo "B"
             return 1
         fi
 
         # Wait for log message update
-        if ! inotifywait -t 1 "$messages_file" >/dev/null 2>&1; then
+        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
             continue
         fi
 
         # Get the last line of log file
-        local last_line=$(tail -n 1 "$messages_file")
+        last_line=$(tail -n 1 "$MESSAGES_FILE")
         case "$last_line" in
             *"$B_L1"*) button_pressed="L1" ;;
             *"$B_L2"*) button_pressed="L2" ;;
@@ -612,7 +540,7 @@ get_button_press() {
         esac
 
         if [ -n "$button_pressed" ]; then
-            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$messages_file"
+            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$MESSAGES_FILE"
             echo "$button_pressed"
             return 0
         fi
@@ -626,17 +554,16 @@ get_current_theme_path() {
 
     # check if config file exists
     if [ ! -f "$SYSTEM_JSON" ]; then
-        echo "Error: Configuration file not found at $SYSTEM_JSON"
+        log_message "Error: Configuration file not found at $SYSTEM_JSON"
         return 1
     fi
 
     # Extract "theme" from JSON, ignoring errors
-    local theme_name
     theme_name=$(jq -r '.theme' "$SYSTEM_JSON")
 
     # If "theme" is empty
     if [ -z "$theme_name" ]; then
-        echo "Error: Could not retrieve theme name from $SYSTEM_JSON"
+        log_message "Error: Could not retrieve theme name from $SYSTEM_JSON"
         return 1
     fi
 
@@ -677,9 +604,7 @@ get_current_theme_path() {
 # echo "Expert Apps icon:           $THEME_EXPERT_APPS"
 get_current_theme() {
     # gets current theme path
-    local theme_path
     theme_path=$(get_current_theme_path)
-    local json_path
     json_path="$theme_path/config.json"
 
     # checks if path exists
@@ -734,16 +659,15 @@ get_current_theme() {
 # This function returns the user's theme path if it's not the default theme
 # Meant to be used on installations and updates only
 get_theme_path_to_restore(){
-    # Get the current theme path
-    local current_theme_path=$(get_current_theme_path)
-    local spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
-    local default_theme="../res/"
-    local default_theme_2="./"
+    current_theme_path=$(get_current_theme_path)
+    spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
+    default_theme="../res/"
+    default_theme_2="./"
 
     # if the current theme is equal to the default miyoo theme
-    if [[ "$current_theme_path" == "$default_theme" ]]; then # that's ugly!
+    if [ "$current_theme_path" = "$default_theme" ]; then # that's ugly!
         echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
-    elif [[ "$current_theme_path" == "$default_theme_2" ]]; then # that's ugly!
+    elif [ "$current_theme_path" = "$default_theme_2" ]; then # that's ugly!
         echo "$spruce_theme"                                     # Switch to the spruce theme ASAP
     else # If not, give back the user his loved theme <3
         echo "$current_theme_path"
@@ -756,14 +680,14 @@ get_event() {
 }
 
 get_version() {
-    local spruce_file="/mnt/SDCARD/spruce/spruce"
+    spruce_file="/mnt/SDCARD/spruce/spruce"
 
     if [ ! -f "$spruce_file" ]; then
         echo "0"
         return 1
     fi
 
-    local version=$(cat "$spruce_file" | tr -d '[:space:]')
+    version=$(cat "$spruce_file" | tr -d '[:space:]')
 
     if [ -z "$version" ]; then
         echo "0"
@@ -782,7 +706,7 @@ get_version() {
 }
 
 get_version_complex() {
-    local base_version=$(get_version)
+    base_version=$(get_version)
 
     # Ensure we got a valid base version
     if [ -z "$base_version" ] || [ "$base_version" = "0" ]; then
@@ -790,17 +714,50 @@ get_version_complex() {
         return 1
     fi
 
-    local version_pattern="/mnt/SDCARD/${base_version}-*"
+    version_pattern="/mnt/SDCARD/${base_version}-*"
     
     # Find any matching version file (beta or nightly)
-    local test_file=$(ls $version_pattern 2>/dev/null | head -n 1)
+    test_file=$(ls $version_pattern 2>/dev/null | head -n 1)
 
     if [ -n "$test_file" ]; then
-        local test_version=$(basename "$test_file")
+        test_version=$(basename "$test_file")
         echo "$test_version"
     else
         echo "$base_version"
     fi
+}
+
+# Call this like:
+# log_message "Your message here"
+# To output to a custom log file, set the variable within your script:
+# log_file="/mnt/SDCARD/App/MyApp/spruce.log"
+# This will log the message to the spruce.log file in the Saves/spruce folder
+#
+# Usage examples:
+# Log a regular message:
+#    log_message "This is a regular log message"
+# Log a verbose message (only logged if log_verbose was called):
+#    log_message "This is a verbose log message" -v
+# Log to a custom file:
+#    log_message "Custom file log message" "" "/path/to/custom/log.file"
+# Log a verbose message to a custom file:
+#    log_message "Verbose custom file log message" -v "/path/to/custom/log.file"
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
+log_message() {
+    message="$1"
+    verbose_flag="$2"
+    custom_log_file="${3:-$log_file}"
+
+    # Check if it's a verbose message and if verbose logging is not enabled
+    [ "$verbose_flag" = "-v" ] && ! flag_check "log_verbose" && return
+
+    # Handle custom log file
+    if [ "$custom_log_file" != "$log_file" ]; then
+        mkdir -p "$(dirname "$custom_log_file")"
+        touch "$custom_log_file"
+    fi
+
+    printf '%s%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "${verbose_flag:+ -v}" "$message" | tee -a "$custom_log_file"
 }
 
 # Call this to toggle verbose logging
@@ -809,7 +766,7 @@ get_version_complex() {
 # Remove it from your script when done.
 # Can be used as a toggle: calling it once enables verbose logging, calling it again disables it
 log_verbose() {
-    local calling_script=$(basename "$0")
+    calling_script=$(basename "$0")
     if flag_check "log_verbose"; then
         flag_remove "log_verbose"
         log_message "Verbose logging disabled in script: $calling_script"
@@ -820,10 +777,10 @@ log_verbose() {
 }
 
 log_precise() {
-    local message="$1"
-    local date_part=$(date '+%Y-%m-%d %H:%M:%S')
-    local uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
-    local timestamp="${date_part}.${uptime_part#*.}"
+    message="$1"
+    date_part=$(date '+%Y-%m-%d %H:%M:%S')
+    uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
+    timestamp="${date_part}.${uptime_part#*.}"
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
 }
 
@@ -835,10 +792,10 @@ log_precise() {
 QRENCODE_PATH="/mnt/SDCARD/miyoo/app/qrencode"
 QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
 qr_code() {
-    local text=""
-    local size=3
-    local level="M"
-    local output="/mnt/SDCARD/spruce/tmp/qr.png"
+    text=""
+    size=3
+    level="M"
+    output="/mnt/SDCARD/spruce/tmp/qr.png"
 
     # Parse arguments
     while [ $# -gt 0 ]; do
@@ -861,7 +818,7 @@ qr_code() {
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
-    local qr_bin_path=$QRENCODE_PATH
+    qr_bin_path=$QRENCODE_PATH
     if [ ! "$PLATFORM" = "A30" ]; then
       qr_bin_path=$QRENCODE64_PATH
     fi
@@ -878,10 +835,19 @@ qr_code() {
 }
 
 read_only_check() {
-    if [ $(mount | grep SDCARD | cut -d"(" -f 2 | cut -d"," -f1 ) == "ro" ]; then
-        log_message "SDCARD is mounted read-only, remounting as read-write"
-        mount -o remount,rw /dev/mmcblk0p1 /mnt/SDCARD
-        log_message "SDCARD remounted as read-write"
+    log_message "Performing read-only check"
+    SD_or_sd=$(mount | grep -q SDCARD && echo "SDCARD" || echo "sdcard")
+    log_message "Device uses /mnt/$SD_or_sd for its SD card path" -v
+    MNT_LINE=$(mount | grep "$SD_or_sd")
+    if [ -n "$MNT_LINE" ]; then
+        log_message "mount line for SD card: $MNT_LINE" -v
+        MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
+        if [ "$MNT_STATUS" = "ro" ] && [ -n "$SD_DEV" ]; then
+            log_message "SD card is mounted as RO. Attempting to remount."
+            mount -o remount,rw "$SD_DEV" /mnt/"$SD_or_sd"
+        else
+            log_message "SD card is not read-only."
+        fi
     fi
 }
 
@@ -893,8 +859,8 @@ record_video() {
     if [ -f "/tmp/ffmpeg_recording.pid" ]; then
         # Stop recording if one is in progress
         vibrate 200
-        local pid=$(cat "/tmp/ffmpeg_recording.pid")
-        kill $pid 2>/dev/null
+        pid=$(cat "/tmp/ffmpeg_recording.pid")
+        kill "$pid" 2>/dev/null
         rm "/tmp/ffmpeg_recording.pid"
         flag_remove "setting_cpu"
         log_message "Stopped recording" -v
@@ -902,9 +868,9 @@ record_video() {
         display -t "Recording stopped" -d 3
     else
         # Start new recording
-        local output_file="$1"
-        local timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
-        local date_str=$(date +%Y-%m-%d_%H-%M-%S)
+        output_file="$1"
+        timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
+        date_str=$(date +%Y-%m-%d_%H-%M-%S)
         set_performance
         # Prevent the CPU from being clocked down while recording
         flag_add "setting_cpu"
@@ -938,6 +904,14 @@ record_video() {
     fi
 }
 
+sanitize_system_json() {
+    if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
+        log_message "$0: Invalid System JSON detected, sanitizing..."
+        jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/platform/system-${PLATFORM}.json /tmp/system.json.clean
+        mv /tmp/system.json.clean "$SYSTEM_JSON"
+    fi
+}
+
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
@@ -951,8 +925,8 @@ set_smart() {
             "Brick" | "SmartPro") scaling_max_freq=1800000 CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative";;
         esac
         echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 35 >$CONSERVATIVE_POLICY_DIR/down_threshold
-        echo 70 >$CONSERVATIVE_POLICY_DIR/up_threshold
+        echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
+        echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
         echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
         echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
         echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
@@ -1027,7 +1001,7 @@ setting_get() {
         CFG="$CFG_FILE"
     fi
 
-value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
+    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then
         echo ""
         return 1
@@ -1077,8 +1051,7 @@ settings_organize() {
 # If no duration is provided, defaults to 50ms
 # If no intensity is provided, gets value from settings
 vibrate() {
-    local duration=50
-    local intensity
+    duration=50
 
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
@@ -1121,7 +1094,8 @@ vibrate() {
                 log_message "this is where I'd put my vibration... IF I HAD ONE"
             fi
             ;;
-        "Flip") # todo: figure out how to make lengths equal across intensity
+        "Flip") 
+            # todo: figure out how to make lengths equal across intensity
             if [ -z "$intensity" ]; then
                 intensity="$(setting_get "rumble_intensity")"
             fi
@@ -1132,7 +1106,7 @@ vibrate() {
                 while [ $timer -lt $duration ]; do
                     sleep 0.002
                     timer=$(($timer + 2))
-                done &
+                done
                 echo -n 0 > /sys/class/gpio/gpio20/value
             elif [ "$intensity" = "Medium" ]; then
                 timer=0
@@ -1154,7 +1128,8 @@ vibrate() {
                 done &
             fi
             ;;
-        "Brick" | "SmartPro") # todo: properly implement duration timer
+        "Brick" | "SmartPro") 
+            # todo: properly implement duration timer
             timer=0
             while [ $timer -lt $duration ]; do
                 echo -n 1 > /sys/class/gpio/gpio227/value
@@ -1171,9 +1146,8 @@ vibrate() {
 # If no output_path is provided, saves to /mnt/SDCARD/Saves/screenshots/
 # If game_name is provided, it will be used as the filename (without extension)
 take_screenshot() {
-    local output_path="${1:-/mnt/SDCARD/Saves/screenshots}"
-    local game_name="$2"
-    local screenshot_path
+    output_path="${1:-/mnt/SDCARD/Saves/screenshots}"
+    game_name="$2"
 
     # Ensure the screenshots directory exists
     mkdir -p "$output_path"
@@ -1183,7 +1157,7 @@ take_screenshot() {
         screenshot_path="$output_path/${game_name}.png"
     else
         # Generate timestamp-based filename if no game name
-        local timestamp=$(date +%Y%m%d_%H%M%S)
+        timestamp=$(date +%Y%m%d_%H%M%S)
         screenshot_path="$output_path/screenshot_${timestamp}.png"
     fi
 

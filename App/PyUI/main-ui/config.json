@@ -1,0 +1,6 @@
+{
+    "theme": "STOCK",
+    "themeDir": "/mnt/SDCARD/Themes/",
+    "turboDelayMs": 300,
+    "enableButtonWatchers": true
+}

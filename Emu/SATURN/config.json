@@ -1,8 +1,8 @@
 {
 "label": "Saturn",
 "icontop": "",
-"icon": "",
-"iconsel": "",
+"icon": "/mnt/SDCARD/Themes/SPRUCE/icons/saturn.png",
+"iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/saturn.png",
 "background": "",
 "themecolor": "E4007F",
 "effectsh": "effect.sh",
@@ -25,12 +25,12 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓LIBRETRO)-standalone",
+      "name": "Emu Core: (✓LIBRETRO)-sa_bios-sa_hle",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {
       "name": "CPU: (✓PERF)-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/speed/Overclock.sh"
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
     {
       "name": "Generate M3U playlists for multi-disc games",

@@ -3,12 +3,51 @@
 
 set -x
 
-if [ -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
-	echo "already installed"
-	exit 0
+# get path of script
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# File locations
+# New payload 				$DIR/payload/runmiyoo.sh
+# Old payload or original	/usr/miyoo/bin/runmiyoo.sh
+# Original after install	/usr/miyoo/bin/runmiyoo-original.sh
+
+# Sample version string for payload... ToDo: Remember to add to payload
+# PAYLOAD_VERSION 20250518
+
+# Get new payload version
+NEW_PAYLOAD_VERSION=$(cat $DIR/payload/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
+echo "New payload version $NEW_PAYLOAD_VERSION"
+
+# debug delay
+sleep 5s
+
+# Check for existing install
+if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
+	# Payload not installed
+	INSTALLED_PAYLOAD_VERSION=0
+else
+	# Check if payload has version string. Returns number of lines with PAYLOAD_VERSION in it
+	PAYLOAD_HAS_VERSION=$(cat /usr/miyoo/bin/runmiyoo.sh | grep -c PAYLOAD_VERSION)
+
+	if [[ PAYLOAD_HAS_VERSION -eq 0 ]]; then
+		# Payload installed but has no version.
+		INSTALLED_PAYLOAD_VERSION=1
+		echo "Old payload has no version"
+	else
+		# Get old payload version
+		OLD_PAYLOAD_VERSION=$(cat /usr/miyoo/bin/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
+		echo "Old payload $OLD_PAYLOAD_VERSION"
+
+		# Compare payload versions
+		if [[ $NEW_PAYLOAD_VERSION -le $OLD_PAYLOAD_VERSION ]]; then
+			echo "Payload is up to date"
+			exit 0	
+		fi
+	fi
 fi
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
+#debug delay
+sleep 5s
 
 export PATH=/tmp/bin:$DIR/payload/bin:$PATH
 export LD_LIBRARY_PATH=/tmp/lib:$DIR/payload/lib:$LD_LIBRARY_PATH
@@ -47,9 +86,14 @@ echo "unpacking rootfs"
 unsquashfs old_rootfs.squashfs
 
 show "inject-hook.png"
-echo "swapping runmiyoo.sh"
-mv squashfs-root/usr/miyoo/bin/runmiyoo.sh squashfs-root/usr/miyoo/bin/runmiyoo-original.sh
-mv runmiyoo.sh squashfs-root/usr/miyoo/bin/
+if [[ PAYLOAD_HAS_VERSION -eq 0 ]]; then
+	echo "swapping runmiyoo.sh"
+	mv squashfs-root/usr/miyoo/bin/runmiyoo.sh squashfs-root/usr/miyoo/bin/runmiyoo-original.sh
+	mv runmiyoo.sh squashfs-root/usr/miyoo/bin/
+else
+	echo "updating runmiyoo.sh"
+	mv -f runmiyoo.sh squashfs-root/usr/miyoo/bin/
+fi
 
 show "pack-root.png"
 echo "packing updated rootfs"

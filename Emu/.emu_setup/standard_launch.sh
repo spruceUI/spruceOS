@@ -1,12 +1,13 @@
 #!/bin/sh
 # One Emu launch.sh to rule them all!
+# This script is Ry's baby, please treat her well -Sun
 # Ry 2024-09-24
 
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
 log_message "-----Launching Emulator-----" -v
 log_message "trying: $0 $@" -v
@@ -108,6 +109,95 @@ handle_network_services() {
 	fi
 }
 
+##### TIME TRACHKING FUNCTIONS #####
+
+export START_TIME_PATH="/tmp/start_time"
+export END_TIME_PATH="/tmp/end_time"
+export DURATION_PATH="/tmp/session_duration"
+export TRACKER_JSON_PATH="/mnt/SDCARD/Saves/spruce/gtt.json"
+export MISSION_JSON_PATH="/mnt/SDCARD/Saves/spruce/bitpal_data/active_missions.json"
+
+record_session_start_time() {
+    date +%s > "$START_TIME_PATH"
+}
+
+record_session_end_time() {
+    date +%s > "$END_TIME_PATH"
+}
+
+calculate_current_session_duration() {
+    START_TIME=$(cat "$START_TIME_PATH")
+    END_TIME=$(cat "$END_TIME_PATH")
+    DURATION=$(( END_TIME - START_TIME ))
+    echo "$DURATION" > "$DURATION_PATH"
+}
+
+update_gtt_and_bp() {
+    # Initialize GTT JSON if needed
+    if [ ! -f "$TRACKER_JSON_PATH" ] || [ -z "$(cat "$TRACKER_JSON_PATH")" ]; then
+        jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
+    fi
+
+	# take care of pesky SDCARD vs sdcard
+	ROM_FILE="$(echo "$ROM_FILE" | sed 's|/mnt/sdcard|/mnt/SDCARD|')"
+
+    GTT_GAME_NAME="${GAME%.*} ($EMU_NAME)"
+    SESSION_DURATION="$(cat "$DURATION_PATH")"
+    END_TIME="$(cat "$END_TIME_PATH")"
+
+    PREVIOUS_PLAYTIME="$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].playtime_seconds // 0' "$TRACKER_JSON_PATH")"
+    NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+
+    OLD_NUM_SESSIONS="$(jq --arg game "$GTT_GAME_NAME" -r '.games[$game].sessions_played // 0' "$TRACKER_JSON_PATH")"
+    NEW_NUM_SESSIONS=$((OLD_NUM_SESSIONS + 1))
+
+	# update Game Time Tracker
+	tmpfile=$(mktemp)
+    jq --arg game "$GTT_GAME_NAME" \
+	   --arg rompath "$ROM_FILE" \
+       --argjson newTime "$NEW_PLAYTIME" \
+       --argjson numPlays "$NEW_NUM_SESSIONS" \
+       --arg emu "$EMU_NAME" \
+       --argjson lastPlayed "$END_TIME" \
+       '.games[$game] += {
+	   	   rompath: $rompath,
+           console: $emu,
+           playtime_seconds: $newTime,
+           sessions_played: $numPlays,
+           last_played: $lastPlayed
+       }' "$TRACKER_JSON_PATH" > "$tmpfile" && mv "$tmpfile" "$TRACKER_JSON_PATH"
+
+	# update any BitPal missions for the given rompath
+	for i in $(jq -r --arg path "$ROM_FILE" '
+		.missions
+		| to_entries[]
+		| select(.value.rompath == $path)
+		| .key
+	' "$MISSION_JSON"); do
+
+		PREVIOUS_PLAYTIME="$(get_mission_time_spent "$i")"
+    	NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
+		set_mission_time_spent "$i" "$NEW_PLAYTIME"
+
+		MISSION_DURATION="$(get_mission_duration "$i")"
+		MISSION_DURATION_SECONDS=$((60 * MISSION_DURATION))
+		if [ "$NEW_PLAYTIME" -ge "$MISSION_DURATION_SECONDS" ]; then
+
+			current_xp=$(get_bitpal_xp)
+			gained_xp=$(get_mission_xp_reward "$i")
+			new_current_xp=$((current_xp + gained_xp))
+			set_bitpal_xp "$new_current_xp"
+
+			set_mission_enddate "$i" "$(date +%s)"
+			move_mission_to_completed_json "$i"
+		fi
+
+	done
+
+	# clean up temp files to prevent accidental cross-pollination
+	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" 2>/dev/null
+}
+
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
@@ -126,6 +216,13 @@ run_ffplay() {
 		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -i "$ROM_FILE" > ffplay.log 2>&1 # trimui devices crash after about 30 seconds when not outputting to a log???
 		kill -9 "$(pidof gptokeyb)"
 	fi
+}
+
+function kill_runner() {
+    PID=`pidof runner`
+    if [ "$PID" != "" ]; then
+        kill -9 $PID
+    fi
 }
 
 run_drastic() {
@@ -166,9 +263,27 @@ run_drastic() {
 
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-		[ "$PLATFORM" = "Flip" ] || export LD_PRELOAD=./lib64/libSDL2-2.0.so.0.2600.1 ### this option affects screen layouts and may be beneficial for the TSP
-		[ "$PLATFORM" = "Flip" ] || export SDL_AUDIODRIVER=dsp ### this option breaks the flip but may help with stuttering on the A133s
-		./drastic64 "$ROM_FILE"
+		
+		if [ "$PLATFORM" = "Brick" ]; then
+			kill_runner
+			LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
+			sleep 1
+			export SDL_VIDEODRIVER=NDS
+			./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic "$ROM_FILE" > std.log 2>&1
+			sync
+			kill_runner
+
+		elif [ "$PLATFORM" = "SmartPro" ]; then
+			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
+			export SDL_AUDIODRIVER=dsp
+			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+
+		elif [ "$PLATFORM" = "Flip" ]; then
+			export SDL_VIDEODRIVER=NDS
+			export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
+			./drastic32 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+		fi
+		
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
 	fi
 	sync
@@ -188,10 +303,10 @@ run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
 	if [ "$PLATFORM" = "Brick" ]; then
-		./OpenBOR_Brick
+		./OpenBOR_Brick "$ROM_FILE"
 	elif [ "$PLATFORM" = "Flip" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
-		./OpenBOR_Flip
+		./OpenBOR_Flip "$ROM_FILE"
 	else # assume A30
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
@@ -299,7 +414,7 @@ extract_game_dir(){
     # If gamedir_name ends with a slash, remove the slash
     gamedir_line="${gamedir_line%/}"
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
-    game_dir="/mnt/sdcard/Roms/PORTS/${gamedir_line##*/}"
+    game_dir="/mnt/SDCARD/Roms/PORTS/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
     echo "${game_dir%\"}"
 }
@@ -314,37 +429,37 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-    rm "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+    rm "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     if [ "$PORT_CONTROL" = "X360" ]; then
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     else
-        cp "/mnt/sdcard/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/sdcard/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     fi
 }
 
 run_port() {
-    if [ "$PLATFORM" = "Flip" ]; then
-        /mnt/sdcard/spruce/flip/bind-new-libmali.sh
+	if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+        /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
         set_port_mode
 
         is_retroarch_port
         if [[ $? -eq 1 ]]; then
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-            cd /mnt/sdcard/RetroArch/
-            export HOME="/mnt/sdcard/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-             "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
+            cd /mnt/SDCARD/RetroArch/
+            export HOME="/mnt/SDCARD/Saves/flip/home"
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+             "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
         else
             PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd $PORTS_DIR
-            export HOME="/mnt/sdcard/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/sdcard/spruce/flip/lib/:/usr/lib:/mnt/sdcard/spruce/flip/muOS/usr/lib/:/mnt/sdcard/spruce/flip/muOS/lib/:/usr/lib32:/mnt/sdcard/spruce/flip/lib32/:/mnt/sdcard/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/sdcard/spruce/flip/bin/:$PATH"
-            "$ROM_FILE" &> /mnt/sdcard/Saves/spruce/port.log
+            export HOME="/mnt/SDCARD/Saves/flip/home"
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+            "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
         fi
         
-        /mnt/sdcard/spruce/flip/unbind-new-libmali.sh
+        /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
@@ -370,7 +485,11 @@ run_ppsspp() {
 	fi
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
-	[ "$PLATFORM" = "A30" ] && PPSSPPSDL="./PPSSPPSDL" || PPSSPPSDL="./PPSSPPSDL_$PLATFORM"
+	case "$PLATFORM" in
+		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
+		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
+		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
+	esac
 	"$PPSSPPSDL" "$ROM_FILE" "$PPSSPP_CMDLINE"
 }
 
@@ -447,7 +566,7 @@ run_retroarch() {
 	fi
 
 	#Swap below if debugging new cores
-	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/sdcard/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
+	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 }
 
@@ -514,6 +633,38 @@ save_custom_n64_controller_profile() {
 	fi
 }
 
+run_mupen_standalone() {
+
+	export HOME="$EMU_DIR/mupen64plus"
+	export XDG_CONFIG_HOME="$HOME"
+	export XDG_DATA_HOME="$HOME"
+	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
+
+	cd "$HOME"
+
+	sed -i "s|^ScreenWidth *=.*|ScreenWidth = $DISPLAY_WIDTH|" "mupen64plus.cfg"
+	sed -i "s|^ScreenHeight *=.*|ScreenHeight = $DISPLAY_HEIGHT|" "mupen64plus.cfg"
+
+	case "$ROM_FILE" in
+	*.n64 | *.v64 | *.z64)
+		ROM_PATH="$ROM_FILE"
+		;;
+	*.zip | *.7z)
+		TEMP_ROM=$(mktemp)
+		ROM_PATH="$TEMP_ROM"
+		7zr e "$ROM_FILE" -so >"$TEMP_ROM"
+		;;
+	esac
+
+	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
+	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
+	sleep 0.3
+	./mupen64plus "$ROM_PATH"
+	kill -9 $(pidof gptokeyb2)
+
+	rm -f "$TEMP_ROM"
+}
+
 run_yabasanshiro() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	export HOME="$EMU_DIR"
@@ -523,29 +674,50 @@ run_yabasanshiro() {
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
 		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
-	if [ -f "$SATURN_BIOS" ]; then
+	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "sa_bios" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
 	fi
 }
 
+run_flycast_standalone() {
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64"
+	export HOME="$EMU_DIR"
+
+	mkdir -p "$EMU_DIR/.local/share/flycast"
+	mkdir -p "/mnt/SDCARD/BIOS/dc"
+	mount --bind /mnt/SDCARD/BIOS/dc $EMU_DIR/.local/share/flycast
+
+	cd "$EMU_DIR"
+	./flycast "$ROM_FILE"
+
+	umount $EMU_DIR/.local/share/flycast
+}
+
+ ########################
 ##### MAIN EXECUTION #####
+ ########################
 
 import_launch_options
-
 set_cpu_mode
-
-# TODO: remove A30 check once network services implemented on Brick
+record_session_start_time
 handle_network_services
 
 flag_add 'emulator_launched'
 
 # Sanitize the rom path
-ROM_FILE="$(echo "$1" | sed 's|/media/sdcard0/|/mnt/SDCARD/|g')"
+ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
+	"DC")
+		if [ "$CORE" = "flycast_xtreme" ] && [ ! "$PLATFORM" = "A30" ]; then
+			run_flycast_standalone
+		else
+			run_retroarch
+		fi
+		;;
 	"MEDIA")
 		run_ffplay
 		;;
@@ -571,23 +743,34 @@ case $EMU_NAME in
 		save_ppsspp_configs
 		;;
 	"SATURN")
-		if [ "$CORE" = "standalone" ]; then
+		if [ "$CORE" = "sa_hle" ] || [ "$CORE" = "sa_bios" ]; then
 			run_yabasanshiro
 		else
 			run_retroarch
 		fi
 		;;
-	
+	"N64")
+			if [ "$CORE" = "mupen64plus" ] && [ ! "$PLATFORM" = "A30" ]; then
+				run_mupen_standalone
+			else
+				load_n64_controller_profile
+				ready_architecture_dependent_states
+				run_retroarch
+				stash_architecture_dependent_states
+				save_custom_n64_controller_profile
+			fi
+		;;
 	*)
-		[ $EMU_NAME = "N64" ] && load_n64_controller_profile
 		ready_architecture_dependent_states
 		run_retroarch
 		stash_architecture_dependent_states
-		[ $EMU_NAME = "N64" ] && save_custom_n64_controller_profile
 		;;
 esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh)
+record_session_end_time
+calculate_current_session_duration
+update_gtt_and_bp
 log_message "-----Closing Emulator-----" -v
 
 auto_regen_tmp_update

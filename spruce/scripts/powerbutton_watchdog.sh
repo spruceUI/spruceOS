@@ -20,7 +20,7 @@ SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
-EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
 
 long_press_handler() {
     # setup flag for long pressed event
@@ -180,7 +180,7 @@ while true; do
             flag_remove "wake.alarm"
             flag_add "sleep.powerdown"
 
-            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic*" >/dev/null || pgrep "PPSSPP*" >/dev/null; then
+            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "drastic*" >/dev/null || pgrep "PPSSPP*" >/dev/null || pgrep "flycast" >/dev/null || pgrep "yaba*" >/dev/null || pgrep "mupen64plus" >/dev/null; then
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
             fi
 

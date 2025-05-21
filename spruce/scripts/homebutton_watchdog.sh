@@ -27,7 +27,7 @@ kill_port(){
         pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader" | grep -v "grep" | awk 'NR==1 {print $1}')
 
         # Check if a PID was found
-        if [[ -n "$pid" ]]; then
+        if [ -n "$pid" ]; then
             log_message "Killing $pid ..." -v
             kill -9 $pid
         else
@@ -37,10 +37,10 @@ kill_port(){
 }
 
 kill_emulator() {
-    # kill RA or other emulator or MainUI
-    log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" -v
 
-    if pgrep -f "drastic" >/dev/null; then
+    if pgrep -f "./drastic" >/dev/null; then
+	    log_message "*** homebutton_watchdog.sh: Killing drastic!" 
+
         # use sendevent to send MENU + L1 combo buttons to drastic
         {
             #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
@@ -50,7 +50,8 @@ kill_emulator() {
             echo $B_MENU 0  # MENU up
             echo 0 0 0  # tell sendevent to exit
         } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+    elif pgrep -f "./PPSSPPSDL" >/dev/null; then
+	    log_message "*** homebutton_watchdog.sh: Killing PPSSPPSDL!" 
         killall -q -CONT PPSSPPSDL
         killall -q -CONT PPSSPPSDL_$PLATFORM
         # use sendevent to send SELECT + R1 combo buttons to PPSSPP
@@ -69,8 +70,15 @@ kill_emulator() {
         killall -q -15 PPSSPPSDL_$PLATFORM
 
     else
+	    log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" 
+        pid=$(ps -f | grep -E "MainUI.py" | grep -v "grep" | awk 'NR==1 {print $1}')
+        if [ -n "$pid" ]; then
+            log_message "Killing MainUI.py with PID: $pid"
+            kill -9 $pid
+        fi
+
         killall -q -CONT pico8_dyn pico8_64
-        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64
+        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui mupen64plus
     fi
 }
 
@@ -89,7 +97,7 @@ kill_current_app() {
             for PID in /proc/[0-9]*; do
                 if grep -q "^\./\|^\./" "$PID/cmdline" 2>/dev/null; then
                     KILL_PID=$(basename "$PID")
-                    log_message "Killing local process with PID: $KILL_PID" -v
+                    log_message "Killing local process with PID: $KILL_PID"
                     kill -9 "$KILL_PID" 2>/dev/null
                 fi
             done
@@ -103,7 +111,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** homebutton_watchdog.sh: 'CMD': $CMD" -v
+        log_message "*** homebutton_watchdog.sh: 'CMD': $CMD"
 
         # check command is emulator
         # exit if not emulator is in command
@@ -122,7 +130,7 @@ prepare_game_switcher() {
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
         log_message "*** homebutton_watchdog.sh: 'EMU_NAME': $EMU_NAME" -v
         SCREENSHOT_NAME="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
-        log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" -v
+        log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
         # ensure folder exists
         mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
         # covert and compress framebuffer to PNG in background
@@ -145,7 +153,7 @@ prepare_game_switcher() {
         if [ -f "$LIST_FILE" ]; then
             # if game list file exists
             # get all commands except the current game
-            log_message "*** homebutton_watchdog.sh: Appending command to list file" -v
+            log_message "*** homebutton_watchdog.sh: Appending command to list file" 
             grep -Fxv "$CMD" "$LIST_FILE" >"$TEMP_FILE"
             mv "$TEMP_FILE" "$LIST_FILE"
             # append the command for current game to the end of game list file
@@ -153,7 +161,7 @@ prepare_game_switcher() {
         else
             # if game list file does not exist
             # put command to new game list file
-            log_message "*** homebutton_watchdog.sh: Creating new list file" -v
+            log_message "*** homebutton_watchdog.sh: Creating new list file" 
             echo "$CMD" >"$LIST_FILE"
         fi
 
@@ -175,16 +183,16 @@ prepare_game_switcher() {
     rm -f "$TEMP_FILE"
     while read -r CMD; do
         EMU_PATH=$(echo $CMD | cut -d\" -f2)
-        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" -v
+        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" 
         GAME_PATH=$(echo $CMD | cut -d\" -f4)
         [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" -v
+        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" 
         if [ ! -f "$EMU_PATH" ]; then
-            log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" -v
+            log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" 
             continue
         fi
         if [ ! -f "$GAME_PATH" ]; then
-            log_message "*** homebutton_watchdog.sh: GAME_PATH does not exist!" -v
+            log_message "*** homebutton_watchdog.sh: GAME_PATH does not exist!" 
             continue
         fi
         echo "$CMD" >>"$TEMP_FILE"
@@ -204,7 +212,7 @@ prepare_game_switcher() {
 
     # set flag file for principal.sh to load game switcher later
     flag_add "gs"
-    log_message "*** homebutton_watchdog.sh: flag file created for gs" -v
+    log_message "*** homebutton_watchdog.sh: flag file created for gs" 
 }
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
@@ -259,7 +267,7 @@ long_press_handler() {
 
         # get setting
         HOLD_HOME=$(setting_get "hold_home")
-        log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" -v
+        log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" 
         [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
 
         if flag_check "simple_mode" && flag_check "in_menu"; then
@@ -331,8 +339,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         # pause RA after screen capture
         if [ "$PLATFORM" = "A30" ]; then
           send_virtual_key_R3
-        else
-          echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
         fi
 
         # fallback to stop ports
@@ -455,8 +461,10 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             take_screenshot
         fi
         ;;
-    # Don't react to dpad presses or ananlog sticks
-    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* | *"key 3"*) ;;
+    # Don't react to dpad presses or analog sticks
+    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*| \
+    *"key $STICK_LEFT"*| *"key $STICK_RIGHT"*| *"key $STICK_UP"*| *"key $STICK_DOWN"*| \
+    *"key $STICK_LEFT_2"*| *"key $STICK_RIGHT_2"*| *"key $STICK_UP_2"*| *"key $STICK_DOWN_2"*) ;;
     # Any other key press while menu is held
     *"key"*"0")
         log_message "*** Catch-all key case matched: $line" -v
@@ -477,14 +485,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
             fi
         fi
-        {
-          paused=$(echo "GET_STATUS" | $BIN_PATH/netcat -u -w1 127.0.0.1 55355 | grep "PAUSED")
-          # non-miyoo/trimui doesn't unpause after hitting continue in the RA menu
-          if [[ -n "$paused" ]] && ! pgrep "ra64.trimui_$PLATFORM" >/dev/null && ! pgrep "ra64.miyoo" >/dev/null; then
-            log_message "*** RA is paused, unpausing" -v
-            echo "PAUSE_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-          fi
-        } &
         ;;
     esac
 done

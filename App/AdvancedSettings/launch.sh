@@ -59,8 +59,9 @@ if flag_check "designer_mode"; then
     MODES="$MODES -m Designer"
 fi
 
-PICO_DIR="/mnt/SDCARD/Emu/PICO8/bin/"
-if [ -f "$PICO_DIR/pico8.dat" ] && [ -f "$PICO_DIR/pico8_dyn" ]; then
+PICO_DIR="/mnt/SDCARD/Emu/PICO8/bin"
+BIOS_DIR="/mnt/SDCARD/BIOS"
+if [ -f "$PICO_DIR/pico8.dat" ] || [ -f "$BIOS_DIR/pico8.dat" ]; then
     MODES="$MODES -m Pico"
 fi
 

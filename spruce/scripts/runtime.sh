@@ -26,9 +26,13 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
 
+if flag_check "reboot-update"; then
+    log_message "Updater continuing!"
+    /mnt/SDCARD/Updater/updater.sh
+fi
+
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    SWAPFILE="/mnt/SDCARD/cachefile"
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
@@ -88,7 +92,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
+	log_message "Check for payload updates"
+	./update_miyoo_payload.sh
+
     if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
         mkdir /mnt/sdcard/Saves/userdata-flip
         cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
         mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
@@ -99,9 +107,18 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
+
+    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
+
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+
 fi
 
 # Flag cleanup
@@ -216,7 +233,6 @@ if [ "$PLATFORM" = "A30" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
 
     # Run scripts for initial setup
     ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
@@ -351,11 +367,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         /usr/miyoo/apps/fw_update/miyoo_fw_update
     fi
 	
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh
-    /mnt/sdcard/spruce/flip/mount_muOS.sh
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh
-
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
         skin_dir="${theme_dir}skin"
@@ -396,10 +407,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # Bind the correct version of retroarch so it can be accessed by PM
     mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
-    # listen hotkeys for brightness adjustment, volume buttons and power button
+    # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/mixer_watchdog.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
@@ -428,8 +440,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         log_message "Auto Resume skipped (no save_active flag)"
     fi
 
-    swapon -p 40 "${SWAPFILE}"
-
     killall runmiyoo.sh
 fi
 
@@ -440,6 +450,7 @@ else
     log_message "First boot procedures skipped"
 fi
 
+${SCRIPTS_DIR}/set_up_swap.sh
 ${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &

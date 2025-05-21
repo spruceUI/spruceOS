@@ -92,6 +92,9 @@ if flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null; the
     fi
 fi
 
+# kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
+pgrep -f "lid_watchdog.sh" | xargs -r kill
+
 # notify user with led
 echo heartbeat > "$LED_PATH"/trigger
 
@@ -136,6 +139,10 @@ else
     killall -q -15 ra64.trimui_$PLATFORM
     killall -q -15 drastic32
     killall -q -15 drastic64
+    killall -q -15 flycast
+    killall -q -15 yabasanshiro
+    killall -q -15 yabasanshiro.trimui
+    killall -q -15 mupen64plus
     killall -q -9 MainUI
 fi
 
@@ -149,6 +156,10 @@ while killall -q -0 ra32.miyoo ||
     killall -q -0 PPSSPPSDL_$PLATFORM ||
     killall -q -0 drastic32 ||
     killall -q -0 drastic64 ||
+    killall -q -0 flycast ||
+    killall -q -0 yabasanshiro ||
+    killall -q -0 yabasanshiro.trimui ||
+    killall -q -0 mupen64plus||
     killall -q -0 MainUI; do
     sleep 0.3
 done

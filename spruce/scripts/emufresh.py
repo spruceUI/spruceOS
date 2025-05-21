@@ -3,15 +3,15 @@ import hashlib
 import logging
 
 # Constants
-BASE_ROM_PATH = "/mnt/sdcard/Roms"
+BASE_ROM_PATH = "/mnt/SDCARD/Roms"
 SECONDARY_ROM_PATH = "/media/sdcard1/Roms"
 ROM_PATHS = [BASE_ROM_PATH, SECONDARY_ROM_PATH]
-EMU_BASE_PATH = "/mnt/sdcard/Emu"
-CHECKSUM_BASE_PATH = "/mnt/sdcard/Emu/.emu_setup/md5"
+EMU_BASE_PATH = "/mnt/SDCARD/Emu"
+CHECKSUM_BASE_PATH = "/mnt/SDCARD/Emu/.emu_setup/md5"
 
 # Set up logging
 logging.basicConfig(
-    filename="/mnt/sdcard/Saves/spruce/emufresh.py.log",  # Log to a file
+    filename="/mnt/SDCARD/Saves/spruce/emufresh.py.log",  # Log to a file
     level=logging.DEBUG,         # Log all levels of messages
     format="%(asctime)s - %(levelname)s - %(message)s",
     filemode='w' #overwrite the log on each run

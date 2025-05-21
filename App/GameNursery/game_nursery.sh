@@ -22,7 +22,7 @@ check_battery() {
 
     if [ "$CAPACITY" -lt 10 ] && [ "$CHARGING" -eq 0 ]; then
         log_message "Game Nursery: Device is below 10% battery and is not plugged in. Aborting."
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Cannot use Game Nursery while device battery is below 10%. Please plug in your A30, then try again."
+        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Cannot use Game Nursery while device battery is below 10%. Please plug in your $PLATFORM, then try again."
         exit 1
     else
         log_message "Game Nursery: Device has at least 10% battery or is currently plugged in. Proceeding."
@@ -208,7 +208,7 @@ construct_config
 [ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
 if [ ! "$PLATFORM" = "A30" ]; then
     cd /mnt/SDCARD/App/GameNursery
-	/mnt/SDCARD/spruce/bin64/gptokeyb -k "nursery" -c "./nursery.gptk" &
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "easyConfig" -c "./nursery.gptk" &
 	sleep 0.5
 fi
 killall -q -USR2 joystickinput # kbd mode

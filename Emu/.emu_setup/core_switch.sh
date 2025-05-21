@@ -85,11 +85,11 @@ case "$EMU_NAME" in
 	"DC" )
 		if [ "$CORE" = "flycast" ]; then
 			NEW_CORE="flycast_xtreme"
-			NEW_DISPLAY="(✓FCXTREME)-flycast"
+			NEW_DISPLAY="flycast_lr-(✓FLYCAST-ALT)"
 
 		else # current core is flycast_xtreme
 			NEW_CORE="flycast"
-			NEW_DISPLAY="fcxtreme-(✓FLYCAST)"
+			NEW_DISPLAY="(✓FLYCAST_LR)-flycast_alt"
 		fi
 	;;
 
@@ -229,13 +229,17 @@ case "$EMU_NAME" in
 	;;
 
 	"SATURN" )
-		if [ "$CORE" = "standalone" ]; then
+		if [ "$CORE" = "sa_bios" ]; then
+			NEW_CORE="sa_hle"
+			NEW_DISPLAY="libretro-sa_bios-(✓SA_HLE)"
+
+		elif [ "$CORE" = "sa_hle" ]; then
 			NEW_CORE="yabasanshiro"
-			NEW_DISPLAY="(✓LIBRETRO)-standalone"
+			NEW_DISPLAY="(✓LIBRETRO)-sa_bios-sa_hle"
 
 		else # current core is yabasanshiro (libretro)
-			NEW_CORE="standalone"
-			NEW_DISPLAY="libretro-(✓STANDALONE)"
+			NEW_CORE="sa_bios"
+			NEW_DISPLAY="libretro-(✓SA_BIOS)-sa_hle"
 		fi
 	;;
 

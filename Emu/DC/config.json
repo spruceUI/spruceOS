@@ -29,7 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
     {
-      "name": "Emu Core: (✓FCXTREME)-flycast",
+      "name": "Emu Core: (✓FLYCAST_LR)-flycast_alt",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },
     {

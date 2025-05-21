@@ -163,8 +163,8 @@ else
 	kill $download_pid
 fi
 
-# Require them to be plugged into power (requisite for A30 update to even occur, but also precautionary on the others)
-if [ "$CHARGING" -eq 0 ]; then
+# Require them to be plugged into power (requisite for A30 update to even occur) - skip this if Flip.
+if [ "$CHARGING" -eq 0 ] && [ ! "$PLATFORM" = "Flip" ]; then
 	log_message "firmwareUpdate.sh: Device not plugged in. Prompting user to plug in their $PLATFORM."
 	while true; do
 		display -i "$BG_IMAGE" -t "Please connect your device to a power source to proceed with the update process." --confirm

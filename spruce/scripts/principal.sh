@@ -63,14 +63,18 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
+    if [ -f /mnt/SDCARD/spruce/flags/bitpal.lock ]; then
+        /mnt/SDCARD/App/BitPal/bitpal.sh
+        rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
+    fi
+
     # Check whether to launch into EmulationStation (only for Flip!)
     if [ "$PLATFORM" = "Flip" ]; then
         runee=$(/usr/miyoo/bin/jsonval runee)
-        if [ "$runee" == "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
+        if [ "$runee" = "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
             cd /mnt/SDCARD/emulationstation/
             ./emulationstation.sh
             runee=$(/usr/miyoo/bin/jsonval runee)
-            echo runee $runee  >> /tmp/runee.log
         fi
     fi
 
@@ -94,8 +98,10 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
+        # This is our hack to add a numeric battery percentage despite MainUI not supporting that feature
         [ "$PLATFORM" = "A30" ] && /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
 
+        # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to MainUI
         if flag_check "pre_menu_unpacking"; then
             display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
             flag_remove "silentUnpacker"
@@ -160,18 +166,36 @@ while [ 1 ]; do
                 # send signal USR1 to joystickinput to switch to ANALOG MODE
                 killall -q -USR1 joystickinput
                 ;;
+
             "Brick" | "SmartPro" )
                 tinymix set 9 1
                 tinymix set 1 0
+
                 export LD_LIBRARY_PATH=/usr/trimui/lib:$LD_LIBRARY_PATH
                 cd /usr/trimui/bin
+
                 runifnecessary "keymon" keymon
                 runifnecessary "inputd" trimui_inputd
                 runifnecessary "scened" trimui_scened
                 runifnecessary "trimui_btmanager" trimui_btmanager
                 runifnecessary "hardwareservice" hardwareservice
-                premainui.sh
-                MainUI
+             
+                # the next two lines are the contents of /usr/trimui/bin/premainui.sh. I moved them
+                # here for greater transparency and control (e.g. what if another CSW modified those
+                # files since NAND is writeable on the TrimUI devices?)
+                rm -f /tmp/trimui_inputd/input_no_dpad
+                rm -f /tmp/trimui_inputd/input_dpad_to_joystick
+             
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+					umount /mnt/SDCARD/Themes
+					touch /tmp/fbdisplay_exit
+					cat /dev/zero > /dev/fb0
+                    export PYSDL2_DLL_PATH="/usr/trimui/lib"
+					export LD_LIBRARY_PATH="/usr/trimui/lib"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                else
+                    MainUI
+                fi
                 preload.sh
 
                 if [ -f /tmp/trimui_inputd_restart ] ; then
@@ -182,6 +206,7 @@ while [ 1 ]; do
                     rm /tmp/trimui_inputd_restart 
                 fi
                 ;;
+
             "Flip" )
                 export LD_LIBRARY_PATH=/usr/miyoo/lib:$LD_LIBRARY_PATH
                 insmod /lib/modules/rtk_btusb.ko
@@ -189,10 +214,16 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                MainUI
+                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+                    export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
+                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                else
+                    MainUI
+                fi
                 ;;
         esac
 
+        # This is to block any games from launching before all necessary assets such as cores have been unpacked
         if flag_check "pre_cmd_unpacking"; then
             [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
             display -t "Finishing up unpacking archives.........." -i "$BG_TREE"
@@ -205,28 +236,36 @@ while [ 1 ]; do
         flag_remove "in_menu"
     fi
 
-    # clear the FB to get rid of residual Loading screen if present
+    # clear the FB to get rid of residual Loading or Iconfresh screen if present
     touch /tmp/fbdisplay_exit
     cat /dev/zero > /dev/fb0
 
+    # When you select a game or app, MainUI writes that command to a temp file and closes itself.
+    # This section handles what becomes of that temp file.
     if [ -f /tmp/cmd_to_run.sh ]; then
-        set_performance
+
+        set_performance # lead with this to speed up launching
+
         kill -9 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # Kill simple mode watchdog
+
         udpbcast -f /tmp/host_msg 2>/dev/null &
-        touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null
+        touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
-        cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock"
+        cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
+
         /tmp/cmd_to_run.sh &>/dev/null
+        
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
-        rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null
-        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null
+        rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
+        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null # hack to keep Flip from using X menu script as launch script
         killall -9 udpbcast 2>/dev/null
 
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart
-        /mnt/SDCARD/spruce/scripts/simple_mode_watchdog.sh &
+
+        /mnt/SDCARD/spruce/scripts/simple_mode_watchdog.sh & # Long live simple mode watchdog
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set
@@ -235,6 +274,7 @@ while [ 1 ]; do
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
 
+    # Set up by spruce/scripts/credits_watchdog.sh
     if [ -f /mnt/SDCARD/spruce/flags/credits.lock ]; then
         /mnt/SDCARD/App/Credits/launch.sh
         rm /mnt/SDCARD/spruce/flags/credits.lock
@@ -244,5 +284,14 @@ while [ 1 ]; do
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
     fi
+
+    # Needed to handle Flip's "Remove SDCARD" in Settings for live unmounting of TF2
+    if [ -f /tmp/system/umount_sdcards ] ; then          
+        chmod a+x /usr/miyoo/bin/umount_sdcards.sh
+        /usr/miyoo/bin/umount_sdcards.sh
+        rm /tmp/system/umount_sdcards          
+    fi
+
+    sanitize_system_json
 
 done

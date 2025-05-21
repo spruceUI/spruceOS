@@ -66,12 +66,14 @@ $SYSTEM_JSON
 /mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
 /mnt/SDCARD/Emu/.emu_setup/overrides
+/mnt/SDCARD/Emu/DC/.config
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32
 /mnt/SDCARD/Emu/NDS/backup-64
 /mnt/SDCARD/Emu/NDS/config
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings.json
+/mnt/SDCARD/Emu/SATURN/.yabasanshiro
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/RetroArch/.retroarch/shaders

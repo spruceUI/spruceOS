@@ -12,7 +12,7 @@ if [ "$1" = "on" ]; then
 	sed -i 's%\"imgpath\": \"../../Roms/FAKE08/Imgs\",%\"imgpath\": \"../../Roms/FAKE08\",%' "$CONFIG"
 
 	# hide Imgs folder so it doesn't appear in games list
-	mv "$IMG_SHOWN" "$IMG_HIDDEN"
+	mv "$IMG_SHOWN" "$IMG_HIDDEN" 2>/dev/null
 
 	# enable PNG extension files to appear in MainUI
 	sed -i 's%\"extlist\": \"p8\",%\"extlist\": \"p8|png\",%' "$CONFIG"
@@ -24,7 +24,7 @@ else
 	sed -i 's%\"imgpath\": \"../../Roms/FAKE08\",%\"imgpath\": \"../../Roms/FAKE08/Imgs\",%' "$CONFIG"
 
 	# return Imgs folder to its original location
-	mv "$IMG_HIDDEN" "$IMG_SHOWN"
+	mv "$IMG_HIDDEN" "$IMG_SHOWN" 2>/dev/null
 
 	# disallow PNG files from showing in Pico-8 game list in MainUI
 	sed -i 's%\"extlist\": \"p8|png\",%\"extlist\": \"p8\",%' "$CONFIG"

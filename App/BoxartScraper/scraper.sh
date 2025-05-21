@@ -145,7 +145,7 @@ messages_file="/var/log/messages"
 
 roms_dir="/mnt/SDCARD/Roms"
 
-display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.15 195 middle
+display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.05 195 middle
 
 # Check if WiFi is enabled in system config
 wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
@@ -194,7 +194,7 @@ for sys_dir in "$roms_dir"/*/; do
     icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
     display --icon "\"$icon_path\"" -t "System: $sys_label 
-    Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.15 195 middle
+    Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.05 195 middle
     if [ -z "$extensions" ]; then
         log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
         continue

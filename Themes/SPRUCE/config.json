@@ -2,6 +2,7 @@
     "name": "Spruce",
     "author": "tenlevels",
     "description": "spruce theme for a30",
+    "showBottomBar": false,
     "batteryPercentage": {
         "color": "#EBDBB2",
         "font": "nunwen.ttf",
