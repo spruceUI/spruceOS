@@ -218,6 +218,13 @@ run_ffplay() {
 	fi
 }
 
+function kill_runner() {
+    PID=`pidof runner`
+    if [ "$PID" != "" ]; then
+        kill -9 $PID
+    fi
+}
+
 run_drastic() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
@@ -257,7 +264,16 @@ run_drastic() {
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
-		if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then # using specific platforms here in case we ever support a device on a different chipset in the future
+		if [ "$PLATFORM" = "Brick" ]; then
+			kill_runner
+			LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
+			sleep 1
+			export SDL_VIDEODRIVER=NDS
+			./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic "$ROM_FILE" > std.log 2>&1
+			sync
+			kill_runner
+
+		elif [ "$PLATFORM" = "SmartPro" ]; then
 			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
 			export SDL_AUDIODRIVER=dsp
 			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
