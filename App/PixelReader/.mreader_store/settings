@@ -1,6 +1,6 @@
 progress_reporting=global
 show_title_bar=false
 color_theme=night_contrast
-font_name=resources/fonts/Merriweather-Light.ttf
+font_name=resources/fonts/nunwen.ttf
 font_size=32
 shoulder_keymap=LR
