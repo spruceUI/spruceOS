@@ -1,7 +1,7 @@
 {
-  "label": "PixelReader",
+  "label": "E-Reader",
   "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/app/pixelreader.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/pixelreader.png",
   "launch": "launch.sh",
-  "description": "PixelReader v0.6"
+  "description": "Read Ebooks on your device"
 }
