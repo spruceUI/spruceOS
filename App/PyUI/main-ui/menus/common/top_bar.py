@@ -1,3 +1,4 @@
+import time
 import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
@@ -8,7 +9,8 @@ from themes.theme import Theme
 class TopBar:
     def __init__(self):
         self.title = ""
-
+        self.volume_changed_time = time.time()
+        self.volume = Device.get_display_volume()
 
     def render_top_bar(self, title, hide_top_bar_icons = False) :
         from display.display import Display
@@ -32,19 +34,27 @@ class TopBar:
         battery_w, battery_h = Display.get_image_dimensions(battery_icon)
         self.top_bar_w = max(self.top_bar_w, battery_w)
         self.top_bar_h = max(self.top_bar_h, battery_h)
-
         
         padding = 10
         center_of_bar = self.top_bar_h //2
 
         if(not hide_top_bar_icons):
-            battery_text_w, battery_text_h = Display.render_text(str(battery_percent),Device.screen_width() - padding*2, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-            battery_icon_x = Device.screen_width() - battery_text_w - (padding*3)
+            #Battery Text
+            x_offset = Device.screen_width() - padding*2
+            battery_text_w, battery_text_h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - battery_text_w - padding
+            #Battery Icon
             battery_icon_w, battery_icon_h = Display.render_image(
-                battery_icon ,battery_icon_x,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
-            wifi_icon_x = Device.screen_width() - battery_icon_w - battery_text_w - (padding*4)
-            Display.render_image(wifi_icon,wifi_icon_x,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
-        
+                battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - battery_icon_w - padding
+            #Wifi
+            wifi_icon_w, wifi_icon_h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - wifi_icon_w - padding
+            #Volume
+            if(time.time() - self.volume_changed_time < 3):
+                Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+
+
         if(Theme.show_top_bar_text()):
             Display.render_text(title,int(Device.screen_width()/2), center_of_bar, Theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
         
@@ -53,3 +63,7 @@ class TopBar:
     
     def get_current_title(self):
         return self.title
+    
+    def volume_changed(self, volume):
+        self.volume = volume
+        self.volume_changed_time = time.time()

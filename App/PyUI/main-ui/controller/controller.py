@@ -122,3 +122,23 @@ class Controller:
         elif event.type == sdl2.SDL_CONTROLLERAXISMOTION:
             return Device.map_analog_input(event.caxis.axis, event.caxis.value)
         return None
+
+    @staticmethod
+    def get_left_analog_x():
+        sdl2.SDL_PumpEvents()
+        return sdl2.SDL_GameControllerGetAxis(Controller.controller, sdl2.SDL_CONTROLLER_AXIS_LEFTX)
+
+    @staticmethod
+    def get_left_analog_y():
+        sdl2.SDL_PumpEvents()
+        return sdl2.SDL_GameControllerGetAxis(Controller.controller, sdl2.SDL_CONTROLLER_AXIS_LEFTY)
+
+    @staticmethod
+    def get_right_analog_x():
+        sdl2.SDL_PumpEvents()
+        return sdl2.SDL_GameControllerGetAxis(Controller.controller, sdl2.SDL_CONTROLLER_AXIS_RIGHTX)
+
+    @staticmethod
+    def get_right_analog_y():
+        sdl2.SDL_PumpEvents()
+        return sdl2.SDL_GameControllerGetAxis(Controller.controller, sdl2.SDL_CONTROLLER_AXIS_RIGHTY)

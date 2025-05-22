@@ -198,6 +198,10 @@ class DeviceCommon(ABC):
     def get_volume(self):
         pass
 
+    @abstractmethod
+    def get_display_volume(self):
+        pass
+
     @property
     @abstractmethod
     def power_off_cmd(self):

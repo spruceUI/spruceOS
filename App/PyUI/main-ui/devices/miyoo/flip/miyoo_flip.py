@@ -17,6 +17,7 @@ from devices.miyoo.system_config import SystemConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
+from display.font_purpose import FontPurpose
 from games.utils.game_entry import GameEntry
 from games.utils.rom_utils import RomUtils
 from menus.games.utils.recents_manager import RecentsManager
@@ -57,7 +58,6 @@ class MiyooFlip(DeviceCommon):
         source = script_dir / 'system.json'
         ConfigCopier.ensure_config("/userdata/system.json", source)
         self.system_config = SystemConfig("/userdata/system.json")
-        
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_lumination_to_config()
         self._set_contrast_to_config()
@@ -78,6 +78,18 @@ class MiyooFlip(DeviceCommon):
             self.power_key_watcher = KeyWatcher("/dev/input/event2")
             power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
             power_key_polling_thread.start()
+
+        self.unknown_axis_ranges = {}  # axis -> (min, max)
+        self.unknown_axis_stats = {}   # axis -> (sum, count)
+        self.sdl_axis_names = {
+            0: "SDL_CONTROLLER_AXIS_LEFTX",
+            1: "SDL_CONTROLLER_AXIS_LEFTY",
+            2: "SDL_CONTROLLER_AXIS_RIGHTX",
+            3: "SDL_CONTROLLER_AXIS_RIGHTY",
+            4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
+            5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
+        }
+        
 
     def init_gpio(self):
         try:
@@ -384,11 +396,17 @@ class MiyooFlip(DeviceCommon):
         self.system_config.reload_config()
         self.system_config.set_volume(volume // 5)
         self.system_config.save_config()
+        return volume // 5
 
 
     def change_volume(self, amount):
-        self._set_volume(self.get_volume() + amount)
+        from display.display import Display
+        volume_level = self._set_volume(self.get_volume() + amount)
+        Display.volume_changed(volume_level)
 
+    def get_display_volume(self):
+        return self.get_volume() // 5
+    
     def get_volume(self):
         try:
             output = subprocess.check_output(
@@ -435,12 +453,20 @@ class MiyooFlip(DeviceCommon):
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     def fix_sleep_sound_bug(self):
-        self.system_config.reload_config()
+        #Don't reload as there is a bug where it gets set to 1/0
+        # self.system_config.reload_config()
         proper_volume = self.system_config.get_volume()
+        PyUiLogger.get_logger().info(f"Restoring volume to {proper_volume*5}")
+        ProcessRunner.run(["amixer", "cset","numid=2", "0"])
         ProcessRunner.run(["amixer", "cset","numid=5", "0"])
-        time.sleep(0.2)  
+        if(self.are_headphones_plugged_in()):
+            ProcessRunner.run(["amixer", "cset","numid=2", "3"])
+        elif(0 == proper_volume):
+            ProcessRunner.run(["amixer", "cset","numid=2", "0"])
+        else:
+            ProcessRunner.run(["amixer", "cset","numid=2", "2"])
         ProcessRunner.run(["amixer", "cset","numid=5", str(proper_volume*5)])
-
+        self._set_volume(proper_volume)
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         RecentsManager.add_game(rom_info)
@@ -495,23 +521,51 @@ class MiyooFlip(DeviceCommon):
         return mapping
 
     def map_analog_input(self, sdl_axis, sdl_value):
-        if(5 == sdl_axis and 32767 == sdl_value):
+        if sdl_axis == 5 and sdl_value == 32767:
             return ControllerInput.R2
-        elif(4 == sdl_axis and 32767 == sdl_value):
+        elif sdl_axis == 4 and sdl_value == 32767:
             return ControllerInput.L2
         else:
-            #PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
-            return None
+            # Update min/max range
+            if sdl_axis not in self.unknown_axis_ranges:
+                self.unknown_axis_ranges[sdl_axis] = (sdl_value, sdl_value)
+            else:
+                current_min, current_max = self.unknown_axis_ranges[sdl_axis]
+                self.unknown_axis_ranges[sdl_axis] = (
+                    min(current_min, sdl_value),
+                    max(current_max, sdl_value)
+                )
 
+            # Update sum/count for average
+            if sdl_axis not in self.unknown_axis_stats:
+                self.unknown_axis_stats[sdl_axis] = (sdl_value, 1)
+            else:
+                total, count = self.unknown_axis_stats[sdl_axis]
+                self.unknown_axis_stats[sdl_axis] = (total + sdl_value, count + 1)
+
+            min_val, max_val = self.unknown_axis_ranges[sdl_axis]
+            total, count = self.unknown_axis_stats[sdl_axis]
+            avg_val = total / count if count > 0 else 0
+
+            axis_name = self.sdl_axis_names.get(sdl_axis, "UNKNOWN_AXIS")
+            #PyUiLogger.get_logger().error(
+            #    f"Received unknown analog input axis = {sdl_axis} ({axis_name}), value = {sdl_value} "
+            #    f"(range: min = {min_val}, max = {max_val}, avg = {avg_val:.2f})"
+            #)
+            return None
+                
     def key_down(self, key_code):
         if(116 == key_code):
+            PyUiLogger.get_logger().debug(f"POWER_BUTTON")
             self.sleep()
             return ControllerInput.POWER_BUTTON
         if(115 == key_code):
-            self.change_volume(10)
+            PyUiLogger.get_logger().debug(f"VOLUME_UP")
+            self.change_volume(5)
             return ControllerInput.VOLUME_UP
         elif(114 == key_code):
-            self.change_volume(-10)
+            PyUiLogger.get_logger().debug(f"VOLUME_DOWN")
+            self.change_volume(-5)
             return ControllerInput.VOLUME_DOWN
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
@@ -812,3 +866,82 @@ class MiyooFlip(DeviceCommon):
     
     def launch_stock_os_menu(self):
         self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")
+
+
+    def get_stick_measurements(self, stick_name, get_x, get_y):
+        duration = 5.0  # seconds
+        warmup_time = 1.0
+        polling_interval = 0.01  # 100 Hz
+
+        # Warmup: Clear queue / stabilize input
+        start_time = time.time()
+        while time.time() - start_time < warmup_time:
+            _ = get_x()
+            _ = get_y()
+            time.sleep(polling_interval)
+
+        # Collect samples
+        x_samples = []
+        y_samples = []
+
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            x_samples.append(get_x())
+            y_samples.append(get_y())
+            time.sleep(polling_interval)
+
+        def trimmed_stats(samples):
+            if not samples:
+                return 0, 0, 0
+            samples.sort()
+            trim_count = max(1, int(len(samples) * 0.01))
+            trimmed = samples[trim_count:-trim_count] if len(samples) > 2 * trim_count else samples
+            return min(trimmed), max(trimmed), sum(trimmed) / len(trimmed)
+
+        x_min, x_max, x_avg = trimmed_stats(x_samples)
+        y_min, y_max, y_avg = trimmed_stats(y_samples)
+
+        print(f"{stick_name} X: min={x_min}, max={x_max}, avg={x_avg:.2f}")
+        print(f"{stick_name} Y: min={y_min}, max={y_max}, avg={y_avg:.2f}")
+        return x_min, x_max, y_min, y_max, x_avg, y_avg
+
+    def run_calibration(self, stick_name, file_path, get_x, get_y):
+        from display.display import Display
+        from themes.theme import Theme
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            Display.clear("Stick Calibration")
+            Display.render_text_centered(f"Removing old calibration file and rebooting",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(f"Then try again",self.screen_width//2, self.screen_height//2 + 50,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.present()
+            time.sleep(5)
+            self.run_app([self.reboot_cmd])
+
+        Display.clear("Stick Calibration")
+        Display.render_text_centered(f"Rotate {stick_name}",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.present()
+        rotate_min_x, rotate_max_x, rotate_min_y, rotate_max_y, rotate_avg_x, rotate_avg_y = self.get_stick_measurements(f"{stick_name} Rotate",get_x, get_y)
+        miyoo_min_x = 128 + (rotate_min_x//256)
+        miyoo_max_x = rotate_max_x//256 + 128
+        miyoo_min_y = 128 + (rotate_min_y//256)
+        miyoo_max_y = rotate_max_y//256 + 128
+
+        Display.clear("Stick Calibration")
+        Display.render_text_centered(f"Leave {stick_name} Still",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.present()
+        centered_min_x, centered_max_x, centered_min_y, centered_max_y, centered_avg_x, centered_avg_y = self.get_stick_measurements(f"{stick_name} Still",get_x, get_y)
+        miyoo_centered_x = 128 + (centered_avg_x//256)
+        miyoo_centered_y = 128 + (centered_avg_y//256)
+
+        with open(file_path, 'w') as f:
+            f.write(f"x_min={miyoo_min_x}\n")
+            f.write(f"x_max={miyoo_max_x}\n")
+            f.write(f"y_min={miyoo_min_y}\n")
+            f.write(f"y_max={miyoo_max_y}\n")
+            f.write(f"x_zero={miyoo_centered_x}\n")
+            f.write(f"y_zero={miyoo_centered_y}\n")
+
+    def calibrate_sticks(self):
+        from controller.controller import Controller
+        self.run_calibration("Left Analog Stick", "/userdata/joypad.config", Controller.get_left_analog_x, Controller.get_left_analog_y)
+        self.run_calibration("Right Analog Stick", "/userdata/joypad_right.config", Controller.get_right_analog_x, Controller.get_right_analog_y)

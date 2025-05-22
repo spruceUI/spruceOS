@@ -2,5 +2,6 @@
     "theme": "SPRUCE",
     "themeDir": "/mnt/SDCARD/Themes/",
     "turboDelayMs": 300,
-    "enableButtonWatchers": false
+    "enableButtonWatchers": false,
+    "mainMenuTitle": "spruceUI"
 }

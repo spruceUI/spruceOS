@@ -214,7 +214,12 @@ class Theme():
             return cls._asset("icon-wifi-signal-04.png")
         else:
             return cls._asset("icon-wifi-locked.png")
-        
+
+    @classmethod
+    def get_volume_indicator(cls, volume):
+        return cls._asset(f"icon-volume-{volume:02d}.png")
+
+
     @classmethod
     def system(cls, system):
         return os.path.join(cls._path, cls._icon_folder, system.lower() + ".png")
@@ -676,6 +681,33 @@ class Theme():
     def set_game_select_img_width(cls, value):
         cls._data["gameSelectImgWidth"] = value
         cls.save_changes()
+
+    @classmethod
+    def get_carousel_game_select_primary_img_width(cls):
+        return cls._data.get("carouselGameSelectPrimaryImgWidth", 40)
+    
+    @classmethod
+    def set_carousel_game_select_primary_img_width(cls, value):
+        cls._data["carouselGameSelectPrimaryImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_carousel_game_select_shrink_further_away(cls):
+        return cls._data.get("carouselGameSelectShrinkFurtherAway", False)
+    
+    @classmethod
+    def set_carousel_game_select_shrink_further_away(cls, value):
+        cls._data["carouselGameSelectShrinkFurtherAway"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_carousel_game_select_sides_hang_off(cls):
+        return cls._data.get("carouselGameSelectSidesHangOff", True)
+
+    @classmethod
+    def set_carousel_game_select_sides_hang_off(cls, value):
+        cls._data["carouselGameSelectSidesHangOff"] = value
+        cls.save_changes()    
 
     @classmethod
     def get_game_select_img_height(cls):

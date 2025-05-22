@@ -6,6 +6,7 @@ class ViewType(Enum):
     TEXT_AND_IMAGE = auto()
     TEXT_ONLY = auto()
     POPUP = auto()
+    CAROUSEL = auto()
 
 def get_next_view_type(current_view_type: ViewType, direction: int, exclude: list[ViewType] = [ViewType.POPUP]) -> ViewType:
     exclude = exclude or []

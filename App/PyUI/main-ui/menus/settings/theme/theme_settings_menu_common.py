@@ -1,6 +1,7 @@
 
 
 from abc import ABC, abstractmethod
+import sys
 from controller.controller_inputs import ControllerInput
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
@@ -76,7 +77,20 @@ class ThemeSettingsMenuCommon(ABC):
             value=lambda input: self.change_numeric(
                 input, get_value_func, set_value_func)
         )
-      
+
+    def build_percent_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
+
+        return GridOrListEntry(
+            primary_text=primary_text,
+            value_text="<    " + str(get_value_func()) + "%    >",
+            image_path=None,
+            image_path_selected=None,
+            description=None,
+            icon=None,
+            value=lambda input: self.change_numeric(
+                input, get_value_func, set_value_func, min=0, max=100)
+        )
+
     def build_view_type_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
 
         return GridOrListEntry(
@@ -137,7 +151,7 @@ class ThemeSettingsMenuCommon(ABC):
 
         set_value_func(value)
 
-    def change_numeric(self, input, get_value_func, set_value_func):
+    def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize):
         value = get_value_func()
         delta = 0
         if input == ControllerInput.DPAD_LEFT:
@@ -152,5 +166,5 @@ class ThemeSettingsMenuCommon(ABC):
             return  # No change for other inputs
 
         value += delta
-        if(value > 0):
+        if(min <= value <= max):
             set_value_func(value)
