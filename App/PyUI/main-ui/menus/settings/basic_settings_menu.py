@@ -1,14 +1,18 @@
 
 import os
+import re
+import subprocess
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from display.on_screen_keyboard import OnScreenKeyboard
 from menus.settings import settings_menu
 from menus.settings.advance_settings_menu import AdvanceSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -193,7 +197,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_stock_os_menu
                     )
             )
-        
+                    
         option_list.append(
                 GridOrListEntry(
                         primary_text="Calibrate Analog Sticks",

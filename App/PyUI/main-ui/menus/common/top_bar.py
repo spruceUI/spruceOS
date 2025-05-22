@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 import traceback
 from devices.device import Device
@@ -38,6 +39,7 @@ class TopBar:
         padding = 10
         center_of_bar = self.top_bar_h //2
 
+        #TODO Allow specifying which side which icon is on    
         if(not hide_top_bar_icons):
             #Battery Text
             x_offset = Device.screen_width() - padding*2
@@ -53,11 +55,19 @@ class TopBar:
             #Volume
             if(time.time() - self.volume_changed_time < 3):
                 Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+    
+            #TODO make left/right configurable
+            Display.render_text(str(self.get_current_time_hhmm()),padding*2, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_LEFT_ALIGNED)
 
 
         if(Theme.show_top_bar_text()):
             Display.render_text(title,int(Device.screen_width()/2), center_of_bar, Theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
         
+    #TODO make this part of a user config class w/ options for 12 or 24 hour    
+    def get_current_time_hhmm(self):
+        #return datetime.now().strftime("%H:%M")
+        return datetime.now().strftime("%I:%M %p") 
+       
     def get_top_bar_height(self):
         return self.top_bar_h
     
