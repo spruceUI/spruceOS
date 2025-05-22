@@ -14,6 +14,7 @@ import os
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
@@ -867,81 +868,59 @@ class MiyooFlip(DeviceCommon):
     def launch_stock_os_menu(self):
         self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")
 
-
-    def get_stick_measurements(self, stick_name, get_x, get_y):
-        duration = 5.0  # seconds
-        warmup_time = 1.0
-        polling_interval = 0.01  # 100 Hz
-
-        # Warmup: Clear queue / stabilize input
-        start_time = time.time()
-        while time.time() - start_time < warmup_time:
-            _ = get_x()
-            _ = get_y()
-            time.sleep(polling_interval)
-
-        # Collect samples
-        x_samples = []
-        y_samples = []
-
-        start_time = time.time()
-        while time.time() - start_time < duration:
-            x_samples.append(get_x())
-            y_samples.append(get_y())
-            time.sleep(polling_interval)
-
-        def trimmed_stats(samples):
-            if not samples:
-                return 0, 0, 0
-            samples.sort()
-            trim_count = max(1, int(len(samples) * 0.01))
-            trimmed = samples[trim_count:-trim_count] if len(samples) > 2 * trim_count else samples
-            return min(trimmed), max(trimmed), sum(trimmed) / len(trimmed)
-
-        x_min, x_max, x_avg = trimmed_stats(x_samples)
-        y_min, y_max, y_avg = trimmed_stats(y_samples)
-
-        print(f"{stick_name} X: min={x_min}, max={x_max}, avg={x_avg:.2f}")
-        print(f"{stick_name} Y: min={y_min}, max={y_max}, avg={y_avg:.2f}")
-        return x_min, x_max, y_min, y_max, x_avg, y_avg
-
-    def run_calibration(self, stick_name, file_path, get_x, get_y):
+    def run_calibration(self, stick_name, joystick, file_path, leftOrRight):
         from display.display import Display
         from themes.theme import Theme
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            Display.clear("Stick Calibration")
-            Display.render_text_centered(f"Removing old calibration file and rebooting",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.render_text_centered(f"Then try again",self.screen_width//2, self.screen_height//2 + 50,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.present()
-            time.sleep(5)
-            self.run_app([self.reboot_cmd])
-
+        
         Display.clear("Stick Calibration")
         Display.render_text_centered(f"Rotate {stick_name}",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
-        rotate_min_x, rotate_max_x, rotate_min_y, rotate_max_y, rotate_avg_x, rotate_avg_y = self.get_stick_measurements(f"{stick_name} Rotate",get_x, get_y)
-        miyoo_min_x = 128 + (rotate_min_x//256)
-        miyoo_max_x = rotate_max_x//256 + 128
-        miyoo_min_y = 128 + (rotate_min_y//256)
-        miyoo_max_y = rotate_max_y//256 + 128
-
+       
+        rotate_stats = joystick.sample_axes_stats()
+        
         Display.clear("Stick Calibration")
         Display.render_text_centered(f"Leave {stick_name} Still",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
-        centered_min_x, centered_max_x, centered_min_y, centered_max_y, centered_avg_x, centered_avg_y = self.get_stick_measurements(f"{stick_name} Still",get_x, get_y)
-        miyoo_centered_x = 128 + (centered_avg_x//256)
-        miyoo_centered_y = 128 + (centered_avg_y//256)
 
+        centered_stats = joystick.sample_axes_stats()
+        print("rotate_stats keys:", rotate_stats.keys())
+        print("centered_stats keys:", rotate_stats.keys())
+        
+        x_min = f"x_min={round(rotate_stats['axisX'+leftOrRight]['min'])}"
+        x_max = f"x_max={round(rotate_stats['axisX'+leftOrRight]['max'])}"
+        x_zero = f"x_zero={round(centered_stats['axisX'+leftOrRight]['avg'])}"
+
+        y_min = f"y_min={round(rotate_stats['axisY'+leftOrRight]['min'])}"
+        y_max = f"y_max={round(rotate_stats['axisY'+leftOrRight]['max'])}"
+        y_zero = f"y_zero={round(centered_stats['axisY'+leftOrRight]['avg'])}" 
+
+        # Log each
+        PyUiLogger.get_logger().info(x_min)
+        PyUiLogger.get_logger().info(x_max)
+        PyUiLogger.get_logger().info(y_min)
+        PyUiLogger.get_logger().info(y_max)
+        PyUiLogger.get_logger().info(x_zero)
+        PyUiLogger.get_logger().info(y_zero)
         with open(file_path, 'w') as f:
-            f.write(f"x_min={miyoo_min_x}\n")
-            f.write(f"x_max={miyoo_max_x}\n")
-            f.write(f"y_min={miyoo_min_y}\n")
-            f.write(f"y_max={miyoo_max_y}\n")
-            f.write(f"x_zero={miyoo_centered_x}\n")
-            f.write(f"y_zero={miyoo_centered_y}\n")
+            # Write to file
+            f.write(x_min + "\n")
+            f.write(x_max + "\n")
+            f.write(y_min + "\n")
+            f.write(y_max + "\n")
+            f.write(x_zero + "\n")
+            f.write(y_zero + "\n")
 
     def calibrate_sticks(self):
         from controller.controller import Controller
-        self.run_calibration("Left Analog Stick", "/userdata/joypad.config", Controller.get_left_analog_x, Controller.get_left_analog_y)
-        self.run_calibration("Right Analog Stick", "/userdata/joypad_right.config", Controller.get_right_analog_x, Controller.get_right_analog_y)
+        sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        ProcessRunner.run(["killall","-9","miyoo_inputd"])
+        time.sleep(0.5)
+        joystick = TrimUIJoystick()
+        joystick.open()
+        self.run_calibration("Left stick",joystick,"/userdata/joypad.config","L")
+        self.run_calibration("Right stick",joystick,"/userdata/joypad_right.config","R")
+        subprocess.Popen(["/usr/miyoo/bin/miyoo_inputd"],
+                                stdin=subprocess.DEVNULL,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+        Controller.re_init_controller()
