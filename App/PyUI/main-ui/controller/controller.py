@@ -20,6 +20,15 @@ class Controller:
     @staticmethod
     def init():
         Controller.clear_input_queue()
+        Controller.init_controller()
+
+    @staticmethod
+    def init_controller():
+        SDL_ENABLE = 1
+        SDL_INIT_GAMECONTROLLER = 0x00002000
+
+        sdl2.SDL_GameControllerEventState(SDL_ENABLE)
+        sdl2.SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)
         PyUiLogger.get_logger().info("Checking for a controller")
         count = sdl2.SDL_NumJoysticks()
         for index in range(count):
@@ -34,9 +43,22 @@ class Controller:
                     PyUiLogger.get_logger().info(f"Opened GameController {index}: {Controller.name}")
                     PyUiLogger.get_logger().info(f" {Controller.mapping}")
 
+
+
+    @staticmethod
+    def re_init_controller():
+        sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        time.sleep(0.2)
+        sdl2.SDL_InitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        # 5. Pump events to make SDL notice new controllers
+        for _ in range(10):
+            sdl2.SDL_PumpEvents()
+            time.sleep(0.1)
+        Controller.init_controller()
+
     @staticmethod
     def new_bt_device_paired():
-        Controller.init_controller()
+        Controller.re_init_controller()
 
     @staticmethod
     def get_controller():
