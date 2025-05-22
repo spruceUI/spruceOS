@@ -17,6 +17,7 @@ from devices.miyoo.system_config import SystemConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
+from display.font_purpose import FontPurpose
 from games.utils.game_entry import GameEntry
 from games.utils.rom_utils import RomUtils
 from menus.games.utils.recents_manager import RecentsManager
@@ -315,6 +316,9 @@ class TrimUIBrick(DeviceCommon):
 
     def change_volume(self, amount):
         self._set_volume(self.get_volume() + amount)
+
+    def get_display_volume(self):
+        return self.get_volume() // 5
 
     def get_volume(self):
         try:
@@ -719,3 +723,15 @@ class TrimUIBrick(DeviceCommon):
     
     def launch_stock_os_menu(self):
         pass
+
+    
+    def calibrate_sticks(self):
+        from display.display import Display
+        from themes.theme import Theme
+        
+        Display.clear("Stick Calibration")
+        Display.render_text_centered("No Analog Sticks Detected",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST))
+        Display.present()
+        time.sleep(2)
+
+

@@ -84,3 +84,8 @@ class PyUiConfig:
     @classmethod
     def enable_button_watchers(cls):
         return cls._data.get("enableButtonWatchers", True)
+
+    @classmethod
+    def get_main_menu_title(cls):
+        return cls._data.get("mainMenuTitle", "PyUI")
+

@@ -41,6 +41,14 @@ class GridOrListEntry:
         self.description = description
         self.icon = icon
 
+    def __str__(self) -> str:
+        # What `print(obj)` and `str(obj)` will produce:
+        return self.primary_text
+
+    def __repr__(self) -> str:
+        # What you'll see in lists, debuggers, etc.
+        return f"<GridOrListEntry {self.primary_text!r}>"
+    
     def get_image_path(self):
         if(self.image_path is None and self.image_path_searcher is not None):
             return self.image_path_searcher(self.value)

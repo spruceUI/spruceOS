@@ -592,3 +592,7 @@ class Display:
     def get_current_top_bar_title(cls):
         return cls.top_bar.get_current_title()
 
+    @classmethod
+    def volume_changed(cls, vol):
+        cls.top_bar.volume_changed(vol)
+

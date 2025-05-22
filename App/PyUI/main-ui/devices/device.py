@@ -211,6 +211,10 @@ class Device:
         return Device._impl.get_volume()
 
     @staticmethod
+    def get_display_volume():
+        return Device._impl.get_display_volume()
+
+    @staticmethod
     def power_off_cmd():
         return Device._impl.power_off_cmd
 
@@ -237,5 +241,9 @@ class Device:
     @staticmethod  
     def launch_stock_os_menu():
         return Device._impl.launch_stock_os_menu()
+    
+    @staticmethod  
+    def calibrate_sticks():
+        return Device._impl.calibrate_sticks()
     
     

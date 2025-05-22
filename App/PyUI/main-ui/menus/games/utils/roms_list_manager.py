@@ -72,8 +72,11 @@ class RomsListManager():
 
         #TODO Refactor to use a dict
         for entry in self._favorites:
-            game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
-            if(game_system is not None):
-                favorite_rom_info_list.append(RomInfo(game_system,entry.rom_file_path))
+            try:
+                game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                if(game_system is not None):
+                    favorite_rom_info_list.append(RomInfo(game_system,entry.rom_file_path))
+            except Exception:
+                PyUiLogger.get_logger().error(f"Unable to load config for {entry.game_system_name} so skipping entry")
 
         return favorite_rom_info_list

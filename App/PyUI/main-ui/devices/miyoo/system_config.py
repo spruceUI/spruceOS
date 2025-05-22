@@ -84,7 +84,10 @@ class SystemConfig:
         self.config["saturation"] = value
     
     def set_volume(self, value):
-        self.config["vol"] = value
+        if(value == 0):
+            self.config["mute"] = 1
+        else:
+            self.config["mute"] = 0
 
     def set_wifi(self, value):
         self.config["wifi"] = value
