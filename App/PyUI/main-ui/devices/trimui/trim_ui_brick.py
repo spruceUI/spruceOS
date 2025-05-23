@@ -426,9 +426,13 @@ class TrimUIBrick(DeviceCommon):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
         return mapping
     
-    def key_down(self, key_code):
+    def map_key(self, key_code):
         PyUiLogger.get_logger().error(f"Received key_down key_code = {key_code}")
+        return None
     
+    def special_input(self, controller_input, length_in_seconds):
+        PyUiLogger.get_logger().error(f"Received special input = {controller_input}")
+
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
 

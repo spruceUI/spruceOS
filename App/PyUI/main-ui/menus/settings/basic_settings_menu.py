@@ -1,18 +1,16 @@
 
 import os
-import re
-import subprocess
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
-from display.on_screen_keyboard import OnScreenKeyboard
 from menus.settings import settings_menu
-from menus.settings.advance_settings_menu import AdvanceSettingsMenu
+from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
+from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
+from menus.settings.timezone_menu import TimezoneMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -25,7 +23,6 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         super().__init__()
         self.wifi_menu = WifiMenu()
         self.bt_menu = BluetoothMenu()
-        self.advance_settings_menu = AdvanceSettingsMenu()
         self.anything_theme_related_changed = False
 
     def shutdown(self, input: ControllerInput):
@@ -44,13 +41,13 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
-            Device.change_volume(-10)
+            Device.change_volume(-5)
         elif(ControllerInput.L1 == input):
-            Device.change_volume(-1)
+            Device.change_volume(-5)
         elif(ControllerInput.DPAD_RIGHT == input):
-            Device.change_volume(+10)
+            Device.change_volume(+5)
         elif(ControllerInput.R1 == input):
-            Device.change_volume(+1)
+            Device.change_volume(+5)
 
     def show_wifi_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
@@ -102,17 +99,9 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         PyUiConfig.save()      
         self.theme_changed = True
 
-    def launch_advance_settings(self,input):
+    def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
-            self.advance_settings_menu.show_menu()
-
-    def launch_stock_os_menu(self,input):
-        if(ControllerInput.A == input):
-            Device.launch_stock_os_menu()
-
-    def calibrate_sticks(self,input):
-        if(ControllerInput.A == input):
-            Device.calibrate_sticks()
+            ExtraSettingsMenu().show_menu()
 
     def build_options_list(self):
         option_list = []
@@ -141,7 +130,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Volume",
-                        value_text="<    " + str(Device.get_volume()) + "    >",
+                        value_text="<    " + str(Device.get_volume()//5) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -188,37 +177,13 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Stock OS Menu",
+                        primary_text="Extra Settings",
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.launch_stock_os_menu
-                    )
-            )
-                    
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Calibrate Analog Sticks",
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.calibrate_sticks
-                    )
-            )
-            
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Advanced Settings",
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_advance_settings
+                        value=self.launch_extra_settings
                     )
             )
 

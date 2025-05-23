@@ -224,6 +224,12 @@ class Display:
             )
 
         line_height = sdl2.sdlttf.TTF_FontHeight(font)
+        surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(font, "A".encode('utf-8'), sdl2.SDL_Color(0, 0, 0))
+        if not surface:
+            line_height = 0
+        else:
+            sdl2.SDL_FreeSurface(surface)
+
         return LoadedFont(font, line_height, font_path)
 
 
@@ -533,7 +539,7 @@ class Display:
 
     @classmethod
     def get_usable_screen_height(cls):
-        return Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()
+        return Device.screen_height() if Theme.ignore_top_and_bottom_bar_for_layout() else Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()
 
     @classmethod
     def get_center_of_usable_screen_height(cls, force_include_top_bar = False):

@@ -65,7 +65,7 @@ class ThemeSettingsMenuCommon(ABC):
                 input, get_value_func, set_value_func)
         )
     
-    def build_numeric_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
+    def build_numeric_entry(self, primary_text, get_value_func, set_value_func, min=1, max=sys.maxsize) -> GridOrListEntry:
 
         return GridOrListEntry(
             primary_text=primary_text,
@@ -75,7 +75,7 @@ class ThemeSettingsMenuCommon(ABC):
             description=None,
             icon=None,
             value=lambda input: self.change_numeric(
-                input, get_value_func, set_value_func)
+                input, get_value_func, set_value_func, min, max)
         )
 
     def build_percent_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:

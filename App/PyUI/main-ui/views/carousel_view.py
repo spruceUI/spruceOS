@@ -186,11 +186,11 @@ class CarouselView(View):
 
             real_y_text_offset = int(Device.screen_height() * 325/480)
 
-            if(self.show_grid_text) :
-                Display.render_text_centered(imageTextPair.get_primary_text(), 
-                                        x_offset,
-                                        real_y_text_offset, color,
-                                        self.font_purpose)
+            #if(self.show_grid_text) :
+            #    Display.render_text_centered(imageTextPair.get_primary_text(), 
+            #                            x_offset,
+            #                            real_y_text_offset, color,
+            #                            self.font_purpose)
         
         Display.present()
 
