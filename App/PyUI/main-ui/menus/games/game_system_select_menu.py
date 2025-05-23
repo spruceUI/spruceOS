@@ -66,12 +66,14 @@ class GameSystemSelectMenu:
                 selected_icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon()))
         
         index = self.get_first_existing_path(icon_system_name_priority)
-        icon = icon_system_name_priority[index]
-        selected_icon = selected_icon_system_name_priority[index]
-        if not os.path.isfile(selected_icon):
-            selected_icon = icon
-            
-        return icon, selected_icon
+        if(index is not None):
+            icon = icon_system_name_priority[index]
+            selected_icon = selected_icon_system_name_priority[index]
+            if not os.path.isfile(selected_icon):
+                selected_icon = icon    
+            return icon, selected_icon
+        else:
+            return None, None
     
     def run_system_selection(self) :
         selected = Selection(None,None,0)
