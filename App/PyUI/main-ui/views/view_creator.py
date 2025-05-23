@@ -36,6 +36,7 @@ class ViewCreator:
                     grid_resized_height=None,
                     set_top_bar_text_to_selection=False,
                     grid_selected_bg=None,
+                    grid_unselected_bg=None,
                     grid_resize_type=None,
                     carousel_selected_entry_width_percent=None,
                     carousel_shrink_further_away=None,
@@ -153,14 +154,18 @@ class ViewCreator:
             case ViewType.GRID:
                 if(hide_grid_bg):
                     grid_selected_bg = None
+                    grid_unselected_bg = None
                 elif(grid_selected_bg is None):
                     grid_selected_bg = Theme.get_grid_bg(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
+                    grid_unselected_bg = Theme.get_grid_bg_unselected(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
+                
                 return GridView(
                     top_bar_text=top_bar_text,
                     options=options,
                     cols=cols,
                     rows=rows,
                     selected_bg=grid_selected_bg,
+                    unselected_bg=grid_unselected_bg,
                     selected_index=selected_index,
                     show_grid_text=show_grid_text,
                     resized_width=grid_resized_width,

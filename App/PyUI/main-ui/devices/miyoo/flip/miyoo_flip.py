@@ -31,10 +31,14 @@ from utils.py_ui_config import PyUiConfig
 import psutil
 
 class MiyooFlip(DeviceCommon):
-    
+    OUTPUT_MIXER = 2
+    SOUND_DISABLED = 0
+
     def __init__(self):
         PyUiLogger.get_logger().info("Initializing Miyoo Flip")
         self.path = self
+        
+        
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
             sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
@@ -52,6 +56,7 @@ class MiyooFlip(DeviceCommon):
             sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
+        
         os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
         os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
         
@@ -71,9 +76,11 @@ class MiyooFlip(DeviceCommon):
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 
         if(PyUiConfig.enable_button_watchers()):
+            from controller.controller import Controller
             #/dev/miyooio if we want to get rid of miyoo_inputd
             # debug in terminal: hexdump  /dev/miyooio
             self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
             volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
             volume_key_polling_thread.start()
             self.power_key_watcher = KeyWatcher("/dev/input/event2")
@@ -407,19 +414,40 @@ class MiyooFlip(DeviceCommon):
 
     def get_display_volume(self):
         return self.get_volume() // 5
-    
-    def get_volume(self):
-        try:
-            output = subprocess.check_output(
-                ["amixer", "cget", "name='SPK Volume'"],
-                text=True
-            )
-            match = re.search(r": values=(\d+)", output)
+        
+    def get_current_mixer_value(self, numid):
+        # Run the amixer command and capture output
+        result = subprocess.run(
+            ['amixer', 'cget', f'numid={numid}'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        output = result.stdout
+        
+        # Find the line containing ': values=' and extract the number
+        for line in reversed(output.splitlines()):
+            match = re.search(r': values=(\d+)', line)
             if match:
                 return int(match.group(1))
+        return None
+
+    def get_volume(self):
+        try:
+            current_mixer = self.get_current_mixer_value(MiyooFlip.OUTPUT_MIXER)
+            if(MiyooFlip.SOUND_DISABLED == current_mixer):
+                return 0
             else:
-                PyUiLogger.get_logger().info("Volume value not found in amixer output.")
-                return 0 # ???
+                output = subprocess.check_output(
+                    ["amixer", "cget", "name='SPK Volume'"],
+                    text=True
+                )
+                match = re.search(r": values=(\d+)", output)
+                if match:
+                    return int(match.group(1))
+                else:
+                    PyUiLogger.get_logger().info("Volume value not found in amixer output.")
+                    return 0 # ???
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Command failed: {e}")
             return 0 # ???
@@ -554,22 +582,46 @@ class MiyooFlip(DeviceCommon):
             #    f"(range: min = {min_val}, max = {max_val}, avg = {avg_val:.2f})"
             #)
             return None
-                
-    def key_down(self, key_code):
+
+    def prompt_power_down(self):
+        from display.display import Display
+        from themes.theme import Theme
+        from controller.controller import Controller
+        while(True):
+            PyUiLogger.get_logger().info("Prompting for shutdown")
+            Display.clear("Power")
+            Display.render_text_centered(f"Would you like to power down?",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width //2, self.screen_height//2+100,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.present()
+            if(Controller.get_input()):
+                if(Controller.last_input() == ControllerInput.A):
+                    self.run_app([self.power_off_cmd])
+                elif(Controller.last_input() == ControllerInput.X):
+                    self.run_app([self.reboot_cmd])
+                elif(Controller.last_input() == ControllerInput.B):
+                    return
+
+    def special_input(self, controller_input, length_in_seconds):
+        if(ControllerInput.POWER_BUTTON == controller_input):
+            if(length_in_seconds < 1):
+                self.sleep()
+            else:
+                self.prompt_power_down()
+        elif(ControllerInput.VOLUME_UP == controller_input):
+            self.change_volume(5)
+        elif(ControllerInput.VOLUME_DOWN == controller_input):
+            self.change_volume(-5)
+
+    def map_key(self, key_code):
         if(116 == key_code):
-            PyUiLogger.get_logger().debug(f"POWER_BUTTON")
-            self.sleep()
             return ControllerInput.POWER_BUTTON
         if(115 == key_code):
-            PyUiLogger.get_logger().debug(f"VOLUME_UP")
-            self.change_volume(5)
             return ControllerInput.VOLUME_UP
         elif(114 == key_code):
-            PyUiLogger.get_logger().debug(f"VOLUME_DOWN")
-            self.change_volume(-5)
             return ControllerInput.VOLUME_DOWN
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+            return None
 
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:

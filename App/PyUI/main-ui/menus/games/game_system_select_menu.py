@@ -31,10 +31,10 @@ class GameSystemSelectMenu:
         return os.path.splitext(os.path.basename(sys_config.get_icon()))[0]
     
     def get_first_existing_path(self,icon_system_name_priority):
-        for path in icon_system_name_priority:
+        for index, path in enumerate(icon_system_name_priority):
             try:
                 if path and os.path.isfile(path):
-                    return path
+                    return index
             except Exception:
                 pass
         return None 
@@ -42,30 +42,36 @@ class GameSystemSelectMenu:
     def get_images(self, game_system : GameSystem):
         icon_system_name = self.get_system_name_for_icon(game_system.game_system_config)
         icon_system_name_priority = []
+        selected_icon_system_name_priority = []
+
         icon_system_name_priority.append(Theme.get_system_icon(icon_system_name))
+        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(icon_system_name))
+
         icon_system_name_priority.append(Theme.get_system_icon(game_system.folder_name.lower()))
+        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(game_system.folder_name.lower()))
+
         icon_system_name_priority.append(Theme.get_system_icon(game_system.display_name.lower()))
+        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(game_system.display_name.lower()))
+
         if game_system.folder_name in self.common_icon_mappings:
             icon_system_name_priority.append(Theme.get_system_icon(self.common_icon_mappings[game_system.folder_name]))
-        icon_system_name_priority.append(game_system.game_system_config.get_icon())
+            selected_icon_system_name_priority.append(Theme.get_system_icon_selected(self.common_icon_mappings[game_system.folder_name]))
 
         if(game_system.game_system_config.get_icon() is not None):
             icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon()))
 
-        selected_icon_system_name_priority = []
-        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(icon_system_name))
-        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(game_system.folder_name.lower()))
-        selected_icon_system_name_priority.append(Theme.get_system_icon_selected(game_system.display_name.lower()))
-        if game_system.folder_name in self.common_icon_mappings:
-            selected_icon_system_name_priority.append(Theme.get_system_icon_selected(self.common_icon_mappings[game_system.folder_name]))
-        selected_icon_system_name_priority.append(game_system.game_system_config.get_icon_selected())
+            if(game_system.game_system_config.get_icon_selected() is not None):
+                selected_icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon_selected()))
+            else:
+                selected_icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon()))
         
-        if(game_system.game_system_config.get_icon_selected() is not None):
-            icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon_selected()))
-
-        
-        
-        return self.get_first_existing_path(icon_system_name_priority), self.get_first_existing_path(selected_icon_system_name_priority),
+        index = self.get_first_existing_path(icon_system_name_priority)
+        icon = icon_system_name_priority[index]
+        selected_icon = selected_icon_system_name_priority[index]
+        if not os.path.isfile(selected_icon):
+            selected_icon = icon
+            
+        return icon, selected_icon
     
     def run_system_selection(self) :
         selected = Selection(None,None,0)

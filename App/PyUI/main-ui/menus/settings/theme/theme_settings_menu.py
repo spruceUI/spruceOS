@@ -7,6 +7,7 @@ from menus.settings.theme.theme_settings_game_select_menu import ThemeSettingsGa
 from menus.settings.theme.theme_settings_grid_view import ThemeSettingsGridView
 from menus.settings.theme.theme_settings_main_menu import ThemeSettingsMainMenu
 from menus.settings.theme.theme_settings_system_select_menu import ThemeSettingsSystemSelectMenu
+from menus.settings.theme.theme_settings_top_bar import ThemeSettingsTopBar
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -34,10 +35,14 @@ class ThemeSettingsMenu():
         if (input == ControllerInput.A):
             ThemeSettingsFonts().show_theme_options_menu()
 
-
     def launch_grid_view_menu_theme_options(self, input):
         if (input == ControllerInput.A):
             ThemeSettingsGridView().show_theme_options_menu()
+
+    def launch_top_bar_menu_theme_options(self, input):
+        if (input == ControllerInput.A):
+            ThemeSettingsTopBar().show_theme_options_menu()
+
 
 
     def build_options_list(self):
@@ -104,7 +109,17 @@ class ThemeSettingsMenu():
             )
         )
 
-        
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Top Bar Options",
+                value_text="",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.launch_top_bar_menu_theme_options
+            )
+        )
 
         return option_list
 

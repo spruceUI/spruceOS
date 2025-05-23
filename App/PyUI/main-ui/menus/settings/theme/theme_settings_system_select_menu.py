@@ -1,4 +1,5 @@
 
+import sys
 from controller.controller_inputs import ControllerInput
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon
 from themes.theme import Theme
@@ -39,5 +40,6 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                         Theme.get_system_select_show_sel_bg_grid_mode, 
                                         Theme.set_system_select_show_sel_bg_grid_mode)
             )
+            
             
         return option_list

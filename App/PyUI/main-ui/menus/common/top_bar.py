@@ -5,6 +5,7 @@ from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from utils.py_ui_config import PyUiConfig
 
 
 class TopBar:
@@ -43,31 +44,36 @@ class TopBar:
         if(not hide_top_bar_icons):
             #Battery Text
             x_offset = Device.screen_width() - padding*2
-            battery_text_w, battery_text_h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - battery_text_w - padding
+            w, h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - w - padding
             #Battery Icon
-            battery_icon_w, battery_icon_h = Display.render_image(
+            w, h = Display.render_image(
                 battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - battery_icon_w - padding
+            x_offset = x_offset - w - padding
             #Wifi
-            wifi_icon_w, wifi_icon_h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - wifi_icon_w - padding
+            w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - w - padding
             #Volume
             if(time.time() - self.volume_changed_time < 3):
                 Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
-    
-            #TODO make left/right configurable
-            Display.render_text(str(self.get_current_time_hhmm()),padding*2, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_LEFT_ALIGNED)
 
+            if(PyUiConfig.show_clock()):   
+                x_offset = Theme.get_top_bar_initial_x_offset()
+                w, h = Display.render_text(str(self.get_current_time_hhmm()),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_LEFT_ALIGNED)
+                x_offset += w +padding
 
         if(Theme.show_top_bar_text()):
             Display.render_text(title,int(Device.screen_width()/2), center_of_bar, Theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
     def get_current_time_hhmm(self):
-        #return datetime.now().strftime("%H:%M")
-        return datetime.now().strftime("%I:%M %p") 
-       
+        if(PyUiConfig.use_24_hour_clock()):
+            return datetime.now().strftime("%H:%M")
+        elif(PyUiConfig.show_am_pm()):
+            return datetime.now().strftime("%I:%M %p") 
+        else:
+            return datetime.now().strftime("%I:%M") 
+
     def get_top_bar_height(self):
         return self.top_bar_h
     

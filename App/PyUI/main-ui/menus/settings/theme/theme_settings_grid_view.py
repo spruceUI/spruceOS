@@ -15,13 +15,6 @@ class ThemeSettingsGridView(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_numeric_entry(
-                primary_text="MultiRow Extra Y Pad",
-                get_value_func=Theme.get_grid_multi_row_extra_y_pad,
-                set_value_func=Theme.set_grid_multi_row_extra_y_pad
-            )
-        )
-        option_list.append(
-            self.build_numeric_entry(
                 primary_text="Sel BG Resize Pad Width",
                 get_value_func=Theme.get_grid_multi_row_sel_bg_resize_pad_width,
                 set_value_func=Theme.set_grid_multi_row_sel_bg_resize_pad_width
