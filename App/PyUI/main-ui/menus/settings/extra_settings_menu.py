@@ -64,17 +64,18 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             )
         
         
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Calibrate Analog Sticks",
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.calibrate_sticks
-                    )
-            )
+        if(Device.supports_analog_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Calibrate Analog Sticks",
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.calibrate_sticks
+                        )
+                )
 
         option_list.append(
                 GridOrListEntry(

@@ -223,6 +223,10 @@ class Device:
         return Device._impl.power_off_cmd
 
     @staticmethod
+    def prompt_power_down():
+        return Device._impl.prompt_power_down()
+
+    @staticmethod
     def reboot_cmd():
         return Device._impl.reboot_cmd
 
@@ -245,6 +249,10 @@ class Device:
     @staticmethod  
     def launch_stock_os_menu():
         return Device._impl.launch_stock_os_menu()
+    
+    @staticmethod  
+    def supports_analog_calibration():
+        return Device._impl.supports_analog_calibration()
     
     @staticmethod  
     def calibrate_sticks():

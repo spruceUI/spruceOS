@@ -24,7 +24,6 @@ class GridView(View):
         self.resized_width = resized_width
         self.resized_height = resized_height
         self.resize_type = resize_type
-        print(f"{top_bar_text} : resized_width = {self.resized_width}, resized_height={self.resized_height}, resize_type={self.resize_type}")
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.options: List[GridOrListEntry] = options
@@ -129,9 +128,6 @@ class GridView(View):
                 img_offset = 0
             else:
                 img_offset = Theme.get_system_select_grid_img_y_offset(text_height)
-            print(f"Theme.ignore_top_and_bottom_bar_for_layout()={Theme.ignore_top_and_bottom_bar_for_layout()}, Display.get_top_bar_height()={Display.get_top_bar_height()}")
-            print(f"img_offset = {img_offset}")
-
                 
             bg_offset = 0
             if (self.resized_width is not None):

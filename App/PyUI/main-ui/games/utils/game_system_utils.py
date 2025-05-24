@@ -10,6 +10,9 @@ class GameSystemUtils:
     def __init__(self):
         self.roms_path = "/mnt/SDCARD/Roms/"
         self.emu_path = "/mnt/SDCARD/Emu/"
+        if(not os.path.exists(self.emu_path)):
+            self.emu_path =  "/mnt/SDCARD/Emus/"
+        PyUiLogger().get_logger().info(f"Emu folder is {self.emu_path}")
         self.rom_utils = RomUtils(self.roms_path)
     
     def get_game_system_by_name(self, system_name) -> GameSystem:
@@ -38,6 +41,7 @@ class GameSystemUtils:
             try:
                 game_system_config = GameSystemConfig(folder)
             except Exception as e:
+                PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
             if(game_system_config is not None):

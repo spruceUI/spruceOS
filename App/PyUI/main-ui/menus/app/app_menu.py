@@ -32,6 +32,7 @@ class AppMenu:
         icon_priority.append(os.path.join(Theme.get_theme_path(),"icons","app",os.path.basename(icon_path_from_config)))
         icon_priority.append(icon_path_from_config)
         icon_priority.append(os.path.join(app_folder,icon_path_from_config))
+        icon_priority.append(os.path.join(app_folder,"icon.png"))
         return self.get_first_existing_path(icon_priority)
 
     def run_app_selection(self) :

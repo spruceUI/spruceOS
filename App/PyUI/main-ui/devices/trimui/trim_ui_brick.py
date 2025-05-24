@@ -1,6 +1,7 @@
 import array
 import ctypes
 import fcntl
+import math
 from pathlib import Path
 import re
 import socket
@@ -9,6 +10,7 @@ import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from controller.key_watcher import KeyWatcher
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
 import os
@@ -25,6 +27,8 @@ import sdl2
 from utils import throttle
 from utils.logger import PyUiLogger
 import psutil
+
+from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(DeviceCommon):
     
@@ -60,6 +64,18 @@ class TrimUIBrick(DeviceCommon):
         self._set_brightness_to_config()
         self.ensure_wpa_supplicant_conf()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
+        if(PyUiConfig.enable_button_watchers()):
+            from controller.controller import Controller
+            #/dev/miyooio if we want to get rid of miyoo_inputd
+            # debug in terminal: hexdump  /dev/miyooio
+            self.volume_key_watcher = KeyWatcher("/dev/input/event3")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+            self.power_key_watcher = KeyWatcher("/dev/input/event1")
+            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+            power_key_polling_thread.start()
+
 
     def ensure_wpa_supplicant_conf(self):
         conf_path = Path("/userdata/cfg/wpa_supplicant.conf")
@@ -132,6 +148,24 @@ class TrimUIBrick(DeviceCommon):
         icon_size = 140
         return icon_size+int(self.large_grid_x_offset/2)
     
+    def prompt_power_down(self):
+        from display.display import Display
+        from themes.theme import Theme
+        from controller.controller import Controller
+        while(True):
+            PyUiLogger.get_logger().info("Prompting for shutdown")
+            Display.clear("Power")
+            Display.render_text_centered(f"Would you like to power down?",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width //2, self.screen_height//2+100,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.present()
+            if(Controller.get_input()):
+                if(Controller.last_input() == ControllerInput.A):
+                    self.run_app([self.power_off_cmd])
+                elif(Controller.last_input() == ControllerInput.X):
+                    self.run_app([self.reboot_cmd])
+                elif(Controller.last_input() == ControllerInput.B):
+                    return
+
     @property
     def power_off_cmd(self):
         return "poweroff"
@@ -204,10 +238,8 @@ class TrimUIBrick(DeviceCommon):
                 # Perform ioctl with pointer to param
                 fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
                 os.close(fd)
-        except PermissionError:
-            print("Permission denied: try running as root.")
         except Exception as e:
-            print(f"Error setting brightness: {e}")
+            PyUiLogger.get_logger().error(f"Error setting brightness: {e}")
 
     def _set_contrast_to_config(self):
         pass
@@ -293,16 +325,18 @@ class TrimUIBrick(DeviceCommon):
     def saturation(self):
         return self.system_config.get("colorsaturation")
 
-    def _set_volume(self, volume):
+    def _set_volume(self, user_volume):
+        from display.display import Display
+        volume = math.ceil(user_volume * 255//100)
         if(volume < 0):
             volume = 0
-        elif(volume > 100):
-            volume = 100
+        elif(volume > 256):
+            volume = 255
 
         try:
             
             ProcessRunner.run(
-                ["amixer", "cset", f"name='Soft Volume Master'", str(volume)],
+                ["amixer", "cset", f"numid=17", str(int(volume))],
                 check=True
             )
 
@@ -310,33 +344,30 @@ class TrimUIBrick(DeviceCommon):
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
-        self.system_config.set_volume(volume // 5)
+        self.system_config.set_volume(user_volume)
         self.system_config.save_config()
-
+        Display.volume_changed(user_volume)
+        return user_volume
 
     def change_volume(self, amount):
         self._set_volume(self.get_volume() + amount)
 
     def get_display_volume(self):
-        return self.get_volume() // 5
+        return self.get_volume()
 
     def get_volume(self):
-        try:
-            output = subprocess.check_output(
-                ["amixer", "cget", "name='Soft Volume Master'"],
-                text=True
-            )
-            match = re.search(r": values=(\d+)", output)
-            if match:
-                return int(match.group(1))
-            else:
-                PyUiLogger.get_logger().info("Volume value not found in amixer output.")
-                return 0 # ???
-            pass
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Command failed: {e}")
-            return 0 # ???
-        
+        # Run the command and capture output
+        result = subprocess.run(['amixer', 'cget', 'numid=17'], capture_output=True, text=True)
+        # Search for 'values=' line and extract the first value
+        match = re.search(r'values=(\d+),\d+', result.stdout)
+        if match:
+            volume = int(match.group(1))
+            PyUiLogger().get_logger().info(f"Volume is {volume}")
+            return math.ceil(volume * 100/255)
+        else:
+            PyUiLogger().get_logger().error("Unable to find volume from amixer command")
+            return 0
+
     def convert_game_path_to_miyoo_path(self,original_path):
         # Define the part of the path to be replaced
         base_dir = "/mnt/SDCARD/Roms/"
@@ -368,6 +399,13 @@ class TrimUIBrick(DeviceCommon):
 
     def fix_sleep_sound_bug(self):
         pass
+
+    def sleep(self):
+        try:
+            with open("/sys/power/state", "w") as f:
+                f.write("mem")  
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failure attempting to sleep: {e}")
 
 
     def run_game(self, rom_info):
@@ -427,11 +465,27 @@ class TrimUIBrick(DeviceCommon):
         return mapping
     
     def map_key(self, key_code):
-        PyUiLogger.get_logger().error(f"Received key_down key_code = {key_code}")
-        return None
+        if(116 == key_code):
+            return ControllerInput.POWER_BUTTON
+        if(115 == key_code):
+            return ControllerInput.VOLUME_UP
+        elif(114 == key_code):
+            return ControllerInput.VOLUME_DOWN
+        else:
+            PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+            return None
+
     
     def special_input(self, controller_input, length_in_seconds):
-        PyUiLogger.get_logger().error(f"Received special input = {controller_input}")
+        if(ControllerInput.POWER_BUTTON == controller_input):
+            if(length_in_seconds < 1):
+                self.sleep()
+            else:
+                self.prompt_power_down()
+        elif(ControllerInput.VOLUME_UP == controller_input):
+            self.change_volume(+5)
+        elif(ControllerInput.VOLUME_DOWN == controller_input):
+            self.change_volume(-5)
 
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
@@ -728,14 +782,8 @@ class TrimUIBrick(DeviceCommon):
     def launch_stock_os_menu(self):
         pass
 
-    
     def calibrate_sticks(self):
-        from display.display import Display
-        from themes.theme import Theme
-        
-        Display.clear("Stick Calibration")
-        Display.render_text_centered("No Analog Sticks Detected",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST))
-        Display.present()
-        time.sleep(2)
+        pass
 
-
+    def supports_analog_calibration(self):
+        return False
