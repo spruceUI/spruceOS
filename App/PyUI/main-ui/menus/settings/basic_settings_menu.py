@@ -7,6 +7,7 @@ from menus.settings import settings_menu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
+from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.timezone_menu import TimezoneMenu
 from menus.settings.wifi_menu import WifiMenu
@@ -27,7 +28,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
     def shutdown(self, input: ControllerInput):
         if(ControllerInput.A == input):
-           Device.run_app(Device.power_off_cmd())
+           Device.prompt_power_down()
     
     def reboot(self, input: ControllerInput):
         if(ControllerInput.A == input):
@@ -90,14 +91,17 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             selected_index+=1
             if(selected_index == len(theme_folders)):
                 selected_index = 0
-        elif(ControllerInput.A == input):
+        elif(ControllerInput.X == input):
             ThemeSettingsMenu().show_theme_options_menu()
+        elif(ControllerInput.A == input):
+            selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
 
-        Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
-        Display.init_fonts()   
-        PyUiConfig.set("theme",theme_folders[selected_index])
-        PyUiConfig.save()      
-        self.theme_changed = True
+        if(selected_index is not None):
+            Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
+            Display.init_fonts()   
+            PyUiConfig.set("theme",theme_folders[selected_index])
+            PyUiConfig.save()      
+            self.theme_changed = True
 
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
@@ -211,7 +215,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             else:
                 list_view.set_options(option_list)
 
-            control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
+            control_options = [ControllerInput.A,ControllerInput.X, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)
 

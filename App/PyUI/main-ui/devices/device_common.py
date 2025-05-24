@@ -211,6 +211,10 @@ class DeviceCommon(ABC):
     def power_off_cmd(self):
         pass
     
+    @abstractmethod
+    def prompt_power_down(self):
+        pass
+    
     @property
     @abstractmethod
     def reboot_cmd(self):
@@ -230,4 +234,16 @@ class DeviceCommon(ABC):
 
     @abstractmethod
     def get_ip_addr_text(self):
+        pass
+    
+    @staticmethod  
+    def launch_stock_os_menu(self):
+        pass
+    
+    @staticmethod  
+    def supports_analog_calibration(self):
+        pass
+    
+    @staticmethod  
+    def calibrate_sticks(self):
         pass

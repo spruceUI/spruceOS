@@ -249,7 +249,6 @@ class Controller:
     def non_sdl_input_event(controller_input, is_down):
         TRIGGER_TIME_FOR_HOLD_BUTTONS = 2
 
-        PyUiLogger.get_logger().info(f"controller_input : {controller_input} is down? {is_down}")
         if(is_down):
             if(controller_input in Controller.hold_buttons):
                 if controller_input not in Controller.last_press_time_map:

@@ -46,7 +46,7 @@ class SystemConfig:
                 raise RuntimeError(f"Failed to save config: {e}")
         
     def get_volume(self):
-        return self.config.get("vol")
+        return self.config.get("vol") * 5
 
     def get_keymap(self):
         return self.config.get("keymap")
@@ -88,6 +88,7 @@ class SystemConfig:
             self.config["mute"] = 1
         else:
             self.config["mute"] = 0
+        self.config["vol"] = value //5
 
     def set_wifi(self, value):
         self.config["wifi"] = value

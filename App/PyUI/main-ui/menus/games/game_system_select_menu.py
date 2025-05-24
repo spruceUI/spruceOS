@@ -80,7 +80,6 @@ class GameSystemSelectMenu:
         systems_list = []
         view = None
         for game_system in self.game_utils.get_active_systems():
-            sys_config = game_system.game_system_config
             image_path, image_path_selected = self.get_images(game_system)
             icon = image_path_selected
             systems_list.append(

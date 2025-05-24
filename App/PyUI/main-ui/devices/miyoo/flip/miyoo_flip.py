@@ -375,6 +375,7 @@ class MiyooFlip(DeviceCommon):
         return self.system_config.get_saturation()
 
     def _set_volume(self, volume):
+        from display.display import Display
         if(volume < 0):
             volume = 0
         elif(volume > 100):
@@ -402,18 +403,17 @@ class MiyooFlip(DeviceCommon):
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
-        self.system_config.set_volume(volume // 5)
+        self.system_config.set_volume(volume)
         self.system_config.save_config()
-        return volume // 5
+        Display.volume_changed(volume)
+        return volume 
 
 
     def change_volume(self, amount):
-        from display.display import Display
-        volume_level = self._set_volume(self.get_volume() + amount)
-        Display.volume_changed(volume_level)
+        self._set_volume(self.get_volume() + amount)
 
     def get_display_volume(self):
-        return self.get_volume() // 5
+        return self.get_volume()
         
     def get_current_mixer_value(self, numid):
         # Run the amixer command and capture output
@@ -976,3 +976,8 @@ class MiyooFlip(DeviceCommon):
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
         Controller.re_init_controller()
+
+
+    def supports_analog_calibration(self):
+        return True
+    

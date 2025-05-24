@@ -1,8 +1,11 @@
 import json
+import os
 
 class GameSystemConfig:
     def __init__(self, system_name):
         self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
+        if(not os.path.exists(self.emu_folder)):
+            self.emu_folder =  f"/mnt/SDCARD/Emus/{system_name}"
         self.config_path = f"{self.emu_folder}/config.json"
         self.reload_config()
 

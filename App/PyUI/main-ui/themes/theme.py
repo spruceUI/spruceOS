@@ -5,6 +5,7 @@ from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
+from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
 from views.view_type import ViewType
 
@@ -21,22 +22,38 @@ class Theme():
     
     @classmethod
     def set_theme_path(cls,path, width = 0, height = 0):
-        cls._data.clear()
-        cls._path = path
-        cls._load_defaults()
+        cls.load_defaults_so_user_can_see_at_least(path)
 
         resolution_specific_config = f"config_{width}x{height}.json"
         config_path = os.path.join(path, resolution_specific_config)
         if os.path.exists(config_path):
-            cls._load_from_file(config_path)
+            PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
+        elif ThemePatcher.patch_theme(path,width, height) and os.path.exists(config_path):
             PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
         else:
-            cls._load_from_file(os.path.join(path, "config.json"))
+            config_path = "config.json"
             PyUiLogger.get_logger().info(f"No resolution specific config {config_path} found, using config.json")
+
+        cls._data.clear()
+        cls._path = path
+        cls._load_defaults()
+        cls._load_from_file(os.path.join(path, config_path))
 
         cls._path = path
         cls._skin_folder = cls._get_asset_folder("skin", width, height)
         cls._icon_folder = cls._get_asset_folder("icons", width, height)
+
+    @classmethod
+    def load_defaults_so_user_can_see_at_least(cls, path):
+        cls._data.clear()
+        cls._path = path
+        cls._load_defaults()
+
+        cls._load_from_file(os.path.join(path, "config.json"))
+
+        cls._path = path
+        cls._skin_folder = cls._get_asset_folder("skin", -1, -1)
+        cls._icon_folder = cls._get_asset_folder("icons", -1, -1)
 
     @classmethod
     def get_theme_path(cls):

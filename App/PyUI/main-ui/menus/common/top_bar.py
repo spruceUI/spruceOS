@@ -5,6 +5,7 @@ from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 
@@ -81,5 +82,7 @@ class TopBar:
         return self.title
     
     def volume_changed(self, volume):
-        self.volume = volume
+        PyUiLogger().get_logger().info(f"Setting volume icon {volume}")
+        #volume icon is for every 5 volume
+        self.volume = volume // 5
         self.volume_changed_time = time.time()
