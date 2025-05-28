@@ -22,7 +22,7 @@ if [ "$PLATFORM" = "A30" ]; then
 	killall -q -USR2 joystickinput   # set stick to d-pad mode
 
 elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "Flip" ]; then
-    /mnt/SDCARD/spruce/bin64/gptokeyb -k "DinguxCommander" -c "./DinguxCommander.gptk" &
+    /mnt/SDCARD/spruce/bin64/gptokeyb -c "./DinguxCommander.gptk" &
     sleep 0.3
 	./"DinguxCommander$PLATFORM"
     kill -9 "$(pidof gptokeyb)" 
