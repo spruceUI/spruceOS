@@ -88,11 +88,6 @@ manage_reconnection() {
     fi
 }
 
-# Start network services on first start
-if [ "$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
-	/mnt/SDCARD/spruce/scripts/networkservices.sh &
-fi
-
 # Infinite loop to keep monitoring by process and Wi-Fi status
 while true; do
     if pgrep "$PROCESS_NAME" > /dev/null; then

@@ -160,6 +160,11 @@ if [ "$PLATFORM" = "A30" ]; then
 fi
 
 # Bring up network and services
+
+if [ "$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
+	/mnt/SDCARD/spruce/scripts/networkservices.sh &
+fi
+
 ${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
 
 unstage_archives_$PLATFORM
