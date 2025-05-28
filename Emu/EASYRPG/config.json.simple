@@ -7,6 +7,7 @@
   "themecolor":"FFFF88",
   "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "subfolder_launch_file":"RPG_RT.ldb",
   "rompathlist": [
     {"rompath": "../../Roms/EASYRPG",
     "imgpath": "../../Roms/EASYRPG/Imgs"},
