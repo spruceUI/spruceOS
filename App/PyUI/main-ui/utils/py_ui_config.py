@@ -130,3 +130,7 @@ class PyUiConfig:
     def set_show_am_pm(cls, value):
         cls._data["showAmPm"] = value
         cls.save()
+
+    @classmethod
+    def animations_enabled(cls):
+        return cls.get("animationsEnabled",False)

@@ -8,6 +8,7 @@ from display.display import Display
 from menus.games.game_config_menu import GameConfigMenu
 from menus.games.game_select_menu_popup import GameSelectMenuPopup
 from menus.games.in_game_menu_listener import InGameMenuListener
+from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
 from themes.theme import Theme
@@ -55,6 +56,7 @@ class RomsMenuCommon(ABC):
         view = None
         rom_list = self._get_rom_list()
         while(selected is not None):
+            Display.set_page(page_name)
             if(view is None):
                 view = ViewCreator.create_view(
                     view_type=Theme.get_game_selection_view_type(),
@@ -71,9 +73,11 @@ class RomsMenuCommon(ABC):
                     set_top_bar_text_to_selection=Theme.get_set_top_bar_text_to_game_selection(),
                     grid_selected_bg=Theme.get_grid_game_selected_bg(),
                     grid_resize_type=Theme.get_grid_game_selected_resize_type(),
+                    grid_img_y_offset=Theme.get_grid_game_img_y_offset(),
                     carousel_selected_entry_width_percent=Theme.get_carousel_game_select_primary_img_width(),
                     carousel_shrink_further_away=Theme.get_carousel_game_select_shrink_further_away(),
-                    carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off()
+                    carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off(),
+                    missing_image_path=Theme.get_missing_image_path()
                     )
 
             else:
@@ -82,19 +86,14 @@ class RomsMenuCommon(ABC):
             selected = view.get_selection([ControllerInput.A, ControllerInput.X, ControllerInput.MENU])
             if(selected is not None):
                 if(ControllerInput.A == selected.get_input()):
-        
-                    if(os.path.isdir(selected.get_selection().get_value().rom_file_path)):
+                    if(self.launched_via_special_case(selected.get_selection().get_value())):
+                        pass
+                    elif(os.path.isdir(selected.get_selection().get_value().rom_file_path)):
                         # If the selected item is a directory, open it
                         self._run_subfolder_menu(selected.get_selection().get_value())
                     else:
-                        Display.deinit_display()
-                        game_thread : subprocess.Popen = Device.run_game(selected.get_selection().get_value())
-            
-                        if(game_thread is not None):
-                            self.in_game_menu_listener.game_launched(game_thread, selected.get_selection().get_value())
-                            Controller.clear_input_queue()
-            
-                        Display.reinitialize()
+                        RecentsManager.add_game(selected.get_selection().get_value())
+                        self.run_game(selected.get_selection().get_value())
                 elif(ControllerInput.X == selected.get_input()):
                     GameConfigMenu(selected.get_selection().get_value().game_system, 
                                    selected.get_selection().get_value()).show_config()
@@ -106,3 +105,30 @@ class RomsMenuCommon(ABC):
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.B == selected.get_input()):
                     selected = None
+        Display.restore_bg()
+        
+    def run_game(self, game_path):
+        #recents is handled one level up to account for launched_via_special_case
+        Display.deinit_display()
+
+        game_thread: subprocess.Popen = Device.run_game(game_path)
+        if (game_thread is not None):
+            self.in_game_menu_listener.game_launched(
+                game_thread, game_path)
+            Controller.clear_input_queue()
+
+        Display.reinitialize()
+
+
+    def launched_via_special_case(self, rom_info : RomInfo):
+        subfolder_launch_file = rom_info.game_system.game_system_config.subfolder_launch_file()
+
+        if(subfolder_launch_file is not None and subfolder_launch_file != ""):
+            RecentsManager.add_game(rom_info)
+            folder = rom_info.rom_file_path
+            launch_file = os.path.join(folder,subfolder_launch_file)
+            if(os.path.isfile(launch_file)):
+                self.run_game(RomInfo(rom_info.game_system,launch_file))
+                return True
+        else:
+            return False

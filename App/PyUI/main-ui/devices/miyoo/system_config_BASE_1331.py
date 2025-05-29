@@ -59,23 +59,23 @@ class SystemConfig:
 
     @property
     def brightness(self):
-        return self.config.get("brightness")
+        return self.config.get("lumination")
 
     def get_brightness(self):
-        return self.config.get("brightness")
+        return self.config.get("lumination")
 
     def set_brightness(self, value):
-        self.config["brightness"] = value
+        self.config["lumination"] = value
 
     @property
     def backlight(self):
-        return self.config.get("backlight")
+        return self.config.get("brightness")
     
     def set_backlight(self, value):
-        self.config["backlight"] = value
+        self.config["brightness"] = value
     
     def get_backlight(self):
-        return self.config.get("backlight")
+        return self.config.get("brightness")
 
     def set_contrast(self, value):
         self.config["contrast"] = value

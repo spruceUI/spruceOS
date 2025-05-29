@@ -1,11 +1,11 @@
-from devices.device_common import DeviceCommon
+from devices.abstract_device import AbstractDevice
 
 
 class Device:
-    _impl: DeviceCommon = None
+    _impl: AbstractDevice = None
 
     @staticmethod
-    def init(impl: DeviceCommon):
+    def init(impl: AbstractDevice):
         Device._impl = impl
 
     @staticmethod
@@ -20,6 +20,10 @@ class Device:
     @staticmethod
     def screen_height():
         return Device._impl.screen_height
+    
+    @staticmethod
+    def screen_rotation():
+        return Device._impl.screen_rotation
 
     @staticmethod
     def output_screen_width():
@@ -32,30 +36,6 @@ class Device:
     @staticmethod
     def should_scale_screen():
         return Device._impl.should_scale_screen()
-
-    @staticmethod
-    def font_size_small():
-        return Device._impl.font_size_small
-
-    @staticmethod
-    def font_size_medium():
-        return Device._impl.font_size_medium
-
-    @staticmethod
-    def font_size_large():
-        return Device._impl.font_size_large
-
-    @staticmethod
-    def large_grid_x_offset():
-        return Device._impl.large_grid_x_offset
-
-    @staticmethod
-    def large_grid_y_offset():
-        return Device._impl.large_grid_y_offset
-
-    @staticmethod
-    def large_grid_spacing_multiplier():
-        return Device._impl.large_grid_spacing_multiplier
 
     @staticmethod
     def lumination():
@@ -119,8 +99,8 @@ class Device:
         return Device._impl.get_battery_percent()
 
     @staticmethod
-    def run_game(path):
-        return Device._impl.run_game(path)
+    def run_game(rom_info):
+        return Device._impl.run_game(rom_info)
 
     @staticmethod
     def run_app(args, dir=None):
@@ -229,10 +209,6 @@ class Device:
     @staticmethod
     def reboot_cmd():
         return Device._impl.reboot_cmd
-
-    @staticmethod
-    def get_rom_utils():
-        return Device._impl.get_rom_utils()
 
     @staticmethod
     def perform_startup_tasks():

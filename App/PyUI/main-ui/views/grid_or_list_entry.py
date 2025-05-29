@@ -78,3 +78,11 @@ class GridOrListEntry:
     
     def get_value(self):
         return self.value
+    
+    def __eq__(self, other):
+        if not isinstance(other, GridOrListEntry):
+            return NotImplemented
+
+        return (
+            self.value == other.value
+        )

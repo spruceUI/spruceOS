@@ -103,7 +103,11 @@ class Theme():
         return os.path.join(cls._path, cls._icon_folder, *parts)
 
     @classmethod
-    def background(cls): return cls._asset("background.png")
+    def background(cls, page = None):
+        if(page is None):
+            return cls._asset("background.png")
+        else:
+            return cls._asset(f"{page.lower()}-background.png")
     
     @classmethod
     def favorite(cls): return cls._asset("ic-favorite-n.png")
@@ -191,6 +195,9 @@ class Theme():
     
     @classmethod
     def get_popup_menu_selected_bg(cls): return cls._asset("bg-list-s2.png")
+    
+    @classmethod
+    def get_missing_image_path(cls): return cls._asset("missing_image.png")
     
     @classmethod
     def get_battery_icon(cls, charging, battery_percent):
@@ -565,6 +572,14 @@ class Theme():
         cls._data["gameSelectGridResizeType"] = view_type.name
         cls.save_changes()
 
+    @classmethod
+    def get_grid_game_img_y_offset(cls):
+        return cls._data.get("gridGameImageYOffset", 0)
+
+    @classmethod
+    def set_grid_game_img_y_offset(cls, value):
+        cls._data["gridGameImageYOffset"] = value
+        cls.save_changes()
 
     @classmethod
     def get_view_type_for_app_menu(cls):

@@ -12,6 +12,7 @@ from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
+from views.text_utils import TextUtils
 
 class ImageListView(NonDescriptiveListView):
     SHOW_ICONS = True
@@ -41,14 +42,9 @@ class ImageListView(NonDescriptiveListView):
 
     def scroll_string(self,text, amt, text_available_width):
         if(Theme.scroll_rom_selection_text()):
-            if not text:
-                return text
-            text_width, char_height = Display.get_text_dimensions(FontPurpose.LIST,text)
-            spaces_to_add = ((text_available_width - text_width) // self.space_width)
-            spaces_to_add = max(spaces_to_add, 8)
-            text = text + ' ' * spaces_to_add
-            amt = amt % len(text)  # Ensure n is within the string length
-            return text[amt:] + text[:amt]
+            return TextUtils.scroll_string(text=text,
+                                    amt=amt,
+                                    text_available_width=text_available_width)
         else:
             return text
     

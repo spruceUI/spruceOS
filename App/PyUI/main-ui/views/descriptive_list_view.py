@@ -20,7 +20,7 @@ class DescriptiveListView(ListView):
         self.selected_bg = selected_bg
         each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
         # TODO is there a bettter way? Apps are getting set to 3 instead of 4 
-        self.max_rows = (Display.get_usable_screen_height() // self.each_entry_height)
+        self.max_rows = (Display.get_usable_screen_height(force_include_top_bar=True) // self.each_entry_height)
         self.current_top = 0
         self.current_bottom = min(self.max_rows,len(options))
 
@@ -32,7 +32,7 @@ class DescriptiveListView(ListView):
 
         row_offset_x = Theme.get_descriptive_list_icon_offset_x()
         #TODO get padding from theme
-        row_offset_y = Display.get_top_bar_height() + 5
+        row_offset_y = Display.get_top_bar_height(force_include_top_bar = True) + 5
         
         for visible_index, (gridOrListEntry) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
@@ -79,3 +79,4 @@ class DescriptiveListView(ListView):
                     FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)
 
             row_offset_y += self.each_entry_height
+            
