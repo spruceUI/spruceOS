@@ -265,13 +265,17 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			kill_runner
-			LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
-			sleep 1
-			export SDL_VIDEODRIVER=NDS
-			./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic "$ROM_FILE" > std.log 2>&1
-			sync
-			kill_runner
+			if [ "$CORE" = "drastic_steward" ]; then
+				kill_runner
+				LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
+				sleep 1
+				export SDL_VIDEODRIVER=NDS
+				./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic "$ROM_FILE" > std.log 2>&1
+				sync
+				kill_runner
+			else
+				./drastic64
+			fi
 
 		elif [ "$PLATFORM" = "SmartPro" ]; then
 			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
@@ -279,9 +283,14 @@ run_drastic() {
 			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
 
 		elif [ "$PLATFORM" = "Flip" ]; then
-			export SDL_VIDEODRIVER=NDS
-			export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
-			./drastic32 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+			if [ -d /usr/l32 ] && [ "$CORE" = "drastic_steward" ]; then
+				export SDL_VIDEODRIVER=NDS
+				export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
+				./drastic32 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+			else
+				# if overlay mount of /usr fails, fall back to original DraStic instead of Steward's
+				./drastic64
+			fi
 		fi
 		
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"

@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export CORE="drastic_steward"
 export MODE="smart"
 
 export scaling_min_freq=816000

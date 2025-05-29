@@ -206,6 +206,17 @@ case "$EMU_NAME" in
 		fi
 	;;
 
+	"NDS" )
+		if [ "$CORE" = "drastic_steward" ]; then
+			NEW_CORE="drastic_original"
+			NEW_DISPLAY="steward-(✓ORIGINAL)"
+
+		else # current core is drastic_original
+			NEW_CORE="drastic_steward"
+			NEW_DISPLAY="(✓STEWARD)-original"
+		fi
+	;;
+
 	"NGP"* )
 		if [ "$CORE" = "mednafen_ngp" ]; then
 			NEW_CORE="race"
