@@ -276,6 +276,10 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "PortMaster" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PortMaster/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PortMaster/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PortMaster/config.json" ""
 @"The ultimate Linux ports manager"
 
+<Brick> <SmartPro> <Flip>
+"" "E-Book Reader" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PixelReader/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PixelReader/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PixelReader/config.json" ""
+@"E-Book reader for 64-bit devices"
+
 <Not_simple>
 "" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
 @"Launch a random game"
