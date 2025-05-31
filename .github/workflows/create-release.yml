@@ -41,6 +41,13 @@ jobs:
           # Get last commit hash and save to file
           git rev-parse HEAD > commit_hash.txt
 
+      - name: Create RetroArch core archives
+        run: |
+          7z a -t7z -mx=9 spruce/archives/staging/cores.7z /mnt/SDCARD/RetroArch/.retroarch/cores
+          7z a -t7z -mx=9 spruce/archives/staging/cores64.7z /mnt/SDCARD/RetroArch/.retroarch/cores64
+          rm -rf /mnt/SDCARD/RetroArch/.retroarch/cores
+          rm -rf /mnt/SDCARD/RetroArch/.retroarch/cores64
+
       - name: Create archives
         run: |
           # Create 7z archive

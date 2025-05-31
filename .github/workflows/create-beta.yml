@@ -83,6 +83,13 @@ jobs:
             done
           ' sh "$VERSION" {} +
 
+      - name: Create RetroArch core archives
+        run: |
+          7z a -t7z -mx=9 spruce/archives/staging/cores.7z /mnt/SDCARD/RetroArch/.retroarch/cores
+          7z a -t7z -mx=9 spruce/archives/staging/cores64.7z /mnt/SDCARD/RetroArch/.retroarch/cores64
+          rm -rf /mnt/SDCARD/RetroArch/.retroarch/cores
+          rm -rf /mnt/SDCARD/RetroArch/.retroarch/cores64
+
       - name: Create 7z archive
         run: |
           7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
