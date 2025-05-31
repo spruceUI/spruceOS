@@ -1,0 +1,6088 @@
+<?xml version="1.0" encoding="utf8"?>
+<!--
+% 20180619
+% taken and converted from https://github.com/hyphenation/tex-hyphen/blob/master/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-ga.tex
+-->
+<HyphenationDescription>
+<pattern> ab4ai</pattern>
+<pattern> ab6ar</pattern>
+<pattern> ab5r</pattern>
+<pattern> ac6ad</pattern>
+<pattern> ach6ar</pattern>
+<pattern> ad6aim</pattern>
+<pattern> ad6am</pattern>
+<pattern> ae5n</pattern>
+<pattern> ag6ar</pattern>
+<pattern> agh4a</pattern>
+<pattern> ag4ó</pattern>
+<pattern> ag5r</pattern>
+<pattern> ag6úi</pattern>
+<pattern> ai6c5</pattern>
+<pattern> ail6te</pattern>
+<pattern> ain3g4</pattern>
+<pattern> ain6te </pattern>
+<pattern> ain6t5ín</pattern>
+<pattern> air6ní</pattern>
+<pattern> ais3</pattern>
+<pattern> aist4</pattern>
+<pattern> ais6te </pattern>
+<pattern> aí4</pattern>
+<pattern> ala5m6</pattern>
+<pattern> al5g6</pattern>
+<pattern> allag6</pattern>
+<pattern> alm4ó</pattern>
+<pattern> al2t5a</pattern>
+<pattern> al6t5á</pattern>
+<pattern> am6ac</pattern>
+<pattern> am6á</pattern>
+<pattern> an2a</pattern>
+<pattern> ana5c</pattern>
+<pattern> anach6</pattern>
+<pattern> an2á</pattern>
+<pattern> anc6</pattern>
+<pattern> an6dór</pattern>
+<pattern> an6dr</pattern>
+<pattern> an6fa</pattern>
+<pattern> ang4l</pattern>
+<pattern> an6i</pattern>
+<pattern> an6lain</pattern>
+<pattern> an6lan</pattern>
+<pattern> an6ó</pattern>
+<pattern> an6rai</pattern>
+<pattern> an6sa</pattern>
+<pattern> an2ta</pattern>
+<pattern> ar2</pattern>
+<pattern> aral4</pattern>
+<pattern> aralt3</pattern>
+<pattern> ara5m6</pattern>
+<pattern> ara5s6</pattern>
+<pattern> ard5</pattern>
+<pattern> aró5</pattern>
+<pattern> aróc6</pattern>
+<pattern> art4</pattern>
+<pattern> as6ail</pattern>
+<pattern> as6aim5</pattern>
+<pattern> as6al </pattern>
+<pattern> as6am</pattern>
+<pattern> asa5m6a</pattern>
+<pattern> asc6ar</pattern>
+<pattern> as6ó</pattern>
+<pattern> as6pa </pattern>
+<pattern> as2t</pattern>
+<pattern> ast5ai</pattern>
+<pattern> ast5aí</pattern>
+<pattern> ast3ó</pattern>
+<pattern> as6tú</pattern>
+<pattern> as4ú</pattern>
+<pattern> ata6</pattern>
+<pattern> at5ar </pattern>
+<pattern> at6á</pattern>
+<pattern> áil6te </pattern>
+<pattern> áil6t5ea</pattern>
+<pattern> áir5ge</pattern>
+<pattern> áir5gí</pattern>
+<pattern> áir6s</pattern>
+<pattern> ál6t</pattern>
+<pattern> ár2a</pattern>
+<pattern> ár6m</pattern>
+<pattern> ba6d</pattern>
+<pattern> bad3á</pattern>
+<pattern> bal6b</pattern>
+<pattern> beo5f</pattern>
+<pattern> beo5g</pattern>
+<pattern> beo5id</pattern>
+<pattern> beo5im</pattern>
+<pattern> bh4</pattern>
+<pattern> bhá5ite </pattern>
+<pattern> bhá5ití</pattern>
+<pattern> bheo5f</pattern>
+<pattern> bheo5id</pattern>
+<pattern> bheo5im</pattern>
+<pattern> bheo5in</pattern>
+<pattern> bhí5dís</pattern>
+<pattern> bhí5mis</pattern>
+<pattern> bhí5oda</pattern>
+<pattern> bhí5omar</pattern>
+<pattern> bhí5teá</pattern>
+<pattern> bhí5tí</pattern>
+<pattern> bhlí3</pattern>
+<pattern> bhreo5f</pattern>
+<pattern> bhreo5id</pattern>
+<pattern> bhreo5im</pattern>
+<pattern> bhreo5in</pattern>
+<pattern> bhrí3o</pattern>
+<pattern> blí3</pattern>
+<pattern> breo5f</pattern>
+<pattern> breo5id</pattern>
+<pattern> breo5im</pattern>
+<pattern> brí3o</pattern>
+<pattern> ca4</pattern>
+<pattern> cach5</pattern>
+<pattern> cacht6</pattern>
+<pattern> cad5á</pattern>
+<pattern> caí5d</pattern>
+<pattern> caí5gí</pattern>
+<pattern> caí5m</pattern>
+<pattern> caí5o</pattern>
+<pattern> car6t5ar</pattern>
+<pattern> ch4</pattern>
+<pattern> cha4</pattern>
+<pattern> chach5</pattern>
+<pattern> chad5á</pattern>
+<pattern> chaí5d</pattern>
+<pattern> chaí5gí</pattern>
+<pattern> chaí5m</pattern>
+<pattern> chaí5o</pattern>
+<pattern> chaí5teá</pattern>
+<pattern> chaí5tí</pattern>
+<pattern> chan5á</pattern>
+<pattern> char6t5ar</pattern>
+<pattern> char6tá</pattern>
+<pattern> chár5ta </pattern>
+<pattern> cheil6te </pattern>
+<pattern> chí6</pattern>
+<pattern> chló5f</pattern>
+<pattern> chló5id</pattern>
+<pattern> chló5im</pattern>
+<pattern> chló5inn</pattern>
+<pattern> chnaí3</pattern>
+<pattern> chnó5</pattern>
+<pattern> chóis5</pattern>
+<pattern> ci6</pattern>
+<pattern> cil6</pattern>
+<pattern> cí6</pattern>
+<pattern> cli6</pattern>
+<pattern> clip5</pattern>
+<pattern> cló5f</pattern>
+<pattern> cló5id</pattern>
+<pattern> cló5im</pattern>
+<pattern> cnaí3</pattern>
+<pattern> cnó5</pattern>
+<pattern> da6</pattern>
+<pattern> dh2</pattern>
+<pattern> dhlí5d</pattern>
+<pattern> dhlí5g</pattern>
+<pattern> dhlí5m</pattern>
+<pattern> dhlí3o</pattern>
+<pattern> dhó5ite </pattern>
+<pattern> dhó5ití</pattern>
+<pattern> dhreach5</pattern>
+<pattern> dhreacht6</pattern>
+<pattern> dhreo5f</pattern>
+<pattern> dhreo5id</pattern>
+<pattern> dhreo5im</pattern>
+<pattern> dhreo5in</pattern>
+<pattern> dlí5d</pattern>
+<pattern> dlí5g</pattern>
+<pattern> dlí5m</pattern>
+<pattern> dlí5o</pattern>
+<pattern> dó5f</pattern>
+<pattern> dó5idí</pattern>
+<pattern> dó5im</pattern>
+<pattern> dó5ite </pattern>
+<pattern> dó5ití</pattern>
+<pattern> dreach5</pattern>
+<pattern> dreo5f</pattern>
+<pattern> dreo5id</pattern>
+<pattern> dreo5im</pattern>
+<pattern> ead1</pattern>
+<pattern> ea6g3</pattern>
+<pattern> eal4t3</pattern>
+<pattern> earb5</pattern>
+<pattern> eas3tó</pattern>
+<pattern> ei6</pattern>
+<pattern> eisc3e</pattern>
+<pattern> eis4il</pattern>
+<pattern> éa6b</pattern>
+<pattern> éad6ar</pattern>
+<pattern> éa3g6ó</pattern>
+<pattern> éar5</pattern>
+<pattern> éart6</pattern>
+<pattern> éi5d6r</pattern>
+<pattern> éi5gear</pattern>
+<pattern> éim5í</pattern>
+<pattern> fa6</pattern>
+<pattern> fach3</pattern>
+<pattern> feo5f</pattern>
+<pattern> feo5idí</pattern>
+<pattern> feo5im</pattern>
+<pattern> fhrioch5</pattern>
+<pattern> fhua6fair</pattern>
+<pattern> fhua6fara</pattern>
+<pattern> fhua5im </pattern>
+<pattern> fí5dí</pattern>
+<pattern> fí5g</pattern>
+<pattern> fí5m</pattern>
+<pattern> fí5odh</pattern>
+<pattern> fí5onn</pattern>
+<pattern> geal6t5aí</pattern>
+<pattern> geat5</pattern>
+<pattern> gh2</pattern>
+<pattern> ghair5t</pattern>
+<pattern> ghlae3</pattern>
+<pattern> ghrá6n</pattern>
+<pattern> góf5</pattern>
+<pattern> ha4</pattern>
+<pattern> hab6ai</pattern>
+<pattern> hab6ar</pattern>
+<pattern> hac6ad</pattern>
+<pattern> hag6ar</pattern>
+<pattern> hag4ó</pattern>
+<pattern> hail6te</pattern>
+<pattern> hain3g</pattern>
+<pattern> hain3t</pattern>
+<pattern> hain6te </pattern>
+<pattern> hair6ní</pattern>
+<pattern> hais5ce</pattern>
+<pattern> hais5tea</pattern>
+<pattern> hais5t6eo</pattern>
+<pattern> haist6i</pattern>
+<pattern> hais5tig</pattern>
+<pattern> haí4</pattern>
+<pattern> hala5m6</pattern>
+<pattern> halm4ó</pattern>
+<pattern> hal4t3a</pattern>
+<pattern> hal6t5á</pattern>
+<pattern> han2a</pattern>
+<pattern> hana5c</pattern>
+<pattern> hanc6</pattern>
+<pattern> han6fa</pattern>
+<pattern> hang4l</pattern>
+<pattern> han6ó</pattern>
+<pattern> han4ta</pattern>
+<pattern> har2a</pattern>
+<pattern> har6á</pattern>
+<pattern> har6ó5</pattern>
+<pattern> haróc6</pattern>
+<pattern> hart6</pattern>
+<pattern> has6ai</pattern>
+<pattern> has6al </pattern>
+<pattern> has6am</pattern>
+<pattern> has4ta</pattern>
+<pattern> hat6á</pattern>
+<pattern> há6</pattern>
+<pattern> háil6te </pattern>
+<pattern> háil6t5ea</pattern>
+<pattern> háir5ge</pattern>
+<pattern> háir5gí</pattern>
+<pattern> háir6s</pattern>
+<pattern> hál6t</pattern>
+<pattern> hár4a</pattern>
+<pattern> hár6m</pattern>
+<pattern> head3</pattern>
+<pattern> heal4t3</pattern>
+<pattern> heis6il</pattern>
+<pattern> héad6ar</pattern>
+<pattern> héa3g6ó</pattern>
+<pattern> héid4e</pattern>
+<pattern> héi5dea</pattern>
+<pattern> hib6é</pattern>
+<pattern> him6ire</pattern>
+<pattern> hios5</pattern>
+<pattern> hiosc6</pattern>
+<pattern> hir4</pattern>
+<pattern> his4</pattern>
+<pattern> hist3</pattern>
+<pattern> hit6eo</pattern>
+<pattern> hit6r</pattern>
+<pattern> hí2</pattern>
+<pattern> híl3</pattern>
+<pattern> híoch5</pattern>
+<pattern> híocht6</pattern>
+<pattern> hoc4r</pattern>
+<pattern> hod6</pattern>
+<pattern> hogh6</pattern>
+<pattern> hoir6n5i</pattern>
+<pattern> hol6ac</pattern>
+<pattern> hom2</pattern>
+<pattern> hor5m</pattern>
+<pattern> hort4</pattern>
+<pattern> hó6</pattern>
+<pattern> hua4f</pattern>
+<pattern> huaf5a</pattern>
+<pattern> huil4e</pattern>
+<pattern> húd4</pattern>
+<pattern> ia5it</pattern>
+<pattern> iat6</pattern>
+<pattern> ib6é</pattern>
+<pattern> ibh5</pattern>
+<pattern> id2</pattern>
+<pattern> il3</pattern>
+<pattern> im6ire</pattern>
+<pattern> in6d5ia</pattern>
+<pattern> in6id</pattern>
+<pattern> in6ín</pattern>
+<pattern> in4ío</pattern>
+<pattern> in6ír</pattern>
+<pattern> in6ste </pattern>
+<pattern> int6e</pattern>
+<pattern> iomáin5</pattern>
+<pattern> ios3</pattern>
+<pattern> iosc6</pattern>
+<pattern> iost4</pattern>
+<pattern> ir4</pattern>
+<pattern> is4</pattern>
+<pattern> ist6</pattern>
+<pattern> it6</pattern>
+<pattern> íl3</pattern>
+<pattern> ío6</pattern>
+<pattern> íoch5</pattern>
+<pattern> íocht6</pattern>
+<pattern> íos5</pattern>
+<pattern> la4</pattern>
+<pattern> lach6t5</pattern>
+<pattern> lad5a</pattern>
+<pattern> lag5á</pattern>
+<pattern> lait5</pattern>
+<pattern> lan5c</pattern>
+<pattern> lao5n</pattern>
+<pattern> lá5ití</pattern>
+<pattern> leab3ó</pattern>
+<pattern> lea6m</pattern>
+<pattern> leas5</pattern>
+<pattern> leat6aí</pattern>
+<pattern> leo3c</pattern>
+<pattern> leoch4</pattern>
+<pattern> lé5ann </pattern>
+<pattern> lé5igí</pattern>
+<pattern> li6</pattern>
+<pattern> lib5é</pattern>
+<pattern> lim5</pattern>
+<pattern> lint6</pattern>
+<pattern> lip5</pattern>
+<pattern> lí5d</pattern>
+<pattern> lí5g</pattern>
+<pattern> lí5mi</pattern>
+<pattern> lí5od</pattern>
+<pattern> lí5omar</pattern>
+<pattern> lí5onn</pattern>
+<pattern> lí6t</pattern>
+<pattern> lít5i</pattern>
+<pattern> lú2</pattern>
+<pattern> mad5a</pattern>
+<pattern> mair5tí </pattern>
+<pattern> maí5d</pattern>
+<pattern> maí5gí</pattern>
+<pattern> maí5mi</pattern>
+<pattern> maí5od</pattern>
+<pattern> maí5oma</pattern>
+<pattern> maí5on</pattern>
+<pattern> maí5teá</pattern>
+<pattern> maí5tí</pattern>
+<pattern> mam5</pattern>
+<pattern> man2t</pattern>
+<pattern> ma6r</pattern>
+<pattern> mar6l5</pattern>
+<pattern> mar6s5ac</pattern>
+<pattern> mar6s5ai</pattern>
+<pattern> mar5ta</pattern>
+<pattern> mar5ú</pattern>
+<pattern> ma6t</pattern>
+<pattern> mat3á</pattern>
+<pattern> mead5a</pattern>
+<pattern> meat5á</pattern>
+<pattern> mh2</pattern>
+<pattern> mhad5a</pattern>
+<pattern> mhais6te </pattern>
+<pattern> mhais6tí </pattern>
+<pattern> mhaí5d</pattern>
+<pattern> mhaí5gí</pattern>
+<pattern> mhaí5mi</pattern>
+<pattern> mhaí5od</pattern>
+<pattern> mhaí5oma</pattern>
+<pattern> mhaí5on</pattern>
+<pattern> mhaí5te </pattern>
+<pattern> mhaí5teá</pattern>
+<pattern> mhaí5tí</pattern>
+<pattern> mhan4t3</pattern>
+<pattern> mhar6l5</pattern>
+<pattern> mhar6sa </pattern>
+<pattern> mhion6t5a</pattern>
+<pattern> mhí6oc</pattern>
+<pattern> mhú6</pattern>
+<pattern> mhúch5</pattern>
+<pattern> mí6oc</pattern>
+<pattern> mí5st</pattern>
+<pattern> nair5</pattern>
+<pattern> nais5</pattern>
+<pattern> naí3</pattern>
+<pattern> naío5l6</pattern>
+<pattern> nar5</pattern>
+<pattern> nd6</pattern>
+<pattern> ndó5f</pattern>
+<pattern> ndó5idí</pattern>
+<pattern> ndó5im</pattern>
+<pattern> ndó5in</pattern>
+<pattern> neach6</pattern>
+<pattern> neacht5</pattern>
+<pattern> neá6</pattern>
+<pattern> neád5</pattern>
+<pattern> ng4</pattern>
+<pattern> ngóf5</pattern>
+<pattern> nit6</pattern>
+<pattern> ní5d</pattern>
+<pattern> ní5gí</pattern>
+<pattern> ní5m</pattern>
+<pattern> ní6oc</pattern>
+<pattern> ní5od</pattern>
+<pattern> ní5om</pattern>
+<pattern> ní5on</pattern>
+<pattern> nom6</pattern>
+<pattern> och6t5</pattern>
+<pattern> oc4r</pattern>
+<pattern> od6</pattern>
+<pattern> ogh6</pattern>
+<pattern> oilt6</pattern>
+<pattern> oir4n3e</pattern>
+<pattern> oir6n5i</pattern>
+<pattern> oir6ní</pattern>
+<pattern> oir5t</pattern>
+<pattern> ol6ac</pattern>
+<pattern> om6a</pattern>
+<pattern> or6ai</pattern>
+<pattern> ort4</pattern>
+<pattern> or6thu</pattern>
+<pattern> os6ló </pattern>
+<pattern> ost5a</pattern>
+<pattern> óp6</pattern>
+<pattern> ór4á</pattern>
+<pattern> phor5t6r</pattern>
+<pattern> pist6</pattern>
+<pattern> ra4</pattern>
+<pattern> rad5a</pattern>
+<pattern> rad5ó</pattern>
+<pattern> raf6t5</pattern>
+<pattern> rai6</pattern>
+<pattern> rat5á</pattern>
+<pattern> rá6</pattern>
+<pattern> reas5</pattern>
+<pattern> reo5f</pattern>
+<pattern> reo5id</pattern>
+<pattern> reo5im</pattern>
+<pattern> reo5in</pattern>
+<pattern> réim5i</pattern>
+<pattern> rí5dí</pattern>
+<pattern> rí5gí</pattern>
+<pattern> rí5mi</pattern>
+<pattern> rí6ocha</pattern>
+<pattern> rí5od</pattern>
+<pattern> rí5oma</pattern>
+<pattern> rí5onn</pattern>
+<pattern> rób5a</pattern>
+<pattern> ró5c</pattern>
+<pattern> róch6</pattern>
+<pattern> róst5</pattern>
+<pattern> rua5im </pattern>
+<pattern> rúm5</pattern>
+<pattern> sa6l</pattern>
+<pattern> sal5a</pattern>
+<pattern> sá5ití</pattern>
+<pattern> sc6</pattern>
+<pattern> sca6</pattern>
+<pattern> scad5á</pattern>
+<pattern> scar5</pattern>
+<pattern> scart6</pattern>
+<pattern> searbh5</pattern>
+<pattern> séa5l6ain</pattern>
+<pattern> shá5inn </pattern>
+<pattern> si4</pattern>
+<pattern> sim3</pattern>
+<pattern> siún4</pattern>
+<pattern> siúnt3</pattern>
+<pattern> sí4o</pattern>
+<pattern> slios5</pattern>
+<pattern> sm4</pattern>
+<pattern> sní5d</pattern>
+<pattern> sní5g</pattern>
+<pattern> sní5m</pattern>
+<pattern> sní5od</pattern>
+<pattern> sní5oma</pattern>
+<pattern> sní5on</pattern>
+<pattern> só5f</pattern>
+<pattern> só5idí</pattern>
+<pattern> só5im</pattern>
+<pattern> só5inn</pattern>
+<pattern> spléach5</pattern>
+<pattern> st4</pattern>
+<pattern> steam5</pattern>
+<pattern> ta6</pattern>
+<pattern> tach6t5</pattern>
+<pattern> tan5g</pattern>
+<pattern> tap5</pattern>
+<pattern> tar5ta</pattern>
+<pattern> téit5e</pattern>
+<pattern> th2</pattern>
+<pattern> théit5ea</pattern>
+<pattern> thrá5ití</pattern>
+<pattern> thróf5</pattern>
+<pattern> ti6</pattern>
+<pattern> tróf5</pattern>
+<pattern> tsí6o</pattern>
+<pattern> tua5im</pattern>
+<pattern> ua4f</pattern>
+<pattern> uaf5a</pattern>
+<pattern> ua6i</pattern>
+<pattern> uas6ala</pattern>
+<pattern> uil2e</pattern>
+<pattern> uir6t</pattern>
+<pattern> uirthi5</pattern>
+<pattern> un6s5</pattern>
+<pattern> ur5b</pattern>
+<pattern> ur3n4</pattern>
+<pattern> úd2</pattern>
+<pattern> úm5</pattern>
+<pattern> úr6ái</pattern>
+<pattern>ab1a</pattern>
+<pattern>abac6</pattern>
+<pattern>aba5ca</pattern>
+<pattern>aba5dá</pattern>
+<pattern>ab4airt</pattern>
+<pattern>a3b4al</pattern>
+<pattern>ab4art</pattern>
+<pattern>ab1á</pattern>
+<pattern>ab3d</pattern>
+<pattern>abh1</pattern>
+<pattern>abh6aile</pattern>
+<pattern>a3bh6e</pattern>
+<pattern>abh6ór</pattern>
+<pattern>abh6re</pattern>
+<pattern>abh2t</pattern>
+<pattern>a5bi</pattern>
+<pattern>ab1l</pattern>
+<pattern>a5bó </pattern>
+<pattern>ab3óig</pattern>
+<pattern>a5bón</pattern>
+<pattern>a1br</pattern>
+<pattern>ab3rad6</pattern>
+<pattern>abra3da</pattern>
+<pattern>a5bu</pattern>
+<pattern>ab1ú</pattern>
+<pattern>ac1a</pattern>
+<pattern>ac4adú</pattern>
+<pattern>acae6</pattern>
+<pattern>ac4aoi</pattern>
+<pattern>ac6ard</pattern>
+<pattern>aca1s4</pattern>
+<pattern>ac4astó</pattern>
+<pattern>aca3t4ú</pattern>
+<pattern>a3cáid</pattern>
+<pattern>acár5</pattern>
+<pattern>ac5é</pattern>
+<pattern>ach1a</pattern>
+<pattern>a4cha </pattern>
+<pattern>acha6d5á</pattern>
+<pattern>achar5</pattern>
+<pattern>ach4arf</pattern>
+<pattern>acharn6</pattern>
+<pattern>achart6</pattern>
+<pattern>ach1á</pattern>
+<pattern>6achár</pattern>
+<pattern>6a3che</pattern>
+<pattern>ach3í</pattern>
+<pattern>4ach1l</pattern>
+<pattern>a6chli</pattern>
+<pattern>ach3óg</pattern>
+<pattern>ach5ór</pattern>
+<pattern>ach1r</pattern>
+<pattern>6achri</pattern>
+<pattern>ach1ú</pattern>
+<pattern>ac1l</pattern>
+<pattern>3acm</pattern>
+<pattern>ac1n</pattern>
+<pattern>ac1ó</pattern>
+<pattern>ac1ra</pattern>
+<pattern>acra3f</pattern>
+<pattern>ac4ras</pattern>
+<pattern>ac3ré</pattern>
+<pattern>a5cró</pattern>
+<pattern>ac5ua</pattern>
+<pattern>ac5ú</pattern>
+<pattern>adag6</pattern>
+<pattern>ad1al</pattern>
+<pattern>ad1am</pattern>
+<pattern>4adamh</pattern>
+<pattern>ada5n6ó</pattern>
+<pattern>ad3ara</pattern>
+<pattern>ad3arl</pattern>
+<pattern>ad5art</pattern>
+<pattern>ad5áil</pattern>
+<pattern>ad5ás</pattern>
+<pattern>4adc</pattern>
+<pattern>adh1</pattern>
+<pattern>adhb1</pattern>
+<pattern>a3dhi</pattern>
+<pattern>4adhro</pattern>
+<pattern>a5dhú</pattern>
+<pattern>ad3i</pattern>
+<pattern>4ad3l</pattern>
+<pattern>4a3d4o</pattern>
+<pattern>a1dó</pattern>
+<pattern>a4d3ód</pattern>
+<pattern>a2dóf</pattern>
+<pattern>a2d3óid</pattern>
+<pattern>a4d3óig</pattern>
+<pattern>a2d3óim</pattern>
+<pattern>a4d3óinn</pattern>
+<pattern>ad1r</pattern>
+<pattern>ad3rog</pattern>
+<pattern>ad3u</pattern>
+<pattern>ad1ú</pattern>
+<pattern>a3d4úr</pattern>
+<pattern>ae3a</pattern>
+<pattern>ae1á</pattern>
+<pattern>aeil3</pattern>
+<pattern>aeilg4</pattern>
+<pattern>aeilí5te</pattern>
+<pattern>af1</pattern>
+<pattern>afa3dá</pattern>
+<pattern>af5air</pattern>
+<pattern>af5art</pattern>
+<pattern>afáil3</pattern>
+<pattern>afáilt6</pattern>
+<pattern>afhol6</pattern>
+<pattern>afholt5</pattern>
+<pattern>a3f6l</pattern>
+<pattern>a3fo</pattern>
+<pattern>a3fóib</pattern>
+<pattern>a3fóin</pattern>
+<pattern>a1f2ón</pattern>
+<pattern>af6rá</pattern>
+<pattern>af6ú</pattern>
+<pattern>agad3á</pattern>
+<pattern>agair5n6</pattern>
+<pattern>ag2al</pattern>
+<pattern>ag5áis</pattern>
+<pattern>ag3e</pattern>
+<pattern>ag3é</pattern>
+<pattern>agh1</pattern>
+<pattern>agh4aid</pattern>
+<pattern>agh5an</pattern>
+<pattern>a5ghi</pattern>
+<pattern>ag3i</pattern>
+<pattern>ag1l</pattern>
+<pattern>a3go</pattern>
+<pattern>a3graim</pattern>
+<pattern>a3gram</pattern>
+<pattern>a6g5re</pattern>
+<pattern>ag3ri</pattern>
+<pattern>ag5rui</pattern>
+<pattern>ag3rú</pattern>
+<pattern>ag3ua</pattern>
+<pattern>ag3ú</pattern>
+<pattern>a1h</pattern>
+<pattern>ah6a</pattern>
+<pattern>aich6t</pattern>
+<pattern>ai5ciú</pattern>
+<pattern>aic5r</pattern>
+<pattern>6aidear</pattern>
+<pattern>4aidhl</pattern>
+<pattern>aid1i</pattern>
+<pattern>aidít5</pattern>
+<pattern>ai3fil</pattern>
+<pattern>ai3gin</pattern>
+<pattern>6aigis</pattern>
+<pattern>ail5bhí</pattern>
+<pattern>ailc3ea</pattern>
+<pattern>ailp3i</pattern>
+<pattern>ailp3ín</pattern>
+<pattern>ailt2</pattern>
+<pattern>a6imh</pattern>
+<pattern>4ai3mia</pattern>
+<pattern>aim3ise</pattern>
+<pattern>ain5í</pattern>
+<pattern>ains5eo</pattern>
+<pattern>ain6tean</pattern>
+<pattern>ain5té</pattern>
+<pattern>air6bh3r</pattern>
+<pattern>airb4í</pattern>
+<pattern>air4b5r</pattern>
+<pattern>air4dé</pattern>
+<pattern>airf5ean</pattern>
+<pattern>air6f5in </pattern>
+<pattern>airf3í</pattern>
+<pattern>air4fín</pattern>
+<pattern>4airisc</pattern>
+<pattern>airis6t</pattern>
+<pattern>air5nín</pattern>
+<pattern>air5nío</pattern>
+<pattern>air4t5éis</pattern>
+<pattern>6aisei</pattern>
+<pattern>aisi3n4é</pattern>
+<pattern>ai5s6íl</pattern>
+<pattern>4aisp</pattern>
+<pattern>ais5teog</pattern>
+<pattern>ais6ti5s</pattern>
+<pattern>ais5t6ín </pattern>
+<pattern>4aitei</pattern>
+<pattern>ai5t6il</pattern>
+<pattern>aits3e</pattern>
+<pattern>4aivi</pattern>
+<pattern>aí2c</pattern>
+<pattern>4aíní</pattern>
+<pattern>aí3o3dó</pattern>
+<pattern>aío5l6an</pattern>
+<pattern>aí3onna</pattern>
+<pattern>aí5ói</pattern>
+<pattern>al1a</pattern>
+<pattern>ala3b</pattern>
+<pattern>alabh4</pattern>
+<pattern>al4ainne</pattern>
+<pattern>alait4</pattern>
+<pattern>al3aí</pattern>
+<pattern>alan4a</pattern>
+<pattern>alan5d</pattern>
+<pattern>al2ann</pattern>
+<pattern>alas3</pattern>
+<pattern>alasc6</pattern>
+<pattern>4al4ath</pattern>
+<pattern>al1á</pattern>
+<pattern>a3láib</pattern>
+<pattern>6alám</pattern>
+<pattern>a3lár</pattern>
+<pattern>al1có</pattern>
+<pattern>6al5e</pattern>
+<pattern>al4f3air</pattern>
+<pattern>al3gó</pattern>
+<pattern>al3i</pattern>
+<pattern>a3lí</pattern>
+<pattern>a6ll</pattern>
+<pattern>al5o</pattern>
+<pattern>al1ó</pattern>
+<pattern>2alr</pattern>
+<pattern>a6lt</pattern>
+<pattern>alt3e</pattern>
+<pattern>al6t5ód</pattern>
+<pattern>al4tóf</pattern>
+<pattern>al6t5óid</pattern>
+<pattern>al6t5óim</pattern>
+<pattern>al6t5óin</pattern>
+<pattern>al6tú</pattern>
+<pattern>al3ui</pattern>
+<pattern>al3ú</pattern>
+<pattern>alú3ch4</pattern>
+<pattern>ama3b</pattern>
+<pattern>ama3d4ú</pattern>
+<pattern>am1al</pattern>
+<pattern>am5all</pattern>
+<pattern>am1an</pattern>
+<pattern>am3ara</pattern>
+<pattern>ama3raí</pattern>
+<pattern>a6mas</pattern>
+<pattern>ama5só</pattern>
+<pattern>4amál</pattern>
+<pattern>am4ána</pattern>
+<pattern>4amb</pattern>
+<pattern>amh1</pattern>
+<pattern>amh5ad</pattern>
+<pattern>amhais6t</pattern>
+<pattern>a3mhas</pattern>
+<pattern>a1mo</pattern>
+<pattern>am5óna</pattern>
+<pattern>6amp</pattern>
+<pattern>amp1a</pattern>
+<pattern>amp1á</pattern>
+<pattern>am4pr</pattern>
+<pattern>4amt</pattern>
+<pattern>am5ut</pattern>
+<pattern>am3úi</pattern>
+<pattern>am5úr</pattern>
+<pattern>anac4</pattern>
+<pattern>ana3ca</pattern>
+<pattern>an6ag</pattern>
+<pattern>6anaige</pattern>
+<pattern>anaist4</pattern>
+<pattern>an3ait</pattern>
+<pattern>an5aí</pattern>
+<pattern>ana5l6ó</pattern>
+<pattern>ana5m6ó</pattern>
+<pattern>ana5r6a</pattern>
+<pattern>anat6</pattern>
+<pattern>an1á</pattern>
+<pattern>an5áis</pattern>
+<pattern>a5n6áise</pattern>
+<pattern>an5ár</pattern>
+<pattern>6anb</pattern>
+<pattern>anc1a</pattern>
+<pattern>anc4aire</pattern>
+<pattern>an5cé5</pattern>
+<pattern>an2d3á</pattern>
+<pattern>andí6</pattern>
+<pattern>andíb5</pattern>
+<pattern>and3o</pattern>
+<pattern>an3dr</pattern>
+<pattern>6andu</pattern>
+<pattern>an3e</pattern>
+<pattern>an6ea</pattern>
+<pattern>an3é</pattern>
+<pattern>ang1</pattern>
+<pattern>ang3a</pattern>
+<pattern>anga3rú</pattern>
+<pattern>ang3á</pattern>
+<pattern>an5gó </pattern>
+<pattern>anin5</pattern>
+<pattern>an4ma</pattern>
+<pattern>ann5</pattern>
+<pattern>6anná</pattern>
+<pattern>an3oi</pattern>
+<pattern>an5oí</pattern>
+<pattern>an1ó</pattern>
+<pattern>anód4</pattern>
+<pattern>anó3dó</pattern>
+<pattern>an4san</pattern>
+<pattern>an6sin</pattern>
+<pattern>an6tu</pattern>
+<pattern>an3u</pattern>
+<pattern>anuas6</pattern>
+<pattern>an1ú</pattern>
+<pattern>aoch3</pattern>
+<pattern>aocht6</pattern>
+<pattern>6aod</pattern>
+<pattern>ao5dar</pattern>
+<pattern>ao5idís</pattern>
+<pattern>ao5im </pattern>
+<pattern>ao3imi</pattern>
+<pattern>aoin6s</pattern>
+<pattern>aoin3t2</pattern>
+<pattern>ao4l1</pattern>
+<pattern>ao5mar</pattern>
+<pattern>aon3u</pattern>
+<pattern>ao6r1</pattern>
+<pattern>aorg4</pattern>
+<pattern>aort4</pattern>
+<pattern>aos3t</pattern>
+<pattern>ap1</pattern>
+<pattern>apa5dá</pattern>
+<pattern>a3p4ait</pattern>
+<pattern>aplais6</pattern>
+<pattern>ar1a</pattern>
+<pattern>ara3bú</pattern>
+<pattern>ar6ac </pattern>
+<pattern>ara3c6á</pattern>
+<pattern>arach6t5</pattern>
+<pattern>ara5có</pattern>
+<pattern>ara3g4a</pattern>
+<pattern>araic6í</pattern>
+<pattern>ara5l4á</pattern>
+<pattern>ara3p4</pattern>
+<pattern>ar5as </pattern>
+<pattern>ara5só</pattern>
+<pattern>ara3tó</pattern>
+<pattern>ar1á</pattern>
+<pattern>arbh3a</pattern>
+<pattern>ar3bhe</pattern>
+<pattern>arch6</pattern>
+<pattern>arc1ó</pattern>
+<pattern>ar1cr</pattern>
+<pattern>ar1e</pattern>
+<pattern>ar2f1ó</pattern>
+<pattern>ar3i</pattern>
+<pattern>arm4ó</pattern>
+<pattern>a5ro</pattern>
+<pattern>ar1ó</pattern>
+<pattern>aróc6ar</pattern>
+<pattern>ar5ón</pattern>
+<pattern>ar5óp</pattern>
+<pattern>ar1p</pattern>
+<pattern>ar4p3ó</pattern>
+<pattern>ar4s3ál</pattern>
+<pattern>ar6sta</pattern>
+<pattern>ar3u</pattern>
+<pattern>ar3úil</pattern>
+<pattern>ar5úl</pattern>
+<pattern>ar3úp</pattern>
+<pattern>ar5ú5s6</pattern>
+<pattern>a5rút</pattern>
+<pattern>asa5c6a</pattern>
+<pattern>a3s4ae</pattern>
+<pattern>asain4</pattern>
+<pattern>as5aí</pattern>
+<pattern>as6alait</pattern>
+<pattern>asal2t</pattern>
+<pattern>asa5mait</pattern>
+<pattern>as6arb</pattern>
+<pattern>asc1</pattern>
+<pattern>ascar5</pattern>
+<pattern>as5cara</pattern>
+<pattern>ascart6</pattern>
+<pattern>as3co</pattern>
+<pattern>4ascr</pattern>
+<pattern>4as3e</pattern>
+<pattern>as3é</pattern>
+<pattern>as3i</pattern>
+<pattern>as3í</pattern>
+<pattern>2asl</pattern>
+<pattern>as1o</pattern>
+<pattern>as1ó</pattern>
+<pattern>as6óil</pattern>
+<pattern>a3s4ól</pattern>
+<pattern>as1ta</pattern>
+<pattern>as6t5ais</pattern>
+<pattern>ast4aí </pattern>
+<pattern>ast3al</pattern>
+<pattern>asta5r6ó</pattern>
+<pattern>as6tas</pattern>
+<pattern>as3tán </pattern>
+<pattern>as5té</pattern>
+<pattern>as3ti</pattern>
+<pattern>as5to</pattern>
+<pattern>a4stó</pattern>
+<pattern>as5tór</pattern>
+<pattern>as5tua</pattern>
+<pattern>as3tú</pattern>
+<pattern>as1u</pattern>
+<pattern>as1ú</pattern>
+<pattern>asúd6</pattern>
+<pattern>asú3it</pattern>
+<pattern>asú5m</pattern>
+<pattern>at1a</pattern>
+<pattern>atac6</pattern>
+<pattern>ata5cá</pattern>
+<pattern>atad5án</pattern>
+<pattern>at4agr</pattern>
+<pattern>a5t6aint</pattern>
+<pattern>at5a1l2</pattern>
+<pattern>ata3m</pattern>
+<pattern>atam4á</pattern>
+<pattern>a3t4ant</pattern>
+<pattern>ata3p4</pattern>
+<pattern>at5arn</pattern>
+<pattern>at3as</pattern>
+<pattern>atá6i</pattern>
+<pattern>a5tár</pattern>
+<pattern>atá5t</pattern>
+<pattern>atáth6</pattern>
+<pattern>até3</pattern>
+<pattern>atéad6</pattern>
+<pattern>ath1</pattern>
+<pattern>athrí5d</pattern>
+<pattern>athrí5gí</pattern>
+<pattern>athrí5m</pattern>
+<pattern>athrí5o</pattern>
+<pattern>ath6us</pattern>
+<pattern>at5ód</pattern>
+<pattern>a6tóg</pattern>
+<pattern>at3óid</pattern>
+<pattern>at3óig</pattern>
+<pattern>at3óim</pattern>
+<pattern>at5rap</pattern>
+<pattern>at1rá</pattern>
+<pattern>a6tro</pattern>
+<pattern>ats5a</pattern>
+<pattern>at6sar</pattern>
+<pattern>at1u</pattern>
+<pattern>at4ui</pattern>
+<pattern>at1ú</pattern>
+<pattern>a5vó</pattern>
+<pattern>áb3a</pattern>
+<pattern>áb4al</pattern>
+<pattern>áb1á</pattern>
+<pattern>ábh1</pattern>
+<pattern>ábht6</pattern>
+<pattern>áb1l</pattern>
+<pattern>á5bo</pattern>
+<pattern>áb3ó</pattern>
+<pattern>áb3ú</pattern>
+<pattern>ác1a</pattern>
+<pattern>ácar5</pattern>
+<pattern>ácarn6</pattern>
+<pattern>ách5á</pattern>
+<pattern>ách5e</pattern>
+<pattern>ách5i</pattern>
+<pattern>ách3l</pattern>
+<pattern>ách5r</pattern>
+<pattern>ách4t3</pattern>
+<pattern>ác3l</pattern>
+<pattern>ác3r</pattern>
+<pattern>ác3ú</pattern>
+<pattern>ád1</pattern>
+<pattern>á3d4ar</pattern>
+<pattern>ádh3a</pattern>
+<pattern>ádh5ú</pattern>
+<pattern>á1fa</pattern>
+<pattern>á4fa </pattern>
+<pattern>á6f3ac</pattern>
+<pattern>áf5air</pattern>
+<pattern>áf5ara</pattern>
+<pattern>á3fá</pattern>
+<pattern>áf3l</pattern>
+<pattern>áf1r</pattern>
+<pattern>ága5dá</pattern>
+<pattern>á3gó</pattern>
+<pattern>ág3r</pattern>
+<pattern>ág5u</pattern>
+<pattern>á5há</pattern>
+<pattern>áib5é</pattern>
+<pattern>áid1</pattern>
+<pattern>á3idís</pattern>
+<pattern>á3igí</pattern>
+<pattern>áil5b</pattern>
+<pattern>áil3c6</pattern>
+<pattern>áilt6eá</pattern>
+<pattern>áilt3i</pattern>
+<pattern>ái6m</pattern>
+<pattern>á3im </pattern>
+<pattern>áim5é</pattern>
+<pattern>á6imh</pattern>
+<pattern>á1imi</pattern>
+<pattern>á6im5ise</pattern>
+<pattern>6áinia</pattern>
+<pattern>áins4</pattern>
+<pattern>áin3te</pattern>
+<pattern>áin4teo</pattern>
+<pattern>6áip</pattern>
+<pattern>4áir4g3</pattern>
+<pattern>áirt3</pattern>
+<pattern>áisc1</pattern>
+<pattern>áist3e</pattern>
+<pattern>áist3i</pattern>
+<pattern>áis5t6íní</pattern>
+<pattern>á3itear</pattern>
+<pattern>áit3é</pattern>
+<pattern>áit3s</pattern>
+<pattern>á5íre</pattern>
+<pattern>ál1</pattern>
+<pattern>álc6</pattern>
+<pattern>ál4s3</pattern>
+<pattern>ám3an</pattern>
+<pattern>á3mar</pattern>
+<pattern>ám3at</pattern>
+<pattern>ámh1</pattern>
+<pattern>án1</pattern>
+<pattern>án6ga</pattern>
+<pattern>á3nna</pattern>
+<pattern>ánt4</pattern>
+<pattern>áp1</pattern>
+<pattern>ár1</pattern>
+<pattern>árach3</pattern>
+<pattern>ár5aim</pattern>
+<pattern>ár5am</pattern>
+<pattern>ár6ca</pattern>
+<pattern>á5r6é</pattern>
+<pattern>4árn2</pattern>
+<pattern>á3rol</pattern>
+<pattern>ár4ta</pattern>
+<pattern>árt6ai</pattern>
+<pattern>árt6an</pattern>
+<pattern>árt6r</pattern>
+<pattern>ás3a</pattern>
+<pattern>ásc3</pattern>
+<pattern>ás5c6á</pattern>
+<pattern>ás5e</pattern>
+<pattern>ás3í</pattern>
+<pattern>ás1ó</pattern>
+<pattern>ás1t4a</pattern>
+<pattern>ás3tú</pattern>
+<pattern>ás3u</pattern>
+<pattern>ás3ú</pattern>
+<pattern>át3a</pattern>
+<pattern>át1á</pattern>
+<pattern>áth1</pattern>
+<pattern>á3th4e</pattern>
+<pattern>át1ó</pattern>
+<pattern>át3r</pattern>
+<pattern>á5úl</pattern>
+<pattern>ba5cas</pattern>
+<pattern>4bacá</pattern>
+<pattern>bac6s5</pattern>
+<pattern>b5adar</pattern>
+<pattern>ba3dái</pattern>
+<pattern>b3aidí</pattern>
+<pattern>b3aig</pattern>
+<pattern>b3aim</pattern>
+<pattern>bain5t4</pattern>
+<pattern>baisc5e</pattern>
+<pattern>baist3</pattern>
+<pattern>bait3é</pattern>
+<pattern>b6aití</pattern>
+<pattern>b1aí</pattern>
+<pattern>balbh5á</pattern>
+<pattern>bamb6</pattern>
+<pattern>banais3</pattern>
+<pattern>ban3d4</pattern>
+<pattern>bar3b</pattern>
+<pattern>bar1n2</pattern>
+<pattern>b4arr</pattern>
+<pattern>bar3ú</pattern>
+<pattern>ba5s6áir</pattern>
+<pattern>ba5s6ár</pattern>
+<pattern>bas5c6ar6</pattern>
+<pattern>bascarn5</pattern>
+<pattern>bat5a</pattern>
+<pattern>bá5inn</pattern>
+<pattern>bá5ite </pattern>
+<pattern>bá5iteá</pattern>
+<pattern>bá5ití</pattern>
+<pattern>bá5í6</pattern>
+<pattern>b1ál</pattern>
+<pattern>b4ált</pattern>
+<pattern>bár4</pattern>
+<pattern>bárth5</pattern>
+<pattern>b1c</pattern>
+<pattern>bc4á</pattern>
+<pattern>b5da</pattern>
+<pattern>b5dé</pattern>
+<pattern>b3dh</pattern>
+<pattern>3beab</pattern>
+<pattern>bea5bh6</pattern>
+<pattern>bea6c</pattern>
+<pattern>beal5t6</pattern>
+<pattern>bear3bó</pattern>
+<pattern>b1eá</pattern>
+<pattern>b6eár</pattern>
+<pattern>5b4ei</pattern>
+<pattern>beif6</pattern>
+<pattern>beil6t</pattern>
+<pattern>beir5f</pattern>
+<pattern>beir5tí</pattern>
+<pattern>beo3c</pattern>
+<pattern>beoch4</pattern>
+<pattern>beo5itea</pattern>
+<pattern>beo5m</pattern>
+<pattern>3béit</pattern>
+<pattern>b1f</pattern>
+<pattern>b3gh</pattern>
+<pattern>6bh </pattern>
+<pattern>b4ha</pattern>
+<pattern>bha6d3á</pattern>
+<pattern>bha3g4á</pattern>
+<pattern>bh3aig</pattern>
+<pattern>bhain3t4</pattern>
+<pattern>bhaist3</pattern>
+<pattern>bhal6b</pattern>
+<pattern>bhalbh5</pattern>
+<pattern>bhar3b</pattern>
+<pattern>bhar3t4</pattern>
+<pattern>bhat5a</pattern>
+<pattern>bhá5inn</pattern>
+<pattern>bhá5iteá</pattern>
+<pattern>bhár6</pattern>
+<pattern>bhárth5</pattern>
+<pattern>bhc6á</pattern>
+<pattern>b4he</pattern>
+<pattern>4bhe </pattern>
+<pattern>bh5eam</pattern>
+<pattern>3bh4ear</pattern>
+<pattern>2bh1eá</pattern>
+<pattern>bheif6</pattern>
+<pattern>bheil6t</pattern>
+<pattern>bheir5f</pattern>
+<pattern>bheir5tí</pattern>
+<pattern>bheo3c</pattern>
+<pattern>bheoch4</pattern>
+<pattern>bheo5g</pattern>
+<pattern>bhéal5</pattern>
+<pattern>bhéalt6</pattern>
+<pattern>bhé5ann</pattern>
+<pattern>bhia5ta </pattern>
+<pattern>bhia5tac</pattern>
+<pattern>3bh4id</pattern>
+<pattern>bh3im</pattern>
+<pattern>bhin6s3e</pattern>
+<pattern>bhin6sí</pattern>
+<pattern>bhin6t5e</pattern>
+<pattern>bhion5gó</pattern>
+<pattern>bhios5</pattern>
+<pattern>3bh4irt</pattern>
+<pattern>6bh3iú</pattern>
+<pattern>4bhíg</pattern>
+<pattern>4bh3ím</pattern>
+<pattern>bh3ín</pattern>
+<pattern>4bhío</pattern>
+<pattern>bhí5ot</pattern>
+<pattern>4bhít</pattern>
+<pattern>bhí6th</pattern>
+<pattern>3bh4las</pattern>
+<pattern>bhlá6</pattern>
+<pattern>bhláf5</pattern>
+<pattern>bhlead5</pattern>
+<pattern>1bho</pattern>
+<pattern>bhol6ta </pattern>
+<pattern>bhol6t5aí</pattern>
+<pattern>bhol6tá</pattern>
+<pattern>bh1ó</pattern>
+<pattern>bhói5s6</pattern>
+<pattern>bhó5l6ac</pattern>
+<pattern>bhran6d5</pattern>
+<pattern>6bhre </pattern>
+<pattern>bh6réa</pattern>
+<pattern>bh6ric</pattern>
+<pattern>bhrí3oc</pattern>
+<pattern>bhrío5mh4</pattern>
+<pattern>4bhs</pattern>
+<pattern>bh5tí</pattern>
+<pattern>1bhu</pattern>
+<pattern>bh4ua</pattern>
+<pattern>bhua5da</pattern>
+<pattern>bhua5im</pattern>
+<pattern>bhua5ite </pattern>
+<pattern>bhual5</pattern>
+<pattern>4bhuit</pattern>
+<pattern>bh3uith</pattern>
+<pattern>bhurd5á</pattern>
+<pattern>bhur2l3</pattern>
+<pattern>bhust5</pattern>
+<pattern>bhúir5</pattern>
+<pattern>bhúis5</pattern>
+<pattern>bhúm5</pattern>
+<pattern>bia3l</pattern>
+<pattern>bia5ta </pattern>
+<pattern>bia5t6ac</pattern>
+<pattern>bia5t6aig</pattern>
+<pattern>bia5t6aí</pattern>
+<pattern>b1id</pattern>
+<pattern>bid5i</pattern>
+<pattern>bin4</pattern>
+<pattern>bi3né</pattern>
+<pattern>bin5i</pattern>
+<pattern>bins3</pattern>
+<pattern>bint3</pattern>
+<pattern>bion5gó</pattern>
+<pattern>bios5</pattern>
+<pattern>biosc6</pattern>
+<pattern>6b1ir</pattern>
+<pattern>6bis3</pattern>
+<pattern>bist4</pattern>
+<pattern>bit5s</pattern>
+<pattern>bí3c</pattern>
+<pattern>b1ín</pattern>
+<pattern>b1ít</pattern>
+<pattern>bít5eac</pattern>
+<pattern>bí6th5</pattern>
+<pattern>bí6tig</pattern>
+<pattern>blad5a</pattern>
+<pattern>bla3gr</pattern>
+<pattern>blas3</pattern>
+<pattern>blá4</pattern>
+<pattern>bláf3</pattern>
+<pattern>blead5</pattern>
+<pattern>bl6i</pattern>
+<pattern>blim6</pattern>
+<pattern>b1lí</pattern>
+<pattern>b1ló</pattern>
+<pattern>bn6i</pattern>
+<pattern>b3ní</pattern>
+<pattern>bod3ó</pattern>
+<pattern>bol4s</pattern>
+<pattern>bol6ta </pattern>
+<pattern>bol6t5aí</pattern>
+<pattern>bol4tá</pattern>
+<pattern>bord3</pattern>
+<pattern>bos5t6</pattern>
+<pattern>b1óg</pattern>
+<pattern>b3óid</pattern>
+<pattern>bó5l6ac</pattern>
+<pattern>bó6s5</pattern>
+<pattern>bóth5</pattern>
+<pattern>bp6á</pattern>
+<pattern>bp6i</pattern>
+<pattern>bpist6</pattern>
+<pattern>b5po</pattern>
+<pattern>brad5á</pattern>
+<pattern>bran6d5</pattern>
+<pattern>bran3g4</pattern>
+<pattern>brat5ó</pattern>
+<pattern>bré6</pattern>
+<pattern>b1rí</pattern>
+<pattern>brío3mh4</pattern>
+<pattern>b1s2</pattern>
+<pattern>b1t</pattern>
+<pattern>bth6</pattern>
+<pattern>bua5da</pattern>
+<pattern>bua3im</pattern>
+<pattern>buair3</pattern>
+<pattern>bua5ite </pattern>
+<pattern>bua5itear</pattern>
+<pattern>buin6t</pattern>
+<pattern>bun1</pattern>
+<pattern>bur2</pattern>
+<pattern>burd3</pattern>
+<pattern>burl1</pattern>
+<pattern>bust5</pattern>
+<pattern>3búid</pattern>
+<pattern>búir5</pattern>
+<pattern>búis5</pattern>
+<pattern>búm3</pattern>
+<pattern>cab5al</pattern>
+<pattern>c1ac</pattern>
+<pattern>c1ad</pattern>
+<pattern>ca3dá</pattern>
+<pattern>cae4d3</pattern>
+<pattern>caib5é</pattern>
+<pattern>caidh5ne</pattern>
+<pattern>cai5m4é</pattern>
+<pattern>cain6d</pattern>
+<pattern>cain2t3</pattern>
+<pattern>cair6b</pattern>
+<pattern>cairbh5</pattern>
+<pattern>cair6d5í</pattern>
+<pattern>cair6t5e</pattern>
+<pattern>c2aisn</pattern>
+<pattern>cais3t6</pattern>
+<pattern>cait3é</pattern>
+<pattern>c1aí</pattern>
+<pattern>cal5an</pattern>
+<pattern>calbh3a</pattern>
+<pattern>cal4m</pattern>
+<pattern>ca3mán</pattern>
+<pattern>can5c6</pattern>
+<pattern>can5s6</pattern>
+<pattern>can3t2</pattern>
+<pattern>5caod</pattern>
+<pattern>c6ara</pattern>
+<pattern>3c4ar1b</pattern>
+<pattern>carbh4</pattern>
+<pattern>card3</pattern>
+<pattern>c4arl</pattern>
+<pattern>carn5á</pattern>
+<pattern>c4ars</pattern>
+<pattern>c6arta</pattern>
+<pattern>cart6ac</pattern>
+<pattern>car3ú</pattern>
+<pattern>cas1</pattern>
+<pattern>cast6</pattern>
+<pattern>cas5tó</pattern>
+<pattern>cat5a</pattern>
+<pattern>cat3ó</pattern>
+<pattern>c1á</pattern>
+<pattern>5c6ác</pattern>
+<pattern>cá4f3</pattern>
+<pattern>cá6i</pattern>
+<pattern>c2áid</pattern>
+<pattern>cáin6t5eac</pattern>
+<pattern>cáin6ti</pattern>
+<pattern>c6ánn</pattern>
+<pattern>cár5ta </pattern>
+<pattern>c2át</pattern>
+<pattern>c3bh6</pattern>
+<pattern>c3dh</pattern>
+<pattern>2ce</pattern>
+<pattern>cea6b</pattern>
+<pattern>c3eab5a</pattern>
+<pattern>6cead</pattern>
+<pattern>cead5as</pattern>
+<pattern>c3eadá</pattern>
+<pattern>5c6eai</pattern>
+<pattern>3ceana</pattern>
+<pattern>5ceanó</pattern>
+<pattern>cean4tá</pattern>
+<pattern>cear3b</pattern>
+<pattern>cearbh4</pattern>
+<pattern>3ceasm</pattern>
+<pattern>ceas6t</pattern>
+<pattern>ceast5a</pattern>
+<pattern>cea3stá</pattern>
+<pattern>ceast5ó</pattern>
+<pattern>cea3sú</pattern>
+<pattern>c1eá</pattern>
+<pattern>5ceá </pattern>
+<pattern>ceá6f5</pattern>
+<pattern>ceá3n4</pattern>
+<pattern>3c4eána</pattern>
+<pattern>c4ei</pattern>
+<pattern>ceil4t</pattern>
+<pattern>ceir5m4</pattern>
+<pattern>ceit6s</pattern>
+<pattern>ceo3m</pattern>
+<pattern>ce3r4</pattern>
+<pattern>céal5</pattern>
+<pattern>céalt6</pattern>
+<pattern>5céas</pattern>
+<pattern>céa3tá</pattern>
+<pattern>céi6</pattern>
+<pattern>c6éit</pattern>
+<pattern>2c1f</pattern>
+<pattern>c3gh</pattern>
+<pattern>c2h</pattern>
+<pattern>4ch </pattern>
+<pattern>6ch5acha</pattern>
+<pattern>chacht6</pattern>
+<pattern>ch1ad</pattern>
+<pattern>chaint3</pattern>
+<pattern>chair6d5</pattern>
+<pattern>chais5t6</pattern>
+<pattern>5ch6aite</pattern>
+<pattern>ch5al </pattern>
+<pattern>chal4m</pattern>
+<pattern>5champ</pattern>
+<pattern>chan5c6</pattern>
+<pattern>ch4antó</pattern>
+<pattern>char3b</pattern>
+<pattern>charbh6</pattern>
+<pattern>ch3arf</pattern>
+<pattern>charn5</pattern>
+<pattern>ch1as1</pattern>
+<pattern>chast4</pattern>
+<pattern>chat5a</pattern>
+<pattern>chat5ó</pattern>
+<pattern>chá6</pattern>
+<pattern>ch3áir</pattern>
+<pattern>ch1ál</pattern>
+<pattern>ch1án</pattern>
+<pattern>5chár</pattern>
+<pattern>2che </pattern>
+<pattern>chear3b</pattern>
+<pattern>chearbh6</pattern>
+<pattern>cheas6t5</pattern>
+<pattern>cheá6</pattern>
+<pattern>cheáf5</pattern>
+<pattern>cheir5m6</pattern>
+<pattern>3ché</pattern>
+<pattern>ch1f</pattern>
+<pattern>chia6</pattern>
+<pattern>chil6</pattern>
+<pattern>chin5t</pattern>
+<pattern>chíl5</pattern>
+<pattern>ch4lasa</pattern>
+<pattern>chlas6p5</pattern>
+<pattern>ch4lár</pattern>
+<pattern>chlé6i</pattern>
+<pattern>3ch4lo</pattern>
+<pattern>chloch5</pattern>
+<pattern>chlocht6</pattern>
+<pattern>chlód6</pattern>
+<pattern>ch1m2</pattern>
+<pattern>ch3nú</pattern>
+<pattern>3c4ho</pattern>
+<pattern>ch5oba</pattern>
+<pattern>choirn6</pattern>
+<pattern>cho4m</pattern>
+<pattern>chomh3</pattern>
+<pattern>chona5m</pattern>
+<pattern>chon3c</pattern>
+<pattern>chon5g</pattern>
+<pattern>chorb5</pattern>
+<pattern>chorn5</pattern>
+<pattern>chor6p3</pattern>
+<pattern>chor5t6</pattern>
+<pattern>5chó </pattern>
+<pattern>5chóc</pattern>
+<pattern>5chóda</pattern>
+<pattern>ch3ódh</pattern>
+<pattern>ch3óg </pattern>
+<pattern>ch3óig</pattern>
+<pattern>3chóip</pattern>
+<pattern>chó1m</pattern>
+<pattern>5chórai</pattern>
+<pattern>5chóras</pattern>
+<pattern>3chót</pattern>
+<pattern>5ch6raic</pattern>
+<pattern>3ch6rao</pattern>
+<pattern>3chrap</pattern>
+<pattern>chrá5inn</pattern>
+<pattern>chrá5ití</pattern>
+<pattern>3ch4re</pattern>
+<pattern>chreach5</pattern>
+<pattern>chreacht6</pattern>
+<pattern>chri6</pattern>
+<pattern>3chrio</pattern>
+<pattern>ch6rit</pattern>
+<pattern>ch4rí6</pattern>
+<pattern>chríoch5</pattern>
+<pattern>1chro</pattern>
+<pattern>chros3</pattern>
+<pattern>chrost6</pattern>
+<pattern>chrua5im</pattern>
+<pattern>4cht</pattern>
+<pattern>1chu</pattern>
+<pattern>chua6</pattern>
+<pattern>chuacht6</pattern>
+<pattern>chuil5c</pattern>
+<pattern>chuil6t</pattern>
+<pattern>chul5</pattern>
+<pattern>chulc6</pattern>
+<pattern>chur6l5</pattern>
+<pattern>chus3</pattern>
+<pattern>c6hú</pattern>
+<pattern>chú6i</pattern>
+<pattern>chúl5</pattern>
+<pattern>ch3ús</pattern>
+<pattern>cia6f5</pattern>
+<pattern>c3iam </pattern>
+<pattern>cid5i</pattern>
+<pattern>c1idí</pattern>
+<pattern>c3igh</pattern>
+<pattern>c1igí</pattern>
+<pattern>c4illi</pattern>
+<pattern>ci3mé</pattern>
+<pattern>cim6p5íní</pattern>
+<pattern>cin4d</pattern>
+<pattern>cineach5</pattern>
+<pattern>cineacht6</pattern>
+<pattern>3cint</pattern>
+<pattern>3cion</pattern>
+<pattern>3cip</pattern>
+<pattern>ci6p5é</pattern>
+<pattern>ci3p4l</pattern>
+<pattern>3cirt</pattern>
+<pattern>cis5tear</pattern>
+<pattern>cis5teá</pattern>
+<pattern>cis3t6in</pattern>
+<pattern>c3iú </pattern>
+<pattern>c3iúl</pattern>
+<pattern>ci5v</pattern>
+<pattern>2cí </pattern>
+<pattern>cíl5</pattern>
+<pattern>c1ím</pattern>
+<pattern>2c1ín</pattern>
+<pattern>3cír</pattern>
+<pattern>cít6</pattern>
+<pattern>3c4ít </pattern>
+<pattern>3c4íte </pattern>
+<pattern>cí6th</pattern>
+<pattern>cla4</pattern>
+<pattern>clad5á</pattern>
+<pattern>clad3ó</pattern>
+<pattern>clas6p5</pattern>
+<pattern>cleach6t5</pattern>
+<pattern>cleat5a</pattern>
+<pattern>clé6i</pattern>
+<pattern>clim5</pattern>
+<pattern>2clo</pattern>
+<pattern>cloch5</pattern>
+<pattern>clocht6</pattern>
+<pattern>clód4</pattern>
+<pattern>cló3dó</pattern>
+<pattern>cló5im </pattern>
+<pattern>cló5ití</pattern>
+<pattern>4clu</pattern>
+<pattern>c1m2</pattern>
+<pattern>2cn2</pattern>
+<pattern>cna6</pattern>
+<pattern>cnag5</pattern>
+<pattern>cneá5c</pattern>
+<pattern>c2o</pattern>
+<pattern>cod3</pattern>
+<pattern>cof5</pattern>
+<pattern>coil4t3</pattern>
+<pattern>coirn4</pattern>
+<pattern>co4m</pattern>
+<pattern>comh3</pattern>
+<pattern>cona6c</pattern>
+<pattern>cona3m</pattern>
+<pattern>con3c</pattern>
+<pattern>con5g</pattern>
+<pattern>coran4</pattern>
+<pattern>corant3</pattern>
+<pattern>corb3</pattern>
+<pattern>corn3</pattern>
+<pattern>cor6p1</pattern>
+<pattern>cor3t4</pattern>
+<pattern>5cos</pattern>
+<pattern>cosc3</pattern>
+<pattern>c6óc</pattern>
+<pattern>4c1óf</pattern>
+<pattern>c4óip</pattern>
+<pattern>cóis3</pattern>
+<pattern>cóist4</pattern>
+<pattern>3c4ó1m</pattern>
+<pattern>có4ma</pattern>
+<pattern>3cón</pattern>
+<pattern>6cóp</pattern>
+<pattern>cór5</pattern>
+<pattern>5c6ót3</pattern>
+<pattern>c1p</pattern>
+<pattern>c3ra </pattern>
+<pattern>crag5</pattern>
+<pattern>crai3l4</pattern>
+<pattern>crais4</pattern>
+<pattern>craist5</pattern>
+<pattern>c4rat</pattern>
+<pattern>crá5inn</pattern>
+<pattern>crá5ití</pattern>
+<pattern>c2re</pattern>
+<pattern>crea6b</pattern>
+<pattern>creab5a</pattern>
+<pattern>creach5</pattern>
+<pattern>creacht6</pattern>
+<pattern>crea5sc</pattern>
+<pattern>c5reá</pattern>
+<pattern>créal3</pattern>
+<pattern>créalt4</pattern>
+<pattern>cri5b</pattern>
+<pattern>c5ril</pattern>
+<pattern>cri6t</pattern>
+<pattern>crit5é</pattern>
+<pattern>criú5i</pattern>
+<pattern>crí6</pattern>
+<pattern>críoch5</pattern>
+<pattern>croch3</pattern>
+<pattern>crocht4</pattern>
+<pattern>cros3</pattern>
+<pattern>crost4</pattern>
+<pattern>cruacht6</pattern>
+<pattern>crua5im</pattern>
+<pattern>crua5itea</pattern>
+<pattern>crú5ití</pattern>
+<pattern>c6se </pattern>
+<pattern>csea5g6</pattern>
+<pattern>c6s5eal</pattern>
+<pattern>c4sic</pattern>
+<pattern>csi5d</pattern>
+<pattern>c4sig</pattern>
+<pattern>c6s5il</pattern>
+<pattern>cs4im</pattern>
+<pattern>cs5is</pattern>
+<pattern>c4s3ít</pattern>
+<pattern>c3s4m</pattern>
+<pattern>cs3ó</pattern>
+<pattern>c3st4</pattern>
+<pattern>c6s5tar</pattern>
+<pattern>cs3ú</pattern>
+<pattern>2c1t</pattern>
+<pattern>c6te </pattern>
+<pattern>c4t3eac</pattern>
+<pattern>c6t5ean</pattern>
+<pattern>c6teái</pattern>
+<pattern>c6t5eár</pattern>
+<pattern>ct4eo</pattern>
+<pattern>cth4</pattern>
+<pattern>ct6iú</pattern>
+<pattern>ct4ío</pattern>
+<pattern>cuacht6</pattern>
+<pattern>cuach5taí</pattern>
+<pattern>cua6m</pattern>
+<pattern>cuil3</pattern>
+<pattern>cuilc6</pattern>
+<pattern>cuil6t</pattern>
+<pattern>cul3</pattern>
+<pattern>culc4</pattern>
+<pattern>cul6t5ai</pattern>
+<pattern>cur6l5</pattern>
+<pattern>cus3</pattern>
+<pattern>cú6i</pattern>
+<pattern>cúl5</pattern>
+<pattern>c3úla </pattern>
+<pattern>c4ún</pattern>
+<pattern>3cúr</pattern>
+<pattern>da6b</pattern>
+<pattern>dab5a</pattern>
+<pattern>d1ac</pattern>
+<pattern>da5c6ac</pattern>
+<pattern>da5c6aí</pattern>
+<pattern>3d4acs</pattern>
+<pattern>d1ad</pattern>
+<pattern>dae5</pattern>
+<pattern>d3a3g</pattern>
+<pattern>dagas5c6</pattern>
+<pattern>d1ai</pattern>
+<pattern>dai3ghn</pattern>
+<pattern>5d6aine</pattern>
+<pattern>3d4aing</pattern>
+<pattern>dai5p</pattern>
+<pattern>3d4air4b</pattern>
+<pattern>dairbh5</pattern>
+<pattern>3d4airi</pattern>
+<pattern>dair4n</pattern>
+<pattern>d1aí</pattern>
+<pattern>dalbh5</pattern>
+<pattern>6da3l4ú</pattern>
+<pattern>d1an</pattern>
+<pattern>4dann</pattern>
+<pattern>dar1</pattern>
+<pattern>da3r4ao</pattern>
+<pattern>d4ará</pattern>
+<pattern>dar6d</pattern>
+<pattern>darg4</pattern>
+<pattern>darn4</pattern>
+<pattern>d3ars</pattern>
+<pattern>dar5t4</pattern>
+<pattern>da3st</pattern>
+<pattern>3d4at</pattern>
+<pattern>d6ád</pattern>
+<pattern>3dáid</pattern>
+<pattern>d5áis</pattern>
+<pattern>d4áit</pattern>
+<pattern>d1ál</pattern>
+<pattern>dár5</pattern>
+<pattern>dára5s</pattern>
+<pattern>dárt6</pattern>
+<pattern>dá3th</pattern>
+<pattern>d1b</pattern>
+<pattern>dbhin4</pattern>
+<pattern>d1c</pattern>
+<pattern>4d3ead</pattern>
+<pattern>6deag3</pattern>
+<pattern>d5eagó</pattern>
+<pattern>deal5a</pattern>
+<pattern>6deam</pattern>
+<pattern>d6eand</pattern>
+<pattern>4deann</pattern>
+<pattern>5d6eannai</pattern>
+<pattern>5d6eannas</pattern>
+<pattern>5d6earb6</pattern>
+<pattern>dear5ba</pattern>
+<pattern>dearbh5</pattern>
+<pattern>dear5t6</pattern>
+<pattern>deat3</pattern>
+<pattern>deá4</pattern>
+<pattern>deáth3</pattern>
+<pattern>deilbh5</pattern>
+<pattern>deil6te </pattern>
+<pattern>3d4eir</pattern>
+<pattern>d6em</pattern>
+<pattern>d1eo</pattern>
+<pattern>4deoir</pattern>
+<pattern>4deor</pattern>
+<pattern>déam5</pattern>
+<pattern>déidlia5</pattern>
+<pattern>d4éim</pattern>
+<pattern>2d1f</pattern>
+<pattern>d1g</pattern>
+<pattern>d2h</pattern>
+<pattern>6dh </pattern>
+<pattern>dh4ao</pattern>
+<pattern>dhar3t4</pattern>
+<pattern>dhas5</pattern>
+<pattern>dhasc6</pattern>
+<pattern>1dhá</pattern>
+<pattern>dh2b</pattern>
+<pattern>dh6c5a</pattern>
+<pattern>dh4cá</pattern>
+<pattern>dh4ci</pattern>
+<pattern>dhearb6</pattern>
+<pattern>dhear5ba</pattern>
+<pattern>dhearbh5</pattern>
+<pattern>dhear5t6</pattern>
+<pattern>dheá6</pattern>
+<pattern>dheilbh5</pattern>
+<pattern>dheil6te </pattern>
+<pattern>3d6hé</pattern>
+<pattern>dh5f</pattern>
+<pattern>dhia5f</pattern>
+<pattern>dhint5</pattern>
+<pattern>dhip5</pattern>
+<pattern>dhí4o</pattern>
+<pattern>dhí3ré</pattern>
+<pattern>dh6l5ean</pattern>
+<pattern>dhlío5dó</pattern>
+<pattern>dh4n3e</pattern>
+<pattern>dh5nu</pattern>
+<pattern>dh5nú</pattern>
+<pattern>3dho</pattern>
+<pattern>dhob4</pattern>
+<pattern>dho5chaid</pattern>
+<pattern>dho5che</pattern>
+<pattern>dho5dh</pattern>
+<pattern>dho5ghl</pattern>
+<pattern>dhoir4n5</pattern>
+<pattern>dhor2</pattern>
+<pattern>dho5ré</pattern>
+<pattern>dhorn5</pattern>
+<pattern>dhosc6a</pattern>
+<pattern>dhos5caí</pattern>
+<pattern>dho5s6m</pattern>
+<pattern>dho5thr</pattern>
+<pattern>dho5thu</pattern>
+<pattern>dhó3f</pattern>
+<pattern>dhó5idí</pattern>
+<pattern>dhó3im</pattern>
+<pattern>dhó5in</pattern>
+<pattern>3dh4ro</pattern>
+<pattern>dhró5l6</pattern>
+<pattern>dh2s3á</pattern>
+<pattern>dh6te</pattern>
+<pattern>3dhu</pattern>
+<pattern>dhual5</pattern>
+<pattern>dhua5m</pattern>
+<pattern>dhuamh6</pattern>
+<pattern>dhur1</pattern>
+<pattern>dhurd4</pattern>
+<pattern>dhú5lé</pattern>
+<pattern>dhú5rú</pattern>
+<pattern>dhú3s</pattern>
+<pattern>dia5f6</pattern>
+<pattern>6d5iam </pattern>
+<pattern>dia3mh</pattern>
+<pattern>4dib</pattern>
+<pattern>dic4</pattern>
+<pattern>dic5e</pattern>
+<pattern>3dict</pattern>
+<pattern>d5idh</pattern>
+<pattern>d3idí</pattern>
+<pattern>d1ig</pattern>
+<pattern>di5lé</pattern>
+<pattern>d1im</pattern>
+<pattern>4din</pattern>
+<pattern>d3iné</pattern>
+<pattern>di3n4éi</pattern>
+<pattern>din6t5</pattern>
+<pattern>5dip</pattern>
+<pattern>dist5</pattern>
+<pattern>d1it</pattern>
+<pattern>dí1gh</pattern>
+<pattern>dí3le</pattern>
+<pattern>dí4lea</pattern>
+<pattern>d1ím</pattern>
+<pattern>dí2o</pattern>
+<pattern>dí3ré</pattern>
+<pattern>d2ís</pattern>
+<pattern>d1ít</pattern>
+<pattern>dí6the</pattern>
+<pattern>dít6i</pattern>
+<pattern>dív3</pattern>
+<pattern>d1la</pattern>
+<pattern>d4l3ad</pattern>
+<pattern>dlam5pa </pattern>
+<pattern>d3lan</pattern>
+<pattern>5d6lá</pattern>
+<pattern>d1lé</pattern>
+<pattern>dlí3b</pattern>
+<pattern>dlío3dó</pattern>
+<pattern>d3ló</pattern>
+<pattern>3d4lú</pattern>
+<pattern>d1m</pattern>
+<pattern>dman4</pattern>
+<pattern>dmh2</pattern>
+<pattern>dm6i</pattern>
+<pattern>d1n</pattern>
+<pattern>dn4i</pattern>
+<pattern>dob4</pattern>
+<pattern>do3br</pattern>
+<pattern>do5chaid</pattern>
+<pattern>do5che</pattern>
+<pattern>doch6t5a</pattern>
+<pattern>doch6tá</pattern>
+<pattern>do3dh</pattern>
+<pattern>do3ghl</pattern>
+<pattern>d3oif</pattern>
+<pattern>doilbh3</pattern>
+<pattern>5doir</pattern>
+<pattern>doir4n3</pattern>
+<pattern>do5lag</pattern>
+<pattern>do5le</pattern>
+<pattern>do3mhi</pattern>
+<pattern>do5mho</pattern>
+<pattern>do5mhú</pattern>
+<pattern>3dor</pattern>
+<pattern>dor2c</pattern>
+<pattern>dorch3</pattern>
+<pattern>dord3</pattern>
+<pattern>do5r6é</pattern>
+<pattern>do5ri</pattern>
+<pattern>dor6n3</pattern>
+<pattern>dosc4a</pattern>
+<pattern>dos3caí</pattern>
+<pattern>do5s6m</pattern>
+<pattern>do3t</pattern>
+<pattern>doth4</pattern>
+<pattern>do6th5a</pattern>
+<pattern>3dó </pattern>
+<pattern>3d4óc</pattern>
+<pattern>d1óf</pattern>
+<pattern>2d1óg</pattern>
+<pattern>5d6óic</pattern>
+<pattern>5d6óigh</pattern>
+<pattern>dó5im </pattern>
+<pattern>2d3óirs</pattern>
+<pattern>5dóiv</pattern>
+<pattern>dó5m6</pattern>
+<pattern>3dónn</pattern>
+<pattern>6d5ós</pattern>
+<pattern>dóth3</pattern>
+<pattern>6draim</pattern>
+<pattern>dra5n6ó</pattern>
+<pattern>d1rá</pattern>
+<pattern>d3reá</pattern>
+<pattern>dreo5it</pattern>
+<pattern>3d4reor</pattern>
+<pattern>d1rí</pattern>
+<pattern>3d2ro</pattern>
+<pattern>4drog</pattern>
+<pattern>3dróc</pattern>
+<pattern>dró3l4</pattern>
+<pattern>3dróm</pattern>
+<pattern>3d4ru</pattern>
+<pattern>dr4ú</pattern>
+<pattern>d1s</pattern>
+<pattern>ds4a</pattern>
+<pattern>ds6r</pattern>
+<pattern>d1t2</pattern>
+<pattern>dta6</pattern>
+<pattern>dtach6t5</pattern>
+<pattern>dtaist5</pattern>
+<pattern>dtan5g</pattern>
+<pattern>dtap5</pattern>
+<pattern>dtéit5ea</pattern>
+<pattern>dt6i6</pattern>
+<pattern>dtrá5ití</pattern>
+<pattern>dtróf5</pattern>
+<pattern>dtua5im</pattern>
+<pattern>dual5</pattern>
+<pattern>dua3m</pattern>
+<pattern>duamh4</pattern>
+<pattern>duar5t</pattern>
+<pattern>3d4uc</pattern>
+<pattern>duch6</pattern>
+<pattern>ducht5</pattern>
+<pattern>d1uit</pattern>
+<pattern>3d4ul</pattern>
+<pattern>dun6s5</pattern>
+<pattern>dur1</pattern>
+<pattern>durd2</pattern>
+<pattern>dú3bh</pattern>
+<pattern>dú3l4é</pattern>
+<pattern>dú5rú</pattern>
+<pattern>dú3sc</pattern>
+<pattern>d3ve</pattern>
+<pattern>eabh5t6</pattern>
+<pattern>ea5car</pattern>
+<pattern>each3ó</pattern>
+<pattern>ea5c6ló</pattern>
+<pattern>ea5co</pattern>
+<pattern>ea5có </pattern>
+<pattern>ead1á</pattern>
+<pattern>ea6dh</pattern>
+<pattern>ea4d3óin</pattern>
+<pattern>eaft5</pattern>
+<pattern>ea4g3a</pattern>
+<pattern>ea3g4ál</pattern>
+<pattern>eagh2d3</pattern>
+<pattern>6eagm</pattern>
+<pattern>eag3ó</pattern>
+<pattern>eain5</pattern>
+<pattern>eais6t3</pattern>
+<pattern>ealbh5ac</pattern>
+<pattern>eal6p5</pattern>
+<pattern>eal4t3ac</pattern>
+<pattern>eal6t5aig</pattern>
+<pattern>ealt3á</pattern>
+<pattern>eal6tái</pattern>
+<pattern>eal6tán</pattern>
+<pattern>eam5ait</pattern>
+<pattern>eamar4</pattern>
+<pattern>eama3ra</pattern>
+<pattern>ea3mat</pattern>
+<pattern>6eamá</pattern>
+<pattern>eam4p3ló</pattern>
+<pattern>ean3d4</pattern>
+<pattern>ean6táil</pattern>
+<pattern>6eanú</pattern>
+<pattern>earai5c</pattern>
+<pattern>earb3á</pattern>
+<pattern>ear3f4</pattern>
+<pattern>ear1m2</pattern>
+<pattern>earn3</pattern>
+<pattern>6earta </pattern>
+<pattern>ea3rúi</pattern>
+<pattern>eas3a</pattern>
+<pattern>ea3s4áir</pattern>
+<pattern>6eash</pattern>
+<pattern>4easm</pattern>
+<pattern>ea3s2tr</pattern>
+<pattern>4easú</pattern>
+<pattern>ea4tá </pattern>
+<pattern>ea5táir</pattern>
+<pattern>2eá </pattern>
+<pattern>eá5g</pattern>
+<pattern>4eáib</pattern>
+<pattern>eá3id</pattern>
+<pattern>eá1im</pattern>
+<pattern>eá3inn</pattern>
+<pattern>5eáis</pattern>
+<pattern>eá3it</pattern>
+<pattern>eáit4e</pattern>
+<pattern>eáit6i</pattern>
+<pattern>4eám</pattern>
+<pattern>eá1t</pattern>
+<pattern>eáth2</pattern>
+<pattern>e3bh</pattern>
+<pattern>e1c</pattern>
+<pattern>e1d</pattern>
+<pattern>e1f</pattern>
+<pattern>e1g</pattern>
+<pattern>eg6í</pattern>
+<pattern>eib3é</pattern>
+<pattern>ei6bh5</pattern>
+<pattern>ei4c</pattern>
+<pattern>eic4si</pattern>
+<pattern>eic6s5í</pattern>
+<pattern>4eid</pattern>
+<pattern>eidh5n6</pattern>
+<pattern>eidh5t6</pattern>
+<pattern>eid1i</pattern>
+<pattern>eig4eac</pattern>
+<pattern>4eil</pattern>
+<pattern>eilít6</pattern>
+<pattern>eilp5</pattern>
+<pattern>eil6t5eac</pattern>
+<pattern>eil6t5ean</pattern>
+<pattern>eil5tear</pattern>
+<pattern>eil5teá</pattern>
+<pattern>eil4t3i</pattern>
+<pattern>6eimh</pattern>
+<pattern>eimin3</pattern>
+<pattern>eini3c</pattern>
+<pattern>ein2t3e</pattern>
+<pattern>ein3t4eá</pattern>
+<pattern>4eip</pattern>
+<pattern>eips6</pattern>
+<pattern>eipt4</pattern>
+<pattern>eirbh6i</pattern>
+<pattern>eir4bí</pattern>
+<pattern>eir6fig</pattern>
+<pattern>eirg3</pattern>
+<pattern>eir2m</pattern>
+<pattern>eirm5é</pattern>
+<pattern>eirm5is</pattern>
+<pattern>eir5m6ít</pattern>
+<pattern>eir6p5</pattern>
+<pattern>eir6st</pattern>
+<pattern>ei4s</pattern>
+<pattern>eisc5eac</pattern>
+<pattern>eis5cir</pattern>
+<pattern>eis6ean </pattern>
+<pattern>eis6ilid</pattern>
+<pattern>eis5in4</pattern>
+<pattern>eist3</pattern>
+<pattern>eit3é</pattern>
+<pattern>eithin6</pattern>
+<pattern>eitim6</pattern>
+<pattern>eiti5mí</pattern>
+<pattern>eits3</pattern>
+<pattern>el1a</pattern>
+<pattern>e3lá</pattern>
+<pattern>el3ó</pattern>
+<pattern>e3lu</pattern>
+<pattern>e3m4ac</pattern>
+<pattern>e5m6aí</pattern>
+<pattern>e3mh</pattern>
+<pattern>emhá6</pattern>
+<pattern>en1</pattern>
+<pattern>e5n6i</pattern>
+<pattern>eo3dar</pattern>
+<pattern>eod5ór</pattern>
+<pattern>eo3fad</pattern>
+<pattern>eo3fai</pattern>
+<pattern>eog4acht</pattern>
+<pattern>eo1gh</pattern>
+<pattern>eoi3f</pattern>
+<pattern>eo3im </pattern>
+<pattern>eo5itear</pattern>
+<pattern>eo3iteá</pattern>
+<pattern>eo3ití</pattern>
+<pattern>eol3c4</pattern>
+<pattern>eol5g6</pattern>
+<pattern>eo3lu</pattern>
+<pattern>eo5mar</pattern>
+<pattern>eomh2a</pattern>
+<pattern>eo3nna</pattern>
+<pattern>eor1</pattern>
+<pattern>eorn4</pattern>
+<pattern>eo3st</pattern>
+<pattern>eó5d</pattern>
+<pattern>e5ólac</pattern>
+<pattern>e5ólaí</pattern>
+<pattern>er1</pattern>
+<pattern>era5d6</pattern>
+<pattern>era3s4</pattern>
+<pattern>eró3b</pattern>
+<pattern>e3s4a</pattern>
+<pattern>e5se</pattern>
+<pattern>e3s4p</pattern>
+<pattern>e1t</pattern>
+<pattern>ethan5</pattern>
+<pattern>éab5ró</pattern>
+<pattern>éa2d1</pattern>
+<pattern>éag3ói</pattern>
+<pattern>éa1gr</pattern>
+<pattern>éa1gu</pattern>
+<pattern>éal1</pattern>
+<pattern>éalbh6</pattern>
+<pattern>éalt3</pattern>
+<pattern>éal5tar</pattern>
+<pattern>éam3at</pattern>
+<pattern>é6amh</pattern>
+<pattern>4éann</pattern>
+<pattern>3éa3p</pattern>
+<pattern>éar5g6</pattern>
+<pattern>éars5a</pattern>
+<pattern>éast4</pattern>
+<pattern>éat3a</pattern>
+<pattern>é1b</pattern>
+<pattern>ébhrí3</pattern>
+<pattern>é1c</pattern>
+<pattern>éch4</pattern>
+<pattern>é3dh</pattern>
+<pattern>é1f</pattern>
+<pattern>é1g</pattern>
+<pattern>é6go</pattern>
+<pattern>é3hé</pattern>
+<pattern>éic4s3</pattern>
+<pattern>éid1</pattern>
+<pattern>éi5dei</pattern>
+<pattern>éi5d6reo</pattern>
+<pattern>éif4ear</pattern>
+<pattern>é3if2i</pattern>
+<pattern>é5ifí</pattern>
+<pattern>éi3g4eal</pattern>
+<pattern>éi5g6é</pattern>
+<pattern>éi3ghn</pattern>
+<pattern>éi5g6ia</pattern>
+<pattern>éi3g4il</pattern>
+<pattern>éig3in </pattern>
+<pattern>éi3g4rí</pattern>
+<pattern>éil5g</pattern>
+<pattern>éilips3</pattern>
+<pattern>éil4t3</pattern>
+<pattern>é6im </pattern>
+<pattern>éim5ir</pattern>
+<pattern>é6in</pattern>
+<pattern>éint3</pattern>
+<pattern>éin6tea</pattern>
+<pattern>éin4té</pattern>
+<pattern>éip4s</pattern>
+<pattern>éir4g3i</pattern>
+<pattern>éir2n3</pattern>
+<pattern>éir6s5eá</pattern>
+<pattern>éisc1</pattern>
+<pattern>éi6se</pattern>
+<pattern>éist3e</pattern>
+<pattern>éist3i</pattern>
+<pattern>é6ite </pattern>
+<pattern>é3iteá</pattern>
+<pattern>éit3é</pattern>
+<pattern>éit6ir</pattern>
+<pattern>éit1s</pattern>
+<pattern>é3lá</pattern>
+<pattern>é5le</pattern>
+<pattern>é3lí</pattern>
+<pattern>é5mh</pattern>
+<pattern>é5n6á</pattern>
+<pattern>é1r</pattern>
+<pattern>é6rb</pattern>
+<pattern>é1s</pattern>
+<pattern>é1t</pattern>
+<pattern>é5úl</pattern>
+<pattern>fa4b</pattern>
+<pattern>fab3r</pattern>
+<pattern>facht2</pattern>
+<pattern>facht5a</pattern>
+<pattern>f6ain </pattern>
+<pattern>faist3</pattern>
+<pattern>faisti3</pattern>
+<pattern>faistic4</pattern>
+<pattern>fal3c4</pattern>
+<pattern>f6an </pattern>
+<pattern>faois3</pattern>
+<pattern>far6am</pattern>
+<pattern>far6at</pattern>
+<pattern>far3n4</pattern>
+<pattern>fas4t</pattern>
+<pattern>fáil2t3</pattern>
+<pattern>fáir5</pattern>
+<pattern>4fás</pattern>
+<pattern>f3ch</pattern>
+<pattern>fea6</pattern>
+<pattern>fead5a</pattern>
+<pattern>f6eadh</pattern>
+<pattern>4fean</pattern>
+<pattern>fear5t6a</pattern>
+<pattern>feil6te </pattern>
+<pattern>feis5c6</pattern>
+<pattern>f4e3l4</pattern>
+<pattern>feo5itea</pattern>
+<pattern>6feol</pattern>
+<pattern>feo5m</pattern>
+<pattern>f4ep</pattern>
+<pattern>féach5</pattern>
+<pattern>féacht6</pattern>
+<pattern>féalt6</pattern>
+<pattern>f6éit</pattern>
+<pattern>fg4a</pattern>
+<pattern>f3gh</pattern>
+<pattern>1fh2</pattern>
+<pattern>fha6</pattern>
+<pattern>fhach3</pattern>
+<pattern>fhacht4</pattern>
+<pattern>fhair5t</pattern>
+<pattern>fhal5c6</pattern>
+<pattern>fhas6t</pattern>
+<pattern>fháil2</pattern>
+<pattern>fháilt3</pattern>
+<pattern>fháir5</pattern>
+<pattern>f4he</pattern>
+<pattern>fhead5a</pattern>
+<pattern>fhear5t6a</pattern>
+<pattern>fheil6te </pattern>
+<pattern>fheis5c6</pattern>
+<pattern>fheo5f</pattern>
+<pattern>fheo5idí</pattern>
+<pattern>fheo5im</pattern>
+<pattern>fheo5in</pattern>
+<pattern>fhéach5</pattern>
+<pattern>fhéacht6</pattern>
+<pattern>fhid5</pattern>
+<pattern>fhios5</pattern>
+<pattern>fhiosc6</pattern>
+<pattern>fhí5dí</pattern>
+<pattern>fhí5g</pattern>
+<pattern>fhí5m</pattern>
+<pattern>fhí4o</pattern>
+<pattern>fhí5oda</pattern>
+<pattern>fhí5odh</pattern>
+<pattern>fhí5om</pattern>
+<pattern>fhí5onn</pattern>
+<pattern>fho5b</pattern>
+<pattern>fho3dh</pattern>
+<pattern>fhoil5</pattern>
+<pattern>fhoin6</pattern>
+<pattern>fhol6ta </pattern>
+<pattern>fhor5b6</pattern>
+<pattern>fhor5n6</pattern>
+<pattern>fhómh3</pattern>
+<pattern>fhraim5</pattern>
+<pattern>fhriocht6</pattern>
+<pattern>f6hu</pattern>
+<pattern>fhua5itea</pattern>
+<pattern>fhuir4s3</pattern>
+<pattern>fiach5</pattern>
+<pattern>fiacht6</pattern>
+<pattern>fid5i</pattern>
+<pattern>f4ill</pattern>
+<pattern>fios3</pattern>
+<pattern>fiosc4</pattern>
+<pattern>fir6m</pattern>
+<pattern>fisc3</pattern>
+<pattern>fi3té</pattern>
+<pattern>fí4o</pattern>
+<pattern>fíod3ó</pattern>
+<pattern>f2ís</pattern>
+<pattern>fl6i</pattern>
+<pattern>flít5</pattern>
+<pattern>f4lu</pattern>
+<pattern>f1n</pattern>
+<pattern>fn4i</pattern>
+<pattern>fo3b</pattern>
+<pattern>fo1d</pattern>
+<pattern>fo6d5a</pattern>
+<pattern>f4oi</pattern>
+<pattern>foil5</pattern>
+<pattern>foin6</pattern>
+<pattern>foirn4</pattern>
+<pattern>fo3le</pattern>
+<pattern>fol6ta </pattern>
+<pattern>fol3u</pattern>
+<pattern>f4or</pattern>
+<pattern>for3b6</pattern>
+<pattern>forch4</pattern>
+<pattern>for3n6</pattern>
+<pattern>fo3scr</pattern>
+<pattern>fost3</pattern>
+<pattern>3f4ób</pattern>
+<pattern>f4óib</pattern>
+<pattern>f4óin</pattern>
+<pattern>fóint6</pattern>
+<pattern>fómh1</pattern>
+<pattern>frai3d</pattern>
+<pattern>f6raim5</pattern>
+<pattern>5f6ram</pattern>
+<pattern>4fri</pattern>
+<pattern>fri3d</pattern>
+<pattern>frioch3</pattern>
+<pattern>friocht4</pattern>
+<pattern>f2t</pattern>
+<pattern>ft5á</pattern>
+<pattern>f5té</pattern>
+<pattern>ft3i</pattern>
+<pattern>fuad3</pattern>
+<pattern>fua6fair</pattern>
+<pattern>fua6f5ara</pattern>
+<pattern>fua5im </pattern>
+<pattern>fua5itea</pattern>
+<pattern>fuir2s3</pattern>
+<pattern>fúith6</pattern>
+<pattern>f6úl</pattern>
+<pattern>fús4</pattern>
+<pattern>fúst3</pattern>
+<pattern>g1a</pattern>
+<pattern>g2ab</pattern>
+<pattern>ga5b6a</pattern>
+<pattern>gabh5</pattern>
+<pattern>gabht6</pattern>
+<pattern>ga3dao</pattern>
+<pattern>g2ae</pattern>
+<pattern>6gaig</pattern>
+<pattern>gair4n3e</pattern>
+<pattern>gai3sp</pattern>
+<pattern>gais5tea</pattern>
+<pattern>gais5teá</pattern>
+<pattern>gai3té</pattern>
+<pattern>g3al </pattern>
+<pattern>5galm6</pattern>
+<pattern>4g5amar</pattern>
+<pattern>gana3</pattern>
+<pattern>g6and</pattern>
+<pattern>3g2ao</pattern>
+<pattern>gaof3</pattern>
+<pattern>g6a5p6</pattern>
+<pattern>garbh5á</pattern>
+<pattern>gard3</pattern>
+<pattern>gar5ma </pattern>
+<pattern>gar1n2</pattern>
+<pattern>gar6tú</pattern>
+<pattern>gas5c6ar</pattern>
+<pattern>gas3c4r</pattern>
+<pattern>ga3stá</pattern>
+<pattern>g1á</pattern>
+<pattern>gáir5</pattern>
+<pattern>6gáis</pattern>
+<pattern>g3ál</pattern>
+<pattern>6g5ánt</pattern>
+<pattern>3g4ár</pattern>
+<pattern>g1b</pattern>
+<pattern>gb6a</pattern>
+<pattern>g1c2</pattern>
+<pattern>gca4</pattern>
+<pattern>gcach5</pattern>
+<pattern>gcacht6</pattern>
+<pattern>gcad5á</pattern>
+<pattern>gcaí5d</pattern>
+<pattern>gcaí5gí</pattern>
+<pattern>gcaí5m</pattern>
+<pattern>gcaí5o</pattern>
+<pattern>gcaí5teá</pattern>
+<pattern>gcaí5tí</pattern>
+<pattern>gcar6t5a</pattern>
+<pattern>gcar6tá</pattern>
+<pattern>gc6i6</pattern>
+<pattern>gcil6</pattern>
+<pattern>gcin5t</pattern>
+<pattern>gcí6</pattern>
+<pattern>gcli6</pattern>
+<pattern>gclip5</pattern>
+<pattern>gcló5f</pattern>
+<pattern>gcló5id</pattern>
+<pattern>gcló5im</pattern>
+<pattern>gcló5inn</pattern>
+<pattern>gcnaí3</pattern>
+<pattern>gcnó5</pattern>
+<pattern>gc6ú</pattern>
+<pattern>g1d</pattern>
+<pattern>gd6a</pattern>
+<pattern>2ge</pattern>
+<pattern>g1eac</pattern>
+<pattern>gea4d</pattern>
+<pattern>6g5eadar</pattern>
+<pattern>gead5as</pattern>
+<pattern>6g5eadh</pattern>
+<pattern>gead3ó</pattern>
+<pattern>g6eaf</pattern>
+<pattern>geal5a</pattern>
+<pattern>geal5b</pattern>
+<pattern>geal6ta </pattern>
+<pattern>gea3nam</pattern>
+<pattern>6gear </pattern>
+<pattern>5g6eart </pattern>
+<pattern>gea3st</pattern>
+<pattern>geat5a</pattern>
+<pattern>g1eá</pattern>
+<pattern>g4ec</pattern>
+<pattern>geit5</pattern>
+<pattern>g1eo</pattern>
+<pattern>g6es</pattern>
+<pattern>géa5b6</pattern>
+<pattern>5g6éas</pattern>
+<pattern>2g1f</pattern>
+<pattern>g2h</pattern>
+<pattern>4gh </pattern>
+<pattern>ghabh3</pattern>
+<pattern>ghabht4</pattern>
+<pattern>ghair4n5e</pattern>
+<pattern>ghais5tea</pattern>
+<pattern>ghais5teá</pattern>
+<pattern>gh6am </pattern>
+<pattern>gharbh5á</pattern>
+<pattern>gháir5</pattern>
+<pattern>gh5c6</pattern>
+<pattern>6ghd</pattern>
+<pattern>ghd3ac</pattern>
+<pattern>ghd3á</pattern>
+<pattern>gh4de </pattern>
+<pattern>gh2di</pattern>
+<pattern>gheal5a</pattern>
+<pattern>gheit5</pattern>
+<pattern>gh1f</pattern>
+<pattern>ghint6i</pattern>
+<pattern>ghin5tí</pattern>
+<pattern>ghis5</pattern>
+<pattern>gh2lu</pattern>
+<pattern>3gho</pattern>
+<pattern>ghoin5</pattern>
+<pattern>ghó6f5</pattern>
+<pattern>ghrá5inn </pattern>
+<pattern>ghrá5ití</pattern>
+<pattern>ghrá3m</pattern>
+<pattern>ghrámh4</pattern>
+<pattern>3ghrú6</pattern>
+<pattern>6ghrú </pattern>
+<pattern>gh4s3á</pattern>
+<pattern>ght4</pattern>
+<pattern>ghual5</pattern>
+<pattern>g1id</pattern>
+<pattern>3g4id </pattern>
+<pattern>g1ig</pattern>
+<pattern>gild5</pattern>
+<pattern>g4ili</pattern>
+<pattern>g1im</pattern>
+<pattern>3gine</pattern>
+<pattern>3giní</pattern>
+<pattern>g3inn </pattern>
+<pattern>3ginnt</pattern>
+<pattern>gin5t6í</pattern>
+<pattern>1gio</pattern>
+<pattern>gios3</pattern>
+<pattern>giost4</pattern>
+<pattern>gip4</pattern>
+<pattern>gip5s</pattern>
+<pattern>gipt5</pattern>
+<pattern>g1is</pattern>
+<pattern>g1it</pattern>
+<pattern>g1iú</pattern>
+<pattern>giúm5</pattern>
+<pattern>giús3</pattern>
+<pattern>g1í</pattern>
+<pattern>glae1</pattern>
+<pattern>g4lán</pattern>
+<pattern>gl4i6</pattern>
+<pattern>5g6lic</pattern>
+<pattern>3glif</pattern>
+<pattern>g6lis</pattern>
+<pattern>g1lí</pattern>
+<pattern>g6lo</pattern>
+<pattern>gl6ú</pattern>
+<pattern>g1m2</pattern>
+<pattern>gmh2</pattern>
+<pattern>2g1n2</pattern>
+<pattern>g2ná</pattern>
+<pattern>gnó3l4</pattern>
+<pattern>goin5</pattern>
+<pattern>gó1c</pattern>
+<pattern>g3ód</pattern>
+<pattern>g1ó6f</pattern>
+<pattern>g1óg</pattern>
+<pattern>g3óid</pattern>
+<pattern>g3óig</pattern>
+<pattern>g1óim</pattern>
+<pattern>góin4</pattern>
+<pattern>g3óinn</pattern>
+<pattern>góint3</pattern>
+<pattern>g4ól</pattern>
+<pattern>g3óra </pattern>
+<pattern>g3ra </pattern>
+<pattern>g1rac</pattern>
+<pattern>1g4raf</pattern>
+<pattern>3graif</pattern>
+<pattern>g3raig</pattern>
+<pattern>g3rait</pattern>
+<pattern>g1raí</pattern>
+<pattern>gra6m</pattern>
+<pattern>grama5d6</pattern>
+<pattern>g5ras</pattern>
+<pattern>3grád</pattern>
+<pattern>grá5inn </pattern>
+<pattern>grá5ití</pattern>
+<pattern>grá3m</pattern>
+<pattern>grámh4</pattern>
+<pattern>grá4n</pattern>
+<pattern>4gri</pattern>
+<pattern>g1ró</pattern>
+<pattern>3gru</pattern>
+<pattern>grú6i</pattern>
+<pattern>g1s2</pattern>
+<pattern>2g1t</pattern>
+<pattern>gth4</pattern>
+<pattern>gual5</pattern>
+<pattern>g3uc</pattern>
+<pattern>g3uir</pattern>
+<pattern>1gum</pattern>
+<pattern>gust5a</pattern>
+<pattern>4gú </pattern>
+<pattern>g5wa</pattern>
+<pattern>hab3r</pattern>
+<pattern>ha4c</pattern>
+<pattern>hach6ar</pattern>
+<pattern>hach5ó</pattern>
+<pattern>hac6s5</pattern>
+<pattern>had6aimh</pattern>
+<pattern>had6amh</pattern>
+<pattern>ha3dái</pattern>
+<pattern>ha3dán </pattern>
+<pattern>hae5nn</pattern>
+<pattern>hagá5l</pattern>
+<pattern>hag5r</pattern>
+<pattern>hag6úis</pattern>
+<pattern>hai6c</pattern>
+<pattern>haic5í</pattern>
+<pattern>haidh5ne</pattern>
+<pattern>h1aim</pattern>
+<pattern>hain2t</pattern>
+<pattern>haint5í</pattern>
+<pattern>hain6tín</pattern>
+<pattern>hais5t6eor</pattern>
+<pattern>hais5tic</pattern>
+<pattern>hait3é</pattern>
+<pattern>h1aí</pattern>
+<pattern>haít5eac</pattern>
+<pattern>haí6ti</pattern>
+<pattern>hal5a</pattern>
+<pattern>halbh3a</pattern>
+<pattern>hal5g6</pattern>
+<pattern>hallag6</pattern>
+<pattern>halt5ar</pattern>
+<pattern>ham5at</pattern>
+<pattern>hamb6</pattern>
+<pattern>ham5ó</pattern>
+<pattern>h6ams</pattern>
+<pattern>han4á</pattern>
+<pattern>han3d4</pattern>
+<pattern>han6lain</pattern>
+<pattern>han6lan</pattern>
+<pattern>han6rai</pattern>
+<pattern>han6sa </pattern>
+<pattern>han6sac</pattern>
+<pattern>han3t4á</pattern>
+<pattern>haof3</pattern>
+<pattern>hara5b6</pattern>
+<pattern>harai5s6í</pattern>
+<pattern>haral4</pattern>
+<pattern>haralt3</pattern>
+<pattern>hard3á</pattern>
+<pattern>h4arg</pattern>
+<pattern>har5ma </pattern>
+<pattern>har3n4ó</pattern>
+<pattern>h6arr</pattern>
+<pattern>har6s5ac</pattern>
+<pattern>har6s5aig</pattern>
+<pattern>hart4ac</pattern>
+<pattern>har3ú</pattern>
+<pattern>hasam6a</pattern>
+<pattern>ha5s6áir</pattern>
+<pattern>ha5s6ár</pattern>
+<pattern>hasc6ar</pattern>
+<pattern>has5car6n5</pattern>
+<pattern>has6pa </pattern>
+<pattern>has6p5aí</pattern>
+<pattern>hast5ait</pattern>
+<pattern>has6tú </pattern>
+<pattern>hat5ar </pattern>
+<pattern>hat5ra</pattern>
+<pattern>hat5ú</pattern>
+<pattern>hách1</pattern>
+<pattern>háin4t</pattern>
+<pattern>háint5eac</pattern>
+<pattern>háí6</pattern>
+<pattern>há5ío</pattern>
+<pattern>h4ár</pattern>
+<pattern>h1b</pattern>
+<pattern>h2ba</pattern>
+<pattern>h5bha</pattern>
+<pattern>hbhain6</pattern>
+<pattern>h5bhe</pattern>
+<pattern>hbheo5f</pattern>
+<pattern>hbheo5id</pattern>
+<pattern>hbheo5im</pattern>
+<pattern>hbheo5in</pattern>
+<pattern>hbhuí6</pattern>
+<pattern>h1c</pattern>
+<pattern>hc4a</pattern>
+<pattern>hc4án</pattern>
+<pattern>h6cé</pattern>
+<pattern>h3ch2</pattern>
+<pattern>h4c3í</pattern>
+<pattern>h1d</pattern>
+<pattern>hd2a</pattern>
+<pattern>hd3aim</pattern>
+<pattern>hd3an</pattern>
+<pattern>hd5eam</pattern>
+<pattern>hd3eann</pattern>
+<pattern>hdeá5nn</pattern>
+<pattern>hd6eog</pattern>
+<pattern>hd6eoig</pattern>
+<pattern>hdh4</pattern>
+<pattern>h5dine</pattern>
+<pattern>hd5inn</pattern>
+<pattern>hd3iú</pattern>
+<pattern>hd4ó</pattern>
+<pattern>h4dt</pattern>
+<pattern>hea6c</pattern>
+<pattern>h3eacn</pattern>
+<pattern>hea6g</pattern>
+<pattern>heag5r</pattern>
+<pattern>heal6ta </pattern>
+<pattern>heana6</pattern>
+<pattern>heanad5</pattern>
+<pattern>h4eang</pattern>
+<pattern>hea6r</pattern>
+<pattern>hear5bó</pattern>
+<pattern>h4eat</pattern>
+<pattern>heat5á</pattern>
+<pattern>heat5ó</pattern>
+<pattern>heá1c</pattern>
+<pattern>h6eána</pattern>
+<pattern>heá6t</pattern>
+<pattern>heáth5</pattern>
+<pattern>heift5</pattern>
+<pattern>heod5ó</pattern>
+<pattern>heo5itea</pattern>
+<pattern>heo3mh</pattern>
+<pattern>h6es</pattern>
+<pattern>h4éadr</pattern>
+<pattern>héidlia5</pattern>
+<pattern>héi5gear</pattern>
+<pattern>héim5í</pattern>
+<pattern>hfach3</pattern>
+<pattern>hfair5t</pattern>
+<pattern>hfeo5f</pattern>
+<pattern>hfeo5idí</pattern>
+<pattern>hfeo5im</pattern>
+<pattern>hfeo5in</pattern>
+<pattern>hfhuad5</pattern>
+<pattern>hfhuaf6</pattern>
+<pattern>hfí5dí</pattern>
+<pattern>hfí5g</pattern>
+<pattern>hfí5m</pattern>
+<pattern>hfí5oda</pattern>
+<pattern>hfí5odh</pattern>
+<pattern>hfí5om</pattern>
+<pattern>hfí5onn</pattern>
+<pattern>h1g</pattern>
+<pattern>hgh2</pattern>
+<pattern>hghair5t</pattern>
+<pattern>hghin5</pattern>
+<pattern>h4gí</pattern>
+<pattern>hg6n</pattern>
+<pattern>hiach5t6</pattern>
+<pattern>hiat6ac</pattern>
+<pattern>hia5t6aig</pattern>
+<pattern>hia5t6aí </pattern>
+<pattern>hi6b</pattern>
+<pattern>hibh5</pattern>
+<pattern>h1id</pattern>
+<pattern>hid4é</pattern>
+<pattern>h1ig</pattern>
+<pattern>hil3b</pattern>
+<pattern>hi4m</pattern>
+<pattern>him3é</pattern>
+<pattern>hin6d5ia</pattern>
+<pattern>h4ine</pattern>
+<pattern>hineach5</pattern>
+<pattern>hineacht6</pattern>
+<pattern>hin6ín</pattern>
+<pattern>hin4íon</pattern>
+<pattern>hin6ír</pattern>
+<pattern>hin6ste </pattern>
+<pattern>hint4e</pattern>
+<pattern>hin5teá</pattern>
+<pattern>hin4t5iú</pattern>
+<pattern>hiosc6á</pattern>
+<pattern>hios3t4</pattern>
+<pattern>hip4e</pattern>
+<pattern>hipi5c6</pattern>
+<pattern>hip6id</pattern>
+<pattern>hirim5</pattern>
+<pattern>hir6im </pattern>
+<pattern>hir6ime</pattern>
+<pattern>hir6n</pattern>
+<pattern>his5tear</pattern>
+<pattern>his5teá</pattern>
+<pattern>his3t6in</pattern>
+<pattern>hit6eor</pattern>
+<pattern>hit5s</pattern>
+<pattern>hiúm5</pattern>
+<pattern>hiúnt3ó</pattern>
+<pattern>hiúr5</pattern>
+<pattern>hiús5t</pattern>
+<pattern>hí1gh</pattern>
+<pattern>hí3leá</pattern>
+<pattern>híod5ó</pattern>
+<pattern>híol5</pattern>
+<pattern>híoll6</pattern>
+<pattern>h4íos</pattern>
+<pattern>híos5t</pattern>
+<pattern>hí5sti</pattern>
+<pattern>hí6th5e</pattern>
+<pattern>hla6</pattern>
+<pattern>hlac5á</pattern>
+<pattern>hlad5a</pattern>
+<pattern>hlad3á</pattern>
+<pattern>hlad5ó</pattern>
+<pattern>h1laí</pattern>
+<pattern>hlas5t</pattern>
+<pattern>h4láir</pattern>
+<pattern>hleach6t5</pattern>
+<pattern>hleat5a</pattern>
+<pattern>hleá5d6</pattern>
+<pattern>hléach6</pattern>
+<pattern>hléacht5</pattern>
+<pattern>hlé5am</pattern>
+<pattern>hlé5igí</pattern>
+<pattern>hlé5imi</pattern>
+<pattern>hl6i6</pattern>
+<pattern>hlim6p</pattern>
+<pattern>hlin4</pattern>
+<pattern>hlip5</pattern>
+<pattern>h1lí</pattern>
+<pattern>hló5im </pattern>
+<pattern>hló5ití</pattern>
+<pattern>hl6ú</pattern>
+<pattern>hma6</pattern>
+<pattern>hm4ad</pattern>
+<pattern>hmad5ó</pattern>
+<pattern>hm4aid </pattern>
+<pattern>hm4ain</pattern>
+<pattern>hm5ainn</pattern>
+<pattern>hm3an</pattern>
+<pattern>h1mh</pattern>
+<pattern>h4mt</pattern>
+<pattern>hn2</pattern>
+<pattern>h1na6</pattern>
+<pattern>hnag5</pattern>
+<pattern>h1ne</pattern>
+<pattern>hn6eán</pattern>
+<pattern>h1ni</pattern>
+<pattern>hniú3c</pattern>
+<pattern>hniúch6</pattern>
+<pattern>h1ní</pattern>
+<pattern>h1nó</pattern>
+<pattern>h6nó </pattern>
+<pattern>hnó5l6</pattern>
+<pattern>h4nr</pattern>
+<pattern>hn5t</pattern>
+<pattern>hnua5c</pattern>
+<pattern>ho3bró</pattern>
+<pattern>hoch6t5a</pattern>
+<pattern>hoch6tá</pattern>
+<pattern>hod3a</pattern>
+<pattern>hod3ó</pattern>
+<pattern>hof3a</pattern>
+<pattern>h4og</pattern>
+<pattern>hoilt6</pattern>
+<pattern>hoi4m</pattern>
+<pattern>hol4agá</pattern>
+<pattern>ho5le</pattern>
+<pattern>hol3u</pattern>
+<pattern>h4om</pattern>
+<pattern>homai3g</pattern>
+<pattern>ho5mhú</pattern>
+<pattern>h4on</pattern>
+<pattern>hon4c3ó</pattern>
+<pattern>ho5nu</pattern>
+<pattern>horan6</pattern>
+<pattern>horant5</pattern>
+<pattern>horch3a</pattern>
+<pattern>hord3á</pattern>
+<pattern>host5ac</pattern>
+<pattern>hos6tá</pattern>
+<pattern>host5áin</pattern>
+<pattern>host5án</pattern>
+<pattern>h1óf</pattern>
+<pattern>hó5im </pattern>
+<pattern>hóin4s</pattern>
+<pattern>hóint6</pattern>
+<pattern>hóist6</pattern>
+<pattern>hó5l6ain</pattern>
+<pattern>hó5l6an</pattern>
+<pattern>hó6ma </pattern>
+<pattern>hó6maí</pattern>
+<pattern>hóp6a</pattern>
+<pattern>hó6s</pattern>
+<pattern>hós5a</pattern>
+<pattern>h2ót</pattern>
+<pattern>hóth1</pattern>
+<pattern>h1p</pattern>
+<pattern>h2p1e</pattern>
+<pattern>h6p5i</pattern>
+<pattern>h6pí</pattern>
+<pattern>h1ra </pattern>
+<pattern>hrad5á</pattern>
+<pattern>h1raí</pattern>
+<pattern>hra6m</pattern>
+<pattern>hramad6</pattern>
+<pattern>hran5g6ó</pattern>
+<pattern>hrat5ó</pattern>
+<pattern>hrá3th4ó</pattern>
+<pattern>h3re </pattern>
+<pattern>hré6i</pattern>
+<pattern>h4rio</pattern>
+<pattern>hrioch5t6á</pattern>
+<pattern>hrí2o</pattern>
+<pattern>hrí3r</pattern>
+<pattern>h4rís</pattern>
+<pattern>hroch3</pattern>
+<pattern>hrocht6</pattern>
+<pattern>hruac6</pattern>
+<pattern>hrua5cá</pattern>
+<pattern>hruacht6</pattern>
+<pattern>hrua5itea</pattern>
+<pattern>hr6ú</pattern>
+<pattern>hrú3ití</pattern>
+<pattern>h4rúp</pattern>
+<pattern>h1s2</pattern>
+<pattern>hsc2</pattern>
+<pattern>hscar5</pattern>
+<pattern>hscart6</pattern>
+<pattern>ht1</pattern>
+<pattern>h3t4ae</pattern>
+<pattern>h3t4aic</pattern>
+<pattern>ht4anac</pattern>
+<pattern>hta5p6</pattern>
+<pattern>h3tar</pattern>
+<pattern>h2tái</pattern>
+<pattern>h1t2e</pattern>
+<pattern>h5th6</pattern>
+<pattern>hthor6t</pattern>
+<pattern>hthorth5</pattern>
+<pattern>ht6i</pattern>
+<pattern>h2tó</pattern>
+<pattern>h3t2úir</pattern>
+<pattern>h1t2úr</pattern>
+<pattern>huil5ce</pattern>
+<pattern>huil5c6i</pattern>
+<pattern>hul6t5ais</pattern>
+<pattern>hur5b</pattern>
+<pattern>hur3n4</pattern>
+<pattern>húch3t6</pattern>
+<pattern>húd5aí</pattern>
+<pattern>húin5t</pattern>
+<pattern>h6úis</pattern>
+<pattern>hú5ite </pattern>
+<pattern>húst5</pattern>
+<pattern>hút5ó</pattern>
+<pattern>h3vó</pattern>
+<pattern>ia3chl</pattern>
+<pattern>iach3ó</pattern>
+<pattern>iacht5aí</pattern>
+<pattern>ia5dar</pattern>
+<pattern>ia3f4a</pattern>
+<pattern>ia5fá</pattern>
+<pattern>iag5ó</pattern>
+<pattern>ia3gr</pattern>
+<pattern>ia3idís</pattern>
+<pattern>ia3igí</pattern>
+<pattern>4iail</pattern>
+<pattern>ia5im </pattern>
+<pattern>ia3imi</pattern>
+<pattern>ia5inn</pattern>
+<pattern>ia3ite</pattern>
+<pattern>iai3t4r</pattern>
+<pattern>ialach3</pattern>
+<pattern>ialacht4</pattern>
+<pattern>ia3l4ain</pattern>
+<pattern>ia3lan</pattern>
+<pattern>ia3lat</pattern>
+<pattern>ia5mar</pattern>
+<pattern>iam4b3</pattern>
+<pattern>ia4mhai</pattern>
+<pattern>ian5a</pattern>
+<pattern>ian3g4</pattern>
+<pattern>iar3b</pattern>
+<pattern>iarbh6</pattern>
+<pattern>iarc6</pattern>
+<pattern>iar3d2</pattern>
+<pattern>iar5m6</pattern>
+<pattern>iar3t4</pattern>
+<pattern>iast5r</pattern>
+<pattern>ia6tá</pattern>
+<pattern>ia1t6r</pattern>
+<pattern>ib1e</pattern>
+<pattern>ib4eab</pattern>
+<pattern>ib3éa</pattern>
+<pattern>ib5éid</pattern>
+<pattern>ib3éil</pattern>
+<pattern>ibh1</pattern>
+<pattern>ibh5é</pattern>
+<pattern>ibhin4</pattern>
+<pattern>ibhit4</pattern>
+<pattern>ib1i</pattern>
+<pattern>ib5ia</pattern>
+<pattern>ibia5n</pattern>
+<pattern>ib5ir</pattern>
+<pattern>ib1í</pattern>
+<pattern>ib1l</pattern>
+<pattern>ib1r</pattern>
+<pattern>ic1</pattern>
+<pattern>iceap4</pattern>
+<pattern>iceapt5</pattern>
+<pattern>i3cei</pattern>
+<pattern>icé5an</pattern>
+<pattern>ich1</pattern>
+<pattern>i5ch6a</pattern>
+<pattern>i3chr</pattern>
+<pattern>icim4</pattern>
+<pattern>ic6iú </pattern>
+<pattern>i3c4íd</pattern>
+<pattern>icí5tea</pattern>
+<pattern>ic4ri</pattern>
+<pattern>ic4st</pattern>
+<pattern>id1e</pattern>
+<pattern>id1é</pattern>
+<pattern>idh3bh</pattern>
+<pattern>idhc3</pattern>
+<pattern>idh3e</pattern>
+<pattern>idh3i</pattern>
+<pattern>idh1l</pattern>
+<pattern>idh1r</pattern>
+<pattern>id1ia</pattern>
+<pattern>id3icí</pattern>
+<pattern>idi3f4</pattern>
+<pattern>id1in</pattern>
+<pattern>id1iú</pattern>
+<pattern>id3íd</pattern>
+<pattern>id3íg</pattern>
+<pattern>id1ín</pattern>
+<pattern>id1ío</pattern>
+<pattern>idí5oc</pattern>
+<pattern>id1l</pattern>
+<pattern>id1r</pattern>
+<pattern>id4ré</pattern>
+<pattern>i5éa</pattern>
+<pattern>if1</pattern>
+<pattern>i6fe</pattern>
+<pattern>if5in </pattern>
+<pattern>ifini5</pattern>
+<pattern>ifinid6</pattern>
+<pattern>ifin6t</pattern>
+<pattern>if3ír</pattern>
+<pattern>i3fís</pattern>
+<pattern>if6ré</pattern>
+<pattern>ig1e</pattern>
+<pattern>igea3s4</pattern>
+<pattern>igea5t</pattern>
+<pattern>ig1é</pattern>
+<pattern>igh1</pattern>
+<pattern>ig3ia</pattern>
+<pattern>igi3b</pattern>
+<pattern>ig1il</pattern>
+<pattern>igi3l4i</pattern>
+<pattern>ig1ip</pattern>
+<pattern>ig1ir</pattern>
+<pattern>ig1l</pattern>
+<pattern>ig1r</pattern>
+<pattern>i1h</pattern>
+<pattern>il3a</pattern>
+<pattern>ilbh5in</pattern>
+<pattern>il4bh5r</pattern>
+<pattern>4ilc</pattern>
+<pattern>il1e</pattern>
+<pattern>ileac2</pattern>
+<pattern>ilea3ca</pattern>
+<pattern>ilea3cá</pattern>
+<pattern>ilea5có</pattern>
+<pattern>il5eá</pattern>
+<pattern>il1é</pattern>
+<pattern>ilé5an</pattern>
+<pattern>il6fr</pattern>
+<pattern>il1i</pattern>
+<pattern>4ilia</pattern>
+<pattern>ilia5n</pattern>
+<pattern>ili5bé</pattern>
+<pattern>ili3c4é</pattern>
+<pattern>il1í</pattern>
+<pattern>ilí6f</pattern>
+<pattern>il5ío</pattern>
+<pattern>il2sc</pattern>
+<pattern>im5a</pattern>
+<pattern>imar6</pattern>
+<pattern>imb3l</pattern>
+<pattern>imeach6</pattern>
+<pattern>imeacht5</pattern>
+<pattern>im3éi</pattern>
+<pattern>2img</pattern>
+<pattern>imh1</pattern>
+<pattern>i3mha</pattern>
+<pattern>imhead6</pattern>
+<pattern>im3ide</pattern>
+<pattern>imig6</pattern>
+<pattern>imi5gé</pattern>
+<pattern>im3io</pattern>
+<pattern>im3ire</pattern>
+<pattern>im3irn</pattern>
+<pattern>im3irt</pattern>
+<pattern>im5isc</pattern>
+<pattern>im5írí</pattern>
+<pattern>in3á</pattern>
+<pattern>ind3eá</pattern>
+<pattern>ind5ia </pattern>
+<pattern>ind3iai</pattern>
+<pattern>ind3ib</pattern>
+<pattern>indí6</pattern>
+<pattern>indíl5</pattern>
+<pattern>indó1</pattern>
+<pattern>in3e</pattern>
+<pattern>in5ea</pattern>
+<pattern>ineam6</pattern>
+<pattern>inea5maí</pattern>
+<pattern>inea3mó</pattern>
+<pattern>in1é</pattern>
+<pattern>i5n6éag</pattern>
+<pattern>ing1</pattern>
+<pattern>in6gir</pattern>
+<pattern>in3i</pattern>
+<pattern>in5ic</pattern>
+<pattern>in5ig</pattern>
+<pattern>iniúch3</pattern>
+<pattern>in1í</pattern>
+<pattern>in5íoc</pattern>
+<pattern>iní6t</pattern>
+<pattern>6innis</pattern>
+<pattern>in3o</pattern>
+<pattern>in4scn</pattern>
+<pattern>int3ean</pattern>
+<pattern>in2tí </pattern>
+<pattern>ioch5t4óg</pattern>
+<pattern>ioch5t6óig</pattern>
+<pattern>ioc5s6</pattern>
+<pattern>iod1</pattern>
+<pattern>iof1</pattern>
+<pattern>iogad3á</pattern>
+<pattern>iol5g6</pattern>
+<pattern>iom3ar</pattern>
+<pattern>6iomá</pattern>
+<pattern>ion3c6</pattern>
+<pattern>iopa5d</pattern>
+<pattern>ior3d</pattern>
+<pattern>4ios</pattern>
+<pattern>iosc6ac</pattern>
+<pattern>io6t</pattern>
+<pattern>iot6as</pattern>
+<pattern>ip1</pattern>
+<pattern>ipea3g</pattern>
+<pattern>i3péid</pattern>
+<pattern>ip5is</pattern>
+<pattern>ipist6</pattern>
+<pattern>ip3í</pattern>
+<pattern>i5plé</pattern>
+<pattern>ir1</pattern>
+<pattern>ir5ch</pattern>
+<pattern>irea5b6</pattern>
+<pattern>iream6</pattern>
+<pattern>irea5má</pattern>
+<pattern>irea5mó</pattern>
+<pattern>ir5id</pattern>
+<pattern>ir5ip</pattern>
+<pattern>ir3í</pattern>
+<pattern>irír3</pattern>
+<pattern>ir5sc</pattern>
+<pattern>irscar5</pattern>
+<pattern>irscart6</pattern>
+<pattern>ir6ta</pattern>
+<pattern>irt3o</pattern>
+<pattern>ir4tr</pattern>
+<pattern>irt6s5</pattern>
+<pattern>i6sc</pattern>
+<pattern>isc3ead</pattern>
+<pattern>isc5eal</pattern>
+<pattern>isc5eam</pattern>
+<pattern>isc5eann</pattern>
+<pattern>isc1é</pattern>
+<pattern>is3céim</pattern>
+<pattern>isc3inn</pattern>
+<pattern>is1e</pattern>
+<pattern>isear3</pattern>
+<pattern>isearbh6</pattern>
+<pattern>6iseas</pattern>
+<pattern>i3sei</pattern>
+<pattern>is1é</pattern>
+<pattern>iséal5</pattern>
+<pattern>is1i</pattern>
+<pattern>4isic</pattern>
+<pattern>i3sint</pattern>
+<pattern>6isis</pattern>
+<pattern>is1í</pattern>
+<pattern>i5s6ít </pattern>
+<pattern>i5s6íte </pattern>
+<pattern>is3o</pattern>
+<pattern>is5pí</pattern>
+<pattern>is1ta</pattern>
+<pattern>ist4r</pattern>
+<pattern>it5ai</pattern>
+<pattern>it1ea</pattern>
+<pattern>6itean</pattern>
+<pattern>it3eart</pattern>
+<pattern>it3eán</pattern>
+<pattern>ith1</pattern>
+<pattern>ithé5an</pattern>
+<pattern>ithin6t</pattern>
+<pattern>it1i</pattern>
+<pattern>itil4t</pattern>
+<pattern>i6tínn</pattern>
+<pattern>i1to</pattern>
+<pattern>it1r</pattern>
+<pattern>it6ré</pattern>
+<pattern>4its</pattern>
+<pattern>its5ean</pattern>
+<pattern>iuch3</pattern>
+<pattern>iucht4</pattern>
+<pattern>iúch3t6</pattern>
+<pattern>4iúd</pattern>
+<pattern>4iúid</pattern>
+<pattern>iú5im</pattern>
+<pattern>iú5inn</pattern>
+<pattern>iúiré5</pattern>
+<pattern>iúir6s</pattern>
+<pattern>iúité5</pattern>
+<pattern>iúr4s3</pattern>
+<pattern>iúst4</pattern>
+<pattern>iús5tá</pattern>
+<pattern>6iút</pattern>
+<pattern>iú5t6ac</pattern>
+<pattern>iv1</pattern>
+<pattern>í5ba</pattern>
+<pattern>í3bea</pattern>
+<pattern>íb3eo</pattern>
+<pattern>í1bha</pattern>
+<pattern>íbh3ei</pattern>
+<pattern>í5bheo</pattern>
+<pattern>íbh1i</pattern>
+<pattern>í5bhr</pattern>
+<pattern>íbhuí4</pattern>
+<pattern>íb1l</pattern>
+<pattern>íb3o</pattern>
+<pattern>íb1r</pattern>
+<pattern>íc1e</pattern>
+<pattern>ícea3s</pattern>
+<pattern>í3cei</pattern>
+<pattern>íc3éa</pattern>
+<pattern>í5céi</pattern>
+<pattern>í1ch</pattern>
+<pattern>í5cha</pattern>
+<pattern>í4ch3eal</pattern>
+<pattern>ích6n</pattern>
+<pattern>íc1i</pattern>
+<pattern>íd1e</pattern>
+<pattern>í1dh</pattern>
+<pattern>íd1i</pattern>
+<pattern>íd3íd</pattern>
+<pattern>íd3íg</pattern>
+<pattern>íd3ín</pattern>
+<pattern>íd1ío</pattern>
+<pattern>í1f</pattern>
+<pattern>í6fe </pattern>
+<pattern>íf5ean</pattern>
+<pattern>í6f5ir</pattern>
+<pattern>í6f5is</pattern>
+<pattern>íg3e</pattern>
+<pattern>ígh4</pattern>
+<pattern>íghnaí6</pattern>
+<pattern>íg3i</pattern>
+<pattern>í5gré</pattern>
+<pattern>íg5ri</pattern>
+<pattern>í1h</pattern>
+<pattern>íl3a</pattern>
+<pattern>í1lá</pattern>
+<pattern>í6le </pattern>
+<pattern>íl1ea</pattern>
+<pattern>íleá5cha</pattern>
+<pattern>íleá5ic</pattern>
+<pattern>íl3é</pattern>
+<pattern>íl3ig</pattern>
+<pattern>íl3im</pattern>
+<pattern>íl5in</pattern>
+<pattern>íl3is</pattern>
+<pattern>í1lit</pattern>
+<pattern>í4l5ith</pattern>
+<pattern>íl5iú</pattern>
+<pattern>í3líth</pattern>
+<pattern>í5lo</pattern>
+<pattern>í1ló</pattern>
+<pattern>í1lu</pattern>
+<pattern>í4m3é</pattern>
+<pattern>í1mh</pattern>
+<pattern>í4mhid</pattern>
+<pattern>ími3t</pattern>
+<pattern>ín1</pattern>
+<pattern>í1n2a</pattern>
+<pattern>ín5ai</pattern>
+<pattern>í3n4á</pattern>
+<pattern>í6nn</pattern>
+<pattern>í3n4o</pattern>
+<pattern>í3n4ó</pattern>
+<pattern>ín3t4</pattern>
+<pattern>í1oc</pattern>
+<pattern>ío3c4á</pattern>
+<pattern>ío6có</pattern>
+<pattern>íof1</pattern>
+<pattern>íoga3dá</pattern>
+<pattern>íomh3</pattern>
+<pattern>ío4mhe</pattern>
+<pattern>í3onna </pattern>
+<pattern>6íop</pattern>
+<pattern>2íor1</pattern>
+<pattern>íorg4</pattern>
+<pattern>íorn6</pattern>
+<pattern>íort6</pattern>
+<pattern>íot6r</pattern>
+<pattern>í5óga</pattern>
+<pattern>íp3e</pattern>
+<pattern>íp3é</pattern>
+<pattern>íp5i</pattern>
+<pattern>íp3r</pattern>
+<pattern>2ír1</pattern>
+<pattern>í1r2a</pattern>
+<pattern>í5rá</pattern>
+<pattern>ír4easc</pattern>
+<pattern>í3rei</pattern>
+<pattern>ír2éir</pattern>
+<pattern>í1r2ia</pattern>
+<pattern>í5r6u</pattern>
+<pattern>í5r6ú</pattern>
+<pattern>í1sca</pattern>
+<pattern>ísc5e</pattern>
+<pattern>í3scé</pattern>
+<pattern>ísc3ir</pattern>
+<pattern>í1scr</pattern>
+<pattern>ís1e</pattern>
+<pattern>4ís3é</pattern>
+<pattern>4ísh</pattern>
+<pattern>ís3i</pattern>
+<pattern>ís1í</pattern>
+<pattern>í1s2p</pattern>
+<pattern>ís3ta</pattern>
+<pattern>íst5e</pattern>
+<pattern>íst5in</pattern>
+<pattern>í5stu</pattern>
+<pattern>ít4e</pattern>
+<pattern>ít5ean</pattern>
+<pattern>í4tear</pattern>
+<pattern>í3teas</pattern>
+<pattern>ít5é</pattern>
+<pattern>í1th</pattern>
+<pattern>íth5is</pattern>
+<pattern>í6th5oin</pattern>
+<pattern>í3ti</pattern>
+<pattern>í1tr</pattern>
+<pattern>í6úi</pattern>
+<pattern>í3úl</pattern>
+<pattern>la5bas</pattern>
+<pattern>4lacá</pattern>
+<pattern>la3c4án</pattern>
+<pattern>lach5ó</pattern>
+<pattern>lach6tá</pattern>
+<pattern>ladh2m5</pattern>
+<pattern>lae6c</pattern>
+<pattern>la3f4á</pattern>
+<pattern>la3f6ó</pattern>
+<pattern>l4agam</pattern>
+<pattern>la1g2á</pattern>
+<pattern>l6agh</pattern>
+<pattern>laghd6</pattern>
+<pattern>lai5d6é</pattern>
+<pattern>l4aih</pattern>
+<pattern>lai3l4</pattern>
+<pattern>lai3m4é</pattern>
+<pattern>lain4</pattern>
+<pattern>lainc4</pattern>
+<pattern>lain5ci</pattern>
+<pattern>l4ai3né</pattern>
+<pattern>lais1</pattern>
+<pattern>laisc3</pattern>
+<pattern>laist6</pattern>
+<pattern>l4aité</pattern>
+<pattern>lai3tín</pattern>
+<pattern>la3l4</pattern>
+<pattern>l4amo</pattern>
+<pattern>lamp1</pattern>
+<pattern>la5mú</pattern>
+<pattern>lan2d3</pattern>
+<pattern>l5ang</pattern>
+<pattern>lao3f</pattern>
+<pattern>lao5inn</pattern>
+<pattern>lao5ire </pattern>
+<pattern>lao5irí</pattern>
+<pattern>lao5itea</pattern>
+<pattern>lao5iteá</pattern>
+<pattern>lao5ití</pattern>
+<pattern>lao5nna</pattern>
+<pattern>l1ar</pattern>
+<pattern>l4ar3n</pattern>
+<pattern>la3rúi</pattern>
+<pattern>lasar3</pattern>
+<pattern>lasarn4</pattern>
+<pattern>l4asb</pattern>
+<pattern>las6pa </pattern>
+<pattern>las5tó</pattern>
+<pattern>lat3á</pattern>
+<pattern>lat3ó</pattern>
+<pattern>lat5r</pattern>
+<pattern>lách5</pattern>
+<pattern>l4áib</pattern>
+<pattern>l6áim</pattern>
+<pattern>láin3</pattern>
+<pattern>lá5inn</pattern>
+<pattern>láint4</pattern>
+<pattern>lá5iteá</pattern>
+<pattern>lá5ití </pattern>
+<pattern>1lál</pattern>
+<pattern>lámhach5</pattern>
+<pattern>lámhacht6</pattern>
+<pattern>lár5</pattern>
+<pattern>lárt6</pattern>
+<pattern>l1b4a</pattern>
+<pattern>lba5t</pattern>
+<pattern>l3bá</pattern>
+<pattern>lbh5acá</pattern>
+<pattern>lbh5ad</pattern>
+<pattern>l5bhain</pattern>
+<pattern>lbh3ait</pattern>
+<pattern>l5bhan</pattern>
+<pattern>l1bhá</pattern>
+<pattern>l4bh5áin </pattern>
+<pattern>l6bh5án </pattern>
+<pattern>lbh5ead</pattern>
+<pattern>lbh5ean</pattern>
+<pattern>lbh3eo</pattern>
+<pattern>l3bhé</pattern>
+<pattern>lbh3f</pattern>
+<pattern>l6bh5id</pattern>
+<pattern>lbhin4</pattern>
+<pattern>lbh5ir </pattern>
+<pattern>lbh5ith</pattern>
+<pattern>lbh1í</pattern>
+<pattern>l1bhr</pattern>
+<pattern>l3b6í</pattern>
+<pattern>lb3n</pattern>
+<pattern>l4b3ó</pattern>
+<pattern>lc1a</pattern>
+<pattern>l3c4ail</pattern>
+<pattern>lca3l4</pattern>
+<pattern>l3c4á</pattern>
+<pattern>l6c5ánt</pattern>
+<pattern>lc3ean</pattern>
+<pattern>l3cei</pattern>
+<pattern>lc3eo</pattern>
+<pattern>l1ch2</pattern>
+<pattern>lc5id</pattern>
+<pattern>lc3im</pattern>
+<pattern>lc5in</pattern>
+<pattern>lc3it</pattern>
+<pattern>lc3í</pattern>
+<pattern>l3cl</pattern>
+<pattern>l5cú5</pattern>
+<pattern>l1d2</pattern>
+<pattern>ld5ean</pattern>
+<pattern>ldeighil6</pattern>
+<pattern>ldú3</pattern>
+<pattern>ldúd4</pattern>
+<pattern>leach6tá</pattern>
+<pattern>lea5gú</pattern>
+<pattern>lea5m6á</pattern>
+<pattern>learb3</pattern>
+<pattern>leat5ó</pattern>
+<pattern>lea3tra</pattern>
+<pattern>l4eav</pattern>
+<pattern>leách3</pattern>
+<pattern>3leáf</pattern>
+<pattern>l4ec</pattern>
+<pattern>l4ef</pattern>
+<pattern>l4ei</pattern>
+<pattern>leicead5</pattern>
+<pattern>leif5</pattern>
+<pattern>leir5c6</pattern>
+<pattern>leisc3</pattern>
+<pattern>l4e5l</pattern>
+<pattern>l4em</pattern>
+<pattern>leo6d5</pattern>
+<pattern>leomh3</pattern>
+<pattern>lé3ad4ar</pattern>
+<pattern>lé3adh</pattern>
+<pattern>léalaim5</pattern>
+<pattern>lé3idís</pattern>
+<pattern>lé1if4</pattern>
+<pattern>lé5imid </pattern>
+<pattern>lé5imis</pattern>
+<pattern>léint6</pattern>
+<pattern>lé3itea</pattern>
+<pattern>lé3ití</pattern>
+<pattern>léit6s</pattern>
+<pattern>l6éiv</pattern>
+<pattern>l1f</pattern>
+<pattern>l4fc</pattern>
+<pattern>lf5ean</pattern>
+<pattern>l4fg</pattern>
+<pattern>lf5ré</pattern>
+<pattern>lga3dá</pattern>
+<pattern>l1g2am</pattern>
+<pattern>lg1e</pattern>
+<pattern>l3gé</pattern>
+<pattern>l1gh6</pattern>
+<pattern>lg3i</pattern>
+<pattern>lg3l</pattern>
+<pattern>lg3r</pattern>
+<pattern>lg6rá</pattern>
+<pattern>l3ha</pattern>
+<pattern>l5he</pattern>
+<pattern>liant3a</pattern>
+<pattern>lian4tac</pattern>
+<pattern>lias5</pattern>
+<pattern>liast6</pattern>
+<pattern>liat6</pattern>
+<pattern>l4ibh</pattern>
+<pattern>li3bhe</pattern>
+<pattern>li5b6il</pattern>
+<pattern>li5bí </pattern>
+<pattern>li5b6ío</pattern>
+<pattern>lic6s5</pattern>
+<pattern>l1id</pattern>
+<pattern>4l1i1f4</pattern>
+<pattern>lig3</pattern>
+<pattern>li5g6éa</pattern>
+<pattern>li3l6</pattern>
+<pattern>li5m6é</pattern>
+<pattern>li3mhi</pattern>
+<pattern>lim5ir</pattern>
+<pattern>limp3í</pattern>
+<pattern>li5n6é</pattern>
+<pattern>ling6te </pattern>
+<pattern>lin4s</pattern>
+<pattern>lint3e</pattern>
+<pattern>4liona</pattern>
+<pattern>lion4t5</pattern>
+<pattern>liost3</pattern>
+<pattern>lip4s</pattern>
+<pattern>l1ir</pattern>
+<pattern>lis1</pattern>
+<pattern>list4</pattern>
+<pattern>li3té</pattern>
+<pattern>li3tiú</pattern>
+<pattern>liú5d6ar</pattern>
+<pattern>liú5ití </pattern>
+<pattern>liú5ma</pattern>
+<pattern>liú3st</pattern>
+<pattern>lí3bhé</pattern>
+<pattern>lí6ochá</pattern>
+<pattern>l1ís</pattern>
+<pattern>lí3sé5</pattern>
+<pattern>líth6i</pattern>
+<pattern>l2l1</pattern>
+<pattern>llab6</pattern>
+<pattern>lla5ba</pattern>
+<pattern>lla3c4á</pattern>
+<pattern>lla3g</pattern>
+<pattern>llag6ac</pattern>
+<pattern>llag6ar</pattern>
+<pattern>llai3s</pattern>
+<pattern>llait4</pattern>
+<pattern>llam6</pattern>
+<pattern>lla5má</pattern>
+<pattern>l6ló</pattern>
+<pattern>llt4</pattern>
+<pattern>l1m</pattern>
+<pattern>l2ma</pattern>
+<pattern>l5ma5n6</pattern>
+<pattern>lm6á</pattern>
+<pattern>l2me</pattern>
+<pattern>lmh2</pattern>
+<pattern>l6mia</pattern>
+<pattern>lm6í</pattern>
+<pattern>l6mí </pattern>
+<pattern>lm4óg</pattern>
+<pattern>lm6óig</pattern>
+<pattern>l4ms</pattern>
+<pattern>l1n</pattern>
+<pattern>ln4a</pattern>
+<pattern>ln4i</pattern>
+<pattern>lod5</pattern>
+<pattern>l3oid</pattern>
+<pattern>6loine</pattern>
+<pattern>loit5e</pattern>
+<pattern>lon5c</pattern>
+<pattern>lorai5</pattern>
+<pattern>loraic6</pattern>
+<pattern>ló5dóir</pattern>
+<pattern>ló5d6ór</pattern>
+<pattern>l6óiní</pattern>
+<pattern>5l6óip</pattern>
+<pattern>ló3l4</pattern>
+<pattern>ló5mh</pattern>
+<pattern>5lóp </pattern>
+<pattern>ló1s</pattern>
+<pattern>lót3a</pattern>
+<pattern>lóth3</pattern>
+<pattern>4lóv</pattern>
+<pattern>lp1a</pattern>
+<pattern>lp3á</pattern>
+<pattern>lp1e</pattern>
+<pattern>l5pei</pattern>
+<pattern>l3pé</pattern>
+<pattern>lp5iú</pattern>
+<pattern>l5pít</pattern>
+<pattern>l3pó</pattern>
+<pattern>l1r</pattern>
+<pattern>lré5</pattern>
+<pattern>l1s2</pattern>
+<pattern>l6sc3ai</pattern>
+<pattern>lsc4á</pattern>
+<pattern>lsc3e</pattern>
+<pattern>lsc6ead</pattern>
+<pattern>l5scid</pattern>
+<pattern>lsc5in</pattern>
+<pattern>l5scl</pattern>
+<pattern>l5s4e</pattern>
+<pattern>l5s6l</pattern>
+<pattern>l1t</pattern>
+<pattern>lt6air</pattern>
+<pattern>lt4ar</pattern>
+<pattern>l6tb</pattern>
+<pattern>lt2e</pattern>
+<pattern>l4t3eann</pattern>
+<pattern>lt3eof</pattern>
+<pattern>lt2i</pattern>
+<pattern>l4tm</pattern>
+<pattern>ltor6</pattern>
+<pattern>lt6rac</pattern>
+<pattern>ltra3l</pattern>
+<pattern>lua3im</pattern>
+<pattern>lua5itear</pattern>
+<pattern>luch6t5</pattern>
+<pattern>luí3o</pattern>
+<pattern>lus5t</pattern>
+<pattern>3lúb</pattern>
+<pattern>lúca3</pattern>
+<pattern>lúch3t4</pattern>
+<pattern>4lúd</pattern>
+<pattern>lú4f3</pattern>
+<pattern>lúg4</pattern>
+<pattern>lúit5é</pattern>
+<pattern>l3úl6</pattern>
+<pattern>lúm3a</pattern>
+<pattern>lúma5n6</pattern>
+<pattern>lú4mh5a</pattern>
+<pattern>lú4mh3á</pattern>
+<pattern>l1ún</pattern>
+<pattern>l4úpa</pattern>
+<pattern>lús3</pattern>
+<pattern>lút3ó</pattern>
+<pattern>l1v</pattern>
+<pattern>m3ab</pattern>
+<pattern>mabh6</pattern>
+<pattern>m1ac</pattern>
+<pattern>5m6ac </pattern>
+<pattern>mac5a</pattern>
+<pattern>m1ad</pattern>
+<pattern>m5adar</pattern>
+<pattern>ma5das</pattern>
+<pattern>ma3dá</pattern>
+<pattern>m5adh4</pattern>
+<pattern>madhm5</pattern>
+<pattern>m3ae</pattern>
+<pattern>m3a3f4</pattern>
+<pattern>m3ag</pattern>
+<pattern>ma5g6l</pattern>
+<pattern>ma3gr</pattern>
+<pattern>m1ai</pattern>
+<pattern>mai5l6ít</pattern>
+<pattern>4maim</pattern>
+<pattern>maini3c4</pattern>
+<pattern>mai3n4id</pattern>
+<pattern>maint6i</pattern>
+<pattern>main6t5í</pattern>
+<pattern>mair6ne</pattern>
+<pattern>mair6ní</pattern>
+<pattern>maist6e</pattern>
+<pattern>mais5teo</pattern>
+<pattern>mais5t6ín</pattern>
+<pattern>mai3té</pattern>
+<pattern>m2aiti</pattern>
+<pattern>m1aí</pattern>
+<pattern>maí5te </pattern>
+<pattern>maít5eac</pattern>
+<pattern>maí6ti</pattern>
+<pattern>m5al </pattern>
+<pattern>ma3l6an</pattern>
+<pattern>m4alá</pattern>
+<pattern>mal5g6</pattern>
+<pattern>m1am</pattern>
+<pattern>mam5ó</pattern>
+<pattern>mam5ú5</pattern>
+<pattern>ma5n6am</pattern>
+<pattern>5m6an5c</pattern>
+<pattern>3m4an3d6</pattern>
+<pattern>mant3</pattern>
+<pattern>ma3r4ad</pattern>
+<pattern>m3ar6b</pattern>
+<pattern>marbh3</pattern>
+<pattern>m1ar6c5</pattern>
+<pattern>m1ard</pattern>
+<pattern>mar6f5</pattern>
+<pattern>mar3m6</pattern>
+<pattern>m3ars</pattern>
+<pattern>mar6sa </pattern>
+<pattern>m3art</pattern>
+<pattern>m3a3rú</pattern>
+<pattern>m1as</pattern>
+<pattern>mast4</pattern>
+<pattern>ma3tag</pattern>
+<pattern>m3a3tó</pattern>
+<pattern>mat5óg</pattern>
+<pattern>m1á</pattern>
+<pattern>mách1</pattern>
+<pattern>6mál</pattern>
+<pattern>már5</pattern>
+<pattern>márt6</pattern>
+<pattern>m4át</pattern>
+<pattern>m1b2</pattern>
+<pattern>mba6d</pattern>
+<pattern>mbad3á</pattern>
+<pattern>mbal6b</pattern>
+<pattern>m6bd</pattern>
+<pattern>mbeo5f</pattern>
+<pattern>mbeo5g</pattern>
+<pattern>mbeo5id</pattern>
+<pattern>mbeo5im</pattern>
+<pattern>mbeo5in</pattern>
+<pattern>mbí5dís</pattern>
+<pattern>mbí5mis</pattern>
+<pattern>mbí5teá</pattern>
+<pattern>mbí5tí</pattern>
+<pattern>m4bl</pattern>
+<pattern>mblí3</pattern>
+<pattern>mb4ó</pattern>
+<pattern>mbreo5f</pattern>
+<pattern>mbreo5id</pattern>
+<pattern>mbreo5im</pattern>
+<pattern>mbreo5in</pattern>
+<pattern>mbrí3o</pattern>
+<pattern>m1c</pattern>
+<pattern>mch2</pattern>
+<pattern>m3c4í</pattern>
+<pattern>m1d</pattern>
+<pattern>m1e</pattern>
+<pattern>m2eal</pattern>
+<pattern>meal6t</pattern>
+<pattern>mear5c6</pattern>
+<pattern>mear5t6ai</pattern>
+<pattern>m2easc</pattern>
+<pattern>meas5t</pattern>
+<pattern>meat5án</pattern>
+<pattern>meá5c</pattern>
+<pattern>meir6f5</pattern>
+<pattern>meo3nó</pattern>
+<pattern>m6es</pattern>
+<pattern>1méa</pattern>
+<pattern>6m5é5ac</pattern>
+<pattern>m5éam</pattern>
+<pattern>m3éar</pattern>
+<pattern>4méar </pattern>
+<pattern>mé5ic</pattern>
+<pattern>mé5igh</pattern>
+<pattern>méin6t</pattern>
+<pattern>m5éis</pattern>
+<pattern>2m1f</pattern>
+<pattern>m6fe </pattern>
+<pattern>m1g</pattern>
+<pattern>2mh </pattern>
+<pattern>3mh4ac5a</pattern>
+<pattern>mh4ad </pattern>
+<pattern>mhadh4</pattern>
+<pattern>mh4ag</pattern>
+<pattern>mh4aid </pattern>
+<pattern>mhaini5c4</pattern>
+<pattern>mhain5te</pattern>
+<pattern>mhain5ti</pattern>
+<pattern>mhais3</pattern>
+<pattern>mhais6c</pattern>
+<pattern>mhaist4</pattern>
+<pattern>mh6am </pattern>
+<pattern>mhar6b</pattern>
+<pattern>mharbh5</pattern>
+<pattern>mhar6ca</pattern>
+<pattern>mhar6c5r</pattern>
+<pattern>mhar4f3</pattern>
+<pattern>3mharg</pattern>
+<pattern>mhar3m6</pattern>
+<pattern>mhar3t4a</pattern>
+<pattern>mh3asf</pattern>
+<pattern>mh6at </pattern>
+<pattern>mhat3á</pattern>
+<pattern>mhat5ó</pattern>
+<pattern>mh6ats</pattern>
+<pattern>mhár5</pattern>
+<pattern>mhárt6</pattern>
+<pattern>mhd6</pattern>
+<pattern>mhea5dai</pattern>
+<pattern>mhead5ar</pattern>
+<pattern>mhea5das</pattern>
+<pattern>mhear5c6</pattern>
+<pattern>mheas3t6</pattern>
+<pattern>mheir6f5</pattern>
+<pattern>mh4éal</pattern>
+<pattern>mh1f</pattern>
+<pattern>mh4ill</pattern>
+<pattern>mhion6ta </pattern>
+<pattern>mhion6t5aí</pattern>
+<pattern>mhis3</pattern>
+<pattern>mhist6</pattern>
+<pattern>mhí3b</pattern>
+<pattern>mhíbh6</pattern>
+<pattern>mhí6le</pattern>
+<pattern>mhí3ré</pattern>
+<pattern>mh1l</pattern>
+<pattern>mhluad5</pattern>
+<pattern>mh1n</pattern>
+<pattern>5mhol5t6</pattern>
+<pattern>mhon5c6</pattern>
+<pattern>mhong5ó</pattern>
+<pattern>mhon6t5</pattern>
+<pattern>mhor6c</pattern>
+<pattern>mhor5n</pattern>
+<pattern>mhor6s5</pattern>
+<pattern>mhó5mh</pattern>
+<pattern>4mh5r</pattern>
+<pattern>mhrí5oc</pattern>
+<pattern>mh1t4</pattern>
+<pattern>3mhuir</pattern>
+<pattern>mhuis5</pattern>
+<pattern>mhuisc6</pattern>
+<pattern>mhuí6</pattern>
+<pattern>mhur5</pattern>
+<pattern>mhus3t</pattern>
+<pattern>mhúd6</pattern>
+<pattern>mh4úin</pattern>
+<pattern>m3ia</pattern>
+<pattern>m1ic</pattern>
+<pattern>mid5i</pattern>
+<pattern>m3idí</pattern>
+<pattern>m1ig</pattern>
+<pattern>m1il</pattern>
+<pattern>mi3l4é</pattern>
+<pattern>milí6</pattern>
+<pattern>milít5</pattern>
+<pattern>m1im</pattern>
+<pattern>m1in2</pattern>
+<pattern>mi3né</pattern>
+<pattern>min5se</pattern>
+<pattern>min5sí</pattern>
+<pattern>mint1</pattern>
+<pattern>mion4t5a</pattern>
+<pattern>mior5</pattern>
+<pattern>mir4c3</pattern>
+<pattern>m3i3r4é</pattern>
+<pattern>m3irí</pattern>
+<pattern>mirt3</pattern>
+<pattern>misc3</pattern>
+<pattern>m1isi</pattern>
+<pattern>m3is3t6</pattern>
+<pattern>m1it</pattern>
+<pattern>mit6e</pattern>
+<pattern>mi3t4i</pattern>
+<pattern>m1iú</pattern>
+<pattern>3miúd</pattern>
+<pattern>m1í</pattern>
+<pattern>mí3b</pattern>
+<pattern>míbh6</pattern>
+<pattern>mí3gh</pattern>
+<pattern>mí5gr</pattern>
+<pattern>3m4íl</pattern>
+<pattern>mí3lít</pattern>
+<pattern>mí6na</pattern>
+<pattern>míos5</pattern>
+<pattern>5míre </pattern>
+<pattern>mí3ré</pattern>
+<pattern>3m4ít </pattern>
+<pattern>3m4íte </pattern>
+<pattern>mí3teac</pattern>
+<pattern>mít6i</pattern>
+<pattern>m1l</pattern>
+<pattern>mleat6</pattern>
+<pattern>mlua5da</pattern>
+<pattern>mlua5itea</pattern>
+<pattern>2m1n2</pattern>
+<pattern>m5na</pattern>
+<pattern>modh5</pattern>
+<pattern>m1oi</pattern>
+<pattern>mol5t6</pattern>
+<pattern>mon5c6</pattern>
+<pattern>mong5ó</pattern>
+<pattern>mon6t5</pattern>
+<pattern>mor2</pattern>
+<pattern>morch5</pattern>
+<pattern>mor5d</pattern>
+<pattern>morf1</pattern>
+<pattern>mor5n</pattern>
+<pattern>mors5</pattern>
+<pattern>m1ó</pattern>
+<pattern>4móf</pattern>
+<pattern>m4óin </pattern>
+<pattern>m6óiní</pattern>
+<pattern>móint6</pattern>
+<pattern>mó5m</pattern>
+<pattern>m2ón</pattern>
+<pattern>3món </pattern>
+<pattern>mór5</pattern>
+<pattern>5m6óró</pattern>
+<pattern>m4ós</pattern>
+<pattern>mp3all</pattern>
+<pattern>mpar5</pattern>
+<pattern>m3p4arn</pattern>
+<pattern>m1pe</pattern>
+<pattern>mp3eann</pattern>
+<pattern>m5pé </pattern>
+<pattern>m5péar</pattern>
+<pattern>mp5éid</pattern>
+<pattern>m5péir</pattern>
+<pattern>m4pf</pattern>
+<pattern>m1pi</pattern>
+<pattern>mpis6</pattern>
+<pattern>mpi5se</pattern>
+<pattern>m3pí</pattern>
+<pattern>m1p2l</pattern>
+<pattern>m1po</pattern>
+<pattern>m1pr</pattern>
+<pattern>m6pt</pattern>
+<pattern>m1pú</pattern>
+<pattern>m1r</pattern>
+<pattern>mroch5</pattern>
+<pattern>mrocht6</pattern>
+<pattern>m1s2</pattern>
+<pattern>msc4</pattern>
+<pattern>m1t</pattern>
+<pattern>mth6</pattern>
+<pattern>m1ua</pattern>
+<pattern>muilc5</pattern>
+<pattern>muis5</pattern>
+<pattern>muisc6</pattern>
+<pattern>muí6</pattern>
+<pattern>5mul</pattern>
+<pattern>mur5</pattern>
+<pattern>murd6</pattern>
+<pattern>mus3t</pattern>
+<pattern>m3ú6c</pattern>
+<pattern>múch3</pattern>
+<pattern>múcht6</pattern>
+<pattern>múin5</pattern>
+<pattern>m3úl</pattern>
+<pattern>m3ús</pattern>
+<pattern>mút5</pattern>
+<pattern>n1a</pattern>
+<pattern>n3abaí</pattern>
+<pattern>na3bh4</pattern>
+<pattern>nach6ain</pattern>
+<pattern>na3ch4an</pattern>
+<pattern>na3chl</pattern>
+<pattern>na5chr</pattern>
+<pattern>na5có</pattern>
+<pattern>na3cr</pattern>
+<pattern>na3dá</pattern>
+<pattern>nae5m6</pattern>
+<pattern>n3aer</pattern>
+<pattern>naf5</pattern>
+<pattern>2nag</pattern>
+<pattern>na3g4am</pattern>
+<pattern>nag3ó</pattern>
+<pattern>na3gr</pattern>
+<pattern>nai3l4i</pattern>
+<pattern>nai5l6ín</pattern>
+<pattern>nail6t</pattern>
+<pattern>n4aise</pattern>
+<pattern>naist3e</pattern>
+<pattern>nais5teo</pattern>
+<pattern>naít6</pattern>
+<pattern>nal3</pattern>
+<pattern>nalbh4</pattern>
+<pattern>na3l4óg</pattern>
+<pattern>na5mara</pattern>
+<pattern>na5mat</pattern>
+<pattern>namh5a</pattern>
+<pattern>na3mhé</pattern>
+<pattern>nan2</pattern>
+<pattern>nant1</pattern>
+<pattern>nao5nn</pattern>
+<pattern>2nap</pattern>
+<pattern>narb5a</pattern>
+<pattern>narbh6</pattern>
+<pattern>na3stá</pattern>
+<pattern>nata6</pattern>
+<pattern>na5tam</pattern>
+<pattern>na3tó</pattern>
+<pattern>nava5</pattern>
+<pattern>4ná </pattern>
+<pattern>ná4f3</pattern>
+<pattern>ná6i</pattern>
+<pattern>n1áid</pattern>
+<pattern>n1áil</pattern>
+<pattern>n5áisc</pattern>
+<pattern>n5áí</pattern>
+<pattern>n1ál</pattern>
+<pattern>n1ár</pattern>
+<pattern>6n5ásc</pattern>
+<pattern>n1b</pattern>
+<pattern>nb6a</pattern>
+<pattern>n4b3e</pattern>
+<pattern>nbhan6</pattern>
+<pattern>nbhand5</pattern>
+<pattern>n6bh5ao</pattern>
+<pattern>n6b5i</pattern>
+<pattern>n6bí</pattern>
+<pattern>n1c</pattern>
+<pattern>n2ca</pattern>
+<pattern>nc5aig</pattern>
+<pattern>nc5an</pattern>
+<pattern>ncar5</pattern>
+<pattern>n5c6ar </pattern>
+<pattern>ncarn6</pattern>
+<pattern>n2cá</pattern>
+<pattern>n3c4ás</pattern>
+<pattern>n6cb</pattern>
+<pattern>nc3e</pattern>
+<pattern>n3ceas</pattern>
+<pattern>n5cei</pattern>
+<pattern>n4c3é</pattern>
+<pattern>n5céad</pattern>
+<pattern>n5céid</pattern>
+<pattern>n5ch2</pattern>
+<pattern>nchró5</pattern>
+<pattern>n6cig</pattern>
+<pattern>n5cisí</pattern>
+<pattern>nc1lo</pattern>
+<pattern>nc3lu</pattern>
+<pattern>n4c4s3</pattern>
+<pattern>n4c3ú</pattern>
+<pattern>n5cún</pattern>
+<pattern>n1d2</pattern>
+<pattern>nda6g</pattern>
+<pattern>n5d6án</pattern>
+<pattern>n5dea</pattern>
+<pattern>n4deá</pattern>
+<pattern>n5dé</pattern>
+<pattern>n4diai</pattern>
+<pattern>ndic5</pattern>
+<pattern>n6dis</pattern>
+<pattern>nd5is </pattern>
+<pattern>nd5ise</pattern>
+<pattern>ndlí5d</pattern>
+<pattern>ndlí5g</pattern>
+<pattern>ndlí5m</pattern>
+<pattern>ndlí3o</pattern>
+<pattern>nd3óg</pattern>
+<pattern>ndó5ite </pattern>
+<pattern>ndó5ití</pattern>
+<pattern>ndreach5</pattern>
+<pattern>ndreacht6</pattern>
+<pattern>ndreo5f</pattern>
+<pattern>ndreo5id</pattern>
+<pattern>ndreo5im</pattern>
+<pattern>ndreo5in</pattern>
+<pattern>nd6ró</pattern>
+<pattern>nea3g4á</pattern>
+<pattern>nea5ma </pattern>
+<pattern>nea5s6ár</pattern>
+<pattern>neat5</pattern>
+<pattern>neá5cha</pattern>
+<pattern>n4ed</pattern>
+<pattern>n4eg</pattern>
+<pattern>n4em</pattern>
+<pattern>neo6</pattern>
+<pattern>neod5</pattern>
+<pattern>n5eoiri</pattern>
+<pattern>5n6eot</pattern>
+<pattern>néa6</pattern>
+<pattern>néal5</pattern>
+<pattern>néalt4</pattern>
+<pattern>4néas</pattern>
+<pattern>n1f</pattern>
+<pattern>n6fa </pattern>
+<pattern>nfair6</pattern>
+<pattern>nfairt5</pattern>
+<pattern>2ng</pattern>
+<pattern>nga3dá</pattern>
+<pattern>ng4aint</pattern>
+<pattern>ngair5t</pattern>
+<pattern>ng4aló</pattern>
+<pattern>n3g4ant</pattern>
+<pattern>ng2á</pattern>
+<pattern>ng3án</pattern>
+<pattern>ng6eal</pattern>
+<pattern>ngear3t4</pattern>
+<pattern>ngeat5</pattern>
+<pattern>n3g4é</pattern>
+<pattern>n1gh6</pattern>
+<pattern>ng6ia</pattern>
+<pattern>n3g4il</pattern>
+<pattern>n4gin</pattern>
+<pattern>ng6íne</pattern>
+<pattern>ng6íoc</pattern>
+<pattern>ng6lí</pattern>
+<pattern>ng6óid </pattern>
+<pattern>ng6óide</pattern>
+<pattern>ng6ór</pattern>
+<pattern>ngt4</pattern>
+<pattern>n5g6ún</pattern>
+<pattern>n5gús</pattern>
+<pattern>n5h6a</pattern>
+<pattern>n5há</pattern>
+<pattern>n1i</pattern>
+<pattern>nia5it</pattern>
+<pattern>nib6é</pattern>
+<pattern>ni5cíne</pattern>
+<pattern>ni3f</pattern>
+<pattern>n5igí</pattern>
+<pattern>n3il</pattern>
+<pattern>6n5im </pattern>
+<pattern>ni6m5é</pattern>
+<pattern>4n3imi</pattern>
+<pattern>n5in</pattern>
+<pattern>nin6d5</pattern>
+<pattern>ninít5</pattern>
+<pattern>nin4s</pattern>
+<pattern>2nio</pattern>
+<pattern>nir5b</pattern>
+<pattern>nir4i</pattern>
+<pattern>nis1</pattern>
+<pattern>nist6</pattern>
+<pattern>ni3té</pattern>
+<pattern>nílim5</pattern>
+<pattern>2níomh</pattern>
+<pattern>nío3t</pattern>
+<pattern>n3ír</pattern>
+<pattern>ní4th5</pattern>
+<pattern>ní6t5r</pattern>
+<pattern>n1l</pattern>
+<pattern>nlé5am</pattern>
+<pattern>nlé5an</pattern>
+<pattern>nlé5igí</pattern>
+<pattern>nlé3imi</pattern>
+<pattern>nlia5n</pattern>
+<pattern>n5lí</pattern>
+<pattern>n1m</pattern>
+<pattern>nm5an</pattern>
+<pattern>n6mc</pattern>
+<pattern>n4me</pattern>
+<pattern>nmh4</pattern>
+<pattern>n6mi</pattern>
+<pattern>n6mí</pattern>
+<pattern>nm4ó</pattern>
+<pattern>n2n1</pattern>
+<pattern>2nn </pattern>
+<pattern>nna3b4</pattern>
+<pattern>6nnac</pattern>
+<pattern>nn3t2</pattern>
+<pattern>noch6</pattern>
+<pattern>nocht5</pattern>
+<pattern>noich4</pattern>
+<pattern>nol6</pattern>
+<pattern>no5la</pattern>
+<pattern>3nom</pattern>
+<pattern>n3ord</pattern>
+<pattern>noscail4</pattern>
+<pattern>5n6ób</pattern>
+<pattern>n1óg</pattern>
+<pattern>3nóia</pattern>
+<pattern>n4óit</pattern>
+<pattern>n1ól</pattern>
+<pattern>5n6óma</pattern>
+<pattern>n1ón</pattern>
+<pattern>n1ór</pattern>
+<pattern>nór6t5as</pattern>
+<pattern>2n2ót</pattern>
+<pattern>nó1th2</pattern>
+<pattern>n1p</pattern>
+<pattern>n1r</pattern>
+<pattern>n3ra</pattern>
+<pattern>n5ri</pattern>
+<pattern>nroch5</pattern>
+<pattern>nrocht6</pattern>
+<pattern>n6ró </pattern>
+<pattern>nr6ú</pattern>
+<pattern>n1s2</pattern>
+<pattern>nsab6</pattern>
+<pattern>nsa5ba</pattern>
+<pattern>ns3ann</pattern>
+<pattern>n4s3áil</pattern>
+<pattern>nsá5inn</pattern>
+<pattern>nsá3it</pattern>
+<pattern>n2s3ál</pattern>
+<pattern>nsc6á</pattern>
+<pattern>nsc6i</pattern>
+<pattern>nsc6r</pattern>
+<pattern>n5seac</pattern>
+<pattern>ns3eá</pattern>
+<pattern>ns4eán</pattern>
+<pattern>nseir5</pattern>
+<pattern>n5sé</pattern>
+<pattern>nsin6t</pattern>
+<pattern>n5sín</pattern>
+<pattern>nst4</pattern>
+<pattern>nsúd6</pattern>
+<pattern>nsú5ití</pattern>
+<pattern>nsú5m</pattern>
+<pattern>n1t</pattern>
+<pattern>ntai3b</pattern>
+<pattern>nt5a5l6ún</pattern>
+<pattern>nta5mó</pattern>
+<pattern>nta3p</pattern>
+<pattern>nt5art</pattern>
+<pattern>n5tá </pattern>
+<pattern>nt4ead</pattern>
+<pattern>nt3eag</pattern>
+<pattern>n5tear</pattern>
+<pattern>n2t1eá</pattern>
+<pattern>n5teá </pattern>
+<pattern>n5t6eán</pattern>
+<pattern>nt6eog</pattern>
+<pattern>nt4eol</pattern>
+<pattern>n5tia</pattern>
+<pattern>nt3ic</pattern>
+<pattern>ntil4</pattern>
+<pattern>nti3lít</pattern>
+<pattern>n3tin</pattern>
+<pattern>n5tis</pattern>
+<pattern>nt5iúir</pattern>
+<pattern>n4t3iúr</pattern>
+<pattern>n4t3íl</pattern>
+<pattern>nt4ín </pattern>
+<pattern>nt6íni</pattern>
+<pattern>nt4íní</pattern>
+<pattern>nt4íoc</pattern>
+<pattern>n4tm</pattern>
+<pattern>nt5oid</pattern>
+<pattern>n3tr</pattern>
+<pattern>ntra5b</pattern>
+<pattern>ntrabh6</pattern>
+<pattern>n6trais</pattern>
+<pattern>n6tras</pattern>
+<pattern>n6ts</pattern>
+<pattern>nua5ch4an</pattern>
+<pattern>nua3chó</pattern>
+<pattern>nua5da</pattern>
+<pattern>nua5im</pattern>
+<pattern>nuais6l</pattern>
+<pattern>nua5itea</pattern>
+<pattern>nuan6</pattern>
+<pattern>n5uar</pattern>
+<pattern>n6uas </pattern>
+<pattern>nua5t</pattern>
+<pattern>n1ui</pattern>
+<pattern>nú5í</pattern>
+<pattern>n1úl</pattern>
+<pattern>n1ún</pattern>
+<pattern>n1ús</pattern>
+<pattern>nút6</pattern>
+<pattern>n3ve</pattern>
+<pattern>ob1a</pattern>
+<pattern>oba3dá</pattern>
+<pattern>ob1á</pattern>
+<pattern>obh1</pattern>
+<pattern>obhar3</pattern>
+<pattern>obhard4</pattern>
+<pattern>o3bh4e</pattern>
+<pattern>o5bhré</pattern>
+<pattern>o3bh6ri</pattern>
+<pattern>obht4</pattern>
+<pattern>ob1l</pattern>
+<pattern>ob1ó</pattern>
+<pattern>ob1r</pattern>
+<pattern>ob3ú</pattern>
+<pattern>4oc </pattern>
+<pattern>2oc1a</pattern>
+<pattern>ocan4</pattern>
+<pattern>oca3t</pattern>
+<pattern>oc3á</pattern>
+<pattern>2ocf</pattern>
+<pattern>och1a</pattern>
+<pattern>och1á</pattern>
+<pattern>4ochb</pattern>
+<pattern>och3eo</pattern>
+<pattern>och3i</pattern>
+<pattern>och5í</pattern>
+<pattern>och1l</pattern>
+<pattern>6ochn</pattern>
+<pattern>och1ó</pattern>
+<pattern>och1r</pattern>
+<pattern>och3t4í</pattern>
+<pattern>och3ua</pattern>
+<pattern>oc1l</pattern>
+<pattern>6oc3n</pattern>
+<pattern>4oc1ó</pattern>
+<pattern>ocó5c</pattern>
+<pattern>2oc1r</pattern>
+<pattern>2oct</pattern>
+<pattern>4oc3u</pattern>
+<pattern>oc5ú</pattern>
+<pattern>od3al</pattern>
+<pattern>od3am</pattern>
+<pattern>od3art</pattern>
+<pattern>o3das</pattern>
+<pattern>od1á</pattern>
+<pattern>od5e</pattern>
+<pattern>odh1a</pattern>
+<pattern>odhear6</pattern>
+<pattern>odhearm5</pattern>
+<pattern>odh5eo</pattern>
+<pattern>o5dhi</pattern>
+<pattern>o5dhí</pattern>
+<pattern>odh6l</pattern>
+<pattern>o5dhó</pattern>
+<pattern>odh1r</pattern>
+<pattern>odh3ú</pattern>
+<pattern>o6d5r</pattern>
+<pattern>od3ú</pattern>
+<pattern>oen6</pattern>
+<pattern>o6f3ac</pattern>
+<pattern>of5ó</pattern>
+<pattern>of5ra</pattern>
+<pattern>og5al</pattern>
+<pattern>og3e</pattern>
+<pattern>ogh1</pattern>
+<pattern>oghair5t</pattern>
+<pattern>ogh2e</pattern>
+<pattern>og1l</pattern>
+<pattern>og3o</pattern>
+<pattern>og1ó</pattern>
+<pattern>og1r</pattern>
+<pattern>og3u</pattern>
+<pattern>og1ú</pattern>
+<pattern>o3hó</pattern>
+<pattern>oid1i</pattern>
+<pattern>oif3</pattern>
+<pattern>oift4</pattern>
+<pattern>o3igí </pattern>
+<pattern>oil5e</pattern>
+<pattern>oimead5</pattern>
+<pattern>oim3ir</pattern>
+<pattern>oimp3é</pattern>
+<pattern>oim4p3í</pattern>
+<pattern>6oinn</pattern>
+<pattern>oint3é</pattern>
+<pattern>oi6p5</pattern>
+<pattern>6oir </pattern>
+<pattern>oir6bhig</pattern>
+<pattern>oir4bhí</pattern>
+<pattern>oir3d4</pattern>
+<pattern>oirn6eá</pattern>
+<pattern>oir6n5it</pattern>
+<pattern>oir6niú</pattern>
+<pattern>oirn3í</pattern>
+<pattern>oir6níd</pattern>
+<pattern>oir6níg</pattern>
+<pattern>oir4ním</pattern>
+<pattern>oir4nío</pattern>
+<pattern>oir4nít</pattern>
+<pattern>oir4p3í</pattern>
+<pattern>6ois</pattern>
+<pattern>oisc1</pattern>
+<pattern>ois5c4eá</pattern>
+<pattern>ois1t4</pattern>
+<pattern>ois4t5ín</pattern>
+<pattern>oit1é</pattern>
+<pattern>oí1</pattern>
+<pattern>oí2c</pattern>
+<pattern>oíche5</pattern>
+<pattern>oíl4</pattern>
+<pattern>oí4te </pattern>
+<pattern>ol1a</pattern>
+<pattern>o5l6ab</pattern>
+<pattern>ola3dá</pattern>
+<pattern>ola3f4</pattern>
+<pattern>ola1g6</pattern>
+<pattern>o5lagh</pattern>
+<pattern>ol6aimé</pattern>
+<pattern>olai3té</pattern>
+<pattern>olan5d</pattern>
+<pattern>ol1á</pattern>
+<pattern>o5láim</pattern>
+<pattern>ol1b</pattern>
+<pattern>olbh4</pattern>
+<pattern>olc3ó</pattern>
+<pattern>ol3eo</pattern>
+<pattern>o3lé</pattern>
+<pattern>ol4g3a</pattern>
+<pattern>o1li</pattern>
+<pattern>o3lí</pattern>
+<pattern>ol3m2</pattern>
+<pattern>o1lo</pattern>
+<pattern>ol1ó</pattern>
+<pattern>6olt</pattern>
+<pattern>ol1úi</pattern>
+<pattern>ol3úr</pattern>
+<pattern>oma3l4ó</pattern>
+<pattern>om1an</pattern>
+<pattern>omant4</pattern>
+<pattern>om3ao</pattern>
+<pattern>om3ará</pattern>
+<pattern>om3at</pattern>
+<pattern>oma5tá</pattern>
+<pattern>omh1</pattern>
+<pattern>omhair5t</pattern>
+<pattern>o5mhara</pattern>
+<pattern>o1mh2e</pattern>
+<pattern>o5mhil</pattern>
+<pattern>o3mh6í</pattern>
+<pattern>om5ó</pattern>
+<pattern>om1p</pattern>
+<pattern>omp6á</pattern>
+<pattern>om3ú</pattern>
+<pattern>on5a</pattern>
+<pattern>ona3b4</pattern>
+<pattern>ona6cra</pattern>
+<pattern>ona3g4ó</pattern>
+<pattern>ona3l4</pattern>
+<pattern>onam4a</pattern>
+<pattern>ona5mai</pattern>
+<pattern>on1á</pattern>
+<pattern>ondu5s</pattern>
+<pattern>on3e</pattern>
+<pattern>on3é</pattern>
+<pattern>on5gab</pattern>
+<pattern>ong3á</pattern>
+<pattern>ong3l</pattern>
+<pattern>ong3ói</pattern>
+<pattern>ong5ón</pattern>
+<pattern>on5gr</pattern>
+<pattern>on5gúi</pattern>
+<pattern>on1o</pattern>
+<pattern>on1ó</pattern>
+<pattern>o3nót</pattern>
+<pattern>6onr</pattern>
+<pattern>onsc2</pattern>
+<pattern>on6t5ail</pattern>
+<pattern>on6t5al</pattern>
+<pattern>ontar3</pattern>
+<pattern>ontarn4</pattern>
+<pattern>ont6e</pattern>
+<pattern>ont6í</pattern>
+<pattern>ont2ó</pattern>
+<pattern>on1ú</pattern>
+<pattern>op1</pattern>
+<pattern>opad6</pattern>
+<pattern>opa5dá</pattern>
+<pattern>opa3la</pattern>
+<pattern>or5a</pattern>
+<pattern>ora3dái</pattern>
+<pattern>ora3dán</pattern>
+<pattern>ora3tó</pattern>
+<pattern>or5á</pattern>
+<pattern>orb5ad</pattern>
+<pattern>or3bá</pattern>
+<pattern>or1bh</pattern>
+<pattern>or4ca</pattern>
+<pattern>orch3ó</pattern>
+<pattern>or5có</pattern>
+<pattern>or3e</pattern>
+<pattern>or1é</pattern>
+<pattern>or3i</pattern>
+<pattern>o5r6ia</pattern>
+<pattern>or6maí</pattern>
+<pattern>or3món</pattern>
+<pattern>or3ne</pattern>
+<pattern>or5ni</pattern>
+<pattern>o1ro</pattern>
+<pattern>or3oid</pattern>
+<pattern>or1ó</pattern>
+<pattern>or5pói</pattern>
+<pattern>or6s5aí</pattern>
+<pattern>or5tas</pattern>
+<pattern>orthé3a</pattern>
+<pattern>or5u</pattern>
+<pattern>or1ú</pattern>
+<pattern>osai5l6</pattern>
+<pattern>os5am</pattern>
+<pattern>osar5</pattern>
+<pattern>osarn6</pattern>
+<pattern>osa3t</pattern>
+<pattern>osc1a</pattern>
+<pattern>o5scao</pattern>
+<pattern>o5scé</pattern>
+<pattern>osc1l</pattern>
+<pattern>osc3ói</pattern>
+<pattern>oscó3l4</pattern>
+<pattern>osc5ór</pattern>
+<pattern>osc5ra</pattern>
+<pattern>o3scri</pattern>
+<pattern>osc3úi</pattern>
+<pattern>o5smá</pattern>
+<pattern>os1ó</pattern>
+<pattern>ospair3</pattern>
+<pattern>ospairt4</pattern>
+<pattern>o3s4pá</pattern>
+<pattern>ost5ad</pattern>
+<pattern>ost3ai</pattern>
+<pattern>os4t3é</pattern>
+<pattern>os3ti</pattern>
+<pattern>ost1ó</pattern>
+<pattern>ost3ú</pattern>
+<pattern>os5t6ún</pattern>
+<pattern>os3u</pattern>
+<pattern>os1ú</pattern>
+<pattern>ot3a</pattern>
+<pattern>otam4</pattern>
+<pattern>ot4asa</pattern>
+<pattern>ot1á</pattern>
+<pattern>oth1</pattern>
+<pattern>o3thais</pattern>
+<pattern>othar3</pattern>
+<pattern>oth6as</pattern>
+<pattern>o3tháir</pattern>
+<pattern>o3th4e</pattern>
+<pattern>o3thí</pattern>
+<pattern>o3tho</pattern>
+<pattern>oth6ri</pattern>
+<pattern>oth6us</pattern>
+<pattern>ot5i</pattern>
+<pattern>ot1ó</pattern>
+<pattern>ot1r</pattern>
+<pattern>ots5ó</pattern>
+<pattern>ot3u</pattern>
+<pattern>ot1ú</pattern>
+<pattern>ó3ál</pattern>
+<pattern>ób3a</pattern>
+<pattern>ó6b5ai</pattern>
+<pattern>ó1bh</pattern>
+<pattern>ób5r</pattern>
+<pattern>óc1a</pattern>
+<pattern>6ócar</pattern>
+<pattern>óch1a</pattern>
+<pattern>óch5á</pattern>
+<pattern>ó3che</pattern>
+<pattern>óch5r</pattern>
+<pattern>ócht6a</pattern>
+<pattern>óch3ú</pattern>
+<pattern>óc3i</pattern>
+<pattern>óc5ó</pattern>
+<pattern>óc3r</pattern>
+<pattern>óc5s6</pattern>
+<pattern>óc1ú</pattern>
+<pattern>ód1</pattern>
+<pattern>4óda</pattern>
+<pattern>ódai5d</pattern>
+<pattern>ó3d4ar</pattern>
+<pattern>ó3dhe</pattern>
+<pattern>ó3dhí</pattern>
+<pattern>ó5dhó</pattern>
+<pattern>4ódó</pattern>
+<pattern>ó3fad</pattern>
+<pattern>6óf5ag</pattern>
+<pattern>ó1fai</pattern>
+<pattern>óf5air</pattern>
+<pattern>óf5ait</pattern>
+<pattern>óf5á</pattern>
+<pattern>óf3r</pattern>
+<pattern>óg1</pattern>
+<pattern>óg3a</pattern>
+<pattern>óga3l4</pattern>
+<pattern>ó5gó </pattern>
+<pattern>6ógt</pattern>
+<pattern>4óia</pattern>
+<pattern>óib5é</pattern>
+<pattern>óid3i</pattern>
+<pattern>ó6igh</pattern>
+<pattern>ó3igí </pattern>
+<pattern>óillí4</pattern>
+<pattern>ói4m5é</pattern>
+<pattern>6ói1mh2</pattern>
+<pattern>óin6se </pattern>
+<pattern>óin5si</pattern>
+<pattern>óin5sí</pattern>
+<pattern>óin3t</pattern>
+<pattern>ói3pé</pattern>
+<pattern>óir3</pattern>
+<pattern>4óireo</pattern>
+<pattern>óisc3</pattern>
+<pattern>óist1</pattern>
+<pattern>óis5teo</pattern>
+<pattern>óis6té</pattern>
+<pattern>ó3itear</pattern>
+<pattern>ó3iteá </pattern>
+<pattern>óit3é</pattern>
+<pattern>óits3</pattern>
+<pattern>6óiv</pattern>
+<pattern>ó5íní</pattern>
+<pattern>ól1</pattern>
+<pattern>óla5dá</pattern>
+<pattern>ó3l4e</pattern>
+<pattern>ó5l6é</pattern>
+<pattern>ó3l4i</pattern>
+<pattern>ó3l4í</pattern>
+<pattern>ó3mar</pattern>
+<pattern>óma3s4ó</pattern>
+<pattern>óm3at</pattern>
+<pattern>ómh4aí</pattern>
+<pattern>ó5mhao</pattern>
+<pattern>ómh5art</pattern>
+<pattern>ómh3as</pattern>
+<pattern>ómh3á</pattern>
+<pattern>ón1</pattern>
+<pattern>ón2as</pattern>
+<pattern>ón3as </pattern>
+<pattern>óng2</pattern>
+<pattern>2ó1nn</pattern>
+<pattern>ó3n4o</pattern>
+<pattern>2óp1</pattern>
+<pattern>óp6al</pattern>
+<pattern>ó5p6é</pattern>
+<pattern>ór1</pattern>
+<pattern>6órais</pattern>
+<pattern>6óras</pattern>
+<pattern>ór4áid</pattern>
+<pattern>órg4</pattern>
+<pattern>ór4ma</pattern>
+<pattern>órós5</pattern>
+<pattern>órt2a</pattern>
+<pattern>ór6t5air</pattern>
+<pattern>ór4tá</pattern>
+<pattern>ós6aise</pattern>
+<pattern>ós5am</pattern>
+<pattern>ósar5</pattern>
+<pattern>ósarn6</pattern>
+<pattern>ósc3a</pattern>
+<pattern>ós3ó</pattern>
+<pattern>óst1</pattern>
+<pattern>ós6tr</pattern>
+<pattern>ós5u</pattern>
+<pattern>ós5ú</pattern>
+<pattern>óta1c4</pattern>
+<pattern>ót5aig</pattern>
+<pattern>ót3air</pattern>
+<pattern>ót1aí</pattern>
+<pattern>ót5a3m</pattern>
+<pattern>ótar3</pattern>
+<pattern>ót1á</pattern>
+<pattern>óth3á</pattern>
+<pattern>ót3ó</pattern>
+<pattern>ó3úl</pattern>
+<pattern>ó5yó</pattern>
+<pattern>p4aca</pattern>
+<pattern>p4acr</pattern>
+<pattern>pai5g6e</pattern>
+<pattern>pair4n3e</pattern>
+<pattern>paisi3</pattern>
+<pattern>pais3t6i</pattern>
+<pattern>4pall</pattern>
+<pattern>pana3m4</pattern>
+<pattern>pan6t5al</pattern>
+<pattern>pa3p4ó</pattern>
+<pattern>para5b6</pattern>
+<pattern>6parag</pattern>
+<pattern>parai3s4</pattern>
+<pattern>par3d4</pattern>
+<pattern>par3n4</pattern>
+<pattern>par2s3</pattern>
+<pattern>par6ta</pattern>
+<pattern>p6asam</pattern>
+<pattern>past4</pattern>
+<pattern>3p4at3</pattern>
+<pattern>páin4t5</pattern>
+<pattern>p1ál</pattern>
+<pattern>pás5</pattern>
+<pattern>p1c</pattern>
+<pattern>p5c6í</pattern>
+<pattern>4pe </pattern>
+<pattern>peacht6</pattern>
+<pattern>peal5a</pattern>
+<pattern>peam6</pattern>
+<pattern>pea5mai</pattern>
+<pattern>6peann</pattern>
+<pattern>pear3</pattern>
+<pattern>pearn6</pattern>
+<pattern>pea3s4ó</pattern>
+<pattern>pea5st</pattern>
+<pattern>p4ei</pattern>
+<pattern>peil3b</pattern>
+<pattern>peilbh6</pattern>
+<pattern>pein6t</pattern>
+<pattern>4peir</pattern>
+<pattern>peir5t</pattern>
+<pattern>p4éid</pattern>
+<pattern>5péin</pattern>
+<pattern>péin6t</pattern>
+<pattern>péir6s</pattern>
+<pattern>p1f</pattern>
+<pattern>1p2h</pattern>
+<pattern>ph6a</pattern>
+<pattern>phais5t6i</pattern>
+<pattern>phana5m6</pattern>
+<pattern>phar5d6</pattern>
+<pattern>phar6s5</pattern>
+<pattern>phast6</pattern>
+<pattern>phat3r</pattern>
+<pattern>pháint5</pattern>
+<pattern>pheil3b</pattern>
+<pattern>pheilbh6</pattern>
+<pattern>phéin6t</pattern>
+<pattern>phéir6s</pattern>
+<pattern>ph4i</pattern>
+<pattern>phin6se </pattern>
+<pattern>phion6t5</pattern>
+<pattern>phis5t6</pattern>
+<pattern>ph6l</pattern>
+<pattern>phlé5an</pattern>
+<pattern>phoin2</pattern>
+<pattern>phoint3</pattern>
+<pattern>phol5c6</pattern>
+<pattern>phonc5</pattern>
+<pattern>phór6t5a</pattern>
+<pattern>phós3</pattern>
+<pattern>phóst6</pattern>
+<pattern>phréach5</pattern>
+<pattern>phréacht6</pattern>
+<pattern>phróis5</pattern>
+<pattern>phuin4</pattern>
+<pattern>phun4t3</pattern>
+<pattern>phúit6</pattern>
+<pattern>6pias</pattern>
+<pattern>pic6s5</pattern>
+<pattern>pi3dé</pattern>
+<pattern>pid5i</pattern>
+<pattern>pi3le</pattern>
+<pattern>p3im</pattern>
+<pattern>pin6se </pattern>
+<pattern>pion6t5</pattern>
+<pattern>pios5</pattern>
+<pattern>piost6</pattern>
+<pattern>pirim5</pattern>
+<pattern>p6irt</pattern>
+<pattern>pist3e</pattern>
+<pattern>pis3ti</pattern>
+<pattern>p6itei</pattern>
+<pattern>p4i3té</pattern>
+<pattern>pit3s</pattern>
+<pattern>6píl</pattern>
+<pattern>6píol</pattern>
+<pattern>3pís</pattern>
+<pattern>pí6t</pattern>
+<pattern>pít5i</pattern>
+<pattern>pla4</pattern>
+<pattern>4p3lag3</pattern>
+<pattern>p6lé</pattern>
+<pattern>pléacht6</pattern>
+<pattern>plé5am</pattern>
+<pattern>plé5an</pattern>
+<pattern>plé5igí</pattern>
+<pattern>plé5imi</pattern>
+<pattern>plim4</pattern>
+<pattern>pló3m6</pattern>
+<pattern>p1n</pattern>
+<pattern>pn6a</pattern>
+<pattern>poch5</pattern>
+<pattern>pocht6</pattern>
+<pattern>poin4</pattern>
+<pattern>point5</pattern>
+<pattern>poist5</pattern>
+<pattern>pol2ag</pattern>
+<pattern>pol4aim</pattern>
+<pattern>pol5c6</pattern>
+<pattern>pon4c3</pattern>
+<pattern>por3t4r</pattern>
+<pattern>post5ac</pattern>
+<pattern>pot3</pattern>
+<pattern>5p6ór</pattern>
+<pattern>pór4t3a</pattern>
+<pattern>pós3</pattern>
+<pattern>póst4</pattern>
+<pattern>pót3</pattern>
+<pattern>praoi5</pattern>
+<pattern>préach5</pattern>
+<pattern>préacht6</pattern>
+<pattern>pré5ad6</pattern>
+<pattern>pré5am</pattern>
+<pattern>pré5id</pattern>
+<pattern>pré5imi</pattern>
+<pattern>pré5itea</pattern>
+<pattern>pré5ití</pattern>
+<pattern>próis5</pattern>
+<pattern>p1s</pattern>
+<pattern>ps4a</pattern>
+<pattern>p6sa </pattern>
+<pattern>psain6</pattern>
+<pattern>ps5ean</pattern>
+<pattern>p5s6im</pattern>
+<pattern>p5sis</pattern>
+<pattern>p1t</pattern>
+<pattern>p4te </pattern>
+<pattern>pt3ean</pattern>
+<pattern>pth4</pattern>
+<pattern>pt4ig</pattern>
+<pattern>pt3is</pattern>
+<pattern>6pu </pattern>
+<pattern>puin2</pattern>
+<pattern>pun4</pattern>
+<pattern>punt3</pattern>
+<pattern>6p6us</pattern>
+<pattern>púin4</pattern>
+<pattern>púins5</pattern>
+<pattern>púit6</pattern>
+<pattern>rabh5t6</pattern>
+<pattern>ra3bó</pattern>
+<pattern>rad5ón</pattern>
+<pattern>raf3</pattern>
+<pattern>ra3g4á</pattern>
+<pattern>ragh4</pattern>
+<pattern>raghs5</pattern>
+<pattern>rag5o</pattern>
+<pattern>6raicn</pattern>
+<pattern>raimh4</pattern>
+<pattern>rai3mhí</pattern>
+<pattern>raimp3</pattern>
+<pattern>rain4</pattern>
+<pattern>rainc3</pattern>
+<pattern>rain5tí</pattern>
+<pattern>rais4eol</pattern>
+<pattern>rais3t4</pattern>
+<pattern>rait3é</pattern>
+<pattern>rait5s</pattern>
+<pattern>ra5l6aíc</pattern>
+<pattern>ra3l4aío</pattern>
+<pattern>r6alan</pattern>
+<pattern>ra3l4ú</pattern>
+<pattern>rama5dac</pattern>
+<pattern>rama5daí</pattern>
+<pattern>ra3mat</pattern>
+<pattern>ra3n4am</pattern>
+<pattern>ra5n6óm</pattern>
+<pattern>ran4t3á</pattern>
+<pattern>rant4ó</pattern>
+<pattern>4raob</pattern>
+<pattern>4raol</pattern>
+<pattern>4rap</pattern>
+<pattern>ra3p4ó</pattern>
+<pattern>6rasn</pattern>
+<pattern>ras1t4</pattern>
+<pattern>rata6m</pattern>
+<pattern>ra3tá</pattern>
+<pattern>ra5té</pattern>
+<pattern>rat3óg</pattern>
+<pattern>ra3tr</pattern>
+<pattern>rábh4ail</pattern>
+<pattern>rách5a</pattern>
+<pattern>r6áini</pattern>
+<pattern>rá3iteá</pattern>
+<pattern>rá3ínt</pattern>
+<pattern>rb3ac4</pattern>
+<pattern>rba3cá</pattern>
+<pattern>rb3adh</pattern>
+<pattern>r3bair</pattern>
+<pattern>rb5ais </pattern>
+<pattern>r5bait</pattern>
+<pattern>rb3am</pattern>
+<pattern>rb3ann</pattern>
+<pattern>r1bar</pattern>
+<pattern>rb3as</pattern>
+<pattern>rb5a5tr</pattern>
+<pattern>r4be</pattern>
+<pattern>rb3ea</pattern>
+<pattern>rbh3as</pattern>
+<pattern>rbh6at</pattern>
+<pattern>rbhá5cha</pattern>
+<pattern>rbh3án</pattern>
+<pattern>r6bh5eas</pattern>
+<pattern>r2bh3eo</pattern>
+<pattern>r5bhia</pattern>
+<pattern>rbh3in</pattern>
+<pattern>r6bh5is</pattern>
+<pattern>r4bh3it</pattern>
+<pattern>rbh5íd</pattern>
+<pattern>rbh3íg</pattern>
+<pattern>rbh3ío</pattern>
+<pattern>rbh3ít</pattern>
+<pattern>r2bh1l</pattern>
+<pattern>r3bhr</pattern>
+<pattern>rbh5uis</pattern>
+<pattern>r4b3ia</pattern>
+<pattern>rb5is</pattern>
+<pattern>rb3l</pattern>
+<pattern>r1br</pattern>
+<pattern>rb4rí</pattern>
+<pattern>r3bú</pattern>
+<pattern>rc1a</pattern>
+<pattern>r3cais</pattern>
+<pattern>rca3s4</pattern>
+<pattern>rc1e</pattern>
+<pattern>r4c3é</pattern>
+<pattern>r1ch</pattern>
+<pattern>rch3ac</pattern>
+<pattern>rcha3d6</pattern>
+<pattern>rchar5t6</pattern>
+<pattern>rch4á</pattern>
+<pattern>rch6i</pattern>
+<pattern>rch5la </pattern>
+<pattern>rch6n</pattern>
+<pattern>rch3ra</pattern>
+<pattern>r2c1i</pattern>
+<pattern>rc4int</pattern>
+<pattern>r5cisi</pattern>
+<pattern>r5c6isí</pattern>
+<pattern>rc1l</pattern>
+<pattern>r4cm</pattern>
+<pattern>rc3n</pattern>
+<pattern>r6cra </pattern>
+<pattern>rc3rá</pattern>
+<pattern>rc3s</pattern>
+<pattern>rc5ú</pattern>
+<pattern>rd1a</pattern>
+<pattern>r6d5acht</pattern>
+<pattern>rd6air</pattern>
+<pattern>r5d6ao</pattern>
+<pattern>r5d6ar</pattern>
+<pattern>r2d1e</pattern>
+<pattern>rd3é</pattern>
+<pattern>r1dh4</pattern>
+<pattern>rdhó5ití</pattern>
+<pattern>r2d1i6</pattern>
+<pattern>rdin5é</pattern>
+<pattern>r4dí </pattern>
+<pattern>r6d5íd</pattern>
+<pattern>r6d5íg</pattern>
+<pattern>r4dím</pattern>
+<pattern>r6d5ínn</pattern>
+<pattern>r4d3ío</pattern>
+<pattern>r4dít</pattern>
+<pattern>rd3l</pattern>
+<pattern>r6dn</pattern>
+<pattern>rd5oid</pattern>
+<pattern>rd1ó</pattern>
+<pattern>r2d3r</pattern>
+<pattern>r3d4ré</pattern>
+<pattern>r6ds</pattern>
+<pattern>r4dt</pattern>
+<pattern>rd3u</pattern>
+<pattern>rd3ú</pattern>
+<pattern>r5d6úin</pattern>
+<pattern>r5d4ún</pattern>
+<pattern>reag3r</pattern>
+<pattern>reas2t</pattern>
+<pattern>reast5a</pattern>
+<pattern>rea3tá</pattern>
+<pattern>reá3ir</pattern>
+<pattern>reic5t6</pattern>
+<pattern>reo3dó</pattern>
+<pattern>reo5ite </pattern>
+<pattern>reo1m</pattern>
+<pattern>ré5adh</pattern>
+<pattern>réal5a</pattern>
+<pattern>réal2t</pattern>
+<pattern>ré5ann </pattern>
+<pattern>r6éas</pattern>
+<pattern>ré5ife</pattern>
+<pattern>réig3</pattern>
+<pattern>ré5igí</pattern>
+<pattern>réi5mír</pattern>
+<pattern>r6éith</pattern>
+<pattern>r1f</pattern>
+<pattern>rf5eol</pattern>
+<pattern>rga5dá</pattern>
+<pattern>r3g4as</pattern>
+<pattern>r4gd</pattern>
+<pattern>r3gead</pattern>
+<pattern>rg5eam</pattern>
+<pattern>rg5ean4</pattern>
+<pattern>rg3eas</pattern>
+<pattern>r4g3é</pattern>
+<pattern>r1gh6</pattern>
+<pattern>rghair5</pattern>
+<pattern>rghin5</pattern>
+<pattern>r2gi</pattern>
+<pattern>r3gint</pattern>
+<pattern>r2gí</pattern>
+<pattern>r4g1l</pattern>
+<pattern>r5góit</pattern>
+<pattern>r5gót</pattern>
+<pattern>r1gr</pattern>
+<pattern>r4g3ru</pattern>
+<pattern>r4gs</pattern>
+<pattern>r3gú</pattern>
+<pattern>r3ha</pattern>
+<pattern>riach3</pattern>
+<pattern>riacht4</pattern>
+<pattern>rias4t5</pattern>
+<pattern>4riat</pattern>
+<pattern>ribh6i</pattern>
+<pattern>ri3ch4</pattern>
+<pattern>ridh4</pattern>
+<pattern>rid3i</pattern>
+<pattern>4righn</pattern>
+<pattern>ri5gin</pattern>
+<pattern>4rih</pattern>
+<pattern>ri5lei</pattern>
+<pattern>rin2</pattern>
+<pattern>rinc1</pattern>
+<pattern>ri3né</pattern>
+<pattern>rins3iú</pattern>
+<pattern>rint3é</pattern>
+<pattern>rion2t3</pattern>
+<pattern>rios3t4</pattern>
+<pattern>rip4te</pattern>
+<pattern>rir4</pattern>
+<pattern>ri5rí</pattern>
+<pattern>ris3c4é</pattern>
+<pattern>ris1t4</pattern>
+<pattern>ri3ta</pattern>
+<pattern>ri3té</pattern>
+<pattern>rit5éa</pattern>
+<pattern>rit5éir</pattern>
+<pattern>ri5tr</pattern>
+<pattern>ríbh3</pattern>
+<pattern>rí2c</pattern>
+<pattern>rí6ch5e</pattern>
+<pattern>rí5chí</pattern>
+<pattern>rí3ocht</pattern>
+<pattern>río5mhar</pattern>
+<pattern>rír2</pattern>
+<pattern>rí6the</pattern>
+<pattern>rí6thi</pattern>
+<pattern>r1l</pattern>
+<pattern>rla5m6án</pattern>
+<pattern>rleat6</pattern>
+<pattern>rlé5ama</pattern>
+<pattern>rlé5an</pattern>
+<pattern>rlé5igí</pattern>
+<pattern>rlé5imi</pattern>
+<pattern>r4lg</pattern>
+<pattern>rlin6</pattern>
+<pattern>r1m2ad</pattern>
+<pattern>r5m6ain</pattern>
+<pattern>rm6air</pattern>
+<pattern>rm3al</pattern>
+<pattern>r3man</pattern>
+<pattern>r2me</pattern>
+<pattern>r3measc</pattern>
+<pattern>r1mh6</pattern>
+<pattern>r4mig</pattern>
+<pattern>rm4il</pattern>
+<pattern>r4mim</pattern>
+<pattern>r5m6isi</pattern>
+<pattern>r4mit</pattern>
+<pattern>r2miú</pattern>
+<pattern>r2mí</pattern>
+<pattern>r4ml</pattern>
+<pattern>r4mo</pattern>
+<pattern>r3mós</pattern>
+<pattern>r4ms</pattern>
+<pattern>r4m3u</pattern>
+<pattern>rm3ú</pattern>
+<pattern>r3n4aca</pattern>
+<pattern>r3n4ap</pattern>
+<pattern>r3nád</pattern>
+<pattern>r3nás</pattern>
+<pattern>r6n5eam</pattern>
+<pattern>rn5eáilt</pattern>
+<pattern>rn3eál</pattern>
+<pattern>r4neálf</pattern>
+<pattern>rn5eoire</pattern>
+<pattern>r4nf</pattern>
+<pattern>rn3g</pattern>
+<pattern>rn2i</pattern>
+<pattern>r6n5ia</pattern>
+<pattern>rn5id</pattern>
+<pattern>rn3iú</pattern>
+<pattern>rn4íne</pattern>
+<pattern>rn6íni</pattern>
+<pattern>r3no</pattern>
+<pattern>rn1ó</pattern>
+<pattern>r5n6óin </pattern>
+<pattern>r5n6ón</pattern>
+<pattern>rn3ú</pattern>
+<pattern>ro4c</pattern>
+<pattern>rof5</pattern>
+<pattern>roi4</pattern>
+<pattern>4roid</pattern>
+<pattern>roim3é</pattern>
+<pattern>2roí</pattern>
+<pattern>r4ol</pattern>
+<pattern>rom4p3a</pattern>
+<pattern>rost3ac</pattern>
+<pattern>rost5al</pattern>
+<pattern>rost3á</pattern>
+<pattern>rost6ór</pattern>
+<pattern>rób4</pattern>
+<pattern>4róc</pattern>
+<pattern>ró6f</pattern>
+<pattern>rói6</pattern>
+<pattern>róist5</pattern>
+<pattern>4róit</pattern>
+<pattern>ró5l6an</pattern>
+<pattern>4róm</pattern>
+<pattern>rómh5ai</pattern>
+<pattern>rómh5ar</pattern>
+<pattern>rós6tá</pattern>
+<pattern>rót1</pattern>
+<pattern>rót5a</pattern>
+<pattern>r5pa </pattern>
+<pattern>r5paí</pattern>
+<pattern>rp3ar</pattern>
+<pattern>r3pán</pattern>
+<pattern>r4p3e</pattern>
+<pattern>r4p3i</pattern>
+<pattern>r6p5óg </pattern>
+<pattern>r5póga</pattern>
+<pattern>rp1r</pattern>
+<pattern>r2r1</pattern>
+<pattern>rra3chó</pattern>
+<pattern>rra3l</pattern>
+<pattern>rran4</pattern>
+<pattern>rrbh4</pattern>
+<pattern>rrc4</pattern>
+<pattern>rr5d</pattern>
+<pattern>rrt4</pattern>
+<pattern>r1s2</pattern>
+<pattern>rs6ain</pattern>
+<pattern>r5san</pattern>
+<pattern>rs6áin</pattern>
+<pattern>r5s6án</pattern>
+<pattern>rsc2á</pattern>
+<pattern>r2scn</pattern>
+<pattern>r6s3ead</pattern>
+<pattern>r4sf</pattern>
+<pattern>rshlua5</pattern>
+<pattern>rs3im</pattern>
+<pattern>rt1a</pattern>
+<pattern>rt4agá</pattern>
+<pattern>r5t6ail</pattern>
+<pattern>rt6ainí</pattern>
+<pattern>r3tair </pattern>
+<pattern>rt5aío</pattern>
+<pattern>r3t4al</pattern>
+<pattern>r3tana</pattern>
+<pattern>r1tar</pattern>
+<pattern>rt6asó</pattern>
+<pattern>rt1á</pattern>
+<pattern>r5tá </pattern>
+<pattern>r4tc</pattern>
+<pattern>r2te</pattern>
+<pattern>rt3eac</pattern>
+<pattern>rt5eag</pattern>
+<pattern>rt3eam</pattern>
+<pattern>rt3ean</pattern>
+<pattern>r3t4ear</pattern>
+<pattern>r3t4eá </pattern>
+<pattern>r1th2</pattern>
+<pattern>rtha3t</pattern>
+<pattern>rthéad6</pattern>
+<pattern>rthé5id</pattern>
+<pattern>rthé5igí</pattern>
+<pattern>rthé5imi</pattern>
+<pattern>rthé5itea</pattern>
+<pattern>rthé5ití</pattern>
+<pattern>r2t1i</pattern>
+<pattern>r3t4il</pattern>
+<pattern>rti3s4</pattern>
+<pattern>r2tí</pattern>
+<pattern>r4t5l</pattern>
+<pattern>r4to</pattern>
+<pattern>rt1ó</pattern>
+<pattern>rt1r</pattern>
+<pattern>r6ts</pattern>
+<pattern>rt3u</pattern>
+<pattern>rt3úc</pattern>
+<pattern>r3túi</pattern>
+<pattern>rt5úil</pattern>
+<pattern>r6t5úl</pattern>
+<pattern>r5túm</pattern>
+<pattern>r1tún</pattern>
+<pattern>rua5b</pattern>
+<pattern>ruad6</pattern>
+<pattern>rua3da</pattern>
+<pattern>ruai6</pattern>
+<pattern>rua3imi</pattern>
+<pattern>rua5itear</pattern>
+<pattern>ruch3t4ó</pattern>
+<pattern>r4ud</pattern>
+<pattern>rusc3a</pattern>
+<pattern>rus3c4á</pattern>
+<pattern>rus4t5</pattern>
+<pattern>rúch6t5</pattern>
+<pattern>4rúd</pattern>
+<pattern>rú3d4ar </pattern>
+<pattern>rú3idí</pattern>
+<pattern>rú1im</pattern>
+<pattern>r5úine</pattern>
+<pattern>rú3inn</pattern>
+<pattern>rú3itea</pattern>
+<pattern>rú5ití </pattern>
+<pattern>r1úl</pattern>
+<pattern>rú3mar</pattern>
+<pattern>rúst3a</pattern>
+<pattern>r3wi</pattern>
+<pattern>s1a</pattern>
+<pattern>sa3bá</pattern>
+<pattern>sa5c6as</pattern>
+<pattern>sa3dá</pattern>
+<pattern>sa3fó</pattern>
+<pattern>sa5fr</pattern>
+<pattern>sa3g4á</pattern>
+<pattern>saigh6d5</pattern>
+<pattern>sail5b</pattern>
+<pattern>sain6t5e</pattern>
+<pattern>sair5d6</pattern>
+<pattern>s6aisí</pattern>
+<pattern>saist3e</pattern>
+<pattern>sa3l4ain</pattern>
+<pattern>sa3lan</pattern>
+<pattern>sal5at</pattern>
+<pattern>5salám</pattern>
+<pattern>salt3</pattern>
+<pattern>s6a5mat</pattern>
+<pattern>s2amh</pattern>
+<pattern>s6ams</pattern>
+<pattern>3s4an </pattern>
+<pattern>san2á</pattern>
+<pattern>sant4</pattern>
+<pattern>5s6ao </pattern>
+<pattern>sar3b</pattern>
+<pattern>sar5c</pattern>
+<pattern>s4arl</pattern>
+<pattern>sa3r4ó</pattern>
+<pattern>s6at </pattern>
+<pattern>sat5a</pattern>
+<pattern>sa5tá</pattern>
+<pattern>sat5ra</pattern>
+<pattern>s6ats</pattern>
+<pattern>s1á</pattern>
+<pattern>s6áili</pattern>
+<pattern>sá5inn </pattern>
+<pattern>sáin6t</pattern>
+<pattern>sá5ite </pattern>
+<pattern>sá5iteá </pattern>
+<pattern>s1b</pattern>
+<pattern>sb6a</pattern>
+<pattern>sbh6</pattern>
+<pattern>sbheir5</pattern>
+<pattern>6sc </pattern>
+<pattern>sca6b</pattern>
+<pattern>scach6</pattern>
+<pattern>sca5chá</pattern>
+<pattern>s3c4ae</pattern>
+<pattern>s3c4aird</pattern>
+<pattern>sc6ao</pattern>
+<pattern>sc3ar3n4</pattern>
+<pattern>s5cat</pattern>
+<pattern>scáin5t</pattern>
+<pattern>s3cear</pattern>
+<pattern>sc1eo</pattern>
+<pattern>s3c4eog</pattern>
+<pattern>s5c6eoig</pattern>
+<pattern>sc4éim</pattern>
+<pattern>s1ch4</pattern>
+<pattern>3scia</pattern>
+<pattern>s6cig</pattern>
+<pattern>sc1im</pattern>
+<pattern>3scior</pattern>
+<pattern>sc3it</pattern>
+<pattern>sc3iúil</pattern>
+<pattern>2sc1í</pattern>
+<pattern>s6cí </pattern>
+<pattern>sc1n</pattern>
+<pattern>scoir5</pattern>
+<pattern>s4cor</pattern>
+<pattern>scor3b4</pattern>
+<pattern>s3có </pattern>
+<pattern>s6cói</pattern>
+<pattern>3scóip</pattern>
+<pattern>s3cól</pattern>
+<pattern>1scóp</pattern>
+<pattern>s3cós</pattern>
+<pattern>sc3raí</pattern>
+<pattern>s1cré</pattern>
+<pattern>scréach5</pattern>
+<pattern>scréacht6</pattern>
+<pattern>1scrí</pattern>
+<pattern>sc1ró</pattern>
+<pattern>sc3um4</pattern>
+<pattern>sc3úc</pattern>
+<pattern>s3cún</pattern>
+<pattern>s1d</pattern>
+<pattern>seach6t5a</pattern>
+<pattern>6seag</pattern>
+<pattern>s5eagá</pattern>
+<pattern>5seai</pattern>
+<pattern>seal5a</pattern>
+<pattern>seal6b</pattern>
+<pattern>sealbh5</pattern>
+<pattern>sealt6</pattern>
+<pattern>seana6</pattern>
+<pattern>seanad5</pattern>
+<pattern>sean5m</pattern>
+<pattern>s5eanna </pattern>
+<pattern>seas5t</pattern>
+<pattern>s4eat</pattern>
+<pattern>5seáib</pattern>
+<pattern>s6eic</pattern>
+<pattern>seic6t</pattern>
+<pattern>seift5</pattern>
+<pattern>seil6f</pattern>
+<pattern>seir4f3</pattern>
+<pattern>seit5s</pattern>
+<pattern>6seo </pattern>
+<pattern>seod3</pattern>
+<pattern>séalt6</pattern>
+<pattern>séar3</pattern>
+<pattern>séir4s5</pattern>
+<pattern>s1f</pattern>
+<pattern>s3fe</pattern>
+<pattern>3s4féa</pattern>
+<pattern>3s4féir</pattern>
+<pattern>sfhear5</pattern>
+<pattern>s3fi</pattern>
+<pattern>s1g</pattern>
+<pattern>sghair5t</pattern>
+<pattern>1sh2</pattern>
+<pattern>shaigh6d5</pattern>
+<pattern>shail5b</pattern>
+<pattern>shair5d6</pattern>
+<pattern>shant6</pattern>
+<pattern>shar5</pattern>
+<pattern>shá5ite </pattern>
+<pattern>shá5iteá </pattern>
+<pattern>shá5ití</pattern>
+<pattern>sheach6t5a</pattern>
+<pattern>sheal5a</pattern>
+<pattern>shean5m</pattern>
+<pattern>shearbh5</pattern>
+<pattern>sheas5t</pattern>
+<pattern>sheic4t</pattern>
+<pattern>sheil6f</pattern>
+<pattern>sheir6f3</pattern>
+<pattern>sheit5s</pattern>
+<pattern>shéa5l6ain</pattern>
+<pattern>shéir6s</pattern>
+<pattern>shib5é</pattern>
+<pattern>ship5</pattern>
+<pattern>shiún4</pattern>
+<pattern>shiúnt3</pattern>
+<pattern>shí5bh</pattern>
+<pattern>shí6l5</pattern>
+<pattern>shí4o</pattern>
+<pattern>shí6t</pattern>
+<pattern>shlios5</pattern>
+<pattern>shlíod5</pattern>
+<pattern>shní5d</pattern>
+<pattern>shní5g</pattern>
+<pattern>shní5m</pattern>
+<pattern>shní5od</pattern>
+<pattern>shní5oma</pattern>
+<pattern>shní5on</pattern>
+<pattern>shnua5</pattern>
+<pattern>sho5chaid</pattern>
+<pattern>sho5gh</pattern>
+<pattern>sho3mh6</pattern>
+<pattern>shor4</pattern>
+<pattern>shorb5</pattern>
+<pattern>sho5th</pattern>
+<pattern>shó5f</pattern>
+<pattern>shó5idí</pattern>
+<pattern>shó5im</pattern>
+<pattern>shó5inn</pattern>
+<pattern>shó5ití</pattern>
+<pattern>shó5mh</pattern>
+<pattern>shua6i</pattern>
+<pattern>shua3l6</pattern>
+<pattern>shú5c</pattern>
+<pattern>shúch6</pattern>
+<pattern>shú5d6ar</pattern>
+<pattern>shú5im </pattern>
+<pattern>shú5in</pattern>
+<pattern>shú5ití </pattern>
+<pattern>shú5mar</pattern>
+<pattern>shús5</pattern>
+<pattern>s1ia</pattern>
+<pattern>siach6</pattern>
+<pattern>siacht5</pattern>
+<pattern>sia5it</pattern>
+<pattern>si5be</pattern>
+<pattern>sib5é</pattern>
+<pattern>s1ic</pattern>
+<pattern>s1id</pattern>
+<pattern>sidh6</pattern>
+<pattern>6sif</pattern>
+<pattern>si3f4é</pattern>
+<pattern>s5i5fr</pattern>
+<pattern>s1ig</pattern>
+<pattern>si5g6é</pattern>
+<pattern>s6ilea</pattern>
+<pattern>s4ilf</pattern>
+<pattern>s6iligí</pattern>
+<pattern>s4ilt</pattern>
+<pattern>s1im</pattern>
+<pattern>simea5</pattern>
+<pattern>s4imé</pattern>
+<pattern>5s6ing</pattern>
+<pattern>sin6í</pattern>
+<pattern>s4int</pattern>
+<pattern>sint5iú</pattern>
+<pattern>sios5t6</pattern>
+<pattern>sis3</pattern>
+<pattern>sis6c</pattern>
+<pattern>sist4</pattern>
+<pattern>s1iú</pattern>
+<pattern>6siúd</pattern>
+<pattern>5s6iúit</pattern>
+<pattern>siúr5</pattern>
+<pattern>5siút</pattern>
+<pattern>sí3bh</pattern>
+<pattern>síl3</pattern>
+<pattern>3s4íle</pattern>
+<pattern>s5ímea</pattern>
+<pattern>síol5</pattern>
+<pattern>síoll6</pattern>
+<pattern>sí4th5</pattern>
+<pattern>s1l</pattern>
+<pattern>sla4</pattern>
+<pattern>slac5á</pattern>
+<pattern>slag3á</pattern>
+<pattern>slag3ó</pattern>
+<pattern>s4láin</pattern>
+<pattern>s6lán</pattern>
+<pattern>sleá5d6</pattern>
+<pattern>sléach6</pattern>
+<pattern>sléacht5</pattern>
+<pattern>slíod5ó</pattern>
+<pattern>slí6t</pattern>
+<pattern>s1m2</pattern>
+<pattern>sma5la</pattern>
+<pattern>smeach5</pattern>
+<pattern>smeacht6</pattern>
+<pattern>smead5</pattern>
+<pattern>smear5</pattern>
+<pattern>smeart6</pattern>
+<pattern>smeá6</pattern>
+<pattern>smh4</pattern>
+<pattern>sm6i</pattern>
+<pattern>s1n2</pattern>
+<pattern>snit4</pattern>
+<pattern>s3nó</pattern>
+<pattern>snua5</pattern>
+<pattern>sobh6</pattern>
+<pattern>so5chaid</pattern>
+<pattern>soch6t5</pattern>
+<pattern>sod3</pattern>
+<pattern>sof3a</pattern>
+<pattern>so5gh</pattern>
+<pattern>soir6bh</pattern>
+<pattern>so5lái</pattern>
+<pattern>so3mh4</pattern>
+<pattern>so5nu</pattern>
+<pattern>sorb5</pattern>
+<pattern>sor4c</pattern>
+<pattern>sorch5</pattern>
+<pattern>so5th6</pattern>
+<pattern>s1óf</pattern>
+<pattern>s1óg</pattern>
+<pattern>sóin4</pattern>
+<pattern>3s4óin </pattern>
+<pattern>s6óine</pattern>
+<pattern>s6óiní</pattern>
+<pattern>só5ití</pattern>
+<pattern>só5l6ain</pattern>
+<pattern>só5l6an</pattern>
+<pattern>só5mh</pattern>
+<pattern>3s4ón</pattern>
+<pattern>só5tac</pattern>
+<pattern>só5t6aí</pattern>
+<pattern>s1p</pattern>
+<pattern>spad5a</pattern>
+<pattern>spad5á</pattern>
+<pattern>spair4n5</pattern>
+<pattern>s6p5ann</pattern>
+<pattern>speach5</pattern>
+<pattern>spi6d</pattern>
+<pattern>spor5</pattern>
+<pattern>sport6</pattern>
+<pattern>spór6</pattern>
+<pattern>sprae5</pattern>
+<pattern>spuir6</pattern>
+<pattern>s1r</pattern>
+<pattern>sr6ú</pattern>
+<pattern>6st </pattern>
+<pattern>sta5dá</pattern>
+<pattern>s1tag</pattern>
+<pattern>stai6</pattern>
+<pattern>st3aig</pattern>
+<pattern>staist5</pattern>
+<pattern>st1aí</pattern>
+<pattern>s1tal</pattern>
+<pattern>st5ama</pattern>
+<pattern>st3as</pattern>
+<pattern>stáin6</pattern>
+<pattern>5stáit</pattern>
+<pattern>5stát3</pattern>
+<pattern>st5eann</pattern>
+<pattern>4steo</pattern>
+<pattern>s1té</pattern>
+<pattern>3stéig</pattern>
+<pattern>s4téin</pattern>
+<pattern>6sti </pattern>
+<pattern>s3tice</pattern>
+<pattern>s5ticig</pattern>
+<pattern>s5tile </pattern>
+<pattern>st1im</pattern>
+<pattern>s6tio</pattern>
+<pattern>s3t4ir</pattern>
+<pattern>st6ise</pattern>
+<pattern>st3ith</pattern>
+<pattern>s3t4íc</pattern>
+<pattern>s3t4ís</pattern>
+<pattern>s3tóg</pattern>
+<pattern>s1tr</pattern>
+<pattern>strae5</pattern>
+<pattern>s4trala</pattern>
+<pattern>st6u</pattern>
+<pattern>s3t6úin</pattern>
+<pattern>sua6i</pattern>
+<pattern>sua3l4</pattern>
+<pattern>sú5c</pattern>
+<pattern>súch6</pattern>
+<pattern>s6úd</pattern>
+<pattern>sú5d6ar</pattern>
+<pattern>s4úf</pattern>
+<pattern>s6úig</pattern>
+<pattern>sú5im </pattern>
+<pattern>sú5inn</pattern>
+<pattern>s4úit</pattern>
+<pattern>sú5ite </pattern>
+<pattern>sú5ití </pattern>
+<pattern>sú5mar</pattern>
+<pattern>s1ún</pattern>
+<pattern>sús5</pattern>
+<pattern>sv4a</pattern>
+<pattern>ta4cha</pattern>
+<pattern>tach6tá</pattern>
+<pattern>ta3cr</pattern>
+<pattern>ta5dái</pattern>
+<pattern>t3adh </pattern>
+<pattern>tae5n</pattern>
+<pattern>3t4aga</pattern>
+<pattern>ta3g4á</pattern>
+<pattern>tag5á5l</pattern>
+<pattern>tagh4</pattern>
+<pattern>taghd3</pattern>
+<pattern>ta1gó</pattern>
+<pattern>5t6aig </pattern>
+<pattern>5t6aige</pattern>
+<pattern>3t4ainia</pattern>
+<pattern>tain4t3</pattern>
+<pattern>tair2b</pattern>
+<pattern>tairbh3</pattern>
+<pattern>tair6g3</pattern>
+<pattern>tair2n3</pattern>
+<pattern>taisc5e</pattern>
+<pattern>tais5tear</pattern>
+<pattern>tais5teá</pattern>
+<pattern>taist5il</pattern>
+<pattern>tais5tí</pattern>
+<pattern>tai3té</pattern>
+<pattern>t5aití</pattern>
+<pattern>ta4l5a</pattern>
+<pattern>tal6c5</pattern>
+<pattern>t4all</pattern>
+<pattern>6t5a5l6úin</pattern>
+<pattern>6talún</pattern>
+<pattern>tam4al</pattern>
+<pattern>ta5m6ái</pattern>
+<pattern>ta3mán</pattern>
+<pattern>5tanb</pattern>
+<pattern>tan3gó</pattern>
+<pattern>t3ann</pattern>
+<pattern>4tanna </pattern>
+<pattern>t6annac</pattern>
+<pattern>t6annai</pattern>
+<pattern>ta5no</pattern>
+<pattern>tan4t3</pattern>
+<pattern>ta5p6l</pattern>
+<pattern>t2ar</pattern>
+<pattern>tar1c2</pattern>
+<pattern>tar5d6</pattern>
+<pattern>tar3g4</pattern>
+<pattern>tart4a</pattern>
+<pattern>tar5ta </pattern>
+<pattern>ta3s4l</pattern>
+<pattern>ta3s4t</pattern>
+<pattern>tas5tr</pattern>
+<pattern>3t4at</pattern>
+<pattern>5tata</pattern>
+<pattern>4ta3to</pattern>
+<pattern>tat5ú</pattern>
+<pattern>3tá </pattern>
+<pattern>tá6d5</pattern>
+<pattern>t1áil</pattern>
+<pattern>tá6im </pattern>
+<pattern>táir4s3</pattern>
+<pattern>táir5t</pattern>
+<pattern>t6áit</pattern>
+<pattern>t3áiv</pattern>
+<pattern>2t1ál</pattern>
+<pattern>3t4ás</pattern>
+<pattern>t6át</pattern>
+<pattern>tá5th6ar</pattern>
+<pattern>t1b</pattern>
+<pattern>tbh6</pattern>
+<pattern>t1c</pattern>
+<pattern>t3dh</pattern>
+<pattern>3teab</pattern>
+<pattern>t3ead</pattern>
+<pattern>tea5fa</pattern>
+<pattern>tea3g4á</pattern>
+<pattern>tea3gr</pattern>
+<pattern>t3eal </pattern>
+<pattern>t3eala</pattern>
+<pattern>tea5lain</pattern>
+<pattern>tea3lan</pattern>
+<pattern>t3ealó</pattern>
+<pattern>t5ealt</pattern>
+<pattern>tea3m4á</pattern>
+<pattern>t4eamo</pattern>
+<pattern>5teanú</pattern>
+<pattern>t2ear</pattern>
+<pattern>t3ear3n4</pattern>
+<pattern>teas2t5</pattern>
+<pattern>teá6</pattern>
+<pattern>t1eái</pattern>
+<pattern>t1eál</pattern>
+<pattern>teám5</pattern>
+<pattern>1tei</pattern>
+<pattern>t1eo</pattern>
+<pattern>5t4eoc</pattern>
+<pattern>téach6</pattern>
+<pattern>téacht5</pattern>
+<pattern>téal2</pattern>
+<pattern>téa3la</pattern>
+<pattern>téar5t6</pattern>
+<pattern>4téig</pattern>
+<pattern>té6igh</pattern>
+<pattern>4t3éirs</pattern>
+<pattern>t4éit</pattern>
+<pattern>2t1f</pattern>
+<pattern>t1g</pattern>
+<pattern>t2h</pattern>
+<pattern>4th </pattern>
+<pattern>t6ha</pattern>
+<pattern>6thab</pattern>
+<pattern>thach6t5</pattern>
+<pattern>thagh4</pattern>
+<pattern>thaghd3</pattern>
+<pattern>thair4b</pattern>
+<pattern>thairbh5</pattern>
+<pattern>thair6g</pattern>
+<pattern>thair6is </pattern>
+<pattern>thair4n</pattern>
+<pattern>thairn5e</pattern>
+<pattern>thaist5</pattern>
+<pattern>th5am </pattern>
+<pattern>than3g</pattern>
+<pattern>than2t3</pattern>
+<pattern>tha6p5</pattern>
+<pattern>tharc6</pattern>
+<pattern>thar5g6</pattern>
+<pattern>thar3n4</pattern>
+<pattern>5tharr</pattern>
+<pattern>thar5t6a</pattern>
+<pattern>tháin5</pattern>
+<pattern>tháir5t</pattern>
+<pattern>t4he</pattern>
+<pattern>thead5as</pattern>
+<pattern>thea3la</pattern>
+<pattern>theas4t5</pattern>
+<pattern>6theá</pattern>
+<pattern>th5eán</pattern>
+<pattern>t6hé</pattern>
+<pattern>théach6</pattern>
+<pattern>théacht5</pattern>
+<pattern>théal2</pattern>
+<pattern>théa3la</pattern>
+<pattern>thé3if</pattern>
+<pattern>th1f</pattern>
+<pattern>th5in </pattern>
+<pattern>thin6i</pattern>
+<pattern>thit3e</pattern>
+<pattern>thí6f5</pattern>
+<pattern>thío5t</pattern>
+<pattern>th6ís</pattern>
+<pattern>th1l</pattern>
+<pattern>thlua5da</pattern>
+<pattern>th5nó</pattern>
+<pattern>5thoin6</pattern>
+<pattern>thoir4n3</pattern>
+<pattern>3thon</pattern>
+<pattern>thor4c</pattern>
+<pattern>thor5pá</pattern>
+<pattern>thost5</pattern>
+<pattern>thóch5</pattern>
+<pattern>5thógt</pattern>
+<pattern>thóir6se</pattern>
+<pattern>thóir6sí</pattern>
+<pattern>thós4</pattern>
+<pattern>thrá5b</pattern>
+<pattern>thrá5inn</pattern>
+<pattern>thrí3oc</pattern>
+<pattern>thros6</pattern>
+<pattern>4ths</pattern>
+<pattern>thua5da</pattern>
+<pattern>thua5im</pattern>
+<pattern>thua5itea</pattern>
+<pattern>thuar5</pattern>
+<pattern>5thuig</pattern>
+<pattern>3thur</pattern>
+<pattern>thu5sa</pattern>
+<pattern>6ti </pattern>
+<pattern>tia5g</pattern>
+<pattern>6t5iam</pattern>
+<pattern>t1ib2</pattern>
+<pattern>tib5é</pattern>
+<pattern>tib6éar</pattern>
+<pattern>ti1bi</pattern>
+<pattern>t1id4</pattern>
+<pattern>ti3dé</pattern>
+<pattern>ti3di</pattern>
+<pattern>ti3f4</pattern>
+<pattern>t1ig</pattern>
+<pattern>5t6ige</pattern>
+<pattern>t3ileo</pattern>
+<pattern>t3ilí</pattern>
+<pattern>4tilít</pattern>
+<pattern>t5ilt</pattern>
+<pattern>4t3i1m4é</pattern>
+<pattern>ti5míne</pattern>
+<pattern>ti5míni</pattern>
+<pattern>tin6d5</pattern>
+<pattern>t3inea</pattern>
+<pattern>t3ini</pattern>
+<pattern>t3iní</pattern>
+<pattern>tin5t4</pattern>
+<pattern>tipi5c6</pattern>
+<pattern>tir4i</pattern>
+<pattern>tis3</pattern>
+<pattern>t3ist6</pattern>
+<pattern>tit5ea</pattern>
+<pattern>tit5eá</pattern>
+<pattern>6t5iteo</pattern>
+<pattern>ti5té</pattern>
+<pattern>ti3tiú</pattern>
+<pattern>t1iú </pattern>
+<pattern>t3iúl</pattern>
+<pattern>3tiún</pattern>
+<pattern>t1í</pattern>
+<pattern>tí4f3</pattern>
+<pattern>tíg5</pattern>
+<pattern>3t2íl1</pattern>
+<pattern>5t6íol</pattern>
+<pattern>5tíop</pattern>
+<pattern>5tíor</pattern>
+<pattern>tío5t6</pattern>
+<pattern>3t4íp</pattern>
+<pattern>5tír</pattern>
+<pattern>6t5íteas</pattern>
+<pattern>6t5íti</pattern>
+<pattern>2t1l</pattern>
+<pattern>t1m</pattern>
+<pattern>tm4a</pattern>
+<pattern>tm6e</pattern>
+<pattern>tm6i</pattern>
+<pattern>2t1n2</pattern>
+<pattern>t5ne</pattern>
+<pattern>t5ní</pattern>
+<pattern>tod5ó</pattern>
+<pattern>tof5</pattern>
+<pattern>6toid</pattern>
+<pattern>toin6</pattern>
+<pattern>toir2n3</pattern>
+<pattern>tom6a</pattern>
+<pattern>tor2c</pattern>
+<pattern>torch3</pattern>
+<pattern>tor3p</pattern>
+<pattern>tort5a</pattern>
+<pattern>tos6t3</pattern>
+<pattern>tóch5</pattern>
+<pattern>t1óf</pattern>
+<pattern>3tóip</pattern>
+<pattern>tóir6se</pattern>
+<pattern>tóir6sí</pattern>
+<pattern>3tól</pattern>
+<pattern>3tóp</pattern>
+<pattern>1tós4</pattern>
+<pattern>tra6bó</pattern>
+<pattern>trac6</pattern>
+<pattern>6tra5cá</pattern>
+<pattern>trai6m5</pattern>
+<pattern>4traip</pattern>
+<pattern>6traláib</pattern>
+<pattern>t3rar</pattern>
+<pattern>trá5b</pattern>
+<pattern>trá5inn</pattern>
+<pattern>t6ráis</pattern>
+<pattern>t4rát</pattern>
+<pattern>tream4</pattern>
+<pattern>trea3ma</pattern>
+<pattern>triach6</pattern>
+<pattern>tri3ghn</pattern>
+<pattern>trí1r</pattern>
+<pattern>tros6</pattern>
+<pattern>trost5</pattern>
+<pattern>3tróp</pattern>
+<pattern>t4ru</pattern>
+<pattern>truac4</pattern>
+<pattern>trua3cá</pattern>
+<pattern>tr6ú</pattern>
+<pattern>t6rús</pattern>
+<pattern>ts2</pattern>
+<pattern>t5sa</pattern>
+<pattern>t6sai</pattern>
+<pattern>tsa6l</pattern>
+<pattern>tsal5a</pattern>
+<pattern>tsal6v5</pattern>
+<pattern>t1s4ea</pattern>
+<pattern>t6sean</pattern>
+<pattern>tsearbh5</pattern>
+<pattern>t3seo</pattern>
+<pattern>t3si</pattern>
+<pattern>tsi6m5</pattern>
+<pattern>tsiún6</pattern>
+<pattern>tsiúnt5</pattern>
+<pattern>t1sí</pattern>
+<pattern>t3su</pattern>
+<pattern>t3sú</pattern>
+<pattern>tua5da</pattern>
+<pattern>tua5itea</pattern>
+<pattern>tuar5</pattern>
+<pattern>tuis3</pattern>
+<pattern>tuío3</pattern>
+<pattern>tur3b</pattern>
+<pattern>tur3n4</pattern>
+<pattern>t5úid</pattern>
+<pattern>tú3m6</pattern>
+<pattern>3tús3</pattern>
+<pattern>t3vi</pattern>
+<pattern>uabh6r</pattern>
+<pattern>ua3chl</pattern>
+<pattern>uad3á</pattern>
+<pattern>ua1f2</pattern>
+<pattern>ua6fa </pattern>
+<pattern>6uaid</pattern>
+<pattern>ua3idí</pattern>
+<pattern>uai5g6é</pattern>
+<pattern>ua3igí </pattern>
+<pattern>ua3imid</pattern>
+<pattern>ua3imis</pattern>
+<pattern>ua3inn </pattern>
+<pattern>uains6</pattern>
+<pattern>uain5t4</pattern>
+<pattern>uair3c4í</pattern>
+<pattern>uairn6</pattern>
+<pattern>uair5tí</pattern>
+<pattern>uais1</pattern>
+<pattern>uaist2</pattern>
+<pattern>ua3iteá</pattern>
+<pattern>uaith6i5s</pattern>
+<pattern>ua3ití </pattern>
+<pattern>uait5s</pattern>
+<pattern>uala5t</pattern>
+<pattern>ualath6</pattern>
+<pattern>ual3g4</pattern>
+<pattern>ua3lu</pattern>
+<pattern>ua3mar</pattern>
+<pattern>uamh6ar</pattern>
+<pattern>ua3mhé</pattern>
+<pattern>uana5l6</pattern>
+<pattern>5uanla</pattern>
+<pattern>ua5nós</pattern>
+<pattern>uar3g4</pattern>
+<pattern>uart4</pattern>
+<pattern>uar5tai</pattern>
+<pattern>uar5taí </pattern>
+<pattern>uar5tan</pattern>
+<pattern>ub1a</pattern>
+<pattern>ub5á</pattern>
+<pattern>ubh1</pattern>
+<pattern>uc1a</pattern>
+<pattern>uch1a</pattern>
+<pattern>uch3á</pattern>
+<pattern>uch3ó</pattern>
+<pattern>uch3r</pattern>
+<pattern>uc5l</pattern>
+<pattern>uc3r</pattern>
+<pattern>uc3s</pattern>
+<pattern>uc5ú</pattern>
+<pattern>ud1</pattern>
+<pattern>uf1</pattern>
+<pattern>uga5dá</pattern>
+<pattern>ug3l</pattern>
+<pattern>uic6i5s</pattern>
+<pattern>uid1</pattern>
+<pattern>uifé5</pattern>
+<pattern>6uig3</pattern>
+<pattern>uil3p</pattern>
+<pattern>ui4m</pattern>
+<pattern>uim3p</pattern>
+<pattern>uin5c</pattern>
+<pattern>uins3iú</pattern>
+<pattern>uin3t4</pattern>
+<pattern>uint5í</pattern>
+<pattern>uin6tín</pattern>
+<pattern>ui6p5</pattern>
+<pattern>uir5b4</pattern>
+<pattern>uirbh6</pattern>
+<pattern>uir3c4í</pattern>
+<pattern>4uire</pattern>
+<pattern>uirn6</pattern>
+<pattern>6uirs</pattern>
+<pattern>uirs3t</pattern>
+<pattern>uir3t</pattern>
+<pattern>uirt4í</pattern>
+<pattern>ui6s</pattern>
+<pattern>uis3cr</pattern>
+<pattern>uis5t</pattern>
+<pattern>uit3é</pattern>
+<pattern>uit3s</pattern>
+<pattern>uí3b</pattern>
+<pattern>uí3d</pattern>
+<pattern>uí1g</pattern>
+<pattern>uí5l6e</pattern>
+<pattern>uí1m</pattern>
+<pattern>uí1od</pattern>
+<pattern>uío3dó</pattern>
+<pattern>uí3oma</pattern>
+<pattern>uí3onn</pattern>
+<pattern>uí3ó</pattern>
+<pattern>uí5teá</pattern>
+<pattern>uíth6</pattern>
+<pattern>uí5tí</pattern>
+<pattern>ul1a</pattern>
+<pattern>ul3á</pattern>
+<pattern>ul3g4</pattern>
+<pattern>ul3m4</pattern>
+<pattern>ul3ó</pattern>
+<pattern>ul5p6</pattern>
+<pattern>ul6t5as</pattern>
+<pattern>ul4tr</pattern>
+<pattern>um1a</pattern>
+<pattern>umh1</pattern>
+<pattern>ump1</pattern>
+<pattern>un5a</pattern>
+<pattern>un3á</pattern>
+<pattern>unc1a</pattern>
+<pattern>un5e</pattern>
+<pattern>ung1</pattern>
+<pattern>un5ga3l</pattern>
+<pattern>un3g4ar</pattern>
+<pattern>un5gá</pattern>
+<pattern>un3o</pattern>
+<pattern>un1ó</pattern>
+<pattern>un6sa </pattern>
+<pattern>un6s5aí</pattern>
+<pattern>un3ú</pattern>
+<pattern>unúd4</pattern>
+<pattern>uó3t6</pattern>
+<pattern>up1</pattern>
+<pattern>4ur1a</pattern>
+<pattern>urach3</pattern>
+<pattern>ur6ag</pattern>
+<pattern>ur3á</pattern>
+<pattern>urca3m4</pattern>
+<pattern>urch4</pattern>
+<pattern>ur3d6ú</pattern>
+<pattern>urg5ói</pattern>
+<pattern>ur5gón</pattern>
+<pattern>ur3i</pattern>
+<pattern>ur6l3ál</pattern>
+<pattern>ur3m4</pattern>
+<pattern>6urn</pattern>
+<pattern>ur3ó</pattern>
+<pattern>ur3p</pattern>
+<pattern>urscar6</pattern>
+<pattern>urscart5</pattern>
+<pattern>ur3t4</pattern>
+<pattern>ur5u</pattern>
+<pattern>ur3ú</pattern>
+<pattern>6us </pattern>
+<pattern>usc5ai</pattern>
+<pattern>usc3l</pattern>
+<pattern>us3cr</pattern>
+<pattern>ust5ac</pattern>
+<pattern>ust5ail</pattern>
+<pattern>us4t3al</pattern>
+<pattern>us3tó</pattern>
+<pattern>us5tu</pattern>
+<pattern>ust5ún</pattern>
+<pattern>ut5a</pattern>
+<pattern>u6t5á</pattern>
+<pattern>ut3e</pattern>
+<pattern>uth1</pattern>
+<pattern>uthan5t</pattern>
+<pattern>ut3ó</pattern>
+<pattern>uz3a</pattern>
+<pattern>ú5an</pattern>
+<pattern>ú1á</pattern>
+<pattern>ú4áil </pattern>
+<pattern>úb1</pattern>
+<pattern>úba5dá</pattern>
+<pattern>úbail4</pattern>
+<pattern>úb4h</pattern>
+<pattern>úbh5a</pattern>
+<pattern>úc1a</pattern>
+<pattern>úca3b</pattern>
+<pattern>úcas4t</pattern>
+<pattern>úch1a</pattern>
+<pattern>ú1ch2á</pattern>
+<pattern>ú3che</pattern>
+<pattern>ú3chí</pattern>
+<pattern>úch5l</pattern>
+<pattern>úch5óg</pattern>
+<pattern>ú5chr</pattern>
+<pattern>úcht4ó</pattern>
+<pattern>úc1l</pattern>
+<pattern>úc1ó</pattern>
+<pattern>úc1r</pattern>
+<pattern>úc4rá</pattern>
+<pattern>úd1</pattern>
+<pattern>ú6dó</pattern>
+<pattern>úd5r</pattern>
+<pattern>úd5ú</pattern>
+<pattern>ú1f</pattern>
+<pattern>ú6fó</pattern>
+<pattern>ú1gh</pattern>
+<pattern>úg1r</pattern>
+<pattern>4úid</pattern>
+<pattern>ú3idís</pattern>
+<pattern>ú3igí</pattern>
+<pattern>6úile</pattern>
+<pattern>6úili</pattern>
+<pattern>úil4t3</pattern>
+<pattern>ú3imi</pattern>
+<pattern>úint4</pattern>
+<pattern>úirt3</pattern>
+<pattern>úir2té</pattern>
+<pattern>úisc3</pattern>
+<pattern>úis3c4é</pattern>
+<pattern>ú5itear</pattern>
+<pattern>ú3iteá </pattern>
+<pattern>úithi5s</pattern>
+<pattern>ú6itín</pattern>
+<pattern>úits3eá</pattern>
+<pattern>úl1</pattern>
+<pattern>ú3l4ag</pattern>
+<pattern>ú4l5agá</pattern>
+<pattern>úlc4</pattern>
+<pattern>ú5l6e</pattern>
+<pattern>úl6éim</pattern>
+<pattern>ú3l4i</pattern>
+<pattern>6úlr</pattern>
+<pattern>últ4</pattern>
+<pattern>ú3l4ua</pattern>
+<pattern>úl5ú</pattern>
+<pattern>úlú5l</pattern>
+<pattern>ú1mh</pattern>
+<pattern>úmh3ac</pattern>
+<pattern>ú4mhn</pattern>
+<pattern>ú4mh3ú</pattern>
+<pattern>ún5a</pattern>
+<pattern>ún3á</pattern>
+<pattern>úng5á</pattern>
+<pattern>úng5u</pattern>
+<pattern>6únl</pattern>
+<pattern>4ú1nn</pattern>
+<pattern>ún3o</pattern>
+<pattern>ún1ó</pattern>
+<pattern>ún3t2</pattern>
+<pattern>úp1</pattern>
+<pattern>ú6p5a</pattern>
+<pattern>úpa5t6</pattern>
+<pattern>ú5p6r</pattern>
+<pattern>úr1</pattern>
+<pattern>úra3b</pattern>
+<pattern>úrabh4</pattern>
+<pattern>úra3dá</pattern>
+<pattern>úran6</pattern>
+<pattern>úr6ana</pattern>
+<pattern>úr5ó</pattern>
+<pattern>úrt4</pattern>
+<pattern>ú3r6u</pattern>
+<pattern>úr4ú</pattern>
+<pattern>ú5rúi</pattern>
+<pattern>ús4air</pattern>
+<pattern>ús2á</pattern>
+<pattern>ús5án</pattern>
+<pattern>úsc1</pattern>
+<pattern>ú4sh3l</pattern>
+<pattern>ú3s4m</pattern>
+<pattern>ús3ó</pattern>
+<pattern>ú3s4pé</pattern>
+<pattern>ú3sto</pattern>
+<pattern>úst3ó</pattern>
+<pattern>ús6t3r</pattern>
+<pattern>ús3ú</pattern>
+<pattern>út3a</pattern>
+<pattern>ú6t1á</pattern>
+<pattern>úth1</pattern>
+<pattern>ú3tho</pattern>
+<pattern>út5óg</pattern>
+<pattern>út1r</pattern>
+<pattern>ú5úi</pattern>
+<pattern>ú5úl</pattern>
+<pattern>v1a</pattern>
+<pattern>vach6</pattern>
+<pattern>vac3s4</pattern>
+<pattern>v4ad</pattern>
+<pattern>vais5</pattern>
+<pattern>vaisc6</pattern>
+<pattern>var5</pattern>
+<pattern>vard6</pattern>
+<pattern>3v4at</pattern>
+<pattern>v1á</pattern>
+<pattern>vean6</pattern>
+<pattern>veant5</pattern>
+<pattern>vear3</pattern>
+<pattern>vearn6</pattern>
+<pattern>3v4ei</pattern>
+<pattern>veil5b</pattern>
+<pattern>v3eo</pattern>
+<pattern>véar6</pattern>
+<pattern>véis5</pattern>
+<pattern>véist6</pattern>
+<pattern>5v6ial</pattern>
+<pattern>3v4ini</pattern>
+<pattern>vios5</pattern>
+<pattern>vir5</pattern>
+<pattern>virg6</pattern>
+<pattern>v6íc</pattern>
+<pattern>v3la</pattern>
+<pattern>3vol4</pattern>
+<pattern>volt3</pattern>
+<pattern>vuít5</pattern>
+<pattern>x3ac</pattern>
+<pattern>x5ai</pattern>
+<pattern>x5aí</pattern>
+<pattern>dtiom5áintí</pattern>
+<pattern>thiom5áintí</pattern>
+<!-- Exceptions, to be fixed, see https://github.com/koreader/crengine/pull/376
+<pattern>bhrachtaí</pattern>
+<pattern>mbrachtaí</pattern>
+<pattern>cháintí</pattern>
+<pattern>gcáintí</pattern>
+<pattern>cheiltí</pattern>
+<pattern>gceiltí</pattern>
+<pattern>chistí</pattern>
+<pattern>gcistí</pattern>
+<pattern>choirtí</pattern>
+<pattern>gcoirtí</pattern>
+<pattern>chreataí</pattern>
+<pattern>gcreataí</pattern>
+<pattern>dhoirteá</pattern>
+<pattern>dhoirtear</pattern>
+<pattern>dhoirtí</pattern>
+<pattern>doirtear</pattern>
+<pattern>ndoirteá</pattern>
+<pattern>ndoirtear</pattern>
+<pattern>ndoirtí</pattern>
+<pattern>bhfuadar</pattern>
+<pattern>fhuadar</pattern>
+<pattern>bhfuafar</pattern>
+<pattern>fhuafar</pattern>
+<pattern>fuafar</pattern>
+<pattern>ghaistí</pattern>
+<pattern>ngaistí</pattern>
+<pattern>ghealtaí</pattern>
+<pattern>ngealtaí</pattern>
+<pattern>ghortaí</pattern>
+<pattern>ngortaí</pattern>
+<pattern>haistí</pattern>
+<pattern>léamar</pattern>
+<pattern>luadar</pattern>
+<pattern>meataí</pattern>
+<pattern>mheataí</pattern>
+<pattern>réaltaí</pattern>
+<pattern>rífear</pattern>
+<pattern>sádar</pattern>
+<pattern>shádar</pattern>
+<pattern>sáimis</pattern>
+<pattern>sháimis</pattern>
+<pattern>sáfaí</pattern>
+<pattern>sháfaí</pattern>
+<pattern>spealta</pattern>
+-->
+</HyphenationDescription>

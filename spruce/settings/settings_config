@@ -277,7 +277,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 @"The ultimate Linux ports manager"
 
 <Brick> <SmartPro> <Flip>
-"" "E-Book Reader" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PixelReader/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PixelReader/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PixelReader/config.json" ""
+"" "E-Book Reader" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/KoReader/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/KoReader/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/KoReader/config.json" ""
 @"E-Book reader for 64-bit devices"
 
 <Not_simple>

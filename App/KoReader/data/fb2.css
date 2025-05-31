@@ -1,0 +1,169 @@
+body { text-align: left; margin: 0; text-indent: 0; page-break-after: always; }
+
+p { text-align: justify; text-indent: 1.2em; margin-top: 0; margin-bottom: 0; min-height: 1em; }
+
+empty-line { height: 1em }
+
+hr { height: 1px; background-color: #808080; margin-top: 0.5em; margin-bottom: 0.5em; /* 2px */ }
+
+a { display: inline; text-decoration: underline; }
+a[type="note"] { vertical-align: super; font-size: 70%; text-decoration: none }
+a[type="note"]::before { content: "\2060" } /* word joiner, avoid break before */
+
+image { text-indent: 0; display: block; margin: 0 auto; }
+p image { display: inline }
+li image { display: inline }
+
+li { display: list-item; text-indent: 0;  }
+ul { display: block; list-style-type: disc; margin-left: 1em; padding-left: -cr-special }
+ol { display: block; list-style-type: decimal; margin-left: 1em; padding-left: -cr-special }
+
+cite p, epigraph p { text-align: left; text-indent: 0 }
+v { text-align: left; text-align-last: -cr-right-if-not-first; text-indent: 1em hanging; hyphenate: none }
+
+stanza { margin-left: 15%; text-align: left; font-style: italic  }
+stanza + stanza { margin-top: 1em; }
+poem { margin-top: 1em; margin-bottom: 1em; text-indent: 0 }
+text-author { font-weight: bold; font-style: italic; margin-left: 5%}
+date { font-style: italic; margin-left: 5% }
+epigraph { margin-left: 15%; margin-right: 1em; text-align: left; text-indent: 1em; font-style: italic; margin-top: 15px; margin-bottom: 25px }
+cite { display: block; font-style: italic; margin-left: 5%; margin-right: 5%; text-align: justify; margin-top: 20px; margin-bottom: 20px }
+style { display: inline; }
+
+title p, subtitle p, h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+	text-align: center;
+	text-indent: 0
+}
+title, h1, h2, h3, h4, h5, h6, subtitle {
+	text-align: center;
+	text-indent: 0;
+	font-weight: bold;
+	hyphenate: none;
+}
+h1, h2, h3, h4, h5, h6 {
+	display: block;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	padding: 10px ;
+}
+title {
+	font-size: 110%;
+	margin-top: 0.7em;
+	margin-bottom: 0.5em
+}
+subtitle {
+	font-style: italic;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em
+}
+h1 { font-size: 150% }
+h2 { font-size: 140% }
+h3 { font-size: 130% }
+h4 { font-size: 120% }
+h5 { font-size: 110% }
+title, h1, h2 {
+	page-break-before: always;
+	page-break-inside: avoid;
+	page-break-after: avoid;
+}
+ol title, ul title {
+	page-break-before: auto;
+}
+subtitle, h3, h4, h5, h6 {
+	page-break-inside: avoid;
+	page-break-after: avoid;
+}
+
+table { font-size: 80%; width: 100%;  }
+td, th { text-indent: 0; padding: 3px }
+th {  font-weight: bold; text-align: center; background-color: #DDD  }
+/* #808080; */
+table caption { text-indent: 0; padding: 4px; background-color: #EEE }
+table, th, td { border-width: 1px; border-style: solid; border-color: black; border-collapse: collapse; }
+
+tt, samp, kbd { font-family: monospace; }
+code, pre {
+   white-space: pre;
+   text-align: left;
+   font-family: monospace;
+   }
+code {
+   display: inline;
+}
+pre {
+   display: block;
+   margin-top: 0.5em;
+   margin-bottom: 0.5em;
+   text-align: left
+}
+
+/* FB2 may have multiple BODY tags, with different "name=" attributes:
+   - name="notes" is for regular footnotes
+   - name="comments" is for additional notes that can be considered end notes */
+/* body[name="notes"], body[name="comments"] { font-size: 80%; } delegated to style tweaks */
+body[name="notes"] section title,
+body[name="comments"] section title {
+    display: run-in;   /* technical trick to have the footnote number inline with the followup text */
+    font-weight: bold;
+    font-size: 100%; /* counteract default of 110% with regular title */
+    font-variant: tabular-nums; /* get fixed width digits for nicer text alignment */
+    text-align: start; /* counteract default of center with regular title */
+    page-break-before: auto; /* counteract default of always with regular title */
+    page-break-inside: auto;
+    page-break-after: auto;
+}
+/* Mark BODYs others than the first as non-linear, so they can be hidden by frontend code.
+   (this is actually suggested by the FB2 specs: "... multiple bodies are used for additional information,
+   like footnotes, that do not appear in the main book flow. The first body is presented to the reader by
+   default, and content in the other bodies should be accessible by hyperlinks.") */
+body + body {
+    -cr-hint: non-linear;
+}
+
+description { display: block; }
+title-info { display: block; }
+annotation { margin-left: 5%; margin-right: 5%; font-size: 80%; font-style: italic; text-align: justify; text-indent: 1em }
+description date  { font-size: 80%; text-align: center }
+genre { display: none; }
+author { display: none; }
+book-title { display: none; }
+keywords { display: none; }
+lang { display: none; }
+src-lang { display: none; }
+translator { display: none; }
+document-info { display: none; }
+publish-info { display: none; }
+custom-info { display: none; }
+coverpage { display: none }
+
+head, form, script { display: none; }
+
+b,strong,i,em,dfn,var,q,u,underline,del,s,strike,spacing,small,big,sub,sup,acronym,tt,samp,kbd {
+   display: inline;
+}
+
+sub { vertical-align: sub; font-size: 70% }
+sup { vertical-align: super; font-size: 70% }
+
+strong, b { font-weight: bold }
+emphasis, i, em, dfn, var { font-style: italic }
+u, underline { text-decoration: underline; }
+del, s, strike, strikethrough { text-decoration: line-through; }
+spacing { letter-spacing: 5px; }
+
+small { font-size: 80%; }
+big { font-size: 130%; }
+
+nobr { display: inline; hyphenate: none; white-space: nowrap; }
+
+dl { margin-left: 0; }
+dt { display: block; margin-left: 0; margin-top:0.3em; font-weight: bold; }
+dd { display: block; margin-left: 1.3em; }
+
+img {
+   margin: 0.5em;
+   text-align: center;
+   text-indent: 0;
+   border-style: solid;
+   border-width: medium;
+}
