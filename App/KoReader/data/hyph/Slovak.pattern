@@ -1,0 +1,2481 @@
+<?xml version="1.0" encoding="utf8"?>
+<!--
+% 20180619
+% taken and converted from https://github.com/hyphenation/tex-hyphen/blob/master/hyph-utf8/tex/generic/hyph-utf8/patterns/tex/hyph-sk.tex
+-->
+<HyphenationDescription>
+<pattern>a1</pattern>
+<pattern>á1</pattern>
+<pattern>ä1</pattern>
+<pattern>e1</pattern>
+<pattern>é1</pattern>
+<pattern>i1</pattern>
+<pattern>í1</pattern>
+<pattern>o1</pattern>
+<pattern>ó1</pattern>
+<pattern>ô1</pattern>
+<pattern>u1</pattern>
+<pattern>ú1</pattern>
+<pattern>y1</pattern>
+<pattern>ý1</pattern>
+<pattern>i2a</pattern>
+<pattern>i2á</pattern>
+<pattern>i2e</pattern>
+<pattern>i2u</pattern>
+<pattern>o2u</pattern>
+<pattern>c2h</pattern>
+<pattern>d2z</pattern>
+<pattern>d2ž</pattern>
+<pattern>2b1b</pattern>
+<pattern>2b1c</pattern>
+<pattern>2b1č</pattern>
+<pattern>2b1d</pattern>
+<pattern>2b1ď</pattern>
+<pattern>2b1f</pattern>
+<pattern>2b1g</pattern>
+<pattern>2b1h</pattern>
+<pattern>2b1c2h</pattern>
+<pattern>2b1j</pattern>
+<pattern>2b1k</pattern>
+<pattern>2b1l</pattern>
+<pattern>2b1ľ</pattern>
+<pattern>2b1m</pattern>
+<pattern>2b1n</pattern>
+<pattern>2b1ň</pattern>
+<pattern>2b1p</pattern>
+<pattern>2b1r</pattern>
+<pattern>2b1s</pattern>
+<pattern>2b1š</pattern>
+<pattern>2b1t</pattern>
+<pattern>2b1ť</pattern>
+<pattern>2b1v</pattern>
+<pattern>2b1w</pattern>
+<pattern>2b1x</pattern>
+<pattern>2b1z</pattern>
+<pattern>2b1ž</pattern>
+<pattern>2b1d2z</pattern>
+<pattern>2b1d2ž</pattern>
+<pattern>2c1b</pattern>
+<pattern>2c1c</pattern>
+<pattern>2c1č</pattern>
+<pattern>2c1d</pattern>
+<pattern>2c1ď</pattern>
+<pattern>2c1f</pattern>
+<pattern>2c1g</pattern>
+<pattern>2c1c2h</pattern>
+<pattern>2c1j</pattern>
+<pattern>2c1k</pattern>
+<pattern>2c1l</pattern>
+<pattern>2c1ľ</pattern>
+<pattern>2c1m</pattern>
+<pattern>2c1n</pattern>
+<pattern>2c1ň</pattern>
+<pattern>2c1p</pattern>
+<pattern>2c1r</pattern>
+<pattern>2c1s</pattern>
+<pattern>2c1š</pattern>
+<pattern>2c1t</pattern>
+<pattern>2c1ť</pattern>
+<pattern>2c1v</pattern>
+<pattern>2c1w</pattern>
+<pattern>2c1x</pattern>
+<pattern>2c1z</pattern>
+<pattern>2c1ž</pattern>
+<pattern>2c1d2z</pattern>
+<pattern>2c1d2ž</pattern>
+<pattern>2č1b</pattern>
+<pattern>2č1c</pattern>
+<pattern>2č1č</pattern>
+<pattern>2č1d</pattern>
+<pattern>2č1ď</pattern>
+<pattern>2č1f</pattern>
+<pattern>2č1g</pattern>
+<pattern>2č1h</pattern>
+<pattern>2č1c2h</pattern>
+<pattern>2č1j</pattern>
+<pattern>2č1k</pattern>
+<pattern>2č1l</pattern>
+<pattern>2č1ľ</pattern>
+<pattern>2č1m</pattern>
+<pattern>2č1n</pattern>
+<pattern>2č1ň</pattern>
+<pattern>2č1p</pattern>
+<pattern>2č1r</pattern>
+<pattern>2č1s</pattern>
+<pattern>2č1š</pattern>
+<pattern>2č1t</pattern>
+<pattern>2č1ť</pattern>
+<pattern>2č1v</pattern>
+<pattern>2č1w</pattern>
+<pattern>2č1x</pattern>
+<pattern>2č1z</pattern>
+<pattern>2č1ž</pattern>
+<pattern>2č1d2z</pattern>
+<pattern>2č1d2ž</pattern>
+<pattern>2d1b</pattern>
+<pattern>2d1c</pattern>
+<pattern>2d1č</pattern>
+<pattern>2d1d</pattern>
+<pattern>2d1ď</pattern>
+<pattern>2d1f</pattern>
+<pattern>2d1g</pattern>
+<pattern>2d1h</pattern>
+<pattern>2d1c2h</pattern>
+<pattern>2d1j</pattern>
+<pattern>2d1k</pattern>
+<pattern>2d1l</pattern>
+<pattern>2d1ľ</pattern>
+<pattern>2d1m</pattern>
+<pattern>2d1n</pattern>
+<pattern>2d1ň</pattern>
+<pattern>2d1p</pattern>
+<pattern>2d1r</pattern>
+<pattern>2d1s</pattern>
+<pattern>2d1š</pattern>
+<pattern>2d1t</pattern>
+<pattern>2d1ť</pattern>
+<pattern>2d1v</pattern>
+<pattern>2d1d2z</pattern>
+<pattern>2d1d2ž</pattern>
+<pattern>2ď1b</pattern>
+<pattern>2ď1c</pattern>
+<pattern>2ď1č</pattern>
+<pattern>2ď1d</pattern>
+<pattern>2ď1ď</pattern>
+<pattern>2ď1f</pattern>
+<pattern>2ď1g</pattern>
+<pattern>2ď1h</pattern>
+<pattern>2ď1c2h</pattern>
+<pattern>2ď1j</pattern>
+<pattern>2ď1k</pattern>
+<pattern>2ď1l</pattern>
+<pattern>2ď1ľ</pattern>
+<pattern> as4t4ro3</pattern>
+<pattern> atmo3</pattern>
+<pattern> a2u1to3</pattern>
+<pattern>2ď1m</pattern>
+<pattern>2ď1n</pattern>
+<pattern>2ď1ň</pattern>
+<pattern>2ď1p</pattern>
+<pattern>2ď1r</pattern>
+<pattern>2ď1s</pattern>
+<pattern>2ď1š</pattern>
+<pattern>2ď1t</pattern>
+<pattern>2ď1ť</pattern>
+<pattern>2ď1v</pattern>
+<pattern>2ď1z</pattern>
+<pattern>2ď1ž</pattern>
+<pattern>2ď1d2z</pattern>
+<pattern>2ď1d2ž</pattern>
+<pattern>2f1b</pattern>
+<pattern>2f1c</pattern>
+<pattern>2f1č</pattern>
+<pattern>2f1d</pattern>
+<pattern>2f1ď</pattern>
+<pattern>2f1f</pattern>
+<pattern>2f1g</pattern>
+<pattern>2f1h</pattern>
+<pattern>2f1c2h</pattern>
+<pattern>2f1j</pattern>
+<pattern>2f1k</pattern>
+<pattern>2f1l</pattern>
+<pattern>2f1ľ</pattern>
+<pattern>2f1m</pattern>
+<pattern>2f1n</pattern>
+<pattern>2f1ň</pattern>
+<pattern>2f1p</pattern>
+<pattern>2f1r</pattern>
+<pattern>2f1s</pattern>
+<pattern>2f1š</pattern>
+<pattern>2f1t</pattern>
+<pattern>2f1ť</pattern>
+<pattern>2f1v</pattern>
+<pattern>2f1z</pattern>
+<pattern>2f1ž</pattern>
+<pattern>2f1d2z</pattern>
+<pattern>2f1d2ž</pattern>
+<pattern>2g1b</pattern>
+<pattern>2g1c</pattern>
+<pattern>2g1č</pattern>
+<pattern>2g1d</pattern>
+<pattern>2g1ď</pattern>
+<pattern>2g1f</pattern>
+<pattern>2g1g</pattern>
+<pattern>2g1h</pattern>
+<pattern>2g1c2h</pattern>
+<pattern>2g1j</pattern>
+<pattern>2g1k</pattern>
+<pattern>2g1l</pattern>
+<pattern>2g1ľ</pattern>
+<pattern>2g1m</pattern>
+<pattern>2g1n</pattern>
+<pattern>2g1ň</pattern>
+<pattern>2g1p</pattern>
+<pattern>2g1r</pattern>
+<pattern>2g1s</pattern>
+<pattern>2g1š</pattern>
+<pattern>2g1t</pattern>
+<pattern>2g1ť</pattern>
+<pattern>2g1v</pattern>
+<pattern>2g1z</pattern>
+<pattern>2g1ž</pattern>
+<pattern>2g1d2z</pattern>
+<pattern>2g1d2ž</pattern>
+<pattern>2h1b</pattern>
+<pattern>2h1c</pattern>
+<pattern>2h1č</pattern>
+<pattern>2h1d</pattern>
+<pattern>2h1ď</pattern>
+<pattern>2h1f</pattern>
+<pattern>2h1g</pattern>
+<pattern>2h1h</pattern>
+<pattern>2h1c2h</pattern>
+<pattern>2h1j</pattern>
+<pattern>2h1k</pattern>
+<pattern>2h1l</pattern>
+<pattern>2h1ľ</pattern>
+<pattern>2h1m</pattern>
+<pattern>2h1n</pattern>
+<pattern>2h1ň</pattern>
+<pattern>2h1p</pattern>
+<pattern>2h1r</pattern>
+<pattern>2h1s</pattern>
+<pattern>2h1š</pattern>
+<pattern>2h1t</pattern>
+<pattern>2h1ť</pattern>
+<pattern>2h1v</pattern>
+<pattern>2h1z</pattern>
+<pattern>2h1ž</pattern>
+<pattern>2h1d2z</pattern>
+<pattern>2h1d2ž</pattern>
+<pattern>2c2h1b</pattern>
+<pattern>2c2h1c</pattern>
+<pattern>2c2h1č</pattern>
+<pattern>2c2h1d</pattern>
+<pattern>2c2h1ď</pattern>
+<pattern>2c2h1f</pattern>
+<pattern>2c2h1g</pattern>
+<pattern>2c2h1h</pattern>
+<pattern>2c2h1c2h</pattern>
+<pattern>2c2h1j</pattern>
+<pattern>2c2h1k</pattern>
+<pattern>2c2h1l</pattern>
+<pattern>2c2h1ľ</pattern>
+<pattern>2c2h1m</pattern>
+<pattern>2c2h1n</pattern>
+<pattern>2c2h1ň</pattern>
+<pattern>2c2h1p</pattern>
+<pattern>2c2h1r</pattern>
+<pattern>2c2h1s</pattern>
+<pattern>2c2h1š</pattern>
+<pattern>2c2h1t</pattern>
+<pattern>2c2h1ť</pattern>
+<pattern>2c2h1v</pattern>
+<pattern>2c2h1w</pattern>
+<pattern>2c2h1ž</pattern>
+<pattern>2c2h1d2z</pattern>
+<pattern>2c2h1d2ž</pattern>
+<pattern>2j1b</pattern>
+<pattern>2j1c</pattern>
+<pattern>2j1č</pattern>
+<pattern>2j1d</pattern>
+<pattern>2j1ď</pattern>
+<pattern>2j1f</pattern>
+<pattern>2j1g</pattern>
+<pattern>2j1h</pattern>
+<pattern>2j1c2h</pattern>
+<pattern>2j1j</pattern>
+<pattern>2j1k</pattern>
+<pattern>2j1l</pattern>
+<pattern>2j1ľ</pattern>
+<pattern>2j1m</pattern>
+<pattern>2j1n</pattern>
+<pattern>2j1ň</pattern>
+<pattern>2j1p</pattern>
+<pattern>2j1r</pattern>
+<pattern>2j1s</pattern>
+<pattern>2j1š</pattern>
+<pattern>2j1t</pattern>
+<pattern>2j1ť</pattern>
+<pattern>2j1v</pattern>
+<pattern>2j1w</pattern>
+<pattern>2j1x</pattern>
+<pattern>2j1z</pattern>
+<pattern>2j1ž</pattern>
+<pattern>2j1d2z</pattern>
+<pattern>2j1d2ž</pattern>
+<pattern>2k1b</pattern>
+<pattern>2k1c</pattern>
+<pattern>2k1č</pattern>
+<pattern>2k1d</pattern>
+<pattern>2k1ď</pattern>
+<pattern>2k1f</pattern>
+<pattern>2k1g</pattern>
+<pattern>2k1h</pattern>
+<pattern>2k1c2h</pattern>
+<pattern>2k1j</pattern>
+<pattern>2k1k</pattern>
+<pattern>2k1l</pattern>
+<pattern>2k1ľ</pattern>
+<pattern>2k1m</pattern>
+<pattern>2k1n</pattern>
+<pattern>2k1ň</pattern>
+<pattern>2k1p</pattern>
+<pattern>2k1r</pattern>
+<pattern>2k1s</pattern>
+<pattern>2k1š</pattern>
+<pattern>2k1t</pattern>
+<pattern>2k1ť</pattern>
+<pattern>2k1v</pattern>
+<pattern>2k1w</pattern>
+<pattern>2k1x</pattern>
+<pattern>2k1z</pattern>
+<pattern>2k1ž</pattern>
+<pattern>2k1d2z</pattern>
+<pattern>2k1d2ž</pattern>
+<pattern>2l1b</pattern>
+<pattern>2l1c</pattern>
+<pattern>2l1č</pattern>
+<pattern>2l1d</pattern>
+<pattern>2l1ď</pattern>
+<pattern>2l1f</pattern>
+<pattern>2l1g</pattern>
+<pattern>2l1h</pattern>
+<pattern>2l1c2h</pattern>
+<pattern>2l1j</pattern>
+<pattern>2l1k</pattern>
+<pattern>2l1l</pattern>
+<pattern>2l1ľ</pattern>
+<pattern>2l1m</pattern>
+<pattern>2l1n</pattern>
+<pattern>2l1ň</pattern>
+<pattern>2l1p</pattern>
+<pattern>2l1r</pattern>
+<pattern>2l1s</pattern>
+<pattern>2l1š</pattern>
+<pattern>2l1t</pattern>
+<pattern>2l1ť</pattern>
+<pattern>2l1v</pattern>
+<pattern>2l1z</pattern>
+<pattern>2l1ž</pattern>
+<pattern>2l1d2z</pattern>
+<pattern>2l1d2ž</pattern>
+<pattern>2ľ1b</pattern>
+<pattern>2ľ1c</pattern>
+<pattern>2ľ1č</pattern>
+<pattern>2ľ1d</pattern>
+<pattern>2ľ1ď</pattern>
+<pattern>2ľ1f</pattern>
+<pattern>2ľ1g</pattern>
+<pattern>2ľ1h</pattern>
+<pattern>2ľ1c2h</pattern>
+<pattern>2ľ1j</pattern>
+<pattern>2ľ1k</pattern>
+<pattern>2ľ1l</pattern>
+<pattern>2ľ1ľ</pattern>
+<pattern>2ľ1m</pattern>
+<pattern>2ľ1n</pattern>
+<pattern>2ľ1ň</pattern>
+<pattern>2ľ1p</pattern>
+<pattern>2ľ1r</pattern>
+<pattern>2ľ1s</pattern>
+<pattern>2ľ1š</pattern>
+<pattern>2ľ1t</pattern>
+<pattern>2ľ1ť</pattern>
+<pattern>2ľ1v</pattern>
+<pattern>2ľ1z</pattern>
+<pattern>2ľ1ž</pattern>
+<pattern>2ľ1d2z</pattern>
+<pattern>2ľ1d2ž</pattern>
+<pattern>2m1b</pattern>
+<pattern>2m1c</pattern>
+<pattern>2m1č</pattern>
+<pattern>2m1d</pattern>
+<pattern>2m1ď</pattern>
+<pattern>2m1f</pattern>
+<pattern>2m1g</pattern>
+<pattern>2m1h</pattern>
+<pattern>2m1c2h</pattern>
+<pattern>2m1j</pattern>
+<pattern>2m1k</pattern>
+<pattern>2m1l</pattern>
+<pattern>2m1ľ</pattern>
+<pattern>2m1m</pattern>
+<pattern>2m1n</pattern>
+<pattern>2m1ň</pattern>
+<pattern>2m1p</pattern>
+<pattern>2m1r</pattern>
+<pattern>2m1s</pattern>
+<pattern>2m1š</pattern>
+<pattern>2m1t</pattern>
+<pattern>2m1ť</pattern>
+<pattern>2m1v</pattern>
+<pattern>2m1z</pattern>
+<pattern>2m1ž</pattern>
+<pattern>2m1d2z</pattern>
+<pattern>2m1d2ž</pattern>
+<pattern>2n1b</pattern>
+<pattern>2n1c</pattern>
+<pattern>2n1č</pattern>
+<pattern>2n1d</pattern>
+<pattern>2n1ď</pattern>
+<pattern>2n1f</pattern>
+<pattern>2n1g</pattern>
+<pattern>2n1h</pattern>
+<pattern>2n1c2h</pattern>
+<pattern>2n1j</pattern>
+<pattern>2n1k</pattern>
+<pattern>2n1l</pattern>
+<pattern>2n1ľ</pattern>
+<pattern>2n1m</pattern>
+<pattern>2n1n</pattern>
+<pattern>2n1ň</pattern>
+<pattern>2n1p</pattern>
+<pattern>2n1r</pattern>
+<pattern>2n1s</pattern>
+<pattern>2n1š</pattern>
+<pattern>2n1t</pattern>
+<pattern>2n1ť</pattern>
+<pattern>2n1v</pattern>
+<pattern>2n1w</pattern>
+<pattern>2n1x</pattern>
+<pattern>2n1z</pattern>
+<pattern>2n1ž</pattern>
+<pattern>2n1d2z</pattern>
+<pattern>2n1d2ž</pattern>
+<pattern>2ň1b</pattern>
+<pattern>2ň1c</pattern>
+<pattern>2ň1č</pattern>
+<pattern>2ň1d</pattern>
+<pattern>2ň1ď</pattern>
+<pattern>2ň1f</pattern>
+<pattern>2ň1g</pattern>
+<pattern>2ň1h</pattern>
+<pattern>2ň1c2h</pattern>
+<pattern>2ň1j</pattern>
+<pattern>2ň1k</pattern>
+<pattern>2ň1l</pattern>
+<pattern>2ň1ľ</pattern>
+<pattern>2ň1m</pattern>
+<pattern>2ň1n</pattern>
+<pattern>2ň1ň</pattern>
+<pattern>2ň1p</pattern>
+<pattern>2ň1r</pattern>
+<pattern>2ň1s</pattern>
+<pattern>2ň1š</pattern>
+<pattern>2ň1t</pattern>
+<pattern>2ň1ť</pattern>
+<pattern>2ň1v</pattern>
+<pattern>2ň1z</pattern>
+<pattern>2ň1ž</pattern>
+<pattern>2ň1d2z</pattern>
+<pattern>2ň1d2ž</pattern>
+<pattern>2p1b</pattern>
+<pattern>2p1c</pattern>
+<pattern>2p1č</pattern>
+<pattern>2p1d</pattern>
+<pattern>2p1ď</pattern>
+<pattern>2p1f</pattern>
+<pattern>2p1g</pattern>
+<pattern>2p1h</pattern>
+<pattern>2p1c2h</pattern>
+<pattern>2p1j</pattern>
+<pattern>2p1k</pattern>
+<pattern>2p1l</pattern>
+<pattern>2p1ľ</pattern>
+<pattern>2p1m</pattern>
+<pattern>2p1n</pattern>
+<pattern>2p1ň</pattern>
+<pattern>2p1p</pattern>
+<pattern>2p1r</pattern>
+<pattern>2p1s</pattern>
+<pattern>2p1š</pattern>
+<pattern>2p1t</pattern>
+<pattern>2p1ť</pattern>
+<pattern>2p1v</pattern>
+<pattern>2p1w</pattern>
+<pattern>2p1x</pattern>
+<pattern>2p1z</pattern>
+<pattern>2p1ž</pattern>
+<pattern>2p1d2z</pattern>
+<pattern>2p1d2ž</pattern>
+<pattern>2r1b</pattern>
+<pattern>2r1c</pattern>
+<pattern>2r1č</pattern>
+<pattern>2r1d</pattern>
+<pattern>2r1ď</pattern>
+<pattern>2r1f</pattern>
+<pattern>2r1g</pattern>
+<pattern>2r1h</pattern>
+<pattern>2r1c2h</pattern>
+<pattern>2r1j</pattern>
+<pattern>2r1k</pattern>
+<pattern>2r1l</pattern>
+<pattern>2r1ľ</pattern>
+<pattern>2r1m</pattern>
+<pattern>2r1n</pattern>
+<pattern>2r1ň</pattern>
+<pattern>2r1p</pattern>
+<pattern>2r1r</pattern>
+<pattern>2r1s</pattern>
+<pattern>2r1š</pattern>
+<pattern>2r1t</pattern>
+<pattern>2r1ť</pattern>
+<pattern>2r1v</pattern>
+<pattern>2r1w</pattern>
+<pattern>2r1x</pattern>
+<pattern>2r1z</pattern>
+<pattern>2r1ž</pattern>
+<pattern>2r1d2z</pattern>
+<pattern>2r1d2ž</pattern>
+<pattern>2s1b</pattern>
+<pattern>2s1c</pattern>
+<pattern>2s1č</pattern>
+<pattern>2s1d</pattern>
+<pattern>2s1ď</pattern>
+<pattern>2s1f</pattern>
+<pattern>2s1g</pattern>
+<pattern>2s1h</pattern>
+<pattern>2s1c2h</pattern>
+<pattern>2s1j</pattern>
+<pattern>2s1k</pattern>
+<pattern>2s1l</pattern>
+<pattern>2s1ľ</pattern>
+<pattern>2s1m</pattern>
+<pattern>2s1n</pattern>
+<pattern>2s1ň</pattern>
+<pattern>2s1p</pattern>
+<pattern>2s1r</pattern>
+<pattern>2s1s</pattern>
+<pattern>2s1š</pattern>
+<pattern>2s1t</pattern>
+<pattern>2s1ť</pattern>
+<pattern>2s1v</pattern>
+<pattern>2s1z</pattern>
+<pattern>2s1ž</pattern>
+<pattern>2s1d2z</pattern>
+<pattern>2s1d2ž</pattern>
+<pattern>2š1b</pattern>
+<pattern>2š1c</pattern>
+<pattern>2š1č</pattern>
+<pattern>2š1d</pattern>
+<pattern>2š1ď</pattern>
+<pattern>2š1f</pattern>
+<pattern>2š1g</pattern>
+<pattern>2š1h</pattern>
+<pattern>2š1c2h</pattern>
+<pattern>2š1j</pattern>
+<pattern>2š1k</pattern>
+<pattern>2š1l</pattern>
+<pattern>2š1ľ</pattern>
+<pattern>2š1m</pattern>
+<pattern>2š1n</pattern>
+<pattern>2š1ň</pattern>
+<pattern>2š1p</pattern>
+<pattern>2š1r</pattern>
+<pattern>2š1s</pattern>
+<pattern>2š1š</pattern>
+<pattern>2š1t</pattern>
+<pattern>2š1ť</pattern>
+<pattern>2š1v</pattern>
+<pattern>2š1w</pattern>
+<pattern>2š1x</pattern>
+<pattern>2š1z</pattern>
+<pattern>2š1ž</pattern>
+<pattern>2š1d2z</pattern>
+<pattern>2š1d2ž</pattern>
+<pattern>2t1b</pattern>
+<pattern>2t1c</pattern>
+<pattern>2t1č</pattern>
+<pattern>2t1d</pattern>
+<pattern>2t1ď</pattern>
+<pattern>2t1f</pattern>
+<pattern>2t1g</pattern>
+<pattern>2t1h</pattern>
+<pattern>2t1c2h</pattern>
+<pattern>2t1j</pattern>
+<pattern>2t1k</pattern>
+<pattern>2t1l</pattern>
+<pattern>2t1ľ</pattern>
+<pattern>2t1m</pattern>
+<pattern>2t1n</pattern>
+<pattern>2t1ň</pattern>
+<pattern>2t1p</pattern>
+<pattern>2t1r</pattern>
+<pattern>2t1s</pattern>
+<pattern>2t1š</pattern>
+<pattern>2t1t</pattern>
+<pattern>2t1ť</pattern>
+<pattern>2t1v</pattern>
+<pattern>2t1w</pattern>
+<pattern>2t1x</pattern>
+<pattern>2t1z</pattern>
+<pattern>2t1ž</pattern>
+<pattern>2t1d2z</pattern>
+<pattern>2t1d2ž</pattern>
+<pattern>2ť1b</pattern>
+<pattern>2ť1c</pattern>
+<pattern>2ť1č</pattern>
+<pattern>2ť1d</pattern>
+<pattern>2ť1ď</pattern>
+<pattern>2ť1f</pattern>
+<pattern>2ť1g</pattern>
+<pattern>2ť1h</pattern>
+<pattern>2ť1c2h</pattern>
+<pattern>2ť1j</pattern>
+<pattern>2ť1k</pattern>
+<pattern>2ť1l</pattern>
+<pattern>2ť1ľ</pattern>
+<pattern>2ť1m</pattern>
+<pattern>2ť1n</pattern>
+<pattern>2ť1ň</pattern>
+<pattern>2ť1p</pattern>
+<pattern>2ť1r</pattern>
+<pattern>2ť1s</pattern>
+<pattern>2ť1š</pattern>
+<pattern>2ť1t</pattern>
+<pattern>2ť1ť</pattern>
+<pattern>2ť1v</pattern>
+<pattern>2ť1w</pattern>
+<pattern>2ť1x</pattern>
+<pattern>2ť1z</pattern>
+<pattern>2ť1ž</pattern>
+<pattern>2ť1d2z</pattern>
+<pattern>2ť1d2ž</pattern>
+<pattern>2v1b</pattern>
+<pattern>2v1c</pattern>
+<pattern>2v1č</pattern>
+<pattern>2v1d</pattern>
+<pattern>2v1ď</pattern>
+<pattern>2v1f</pattern>
+<pattern>2v1g</pattern>
+<pattern>2v1h</pattern>
+<pattern>2v1c2h</pattern>
+<pattern>2v1j</pattern>
+<pattern>2v1k</pattern>
+<pattern>2v1l</pattern>
+<pattern>2v1ľ</pattern>
+<pattern>2v1m</pattern>
+<pattern>2v1n</pattern>
+<pattern>2v1ň</pattern>
+<pattern>2v1p</pattern>
+<pattern>2v1r</pattern>
+<pattern>2v1s</pattern>
+<pattern>2v1š</pattern>
+<pattern>2v1t</pattern>
+<pattern>2v1ť</pattern>
+<pattern>2v1v</pattern>
+<pattern>2v1w</pattern>
+<pattern>2v1x</pattern>
+<pattern>2v1z</pattern>
+<pattern>2v1ž</pattern>
+<pattern>2v1d2z</pattern>
+<pattern>2v1d2ž</pattern>
+<pattern>2z1b</pattern>
+<pattern>2z1c</pattern>
+<pattern>2z1č</pattern>
+<pattern>2z1d</pattern>
+<pattern>2z1ď</pattern>
+<pattern>2z1f</pattern>
+<pattern>2z1g</pattern>
+<pattern>2z1h</pattern>
+<pattern>2z1c2h</pattern>
+<pattern>2z1j</pattern>
+<pattern>2z1k</pattern>
+<pattern>2z1l</pattern>
+<pattern>2z1ľ</pattern>
+<pattern>2z1m</pattern>
+<pattern>2z1n</pattern>
+<pattern>2z1ň</pattern>
+<pattern>2z1p</pattern>
+<pattern>2z1r</pattern>
+<pattern>2z1s</pattern>
+<pattern>2z1š</pattern>
+<pattern>2z1t</pattern>
+<pattern>2z1ť</pattern>
+<pattern>2z1v</pattern>
+<pattern>2z1z</pattern>
+<pattern>2z1ž</pattern>
+<pattern>2z1d2z</pattern>
+<pattern>2z1d2ž</pattern>
+<pattern>2ž1b</pattern>
+<pattern>2ž1c</pattern>
+<pattern>2ž1č</pattern>
+<pattern>2ž1d</pattern>
+<pattern>2ž1ď</pattern>
+<pattern>2ž1f</pattern>
+<pattern>2ž1g</pattern>
+<pattern>2ž1h</pattern>
+<pattern>2ž1c2h</pattern>
+<pattern>2ž1j</pattern>
+<pattern>2ž1k</pattern>
+<pattern>2ž1l</pattern>
+<pattern>2ž1ľ</pattern>
+<pattern>2ž1m</pattern>
+<pattern>2ž1n</pattern>
+<pattern>2ž1ň</pattern>
+<pattern>2ž1p</pattern>
+<pattern>2ž1r</pattern>
+<pattern>2ž1s</pattern>
+<pattern>2ž1š</pattern>
+<pattern>2ž1t</pattern>
+<pattern>2ž1ť</pattern>
+<pattern>2ž1v</pattern>
+<pattern>2ž1z</pattern>
+<pattern>2ž1ž</pattern>
+<pattern>2ž1d2z</pattern>
+<pattern>2ž1d2ž</pattern>
+<pattern>2d2z1k</pattern>
+<pattern>2d2z1n</pattern>
+<pattern>2d2z1r</pattern>
+<pattern>2d2z1s</pattern>
+<pattern>2d2ž1š</pattern>
+<pattern>2x1t</pattern>
+<pattern>2x1n</pattern>
+<pattern>2b1ŕ</pattern>
+<pattern>2ŕ1b</pattern>
+<pattern>2d2z1ŕ</pattern>
+<pattern>2ŕ1d2z</pattern>
+<pattern>2d2z1ľ</pattern>
+<pattern>2ŕ1d2ž</pattern>
+<pattern>2d2ž1ľ</pattern>
+<pattern>a1í2</pattern>
+<pattern>a1o2</pattern>
+<pattern>e1á2</pattern>
+<pattern>e1í2</pattern>
+<pattern>e1o2</pattern>
+<pattern>e1ó2</pattern>
+<pattern>e1u2</pattern>
+<pattern>i1o2</pattern>
+<pattern>o1a2</pattern>
+<pattern>o1e2</pattern>
+<pattern>o1i2</pattern>
+<pattern>o1o2</pattern>
+<pattern>u1a2</pattern>
+<pattern>u1á2</pattern>
+<pattern>u1i2</pattern>
+<pattern>u1í2</pattern>
+<pattern>u1o2</pattern>
+<pattern>u1u2</pattern>
+<pattern>y1a2</pattern>
+<pattern>y1e2</pattern>
+<pattern>y1ó2</pattern>
+<pattern>y1u2</pattern>
+<pattern>a2u1</pattern>
+<pattern>a2i1</pattern>
+<pattern>b2l3b</pattern>
+<pattern>3b2l3č</pattern>
+<pattern>b2l3c2h</pattern>
+<pattern>3b2l3k</pattern>
+<pattern>3b2ľ3k</pattern>
+<pattern>3b2l3ň</pattern>
+<pattern>b2l3š</pattern>
+<pattern>b2ľ3š</pattern>
+<pattern>3b2r3b</pattern>
+<pattern>b2r3d</pattern>
+<pattern>3b2r3k</pattern>
+<pattern>3b2ŕ3k</pattern>
+<pattern>3b2r3l</pattern>
+<pattern>3b2ŕ3ľ</pattern>
+<pattern>3b2r3n</pattern>
+<pattern>3b2r3ň</pattern>
+<pattern>3b2r3v</pattern>
+<pattern>b2r3z</pattern>
+<pattern>b3s2c</pattern>
+<pattern>b3s2t</pattern>
+<pattern>c3k2t</pattern>
+<pattern>3c2r3č</pattern>
+<pattern>3c2ŕ3č</pattern>
+<pattern>3c2r3k</pattern>
+<pattern>3c2ŕ3k</pattern>
+<pattern>c3t2v</pattern>
+<pattern>3č2l3n</pattern>
+<pattern>3č2r3č</pattern>
+<pattern>č2r3p</pattern>
+<pattern>3č2r3t</pattern>
+<pattern>3č2r3v</pattern>
+<pattern>d3c4h4n</pattern>
+<pattern>3d2l3b</pattern>
+<pattern>3d2l3h</pattern>
+<pattern>d2l3n</pattern>
+<pattern>3d2l3ž</pattern>
+<pattern>3d2ľ3ž</pattern>
+<pattern>3d2r3d</pattern>
+<pattern>3d2r3g</pattern>
+<pattern>d2r3l</pattern>
+<pattern>3d2r3k</pattern>
+<pattern>3d2r3m</pattern>
+<pattern>d2r3n</pattern>
+<pattern>3d2r3v</pattern>
+<pattern>3d2r3z</pattern>
+<pattern>3d2r3ž</pattern>
+<pattern>3d2ŕ3ž</pattern>
+<pattern>d3s2v</pattern>
+<pattern>d3s2t</pattern>
+<pattern>d3v2r</pattern>
+<pattern>3f2r3č</pattern>
+<pattern>3f2r3f</pattern>
+<pattern>3f2r3k</pattern>
+<pattern>3f2ŕ3k</pattern>
+<pattern>3f2r3m</pattern>
+<pattern>3f2r3n</pattern>
+<pattern>3g2l3g</pattern>
+<pattern>3g2r3c</pattern>
+<pattern>3g2r3g</pattern>
+<pattern>3h2l3b</pattern>
+<pattern>3h2ľ3b</pattern>
+<pattern>3h2l3t</pattern>
+<pattern>3h2m2l</pattern>
+<pattern>3h2r3b</pattern>
+<pattern>3h2ŕ3b</pattern>
+<pattern>3h2r3č</pattern>
+<pattern>3h2r3d</pattern>
+<pattern>3h2r3d2z</pattern>
+<pattern>3h2r3k</pattern>
+<pattern>3h2r3m</pattern>
+<pattern>3h2r3n</pattern>
+<pattern>3h2r3ň</pattern>
+<pattern>3h2r3t</pattern>
+<pattern>3h2r3v</pattern>
+<pattern>3c2h2l3p</pattern>
+<pattern>3c2h2r3b</pattern>
+<pattern>3c2h2r3č</pattern>
+<pattern>c2h2r3c4h</pattern>
+<pattern>3c2h2r3l</pattern>
+<pattern>3c2h2r3t</pattern>
+<pattern>j2c2h3n</pattern>
+<pattern>j3s2t</pattern>
+<pattern>j3š2le</pattern>
+<pattern>j3t2m</pattern>
+<pattern>j3t2r</pattern>
+<pattern>3k2l3b</pattern>
+<pattern>3k2ľ3b</pattern>
+<pattern>3k2l3č</pattern>
+<pattern>3k2l3z</pattern>
+<pattern>3k2ľ3z</pattern>
+<pattern>k2r3b</pattern>
+<pattern>3k2r3č</pattern>
+<pattern>3k2ŕ3č</pattern>
+<pattern>3k2ŕ3d</pattern>
+<pattern>3k2r3k</pattern>
+<pattern>3k2ŕ3k</pattern>
+<pattern>3k2ŕ3m</pattern>
+<pattern>3k2r3p</pattern>
+<pattern>3k2r3s</pattern>
+<pattern>3k2r3t</pattern>
+<pattern>3k2r3v</pattern>
+<pattern>k3s2ľ</pattern>
+<pattern>k2s3n</pattern>
+<pattern>k3t2r</pattern>
+<pattern>l3d2r</pattern>
+<pattern>ľ3k2n</pattern>
+<pattern>l3t2r</pattern>
+<pattern>m3b2l</pattern>
+<pattern>m3b2ľ</pattern>
+<pattern>m3b2r</pattern>
+<pattern>m3f2l</pattern>
+<pattern>m3f2r</pattern>
+<pattern>m3k2n</pattern>
+<pattern>3m2l3č</pattern>
+<pattern>3m2l3k</pattern>
+<pattern>m3p2l</pattern>
+<pattern>m3p2ľ</pattern>
+<pattern>m3p2r</pattern>
+<pattern>m3p2s</pattern>
+<pattern>3m2r3h</pattern>
+<pattern>m2r3c4h</pattern>
+<pattern>3m2r3k</pattern>
+<pattern>m2r3l</pattern>
+<pattern>m2r3š</pattern>
+<pattern>m2r3t</pattern>
+<pattern>3m2r3v</pattern>
+<pattern>3m2r3z</pattern>
+<pattern>3m2ŕ3z</pattern>
+<pattern>m3s2t</pattern>
+<pattern>m3š2t</pattern>
+<pattern>n3dľa</pattern>
+<pattern>n3d2r</pattern>
+<pattern>n3f2l</pattern>
+<pattern>n3f2r</pattern>
+<pattern>n3g2h</pattern>
+<pattern>n3g2l</pattern>
+<pattern>n3g2ľ</pattern>
+<pattern>n2g3n</pattern>
+<pattern>n3g2r</pattern>
+<pattern>n3g2v</pattern>
+<pattern>n3k2c</pattern>
+<pattern>n3k2h</pattern>
+<pattern>n3k2n</pattern>
+<pattern>n3k2r</pattern>
+<pattern>n3k2v</pattern>
+<pattern>n3s2c</pattern>
+<pattern>n3š2p</pattern>
+<pattern>n3š2t</pattern>
+<pattern>n3t2g</pattern>
+<pattern>n3t2l</pattern>
+<pattern>n3t2n</pattern>
+<pattern>n3t2r</pattern>
+<pattern>n2ž3m</pattern>
+<pattern>3p2l3n</pattern>
+<pattern>3p2l3ň</pattern>
+<pattern>3p2ľ3ň</pattern>
+<pattern>3p2l3z</pattern>
+<pattern>3p2ľ3z</pattern>
+<pattern>3p2ľ3ž</pattern>
+<pattern>3p2ŕ3c</pattern>
+<pattern>3p2r3č</pattern>
+<pattern>3p2r3d</pattern>
+<pattern>3p2r3s</pattern>
+<pattern>3p2r3š</pattern>
+<pattern>p3š2ť</pattern>
+<pattern>p3t2r</pattern>
+<pattern>r2b3n</pattern>
+<pattern>r3g2ľ</pattern>
+<pattern>r3g2r</pattern>
+<pattern>r3g2s</pattern>
+<pattern>r3k2d</pattern>
+<pattern>r2k3n</pattern>
+<pattern>r3k2t</pattern>
+<pattern>r3k2v</pattern>
+<pattern>r3p2c</pattern>
+<pattern>r3p2č</pattern>
+<pattern>r3p2r</pattern>
+<pattern>r3s2p</pattern>
+<pattern>r3š2č</pattern>
+<pattern>r3š2l</pattern>
+<pattern>r3š2r</pattern>
+<pattern>r2t3m</pattern>
+<pattern>r3t2n</pattern>
+<pattern>r2t3ň</pattern>
+<pattern>r3t2r</pattern>
+<pattern>r3t2v</pattern>
+<pattern>3s4c4h4n</pattern>
+<pattern>s2k3l</pattern>
+<pattern>s2k3m</pattern>
+<pattern>s2k3n</pattern>
+<pattern>s3k2r</pattern>
+<pattern>s3k2v</pattern>
+<pattern>3s2l3n</pattern>
+<pattern>3s2l3ň</pattern>
+<pattern>3s2l3z</pattern>
+<pattern>s3p2r</pattern>
+<pattern>3s2r3d</pattern>
+<pattern>3s4ŕ3k</pattern>
+<pattern>3s4r3š</pattern>
+<pattern>s3t2k</pattern>
+<pattern>ôs4t3k2ár3s4t4v</pattern>
+<pattern>s2t3l</pattern>
+<pattern>s3t2m</pattern>
+<pattern>s2t3n</pattern>
+<pattern>s3t2r</pattern>
+<pattern>s3t2v</pattern>
+<pattern>s2ť3h</pattern>
+<pattern>s2ť3m</pattern>
+<pattern>s2ť3p</pattern>
+<pattern>š3k2l</pattern>
+<pattern>š3k2r</pattern>
+<pattern>š3t2r</pattern>
+<pattern>3š4t4v</pattern>
+<pattern>t3k2l</pattern>
+<pattern>t3k2n</pattern>
+<pattern>3t2l3č</pattern>
+<pattern>3t2l3k</pattern>
+<pattern>t3h2l</pattern>
+<pattern>3t4r3č</pattern>
+<pattern>3t4r3h</pattern>
+<pattern>3t2r3l</pattern>
+<pattern>3t2r3k</pattern>
+<pattern>3t2r3m</pattern>
+<pattern>a4t2r3n</pattern>
+<pattern>3t2r3n</pattern>
+<pattern>3t2ŕ3n</pattern>
+<pattern>3t2ŕ3ň</pattern>
+<pattern>3t4r3p</pattern>
+<pattern>3t2r3v</pattern>
+<pattern>3t2ŕ3ž</pattern>
+<pattern>3v2l3č</pattern>
+<pattern>3v2ľ3č</pattern>
+<pattern>3v2l3h</pattern>
+<pattern>3v2l3k</pattern>
+<pattern>3v2l3n</pattern>
+<pattern>3v2r3h</pattern>
+<pattern>3v2r3c2h</pattern>
+<pattern>3v2r3l</pattern>
+<pattern>3v2ŕ3š</pattern>
+<pattern>3v2ŕ3t</pattern>
+<pattern>3v2r3z</pattern>
+<pattern>3v2ŕ3z</pattern>
+<pattern>3v4z4d</pattern>
+<pattern>3v4z4h</pattern>
+<pattern>3v4z4n</pattern>
+<pattern>3v3z2ť</pattern>
+<pattern>z3d2n</pattern>
+<pattern>noz5d4r</pattern>
+<pattern>3z4d4r</pattern>
+<pattern>3z4d4v</pattern>
+<pattern>z3g2n</pattern>
+<pattern>3z4h4r</pattern>
+<pattern>3z2r3k</pattern>
+<pattern>3z2r3n</pattern>
+<pattern>3z4v4l</pattern>
+<pattern>ž2d3n</pattern>
+<pattern>3ž2l3č</pattern>
+<pattern>3ž2l3t</pattern>
+<pattern>3ž2ľt</pattern>
+<pattern>3ž2r3ď</pattern>
+<pattern>ž3s2t</pattern>
+<pattern>x3p2l</pattern>
+<pattern>x3p2r</pattern>
+<pattern>x3t2r</pattern>
+<pattern>3b2l4č3n</pattern>
+<pattern>3b2ľ4č3k</pattern>
+<pattern>3b2l4n3k</pattern>
+<pattern>3b2ľ3k2n</pattern>
+<pattern>3b2r4b3l</pattern>
+<pattern>3b2r4b3t</pattern>
+<pattern>3b2r4č3k</pattern>
+<pattern>3b2r4d3c</pattern>
+<pattern>3b2ŕ4d3n</pattern>
+<pattern>3b2r3h2l</pattern>
+<pattern>3b4ŕ4k3n</pattern>
+<pattern>3b4r4m3b</pattern>
+<pattern>3b4r4n3č</pattern>
+<pattern>3b4r4n3k</pattern>
+<pattern>3b4r4š3l</pattern>
+<pattern>3b4r4t3l</pattern>
+<pattern>3b4r4t3n</pattern>
+<pattern>3b4r4v3n</pattern>
+<pattern>3b4r4z3d</pattern>
+<pattern>3b4r4z3l</pattern>
+<pattern>3b4r4z3n</pattern>
+<pattern>b3s2t2r</pattern>
+<pattern>3c4ŕ4č3k</pattern>
+<pattern>3c4r4k3n</pattern>
+<pattern>3c4v4r3č</pattern>
+<pattern>3c4v4r3k</pattern>
+<pattern>3c4v4ŕ3k</pattern>
+<pattern>3c4v4r3l</pattern>
+<pattern>3č4l4n3k</pattern>
+<pattern>3č4r3č4r</pattern>
+<pattern>3č4r4c4h3n</pattern>
+<pattern>3č4r4p3k</pattern>
+<pattern>3č4r4p3n</pattern>
+<pattern>3č4r4t3n</pattern>
+<pattern>3č4v4r3k</pattern>
+<pattern>3č4v4r3l</pattern>
+<pattern>3d4l4b3n</pattern>
+<pattern>d4ľ4ž3k</pattern>
+<pattern>d4l4ž3n</pattern>
+<pattern>d4ľ4ž3n</pattern>
+<pattern>3d4r4c3n</pattern>
+<pattern>3d4r4g3ľ</pattern>
+<pattern>3d4r4g3n</pattern>
+<pattern>3d4r4h3n</pattern>
+<pattern>3d4r4n3č</pattern>
+<pattern>3d4r4n3k</pattern>
+<pattern>3d4r4s3n</pattern>
+<pattern>3d4r4ž3b</pattern>
+<pattern>3d4r4ž3k</pattern>
+<pattern>3f4r4c3k</pattern>
+<pattern>3f4r4c3n</pattern>
+<pattern>3f4r4č3k</pattern>
+<pattern>3f4r4f3l</pattern>
+<pattern>3f4r4k3n</pattern>
+<pattern>3f4r4n3d</pattern>
+<pattern>3f4r4n3d4ž</pattern>
+<pattern>3f4r4n3g</pattern>
+<pattern>3f4r4n3k</pattern>
+<pattern>3g4l4g3n</pattern>
+<pattern>3g2r4c3k</pattern>
+<pattern>3h2ľ4b3k</pattern>
+<pattern>3h2l3t4n</pattern>
+<pattern>3h2r4b3č</pattern>
+<pattern>3h2r4č3k</pattern>
+<pattern>h2r4d3l</pattern>
+<pattern>3h2r4g3ľ</pattern>
+<pattern>3h2r4k3ľ</pattern>
+<pattern>3h2r4k3n</pattern>
+<pattern>3h2ŕ4k3n</pattern>
+<pattern>3h2r4n3č</pattern>
+<pattern>3h2r4s3t</pattern>
+<pattern>3h2r4s3ť</pattern>
+<pattern>3ch4ľ4p3k</pattern>
+<pattern>3c2h2r4b3t</pattern>
+<pattern>3c2h2r4c4h3l</pattern>
+<pattern>3c2h2r4c4h3ľ</pattern>
+<pattern>3c4h4r4s3t</pattern>
+<pattern>j3s4t4r</pattern>
+<pattern>j3s4t4v</pattern>
+<pattern>3k4l4b3č</pattern>
+<pattern>3k4l4b3k</pattern>
+<pattern>3k4l4z3k</pattern>
+<pattern>3k4l4z3n</pattern>
+<pattern>3k4r4č3m</pattern>
+<pattern>3k4r4č3n</pattern>
+<pattern>3k4r4k3v</pattern>
+<pattern>3k4r4m3n</pattern>
+<pattern>3k4ŕ4m3n</pattern>
+<pattern>3k4r4p3č</pattern>
+<pattern>3k4r4s3t</pattern>
+<pattern>3k4r4š3t</pattern>
+<pattern>3k4r4t3k</pattern>
+<pattern>3k4r4v3n</pattern>
+<pattern>3m2l4č3k</pattern>
+<pattern>3m2ľ4k3n</pattern>
+<pattern>3m2ľ4k3v</pattern>
+<pattern>3m2l4s3n</pattern>
+<pattern>m3p4r3p</pattern>
+<pattern>m3p4r3v</pattern>
+<pattern>3m4r4k3n</pattern>
+<pattern>3m4r4k3v</pattern>
+<pattern>3m4r4m3l</pattern>
+<pattern>3m4r4n3č</pattern>
+<pattern>3m4r4n3k</pattern>
+<pattern>3m4ŕ4š3t</pattern>
+<pattern>3m4ŕ4t3v</pattern>
+<pattern>3m4r4z3l</pattern>
+<pattern>3m4r4z3k</pattern>
+<pattern>3m4r4z3n</pattern>
+<pattern>n4g3s4t</pattern>
+<pattern>n3š4t4r</pattern>
+<pattern>n3t4l3m</pattern>
+<pattern>3p2l4z3l</pattern>
+<pattern>3p2ľ4z3n</pattern>
+<pattern>p2ŕ4c3n</pattern>
+<pattern>3p2r4č3k</pattern>
+<pattern>3p4r4d3n</pattern>
+<pattern>3p4ŕ4c2h3n</pattern>
+<pattern>3p4r4s3k</pattern>
+<pattern>3p4r4t3k</pattern>
+<pattern>r2s3k4d</pattern>
+<pattern>r2s3k4t</pattern>
+<pattern>čer4s3t4v</pattern>
+<pattern>3s4l4n3k</pattern>
+<pattern>3s4k4r3z</pattern>
+<pattern>3s4m4r3c</pattern>
+<pattern>3s4m4r3č</pattern>
+<pattern>3s4m4r3d</pattern>
+<pattern>3s4m4r3k</pattern>
+<pattern>3s4m4r3t</pattern>
+<pattern>3s4p4r3c4h</pattern>
+<pattern>3s4r4d3c</pattern>
+<pattern>3s4r4k3n</pattern>
+<pattern>3s4r4s3t</pattern>
+<pattern>3s4t4ľ3k</pattern>
+<pattern>s3t4r3b</pattern>
+<pattern>ko4s3t4r3č</pattern>
+<pattern>3s4t4r3č</pattern>
+<pattern>3s4t4ŕ3h</pattern>
+<pattern>3s4t4r3k</pattern>
+<pattern>s4t4r3v</pattern>
+<pattern>4s4ť5k4rát</pattern>
+<pattern>3š4k4l3b</pattern>
+<pattern>3š4k4r3k</pattern>
+<pattern>3š4k4ŕ3k</pattern>
+<pattern>maš3k4r3t</pattern>
+<pattern>3š4k4r3t</pattern>
+<pattern>3š4p4l3h</pattern>
+<pattern>3š4t4r3b</pattern>
+<pattern>š4t4r3n</pattern>
+<pattern>3š4t4v4r3t</pattern>
+<pattern>3š4t4v4r3ť</pattern>
+<pattern>3t2ľ4c3ť</pattern>
+<pattern>3t2r4b3l</pattern>
+<pattern>t2r4č3k</pattern>
+<pattern>3t2r4d3l</pattern>
+<pattern>3t2r4h3l</pattern>
+<pattern>3t2r4h3n</pattern>
+<pattern>3t2r4k3n</pattern>
+<pattern>3t2r4k3v</pattern>
+<pattern>3t2r4m3n</pattern>
+<pattern>3t4ŕ4p3n</pattern>
+<pattern>3t2r4ž3k</pattern>
+<pattern>3t2r4ž3n</pattern>
+<pattern>3t2v4r3d</pattern>
+<pattern>3t2v4r3d4z</pattern>
+<pattern>3t2v4ŕ3d4z</pattern>
+<pattern>3v2l4h3č</pattern>
+<pattern>3v2l4h3k</pattern>
+<pattern>3v2l4h3n</pattern>
+<pattern>3v2l4n3k</pattern>
+<pattern>3v2l4n3n</pattern>
+<pattern>3v4r4h3n</pattern>
+<pattern>3v4r4k3n</pattern>
+<pattern>3v4ŕ4z3g</pattern>
+<pattern>3v4r4z3g</pattern>
+<pattern>3v4r4z3n</pattern>
+<pattern>3v4r4ž3l</pattern>
+<pattern>3z4h4ŕ3ň</pattern>
+<pattern>3z4r4n3n</pattern>
+<pattern>3ž4l4č3n</pattern>
+<pattern>3ž4l4t3n</pattern>
+<pattern>3ž4r4d3k</pattern>
+<pattern>3b4r4n3k4n</pattern>
+<pattern>b3d4ľ4ž3n</pattern>
+<pattern>3c4v4r4č3k</pattern>
+<pattern>3c4v4r4n3k</pattern>
+<pattern>3č4ŕ4s3t4v</pattern>
+<pattern>3č4r4t4t3n</pattern>
+<pattern>3č4v4r4k3n</pattern>
+<pattern>3d4r4ž3g4r</pattern>
+<pattern>3f4r4n4g3n</pattern>
+<pattern>h2ŕ4s3t4k</pattern>
+<pattern>3c4h4r4s4t3n</pattern>
+<pattern>3k4r4s4t3n</pattern>
+<pattern>3k4r4s4t3ň</pattern>
+<pattern>3s4m4r4š3ť</pattern>
+<pattern>3s4m4r4t3k</pattern>
+<pattern>s3t4r4n3k</pattern>
+<pattern>3š4k4l4b3n</pattern>
+<pattern>maš3k4r4t3n</pattern>
+<pattern>3š4k4r4t3n</pattern>
+<pattern>3š4k4v4r3č</pattern>
+<pattern>3š4k4v4r3k</pattern>
+<pattern>3š4k4v4ŕ3k</pattern>
+<pattern>3š4k4v4r3n</pattern>
+<pattern>3š4m4r4d3k</pattern>
+<pattern>3š4m4r4n3c</pattern>
+<pattern>3š4p4l4h3n</pattern>
+<pattern>3š4t4r4k3n</pattern>
+<pattern>3š3t4r4n3g</pattern>
+<pattern>3t4v4r4d3n</pattern>
+<pattern>3v4r4s3t4v</pattern>
+<pattern>3v4r4z3g4n</pattern>
+<pattern>3c4v4r4n3g4n</pattern>
+<pattern>3š4k4v4r4k3n</pattern>
+<pattern>3š4k4v4ŕ4k3n</pattern>
+<pattern>k4č3ný </pattern>
+<pattern>k4č3ného </pattern>
+<pattern>k4č3nému </pattern>
+<pattern>k4č3nom </pattern>
+<pattern>k4č3ným </pattern>
+<pattern>k4č3né </pattern>
+<pattern>k4č3ná </pattern>
+<pattern>k4č3nej </pattern>
+<pattern>k4č3nú </pattern>
+<pattern>k4č3nou </pattern>
+<pattern>k4č3ní </pattern>
+<pattern>k4č3ných </pattern>
+<pattern>k4č3nými </pattern>
+<pattern>k4t3ný </pattern>
+<pattern>k4t3ného </pattern>
+<pattern>k4t3nému </pattern>
+<pattern>k4t3nom </pattern>
+<pattern>k4t3ným </pattern>
+<pattern>k4t3né </pattern>
+<pattern>k4t3ná </pattern>
+<pattern>k4t3nej </pattern>
+<pattern>k4t3nú </pattern>
+<pattern>k4t3nou </pattern>
+<pattern>k4t3ní </pattern>
+<pattern>k4t3ných </pattern>
+<pattern>k4t3nými </pattern>
+<pattern>n4č3ný </pattern>
+<pattern>n4č3ného </pattern>
+<pattern>n4č3nému </pattern>
+<pattern>n4č3nom </pattern>
+<pattern>n4č3ným </pattern>
+<pattern>n4č3né </pattern>
+<pattern>n4č3ná </pattern>
+<pattern>n4č3nej </pattern>
+<pattern>n4č3nú </pattern>
+<pattern>n4č3nou </pattern>
+<pattern>n4č3ní </pattern>
+<pattern>n4č3ných </pattern>
+<pattern>n4č3nými </pattern>
+<pattern>n4k4č3n</pattern>
+<pattern>n4t3ný </pattern>
+<pattern>n4t3ného </pattern>
+<pattern>n4t3nému </pattern>
+<pattern>n4t3nom </pattern>
+<pattern>n4t3ným </pattern>
+<pattern>n4t3né </pattern>
+<pattern>n4t3ná </pattern>
+<pattern>n4t3nej </pattern>
+<pattern>n4t3nú </pattern>
+<pattern>n4t3nou </pattern>
+<pattern>n4t3ní </pattern>
+<pattern>n4t3ných </pattern>
+<pattern>n4t3nými </pattern>
+<pattern>r4d3ný </pattern>
+<pattern>r4d3ného </pattern>
+<pattern>r4d3nému </pattern>
+<pattern>r4d3nom </pattern>
+<pattern>r4d3ným </pattern>
+<pattern>r4d3né </pattern>
+<pattern>r4d3ná </pattern>
+<pattern>r4d3nej </pattern>
+<pattern>r4d3nú </pattern>
+<pattern>r4d3nou </pattern>
+<pattern>r4d3ní </pattern>
+<pattern>r4d3ných </pattern>
+<pattern>r4d3nými </pattern>
+<pattern>r4m3ný </pattern>
+<pattern>r4m3ného </pattern>
+<pattern>r4m3nému </pattern>
+<pattern>r4m3nom </pattern>
+<pattern>r4m3ným </pattern>
+<pattern>r4m3né </pattern>
+<pattern>r4m3ná </pattern>
+<pattern>r4m3nej </pattern>
+<pattern>r4m3nú </pattern>
+<pattern>r4m3nou </pattern>
+<pattern>r4m3ní </pattern>
+<pattern>r4m3ných </pattern>
+<pattern>r4m3nými </pattern>
+<pattern>r4p4č3n</pattern>
+<pattern>r4t3ný </pattern>
+<pattern>r4t3ného </pattern>
+<pattern>r4t3nému </pattern>
+<pattern>r4t3nom </pattern>
+<pattern>r4t3ným </pattern>
+<pattern>r4t3né </pattern>
+<pattern>r4t3ná </pattern>
+<pattern>r4t3nej </pattern>
+<pattern>r4t3nú </pattern>
+<pattern>r4t3nou </pattern>
+<pattern>r4t3ní </pattern>
+<pattern>r4t3ných </pattern>
+<pattern>r4t3nými </pattern>
+<pattern>s4t3ný </pattern>
+<pattern>s4t3ného </pattern>
+<pattern>s4t3nému </pattern>
+<pattern>s4t3nom </pattern>
+<pattern>s4t3ným </pattern>
+<pattern>s4t3né </pattern>
+<pattern>s4t3ná </pattern>
+<pattern>s4t3nej </pattern>
+<pattern>s4t3nú </pattern>
+<pattern>s4t3nou </pattern>
+<pattern>s4t3ní </pattern>
+<pattern>s4t3ných </pattern>
+<pattern>s4t3nými </pattern>
+<pattern>z4d3ny </pattern>
+<pattern>z4d3neho </pattern>
+<pattern>z4d3nemu </pattern>
+<pattern>z4d3nom </pattern>
+<pattern>z4d3nym </pattern>
+<pattern>z4d3ne </pattern>
+<pattern>z4d3na </pattern>
+<pattern>z4d3nej </pattern>
+<pattern>z4d3nu </pattern>
+<pattern>z4d3nou </pattern>
+<pattern>z4d3ni </pattern>
+<pattern>z4d3nych </pattern>
+<pattern>z4d3nymi </pattern>
+<pattern>z4d3ný </pattern>
+<pattern>z4d3ného </pattern>
+<pattern>z4d3nému </pattern>
+<pattern>z4d3ným </pattern>
+<pattern>z4d3né </pattern>
+<pattern>z4d3ná </pattern>
+<pattern>z4d3nú </pattern>
+<pattern>z4d3ní </pattern>
+<pattern>z4d3ných </pattern>
+<pattern>z4d3nými </pattern>
+<pattern>b2l4š3k</pattern>
+<pattern>l2t3k2a </pattern>
+<pattern>l2t3k2y </pattern>
+<pattern>l2t3k2e </pattern>
+<pattern>l2t3k2u </pattern>
+<pattern>l2t3k2ou </pattern>
+<pattern>l2t3k2ám </pattern>
+<pattern>l2t3k2ách </pattern>
+<pattern>l2t3k2a1mi </pattern>
+<pattern>n2t3k2a </pattern>
+<pattern>n2t3k2y </pattern>
+<pattern>n2t3k2e </pattern>
+<pattern>n2t3k2u </pattern>
+<pattern>n2t3k2ou </pattern>
+<pattern>n2t3k2ám </pattern>
+<pattern>n2t3k2ách </pattern>
+<pattern>n2t3k2a1mi </pattern>
+<pattern>n2k2t3k</pattern>
+<pattern>p2t3k2a </pattern>
+<pattern>p2t3k2y </pattern>
+<pattern>p2t3k2e </pattern>
+<pattern>p2t3k2u </pattern>
+<pattern>p2t3k2ou </pattern>
+<pattern>p2t3k2ám </pattern>
+<pattern>p2t3k2ách </pattern>
+<pattern>p2t3k2a1mi </pattern>
+<pattern>s2t3k2a </pattern>
+<pattern>s2t3k2y </pattern>
+<pattern>s2t3k2e </pattern>
+<pattern>s2t3k2u </pattern>
+<pattern>s2t3k2ou </pattern>
+<pattern>s2t3k2ám </pattern>
+<pattern>s2t3k2ách </pattern>
+<pattern>s2t3k2a1mi </pattern>
+<pattern>5p4r4s3t</pattern>
+<pattern>b3s4k</pattern>
+<pattern>d3s4k</pattern>
+<pattern>j3s4k</pattern>
+<pattern>l4p3s4k</pattern>
+<pattern>l3s4k</pattern>
+<pattern>ľ3s4k</pattern>
+<pattern>l4t3s4k</pattern>
+<pattern>4m3s4k</pattern>
+<pattern>4m4p3s4k</pattern>
+<pattern>n4d3s4k</pattern>
+<pattern>n4k4t3s4k</pattern>
+<pattern>n3s4k</pattern>
+<pattern>n4t3s4k</pattern>
+<pattern>p3s4k</pattern>
+<pattern>p4t3s4k</pattern>
+<pattern>r3s4k</pattern>
+<pattern>r4t3s4k</pattern>
+<pattern>r4z5s4k</pattern>
+<pattern>5s4r4b3s4k</pattern>
+<pattern>š3s4k</pattern>
+<pattern>t3s4k</pattern>
+<pattern>v3s4k</pattern>
+<pattern>z3s4k</pattern>
+<pattern>ž3s4k</pattern>
+<pattern>n2d3č</pattern>
+<pattern>z3š2t2</pattern>
+<pattern>r4z3š2t2</pattern>
+<pattern>b3s4t4v</pattern>
+<pattern>č3s4t4v</pattern>
+<pattern>d3s4t4v</pattern>
+<pattern>ď3s4t4v</pattern>
+<pattern>ľ3s4t4v</pattern>
+<pattern>m3s4t4v</pattern>
+<pattern>n3s4t4v</pattern>
+<pattern>n4t3s4t4v</pattern>
+<pattern>p3s4t4v</pattern>
+<pattern>r3s4t4v</pattern>
+<pattern>r4v5s4t4v</pattern>
+<pattern>š3s4t4v</pattern>
+<pattern>t3s4t4v</pattern>
+<pattern>v3s4t4v</pattern>
+<pattern>ž3s4t4v</pattern>
+<pattern> a2e2ro</pattern>
+<pattern> a2e2ro3d2r</pattern>
+<pattern> aero3g2r</pattern>
+<pattern> a2e2ro3k2l</pattern>
+<pattern> aero3p2l</pattern>
+<pattern> aero3s2k</pattern>
+<pattern> aero3s2t</pattern>
+<pattern> aero3t2r</pattern>
+<pattern> akcie3s2c2h</pattern>
+<pattern> ane3s2teti</pattern>
+<pattern> ane3s2téz</pattern>
+<pattern> anti5k4l</pattern>
+<pattern> anti5k4r</pattern>
+<pattern> apo5p4le</pattern>
+<pattern> ap4rio</pattern>
+<pattern> ap4rió</pattern>
+<pattern> arci5k4</pattern>
+<pattern> aristo5k4</pattern>
+<pattern> as3k2lep</pattern>
+<pattern> austro5s4</pattern>
+<pattern> bac2k3hand</pattern>
+<pattern> balne2o3</pattern>
+<pattern> belo5</pattern>
+<pattern> belo5h4</pattern>
+<pattern> bez5</pattern>
+<pattern> bez5b4</pattern>
+<pattern> bez5d4</pattern>
+<pattern> bez5h4</pattern>
+<pattern> bez5k4</pattern>
+<pattern> bez5m4</pattern>
+<pattern> bez5p4</pattern>
+<pattern> bez5s4</pattern>
+<pattern> bez5t4</pattern>
+<pattern> bez5v4</pattern>
+<pattern> bez5z4</pattern>
+<pattern> bielo5</pattern>
+<pattern> bielob4</pattern>
+<pattern> bieloh4</pattern>
+<pattern> bielov4</pattern>
+<pattern> bi2o5</pattern>
+<pattern> biok4</pattern>
+<pattern> biop4</pattern>
+<pattern> bios4</pattern>
+<pattern> blaho5</pattern>
+<pattern> blahop4</pattern>
+<pattern> blahos4</pattern>
+<pattern> bledo5</pattern>
+<pattern> boha5p4</pattern>
+<pattern> boho5s4</pattern>
+<pattern> bože5</pattern>
+<pattern> bože5d4</pattern>
+<pattern> božec2h4</pattern>
+<pattern> brato5v4r</pattern>
+<pattern> b2z2d</pattern>
+<pattern> cáro5v4ra</pattern>
+<pattern> celo5d4</pattern>
+<pattern> celo5k4</pattern>
+<pattern> celo5p4</pattern>
+<pattern> celo5s4</pattern>
+<pattern> celo5u4</pattern>
+<pattern> ceno5t4</pattern>
+<pattern> ces2t5maj</pattern>
+<pattern> cirkevno5</pattern>
+<pattern> cirkevno5p4</pattern>
+<pattern> c4t4n</pattern>
+<pattern> cudzo5k4</pattern>
+<pattern> cudzo5o4</pattern>
+<pattern> cudzo5s4</pattern>
+<pattern> cudzo5t4</pattern>
+<pattern> cudzo5v4</pattern>
+<pattern> cyto5p4</pattern>
+<pattern> čaro5k4</pattern>
+<pattern> čaro5s4</pattern>
+<pattern> čaro5v4</pattern>
+<pattern> čaro5z4</pattern>
+<pattern> černo5b4</pattern>
+<pattern> černo5h4</pattern>
+<pattern> černo5k4</pattern>
+<pattern> černo5o4</pattern>
+<pattern> červeno5a4</pattern>
+<pattern> červeno5b4</pattern>
+<pattern> červeno5h4</pattern>
+<pattern> červeno5k4</pattern>
+<pattern> červeno5o4</pattern>
+<pattern> červeno5p4</pattern>
+<pattern> čierno5b4</pattern>
+<pattern> čierno5h4</pattern>
+<pattern> čierno5o4</pattern>
+<pattern> čo5ch4</pattern>
+<pattern> čo5s4</pattern>
+<pattern> čudo5t4</pattern>
+<pattern> da3k2d</pattern>
+<pattern> ďatelino5t4</pattern>
+<pattern> de5f4</pattern>
+<pattern> de5g4</pattern>
+<pattern> dek4l</pattern>
+<pattern> desať5</pattern>
+<pattern> de5š4t2</pattern>
+<pattern> dez5i2</pattern>
+<pattern> dez5o2</pattern>
+<pattern> dis2k3d4</pattern>
+<pattern> divo5t4</pattern>
+<pattern> dlho5h4</pattern>
+<pattern> dlho5p4</pattern>
+<pattern> dobro5d4</pattern>
+<pattern> dobro5p4</pattern>
+<pattern> dobro5s4</pattern>
+<pattern> do5č2m</pattern>
+<pattern> do5d4</pattern>
+<pattern> do5f4</pattern>
+<pattern> do5h4</pattern>
+<pattern> do5c4h4</pattern>
+<pattern> do5i4</pattern>
+<pattern> do5k4</pattern>
+<pattern> do5o</pattern>
+<pattern> do5p4</pattern>
+<pattern> do5s4</pattern>
+<pattern> do5š4p</pattern>
+<pattern> do5š4tie</pattern>
+<pattern> do5š4tí</pattern>
+<pattern> do5t4l</pattern>
+<pattern> do5t4m</pattern>
+<pattern> do5t4r</pattern>
+<pattern> do5t4v</pattern>
+<pattern> do5u</pattern>
+<pattern> do5v4</pattern>
+<pattern> do5z4</pattern>
+<pattern> do5ž4</pattern>
+<pattern> drevo5p4</pattern>
+<pattern> drevo5o</pattern>
+<pattern> drevo5v4</pattern>
+<pattern> drobno5z4</pattern>
+<pattern> druho5s4</pattern>
+<pattern> dvoj5al</pattern>
+<pattern> dvoj5č4</pattern>
+<pattern> dvoj5d4</pattern>
+<pattern> dvoj5h4</pattern>
+<pattern> dvoj5i4</pattern>
+<pattern> dvoj5k4</pattern>
+<pattern> dvoj5p4</pattern>
+<pattern> dvoj5s4</pattern>
+<pattern> dvoj5t4</pattern>
+<pattern> dvoj5u</pattern>
+<pattern> dvoj5v4</pattern>
+<pattern> dvoj5z4</pattern>
+<pattern> elektro5</pattern>
+<pattern> ex5k4</pattern>
+<pattern> fol2k5</pattern>
+<pattern> foto5</pattern>
+<pattern> gala5p4</pattern>
+<pattern> gama5g4</pattern>
+<pattern> ge4o</pattern>
+<pattern> hnedo5o</pattern>
+<pattern> hnedo5u</pattern>
+<pattern> holo5b4</pattern>
+<pattern> holo5h4</pattern>
+<pattern> holo5k4</pattern>
+<pattern> hore5z4</pattern>
+<pattern> horno5u4</pattern>
+<pattern> hrôzo5s4t4</pattern>
+<pattern> hrôzo5v4</pattern>
+<pattern> hrôzy5p4</pattern>
+<pattern> hrubo5s4</pattern>
+<pattern> hydro5</pattern>
+<pattern> chorobo5p4</pattern>
+<pattern> jasno5o</pattern>
+<pattern> jasno5z4</pattern>
+<pattern> jedno5h4</pattern>
+<pattern> jedno5i4</pattern>
+<pattern> jedno5p4</pattern>
+<pattern> jedno5s4</pattern>
+<pattern> jedno5u4</pattern>
+<pattern> jedno5z4</pattern>
+<pattern> juho5a</pattern>
+<pattern> juho5s4</pattern>
+<pattern> južno5s4</pattern>
+<pattern> kata5k4</pattern>
+<pattern> kata5s4t4</pattern>
+<pattern> kmeňo5t4</pattern>
+<pattern> koso5d4</pattern>
+<pattern> koso5š4</pattern>
+<pattern> koso5u</pattern>
+<pattern> krivo5p4</pattern>
+<pattern> kruto5v4</pattern>
+<pattern> krvi5p4</pattern>
+<pattern> krvi5s4</pattern>
+<pattern> krvi5t4</pattern>
+<pattern> ktovie5a2</pattern>
+<pattern> lásky5p4</pattern>
+<pattern> lesos4</pattern>
+<pattern> ľ4s4t</pattern>
+<pattern> ľudovo5u</pattern>
+<pattern> makro5k4</pattern>
+<pattern> makro5o4</pattern>
+<pattern> makro5s4</pattern>
+<pattern> málo5k4</pattern>
+<pattern> malo5o</pattern>
+<pattern> málo5v4</pattern>
+<pattern> márno5t4</pattern>
+<pattern> medzi5h4</pattern>
+<pattern> medzi5i4</pattern>
+<pattern> medzi5p4</pattern>
+<pattern> medzi5š4</pattern>
+<pattern> medzi5t4</pattern>
+<pattern> melo5d4</pattern>
+<pattern> meru5ô2</pattern>
+<pattern> miesto5d4</pattern>
+<pattern> miesto5p4</pattern>
+<pattern> mikro5e4</pattern>
+<pattern> mikro5k4</pattern>
+<pattern> mikro5o</pattern>
+<pattern> mikro5p4</pattern>
+<pattern> mimo5š4</pattern>
+<pattern> mimo5ú</pattern>
+<pattern> mimo5v4</pattern>
+<pattern> mnoho5s4</pattern>
+<pattern> mnoho5t4</pattern>
+<pattern> mnoho5u</pattern>
+<pattern> mnoho5v</pattern>
+<pattern> mnoho5z</pattern>
+<pattern> modro5o</pattern>
+<pattern> mrako5d4</pattern>
+<pattern> mravo5u</pattern>
+<pattern> mucho5t4</pattern>
+<pattern> m4z4d</pattern>
+<pattern> na5a4</pattern>
+<pattern> na5b4</pattern>
+<pattern> na5c4</pattern>
+<pattern> nad5h4</pattern>
+<pattern> na5d4nes </pattern>
+<pattern> nad5p4</pattern>
+<pattern> na5d4p4 </pattern>
+<pattern> na5d4ŕ4 </pattern>
+<pattern> na5d4robno </pattern>
+<pattern> na5h4</pattern>
+<pattern> na5i4</pattern>
+<pattern> na5k4</pattern>
+<pattern> na5m4</pattern>
+<pattern> na5o4</pattern>
+<pattern> na5p4</pattern>
+<pattern> ná5p4</pattern>
+<pattern> národno5o</pattern>
+<pattern> na5s4</pattern>
+<pattern> na5st4</pattern>
+<pattern> ná5s4</pattern>
+<pattern> ná5st4</pattern>
+<pattern> na5š4</pattern>
+<pattern> na5šk4</pattern>
+<pattern> na6š5sk</pattern>
+<pattern> na5t4</pattern>
+<pattern> na5u4</pattern>
+<pattern> na5ú4</pattern>
+<pattern> ná5u4</pattern>
+<pattern> ná5ú4</pattern>
+<pattern> na5v4l</pattern>
+<pattern> na5v4na</pattern>
+<pattern> na5v4r4</pattern>
+<pattern> ná5v4r4</pattern>
+<pattern> na5v4z4</pattern>
+<pattern> na5z4r</pattern>
+<pattern> na5z4v</pattern>
+<pattern> na6z5vyš</pattern>
+<pattern> náz5v4</pattern>
+<pattern> na5ž4</pattern>
+<pattern> ne5a4</pattern>
+<pattern> ne5do3u2k</pattern>
+<pattern> ne5e4</pattern>
+<pattern> ne5i4</pattern>
+<pattern> ne5m4</pattern>
+<pattern> ne5na5h4</pattern>
+<pattern> ne5na5i4</pattern>
+<pattern> ne5na5k4</pattern>
+<pattern> ne5na5m4</pattern>
+<pattern> ne5na5p4</pattern>
+<pattern> ne5na5s4</pattern>
+<pattern> ne5na5t4</pattern>
+<pattern> ne5p4</pattern>
+<pattern> ne5s4</pattern>
+<pattern> ne6s5tor</pattern>
+<pattern> ne5š4</pattern>
+<pattern> ne5t4</pattern>
+<pattern> ne6t5t</pattern>
+<pattern> ne5u2</pattern>
+<pattern> ne5ú2</pattern>
+<pattern> ne5v4</pattern>
+<pattern> ne5z4d4r</pattern>
+<pattern> ne5z4d4v</pattern>
+<pattern> ne5z4l</pattern>
+<pattern> ne5z4m</pattern>
+<pattern> ne5z4n</pattern>
+<pattern> ne5z4r</pattern>
+<pattern> ne5z4v</pattern>
+<pattern> nie5k4</pattern>
+<pattern> ni5k4</pattern>
+<pattern> ni6k5toš</pattern>
+<pattern> nízko5k4</pattern>
+<pattern> novo5u2</pattern>
+<pattern> novo5z2</pattern>
+<pattern> obi5d4</pattern>
+<pattern> ob5k4</pattern>
+<pattern> obo5s4</pattern>
+<pattern> obo5z4</pattern>
+<pattern> ob5s4</pattern>
+<pattern> ob5t4</pattern>
+<pattern> ob5z4</pattern>
+<pattern> od5b4</pattern>
+<pattern> od5c4</pattern>
+<pattern> od5d4</pattern>
+<pattern> od5f4</pattern>
+<pattern> od5h4</pattern>
+<pattern> od5c4h4</pattern>
+<pattern> od5i4</pattern>
+<pattern> od6i5ó</pattern>
+<pattern> od5í4</pattern>
+<pattern> od5k4</pattern>
+<pattern> odo5b4</pattern>
+<pattern> odo5h4</pattern>
+<pattern> odo5k4</pattern>
+<pattern> odo5m4k4</pattern>
+<pattern> odo5p4</pattern>
+<pattern> odo5s4</pattern>
+<pattern> od5p4</pattern>
+<pattern> od5s4</pattern>
+<pattern> od5š4</pattern>
+<pattern> od5t4</pattern>
+<pattern> od5v4</pattern>
+<pattern> od5z4</pattern>
+<pattern> t4v4r</pattern>
+<pattern> o5h4l</pattern>
+<pattern> o5h4ľ</pattern>
+<pattern> o5h4na</pattern>
+<pattern> o5h4nú</pattern>
+<pattern> o5h4r</pattern>
+<pattern> o5c4h4</pattern>
+<pattern> o5k4l</pattern>
+<pattern> o5k4ľ</pattern>
+<pattern> okolo5i</pattern>
+<pattern> okolo5s4</pattern>
+<pattern> o5k4ra</pattern>
+<pattern> o5k4rá</pattern>
+<pattern> o5k4resať</pattern>
+<pattern> o5k4resávať</pattern>
+<pattern> o5k4ri</pattern>
+<pattern> o5k4rí</pattern>
+<pattern> o5k4ru</pattern>
+<pattern> o5k4rú</pattern>
+<pattern> o5m4l</pattern>
+<pattern> o5m4n</pattern>
+<pattern> o5m4r</pattern>
+<pattern> o5p4</pattern>
+<pattern> o6p5lan</pattern>
+<pattern> o6p5rat</pattern>
+<pattern> o5s4lab</pattern>
+<pattern> o5s4lad</pattern>
+<pattern> o5s4lav</pattern>
+<pattern> o5s4láv</pattern>
+<pattern> o5s4lep</pattern>
+<pattern> o5s4lo</pattern>
+<pattern> o5s4p4</pattern>
+<pattern> o5s4tar</pattern>
+<pattern> o5s4tať</pattern>
+<pattern> o5s4tan</pattern>
+<pattern> o5s4taň</pattern>
+<pattern> o6s5tatn</pattern>
+<pattern> o5s4tatok</pattern>
+<pattern> o5s4tatk</pattern>
+<pattern> o5s4táv</pattern>
+<pattern> o5s6to5</pattern>
+<pattern> o5s6t4rap</pattern>
+<pattern> ostro5u</pattern>
+<pattern> o5s4ved</pattern>
+<pattern> o5s4vetl</pattern>
+<pattern> o5s4viet</pattern>
+<pattern> o5s4viež</pattern>
+<pattern> o5s4vit</pattern>
+<pattern> o5s4voj</pattern>
+<pattern> o5š4k4</pattern>
+<pattern> o5š4ľ4</pattern>
+<pattern> o5š4m4</pattern>
+<pattern> o5š4p4</pattern>
+<pattern> o5š4v4</pattern>
+<pattern> o5t4ras</pattern>
+<pattern> o5t4rav</pattern>
+<pattern> o5t4ráv</pattern>
+<pattern> o5t4rep</pattern>
+<pattern> o5t4ria</pattern>
+<pattern> o5v4dov</pattern>
+<pattern> o5v4lád</pattern>
+<pattern> o5v4laž</pattern>
+<pattern> o5v4p4</pattern>
+<pattern> o5v4r</pattern>
+<pattern> o5z4l4</pattern>
+<pattern> o5z4n</pattern>
+<pattern> o5z4re</pattern>
+<pattern> o5z4v4l</pattern>
+<pattern> päť5izbo</pattern>
+<pattern> plno5a</pattern>
+<pattern> plno5p4</pattern>
+<pattern> plno5š4</pattern>
+<pattern> plno5kr4</pattern>
+<pattern> plocho5d4</pattern>
+<pattern> po5b4</pattern>
+<pattern> po5č4</pattern>
+<pattern> poda5k4</pattern>
+<pattern> pod5b4r</pattern>
+<pattern> pod5h4</pattern>
+<pattern> pod5c4h</pattern>
+<pattern> pod5k4</pattern>
+<pattern> pod5p4</pattern>
+<pattern> po5d4ráž</pattern>
+<pattern> po5d4rep</pattern>
+<pattern> pod5re</pattern>
+<pattern> po5d4rh</pattern>
+<pattern> po5d4rie</pattern>
+<pattern> po5d4rm</pattern>
+<pattern> po5d4rv</pattern>
+<pattern> po5d4r4ž</pattern>
+<pattern> pod5s4koč</pattern>
+<pattern> pod5v4</pattern>
+<pattern> pod3zem</pattern>
+<pattern> pod3zol</pattern>
+<pattern> pod3ža</pattern>
+<pattern> pod3žu</pattern>
+<pattern> po5h4</pattern>
+<pattern> po6h5reb</pattern>
+<pattern> po5c4h4</pattern>
+<pattern> po5i4</pattern>
+<pattern> po5k4</pattern>
+<pattern> pol5d4</pattern>
+<pattern> pol5i4z</pattern>
+<pattern> polo5a</pattern>
+<pattern> polo5b4</pattern>
+<pattern> pol5o4blú</pattern>
+<pattern> polo5d4</pattern>
+<pattern> polo5h4l</pattern>
+<pattern> polo5i</pattern>
+<pattern> polo5k4</pattern>
+<pattern> polo5m4</pattern>
+<pattern> polo5o4</pattern>
+<pattern> polo5p4</pattern>
+<pattern> polo5s4</pattern>
+<pattern> polo5t4</pattern>
+<pattern> polo5u4</pattern>
+<pattern> polo5ú4</pattern>
+<pattern> polo5v4</pattern>
+<pattern> polo5z4</pattern>
+<pattern> pol5s4t</pattern>
+<pattern> po5m4</pattern>
+<pattern> po6m5ník</pattern>
+<pattern> po5o4</pattern>
+<pattern> po5ob4h</pattern>
+<pattern> po5ob4l</pattern>
+<pattern> po5s4</pattern>
+<pattern> po6s4t5s4k4rip</pattern>
+<pattern> po6s5tul</pattern>
+<pattern> po5š4</pattern>
+<pattern> po6š5ta</pattern>
+<pattern> po6š5tov</pattern>
+<pattern> po6š5v</pattern>
+<pattern> po5t4k4n</pattern>
+<pattern> po5t4ľ</pattern>
+<pattern> po5t4r</pattern>
+<pattern> poroz5p4</pattern>
+<pattern> poroz5s4</pattern>
+<pattern> poroz5v4</pattern>
+<pattern> po6st5g4r</pattern>
+<pattern> po6s5ti</pattern>
+<pattern> po5t4</pattern>
+<pattern> po5u</pattern>
+<pattern> po5v4</pattern>
+<pattern> po4v5ra</pattern>
+<pattern> povy5h4</pattern>
+<pattern> povy5k4</pattern>
+<pattern> povy5p4</pattern>
+<pattern> povy5s4</pattern>
+<pattern> povy5v4</pattern>
+<pattern> povy5z4</pattern>
+<pattern> po5v4z4b</pattern>
+<pattern> po5z4</pattern>
+<pattern> pra5o4</pattern>
+<pattern> pra5p4</pattern>
+<pattern> pravicovo5o</pattern>
+<pattern> pra5v4l</pattern>
+<pattern> pra5v4nu</pattern>
+<pattern> pra5v4nú</pattern>
+<pattern> prá5vo5p4</pattern>
+<pattern> pra5vo5s4</pattern>
+<pattern> pre5b4</pattern>
+<pattern> pre5c4</pattern>
+<pattern> pred5c4</pattern>
+<pattern> pred5h4</pattern>
+<pattern> pred5ch4</pattern>
+<pattern> pred5i</pattern>
+<pattern> pred5k4</pattern>
+<pattern> pred5m4</pattern>
+<pattern> predo5h4</pattern>
+<pattern> pred5op</pattern>
+<pattern> pred5ostatn</pattern>
+<pattern> pred5p4</pattern>
+<pattern> pre5d4rah</pattern>
+<pattern> pre5d4rap</pattern>
+<pattern> pre5d4rať</pattern>
+<pattern> pre5d4raž</pattern>
+<pattern> pre5d4ri</pattern>
+<pattern> pre5d4rž</pattern>
+<pattern> pred5s4</pattern>
+<pattern> pred5v4</pattern>
+<pattern> pred5z4</pattern>
+<pattern> pre5č4</pattern>
+<pattern> pre5e2</pattern>
+<pattern> pre5f2</pattern>
+<pattern> pre5h4</pattern>
+<pattern> pre5c4h4</pattern>
+<pattern> pre5i4</pattern>
+<pattern> pre5k4</pattern>
+<pattern> pre6k5vap</pattern>
+<pattern> pre5m4</pattern>
+<pattern> pre5o4</pattern>
+<pattern> pre5p4</pattern>
+<pattern> pre5s4</pattern>
+<pattern> pre6s5n</pattern>
+<pattern> pre5š4</pattern>
+<pattern> pre5t4</pattern>
+<pattern> pre5v4</pattern>
+<pattern> pre5z4</pattern>
+<pattern> pre5ž4</pattern>
+<pattern> pri5b4</pattern>
+<pattern> pri5č4</pattern>
+<pattern> pri5d4</pattern>
+<pattern> pri5h4</pattern>
+<pattern> pri5c4h4</pattern>
+<pattern> pri5k4</pattern>
+<pattern> prí5k4</pattern>
+<pattern> pri5m4</pattern>
+<pattern> pri5p4</pattern>
+<pattern> pri5s4</pattern>
+<pattern> prí5s4</pattern>
+<pattern> prí6s5p</pattern>
+<pattern> pri6s5p</pattern>
+<pattern> pri5s4pô</pattern>
+<pattern> pri5š4</pattern>
+<pattern> pri6š5la </pattern>
+<pattern> pri6š5li </pattern>
+<pattern> pri6š5lo </pattern>
+<pattern> pri5t4</pattern>
+<pattern> pri5v4</pattern>
+<pattern> pri5z4</pattern>
+<pattern> pri5ž4</pattern>
+<pattern> re5g4</pattern>
+<pattern> re5k4</pattern>
+<pattern> re6k5v</pattern>
+<pattern> re5p4</pattern>
+<pattern> re6p5n</pattern>
+<pattern> re5š4</pattern>
+<pattern> re5t4</pattern>
+<pattern> ro4z5i4</pattern>
+<pattern> ro6z5í4</pattern>
+<pattern> rozo5b4</pattern>
+<pattern> rozo5d4</pattern>
+<pattern> rozo5c4h4</pattern>
+<pattern> rozo5m4</pattern>
+<pattern> rozo5p4</pattern>
+<pattern> rozo5r4</pattern>
+<pattern> rozo5s4</pattern>
+<pattern> rozo5š4</pattern>
+<pattern> rozo5z4</pattern>
+<pattern> rozo5ž4</pattern>
+<pattern> ro6z5u4</pattern>
+<pattern> ro6z5v4</pattern>
+<pattern>3s4polu5</pattern>
+<pattern>3s4polu5h4</pattern>
+<pattern>3s4polu5p4</pattern>
+<pattern>3s4polu5v4</pattern>
+<pattern> šikmo5o</pattern>
+<pattern> široko5</pattern>
+<pattern> široko5p4</pattern>
+<pattern> štáto5</pattern>
+<pattern> št4vor5</pattern>
+<pattern> su4b5s4</pattern>
+<pattern> sú5h4</pattern>
+<pattern> sú5k4r</pattern>
+<pattern> sú5m4r</pattern>
+<pattern> sú5s4</pattern>
+<pattern> sú5v4</pattern>
+<pattern> sú5z4</pattern>
+<pattern> troj5</pattern>
+<pattern> t4v4r4do5</pattern>
+<pattern> viac5k4</pattern>
+<pattern> viac5v4</pattern>
+<pattern> vide2o5</pattern>
+<pattern> vnútro5s4</pattern>
+<pattern> vnútro5š4</pattern>
+<pattern> vo5p4ch</pattern>
+<pattern> vo5p4r</pattern>
+<pattern> vo5s4p</pattern>
+<pattern> vo5t4</pattern>
+<pattern> vo5v4</pattern>
+<pattern> vy5</pattern>
+<pattern> vý5</pattern>
+<pattern> vy5b4</pattern>
+<pattern> vy5c4</pattern>
+<pattern> vý5c4</pattern>
+<pattern> vy5č4</pattern>
+<pattern> vý5č4</pattern>
+<pattern> vy5d4</pattern>
+<pattern> vý5d4</pattern>
+<pattern> vy5h4</pattern>
+<pattern> vy6h5ň</pattern>
+<pattern> vy6h5ne</pattern>
+<pattern> vý5h4</pattern>
+<pattern> vy5c4h4</pattern>
+<pattern> vy5k4</pattern>
+<pattern> vý5k4</pattern>
+<pattern> vy5m4</pattern>
+<pattern> vy5p4</pattern>
+<pattern> vý5p4</pattern>
+<pattern> vy5s4</pattern>
+<pattern> vý5s4</pattern>
+<pattern> vy5š4</pattern>
+<pattern> vy6š5š</pattern>
+<pattern> vý6š5k</pattern>
+<pattern> vy5t4</pattern>
+<pattern> vý5t4</pattern>
+<pattern> vy5v4</pattern>
+<pattern> vy5z4</pattern>
+<pattern> vý5z4</pattern>
+<pattern> za5b4</pattern>
+<pattern> zá5b4</pattern>
+<pattern> za5c4</pattern>
+<pattern> za5č4</pattern>
+<pattern> za5d4</pattern>
+<pattern> za5h4</pattern>
+<pattern> za5c4h4</pattern>
+<pattern> za5k4</pattern>
+<pattern> za5m4</pattern>
+<pattern> za5p4</pattern>
+<pattern> za5r4</pattern>
+<pattern> za5s4</pattern>
+<pattern> za5š4</pattern>
+<pattern> za5t4</pattern>
+<pattern> za5v4</pattern>
+<pattern> za5z4</pattern>
+<pattern> za5ž4</pattern>
+<pattern> zá5k4</pattern>
+<pattern> zá5z4</pattern>
+<pattern> zo5b4</pattern>
+<pattern> zo6d5p</pattern>
+<pattern> zo5d4r</pattern>
+<pattern> zo5d4v</pattern>
+<pattern> zo5h4</pattern>
+<pattern> zo5m4l</pattern>
+<pattern> zo5m4r</pattern>
+<pattern> zo5s4</pattern>
+<pattern> zo5š4</pattern>
+<pattern> zo5t4</pattern>
+<pattern> zo5v4</pattern>
+<pattern> zo5z4</pattern>
+<pattern> zo5ž4</pattern>
+<pattern>5alkohol</pattern>
+<pattern>auto4rk</pattern>
+<pattern>auto4rs</pattern>
+<pattern>5b4lah</pattern>
+<pattern>5b4ledn</pattern>
+<pattern>5b4lesk</pattern>
+<pattern>5b4lok</pattern>
+<pattern>5b4lúd</pattern>
+<pattern>5b4lysk</pattern>
+<pattern>5b4lysn</pattern>
+<pattern>5boh3vi4e3a2k</pattern>
+<pattern>5boh3vi4e3o2d3k</pattern>
+<pattern>5boh3z4</pattern>
+<pattern>5boles4t5n</pattern>
+<pattern>5b4rať</pattern>
+<pattern>5b4rázd</pattern>
+<pattern>5b4rec2h</pattern>
+<pattern>5b4ronz</pattern>
+<pattern>5b4ruč</pattern>
+<pattern>5b4rús</pattern>
+<pattern>5b4rýzg</pattern>
+<pattern>5c4muk</pattern>
+<pattern>5c4nie</pattern>
+<pattern>5c4vak</pattern>
+<pattern>5c4vič</pattern>
+<pattern>5c4vik</pattern>
+<pattern>čí6s5lov</pattern>
+<pattern>5č4len</pattern>
+<pattern>5č4lánk</pattern>
+<pattern>5č4lánok</pattern>
+<pattern>5č4lov</pattern>
+<pattern>5d4ňov</pattern>
+<pattern>5d4ramat</pattern>
+<pattern>5d4rať</pattern>
+<pattern>5d4vanás4ť5</pattern>
+<pattern>5d4vih</pattern>
+<pattern>5d4viž</pattern>
+<pattern>5d4voj</pattern>
+<pattern>5d4vor</pattern>
+<pattern>5e2u2róp</pattern>
+<pattern>5f4ľak</pattern>
+<pattern>5f4lias</pattern>
+<pattern>5f4rancú</pattern>
+<pattern>5f4rekven</pattern>
+<pattern>5f4ráz</pattern>
+<pattern>5g4raf</pattern>
+<pattern>5g4ram</pattern>
+<pattern>pro6g5ram</pattern>
+<pattern>5g4réč</pattern>
+<pattern>5g4rob</pattern>
+<pattern>5g4vardej</pattern>
+<pattern>5h4lad</pattern>
+<pattern>5h4las</pattern>
+<pattern>5h4lav</pattern>
+<pattern>5h4ľad</pattern>
+<pattern>5h4liad</pattern>
+<pattern>5h4luch</pattern>
+<pattern>5h4mat</pattern>
+<pattern>5h4mot</pattern>
+<pattern>5h4nať</pattern>
+<pattern>5h4ned</pattern>
+<pattern>5h4nev</pattern>
+<pattern>5h4niezd</pattern>
+<pattern>5h4noj</pattern>
+<pattern>5h4nut</pattern>
+<pattern>5h4núť</pattern>
+<pattern>5h4nút</pattern>
+<pattern>5h4rab</pattern>
+<pattern>5h4r3mot</pattern>
+<pattern>5h4ran</pattern>
+<pattern>5h4rať</pattern>
+<pattern>5h4rob</pattern>
+<pattern>5h4rom</pattern>
+<pattern>5h4roz</pattern>
+<pattern>5h4rub</pattern>
+<pattern>5h4ryz</pattern>
+<pattern>5h4viezd</pattern>
+<pattern>5c6h4lap</pattern>
+<pattern>5c6h4leb</pattern>
+<pattern>5c6hran</pattern>
+<pattern>5c6h4rán</pattern>
+<pattern>5c6h4ráň</pattern>
+<pattern>5c6h4vál</pattern>
+<pattern>5c6h4vát</pattern>
+<pattern>5c6h4vat</pattern>
+<pattern>5c6h4vost</pattern>
+<pattern>5jedenás4t5k</pattern>
+<pattern>5jedenás4ť5</pattern>
+<pattern>5k4lad</pattern>
+<pattern>5k4laď</pattern>
+<pattern>5k4ľak</pattern>
+<pattern>5k4lam</pattern>
+<pattern>5k4lásť</pattern>
+<pattern>5k4liat</pattern>
+<pattern>5k4liať</pattern>
+<pattern>5k4lep</pattern>
+<pattern>5k4les</pattern>
+<pattern>5k4ľúč</pattern>
+<pattern>5k4resb</pattern>
+<pattern>5k4resť</pattern>
+<pattern>5k4ritic</pattern>
+<pattern>5k4rídl</pattern>
+<pattern>5k4rôch</pattern>
+<pattern>5k4ruh</pattern>
+<pattern>5k4rúž</pattern>
+<pattern>5k4ryt</pattern>
+<pattern>5k4valif</pattern>
+<pattern>5k4valit</pattern>
+<pattern>5k4vet</pattern>
+<pattern>5k4vadr</pattern>
+<pattern>5m4ladis4t3v</pattern>
+<pattern>5m4nož</pattern>
+<pattern>5m4rav</pattern>
+<pattern>5m4ráz</pattern>
+<pattern>na5d4ž4ga</pattern>
+<pattern>na5d4ž4gá</pattern>
+<pattern>nav3š4tev</pattern>
+<pattern>náv3š4tev</pattern>
+<pattern>nav3š4tív</pattern>
+<pattern>5p4lán</pattern>
+<pattern>5p4lastik</pattern>
+<pattern>5p4lat</pattern>
+<pattern>5p4lav</pattern>
+<pattern>5p4leta</pattern>
+<pattern>5p4letie</pattern>
+<pattern>5p4letú</pattern>
+<pattern>5p4liesť</pattern>
+<pattern>5p4ne2umat</pattern>
+<pattern>5p4ráv</pattern>
+<pattern>s6práv</pattern>
+<pattern>5p4riam</pattern>
+<pattern>5p4rirod</pattern>
+<pattern>5p2risám</pattern>
+<pattern>5p4roduk</pattern>
+<pattern>5s4fér</pattern>
+<pattern>5s4c2hopn</pattern>
+<pattern>5s4k4lad</pattern>
+<pattern>5s4k4lon</pattern>
+<pattern>5s4koč</pattern>
+<pattern>5s4kok</pattern>
+<pattern>5s4kop</pattern>
+<pattern>5s4kor</pattern>
+<pattern>5s4kôr</pattern>
+<pattern>5s4k4romne</pattern>
+<pattern>5s4k4rot</pattern>
+<pattern>5s4k4rúc</pattern>
+<pattern>5s4k4rutk</pattern>
+<pattern>5s4k4rýv</pattern>
+<pattern>5s4kúsen</pattern>
+<pattern>5s4kutoč</pattern>
+<pattern>5s4k4vúc</pattern>
+<pattern>5s4ladk</pattern>
+<pattern>5s4lav</pattern>
+<pattern>5s4láv</pattern>
+<pattern>5s4led</pattern>
+<pattern>5s4lep</pattern>
+<pattern>5s4lovn</pattern>
+<pattern>5s4love</pattern>
+<pattern>5s4lova</pattern>
+<pattern>5s4lovk</pattern>
+<pattern>5s4luh</pattern>
+<pattern>5s4lúž</pattern>
+<pattern>5s4ľub</pattern>
+<pattern>5s4maž</pattern>
+<pattern>5s4mel</pattern>
+<pattern>5s4mer</pattern>
+<pattern>5s4piev</pattern>
+<pattern>5s4pev</pattern>
+<pattern>5s4por</pattern>
+<pattern>5s4potreb</pattern>
+<pattern>5s4p4ravod</pattern>
+<pattern>5s4p4raved</pattern>
+<pattern>5s4p4rávn</pattern>
+<pattern>5s4p4ravo</pattern>
+<pattern>5s4tarost</pattern>
+<pattern>5s4tatic</pattern>
+<pattern>5s4tav</pattern>
+<pattern>5s4t4rach</pattern>
+<pattern>5s4t4ran</pattern>
+<pattern>5s4t4rán</pattern>
+<pattern>5s4t4ráda</pattern>
+<pattern>5s4t4raš</pattern>
+<pattern>5s4t2rat</pattern>
+<pattern>5s4t2red</pattern>
+<pattern>5s4t2rek</pattern>
+<pattern>5s4t4rel</pattern>
+<pattern>5s4t4reľ</pattern>
+<pattern>5s4t4riel</pattern>
+<pattern>5s4t4rieľ</pattern>
+<pattern>5s4t4rih</pattern>
+<pattern>5s4t4riž</pattern>
+<pattern>5s4t4rom</pattern>
+<pattern>5s4t4rúh</pattern>
+<pattern>5s4t4run</pattern>
+<pattern>5s4t4ruž</pattern>
+<pattern>5s4tati</pattern>
+<pattern>5d2ve5s4to</pattern>
+<pattern>5t2ri5s4to</pattern>
+<pattern>5š4tyri5s4to</pattern>
+<pattern>5päť5s4to</pattern>
+<pattern>5šes4ť5s4to</pattern>
+<pattern>5sedem5s4to</pattern>
+<pattern>5osem5s4to</pattern>
+<pattern>5deväť5s4to</pattern>
+<pattern>5päť5</pattern>
+<pattern>5šes4ť5</pattern>
+<pattern>5s4t4la</pattern>
+<pattern>5s4tup</pattern>
+<pattern>5s4ved</pattern>
+<pattern>5š4ľah</pattern>
+<pattern>5š4liap</pattern>
+<pattern>5š4kola</pattern>
+<pattern>5š4k4rab</pattern>
+<pattern>5š4k4rie</pattern>
+<pattern>5š4pin</pattern>
+<pattern>5š4p4liech</pattern>
+<pattern>5š4print</pattern>
+<pattern>5š4tart</pattern>
+<pattern>5š4tát</pattern>
+<pattern>5š4tep</pattern>
+<pattern>5š4tít</pattern>
+<pattern>5š4t4ruktúr</pattern>
+<pattern>5š4tude</pattern>
+<pattern>5š4tudo</pattern>
+<pattern>5š4t4vera</pattern>
+<pattern>5š4t4vorec</pattern>
+<pattern>5š4tyli</pattern>
+<pattern>5š4ťast</pattern>
+<pattern>5štiep4</pattern>
+<pattern>5š4t4v4r4ť5k4</pattern>
+<pattern>5š4t4v4r4ť5l4</pattern>
+<pattern>5š4t4v4r4ť5r4</pattern>
+<pattern>5š4t4v4r4ť5s4</pattern>
+<pattern>5t4lač</pattern>
+<pattern>5t4lak</pattern>
+<pattern>5t4ran4s5</pattern>
+<pattern>5t4ras</pattern>
+<pattern>5t4resk</pattern>
+<pattern>5t4retin</pattern>
+<pattern>5t4ried</pattern>
+<pattern>5t4rub</pattern>
+<pattern>5t4r4vaj</pattern>
+<pattern>5t4r4val</pattern>
+<pattern>5t4r4van</pattern>
+<pattern>5uholník</pattern>
+<pattern>5uhoľn</pattern>
+<pattern>5viac5h4</pattern>
+<pattern>5v4čera</pattern>
+<pattern>5v4lád</pattern>
+<pattern>5v4las</pattern>
+<pattern>5v4rás</pattern>
+<pattern>5v4rav</pattern>
+<pattern>5v4rat</pattern>
+<pattern>5v4rát</pattern>
+<pattern>5v4šimn</pattern>
+<pattern>5v4ták</pattern>
+<pattern>5v4tip</pattern>
+<pattern>5vy5s4t4rája</pattern>
+<pattern>5v4z4du</pattern>
+<pattern>5v4z4ťah</pattern>
+<pattern>5v4z4ťaž</pattern>
+<pattern>5z4lom</pattern>
+<pattern>5z4luč</pattern>
+<pattern>5z4mysel</pattern>
+<pattern>5z4mysl</pattern>
+<pattern>5z4nak</pattern>
+<pattern>5z4nám</pattern>
+<pattern>5z4náša</pattern>
+<pattern>5z4rak</pattern>
+<pattern>5z4väz</pattern>
+<pattern>5z4vest</pattern>
+<pattern>5zv4esť</pattern>
+<pattern>5z4vod</pattern>
+<pattern>5z4vuk</pattern>
+<pattern>5z4vuč</pattern>
+<pattern>5ž4ráč</pattern>
+<pattern>5ž4rane</pattern>
+<pattern>5ž4reb</pattern>
+<pattern>5ž4rút</pattern>
+<pattern> cv6</pattern>
+<pattern> ch6</pattern>
+<pattern> sp6</pattern>
+<pattern> st6</pattern>
+<pattern> šk6</pattern>
+<pattern> šp6</pattern>
+<pattern> št6</pattern>
+<pattern> tk6</pattern>
+<pattern> uh6</pattern>
+<pattern> uc6h6</pattern>
+<pattern> uk6</pattern>
+<pattern> um6</pattern>
+<pattern> up6</pattern>
+<pattern> us6</pattern>
+<pattern> ús6</pattern>
+<pattern> usc6h6</pattern>
+<pattern> úsc6h</pattern>
+<pattern> usk6</pattern>
+<pattern> úsl6</pattern>
+<pattern> usm6</pattern>
+<pattern> úsm6</pattern>
+<pattern> ús7ta </pattern>
+<pattern> ús7tami </pattern>
+<pattern> ús7toč</pattern>
+<pattern> ús7ti</pattern>
+<pattern> ust6l</pattern>
+<pattern> úst7ny</pattern>
+<pattern> ust6r</pattern>
+<pattern> ús7tret</pattern>
+<pattern> us7t4ric</pattern>
+<pattern> ús6t6r</pattern>
+<pattern> úš6</pattern>
+<pattern> ut6</pattern>
+<pattern> uv6</pattern>
+<pattern> uz6</pattern>
+<pattern> vd6</pattern>
+<pattern> vh6</pattern>
+<pattern> vk6</pattern>
+<pattern> vp6</pattern>
+<pattern> vs6</pattern>
+<pattern> vš6</pattern>
+<pattern> vt6</pattern>
+<pattern> vz6</pattern>
+<pattern> vzh6</pattern>
+<pattern> vzk6</pattern>
+<pattern> vzl6</pattern>
+<pattern> vzp6</pattern>
+<pattern> vž6</pattern>
+<pattern> zb6</pattern>
+<pattern> zd6n</pattern>
+<pattern> zd6r</pattern>
+<pattern> zd6v</pattern>
+<pattern> zg6</pattern>
+<pattern> zh6</pattern>
+<pattern> zm6</pattern>
+<pattern> zr6</pattern>
+<pattern> zv6</pattern>
+<pattern>4b4s4ť </pattern>
+<pattern>8c4h </pattern>
+<pattern>8d4z </pattern>
+<pattern>8d4ž </pattern>
+<pattern>4c4ht4 </pattern>
+<pattern>4j4s4ť </pattern>
+<pattern>4lt </pattern>
+<pattern>4m4p4r </pattern>
+<pattern>4m4p4s </pattern>
+<pattern>4m4š4t </pattern>
+<pattern>4n4k4t </pattern>
+<pattern>4p4r4v </pattern>
+<pattern>4rd </pattern>
+<pattern>r4p4t </pattern>
+<pattern>r4š4č </pattern>
+<pattern>r4t4z </pattern>
+<pattern>4st </pattern>
+<pattern>4sť </pattern>
+<pattern>5k4rát </pattern>
+<pattern>5s4to5k4rát </pattern>
+<pattern>5t4ľ4c4ť </pattern>
+<pattern>akci3a2</pattern>
+<pattern>akvári3u2m</pattern>
+<pattern>gymnázi3um</pattern>
+<pattern>le2u3kémia</pattern>
+<pattern>t2ri3u2mf</pattern>
+<pattern>kli3e2nt</pattern>
+<pattern>me5tó5da</pattern>
+<pattern>me5tó5dy</pattern>
+<pattern>ne5do5stat5ka5mi</pattern>
+<pattern>sep5tem5bra</pattern>
+<!-- Exceptions, to be fixed, see https://github.com/koreader/crengine/pull/376
+<pattern>dosť</pattern>
+-->
+</HyphenationDescription>
