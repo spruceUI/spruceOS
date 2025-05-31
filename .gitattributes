@@ -2,4 +2,5 @@
 *text eol=lf
 *.sh text eol=lf
 *.bat text eol=crlf
-spruce/flip/miyoo355_rootfs_32.img filter=lfs diff=lfs merge=lfs -text
+RetroArch/.retroarch/cores/scummvm_libretro.so filter=lfs diff=lfs merge=lfs -text
+RetroArch/.retroarch/cores64/scummvm_libretro.so filter=lfs diff=lfs merge=lfs -text
