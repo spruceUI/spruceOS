@@ -196,3 +196,9 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## News
 The release of the Miyoo Flip has us excited! We are working on spruceOS 4.0 that will be multi platform! One SD card with our software will boot/play on the Miyoo A30, Flip, Trimui Brick and Smart Pro. 
 [Gogamegeek.com](https://www.gogamegeek.com/) as well as Miyoo themselves has kindly sent us a few units. Expect updates on our progress "soon"!
+
+## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
+
+[![spruce logo](https://github.com/user-attachments/assets/ee3ce8fa-87f2-455a-adf6-c071f7ce4e7a)
+](https://discord.gg/KjR5uMQQt9)
+
