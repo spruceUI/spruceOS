@@ -7,7 +7,7 @@ IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes."
 
 delete_gamelist_files() {
-    rootdir="/mnt/SDCARD/roms"
+    rootdir="/mnt/SDCARD/Roms"
     
     for system in "$rootdir"/*; do
         if [ -d "$system" ]; then
@@ -22,7 +22,7 @@ delete_gamelist_files() {
 }
 
 delete_cache_files() {
-    find /mnt/SDCARD/roms -name "*cache6.db" -exec rm {} \;
+    find /mnt/SDCARD/Roms -name "*cache6.db" -exec rm {} \;
 }
 
 # Delete miyoogamelist.xml files first
@@ -121,9 +121,9 @@ for system in "$rootdir"/*; do
 
         cd "$system"
 
-        rompath=$(grep -E '"rompath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
-        extlist=$(grep -E '"extlist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
-        imgpath=$(grep -E '"imgpath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        rompath=$(grep -m 1 -oE '"rompath": *"[^"]+"' config.json | sed -E 's/.*"rompath": *"(.*)"/\1/')
+        extlist=$(grep -m 1 -oE '"extlist": *"[^"]+"' config.json | sed -E 's/.*"extlist": *"(.*)"/\1/')
+        imgpath=$(grep -m 1 -oE '"imgpath": *"[^"]+"' config.json | sed -E 's/.*"imgpath": *"(.*)"/\1/')
         imgpath=".${imgpath#$rompath}"
 
         valid_subfolders=true
