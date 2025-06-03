@@ -58,6 +58,7 @@ clean_name() {
     fi
 
     name=$(echo "$name" | sed -e 's/ - /: /')
+    name=$(echo "$name" | sed -e 's/_/ /g')
 
     echo "$name"
 }
