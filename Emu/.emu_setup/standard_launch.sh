@@ -109,7 +109,7 @@ handle_network_services() {
 	fi
 }
 
-##### TIME TRACHKING FUNCTIONS #####
+##### TIME TRACKING FUNCTIONS #####
 
 export START_TIME_PATH="/tmp/start_time"
 export END_TIME_PATH="/tmp/end_time"
@@ -229,7 +229,7 @@ run_drastic() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 
-	if [ "$PLATFORM" = "A30" ]; then
+	if [ "$PLATFORM" = "A30" ]; then # only Steward is available; core switching does nothing
 
 		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
@@ -270,26 +270,39 @@ run_drastic() {
 				LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
 				sleep 1
 				export SDL_VIDEODRIVER=NDS
-				./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic "$ROM_FILE" > std.log 2>&1
+				./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic32 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-steward-brick.log 2>&1
 				sync
 				kill_runner
-			else
-				./drastic64
+			else 
+
+				##### TODO: HOOK UP TRNGAJE's DRASTIC FOR BRICK
+
+				./drastic64 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-og-brick.log 2>&1
 			fi
 
 		elif [ "$PLATFORM" = "SmartPro" ]; then
+
+			##### TODO: HOOK UP CORE SWITCH B/T TRNGAJE AND OG DRASTIC on SMART PRO; no Steward available
+
 			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
 			export SDL_AUDIODRIVER=dsp
-			./drastic64 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+			./drastic64 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-og-smartpro.log 2>&1
 
 		elif [ "$PLATFORM" = "Flip" ]; then
+
 			if [ -d /usr/l32 ] && [ "$CORE" = "drastic_steward" ]; then
 				export SDL_VIDEODRIVER=NDS
 				export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
-				./drastic32 "$ROM_FILE" >/mnt/SDCARD/drastic.log 2>&1
+				./drastic32 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-steward-flip.log 2>&1
+
+			elif [ "$CORE" = "drastic_trngaje" ]; then
+				export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
+				mv ./drastic64 ./drastic
+				./drastic "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-trngaje-flip.log 2>&1
+				mv ./drastic ./drastic64
 			else
 				# if overlay mount of /usr fails, fall back to original DraStic instead of Steward's
-				./drastic64
+				./drastic64 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-og-flip.log
 			fi
 		fi
 		

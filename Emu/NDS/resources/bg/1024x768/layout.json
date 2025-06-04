@@ -1,0 +1,173 @@
+{
+"name":"steward",
+"number":14,
+"layout":[
+{
+    "index":0,
+    "name":"vh_t0",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":256,
+    "screen0_h":192,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1024,
+    "screen1_h":768
+},
+{
+    "index":1,
+    "name":"vh_t1",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1024,
+    "screen1_h":768
+},
+
+{
+    "index":2,
+    "name":"s1",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":0,
+    "screen0_h":0,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1024,
+    "screen1_h":768
+},
+
+{
+    "index":3,
+    "name":"v1",
+    "bg":"bg_v1.png",
+
+    "screen0_x":256,
+    "screen0_y":0,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":256,
+    "screen1_y":384,
+    "screen1_w":512,
+    "screen1_h":384
+},
+
+{
+    "index":4,
+    "name":"h1",
+    "bg":"bg_h1.png",
+
+    "screen0_x":0,
+    "screen0_y":192,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":512,
+    "screen1_y":192,
+    "screen1_w":512,
+    "screen1_h":384
+},
+
+{
+    "index":5,
+    "name":"vh_s0",
+    "bg":"bg_vh_s0.png",
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":768,
+    "screen0_h":576,
+
+    "screen1_x":768,
+    "screen1_y":576,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":6,
+    "name":"vh_s2",
+    "bg":"bg_vh_s2.png",
+
+    "screen0_x":128,
+    "screen0_y":0,
+    "screen0_w":768,
+    "screen0_h":576,
+
+    "screen1_x":384,
+    "screen1_y":576,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":7,
+    "name":"hh0",
+    "bg":"bg_hh0.png",
+    "rotate":90,
+    "type":2,
+
+    "screen0_x":0,
+    "screen0_y":43,
+    "screen0_w":682,
+    "screen0_h":512,
+
+    "screen1_x":512,
+    "screen1_y":43,
+    "screen1_w":682,
+    "screen1_h":512
+},
+
+{
+    "index":8,
+    "name":"hh1",
+    "bg":"bg_hh0.png",
+    "rotate":270,
+    "type":2,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":768,
+    "screen1_h":576,
+    
+    "screen0_x":576,
+    "screen0_y":85,
+    "screen0_w":597,
+    "screen0_h":448
+},
+
+{
+    "index":9,
+    "name":"hres1",
+    "type":3,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":1024,
+    "screen0_h":768,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1024,
+    "screen1_h":768
+},
+]
+
+}
+

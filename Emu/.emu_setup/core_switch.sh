@@ -207,13 +207,17 @@ case "$EMU_NAME" in
 	;;
 
 	"NDS" )
-		if [ "$CORE" = "drastic_steward" ]; then
+		if [ "$CORE" = "drastic_trngaje" ]; then
+			NEW_CORE="drastic_steward"
+			NEW_DISPLAY="trngaje-(✓STEWARD)-original"
+		
+		elif [ "$CORE" = "drastic_steward" ]; then
 			NEW_CORE="drastic_original"
-			NEW_DISPLAY="steward-(✓ORIGINAL)"
+			NEW_DISPLAY="trngaje-steward-(✓ORIGINAL)"
 
 		else # current core is drastic_original
-			NEW_CORE="drastic_steward"
-			NEW_DISPLAY="(✓STEWARD)-original"
+			NEW_CORE="drastic_trngaje"
+			NEW_DISPLAY="(✓TRNGAJE)-steward-original"
 		fi
 	;;
 
