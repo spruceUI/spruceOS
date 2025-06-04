@@ -50,6 +50,7 @@ clean_name() {
     name=$(echo "$name" | sed -e 's/([^)]*)//g')
     name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
     name=$(echo "$name" | sed -e 's/^[0-9]\+\.//')
+    name=$(echo "$name" | sed -e 's/_/ /g')
     name=$(echo "$name" | awk '{$1=$1};1')
 
     article=$(echo "$name" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
@@ -58,7 +59,6 @@ clean_name() {
     fi
 
     name=$(echo "$name" | sed -e 's/ - /: /')
-    name=$(echo "$name" | sed -e 's/_/ /g')
 
     echo "$name"
 }
