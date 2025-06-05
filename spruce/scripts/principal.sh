@@ -186,7 +186,7 @@ while [ 1 ]; do
                 rm -f /tmp/trimui_inputd/input_no_dpad
                 rm -f /tmp/trimui_inputd/input_dpad_to_joystick
              
-                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+                if [ -f "$PYUI_FLAG" ]; then
 					umount /mnt/SDCARD/Themes
 					touch /tmp/fbdisplay_exit
 					cat /dev/zero > /dev/fb0
@@ -214,7 +214,7 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                if [ -f /mnt/SDCARD/App/PyUI/.enabled ]; then
+                if [ -f "$PYUI_FLAG" ]; then
                     export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
                     /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 else
