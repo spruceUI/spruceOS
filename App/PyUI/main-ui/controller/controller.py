@@ -103,7 +103,8 @@ class Controller:
         # Clear stale events if enough time has passed
         if time_since_last_input > INPUT_DEBOUNCE_SECONDS:
             sdl2.SDL_PumpEvents()
-            Controller.clear_input_queue()
+            if not Controller.still_held_down():
+                Controller.clear_input_queue()
 
         sdl2.SDL_PumpEvents()
         start_time = time.time()

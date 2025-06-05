@@ -59,29 +59,38 @@ class SystemConfig:
 
     @property
     def brightness(self):
-        return self.config.get("brightness")
+        return self.config.get("lumination") or self.config.get("colorbrightness")
 
     def get_brightness(self):
-        return self.config.get("brightness")
+        return self.config.get("lumination") or self.config.get("colorbrightness")
 
     def set_brightness(self, value):
-        self.config["brightness"] = value
+        if "lumination" in self.config:
+            self.config["lumination"] = value
+        elif "colorbrightness" in self.config:
+            self.config["colorbrightness"] = value
 
     @property
     def backlight(self):
-        return self.config.get("backlight")
+        return self.config.get("brightness")
     
     def set_backlight(self, value):
-        self.config["backlight"] = value
+        self.config["brightness"] = value
     
     def get_backlight(self):
-        return self.config.get("backlight")
+        return self.config.get("brightness")
 
     def set_contrast(self, value):
-        self.config["contrast"] = value
+        if "contrast" in self.config:
+            self.config["contrast"] = value
+        elif "colorcontrast" in self.config:
+            self.config["colorcontrast"] = value
     
     def set_saturation(self, value):
-        self.config["saturation"] = value
+        if "saturation" in self.config:
+            self.config["saturation"] = value
+        elif "colorsaturation" in self.config:
+            self.config["colorsaturation"] = value
     
     def set_volume(self, value):
         if(value == 0):
@@ -104,17 +113,17 @@ class SystemConfig:
 
     @property
     def saturation(self):
-        return self.config.get("saturation")
+        return self.config.get("saturation") or self.config.get("colorsaturation")
 
     def get_saturation(self):
-        return self.config.get("saturation")
+        return self.config.get("saturation") or self.config.get("colorsaturation")
 
     @property
     def contrast(self):
-        return self.config.get("contrast")
+        return self.config.get("contrast") or self.config.get("colorcontrast")
 
     def get_contrast(self):
-        return self.config.get("contrast")
+        return self.config.get("contrast") or self.config.get("colorcontrast")
 
     def get_theme_path(self):
         return self.config.get("theme")

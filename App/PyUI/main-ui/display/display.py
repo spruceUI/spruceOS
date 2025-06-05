@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+import os
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
@@ -14,6 +15,7 @@ import sdl2.ext
 import sdl2.sdlttf
 from themes.theme import Theme
 from utils.logger import PyUiLogger
+from ctypes import c_double
 
 @dataclass
 class CachedImageTexture:
@@ -72,11 +74,12 @@ class Display:
     bg_canvas = None
     render_canvas = None
     bg_path = ""
-    top_bar = None
-    bottom_bar = None
+    page = ""
+    top_bar = TopBar()
+    bottom_bar = BottomBar()
     window = None
     background_texture = None
-    screen = None
+    top_bar_text = None
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
 
@@ -97,9 +100,7 @@ class Display:
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
-        cls._check_for_bg_change()
-        cls.top_bar = TopBar()
-        cls.bottom_bar = BottomBar()
+        cls.restore_bg()
         cls.clear("init")
         cls.present()
 
@@ -179,7 +180,7 @@ class Display:
         cls._unload_bg_texture()
         cls._init_display()
         cls.init_fonts()
-        cls._load_bg_texture()
+        cls.restore_bg()
         cls.clear("reinitialize")
         cls.present()
 
@@ -192,25 +193,35 @@ class Display:
             PyUiLogger.get_logger().debug("Destroying bg texture")
 
     @classmethod
-    def _load_bg_texture(cls):
-        cls.bg_path = Theme.background()
-        surface = sdl2.sdlimage.IMG_Load(cls.bg_path.encode('utf-8'))
-        if not surface:
-            PyUiLogger.get_logger().error(f"Failed to load image: {cls.bg_path}")
-            return
-
-        cls.background_texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
-        sdl2.SDL_FreeSurface(surface)
-
-        if not cls.background_texture:
-            PyUiLogger.get_logger().error("Failed to create texture from surface")
+    def restore_bg(cls):
+        cls.set_new_bg(Theme.background())
 
     @classmethod
-    def _check_for_bg_change(cls):
-        new_bg_path = Theme.background()
-        if cls.bg_path != new_bg_path:
-            cls._unload_bg_texture()
-            cls._load_bg_texture()
+    def set_new_bg(cls, bg_path):
+        cls._unload_bg_texture()
+        cls.bg_path = bg_path
+        PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
+        if(bg_path is not None):
+            surface = sdl2.sdlimage.IMG_Load(cls.bg_path.encode('utf-8'))
+            if not surface:
+                PyUiLogger.get_logger().error(f"Failed to load image: {cls.bg_path}")
+                return
+
+            cls.background_texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
+            sdl2.SDL_FreeSurface(surface)
+
+            if not cls.background_texture:
+                PyUiLogger.get_logger().error("Failed to create texture from surface")
+
+    @classmethod
+    def set_page(cls, page):
+        if(page != cls.page):
+            cls.page = page 
+            background = Theme.background(page)
+            if(os.path.exists(background)):
+                cls.set_new_bg(background)
+            else:
+                PyUiLogger.get_logger().debug(f"Theme did not provide bg for {background}")
 
     @classmethod
     def _load_font(cls, font_purpose):
@@ -258,9 +269,11 @@ class Display:
             cls.bg_canvas = None
 
     @classmethod
-    def clear(cls, screen, hide_top_bar_icons = False):
-        cls.screen = screen
-        cls._check_for_bg_change()
+    def clear(cls, 
+              top_bar_text, 
+              hide_top_bar_icons = False,
+              bottom_bar_text = None):
+        cls.top_bar_text = top_bar_text
 
         if cls.bg_canvas is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
@@ -268,8 +281,8 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
 
         if not Theme.render_top_and_bottom_bar_last():
-            cls.top_bar.render_top_bar(cls.screen,hide_top_bar_icons)
-            cls.bottom_bar.render_bottom_bar()
+            cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
+            cls.bottom_bar.render_bottom_bar(bottom_bar_text)
 
     @classmethod
     def _log(cls, msg):
@@ -384,7 +397,7 @@ class Display:
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None):
         loaded_font = cls.fonts[purpose]
-        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, loaded_font.font_path, color)
+        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, purpose, color)
         
         if cache:
             surface = cache.surface
@@ -402,7 +415,7 @@ class Display:
                 PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
                 return 0, 0
 
-            cls._text_texture_cache.add_texture(text, loaded_font.font_path, color, surface, texture)
+            cls._text_texture_cache.add_texture(text, purpose, color, surface, texture)
 
         return cls._render_surface_texture(
                 x=x,
@@ -513,7 +526,7 @@ class Display:
     @classmethod
     def present(cls):
         if Theme.render_top_and_bottom_bar_last():
-            cls.top_bar.render_top_bar(cls.screen)
+            cls.top_bar.render_top_bar(cls.top_bar_text)
             cls.bottom_bar.render_bottom_bar()
 
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
@@ -522,9 +535,18 @@ class Display:
             scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.output_screen_width, Device.output_screen_height)
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
             sdl2.SDL_DestroyTexture(scaled_canvas)
-        else:
+        elif(0 == Device.screen_rotation()):
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
-
+        else:
+            sdl2.SDL_RenderCopyEx(
+                cls.renderer.sdlrenderer,     # Renderer
+                cls.render_canvas,            # Texture (canvas)
+                None,                         # Source rect (None = full texture)
+                None,                         # Destination rect (None = full screen)
+                c_double(Device.screen_rotation()),                        # Angle in degrees
+                None,                         # Center point (None = center of dest rect)
+                sdl2.SDL_FLIP_NONE            # Flip (you can also use SDL_FLIP_HORIZONTAL or _VERTICAL if needed)
+            )
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
 
@@ -538,8 +560,8 @@ class Display:
         return 0 if Theme.ignore_top_and_bottom_bar_for_layout() else cls.bottom_bar.get_bottom_bar_height()
 
     @classmethod
-    def get_usable_screen_height(cls):
-        return Device.screen_height() if Theme.ignore_top_and_bottom_bar_for_layout() else Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()
+    def get_usable_screen_height(cls, force_include_top_bar = False):
+        return Device.screen_height() if Theme.ignore_top_and_bottom_bar_for_layout() and not force_include_top_bar else Device.screen_height() - cls.get_bottom_bar_height() - cls.get_top_bar_height()
 
     @classmethod
     def get_center_of_usable_screen_height(cls, force_include_top_bar = False):
@@ -568,31 +590,43 @@ class Display:
         return width, height
 
     @classmethod
-    def add_index_text(cls, index, total):
-        if(Theme.show_index_text()):
+    def add_index_text(cls, index, total, force_include_index = False, letter = None):
+        if(force_include_index or Theme.show_index_text()):
             y_padding = max(5, cls.get_bottom_bar_height() // 4)
             y_value = Device.screen_height() - y_padding
             x_padding = 10
 
-            total_text_x = Device.screen_width() - x_padding
+            x_offset = Device.screen_width() - x_padding
             total_text_w, _ = cls.render_text(
                 str(total),
-                total_text_x,
+                x_offset,
                 y_value,
                 Theme.text_color(FontPurpose.LIST_TOTAL),
                 FontPurpose.LIST_TOTAL,
                 RenderMode.BOTTOM_RIGHT_ALIGNED
             )
 
-            index_text_x = Device.screen_width() - x_padding - total_text_w
-            cls.render_text(
+            x_offset -= total_text_w
+            index_text_w, index_text_h = cls.render_text(
                 str(index) + "/",
-                index_text_x,
+                x_offset,
                 y_value,
                 Theme.text_color(FontPurpose.LIST_INDEX),
                 FontPurpose.LIST_INDEX,
                 RenderMode.BOTTOM_RIGHT_ALIGNED
             )
+
+            x_offset -= index_text_w  + x_padding
+            if(letter is not None):
+                cls.render_text(
+                    letter,
+                    x_offset,
+                    y_value,
+                    Theme.text_color(FontPurpose.LIST_INDEX),
+                    FontPurpose.LIST_INDEX,
+                    RenderMode.BOTTOM_RIGHT_ALIGNED
+                )
+
 
     @classmethod
     def get_current_top_bar_title(cls):

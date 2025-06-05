@@ -102,6 +102,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             PyUiConfig.set("theme",theme_folders[selected_index])
             PyUiConfig.save()      
             self.theme_changed = True
+            Display.restore_bg()
 
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):

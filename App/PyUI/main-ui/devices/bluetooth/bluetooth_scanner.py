@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 import re
 import select
 import subprocess
@@ -6,6 +7,7 @@ import threading
 import time
 from typing import List
 
+from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 
 @dataclass
@@ -18,17 +20,11 @@ class BluetoothDevice:
 
 class BluetoothScanner:
     def __init__(self):
-        pass
+        self.seen_devices = {}
 
-    def remove_ansi_escape_sequences(self,text):
-        # Remove ANSI escape sequences (for coloring and formatting in terminal)
-        text = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', text)
-        # Remove non-printable characters
-        text = ''.join(c for c in text if c.isprintable())
-        return text
-    
-    def scan_once(self, duration=10) -> List[BluetoothDevice]:
-        process = subprocess.Popen(
+
+    def start(self):
+        self.process = subprocess.Popen(
             ['bluetoothctl'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -37,51 +33,94 @@ class BluetoothScanner:
             bufsize=1
         )
 
-        def send(cmd):
-            process.stdin.write(cmd + '\n')
-            process.stdin.flush()
 
-        send('power on')
+        self.send('power on')
         time.sleep(1)
-        send('scan on')
+        self.send('scan on')
 
-        PyUiLogger.get_logger().info(f"Scanning for {duration} seconds...")
-        start_time = time.time()
-        seen_devices = {}
+    def stop(self):
+        self.send('scan off')
+        time.sleep(0.25)
+        self.send('exit')
+        self.process.terminate()
 
-        try:
-            while time.time() - start_time < duration:
-                # Check if there is data ready to be read from stdout
-                rlist, _, _ = select.select([process.stdout], [], [], 0.1)
-                if rlist:
-                    line = process.stdout.readline().strip()
-                    PyUiLogger.get_logger().info(f"{line}")  # Debug line read
-                    line = self.remove_ansi_escape_sequences(line)  # Remove escape sequences
-                    if line.startswith('[NEW] Device '):
-                        parts = line.split(' ', 3)
-                        if len(parts) >= 4:
-                            addr = parts[2].strip()  # Ensure no extra spaces
-                            name = parts[3].strip()  # Ensure no extra spaces
-                            #print(f"Parsed addr: {addr}, name: {name}")  # Debug parsed output
-                            if addr not in seen_devices:
-                                seen_devices[addr] = BluetoothDevice(address=addr, name=name)
-                                PyUiLogger.get_logger().error(f"Found: {seen_devices[addr]}")
-                            else:
-                                PyUiLogger.get_logger().error(f"Device {addr} already seen.")  # Debug already seen device
-        finally:
-            send('scan off')
-            send('exit')
-            process.terminate()
-
-        return list(seen_devices.values())
+    def remove_ansi_escape_sequences(self,text):
+        # Remove ANSI escape sequences (for coloring and formatting in terminal)
+        text = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', text)
+        # Remove non-printable characters
+        text = ''.join(c for c in text if c.isprintable())
+        return text
     
+    def send(self, cmd):
+        self.process.stdin.write(cmd + '\n')
+        PyUiLogger.get_logger().info(f"Running cmd : {cmd}")
+        self.process.stdin.flush()
+
+    def get_device_name_from_address(self, addr: str) -> str:
+        base_path = "/var/lib/bluetooth"
+        controllers = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        if not controllers:
+            PyUiLogger.get_logger().error(f"No directories found in {base_path}")
+            return f"Unknown ({addr})"
+       
+        controller_dir = os.path.join(base_path, controllers[0])  # assume only one controller folder
+        cache_dir = os.path.join(controller_dir, "cache")
+        cache_file_path = os.path.join(cache_dir, addr.upper())
+
+        if not os.path.isfile(cache_file_path):
+            PyUiLogger.get_logger().error(f"Cannot find cache file : {cache_file_path}")
+            return f"Unknown ({addr})"
+
+        with open(cache_file_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("Name="):
+                    name = line[len("Name="):].strip()
+                    return name
+
+        PyUiLogger.get_logger().error(f"No name line found in : {cache_file_path}")
+
+
     def scan_devices(self) -> List[BluetoothDevice]:
-        PyUiLogger.get_logger().info("Starting Bluetooth Scan")
-        return self.scan_once()
+        rlist, _, _ = select.select([self.process.stdout], [], [], 0.1)
+        if rlist:
+            line = self.process.stdout.readline().strip()
+            PyUiLogger.get_logger().info(f"{line}")  # Debug line read
+            line = self.remove_ansi_escape_sequences(line)  # Remove escape sequences
+
+            if line.startswith('[NEW] Device '):
+                parts = line.split(' ', 3)
+                if len(parts) >= 4:
+                    addr = parts[2].strip()
+                    name = parts[3].strip()
+                    if addr not in self.seen_devices:
+                        self.seen_devices[addr] = BluetoothDevice(address=addr, name=name)
+                        PyUiLogger.get_logger().error(f"Found: {self.seen_devices[addr]}")
+                    else:
+                        PyUiLogger.get_logger().error(f"Device {addr} already seen.")
+
+            elif '[CHG] Device ' in line:
+                parts = line.split()
+                if len(parts) >= 4:
+                    addr = parts[2].strip()
+                    if addr not in self.seen_devices:
+                        name = self.get_device_name_from_address(addr)
+                        self.seen_devices[addr] = BluetoothDevice(address=addr, name=name)
+                        PyUiLogger.get_logger().error(f"Found device: {self.seen_devices[addr]}")
+                    else:
+                        PyUiLogger.get_logger().error(f"Controller {addr} already seen.")
+
+        return list(self.seen_devices.values())
     
-                
     def connect_to_device(self, device_address):
+        from display.display import Display
+        from devices.device import Device
+        from themes.theme import Theme
+        from controller.controller import Controller
         PyUiLogger.get_logger().info(f"Attempting to connect to {device_address}")
+        Display.clear("Bluetooth Connection")
+        Display.render_text_centered(f"Attempting to connect to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.present()
 
         try:
             process = subprocess.Popen(
@@ -133,8 +172,21 @@ class BluetoothScanner:
             all_output = ''.join(output_lines)
             if "Connection successful" in all_output:
                 PyUiLogger.get_logger().info(f"Successfully connected to {device_address}")
+                Display.clear("Bluetooth Connection")
+                Display.render_text_centered(f"Successfully connected to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.present()
+                while(not Controller.get_input()):
+                    pass
+                return True
             else:
                 PyUiLogger.get_logger().info(f"Failed to connect to {device_address}. Output:\n{all_output}")
+                Display.clear("Bluetooth Connection")
+                Display.render_text_centered(f"Failed to connect to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.present()
+                while(not Controller.get_input()):
+                    pass
+                return False
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error while connecting to the device: {str(e)}")
+            return False

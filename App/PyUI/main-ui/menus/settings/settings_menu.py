@@ -1,4 +1,5 @@
 from controller.controller_inputs import ControllerInput
+from display.display import Display
 from views.selection import Selection
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
@@ -20,7 +21,6 @@ class SettingsMenu(ABC):
         while(selected is not None):
             option_list = self.build_options_list()
             
-
             if(list_view is None or self.theme_changed):
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
@@ -30,7 +30,7 @@ class SettingsMenu(ABC):
                 self.theme_changed = False
             else:
                 list_view.set_options(option_list)
-
+    
             control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)

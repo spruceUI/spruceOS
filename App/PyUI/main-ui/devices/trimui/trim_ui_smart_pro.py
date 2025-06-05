@@ -1,17 +1,40 @@
+import array
+import ctypes
+import fcntl
+import math
 from pathlib import Path
+import re
+import socket
+import subprocess
 import threading
+import time
+from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
+from devices.charge.charge_status import ChargeStatus
+from devices.abstract_device import AbstractDevice
+import os
+from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
+from devices.utils.process_runner import ProcessRunner
+from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from devices.wifi.wifi_status import WifiStatus
+from display.font_purpose import FontPurpose
+from games.utils.game_entry import GameEntry
+from games.utils.rom_utils import RomUtils
+from menus.games.utils.recents_manager import RecentsManager
 import sdl2
 from utils import throttle
-
 from utils.config_copier import ConfigCopier
+from utils.logger import PyUiLogger
+import psutil
+
 from utils.py_ui_config import PyUiConfig
 
-class TrimUIBrick(TrimUIDevice):
+class TrimUISmartPro(TrimUIDevice):
     
     def __init__(self):
         self.path = self
@@ -33,10 +56,12 @@ class TrimUIBrick(TrimUIDevice):
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
 
+        #Idea is if something were to change from he we can reload it
+        #so it always has the more accurate data
         script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'brick-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
+        source = script_dir / 'smartpro-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/smartpro-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/smartpro-system.json")
 
 
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
@@ -46,6 +71,7 @@ class TrimUIBrick(TrimUIDevice):
         self._set_brightness_to_config()
         self.ensure_wpa_supplicant_conf()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
+        
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller
             #/dev/miyooio if we want to get rid of miyoo_inputd
@@ -57,10 +83,10 @@ class TrimUIBrick(TrimUIDevice):
             self.power_key_watcher = KeyWatcher("/dev/input/event1")
             power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
             power_key_polling_thread.start()
-            
+        
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
-            
+
     #Untested
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
@@ -71,12 +97,11 @@ class TrimUIBrick(TrimUIDevice):
 
     @property
     def screen_width(self):
-        return 1024
+        return 1280
 
     @property
     def screen_height(self):
-        return 768
-    
+        return 720
     
     @property
     def output_screen_width(self):
@@ -88,7 +113,7 @@ class TrimUIBrick(TrimUIDevice):
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
-            return 2.25
+            return 1.5
         else:
             return 1
         

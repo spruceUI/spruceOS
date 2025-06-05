@@ -13,7 +13,7 @@ class TopBar:
     def __init__(self):
         self.title = ""
         self.volume_changed_time = time.time()
-        self.volume = Device.get_display_volume()
+        self.volume = 0
 
     def render_top_bar(self, title, hide_top_bar_icons = False) :
         from display.display import Display
@@ -64,7 +64,12 @@ class TopBar:
                 x_offset += w +padding
 
         if(Theme.show_top_bar_text()):
-            Display.render_text(title,int(Device.screen_width()/2), center_of_bar, Theme.text_color(FontPurpose.TOP_BAR_TEXT), FontPurpose.TOP_BAR_TEXT, RenderMode.MIDDLE_CENTER_ALIGNED)
+            Display.render_text(title,
+                                int(Device.screen_width()/2), 
+                                center_of_bar, 
+                                Theme.text_color(FontPurpose.TOP_BAR_TEXT), 
+                                FontPurpose.TOP_BAR_TEXT, 
+                                RenderMode.MIDDLE_CENTER_ALIGNED)
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
     def get_current_time_hhmm(self):

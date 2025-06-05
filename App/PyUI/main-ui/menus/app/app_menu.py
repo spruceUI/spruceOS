@@ -50,7 +50,7 @@ class AppMenu:
                         image_path_selected=icon,
                         description=app.get_description(),
                         icon=icon,
-                        value=app.get_launch()
+                        value=app
                     )
                 )
         if(view is None):
@@ -66,10 +66,10 @@ class AppMenu:
         while(running):
             selected = view.get_selection()
             if(ControllerInput.A == selected.get_input()):
-                filepath = selected.get_selection().get_value()
-                directory = os.path.dirname(filepath)
+                filepath = selected.get_selection().get_value().get_launch()
+                directory = selected.get_selection().get_value().get_folder()
                 Display.deinit_display()
-                Device.run_app([filepath], directory)
+                Device.run_app(["bash", filepath], directory)
                 Controller.clear_input_queue()
                 Display.reinitialize()
             elif(ControllerInput.B == selected.get_input()):

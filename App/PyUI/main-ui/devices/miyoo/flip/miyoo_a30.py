@@ -1,5 +1,4 @@
 from pathlib import Path
-import subprocess
 import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
@@ -15,12 +14,12 @@ from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
-class MiyooFlip(MiyooDevice):
+class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
 
     def __init__(self):
-        PyUiLogger.get_logger().info("Initializing Miyoo Flip")        
+        PyUiLogger.get_logger().info("Initializing Miyoo A30")        
         
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -39,14 +38,11 @@ class MiyooFlip(MiyooDevice):
             sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
             sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
         }
-        
-        os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
-        os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
-        
+                
         script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'flip-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
+        source = script_dir / 'a30-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self._set_lumination_to_config()
         self._set_contrast_to_config()
@@ -80,37 +76,9 @@ class MiyooFlip(MiyooDevice):
             4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
             5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
         }
-
-        self.init_bluetooth()
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
-
-    def init_bluetooth(self):
-        try:
-            subprocess.Popen(["insmod","/lib/modules/rtk_btusb.ko"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error running insmod {e}")
-
-        if(not self.is_btmanager_runing()):
-            try:
-                subprocess.Popen(["/usr/miyoo/bin/btmanager"],
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Error running insmod {e}")
-
-    def is_btmanager_runing(self):
-        try:
-            # Run 'ps' to check for bluetoothd process
-            result = self.get_running_processes()
-            # Check if bluetoothd is in the process list
-            return 'btmanager' in result.stdout
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
-            return False
-
+ 
 
     def init_gpio(self):
         try:
@@ -163,7 +131,10 @@ class MiyooFlip(MiyooDevice):
     @property
     def screen_height(self):
         return 480
-    
+        
+    @property
+    def screen_rotation(self):
+        return 270
     
     @property
     def output_screen_width(self):
