@@ -69,6 +69,12 @@ Plus many more enhancements over the original stock operating system!
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
+## All In One Installer
+  - Download [The new SpruceBurner program](https://github.com/spruceUI/spruceSource/releases/download/SpruceBurnerV1.0/SpruceBurner.exe)
+  - Simply insert your SD card into your Windows computer and run the program, be sure to select the correct drive!
+  - It formats your card, downloads the latest official spruce release, and installs it in one click!
+  - HUGE props to spycat from the Rocknix team for developing this for us!
+
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
