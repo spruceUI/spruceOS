@@ -21,6 +21,7 @@ from devices.miyoo.flip.miyoo_flip import MiyooFlip
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from utils.py_ui_state import PyUiState
 
 
 def parse_arguments():
@@ -87,6 +88,7 @@ def main():
     PyUiLogger.get_logger().info(f"{selected_theme}")
 
     initialize_device(args.device)
+    PyUiState.init(Device.get_state_path())
 
     Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
     Display.init()

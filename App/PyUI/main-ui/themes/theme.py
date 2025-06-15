@@ -1,10 +1,13 @@
 import json
+import logging
 import os
+import traceback
 
 from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
+from menus.games.utils.daijisho_theme_index import DaijishoThemeIndex
 from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
 from views.view_type import ViewType
@@ -15,6 +18,7 @@ class Theme():
     _skin_folder = ""
     _icon_folder = ""
     _loaded_file_path = ""
+    _daijisho_theme_index = None
 
     @classmethod
     def init(cls, path, width, height):
@@ -42,6 +46,18 @@ class Theme():
         cls._path = path
         cls._skin_folder = cls._get_asset_folder("skin", width, height)
         cls._icon_folder = cls._get_asset_folder("icons", width, height)
+        daijisho_theme_index_file = os.path.join(cls._path, cls._icon_folder,"index.json")
+        if os.path.exists(daijisho_theme_index_file):
+            try:
+                cls._daijisho_theme_index = DaijishoThemeIndex(daijisho_theme_index_file)
+                PyUiLogger.get_logger().info(f"Using DaijishoThemeIndex from {daijisho_theme_index_file}")
+            except Exception:
+                PyUiLogger.get_logger().error(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}:")
+                logging.exception(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}")
+                cls._daijisho_theme_index = None
+        else:
+            PyUiLogger.get_logger().error(f"DaijishoThemeIndex does not exist at: {daijisho_theme_index_file}")
+            cls._daijisho_theme_index = None
 
     @classmethod
     def load_defaults_so_user_can_see_at_least(cls, path):
@@ -152,6 +168,9 @@ class Theme():
     def back_icon(cls): return cls._asset("icon-B-54.png")
     
     @classmethod
+    def start_icon(cls): return cls._asset("icon-START.png")
+    
+    @classmethod
     def show_bottom_bar(cls): return cls._data.get("showBottomBar", True) is not False
     
     @classmethod
@@ -245,14 +264,6 @@ class Theme():
 
 
     @classmethod
-    def system(cls, system):
-        return os.path.join(cls._path, cls._icon_folder, system.lower() + ".png")
-    
-    @classmethod
-    def system_selected(cls, system):
-        return os.path.join(cls._path, cls._icon_folder, "sel", system.lower() + ".png")
-    
-    @classmethod
     def _grid_multi_row_selected_bg(cls):
         return cls._asset("bg-game-item-f.png")
     
@@ -270,11 +281,17 @@ class Theme():
 
     @classmethod
     def get_system_icon(cls, system):
-        return os.path.join(cls._path, cls._icon_folder, system + ".png")
+        if(cls._daijisho_theme_index is not None):
+            return cls._daijisho_theme_index.get_file_name_for_system(system)
+        else:
+            return os.path.join(cls._path, cls._icon_folder, system + ".png")
    
     @classmethod
     def get_system_icon_selected(cls, system):
-        return os.path.join(cls._path, cls._icon_folder, "sel", system + ".png")
+        if(cls._daijisho_theme_index is not None):
+            return cls._daijisho_theme_index.get_file_name_for_system(system)
+        else:
+            return os.path.join(cls._path, cls._icon_folder, "sel", system + ".png")
 
     @classmethod
     def get_font(cls, font_purpose : FontPurpose):
@@ -298,6 +315,14 @@ class Theme():
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
                 case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
+                case FontPurpose.SHADOWED:
+                    font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
+                case FontPurpose.SHADOWED_BACKDROP:
+                    font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
+                case FontPurpose.SHADOWED_SMALL:
+                    font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
+                case FontPurpose.SHADOWED_BACKDROP_SMALL:
+                    font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
                 case _:
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
                 
@@ -335,6 +360,14 @@ class Theme():
                     return cls._data.get("indexSelectedFontSize",cls._data["list"].get("size", 20))
                 case FontPurpose.LIST_TOTAL:
                     return cls._data.get("indexTotalSize",cls._data["list"].get("size", 20))
+                case FontPurpose.SHADOWED:
+                    return cls._data["shadowed"]["shadowedFontSize"] 
+                case FontPurpose.SHADOWED_BACKDROP:
+                    return cls._data["shadowed"]["shadowedFontBackdropSize"]
+                case FontPurpose.SHADOWED_SMALL:
+                    return cls._data["shadowed"]["shadowedFontSmallSize"] 
+                case FontPurpose.SHADOWED_BACKDROP_SMALL:
+                    return cls._data["shadowed"]["shadowedFontBackdropSmallSize"]
                 case _:
                     return cls._data["list"]["font"]
         except Exception as e:
@@ -369,6 +402,18 @@ class Theme():
                     cls._data["indexSelectedFontSize"] = size
                 case FontPurpose.LIST_TOTAL:
                     cls._data["indexTotalSize"] = size
+                case FontPurpose.SHADOWED:
+                    cls._data["indexSelectedFontSize"] = size
+                case FontPurpose.SHADOWED_BACKDROP:
+                    cls._data["indexTotalSize"] = size
+                case FontPurpose.SHADOWED:
+                    cls._data["shadowed"]["shadowedFontSize"] = size
+                case FontPurpose.SHADOWED_BACKDROP:
+                    cls._data["shadowed"]["shadowedFontBackdropSize"]  = size
+                case FontPurpose.SHADOWED_SMALL:
+                    cls._data["shadowed"]["shadowedFontSmallSize"] = size
+                case FontPurpose.SHADOWED_BACKDROP_SMALL:
+                    cls._data["shadowed"]["shadowedFontBackdropSmallSize"]  = size
                 case _:
                     PyUiLogger.get_logger().error(
                         f"set_font_size: Unknown font purpose {font_purpose}")
@@ -383,38 +428,46 @@ class Theme():
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
-                    if(cls._data["title"] and cls._data["title"]["color"]):
+                    if(cls._data.get("title") and cls._data["title"]["color"]):
                         return cls.hex_to_color(cls._data["title"]["color"])
                     else:
                         return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.BATTERY_PERCENT:
-                    if(cls._data["batteryPercentage"] and cls._data["batteryPercentage"]["color"]):
+                    if(cls._data.get("batteryPercentage") and cls._data["batteryPercentage"]["color"]):
                         return cls.hex_to_color(cls._data["batteryPercentage"]["color"])
                     else:
-                        return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
+                        return cls.text_color(FontPurpose.TOP_BAR_TEXT)
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     return cls.hex_to_color(cls._data["grid"]["color"])
                 case FontPurpose.GRID_ONE_ROW:
                     return cls.hex_to_color(cls._data["grid"]["color"])
                 case FontPurpose.GRID_MULTI_ROW:
                     return cls.hex_to_color(cls._data["grid"]["color"])
-                case FontPurpose.LIST:
-                    return cls.hex_to_color(cls._data["grid"]["color"])
-                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                    return cls.hex_to_color(cls._data["grid"]["color"])
+                case FontPurpose.LIST | FontPurpose.DESCRIPTIVE_LIST_TITLE | FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    if(cls._data.get("list") and cls._data.get("list").get("color")):
+                        return cls.hex_to_color(cls._data.get("list").get("color"))
+                    else:
+                        return cls.hex_to_color(cls._data["grid"]["color"])
                 case FontPurpose.MESSAGE:
-                    return cls.hex_to_color(cls._data["grid"]["color"])
-                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
                     return cls.hex_to_color(cls._data["grid"]["color"])
                 case FontPurpose.LIST_INDEX:
                     return cls.hex_to_color(cls._data["currentpage"]["color"])
                 case FontPurpose.LIST_TOTAL:
                     return cls.hex_to_color(cls._data["total"]["color"])
+                case FontPurpose.SHADOWED:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontColor"])
+                case FontPurpose.SHADOWED_BACKDROP:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropColor"])
+                case FontPurpose.SHADOWED_SMALL:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontSmallColor"])
+                case FontPurpose.SHADOWED_BACKDROP_SMALL:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropSmallColor"])
                 case _:
                     return cls.hex_to_color(cls._data["grid"]["color"])
         except Exception as e:
+            PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
             return cls.hex_to_color("#808080")
-      
+            
     @classmethod
     def text_color_selected(cls, font_purpose : FontPurpose):
         try:
@@ -423,13 +476,12 @@ class Theme():
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.GRID_MULTI_ROW:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
-                case FontPurpose.LIST:
-                    return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
-                case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                    return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
+                case FontPurpose.LIST | FontPurpose.DESCRIPTIVE_LIST_TITLE | FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
+                    if(cls._data.get("list") and cls._data.get("list").get("selectedcolor")):
+                        return cls.hex_to_color(cls._data.get("list").get("selectedcolor"))
+                    else:
+                        return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.MESSAGE:
-                    return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
-                case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.LIST_INDEX:
                     return cls.hex_to_color(cls._data["currentpage"]["color"])
@@ -437,6 +489,14 @@ class Theme():
                     return cls.hex_to_color(cls._data["total"]["color"])
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
+                case FontPurpose.SHADOWED:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontColor"])
+                case FontPurpose.SHADOWED_BACKDROP:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropColor"])
+                case FontPurpose.SHADOWED:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontSmallColor"])
+                case FontPurpose.SHADOWED_BACKDROP:
+                    return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropSmallColor"])
                 case _:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
         except Exception as e:
@@ -728,6 +788,24 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_grid_game_select_img_width(cls):
+        return cls._data.get("gridGameSelectImgWidth", cls.get_game_select_img_width())
+    
+    @classmethod
+    def set_grid_game_select_img_width(cls, value):
+        cls._data["gridGameSelectImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_list_game_select_img_width(cls):
+        return cls._data.get("listGameSelectImgWidth", cls.get_game_select_img_width())
+    
+    @classmethod
+    def set_list_game_select_img_width(cls, value):
+        cls._data["listGameSelectImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_carousel_game_select_primary_img_width(cls):
         return cls._data.get("carouselGameSelectPrimaryImgWidth", 40)
     
@@ -762,6 +840,23 @@ class Theme():
     @classmethod
     def set_game_select_img_height(cls, value):
         cls._data["gameSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_game_select_img_height(cls):
+        return cls._data.get("gridGameSelectImgHeight", cls.get_game_select_img_height())
+    
+    @classmethod
+    def set_grid_game_select_img_height(cls, value):
+        cls._data["grid_gameSelectImgHeight"] = value
+        cls.save_changes()
+    @classmethod
+    def get_list_game_select_img_height(cls):
+        return cls._data.get("listGameSelectImgHeight", cls.get_game_select_img_height())
+    
+    @classmethod
+    def set_list_game_select_img_height(cls, value):
+        cls._data["listGameSelectImgHeight"] = value
         cls.save_changes()
 
     @classmethod

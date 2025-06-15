@@ -133,4 +133,4 @@ class PyUiConfig:
 
     @classmethod
     def animations_enabled(cls):
-        return cls.get("animationsEnabled",False)
+        return cls.get("animationsEnabled",True)

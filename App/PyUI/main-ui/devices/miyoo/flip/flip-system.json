@@ -4,6 +4,7 @@
         "brightness": 7,
         "contrast": 10,
         "saturation": 14,
+        "hue":10,
         "audiofix": 1,
         "wifi": 0,
         "bluetooth": 0

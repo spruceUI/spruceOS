@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from PIL import Image
 from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
@@ -8,7 +9,9 @@ from utils.logger import PyUiLogger
 class ThemePatcher():
 
     # Add properties you want to scale (case-sensitive)
-    SCALABLE_KEYS = {"grid1x4","grid3x4"}
+    SCALABLE_KEYS = {"grid1x4","grid3x4","FontSize","gameSelectImgWidth","gameSelectImgHeight","gridGameSelectImgWidth",
+                     "gridGameSelectImgHeight","listGameSelectImgWidth","listGameSelectImgHeight","gridMultiRowSelBgResizePadWidth",
+                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad"}
 
     @classmethod
     def patch_theme(cls, path, target_width, target_height):
@@ -82,8 +85,13 @@ class ThemePatcher():
                 resized_img.save(output_file)
                 PyUiLogger().get_logger().info(f"Scaled and saved: {output_file}")
         except Exception as e:
-            PyUiLogger().get_logger().error(f"Failed to process {input_file}: {e}")
-
+            # Copy the file instead of scaling if something fails
+            try:
+                shutil.copyfile(input_file, output_file)
+                PyUiLogger().get_logger().warning(f"Scaling failed for {input_file}, copied original instead: {e}")
+            except Exception as copy_err:
+                PyUiLogger().get_logger().error(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
+                        
     @classmethod
     def scale_config_json(cls, config_path, output_config_path, scale):
         try:
@@ -114,7 +122,12 @@ class ThemePatcher():
 
     @classmethod
     def _should_scale_key(cls, key):
-        return key in cls.SCALABLE_KEYS or key.endswith("size")
+        should_scale = key in cls.SCALABLE_KEYS or key.endswith("size") or key.endswith("Size")
+        if(should_scale):
+            PyUiLogger.get_logger().info(f"Scaling {key}")
+        else:
+            PyUiLogger.get_logger().info(f"Not scaling {key}")
+        return should_scale
 
     @staticmethod
     def _scale_if_number(value, scale):

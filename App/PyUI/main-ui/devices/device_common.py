@@ -22,8 +22,8 @@ class DeviceCommon(AbstractDevice):
         while(True):
             PyUiLogger.get_logger().info("Prompting for shutdown")
             Display.clear("Power")
-            Display.render_text_centered(f"Would you like to power down?",self.screen_width//2, self.screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width //2, self.screen_height//2+100,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(f"Would you like to power down?",self.screen_width//2, self.screen_height//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width //2, self.screen_height//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             Display.present()
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
@@ -121,7 +121,24 @@ class DeviceCommon(AbstractDevice):
             self.system_config.save_config()
             self._set_saturation_to_config()
 
+    def lower_hue(self):
+        self.system_config.reload_config()
+        if(self.system_config.hue > 0):
+            self.system_config.set_hue(self.system_config.hue - 1)
+            self.system_config.save_config()
+            self._set_hue_to_config()
 
+    def raise_hue(self):
+        self.system_config.reload_config()
+        if(self.system_config.hue < 20):
+            self.system_config.set_hue(self.system_config.hue + 1)
+            self.system_config.save_config()
+            self._set_hue_to_config()
+
+    @property
+    def hue(self):
+        return self.system_config.get_hue()
+    
     @property
     def lumination(self):
         return self.system_config.backlight

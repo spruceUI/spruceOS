@@ -38,7 +38,7 @@ class PopupTextListView(TextListView):
             render_mode=RenderMode.TOP_LEFT_ALIGNED
         )
         Display.present()
-        Display.lock_current_image_as_bg()
+        Display.lock_current_image()
 
     def view_finished(self):
-        Display.unlock_current_image_as_bg()
+        Display.unlock_current_image()
