@@ -12,11 +12,15 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.game_entry import GameEntry
+from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
 
 class TrimUIDevice(DeviceCommon):
     
+    def __init__(self):
+        self.button_remapper = ButtonRemapper(self.system_config)
+
     def ensure_wpa_supplicant_conf(self):
         MiyooTrimCommon.ensure_wpa_supplicant_conf()
 
@@ -43,14 +47,21 @@ class TrimUIDevice(DeviceCommon):
             PyUiLogger.get_logger().error(f"Error setting brightness: {e}")
 
     def _set_contrast_to_config(self):
-        pass
-    
+        with open("/sys/devices/virtual/disp/disp/attr/enhance_contrast", "w") as f:
+            f.write(str(self.system_config.contrast * 5))
+
     def _set_saturation_to_config(self):
-        pass
+        with open("/sys/devices/virtual/disp/disp/attr/enhance_saturation", "w") as f:
+            f.write(str(self.system_config.saturation * 5))
 
     def _set_brightness_to_config(self):
-        pass
+        with open("/sys/devices/virtual/disp/disp/attr/enhance_bright", "w") as f:
+            f.write(str(self.system_config.brightness * 5))
 
+    def _set_hue_to_config(self):
+        with open("/sys/devices/virtual/disp/disp/attr/color_temperature", "w") as f:
+            f.write(str((self.system_config.hue * 5) - 50))
+            
     def _set_volume(self, user_volume):
         from display.display import Display
         if(user_volume < 0):
@@ -112,15 +123,15 @@ class TrimUIDevice(DeviceCommon):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
-        return mapping
+        return self.button_remapper.get_mappping(mapping)
     
     def map_key(self, key_code):
         if(116 == key_code):
-            return ControllerInput.POWER_BUTTON
+            return self.button_remapper.get_mappping(ControllerInput.POWER_BUTTON)
         if(115 == key_code):
-            return ControllerInput.VOLUME_UP
+            return self.button_remapper.get_mappping(ControllerInput.VOLUME_UP)
         elif(114 == key_code):
-            return ControllerInput.VOLUME_DOWN
+            return self.button_remapper.get_mappping(ControllerInput.VOLUME_DOWN)
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
@@ -246,6 +257,9 @@ class TrimUIDevice(DeviceCommon):
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
     
+    def get_state_path(self):
+        return "/mnt/SDCARD/Saves/pyui-state.json"
+
     def launch_stock_os_menu(self):
         pass
 
@@ -254,3 +268,6 @@ class TrimUIDevice(DeviceCommon):
 
     def supports_analog_calibration(self):
         return False
+
+    def remap_buttons(self):
+        self.button_remapper.remap_buttons()

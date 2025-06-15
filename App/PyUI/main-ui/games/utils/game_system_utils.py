@@ -41,7 +41,7 @@ class GameSystemUtils:
             try:
                 game_system_config = GameSystemConfig(folder)
             except Exception as e:
-                PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
+                #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
             if(game_system_config is not None):

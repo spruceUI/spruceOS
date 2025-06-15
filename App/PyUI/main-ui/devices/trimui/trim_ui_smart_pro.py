@@ -69,6 +69,7 @@ class TrimUISmartPro(TrimUIDevice):
         self._set_contrast_to_config()
         self._set_saturation_to_config()
         self._set_brightness_to_config()
+        self._set_hue_to_config()
         self.ensure_wpa_supplicant_conf()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
         
@@ -86,6 +87,7 @@ class TrimUISmartPro(TrimUIDevice):
         
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
+        super().__init__()
 
     #Untested
     @throttle.limit_refresh(5)

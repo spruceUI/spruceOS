@@ -53,16 +53,18 @@ class GameConfigMenu:
                 # Miyoo handles this strangley
                 # Example rom /mnt/SDCARD/Roms/PORTS/PokeMMO.sh               
                 # example arg /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
-                #/media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
+                # /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
+                # NOTE: Switching to /mnt as it works on brick and flip despite
+                # it not being 1:1 it should work out
                 game_file_name = os.path.basename(self.game.rom_file_path)
-                miyoo_game_path = os.path.join("/media/SDCARD/Emu", self.game_system.folder_name, "../../Roms", self.game_system.folder_name, game_file_name)
+                miyoo_game_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, "../../Roms", self.game_system.folder_name, game_file_name)
                 Display.deinit_display()
 
                 app_path = selected.get_selection().get_value()
                 if(not os.path.isfile(app_path)):
-                    app_path = os.path.join("/media/SDCARD/Emu", self.game_system.folder_name, selected.get_selection().get_value())
+                    app_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, selected.get_selection().get_value())
 
-                Device.run_app(["sh",app_path, miyoo_game_path], dir=os.path.join("/media/SDCARD/Emu", self.game_system.folder_name))
+                Device.run_app(["sh",app_path, miyoo_game_path], dir=os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name))
                 # TODO Once we remove the display_kill and popups from launch.sh we can remove this
                 # For a good speedup
                 Display.reinitialize()

@@ -168,6 +168,19 @@ class AbstractDevice(ABC):
     @abstractmethod
     def raise_saturation(self):
         pass
+    
+    @property
+    @abstractmethod
+    def hue(self):
+        pass
+
+    @abstractmethod
+    def lower_hue(self):
+        pass
+
+    @abstractmethod
+    def raise_hue(self):
+        pass
 
     @abstractmethod
     def change_volume(self, amount):
@@ -217,4 +230,12 @@ class AbstractDevice(ABC):
     
     @staticmethod  
     def calibrate_sticks(self):
+        pass
+    
+    @staticmethod  
+    def get_state_path(self):
+        pass
+
+    @abstractmethod
+    def remap_buttons(self):
         pass

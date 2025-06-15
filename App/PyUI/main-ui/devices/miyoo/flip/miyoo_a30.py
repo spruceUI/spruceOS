@@ -78,7 +78,7 @@ class MiyooA30(MiyooDevice):
         }
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
- 
+        super().__init__()
 
     def init_gpio(self):
         try:

@@ -115,7 +115,7 @@ class MainMenu:
             view =  self.build_main_menu_view(image_text_list, selected)        
                 
             expected_inputs = [ControllerInput.A, ControllerInput.MENU]
-            while(selected.get_input() != ControllerInput.B):      
+            while(True):      
 
                 if((selected := view.get_selection(expected_inputs)) is not None):       
                     if(ControllerInput.A == selected.get_input()): 
