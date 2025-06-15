@@ -29,6 +29,11 @@ class RomUtils:
         game_system_config = GameSystemConfig(system)
         return game_system_config.get_extlist()
 
+    #TODO do a git system device file so we can geneically
+    #support other formats/systems
+    def get_miyoo_games_file(self,system):
+        return os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system),"miyoogamelist.xml")
+
     def get_system_rom_directory(self, system):
         return os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system))
     
@@ -83,7 +88,5 @@ class RomUtils:
                 if self.has_roms(system, entry.path):
                     valid_folders.append(entry.path)
 
-        # Combine and sort once at the end
-        valid_files = sorted(valid_folders) + sorted(valid_files)
 
-        return valid_files
+        return valid_files, valid_folders

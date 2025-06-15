@@ -35,6 +35,11 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             Device.calibrate_sticks()
 
+    def remap_buttons(self,input):
+        if(ControllerInput.A == input):
+            Device.remap_buttons()
+
+
 
     def build_options_list(self):
         option_list = []
@@ -76,6 +81,17 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                             value=self.calibrate_sticks
                         )
                 )
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Remap Buttons",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.remap_buttons
+                )
+        )
 
         option_list.append(
                 GridOrListEntry(

@@ -13,11 +13,13 @@ from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
 from themes.theme import Theme
 from utils.logger import PyUiLogger
+from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from abc import ABC, abstractmethod
 
 from views.view_creator import ViewCreator
+from views.view_type import ViewType
 
 
 class RomsMenuCommon(ABC):
@@ -51,41 +53,49 @@ class RomsMenuCommon(ABC):
         from menus.games.game_select_menu import GameSelectMenu
         return GameSelectMenu().run_rom_selection(rom_info.game_system, rom_info.rom_file_path)
     
+    def create_view(self, page_name, rom_list, selected):
+        return ViewCreator.create_view(
+                        view_type=Theme.get_game_selection_view_type(),
+                        top_bar_text=page_name,
+                        options=rom_list,
+                        selected_index=selected.get_index(),
+                        rows=Theme.get_game_select_row_count(),
+                        cols=Theme.get_game_select_col_count(),
+                        grid_resized_width=Theme.get_game_select_img_width(),
+                        grid_resized_height=Theme.get_game_select_img_height(),
+                        use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),
+                        hide_grid_bg=not Theme.get_game_select_show_sel_bg_grid_mode(),
+                        show_grid_text=Theme.get_game_select_show_text_grid_mode(),
+                        set_top_bar_text_to_selection=Theme.get_set_top_bar_text_to_game_selection(),
+                        grid_selected_bg=Theme.get_grid_game_selected_bg(),
+                        grid_resize_type=Theme.get_grid_game_selected_resize_type(),
+                        grid_img_y_offset=Theme.get_grid_game_img_y_offset(),
+                        carousel_selected_entry_width_percent=Theme.get_carousel_game_select_primary_img_width(),
+                        carousel_shrink_further_away=Theme.get_carousel_game_select_shrink_further_away(),
+                        carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off(),
+                        missing_image_path=Theme.get_missing_image_path()
+                        )
+
     def _run_rom_selection(self, page_name) :
         selected = Selection(None,None,0)
         view = None
         rom_list = self._get_rom_list()
+
+        for index, entry in enumerate(rom_list):
+            if(entry.get_value().rom_file_path == PyUiState.get_last_game_selection(page_name)):
+                selected = Selection(None,None,index)
+
         while(selected is not None):
             Display.set_page(page_name)
             if(view is None):
-                view = ViewCreator.create_view(
-                    view_type=Theme.get_game_selection_view_type(),
-                    top_bar_text=page_name,
-                    options=rom_list,
-                    selected_index=selected.get_index(),
-                    rows=Theme.get_game_select_row_count(),
-                    cols=Theme.get_game_select_col_count(),
-                    grid_resized_width=Theme.get_game_select_img_width(),
-                    grid_resized_height=Theme.get_game_select_img_height(),
-                    use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),
-                    hide_grid_bg=not Theme.get_game_select_show_sel_bg_grid_mode(),
-                    show_grid_text=Theme.get_game_select_show_text_grid_mode(),
-                    set_top_bar_text_to_selection=Theme.get_set_top_bar_text_to_game_selection(),
-                    grid_selected_bg=Theme.get_grid_game_selected_bg(),
-                    grid_resize_type=Theme.get_grid_game_selected_resize_type(),
-                    grid_img_y_offset=Theme.get_grid_game_img_y_offset(),
-                    carousel_selected_entry_width_percent=Theme.get_carousel_game_select_primary_img_width(),
-                    carousel_shrink_further_away=Theme.get_carousel_game_select_shrink_further_away(),
-                    carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off(),
-                    missing_image_path=Theme.get_missing_image_path()
-                    )
-
+                view = self.create_view(page_name,rom_list,selected)
             else:
                 view.set_options(rom_list)
 
-            selected = view.get_selection([ControllerInput.A, ControllerInput.X, ControllerInput.MENU])
+            selected = view.get_selection([ControllerInput.A, ControllerInput.X, ControllerInput.MENU, ControllerInput.SELECT])
             if(selected is not None):
                 if(ControllerInput.A == selected.get_input()):
+                    PyUiState.set_last_game_selection(page_name,selected.get_selection().get_value().rom_file_path)
                     if(self.launched_via_special_case(selected.get_selection().get_value())):
                         pass
                     elif(os.path.isdir(selected.get_selection().get_value().rom_file_path)):
@@ -100,11 +110,25 @@ class RomsMenuCommon(ABC):
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input()):
+                    prev_view = Theme.get_game_selection_view_type()
                     self.popup_menu.run_game_select_popup_menu(selected.get_selection().get_value())
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
+                    if(Theme.get_game_selection_view_type() != prev_view):
+                        view = self.create_view(page_name,rom_list,selected)
                 elif(ControllerInput.B == selected.get_input()):
                     selected = None
+                elif(ControllerInput.SELECT == selected.get_input()):
+                    if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
+                        Theme.set_game_selection_view_type(ViewType.GRID)
+                        view = self.create_view(page_name,rom_list,selected)
+                    elif(ViewType.GRID == Theme.get_game_selection_view_type()):
+                        Theme.set_game_selection_view_type(ViewType.CAROUSEL)
+                        view = self.create_view(page_name,rom_list,selected)
+                    else:
+                        Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
+                        view = self.create_view(page_name,rom_list,selected)
+
         Display.restore_bg()
         
     def run_game(self, game_path):

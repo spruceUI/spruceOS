@@ -187,6 +187,18 @@ class Device:
         return Device._impl.raise_saturation()
 
     @staticmethod
+    def get_hue():
+        return Device._impl.hue
+
+    @staticmethod
+    def lower_hue():
+        return Device._impl.lower_hue()
+
+    @staticmethod
+    def raise_hue():
+        return Device._impl.raise_hue()
+
+    @staticmethod
     def change_volume(amount):
         return Device._impl.change_volume(amount)
 
@@ -233,5 +245,14 @@ class Device:
     @staticmethod  
     def calibrate_sticks():
         return Device._impl.calibrate_sticks()
+    
+    @staticmethod  
+    def get_state_path():
+        return Device._impl.get_state_path()
+    
+    @staticmethod
+    def remap_buttons():
+        return Device._impl.remap_buttons()
+    
     
     

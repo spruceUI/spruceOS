@@ -15,6 +15,7 @@ import sdl2.ext
 import sdl2.sdlttf
 from themes.theme import Theme
 from utils.logger import PyUiLogger
+import ctypes
 from ctypes import c_double
 
 @dataclass
@@ -99,6 +100,8 @@ class Display:
         )
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+        PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
+        sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         cls.restore_bg()
         cls.clear("init")
@@ -243,10 +246,8 @@ class Display:
 
         return LoadedFont(font, line_height, font_path)
 
-
-
     @classmethod
-    def lock_current_image_as_bg(cls):
+    def lock_current_image(cls):
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -263,7 +264,7 @@ class Display:
         sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
 
     @classmethod
-    def unlock_current_image_as_bg(cls):
+    def unlock_current_image(cls):
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -272,7 +273,8 @@ class Display:
     def clear(cls, 
               top_bar_text, 
               hide_top_bar_icons = False,
-              bottom_bar_text = None):
+              bottom_bar_text = None,
+              render_bottom_bar_icons_and_images = True):
         cls.top_bar_text = top_bar_text
 
         if cls.bg_canvas is not None:
@@ -282,7 +284,7 @@ class Display:
 
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
-            cls.bottom_bar.render_bottom_bar(bottom_bar_text)
+            cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
 
     @classmethod
     def _log(cls, msg):
@@ -395,11 +397,11 @@ class Display:
 
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                    crop_w=None, crop_h=None):
+                    crop_w=None, crop_h=None, alpha=None):
         loaded_font = cls.fonts[purpose]
         cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, purpose, color)
         
-        if cache:
+        if cache and alpha is None:
             surface = cache.surface
             texture = cache.texture
         else:
@@ -415,7 +417,23 @@ class Display:
                 PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
                 return 0, 0
 
-            cls._text_texture_cache.add_texture(text, purpose, color, surface, texture)
+            if(alpha is not None):
+                sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
+                sdl2.SDL_SetTextureAlphaMod(texture, alpha)
+                w,h = cls._render_surface_texture(
+                        x=x,
+                        y=y, 
+                        texture=texture, 
+                        surface=surface, 
+                        render_mode=render_mode, 
+                        texture_id=text, 
+                        crop_w=crop_w, 
+                        crop_h=crop_h)
+                sdl2.SDL_DestroyTexture(texture)
+                sdl2.SDL_FreeSurface(surface)
+                return w,h
+            else:
+                cls._text_texture_cache.add_texture(text, purpose, color, surface, texture)
 
         return cls._render_surface_texture(
                 x=x,
@@ -523,8 +541,73 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.sdlrenderer, old_target)
         return scaled_texture
 
+    FADE_DURATION_MS = 96  # 0.25 seconds
+
     @classmethod
-    def present(cls):
+    def fade_transition(cls, texture1, texture2):
+        renderer = cls.renderer.renderer
+
+        # Get renderer output size (window size)
+        width = ctypes.c_int()
+        height = ctypes.c_int()
+        sdl2.SDL_GetRendererOutputSize(renderer, width, height)
+
+        # Create an intermediate render target texture
+        render_target = sdl2.SDL_CreateTexture(
+            renderer,
+            sdl2.SDL_PIXELFORMAT_RGBA8888,
+            sdl2.SDL_TEXTUREACCESS_TARGET,
+            width.value, height.value
+        )
+
+        # Enable blending on both target and texture2
+        sdl2.SDL_SetTextureBlendMode(texture2, sdl2.SDL_BLENDMODE_BLEND)
+        sdl2.SDL_SetTextureBlendMode(render_target, sdl2.SDL_BLENDMODE_BLEND)
+
+        TARGET_FRAME_MS = 16
+        start_time = sdl2.SDL_GetTicks()
+
+        while True:
+            frame_start = sdl2.SDL_GetTicks()
+
+            now = sdl2.SDL_GetTicks()
+            elapsed = now - start_time
+            alpha = int(255 * (elapsed / cls.FADE_DURATION_MS))
+            if alpha > 255:
+                alpha = 255
+
+            sdl2.SDL_SetTextureAlphaMod(texture2, alpha)
+
+            # Set render target to the intermediate texture
+            sdl2.SDL_SetRenderTarget(renderer, render_target)
+
+            # Composite both images into the target
+            sdl2.SDL_RenderClear(renderer)
+            sdl2.SDL_RenderCopy(renderer, texture1, None, None)
+            sdl2.SDL_RenderCopy(renderer, texture2, None, None)
+
+            # Set render target back to default (the screen)
+            sdl2.SDL_SetRenderTarget(renderer, None)
+
+            # Draw final composited texture to the screen
+            sdl2.SDL_RenderClear(renderer)
+            sdl2.SDL_RenderCopy(renderer, render_target, None, None)
+            sdl2.SDL_RenderPresent(renderer)
+
+            if alpha == 255:
+                break
+
+            # Frame pacing
+            frame_time = sdl2.SDL_GetTicks() - frame_start
+            delay = TARGET_FRAME_MS - frame_time
+            if delay > 0:
+                sdl2.SDL_Delay(delay)
+
+        # Cleanup render target (optional, good practice)
+        sdl2.SDL_DestroyTexture(render_target)
+                
+    @classmethod
+    def present(cls, fade=False):
         if Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text)
             cls.bottom_bar.render_bottom_bar()
@@ -536,7 +619,10 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
             sdl2.SDL_DestroyTexture(scaled_canvas)
         elif(0 == Device.screen_rotation()):
-            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
+            if(fade):
+                cls.fade_transition(cls.bg_canvas, cls.render_canvas)
+            else:
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
         else:
             sdl2.SDL_RenderCopyEx(
                 cls.renderer.sdlrenderer,     # Renderer
@@ -608,7 +694,7 @@ class Display:
 
             x_offset -= total_text_w
             index_text_w, index_text_h = cls.render_text(
-                str(index) + "/",
+                str(index).zfill(len(str(total))) + "/",
                 x_offset,
                 y_value,
                 Theme.text_color(FontPurpose.LIST_INDEX),

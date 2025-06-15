@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 class ViewType(Enum):
     ICON_AND_DESC = auto()
+    FULLSCREEN_GRID = auto()
     GRID = auto()
     TEXT_AND_IMAGE = auto()
     TEXT_ONLY = auto()

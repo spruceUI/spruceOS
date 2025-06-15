@@ -21,7 +21,7 @@ class EmptyView(View):
 
     def _render(self):
         Display.clear("No Entries Found")
-        Display.render_text_centered(f"No Entries Found",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.render_text_centered(f"No Entries Found",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
         
 

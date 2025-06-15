@@ -13,6 +13,7 @@ from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
+from menus.settings.button_remapper import ButtonRemapper
 import sdl2
 from utils import throttle
 from utils.logger import PyUiLogger
@@ -23,6 +24,9 @@ from devices.device_common import DeviceCommon
 class MiyooDevice(DeviceCommon):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
+
+    def __init__(self):
+        self.button_remapper = ButtonRemapper(self.system_config)
 
     def sleep(self):
         with open("/sys/power/mem_sleep", "w") as f:
@@ -166,13 +170,13 @@ class MiyooDevice(DeviceCommon):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
-        return mapping
+        return self.button_remapper.get_mappping(mapping)
 
     def map_analog_input(self, sdl_axis, sdl_value):
         if sdl_axis == 5 and sdl_value == 32767:
-            return ControllerInput.R2
+            return self.button_remapper.get_mappping(ControllerInput.R2)
         elif sdl_axis == 4 and sdl_value == 32767:
-            return ControllerInput.L2
+            return self.button_remapper.get_mappping(ControllerInput.L2)
         else:
             # Update min/max range
             if sdl_axis not in self.unknown_axis_ranges:
@@ -218,11 +222,11 @@ class MiyooDevice(DeviceCommon):
 
     def map_key(self, key_code):
         if(116 == key_code):
-            return ControllerInput.POWER_BUTTON
+            return self.button_remapper.get_mappping(ControllerInput.POWER_BUTTON)
         if(115 == key_code):
-            return ControllerInput.VOLUME_UP
+            return self.button_remapper.get_mappping(ControllerInput.VOLUME_UP)
         elif(114 == key_code):
-            return ControllerInput.VOLUME_DOWN
+            return self.button_remapper.get_mappping(ControllerInput.VOLUME_DOWN)
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
@@ -343,6 +347,8 @@ class MiyooDevice(DeviceCommon):
     def launch_stock_os_menu(self):
         self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")
 
+    def get_state_path(self):
+        return "/mnt/SDCARD/Saves/pyui-state.json"
 
     def calibrate_sticks(self):
         from controller.controller import Controller
@@ -363,3 +369,5 @@ class MiyooDevice(DeviceCommon):
     def supports_analog_calibration(self):
         return True
     
+    def remap_buttons(self):
+        self.button_remapper.remap_buttons()

@@ -28,6 +28,15 @@ class GameSelectMenuPopup:
         if(search_txt is not None):
             SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 
+    def toggle_view(self):
+        if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
+            Theme.set_game_selection_view_type(ViewType.GRID)
+        elif(ViewType.GRID == Theme.get_game_selection_view_type()):
+            Theme.set_game_selection_view_type(ViewType.CAROUSEL)
+        else:
+            Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
+
+
     def run_game_select_popup_menu(self, rom_info : RomInfo):
         popup_options = []
         rom_name = os.path.basename(rom_info.rom_file_path)
@@ -58,6 +67,15 @@ class GameSelectMenuPopup:
             description="",
             icon=Theme.settings(),
             value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
+        ))
+            
+        popup_options.append(GridOrListEntry(
+            primary_text=f"Toggle View",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=lambda input_value: self.toggle_view()
         ))
 
         popup_view = ViewCreator.create_view(

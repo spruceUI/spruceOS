@@ -26,7 +26,7 @@ class CarouselView(View):
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
-        self.options : List[GridOrListEntry] = options 
+        self.options : List[GridOrListEntry] = list(options)
         self.font_purpose = FontPurpose.GRID_ONE_ROW
         self.show_grid_text = show_grid_text
         self.selected_entry_width_percent = selected_entry_width_percent
@@ -41,17 +41,17 @@ class CarouselView(View):
         if(cols < 3):
             cols = 3
 
-        while(len(self.options) <= cols):
+        while(len(self.options) <= cols*2):
             self.options += self.options
                        
-        cols = min(cols, len(options))
+        cols = min(cols, len(self.options))
         if(cols %2 == 0):
-            cols -=1 
+            cols +=1 
         
-        cols = min(cols, len(options))
+        cols = min(cols, len(self.options))
         
         self.cols = cols
-        self.current_left = len(options)-(cols-1)//2
+        self.current_left = len(self.options)-(cols-1)//2
         self.current_right = (cols-1)//2
         self.correct_selected_for_off_list()
         self.prev_visible_options = None
@@ -60,7 +60,8 @@ class CarouselView(View):
         self.missing_image_path = missing_image_path
 
     def set_options(self, options):
-        self.options = options
+        #Carousel breaks but the options shouldn't change the view
+        pass
 
     def correct_selected_for_off_list(self):
         if(self.selected < 0):
@@ -313,7 +314,7 @@ class CarouselView(View):
                                             y_image_offset,
                                             render_mode,
                                             target_width=frame_widths[visible_index],
-                                            target_height=None,
+                                            target_height=Display.get_usable_screen_height(),
                                             resize_type=self.resize_type)
 
                 if time.time() - last_frame_time < frame_duration:
