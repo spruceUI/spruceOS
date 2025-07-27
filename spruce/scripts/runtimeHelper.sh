@@ -95,7 +95,7 @@ developer_mode_task() {
                 start_samba_process
             fi
 
-            if setting_get "dropbear" && ! pgrep "dropbear" > /dev/null; then
+            if setting_get "dropbear" && ! pgrep "dropbearmulti" > /dev/null; then
                 log_message "Dev Mode: Dropbear starting..."
                 start_dropbear_process
             fi

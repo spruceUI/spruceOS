@@ -29,7 +29,7 @@ connect_services() {
 	fi
 
 	# SSH check
-	if setting_get "dropbear" && ! pgrep "dropbear" >/dev/null; then
+	if setting_get "dropbear" && ! pgrep "dropbearmulti" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: Dropbear detected not running, starting..."
 		start_dropbear_process
@@ -57,11 +57,11 @@ connect_services() {
 disconnect_services() {
 
 	log_message "Network services: Stopping all network services..."
-	for service in "$SFTP_SERVICE_NAME" "dropbear" "smbd" "syncthing" "darkhttpd"; do
+	for service in "$SFTP_SERVICE_NAME" "dropbearmulti" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in
 			"$SFTP_SERVICE_NAME") stop_sftpgo_process ;;
-			"dropbear") stop_dropbear_process ;;
+			"dropbearmulti") stop_dropbear_process ;;
 			"smbd") stop_samba_process ;;
 			"syncthing") stop_syncthing_process ;;
 			"darkhttpd") stop_darkhttpd_process ;;
