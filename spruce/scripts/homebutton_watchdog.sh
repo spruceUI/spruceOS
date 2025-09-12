@@ -277,6 +277,13 @@ long_press_handler() {
         case $HOLD_HOME in
         "Game Switcher")
             prepare_game_switcher
+
+            if ps -f | grep -q "[/]mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py"; then
+                rm /tmp/cmd_to_run.sh
+				touch /mnt/SDCARD/spruce/flags/gs.lock
+                killall -9 python3
+            fi
+
             ;;
         "In-game menu")
             if pgrep "ra32.miyoo" >/dev/null; then
