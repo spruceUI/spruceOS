@@ -3,6 +3,7 @@ import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 import os
@@ -11,6 +12,7 @@ from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
@@ -27,6 +29,18 @@ class MiyooDevice(DeviceCommon):
 
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
+
+    def get_controller_interface(self):
+        return Sdl2ControllerInterface()
+
+    def clear_framebuffer(self):
+        pass
+    
+    def capture_framebuffer(self):
+        pass
+
+    def restore_framebuffer(self):
+        pass
 
     def sleep(self):
         with open("/sys/power/mem_sleep", "w") as f:
@@ -49,12 +63,6 @@ class MiyooDevice(DeviceCommon):
         return "reboot"
 
     def _set_volume(self, volume):
-        from display.display import Display
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-
         try:
             
             if(0 == volume):
@@ -76,10 +84,6 @@ class MiyooDevice(DeviceCommon):
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
-        self.system_config.reload_config()
-        self.system_config.set_volume(volume)
-        self.system_config.save_config()
-        Display.volume_changed(volume)
         return volume 
 
 
@@ -344,6 +348,9 @@ class MiyooDevice(DeviceCommon):
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
     
+    def get_collections_path(self):
+        return "/mnt/SDCARD/Collections/"
+    
     def launch_stock_os_menu(self):
         self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")
 
@@ -371,3 +378,9 @@ class MiyooDevice(DeviceCommon):
     
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
+ 
+    def supports_wifi(self):
+        return True
+    
+    def get_game_system_utils(self):
+        return MiyooTrimGameSystemUtils()

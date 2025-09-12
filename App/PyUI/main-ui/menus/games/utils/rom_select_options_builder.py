@@ -29,8 +29,9 @@ class RomSelectOptionsBuilder:
         parts = os.path.normpath(rom_info.rom_file_path).split(os.sep)
 
         try:
-            roms_index = parts.index("Roms")
+            roms_index = next(i for i, part in enumerate(parts) if part.lower() == "roms")
         except (ValueError, IndexError):
+            PyUiLogger.get_logger().info(f"Roms not found in {rom_info.rom_file_path}")
             return None  # "Roms" not in path or nothing after "Roms"
 
         # Build path to the image using the extracted directory
@@ -73,8 +74,7 @@ class RomSelectOptionsBuilder:
     def build_rom_list(self, game_system,filter: Callable[[str], bool] = lambda a: True, subfolder = None) -> list[GridOrListEntry]:
         file_rom_list = []
         folder_rom_list = []
-        print(f"Building rom list for {game_system.folder_name} in {subfolder}")
-        valid_files, valid_folders = self.rom_utils.get_roms(game_system.folder_name, subfolder)
+        valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
         
 
         miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))

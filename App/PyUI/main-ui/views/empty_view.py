@@ -27,7 +27,7 @@ class EmptyView(View):
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render()
-        if(Controller.get_input() and Controller.last_input() == ControllerInput.B):
-            return Selection(None,ControllerInput.B, None)
+        if(Controller.get_input()):
+            return Selection(None,Controller.last_input(), None)
         else:
             return Selection(None,None, None)

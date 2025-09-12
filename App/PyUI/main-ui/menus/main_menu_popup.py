@@ -16,7 +16,7 @@ class MainMenuPopup:
         if (ControllerInput.A == input):
             search_txt = OnScreenKeyboard().get_input("Game Search:")
             if (search_txt is not None):
-                SearchedRomsMenu(search_txt.upper()).run_rom_selection()
+                return SearchedRomsMenu(search_txt.upper()).run_rom_selection()
 
     def open_settings(self, input):
         if (ControllerInput.A == input):

@@ -5,12 +5,14 @@ import re
 import subprocess
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
@@ -21,9 +23,21 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
 
+    def get_controller_interface(self):
+        return Sdl2ControllerInterface()
+
     def ensure_wpa_supplicant_conf(self):
         MiyooTrimCommon.ensure_wpa_supplicant_conf()
+        
+    def clear_framebuffer(self):
+        pass
 
+    def capture_framebuffer(self):
+        pass
+
+    def restore_framebuffer(self):
+        pass
+    
     @property
     def power_off_cmd(self):
         return "poweroff"
@@ -257,6 +271,9 @@ class TrimUIDevice(DeviceCommon):
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
     
+    def get_collections_path(self):
+        return "/mnt/SDCARD/Collections/"
+
     def get_state_path(self):
         return "/mnt/SDCARD/Saves/pyui-state.json"
 
@@ -271,3 +288,9 @@ class TrimUIDevice(DeviceCommon):
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
+
+    def supports_wifi(self):
+        return True
+    
+    def get_game_system_utils(self):
+        return MiyooTrimGameSystemUtils()

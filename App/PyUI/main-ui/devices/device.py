@@ -27,11 +27,11 @@ class Device:
 
     @staticmethod
     def output_screen_width():
-        return Device._impl.output_screen_width()
+        return Device._impl.output_screen_width
 
     @staticmethod
     def output_screen_height():
-        return Device._impl.output_screen_height()
+        return Device._impl.output_screen_height
 
     @staticmethod
     def should_scale_screen():
@@ -129,6 +129,10 @@ class Device:
     @staticmethod
     def get_recents_path():
         return Device._impl.get_recents_path()
+
+    @staticmethod
+    def get_collections_path():
+        return Device._impl.get_collections_path()
 
     @staticmethod
     def parse_favorites():
@@ -229,6 +233,10 @@ class Device:
     @staticmethod
     def get_bluetooth_scanner():
         return Device._impl.get_bluetooth_scanner()
+    
+    @staticmethod  
+    def supports_wifi():
+        return Device._impl.supports_wifi()
 
     @staticmethod  
     def get_ip_addr_text():
@@ -254,5 +262,23 @@ class Device:
     def remap_buttons():
         return Device._impl.remap_buttons()
     
+    @staticmethod
+    def get_controller_interface():
+        return Device._impl.get_controller_interface()
+
+    @staticmethod
+    def clear_framebuffer():
+        return Device._impl.clear_framebuffer()
+
+    @staticmethod
+    def capture_framebuffer():
+        return Device._impl.capture_framebuffer()
+
+    @staticmethod
+    def restore_framebuffer():
+        return Device._impl.restore_framebuffer()
     
+    @staticmethod
+    def get_game_system_utils():
+        return Device._impl.get_game_system_utils()
     

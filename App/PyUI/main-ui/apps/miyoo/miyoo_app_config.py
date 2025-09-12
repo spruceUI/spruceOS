@@ -1,7 +1,9 @@
 import json
 import os
 
-class MiyooAppConfig:
+from apps.app_config import AppConfig
+
+class MiyooAppConfig(AppConfig):
     def __init__(self, json_path):
         if not os.path.exists(json_path):
             raise FileNotFoundError(f"Config file not found: {json_path}")

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from display.display import Display
+from themes.theme import Theme
 from views.selection import Selection
 from views.view import View
 
@@ -14,6 +15,26 @@ class ListView(View):
         self.current_bottom = 0
         self.clear_display_each_render_cycle = True
         self.include_index_text = True
+
+    def center_selection(self):
+        if(self.selected != 0):
+            window_size = self.current_bottom - self.current_top
+            half_window = window_size // 2
+
+            # Try to center selected
+            new_top = self.selected - half_window
+            new_bottom = new_top + window_size
+
+            # Clamp top and bottom
+            if new_top < 0:
+                new_top = 0
+                new_bottom = window_size
+            if new_bottom > len(self.options):
+                new_bottom = len(self.options)
+                new_top = new_bottom - window_size
+
+            self.current_top = new_top
+            self.current_bottom = new_bottom
 
     @abstractmethod
     def _render(self):
@@ -41,9 +62,15 @@ class ListView(View):
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.L1:
-                self.adjust_selected(-1*self.max_rows+1)
+                if(Theme.skip_main_menu()):
+                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+                else:
+                    self.adjust_selected(-1*self.max_rows+1)
             elif Controller.last_input() == ControllerInput.R1:
-                self.adjust_selected(self.max_rows-1)
+                if(Theme.skip_main_menu()):
+                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+                else:
+                    self.adjust_selected(self.max_rows-1)
             elif Controller.last_input() == ControllerInput.B:
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)

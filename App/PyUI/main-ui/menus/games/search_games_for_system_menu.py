@@ -24,4 +24,4 @@ class SearchGamesForSystemMenu(RomsMenuCommon):
         return self.rom_select_options_builder.build_rom_list(self.game_system, self.include_rom)
 
     def run_rom_selection(self) :
-        self._run_rom_selection(f"{self.game_system.display_name} Search")
+        return self._run_rom_selection(f"{self.game_system.display_name} Search")

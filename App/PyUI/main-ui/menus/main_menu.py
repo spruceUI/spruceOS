@@ -1,6 +1,8 @@
 
 from controller.controller_inputs import ControllerInput
+from display.display import Display
 from menus.app.app_menu import AppMenu
+from menus.games.collections_menu import CollectionsMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
 from menus.main_menu_popup import MainMenuPopup
@@ -18,6 +20,7 @@ class MainMenu:
         self.system_select_menu = GameSystemSelectMenu()
         self.app_menu = AppMenu()
         self.favorites_menu = FavoritesMenu()
+        self.collections_menu = CollectionsMenu()
         self.recents_menu = RecentsMenu()
         self.settings_menu = BasicSettingsMenu()
         self.popup_menu = MainMenuPopup()
@@ -40,6 +43,18 @@ class MainMenu:
                     description="Recent",
                     icon=None,
                     value="Recent"
+                )
+            )
+
+        if (Theme.get_collections_enabled()):
+            image_text_list.append(
+                GridOrListEntry(
+                    primary_text="Collection",
+                    image_path=Theme.collection(),
+                    image_path_selected=Theme.collection_selected(),
+                    description="Collection",
+                    icon=None,
+                    value="Collection"
                 )
             )
 
@@ -107,7 +122,28 @@ class MainMenu:
     def run_main_menu_selection(self):
         
         if(Theme.skip_main_menu()):
-            self.system_select_menu.run_system_selection()
+            selection = "Games"
+            while(True):
+                Display.set_selected_tab(selection)
+                if("Games" == selection):
+                    controller_input = self.system_select_menu.run_system_selection()
+                    if(ControllerInput.L1 == controller_input):
+                        selection = "Settings"
+                    elif(ControllerInput.R1 == controller_input):
+                        selection = "Apps"
+                elif("Apps" == selection):
+                    controller_input = self.app_menu.run_app_selection()
+                    if(ControllerInput.L1 == controller_input):
+                        selection = "Games"
+                    elif(ControllerInput.R1 == controller_input):
+                        selection = "Settings"
+                elif("Settings" == selection):
+                    controller_input = self.settings_menu.show_menu()
+                    if(ControllerInput.L1 == controller_input):
+                        selection = "Apps"
+                    elif(ControllerInput.R1 == controller_input):
+                        selection = "Games"
+
         else:
             selected = Selection(None,None,0)
 
@@ -125,6 +161,8 @@ class MainMenu:
                             self.app_menu.run_app_selection()
                         elif("Favorite" == selected.get_selection().get_primary_text()):
                             self.favorites_menu.run_rom_selection()
+                        elif("Collection" == selected.get_selection().get_primary_text()):
+                            self.collections_menu.run_rom_selection()
                         elif("Recent" == selected.get_selection().get_primary_text()):
                             self.recents_menu.run_rom_selection()
                         elif("Setting" == selected.get_selection().get_primary_text()):

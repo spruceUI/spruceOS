@@ -54,6 +54,14 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     set_value_func=Theme.set_recents_enabled
                 )
             )
+
+            option_list.append(
+                self.build_enabled_disabled_entry(
+                    primary_text="Show Collections",
+                    get_value_func=Theme.get_collections_enabled,
+                    set_value_func=Theme.set_collections_enabled
+                )
+            )
             option_list.append(
                 self.build_enabled_disabled_entry(
                     primary_text="Show Favorites",

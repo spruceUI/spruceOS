@@ -6,8 +6,10 @@ import sys
 import threading
 from devices.device import Device
 from devices.miyoo.flip.miyoo_a30 import MiyooA30
+from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
 from devices.trimui.trim_ui_brick import TrimUIBrick
 from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
+from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 import sdl2
@@ -47,6 +49,10 @@ def initialize_device(device):
         Device.init(TrimUISmartPro())
     elif "MIYOO_A30" == device:
         Device.init(MiyooA30())
+    elif "ANBERNIC_RG34XXSP" == device:
+        Device.init(MuosAnbernicRGXX())
+    elif "ANBERNIC_RG28XX" == device:
+        Device.init(MuosAnbernicRGXX())
     else:
         raise RuntimeError(f"{device} is not a supported device")
 
@@ -54,6 +60,7 @@ def initialize_device(device):
 def background_startup():
     FavoritesManager.initialize(Device.get_favorites_path())
     RecentsManager.initialize(Device.get_recents_path())
+    CollectionsManager.initialize(Device.get_collections_path())
 
 def start_background_threads():
     startup_thread = threading.Thread(target=Device.perform_startup_tasks)

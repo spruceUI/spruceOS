@@ -18,11 +18,12 @@ class DescriptiveListView(ListView):
 
         self.selected : int = selected
         self.selected_bg = selected_bg
-        each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
+        self.each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
         # TODO is there a bettter way? Apps are getting set to 3 instead of 4 
         self.max_rows = (Display.get_usable_screen_height(force_include_top_bar=True) // self.each_entry_height)
         self.current_top = 0
         self.current_bottom = min(self.max_rows,len(options))
+        self.center_selection()
 
     def set_options(self, options):
         self.options = options
@@ -49,7 +50,10 @@ class DescriptiveListView(ListView):
             if(iconPath is not None):
                 icon_w, icon_h = Display.render_image(iconPath, 
                                     row_offset_x, 
-                                    row_offset_y + Theme.get_descriptive_list_icon_offset_y())
+                                    row_offset_y + Theme.get_descriptive_list_icon_offset_y(),
+                                    render_mode = RenderMode.TOP_LEFT_ALIGNED, 
+                                    target_width=int(self.each_entry_width*0.8), 
+                                    target_height=int(self.each_entry_height*0.8))
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_TITLE) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE)
             title_w, title_h = Display.render_text(

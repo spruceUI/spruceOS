@@ -1,5 +1,6 @@
 
 import os
+import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
@@ -109,6 +110,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             ExtraSettingsMenu().show_menu()
 
+    def exit(self,input):
+        if(ControllerInput.A == input):
+            sys.exit()
+
     def build_options_list(self):
         option_list = []
         option_list.append(
@@ -144,17 +149,19 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.volume_adjust
                     )
             )
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="WiFi",
-                        value_text="<    " + (Device.get_ip_addr_text()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.show_wifi_menu
-                    )
-            )
+        
+        if(Device.supports_wifi()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="WiFi",
+                            value_text="<    " + (Device.get_ip_addr_text()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.show_wifi_menu
+                        )
+                )
         
         if(Device.get_bluetooth_scanner() is not None):
             option_list.append(
@@ -192,6 +199,17 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_extra_settings
                     )
             )
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Exit",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.exit
+                    )
+            )
 
         return option_list
 
@@ -221,12 +239,20 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)
 
-            if(selected.get_input() in control_options):
+            if(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):
+                if(self.anything_theme_related_changed):
+                    os._exit(0)
+                return ControllerInput.L1
+            if(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
+                if(self.anything_theme_related_changed):
+                    os._exit(0)
+                return ControllerInput.R1
+            elif(selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
             elif(ControllerInput.B == selected.get_input()):
-                selected = None
+                if(not Theme.skip_main_menu()):
+                    selected = None
         
         if(self.anything_theme_related_changed):
             os._exit(0)
         return False #shouldnt need to do this but jic
-

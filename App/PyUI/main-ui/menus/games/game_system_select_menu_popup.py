@@ -4,6 +4,9 @@ from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
 from menus.app.app_menu import AppMenu
+from menus.games.collections_menu import CollectionsMenu
+from menus.games.favorites_menu import FavoritesMenu
+from menus.games.recents_menu import RecentsMenu
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.basic_settings_menu import BasicSettingsMenu
@@ -21,12 +24,12 @@ class GameSystemSelectMenuPopup:
     def execute_game_search(self, game_system, input_value):
         search_txt = OnScreenKeyboard().get_input("Game Search:")
         if(search_txt is not None):
-            SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
+            return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
     
     def all_system_game_search(self, input_value):
         search_txt = OnScreenKeyboard().get_input("Game Search:")
         if(search_txt is not None):
-            SearchedRomsMenu(search_txt.upper()).run_rom_selection()
+            return SearchedRomsMenu(search_txt.upper()).run_rom_selection()
 
     def open_settings(self, input):
         if (ControllerInput.A == input):
@@ -36,8 +39,52 @@ class GameSystemSelectMenuPopup:
         if (ControllerInput.A == input):
             AppMenu().run_app_selection()
 
+    def open_recents(self, input):
+        if (ControllerInput.A == input):
+            RecentsMenu().run_rom_selection()
+
+    def open_favorites(self, input):
+        if (ControllerInput.A == input):
+            FavoritesMenu().run_rom_selection()
+
+    def open_collections(self, input):
+        if (ControllerInput.A == input):
+            CollectionsMenu().run_rom_selection()
+
     def run_popup_menu_selection(self, game_system : GameSystem):
         popup_options = []
+
+        if (Theme.skip_main_menu()):
+            popup_options.append(
+                GridOrListEntry(
+                    primary_text="Recents",
+                    image_path=None,
+                    image_path_selected=None,
+                    description="",
+                    icon=None,
+                    value=self.open_recents
+                )
+            )
+            popup_options.append(
+                GridOrListEntry(
+                    primary_text="Favorites",
+                    image_path=None,
+                    image_path_selected=None,
+                    description="",
+                    icon=None,
+                    value=self.open_favorites
+                )
+            )
+            popup_options.append(
+                GridOrListEntry(
+                    primary_text="Collections",
+                    image_path=None,
+                    image_path_selected=None,
+                    description="",
+                    icon=None,
+                    value=self.open_collections
+                )
+            )
 
         if (Theme.skip_main_menu()):
             popup_options.append(

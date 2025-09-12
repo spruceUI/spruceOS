@@ -156,7 +156,17 @@ class DeviceCommon(AbstractDevice):
         return self.system_config.get_saturation()
 
     def change_volume(self, amount):
-        self._set_volume(self.get_volume() + amount)
+        from display.display import Display
+        self.system_config.reload_config()
+        volume = self.get_volume() + amount
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        self._set_volume(volume)
+        self.system_config.set_volume(volume)
+        self.system_config.save_config()
+        Display.volume_changed(volume)
 
     def get_display_volume(self):
         return self.get_volume()
