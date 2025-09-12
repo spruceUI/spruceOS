@@ -27,7 +27,7 @@ class DaijishoThemeIndex:
                 self.uniqueid_map[uniqueid] = filename
 
         self.name_mapping = {
-            "32X": ["sega32x"],
+            "32x": ["sega32x"],
             "5200": ["atari5200"],
             "7800": ["atari7800"],
             "amiga": ["amiga"],
@@ -134,8 +134,8 @@ class DaijishoThemeIndex:
                 elif(uniquename is not None):
                     return self._convert_if_needed(uniquename)
         
-        PyUiLogger.get_logger().info(f"No image found for {system}")
-        return self.get_default_filename()
+        PyUiLogger.get_logger().info(f"No theme image found for {system}")
+        return None
 
     def get_default_filename(self):
         return self._convert_if_needed(self.default_filename)

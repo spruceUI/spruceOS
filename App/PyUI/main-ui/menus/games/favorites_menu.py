@@ -30,4 +30,4 @@ class FavoritesMenu(RomsMenuCommon):
         return rom_list
 
     def run_rom_selection(self) :
-        self._run_rom_selection("Favorites")
+        return self._run_rom_selection("Favorites")

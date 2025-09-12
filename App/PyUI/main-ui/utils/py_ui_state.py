@@ -28,7 +28,6 @@ class PyUiState:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             with open(filepath, 'w') as f:
                 json.dump(cls._data, f, indent=4)
-            PyUiLogger.get_logger().info(f"State saved to {filepath}")
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write state to {filepath}: {e}")
 
@@ -37,14 +36,15 @@ class PyUiState:
         try:
             with open(filepath, 'r') as f:
                 cls._data = json.load(f)
-                PyUiLogger.get_logger().info(f"State loaded from {filepath}")
         except FileNotFoundError:
             PyUiLogger.get_logger().error(f"State file not found: {filepath}, using defaults.")
             cls._data = {}
-        except json.JSONDecodeError:
-            PyUiLogger.get_logger().error(f"Invalid JSON in state file: {filepath}, using defaults.")
+        except json.JSONDecodeError as e:
+            PyUiLogger.get_logger().error(
+                f"Invalid JSON in state file: {filepath}, using defaults. Error: {e}"
+            )
             cls._data = {}
-
+            
     @classmethod
     def __contains__(cls, key):
         return key in cls._data
@@ -67,12 +67,33 @@ class PyUiState:
         cls.save()
 
     @classmethod
+    def get_last_app_selection(cls):
+        return cls._data.get("lastAppSelectionDir", None), cls._data.get("lastAppSelectionFile", None)
+
+    @classmethod
+    def set_last_app_selection(cls, directory,filepath):
+        cls._data["lastAppSelectionDir"] = directory
+        cls._data["lastAppSelectionFile"] = filepath
+        cls.save()
+
+    @classmethod
     def get_last_game_selection(cls, page_name):
-        return cls._data.get(page_name, {}).get("lastGameSelection", None)
+        return cls._data.get(page_name, {}).get("lastGameSelection", None), cls._data.get(page_name, {}).get("subfolder", None)
         
     @classmethod
-    def set_last_game_selection(cls, page_name, value):
+    def set_last_game_selection(cls, page_name, value, subfolder):
         if page_name not in cls._data:
             cls._data[page_name] = {}
         cls._data[page_name]["lastGameSelection"] = value
+        cls._data[page_name]["subfolder"] = subfolder
         cls.save()
+
+    @classmethod
+    def get_in_game_selection_screen(cls):
+        return cls.get("inGameSelectionScreen",False)
+
+    @classmethod
+    def set_in_game_selection_screen(cls, value):
+        cls._data["inGameSelectionScreen"] = value
+        cls.save()
+

@@ -234,6 +234,7 @@ class FullScreenGridView(View):
 
         if(self.selected != self.last_selected):
             self.animate_transition()
+            self._render_entire_screen(index=self.selected,x_offset=0)
         else:
             self._render_entire_screen(index=self.selected,x_offset=0)
 
@@ -250,7 +251,11 @@ class FullScreenGridView(View):
         self._render()
 
         if (Controller.get_input()):
-            if Controller.last_input() == ControllerInput.DPAD_LEFT:
+            if Controller.last_input() in select_controller_inputs:
+                return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.B:
+                return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.DPAD_LEFT:
                 self.selected -= 1
                 self.correct_selected_for_off_list()
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
@@ -262,10 +267,6 @@ class FullScreenGridView(View):
             elif Controller.last_input() == ControllerInput.R1:
                 self.selected += 1
                 self.correct_selected_for_off_list()
-            elif Controller.last_input() in select_controller_inputs:
-                return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
-            elif Controller.last_input() == ControllerInput.B:
-                return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
 
         return Selection(self.get_selected_option(), None, self.selected)
     

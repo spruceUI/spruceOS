@@ -20,6 +20,7 @@ class NonDescriptiveListView(ListView):
         self.selected = selected_index
         while(self.selected > len(options) and self.selected > 0):
             self.selected -= 1
+
         self.current_top = 0
         self.base_y_offset = Display.get_top_bar_height() + 5
         #TODO get line height padding from theme
@@ -31,6 +32,7 @@ class NonDescriptiveListView(ListView):
             usable_height = Display.get_usable_screen_height()
         self.max_rows = usable_height // self.line_height
         self.current_bottom = min(self.max_rows,len(options))
+        self.center_selection()
 
     def set_options(self, options):
         self.options = options

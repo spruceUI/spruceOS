@@ -22,7 +22,6 @@ class MiyooGameList:
 
     def _load(self, xml_file):
         if not os.path.isfile(xml_file):
-            PyUiLogger.get_logger().error(f"XML file '{xml_file}' does not exist.")
             return
         try:
             tree = ET.parse(xml_file)

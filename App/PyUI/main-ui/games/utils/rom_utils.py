@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import time
 
-from menus.games.game_system_config import GameSystemConfig
+from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from utils.logger import PyUiLogger
 
 class RomUtils:
@@ -26,7 +26,7 @@ class RomUtils:
         return self.emu_dir_to_rom_dir_non_matching.get(emu_dir,emu_dir)
 
     def _get_valid_suffix(self, system):
-        game_system_config = GameSystemConfig(system)
+        game_system_config = FileBasedGameSystemConfig(system)
         return game_system_config.get_extlist()
 
     #TODO do a git system device file so we can geneically
@@ -37,20 +37,20 @@ class RomUtils:
     def get_system_rom_directory(self, system):
         return os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system))
     
-    def has_roms(self, system, directory = None):
+    def has_roms(self, game_system, directory = None):
         if(directory is None):
-            directory = self.get_system_rom_directory(system)
+            directory = game_system.folder_path
 
         if os.path.basename(directory) == "Imgs":
             return False
 
-        valid_suffix_set = self._get_valid_suffix(system)
+        valid_suffix_set = game_system.game_system_config.get_extlist()
 
         try:
             for entry in os.scandir(directory):
                 if not entry.is_file(follow_symlinks=False):
-                    if (entry.is_dir(follow_symlinks=False) and system not in self.dont_scan_subfolders):
-                        if(self.has_roms(system, directory=entry)):
+                    if (entry.is_dir(follow_symlinks=False) and game_system.game_system_config.get_label() not in self.dont_scan_subfolders):
+                        if(self.has_roms(game_system, directory=entry)):
                             return True
                     continue
 
@@ -66,14 +66,14 @@ class RomUtils:
             PyUiLogger.get_logger().error(f"Error scanning directory '{directory}': {e}")
             return False
     
-    def get_roms(self, system, directory = None):
+    def get_roms(self, game_system, directory = None):
         if(directory is None):
-            directory = self.get_system_rom_directory(system)
+            directory = game_system.folder_path
 
         if os.path.basename(directory) == "Imgs":
             return []
         
-        valid_suffix_set = self._get_valid_suffix(system)
+        valid_suffix_set = game_system.game_system_config.get_extlist()
         valid_files = []
         valid_folders = []
 
@@ -85,7 +85,7 @@ class RomUtils:
                 ):
                     valid_files.append(entry.path)
             elif entry.is_dir(follow_symlinks=False):
-                if self.has_roms(system, entry.path):
+                if self.has_roms(game_system, entry.path):
                     valid_folders.append(entry.path)
 
 

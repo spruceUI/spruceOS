@@ -1,22 +1,24 @@
 
 
+import json
 import os
+from games.game_system_utils import GameSystemUtils
 from games.utils.game_system import GameSystem 
 from games.utils.rom_utils import RomUtils
-from menus.games.game_system_config import GameSystemConfig
+from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
+from menus.games.muos_game_system_config import MuosGameSystemConfig
 from utils.logger import PyUiLogger
 
-class GameSystemUtils:
-    def __init__(self):
-        self.roms_path = "/mnt/SDCARD/Roms/"
+class MuosGameSystemUtils(GameSystemUtils):
+    def __init__(self, muos_systems):
+        self.roms_path = "/mnt/SDCARD/ROMS/"
         self.emu_path = "/mnt/SDCARD/Emu/"
-        if(not os.path.exists(self.emu_path)):
-            self.emu_path =  "/mnt/SDCARD/Emus/"
-        PyUiLogger().get_logger().info(f"Emu folder is {self.emu_path}")
+
         self.rom_utils = RomUtils(self.roms_path)
-    
+        self.muos_systems = muos_systems 
+
     def get_game_system_by_name(self, system_name) -> GameSystem:
-        game_system_config = GameSystemConfig(system_name)
+        game_system_config = MuosGameSystemConfig(system_name,system_name)
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()
@@ -25,13 +27,14 @@ class GameSystemUtils:
         PyUiLogger.get_logger().error(f"Unable to load game system for {system_name}")
         return None
 
+
     def get_active_systems(self) -> list[GameSystem]:
         active_systems : list[GameSystem]= []
         
-        # Step 1: Get list of folders in self.emu_path
+        # Step 1: Get list of folders in self.roms_path
         try:
-            folders = [name for name in os.listdir(self.emu_path)
-                    if os.path.isdir(os.path.join(self.emu_path, name))]
+            folders = [name for name in os.listdir(self.roms_path)
+                    if os.path.isdir(os.path.join(self.roms_path, name))]
         except FileNotFoundError:
             return []  # or handle the error as needed
         
@@ -39,15 +42,20 @@ class GameSystemUtils:
         for folder in folders:
             game_system_config = None
             try:
-                game_system_config = GameSystemConfig(folder)
-            except Exception as e:
-                #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
-                pass
+                if os.path.isdir(os.path.join(self.emu_path, folder)):
+                    game_system_config = FileBasedGameSystemConfig(folder)
+                elif folder.upper() in self.muos_systems:
+                    game_system_config = MuosGameSystemConfig(folder,self.muos_systems[folder.upper()])
 
+            except Exception as e:
+                pass
+            
             if(game_system_config is not None):
                 display_name = game_system_config.get_label()
-                if(self.rom_utils.has_roms(folder)):
-                    active_systems.append(GameSystem(folder,display_name, game_system_config))
+                game_system = GameSystem(os.path.join(self.roms_path, folder),display_name, game_system_config)
+                if(self.rom_utils.has_roms(game_system)):
+                    active_systems.append(game_system)
+
 
         # Step 4: Sort the list alphabetically
         active_systems.sort(key=lambda system: system.display_name)

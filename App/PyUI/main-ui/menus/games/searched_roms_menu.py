@@ -2,7 +2,6 @@
 import os
 import subprocess
 from devices.device import Device
-from games.utils.game_system_utils import GameSystemUtils
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
@@ -21,11 +20,11 @@ class SearchedRomsMenu(RomsMenuCommon):
     
     def _get_rom_list(self) -> list[GridOrListEntry]:
         roms = []
-        game_utils = GameSystemUtils()
+        game_utils = Device.get_game_system_utils()
         for game_system in game_utils.get_active_systems():
             roms += self.rom_select_options_builder.build_rom_list(game_system, self.include_rom)
         
         return roms
 
     def run_rom_selection(self) :
-        self._run_rom_selection("Game Search")
+        return self._run_rom_selection("Game Search")

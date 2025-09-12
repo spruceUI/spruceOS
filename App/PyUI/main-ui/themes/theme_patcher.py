@@ -43,7 +43,8 @@ class ThemePatcher():
 
         cls.patch_folder(os.path.join(config_path,"skin"),
                      os.path.join(config_path,f"skin_{target_width}x{target_height}"),
-                     scale)
+                     scale,
+                     theme_width, theme_height, target_width, target_height)
         
         Display.clear("Theme Patch")
         Display.render_text_centered(f"Theme is missing correctly sized assets so caling",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
@@ -52,14 +53,15 @@ class ThemePatcher():
 
         cls.patch_folder(os.path.join(config_path,"icons"),
                      os.path.join(config_path,f"icons_{target_width}x{target_height}"),
-                     scale)
+                     scale,
+                     theme_width, theme_height, target_width, target_height)
     
         cls.scale_config_json(os.path.join(config_path,"config.json"),
                      os.path.join(config_path,f"config_{target_width}x{target_height}.json"),
                      scale)
 
     @classmethod
-    def patch_folder(cls, input_folder, output_folder, scale):
+    def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):
         PyUiLogger().get_logger().error(f"Patching theme [{input_folder}] to [{input_folder}] with scale factor [{scale}]")
         # Ensure the output directory exists
         os.makedirs(output_folder, exist_ok=True)
@@ -70,17 +72,22 @@ class ThemePatcher():
 
             if os.path.isdir(input_path):
                 # Recursively patch subfolders
-                cls.patch_folder(input_path, output_path, scale)
+                cls.patch_folder(input_path, output_path, scale, theme_width, theme_height, target_width, target_height)
             elif os.path.isfile(input_path):
                 # Process image file
-                cls.scale_image(input_path, output_path, scale)
+                cls.scale_image(input_path, output_path, scale, theme_width, theme_height, target_width, target_height)
 
     @staticmethod
-    def scale_image(input_file, output_file, scale):
+    def scale_image(input_file, output_file, scale, theme_width, theme_height, target_width, target_height):
         try:
             with Image.open(input_file) as img:
                 new_width = int(img.width * scale)
+                if(img.width == theme_width and img.height != theme_height):
+                    new_width = target_width
                 new_height = int(img.height * scale)
+                if(img.height == theme_height and img.width != theme_width):
+                    new_height = target_height
+
                 resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
                 resized_img.save(output_file)
                 PyUiLogger().get_logger().info(f"Scaled and saved: {output_file}")

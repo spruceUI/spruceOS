@@ -20,10 +20,12 @@ class AbstractDevice(ABC):
     def screen_rotation(self):
         pass
 
+    @property
     @abstractmethod
     def output_screen_width(self):
         pass
 
+    @property
     @abstractmethod
     def output_screen_height(self):
         pass
@@ -122,6 +124,10 @@ class AbstractDevice(ABC):
 
     @abstractmethod
     def get_recents_path(self):
+        pass
+
+    @abstractmethod
+    def get_collections_path(self):
         pass
 
     @abstractmethod

@@ -3,6 +3,7 @@
 import os
 from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
+from menus.games.collections.collections_management_menu import CollectionsManagementMenu
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
@@ -22,11 +23,14 @@ class GameSelectMenuPopup:
     def remove_favorite(self, rom_info : RomInfo, input_value):
         FavoritesManager.remove_favorite(rom_info)
     
+    def collections_management_view(self, rom_info : RomInfo, input_value):
+        CollectionsManagementMenu(rom_info).show_menu()
+
     def execute_game_search(self, game_system, input_value):
         from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
         search_txt = OnScreenKeyboard().get_input("Game Search:")
         if(search_txt is not None):
-            SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
+            return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 
     def toggle_view(self):
         if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
@@ -41,6 +45,15 @@ class GameSelectMenuPopup:
         popup_options = []
         rom_name = os.path.basename(rom_info.rom_file_path)
         
+        popup_options.append(GridOrListEntry(
+            primary_text=f"{rom_info.game_system.display_name} Game Search",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
+        ))
+
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
                 primary_text="Remove Favorite",
@@ -60,15 +73,16 @@ class GameSelectMenuPopup:
                 value=lambda input_value, rom_info=rom_info: self.add_favorite(rom_info, input_value)
             ))
             
+        
         popup_options.append(GridOrListEntry(
-            primary_text=f"{rom_info.game_system.display_name} Game Search",
+            primary_text=f"Add/Remove from Collection",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
             icon=Theme.settings(),
-            value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
+            value=lambda input_value, rom_info=rom_info: self.collections_management_view(rom_info, input_value)
         ))
-            
+
         popup_options.append(GridOrListEntry(
             primary_text=f"Toggle View",
             image_path=Theme.settings(),
@@ -88,7 +102,6 @@ class GameSelectMenuPopup:
                         
 
         while (popup_selection := popup_view.get_selection()):
-            PyUiLogger.get_logger().info(f"Waiting for input")
             if(popup_selection.get_input() is not None):
                 PyUiLogger.get_logger().info(f"Received {popup_selection.get_input()}")
                 break

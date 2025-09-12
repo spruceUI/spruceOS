@@ -136,6 +136,12 @@ class Theme():
     
     @classmethod
     def recent_selected(cls): return cls._asset("ic-recent-f.png")
+
+    @classmethod
+    def collection(cls): return cls._asset("ic-collection-n.png")
+    
+    @classmethod
+    def collection_selected(cls): return cls._asset("ic-collection-f.png")
     
     @classmethod
     def game(cls): return cls._asset("ic-game-n.png")
@@ -285,7 +291,14 @@ class Theme():
             return cls._daijisho_theme_index.get_file_name_for_system(system)
         else:
             return os.path.join(cls._path, cls._icon_folder, system + ".png")
-   
+
+    @classmethod
+    def get_default_system_icon(cls):
+        if(cls._daijisho_theme_index is not None):
+            return cls._daijisho_theme_index.get_default_filename()
+        else:
+            return None   
+
     @classmethod
     def get_system_icon_selected(cls, system):
         if(cls._daijisho_theme_index is not None):
@@ -729,6 +742,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_collections_enabled(cls):
+        return cls._data.get("collectionsEnabled", True)
+
+    @classmethod
+    def set_collections_enabled(cls, value):
+        cls._data["collectionsEnabled"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_favorites_enabled(cls):
         return cls._data.get("favoritesEnabled", True)
 
@@ -757,7 +779,7 @@ class Theme():
 
     @classmethod
     def get_main_menu_option_ordering(cls):
-        return cls._data.get("mainMenuOrdering", ["Recent", "Favorite", "Game", "App", "Setting"])
+        return cls._data.get("mainMenuOrdering", ["Recent", "Favorite","Collection", "Game", "App", "Setting"])
 
     @classmethod
     def get_game_select_row_count(cls):
