@@ -1,5 +1,8 @@
 from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
+from menus.games.collections_menu import CollectionsMenu
+from menus.games.favorites_menu import FavoritesMenu
+from menus.games.recents_menu import RecentsMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from themes.theme import Theme
@@ -21,6 +24,19 @@ class MainMenuPopup:
     def open_settings(self, input):
         if (ControllerInput.A == input):
             BasicSettingsMenu().show_menu()
+            
+    def open_recents(self, input):
+        if (ControllerInput.A == input):
+            RecentsMenu().run_rom_selection()
+
+    def open_favorites(self, input):
+        if (ControllerInput.A == input):
+            FavoritesMenu().run_rom_selection()
+
+    def open_collections(self, input):
+        if (ControllerInput.A == input):
+            CollectionsMenu().run_rom_selection()
+
 
     def run_popup_menu_selection(self):
         popup_options = []
@@ -40,6 +56,43 @@ class MainMenuPopup:
             icon=None,
             value=self.open_settings
         ))
+
+        if(not Theme.get_recents_enabled()):
+            popup_options.append(
+                    GridOrListEntry(
+                        primary_text="Recents",
+                        image_path=None,
+                        image_path_selected=None,
+                        description="",
+                        icon=None,
+                        value=self.open_recents
+                    )
+                )
+            
+        if(not Theme.get_favorites_enabled()):            
+            popup_options.append(
+                    GridOrListEntry(
+                        primary_text="Favorites",
+                        image_path=None,
+                        image_path_selected=None,
+                        description="",
+                        icon=None,
+                        value=self.open_favorites
+                    )
+                )
+
+        if(not Theme.get_collections_enabled()):
+            popup_options.append(
+                    GridOrListEntry(
+                        primary_text="Collections",
+                        image_path=None,
+                        image_path_selected=None,
+                        description="",
+                        icon=None,
+                        value=self.open_collections
+                    )
+                )
+
 
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
