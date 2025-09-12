@@ -743,7 +743,7 @@ class Theme():
 
     @classmethod
     def get_collections_enabled(cls):
-        return cls._data.get("collectionsEnabled", True)
+        return cls._data.get("collectionsEnabled", False)
 
     @classmethod
     def set_collections_enabled(cls, value):
