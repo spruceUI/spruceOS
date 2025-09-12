@@ -55,6 +55,9 @@ class CollectionsManager:
         cls._collections = []
         file_path = os.path.join(cls._collections_folder, cls._collections_file_name)
 
+        # Ensure the parent folders exist
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
         if not os.path.exists(file_path):
             # If file doesn't exist, initialize it as empty
             with open(file_path, 'w') as f:
