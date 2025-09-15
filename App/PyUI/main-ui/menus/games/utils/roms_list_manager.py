@@ -12,7 +12,7 @@ class RomsListEntry:
     rom_file_path: str
     game_system_name: str 
     display_name: str
-    def __init__(self, rom_file_path, game_system_name, display_name):
+    def __init__(self, rom_file_path, game_system_name, display_name=None):
         self.rom_file_path = rom_file_path
         self.game_system_name = game_system_name
         self.display_name = display_name
@@ -37,7 +37,7 @@ class RomsListManager():
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def remove_game(self, rom_info: RomInfo):
-        to_remove_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        to_remove_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name, rom_info.display_name)
         self._entries = [
             existing for existing in self._entries
             if not (existing.rom_file_path == to_remove_entry.rom_file_path and existing.game_system_name == to_remove_entry.game_system_name)
