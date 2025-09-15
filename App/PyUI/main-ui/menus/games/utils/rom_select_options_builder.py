@@ -84,13 +84,15 @@ class RomSelectOptionsBuilder:
                 rom_file_name = os.path.basename(rom_file_path)
                 game_entry = miyoo_game_list.get_by_file_name(rom_file_name)
                 if(game_entry is not None):
-                    rom_file_name = game_entry.name
+                    display_name = game_entry.name
+                else:
+                    display_name = os.path.splitext(rom_file_name)[0]
 
-                rom_info = RomInfo(game_system,rom_file_path)
+                rom_info = RomInfo(game_system,rom_file_path, display_name)
 
                 file_rom_list.append(
                     GridOrListEntry(
-                        primary_text=os.path.splitext(rom_file_name)[0],
+                        primary_text=display_name,
                         description=game_system.folder_name, 
                         value=rom_info,
                         image_path_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry),
@@ -106,7 +108,7 @@ class RomSelectOptionsBuilder:
 
                 folder_rom_list.append(
                     GridOrListEntry(
-                        primary_text=os.path.splitext(rom_file_name)[0],
+                        primary_text=rom_file_name,
                         description=game_system.folder_name, 
                         value=rom_info,
                         image_path_searcher=lambda rom_info: self.get_image_path(rom_info),

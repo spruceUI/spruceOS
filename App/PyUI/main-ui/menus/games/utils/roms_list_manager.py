@@ -11,9 +11,11 @@ from utils.logger import PyUiLogger
 class RomsListEntry:
     rom_file_path: str
     game_system_name: str 
-    def __init__(self, rom_file_path, game_system_name):
+    display_name: str
+    def __init__(self, rom_file_path, game_system_name, display_name):
         self.rom_file_path = rom_file_path
         self.game_system_name = game_system_name
+        self.display_name = display_name
 
 class RomsListManager():
     def __init__(self, entries_file):
@@ -24,7 +26,7 @@ class RomsListManager():
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def add_game(self, rom_info: RomInfo):
-        new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name, rom_info.display_name)
         if any(existing.rom_file_path == new_entry.rom_file_path and existing.game_system_name == new_entry.game_system_name for existing in self._entries):
             self.remove_game(rom_info)
             self._entries.insert(0, new_entry)
@@ -82,7 +84,7 @@ class RomsListManager():
             try:
                 game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
                 if(game_system is not None):
-                    rom_info_list.append(RomInfo(game_system,entry.rom_file_path))
+                    rom_info_list.append(RomInfo(game_system,entry.rom_file_path, entry.display_name))
             except Exception:
                 PyUiLogger.get_logger().error(f"Unable to load config for {entry.game_system_name} so skipping entry")
 

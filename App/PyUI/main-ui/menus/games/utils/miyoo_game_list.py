@@ -24,8 +24,18 @@ class MiyooGameList:
         if not os.path.isfile(xml_file):
             return
         try:
-            tree = ET.parse(xml_file)
-            root = tree.getroot()
+            # Read the entire file content into memory
+            with open(xml_file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+
+            # Ensure there is at least a newline at the end of the file
+            # This avoids ElementTree thinking there are multiple root elements
+            if not content.endswith('\n'):
+                content += '\n'
+
+            # Parse the XML from the cleaned string
+            root = ET.fromstring(content)
+
             base_dir = os.path.dirname(xml_file)
             for game in root.findall('game'):
                 game_id = game.get('id')
@@ -44,8 +54,11 @@ class MiyooGameList:
                 image_path = os.path.join(base_dir, image[2:] if image.startswith('./') else image)
                 entry = GameEntry(game_id, source, path, image_path, name)
                 self.games_by_file_name[file_name] = entry
+
         except Exception as e:
+            import traceback
             PyUiLogger.get_logger().error(f"Error loading XML file '{xml_file}': {e}")
+            PyUiLogger.get_logger().error(traceback.format_exc())
 
     def get_by_file_name(self, file_name):
         return self.games_by_file_name.get(file_name)
