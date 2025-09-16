@@ -125,16 +125,6 @@ while [ 1 ]; do
                     export PATH="/mnt/SDCARD/trimui/app/norecents-Brick:$PATH"
                 fi
                 ;;
-            "Flip" )
-                # export LD_LIBRARY_PATH=/usr/miyoo/lib
-                if flag_check "simple_mode"; then
-                    export PATH="/mnt/SDCARD/miyoo355/app/nosettings:$PATH"
-                elif setting_get "recentsTile"; then
-                    export PATH="/mnt/SDCARD/miyoo355/app/recents:$PATH"
-                else
-                    export PATH="/mnt/SDCARD/miyoo355/app/norecents:$PATH"
-                fi
-                ;;
         esac
 
         # Launch (and subsequently close) MainUI with various quirks depending on PLATFORM
@@ -204,12 +194,9 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                if [ -f "$PYUI_FLAG" ]; then
-                    export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
-                    /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
-                else
-                    MainUI
-                fi
+                touch "$PYUI_FLAG"
+                export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
+                /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 ;;
         esac
 
