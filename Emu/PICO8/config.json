@@ -6,6 +6,10 @@
   "themecolor": "00FF88",
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
+  "requiredfiles": [
+    ["/mnt/SDCARD/Emu/PICO8/bin/pico8.dat"],
+    ["/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn"]
+  ],
   "rompathlist": [
     {"rompath": "../../Roms/PICO8",
     "imgpath": "../../Roms/PICO8/Imgs"},
