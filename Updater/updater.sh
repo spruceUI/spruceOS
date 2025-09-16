@@ -384,7 +384,7 @@ else
 fi
 
 # Reboot device
-killall -9 runtime.sh principal.sh MainUI PyUI emulationstation
+killall -9 runtime.sh principal.sh MainUI PyUI
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then

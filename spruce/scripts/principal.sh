@@ -68,16 +68,6 @@ while [ 1 ]; do
         rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
     fi
 
-    # Check whether to launch into EmulationStation (only for Flip!)
-    if [ "$PLATFORM" = "Flip" ]; then
-        runee=$(/usr/miyoo/bin/jsonval runee)
-        if [ "$runee" = "1" ] && [ -f /mnt/SDCARD/emulationstation/emulationstation ] && [ -f /mnt/SDCARD/emulationstation/emulationstation.sh ] ; then
-            cd /mnt/SDCARD/emulationstation/
-            ./emulationstation.sh
-            runee=$(/usr/miyoo/bin/jsonval runee)
-        fi
-    fi
-
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"
