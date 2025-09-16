@@ -80,6 +80,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             ]
         )    
     
+    
     def change_theme(self, input):
         self.anything_theme_related_changed = True
         theme_folders = self.get_theme_folders()
@@ -109,6 +110,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
             ExtraSettingsMenu().show_menu()
+
+    def launch_theme_settings(self,input):
+        if(ControllerInput.A == input):
+            ThemeSettingsMenu().show_theme_options_menu()
 
     def exit(self,input):
         if(ControllerInput.A == input):
@@ -185,6 +190,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.change_theme
+                    )
+            )
+        
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Current Theme Settings",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_theme_settings
                     )
             )
             
