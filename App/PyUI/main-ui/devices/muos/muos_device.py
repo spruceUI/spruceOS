@@ -227,6 +227,8 @@ class MuosDevice(DeviceCommon):
     def supports_wifi(self):
         return False #Let it be handled in muOS proper, too lazy to implement
     
+    def get_roms_dir(self):
+        return "/mnt/union/ROMS/"
     
     @property
     def screen_width(self):
@@ -236,7 +238,6 @@ class MuosDevice(DeviceCommon):
     def screen_height(self):
         return int(self.read_based_on_muos_config("/opt/muos/device/config/screen/internal/height"))
     
-            
     @property
     def screen_rotation(self):
         return int(self.read_based_on_muos_config("/opt/muos/device/config/screen/rotate"))
@@ -285,3 +286,5 @@ class MuosDevice(DeviceCommon):
             return {k.upper(): v for k, v in data.items()}
 
         return data
+
+    

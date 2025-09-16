@@ -90,6 +90,12 @@ if flag_check "pre_menu_unpacking"; then
     done
 fi
 
+mkdir -p /mnt/SDCARD/Persistent/
+
+if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
+  mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster
+fi
+
 log_message "Displaying enjoy image"
 display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 

@@ -11,7 +11,7 @@ from utils.logger import PyUiLogger
 
 class MuosGameSystemUtils(GameSystemUtils):
     def __init__(self, muos_systems):
-        self.roms_path = "/mnt/SDCARD/ROMS/"
+        self.roms_path = "/mnt/union/ROMS/"
         self.emu_path = "/mnt/SDCARD/Emu/"
 
         self.rom_utils = RomUtils(self.roms_path)

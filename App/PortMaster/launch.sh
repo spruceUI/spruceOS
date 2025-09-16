@@ -6,8 +6,9 @@ export PATH="/mnt/SDCARD/spruce/flip/bin/:/mnt/SDCARD/Persistent/portmaster/bin:
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:$LD_LIBRARY_PATH"
 export HOME="/mnt/SDCARD/Saves/flip/home"
 
+# Fallback incase it somehow didnt work from firstboot.sh
 if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-  cp -R /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster
+  mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster
 fi
 
 # Until PM-GUI is updated we need to override where spruce stores things
