@@ -42,3 +42,6 @@ class FileBasedGameSystemConfig():
     
     def subfolder_launch_file(self):
         return self._data.get('subfolder_launch_file')
+    
+    def required_files_groups(self):
+        return self._data.get('requiredfiles', [])

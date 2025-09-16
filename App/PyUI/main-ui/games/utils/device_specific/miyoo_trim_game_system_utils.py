@@ -45,7 +45,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                 #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
-            if(game_system_config is not None):
+            if(game_system_config is not None and self.contains_needed_files(game_system_config)):
                 display_name = game_system_config.get_label()
                 game_system = GameSystem(os.path.join(self.roms_path, folder),display_name, game_system_config)
                 if(self.rom_utils.has_roms(game_system)):
@@ -57,3 +57,21 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         # Step 5: Return the list
         return active_systems
  
+    def contains_needed_files(self, game_system_config):
+        required_files_groups = game_system_config.required_files_groups()
+
+        # If there are no required files, we consider it valid
+        if not required_files_groups:
+            return True
+
+        for group in required_files_groups:
+            # Ensure at least one file in the group exists
+            if not any(os.path.exists(file_path) for file_path in group):
+                # Log which group is missing
+                missing_files = ", ".join(group)
+                PyUiLogger.get_logger().error(
+                    f"Missing required files: none of these exist [{missing_files}]"
+                )
+                return False  # This group failed
+        
+        return True  # All groups passed

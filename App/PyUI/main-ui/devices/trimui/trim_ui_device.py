@@ -294,3 +294,6 @@ class TrimUIDevice(DeviceCommon):
     
     def get_game_system_utils(self):
         return MiyooTrimGameSystemUtils()
+    
+    def get_roms_dir(self):
+        return "/mnt/SDCARD/Roms/"

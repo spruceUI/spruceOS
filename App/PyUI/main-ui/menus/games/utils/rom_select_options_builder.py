@@ -15,7 +15,7 @@ from views.grid_or_list_entry import GridOrListEntry
 
 class RomSelectOptionsBuilder:
     def __init__(self):
-        self.roms_path = "/mnt/SDCARD/Roms/"
+        self.roms_path = Device.get_roms_dir()
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
         
     

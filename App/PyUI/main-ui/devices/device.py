@@ -282,3 +282,8 @@ class Device:
     def get_game_system_utils():
         return Device._impl.get_game_system_utils()
     
+    @staticmethod
+    def get_roms_dir():
+        return Device._impl.get_roms_dir()
+    
+    
