@@ -1,7 +1,9 @@
 import json
 import logging
 import os
+import sys
 import traceback
+from zipfile import Path
 
 from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
@@ -342,10 +344,15 @@ class Theme():
             if os.path.exists(font):
                 return font 
             else:
-                return "/mnt/SDCARD/Themes/STOCK/nunwen.ttf"
+                return Theme.get_fallback_font()
         except Exception as e:
             PyUiLogger.get_logger().error(f"get_font error occurred: {e}")
-            return "/mnt/SDCARD/Themes/STOCK/nunwen.ttf"
+            return Theme.get_fallback_font()
+
+    @classmethod
+    def get_fallback_font(cls):
+        base_dir = os.path.abspath(sys.path[0])
+        return os.path.join(base_dir, "themes", "nunwen.ttf")
 
     @classmethod
     def get_font_size(cls, font_purpose : FontPurpose):
