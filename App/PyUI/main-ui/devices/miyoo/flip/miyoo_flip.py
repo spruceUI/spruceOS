@@ -55,7 +55,9 @@ class MiyooFlip(MiyooDevice):
         self._set_hue_to_config()
         self.ensure_wpa_supplicant_conf()
         self.init_gpio()
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
+        if(PyUiConfig.enable_wifi_monitor()):
+            threading.Thread(target=self.monitor_wifi, daemon=True).start()
+   
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 

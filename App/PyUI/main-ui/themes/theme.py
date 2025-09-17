@@ -2,8 +2,6 @@ import json
 import logging
 import os
 import sys
-import traceback
-from zipfile import Path
 
 from devices.charge.charge_status import ChargeStatus
 from devices.wifi.wifi_status import WifiStatus
