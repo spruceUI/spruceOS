@@ -33,7 +33,7 @@ reset_wifi() {
     # Bring the Wi-Fi interface back up
     ifconfig "$WIFI_INTERFACE" up
     sleep .5
-    wpa_supplicant -B -i "$WIFI_INTERFACE" -c /config/wpa_supplicant.conf
+    wpa_supplicant -B -i "$WIFI_INTERFACE" -c "$WPA_SUPPLICANT_FILE"
     udhcpc -i "$WIFI_INTERFACE" & 
     log_message "WiFi Watchdog: Wi-Fi reset completed."
     

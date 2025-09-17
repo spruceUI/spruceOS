@@ -9,27 +9,13 @@ if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
     exit 0
 fi
 
-case "$PLATFORM" in
-    "Brick" | "SmartPro" )
-        WPA_FILE="/etc/wifi/wpa_supplicant.conf"
-        TEMP_FILE="/etc/wifi/wpa_supplicant_temp.conf"
-    ;;
-    "Flip" )
-        WPA_FILE="/userdata/cfg/wpa_supplicant.conf"
-        TEMP_FILE="/userdata/cfg/wpa_supplicant_temp.conf"
-    ;;
-    "A30" )
-        WPA_FILE="/config/wpa_supplicant.conf"
-        TEMP_FILE="/config/wpa_supplicant_temp.conf"
-    ;;
-esac
-
 MULTIPASS="/mnt/SDCARD/multipass.cfg"
+TEMP_FILE="${WPA_SUPPLICANT_FILE}.tmp"
 
 # Check if the WPA file exists; create one if not
-if [ ! -f "$WPA_FILE" ]; then
-    log_message "Creating new $WPA_FILE"
-    echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$WPA_FILE"
+if [ ! -f "$WPA_SUPPLICANT_FILE" ]; then
+    log_message "Creating new $WPA_SUPPLICANT_FILE"
+    echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$WPA_SUPPLICANT_FILE"
 fi
 
 ##### MULTIPASS.CFG #####
@@ -63,7 +49,7 @@ get_psk() {
         if echo "$line" | grep -q "ssid=\"$ssid\""; then
             found=1
         fi
-    done < "$WPA_FILE"
+    done < "$WPA_SUPPLICANT_FILE"
 }
 
 # Check if multipass.cfg exists at SD root.
@@ -80,12 +66,12 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
         if [ -n "$ID" ] && [ -n "$PW" ]; then
 
             # Check if given SSID already exists in wpa_supplicant.conf
-            if grep -q "ssid=\"$ID\"" "$WPA_FILE"; then
+            if grep -q "ssid=\"$ID\"" "$WPA_SUPPLICANT_FILE"; then
             
                 # If SSID but not PSK already found, update PSK
-                if ! grep -q "psk=\"$PW\"" "$WPA_FILE"; then
+                if ! grep -q "psk=\"$PW\"" "$WPA_SUPPLICANT_FILE"; then
                     OLD_PW="$(get_psk "$ID")"
-                    sed -i "s|$(printf '%s' "$OLD_PW" | sed 's/[\/&]/\\&/g')|$(printf '%s' "$PW" | sed 's/[\/&]/\\&/g')|" "$WPA_FILE"
+                    sed -i "s|$(printf '%s' "$OLD_PW" | sed 's/[\/&]/\\&/g')|$(printf '%s' "$PW" | sed 's/[\/&]/\\&/g')|" "$WPA_SUPPLICANT_FILE"
                     log_message "Password updated for network $ID"
 
                 else ### both SSID and PSK found
@@ -93,7 +79,7 @@ if [ -f /mnt/SDCARD/multipass.cfg ]; then
                 fi
 
             else ### SSID not found in wpa_supplicant.conf, so we add it
-                append_network_from_multipass "$ID" "$PW" "$HIDDEN" >> "$WPA_FILE"
+                append_network_from_multipass "$ID" "$PW" "$HIDDEN" >> "$WPA_SUPPLICANT_FILE"
                 log_message "Network $ID added to wpa_supplicant.conf"
             fi
 
@@ -110,8 +96,8 @@ fi
 
 ##### MAINUI WI-FI GUI #####
 
-# Preserve the original WPA_FILE to TEMP_FILE on startup
-cp "$WPA_FILE" "$TEMP_FILE"
+# Preserve the original WPA_SUPPLICANT_FILE to TEMP_FILE on startup
+cp "$WPA_SUPPLICANT_FILE" "$TEMP_FILE"
 
 remove_ssid() {
 
@@ -144,7 +130,7 @@ remove_ssid() {
 append_network() {
     # Extract the new network block (last added network)
     # This is adjusted for how MainUI adds networks to the wpa_supplicant in terms of # of lines
-    NEW_NETWORK="$(tail -n 4 "$WPA_FILE" | grep -A 4 "network={")"
+    NEW_NETWORK="$(tail -n 4 "$WPA_SUPPLICANT_FILE" | grep -A 4 "network={")"
     
     # Extract the SSID from the new network block
     NEW_SSID=$(echo "$NEW_NETWORK" | grep 'ssid=' | sed 's/.*ssid="\([^"]*\)".*/\1/')
@@ -152,7 +138,7 @@ append_network() {
     # Check if NEW_NETWORK or NEW_SSID is empty
     if [ -z "$NEW_NETWORK" ] || [ -z "$NEW_SSID" ]; then
         # Must do the below to not lose networks!  MainUI resets wpa_supplicant to empty on failed attempt to add new network
-        cp "$TEMP_FILE" "$WPA_FILE"
+        cp "$TEMP_FILE" "$WPA_SUPPLICANT_FILE"
         return
     fi
 
@@ -171,17 +157,17 @@ append_network() {
             echo "$NEW_NETWORK" >> "$TEMP_FILE"
             log_message "WPA Watchdog: \"$NEW_SSID\" added."
         fi
-        # Overwrite WPA_FILE with TEMP_FILE (safe because duplicate SSIDs are considered)
-        cp "$TEMP_FILE" "$WPA_FILE"
+        # Overwrite WPA_SUPPLICANT_FILE with TEMP_FILE (safe because duplicate SSIDs are considered)
+        cp "$TEMP_FILE" "$WPA_SUPPLICANT_FILE"
     fi
 }
 
 # Monitor WPA file for new additions
 while true; do
     # Wait for a modify event on the WPA file
-    inotifywait -e modify -qq "$WPA_FILE"
+    inotifywait -e modify -qq "$WPA_SUPPLICANT_FILE"
     # Call the append function when a modification is detected
-    log_message "WPA Watchdog: Detected change in $WPA_FILE"
+    log_message "WPA Watchdog: Detected change in $WPA_SUPPLICANT_FILE"
     # Sleep required to handle over-detections by inotifywait
     sleep 1
     append_network

@@ -120,7 +120,7 @@ check_and_connect_wifi() {
 
             # Restart the interface and try to connect
             ifconfig wlan0 up
-            wpa_supplicant -B -i wlan0 -c /config/wpa_supplicant.conf
+            wpa_supplicant -B -i wlan0 -c $WPA_SUPPLICANT_FILE
             udhcpc -i wlan0 &
         else
             log_message "Letting stock OS restart wifi due to existance of /mnt/sdcard/Saves/.disablesprucewifi"
