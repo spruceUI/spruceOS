@@ -7,8 +7,9 @@
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "requiredfiles": [
-    ["/mnt/SDCARD/Emu/PICO8/bin/pico8.dat"],
-    ["/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn"]
+    ["/mnt/SDCARD/BIOS/pico8.dat"],
+    ["/mnt/SDCARD/BIOS/pico8_64"],
+    ["/mnt/SDCARD/BIOS/pico8_dyn"]
   ],
   "rompathlist": [
     {"rompath": "../../Roms/PICO8",
