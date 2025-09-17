@@ -20,6 +20,14 @@ case "$PLATFORM" in
     "Flip") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
 esac
 
+if [ -f "$PYUI_FLAG" ]; then
+	touch /mnt/sdcard/Saves/.disablesprucewifi
+    log_message "runtime.sh: Disabling wifi services as pyui flag is true"
+else
+	rm /mnt/sdcard/Saves/.disablesprucewifi
+fi
+
+
 # Resetting log file location
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
