@@ -3,6 +3,6 @@
     "themeDir": "/mnt/SDCARD/Themes/",
     "turboDelayMs": 300,
     "enableButtonWatchers": false,
-    "enableWifiMonitor": false,
+    "enableWifiMonitor": true,
     "mainMenuTitle": "spruceOS"
 }
