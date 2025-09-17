@@ -90,6 +90,10 @@ class PyUiConfig:
         return cls._data.get("enableButtonWatchers", True)
 
     @classmethod
+    def enable_wifi_monitor(cls):
+        return cls._data.get("enableWifiMonitor", True)
+
+    @classmethod
     def get_main_menu_title(cls):
         return cls._data.get("mainMenuTitle", "PyUI")
 
