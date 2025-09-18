@@ -2,8 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
-    log_message "clearwifi disabled due to existence of /mnt/sdcard/Saves/.disablesprucewifi"
+if [ "$PLATFORM" != "Flip" ]; then
+    log_message "clearwifi disabled due to running on the Flip"
     exit 0
 fi
 

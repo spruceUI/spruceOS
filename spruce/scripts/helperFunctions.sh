@@ -113,7 +113,7 @@ check_and_connect_wifi() {
         log_message "Attempting to connect to WiFi"
 
         # Bring the existing interface down cleanly if its running
-        if [ ! -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
+        if [ "$PLATFORM" != "Flip" ]; then
             ifconfig wlan0 down
             killall wpa_supplicant
             killall udhcpc
@@ -123,7 +123,7 @@ check_and_connect_wifi() {
             wpa_supplicant -B -i wlan0 -c $WPA_SUPPLICANT_FILE
             udhcpc -i wlan0 &
         else
-            log_message "Letting stock OS restart wifi due to existance of /mnt/sdcard/Saves/.disablesprucewifi"
+            log_message "Letting stock OS restart wifi for the FLIP"
         fi
 		
         display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....

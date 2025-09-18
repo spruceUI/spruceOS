@@ -4,8 +4,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ -f /mnt/sdcard/Saves/.disablesprucewifi ]; then
-    log_message "wpa_watchdog disabled due to existence of /mnt/sdcard/Saves/.disablesprucewifi"
+if [ "$PLATFORM" != "Flip" ]; then
+    log_message "wpa_watchdog disabled due to running on the flip"
     exit 0
 fi
 
