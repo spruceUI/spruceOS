@@ -16,7 +16,7 @@ from views.view import View
 class GridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str = None,
                  selected_index=0, show_grid_text=True, resized_width=None, resized_height=None,
-                 set_top_bar_text_to_selection=False, resize_type=None, 
+                 set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None, 
                  unselected_bg = None, grid_img_y_offset=None, missing_image_path=None):
         super().__init__()
         self.resized_width = resized_width
@@ -24,6 +24,7 @@ class GridView(View):
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
+        self.set_bottom_bar_text_to_selection = set_bottom_bar_text_to_selection
         self.options: List[GridOrListEntry] = options
 
         self.max_img_height = resized_height
@@ -199,6 +200,8 @@ class GridView(View):
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(
                 self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+        elif(self.set_bottom_bar_text_to_selection and len(self.options) > 0):
+            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
         else:
             Display.clear(self.top_bar_text)
         self.correct_selected_for_off_list()
