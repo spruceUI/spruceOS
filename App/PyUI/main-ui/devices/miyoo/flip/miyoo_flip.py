@@ -48,21 +48,10 @@ class MiyooFlip(MiyooDevice):
         ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
         self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self._set_hue_to_config()
-        self.ensure_wpa_supplicant_conf()
-        self.init_gpio()
-        if(PyUiConfig.enable_wifi_monitor()):
-            PyUiLogger.get_logger().error(f"Starting wifi monitor")
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
-            if(self.is_wifi_enabled()):
-                self.restart_wifi_services()
    
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+        threading.Thread(target=self.startup_init, daemon=True).start()
 
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller
@@ -87,10 +76,26 @@ class MiyooFlip(MiyooDevice):
             5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
         }
 
+        super().__init__()
+
+    def startup_init(self):
+        self._set_lumination_to_config()
+        self._set_contrast_to_config()
+        self._set_saturation_to_config()
+        self._set_brightness_to_config()
+        self._set_hue_to_config()
+        self.ensure_wpa_supplicant_conf()
+        self.init_gpio()
+
+        if(PyUiConfig.enable_wifi_monitor()):
+            PyUiLogger.get_logger().error(f"Starting wifi monitor")
+            threading.Thread(target=self.monitor_wifi, daemon=True).start()
+            if(self.is_wifi_enabled()):
+                self.restart_wifi_services()
+
         self.init_bluetooth()
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
-        super().__init__()
 
     def init_bluetooth(self):
         try:
