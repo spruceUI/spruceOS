@@ -36,6 +36,7 @@ class ViewCreator:
                     grid_resized_width=None,
                     grid_resized_height=None,
                     set_top_bar_text_to_selection=False,
+                    set_bottom_bar_text_to_selection=False,
                     grid_selected_bg=None,
                     grid_unselected_bg=None,
                     grid_resize_type=None,
@@ -174,6 +175,7 @@ class ViewCreator:
                     resized_width=grid_resized_width,
                     resized_height=grid_resized_height,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
+                    set_bottom_bar_text_to_selection=set_bottom_bar_text_to_selection,
                     resize_type=grid_resize_type,
                     grid_img_y_offset=grid_img_y_offset,
                     missing_image_path=missing_image_path
