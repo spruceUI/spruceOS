@@ -1,4 +1,6 @@
 
+import os
+import re
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
@@ -25,22 +27,50 @@ class WifiMenu:
         else:
             Device.enable_wifi()
 
-    def write_wpa_supplicant_conf(self,ssid, pw_line, file_path="/userdata/cfg/wpa_supplicant.conf"):
-        # WPA configuration template
-        config = f"""
-ctrl_interface=/var/run/wpa_supplicant
-update_config=1
+    def write_wpa_supplicant_conf(self, ssid, pw_line, file_path="/userdata/cfg/wpa_supplicant.conf"):
+        # WPA configuration header
+        header = """ctrl_interface=/var/run/wpa_supplicant
+    update_config=1
+    """
 
-network={{
-    ssid="{ssid}"
-    {pw_line}
-}}
-"""
+        # Build the new network block
+        new_network = f"""
+    network={{
+        ssid="{ssid}"
+        {pw_line}
+    }}
+    """
+
         try:
-            # Open the file in write mode and write the config
+            # Read the existing file if it exists
+            existing_content = ""
+            if os.path.exists(file_path):
+                with open(file_path, "r") as f:
+                    existing_content = f.read().strip()
+
+            # Ensure the file starts with the required header
+            if not existing_content.startswith("ctrl_interface"):
+                existing_content = header + "\n" + existing_content
+
+            # Regex to locate a block for this SSID
+            ssid_pattern = re.compile(
+                r'network\s*\{\s*ssid="' + re.escape(ssid) + r'".*?\}',
+                re.DOTALL
+            )
+
+            if ssid_pattern.search(existing_content):
+                # Replace the existing block for this SSID
+                updated_content = ssid_pattern.sub(new_network.strip(), existing_content)
+                PyUiLogger.get_logger().info(f"Updated existing network '{ssid}' in {file_path}")
+            else:
+                # Append the new network at the end
+                updated_content = existing_content.rstrip() + "\n" + new_network.strip() + "\n"
+                PyUiLogger.get_logger().info(f"Added new network '{ssid}' to {file_path}")
+
+            # Write the updated content back to the file
             with open(file_path, "w") as f:
-                f.write(config.strip())
-            PyUiLogger.get_logger().info(f"Configuration written to {file_path}")
+                f.write(updated_content)
+
         except IOError as e:
             PyUiLogger.get_logger().error(f"Error writing to {file_path}: {e}")
 
