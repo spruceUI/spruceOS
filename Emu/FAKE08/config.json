@@ -18,7 +18,7 @@
   "useswap": 1,
   "shortname": 0,
   "hidebios": 0,
-  "extlist": "p8",
+  "extlist": "p8|png",
   "launchlist": [
     {
       "name": "Add/Remove Favorite",
