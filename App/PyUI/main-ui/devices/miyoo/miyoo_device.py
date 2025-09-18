@@ -387,3 +387,6 @@ class MiyooDevice(DeviceCommon):
     
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
+    
+    def get_extra_settings_options(self):
+        return []

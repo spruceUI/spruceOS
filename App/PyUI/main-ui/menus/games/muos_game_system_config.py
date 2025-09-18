@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 from menus.games.utils.rom_extensions import RomFolders
 
@@ -28,7 +29,8 @@ class MuosGameSystemConfig():
         return self.iconsel
 
     def get_launch(self):
-        return '/mnt/sdcard/Emu/muos_launch.sh'
+        base_dir = os.path.abspath(sys.path[0])
+        return os.path.join(base_dir, "devices","muos", "muos_launch.sh")
 
     def get_extlist(self):
         return RomFolders.get_extensions(self.system_name)

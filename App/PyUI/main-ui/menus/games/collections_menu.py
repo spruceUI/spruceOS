@@ -1,10 +1,8 @@
 
 import os
-import subprocess
 from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.collections_manager import CollectionsManager
-from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.rom_info import RomInfo
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry

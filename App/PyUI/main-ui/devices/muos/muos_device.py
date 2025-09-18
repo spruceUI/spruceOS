@@ -1,6 +1,9 @@
 import json
+from pathlib import Path
 import re
+import shutil
 import subprocess
+import sys
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from apps.muos.muos_app_finder import MuosAppFinder
@@ -10,6 +13,7 @@ from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
+from devices.miyoo.system_config import SystemConfig
 from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
@@ -20,18 +24,27 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 import sdl2
 from utils import throttle
+from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
+from views.grid_or_list_entry import GridOrListEntry
 
 
 class MuosDevice(DeviceCommon):
-    OUTPUT_MIXER = 2
-    SOUND_DISABLED = 0
-
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.muos_systems = self.load_assign_json()
+
+    def setup_system_config(self):
+        base_dir = os.path.abspath(sys.path[0])
+        PyUiLogger.get_logger().info(f"base_dir is {base_dir}")
+        self.script_dir = os.path.join(base_dir, "devices","muos")
+        self.parent_dir = os.path.dirname(base_dir)
+        source = os.path.join(self.script_dir,"muos-system.json") 
+        system_json_path = os.path.join(self.parent_dir,"muos-system.json")
+        ConfigCopier.ensure_config(system_json_path, Path(source))
+        self.system_config = SystemConfig(system_json_path)
 
     def sleep(self):
         ProcessRunner.run(["/opt/muos/script/system/suspend.sh"])
@@ -201,22 +214,22 @@ class MuosDevice(DeviceCommon):
         return None
 
     def get_favorites_path(self):
-        return "/mnt/sdcard/Saves/pyui-favorites.json"
+        return os.path.join(self.parent_dir,"/pyui-favorites.json")
     
     def get_recents_path(self):
-        return "/mnt/sdcard/Saves/pyui-recents.json"
+        return os.path.join(self.parent_dir,"/pyui-recents.json")
     
     def get_collections_path(self):
-        return "/mnt/sdcard/Collections/"
+        return os.path.join(self.parent_dir,"/Collections/")
 
     def launch_stock_os_menu(self):
         os._exit(0)
 
     def get_state_path(self):
-        return "/mnt/sdcard/Saves/pyui-state.json"
+        return os.path.join(self.parent_dir,"/pyui-state.json")
 
     def calibrate_sticks(self):
-        from controller.controller import Controller
+        pass
 
     def supports_analog_calibration(self):
         return False
@@ -287,4 +300,36 @@ class MuosDevice(DeviceCommon):
 
         return data
 
-    
+    def add_app_launch_as_startup(self, input):
+        if (ControllerInput.A == input):
+            muos_frontend_sh_path = "/opt/muos/script/mux/frontend.sh"        
+            updated_frontend = os.path.join(self.script_dir,"frontend.sh") 
+            
+            try:
+                shutil.copyfile(updated_frontend, muos_frontend_sh_path)
+                print(f"Copied {updated_frontend} to {muos_frontend_sh_path}")
+            except OSError as e:
+                print(f"Failed to copy file: {e}")
+                
+            startup_path = "/opt/muos/config/settings/general/startup"
+            try:
+                with open(startup_path, "w") as f:
+                    f.write("lastapp\n")
+            except OSError as e:
+                print(f"Failed to write to {startup_path}: {e}")
+
+
+    def get_extra_settings_options(self):
+        option_list = []
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Set PyUI as Startup",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.add_app_launch_as_startup
+                    )
+                )
+        return option_list

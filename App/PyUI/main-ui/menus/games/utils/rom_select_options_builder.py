@@ -53,8 +53,17 @@ class RomSelectOptionsBuilder:
                 same_dir_png = os.path.join(root_dir, base_name + ".png")
                 if os.path.exists(same_dir_png):
                     return same_dir_png
-                else:
-                    return None
+                
+        # Else try the muOS location
+        muos_image_path_sd2 = os.path.join("/mnt/sdcard/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
+        if os.path.exists(muos_image_path_sd2):
+            return muos_image_path_sd2
+
+        muos_image_path_sd1 = os.path.join("/mnt/mmc/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
+        if os.path.exists(muos_image_path_sd1):
+            return muos_image_path_sd1
+
+        return None
 
     def _build_favorites_dict(self):
         favorites = Device.parse_favorites()

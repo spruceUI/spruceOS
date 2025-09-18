@@ -571,7 +571,7 @@ class Theme():
 
     @classmethod
     def get_game_select_show_text_grid_mode(cls):
-        return cls._data.get("gameSelectShowTextGridMode", True)
+        return cls._data.get("gameSelectShowTextGridMode", False)
     
     @classmethod
     def set_game_select_show_text_grid_mode(cls, value):
@@ -642,8 +642,8 @@ class Theme():
 
     @classmethod
     def get_grid_game_selected_resize_type(cls):
-        view_type_str = cls._data.get("gameSelectGridResizeType", "FIT")
-        return getattr(ResizeType, view_type_str, ResizeType.FIT)
+        view_type_str = cls._data.get("gameSelectGridResizeType", "ZOOM")
+        return getattr(ResizeType, view_type_str, ResizeType.ZOOM)
 
     @classmethod
     def set_grid_game_selected_resize_type(cls, view_type):
@@ -816,7 +816,8 @@ class Theme():
 
     @classmethod
     def get_grid_game_select_img_width(cls):
-        return cls._data.get("gridGameSelectImgWidth", cls.get_game_select_img_width())
+        from devices.device import Device
+        return cls._data.get("gridGameSelectImgWidth", int(Device.screen_width() * 140 / 640))
     
     @classmethod
     def set_grid_game_select_img_width(cls, value):
@@ -871,12 +872,14 @@ class Theme():
 
     @classmethod
     def get_grid_game_select_img_height(cls):
-        return cls._data.get("gridGameSelectImgHeight", cls.get_game_select_img_height())
+        from devices.device import Device
+        return cls._data.get("gridGameSelectImgHeight", int(Device.screen_width() * 140 / 640))
     
     @classmethod
     def set_grid_game_select_img_height(cls, value):
         cls._data["grid_gameSelectImgHeight"] = value
         cls.save_changes()
+
     @classmethod
     def get_list_game_select_img_height(cls):
         return cls._data.get("listGameSelectImgHeight", cls.get_game_select_img_height())
