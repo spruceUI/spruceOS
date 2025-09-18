@@ -4,11 +4,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" != "Flip" ]; then
-    log_message "wpa_watchdog disabled due to running on the flip"
-    exit 0
-fi
-
 MULTIPASS="/mnt/SDCARD/multipass.cfg"
 TEMP_FILE="${WPA_SUPPLICANT_FILE}.tmp"
 
