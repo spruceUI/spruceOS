@@ -8,6 +8,7 @@ from display.render_mode import RenderMode
 import sdl2
 from controller.controller import Controller
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -83,25 +84,24 @@ class CarouselView(View):
             self.current_right =  self.current_right%len(self.options)
 
     def get_visible_options(self):
+
         n = len(self.options)
-        # Normalize into [0, n)
-        left = (self.current_left-1) % n
-        right = (self.current_right+1) % n
+
+        half = self.cols // 2
+        if(self.sides_hang_off_edge):
+            start = (self.selected - half - 1) % n
+        else:
+            start = (self.selected - half) % n
 
         visible = []
-        visible_indexes = []
-
-        i = left
-        while True:
-            visible.append(self.options[i])
-            visible_indexes.append(i)
-            # stop as soon as we've just appended the inclusive `right`
-            if i == right:
-                break
-            i = (i + 1) % n  # wrap around
+        range_amt = self.cols
+        if(self.sides_hang_off_edge):
+            range_amt += 1
+        for i in range(range_amt):
+            options_offset = (start + i) % n
+            visible.append(self.options[options_offset])
 
         return visible
-
 
     def get_width_percentages(self) -> List[float]:
         if(self.shrink_further_away):
