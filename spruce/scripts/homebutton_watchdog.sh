@@ -236,6 +236,14 @@ send_virtual_key_R3() {
     fi
 }
 
+check_and_kill_pyui() {
+    if ps -f | grep -q "[/]mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py"; then
+        rm -f /tmp/cmd_to_run.sh
+        touch /mnt/SDCARD/spruce/flags/gs.lock
+        killall -9 python3
+    fi
+}
+
 long_press_handler() {
     HELD_ID="$1"
     # setup flag for long pressed event
@@ -260,13 +268,7 @@ long_press_handler() {
         case $HOLD_HOME in
         "Game Switcher")
             prepare_game_switcher
-
-            if ps -f | grep -q "[/]mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py"; then
-                rm /tmp/cmd_to_run.sh
-				touch /mnt/SDCARD/spruce/flags/gs.lock
-                killall -9 python3
-            fi
-
+            check_and_kill_pyui
             ;;
         "In-game menu")
             if pgrep "ra32.miyoo" >/dev/null; then
@@ -366,6 +368,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             "Game Switcher")
               log_message "*** homebutton_watchdog.sh: Game Switcher" -v
                 prepare_game_switcher
+                check_and_kill_pyui
                 ;;
             "In-game menu")
               log_message "*** homebutton_watchdog.sh: In-game menu" -v
