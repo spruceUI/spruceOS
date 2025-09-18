@@ -18,9 +18,6 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 NEW_PAYLOAD_VERSION=$(cat $DIR/payload/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
 echo "New payload version $NEW_PAYLOAD_VERSION"
 
-# debug delay
-sleep 5s
-
 # Check for existing install
 if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
 	# Payload not installed
