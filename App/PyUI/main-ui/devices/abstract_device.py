@@ -245,3 +245,7 @@ class AbstractDevice(ABC):
     @abstractmethod
     def remap_buttons(self):
         pass
+
+    @abstractmethod
+    def get_extra_settings_options(self):
+        pass

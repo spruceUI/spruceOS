@@ -3,6 +3,7 @@ import os
 
 class FileBasedGameSystemConfig():
     def __init__(self, system_name):
+        self.system_name = system_name
         self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
         if(not os.path.exists(self.emu_folder)):
             self.emu_folder =  f"/mnt/SDCARD/Emus/{system_name}"

@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
@@ -19,16 +20,13 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class MuosAnbernicRGXX(MuosDevice):
-    OUTPUT_MIXER = 2
-    SOUND_DISABLED = 0
 
     def __init__(self):
-        PyUiLogger.get_logger().info("Initializing RG34XXSP")        
+        PyUiLogger.get_logger().info("Initializing MuosAnbernicRGXX")        
         
-        script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'rg34xxsp-system.json'
-        ConfigCopier.ensure_config("/mnt/sdcard/Saves/rg34xxsp-system.json", source)
-        self.system_config = SystemConfig("/mnt/sdcard/Saves/rg34xxsp-system.json")
+        self.setup_system_config()
+
+
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
         self.hardware_poller = MiyooFlipPoller(self)

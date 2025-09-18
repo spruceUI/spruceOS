@@ -285,5 +285,9 @@ class Device:
     @staticmethod
     def get_roms_dir():
         return Device._impl.get_roms_dir()
-    
+        
+    @staticmethod
+    def get_extra_settings_options():
+        return Device._impl.get_extra_settings_options()
+
     

@@ -53,6 +53,8 @@ def initialize_device(device):
         Device.init(MuosAnbernicRGXX())
     elif "ANBERNIC_RG28XX" == device:
         Device.init(MuosAnbernicRGXX())
+    elif "ANBERNIC_MUOS" == device:
+        Device.init(MuosAnbernicRGXX())
     else:
         raise RuntimeError(f"{device} is not a supported device")
 

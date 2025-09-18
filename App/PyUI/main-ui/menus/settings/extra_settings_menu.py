@@ -93,6 +93,8 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
         )
 
+        option_list.extend(Device.get_extra_settings_options())
+
         option_list.append(
                 GridOrListEntry(
                         primary_text="Reboot",
