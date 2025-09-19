@@ -13,21 +13,28 @@ class MiyooTrimCommon():
         
     @staticmethod
     def convert_game_path_to_miyoo_path(original_path):
-        # Define the part of the path to be replaced
-        base_dir = "/mnt/SDCARD/Roms/"
+        # Define the possible base directories
+        base_dirs = {
+            "/mnt/SDCARD/Roms/": "/media/sdcard0/",
+            "/media/sdcard1/Roms/": "/media/sdcard1/"
+        }
+        for base_dir, sdcard_mount in base_dirs.items():
+            if original_path.startswith(base_dir):
+                # Extract the subdirectory after Roms or Roms2
+                subdirectory = original_path[len(base_dir):].split(os.sep, 1)[0]
 
-        # Check if the original path starts with the base directory
-        if original_path.startswith(base_dir):
-            # Extract the subdirectory after Roms/
-            subdirectory = original_path[len(base_dir):].split(os.sep, 1)[0]
-            
-            # Construct the new path using the desired format
-            new_path = original_path.replace(f"Roms{os.sep}{subdirectory}", f"Emu{os.sep}{subdirectory}{os.sep}..{os.sep}..{os.sep}Roms{os.sep}{subdirectory}")
-            new_path = new_path.replace("/mnt/SDCARD/", "/media/sdcard0/")
-            return new_path
-        else:
-            PyUiLogger.get_logger().error(f"Unable to convert {original_path} to miyoo path")
-            return original_path
+                # Construct the new path using the desired format
+                new_path = original_path.replace(
+                    f"{os.path.basename(base_dir.rstrip(os.sep))}{os.sep}{subdirectory}",
+                    f"Emu{os.sep}{subdirectory}{os.sep}..{os.sep}..{os.sep}{os.path.basename(base_dir.rstrip(os.sep))}{os.sep}{subdirectory}"
+                )
+                new_path = new_path.replace(base_dir, sdcard_mount)
+                return new_path
+
+        # If no matching base directory found
+        PyUiLogger.get_logger().error(f"Unable to convert {original_path} to miyoo path")
+        return original_path
+
 
                 
     @staticmethod

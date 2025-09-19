@@ -2,18 +2,19 @@ import os
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 
 class GameSystem:
-    def __init__(self, folder_path, display_name, game_system_config : FileBasedGameSystemConfig):
-        self._folder_path = folder_path
+    def __init__(self, folder_paths, display_name, game_system_config : FileBasedGameSystemConfig):
+        self._folder_paths = folder_paths
         self._display_name = display_name
         self._game_system_config : FileBasedGameSystemConfig = game_system_config
 
     @property
     def folder_name(self):
-        return os.path.basename(self._folder_path)
+        #TODO how to handle, does it matter?
+        return os.path.basename(self._folder_paths[0])
 
     @property
-    def folder_path(self):
-        return self._folder_path
+    def folder_paths(self):
+        return self._folder_paths
     
     @property
     def display_name(self):
