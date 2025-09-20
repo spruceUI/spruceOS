@@ -9,22 +9,29 @@ from utils.logger import PyUiLogger
 
 class MiyooTrimGameSystemUtils(GameSystemUtils):
     def __init__(self):
-        self.roms_path = "/mnt/SDCARD/Roms/"
+        self.roms_paths = ["/mnt/SDCARD/Roms/"]
         self.emu_path = "/mnt/SDCARD/Emu/"
         if(not os.path.exists(self.emu_path)):
             self.emu_path =  "/mnt/SDCARD/Emus/"
+            
+        if(os.path.exists("/media/sdcard1/Roms/")):
+            self.roms_paths.append("/media/sdcard1/Roms/")
         PyUiLogger().get_logger().info(f"Emu folder is {self.emu_path}")
-        self.rom_utils = RomUtils(self.roms_path)
+        self.rom_utils = RomUtils(self.roms_paths[0])
     
     def get_game_system_by_name(self, system_name) -> GameSystem:
         game_system_config = FileBasedGameSystemConfig(system_name)
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()
-            return GameSystem(self.roms_path+system_name,display_name, game_system_config)
+            return GameSystem(self.build_paths_array(system_name),display_name, game_system_config)
 
         PyUiLogger.get_logger().error(f"Unable to load game system for {system_name}")
         return None
+
+    def build_paths_array(self, system_name):
+        # Build a copy of self.roms_paths with the system_name appended to each path
+        return [os.path.join(path, system_name) for path in self.roms_paths]
 
     def get_active_systems(self) -> list[GameSystem]:
         active_systems : list[GameSystem]= []
@@ -47,7 +54,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
 
             if(game_system_config is not None and self.contains_needed_files(game_system_config)):
                 display_name = game_system_config.get_label()
-                game_system = GameSystem(os.path.join(self.roms_path, folder),display_name, game_system_config)
+                game_system = GameSystem(self.build_paths_array(folder),display_name, game_system_config)
                 if(self.rom_utils.has_roms(game_system)):
                     active_systems.append(game_system)
 

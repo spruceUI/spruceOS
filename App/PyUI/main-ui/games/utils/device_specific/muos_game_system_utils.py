@@ -22,7 +22,7 @@ class MuosGameSystemUtils(GameSystemUtils):
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()
-            return GameSystem(system_name,display_name, game_system_config)
+            return GameSystem([system_name],display_name, game_system_config)
 
         PyUiLogger.get_logger().error(f"Unable to load game system for {system_name}")
         return None
@@ -52,7 +52,7 @@ class MuosGameSystemUtils(GameSystemUtils):
             
             if(game_system_config is not None):
                 display_name = game_system_config.get_label()
-                game_system = GameSystem(os.path.join(self.roms_path, folder),display_name, game_system_config)
+                game_system = GameSystem([os.path.join(self.roms_path, folder)],display_name, game_system_config)
                 if(self.rom_utils.has_roms(game_system)):
                     active_systems.append(game_system)
 
