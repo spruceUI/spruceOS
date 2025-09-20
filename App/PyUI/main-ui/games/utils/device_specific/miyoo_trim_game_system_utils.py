@@ -31,8 +31,10 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
 
     def build_paths_array(self, system_name):
         # Build a copy of self.roms_paths with the system_name appended to each path
-        return [os.path.join(path, system_name) for path in self.roms_paths]
-
+        return [
+            full_path for full_path in (os.path.join(path, system_name) for path in self.roms_paths)
+            if os.path.isdir(full_path)
+        ]
     def get_active_systems(self) -> list[GameSystem]:
         active_systems : list[GameSystem]= []
         

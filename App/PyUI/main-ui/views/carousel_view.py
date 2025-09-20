@@ -96,10 +96,15 @@ class CarouselView(View):
         visible = []
         range_amt = self.cols
         if(self.sides_hang_off_edge):
-            range_amt += 1
+            range_amt += 2
+
+        #PyUiLogger.get_logger().info(f"Selected: {self.options[self.selected].get_primary_text()}, cols = {self.cols}")
+
         for i in range(range_amt):
             options_offset = (start + i) % n
             visible.append(self.options[options_offset])
+            #PyUiLogger.get_logger().info(f"Visible option {i}: {self.options[options_offset].get_primary_text()}")
+
 
         return visible
 
@@ -186,11 +191,12 @@ class CarouselView(View):
         # x_offset[0] = 0; for i>0, sum of widths[0] through widths[i-1]
         x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
-        #Add one extra that is offscreen
-        x_offsets = [-x_offsets[1]] + x_offsets + [x_offsets[len(x_offsets)-1] + (x_offsets[len(x_offsets)-1] - x_offsets[len(x_offsets)-2])]
-        widths = [widths[0]] + widths + [widths[len(widths)-1]]
 
         if(self.sides_hang_off_edge):
+            #Add one extra that is offscreen
+            x_offsets = [-x_offsets[1]] + x_offsets + [x_offsets[len(x_offsets)-1] + (x_offsets[len(x_offsets)-1] - x_offsets[len(x_offsets)-2])]
+            widths = [widths[0]] + widths + [widths[len(widths)-1]]
+            #PyUiLogger.get_logger().info(f"x_offsets = {x_offsets}")
             x_offsets = [x - widths[0]//2 for x in x_offsets]
 
         #Center the x_offset in its spot
@@ -209,6 +215,7 @@ class CarouselView(View):
         render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
         for visible_index, imageTextPair in enumerate(visible_options):
             x_offset = x_offsets[visible_index]
+            #PyUiLogger.get_logger().info(f"Visible option {visible_index}: {imageTextPair.get_primary_text()} w/ x_offset {x_offset}")
 
             y_image_offset = Display.get_center_of_usable_screen_height()
             
