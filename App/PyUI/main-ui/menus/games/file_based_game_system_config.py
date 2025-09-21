@@ -41,6 +41,9 @@ class FileBasedGameSystemConfig():
     def run_in_game_menu(self):
         return bool(self._data.get('ingamemenu', 0))
     
+    def uses_retroarch(self):
+        return bool(self._data.get('uses_retroarch', 0))
+    
     def subfolder_launch_file(self):
         return self._data.get('subfolder_launch_file')
     

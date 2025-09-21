@@ -41,8 +41,9 @@ class GameSelectMenuPopup:
             Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
 
 
-    def run_game_select_popup_menu(self, rom_info : RomInfo):
+    def run_game_select_popup_menu(self, rom_info : RomInfo, additional_popup_options = []):
         popup_options = []
+        popup_options.extend(additional_popup_options)
         rom_name = os.path.basename(rom_info.rom_file_path)
         
         popup_options.append(GridOrListEntry(
@@ -92,6 +93,7 @@ class GameSelectMenuPopup:
             value=lambda input_value: self.toggle_view()
         ))
 
+
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
@@ -100,6 +102,7 @@ class GameSelectMenuPopup:
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
                         
+
 
         while (popup_selection := popup_view.get_selection()):
             if(popup_selection.get_input() is not None):

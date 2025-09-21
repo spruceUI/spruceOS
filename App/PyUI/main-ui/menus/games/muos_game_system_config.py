@@ -41,5 +41,9 @@ class MuosGameSystemConfig():
     def run_in_game_menu(self):
         return "PORTS" == self.label
     
+    def uses_retroarch(self):
+        return "PORTS" != self.label and "PSP" != self.label
+    
+    
     def subfolder_launch_file(self):
         return None

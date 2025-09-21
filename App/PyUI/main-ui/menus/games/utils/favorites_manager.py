@@ -25,3 +25,7 @@ class FavoritesManager:
     @classmethod
     def get_favorites(cls) -> List[RomInfo]:
         return cls._favoritesManager.get_games()
+
+    @classmethod
+    def sort_favorites_alphabetically(cls):
+        return cls._favoritesManager.sort_alphabetically()

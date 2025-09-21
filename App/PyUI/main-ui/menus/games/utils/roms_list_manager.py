@@ -89,3 +89,8 @@ class RomsListManager():
                 PyUiLogger.get_logger().error(f"Unable to load config for {entry.game_system_name} so skipping entry")
 
         return rom_info_list
+    
+    def sort_alphabetically(self):
+        self._entries.sort(key=lambda entry: (entry.display_name or os.path.basename(entry.rom_file_path)).lower())
+        self.save_to_file()
+        self.rom_info_list = self.load_entries_as_rom_info()

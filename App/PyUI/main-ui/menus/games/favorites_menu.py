@@ -1,6 +1,7 @@
 
 import os
 import subprocess
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.favorites_manager import FavoritesManager
@@ -35,3 +36,20 @@ class FavoritesMenu(RomsMenuCommon):
 
     def run_rom_selection(self) :
         return self._run_rom_selection("Favorites")
+
+
+    def sort_favorites_alphabetically(self, input_value):
+        if(ControllerInput.A == input_value):
+            FavoritesManager.sort_favorites_alphabetically()
+
+    def get_additional_menu_options(self):
+        popup_options = []
+        popup_options.append(GridOrListEntry(
+            primary_text="Sort Favorites Alphabetically",
+            image_path=None,
+            image_path_selected=None,
+            description=f"Sort Favorites Alphabetically",
+            icon=None,
+            value=lambda input_value: self.sort_favorites_alphabetically(input_value)
+        ))
+        return popup_options

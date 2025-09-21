@@ -1,5 +1,6 @@
 
 
+import socket
 from controller.controller_inputs import ControllerInput
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
@@ -8,15 +9,52 @@ from views.view_type import ViewType
 
 CONTINUE_RUNNING = True
 
-class InGameMenuPopup:
+class RetroarchInGameMenuPopup:
     def __init__(self):
         pass
 
     def exit_game(self, input):
-        return False
+        if(ControllerInput.A == input):
+            return False
+        else:
+            return True
+        
+    def send_cmd_to_ra(self, cmd):
+        ra_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); 
+        ra_socket.sendto(cmd, ('127.0.0.1', 55355))
+
+    def save_state(self, input):
+        if(ControllerInput.A == input):
+            self.send_cmd_to_ra(b'SAVE_STATE')
+
+        return True
+    
+    def load_state(self, input):
+        if(ControllerInput.A == input):
+            self.send_cmd_to_ra(b'LOAD_STATE')
+        return True
+
 
     def run_in_game_menu(self):
         popup_options = []
+
+        popup_options.append(GridOrListEntry(
+            primary_text="Save State",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=self.save_state
+        ))
+
+        popup_options.append(GridOrListEntry(
+            primary_text="Load State",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=self.load_state
+        ))
     
         popup_options.append(GridOrListEntry(
             primary_text="Exit Game",
