@@ -1,17 +1,22 @@
 {
   "label": "Sega MS",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ms.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ms.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
   "background": "",
-  "themecolor":"740009",
-  "effectsh":"effect.sh",
+  "themecolor": "740009",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MS",
-    "imgpath": "../../Roms/MS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MS",
-    "imgpath": "../../../../media/sdcard1/Roms/MS/Imgs"}],
+    {
+      "rompath": "../../Roms/MS",
+      "imgpath": "../../Roms/MS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MS",
+      "imgpath": "../../../../media/sdcard1/Roms/MS/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MS",
   "imgpath": "../../Roms/MS/Imgs",
   "gamelist": "../../Roms/MS/miyoogamelist.xml",

@@ -1,6 +1,6 @@
 {
   "label": "TIC-80",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/tic.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/tic.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/tic.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/tic.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/TIC",
-    "imgpath": "../../Roms/TIC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/TIC",
-    "imgpath": "../../../../media/sdcard1/Roms/TIC/Imgs"}],
+    {
+      "rompath": "../../Roms/TIC",
+      "imgpath": "../../Roms/TIC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/TIC",
+      "imgpath": "../../../../media/sdcard1/Roms/TIC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/TIC",
   "imgpath": "../../Roms/TIC/Imgs",
   "gamelist": "../../Roms/TIC/miyoogamelist.xml",

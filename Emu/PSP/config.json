@@ -1,17 +1,22 @@
 {
   "label": "PSP",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/psp.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/psp.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
   "background": "",
-  "themecolor":"64A8BD",
-  "effectsh":"effect.sh",
+  "themecolor": "64A8BD",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/PSP",
-    "imgpath": "../../Roms/PSP/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/PSP",
-    "imgpath": "../../../../media/sdcard1/Roms/PSP/Imgs"}],
+    {
+      "rompath": "../../Roms/PSP",
+      "imgpath": "../../Roms/PSP/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/PSP",
+      "imgpath": "../../../../media/sdcard1/Roms/PSP/Imgs"
+    }
+  ],
   "rompath": "../../Roms/PSP",
   "imgpath": "../../Roms/PSP/Imgs",
   "gamelist": "../../Roms/PSP/miyoogamelist.xml",

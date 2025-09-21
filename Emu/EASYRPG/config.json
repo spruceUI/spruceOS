@@ -1,18 +1,23 @@
 {
   "label": "EasyRPG",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/easyrpg.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/easyrpg.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/easyrpg.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/easyrpg.png",
   "background": "",
-  "themecolor":"FFFF88",
-  "effectsh":"effect.sh",
+  "themecolor": "FFFF88",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
-  "subfolder_launch_file":"RPG_RT.ldb",
+  "subfolder_launch_file": "RPG_RT.ldb",
   "rompathlist": [
-    {"rompath": "../../Roms/EASYRPG",
-    "imgpath": "../../Roms/EASYRPG/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/EASYRPG",
-    "imgpath": "../../../../media/sdcard1/Roms/EASYRPG/Imgs"}],
+    {
+      "rompath": "../../Roms/EASYRPG",
+      "imgpath": "../../Roms/EASYRPG/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/EASYRPG",
+      "imgpath": "../../../../media/sdcard1/Roms/EASYRPG/Imgs"
+    }
+  ],
   "rompath": "../../Roms/EASYRPG",
   "imgpath": "../../Roms/EASYRPG/Imgs",
   "gamelist": "../../Roms/EASYRPG/miyoogamelist.xml",

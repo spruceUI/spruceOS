@@ -1,6 +1,6 @@
 {
   "label": "VideoPac",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/vdp.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/vdp.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vdp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vdp.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/VIDEOPAC",
-    "imgpath": "../../Roms/VIDEOPAC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/VIDEOPAC",
-    "imgpath": "../../../../media/sdcard1/Roms/VIDEOPAC/Imgs"}],
+    {
+      "rompath": "../../Roms/VIDEOPAC",
+      "imgpath": "../../Roms/VIDEOPAC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/VIDEOPAC",
+      "imgpath": "../../../../media/sdcard1/Roms/VIDEOPAC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/VIDEOPAC",
   "imgpath": "../../Roms/VIDEOPAC/Imgs",
   "gamelist": "../../Roms/VIDEOPAC/miyoogamelist.xml",

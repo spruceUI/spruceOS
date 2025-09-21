@@ -1,6 +1,6 @@
 {
   "label": "ZXS",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/zxs.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/zxs.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/zxs.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/zxs.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/ZXS",
-    "imgpath": "../../Roms/ZXS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/ZXS",
-    "imgpath": "../../../../media/sdcard1/Roms/ZXS/Imgs"}],
+    {
+      "rompath": "../../Roms/ZXS",
+      "imgpath": "../../Roms/ZXS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/ZXS",
+      "imgpath": "../../../../media/sdcard1/Roms/ZXS/Imgs"
+    }
+  ],
   "rompath": "../../Roms/ZXS",
   "imgpath": "../../Roms/ZXS/Imgs",
   "gamelist": "../../Roms/ZXS/miyoogamelist.xml",

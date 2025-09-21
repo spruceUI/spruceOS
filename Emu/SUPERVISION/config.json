@@ -1,6 +1,6 @@
 {
   "label": "Supervision",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/supervision.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/supervision.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/supervision.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/SUPERVISION",
-    "imgpath": "../../Roms/SUPERVISION/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SUPERVISION",
-    "imgpath": "../../../../media/sdcard1/Roms/SUPERVISION/Imgs"}],
+    {
+      "rompath": "../../Roms/SUPERVISION",
+      "imgpath": "../../Roms/SUPERVISION/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/SUPERVISION",
+      "imgpath": "../../../../media/sdcard1/Roms/SUPERVISION/Imgs"
+    }
+  ],
   "rompath": "../../Roms/SUPERVISION",
   "imgpath": "../../Roms/SUPERVISION/Imgs",
   "gamelist": "../../Roms/SUPERVISION/miyoogamelist.xml",

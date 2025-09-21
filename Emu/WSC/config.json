@@ -1,17 +1,22 @@
 {
   "label": "WndrSwnC",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/wsc.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/wsc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
   "background": "",
-  "themecolor":"3C4593",
-  "effectsh":"effect.sh",
+  "themecolor": "3C4593",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/WSC",
-    "imgpath": "../../Roms/WSC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/WSC",
-    "imgpath": "../../../../media/sdcard1/Roms/WSC/Imgs"}],
+    {
+      "rompath": "../../Roms/WSC",
+      "imgpath": "../../Roms/WSC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/WSC",
+      "imgpath": "../../../../media/sdcard1/Roms/WSC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/WSC",
   "imgpath": "../../Roms/WSC/Imgs",
   "gamelist": "../../Roms/WSC/miyoogamelist.xml",

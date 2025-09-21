@@ -1,17 +1,22 @@
 {
   "label": "Media",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ffplay.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ffplay.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
   "background": "",
-  "themecolor":"DDEEFF",
-  "effectsh":"effect.sh",
+  "themecolor": "DDEEFF",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MEDIA",
-    "imgpath": "../../Roms/MEDIA/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MEDIA",
-    "imgpath": "../../../../media/sdcard1/Roms/MEDIA/Imgs"}],
+    {
+      "rompath": "../../Roms/MEDIA",
+      "imgpath": "../../Roms/MEDIA/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MEDIA",
+      "imgpath": "../../../../media/sdcard1/Roms/MEDIA/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MEDIA",
   "imgpath": "../../Roms/MEDIA/Imgs",
   "useswap": 1,

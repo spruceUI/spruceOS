@@ -1,17 +1,22 @@
 {
   "label": "OpenBOR",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/openbor.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/openbor.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/openbor.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/openbor.png",
   "background": "",
-  "themecolor":"FFFF00",
-  "effectsh":"effect.sh",
+  "themecolor": "FFFF00",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/OPENBOR",
-    "imgpath": "../../Roms/OPENBOR/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/OPENBOR",
-    "imgpath": "../../../../media/sdcard1/Roms/OPENBOR/Imgs"}],
+    {
+      "rompath": "../../Roms/OPENBOR",
+      "imgpath": "../../Roms/OPENBOR/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/OPENBOR",
+      "imgpath": "../../../../media/sdcard1/Roms/OPENBOR/Imgs"
+    }
+  ],
   "rompath": "../../Roms/OpenBOR",
   "imgpath": "../../Imgs/OpenBOR/Imgs",
   "gamelist": "../../Roms/OpenBOR/miyoogamelist.xml",

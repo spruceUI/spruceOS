@@ -1,17 +1,22 @@
 {
   "label": "NES",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/fc.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/fc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fc.png",
   "background": "",
-  "effectsh":"effect.sh",
-  "themecolor":"991615",
+  "effectsh": "effect.sh",
+  "themecolor": "991615",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/FC",
-    "imgpath": "../../Roms/FC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/FC",
-    "imgpath": "../../../../media/sdcard1/Roms/FC/Imgs"}],
+    {
+      "rompath": "../../Roms/FC",
+      "imgpath": "../../Roms/FC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/FC",
+      "imgpath": "../../../../media/sdcard1/Roms/FC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/FC",
   "imgpath": "../../Roms/FC/Imgs",
   "gamelist": "../../Roms/FC/miyoogamelist.xml",

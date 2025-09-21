@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/DOOM",
-    "imgpath": "../../Roms/DOOM/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/DOOM",
-    "imgpath": "../../../../media/sdcard1/Roms/DOOM/Imgs"}],
+    {
+      "rompath": "../../Roms/DOOM",
+      "imgpath": "../../Roms/DOOM/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/DOOM",
+      "imgpath": "../../../../media/sdcard1/Roms/DOOM/Imgs"
+    }
+  ],
   "rompath": "../../Roms/DOOM",
   "imgpath": "../../Roms/DOOM/Imgs",
   "gamelist": "../../Roms/DOOM/miyoogamelist.xml",

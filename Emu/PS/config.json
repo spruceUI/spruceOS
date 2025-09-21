@@ -1,17 +1,22 @@
 {
   "label": "PSX",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ps.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ps.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
   "background": "",
-  "themecolor":"00FF00",
-  "effectsh":"effect.sh",
+  "themecolor": "00FF00",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/PS",
-    "imgpath": "../../Roms/PS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/PS",
-    "imgpath": "../../../../media/sdcard1/Roms/PS/Imgs"}],
+    {
+      "rompath": "../../Roms/PS",
+      "imgpath": "../../Roms/PS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/PS",
+      "imgpath": "../../../../media/sdcard1/Roms/PS/Imgs"
+    }
+  ],
   "rompath": "../../Roms/PS",
   "imgpath": "../../Roms/PS/Imgs",
   "gamelist": "../../Roms/PS/miyoogamelist.xml",

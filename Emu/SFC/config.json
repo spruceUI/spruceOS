@@ -1,17 +1,22 @@
 {
   "label": "SNES",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/sfc.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/sfc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
   "background": "",
-  "themecolor":"FF0000",
-  "effectsh":"effect.sh",
+  "themecolor": "FF0000",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/SFC",
-    "imgpath": "../../Roms/SFC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SFC",
-    "imgpath": "../../../../media/sdcard1/Roms/SFC/Imgs"}],
+    {
+      "rompath": "../../Roms/SFC",
+      "imgpath": "../../Roms/SFC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/SFC",
+      "imgpath": "../../../../media/sdcard1/Roms/SFC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/SFC",
   "imgpath": "../../Roms/SFC/Imgs",
   "gamelist": "../../Roms/SFC/miyoogamelist.xml",

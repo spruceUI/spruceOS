@@ -1,6 +1,6 @@
 {
   "label": "Fake08",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/FAKE08",
-    "imgpath": "../../Roms/FAKE08/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/FAKE08",
-    "imgpath": "../../../../media/sdcard1/Roms/FAKE08/Imgs"}],
+    {
+      "rompath": "../../Roms/FAKE08",
+      "imgpath": "../../Roms/FAKE08/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/FAKE08",
+      "imgpath": "../../../../media/sdcard1/Roms/FAKE08/Imgs"
+    }
+  ],
   "rompath": "../../Roms/FAKE08",
   "imgpath": "../../Roms/FAKE08/Imgs",
   "gamelist": "../../Roms/FAKE08/miyoogamelist.xml",

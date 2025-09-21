@@ -1,17 +1,22 @@
 {
   "label": "MSUMD",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/msumd.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/msumd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msumd.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MSUMD",
-    "imgpath": "../../Roms/MSUMD/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MSUMD",
-    "imgpath": "../../../../media/sdcard1/Roms/MSUMD/Imgs"}],
+    {
+      "rompath": "../../Roms/MSUMD",
+      "imgpath": "../../Roms/MSUMD/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MSUMD",
+      "imgpath": "../../../../media/sdcard1/Roms/MSUMD/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MSUMD",
   "imgpath": "../../Roms/MSUMD/Imgs",
   "gamelist": "../../Roms/MSUMD/miyoogamelist.xml",

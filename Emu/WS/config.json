@@ -1,6 +1,6 @@
 {
   "label": "WndrSwan",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ws.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ws.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ws.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ws.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/WS",
-    "imgpath": "../../Roms/WS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/WS",
-    "imgpath": "../../../../media/sdcard1/Roms/WS/Imgs"}],
+    {
+      "rompath": "../../Roms/WS",
+      "imgpath": "../../Roms/WS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/WS",
+      "imgpath": "../../../../media/sdcard1/Roms/WS/Imgs"
+    }
+  ],
   "rompath": "../../Roms/WS",
   "imgpath": "../../Roms/WS/Imgs",
   "gamelist": "../../Roms/WS/miyoogamelist.xml",

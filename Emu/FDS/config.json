@@ -1,6 +1,6 @@
 {
   "label": "FDS",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/fds.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/fds.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fds.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fds.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/FDS",
-    "imgpath": "../../Roms/FDS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/FDS",
-    "imgpath": "../../../../media/sdcard1/Roms/FDS/Imgs"}],
+    {
+      "rompath": "../../Roms/FDS",
+      "imgpath": "../../Roms/FDS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/FDS",
+      "imgpath": "../../../../media/sdcard1/Roms/FDS/Imgs"
+    }
+  ],
   "rompath": "../../Roms/FDS",
   "imgpath": "../../Roms/FDS/Imgs",
   "gamelist": "../../Roms/FDS/miyoogamelist.xml",
