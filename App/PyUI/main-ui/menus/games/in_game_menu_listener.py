@@ -9,6 +9,7 @@ from devices.device import Device
 from display.display import Display
 from games.utils.game_system import GameSystem
 from menus.games.in_game_menu_popup import InGameMenuPopup
+from menus.games.retroarch_in_game_menu_popup import RetroarchInGameMenuPopup
 from menus.games.utils.rom_info import RomInfo
 from utils.logger import PyUiLogger
 import psutil
@@ -17,6 +18,7 @@ import signal
 class InGameMenuListener:
     def __init__(self):
         self.popup_menu = InGameMenuPopup()
+        self.ra_popup_menu = RetroarchInGameMenuPopup()
             
     def send_signal(self, proc: subprocess.Popen, sig, timeout: float = 3.0):
         try:
@@ -52,6 +54,7 @@ class InGameMenuListener:
     
     def game_launched(self, game_process: subprocess.Popen, game: RomInfo):
         support_menu_button_in_game = game.game_system.game_system_config.run_in_game_menu()
+        uses_retroarch = game.game_system.game_system_config.run_in_game_menu()
         while(game_process.poll() is None):
             if(Controller.get_input()):
                 if (ControllerInput.MENU == Controller.last_input() and support_menu_button_in_game):
@@ -60,7 +63,10 @@ class InGameMenuListener:
                     Display.reinitialize()
                     
                     PyUiLogger.get_logger().debug(f"In game menu opened")
-                    continue_running = self.popup_menu.run_in_game_menu()
+                    if(uses_retroarch):
+                        continue_running = self.ra_popup_menu.run_in_game_menu()
+                    else:
+                        continue_running = self.popup_menu.run_in_game_menu()
                     PyUiLogger.get_logger().debug(f"In game menu opened closed. Continue Running ? {continue_running}")
 
                     Display.deinit_display()
