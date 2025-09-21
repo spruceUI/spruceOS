@@ -80,6 +80,20 @@ class MiyooDevice(DeviceCommon):
                 else:
                     ProcessRunner.run(["amixer","sset","Playback Path","SPK"], print=False)
 
+                # Why is the volume at 5 sometimes broken, but going 10 -> 5 fixes it?
+                if(volume == 5):
+                    ProcessRunner.run(
+                        ["amixer", "cset", f"name='SPK Volume'", str(10)],
+                        check=True,
+                        print=False
+                    )
+                    ProcessRunner.run(
+                        ["amixer", "cset", f"name='SPK Volume'", str(5)],
+                        check=True,
+                        print=False
+                    )
+
+
             
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")

@@ -58,24 +58,37 @@ class InGameMenuListener:
         while(game_process.poll() is None):
             if(Controller.get_input()):
                 if (ControllerInput.MENU == Controller.last_input() and support_menu_button_in_game):
-                    self.send_signal(game_process, signal.SIGSTOP)
-                    Device.capture_framebuffer()
-                    Display.reinitialize()
-                    
-                    PyUiLogger.get_logger().debug(f"In game menu opened")
-                    if(uses_retroarch):
-                        continue_running = self.ra_popup_menu.run_in_game_menu()
-                    else:
-                        continue_running = self.popup_menu.run_in_game_menu()
-                    PyUiLogger.get_logger().debug(f"In game menu opened closed. Continue Running ? {continue_running}")
+                    held_down = True
+                    hold_start = time.time()
+                    while(held_down and time.time() - hold_start < 0.3):   
+                        held_down = Controller.still_held_down() and Controller.last_input() == ControllerInput.MENU
+                        time.sleep(0.05)
 
-                    Display.deinit_display()
-                    Device.restore_framebuffer()
-                    if(continue_running):
-                        self.send_signal(game_process, signal.SIGCONT)
+                    if(held_down):
+                        PyUiLogger.get_logger().debug(f"Held down detected, ignoring menu button")
                     else:
-                        self.send_signal(game_process, signal.SIGCONT)
-                        time.sleep(0.1)
-                        self.send_signal(game_process, signal.SIGTERM)
+                        self.send_signal(game_process, signal.SIGSTOP)
+                        PyUiLogger.get_logger().info(f"Taking snapshot before in-game menu")
+                        snapshot = Device.take_snapshot("/tmp/screenshot.png")
+                        PyUiLogger.get_logger().info(f"Finished Taking snapshot before in-game menu")
+                        Device.capture_framebuffer()
+                        Display.reinitialize(snapshot)
+                        
+                        PyUiLogger.get_logger().debug(f"In game menu opened")
+                        if(uses_retroarch):
+                            continue_running = self.ra_popup_menu.run_in_game_menu()
+                        else:
+                            continue_running = self.popup_menu.run_in_game_menu()
+                        PyUiLogger.get_logger().debug(f"In game menu opened closed. Continue Running ? {continue_running}")
+
+                        Display.deinit_display()
+                        Device.restore_framebuffer()
+                        if(continue_running):
+                            self.send_signal(game_process, signal.SIGCONT)
+                        else:
+                            self.send_signal(game_process, signal.SIGCONT)
+                            time.sleep(0.1)
+                            self.send_signal(game_process, signal.SIGTERM)
+
         
         PyUiLogger.get_logger().debug(f"Game exit code was {game_process.poll()}")

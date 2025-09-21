@@ -290,4 +290,8 @@ class Device:
     def get_extra_settings_options():
         return Device._impl.get_extra_settings_options()
 
+    @staticmethod
+    def take_snapshot(path):
+        return Device._impl.take_snapshot(path)
+
     
