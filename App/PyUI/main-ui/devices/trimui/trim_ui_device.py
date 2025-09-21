@@ -1,3 +1,4 @@
+from asyncio import Future
 import ctypes
 import fcntl
 import math
@@ -300,3 +301,6 @@ class TrimUIDevice(DeviceCommon):
     
     def get_extra_settings_options(self):
         return []
+    
+    def take_snapshot(self, path):
+        return None

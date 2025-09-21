@@ -1,3 +1,4 @@
+from concurrent.futures import Future
 import json
 from pathlib import Path
 import re
@@ -333,3 +334,6 @@ class MuosDevice(DeviceCommon):
                     )
                 )
         return option_list
+
+    def take_snapshot(self, path):
+        return None

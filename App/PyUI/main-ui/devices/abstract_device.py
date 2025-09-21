@@ -249,3 +249,7 @@ class AbstractDevice(ABC):
     @abstractmethod
     def get_extra_settings_options(self):
         pass
+
+    @abstractmethod
+    def take_snapshot(self, path):
+        pass

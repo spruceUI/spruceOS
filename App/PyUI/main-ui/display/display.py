@@ -179,13 +179,13 @@ class Display:
         cls.fonts.clear()
 
     @classmethod
-    def reinitialize(cls):
+    def reinitialize(cls, bg=None):
         PyUiLogger.get_logger().info("reinitialize display")
         cls.deinit_display()
         cls._unload_bg_texture()
         cls._init_display()
         cls.init_fonts()
-        cls.restore_bg()
+        cls.restore_bg(bg)
         cls.clear("reinitialize")
         cls.present()
 
@@ -198,8 +198,11 @@ class Display:
             PyUiLogger.get_logger().debug("Destroying bg texture")
 
     @classmethod
-    def restore_bg(cls):
-        cls.set_new_bg(Theme.background())
+    def restore_bg(cls, bg=None):
+        if(bg is not None):
+            cls.set_new_bg(bg)
+        else:
+            cls.set_new_bg(Theme.background())
 
     @classmethod
     def set_new_bg(cls, bg_path):

@@ -1,3 +1,4 @@
+from concurrent.futures import Future
 from pathlib import Path
 import threading
 from controller.controller_inputs import ControllerInput
@@ -172,3 +173,5 @@ class MiyooA30(MiyooDevice):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:brightness:"+str(self.system_config.brightness * 5)])
 
+    def take_snapshot(self, path):
+        return None

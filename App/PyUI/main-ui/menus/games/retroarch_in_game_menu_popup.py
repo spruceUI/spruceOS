@@ -12,32 +12,40 @@ CONTINUE_RUNNING = True
 class RetroarchInGameMenuPopup:
     def __init__(self):
         pass
-
-    def exit_game(self, input):
-        if(ControllerInput.A == input):
-            return False
-        else:
-            return True
         
     def send_cmd_to_ra(self, cmd):
         ra_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); 
         ra_socket.sendto(cmd, ('127.0.0.1', 55355))
 
+    def exit_game(self, input):
+        if(ControllerInput.A == input):
+            self.send_cmd_to_ra(b'QUIT')
+            return False
+        else:
+            return True
     def save_state(self, input):
         if(ControllerInput.A == input):
             self.send_cmd_to_ra(b'SAVE_STATE')
-
         return True
     
     def load_state(self, input):
         if(ControllerInput.A == input):
             self.send_cmd_to_ra(b'LOAD_STATE')
         return True
-
+    
+    def fast_forward(self, input):
+        if(ControllerInput.A == input):
+            self.send_cmd_to_ra(b'FAST_FORWARD')
+        return True
+    
+    def ra_menu(self, input):
+        if(ControllerInput.A == input):
+            self.send_cmd_to_ra(b'MENU_TOGGLE')
+        return True
 
     def run_in_game_menu(self):
         popup_options = []
-
+        self.send_cmd_to_ra(b'PAUSE_TOGGLE')
         popup_options.append(GridOrListEntry(
             primary_text="Save State",
             image_path=Theme.settings(),
@@ -55,7 +63,25 @@ class RetroarchInGameMenuPopup:
             icon=Theme.settings(),
             value=self.load_state
         ))
-    
+
+        popup_options.append(GridOrListEntry(
+            primary_text="Toggle Fast Forward",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=self.fast_forward
+        ))
+
+        popup_options.append(GridOrListEntry(
+            primary_text="RA Menu",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=self.ra_menu
+        ))
+
         popup_options.append(GridOrListEntry(
             primary_text="Exit Game",
             image_path=Theme.settings(),
@@ -79,6 +105,8 @@ class RetroarchInGameMenuPopup:
                 break
         
         if(ControllerInput.A == popup_selection.get_input()): 
+            self.send_cmd_to_ra(b'PAUSE_TOGGLE')
             return popup_selection.get_selection().get_value()(popup_selection.get_input())
-
-        return True
+        else:
+            self.send_cmd_to_ra(b'PAUSE_TOGGLE')
+            return True

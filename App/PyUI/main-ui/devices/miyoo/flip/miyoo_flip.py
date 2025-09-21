@@ -14,6 +14,7 @@ from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from concurrent.futures import ThreadPoolExecutor
 
 class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
@@ -216,3 +217,42 @@ class MiyooFlip(MiyooDevice):
     def _set_hue_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:hue:"+str(self.system_config.hue * 5)])
+        
+
+    #This was from ChatGPT and might be able to be modified to get the current display
+    #but currently its capturing an old one which just says Loading...
+    def capture_kmsdrm_png(self, output_path="/tmp/screenshot.png", fb_path="/dev/fb0"):
+        logger = PyUiLogger.get_logger()
+
+        # Read width/height/stride from sysfs if possible
+        try:
+            with open("/sys/class/graphics/fb0/virtual_size", "r") as f:
+                width_str, height_str = f.read().strip().split(",")
+                width, height = int(width_str), int(height_str)
+            with open("/sys/class/graphics/fb0/stride", "r") as f:
+                stride = int(f.read().strip())
+        except Exception as e:
+            logger.warning(f"Failed to read fb0 sysfs info: {e}, using defaults")
+            width, height, stride = 640, 480, 2560
+
+        # Open framebuffer for reading
+        frame_bytes = bytearray()
+        with open(fb_path, "rb") as fb:
+            for _ in range(height):
+                row = fb.read(stride)
+                frame_bytes.extend(row[:width*4])  # slice only visible pixels
+
+        # Convert BGRA to RGBA
+        img = Image.frombytes("RGBA", (width, height), bytes(frame_bytes), "raw", "BGRA")
+        img.save(output_path)
+        logger.info(f"Framebuffer saved to {output_path} ({width}x{height})")
+        return output_path
+            
+    def _take_snapshot(self, path):
+        ProcessRunner.run(["/mnt/sdcard/spruce/flip/screenshot.sh", path])
+        return path
+
+    def take_snapshot(self, path):
+        #Currently this takes 0.7s on the flip, way too long to leave enabled
+        #return self._take_snapshot(path)
+        return None
