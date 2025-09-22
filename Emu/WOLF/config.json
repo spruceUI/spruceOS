@@ -1,6 +1,6 @@
 {
   "label": "Wolf3D",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/wolf.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/wolf.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wolf.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wolf.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/WOLF",
-    "imgpath": "../../Roms/WOLF/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/WOLF",
-    "imgpath": "../../../../media/sdcard1/Roms/WOLF/Imgs"}],
+    {
+      "rompath": "../../Roms/WOLF",
+      "imgpath": "../../Roms/WOLF/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/WOLF",
+      "imgpath": "../../../../media/sdcard1/Roms/WOLF/Imgs"
+    }
+  ],
   "rompath": "../../Roms/WOLF",
   "imgpath": "../../Roms/WOLF/Imgs",
   "gamelist": "../../Roms/WOLF/miyoogamelist.xml",

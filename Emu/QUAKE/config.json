@@ -1,17 +1,22 @@
 {
   "label": "Quake",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/quake.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/quake.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/quake.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/quake.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/QUAKE",
-    "imgpath": "../../Roms/QUAKE/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/QUAKE",
-    "imgpath": "../../../../media/sdcard1/Roms/QUAKE/Imgs"}],
+    {
+      "rompath": "../../Roms/QUAKE",
+      "imgpath": "../../Roms/QUAKE/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/QUAKE",
+      "imgpath": "../../../../media/sdcard1/Roms/QUAKE/Imgs"
+    }
+  ],
   "rompath": "../../Roms/QUAKE",
   "imgpath": "../../Roms/QUAKE/Imgs",
   "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",

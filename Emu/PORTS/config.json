@@ -1,17 +1,22 @@
 {
   "label": "PORTS",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ports.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ports.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ports.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/PORTS",
-    "imgpath": "../../Roms/PORTS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/PORTS",
-    "imgpath": "../../../../media/sdcard1/Roms/PORTS/Imgs"}],
+    {
+      "rompath": "../../Roms/PORTS",
+      "imgpath": "../../Roms/PORTS/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/PORTS",
+      "imgpath": "../../../../media/sdcard1/Roms/PORTS/Imgs"
+    }
+  ],
   "rompath": "/mnt/SDCARD/Roms/PORTS",
   "imgpath": "/mnt/SDCARD/Roms/PORTS/Imgs",
   "gamelist": "/mnt/SDCARD/Roms/PORTS/miyoogamelist.xml",

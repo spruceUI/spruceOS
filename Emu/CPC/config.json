@@ -1,6 +1,6 @@
 {
   "label": "Amst CPC",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/cpc.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/cpc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cpc.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/CPC",
-    "imgpath": "../../Roms/CPC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/CPC",
-    "imgpath": "../../../../media/sdcard1/Roms/CPC/Imgs"}],
+    {
+      "rompath": "../../Roms/CPC",
+      "imgpath": "../../Roms/CPC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/CPC",
+      "imgpath": "../../../../media/sdcard1/Roms/CPC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/CPC",
   "imgpath": "../../Roms/CPC/Imgs",
   "gamelist": "../../Roms/CPC/miyoogamelist.xml",

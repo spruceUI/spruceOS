@@ -1,6 +1,6 @@
 {
   "label": "VIC-20",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/c64.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/c64.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/VIC20",
-    "imgpath": "../../Roms/VIC20/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/VIC20",
-    "imgpath": "../../../../media/sdcard1/Roms/VIC20/Imgs"}],
+    {
+      "rompath": "../../Roms/VIC20",
+      "imgpath": "../../Roms/VIC20/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/VIC20",
+      "imgpath": "../../../../media/sdcard1/Roms/VIC20/Imgs"
+    }
+  ],
   "rompath": "../../Roms/VIC20",
   "imgpath": "../../Roms/VIC20/Imgs",
   "gamelist": "../../Roms/VIC20/miyoogamelist.xml",

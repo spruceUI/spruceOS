@@ -1,17 +1,22 @@
 {
   "label": "G&W",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gw.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/gw.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gw.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gw.png",
   "background": "",
-  "themecolor":"FF0000",
-  "effectsh":"",
+  "themecolor": "FF0000",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/GW",
-    "imgpath": "../../Roms/GW/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/GW",
-    "imgpath": "../../../../media/sdcard1/Roms/GW/Imgs"}],
+    {
+      "rompath": "../../Roms/GW",
+      "imgpath": "../../Roms/GW/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/GW",
+      "imgpath": "../../../../media/sdcard1/Roms/GW/Imgs"
+    }
+  ],
   "rompath": "../../Roms/GW",
   "imgpath": "../../Roms/GW/Imgs",
   "gamelist": "../../Roms/GW/miyoogamelist.xml",

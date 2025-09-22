@@ -1,17 +1,22 @@
 {
   "label": "Pokemini",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/poke.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/poke.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/POKE",
-    "imgpath": "../../Roms/POKE/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/POKE",
-    "imgpath": "../../../../media/sdcard1/Roms/POKE/Imgs"}],
+    {
+      "rompath": "../../Roms/POKE",
+      "imgpath": "../../Roms/POKE/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/POKE",
+      "imgpath": "../../../../media/sdcard1/Roms/POKE/Imgs"
+    }
+  ],
   "rompath": "../../Roms/POKE",
   "imgpath": "../../Roms/POKE/Imgs",
   "gamelist": "../../Roms/POKE/miyoogamelist.xml",

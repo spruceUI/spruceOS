@@ -49,3 +49,31 @@ class FileBasedGameSystemConfig():
     
     def required_files_groups(self):
         return self._data.get('requiredfiles', [])
+
+    def get_cpu_options(self):
+        return self._data.get('cpuOptions', [])
+    
+    def get_selected_cpu(self):
+        return self._data.get('selectedCpu', None)
+    
+    
+    def get_core_options(self):
+        return self._data.get('coreOptions', [])
+    
+    def get_selected_core(self):
+        return self._data.get('selectedCore', None)
+    
+    def save_config(self):
+        with open(self.config_path, 'w', encoding='utf-8') as f:
+            json.dump(self._data, f, indent=4)
+        self.reload_config()
+
+    def set_selected_core(self, core_name):
+        self._data['selectedCore'] = core_name
+        self.save_config()
+        self.reload_config()
+
+    def set_selected_cpu(self, cpu):
+        self._data['selectedCpu'] = cpu
+        self.save_config()
+        self.reload_config()

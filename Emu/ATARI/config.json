@@ -1,17 +1,22 @@
 {
   "label": "Atari 2600",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/atari.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/atari.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari.png",
   "background": "",
-  "themecolor":"AF7AC5",
-  "effectsh":"effect.sh",
+  "themecolor": "AF7AC5",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/ATARI",
-    "imgpath": "../../Roms/ATARI/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/ATARI",
-    "imgpath": "../../../../media/sdcard1/Roms/ATARI/Imgs"}],
+    {
+      "rompath": "../../Roms/ATARI",
+      "imgpath": "../../Roms/ATARI/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/ATARI",
+      "imgpath": "../../../../media/sdcard1/Roms/ATARI/Imgs"
+    }
+  ],
   "rompath": "../../Roms/ATARI",
   "imgpath": "../../Roms/ATARI/Imgs",
   "gamelist": "../../Roms/ATARI/miyoogamelist.xml",

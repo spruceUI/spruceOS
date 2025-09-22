@@ -1,17 +1,22 @@
 {
   "label": "GBA",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/gba.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/gba.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
   "background": "",
-  "themecolor":"FF00FF",
-  "effectsh":"effect.sh",
-  "launch":"../.emu_setup/standard_launch.sh",
+  "themecolor": "FF00FF",
+  "effectsh": "effect.sh",
+  "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/GBA",
-    "imgpath": "../../Roms/GBA/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/GBA",
-    "imgpath": "../../../../media/sdcard1/Roms/GBA/Imgs"}],
+    {
+      "rompath": "../../Roms/GBA",
+      "imgpath": "../../Roms/GBA/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/GBA",
+      "imgpath": "../../../../media/sdcard1/Roms/GBA/Imgs"
+    }
+  ],
   "rompath": "../../Roms/GBA",
   "imgpath": "../../Roms/GBA/Imgs",
   "gamelist": "../../Roms/GBA/miyoogamelist.xml",

@@ -47,3 +47,15 @@ class MuosGameSystemConfig():
     
     def subfolder_launch_file(self):
         return None
+
+    def get_cpu_options(self):
+        return []
+    
+    def get_selected_cpu(self):
+        return None
+    
+    def get_core_options(self):
+        return []
+    
+    def get_selected_core(self):
+        return None

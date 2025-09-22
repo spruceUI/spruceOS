@@ -1,17 +1,22 @@
 {
   "label": "N64",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/n64.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/n64.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
   "background": "",
-  "themecolor":"FFFF88",
-  "effectsh":"effect.sh",
+  "themecolor": "FFFF88",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/N64",
-    "imgpath": "../../Roms/N64/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/N64",
-    "imgpath": "../../../../media/sdcard1/Roms/N64/Imgs"}],
+    {
+      "rompath": "../../Roms/N64",
+      "imgpath": "../../Roms/N64/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/N64",
+      "imgpath": "../../../../media/sdcard1/Roms/N64/Imgs"
+    }
+  ],
   "rompath": "../../Roms/N64",
   "imgpath": "../../Roms/N64/Imgs",
   "gamelist": "../../Roms/N64/miyoogamelist.xml",

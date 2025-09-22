@@ -1,17 +1,22 @@
 {
   "label": "ScummVM",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/scummvm.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/scummvm.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/SCUMMVM",
-    "imgpath": "../../Roms/SCUMMVM/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SCUMMVM",
-    "imgpath": "../../../../media/sdcard1/Roms/SCUMMVM/Imgs"}],
+    {
+      "rompath": "../../Roms/SCUMMVM",
+      "imgpath": "../../Roms/SCUMMVM/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/SCUMMVM",
+      "imgpath": "../../../../media/sdcard1/Roms/SCUMMVM/Imgs"
+    }
+  ],
   "rompath": "../../Roms/SCUMMVM",
   "imgpath": "../../Roms/SCUMMVM/Imgs",
   "gamelist": "../../Roms/SCUMMVM/miyoogamelist.xml",

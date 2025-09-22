@@ -1,6 +1,6 @@
 {
   "label": "SGB",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/sgb.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/sgb.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgb.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgb.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/SGB",
-    "imgpath": "../../Roms/SGB/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SGB",
-    "imgpath": "../../../../media/sdcard1/Roms/SGB/Imgs"}],
+    {
+      "rompath": "../../Roms/SGB",
+      "imgpath": "../../Roms/SGB/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/SGB",
+      "imgpath": "../../../../media/sdcard1/Roms/SGB/Imgs"
+    }
+  ],
   "rompath": "../../Roms/SGB",
   "imgpath": "../../Roms/SGB/Imgs",
   "gamelist": "../../Roms/SGB/miyoogamelist.xml",

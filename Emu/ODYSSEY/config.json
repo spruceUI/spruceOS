@@ -1,17 +1,22 @@
 {
   "label": "Odyssey2",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ody.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ody.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ody.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ody.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/ODYSSEY",
-    "imgpath": "../../Roms/ODYSSEY/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/ODYSSEY",
-    "imgpath": "../../../../media/sdcard1/Roms/ODYSSEY/Imgs"}],
+    {
+      "rompath": "../../Roms/ODYSSEY",
+      "imgpath": "../../Roms/ODYSSEY/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/ODYSSEY",
+      "imgpath": "../../../../media/sdcard1/Roms/ODYSSEY/Imgs"
+    }
+  ],
   "rompath": "../../Roms/ODYSSEY",
   "imgpath": "../../Roms/ODYSSEY/Imgs",
   "gamelist": "../../Roms/ODYSSEY/miyoogamelist.xml",

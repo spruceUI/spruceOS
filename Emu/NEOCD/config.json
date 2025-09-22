@@ -1,17 +1,22 @@
 {
   "label": "Neo CD",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/neocd.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/neocd.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/NEOCD",
-    "imgpath": "../../Roms/NEOCD/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/NEOCD",
-    "imgpath": "../../../../media/sdcard1/Roms/NEOCD/Imgs"}],
+    {
+      "rompath": "../../Roms/NEOCD",
+      "imgpath": "../../Roms/NEOCD/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/NEOCD",
+      "imgpath": "../../../../media/sdcard1/Roms/NEOCD/Imgs"
+    }
+  ],
   "rompath": "../../Roms/NEOCD",
   "imgpath": "../../Roms/NEOCD/Imgs",
   "gamelist": "../../Roms/NEOCD/miyoogamelist.xml",

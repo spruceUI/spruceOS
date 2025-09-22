@@ -1,6 +1,6 @@
 {
   "label": "ColecoVis",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/col.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/col.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/col.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/col.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/COLECO",
-    "imgpath": "../../Roms/COLECO/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/COLECO",
-    "imgpath": "../../../../media/sdcard1/Roms/COLECO/Imgs"}],
+    {
+      "rompath": "../../Roms/COLECO",
+      "imgpath": "../../Roms/COLECO/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/COLECO",
+      "imgpath": "../../../../media/sdcard1/Roms/COLECO/Imgs"
+    }
+  ],
   "rompath": "../../Roms/COLECO",
   "imgpath": "../../Roms/COLECO/Imgs",
   "gamelist": "../../Roms/COLECO/miyoogamelist.xml",

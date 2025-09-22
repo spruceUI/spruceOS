@@ -1,6 +1,6 @@
 {
   "label": "Mega Duck",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/megaduck.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/megaduck.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/megaduck.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/megaduck.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MEGADUCK",
-    "imgpath": "../../Roms/MEGADUCK/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MEGADUCK",
-    "imgpath": "../../../../media/sdcard1/Roms/MEGADUCK/Imgs"}],
+    {
+      "rompath": "../../Roms/MEGADUCK",
+      "imgpath": "../../Roms/MEGADUCK/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MEGADUCK",
+      "imgpath": "../../../../media/sdcard1/Roms/MEGADUCK/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MEGADUCK",
   "imgpath": "../../Roms/MEGADUCK/Imgs",
   "gamelist": "../../Roms/MEGADUCK/miyoogamelist.xml",

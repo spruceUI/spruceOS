@@ -1,17 +1,22 @@
 {
   "label": "MSX",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/msx.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/msx.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MSX",
-    "imgpath": "../../Roms/MSX/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MSX",
-    "imgpath": "../../../../media/sdcard1/Roms/MSX/Imgs"}],
+    {
+      "rompath": "../../Roms/MSX",
+      "imgpath": "../../Roms/MSX/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MSX",
+      "imgpath": "../../../../media/sdcard1/Roms/MSX/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MSX",
   "imgpath": "../../Roms/MSX/Imgs",
   "gamelist": "../../Roms/MSX/miyoogamelist.xml",

@@ -1,21 +1,32 @@
 {
   "label": "Pico-8",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/pico.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
   "themecolor": "00FF88",
   "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "requiredfiles": [
-    ["/mnt/SDCARD/BIOS/pico8.dat"],
-    ["/mnt/SDCARD/BIOS/pico8_64"],
-    ["/mnt/SDCARD/BIOS/pico8_dyn"]
+    [
+      "/mnt/SDCARD/BIOS/pico8.dat"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/pico8_64"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/pico8_dyn"
+    ]
   ],
   "rompathlist": [
-    {"rompath": "../../Roms/PICO8",
-    "imgpath": "../../Roms/PICO8/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/PICO8",
-    "imgpath": "../../../../media/sdcard1/Roms/PICO8/Imgs"}],
+    {
+      "rompath": "../../Roms/PICO8",
+      "imgpath": "../../Roms/PICO8/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/PICO8",
+      "imgpath": "../../../../media/sdcard1/Roms/PICO8/Imgs"
+    }
+  ],
   "rompath": "../../Roms/PICO8",
   "imgpath": "../../Roms/PICO8",
   "gamelist": "../../Roms/PICO8/miyoogamelist.xml",

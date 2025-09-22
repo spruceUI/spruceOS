@@ -1,17 +1,22 @@
 {
   "label": "Genesis",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/md.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/md.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/md.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/md.png",
   "background": "",
-  "themecolor":"0088CF",
-  "effectsh":"effect.sh",
+  "themecolor": "0088CF",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/MD",
-    "imgpath": "../../Roms/MD/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MD",
-    "imgpath": "../../../../media/sdcard1/Roms/MD/Imgs"}],
+    {
+      "rompath": "../../Roms/MD",
+      "imgpath": "../../Roms/MD/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/MD",
+      "imgpath": "../../../../media/sdcard1/Roms/MD/Imgs"
+    }
+  ],
   "rompath": "../../Roms/MD",
   "imgpath": "../../Roms/MD/Imgs",
   "gamelist": "../../Roms/MD/miyoogamelist.xml",

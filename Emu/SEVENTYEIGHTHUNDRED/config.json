@@ -1,17 +1,22 @@
 {
   "label": "Atari 7800",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/7800.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/7800.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/7800.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/7800.png",
   "background": "",
-  "themecolor":"A569BD",
-  "effectsh":"effect.sh",
+  "themecolor": "A569BD",
+  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/SEVENTYEIGHTHUNDRED",
-    "imgpath": "../../Roms/SEVENTYEIGHTHUNDRED/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SEVENTYEIGHTHUNDRED",
-    "imgpath": "../../../../media/sdcard1/Roms/SEVENTYEIGHTHUNDRED/Imgs"}],
+    {
+      "rompath": "../../Roms/SEVENTYEIGHTHUNDRED",
+      "imgpath": "../../Roms/SEVENTYEIGHTHUNDRED/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/SEVENTYEIGHTHUNDRED",
+      "imgpath": "../../../../media/sdcard1/Roms/SEVENTYEIGHTHUNDRED/Imgs"
+    }
+  ],
   "rompath": "../../Roms/SEVENTYEIGHTHUNDRED",
   "imgpath": "../../Roms/SEVENTYEIGHTHUNDRED/Imgs",
   "gamelist": "../../Roms/SEVENTYEIGHTHUNDRED/miyoogamelist.xml",

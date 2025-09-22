@@ -1,6 +1,6 @@
 {
   "label": "Vectrex",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/vectrex.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/vectrex.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vectrex.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vectrex.png",
   "background": "",
@@ -8,10 +8,15 @@
   "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/VECTREX",
-    "imgpath": "../../Roms/VECTREX/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/VECTREX",
-    "imgpath": "../../../../media/sdcard1/Roms/VECTREX/Imgs"}],
+    {
+      "rompath": "../../Roms/VECTREX",
+      "imgpath": "../../Roms/VECTREX/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/VECTREX",
+      "imgpath": "../../../../media/sdcard1/Roms/VECTREX/Imgs"
+    }
+  ],
   "rompath": "../../Roms/VECTREX",
   "imgpath": "../../Roms/VECTREX/Imgs",
   "gamelist": "../../Roms/VECTREX/miyoogamelist.xml",

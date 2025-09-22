@@ -1,17 +1,22 @@
 {
   "label": "NGPC",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/ngpc.png",
+  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/ngpc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngpc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngpc.png",
   "background": "",
-  "themecolor":"",
-  "effectsh":"",
+  "themecolor": "",
+  "effectsh": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
-    {"rompath": "../../Roms/NGPC",
-    "imgpath": "../../Roms/NGPC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/NGPC",
-    "imgpath": "../../../../media/sdcard1/Roms/NGPC/Imgs"}],
+    {
+      "rompath": "../../Roms/NGPC",
+      "imgpath": "../../Roms/NGPC/Imgs"
+    },
+    {
+      "rompath": "../../../../media/sdcard1/Roms/NGPC",
+      "imgpath": "../../../../media/sdcard1/Roms/NGPC/Imgs"
+    }
+  ],
   "rompath": "../../Roms/NGPC",
   "imgpath": "../../Roms/NGPC/Imgs",
   "gamelist": "../../Roms/NGPC/miyoogamelist.xml",
