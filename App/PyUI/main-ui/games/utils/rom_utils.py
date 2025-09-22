@@ -75,10 +75,7 @@ class RomUtils:
         valid_files = []
         valid_folders = []
 
-        for dir_to_search in directories_to_search:
-            if os.path.basename(dir_to_search) == "Imgs":
-                return []
-            
+        for dir_to_search in directories_to_search:           
             valid_suffix_set = game_system.game_system_config.get_extlist()
 
             for entry in os.scandir(dir_to_search):
@@ -88,7 +85,7 @@ class RomUtils:
                         or Path(entry.name).suffix.lower() in valid_suffix_set
                     ):
                         valid_files.append(entry.path)
-                elif not entry.name.startswith('.') and entry.is_dir(follow_symlinks=False):
+                elif not entry.name.startswith('.') and os.path.basename(dir_to_search) != "Imgs" and entry.is_dir(follow_symlinks=False):
                     if self.has_roms(game_system, entry.path):
                         valid_folders.append(entry.path)
 
