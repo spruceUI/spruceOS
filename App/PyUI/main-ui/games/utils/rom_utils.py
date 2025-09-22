@@ -88,7 +88,7 @@ class RomUtils:
                         or Path(entry.name).suffix.lower() in valid_suffix_set
                     ):
                         valid_files.append(entry.path)
-                elif entry.is_dir(follow_symlinks=False):
+                elif not entry.name.startswith('.') and entry.is_dir(follow_symlinks=False):
                     if self.has_roms(game_system, entry.path):
                         valid_folders.append(entry.path)
 
