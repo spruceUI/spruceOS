@@ -28,7 +28,7 @@ class TrimUIDevice(DeviceCommon):
         return Sdl2ControllerInterface()
 
     def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf()
+        MiyooTrimCommon.ensure_wpa_supplicant_conf("/userdata/cfg/wpa_supplicant.conf")
         
     def clear_framebuffer(self):
         pass

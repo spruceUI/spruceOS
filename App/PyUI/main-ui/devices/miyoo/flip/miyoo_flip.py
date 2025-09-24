@@ -291,3 +291,5 @@ class MiyooFlip(MiyooDevice):
     def reboot_cmd(self):
         return "reboot"
 
+    def get_wpa_supplicant_conf_path(self):
+        return "/userdata/cfg/wpa_supplicant.conf"
