@@ -10,7 +10,9 @@ from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
+from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
@@ -293,3 +295,101 @@ class MiyooFlip(MiyooDevice):
 
     def get_wpa_supplicant_conf_path(self):
         return "/userdata/cfg/wpa_supplicant.conf"
+    
+    
+
+    def get_volume(self):
+        return self.system_config.get_volume()
+
+
+    def _set_volume(self, volume):
+        try:
+            
+            if(0 == volume):
+                ProcessRunner.run(["amixer","sset","Playback Path","OFF"], print=False)
+            else:
+                PyUiLogger.get_logger().info(f"Setting volume to {volume}")
+                ProcessRunner.run(
+                    ["amixer", "cset", f"name='SPK Volume'", str(volume)],
+                    check=True,
+                    print=False
+                )
+
+                if(self.are_headphones_plugged_in()):
+                    ProcessRunner.run(["amixer","sset","Playback Path","HP"], print=False)
+                else:
+                    ProcessRunner.run(["amixer","sset","Playback Path","SPK"], print=False)
+
+                # Why is the volume at 5 sometimes broken, but going 10 -> 5 fixes it?
+                if(volume == 5):
+                    ProcessRunner.run(
+                        ["amixer", "cset", f"name='SPK Volume'", str(10)],
+                        check=True,
+                        print=False
+                    )
+                    ProcessRunner.run(
+                        ["amixer", "cset", f"name='SPK Volume'", str(5)],
+                        check=True,
+                        print=False
+                    )
+
+
+            
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
+
+        return volume 
+
+
+    def get_current_mixer_value(self, numid):
+        # Run the amixer command and capture output
+        result = subprocess.run(
+            ['amixer', 'cget', f'numid={numid}'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        output = result.stdout
+        
+        # Find the line containing ': values=' and extract the number
+        for line in reversed(output.splitlines()):
+            match = re.search(r': values=(\d+)', line)
+            if match:
+                return int(match.group(1))
+        return None
+    
+    def read_volume(self):
+        try:
+            current_mixer = self.get_current_mixer_value(MiyooDevice.OUTPUT_MIXER)
+            if(MiyooDevice.SOUND_DISABLED == current_mixer):
+                return 0
+            else:
+                output = subprocess.check_output(
+                    ["amixer", "cget", "name='SPK Volume'"],
+                    text=True
+                )
+                match = re.search(r": values=(\d+)", output)
+                if match:
+                    return int(match.group(1))
+                else:
+                    PyUiLogger.get_logger().info("Volume value not found in amixer output.")
+                    return 0 # ???
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Command failed: {e}")
+            return 0 # ???
+
+    def fix_sleep_sound_bug(self):
+        config_volume = self.system_config.get_volume()
+        PyUiLogger.get_logger().info(f"Restoring volume to {config_volume}")
+        ProcessRunner.run(["amixer", "cset","numid=2", "0"])
+        ProcessRunner.run(["amixer", "cset","numid=5", "0"])
+        if(self.are_headphones_plugged_in()):
+            ProcessRunner.run(["amixer", "cset","numid=2", "3"])
+        elif(0 == config_volume):
+            ProcessRunner.run(["amixer", "cset","numid=2", "0"])
+        else:
+            ProcessRunner.run(["amixer", "cset","numid=2", "2"])
+        self._set_volume(config_volume)
+
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+        return MiyooTrimCommon.run_game(self,rom_info)

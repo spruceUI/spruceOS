@@ -43,7 +43,7 @@ class DeviceCommon(AbstractDevice):
     def screen_rotation(self):
         return 0
 
-    def map_backlight_from_10_to_full_255(self,lumination_level):
+    def map_backlight_from_10_to_full_255(self,lumination_level, min_level=1):
         if lumination_level == 10:
             return 255
         elif lumination_level == 9:
@@ -65,7 +65,7 @@ class DeviceCommon(AbstractDevice):
         elif lumination_level == 1:
             return 25
         else: 
-            return 1
+            return min_level
         
     def lower_lumination(self):
         self.system_config.reload_config()
