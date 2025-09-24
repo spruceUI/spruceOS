@@ -31,10 +31,6 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
            Device.prompt_power_down()
     
-    def reboot(self, input: ControllerInput):
-        if(ControllerInput.A == input):
-            Device.run_app(Device.reboot_cmd())
-    
     def lumination_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
             Device.lower_lumination()

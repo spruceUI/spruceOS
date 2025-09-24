@@ -211,3 +211,9 @@ class MiyooA30(MiyooDevice):
 
     def get_bluetooth_scanner(self):
         return None
+        
+    @property
+    def reboot_cmd(self):
+        return None
+
+

@@ -57,10 +57,6 @@ class MiyooDevice(DeviceCommon):
     @property
     def power_off_cmd(self):
         return "poweroff"
-    
-    @property
-    def reboot_cmd(self):
-        return "reboot"
 
     def _set_volume(self, volume):
         try:
