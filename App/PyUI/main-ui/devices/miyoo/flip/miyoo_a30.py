@@ -1,7 +1,10 @@
 from concurrent.futures import Future
+import fcntl
 from pathlib import Path
+import struct
 import subprocess
 import threading
+import time
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 import os
@@ -10,7 +13,9 @@ from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
+from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
@@ -54,8 +59,8 @@ class MiyooA30(MiyooDevice):
         self.ensure_wpa_supplicant_conf()
         self.init_gpio()
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
-        self.hardware_poller = MiyooFlipPoller(self)
-        threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+        #self.hardware_poller = MiyooFlipPoller(self)
+        #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller
@@ -139,10 +144,22 @@ class MiyooA30(MiyooDevice):
             return 1
     
     def _set_lumination_to_config(self):
-        #with open("/sys/class/backlight/backlight/brightness", "w") as f:
-        #    f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
-        pass
-    
+        DISP_LCD_SET_BRIGHTNESS = 0x102
+        try:
+            fd = os.open("/dev/disp", os.O_RDWR)
+        except OSError as e:
+            print(f"Failed to open /dev/disp: {e}")
+            return
+
+        param = struct.pack('LLLL', 0, self.map_backlight_from_10_to_full_255(self.system_config.backlight, min_level=10), 0, 0)
+
+        try:
+            fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+        except OSError as e:
+            print(f"ioctl failed: {e}")
+        finally:
+            os.close(fd)
+
     def _set_contrast_to_config(self):
 #        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
 #                                    "179:contrast:"+str(self.system_config.contrast * 5)])
@@ -218,3 +235,35 @@ class MiyooA30(MiyooDevice):
 
     def get_wpa_supplicant_conf_path(self):
         return "/config/wpa_supplicant.conf"
+    
+
+
+    def get_volume(self):
+        return self.system_config.get_volume()
+
+    def _set_volume(self, volume):
+        try:
+            ProcessRunner.run(["amixer","set","headphone volume",str(volume)+"%"], print=True)            
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
+
+        return volume 
+
+    def fix_sleep_sound_bug(self):
+        config_volume = self.system_config.get_volume()
+        self._set_volume(config_volume)
+
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+        def delayed_fix():
+            total_time = 2.0
+            interval = 0.1
+            elapsed = 0.0
+            config_volume = self.system_config.get_volume()
+            while elapsed < total_time:
+                time.sleep(interval)
+                elapsed += interval 
+                self._set_volume(config_volume)
+
+        # Start the thread
+        threading.Thread(target=delayed_fix, daemon=True).start()
+        return MiyooTrimCommon.run_game(self,rom_info)
