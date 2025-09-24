@@ -614,7 +614,95 @@ class Display:
 
         # Cleanup render target (optional, good practice)
         sdl2.SDL_DestroyTexture(render_target)
-                
+
+
+    @classmethod
+    def rotate_canvas(cls) -> sdl2.SDL_Texture:
+        """
+        Rotates a texture by a given angle (supports 90, 180, 270) without scaling.
+        Returns a new texture with dimensions swapped if needed.
+        """
+        # Query source texture size
+        w = sdl2.c_int()
+        h = sdl2.c_int()
+        query_texture_result = sdl2.SDL_QueryTexture(cls.render_canvas, None, None, w, h)
+        
+        if query_texture_result != 0:
+            # Destroy the old texture if it exists
+            if cls.render_canvas:
+                sdl2.SDL_DestroyTexture(cls.render_canvas)
+                cls.render_canvas = None
+
+            # Decide default size (fallback to current display size)
+            width, height = Device.screen_width(), Device.screen_height()
+
+            cls.render_canvas = sdl2.SDL_CreateTexture(
+                cls.renderer.sdlrenderer,
+                sdl2.SDL_PIXELFORMAT_RGBA8888,
+                sdl2.SDL_TEXTUREACCESS_TARGET,
+                width,
+                height
+            )
+            if not cls.render_canvas:
+                PyUiLogger.get_logger().error("Failed to recreate render_canvas: " + sdl2.SDL_GetError().decode())
+                return None        
+            
+        src_w, src_h = w.value, h.value
+
+        # Determine new target size after rotation
+        angle_mod = Device.screen_rotation() % 360
+        if angle_mod in (90, 270):
+            new_w, new_h = src_h, src_w
+        else:
+            new_w, new_h = src_w, src_h
+
+        # Create a new target texture
+        rotated_texture = sdl2.SDL_CreateTexture(
+            cls.renderer.sdlrenderer,
+            sdl2.SDL_PIXELFORMAT_RGBA8888,
+            sdl2.SDL_TEXTUREACCESS_TARGET,
+            new_w,
+            new_h
+        )
+        if not rotated_texture:
+            PyUiLogger.get_logger().error(f"new_w = {new_w}, new_h = {new_h}")
+            PyUiLogger.get_logger().error("Failed to create target texture: " + sdl2.SDL_GetError().decode())
+            return None
+
+        # Set render target
+        sdl2.SDL_SetRenderTarget(cls.renderer.sdlrenderer, rotated_texture)
+        
+        # Clear it
+        sdl2.SDL_SetRenderDrawColor(cls.renderer.sdlrenderer, 0, 0, 0, 0)
+        sdl2.SDL_RenderClear(cls.renderer.sdlrenderer)
+
+        # Destination rectangle uses **original texture size** (no scaling)
+        dst_rect = sdl2.SDL_Rect(
+            (new_w - src_w) // 2,  # center horizontally
+            (new_h - src_h) // 2,  # center vertically
+            src_w,
+            src_h
+        )
+
+        # Center of rotation inside the dst_rect
+        center = sdl2.SDL_Point(src_w // 2, src_h // 2)
+
+        # Render with rotation
+        sdl2.SDL_RenderCopyEx(
+            cls.renderer.sdlrenderer,
+            cls.render_canvas,
+            None,
+            dst_rect,
+            Device.screen_rotation(),
+            center,
+            sdl2.SDL_FLIP_NONE
+        )
+
+        # Reset render target
+        sdl2.SDL_SetRenderTarget(cls.renderer.sdlrenderer, None)
+
+        return rotated_texture
+         
     @classmethod
     def present(cls, fade=False):
         if Theme.render_top_and_bottom_bar_last():
@@ -632,16 +720,12 @@ class Display:
                 cls.fade_transition(cls.bg_canvas, cls.render_canvas)
             else:
                 sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
-        else:
-            sdl2.SDL_RenderCopyEx(
-                cls.renderer.sdlrenderer,     # Renderer
-                cls.render_canvas,            # Texture (canvas)
-                None,                         # Source rect (None = full texture)
-                None,                         # Destination rect (None = full screen)
-                c_double(Device.screen_rotation()),                        # Angle in degrees
-                None,                         # Center point (None = center of dest rect)
-                sdl2.SDL_FLIP_NONE            # Flip (you can also use SDL_FLIP_HORIZONTAL or _VERTICAL if needed)
-            )
+        else:   
+                rotated_texture = cls.rotate_canvas()
+                if(rotated_texture is not None):
+                    sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
+                    sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
+
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
 

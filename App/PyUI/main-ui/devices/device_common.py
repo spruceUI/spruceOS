@@ -10,7 +10,6 @@ from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from utils import throttle
 from utils.logger import PyUiLogger
-import psutil
 
 
 class DeviceCommon(AbstractDevice):
@@ -285,6 +284,7 @@ class DeviceCommon(AbstractDevice):
 
     @throttle.limit_refresh(15)
     def get_ip_addr_text(self):
+        import psutil
         if self.is_wifi_enabled():
             try:
                 addrs = psutil.net_if_addrs().get("wlan0")

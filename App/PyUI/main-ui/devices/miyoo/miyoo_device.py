@@ -280,12 +280,6 @@ class MiyooDevice(DeviceCommon):
             PyUiLogger.get_logger().error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
-
-    def set_wifi_power(self, value):
-        PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
-        with open('/sys/class/rkwifi/wifi_power', 'w') as f:
-            f.write(str(value))
-
     def stop_wifi_services(self):
         MiyooTrimCommon.stop_wifi_services(self)
 
@@ -301,22 +295,6 @@ class MiyooDevice(DeviceCommon):
 
     def enable_wifi(self):
         MiyooTrimCommon.enable_wifi(self)
-
-    @throttle.limit_refresh(5)
-    def get_charge_status(self):
-        with open("/sys/class/power_supply/ac/online", "r") as f:
-            ac_online = int(f.read().strip())
-            
-        if(ac_online):
-           return ChargeStatus.CHARGING
-        else:
-            return ChargeStatus.DISCONNECTED
-    
-    @throttle.limit_refresh(15)
-    def get_battery_percent(self):
-        with open("/sys/class/power_supply/battery/capacity", "r") as f:
-            return int(f.read().strip()) 
-        return 0
         
     def get_app_finder(self):
         return MiyooAppFinder()

@@ -4,6 +4,7 @@ import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 import os
+from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -99,20 +100,23 @@ class MiyooFlip(MiyooDevice):
         self._set_volume(config_volume)
 
     def init_bluetooth(self):
-        try:
-            subprocess.Popen(["insmod","/lib/modules/rtk_btusb.ko"],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error running insmod {e}")
-
-        if(not self.is_btmanager_runing()):
+        if(self.system_config.is_bluetooth_enabled()):
             try:
-                subprocess.Popen(["/usr/miyoo/bin/btmanager"],
+                subprocess.Popen(["insmod","/lib/modules/rtk_btusb.ko"],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
             except Exception as e:
                 PyUiLogger.get_logger().error(f"Error running insmod {e}")
+
+            if(not self.is_btmanager_runing()):
+                try:
+                    subprocess.Popen(["/usr/miyoo/bin/btmanager"],
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL)
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Error running insmod {e}")
+        else:
+            self.disable_bluetooth()
 
     def is_btmanager_runing(self):
         try:
@@ -256,3 +260,25 @@ class MiyooFlip(MiyooDevice):
         #Currently this takes 0.7s on the flip, way too long to leave enabled
         #return self._take_snapshot(path)
         return None
+    
+    
+    @throttle.limit_refresh(5)
+    def get_charge_status(self):
+        with open("/sys/class/power_supply/ac/online", "r") as f:
+            ac_online = int(f.read().strip())
+            
+        if(ac_online):
+           return ChargeStatus.CHARGING
+        else:
+            return ChargeStatus.DISCONNECTED
+    
+    @throttle.limit_refresh(15)
+    def get_battery_percent(self):
+        with open("/sys/class/power_supply/battery/capacity", "r") as f:
+            return int(f.read().strip()) 
+        return 0
+    
+    def set_wifi_power(self, value):
+        PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
+        with open('/sys/class/rkwifi/wifi_power', 'w') as f:
+            f.write(str(value))
