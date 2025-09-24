@@ -101,7 +101,7 @@ class MiyooTrimCommon():
                 '-B',
                 '-D', 'nl80211',
                 '-i', 'wlan0',
-                '-c', '/userdata/cfg/wpa_supplicant.conf'
+                '-c', device.get_wpa_supplicant_conf_path()
             ])
             time.sleep(0.5)  # Wait for it to initialize
             PyUiLogger.get_logger().info("wpa_supplicant started.")
@@ -109,9 +109,9 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
 
     @staticmethod
-    def ensure_wpa_supplicant_conf():
+    def ensure_wpa_supplicant_conf(wpa_supplicant_path):
         try:
-            conf_path = Path("/userdata/cfg/wpa_supplicant.conf")
+            conf_path = Path(wpa_supplicant_path)
             
             if not conf_path.exists():
                 conf_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure /userdata/cfg exists

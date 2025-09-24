@@ -49,7 +49,7 @@ class MiyooDevice(DeviceCommon):
             f.write("mem")  
 
     def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf()
+        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()

@@ -216,4 +216,5 @@ class MiyooA30(MiyooDevice):
     def reboot_cmd(self):
         return None
 
-
+    def get_wpa_supplicant_conf_path(self):
+        return "/config/wpa_supplicant.conf"
