@@ -2,8 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "Flip" ]; then
-    log_message "clearwifi disabled due to running on the Flip"
+if [ "$PLATFORM" = "Flip" ] || [ -f "$PYUI_FLAG" ]; then
+    log_message "clearwifi disabled due to running  PyUI"
     exit 0
 fi
 
