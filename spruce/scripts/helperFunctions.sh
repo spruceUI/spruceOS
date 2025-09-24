@@ -113,7 +113,7 @@ check_and_connect_wifi() {
         log_message "Attempting to connect to WiFi"
 
         # Bring the existing interface down cleanly if its running
-        if [ "$PLATFORM" != "Flip" ]; then
+        if [ "$PLATFORM" = "Flip" ]; then
             ifconfig wlan0 down
             killall wpa_supplicant
             killall udhcpc
