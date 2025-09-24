@@ -4,6 +4,7 @@ import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 import os
+from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -282,3 +283,6 @@ class MiyooFlip(MiyooDevice):
         PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
         with open('/sys/class/rkwifi/wifi_power', 'w') as f:
             f.write(str(value))
+
+    def get_bluetooth_scanner(self):
+        return BluetoothScanner()

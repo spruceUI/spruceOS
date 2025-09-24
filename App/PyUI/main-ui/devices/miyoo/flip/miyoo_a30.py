@@ -189,9 +189,6 @@ class MiyooA30(MiyooDevice):
 
         return "Off"
 
-
-
-
     @throttle.limit_refresh(5)
     def get_charge_status(self):
         with open("/sys/class/power_supply/ac/online", "r") as f:
@@ -211,3 +208,6 @@ class MiyooA30(MiyooDevice):
     def set_wifi_power(self, value):
         # Not implemented on A30
         pass
+
+    def get_bluetooth_scanner(self):
+        return None
