@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" != "Flip" ]; then
+if [ "$PLATFORM" = "Flip" ]; then
     log_message "clearwifi disabled due to running on the Flip"
     exit 0
 fi
