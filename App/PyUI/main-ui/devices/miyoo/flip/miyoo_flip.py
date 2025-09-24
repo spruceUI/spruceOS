@@ -286,3 +286,8 @@ class MiyooFlip(MiyooDevice):
 
     def get_bluetooth_scanner(self):
         return BluetoothScanner()
+    
+    @property
+    def reboot_cmd(self):
+        return "reboot"
+
