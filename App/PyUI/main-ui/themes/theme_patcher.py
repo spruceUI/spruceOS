@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-from PIL import Image
 from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 
@@ -79,6 +78,7 @@ class ThemePatcher():
 
     @staticmethod
     def scale_image(input_file, output_file, scale, theme_width, theme_height, target_width, target_height):
+        from PIL import Image
         try:
             with Image.open(input_file) as img:
                 new_width = int(img.width * scale)

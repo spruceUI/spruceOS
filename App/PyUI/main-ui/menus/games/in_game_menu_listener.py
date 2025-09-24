@@ -12,7 +12,6 @@ from menus.games.in_game_menu_popup import InGameMenuPopup
 from menus.games.retroarch_in_game_menu_popup import RetroarchInGameMenuPopup
 from menus.games.utils.rom_info import RomInfo
 from utils.logger import PyUiLogger
-import psutil
 import signal
 
 class InGameMenuListener:
@@ -22,6 +21,7 @@ class InGameMenuListener:
             
     def send_signal(self, proc: subprocess.Popen, sig, timeout: float = 3.0):
         try:
+            import psutil
             ps_proc = psutil.Process(proc.pid)
 
             # Send SIGTERM to all children

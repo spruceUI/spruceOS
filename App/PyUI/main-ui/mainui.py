@@ -5,10 +5,6 @@ import shutil
 import sys
 import threading
 from devices.device import Device
-from devices.miyoo.flip.miyoo_a30 import MiyooA30
-from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-from devices.trimui.trim_ui_brick import TrimUIBrick
-from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -44,16 +40,22 @@ def initialize_device(device):
     if "MIYOO_FLIP" == device:
         Device.init(MiyooFlip())
     elif "TRIMUI_BRICK" == device:
+        from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick())
     elif "TRIMUI_SMART_PRO" == device:
+        from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
         Device.init(TrimUISmartPro())
     elif "MIYOO_A30" == device:
+        from devices.miyoo.flip.miyoo_a30 import MiyooA30
         Device.init(MiyooA30())
     elif "ANBERNIC_RG34XXSP" == device:
+        from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX())
     elif "ANBERNIC_RG28XX" == device:
+        from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX())
     elif "ANBERNIC_MUOS" == device:
+        from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX())
     else:
         raise RuntimeError(f"{device} is not a supported device")

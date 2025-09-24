@@ -1,6 +1,5 @@
 import json
 import os
-from PIL import Image
 from utils.logger import PyUiLogger
 
 class DaijishoThemeIndex:
@@ -104,6 +103,7 @@ class DaijishoThemeIndex:
         }
 
     def _convert_if_needed(self, filename):
+        from PIL import Image
         # Check if filename ends with .jpg or .jpeg (case-insensitive)
         if filename.lower().endswith((".jpg", ".jpeg")):
             jpg_path = os.path.join(self.foldername, filename)

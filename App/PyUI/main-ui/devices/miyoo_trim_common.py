@@ -110,19 +110,22 @@ class MiyooTrimCommon():
 
     @staticmethod
     def ensure_wpa_supplicant_conf():
-        conf_path = Path("/userdata/cfg/wpa_supplicant.conf")
-        
-        if not conf_path.exists():
-            conf_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure /userdata/cfg exists
-            conf_content = (
-                "ctrl_interface=/var/run/wpa_supplicant\n"
-                "update_config=1\n\n"
-            )
-            with conf_path.open("w") as f:
-                f.write(conf_content)
-            PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
-        else:
-            PyUiLogger.get_logger().info("wpa_supplicant.conf already exists.")
+        try:
+            conf_path = Path("/userdata/cfg/wpa_supplicant.conf")
+            
+            if not conf_path.exists():
+                conf_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure /userdata/cfg exists
+                conf_content = (
+                    "ctrl_interface=/var/run/wpa_supplicant\n"
+                    "update_config=1\n\n"
+                )
+                with conf_path.open("w") as f:
+                    f.write(conf_content)
+                PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
+            else:
+                PyUiLogger.get_logger().info("wpa_supplicant.conf already exists.")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error creating /userdata/cfg/wpa_supplicant.conf: {e}")
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()

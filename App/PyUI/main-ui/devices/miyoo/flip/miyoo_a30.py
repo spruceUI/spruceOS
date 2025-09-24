@@ -1,9 +1,11 @@
 from concurrent.futures import Future
 from pathlib import Path
+import subprocess
 import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 import os
+from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -98,32 +100,11 @@ class MiyooA30(MiyooDevice):
             return False
         
     def is_lid_closed(self):
-        try:
-            with open("/sys/devices/platform/hall-mh248/hallvalue", "r") as f:
-                value = f.read().strip()
-                return "0" == value 
-        except (FileNotFoundError, IOError) as e:
-            return False
+        return False
 
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
-        try:
-            # Read the HDMI status from the file
-            with open('/sys/class/drm/card0-HDMI-A-1/status', 'r') as f:
-                status = f.read().strip()
-
-            # Check if the status is 'disconnected'
-            if status.lower() == 'disconnected':
-                return False
-            else:
-                PyUiLogger.get_logger().info(f"HDMI Connected")
-                return True
-        except FileNotFoundError:
-            PyUiLogger.get_logger().error("Error: The file '/sys/class/drm/card0-HDMI-A-1/status' does not exist.")
-            return False
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred: {e}")
-            return False
+        return False
 
     @property
     def screen_width(self):
@@ -142,14 +123,14 @@ class MiyooA30(MiyooDevice):
         if(self.should_scale_screen()):
             return 1920
         else:
-            return 640
+            return self.screen_height
         
     @property
     def output_screen_height(self):
         if(self.should_scale_screen()):
             return 1080
         else:
-            return 480
+            return self.screen_widths
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
@@ -158,20 +139,75 @@ class MiyooA30(MiyooDevice):
             return 1
     
     def _set_lumination_to_config(self):
-        with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
+        #with open("/sys/class/backlight/backlight/brightness", "w") as f:
+        #    f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
+        pass
     
     def _set_contrast_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:contrast:"+str(self.system_config.contrast * 5)])
+#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
+#                                    "179:contrast:"+str(self.system_config.contrast * 5)])
+        pass
     
     def _set_saturation_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:saturation:"+str(self.system_config.saturation * 5)])
+#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
+#                                    "179:saturation:"+str(self.system_config.saturation * 5)])
+        pass
 
     def _set_brightness_to_config(self):
-        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:brightness:"+str(self.system_config.brightness * 5)])
+#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
+#                                     "179:brightness:"+str(self.system_config.brightness * 5)])
+        pass
 
     def take_snapshot(self, path):
         return None
+    
+    @throttle.limit_refresh(15)
+    def get_ip_addr_text(self):
+        if self.is_wifi_enabled():
+            try:
+                # Run the system command to get wlan0 info
+                result = subprocess.run(
+                    ["ip", "addr", "show", "wlan0"],
+                    capture_output=True,
+                    text=True
+                )
+
+                if result.returncode != 0:
+                    return "Error"
+
+                # Look for an IPv4 address in the command output
+                for line in result.stdout.splitlines():
+                    line = line.strip()
+                    if line.startswith("inet "):  # Example: "inet 192.168.1.42/24 ..."
+                        ip = line.split()[1].split("/")[0]  # Take "192.168.1.42" part
+                        return ip
+
+                return "Connecting"  # wlan0 exists but no IP yet
+
+            except Exception:
+                return "Error"
+
+        return "Off"
+
+
+
+
+    @throttle.limit_refresh(5)
+    def get_charge_status(self):
+        with open("/sys/class/power_supply/ac/online", "r") as f:
+            ac_online = int(f.read().strip())
+            
+        if(ac_online):
+           return ChargeStatus.CHARGING
+        else:
+            return ChargeStatus.DISCONNECTED
+    
+    @throttle.limit_refresh(15)
+    def get_battery_percent(self):
+        with open("/sys/class/power_supply/battery/capacity", "r") as f:
+            return int(f.read().strip()) 
+        return 0
+    
+    def set_wifi_power(self, value):
+        # Not implemented on A30
+        pass
