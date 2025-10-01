@@ -2,11 +2,13 @@
 
 import socket
 import subprocess
+import sys
 import time
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
+from display.display import Display
 from display.font_purpose import FontPurpose
 from utils import throttle
 from utils.logger import PyUiLogger
@@ -303,3 +305,7 @@ class DeviceCommon(AbstractDevice):
         
         return "Off"
     
+
+    def exit_pyui(self):
+        Display.deinit_display()
+        sys.exit()

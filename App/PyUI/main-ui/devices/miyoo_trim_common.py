@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import subprocess
+import sys
 import time
 from devices.utils.process_runner import ProcessRunner
 from display.font_purpose import FontPurpose
@@ -12,7 +13,7 @@ from utils.logger import PyUiLogger
 class MiyooTrimCommon():
         
     @staticmethod
-    def convert_game_path_to_miyoo_path(original_path):
+    def convert_game_path_to_miyoo_path(original_path, remap_sdcard_path):
         # Define the possible base directories
         base_dirs = {
             "/mnt/SDCARD/": "/media/sdcard0/",
@@ -26,7 +27,9 @@ class MiyooTrimCommon():
 
                 # Construct the new path using the desired format
                 new_path = original_path.replace(f"Roms{os.sep}{subdirectory}", f"Emu{os.sep}{subdirectory}{os.sep}..{os.sep}..{os.sep}Roms{os.sep}{subdirectory}")
-                new_path = new_path.replace(base_dir, sdcard_mount)
+                if(remap_sdcard_path):
+                    new_path = new_path.replace(base_dir, sdcard_mount)
+
                 PyUiLogger.get_logger().info(f"Converted {original_path} to {new_path}")
                 return new_path        
             
@@ -51,21 +54,23 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     @staticmethod
-    def run_game(device, rom_info: RomInfo) -> subprocess.Popen:
+    def run_game(device, rom_info: RomInfo, remap_sdcard_path = True) -> subprocess.Popen:
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8
         #miyoo maps it to /media/sdcard0/Emu/FAKE08/../../Roms/FAKE08/Alpine Alpaca.p8
-        miyoo_app_path = MiyooTrimCommon.convert_game_path_to_miyoo_path(rom_info.rom_file_path)
+        miyoo_app_path = MiyooTrimCommon.convert_game_path_to_miyoo_path(rom_info.rom_file_path, remap_sdcard_path)
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";"{launch_path}" "{miyoo_app_path}"''')
 
         device.fix_sleep_sound_bug()
-        try:
-            return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
-                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to launch game {rom_info.rom_file_path}: {e}")
-            return None
+
+        sys.exit()
+        #try:
+        #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
+        #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #except Exception as e:
+        #    PyUiLogger.get_logger().error(f"Failed to launch game {rom_info.rom_file_path}: {e}")
+        #    return None
         
     @staticmethod
     def run_app(device, args, dir = None):

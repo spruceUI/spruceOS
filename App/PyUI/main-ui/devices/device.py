@@ -294,4 +294,8 @@ class Device:
     def take_snapshot(path):
         return Device._impl.take_snapshot(path)
 
+    @staticmethod
+    def exit_pyui():
+        return Device._impl.exit_pyui()
+
     

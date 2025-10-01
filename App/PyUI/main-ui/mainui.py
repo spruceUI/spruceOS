@@ -5,6 +5,7 @@ import shutil
 import sys
 import threading
 from devices.device import Device
+from devices.miyoo.flip.miyoo_mini_flip import MiyooMiniFlip
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -36,9 +37,15 @@ def log_renderer_info():
         sdl2.SDL_GetRenderDriverInfo(i, info)
         print(f"Found Renderer {i}: {info.name.decode()}")
 
+    num = sdl2.SDL_GetNumVideoDrivers()
+    for i in range(num):
+        print(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
+
 def initialize_device(device):
     if "MIYOO_FLIP" == device:
         Device.init(MiyooFlip())
+    elif "MIYOO_MINI_FLIP" == device:
+        Device.init(MiyooMiniFlip())
     elif "TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick())
