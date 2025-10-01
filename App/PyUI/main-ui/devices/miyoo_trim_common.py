@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from display.font_purpose import FontPurpose
 from menus.games.utils.rom_info import RomInfo
@@ -64,7 +65,7 @@ class MiyooTrimCommon():
 
         device.fix_sleep_sound_bug()
 
-        sys.exit()
+        Device.exit_pyui()
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
         #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
