@@ -253,3 +253,7 @@ class AbstractDevice(ABC):
     @abstractmethod
     def take_snapshot(self, path):
         pass
+
+    @abstractmethod
+    def exit_pyui(self):
+        pass

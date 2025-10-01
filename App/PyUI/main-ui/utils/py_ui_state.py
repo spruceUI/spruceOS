@@ -97,3 +97,12 @@ class PyUiState:
         cls._data["inGameSelectionScreen"] = value
         cls.save()
 
+    @classmethod
+    def get_last_main_menu_selection(cls):
+        return cls.get("lastMainMenuSelection",None)
+
+    @classmethod
+    def set_last_main_menu_selection(cls, value):
+        cls._data["lastMainMenuSelection"] = value
+        cls.save()
+

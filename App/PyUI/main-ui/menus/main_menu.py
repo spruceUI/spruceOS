@@ -9,7 +9,9 @@ from menus.main_menu_popup import MainMenuPopup
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from menus.games.recents_menu import RecentsMenu
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -119,30 +121,68 @@ class MainMenu:
             selected_index=selected.get_index(),
             show_grid_text=Theme.get_main_menu_show_text_grid_mode())
 
+    def launch_selection(self, selection):
+        if("Game" == selection):
+            PyUiLogger.get_logger().info(f"Launching Game Menu")
+            PyUiState.set_last_main_menu_selection("Game")
+            self.system_select_menu.run_system_selection()
+            PyUiState.set_last_main_menu_selection(None)
+        elif("App" == selection):
+            PyUiLogger.get_logger().info(f"Launching App Menu")
+            PyUiState.set_last_main_menu_selection("App")
+            self.app_menu.run_app_selection()
+            PyUiState.set_last_main_menu_selection(None)
+        elif("Favorite" == selection):
+            PyUiLogger.get_logger().info(f"Launching Favorite Menu")
+            PyUiState.set_last_main_menu_selection("Favorite")
+            self.favorites_menu.run_rom_selection()
+            PyUiState.set_last_main_menu_selection(None)
+        elif("Collection" == selection):
+            PyUiLogger.get_logger().info(f"Launching Collection Menu")
+            PyUiState.set_last_main_menu_selection("Collection")
+            self.collections_menu.run_rom_selection()
+            PyUiState.set_last_main_menu_selection(None)
+        elif("Recent" == selection):
+            PyUiLogger.get_logger().info(f"Launching Recent Menu")
+            PyUiState.set_last_main_menu_selection("Recent")
+            self.recents_menu.run_rom_selection()
+            PyUiState.set_last_main_menu_selection(None)
+        elif("Setting" == selection):
+            PyUiLogger.get_logger().info(f"Launching Setting Menu")
+            # Don't save state for settings
+            self.settings_menu.show_menu()
+
+
     def run_main_menu_selection(self):
-        
+        self.launch_selection(PyUiState.get_last_main_menu_selection())            
+
         if(Theme.skip_main_menu()):
             selection = "Games"
             while(True):
                 Display.set_selected_tab(selection)
                 if("Games" == selection):
+                    PyUiState.set_last_main_menu_selection("Game")
                     controller_input = self.system_select_menu.run_system_selection()
                     if(ControllerInput.L1 == controller_input):
                         selection = "Settings"
                     elif(ControllerInput.R1 == controller_input):
                         selection = "Apps"
+                    PyUiState.set_last_main_menu_selection(None)
                 elif("Apps" == selection):
+                    PyUiState.set_last_main_menu_selection("App")
                     controller_input = self.app_menu.run_app_selection()
                     if(ControllerInput.L1 == controller_input):
                         selection = "Games"
                     elif(ControllerInput.R1 == controller_input):
                         selection = "Settings"
+                    PyUiState.set_last_main_menu_selection(None)
                 elif("Settings" == selection):
                     controller_input = self.settings_menu.show_menu()
                     if(ControllerInput.L1 == controller_input):
                         selection = "Apps"
                     elif(ControllerInput.R1 == controller_input):
                         selection = "Games"
+                    PyUiState.set_last_main_menu_selection(None)
 
         else:
             selected = Selection(None,None,0)
@@ -155,18 +195,7 @@ class MainMenu:
 
                 if((selected := view.get_selection(expected_inputs)) is not None):       
                     if(ControllerInput.A == selected.get_input()): 
-                        if("Game" == selected.get_selection().get_primary_text()):
-                            self.system_select_menu.run_system_selection()
-                        elif("App" == selected.get_selection().get_primary_text()):
-                            self.app_menu.run_app_selection()
-                        elif("Favorite" == selected.get_selection().get_primary_text()):
-                            self.favorites_menu.run_rom_selection()
-                        elif("Collection" == selected.get_selection().get_primary_text()):
-                            self.collections_menu.run_rom_selection()
-                        elif("Recent" == selected.get_selection().get_primary_text()):
-                            self.recents_menu.run_rom_selection()
-                        elif("Setting" == selected.get_selection().get_primary_text()):
-                            self.settings_menu.show_menu()
+                        self.launch_selection(selected.get_selection().get_primary_text())
                     elif(ControllerInput.MENU == selected.get_input()):
                         self.popup_menu.run_popup_menu_selection()
 

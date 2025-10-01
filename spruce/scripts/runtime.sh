@@ -56,6 +56,9 @@ if [ "$PLATFORM" = "A30" ]; then
         wait
     )
 
+    touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
+    
     lcd_init 1
 
     # Stop NTPD
@@ -112,6 +115,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
+    touch /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
 
     /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
