@@ -145,7 +145,7 @@ while [ 1 ]; do
 					cat /dev/zero > /dev/fb0
                     export PYSDL2_DLL_PATH="/usr/miyoo/lib"
 					export LD_LIBRARY_PATH="/usr/miyoo/lib"
-                    /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                    /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 else
                     MainUI &> /dev/null
 					# send signal USR1 to joystickinput to switch to ANALOG MODE
