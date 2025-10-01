@@ -55,7 +55,7 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     @staticmethod
-    def run_game(device, rom_info: RomInfo, remap_sdcard_path = True) -> subprocess.Popen:
+    def run_game(device, rom_info: RomInfo, remap_sdcard_path = False) -> subprocess.Popen:
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8

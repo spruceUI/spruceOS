@@ -392,4 +392,4 @@ class MiyooFlip(MiyooDevice):
         self._set_volume(config_volume)
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
-        return MiyooTrimCommon.run_game(self,rom_info)
+        return MiyooTrimCommon.run_game(self,rom_info, remap_sdcard_path = True)

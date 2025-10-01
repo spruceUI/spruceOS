@@ -266,4 +266,4 @@ class MiyooA30(MiyooDevice):
 
         # Start the thread
         threading.Thread(target=delayed_fix, daemon=True).start()
-        return MiyooTrimCommon.run_game(self,rom_info,False)
+        return MiyooTrimCommon.run_game(self,rom_info)
