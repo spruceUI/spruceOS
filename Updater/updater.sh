@@ -312,7 +312,7 @@ log_update_message "Extracting update file: $UPDATE_FILE"
 
 read_only_check
 
-display -t "Applying update. This should take around 5 minutes..."
+display -t "Applying update. This should take around 10 minutes..."
 
 if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
