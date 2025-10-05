@@ -90,6 +90,10 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
     )
+
+    touch /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
+
 elif [ "$PLATFORM" = "Flip" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
     export PATH="$SYSTEM_PATH/app:${PATH}"
