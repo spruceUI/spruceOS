@@ -103,8 +103,12 @@ class Device:
         return Device._impl.run_game(rom_info)
 
     @staticmethod
-    def run_app(args, dir=None):
-        return Device._impl.run_app(args, dir)
+    def run_cmd(args, dir=None):
+        return Device._impl.run_cmd(args, dir)
+
+    @staticmethod
+    def run_app(folder,launch):
+        return Device._impl.run_app(folder,launch)
 
     @staticmethod
     def map_digital_input(sdl_input):
@@ -237,6 +241,10 @@ class Device:
     @staticmethod  
     def supports_wifi():
         return Device._impl.supports_wifi()
+    
+    @staticmethod  
+    def supports_volume():
+        return Device._impl.supports_volume()
 
     @staticmethod  
     def get_ip_addr_text():
@@ -298,4 +306,10 @@ class Device:
     def exit_pyui():
         return Device._impl.exit_pyui()
 
-    
+    @staticmethod
+    def double_init_sdl_display():
+        return Device._impl.double_init_sdl_display()
+
+    @staticmethod
+    def shrink_text_if_needed(text):
+        return Device._impl.shrink_text_if_needed(text)

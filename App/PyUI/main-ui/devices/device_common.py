@@ -31,9 +31,9 @@ class DeviceCommon(AbstractDevice):
             Display.present()
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
-                    self.run_app([self.power_off_cmd])
+                    self.run_cmd([self.power_off_cmd])
                 elif(Controller.last_input() == ControllerInput.X and self.reboot_cmd is not None):
-                    self.run_app([self.reboot_cmd])
+                    self.run_cmd([self.reboot_cmd])
                 elif(Controller.last_input() == ControllerInput.B):
                     return
 
@@ -309,3 +309,12 @@ class DeviceCommon(AbstractDevice):
     def exit_pyui(self):
         Display.deinit_display()
         sys.exit()
+
+    def double_init_sdl_display(self):
+        return False
+
+    def supports_volume(self):
+        return True
+    
+    def shrink_text_if_needed(self, text):
+        return text

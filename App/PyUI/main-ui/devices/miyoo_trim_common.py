@@ -44,6 +44,8 @@ class MiyooTrimCommon():
     def write_cmd_to_run(command):
         with open('/tmp/cmd_to_run.sh', 'w') as file:
             file.write(command)
+            PyUiLogger.get_logger().info(f"Writing cmd to run: {command}")
+
 
     @staticmethod
     def delete_cmd_to_run():
@@ -55,15 +57,15 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     @staticmethod
-    def run_game(device, rom_info: RomInfo, remap_sdcard_path = False) -> subprocess.Popen:
+    def run_game(device, rom_info: RomInfo, remap_sdcard_path = False, run_prefix ="") -> subprocess.Popen:
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8
         #miyoo maps it to /media/sdcard0/Emu/FAKE08/../../Roms/FAKE08/Alpine Alpaca.p8
         miyoo_app_path = MiyooTrimCommon.convert_game_path_to_miyoo_path(rom_info.rom_file_path, remap_sdcard_path)
-        MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";"{launch_path}" "{miyoo_app_path}"''')
-
+        MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{miyoo_app_path}"''')
         device.fix_sleep_sound_bug()
+
 
         Device.exit_pyui()
         #try:
@@ -74,10 +76,17 @@ class MiyooTrimCommon():
         #    return None
         
     @staticmethod
-    def run_app(device, args, dir = None):
+    def run_cmd(device, args, dir = None):
         device.fix_sleep_sound_bug()
         PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
         subprocess.run(args, cwd = dir)
+
+    @staticmethod
+    def run_app(device, folder,launch, run_prefix =""):
+        device.fix_sleep_sound_bug()
+        #cd /mnt/SDCARD/App/Commander_Italic; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh 
+        MiyooTrimCommon.write_cmd_to_run(f'cd "{folder}"; chmod a+x "{launch}"; {run_prefix}"{launch}"''')
+        Device.exit_pyui()
 
     @staticmethod
     def stop_wifi_services(device):

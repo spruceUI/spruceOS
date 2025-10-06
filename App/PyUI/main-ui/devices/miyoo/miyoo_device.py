@@ -59,8 +59,11 @@ class MiyooDevice(DeviceCommon):
         return "poweroff"
 
 
-    def run_app(self, args, dir = None):
-        MiyooTrimCommon.run_app(self, args, dir)
+    def run_cmd(self, args, dir = None):
+        MiyooTrimCommon.run_cmd(self, args, dir)
+
+    def run_app(self, folder,launch):
+        MiyooTrimCommon.run_app(self, folder,launch)
 
     #TODO untested
     def map_analog_axis(self,sdl_input, value, threshold=16000):
@@ -243,7 +246,7 @@ class MiyooDevice(DeviceCommon):
         return "/mnt/SDCARD/Collections/"
     
     def launch_stock_os_menu(self):
-        self.run_app("/usr/miyoo/bin/runmiyoo-original.sh")
+        self.run_cmd("/usr/miyoo/bin/runmiyoo-original.sh")
 
     def get_state_path(self):
         return "/mnt/SDCARD/Saves/pyui-state.json"

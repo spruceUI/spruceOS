@@ -5,7 +5,7 @@ import shutil
 import sys
 import threading
 from devices.device import Device
-from devices.miyoo.flip.miyoo_mini_flip import MiyooMiniFlip
+from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager

@@ -87,7 +87,7 @@ class GameConfigMenu:
             if(not os.path.isfile(app_path)):
                 app_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, launch_option)
 
-            Device.run_app(["sh",app_path, miyoo_game_path], dir=os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name))
+            Device.run_cmd(["sh",app_path, miyoo_game_path], dir=os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name))
             # TODO Once we remove the display_kill and popups from launch.sh we can remove this
             # For a good speedup
             Display.reinitialize()
