@@ -64,7 +64,7 @@ class TopBar:
             x_offset = x_offset - w - img_padding
  
         #Volume
-        if(time.time() - self.volume_changed_time < 3):
+        if(time.time() - self.volume_changed_time < 3 and Device.supports_volume()):
             Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
 
     def render_top_bar_menu_not_skipped(self, title, hide_top_bar_icons = False) :

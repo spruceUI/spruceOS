@@ -350,7 +350,7 @@ class Theme():
     @classmethod
     def get_fallback_font(cls):
         base_dir = os.path.abspath(sys.path[0])
-        return os.path.join(base_dir, "themes", "nunwen.ttf")
+        return os.path.join(base_dir, "themes", "font.ttf")
 
     @classmethod
     def get_font_size(cls, font_purpose : FontPurpose):
