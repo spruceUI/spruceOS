@@ -31,7 +31,6 @@ $BLFILTER=/mnt/SDCARD/spruce/scripts/applySetting/blfilter.sh$
 # Task Scripts
 $CLEAR_WIFI=/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh$
 $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
-$RESET_EMUFRESH=/mnt/SDCARD/spruce/scripts/tasks/resetEmufresh.sh$
 $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
@@ -173,9 +172,6 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 <Not_simple>
 "" "Reset PPSSPP to spruce defaults" "|" "run|off" "echo -n off" "$RESET_PPSSPP$|" "$RESET_PPSSPP$ _INDEX_"
 @"We recommend backing up first."
-
-"" "Reset Emufresh" "|" "run|off" "echo -n off" "$RESET_EMUFRESH$|" "$RESET_EMUFRESH$ _INDEX_"
-@"Use this to trigger a full reset of Emufresh. Helpful if your displayed roms or consoles are incorrect."
 
 
 [Network]

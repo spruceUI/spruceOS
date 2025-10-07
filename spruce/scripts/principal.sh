@@ -72,9 +72,6 @@ while [ 1 ]; do
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"
 
-        # check if emu visibility needs a refresh, before entering MainUI
-        /mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
-
         # Check for the themeChanged flag
         if flag_check "themeChanged"; then
             /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent

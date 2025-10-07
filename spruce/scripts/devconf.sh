@@ -4,8 +4,6 @@
 . /mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
-EMUFRESH="/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh"
-
 if flag_check "developer_mode"; then
     log_message "Developer mode enabled"
     # Turn off idle monitors
@@ -32,22 +30,9 @@ fi
 
 if flag_check "designer_mode"; then
     log_message "Designer mode enabled"
-    if [ -f "$EMUFRESH" ]; then
-        "$EMUFRESH" -showall  &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
-    elif [ -f "$EMUFRESH.bak" ]; then
-        "$EMUFRESH.bak" -showall  &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
-    fi
-    # Changing the name to break future calls.
-    mv "$EMUFRESH" "$EMUFRESH.bak"
-
     # Remove @ from Theme Packer label
     sed -i 's/"#label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
 else
-    # Restore EMUFRESH if it exists
-    if [ -f "$EMUFRESH.bak" ]; then
-        mv "$EMUFRESH.bak" "$EMUFRESH"
-    fi
-
     # Restore @ in Theme Packer label
     sed -i 's/"label"/"#label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi

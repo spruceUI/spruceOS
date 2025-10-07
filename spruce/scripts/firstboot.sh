@@ -38,9 +38,6 @@ log_message "Running developer mode check" -v
 log_message "Running emu_setup.sh"
 /mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
 
-log_message "Running emufresh.sh"
-/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
-
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 

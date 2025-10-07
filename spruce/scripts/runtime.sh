@@ -130,7 +130,6 @@ flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
-flag_remove "emufresh"
 
 log_message " " -v
 log_message "---------Starting up---------"
@@ -180,11 +179,6 @@ if flag_check "first_boot_${PLATFORM}"; then
 else
     ${SCRIPTS_DIR}/archiveUnpacker.sh
 fi
-
-{
-    ${SCRIPTS_DIR}/romdirpostrofix.sh
-    ${SCRIPTS_DIR}/emufresh_md5_multi.sh # &> /mnt/sdcard/Saves/spruce/emufresh_md5_multi.log
-} &
 
 check_and_handle_firmware_app &
 
