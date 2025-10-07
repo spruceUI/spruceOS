@@ -1,6 +1,5 @@
 {
   "label": "DC",
-  "icontop":"/mnt/SDCARD/Themes/SPRUCE/icontop/dc.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
   "effectsh":"effect.sh",

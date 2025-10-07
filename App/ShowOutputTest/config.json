@@ -1,6 +1,5 @@
 {
   "#label": "Show Output Test",
-  "icontop": "/mnt/SDCARD/Themes/SPRUCE/icontop/App/menuswitch.png",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/menuswitch.png",
   "launch": "launch.sh",
   "description": "Demo Program for ShowOutput Binary"
