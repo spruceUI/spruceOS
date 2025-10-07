@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/NGP",
-      "imgpath": "../../Roms/NGP/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/NGP",
-      "imgpath": "../../../../media/sdcard1/Roms/NGP/Imgs"
     }
   ],
-  "rompath": "../../Roms/NGP",
-  "imgpath": "../../Roms/NGP/Imgs",
-  "gamelist": "../../Roms/NGP/miyoogamelist.xml",
   "extlist": "ngp|ngc|zip|7z",
   "launchlist": [
     {

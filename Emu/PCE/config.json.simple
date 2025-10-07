@@ -5,14 +5,6 @@
   "background": "",
   "themecolor":"EA483F",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/PCE",
-    "imgpath": "../../Roms/PCE/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/PCE",
-    "imgpath": "../../../../media/sdcard1/Roms/PCE/Imgs"}],
-  "rompath": "../../Roms/PCE",
-  "imgpath": "../../Roms/PCE/Imgs",
-  "gamelist": "../../Roms/PCE/miyoogamelist.xml",
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",
   "launchlist": [
     {

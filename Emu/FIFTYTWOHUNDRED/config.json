@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/FIFTYTWOHUNDRED",
-      "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/FIFTYTWOHUNDRED",
-      "imgpath": "../../../../media/sdcard1/Roms/FIFTYTWOHUNDRED/Imgs"
     }
   ],
-  "rompath": "../../Roms/FIFTYTWOHUNDRED",
-  "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs",
-  "gamelist": "../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",
   "extlist": "a52|zip|7z|atr|bin",
   "launchlist": [
     {

@@ -5,14 +5,6 @@
   "background": "",
   "themecolor":"3C4593",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/WSC",
-    "imgpath": "../../Roms/WSC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/WSC",
-    "imgpath": "../../../../media/sdcard1/Roms/WSC/Imgs"}],
-  "rompath": "../../Roms/WSC",
-  "imgpath": "../../Roms/WSC/Imgs",
-  "gamelist": "../../Roms/WSC/miyoogamelist.xml",
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [
     {

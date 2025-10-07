@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/CPC",
-      "imgpath": "../../Roms/CPC/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/CPC",
-      "imgpath": "../../../../media/sdcard1/Roms/CPC/Imgs"
     }
   ],
-  "rompath": "../../Roms/CPC",
-  "imgpath": "../../Roms/CPC/Imgs",
-  "gamelist": "../../Roms/CPC/miyoogamelist.xml",
   "extlist": "zip|7z|sna|dsk|kcr|bin",
   "launchlist": [
     {

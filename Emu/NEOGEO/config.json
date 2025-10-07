@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FFD200",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/NEOGEO",
-      "imgpath": "../../Roms/NEOGEO/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/NEOGEO",
-      "imgpath": "../../../../media/sdcard1/Roms/NEOGEO/Imgs"
     }
   ],
-  "rompath": "../../Roms/NEOGEO",
-  "imgpath": "../../Roms/NEOGEO/Imgs",
-  "gamelist": "../../Roms/NEOGEO/miyoogamelist.xml",
   "extlist": "zip|7z",
   "launchlist": [
     {

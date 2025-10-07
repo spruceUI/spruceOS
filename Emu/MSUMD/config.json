@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/MSUMD",
-      "imgpath": "../../Roms/MSUMD/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/MSUMD",
-      "imgpath": "../../../../media/sdcard1/Roms/MSUMD/Imgs"
     }
   ],
-  "rompath": "../../Roms/MSUMD",
-  "imgpath": "../../Roms/MSUMD/Imgs",
-  "gamelist": "../../Roms/MSUMD/miyoogamelist.xml",
   "extlist": "zip|7z|gen|smd|md|32x|bin|iso|sms|68k|chd",
   "launchlist": [
     {

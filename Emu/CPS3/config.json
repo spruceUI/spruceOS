@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FF4400",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/CPS3",
-      "imgpath": "../../Roms/CPS3/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/CPS3",
-      "imgpath": "../../../../media/sdcard1/Roms/CPS3/Imgs"
     }
   ],
-  "rompath": "../../Roms/CPS3",
-  "imgpath": "../../Roms/CPS3/Imgs",
-  "gamelist": "../../Roms/CPS3/miyoogamelist.xml",
   "extlist": "zip|7z|cue",
   "launchlist": [
     {

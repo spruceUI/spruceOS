@@ -6,14 +6,6 @@
   "themecolor":"FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "subfolder_launch_file":"RPG_RT.ldb",
-  "rompathlist": [
-    {"rompath": "../../Roms/EASYRPG",
-    "imgpath": "../../Roms/EASYRPG/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/EASYRPG",
-    "imgpath": "../../../../media/sdcard1/Roms/EASYRPG/Imgs"}],
-  "rompath": "../../Roms/EASYRPG",
-  "imgpath": "../../Roms/EASYRPG/Imgs",
-  "gamelist": "../../Roms/EASYRPG/miyoogamelist.xml",
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [
     {

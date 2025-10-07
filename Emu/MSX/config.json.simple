@@ -5,14 +5,6 @@
   "background": "",
   "themecolor":"",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/MSX",
-    "imgpath": "../../Roms/MSX/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/MSX",
-    "imgpath": "../../../../media/sdcard1/Roms/MSX/Imgs"}],
-  "rompath": "../../Roms/MSX",
-  "imgpath": "../../Roms/MSX/Imgs",
-  "gamelist": "../../Roms/MSX/miyoogamelist.xml",
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",
   "launchlist": [
     {

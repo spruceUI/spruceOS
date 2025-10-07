@@ -5,14 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/SUFAMI",
-    "imgpath": "../../Roms/SUFAMI/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/SUFAMI",
-    "imgpath": "../../../../media/sdcard1/Roms/SUFAMI/Imgs"}],
-  "rompath": "../../Roms/SUFAMI",
-  "imgpath": "../../Roms/SUFAMI/Imgs",
-  "gamelist": "../../Roms/SUFAMI/miyoogamelist.xml",
   "extlist": "smc|zip|7z",
   "launchlist": [
     {

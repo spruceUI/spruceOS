@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FFFF00",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/OPENBOR",
-      "imgpath": "../../Roms/OPENBOR/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/OPENBOR",
-      "imgpath": "../../../../media/sdcard1/Roms/OPENBOR/Imgs"
     }
   ],
-  "rompath": "../../Roms/OpenBOR",
-  "imgpath": "../../Imgs/OpenBOR/Imgs",
-  "gamelist": "../../Roms/OpenBOR/miyoogamelist.xml",
   "extlist": "pak",
   "launchlist": [
     {

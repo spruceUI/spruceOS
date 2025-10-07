@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/DC",
-      "imgpath": "../../Roms/DC/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/DC",
-      "imgpath": "../../../../media/sdcard1/Roms/DC/Imgs"
     }
   ],
-  "rompath": "../../Roms/DC",
-  "imgpath": "../../Roms/DC/Imgs",
-  "gamelist": "../../Roms/DC/miyoogamelist.xml",
   "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {

@@ -3,14 +3,6 @@
   "icon": "/mnt/SDCARD/path/to/icon/while/not/selected.png",
   "iconsel": "/mnt/SDCARD/path/to/icon/while/selected.png",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/-CUSTOM-SYSTEM-",
-    "imgpath": "../../Roms/-CUSTOM-SYSTEM-/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/-CUSTOM-SYSTEM-",
-    "imgpath": "../../../../media/sdcard1/Roms/-CUSTOM-SYSTEM-/Imgs"}],
-  "rompath": "../../Roms/-CUSTOM-SYSTEM-",
-  "imgpath": "../../Roms/-CUSTOM-SYSTEM-/Imgs",
-  "gamelist": "../../Roms/-CUSTOM-SYSTEM-/miyoogamelist.xml",
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
   "launchlist": [
     {

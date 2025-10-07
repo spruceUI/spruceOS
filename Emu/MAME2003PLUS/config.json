@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "00CCFF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/MAME2003PLUS",
-      "imgpath": "../../Roms/MAME2003PLUS/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/MAME2003PLUS",
-      "imgpath": "../../../../media/sdcard1/Roms/MAME2003PLUS/Imgs"
     }
   ],
-  "rompath": "../../Roms/MAME2003PLUS",
-  "imgpath": "../../Roms/MAME2003PLUS/Imgs",
-  "gamelist": "../../Roms/MAME2003PLUS/miyoogamelist.xml",
   "extlist": "zip",
   "launchlist": [
     {

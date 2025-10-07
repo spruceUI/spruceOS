@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/ODYSSEY",
-      "imgpath": "../../Roms/ODYSSEY/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/ODYSSEY",
-      "imgpath": "../../../../media/sdcard1/Roms/ODYSSEY/Imgs"
     }
   ],
-  "rompath": "../../Roms/ODYSSEY",
-  "imgpath": "../../Roms/ODYSSEY/Imgs",
-  "gamelist": "../../Roms/ODYSSEY/miyoogamelist.xml",
   "extlist": "bin|zip|7z",
   "launchlist": [
     {

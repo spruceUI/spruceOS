@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FF00FF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/GBA",
-      "imgpath": "../../Roms/GBA/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/GBA",
-      "imgpath": "../../../../media/sdcard1/Roms/GBA/Imgs"
     }
   ],
-  "rompath": "../../Roms/GBA",
-  "imgpath": "../../Roms/GBA/Imgs",
-  "gamelist": "../../Roms/GBA/miyoogamelist.xml",
   "extlist": "gba|zip|7z|bin",
   "launchlist": [
     {

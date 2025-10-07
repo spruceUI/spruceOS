@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/WOLF",
-      "imgpath": "../../Roms/WOLF/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/WOLF",
-      "imgpath": "../../../../media/sdcard1/Roms/WOLF/Imgs"
     }
   ],
-  "rompath": "../../Roms/WOLF",
-  "imgpath": "../../Roms/WOLF/Imgs",
-  "gamelist": "../../Roms/WOLF/miyoogamelist.xml",
   "extlist": "ecwolf|exe",
   "launchlist": [
     {

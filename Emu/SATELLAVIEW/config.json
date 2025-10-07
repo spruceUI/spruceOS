@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/SATELLAVIEW",
-      "imgpath": "../../Roms/SATELLAVIEW/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/SATELLAVIEW",
-      "imgpath": "../../../../media/sdcard1/Roms/SATELLAVIEW/Imgs"
     }
   ],
-  "rompath": "../../Roms/SATELLAVIEW",
-  "imgpath": "../../Roms/SATELLAVIEW/Imgs",
-  "gamelist": "../../Roms/SATELLAVIEW/miyoogamelist.xml",
   "extlist": "zip|7z|bs|sfc|smc|swc|fig|st",
   "launchlist": [
     {

@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/VB",
-      "imgpath": "../../Roms/VB/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/VB",
-      "imgpath": "../../../../media/sdcard1/Roms/VB/Imgs"
     }
   ],
-  "rompath": "../../Roms/VB",
-  "imgpath": "../../Roms/VB/Imgs",
-  "gamelist": "../../Roms/VB/miyoogamelist.xml",
   "extlist": "vb|vboy|zip|7z",
   "launchlist": [
     {

@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/EIGHTHUNDRED",
-      "imgpath": "../../Roms/EIGHTHUNDRED/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/EIGHTHUNDRED",
-      "imgpath": "../../../../media/sdcard1/Roms/EIGHTHUNDRED/Imgs"
     }
   ],
-  "rompath": "../../Roms/EIGHTHUNDRED",
-  "imgpath": "../../Roms/EIGHTHUNDRED/Imgs",
-  "gamelist": "../../Roms/EIGHTHUNDRED/miyoogamelist.xml",
   "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
   "launchlist": [
     {

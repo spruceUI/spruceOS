@@ -5,14 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/CHAI",
-    "imgpath": "../../Roms/CHAI/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/CHAI",
-    "imgpath": "../../../../media/sdcard1/Roms/CHAI/Imgs"}],
-  "rompath": "../../Roms/CHAI",
-  "imgpath": "../../Roms/CHAI/Imgs",
-  "gamelist": "../../Roms/CHAI/miyoogamelist.xml",
   "extlist": "chailove",
   "launchlist": [
     {

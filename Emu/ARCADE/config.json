@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "CD6155",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/ARCADE",
-      "imgpath": "../../Roms/ARCADE/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/ARCADE",
-      "imgpath": "../../../../media/sdcard1/Roms/ARCADE/Imgs"
     }
   ],
-  "rompath": "../../Roms/ARCADE",
-  "imgpath": "../../Roms/ARCADE/Imgs",
-  "gamelist": "../../Roms/ARCADE/miyoogamelist.xml",
   "extlist": "zip",
   "launchlist": [
     {

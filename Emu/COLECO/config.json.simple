@@ -5,14 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/COLECO",
-    "imgpath": "../../Roms/COLECO/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/COLECO",
-    "imgpath": "../../../../media/sdcard1/Roms/COLECO/Imgs"}],
-  "rompath": "../../Roms/COLECO",
-  "imgpath": "../../Roms/COLECO/Imgs",
-  "gamelist": "../../Roms/COLECO/miyoogamelist.xml",
   "extlist": "zip|7z|rom|ri|mx1|mx2|col|dsk|cas|sg|sc|m3u",
   "launchlist": [
     {

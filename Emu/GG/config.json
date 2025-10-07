@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/GG",
-      "imgpath": "../../Roms/GG/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/GG",
-      "imgpath": "../../../../media/sdcard1/Roms/GG/Imgs"
     }
   ],
-  "rompath": "../../Roms/GG",
-  "imgpath": "../../Roms/GG/Imgs",
-  "gamelist": "../../Roms/GG/miyoogamelist.xml",
   "extlist": "bin|gg|zip|7z",
   "launchlist": [
     {

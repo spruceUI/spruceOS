@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/PORTS",
-      "imgpath": "../../Roms/PORTS/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/PORTS",
-      "imgpath": "../../../../media/sdcard1/Roms/PORTS/Imgs"
     }
   ],
-  "rompath": "/mnt/SDCARD/Roms/PORTS",
-  "imgpath": "/mnt/SDCARD/Roms/PORTS/Imgs",
-  "gamelist": "/mnt/SDCARD/Roms/PORTS/miyoogamelist.xml",
   "ingamemenu": 1,
   "extlist": "sh",
   "launchlist": [

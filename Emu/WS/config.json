@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/WS",
-      "imgpath": "../../Roms/WS/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/WS",
-      "imgpath": "../../../../media/sdcard1/Roms/WS/Imgs"
     }
   ],
-  "rompath": "../../Roms/WS",
-  "imgpath": "../../Roms/WS/Imgs",
-  "gamelist": "../../Roms/WS/miyoogamelist.xml",
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [
     {

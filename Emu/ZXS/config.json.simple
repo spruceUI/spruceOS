@@ -5,14 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/ZXS",
-    "imgpath": "../../Roms/ZXS/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/ZXS",
-    "imgpath": "../../../../media/sdcard1/Roms/ZXS/Imgs"}],
-  "rompath": "../../Roms/ZXS",
-  "imgpath": "../../Roms/ZXS/Imgs",
-  "gamelist": "../../Roms/ZXS/miyoogamelist.xml",
   "extlist": "zip|7z|tzx|tap|z80|rzx|scl|trd",
   "launchlist": [
     {

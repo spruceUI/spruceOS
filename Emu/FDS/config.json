@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/FDS",
-      "imgpath": "../../Roms/FDS/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/FDS",
-      "imgpath": "../../../../media/sdcard1/Roms/FDS/Imgs"
     }
   ],
-  "rompath": "../../Roms/FDS",
-  "imgpath": "../../Roms/FDS/Imgs",
-  "gamelist": "../../Roms/FDS/miyoogamelist.xml",
   "extlist": "zip|7z|fds|nes|unif|unf",
   "launchlist": [
     {

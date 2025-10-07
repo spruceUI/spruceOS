@@ -5,14 +5,6 @@
   "background": "",
   "themecolor":"FFB800",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
-    {"rompath": "../../Roms/GBC",
-    "imgpath": "../../Roms/GBC/Imgs"},
-    {"rompath": "../../../../media/sdcard1/Roms/GBC",
-    "imgpath": "../../../../media/sdcard1/Roms/GBC/Imgs"}],
-  "rompath": "../../Roms/GBC",
-  "imgpath": "../../Roms/GBC/Imgs",
-  "gamelist": "../../Roms/GBC/miyoogamelist.xml",
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [
     {

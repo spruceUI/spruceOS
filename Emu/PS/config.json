@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "00FF00",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/PS",
-      "imgpath": "../../Roms/PS/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/PS",
-      "imgpath": "../../../../media/sdcard1/Roms/PS/Imgs"
     }
   ],
-  "rompath": "../../Roms/PS",
-  "imgpath": "../../Roms/PS/Imgs",
-  "gamelist": "../../Roms/PS/miyoogamelist.xml",
   "extlist": "m3u|chd|cue|img|mdf|pbp|PBP|toc|cbn",
   "launchlist": [
     {

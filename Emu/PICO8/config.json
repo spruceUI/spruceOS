@@ -15,19 +15,11 @@
       "/mnt/SDCARD/BIOS/pico8_dyn"
     ]
   ],
-  "rompathlist": [
     {
-      "rompath": "../../Roms/PICO8",
-      "imgpath": "../../Roms/PICO8/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/PICO8",
-      "imgpath": "../../../../media/sdcard1/Roms/PICO8/Imgs"
     }
   ],
-  "rompath": "../../Roms/PICO8",
-  "imgpath": "../../Roms/PICO8",
-  "gamelist": "../../Roms/PICO8/miyoogamelist.xml",
   "extlist": "p8|png|splore",
   "launchlist": [
     {

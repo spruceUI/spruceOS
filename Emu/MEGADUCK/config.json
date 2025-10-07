@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/MEGADUCK",
-      "imgpath": "../../Roms/MEGADUCK/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/MEGADUCK",
-      "imgpath": "../../../../media/sdcard1/Roms/MEGADUCK/Imgs"
     }
   ],
-  "rompath": "../../Roms/MEGADUCK",
-  "imgpath": "../../Roms/MEGADUCK/Imgs",
-  "gamelist": "../../Roms/MEGADUCK/miyoogamelist.xml",
   "extlist": "bin|zip|7z",
   "launchlist": [
     {

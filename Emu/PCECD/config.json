@@ -5,19 +5,11 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompathlist": [
     {
-      "rompath": "../../Roms/PCECD",
-      "imgpath": "../../Roms/PCECD/Imgs"
     },
     {
-      "rompath": "../../../../media/sdcard1/Roms/PCECD",
-      "imgpath": "../../../../media/sdcard1/Roms/PCECD/Imgs"
     }
   ],
-  "rompath": "../../Roms/PCECD",
-  "imgpath": "../../Roms/PCECD/Imgs",
-  "gamelist": "../../Roms/PCECD/miyoogamelist.xml",
   "extlist": "iso|img|chd|pce|ccd|cue|zip|7z",
   "launchlist": [
     {
