@@ -13,9 +13,6 @@
   "rompath": "../../Roms/QUAKE",
   "imgpath": "../../Roms/QUAKE/Imgs",
   "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "fbl|pak",
   "launchlist": [
     {

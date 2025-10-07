@@ -13,9 +13,6 @@
   "rompath": "../../Roms/DC",
   "imgpath": "../../Roms/DC/Imgs",
   "gamelist": "../../Roms/DC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {

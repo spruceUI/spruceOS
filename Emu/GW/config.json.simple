@@ -13,9 +13,6 @@
   "rompath": "../../Roms/GW",
   "imgpath": "../../Roms/GW/Imgs",
   "gamelist": "../../Roms/GW/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "mgw|zip|7z",
   "launchlist": [
     {

@@ -18,9 +18,6 @@
   "rompath": "../../Roms/POKE",
   "imgpath": "../../Roms/POKE/Imgs",
   "gamelist": "../../Roms/POKE/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "min|zip|7z",
   "launchlist": [
     {

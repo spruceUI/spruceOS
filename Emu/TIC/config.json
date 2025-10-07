@@ -18,9 +18,6 @@
   "rompath": "../../Roms/TIC",
   "imgpath": "../../Roms/TIC/Imgs",
   "gamelist": "../../Roms/TIC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [
     {

@@ -18,9 +18,6 @@
   "rompath": "../../Roms/ZXS",
   "imgpath": "../../Roms/ZXS/Imgs",
   "gamelist": "../../Roms/ZXS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "zip|7z|tzx|tap|z80|rzx|scl|trd",
   "launchlist": [
     {

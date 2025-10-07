@@ -18,9 +18,6 @@
   "rompath": "../../Roms/NDS",
   "imgpath": "../../Roms/NDS/Imgs",
   "gamelist": "../../Roms/NDS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "noaudiofix": 1,
   "extlist": "nds|zip|7z|rar",
   "launchlist": [

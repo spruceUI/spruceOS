@@ -13,9 +13,6 @@
   "rompath": "../../Roms/PCECD",
   "imgpath": "../../Roms/PCECD/Imgs",
   "gamelist": "../../Roms/PCECD/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "iso|img|chd|pce|ccd|cue|zip|7z",
   "launchlist": [
     {

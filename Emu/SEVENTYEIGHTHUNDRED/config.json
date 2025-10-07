@@ -18,9 +18,6 @@
   "rompath": "../../Roms/SEVENTYEIGHTHUNDRED",
   "imgpath": "../../Roms/SEVENTYEIGHTHUNDRED/Imgs",
   "gamelist": "../../Roms/SEVENTYEIGHTHUNDRED/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "a78|zip|7z",
   "launchlist": [
     {

@@ -18,9 +18,6 @@
   "rompath": "../../Roms/INTELLIVISION",
   "imgpath": "../../Roms/INTELLIVISION/Imgs",
   "gamelist": "../../Roms/INTELLIVISION/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "zip|7z|bin|int",
   "launchlist": [
     {

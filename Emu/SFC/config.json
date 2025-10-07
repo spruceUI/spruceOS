@@ -18,9 +18,6 @@
   "rompath": "../../Roms/SFC",
   "imgpath": "../../Roms/SFC/Imgs",
   "gamelist": "../../Roms/SFC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "zip|7z|smc|sfc|fig|gd3|gd7|dx2|bsx|bs|swc|st",
   "launchlist": [
     {

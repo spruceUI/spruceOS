@@ -18,9 +18,6 @@
   "rompath": "../../Roms/DOS",
   "imgpath": "../../Roms/DOS/Imgs",
   "gamelist": "../../Roms/DOS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
   "launchlist": [
     {

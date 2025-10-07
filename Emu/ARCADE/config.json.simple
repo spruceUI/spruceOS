@@ -13,9 +13,6 @@
   "rompath": "../../Roms/ARCADE",
   "imgpath": "../../Roms/ARCADE/Imgs",
   "gamelist": "../../Roms/ARCADE/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 1,
-  "hidebios": 1,
   "extlist": "zip",
   "launchlist": [
     {

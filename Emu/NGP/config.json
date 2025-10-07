@@ -18,9 +18,6 @@
   "rompath": "../../Roms/NGP",
   "imgpath": "../../Roms/NGP/Imgs",
   "gamelist": "../../Roms/NGP/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "ngp|ngc|zip|7z",
   "launchlist": [
     {

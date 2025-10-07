@@ -18,9 +18,6 @@
   "rompath": "../../Roms/PSP",
   "imgpath": "../../Roms/PSP/Imgs",
   "gamelist": "../../Roms/PSP/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "iso|cso|chd",
   "launchlist": [
     {

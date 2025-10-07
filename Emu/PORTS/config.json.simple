@@ -13,9 +13,6 @@
   "rompath": "/mnt/SDCARD/Roms/PORTS",
   "imgpath": "/mnt/SDCARD/Roms/PORTS/Imgs",
   "gamelist": "/mnt/SDCARD/Roms/PORTS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "sh",
   "launchlist": [
     {

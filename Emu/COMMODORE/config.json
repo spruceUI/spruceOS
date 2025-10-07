@@ -18,9 +18,6 @@
   "rompath": "../../Roms/COMMODORE",
   "imgpath": "../../Roms/COMMODORE/Imgs",
   "gamelist": "../../Roms/COMMODORE/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
   "launchlist": [
     {

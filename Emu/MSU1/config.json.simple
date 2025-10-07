@@ -13,9 +13,6 @@
   "rompath": "../../Roms/MSU1",
   "imgpath": "../../Roms/MSU1/Imgs",
   "gamelist": "../../Roms/MSU1/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "sfc|smc|zip|7z|fig|bs|st",
   "launchlist": [
     {

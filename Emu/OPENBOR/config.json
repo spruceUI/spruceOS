@@ -18,9 +18,6 @@
   "rompath": "../../Roms/OpenBOR",
   "imgpath": "../../Imgs/OpenBOR/Imgs",
   "gamelist": "../../Roms/OpenBOR/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "pak",
   "launchlist": [
     {

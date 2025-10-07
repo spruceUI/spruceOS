@@ -18,9 +18,6 @@
   "rompath": "../../Roms/MS",
   "imgpath": "../../Roms/MS/Imgs",
   "gamelist": "../../Roms/MS/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",
   "launchlist": [
     {

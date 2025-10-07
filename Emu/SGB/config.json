@@ -18,9 +18,6 @@
   "rompath": "../../Roms/SGB",
   "imgpath": "../../Roms/SGB/Imgs",
   "gamelist": "../../Roms/SGB/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
   "extlist": "gb|gbc|gba|zip|7z|bin",
   "launchlist": [
     {

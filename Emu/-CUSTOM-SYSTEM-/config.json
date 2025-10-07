@@ -11,9 +11,6 @@
   "rompath": "../../Roms/-CUSTOM-SYSTEM-",
   "imgpath": "../../Roms/-CUSTOM-SYSTEM-/Imgs",
   "gamelist": "../../Roms/-CUSTOM-SYSTEM-/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
   "launchlist": [
     {

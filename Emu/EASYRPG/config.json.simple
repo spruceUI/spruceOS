@@ -14,9 +14,6 @@
   "rompath": "../../Roms/EASYRPG",
   "imgpath": "../../Roms/EASYRPG/Imgs",
   "gamelist": "../../Roms/EASYRPG/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [
     {

@@ -13,9 +13,6 @@
   "rompath": "../../Roms/ATARIST",
   "imgpath": "../../Roms/ATARIST/Imgs",
   "gamelist": "../../Roms/ATARIST/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "st|msa|stx|dim|ipf|zip|7z",
   "launchlist": [
     {

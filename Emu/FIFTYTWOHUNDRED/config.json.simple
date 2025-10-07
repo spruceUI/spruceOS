@@ -13,9 +13,6 @@
   "rompath": "../../Roms/FIFTYTWOHUNDRED",
   "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs",
   "gamelist": "../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "a52|zip|7z|atr|bin",
   "launchlist": [
     {

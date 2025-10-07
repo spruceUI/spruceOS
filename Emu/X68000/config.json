@@ -18,9 +18,6 @@
   "rompath": "../../Roms/X68000",
   "imgpath": "../../Roms/X68000/Imgs",
   "gamelist": "../../Roms/X68000/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
   "launchlist": [
     {

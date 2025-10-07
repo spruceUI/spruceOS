@@ -18,9 +18,6 @@
   "rompath": "../../Roms/FBNEO",
   "imgpath": "../../Roms/FBNEO/Imgs",
   "gamelist": "../../Roms/FBNEO/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 1,
-  "hidebios": 1,
   "extlist": "zip",
   "launchlist": [
     {

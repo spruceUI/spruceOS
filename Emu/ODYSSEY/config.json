@@ -18,9 +18,6 @@
   "rompath": "../../Roms/ODYSSEY",
   "imgpath": "../../Roms/ODYSSEY/Imgs",
   "gamelist": "../../Roms/ODYSSEY/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
   "extlist": "bin|zip|7z",
   "launchlist": [
     {

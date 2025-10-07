@@ -18,9 +18,6 @@
   "rompath": "../../Roms/MAME2003PLUS",
   "imgpath": "../../Roms/MAME2003PLUS/Imgs",
   "gamelist": "../../Roms/MAME2003PLUS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 1,
-  "hidebios": 1,
   "extlist": "zip",
   "launchlist": [
     {
