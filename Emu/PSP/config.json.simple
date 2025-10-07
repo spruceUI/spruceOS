@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
   "background": "",
   "themecolor":"64A8BD",
-  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {"rompath": "../../Roms/PSP",

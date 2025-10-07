@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
   "background": "",
   "themecolor":"CD6155",
-  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {"rompath": "../../Roms/ARCADE",

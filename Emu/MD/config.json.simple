@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/md.png",
   "background": "",
   "themecolor":"0088CF",
-  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {"rompath": "../../Roms/MD",

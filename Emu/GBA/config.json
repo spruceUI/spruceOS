@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
   "background": "",
   "themecolor": "FF00FF",
-  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {

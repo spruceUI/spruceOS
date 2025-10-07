@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/easyrpg.png",
   "background": "",
   "themecolor": "FFFF88",
-  "effectsh": "effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "subfolder_launch_file": "RPG_RT.ldb",
   "rompathlist": [

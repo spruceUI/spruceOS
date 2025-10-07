@@ -4,7 +4,6 @@
 "iconsel": "",
 "background": "",
 "themecolor": "E4007F",
-"effectsh": "effect.sh",
 "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {"rompath": "../../Roms/SATURN",

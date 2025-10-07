@@ -2,7 +2,6 @@
   "label": "DC",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
-  "effectsh": "effect.sh",
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",

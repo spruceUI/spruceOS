@@ -4,7 +4,6 @@
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
   "background": "",
   "themecolor":"3C4593",
-  "effectsh":"effect.sh",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompathlist": [
     {"rompath": "../../Roms/WSC",
