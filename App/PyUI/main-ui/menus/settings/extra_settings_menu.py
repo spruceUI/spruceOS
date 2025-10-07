@@ -16,7 +16,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
     def reboot(self, input: ControllerInput):
         if(ControllerInput.A == input):
-            Device.run_app(Device.reboot_cmd())
+            Device.run_cmd(Device.reboot_cmd())
 
     def launch_display_settings(self,input):
         if(ControllerInput.A == input):

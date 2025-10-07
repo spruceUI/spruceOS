@@ -79,10 +79,10 @@ class AppMenu:
             selected = view.get_selection()
             if(ControllerInput.A == selected.get_input()):
                 self.save_app_selection(selected)
-                filepath = selected.get_selection().get_value().get_launch()
-                directory = selected.get_selection().get_value().get_folder()
+                launch = selected.get_selection().get_value().get_launch()
+                folder = selected.get_selection().get_value().get_folder()
                 Display.deinit_display()
-                Device.run_app(["sh", filepath], directory)
+                Device.run_app(folder,launch)
                 Controller.clear_input_queue()
                 Display.reinitialize()
             elif(ControllerInput.B == selected.get_input()):

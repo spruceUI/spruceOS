@@ -139,17 +139,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                     )
             )
 
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Volume",
-                        value_text="<    " + str(Device.get_volume()//5) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.volume_adjust
-                    )
-            )
+        if(Device.supports_volume()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Volume",
+                            value_text="<    " + str(Device.get_volume()//5) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.volume_adjust
+                        )
+                )
         
         if(Device.supports_wifi()):
             option_list.append(
