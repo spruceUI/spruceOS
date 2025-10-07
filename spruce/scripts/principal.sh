@@ -105,28 +105,6 @@ while [ 1 ]; do
 
         flag_add "in_menu"
 
-        # Choose which MainUI to put into PATH depending on PLATFORM, simple mode, and recents tile.
-        case "$PLATFORM" in
-            "A30" )
-                if flag_check "simple_mode"; then
-                    export PATH="/mnt/SDCARD/miyoo/app/nosettings:$PATH"
-                elif setting_get "recentsTile"; then
-                    export PATH="/mnt/SDCARD/miyoo/app/recents:$PATH"
-                else
-                    export PATH="/mnt/SDCARD/miyoo/app/norecents:$PATH"
-                fi
-                ;;
-            "Brick" )
-                if flag_check "simple_mode"; then
-                    export PATH="/mnt/SDCARD/trimui/app/nosettings-Brick:$PATH"
-                elif setting_get "recentsTile"; then
-                    export PATH="/mnt/SDCARD/trimui/app/recents-Brick:$PATH"
-                else
-                    export PATH="/mnt/SDCARD/trimui/app/norecents-Brick:$PATH"
-                fi
-                ;;
-        esac
-
         # Launch (and subsequently close) MainUI with various quirks depending on PLATFORM
         case "$PLATFORM" in
             "A30" )
@@ -169,7 +147,6 @@ while [ 1 ]; do
                 rm -f /tmp/trimui_inputd/input_no_dpad
                 rm -f /tmp/trimui_inputd/input_dpad_to_joystick
              
-                umount /mnt/SDCARD/Themes
                 touch /tmp/fbdisplay_exit
                 cat /dev/zero > /dev/fb0
                 export PYSDL2_DLL_PATH="/usr/trimui/lib"

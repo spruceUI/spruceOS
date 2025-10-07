@@ -78,9 +78,6 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         # Mask Roms/PORTS with non-A30 version
         mkdir -p "/mnt/SDCARD/Roms/PORTS64"
         mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
-        # mount Brick themes to hide A30 ones
-        mkdir -p "/mnt/SDCARD/trimui/brickThemes"
-        mount --bind "/mnt/SDCARD/trimui/brickThemes" "/mnt/SDCARD/Themes" &
         wait
 
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
