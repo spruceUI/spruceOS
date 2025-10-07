@@ -3,9 +3,12 @@ import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
+from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
+from menus.settings.language_menu import LanguageMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
+from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -39,6 +42,12 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             Device.remap_buttons()
 
+    def change_language_setting(self, input):
+        if (ControllerInput.A == input):
+            lang = LanguageMenu().ask_user_for_language()
+            if (lang is not None):
+                PyUiConfig.set_language(lang)
+                Language.load()
 
 
     def build_options_list(self):
@@ -105,7 +114,19 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         value=self.reboot
                 )
         )
-            
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Language",
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.change_language_setting
+            )
+        )        
+                    
         option_list.append(
                 GridOrListEntry(
                         primary_text="Stock OS Menu",

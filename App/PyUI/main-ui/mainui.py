@@ -9,6 +9,7 @@ from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
+from menus.language.language import Language
 import sdl2
 import sdl2.ext
 
@@ -115,6 +116,7 @@ def main():
     Display.clear_image_cache()
     Display.clear_text_cache()
     Controller.init()
+    Language.init()
     main_menu = MainMenu()
 
     start_background_threads()

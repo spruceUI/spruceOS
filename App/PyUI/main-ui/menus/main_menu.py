@@ -5,6 +5,7 @@ from menus.app.app_menu import AppMenu
 from menus.games.collections_menu import CollectionsMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
+from menus.language.language import Language
 from menus.main_menu_popup import MainMenuPopup
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from menus.games.recents_menu import RecentsMenu
@@ -39,7 +40,7 @@ class MainMenu:
         if (Theme.get_recents_enabled()):
             image_text_list.append(
                 GridOrListEntry(
-                    primary_text="Recent",
+                    primary_text=Language.recents(),
                     image_path=Theme.recent(),
                     image_path_selected=Theme.recent_selected(),
                     description="Recent",
@@ -51,7 +52,7 @@ class MainMenu:
         if (Theme.get_collections_enabled()):
             image_text_list.append(
                 GridOrListEntry(
-                    primary_text="Collection",
+                    primary_text=Language.collections(),
                     image_path=Theme.collection(),
                     image_path_selected=Theme.collection_selected(),
                     description="Collection",
@@ -63,7 +64,7 @@ class MainMenu:
         if (Theme.get_favorites_enabled()):
             image_text_list.append(
                 GridOrListEntry(
-                    primary_text="Favorite",
+                    primary_text=Language.favorites(),
                     image_path=Theme.favorite(),
                     image_path_selected=Theme.favorite_selected(),
                     description="Favorite",
@@ -74,7 +75,7 @@ class MainMenu:
 
         image_text_list.append(
             GridOrListEntry(
-                primary_text="Game",
+                primary_text=Language.games(),
                 image_path=Theme.game(),
                 image_path_selected=Theme.game_selected(),
                 description="Your games",
@@ -87,7 +88,7 @@ class MainMenu:
 
             image_text_list.append(
                 GridOrListEntry(
-                    primary_text="App",
+                    primary_text=Language.apps(),
                     image_path=Theme.app(),
                     image_path_selected=Theme.app_selected(),
                     description="Your Apps",
@@ -99,7 +100,7 @@ class MainMenu:
         if (Theme.get_settings_enabled()):
             image_text_list.append(
                 GridOrListEntry(
-                    primary_text="Setting",
+                    primary_text=Language.settings(),
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
                     description="Your Apps",
@@ -195,7 +196,7 @@ class MainMenu:
 
                 if((selected := view.get_selection(expected_inputs)) is not None):       
                     if(ControllerInput.A == selected.get_input()): 
-                        self.launch_selection(selected.get_selection().get_primary_text())
+                        self.launch_selection(selected.get_selection().get_value())
                     elif(ControllerInput.MENU == selected.get_input()):
                         self.popup_menu.run_popup_menu_selection()
 

@@ -328,7 +328,7 @@ class MiyooFlip(MiyooDevice):
                         print=False
                     )
                     ProcessRunner.run(
-                        ["amixer", "cset", f"name='SPK Volume'", str(5)],
+                        ["amixer", "cset", f"name='SPK Volume'", str(0)],
                         check=True,
                         print=False
                     )
