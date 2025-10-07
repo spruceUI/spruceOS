@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FFD200",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "zip|7z",
   "launchlist": [
     {

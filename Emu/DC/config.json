@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {

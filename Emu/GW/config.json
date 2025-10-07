@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FF0000",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "mgw|zip|7z",
   "launchlist": [
     {

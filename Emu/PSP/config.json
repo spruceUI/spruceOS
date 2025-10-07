@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "64A8BD",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "iso|cso|chd",
   "launchlist": [
     {

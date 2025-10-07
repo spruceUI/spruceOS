@@ -6,11 +6,6 @@
   "themecolor": "FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "subfolder_launch_file": "RPG_RT.ldb",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [
     {

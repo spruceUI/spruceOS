@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FFB800",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [
     {

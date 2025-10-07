@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FF00FF",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "gba|zip|7z|bin",
   "launchlist": [
     {

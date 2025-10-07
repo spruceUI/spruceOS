@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [
     {

@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "FF4400",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "zip|7z|cue",
   "launchlist": [
     {

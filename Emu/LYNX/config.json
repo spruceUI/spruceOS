@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "88FF88",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "lnx|zip",
   "launchlist": [
     {

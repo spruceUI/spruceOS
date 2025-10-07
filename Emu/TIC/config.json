@@ -5,11 +5,6 @@
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-    {
-    },
-    {
-    }
-  ],
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [
     {
