@@ -59,8 +59,6 @@ if [ "$PLATFORM" = "A30" ]; then
     touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
     
-    lcd_init 1
-
     # Stop NTPD
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
 

@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "Flip" ] || [ -f "$PYUI_FLAG" ]; then
+if [ "$PLATFORM" = "Flip" ]; then
     log_message "wifi_watchdog disabled due to running PyUI"
     exit 0
 fi

@@ -137,20 +137,13 @@ while [ 1 ]; do
                 # this allows joystick to be used as DPAD in MainUI
                 killall -q -USR2 joystickinput
 
-                cd ${SYSTEM_PATH}/app/
-                if [ -f "$PYUI_FLAG" ]; then
-					# send signal USR1 to joystickinput to switch to ANALOG MODE
-					killall -q -USR1 joystickinput
-					touch /tmp/fbdisplay_exit
-					cat /dev/zero > /dev/fb0
-                    export PYSDL2_DLL_PATH="/usr/miyoo/lib"
-					export LD_LIBRARY_PATH="/usr/miyoo/lib"
-                    /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
-                else
-                    MainUI &> /dev/null
-					# send signal USR1 to joystickinput to switch to ANALOG MODE
-					killall -q -USR1 joystickinput
-                fi
+                # send signal USR1 to joystickinput to switch to ANALOG MODE
+                killall -q -USR1 joystickinput
+                touch /tmp/fbdisplay_exit
+                cat /dev/zero > /dev/fb0
+                export PYSDL2_DLL_PATH="/usr/miyoo/lib"
+                export LD_LIBRARY_PATH="/usr/miyoo/lib"
+                /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
 
                 # remove soft link
                 rm /dev/ttyS0
@@ -176,16 +169,13 @@ while [ 1 ]; do
                 rm -f /tmp/trimui_inputd/input_no_dpad
                 rm -f /tmp/trimui_inputd/input_dpad_to_joystick
              
-                if [ -f "$PYUI_FLAG" ]; then
-					umount /mnt/SDCARD/Themes
-					touch /tmp/fbdisplay_exit
-					cat /dev/zero > /dev/fb0
-                    export PYSDL2_DLL_PATH="/usr/trimui/lib"
-					export LD_LIBRARY_PATH="/usr/trimui/lib"
-                    /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
-                else
-                    MainUI
-                fi
+                umount /mnt/SDCARD/Themes
+                touch /tmp/fbdisplay_exit
+                cat /dev/zero > /dev/fb0
+                export PYSDL2_DLL_PATH="/usr/trimui/lib"
+                export LD_LIBRARY_PATH="/usr/trimui/lib"
+                /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+
                 preload.sh
 
                 if [ -f /tmp/trimui_inputd_restart ] ; then
@@ -204,7 +194,6 @@ while [ 1 ]; do
                 runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
-                touch "$PYUI_FLAG"
                 export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
                 /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 ;;
