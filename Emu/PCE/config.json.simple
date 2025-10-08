@@ -6,10 +6,5 @@
   "themecolor": "EA483F",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",
-  "launchlist": [
-    {
-      "name": "Jump to random TG16/PCE game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

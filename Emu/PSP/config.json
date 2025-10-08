@@ -8,10 +8,6 @@
   "extlist": "iso|cso|chd",
   "launchlist": [
     {
-      "name": "Jump to random PlayStation Portable game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

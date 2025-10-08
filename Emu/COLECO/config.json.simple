@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|rom|ri|mx1|mx2|col|dsk|cas|sg|sc|m3u",
-  "launchlist": [
-    {
-      "name": "Jump to random Colecovision game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

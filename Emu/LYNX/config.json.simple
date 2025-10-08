@@ -6,10 +6,5 @@
   "themecolor": "88FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "lnx|zip",
-  "launchlist": [
-    {
-      "name": "Jump to random Lynx game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

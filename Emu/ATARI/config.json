@@ -8,10 +8,6 @@
   "extlist": "a26|zip|7z|bin",
   "launchlist": [
     {
-      "name": "Jump to random Atari 2600 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

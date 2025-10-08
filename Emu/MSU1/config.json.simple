@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "sfc|smc|zip|7z|fig|bs|st",
-  "launchlist": [
-    {
-      "name": "Jump to random SNES MSU1 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

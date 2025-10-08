@@ -8,10 +8,6 @@
   "extlist": "smc|zip|7z",
   "launchlist": [
     {
-      "name": "Jump to random Sufami game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

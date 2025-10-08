@@ -8,10 +8,6 @@
   "extlist": "zip|bin|rom|chf",
   "launchlist": [
     {
-      "name": "Jump to random Channel F game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

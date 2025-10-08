@@ -6,10 +6,5 @@
   "themecolor": "64A8BD",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "iso|cso|chd",
-  "launchlist": [
-    {
-      "name": "Jump to random PlayStation Portable game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

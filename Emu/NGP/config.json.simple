@@ -6,10 +6,5 @@
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "ngp|ngc|zip|7z",
-  "launchlist": [
-    {
-      "name": "Jump to random NeoGeo Pocket game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

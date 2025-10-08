@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
-  "launchlist": [
-    {
-      "name": "Jump to random DOS game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

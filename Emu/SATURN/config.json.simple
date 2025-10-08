@@ -1,15 +1,10 @@
 {
-"label": "Saturn",
-"icon": "",
-"iconsel": "",
-"background": "",
-"themecolor": "E4007F",
-"launch": "../.emu_setup/standard_launch.sh",
-"extlist": "chd|zip|mds|ccd|iso|cue",
-"launchlist": [
-    {
-      "name": "Jump to random Saturn game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "label": "Saturn",
+  "icon": "",
+  "iconsel": "",
+  "background": "",
+  "themecolor": "E4007F",
+  "launch": "../.emu_setup/standard_launch.sh",
+  "extlist": "chd|zip|mds|ccd|iso|cue",
+  "launchlist": []
 }

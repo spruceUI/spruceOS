@@ -9,10 +9,6 @@
   "extlist": "nds|zip|7z|rar",
   "launchlist": [
     {
-      "name": "Jump to random Nintendo DS game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓TRNGAJE)-steward-original",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

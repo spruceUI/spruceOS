@@ -6,10 +6,5 @@
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chd|cdi|gdi|cue|iso|m3u",
-  "launchlist": [
-    {
-      "name": "Jump to random Dreamcast game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

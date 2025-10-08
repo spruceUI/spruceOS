@@ -6,10 +6,5 @@
   "themecolor": "FF00FF",
   "launch": "launch.sh",
   "extlist": "gba|zip|7z|bin",
-  "launchlist": [
-    {
-      "name": "Jump to random GameBoy Advance game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

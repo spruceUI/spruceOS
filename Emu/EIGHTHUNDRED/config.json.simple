@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
-  "launchlist": [
-    {
-      "name": "Jump to random Atari 800 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

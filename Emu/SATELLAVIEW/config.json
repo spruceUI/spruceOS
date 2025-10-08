@@ -8,10 +8,6 @@
   "extlist": "zip|7z|bs|sfc|smc|swc|fig|st",
   "launchlist": [
     {
-      "name": "Jump to random Satellaview game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

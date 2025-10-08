@@ -8,10 +8,6 @@
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [
     {
-      "name": "Jump to random WonderSwan Color game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

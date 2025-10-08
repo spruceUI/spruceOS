@@ -8,10 +8,6 @@
   "extlist": "gb|gbc|gba|zip|7z|bin",
   "launchlist": [
     {
-      "name": "Jump to random Super GameBoy game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

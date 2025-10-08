@@ -8,10 +8,6 @@
   "extlist": "chd|m3u|zip|7z|gen|smd|md|32x|cue|iso|sms|68k",
   "launchlist": [
     {
-      "name": "Jump to random Sega CD/MD-CD game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓PICODRIVE)-genesis+gx",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

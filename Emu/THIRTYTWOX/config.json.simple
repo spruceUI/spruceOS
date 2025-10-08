@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|gen|smd|md|32x|bin|iso|sms|68k|chd",
-  "launchlist": [
-    {
-      "name": "Jump to random Sega 32X game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

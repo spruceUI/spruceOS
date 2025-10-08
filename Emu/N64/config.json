@@ -8,10 +8,6 @@
   "extlist": "zip|7z|n64|z64|v64",
   "launchlist": [
     {
-      "name": "Jump to random Nintendo 64 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

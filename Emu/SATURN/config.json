@@ -8,10 +8,6 @@
   "extlist": "chd|zip|mds|ccd|iso|cue",
   "launchlist": [
     {
-      "name": "Jump to random Saturn game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓LIBRETRO)-sa_bios-sa_hle",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

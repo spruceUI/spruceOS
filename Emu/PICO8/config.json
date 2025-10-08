@@ -18,10 +18,6 @@
   "extlist": "p8|png|splore",
   "launchlist": [
     {
-      "name": "Jump to random Pico-8 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Import carts from Splore to MainUI",
       "launch": "import.sh"
     },

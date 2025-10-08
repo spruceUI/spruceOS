@@ -8,10 +8,6 @@
   "extlist": "zip|7z|adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|rp9",
   "launchlist": [
     {
-      "name": "Jump to random Amiga game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓UAE4ARM)-puae2021",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

@@ -8,10 +8,6 @@
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [
     {
-      "name": "Jump to random Tic-80 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },
