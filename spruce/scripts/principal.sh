@@ -115,7 +115,7 @@ while [ 1 ]; do
                 cat /dev/zero > /dev/fb0
                 export PYSDL2_DLL_PATH="/usr/miyoo/lib"
                 export LD_LIBRARY_PATH="/usr/miyoo/lib"
-                /mnt/SDCARD/spruce/bin/python/bin/MainUI -OO /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
 
                 # remove soft link
                 rm /dev/ttyS0
@@ -145,7 +145,7 @@ while [ 1 ]; do
                 cat /dev/zero > /dev/fb0
                 export PYSDL2_DLL_PATH="/usr/trimui/lib"
                 export LD_LIBRARY_PATH="/usr/trimui/lib"
-                /mnt/SDCARD/spruce/flip/bin/MainUI -OO /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
 
                 preload.sh
 
@@ -166,7 +166,7 @@ while [ 1 ]; do
                 runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
                 cd /usr/miyoo/bin/
                 export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
-                /mnt/SDCARD/spruce/flip/bin/MainUI -OO /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
+                /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
                 ;;
         esac
 
