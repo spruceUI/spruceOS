@@ -116,8 +116,8 @@ class RomsMenuCommon(ABC):
     def get_additional_menu_options(self):
         return []
 
-    def _menu_pressed(self, selection):
-        self.popup_menu.run_game_select_popup_menu(selection, self.get_additional_menu_options())
+    def _menu_pressed(self, selection, rom_list):
+        self.popup_menu.run_game_select_popup_menu(selection, self.get_additional_menu_options(), rom_list)
 
     def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
         selected = Selection(None,None,0)
@@ -199,7 +199,7 @@ class RomsMenuCommon(ABC):
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input()):
                     prev_view = Theme.get_game_selection_view_type()
-                    self._menu_pressed(selected.get_selection().get_value())
+                    self._menu_pressed(selected.get_selection().get_value(), rom_list)
                     # Regenerate as game config menu might've changed something
                     original_length = len(rom_list)
                     rom_list = self._get_rom_list()
