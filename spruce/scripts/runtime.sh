@@ -47,7 +47,6 @@ if [ "$PLATFORM" = "A30" ]; then
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
         mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/SATURN &
-        mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/PORT32 &
         mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/App/PortMaster &
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
@@ -68,12 +67,6 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
 
     # Create directories and mount in parallel
     (
-        # Use Emu folder for Miyoo and TrimUI devices despite different name schemes
-        mkdir -p "/mnt/SDCARD/Emus"
-        mount --bind "/mnt/SDCARD/Emu" "/mnt/SDCARD/Emus" &
-        # Use App folder for Miyoo and TrimUI devices despite different name schemes
-        mkdir -p "/mnt/SDCARD/Apps"
-        mount --bind "/mnt/SDCARD/App" "/mnt/SDCARD/Apps" &
         # Mask Roms/PORTS with non-A30 version
         mkdir -p "/mnt/SDCARD/Roms/PORTS64"
         mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
