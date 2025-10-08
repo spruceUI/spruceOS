@@ -44,7 +44,6 @@ if [ "$PLATFORM" = "A30" ]; then
         mkdir -p /var/lib/alsa
         mkdir -p /mnt/SDCARD/spruce/dummy
         mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
-        mount -o bind /mnt/SDCARD/miyoo/app /usr/miyoo/app &
         mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
         mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
         mount -o bind /mnt/SDCARD/spruce/dummy /mnt/SDCARD/Emu/SATURN &

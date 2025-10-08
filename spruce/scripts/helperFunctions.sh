@@ -40,7 +40,7 @@ export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export MESSAGES_FILE="/var/log/messages"
 
 # Export for enabling SSL support in CURL
-export SSL_CERT_FILE=/mnt/SDCARD/miyoo/app/ca-certificates.crt
+export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
