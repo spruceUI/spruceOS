@@ -26,10 +26,6 @@
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random GameBoy game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

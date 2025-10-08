@@ -26,10 +26,6 @@
   "extlist": "a26|zip|7z|bin",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random Atari 2600 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

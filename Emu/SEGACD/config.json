@@ -26,10 +26,6 @@
   "extlist": "chd|m3u|zip|7z|gen|smd|md|32x|cue|iso|sms|68k",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random Sega CD/MD-CD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

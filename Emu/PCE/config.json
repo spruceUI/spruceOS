@@ -26,10 +26,6 @@
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random TG16/PCE game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

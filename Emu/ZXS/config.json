@@ -26,10 +26,6 @@
   "extlist": "zip|7z|tzx|tap|z80|rzx|scl|trd",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random ZX Spectrum game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

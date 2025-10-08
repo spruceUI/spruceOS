@@ -27,10 +27,6 @@
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random EasyRPG game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
