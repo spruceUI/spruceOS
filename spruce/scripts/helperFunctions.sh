@@ -788,7 +788,7 @@ log_precise() {
 # If no output is provided, the QR code will be saved to /tmp/tmp/qr.png
 #   QR_CODE=$(qr_code -t "https://www.google.com")
 #   display -i "$QR_CODE" -t "DT: QR Code" -d 5
-QRENCODE_PATH="/mnt/SDCARD/miyoo/app/qrencode"
+QRENCODE_PATH="/mnt/SDCARD/spruce/bin/qrencode"
 QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
 qr_code() {
     text=""
