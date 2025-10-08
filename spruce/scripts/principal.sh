@@ -208,7 +208,6 @@ while [ 1 ]; do
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
-        rm -f /mnt/SDCARD/Roms/deflaunch.json 2>/dev/null # hack to keep Flip from using X menu script as launch script
         killall -9 udpbcast 2>/dev/null
 
         # reset CPU settings to defaults in case an emulator changes anything
@@ -233,13 +232,6 @@ while [ 1 ]; do
     if flag_check "tmp_update_repair_attempted"; then
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
-    fi
-
-    # Needed to handle Flip's "Remove SDCARD" in Settings for live unmounting of TF2
-    if [ -f /tmp/system/umount_sdcards ] ; then          
-        chmod a+x /usr/miyoo/bin/umount_sdcards.sh
-        /usr/miyoo/bin/umount_sdcards.sh
-        rm /tmp/system/umount_sdcards          
     fi
 
     sanitize_system_json

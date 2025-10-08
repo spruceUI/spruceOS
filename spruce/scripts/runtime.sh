@@ -238,8 +238,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
 
     # Run scripts for initial setup
-    ${SCRIPTS_DIR}/ffplay_is_now_media.sh &
-    ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
@@ -422,7 +420,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/checkfaves.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
 
     # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
@@ -454,7 +451,6 @@ else
 fi
 
 ${SCRIPTS_DIR}/set_up_swap.sh
-${SCRIPTS_DIR}/favePathFix.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
