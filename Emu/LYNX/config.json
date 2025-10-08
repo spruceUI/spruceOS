@@ -8,10 +8,6 @@
   "extlist": "lnx|zip",
   "launchlist": [
     {
-      "name": "Jump to random Lynx game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓HANDY)-mednafen",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

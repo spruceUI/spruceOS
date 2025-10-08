@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "a52|zip|7z|atr|bin",
-  "launchlist": [
-    {
-      "name": "Jump to random Atari 5200 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

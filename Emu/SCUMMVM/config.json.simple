@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "scummvm",
-  "launchlist": [
-    {
-      "name": "Jump to random ScummVM game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

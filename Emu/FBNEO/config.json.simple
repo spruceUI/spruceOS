@@ -6,10 +6,5 @@
   "themecolor": "EC7063",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "Jump to random FBNeo game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

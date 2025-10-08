@@ -6,10 +6,5 @@
   "themecolor": "DDEEFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
-  "launchlist": [
-    {
-      "name": "Jump to random media",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

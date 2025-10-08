@@ -8,10 +8,6 @@
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [
     {
-      "name": "Jump to random GameBoy game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓GAMBATTE)-mgba-tgbdual",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

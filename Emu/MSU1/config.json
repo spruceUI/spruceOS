@@ -8,10 +8,6 @@
   "extlist": "sfc|smc|zip|7z|fig|bs|st",
   "launchlist": [
     {
-      "name": "Jump to random SNES MSU1 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

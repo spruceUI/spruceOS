@@ -8,10 +8,6 @@
   "extlist": "p8|png",
   "launchlist": [
     {
-      "name": "Jump to random Fake-08 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

@@ -6,10 +6,5 @@
   "themecolor": "3C4593",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "ws|wsc|zip|7z|pc2",
-  "launchlist": [
-    {
-      "name": "Jump to random WonderSwan Color game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

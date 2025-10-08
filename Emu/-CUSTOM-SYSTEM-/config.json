@@ -6,14 +6,6 @@
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Custom System game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

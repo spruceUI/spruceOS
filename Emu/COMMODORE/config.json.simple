@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
-  "launchlist": [
-    {
-      "name": "Jump to random C64 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

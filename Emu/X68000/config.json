@@ -8,10 +8,6 @@
   "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
   "launchlist": [
     {
-      "name": "Jump to random X68000 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

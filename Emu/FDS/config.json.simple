@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|fds|nes|unif|unf",
-  "launchlist": [
-    {
-      "name": "Jump to random FDS game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

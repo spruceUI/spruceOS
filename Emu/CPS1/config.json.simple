@@ -6,10 +6,5 @@
   "themecolor": "0000FF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|cue",
-  "launchlist": [
-    {
-      "name": "Jump to random CPS1 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

@@ -6,10 +6,5 @@
   "themecolor": "FFFF00",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "pak",
-  "launchlist": [
-    {
-      "name": "Jump to random OpenBOR game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

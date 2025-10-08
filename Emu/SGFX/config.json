@@ -8,10 +8,6 @@
   "extlist": "zip|7z|pce|sgx|cue|ccd|chd",
   "launchlist": [
     {
-      "name": "Jump to random SuperGrafx game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "CPU: (✓SMART)-Perf-Max",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
     },

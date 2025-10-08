@@ -8,10 +8,6 @@
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",
   "launchlist": [
     {
-      "name": "Jump to random MSX game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓BLUEMSX)-fmsx",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

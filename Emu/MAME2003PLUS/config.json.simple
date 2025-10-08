@@ -6,10 +6,5 @@
   "themecolor": "00CCFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "Jump to random MAME game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

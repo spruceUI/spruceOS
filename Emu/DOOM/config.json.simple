@@ -6,10 +6,5 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|wad|exe",
-  "launchlist": [
-    {
-      "name": "Jump to random Doom wad",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

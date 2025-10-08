@@ -6,10 +6,5 @@
   "themecolor": "FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
-  "launchlist": [
-    {
-      "name": "Jump to random Nintendo 64 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

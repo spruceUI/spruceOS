@@ -6,10 +6,5 @@
   "themecolor": "00FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "p8",
-  "launchlist": [
-    {
-      "name": "Jump to random Fake-08 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

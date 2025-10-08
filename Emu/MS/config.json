@@ -8,10 +8,6 @@
   "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",
   "launchlist": [
     {
-      "name": "Jump to random Master System game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Emu Core: (✓GENESIS+GX)-picodrive-gearsystem",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
     },

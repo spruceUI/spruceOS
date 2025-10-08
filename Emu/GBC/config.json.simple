@@ -6,10 +6,5 @@
   "themecolor": "FFB800",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gb|gbc|zip|7z|bin|dmg",
-  "launchlist": [
-    {
-      "name": "Jump to random GameBoy Color game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }

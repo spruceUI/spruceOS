@@ -6,10 +6,5 @@
   "themecolor": "CD6155",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "Jump to random Arcade game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    }
-  ]
+  "launchlist": []
 }
