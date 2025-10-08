@@ -47,27 +47,18 @@ class GameSelectMenuPopup:
             Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
 
 
-    def run_game_select_popup_menu(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
+    def get_game_options(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
         popup_options = []
         popup_options.extend(additional_popup_options)
         rom_name = os.path.basename(rom_info.rom_file_path)
         
-        popup_options.append(GridOrListEntry(
-            primary_text=f"{rom_info.game_system.display_name} Game Search",
-            image_path=Theme.settings(),
-            image_path_selected=Theme.settings_selected(),
-            description="",
-            icon=Theme.settings(),
-            value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
-        ))
-
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
                 primary_text="Remove Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description=f"Remove {rom_name} as a favorite",
-                icon=Theme.settings(),
+                description="",
+                icon=None,
                 value=lambda input_value, rom_info=rom_info: self.remove_favorite(rom_info, input_value)
             ))
         else:
@@ -75,8 +66,8 @@ class GameSelectMenuPopup:
                 primary_text="Add Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description=f"Add {rom_name} as a favorite",
-                icon=Theme.settings(),
+                description="",
+                icon=None,
                 value=lambda input_value, rom_info=rom_info: self.add_favorite(rom_info, input_value)
             ))
             
@@ -86,7 +77,7 @@ class GameSelectMenuPopup:
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
-            icon=Theme.settings(),
+            icon=None,
             value=lambda input_value, rom_info=rom_info: self.collections_management_view(rom_info, input_value)
         ))
 
@@ -94,20 +85,36 @@ class GameSelectMenuPopup:
                 primary_text="Launch Random Game",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description=f"Launch Random Game",
-                icon=Theme.settings(),
+                description="",
+                icon=None,
                 value=lambda input_value, rom_list=rom_list: self.launch_random_game(input_value, rom_list)
         ))
+
+        return popup_options
+
+
+    def run_game_select_popup_menu(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
+        popup_options = []
+        popup_options.append(GridOrListEntry(
+            primary_text=f"{rom_info.game_system.display_name} Game Search",
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=None,
+            value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
+        ))
+
+
+        popup_options.extend(self.get_game_options(rom_info, additional_popup_options, rom_list)) 
 
         popup_options.append(GridOrListEntry(
             primary_text=f"Toggle View",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
-            icon=Theme.settings(),
+            icon=None,
             value=lambda input_value: self.toggle_view()
         ))
-
 
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
@@ -116,7 +123,6 @@ class GameSelectMenuPopup:
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
-                        
 
 
         while (popup_selection := popup_view.get_selection()):

@@ -119,6 +119,9 @@ class RomsMenuCommon(ABC):
     def _menu_pressed(self, selection, rom_list):
         self.popup_menu.run_game_select_popup_menu(selection, self.get_additional_menu_options(), rom_list)
 
+    def _get_menu_button_game_options(self, selection, rom_list):
+        return self.popup_menu.get_game_options(selection, self.get_additional_menu_options(), rom_list)
+
     def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
         selected = Selection(None,None,0)
         view = None
@@ -193,8 +196,9 @@ class RomsMenuCommon(ABC):
                         RecentsManager.add_game(selected.get_selection().get_value())
                         self.run_game(selected.get_selection().get_value())
                 elif(ControllerInput.X == selected.get_input()):
+                    gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
                     GameConfigMenu(selected.get_selection().get_value().game_system, 
-                                   selected.get_selection().get_value()).show_config()
+                                   selected.get_selection().get_value(), gen_additional_game_options).show_config()
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input()):

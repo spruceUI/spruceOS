@@ -15,9 +15,10 @@ from views.view_type import ViewType
 # Would like this to be generic in the future but this is so Miyoo specific right now 
 # Due to the oddities in how its handled
 class GameConfigMenu:
-    def __init__(self, game_system: GameSystem, game : RomInfo):
+    def __init__(self, game_system: GameSystem, game : RomInfo, gen_additional_game_options):
         self.game_system = game_system
         self.game = game
+        self.gen_additional_game_options = gen_additional_game_options
 
     def get_selected_index(self, title, options):
         selected = Selection(None, None, 0)
@@ -116,6 +117,8 @@ class GameConfigMenu:
                         
                     )
                 )
+
+            config_list.extend(self.gen_additional_game_options())
 
             core_options = self.game_system.game_system_config.get_core_options()
             cpu_options = self.game_system.game_system_config.get_cpu_options()
