@@ -9,7 +9,7 @@ if [ "$MOUNT_MODE" = "ro" ]; then #set to rw for testing
 	if [ "$(uname -m)" = "aarch64" ]; then
 		FSCK_FAT="/mnt/SDCARD/spruce/bin64/fsck.fat"
 	else
-		FSCK_FAT="/mnt/SDCARD/miyoo/app/fsck.fat" # move to spruce/bin?
+		FSCK_FAT="/mnt/SDCARD/spruce/bin/fsck.fat"
 	fi	
     
 	cp /mnt/SDCARD/spruce/scripts/sdfix.sh /tmp
