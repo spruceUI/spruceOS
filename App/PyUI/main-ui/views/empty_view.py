@@ -5,6 +5,7 @@ from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.display import Display
 from display.render_mode import RenderMode
+from menus.language.language import Language
 import sdl2
 from controller.controller import Controller
 from themes.theme import Theme
@@ -20,8 +21,8 @@ class EmptyView(View):
         pass
 
     def _render(self):
-        Display.clear("No Entries Found")
-        Display.render_text_centered(f"No Entries Found",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.clear(Language.no_entries_found())
+        Display.render_text_centered(Language.no_entries_found(),Device.screen_width()//2, Device.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
         
 

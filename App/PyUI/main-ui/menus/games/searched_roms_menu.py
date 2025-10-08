@@ -14,8 +14,7 @@ class SearchedRomsMenu(RomsMenuCommon):
         self.rom_select_options_builder = RomSelectOptionsBuilder()
         self.search_str = search_str
 
-    def include_rom(self,rom_file_path):
-        rom_file_name = os.path.splitext(os.path.basename(rom_file_path))[0]
+    def include_rom(self,rom_file_name):
         return self.search_str in rom_file_name.upper()
     
     def _get_rom_list(self) -> list[GridOrListEntry]:

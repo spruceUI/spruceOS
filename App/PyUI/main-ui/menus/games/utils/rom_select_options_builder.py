@@ -111,7 +111,7 @@ class RomSelectOptionsBuilder:
                 )
 
         for rom_file_path in valid_folders:
-            if(filter(rom_file_path)):
+            if(filter(rom_file_name)):
                 rom_info = RomInfo(game_system,rom_file_path)
                 rom_file_name = os.path.basename(rom_file_path)
 

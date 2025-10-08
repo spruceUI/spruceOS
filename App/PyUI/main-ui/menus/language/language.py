@@ -112,3 +112,27 @@ class Language:
     @classmethod
     def settings(cls):
         return cls._data.get("Settings","Settings")
+
+    @classmethod
+    def no_entries_found(cls):
+        return cls._data.get("noEntriesFound","No Entries Found")
+
+    @classmethod
+    def system_game_search(cls):
+        return cls._data.get("systemGameSearch","$system Game Search")
+
+    @classmethod
+    def all_system_game_search(cls):
+        return cls._data.get("allSystemGameSearch","All System Game Search")
+
+    @classmethod
+    def system_menu_sub_options(cls):
+        return cls._data.get("systemMenuSubOptions","$system Menu Sub Options")
+
+    @classmethod
+    def game_search(cls):
+        return cls._data.get("gameSearch","Game Search:")
+
+    
+    
+    
