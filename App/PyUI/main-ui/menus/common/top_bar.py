@@ -4,6 +4,7 @@ import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -35,11 +36,11 @@ class TopBar:
         settings_color = Theme.text_color_selected(FontPurpose.GRID_ONE_ROW) if "Settings" == self.selected_tab else Theme.text_color(FontPurpose.GRID_ONE_ROW)
         
         text_padding = 20
-        w, h = Display.render_text("Games",x_offset, center_of_bar,  games_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        w, h = Display.render_text(Language.games(),x_offset, center_of_bar,  games_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
         x_offset += w +text_padding
-        w, h = Display.render_text("Apps",x_offset, center_of_bar,  apps_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        w, h = Display.render_text(Language.apps(),x_offset, center_of_bar,  apps_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
         x_offset += w +text_padding
-        w, h = Display.render_text("Settings",x_offset, center_of_bar,  settings_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        w, h = Display.render_text(Language.settings(),x_offset, center_of_bar,  settings_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
         x_offset += w +text_padding
 
         battery_percent = Device.get_battery_percent()

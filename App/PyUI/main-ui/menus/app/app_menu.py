@@ -5,6 +5,7 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
@@ -68,7 +69,7 @@ class AppMenu:
         if(view is None):
             view = ViewCreator.create_view(
                 view_type=Theme.get_view_type_for_app_menu(),
-                top_bar_text="Apps", 
+                top_bar_text=Language.apps(), 
                 options=app_list,
                 selected_index=selected.get_index())
         else:

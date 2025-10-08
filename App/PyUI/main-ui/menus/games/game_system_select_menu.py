@@ -7,6 +7,7 @@ from games.utils.game_system import GameSystem
 from menus.games.game_select_menu import GameSelectMenu
 from menus.games.game_system_select_menu_popup import GameSystemSelectMenuPopup
 from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -233,7 +234,7 @@ class GameSystemSelectMenu:
         if(view is None):
             view = ViewCreator.create_view(
                 view_type=Theme.get_view_type_for_system_select_menu(),
-                top_bar_text="Game", 
+                top_bar_text=Language.games(), 
                 options=self.systems_list, 
                 cols=Theme.get_game_system_select_col_count(), 
                 rows=Theme.get_game_system_select_row_count(),
