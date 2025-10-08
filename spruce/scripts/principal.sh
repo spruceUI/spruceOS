@@ -85,9 +85,6 @@ while [ 1 ]; do
             flag_remove "low_battery"
         fi
 
-        # This is our hack to add a numeric battery percentage despite MainUI not supporting that feature
-        [ "$PLATFORM" = "A30" ] && /mnt/SDCARD/spruce/scripts/powerdisplay.sh &
-
         # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to MainUI
         if flag_check "pre_menu_unpacking"; then
             display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
