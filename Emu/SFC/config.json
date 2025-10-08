@@ -8,10 +8,6 @@
   "extlist": "zip|7z|smc|sfc|fig|gd3|gd7|dx2|bsx|bs|swc|st",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random SNES/SFC game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },

@@ -8,10 +8,6 @@
   "extlist": "cue|chd|m3u",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random Neo CD game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     },
