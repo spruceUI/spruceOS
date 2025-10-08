@@ -3,15 +3,11 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/nds.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/nds.png",
   "background": "",
-  "themecolor":"FF8800",
+  "themecolor": "FF8800",
   "launch": "../.emu_setup/standard_launch.sh",
   "noaudiofix": 1,
   "extlist": "nds|zip|7z|rar",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Nintendo DS game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

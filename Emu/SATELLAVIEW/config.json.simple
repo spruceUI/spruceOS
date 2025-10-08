@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/satella.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/satella.png",
   "background": "",
-  "themecolor":"",
+  "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|bs|sfc|smc|swc|fig|st",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Satellaview game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

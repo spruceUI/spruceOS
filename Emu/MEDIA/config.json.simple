@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
   "background": "",
-  "themecolor":"DDEEFF",
+  "themecolor": "DDEEFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random media",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

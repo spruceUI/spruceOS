@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
   "background": "",
-  "themecolor":"",
+  "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random MSX game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fc.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fc.png",
   "background": "",
-  "themecolor":"991615",
+  "themecolor": "991615",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|nes|fds|unif|unf",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random NES/FC game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

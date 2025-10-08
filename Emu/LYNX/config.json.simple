@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/lynx.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/lynx.png",
   "background": "",
-  "themecolor":"88FF88",
+  "themecolor": "88FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "lnx|zip",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Lynx game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

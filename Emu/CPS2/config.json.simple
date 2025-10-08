@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
   "background": "",
-  "themecolor":"FFFF00",
+  "themecolor": "FFFF00",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|cue",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random CPS2 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

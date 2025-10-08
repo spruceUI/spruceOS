@@ -8,10 +8,6 @@
   "extlist": "zip|7z|sna|dsk|kcr|bin",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
       "name": "Jump to random CPC game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
     }

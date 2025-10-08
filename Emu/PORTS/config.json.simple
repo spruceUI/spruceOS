@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ports.png",
   "background": "",
-  "themecolor":"",
+  "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "sh",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Port",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

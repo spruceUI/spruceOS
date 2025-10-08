@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
   "background": "",
-  "themecolor":"FFFF88",
+  "themecolor": "FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Nintendo 64 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

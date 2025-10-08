@@ -2,15 +2,11 @@
   "label": "NeoGeo",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neogeo.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neogeo.png",
- 	"background": "",
-	"themecolor": "FFD200",
+  "background": "",
+  "themecolor": "FFD200",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random NeoGeo game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
