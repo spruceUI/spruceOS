@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
   "background": "",
-  "themecolor":"64A8BD",
+  "themecolor": "64A8BD",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "iso|cso|chd",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random PlayStation Portable game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

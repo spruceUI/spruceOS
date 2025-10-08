@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps3.png",
   "background": "",
-  "themecolor":"FF4400",
+  "themecolor": "FF4400",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|cue",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random CPS3 game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"

@@ -3,14 +3,10 @@
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arcade.png",
   "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
   "background": "",
-  "themecolor":"CD6155",
+  "themecolor": "CD6155",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
   "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
     {
       "name": "Jump to random Arcade game",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
