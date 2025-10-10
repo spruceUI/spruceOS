@@ -253,10 +253,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                                                   ControllerInput.L1, ControllerInput.R1]
             selected = list_view.get_selection(control_options)
 
-            if(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):
+            if(Theme.skip_main_menu() and (ControllerInput.L1 == selected.get_input() or ControllerInput.B == selected.get_input())):
                 if(self.anything_theme_related_changed):
                     os._exit(0)
-                return ControllerInput.L1
+                return selected.get_input()
             if(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
                 if(self.anything_theme_related_changed):
                     os._exit(0)

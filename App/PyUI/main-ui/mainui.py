@@ -5,7 +5,6 @@ import shutil
 import sys
 import threading
 from devices.device import Device
-from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -17,7 +16,6 @@ from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
-from devices.miyoo.flip.miyoo_flip import MiyooFlip
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -44,8 +42,10 @@ def log_renderer_info():
 
 def initialize_device(device):
     if "MIYOO_FLIP" == device:
+        from devices.miyoo.flip.miyoo_flip import MiyooFlip
         Device.init(MiyooFlip())
     elif "MIYOO_MINI_FLIP" == device:
+        from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
         Device.init(MiyooMiniFlip())
     elif "TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
