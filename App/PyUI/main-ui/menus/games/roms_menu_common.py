@@ -127,8 +127,13 @@ class RomsMenuCommon(ABC):
         view = None
         last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name)
 
-        if(last_subfolder != '' and getattr(self, 'subfolder', '') != last_subfolder and getattr(self, 'subfolder', '') != ''):
-            print(f"Subfolder does not match {last_subfolder} vs {getattr(self, 'subfolder', '') }")
+        if (
+            last_subfolder != '' and
+            getattr(self, 'subfolder', '') != last_subfolder and
+            getattr(self, 'subfolder', '') != '' and
+            os.path.isdir(last_subfolder)
+        ):
+            PyUiLogger.get_logger().info(f"Subfolder does not match {last_subfolder} vs {getattr(self, 'subfolder', '') }")
             rom_info_subfolder = RomInfo(game_system=rom_list[0].get_value().game_system,rom_file_path=last_subfolder)
             return_value = self._run_subfolder_menu(rom_info_subfolder)
             if(return_value is not None):
