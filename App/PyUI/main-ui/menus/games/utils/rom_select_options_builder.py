@@ -80,7 +80,7 @@ class RomSelectOptionsBuilder:
             return None
         
 
-    def build_rom_list(self, game_system,filter: Callable[[str], bool] = lambda a: True, subfolder = None) -> list[GridOrListEntry]:
+    def build_rom_list(self, game_system,filter: Callable[[str, str], bool] = lambda a,b: True, subfolder = None) -> list[GridOrListEntry]:
         file_rom_list = []
         folder_rom_list = []
         valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
@@ -89,9 +89,9 @@ class RomSelectOptionsBuilder:
         miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
         
         for rom_file_path in valid_files:
-            if(filter(rom_file_path)):
-                rom_file_name = os.path.basename(rom_file_path)
-                game_entry = miyoo_game_list.get_by_file_name(rom_file_name)
+            rom_file_name = os.path.basename(rom_file_path)
+            game_entry = miyoo_game_list.get_by_file_name(rom_file_name)
+            if(filter(rom_file_name, rom_file_path)):
                 if(game_entry is not None):
                     display_name = game_entry.name
                 else:
@@ -111,9 +111,9 @@ class RomSelectOptionsBuilder:
                 )
 
         for rom_file_path in valid_folders:
-            if(filter(rom_file_name)):
-                rom_info = RomInfo(game_system,rom_file_path)
-                rom_file_name = os.path.basename(rom_file_path)
+            rom_info = RomInfo(game_system,rom_file_path)
+            rom_file_name = os.path.basename(rom_file_path)
+            if(filter(rom_file_name, rom_file_path)):
 
                 folder_rom_list.append(
                     GridOrListEntry(
