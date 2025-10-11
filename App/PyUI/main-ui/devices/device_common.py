@@ -175,11 +175,6 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    def restart_wifi_services(self):
-        PyUiLogger.get_logger().info("Restarting WiFi services")
-        self.stop_wifi_services()
-        self.start_wifi_services()
-
     def is_wifi_up(self):
         result = ProcessRunner.run(["ip", "link", "show", "wlan0"], print=False)
         return "UP" in result.stdout
@@ -210,7 +205,9 @@ class DeviceCommon(AbstractDevice):
                     self.wifi_error = False
                     fail_count = 0
                     PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
-                    self.restart_wifi_services()
+                    PyUiLogger.get_logger().info("Restarting WiFi services")
+                    self.stop_wifi_services()
+                    self.start_wifi_services()
                 else:
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
@@ -278,13 +275,12 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
 
     def start_wifi_services(self):
-        PyUiLogger.get_logger().info("Starting WiFi Services")
-        self.set_wifi_power(0)
-        time.sleep(1)  
-        self.set_wifi_power(1)
-        time.sleep(1)  
-        self.start_wpa_supplicant()
-        self.start_udhcpc()
+        if not self.connection_seems_up():
+            PyUiLogger.get_logger().info("Starting WiFi Services")
+            self.set_wifi_power(1)
+            time.sleep(1)  
+            self.start_wpa_supplicant()
+            self.start_udhcpc()
 
 
     @throttle.limit_refresh(15)
