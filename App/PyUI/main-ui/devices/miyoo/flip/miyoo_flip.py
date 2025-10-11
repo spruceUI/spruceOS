@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 import subprocess
 import threading
@@ -96,7 +97,9 @@ class MiyooFlip(MiyooDevice):
             PyUiLogger.get_logger().error(f"Starting wifi monitor")
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             if(self.is_wifi_enabled()):
-                self.restart_wifi_services()
+                if(not self.connection_seems_up()):
+                    self.stop_wifi_services()
+                self.start_wifi_services()
 
         self.init_bluetooth()
         config_volume = self.system_config.get_volume()
@@ -282,7 +285,10 @@ class MiyooFlip(MiyooDevice):
         return 0
     
     def set_wifi_power(self, value):
-        PyUiLogger.get_logger().info(f"Setting /sys/class/rkwifi/wifi_power to {str(value)}")
+        caller = inspect.stack()[1].function
+        PyUiLogger.get_logger().info(
+            f"Called from {caller}: Setting /sys/class/rkwifi/wifi_power to {str(value)}"
+        )
         with open('/sys/class/rkwifi/wifi_power', 'w') as f:
             f.write(str(value))
 

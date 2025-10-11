@@ -186,6 +186,7 @@ class MiyooDevice(DeviceCommon):
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
         
     def stop_wifi_services(self):
+        PyUiLogger.get_logger().info(f"Stopping WiFi Services")
         MiyooTrimCommon.stop_wifi_services(self)
 
     def start_wpa_supplicant(self):
