@@ -45,10 +45,10 @@ class FavoritesMenu(RomsMenuCommon):
     def get_additional_menu_options(self):
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text="Sort Favorites Alphabetically",
+            primary_text="Sort Favorites",
             image_path=None,
             image_path_selected=None,
-            description=f"Sort Favorites Alphabetically",
+            description=f"Sort Favorites",
             icon=None,
             value=lambda input_value: self.sort_favorites_alphabetically(input_value)
         ))

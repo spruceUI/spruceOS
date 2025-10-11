@@ -54,7 +54,7 @@ class GameSelectMenuPopup:
         
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
-                primary_text="Remove Favorite",
+                primary_text="+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
@@ -63,7 +63,7 @@ class GameSelectMenuPopup:
             ))
         else:
             popup_options.append(GridOrListEntry(
-                primary_text="Add Favorite",
+                primary_text="+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
@@ -73,7 +73,7 @@ class GameSelectMenuPopup:
             
         
         popup_options.append(GridOrListEntry(
-            primary_text=f"Add/Remove from Collection",
+            primary_text=f"+/- Collection",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
