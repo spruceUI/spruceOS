@@ -19,6 +19,23 @@ LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
+kill_port(){
+	scan=true
+    while $scan; do
+
+        # Run the ps command, filter for 'box86', and exclude the grep process itself
+        pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader" | grep -v "grep" | awk 'NR==1 {print $1}')
+
+        # Check if a PID was found
+        if [ -n "$pid" ]; then
+            log_message "Killing $pid ..." -v
+            kill -9 $pid
+        else
+            scan=false
+        fi
+    done
+}
+
 kill_emulator() {
 
     if pgrep -f "./drastic" >/dev/null; then
@@ -333,6 +350,8 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
           send_virtual_key_R3
         fi
 
+        # fallback to stop ports
+        kill_port
     }
 
     home_key_up () {
