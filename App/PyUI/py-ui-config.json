@@ -5,5 +5,5 @@
     "enableButtonWatchers": false,
     "enableWifiMonitor": true,
     "mainMenuTitle": "spruceOS",
-    "gameSystemSortMode": "Alphabetical"
+    "gameSystemSortMode": "SortOrderKey"
 }

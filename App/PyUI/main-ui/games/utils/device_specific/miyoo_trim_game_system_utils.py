@@ -66,14 +66,32 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         # Step 4: Sort the list alphabetically
         if("Alphabetical" == PyUiConfig.game_system_sort_mode()):        
             active_systems.sort(key=lambda system: system.display_name)
-        elif("ReleaseYear" == PyUiConfig.game_system_sort_mode()):
-            active_systems.sort(key=lambda system: system.release_year)
-        elif("Brand" == PyUiConfig.game_system_sort_mode()):
-            active_systems.sort(key=lambda system: system.brand)
-        elif("Type" == PyUiConfig.game_system_sort_mode()):
-            active_systems.sort(key=lambda system: system.type)
         elif("SortOrderKey" == PyUiConfig.game_system_sort_mode()):
             active_systems.sort(key=lambda system: system.sort_order)
+        elif("Custom" == PyUiConfig.game_system_sort_mode()):
+            # Get priorities (1 = highest priority, 3 = lowest)
+            type_priority = PyUiConfig.game_system_sort_type_priority()
+            brand_priority = PyUiConfig.game_system_sort_brand_priority()
+            year_priority = PyUiConfig.game_system_sort_year_priority()
+            name_priority = PyUiConfig.game_system_sort_name_priority()
+
+            # Create a mapping from priority to the field accessor
+            priority_order = {
+                type_priority: lambda s: s.type,
+                brand_priority: lambda s: s.brand,
+                year_priority: lambda s: s.release_year,
+                name_priority: lambda s: s.display_name,
+            }
+
+            # Sort using a tuple key ordered by priority, then display_name
+            active_systems.sort(
+                key=lambda s: (
+                    priority_order[1](s),
+                    priority_order[2](s),
+                    priority_order[3](s),
+                    priority_order[4](s),
+                )
+            )
 
         # Step 5: Return the list
         return active_systems
