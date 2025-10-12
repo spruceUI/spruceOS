@@ -20,8 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 4600,
-  "brand": "Other",
+  "sortOrder": 4500,
+  "brand": "Magnavox",
   "type": "homeconsole",
   "releaseYear": 1972
 }

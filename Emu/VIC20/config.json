@@ -20,7 +20,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 7400,
+  "sortOrder": 7000,
   "brand": "Commodore",
   "type": "homeconsole",
   "releaseYear": 1980

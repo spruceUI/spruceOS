@@ -24,8 +24,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5300,
-  "brand": "Other",
-  "type": "homeconsole",
+  "sortOrder": 900,
+  "brand": "Amstrad",
+  "type": "pc",
   "releaseYear": 1984
 }

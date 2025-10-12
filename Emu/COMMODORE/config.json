@@ -20,7 +20,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 7500,
+  "sortOrder": 800,
   "brand": "Commodore",
   "type": "pc",
   "releaseYear": 1982

@@ -24,8 +24,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5000,
-  "brand": "Other",
+  "sortOrder": 700,
+  "brand": "Coleco",
   "type": "homeconsole",
   "releaseYear": 1982
 }

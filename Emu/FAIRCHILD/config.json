@@ -20,8 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 4700,
-  "brand": "Other",
+  "sortOrder": 1800,
+  "brand": "Fairchild",
   "type": "homeconsole",
   "releaseYear": 1976
 }

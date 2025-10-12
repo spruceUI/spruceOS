@@ -20,8 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5400,
-  "brand": "Other",
+  "sortOrder": 6500,
+  "brand": "Watara",
   "type": "handheld",
-  "releaseYear": 1982
+  "releaseYear": 1992
 }

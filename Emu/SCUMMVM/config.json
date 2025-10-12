@@ -20,8 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 6300,
-  "brand": "Other",
+  "sortOrder": 5700,
+  "brand": "modernengine",
   "type": "pc",
-  "releaseYear": 1981
+  "releaseYear": 2001
 }

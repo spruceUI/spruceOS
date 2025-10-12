@@ -24,8 +24,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 2700,
+  "sortOrder": 200,
   "brand": "Arcade",
   "type": "arcade",
-  "releaseYear": 1970
+  "releaseYear": 1971
 }

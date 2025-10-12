@@ -24,7 +24,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 1800,
+  "sortOrder": 3200,
   "brand": "Sega",
   "type": "homeconsole",
   "releaseYear": 1988
