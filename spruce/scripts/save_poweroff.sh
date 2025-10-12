@@ -51,7 +51,9 @@ if pgrep -f gameswitcher.sh >/dev/null; then
 fi
 
 # Check if MainUI or PICO8 is running and skip_shutdown_confirm is not set
-if flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null; then
+# NOTE: Flip uses KMSDRM so we just always skip the prompt
+if (flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null) && [ "$PLATFORM" != "Flip" ]; then
+	
     if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
         rm "${FLAGS_DIR}/lastgame.lock"
