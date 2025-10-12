@@ -20,5 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 3300
+  "sortOrder": 3300,
+  "brand": "Atari",
+  "type": "homeconsole",
+  "releaseYear": 1977
 }

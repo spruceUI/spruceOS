@@ -28,5 +28,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 2500
+  "sortOrder": 2500,
+  "brand": "Sony",
+  "type": "homeconsole",
+  "releaseYear": 1994
 }

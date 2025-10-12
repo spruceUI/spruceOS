@@ -18,5 +18,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 7300
+  "sortOrder": 7700,
+  "brand": "-CUSTOM-SYSTEM-",
+  "type": "other",
+  "releaseYear": 9999
 }

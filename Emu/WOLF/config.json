@@ -20,5 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5900
+  "sortOrder": 5900,
+  "brand": "Other",
+  "type": "pc",
+  "releaseYear": 1992
 }

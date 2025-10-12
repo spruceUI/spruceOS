@@ -20,5 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5400
+  "sortOrder": 5400,
+  "brand": "Other",
+  "type": "homeconsole",
+  "releaseYear": 1982
 }
