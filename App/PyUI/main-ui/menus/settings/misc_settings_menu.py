@@ -28,7 +28,12 @@ class MiscSettingsMenu(settings_menu.SettingsMenu):
 
         self.theme_changed = True
         self.theme_ever_changed = True
-
+    
+    def change_show_all_game_systems(self, input):
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
+            PyUiConfig.set_show_all_game_systems(not PyUiConfig.show_all_game_systems())
+            self.theme_changed = True
+            self.theme_ever_changed = True
 
     def build_options_list(self):
         option_list = []
@@ -42,6 +47,19 @@ class MiscSettingsMenu(settings_menu.SettingsMenu):
                 description=None,
                 icon=None,
                 value=self.change_game_system_sort_mode
+            )
+        )
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Show All Systems",
+                value_text="<    " +
+                ("On" if PyUiConfig.show_all_game_systems() else "Off") + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.change_show_all_game_systems
             )
         )
 

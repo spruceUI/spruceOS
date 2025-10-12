@@ -127,6 +127,15 @@ class PyUiConfig:
         cls.save()
 
     @classmethod
+    def show_all_game_systems(cls):
+        return cls.get("showAllGameSystems",False)
+
+    @classmethod
+    def set_show_all_game_systems(cls, value):
+        cls._data["showAllGameSystems"] = value
+        cls.save()
+
+    @classmethod
     def show_am_pm(cls):
         return cls.get("showAmPm",True)
 

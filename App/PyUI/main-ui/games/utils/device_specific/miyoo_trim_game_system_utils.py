@@ -55,11 +55,13 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                 #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
-            if(game_system_config is not None and self.contains_needed_files(game_system_config)):
-                display_name = game_system_config.get_label()
-                game_system = GameSystem(self.build_paths_array(folder),display_name, game_system_config)
-                if(self.rom_utils.has_roms(game_system)):
-                    active_systems.append(game_system)
+            if(game_system_config is not None and (self.contains_needed_files(game_system_config) or PyUiConfig.show_all_game_systems())):
+                folder_paths = self.build_paths_array(folder)
+                if(len(folder_paths) > 0):
+                    display_name = game_system_config.get_label()
+                    game_system = GameSystem(folder_paths,display_name, game_system_config)
+                    if(PyUiConfig.show_all_game_systems() or self.rom_utils.has_roms(game_system)):
+                        active_systems.append(game_system)
 
         # Step 4: Sort the list alphabetically
         if("Alphabetical" == PyUiConfig.game_system_sort_mode()):        
