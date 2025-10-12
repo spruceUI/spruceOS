@@ -23,6 +23,18 @@ class GameSystem:
     @property
     def sort_order(self):
         return self._game_system_config.get_sort_order()
+    
+    @property
+    def brand(self):
+        return self._game_system_config.get_brand()
+    
+    @property
+    def type(self):
+        return self._game_system_config.get_type()
+    
+    @property
+    def release_year(self):
+        return self._game_system_config.get_release_year()
         
     @property
     def game_system_config(self) -> FileBasedGameSystemConfig:

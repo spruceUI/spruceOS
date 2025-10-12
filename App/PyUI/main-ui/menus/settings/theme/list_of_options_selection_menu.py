@@ -14,18 +14,17 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
-class ThemeSelectionMenu:
+class ListOfOptionsSelectionMenu:
     def __init__(self):
         pass
 
-    def get_selected_theme_index(self, themes):
+    def get_selected_option_index(self, options, title):
         selected = Selection(None, None, 0)
-        self.should_scan_for_bluetooth = True
         option_list = []
-        for index, theme in enumerate(themes):
+        for index, opt in enumerate(options):
             option_list.append(
                 GridOrListEntry(
-                    primary_text=theme,
+                    primary_text=opt,
                     value=index
                 )
             )
@@ -34,7 +33,7 @@ class ThemeSelectionMenu:
         #maybe preview too if theyre common
         view = ViewCreator.create_view(
             view_type=ViewType.TEXT_ONLY,
-            top_bar_text="Select a Theme",
+            top_bar_text=title,
             options=option_list,
             selected_index=selected.get_index())
 
