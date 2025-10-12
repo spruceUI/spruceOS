@@ -136,6 +136,15 @@ class PyUiConfig:
         cls.save()
 
     @classmethod
+    def game_system_sort_mode(cls):
+        return cls.get("gameSystemSortMode","Alphabetical")
+
+    @classmethod
+    def set_game_system_sort_mode(cls, value):
+        cls._data["gameSystemSortMode"] = value
+        cls.save()
+
+    @classmethod
     def animations_enabled(cls):
         return cls.get("animationsEnabled",True)
 

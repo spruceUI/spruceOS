@@ -6,6 +6,7 @@ from games.utils.game_system import GameSystem
 from games.utils.rom_utils import RomUtils
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 class MiyooTrimGameSystemUtils(GameSystemUtils):
     def __init__(self):
@@ -61,7 +62,16 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                     active_systems.append(game_system)
 
         # Step 4: Sort the list alphabetically
-        active_systems.sort(key=lambda system: system.sort_order)
+        if("Alphabetical" == PyUiConfig.game_system_sort_mode()):        
+            active_systems.sort(key=lambda system: system.display_name)
+        elif("ReleaseYear" == PyUiConfig.game_system_sort_mode()):
+            active_systems.sort(key=lambda system: system.release_year)
+        elif("Brand" == PyUiConfig.game_system_sort_mode()):
+            active_systems.sort(key=lambda system: system.brand)
+        elif("Type" == PyUiConfig.game_system_sort_mode()):
+            active_systems.sort(key=lambda system: system.type)
+        elif("SortOrderKey" == PyUiConfig.game_system_sort_mode()):
+            active_systems.sort(key=lambda system: system.sort_order)
 
         # Step 5: Return the list
         return active_systems

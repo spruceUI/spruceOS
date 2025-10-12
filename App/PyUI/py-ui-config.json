@@ -4,5 +4,6 @@
     "turboDelayMs": 300,
     "enableButtonWatchers": false,
     "enableWifiMonitor": true,
-    "mainMenuTitle": "spruceOS"
+    "mainMenuTitle": "spruceOS",
+    "gameSystemSortMode": "Alphabetical"
 }

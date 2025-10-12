@@ -1,5 +1,6 @@
 from controller.controller_inputs import ControllerInput
 from display.display import Display
+from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
@@ -18,9 +19,13 @@ class SettingsMenu(ABC):
         selected = Selection(None, None, 0)
         list_view = None
         self.theme_changed = False
+        self.theme_ever_changed = False
         while(selected is not None):
             option_list = self.build_options_list()
             
+            if(self.theme_changed):
+                self.theme_ever_changed = True
+
             if(list_view is None or self.theme_changed):
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
@@ -39,4 +44,15 @@ class SettingsMenu(ABC):
                 selected.get_selection().get_value()(selected.get_input())
             elif(ControllerInput.B == selected.get_input()):
                 selected = None
+        
+        return self.theme_ever_changed
+
+    def get_next_entry(self,current_entry, all_entries, direction):
+        if current_entry not in all_entries:
+            PyUiLogger.get_logger().info(f"Current entry {current_entry} is invalid.")
+            return all_entries[0]
+
+        current_index = all_entries.index(current_entry)
+        next_index = (current_index + direction) % len(all_entries)
+        return all_entries[next_index]
 
