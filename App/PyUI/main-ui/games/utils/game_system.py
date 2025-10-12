@@ -19,6 +19,10 @@ class GameSystem:
     @property
     def display_name(self):
         return self._display_name
+    
+    @property
+    def sort_order(self):
+        return self._game_system_config.get_sort_order()
         
     @property
     def game_system_config(self) -> FileBasedGameSystemConfig:

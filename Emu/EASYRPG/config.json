@@ -20,5 +20,6 @@
       "name": "Remove per-game launch setting override",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
-  ]
+  ],
+  "sortOrder": 6400
 }
