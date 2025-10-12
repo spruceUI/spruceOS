@@ -24,5 +24,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 4000
+  "sortOrder": 4000,
+  "brand": "NEC",
+  "type": "homeconsole",
+  "releaseYear": 1988
 }

@@ -20,5 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 7000
+  "sortOrder": 7000,
+  "brand": "Other",
+  "type": "handheld",
+  "releaseYear": 2013
 }

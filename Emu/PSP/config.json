@@ -20,5 +20,8 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 2600
+  "sortOrder": 2600,
+  "brand": "Sony",
+  "type": "handheld",
+  "releaseYear": 2004
 }
