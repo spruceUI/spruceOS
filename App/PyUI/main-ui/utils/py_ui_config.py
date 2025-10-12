@@ -154,6 +154,42 @@ class PyUiConfig:
         cls.save()
 
     @classmethod
+    def game_system_sort_type_priority(cls):
+        return cls.get("gameSystemSortTypePrio",1)
+
+    @classmethod
+    def set_game_system_sort_type_priority(cls, value):
+        cls._data["gameSystemSortTypePrio"] = value
+        cls.save()
+
+    @classmethod
+    def game_system_sort_brand_priority(cls):
+        return cls.get("gameSystemSortBrandPrio",2)
+
+    @classmethod
+    def set_game_system_sort_brand_priority(cls, value):
+        cls._data["gameSystemSortBrandPrio"] = value
+        cls.save()
+
+    @classmethod
+    def game_system_sort_year_priority(cls):
+        return cls.get("gameSystemSortYearPrio",3)
+    
+    @classmethod
+    def set_game_system_sort_year_priority(cls, value):
+        cls._data["gameSystemSortYearPrio"] = value
+        cls.save()
+
+    @classmethod
+    def game_system_sort_name_priority(cls):
+        return cls.get("gameSystemSortNamePrio",4)
+    
+    @classmethod
+    def set_game_system_sort_name_priority(cls, value):
+        cls._data["gameSystemSortNamePrio"] = value
+        cls.save()
+
+    @classmethod
     def animations_enabled(cls):
         return cls.get("animationsEnabled",True)
 

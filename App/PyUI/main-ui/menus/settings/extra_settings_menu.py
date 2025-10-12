@@ -7,7 +7,7 @@ from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.language_menu import LanguageMenu
-from menus.settings.misc_settings_menu import MiscSettingsMenu
+from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -30,9 +30,9 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             TimeSettingsMenu().show_menu()
 
-    def launch_misc_settings(self,input):
+    def launch_game_system_select_settings(self,input):
         if(ControllerInput.A == input):
-            if(MiscSettingsMenu().show_menu()):
+            if(GameSystemSelectSettingsMenu().show_menu()):
                 self.theme_changed = True
                 self.theme_ever_changed = True
 
@@ -85,13 +85,13 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Misc Settings",
+                        primary_text="Game System Select Settings",
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.launch_misc_settings
+                        value=self.launch_game_system_select_settings
                     )
             )
         
