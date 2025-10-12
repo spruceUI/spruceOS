@@ -20,7 +20,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 900,
+  "sortOrder": 1100,
   "brand": "Nintendo",
   "type": "handheld",
   "releaseYear": 1995

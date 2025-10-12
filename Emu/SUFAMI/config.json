@@ -20,7 +20,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 1100,
+  "sortOrder": 700,
   "brand": "Nintendo",
   "type": "homeconsole",
   "releaseYear": 1996
