@@ -56,6 +56,8 @@ class FileBasedGameSystemConfig():
     def get_selected_cpu(self):
         return self._data.get('selectedCpu', None)
     
+    def get_sort_order(self):
+        return self._data.get('sortOrder', 9999999)
     
     def get_core_options(self):
         return self._data.get('coreOptions', [])

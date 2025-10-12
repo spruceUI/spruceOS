@@ -61,7 +61,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                     active_systems.append(game_system)
 
         # Step 4: Sort the list alphabetically
-        active_systems.sort(key=lambda system: system.display_name)
+        active_systems.sort(key=lambda system: system.sort_order)
 
         # Step 5: Return the list
         return active_systems
