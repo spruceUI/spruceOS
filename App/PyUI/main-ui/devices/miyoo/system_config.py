@@ -2,6 +2,7 @@ import json
 import threading
 
 from controller.controller_inputs import ControllerInput
+from utils.py_ui_config import PyUiConfig
 
 class SystemConfig:
     def __init__(self, filepath):
@@ -183,3 +184,14 @@ class SystemConfig:
                 continue
 
         return mapping
+    
+    def get_theme(self):
+        theme = self.config.get("theme", None)
+        if(theme is None):
+            theme = PyUiConfig.get("theme")
+            self.set_theme(theme)
+        return theme
+
+    def set_theme(self, theme):
+        self.config["theme"] = theme
+        self.save_config()

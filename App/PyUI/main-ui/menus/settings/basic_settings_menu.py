@@ -98,8 +98,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(selected_index is not None):
             Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
             Display.init_fonts()   
-            PyUiConfig.set("theme",theme_folders[selected_index])
-            PyUiConfig.save()      
+            Device.get_system_config().set_theme(theme_folders[selected_index])
             self.theme_changed = True
             Display.restore_bg()
 

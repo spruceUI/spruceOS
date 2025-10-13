@@ -314,3 +314,6 @@ class DeviceCommon(AbstractDevice):
     
     def shrink_text_if_needed(self, text):
         return text
+
+    def get_system_config(self):
+        return self.system_config

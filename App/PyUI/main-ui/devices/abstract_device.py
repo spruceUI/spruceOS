@@ -270,3 +270,8 @@ class AbstractDevice(ABC):
     def shrink_text_if_needed(self, text):
         pass
 
+    @abstractmethod
+    def get_system_config(self):
+        pass
+
+
