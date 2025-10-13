@@ -3,28 +3,17 @@
 . "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-INITIAL_SETTINGS="/mnt/SDCARD/spruce/settings/platform/system-$PLATFORM.json"
 flag_remove "first_boot_$PLATFORM"
-
 log_message "Removed first boot flag for $PLATFORM"
 
 FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
-USER_THEME=$(get_theme_path_to_restore)
 [ "$PLATFORM" = "SmartPro" ] && SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm_wide.png" || SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
 
 SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 
 log_message "Starting firstboot script"
-
-# initialize system settings.
-cp "$INITIAL_SETTINGS" "$SYSTEM_JSON"
-
-# restore the user's theme in the "theme" field of the config.JSON
-jq --arg new_theme "$USER_THEME" '.theme = $new_theme' "$SYSTEM_JSON" > tmp.json && mv tmp.json "$SYSTEM_JSON"
-
-sync # Use sync just once to flush all changes of system.json to disk
 
 # Copy spruce.cfg to www folder so the landing page can read it.
 cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
@@ -40,12 +29,6 @@ log_message "Running emu_setup.sh"
 
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
-
-log_message "Checking for DONTTOUCH theme"
-if [ -d "/mnt/SDCARD/Themes/DONTTOUCH" ]; then
-    log_message "DONTTOUCH theme found. Removing theme."
-    rm -rf /mnt/SDCARD/Themes/DONTTOUCH
-fi
 
 log_message "Sorting themes"
 sh /mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh
@@ -71,19 +54,11 @@ if [ "$PLATFORM" = "A30" ]; then
     fi
 fi
 
-# Disable stock USB file transfer app and SD formatter for Brick & SmartPro
-if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    USB_CONFIG="/usr/trimui/apps/usb_storage/config.json"
-    [ -f "$USB_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$USB_CONFIG" 2>/dev/null
-    FORMAT_CONFIG="/usr/trimui/apps/zformatter_fat32/config.json"
-    [ -f "$FORMAT_CONFIG" ] && sed -i "s|\"label|\"#label|g" "$FORMAT_CONFIG" 2>/dev/null
-fi
-
 if flag_check "pre_menu_unpacking"; then
     display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes and files.........."
     flag_remove "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
-        sleep 0.3
+        sleep 0.2
     done
 fi
 
