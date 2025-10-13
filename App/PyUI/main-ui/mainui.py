@@ -5,6 +5,7 @@ import shutil
 import sys
 import threading
 from devices.device import Device
+from devices.miyoo.system_config import SystemConfig
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -103,11 +104,12 @@ def main():
     verify_config_exists(args.pyUiConfig)
     PyUiConfig.init(args.pyUiConfig)
 
-    selected_theme = os.path.join(PyUiConfig.get("themeDir"), PyUiConfig.get("theme"))
-    PyUiLogger.get_logger().info(f"{selected_theme}")
 
     initialize_device(args.device)
     PyUiState.init(Device.get_state_path())
+
+    selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
+    PyUiLogger.get_logger().info(f"{selected_theme}")
 
     Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
     Display.init()

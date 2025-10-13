@@ -313,3 +313,7 @@ class Device:
     @staticmethod
     def shrink_text_if_needed(text):
         return Device._impl.shrink_text_if_needed(text)
+
+    @staticmethod
+    def get_system_config():
+        return Device._impl.get_system_config()
