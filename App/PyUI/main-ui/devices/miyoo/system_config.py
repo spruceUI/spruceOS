@@ -2,6 +2,7 @@ import json
 import threading
 
 from controller.controller_inputs import ControllerInput
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class SystemConfig:
@@ -108,9 +109,6 @@ class SystemConfig:
     def get_contrast(self):
         return self.config.get("contrast", 10)
 
-    def get_theme_path(self):
-        return self.config.get("theme")
-
     def get_fontsize(self):
         return self.config.get("fontsize")
 
@@ -189,9 +187,18 @@ class SystemConfig:
         theme = self.config.get("theme", None)
         if(theme is None):
             theme = PyUiConfig.get("theme")
+            PyUiLogger.get_logger().info(f"Current user config does not have theme set, so loading from PyUIConfig as {theme}")
             self.set_theme(theme)
         return theme
 
     def set_theme(self, theme):
         self.config["theme"] = theme
         self.save_config()
+
+    def delete_theme_entry(self):
+        if "theme" in self.config:
+            del self.config["theme"]
+            PyUiLogger.get_logger().info("Deleted 'theme' entry from user config")
+            self.save_config()
+        else:
+            PyUiLogger.get_logger().info("'theme' entry not found in user config; nothing to delete")

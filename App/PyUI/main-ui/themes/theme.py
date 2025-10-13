@@ -2,8 +2,10 @@ import json
 import logging
 import os
 import sys
+import traceback
 
 from devices.charge.charge_status import ChargeStatus
+from devices.device import Device
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
@@ -92,12 +94,19 @@ class Theme():
 
     @classmethod
     def _load_from_file(cls, file_path):
-        cls._loaded_file_path = file_path
-        with open(file_path, 'r', encoding='utf-8') as f:
-            cls._data.update(json.load(f))
-        desc = cls._data.get("description", "UNKNOWN")
-        PyUiLogger.get_logger().info(f"Loaded Theme : {desc}")
-     
+        try:
+            cls._loaded_file_path = file_path
+            with open(file_path, 'r', encoding='utf-8') as f:
+                cls._data.update(json.load(f))
+            desc = cls._data.get("description", "UNKNOWN")
+            PyUiLogger.get_logger().info(f"Loaded Theme : {desc}")
+        except Exception as e:
+            PyUiLogger.get_logger().error(
+                f"Unexpected error while loading {file_path}: {e}\n{traceback.format_exc()}"
+            )
+            Device.get_system_config().delete_theme_entry()
+            raise
+
     @classmethod
     def save_changes(cls):
         data = {
