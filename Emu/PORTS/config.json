@@ -25,7 +25,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 5100,
+  "sortOrder": 5000,
   "brand": "Other",
   "type": "other",
   "releaseYear": 2000

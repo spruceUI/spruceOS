@@ -20,7 +20,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 6600,
+  "sortOrder": 5700,
   "brand": "Sega",
   "type": "homeconsole",
   "releaseYear": 1994

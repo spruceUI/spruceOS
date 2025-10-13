@@ -28,7 +28,7 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
-  "sortOrder": 2700,
+  "sortOrder": 2600,
   "brand": "Sega",
   "type": "handheld",
   "releaseYear": 1990
