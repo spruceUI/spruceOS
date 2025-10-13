@@ -181,7 +181,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text="Theme",
-                        value_text="<    " + PyUiConfig.get("theme") + "    >",
+                        value_text="<    " + Device.get_system_config().get_theme() + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
