@@ -22,6 +22,7 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 
 	# Paths
 	THEME_SRC="/mnt/SDCARD/Themes/${THEME_PATH}/skin"
+	# What should this be for the brick?
 	DEFAULT_SRC="/mnt/SDCARD/miyoo355/app/skin"
 	CFG="/mnt/SDCARD/Themes/${THEME_PATH}/config.json"
 	DST="/usr/miyoo/bin/skin"
