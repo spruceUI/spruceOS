@@ -18,11 +18,16 @@ while true; do
     NEW_THEME_PATH=$(get_theme_path)
 
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
-        flag_add "themeChanged"
-        killall -9 MainUI
-        display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......"
-        THEME_PATH="$NEW_THEME_PATH"
-        log_message "Theme path changed to: $THEME_PATH"
+
+		if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
+			/mnt/SDCARD/spruce/scripts/iconfresh.sh
+		else
+			flag_add "themeChanged"
+			killall -9 MainUI
+			display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......"
+			THEME_PATH="$NEW_THEME_PATH"
+			log_message "Theme path changed to: $THEME_PATH"
+		fi
     fi
 
     # avoid potential busy looping
