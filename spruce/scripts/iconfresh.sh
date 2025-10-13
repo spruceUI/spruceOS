@@ -28,7 +28,7 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 
 	# Determine which source to mount
 	if [ -f "$CFG" ]; then
-		BIND_ENABLED=$(jq -r '.["bind-over-miyoo-theme"] // false' "$CFG")
+		BIND_ENABLED=$(jq -r '.["bindOverMiyooTheme"] // false' "$CFG")
 	else
 		BIND_ENABLED="false"
 	fi

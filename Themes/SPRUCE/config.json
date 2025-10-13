@@ -40,7 +40,7 @@
         "color": "#FBF1C7",
         "selectedcolor": "#FBF1C7"
     },
-    "bind-over-miyoo-theme":true,
+    "bindOverMiyooTheme":true,
     "recentsEnabled": false,
     "topBarInitialXOffset": 60
 }
