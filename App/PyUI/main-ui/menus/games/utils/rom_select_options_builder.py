@@ -62,6 +62,27 @@ class RomSelectOptionsBuilder:
         muos_image_path_sd1 = os.path.join("/mnt/mmc/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
         if os.path.exists(muos_image_path_sd1):
             return muos_image_path_sd1
+        
+        #ES format
+        imgs_folder_with_image_suffix = os.path.join(root_dir, "Imgs", base_name + "-image.png")
+        if os.path.exists(imgs_folder_with_image_suffix):
+            return imgs_folder_with_image_suffix
+
+        #ES format2
+        imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(root_dir, "Imgs", base_name + "-thumb.png")
+        if os.path.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
+            return imgs_folder_equal_to_roms_path_with_thumb_suffix
+
+        #ES format same folder
+        imgs_folder_equal_to_roms_path_with_image_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-image.png")
+        if os.path.exists(imgs_folder_equal_to_roms_path_with_image_suffix):
+            return imgs_folder_equal_to_roms_path_with_image_suffix
+        
+        #ES format2 same folder
+        imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-thumb.png")
+        if os.path.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
+            return imgs_folder_equal_to_roms_path_with_thumb_suffix
+
 
         return None
 
