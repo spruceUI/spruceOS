@@ -79,6 +79,7 @@ fix_sleep_sound_bug() {
 
 # default to open
 current_value=1
+fix_sleep_sound_bug # Ensure it's correct on startup
 while true; do
     VALUE=$(cat "$GPIO_PATH")
     if [ "$VALUE" -eq 0 ] && [ "$current_value" -eq 1 ]; then
