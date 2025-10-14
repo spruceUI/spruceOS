@@ -9,6 +9,7 @@
     "systemGameSearch": "$system Game Search",
     "allSystemGameSearch": "All System Game Search",
     "systemMenuSubOptions" : "$system Menu Sub Options",
-    "gameSearch": "Game Search:"
+    "gameSearch": "Game Search:",
+    "exitPyUi": "Reload UI"
     
 }
