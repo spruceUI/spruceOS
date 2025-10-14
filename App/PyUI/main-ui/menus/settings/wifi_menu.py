@@ -27,7 +27,8 @@ class WifiMenu:
         else:
             Device.enable_wifi()
 
-    def write_wpa_supplicant_conf(self, ssid, pw_line, file_path="/userdata/cfg/wpa_supplicant.conf"):
+    def write_wpa_supplicant_conf(self, ssid, pw_line):
+        file_path = Device.get_wpa_supplicant_conf_path()
         # WPA configuration header
         header = """ctrl_interface=/var/run/wpa_supplicant
     update_config=1

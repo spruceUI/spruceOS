@@ -317,3 +317,7 @@ class Device:
     @staticmethod
     def get_system_config():
         return Device._impl.get_system_config()
+
+    @staticmethod
+    def get_wpa_supplicant_conf_path():
+        return Device._impl.get_wpa_supplicant_conf_path()

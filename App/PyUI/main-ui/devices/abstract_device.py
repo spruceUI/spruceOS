@@ -274,4 +274,8 @@ class AbstractDevice(ABC):
     def get_system_config(self):
         pass
 
+    @abstractmethod
+    def get_wpa_supplicant_conf_path(self):
+        pass
+
 
