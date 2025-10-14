@@ -4,6 +4,7 @@ import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
@@ -215,7 +216,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             )
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Exit",
+                        primary_text=Language.exit_py_ui(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,

@@ -133,6 +133,10 @@ class Language:
     def game_search(cls):
         return cls._data.get("gameSearch","Game Search:")
 
+    @classmethod
+    def exit_py_ui(cls):
+        return cls._data.get("exitPyUi","Exit")
+
     
     
     
