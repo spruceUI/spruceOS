@@ -266,10 +266,6 @@ class MiyooDevice(DeviceCommon):
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
         Controller.re_init_controller()
-
-
-    def supports_analog_calibration(self):
-        return True
     
     def remap_buttons(self):
         self.button_remapper.remap_buttons()

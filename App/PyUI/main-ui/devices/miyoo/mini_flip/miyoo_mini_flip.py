@@ -421,3 +421,6 @@ class MiyooMiniFlip(MiyooDevice):
     
     def supports_volume(self):
         return False
+
+    def supports_analog_calibration(self):
+        return False

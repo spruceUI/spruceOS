@@ -144,19 +144,17 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             )
         )        
                     
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Stock OS Menu",
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_stock_os_menu
-                    )
-            )
+        if(PyUiConfig.include_stock_os_launch_option()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Stock OS Menu",
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_stock_os_menu
+                        )
+                )
                     
-
-            
-        
         return option_list

@@ -235,8 +235,6 @@ class MiyooA30(MiyooDevice):
 
     def get_wpa_supplicant_conf_path(self):
         return "/config/wpa_supplicant.conf"
-    
-
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -267,3 +265,6 @@ class MiyooA30(MiyooDevice):
         # Start the thread
         threading.Thread(target=delayed_fix, daemon=True).start()
         return MiyooTrimCommon.run_game(self,rom_info)
+
+    def supports_analog_calibration(self):
+        return False
