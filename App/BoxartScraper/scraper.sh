@@ -189,7 +189,8 @@ for sys_dir in "$roms_dir"/*/; do
     fi
 
     extensions="$(jq -r '.extlist' "/mnt/SDCARD/Emu/$sys_name/config.json" | awk '{gsub(/\|/, " "); print $0}')"
-    amount_games="$(find "$sys_dir" -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$" | wc -l)"
+    games="$(find "$sys_dir" -maxdepth 2 -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$")"
+    amount_games="$(echo "$games" | wc -l)"
     sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
     icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
@@ -204,7 +205,7 @@ for sys_dir in "$roms_dir"/*/; do
     scraped_count=0
     non_found_count=0
 
-    for file in "$sys_dir"*; do
+    printf "$games" | while IFS= read -r file; do
         # Check if the user pressed B to exit
         if tail -n1 "$messages_file" | grep -q "key $B_B"; then
             log_message "BoxartScraper: User pressed B, exiting."
