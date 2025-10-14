@@ -47,14 +47,14 @@ class GameSelectMenuPopup:
             Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
 
 
-    def get_game_options(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
+    def get_game_options(self, rom_info : RomInfo, additional_popup_options = [], rom_list= [], use_full_text = True):
         popup_options = []
         popup_options.extend(additional_popup_options)
         rom_name = os.path.basename(rom_info.rom_file_path)
         
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
-                primary_text="+/- Favorite",
+                primary_text="Add Favorite" if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
@@ -63,7 +63,7 @@ class GameSelectMenuPopup:
             ))
         else:
             popup_options.append(GridOrListEntry(
-                primary_text="+/- Favorite",
+                primary_text="Remove Favorite" if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
@@ -73,7 +73,7 @@ class GameSelectMenuPopup:
             
         
         popup_options.append(GridOrListEntry(
-            primary_text=f"+/- Collection",
+            primary_text="Add/Remove Collection" if use_full_text else "+/- Collection",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
@@ -105,7 +105,7 @@ class GameSelectMenuPopup:
         ))
 
 
-        popup_options.extend(self.get_game_options(rom_info, additional_popup_options, rom_list)) 
+        popup_options.extend(self.get_game_options(rom_info, additional_popup_options, rom_list, use_full_text=False)) 
 
         popup_options.append(GridOrListEntry(
             primary_text=f"Toggle View",

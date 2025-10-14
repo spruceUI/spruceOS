@@ -120,7 +120,7 @@ class RomsMenuCommon(ABC):
         self.popup_menu.run_game_select_popup_menu(selection, self.get_additional_menu_options(), rom_list)
 
     def _get_menu_button_game_options(self, selection, rom_list):
-        return self.popup_menu.get_game_options(selection, self.get_additional_menu_options(), rom_list)
+        return self.popup_menu.get_game_options(selection, self.get_additional_menu_options(), rom_list, use_full_text=True)
 
     def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
         selected = Selection(None,None,0)

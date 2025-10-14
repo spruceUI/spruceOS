@@ -202,3 +202,7 @@ class PyUiConfig:
         cls._data["language"] = language
         cls.save()
 
+    @classmethod
+    def include_stock_os_launch_option(cls):
+        return cls.get("includeStockOsLaunchOption",True)
+
