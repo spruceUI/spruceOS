@@ -301,8 +301,6 @@ class MiyooFlip(MiyooDevice):
 
     def get_wpa_supplicant_conf_path(self):
         return "/userdata/cfg/wpa_supplicant.conf"
-    
-    
 
     def get_volume(self):
         return self.system_config.get_volume()
