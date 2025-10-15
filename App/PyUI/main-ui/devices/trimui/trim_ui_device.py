@@ -307,3 +307,6 @@ class TrimUIDevice(DeviceCommon):
     
     def take_snapshot(self, path):
         return None
+    
+    def get_wpa_supplicant_conf_path(self):
+        return "/userdata/cfg/wpa_supplicant.conf"
