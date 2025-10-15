@@ -136,9 +136,13 @@ prepare_game_switcher() {
         # covert and compress framebuffer to PNG in background
         WIDTH="$DISPLAY_WIDTH"
         HEIGHT="$DISPLAY_HEIGHT"
+        if [ "$PLATFORM" = "A30" ]; then # A30 is rotated 270 degrees, swap width and height
+            WIDTH=$DISPLAY_HEIGHT
+            HEIGHT=$DISPLAY_WIDTH
+        fi
 
         if [ "$PLATFORM" = "A30" ]; then
-			$BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $DISPLAY_WIDTH -h $DISPLAY_HEIGHT -b 32 -l $DISPLAY_WIDTH "$SCREENSHOT_NAME" 2>/dev/null &
+            $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
         else
             $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
         fi
