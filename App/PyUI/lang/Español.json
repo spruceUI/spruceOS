@@ -2,7 +2,14 @@
     "Games" : "Juegos",
     "Recents": "Recientes",
     "Apps": "Apps",
-    "Collections": "Collections",
+    "Collections": "Colecciones",
     "Favorites": "Favoritos",
-    "Settings": "Ajustes"
+    "Settings": "Ajustes",
+    "noEntriesFound": "No Se Encontraron Entradas",
+    "systemGameSearch": "$system Búsqueda de Juegos",
+    "allSystemGameSearch": "Búsqueda de Juegos en Todos los Sistemas",
+    "systemMenuSubOptions" : "$system Subopciones del Menú",
+    "gameSearch": "Búsqueda de Juegos:",
+    "exitPyUi": "Recargar UI"
+    
 }
