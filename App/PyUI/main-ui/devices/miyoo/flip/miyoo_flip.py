@@ -94,7 +94,7 @@ class MiyooFlip(MiyooDevice):
         self.init_gpio()
 
         if(PyUiConfig.enable_wifi_monitor()):
-            PyUiLogger.get_logger().error(f"Starting wifi monitor")
+            PyUiLogger.get_logger().info(f"Starting wifi monitor")
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             if(self.is_wifi_enabled()):
                 if(not self.connection_seems_up()):
@@ -141,7 +141,7 @@ class MiyooFlip(MiyooDevice):
                 with open("/sys/class/gpio/export", "w") as f:
                     f.write("150")
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Error exportiing gpio150 {e}")
+            PyUiLogger.get_logger().warning(f"Unable to export gpio150, probably already exported? {e}")
 
     def are_headphones_plugged_in(self):
         try:

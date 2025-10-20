@@ -58,7 +58,7 @@ class Theme():
                 logging.exception(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}")
                 cls._daijisho_theme_index = None
         else:
-            PyUiLogger.get_logger().error(f"DaijishoThemeIndex does not exist at: {daijisho_theme_index_file}")
+            PyUiLogger.get_logger().info(f"DaijishoThemeIndex does not exist at: {daijisho_theme_index_file} (Assuming non daijisho theme)")
             cls._daijisho_theme_index = None
 
     @classmethod
@@ -353,7 +353,7 @@ class Theme():
             else:
                 return Theme.get_fallback_font()
         except Exception as e:
-            PyUiLogger.get_logger().error(f"get_font error occurred: {e}")
+            PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback font.")
             return Theme.get_fallback_font()
 
     @classmethod
@@ -398,7 +398,7 @@ class Theme():
                 case _:
                     return cls._data["list"]["font"]
         except Exception as e:
-            PyUiLogger.get_logger().error(f"get_font_size error occurred: {e}")
+            PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback value of 20.")
             return 20
 
 
@@ -447,7 +447,7 @@ class Theme():
                 
             cls.save_changes()
         except Exception as e:
-            PyUiLogger.get_logger().error(f"get_font_size error occurred: {e}")
+            PyUiLogger.get_logger().error(f"set_font_size error occurred: {e}")
 
 
     @classmethod

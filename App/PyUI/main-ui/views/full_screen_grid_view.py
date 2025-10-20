@@ -220,7 +220,7 @@ class FullScreenGridView(View):
     def _clear(self):
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(
-                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True, render_bottom_bar=False)
+                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True, render_bottom_bar_icons_and_images=False)
         else:
             Display.clear(self.top_bar_text, render_bottom_bar_icons_and_images=False)
 

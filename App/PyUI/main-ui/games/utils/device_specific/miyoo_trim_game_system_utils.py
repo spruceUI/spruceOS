@@ -108,8 +108,8 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
             if not any(os.path.exists(file_path) for file_path in group):
                 # Log which group is missing
                 missing_files = ", ".join(group)
-                PyUiLogger.get_logger().error(
-                    f"Missing required files: none of these exist [{missing_files}]"
+                PyUiLogger.get_logger().warning(
+                    f"{game_system_config.system_name} is missing required files: none of these exist [{missing_files}]"
                 )
                 return False  # This group failed
         
