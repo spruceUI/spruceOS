@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from display.display import Display
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.view import View
 
@@ -55,9 +57,9 @@ class ListView(View):
         
         if(Controller.get_input()):
             if Controller.last_input() == ControllerInput.DPAD_UP:
-                self.adjust_selected(-1)
+                self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_DOWN:
-                self.adjust_selected(1)
+                self.adjust_selected(1, skip_by_letter=False)
             elif Controller.last_input() in select_controller_inputs: #requested inputs have priority over the rest
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
@@ -65,12 +67,22 @@ class ListView(View):
                 if(Theme.skip_main_menu()):
                     return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 else:
-                    self.adjust_selected(-1*self.max_rows+1)
+                    self.adjust_selected(-1*self.max_rows+1, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.L2:
+                if(Theme.skip_main_menu()):
+                    self.adjust_selected(-1*self.max_rows+1, skip_by_letter=True)
+                else:
+                    self.adjust_selected(-1*self.max_rows+1, skip_by_letter=Device.get_system_config().get_skip_by_letter())
             elif Controller.last_input() == ControllerInput.R1:
                 if(Theme.skip_main_menu()):
                     return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 else:
-                    self.adjust_selected(self.max_rows-1)
+                    self.adjust_selected(self.max_rows-1, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.R2:
+                if(Theme.skip_main_menu()):
+                    self.adjust_selected(self.max_rows-1, skip_by_letter=Device.get_system_config().get_skip_by_letter())
+                else:
+                    self.adjust_selected(self.max_rows-1, skip_by_letter=True)
             elif Controller.last_input() == ControllerInput.B:
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
@@ -104,29 +116,28 @@ class ListView(View):
             self.current_top += 1
             self.current_bottom +=1
 
+    def adjust_selected(self, amount, skip_by_letter):
+        if not self.options:
+            return
 
-    def adjust_selected(self, amount):
-        #print(f"Adjust by {amount}")
-        #print(f"    selected = {self.selected}, current_top = {self.current_top}, current_bottom = {self.current_bottom}")
-        if(self.selected == 0 and amount < 0):
-            # Hitting up when on the top most row
-            #print(f"    Wrapping from top to bottom")
+        amount = self.calculate_amount_to_move_by(amount, skip_by_letter)
+
+        # --- Step 2: Continue with normal scrolling/wrapping logic ---
+        if self.selected == 0 and amount < 0:
+            # Wrapping from top to bottom
             delta = self.current_bottom - self.current_top
-            self.selected = len(self.options)-1
+            self.selected = len(self.options) - 1
             self.current_bottom = len(self.options)
             self.current_top = max(0, self.current_bottom - delta)
-        elif(self.selected == len(self.options)-1 and amount > 0):
-            # Hitting down when on the bottom most row
-            #print(f"    Wrapping from bottom to top")
+        elif self.selected == len(self.options) - 1 and amount > 0:
+            # Wrapping from bottom to top
             delta = self.current_bottom - self.current_top
             self.selected = 0
             self.current_top = 0
-            #print(f"    delta = {delta}, len(self.options) = {len(self.options)}")
             self.current_bottom = min(delta, len(self.options))
-        else :    
+        else:
             # Normal adjustment
-            #print(f"    Normal Adjustment")
-            self.selected += amount
-            if(amount > 1):
+            self.selected = max(0, min(len(self.options) - 1, self.selected + amount))
+            if amount > 1:
                 self.current_top += amount
                 self.current_bottom += amount

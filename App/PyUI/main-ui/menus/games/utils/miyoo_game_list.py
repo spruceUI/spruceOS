@@ -60,5 +60,23 @@ class MiyooGameList:
             PyUiLogger.get_logger().error(f"Error loading XML file '{xml_file}': {e}")
             PyUiLogger.get_logger().error(traceback.format_exc())
 
-    def get_by_file_name(self, file_name):
+
+    def get_by_file_path(self, file_path):
+        # Normalize the path and find the portion after "Roms/"
+        parts = file_path.split("/Roms/", 1)
+        if len(parts) < 2:
+            return None  # No "Roms/" in path
+        rel_path = parts[1]  # e.g. "FC/subFolder1/subFolder2/game.txt"
+
+        # Split into components
+        components = rel_path.split("/")
+
+        # Remove the system folder (e.g., "FC") and begin recursive search
+        for i in range(1, len(components)):
+            sub_path = "/".join(components[i:])
+            if sub_path in self.games_by_file_name:
+                return self.games_by_file_name[sub_path]
+
+        # Finally, check just the filename as a fallback
+        file_name = components[-1]
         return self.games_by_file_name.get(file_name)

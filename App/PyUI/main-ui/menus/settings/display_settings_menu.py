@@ -57,50 +57,54 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                     )
             )
 
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Brightness",
-                        value_text="<    " + str(Device.get_brightness()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.brightness_adjust
-                    )
-            )
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Contrast",
-                        value_text="<    " + str(Device.get_contrast()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.contrast_adjust
-                    )
-            )
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Saturation",
-                        value_text="<    " + str(Device.get_saturation()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.saturation_adjust
-                    )
-            )          
+        if(Device.supports_brightness_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Brightness",
+                            value_text="<    " + str(Device.get_brightness()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.brightness_adjust
+                        )
+                )
+        if(Device.supports_contrast_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Contrast",
+                            value_text="<    " + str(Device.get_contrast()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.contrast_adjust
+                        )
+                )
+        if(Device.supports_saturation_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Saturation",
+                            value_text="<    " + str(Device.get_saturation()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.saturation_adjust
+                        )
+                )          
         
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Hue",
-                        value_text="<    " + str(Device.get_hue()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.hue_adjust
-                    )
-            )          
+        if(Device.supports_hue_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Hue",
+                            value_text="<    " + str(Device.get_hue()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.hue_adjust
+                        )
+                )          
         
         return option_list

@@ -54,7 +54,7 @@ class FullScreenGridView(View):
         self.x_text_pad = 20 #TODO
         self.option_text_widths = []
         for option in self.options:
-            self.option_text_widths.append(Display.get_text_dimensions(self.font_purpose, option.get_primary_text())[0])
+            self.option_text_widths.append(Display.get_text_dimensions(self.font_purpose, option.get_primary_text()[:10])[0])
 
         self.last_selected = self.selected
         self.last_start = 0
@@ -207,7 +207,7 @@ class FullScreenGridView(View):
             actual_index = start_index + visible_index
             color = Theme.text_color_selected(
                 self.font_purpose) if actual_index == self.selected else Theme.text_color(self.font_purpose)
-            w, h = Display.render_text(imageTextPair.get_primary_text(),
+            w, h = Display.render_text(imageTextPair.get_primary_text()[:10],
                                  x_offset,
                                  y_offset,
                                  color,
@@ -256,20 +256,25 @@ class FullScreenGridView(View):
             elif Controller.last_input() == ControllerInput.B:
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.DPAD_LEFT:
-                self.selected -= 1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
-                self.selected += 1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(+1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
-                self.selected -= 1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(-5, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R1:
-                self.selected += 1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(+5, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.L2:
+                self.adjust_selected(-5, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+            elif Controller.last_input() == ControllerInput.R2:
+                self.adjust_selected(+5, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
 
         return Selection(self.get_selected_option(), None, self.selected)
     
+    def adjust_selected(self, amount, skip_by_letter):
+        amount = self.calculate_amount_to_move_by(amount, skip_by_letter)
+        self.selected += amount
+        self.correct_selected_for_off_list()
+
     def animate_transition(self):
         if not PyUiConfig.animations_enabled():
             return

@@ -170,7 +170,7 @@ class DeviceCommon(AbstractDevice):
         self._set_volume(volume)
         self.system_config.set_volume(volume)
         self.system_config.save_config()
-        Display.volume_changed(volume)
+        Display.volume_changed(self.get_volume())
 
     def get_display_volume(self):
         return self.get_volume()
