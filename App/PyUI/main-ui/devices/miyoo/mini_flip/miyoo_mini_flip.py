@@ -21,7 +21,9 @@ from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
+from display.display import Display
 from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
@@ -96,14 +98,37 @@ class MiyooMiniFlip(MiyooDevice):
             4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
             5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
         }
+        self.mainui_volume = None
         threading.Thread(target=self.startup_init, daemon=True).start()
+        self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
+            "/appconfigs/system.json", self.on_mainui_config_change, interval=1.0)
         super().__init__()
+
+    def on_mainui_config_change(self):
+        path = "/appconfigs/system.json"
+        if not os.path.exists(path):
+            PyUiLogger.get_logger().warning(f"File not found: {path}")
+            return
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            old_volume = self.mainui_volume
+            self.mainui_volume = data.get("vol")
+            if(old_volume != self.mainui_volume):
+                Display.volume_changed(self.mainui_volume * 5)
+
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
+            return None
 
     def startup_init(self):
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
         if(self.is_wifi_enabled()):
             self.start_wifi_services()
+        self.on_mainui_config_change()
 
     def get_controller_interface(self):
         key_mappings = {}  
@@ -345,7 +370,7 @@ class MiyooMiniFlip(MiyooDevice):
         return "/appconfigs/wpa_supplicant.conf"
 
     def get_volume(self):
-        return self.system_config.get_volume()
+        return self.mainui_volume * 5
 
     def _set_volume_raw(self, value: int, add: int = 0) -> int:
         try:
@@ -420,7 +445,19 @@ class MiyooMiniFlip(MiyooDevice):
         return text[:40]
     
     def supports_volume(self):
-        return False
+        return True #can read but not write
 
     def supports_analog_calibration(self):
+        return False
+
+    def supports_brightness_calibration(self):
+        return False
+
+    def supports_contrast_calibration(self):
+        return False
+
+    def supports_saturation_calibration(self):
+        return False
+
+    def supports_hue_calibration(self):
         return False

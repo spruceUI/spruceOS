@@ -12,7 +12,9 @@ from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
+from display.display import Display
 from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
@@ -83,6 +85,16 @@ class MiyooFlip(MiyooDevice):
         }
 
         super().__init__()
+        # Done to try to account for external systems editting the config file
+        self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+            "/mnt/SDCARD/Saves/flip-system.json", self.on_system_config_changed, interval=1.0)
+
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if(old_volume != new_volume):
+            Display.volume_changed(new_volume)
 
     def startup_init(self):
         self._set_lumination_to_config()
@@ -399,4 +411,16 @@ class MiyooFlip(MiyooDevice):
         return MiyooTrimCommon.run_game(self,rom_info, remap_sdcard_path = True)
 
     def supports_analog_calibration(self):
+        return True
+    
+    def supports_brightness_calibration(self):
+        return True
+
+    def supports_contrast_calibration(self):
+        return True
+
+    def supports_saturation_calibration(self):
+        return True
+
+    def supports_hue_calibration(self):
         return True

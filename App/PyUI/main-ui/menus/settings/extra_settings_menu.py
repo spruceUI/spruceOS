@@ -6,6 +6,7 @@ from display.on_screen_keyboard import OnScreenKeyboard
 from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
+from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
@@ -33,6 +34,12 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def launch_game_system_select_settings(self,input):
         if(ControllerInput.A == input):
             if(GameSystemSelectSettingsMenu().show_menu()):
+                self.theme_changed = True
+                self.theme_ever_changed = True
+
+    def launch_game_select_settings(self,input):
+        if(ControllerInput.A == input):
+            if(GameSelectSettingsMenu().show_menu()):
                 self.theme_changed = True
                 self.theme_ever_changed = True
 
@@ -92,6 +99,18 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.launch_game_system_select_settings
+                    )
+            )
+        
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Game Select Settings",
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_game_select_settings
                     )
             )
         

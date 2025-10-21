@@ -59,6 +59,7 @@ class CarouselView(View):
         self.animated_count = 0
         self.include_index_text = True
         self.missing_image_path = missing_image_path
+        self.skip_next_animation = False
 
     def set_options(self, options):
         #Carousel breaks but the options shouldn't change the view
@@ -88,14 +89,14 @@ class CarouselView(View):
         n = len(self.options)
 
         half = self.cols // 2
-        if(self.sides_hang_off_edge):
+        if(self.sides_hang_off_edge and not self.shrink_further_away):
             start = (self.selected - half - 1) % n
         else:
             start = (self.selected - half) % n
 
         visible = []
         range_amt = self.cols
-        if(self.sides_hang_off_edge):
+        if(self.sides_hang_off_edge and not self.shrink_further_away):
             range_amt += 2
 
         #PyUiLogger.get_logger().info(f"Selected: {self.options[self.selected].get_primary_text()}, cols = {self.cols}")
@@ -192,7 +193,7 @@ class CarouselView(View):
         x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
 
-        if(self.sides_hang_off_edge):
+        if(self.sides_hang_off_edge and not self.shrink_further_away):
             #Add one extra that is offscreen
             x_offsets = [-x_offsets[1]] + x_offsets + [x_offsets[len(x_offsets)-1] + (x_offsets[len(x_offsets)-1] - x_offsets[len(x_offsets)-2])]
             widths = [widths[0]] + widths + [widths[len(widths)-1]]
@@ -248,15 +249,21 @@ class CarouselView(View):
         
         if(Controller.get_input()):
             if Controller.last_input() == ControllerInput.DPAD_LEFT:
-                self.selected-=1
-                self.current_left-=1
-                self.current_right-=1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
-                self.selected+=1
-                self.current_left+=1
-                self.current_right+=1
-                self.correct_selected_for_off_list()
+                self.adjust_selected(1, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.L1:
+                self.skip_next_animation = True
+                self.adjust_selected(-1* self.cols, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.R1:
+                self.skip_next_animation = True
+                self.adjust_selected(self.cols, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.L2:
+                self.skip_next_animation = True
+                self.adjust_selected(-1* self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+            elif Controller.last_input() == ControllerInput.R2:
+                self.skip_next_animation = True
+                self.adjust_selected(self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
             elif Controller.last_input() in select_controller_inputs:
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
@@ -264,72 +271,80 @@ class CarouselView(View):
                 
         return Selection(self.get_selected_option(),None, self.selected)
 
+    def adjust_selected(self, amount, skip_by_letter):
+        amount = self.calculate_amount_to_move_by(amount, skip_by_letter)
+        self.selected += amount
+        self.current_left += amount
+        self.current_right += amount
+        self.correct_selected_for_off_list()
 
     def animate_transition(self):
-        animation_frames = 10 - self.animated_count*2
+        if(not self.skip_next_animation):
+            animation_frames = 10 - self.animated_count*2
 
+            if PyUiConfig.animations_enabled() and animation_frames > 1:
+                render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
+                animation_frames = 10
+                frame_duration = 1 / 60.0  # 60 FPS
+                last_frame_time = 0
 
-        if PyUiConfig.animations_enabled() and animation_frames > 1:
-            render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
-            animation_frames = 10
-            frame_duration = 1 / 60.0  # 60 FPS
-            last_frame_time = 0
+                diff = (self.selected - self.prev_selected) % (len(self.options) + 1)
+                rotate_left = diff > (len(self.options) + 1) // 2
 
-            diff = (self.selected - self.prev_selected) % (len(self.options) + 1)
-            rotate_left = diff > (len(self.options) + 1) // 2
+                for frame in range(animation_frames):
+                    self._clear()
 
-            for frame in range(animation_frames):
-                self._clear()
+                    frame_x_offset = []
+                    frame_widths = []
+                    t = frame / (animation_frames - 1)
 
-                frame_x_offset = []
-                frame_widths = []
-                t = frame / (animation_frames - 1)
+                    for i in range(len(self.prev_x_offsets)):
+                        start_x_offset = self.prev_x_offsets[i]
+                        start_width = self.prev_widths[i]
 
-                for i in range(len(self.prev_x_offsets)):
-                    start_x_offset = self.prev_x_offsets[i]
-                    start_width = self.prev_widths[i]
-
-                    if rotate_left:
-                        if i < len(self.prev_x_offsets) - 1:
-                            end_x_offset = self.prev_x_offsets[i + 1]
-                            end_width = self.prev_widths[i+1]
+                        if rotate_left:
+                            if i < len(self.prev_x_offsets) - 1:
+                                end_x_offset = self.prev_x_offsets[i + 1]
+                                end_width = self.prev_widths[i+1]
+                            else:
+                                # Last item exits to the right
+                                end_x_offset = start_x_offset
+                                end_width = start_width
                         else:
-                            # Last item exits to the right
-                            end_x_offset = start_x_offset
-                            end_width = start_width
-                    else:
-                        if i > 0:
-                            end_x_offset = self.prev_x_offsets[i - 1]
-                            end_width = self.prev_widths[i - 1]
-                        else:
-                            # First item exits to the left0+12
-                            end_x_offset = start_x_offset
-                            end_width = start_width
+                            if i > 0:
+                                end_x_offset = self.prev_x_offsets[i - 1]
+                                end_width = self.prev_widths[i - 1]
+                            else:
+                                # First item exits to the left0+12
+                                end_x_offset = start_x_offset
+                                end_width = start_width
 
-                    new_x_offset = start_x_offset + (end_x_offset - start_x_offset) * t
-                    new_width = start_width + (end_width - start_width) * t
-                    frame_x_offset.append(new_x_offset)         
-                    frame_widths.append(new_width)
+                        new_x_offset = start_x_offset + (end_x_offset - start_x_offset) * t
+                        new_width = start_width + (end_width - start_width) * t
+                        frame_x_offset.append(new_x_offset)         
+                        frame_widths.append(new_width)
 
-                for visible_index, imageTextPair in enumerate(self.prev_visible_options):
-                    x_offset = frame_x_offset[visible_index]
+                    for visible_index, imageTextPair in enumerate(self.prev_visible_options):
+                        x_offset = frame_x_offset[visible_index]
 
-                    y_image_offset = Display.get_center_of_usable_screen_height()
-                    
-                    self._render_image(imageTextPair.get_image_path(), 
-                                            x_offset, 
-                                            y_image_offset,
-                                            render_mode,
-                                            target_width=frame_widths[visible_index],
-                                            target_height=Display.get_usable_screen_height(),
-                                            resize_type=self.resize_type)
+                        y_image_offset = Display.get_center_of_usable_screen_height()
+                        
+                        self._render_image(imageTextPair.get_image_path(), 
+                                                x_offset, 
+                                                y_image_offset,
+                                                render_mode,
+                                                target_width=frame_widths[visible_index],
+                                                target_height=Display.get_usable_screen_height(),
+                                                resize_type=self.resize_type)
 
-                if time.time() - last_frame_time < frame_duration:
-                    time.sleep(frame_duration - (time.time() - last_frame_time))
-                if(self.include_index_text):
-                    Display.add_index_text(self.selected%self.options_length +1, self.options_length,
-                                           letter=self.options[self.selected].get_primary_text()[0])
-                Display.present()
-                last_frame_time = time.time()
-        
-        self.animated_count += 1
+                    if time.time() - last_frame_time < frame_duration:
+                        time.sleep(frame_duration - (time.time() - last_frame_time))
+                    if(self.include_index_text):
+                        Display.add_index_text(self.selected%self.options_length +1, self.options_length,
+                                            letter=self.options[self.selected].get_primary_text()[0])
+                    Display.present()
+                    last_frame_time = time.time()
+            
+            self.animated_count += 1
+        else:
+            self.skip_next_animation = False

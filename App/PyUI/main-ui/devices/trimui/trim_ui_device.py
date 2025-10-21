@@ -310,3 +310,15 @@ class TrimUIDevice(DeviceCommon):
     
     def get_wpa_supplicant_conf_path(self):
         return "/userdata/cfg/wpa_supplicant.conf"
+    
+    def supports_brightness_calibration():
+        return True
+
+    def supports_contrast_calibration():
+        return True
+
+    def supports_saturation_calibration():
+        return True
+
+    def supports_hue_calibration():
+        return True

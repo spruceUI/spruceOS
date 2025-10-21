@@ -94,3 +94,14 @@ class TrimUIBrick(TrimUIDevice):
         else:
             return 1
         
+    def supports_brightness_calibration(self):
+        return True
+
+    def supports_contrast_calibration(self):
+        return True
+
+    def supports_saturation_calibration(self):
+        return True
+
+    def supports_hue_calibration(self):
+        return True

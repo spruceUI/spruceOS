@@ -278,4 +278,18 @@ class AbstractDevice(ABC):
     def get_wpa_supplicant_conf_path(self):
         pass
 
+    @abstractmethod
+    def supports_brightness_calibration(self):
+        pass
 
+    @abstractmethod
+    def supports_contrast_calibration(self):
+        pass
+
+    @abstractmethod
+    def supports_saturation_calibration(self):
+        pass
+
+    @abstractmethod
+    def supports_hue_calibration(self):
+        pass
