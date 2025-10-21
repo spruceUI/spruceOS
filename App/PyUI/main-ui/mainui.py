@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 import shutil
+import signal
 import sys
 import threading
 from devices.device import Device
@@ -21,6 +22,7 @@ from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
+
 
 
 def parse_arguments():
@@ -45,7 +47,7 @@ def initialize_device(device):
     if "MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
         Device.init(MiyooFlip())
-    elif "MIYOO_MINI_FLIP" == device:
+    elif "MIYOO_MINI_FLIP" == device or "SPRIG_MIYOO_MINI_FLIP" == device:
         from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
         Device.init(MiyooMiniFlip())
     elif "TRIMUI_BRICK" == device:
@@ -125,6 +127,12 @@ def main():
 
     main_menu.run_main_menu_selection()
 
+
+def sigterm_handler(signum, frame):
+    print(f"Received SIGTERM (Signal {signum}). Shutting down...")
+    sys.exit(0) # Exit gracefully
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, sigterm_handler)
     main()
     os._exit(0)

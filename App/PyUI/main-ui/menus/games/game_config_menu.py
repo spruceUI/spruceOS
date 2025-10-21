@@ -49,27 +49,44 @@ class GameConfigMenu:
             elif (ControllerInput.B == selected.get_input()):
                 return None
             
-    def change_indexed_array_option(self, input, all_options, current_value, update_value):
+    def change_indexed_array_option(self, entry_name, input, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override):
         try:
             selected_index = all_options.index(current_value)
         except:
             selected_index = 0
+            PyUiLogger.get_logger().error(f"{current_value} not found in options for {entry_name}")
 
-        if(ControllerInput.DPAD_LEFT == input):
-            selected_index-=1
-            if(selected_index < 0):
-                selected_index = len(all_options) -1
-        elif(ControllerInput.DPAD_RIGHT == input):
-            selected_index+=1
-            if(selected_index == len(all_options)):
-                selected_index = 0
-        elif(ControllerInput.A == input):
-            #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-            selected_index = self.get_selected_index("Select a Core", all_options)
+        PyUiLogger.get_logger().info(f"{current_value} is index {selected_index}")
 
-        if(selected_index is not None):
-            PyUiLogger.get_logger().info(f"Updating core to {all_options[selected_index]}")
-            update_value(all_options[selected_index])
+        if(ControllerInput.X == input or ControllerInput.Y == input):
+            if(contains_override):
+                PyUiLogger.get_logger().info(f"Removing override core for {rom_file_path}")
+                remove_override(entry_name,rom_file_path)
+            else:
+                PyUiLogger.get_logger().info(f"Updating override core for {rom_file_path} to {current_value}")
+                update_override(entry_name,rom_file_path, current_value)
+        else:
+            if(ControllerInput.DPAD_LEFT == input):
+                selected_index-=1
+                if(selected_index < 0):
+                    selected_index = len(all_options) -1
+            elif(ControllerInput.DPAD_RIGHT == input):
+                selected_index+=1
+                if(selected_index == len(all_options)):
+                    selected_index = 0
+            elif(ControllerInput.A == input):
+                #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
+                selected_index = self.get_selected_index("Select a Core", all_options)
+
+            PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
+
+            if(selected_index is not None):
+                if(contains_override):
+                    PyUiLogger.get_logger().info(f"Updating override to {all_options[selected_index]}")
+                    update_override(entry_name,rom_file_path, all_options[selected_index])
+                else:
+                    PyUiLogger.get_logger().info(f"Updating core to {all_options[selected_index]}")
+                    update_value(entry_name, all_options[selected_index])
 
     def run_launch_option(self, input_value, launch_option):
         if(ControllerInput.A == input_value):
@@ -94,7 +111,7 @@ class GameConfigMenu:
             Display.reinitialize()
             self.game_system.game_system_config.reload_config()
 
-    def show_config(self) :
+    def show_config(self, rom_file_path) :
         selected = Selection(None, None, 0)
         view = None
         #Loop is weird here due to how these options are handled.
@@ -120,41 +137,29 @@ class GameConfigMenu:
 
             config_list.extend(self.gen_additional_game_options())
 
-            core_options = self.game_system.game_system_config.get_core_options()
-            cpu_options = self.game_system.game_system_config.get_cpu_options()
+            menu_options = self.game_system.game_system_config.get_menu_options()
 
-            if(len(core_options) > 0):
+            for name, option in menu_options.items():
+                effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
+                display_name = option.get('display')
+                contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
+                if(contains_override):
+                    display_name = display_name + "*"
                 config_list.append(
-                        GridOrListEntry(
-                                primary_text="Emu Core",
-                                value_text="<    " + self.game_system.game_system_config.get_selected_core() + "    >",
+                                GridOrListEntry(
+                                primary_text=display_name,
+                                value_text="<    " + effective_value + "    >",
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
                                 icon=None,
-                                value=lambda input_value, all_options=core_options, current_value=self.game_system.game_system_config.get_selected_core(), update_value=self.game_system.game_system_config.set_selected_core
-                                    : self.change_indexed_array_option(input_value, all_options, current_value, update_value)
+                                value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
+                                all_options=option.get('options', []), current_value=effective_value,
+                                    update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
+                                    remove_override=self.game_system.game_system_config.delete_menu_override
+                                    : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
                         )
-                    )
-            else:
-                PyUiLogger.get_logger().info(f"No core options found in config")
-
-            if(len(cpu_options) > 0):
-                config_list.append(
-                        GridOrListEntry(
-                                primary_text="CPU Governor",
-                                value_text="<    " + self.game_system.game_system_config.get_selected_cpu() + "    >",
-                                image_path=None,
-                                image_path_selected=None,
-                                description=None,
-                                icon=None,
-                                value=lambda input_value, all_options=cpu_options, current_value=self.game_system.game_system_config.get_selected_cpu(), update_value=self.game_system.game_system_config.set_selected_cpu
-                                    : self.change_indexed_array_option(input_value, all_options, current_value, update_value)
-                        )
-                    )
-            else:
-                PyUiLogger.get_logger().info(f"No core options found in config")
-
+                )
 
             if(view is None):        
                 view = ViewCreator.create_view(
@@ -165,12 +170,10 @@ class GameConfigMenu:
             else:
                 view.set_options(config_list)
 
-            expected_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT, ControllerInput.B]
+            expected_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT, ControllerInput.B, ControllerInput.X, ControllerInput.Y]
             selected = view.get_selection(expected_inputs)
 
-            if(ControllerInput.A == selected.get_input() or ControllerInput.DPAD_LEFT == selected.get_input() or ControllerInput.DPAD_RIGHT == selected.get_input()):
-                PyUiLogger.get_logger().info(f"DPAD LEFT OR RIGHT CALLED")
-                selected.get_selection().get_value()(selected.get_input()) 
-            elif(ControllerInput.B == selected.get_input()):
+            if(ControllerInput.B == selected.get_input()):
                 selected = None
-                
+            elif(selected.get_input() is not None):
+                selected.get_selection().get_value()(selected.get_input()) 

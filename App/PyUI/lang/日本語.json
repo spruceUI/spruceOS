@@ -1,0 +1,15 @@
+{
+    "Games" : "ゲーム",
+    "Recents": "最近",
+    "Apps": "アプリ",
+    "Collections": "コレクション",
+    "Favorites": "お気に入り",
+    "Settings": "設定",
+    "noEntriesFound": "エントリは見つかりませんでした",
+    "systemGameSearch": "$systemゲーム探索",
+    "allSystemGameSearch": "全部ゲーム探索",
+    "systemMenuSubOptions" : "$systemメニュー追加オプション",
+    "gameSearch": "ゲーム探索:",
+    "exitPyUi": "リロード ＵＩ "
+    
+}

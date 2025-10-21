@@ -124,14 +124,14 @@ class MiyooMiniFlip(MiyooDevice):
         key_mappings[KeyEvent(1, 1, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]
         key_mappings[KeyEvent(1, 1, 1)] = [InputResult(ControllerInput.MENU, KeyState.PRESS)]  
 
-        key_mappings[KeyEvent(1, 15, 0)] = [InputResult(ControllerInput.L1, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 15, 1)] = [InputResult(ControllerInput.L1, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 20, 0)] = [InputResult(ControllerInput.L2, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 20, 1)] = [InputResult(ControllerInput.L2, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 14, 0)] = [InputResult(ControllerInput.R1, KeyState.RELEASE)]
-        key_mappings[KeyEvent(1, 14, 1)] = [InputResult(ControllerInput.R1, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 18, 0)] = [InputResult(ControllerInput.R2, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 18, 1)] = [InputResult(ControllerInput.R2, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 15, 0)] = [InputResult(ControllerInput.L2, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 15, 1)] = [InputResult(ControllerInput.L2, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 20, 0)] = [InputResult(ControllerInput.R1, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 20, 1)] = [InputResult(ControllerInput.R1, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 14, 0)] = [InputResult(ControllerInput.R2, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 14, 1)] = [InputResult(ControllerInput.R2, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 18, 0)] = [InputResult(ControllerInput.L1, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 18, 1)] = [InputResult(ControllerInput.L1, KeyState.PRESS)]  
 
         key_mappings[KeyEvent(1, 103, 1)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
         key_mappings[KeyEvent(1, 103, 0)] = [InputResult(ControllerInput.DPAD_UP, KeyState.RELEASE)]
@@ -339,7 +339,7 @@ class MiyooMiniFlip(MiyooDevice):
         
     @property
     def reboot_cmd(self):
-        return None
+        return "reboot"
 
     def get_wpa_supplicant_conf_path(self):
         return "/appconfigs/wpa_supplicant.conf"

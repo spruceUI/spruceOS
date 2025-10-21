@@ -23,6 +23,6 @@ class ProcessRunner:
             if result.stdout:
                 PyUiLogger.get_logger().info(f"{caller} stdout: {result.stdout.strip()}")
             if result.stderr:
-                PyUiLogger.get_logger().error(f"{caller} stderr: {result.stderr.strip()}")
+                PyUiLogger.get_logger().warning(f"{caller} stderr: {result.stderr.strip()}")
 
         return result
