@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<gameList>
+    <game>
+        <path>./Chrono Trigger (USA).sfc</path>
+        <name>Chrono Trigger</name>
+        <image>./Imgs/Chrono Trigger (USA).png</image>
+    </game>
+    <game>
+        <path>./Donkey Kong Country (USA).sfc</path>
+        <name>Donkey Kong Country</name>
+        <image>./Imgs/Donkey Kong Country (USA).png</image>
+    </game>
+    <game>
+        <path>./Final Fantasy VI (USA).sfc</path>
+        <name>Final Fantasy VI</name>
+        <image>./Imgs/Final Fantasy VI (USA).png</image>
+    </game>
+    <game>
+        <path>./Homebrew/Demos/Demo 1.sfc</path>
+        <name>Homebrew/Demos/Demo 1</name>
+        <image>./Imgs/Homebrew/Demos/Demo 1.png</image>
+    </game>
+    <game>
+        <path>./Homebrew/Demos/Demo 2.sfc</path>
+        <name>Homebrew/Demos/Demo 2</name>
+        <image>./Imgs/Homebrew/Demos/Demo 2.png</image>
+    </game>
+    <game>
+        <path>./Homebrew/Demos/Demo 3.sfc</path>
+        <name>Homebrew/Demos/Demo 3</name>
+        <image>./Imgs/Homebrew/Demos/Demo 3.png</image>
+    </game>
+    <game>
+        <path>./Homebrew/Test Game 1.sfc</path>
+        <name>Homebrew/Test Game 1</name>
+        <image>./Imgs/Homebrew/Test Game 1.png</image>
+    </game>
+    <game>
+        <path>./Homebrew/Test Game 2.sfc</path>
+        <name>Homebrew/Test Game 2</name>
+        <image>./Imgs/Homebrew/Test Game 2.png</image>
+    </game>
+    <game>
+        <path>./Legend of Zelda - A Link to the Past, The (USA).sfc</path>
+        <name>The Legend of Zelda: A Link to the Past</name>
+        <image>./Imgs/Legend of Zelda - A Link to the Past, The (USA).png</image>
+    </game>
+    <game>
+        <path>./Mega Man X (USA).sfc</path>
+        <name>Mega Man X</name>
+        <image>./Imgs/Mega Man X (USA).png</image>
+    </game>
+    <game>
+        <path>./Rom Hacks/Super Mario World - Kaizo Edition.sfc</path>
+        <name>Rom Hacks/Super Mario World: Kaizo Edition</name>
+        <image>./Imgs/Rom Hacks/Super Mario World - Kaizo Edition.png</image>
+    </game>
+    <game>
+        <path>./Rom Hacks/Zelda - Parallel Worlds.sfc</path>
+        <name>Rom Hacks/Zelda: Parallel Worlds</name>
+        <image>./Imgs/Rom Hacks/Zelda - Parallel Worlds.png</image>
+    </game>
+    <game>
+        <path>./Super Mario World (USA).sfc</path>
+        <name>Super Mario World</name>
+        <image>./Imgs/Super Mario World (USA).png</image>
+    </game>
+</gameList>
