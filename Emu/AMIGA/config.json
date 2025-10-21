@@ -6,33 +6,10 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|rp9",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓UAE4ARM)-puae2021",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
-    }
-  ],
+  "launchlist": [],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
-      "devices": [
-        "MIYOO_FLIP",
-        "MIYOO_A30",
-        "TRIMUI_BRICK",
-        "TRIMUI_SMART_PRO"
-      ],
       "options": [
         "Smart",
         "Performance",

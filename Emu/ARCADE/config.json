@@ -6,25 +6,29 @@
   "themecolor": "CD6155",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓FBNEO)-mame2003+-fbalpha2012",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "fbneo",
+        "mame2003_plus",
+        "fbalpha2012"
+      ],
+      "selected": "uae4arm",
+      "overrides": {}
     }
-  ],
-  "sortOrder": 300,
+  },  "sortOrder": 300,
   "brand": "Arcade",
   "type": "arcade",
   "releaseYear": 1971
