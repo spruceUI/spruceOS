@@ -7,9 +7,11 @@ delete_gamelist_files() {
     for system in "$rootdir"/*; do
         if [ -d "$system" ]; then
             # Exclude specific directories
-            if echo "$system" | grep -qE "(.gamelists|PORTS|FBNEO|MAME2003PLUS|ARCADE|NEOGEO|CPS1|CPS2|CPS3|FFPLAY|EASYRPG|MSUMD|SCUMMVM|WOLF|QUAKE|DOOM)"; then
-                continue
-            fi
+            case "$system" in
+                *.gamelists*|*PORTS*|*FBNEO*|*MAME2003PLUS*|*ARCADE*|*NEOGEO*|*CPS1*|*CPS2*|*CPS3*|*FFPLAY*|*EASYRPG*|*MSUMD*|*SCUMMVM*|*WOLF*|*QUAKE*|*DOOM*)
+                    continue
+                    ;;
+            esac
             # Find and delete miyoogamelist.xml files in non-excluded directories
             find "$system" -name "miyoogamelist.xml" -exec rm {} +
         fi
@@ -27,8 +29,28 @@ clean_name() {
     name="$1"
     extlist="$2"
 
-    while echo "$name" | grep -qE "\.($extlist)$"; do
-        name="${name%.*}"
+    # Strip extensions - convert extlist to case pattern
+    _cn_has_ext=1
+    while [ $_cn_has_ext -eq 1 ]; do
+        _cn_has_ext=0
+        _cn_old_name="$name"
+        # Check each extension in the list
+        _cn_ifs_save="$IFS"
+        IFS="|"
+        for _cn_ext in $extlist; do
+            case "$name" in
+                *.$_cn_ext)
+                    name="${name%.*}"
+                    _cn_has_ext=1
+                    break
+                    ;;
+            esac
+        done
+        IFS="$_cn_ifs_save"
+        # Safety check to prevent infinite loop
+        if [ "$name" = "$_cn_old_name" ]; then
+            break
+        fi
     done
 
     name=$(echo "$name" | sed -e 's/([^)]*)//g')
@@ -38,7 +60,7 @@ clean_name() {
     name=$(echo "$name" | awk '{$1=$1};1')
 
     article=$(echo "$name" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
-    if [ ! -z "$article" ]; then
+    if [ -n "$article" ]; then
         name="$article $(echo "$name" | sed -e 's/, \(A\|The\|An\)//')"
     fi
 
@@ -49,72 +71,88 @@ clean_name() {
 
 # Helper function to process games recursively
 process_roms_recursive() {
-    local current_dir="$1"
-    local base_path="$2"
-    local imgpath="$3"
-    local extlist="$4"
-    local out="$5"
-    local tempfile="$6"
+    _pr_current_dir="$1"
+    _pr_base_path="$2"
+    _pr_imgpath="$3"
+    _pr_extlist="$4"
+    _pr_out="$5"
+    _pr_tempfile="$6"
 
     # Get relative path from base
-    local rel_path="${current_dir#$base_path}"
-    rel_path="${rel_path#/}"
+    _pr_rel_path="${_pr_current_dir#$_pr_base_path}"
+    _pr_rel_path="${_pr_rel_path#/}"
 
     # Process files in current directory
-    for item in "$current_dir"/*; do
-        if [ ! -e "$item" ]; then
+    for _pr_item in "$_pr_current_dir"/*; do
+        if [ ! -e "$_pr_item" ]; then
             continue
         fi
 
-        local item_name=$(basename "$item")
+        _pr_item_name=$(basename "$_pr_item")
 
-        if [ -d "$item" ]; then
+        if [ -d "$_pr_item" ]; then
             # Skip Imgs directory and hidden directories
-            if [ "$item_name" = "Imgs" ] || echo "$item_name" | grep -q "^\."; then
+            if [ "$_pr_item_name" = "Imgs" ] || echo "$_pr_item_name" | grep -q "^\."; then
                 continue
             fi
             # Recursively process subdirectory
-            process_roms_recursive "$item" "$base_path" "$imgpath" "$extlist" "$out" "$tempfile"
-        elif echo "$item_name" | grep -qE "\.($extlist)$"; then
+            process_roms_recursive "$_pr_item" "$_pr_base_path" "$_pr_imgpath" "$_pr_extlist" "$_pr_out" "$_pr_tempfile"
+        else
+            # Check if file matches any extension
+            _pr_match=0
+            _pr_ifs_save="$IFS"
+            IFS="|"
+            for _pr_ext in $_pr_extlist; do
+                case "$_pr_item_name" in
+                    *.$_pr_ext)
+                        _pr_match=1
+                        break
+                        ;;
+                esac
+            done
+            IFS="$_pr_ifs_save"
+
+            if [ $_pr_match -eq 0 ]; then
+                continue
+            fi
             # Process ROM file
-            local filename="${item_name%.*}"
+            _pr_filename="${_pr_item_name%.*}"
 
             # Build relative path from rompath
-            if [ -z "$rel_path" ]; then
-                local file_rel_path="./$item_name"
-                local img_rel_path="$imgpath/$filename.png"
+            if [ -z "$_pr_rel_path" ]; then
+                _pr_file_rel_path="./$_pr_item_name"
+                _pr_img_rel_path="$_pr_imgpath/$_pr_filename.png"
             else
-                local file_rel_path="./$rel_path/$item_name"
-                local img_rel_path="$imgpath/$rel_path/$filename.png"
+                _pr_file_rel_path="./$_pr_rel_path/$_pr_item_name"
+                _pr_img_rel_path="$_pr_imgpath/$_pr_rel_path/$_pr_filename.png"
             fi
 
             # Clean the name for display
-            local digest=$(clean_name "$item_name" "$extlist")
+            _pr_digest=$(clean_name "$_pr_item_name" "$_pr_extlist")
 
             # Prefix with subdirectory for namespacing if in subdirectory
-            if [ ! -z "$rel_path" ]; then
-                digest="$rel_path/$digest"
+            if [ -n "$_pr_rel_path" ]; then
+                _pr_digest="$_pr_rel_path/$_pr_digest"
             fi
 
             # Check if the cleaned name has already been used
-            local name_to_use
-            if grep -q "^$digest$" "$tempfile"; then
+            if grep -q "^$_pr_digest$" "$_pr_tempfile"; then
                 # Use the full path without extension if it's a duplicate
-                if [ -z "$rel_path" ]; then
-                    name_to_use="$filename"
+                if [ -z "$_pr_rel_path" ]; then
+                    _pr_name_to_use="$_pr_filename"
                 else
-                    name_to_use="$rel_path/$filename"
+                    _pr_name_to_use="$_pr_rel_path/$_pr_filename"
                 fi
             else
-                name_to_use="$digest"
-                echo "$digest" >> "$tempfile"
+                _pr_name_to_use="$_pr_digest"
+                echo "$_pr_digest" >> "$_pr_tempfile"
             fi
 
-            cat <<EOF >>$out
+            cat <<EOF >>$_pr_out
     <game>
-        <path>$file_rel_path</path>
-        <name>$name_to_use</name>
-        <image>$img_rel_path</image>
+        <path>$_pr_file_rel_path</path>
+        <name>$_pr_name_to_use</name>
+        <image>$_pr_img_rel_path</image>
     </game>
 EOF
         fi
