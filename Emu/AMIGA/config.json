@@ -24,6 +24,33 @@
       "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "devices": [
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO"
+      ],
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    },
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "uae4arm",
+        "puae2021"
+      ],
+      "selected": "uae4arm",
+      "overrides": {}
+    }
+  },
   "sortOrder": 100,
   "brand": "Commodore",
   "type": "pc",

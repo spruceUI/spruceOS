@@ -9,46 +9,99 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
-log_message "-----Launching Emulator-----" -v
-log_message "trying: $0 $@" -v
+log_message "-----Launching Emulator-----"
+log_message "trying: $0 $@"
+
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
-export GAME="$(basename "$1")"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
-export OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
-export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
-export DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
-export OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
-export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-export CUSTOM_DEF_FILE="$EMU_DIR/default.opt"
+export EMU_JSON_PATH="${EMU_DIR}/config.json"
+export GAME="$(basename "$1")"
+export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
+export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 
 ##### GENERAL FUNCTIONS #####
 
-import_launch_options() {
-	if [ -f "$DEF_FILE" ]; then
-		. "$DEF_FILE"
-	elif [ -f "$CUSTOM_DEF_FILE" ]; then
-		. "$CUSTOM_DEF_FILE"
-	else
-		log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
-	fi
+use_default_emulator() {
 
-	if [ -f "$OPT_FILE" ]; then
-		. "$OPT_FILE"
-	else
-		log_message "WARNING: System .opt file not found for $EMU_NAME!" -v
-	fi
+	case "$EMU_NAME" in
+		"AMIGA")			default_core="uae4arm";;
+		"ARCADE"|"FBNEO")	default_core="fbneo";;
+		"ARDUBOY")			default_core="ardens";;
+		"ATARI")			default_core="stella2014";;
+		"ATARIST")			default_core="hatari";;
+		"CHAI")				default_core="chailove";;
+		"COLECO"|"MSX")		default_core="bluemsx";;
+		"COMMODORE")		default_core="vice_x64";;
+		"CPC")				default_core="cap32";;
+		"CPS1"|"CPS2"|"CPS3"|"NEOGEO")	default_core="fbalpha2012";;
+		"DC")				default_core="flycast";;
+		"DOOM")				default_core="prboom";;
+		"DOS")				default_core="dosbox_pure";;
+		"EASYRPG")			default_core="easyrpg";;
+		"EIGHTHUNDRED")		default_core="atari800";;
+		"FAIRCHILD")		default_core="freechaf";;
+		"FAKE08")			default_core="fake08";;
+		"FC"|"FDS")			default_core="fceumm";;
+		"FIFTYTWOHUNDRED")	default_core="a5200";;
+		"GAMETANK")			default_core="gametank";;
+		"GB"|"GBC")			default_core="gambatte";;
+		"GBA"|"SGB")		default_core="mgba";;
+		"GG"|"MS"|"MSUMD"|"SEGASGONE")	default_core="genesis_plus_gx";;
+		"GW")				default_core="gw";;
+		"INTELLIVISION")	default_core="freeintv";;
+		"LYNX")				default_core="handy";;
+		"MAME2003PLUS")		default_core="mame2003_plus";;
+		"MD"|"SEGACD"|"THIRTYTWOX")	default_core="picodrive";;
+		"MEGADUCK")			default_core="sameduck";;
+		"MSU1"|"SATELLAVIEW"|"SUFAMI")	default_core="snes9x";;
+		"N64")				default_core="km_ludicrousn64_2k22_xtreme_amped";;
+		"NDS")				default_core="DraStic-original";;
+		"NEOCD")			default_core="neocd";;
+		"NGP"|"NGPC")		default_core="mednafen_ngp";;
+		"ODYSSEY"|"VIDEOPAC")	default_core="o2em";;
+		"PCE"|"PCECD")		default_core="mednafen_pce_fast";;
+		"POKE")				default_core="pokemini";;
+		"PS")				default_core="pcsx_rearmed";;
+		"PSP")				default_core="PPSSPP-standalone";;
+		"QUAKE")			default_core="tyrquake";;
+		"SATURN")			default_core="yabasanshiro";;
+		"SCUMMVM")			default_core="scummvm";;
+		"SEVENTYEIGHTHUNDRED")	default_core="prosystem";;
+		"SFC")				default_core="chimerasnes";;
+		"SGFX")				default_core="mednafen_supergrafx";;
+		"SUPERVISION")		default_core="potator";;
+		"TIC")				default_core="tic80";;
+		"VB")				default_core="mednafen_vb";;
+		"VECTREX")			default_core="vecx";;
+		"VIC20")			default_core="vice_xvic";;
+		"WOLF")				default_core="ecwolf";;
+		"WS"|"WSC")			default_core="mednafen_wswan";;
+		"X68000")			default_core="px68k";;
+		"ZXS")				default_core="fuse";;
+		*)					default_core="";;
+	esac
 
-	if [ -f "$OVR_FILE" ]; then
-		. "$OVR_FILE";
-		log_message "Launch setting OVR_FILE detected @ $OVR_FILE" -v
-	else
-		log_message "No launch OVR_FILE detected. Using current system settings." -v
+	export CORE="$default_core"
+	log_message "Using default core of $CORE to run $EMU_NAME"
+}
+
+
+get_core_override() {
+	local core_override="$(jq -r --arg game "$GAME" '.menuOptions.Emulator.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
+		export CORE=$core_override
+	fi
+}
+
+get_mode_override() {
+	local mode_override="$(jq -r --arg game "$GAME" '.menuOptions.Governor.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$mode_override" ] && [ "$mode_override" != "null" ]; then
+		export MODE=$mode_override
 	fi
 }
 
 set_cpu_mode() {
-	if [ "$MODE" = "overclock" ]; then
+	if [ "$MODE" = "Overclock" ]; then
 		if [ "$EMU_NAME" = "NDS" ]; then
 			( sleep 33 && set_overclock ) &
 		else
@@ -56,7 +109,7 @@ set_cpu_mode() {
 		fi
 	fi
 
-	if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
+	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 	fi
 }
@@ -721,7 +774,9 @@ run_flycast_standalone() {
 ##### MAIN EXECUTION #####
  ########################
 
-import_launch_options
+if [ -z "$CORE" ] || [ "$CORE" = "null" ]; then	use_default_emulator ; fi
+get_core_override
+get_mode_override
 set_cpu_mode
 record_session_start_time
 handle_network_services
