@@ -4,6 +4,7 @@
 delete_gamelist_files() {
     rootdir="$1"
 
+    echo "Deleting existing miyoogamelist.xml files..."
     for system in "$rootdir"/*; do
         if [ -d "$system" ]; then
             # Exclude specific directories
@@ -13,15 +14,29 @@ delete_gamelist_files() {
                     ;;
             esac
             # Find and delete miyoogamelist.xml files in non-excluded directories
-            find "$system" -name "miyoogamelist.xml" -exec rm {} +
+            _system_name=$(basename "$system")
+            _count=$(find "$system" -name "miyoogamelist.xml" | wc -l)
+            if [ $_count -gt 0 ]; then
+                echo "  Removing $_count file(s) from $_system_name"
+                find "$system" -name "miyoogamelist.xml" -exec rm {} +
+            fi
         fi
     done
+    echo "Done deleting miyoogamelist.xml files"
 }
 
 # Function to delete cache files
 delete_cache_files() {
     rootdir="$1"
-    find "$rootdir" -name "*cache6.db" -exec rm {} \;
+    echo "Deleting cache files..."
+    _cache_count=$(find "$rootdir" -name "*cache6.db" | wc -l)
+    if [ $_cache_count -gt 0 ]; then
+        echo "  Removing $_cache_count cache file(s)"
+        find "$rootdir" -name "*cache6.db" -exec rm {} \;
+    else
+        echo "  No cache files found"
+    fi
+    echo "Done deleting cache files"
 }
 
 # Function to clean ROM names
@@ -81,6 +96,11 @@ process_roms_recursive() {
     # Get relative path from base
     _pr_rel_path="${_pr_current_dir#$_pr_base_path}"
     _pr_rel_path="${_pr_rel_path#/}"
+
+    # Show directory being processed
+    if [ -n "$_pr_rel_path" ]; then
+        echo "  Scanning subdirectory: $_pr_rel_path"
+    fi
 
     # Process files in current directory
     for _pr_item in "$_pr_current_dir"/*; do
@@ -170,6 +190,7 @@ generate_miyoogamelist() {
 
     cd "$rompath"
 
+    echo "Generating $out..."
     echo '<?xml version="1.0"?>' >$out
     echo '<gameList>' >>$out
 
@@ -179,7 +200,11 @@ generate_miyoogamelist() {
     # Process ROMs recursively
     process_roms_recursive "$rompath" "$rompath" "$imgpath" "$extlist" "$out" "$tempfile"
 
+    _game_count=$(grep -c '<game>' "$out")
+    echo "  Found $_game_count game(s)"
+
     echo '</gameList>' >>$out
     rm "$tempfile"
     rm "$tempfile_original_names"
+    echo "  Saved to: $rompath/$out"
 }
