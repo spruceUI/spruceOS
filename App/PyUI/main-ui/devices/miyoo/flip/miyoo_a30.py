@@ -269,6 +269,9 @@ class MiyooA30(MiyooDevice):
     def supports_analog_calibration(self):
         return False
 
+    def supports_image_resizing(self):
+        return False
+
     def supports_brightness_calibration(self):
         return False
 
