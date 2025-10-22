@@ -84,6 +84,19 @@ clean_name() {
     echo "$name"
 }
 
+# Sanitize a string for safe inclusion in XML (remove invalid chars and escape specials)
+sanitize_xml() {
+    _sx_input="$1"
+    _sx_clean=$(printf '%s' "$_sx_input" | tr -d '\000-\010\013\014\016-\037')
+    _sx_clean=$(printf '%s' "$_sx_clean" \
+        | sed -e 's/&/\&amp;/g' \
+              -e 's/</\&lt;/g' \
+              -e 's/>/\&gt;/g' \
+              -e 's/"/\&quot;/g' \
+              -e "s/'/\&apos;/g")
+    echo "$_sx_clean"
+}
+
 # Helper function to process games recursively
 process_roms_recursive() {
     _pr_current_dir="$1"
@@ -168,11 +181,16 @@ process_roms_recursive() {
                 echo "$_pr_digest" >> "$_pr_tempfile"
             fi
 
+            # Sanitize values before writing XML
+            _pr_file_rel_path_xml=$(sanitize_xml "$_pr_file_rel_path")
+            _pr_name_to_use_xml=$(sanitize_xml "$_pr_name_to_use")
+            _pr_img_rel_path_xml=$(sanitize_xml "$_pr_img_rel_path")
+
             cat <<EOF >>$_pr_out
     <game>
-        <path>$_pr_file_rel_path</path>
-        <name>$_pr_name_to_use</name>
-        <image>$_pr_img_rel_path</image>
+        <path>$_pr_file_rel_path_xml</path>
+        <name>$_pr_name_to_use_xml</name>
+        <image>$_pr_img_rel_path_xml</image>
     </game>
 EOF
         fi
