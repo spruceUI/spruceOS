@@ -321,3 +321,19 @@ class Device:
     @staticmethod
     def get_wpa_supplicant_conf_path():
         return Device._impl.get_wpa_supplicant_conf_path()
+
+    @staticmethod
+    def supports_brightness_calibration():
+        return Device._impl.supports_brightness_calibration()
+
+    @staticmethod
+    def supports_contrast_calibration():
+        return Device._impl.supports_contrast_calibration()
+
+    @staticmethod
+    def supports_saturation_calibration():
+        return Device._impl.supports_saturation_calibration()
+
+    @staticmethod
+    def supports_hue_calibration():
+        return Device._impl.supports_hue_calibration()

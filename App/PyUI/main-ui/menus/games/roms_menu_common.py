@@ -224,7 +224,13 @@ class RomsMenuCommon(ABC):
                     elif(ViewType.GRID == Theme.get_game_selection_view_type()):
                         Theme.set_game_selection_view_type(ViewType.CAROUSEL)
                         view = self.create_view(page_name,rom_list,selected)
-                    else:
+                    elif(ViewType.CAROUSEL == Theme.get_game_selection_view_type()):
+                        Theme.set_game_selection_view_type(ViewType.FULLSCREEN_GRID)
+                        view = self.create_view(page_name,rom_list,selected)
+                    elif(ViewType.FULLSCREEN_GRID == Theme.get_game_selection_view_type()):
+                        Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
+                        view = self.create_view(page_name,rom_list,selected)
+                    else: # how did we hit this else?
                         Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
                         view = self.create_view(page_name,rom_list,selected)
                 elif(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):

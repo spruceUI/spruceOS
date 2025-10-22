@@ -111,7 +111,7 @@ class RomSelectOptionsBuilder:
         
         for rom_file_path in valid_files:
             rom_file_name = os.path.basename(rom_file_path)
-            game_entry = miyoo_game_list.get_by_file_name(rom_file_name)
+            game_entry = miyoo_game_list.get_by_file_path(rom_file_path)
             if(filter(rom_file_name, rom_file_path)):
                 if(game_entry is not None):
                     display_name = game_entry.name

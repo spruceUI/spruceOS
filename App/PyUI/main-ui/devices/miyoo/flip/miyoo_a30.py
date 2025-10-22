@@ -268,3 +268,15 @@ class MiyooA30(MiyooDevice):
 
     def supports_analog_calibration(self):
         return False
+
+    def supports_brightness_calibration(self):
+        return False
+
+    def supports_contrast_calibration(self):
+        return False
+
+    def supports_saturation_calibration(self):
+        return False
+
+    def supports_hue_calibration(self):
+        return False

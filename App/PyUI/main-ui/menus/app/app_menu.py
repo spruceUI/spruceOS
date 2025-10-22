@@ -18,7 +18,7 @@ class AppMenu:
         self.appFinder = Device.get_app_finder()
 
     def _convert_to_theme_version_of_icon(self, icon_path):
-        return os.path.join(Theme.get_theme_path(),"icons","app",os.path.basename(icon_path))
+        return Theme.get_app_icon(os.path.basename(icon_path))
 
     def get_first_existing_path(self,file_priority_list):
         for path in file_priority_list:
@@ -32,7 +32,7 @@ class AppMenu:
     def get_icon(self, app_folder, icon_path_from_config):
         icon_priority = []
         if(icon_path_from_config is not None):
-            icon_priority.append(os.path.join(Theme.get_theme_path(),"icons","app",os.path.basename(icon_path_from_config)))
+            icon_priority.append(self._convert_to_theme_version_of_icon(icon_path_from_config))
             icon_priority.append(icon_path_from_config)
             icon_priority.append(os.path.join(app_folder,icon_path_from_config))
         icon_priority.append(os.path.join(app_folder,"icon.png"))
