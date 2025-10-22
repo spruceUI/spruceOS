@@ -62,7 +62,11 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 PyUiConfig.set_language(lang)
                 Language.load()
 
-
+    def resize_boxart(self, input):
+        if (ControllerInput.A == input):
+            from games.utils.box_art_resizer import BoxArtResizer
+            BoxArtResizer.patch_boxart()
+            
     def build_options_list(self):
         option_list = []
         
@@ -114,6 +118,19 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                     )
             )
         
+        if(Device.supports_image_resizing()):
+            option_list.append(
+                GridOrListEntry(
+                    primary_text="Resize Boxart",
+                    value_text=None,
+                    image_path=None,
+                    image_path_selected=None,
+                    description=None,
+                    icon=None,
+                    value=self.resize_boxart
+                )
+            )        
+
         if(Device.supports_analog_calibration()):
             option_list.append(
                     GridOrListEntry(
@@ -162,6 +179,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 value=self.change_language_setting
             )
         )        
+
                     
         if(PyUiConfig.include_stock_os_launch_option()):
             option_list.append(
@@ -175,5 +193,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                             value=self.launch_stock_os_menu
                         )
                 )
-                    
+
+
+
         return option_list
