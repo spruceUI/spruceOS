@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 import os
+import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
@@ -861,3 +862,10 @@ class Display:
     def volume_changed(cls, vol):
         cls.top_bar.volume_changed(vol)
 
+    @classmethod
+    def display_message(cls,message, duration_ms=0):
+        Display.clear("")
+        Display.render_text_centered(f"{message}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.present()
+        # Sleep for the specified duration in milliseconds
+        time.sleep(duration_ms / 1000)
