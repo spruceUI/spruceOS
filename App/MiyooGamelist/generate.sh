@@ -10,7 +10,7 @@ echo "MiyooGamelist Generator"
 echo "========================================"
 echo ""
 
-display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, this can take a few minutes especially with large rom sets."
+display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, this can take a while with large rom sets."
 
 # Delete miyoogamelist.xml files first
 delete_gamelist_files "/mnt/SDCARD/Roms"
