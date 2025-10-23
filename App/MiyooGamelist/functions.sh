@@ -104,7 +104,6 @@ process_roms_recursive() {
     _pr_imgpath="$3"
     _pr_extlist="$4"
     _pr_out="$5"
-    _pr_tempfile="$6"
 
     # Get relative path from base
     _pr_rel_path="${_pr_current_dir#$_pr_base_path}"
@@ -129,7 +128,7 @@ process_roms_recursive() {
                 continue
             fi
             # Recursively process subdirectory
-            process_roms_recursive "$_pr_item" "$_pr_base_path" "$_pr_imgpath" "$_pr_extlist" "$_pr_out" "$_pr_tempfile"
+            process_roms_recursive "$_pr_item" "$_pr_base_path" "$_pr_imgpath" "$_pr_extlist" "$_pr_out"
         else
             # Check if file matches any extension
             _pr_match=0
@@ -163,23 +162,7 @@ process_roms_recursive() {
             # Clean the name for display
             _pr_digest=$(clean_name "$_pr_item_name" "$_pr_extlist")
 
-            # Prefix with subdirectory for namespacing if in subdirectory
-            if [ -n "$_pr_rel_path" ]; then
-                _pr_digest="$_pr_rel_path/$_pr_digest"
-            fi
-
-            # Check if the cleaned name has already been used
-            if grep -q "^$_pr_digest$" "$_pr_tempfile"; then
-                # Use the full path without extension if it's a duplicate
-                if [ -z "$_pr_rel_path" ]; then
-                    _pr_name_to_use="$_pr_filename"
-                else
-                    _pr_name_to_use="$_pr_rel_path/$_pr_filename"
-                fi
-            else
-                _pr_name_to_use="$_pr_digest"
-                echo "$_pr_digest" >> "$_pr_tempfile"
-            fi
+            _pr_name_to_use="$_pr_digest"
 
             # Sanitize values before writing XML
             _pr_file_rel_path_xml=$(sanitize_xml "$_pr_file_rel_path")
