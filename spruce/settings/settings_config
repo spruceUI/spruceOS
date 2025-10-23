@@ -74,7 +74,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 "" "Extended brightness controls" "|" "on|off" "$HELP$ check extended_brightness" "$HELP$ update extended_brightness _VALUE_" ""
 @"Start + L/R change contrast at minimum brightness"
 
-<Not_simple>
+<A30>
 "" "Blue Light Filter" "Off|Low|Moderate|Strong|Very strong" "Off|Low|Moderate|Strong|Very strong" "$HELP$ get blf_intensity 'Off'" "$HELP$ update blf_intensity '_VALUE_'" "$BLFILTER$ '_VALUE_'"
 
 <Not_simple>
