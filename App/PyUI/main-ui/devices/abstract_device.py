@@ -297,3 +297,8 @@ class AbstractDevice(ABC):
     @abstractmethod
     def supports_hue_calibration(self):
         pass
+
+    @abstractmethod
+    def supports_popup_menu(self):
+        pass
+

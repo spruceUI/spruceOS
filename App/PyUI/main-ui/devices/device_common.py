@@ -317,3 +317,6 @@ class DeviceCommon(AbstractDevice):
 
     def get_system_config(self):
         return self.system_config
+    
+    def supports_popup_menu(self):
+        return True

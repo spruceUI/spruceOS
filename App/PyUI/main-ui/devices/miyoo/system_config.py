@@ -149,10 +149,26 @@ class SystemConfig:
         return self.config.get("bluetooth") == 1
 
     def get_skip_by_letter(self):
-        return self.config.get("skip_by_letter", False)
+        return self.config.get("skipByLetter", False)
 
     def set_skip_by_letter(self,value):
-        self.config["skip_by_letter"] = value
+        self.config["skipByLetter"] = value
+        self.save_config()
+
+    def game_switcher_enabled(self):
+        return self.config.get("gameSwitcherEnabled", True)
+
+    def set_game_switcher_enabled(self,value):
+        self.config["gameSwitcherEnabled"] = value
+        self.save_config()
+
+    def game_switcher_game_count(self):
+        return self.config.get("gameSwitcherGameCount", 5)
+
+    def set_game_switcher_game_count(self, value):
+        if(value < 1):
+            value = 1
+        self.config["gameSwitcherGameCount"] = value
         self.save_config()
 
     def get(self, property):

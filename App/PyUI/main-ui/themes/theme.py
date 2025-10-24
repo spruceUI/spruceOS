@@ -398,25 +398,25 @@ class Theme():
                     try:
                         return cls._data["shadowed"]["shadowedFontSize"] 
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontSize\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontSize\"] ")
                         return int(40 * cls._default_multiplier)
                 case FontPurpose.SHADOWED_BACKDROP:
                     try:
                         return cls._data["shadowed"]["shadowedFontBackdropSize"]
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontBackdropSize\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontBackdropSize\"] ")
                         return int(40 * cls._default_multiplier)
                 case FontPurpose.SHADOWED_SMALL:
                     try:
                         return cls._data["shadowed"]["shadowedFontSmallSize"] 
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontSmallSize\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontSmallSize\"] ")
                         return int(26 * cls._default_multiplier)
                 case FontPurpose.SHADOWED_BACKDROP_SMALL:
                     try:
                         return cls._data["shadowed"]["shadowedFontBackdropSmallSize"]
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontBackdropSmallSize\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontBackdropSmallSize\"] ")
                         return int(26 * cls._default_multiplier)
                 case _:
                     return cls._data["list"]["font"]
@@ -508,25 +508,25 @@ class Theme():
                     try:
                         return cls.hex_to_color(cls._data["shadowed"]["shadowedFontColor"])
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontSmallSize\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontSmallSize\"] ")
                         return cls.hex_to_color("#FFFFFF")
                 case FontPurpose.SHADOWED_BACKDROP:
                     try:
                         return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropColor"])
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontBackdropColor\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontBackdropColor\"] ")
                         return cls.hex_to_color("#000000")
                 case FontPurpose.SHADOWED_SMALL:
                     try:
                         return cls.hex_to_color(cls._data["shadowed"]["shadowedFontSmallColor"])
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontSmallColor\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontSmallColor\"] ")
                         return cls.hex_to_color("#FFFFFF")
                 case FontPurpose.SHADOWED_BACKDROP_SMALL:
                     try:
                         return cls.hex_to_color(cls._data["shadowed"]["shadowedFontBackdropSmallColor"])
                     except Exception as e:
-                        PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontBackdropSmallColor\"] ")
+                        #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowedFontColor\"][\"shadowedFontBackdropSmallColor\"] ")
                         return cls.hex_to_color("#000000")
                 case _:
                     return cls.hex_to_color(cls._data["grid"]["color"])
@@ -996,3 +996,7 @@ class Theme():
         PyUiLogger.get_logger().info(f"App icon path is {app_icon_path}")
 
         return cls._icon("app",app_name)
+
+    @classmethod
+    def include_index_text(cls):
+        return cls._data.get("includeIndexText", True)

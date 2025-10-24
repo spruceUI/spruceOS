@@ -341,3 +341,8 @@ class Device:
     @staticmethod
     def supports_hue_calibration():
         return Device._impl.supports_hue_calibration()
+
+    @staticmethod
+    def supports_popup_menu():
+        return Device._impl.supports_popup_menu()
+

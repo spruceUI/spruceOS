@@ -266,6 +266,7 @@ class Display:
 
     @classmethod
     def lock_current_image(cls):
+        PyUiLogger.get_logger().info("Locking current image as background")
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -283,6 +284,7 @@ class Display:
 
     @classmethod
     def unlock_current_image(cls):
+        PyUiLogger.get_logger().warning("Unlocking current iamge as background")
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -299,6 +301,8 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
         elif cls.background_texture is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
+        else:
+            PyUiLogger.get_logger().warning("No background texture to render")
 
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
