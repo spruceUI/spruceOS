@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import json
 import os
+import threading
 from typing import List, Optional
 from devices.device import Device
 from menus.games.utils.rom_info import RomInfo
@@ -20,19 +21,27 @@ class CollectionEntry:
 class CollectionsManager:
     _collections: List[CollectionEntry] = []
     _collections_file_name = "collections.json"
+    _init_event = threading.Event()  # signals when initialize() has been called
 
     @classmethod
     def initialize(cls, _collections_folder: str):
         cls._game_system_utils = Device.get_game_system_utils()
         cls._collections_folder = _collections_folder
         cls.load_from_file()
+        cls._init_event.set()  # unblock waiting methods
+
+    @classmethod
+    def _wait_for_init(cls):
+        cls._init_event.wait()  # blocks until initialize() happens
 
     @classmethod
     def convert_to_rom_list_entry(cls, rom_info):
+        cls._wait_for_init()
         return RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name)
 
     @classmethod
     def load_entries_as_rom_info(cls, game_list) -> List['RomInfo']:
+        cls._wait_for_init()
         rom_info_list: List['RomInfo'] = []
 
         for entry in game_list:
@@ -79,6 +88,7 @@ class CollectionsManager:
 
     @classmethod
     def save_to_file(cls):
+        cls._wait_for_init()
         os.makedirs(cls._collections_folder, exist_ok=True)
         file_path = os.path.join(cls._collections_folder, cls._collections_file_name)
 
@@ -104,6 +114,7 @@ class CollectionsManager:
 
     @classmethod
     def create_collection(cls, collection_name):
+        cls._wait_for_init()
         if not any(c.collection_name == collection_name for c in cls._collections):
             cls._collections.append(CollectionEntry(collection_name, []))
             cls.save_to_file()
@@ -111,6 +122,7 @@ class CollectionsManager:
 
     @classmethod
     def delete_collection(cls, collection_name):
+        cls._wait_for_init()
         cls._collections = [
             c for c in cls._collections if c.collection_name != collection_name
         ]
@@ -119,6 +131,7 @@ class CollectionsManager:
 
     @classmethod
     def add_game_to_collection(cls, collection_name, rom_info: 'RomInfo'):
+        cls._wait_for_init()
         for coll in cls._collections:
             if coll.collection_name == collection_name:
                 # Prevent duplicate entries
@@ -136,6 +149,7 @@ class CollectionsManager:
 
     @classmethod
     def remove_from_collection(cls, collection_name, rom_info: 'RomInfo'):
+        cls._wait_for_init()
         for coll in cls._collections:
             if coll.collection_name == collection_name:
                 coll.game_list = [
@@ -150,10 +164,12 @@ class CollectionsManager:
 
     @classmethod
     def get_collection_names(cls):
+        cls._wait_for_init()
         return [c.collection_name for c in cls._collections]
 
     @classmethod
     def get_games_in_collection(cls, collection_name):
+        cls._wait_for_init()
         for coll in cls._collections:
             if coll.collection_name == collection_name:
                 return cls.load_entries_as_rom_info(coll.game_list)
@@ -161,6 +177,7 @@ class CollectionsManager:
     
     @classmethod
     def get_collections_containing_rom(cls, rom_file_path: str) -> List[str]:
+        cls._wait_for_init()
         matching_collections = []
         for coll in cls._collections:
             if any(game.rom_file_path == rom_file_path for game in coll.game_list):
@@ -169,6 +186,7 @@ class CollectionsManager:
     
     @classmethod
     def get_collections_not_containing_rom(cls, rom_file_path: str) -> List[str]:
+        cls._wait_for_init()
         matching_collections = []
         for coll in cls._collections:
             if not any(game.rom_file_path == rom_file_path for game in coll.game_list):

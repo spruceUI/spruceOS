@@ -206,3 +206,7 @@ class PyUiConfig:
     def include_stock_os_launch_option(cls):
         return cls.get("includeStockOsLaunchOption",True)
 
+    @classmethod
+    def allow_pyui_game_switcher(cls):
+        return cls.get("allowPyUiGameSwitcher",True)
+

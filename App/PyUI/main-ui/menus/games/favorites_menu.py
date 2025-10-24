@@ -21,7 +21,7 @@ class FavoritesMenu(RomsMenuCommon):
 
             display_name = rom_info.display_name
             if(display_name is None):
-                display_name =  self._remove_extension(os.path.basename(rom_info.rom_file_path))
+                display_name =  self.rom_select_options_builder.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
             rom_list.append(
                 GridOrListEntry(

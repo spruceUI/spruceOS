@@ -1,4 +1,6 @@
 
+import os
+from pathlib import Path
 from controller.controller_inputs import ControllerInput
 from display.display import Display
 from menus.app.app_menu import AppMenu
@@ -155,6 +157,17 @@ class MainMenu:
 
 
     def run_main_menu_selection(self):
+        py_ui_dir = Path(__file__).resolve().parent.parent.parent
+        gs_trigger_file = py_ui_dir / "pyui_gs_trigger"
+        if (gs_trigger_file).exists():
+            gs_trigger_file.unlink()
+            from controller.controller import Controller
+            from menus.games.recents_menu_gs import RecentsMenuGS
+            Controller.gs_triggered = True
+            RecentsMenuGS().run_rom_selection()
+        else:
+            PyUiLogger.get_logger().info(f"No GS Trigger file found at {gs_trigger_file}")         
+
         self.launch_selection(PyUiState.get_last_main_menu_selection())            
 
         if(Theme.skip_main_menu()):
@@ -198,6 +211,7 @@ class MainMenu:
                     if(ControllerInput.A == selected.get_input()): 
                         self.launch_selection(selected.get_selection().get_value())
                     elif(ControllerInput.MENU == selected.get_input()):
+                        PyUiLogger.get_logger().info(f"Launching Main Menu Popup")  
                         self.popup_menu.run_popup_menu_selection()
 
                     if(selected.get_input() is not None):

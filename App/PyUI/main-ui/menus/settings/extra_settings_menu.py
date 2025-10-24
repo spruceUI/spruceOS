@@ -5,8 +5,10 @@ from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.controller_settings_menu import ControllerSettingsMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
+from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
@@ -47,13 +49,13 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             Device.launch_stock_os_menu()
 
-    def calibrate_sticks(self,input):
+    def launch_controller_settings(self,input):
         if(ControllerInput.A == input):
-            Device.calibrate_sticks()
+            ControllerSettingsMenu().show_menu()
 
-    def remap_buttons(self,input):
+    def launch_gammeswitcher_settings(self,input):
         if(ControllerInput.A == input):
-            Device.remap_buttons()
+            GameSwitcherSettingsMenu().show_menu()
 
     def change_language_setting(self, input):
         if (ControllerInput.A == input):
@@ -131,29 +133,29 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
             )        
 
-        if(Device.supports_analog_calibration()):
+        if(PyUiConfig.allow_pyui_game_switcher()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Calibrate Analog Sticks",
-                            value_text=None,
+                            primary_text="Game Switcher Settings",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=self.calibrate_sticks
-                        )
-                )
+                            value=self.launch_gammeswitcher_settings
+                    )
+            )
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Remap Buttons",
+                        primary_text="Controller Settings",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.remap_buttons
+                        value=self.launch_controller_settings
                 )
         )
+
 
         option_list.extend(Device.get_extra_settings_options())
 

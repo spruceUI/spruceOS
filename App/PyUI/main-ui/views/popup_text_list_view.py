@@ -17,7 +17,8 @@ class PopupTextListView(TextListView):
                          show_icons=show_icons,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
-                         usable_height=int(Display.get_image_dimensions(Theme.menu_popup_bg_large())[1]))
+                         usable_height=int(Display.get_image_dimensions(Theme.menu_popup_bg_large())[1]),
+                         allow_scrolling=False)
 
         self.clear_display_each_render_cycle = False
         self.include_index_text = False
