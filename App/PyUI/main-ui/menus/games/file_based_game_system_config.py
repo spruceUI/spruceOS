@@ -128,9 +128,8 @@ class FileBasedGameSystemConfig():
         if override_key is None:
             return option.get('selected')
 
-        overrides = option.get('overrides', {})
+        overrides = option.get('overrides') or {}
         return overrides.get(override_key, option.get('selected'))
-
 
     def delete_menu_override(self, option_name, override_key):
         """

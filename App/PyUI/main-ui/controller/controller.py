@@ -55,15 +55,15 @@ class Controller:
 
     @staticmethod
     def clear_last_input():
-        if(Controller.last_controller_input is not None):
-            PyUiLogger.get_logger().info(f"Clearing last input")
+        #if(Controller.last_controller_input is not None):
+        #    PyUiLogger.get_logger().info(f"Clearing last input")
         Controller.last_controller_input = None
         Controller.controller_interface.clear_input()
 
     @staticmethod
     def set_last_input(last_input):
-        if(last_input is not None):            
-            PyUiLogger.get_logger().info(f"Setting last input to {last_input}")
+        #if(last_input is not None):            
+        #    PyUiLogger.get_logger().info(f"Setting last input to {last_input}")
         #elif(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"Setting last input to {last_input}")
         Controller.last_controller_input = last_input

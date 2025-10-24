@@ -56,22 +56,18 @@ class CollectionsMenu(RomsMenuCommon):
 
     def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
         if(last_subfolder == ''):
-            PyUiLogger.get_logger().info(f"last sub folder is empty string")
             return None
         elif(getattr(self, 'subfolder', '') == last_subfolder):
-            PyUiLogger.get_logger().info(f"attr sub folder is already last subfolder")
             return None
         else:
             collections = CollectionsManager.get_collection_names()
             for collection in collections:
                 PyUiLogger.get_logger().info(f"collection: {collection}")
                 if collection == last_subfolder:
-                    PyUiLogger.get_logger().info(f"Found collection with name: {last_subfolder}")
                     self._load_collection_menu(RomInfo(None, collection, is_collection=True))
                     PyUiState.set_last_game_selection(
                         "Collections",
                         '',
                         getattr(self, 'subfolder', '') or ''
                     )
-            PyUiLogger.get_logger().info(f"No collection found with last_subfolder: {last_subfolder}")
             return None
