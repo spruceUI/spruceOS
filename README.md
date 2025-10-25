@@ -171,6 +171,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## The Current Team (Alphabetical order):
    - 369px
    - Basecase - Stefan Ayala
+   - chrisj951 - Discord @chrisbastion
    - Cinethezs
    - Cobaltdsc4102
    - Dandon
