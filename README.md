@@ -134,6 +134,7 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - All past and present Team Members!
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   - Shauninman: Help, support and Bootlogo function (and so much more!).
+  - MuOS and team, we borrowed kind of a lot from you guys thank you (looking at you AntiKK, SCUMMVM)!
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
   - Ndguardian, XanXic, and XK9274: Syncthing App.
