@@ -136,6 +136,7 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   - Shauninman: Help, support and Bootlogo function (and so much more!).
   - MustardOS and team, we borrowed kind of a lot from you guys thank you (looking at you AntiKK, SCUMMVM)!
+  - Knulli and the rest of the Open Handheld Collective for amazing collaboration and sharing. It takes a village! 
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
   - Ndguardian, XanXic, and XK9274: Syncthing App.
