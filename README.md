@@ -131,6 +131,7 @@ Please do not adjust the RetroArch configurations unless you are already familia
 
 ## Credits and Thanks
   - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
+  - Chrisj951: Creating the Python based UI that enabled us to get rid of MainUI. You turned a pipedream into reality.
   - All past and present Team Members!
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   - Shauninman: Help, support and Bootlogo function (and so much more!).
@@ -172,7 +173,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## The Current Team (Alphabetical order):
    - 369px
    - Basecase - Stefan Ayala
-   - chrisj951 - Discord @chrisbastion
+   - Chrisj951 - Discord @chrisbastion
    - Cinethezs
    - Cobaltdsc4102
    - Dandon
