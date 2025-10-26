@@ -201,5 +201,3 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## News
 The "soon" to happen release of the Miyoo Flip has us excited! We are planning on trying to do something for it but have not gotten ahold of any test units yet.
 [Gogamegeek.com](https://www.gogamegeek.com/) has kindly offered to send us a few units as soon as they recieve them. Expect updates on our progress "soon"!
-
-# Test - Having a laugh with Sun in VC - Lonko
