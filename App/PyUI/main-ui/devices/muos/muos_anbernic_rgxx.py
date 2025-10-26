@@ -17,6 +17,7 @@ import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 
 class MuosAnbernicRGXX(MuosDevice):
@@ -135,3 +136,6 @@ class MuosAnbernicRGXX(MuosDevice):
 
     def clear_framebuffer(self):
         ProcessRunner.run(["dd", "if=/dev/zero", "of=/dev/fb0", "bs=4096"])
+
+    def get_image_utils(self):
+        return PilImageUtils()

@@ -165,6 +165,7 @@ class MainMenu:
             from menus.games.recents_menu_gs import RecentsMenuGS
             Controller.gs_triggered = True
             RecentsMenuGS().run_rom_selection()
+            Controller.gs_triggered = False
         else:
             PyUiLogger.get_logger().info(f"No GS Trigger file found at {gs_trigger_file}")         
 

@@ -1,5 +1,6 @@
 import json
 import os
+from devices.device import Device
 from utils.logger import PyUiLogger
 
 class DaijishoThemeIndex:
@@ -110,20 +111,11 @@ class DaijishoThemeIndex:
             png_path = os.path.join(self.foldername, png_filename)
             if os.path.exists(png_path):
                 return png_path
-            # Try to import PIL, skip conversion if not installed
-            try:
-                from PIL import Image
-            except ImportError:
-                PyUiLogger.get_logger().warning(
-                    f"PIL not available, skipping conversion of {jpg_path}"
-                )
-                return None  # fallback: return original JPG
 
             if not os.path.exists(png_path):
                 PyUiLogger.get_logger().info(f"Converting {jpg_path} to {png_path}")
                 try:
-                    with Image.open(jpg_path) as img:
-                        img.save(png_path, "PNG")
+                    Device.get_image_utils().convert_from_jpg_to_png(jpg_path, png_path)
                 except Exception as e:
                     PyUiLogger.get_logger().warning(
                         f"Failed to convert {jpg_path} to PNG: {e}"

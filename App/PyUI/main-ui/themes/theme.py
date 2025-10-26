@@ -1000,3 +1000,33 @@ class Theme():
     @classmethod
     def include_index_text(cls):
         return cls._data.get("includeIndexText", True)
+
+    @classmethod
+    def get_view_type_for_game_switcher(cls):
+        view_type_str = cls._data.get("gameSwitcherViewType", "FULLSCREEN_GRID")
+        return getattr(ViewType, view_type_str, ViewType.FULLSCREEN_GRID)
+
+    @classmethod
+    def set_view_type_for_game_switcher(cls, view_type):
+        cls._data["gameSwitcherViewType"] = view_type.name
+        cls.save_changes()
+
+    @classmethod
+    def get_resize_type_for_game_switcher(cls):
+        view_type_str = cls._data.get("gameSwitcherResizeType", "FIT")
+        return getattr(ResizeType, view_type_str, ResizeType.FIT)
+
+    @classmethod
+    def set_resize_type_for_game_switcher(cls, resize_type):
+        cls._data["gameSwitcherResizeType"] = resize_type.name
+        cls.save_changes()
+
+
+    @classmethod
+    def get_set_top_bar_text_to_game_selection_for_game_switcher(cls):
+        return cls._data.get("gameSwitcherSetTopBarTextToGameSelection", True)
+    
+    @classmethod
+    def set_set_top_bar_text_to_game_selection_for_game_switcher(cls, value):
+        cls._data["gameSwitcherSetTopBarTextToGameSelection"] = value
+        cls.save_changes()

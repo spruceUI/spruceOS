@@ -3,10 +3,14 @@ import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
+from utils.cfw_system_config import CfwSystemConfig
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 
 
 class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
+    SETTINGS_NAME = "Game Switcher Settings"
+
     def __init__(self):
         super().__init__()
 
@@ -19,7 +23,6 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
             Device.get_system_config().set_game_switcher_game_count(Device.get_system_config().game_switcher_game_count() - 1)
         elif(ControllerInput.DPAD_RIGHT == input):
             Device.get_system_config().set_game_switcher_game_count(Device.get_system_config().game_switcher_game_count() + 1)
-
 
     def build_options_list(self):
         option_list = []
@@ -47,5 +50,8 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                         value=self.update_game_switcher_game_count
                     )
             )
+        
+        menu_options = self.build_options_list_from_config_menu_options(GameSwitcherSettingsMenu.SETTINGS_NAME)
+        option_list.extend(menu_options)
 
         return option_list

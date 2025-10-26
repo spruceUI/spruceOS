@@ -5,6 +5,7 @@ from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.cfw_system_settings_menu import CfwSystemSettingsMenu
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
@@ -12,6 +13,8 @@ from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
+from utils.cfw_system_config import CfwSystemConfig
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -63,6 +66,10 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if (lang is not None):
                 PyUiConfig.set_language(lang)
                 Language.load()
+
+    def launch_cfw_system_settings(self,input):
+        if(ControllerInput.A == input):
+            CfwSystemSettingsMenu().show_menu()
 
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
@@ -156,8 +163,20 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
         )
 
-
         option_list.extend(Device.get_extra_settings_options())
+
+        if(len(CfwSystemConfig.get_categories()) > 0):
+            option_list.append(
+                GridOrListEntry(
+                            primary_text="CFW System Settings",
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_cfw_system_settings
+                )
+            )
 
         option_list.append(
                 GridOrListEntry(

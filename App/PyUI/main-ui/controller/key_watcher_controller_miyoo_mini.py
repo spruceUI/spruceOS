@@ -124,7 +124,8 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
                     else:
                         logger.error("No mapping for event: %s", key_event)
                 elif(key_event.event_type != 0 or key_event.code !=0 or key_event.value != 0):
-                    logger.debug("Unmapped key event: %s", key_event)
+                    #logger.debug("Unmapped key event: %s", key_event)
+                    pass
 
             except Exception as e:
                 logger.exception("Error reading input: %s", e)

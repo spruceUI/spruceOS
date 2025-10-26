@@ -19,6 +19,7 @@ from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -270,7 +271,7 @@ class MiyooA30(MiyooDevice):
         return False
 
     def supports_image_resizing(self):
-        return False
+        return True
 
     def supports_brightness_calibration(self):
         return False
@@ -283,3 +284,6 @@ class MiyooA30(MiyooDevice):
 
     def supports_hue_calibration(self):
         return False
+
+    def get_image_utils(self):
+        return FfmpegImageUtils()
