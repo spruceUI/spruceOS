@@ -319,3 +319,12 @@ class AbstractDevice(ABC):
     def get_image_utils(self) -> ImageUtils:
         pass
 
+    @abstractmethod
+    def get_boxart_resize_dimensions(self):
+        pass
+
+    @abstractmethod
+    def get_boxart_small_resize_dimensions(self):
+        pass
+
+

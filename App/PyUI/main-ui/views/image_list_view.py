@@ -137,7 +137,7 @@ class ImageListView(NonDescriptiveListView):
     def _render_image(self, visible_options):
         for visible_index, (imageTextPair) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
-            imagePath = imageTextPair.get_image_path_selected() if actual_index == self.selected else imageTextPair.get_image_path()
+            imagePath = imageTextPair.get_image_path_ideal(self.img_width, self.img_height) if actual_index == self.selected else imageTextPair.get_image_path()
             if(actual_index == self.selected and imagePath is not None):
                 Display.render_image(imagePath, 
                                      self.img_offset_x, 
