@@ -6,24 +6,28 @@
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|fds|nes|unif|unf",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓FCEUMM)-nestopia",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "fceumm",
+        "nestopia"
+      ],
+      "selected": "fceumm",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 2400,
   "brand": "Nintendo",
   "type": "homeconsole",

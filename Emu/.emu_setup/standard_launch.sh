@@ -271,8 +271,8 @@ run_ffplay() {
 	fi
 }
 
-function kill_runner() {
-    PID=`pidof runner`
+kill_runner() {
+    PID="$(pidof runner)"
     if [ "$PID" != "" ]; then
         kill -9 $PID
     fi
@@ -301,11 +301,6 @@ run_drastic() {
 		export SDL_AUDIODRIVER=mmiyoo
 		export EGL_VIDEODRIVER=mmiyoo
 
-		if [ -f 'libs/libEGL.so' ]; then
-			rm -rf libs/libEGL.so
-			rm -rf libs/libGLESv1_CM.so
-			rm -rf libs/libGLESv2.so
-		fi
 		./drastic32 "$ROM_FILE"
 		# remove soft link and resume joystickinput
 		rm /dev/ttyS0
@@ -318,7 +313,7 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			if [ "$CORE" = "drastic_steward" ]; then
+			if [ "$CORE" = "drastic-steward" ]; then
 				kill_runner
 				LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
 				sleep 1
@@ -343,12 +338,12 @@ run_drastic() {
 
 		elif [ "$PLATFORM" = "Flip" ]; then
 
-			if [ -d /usr/l32 ] && [ "$CORE" = "drastic_steward" ]; then
+			if [ -d /usr/l32 ] && [ "$CORE" = "DraStic-Steward" ]; then
 				export SDL_VIDEODRIVER=NDS
 				export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
 				./drastic32 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-steward-flip.log 2>&1
 
-			elif [ "$CORE" = "drastic_trngaje" ]; then
+			elif [ "$CORE" = "DraStic-trngaje" ]; then
 				export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
 				mv ./drastic64 ./drastic
 				./drastic "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-trngaje-flip.log 2>&1
