@@ -333,3 +333,9 @@ class DeviceCommon(AbstractDevice):
     
     def supports_popup_menu(self):
         return True
+
+    def get_boxart_resize_dimensions(self):
+        return 512, 512
+
+    def get_boxart_small_resize_dimensions(self):
+        return 256, 256

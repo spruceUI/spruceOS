@@ -363,3 +363,11 @@ class Device:
     def get_image_utils() -> ImageUtils:
         return Device._impl.get_image_utils()
 
+    @staticmethod
+    def get_boxart_resize_dimensions():
+        return Device._impl.get_boxart_resize_dimensions()
+    
+    @staticmethod
+    def get_boxart_small_resize_dimensions():
+        return Device._impl.get_boxart_small_resize_dimensions()
+
