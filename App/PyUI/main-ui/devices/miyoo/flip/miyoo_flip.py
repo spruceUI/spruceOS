@@ -20,6 +20,7 @@ import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 from concurrent.futures import ThreadPoolExecutor
 
@@ -427,3 +428,6 @@ class MiyooFlip(MiyooDevice):
 
     def supports_hue_calibration(self):
         return True
+
+    def get_image_utils(self):
+        return PilImageUtils()

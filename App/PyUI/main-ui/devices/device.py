@@ -1,4 +1,5 @@
 from devices.abstract_device import AbstractDevice
+from utils.image_utils import ImageUtils
 
 
 class Device:
@@ -315,8 +316,20 @@ class Device:
         return Device._impl.double_init_sdl_display()
 
     @staticmethod
-    def shrink_text_if_needed(text):
-        return Device._impl.shrink_text_if_needed(text)
+    def get_text_width_measurement_multiplier():
+        return Device._impl.get_text_width_measurement_multiplier()
+    
+    @staticmethod
+    def max_texture_width():
+        return Device._impl.max_texture_width()
+    
+    @staticmethod
+    def max_texture_height():
+        return Device._impl.max_texture_height()
+
+    @staticmethod
+    def get_guaranteed_safe_max_text_char_count():
+        return Device._impl.get_guaranteed_safe_max_text_char_count()
 
     @staticmethod
     def get_system_config():
@@ -345,4 +358,8 @@ class Device:
     @staticmethod
     def supports_popup_menu():
         return Device._impl.supports_popup_menu()
+
+    @staticmethod
+    def get_image_utils() -> ImageUtils:
+        return Device._impl.get_image_utils()
 

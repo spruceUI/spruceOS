@@ -20,8 +20,8 @@ class BoxArtResizer():
     def process_rom_folders(cls):
         """Search through ROM directories and scale images inside Imgs folders."""
         rom_paths = ["/mnt/SDCARD/Roms/", "/media/sdcard1/Roms/"]
-        target_width = 1280
-        target_height = 768
+        target_width = 294
+        target_height = 294
 
         for base_path in rom_paths:
             if not os.path.exists(base_path):
@@ -41,6 +41,7 @@ class BoxArtResizer():
                         if file.lower().endswith((".png", ".jpg", ".jpeg")):
                             full_path = os.path.join(root, file)
                             try:
+                                PyUiLogger().get_logger().info(f"Checking {full_path} for resizing")
                                 cls.scale_image(
                                     full_path, target_width, target_height)
                             except Exception as e:
@@ -49,30 +50,11 @@ class BoxArtResizer():
     @classmethod
     def scale_image(cls, image_file, target_width, target_height):
         """Open an image and shrink it (preserving aspect ratio) to fit within target size."""
-        from PIL import Image
 
         now = time.time()
         if now - cls._last_display_time >= 1.0:
-            Display.clear("Box Art Resizer")
-            Display.render_text_centered(f"Patching {image_file}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.display_message(f"Patching {os.path.basename(image_file)}")
             Display.present()
             cls._last_display_time = now
 
-        img = Image.open(image_file)
-        width, height = img.size
-
-        # Only shrink if necessary
-        if width > target_width or height > target_height:
-            aspect_ratio = width / height
-            if width / target_width > height / target_height:
-                # Width is the limiting factor
-                new_width = target_width
-                new_height = int(target_width / aspect_ratio)
-            else:
-                # Height is the limiting factor
-                new_height = target_height
-                new_width = int(target_height * aspect_ratio)
-
-            img = img.resize((new_width, new_height), Image.LANCZOS)
-            img.save(image_file)
-            print(f"Scaled: {image_file} -> {new_width}x{new_height}")
+        Device.get_image_utils().shrink_image_if_needed(image_file,image_file,target_width, target_height)

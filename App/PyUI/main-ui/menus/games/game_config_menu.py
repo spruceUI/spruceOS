@@ -60,10 +60,10 @@ class GameConfigMenu:
 
         if(ControllerInput.X == input or ControllerInput.Y == input):
             if(contains_override):
-                PyUiLogger.get_logger().info(f"Removing override core for {rom_file_path}")
+                PyUiLogger.get_logger().info(f"Removing override {entry_name} for {rom_file_path}")
                 remove_override(entry_name,rom_file_path)
             else:
-                PyUiLogger.get_logger().info(f"Updating override core for {rom_file_path} to {current_value}")
+                PyUiLogger.get_logger().info(f"Updating override {entry_name} for {rom_file_path} to {current_value}")
                 update_override(entry_name,rom_file_path, current_value)
         else:
             if(ControllerInput.DPAD_LEFT == input):
@@ -76,7 +76,7 @@ class GameConfigMenu:
                     selected_index = 0
             elif(ControllerInput.A == input):
                 #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-                selected_index = self.get_selected_index("Select a Core", all_options)
+                selected_index = self.get_selected_index(f"Select a {entry_name}", all_options)
 
             PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -85,7 +85,7 @@ class GameConfigMenu:
                     PyUiLogger.get_logger().info(f"Updating override to {all_options[selected_index]}")
                     update_override(entry_name,rom_file_path, all_options[selected_index])
                 else:
-                    PyUiLogger.get_logger().info(f"Updating core to {all_options[selected_index]}")
+                    PyUiLogger.get_logger().info(f"Updating {entry_name} to {all_options[selected_index]}")
                     update_value(entry_name, all_options[selected_index])
 
     def run_launch_option(self, input_value, launch_option):

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import subprocess
 
 from games.utils.game_entry import GameEntry
+from utils.image_utils import ImageUtils
 
 class AbstractDevice(ABC):
  
@@ -271,7 +272,19 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def shrink_text_if_needed(self, text):
+    def get_text_width_measurement_multiplier(self):
+        pass
+
+    @abstractmethod
+    def max_texture_width(self):
+        pass
+
+    @abstractmethod
+    def max_texture_height(self):
+        pass
+
+    @abstractmethod
+    def get_guaranteed_safe_max_text_char_count(self):
         pass
 
     @abstractmethod
@@ -300,5 +313,9 @@ class AbstractDevice(ABC):
 
     @abstractmethod
     def supports_popup_menu(self):
+        pass
+
+    @abstractmethod
+    def get_image_utils(self) -> ImageUtils:
         pass
 

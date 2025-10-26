@@ -45,7 +45,8 @@ class ViewCreator:
                     carousel_shrink_further_away=None,
                     carousel_sides_hang_off_edge=None,
                     missing_image_path=None,
-                    allow_scrolling_text=False) -> object:
+                    allow_scrolling_text=False,
+                    full_screen_grid_resize_type=None) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -202,7 +203,8 @@ class ViewCreator:
                     selected_index=selected_index,
                     show_grid_text=show_grid_text,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
-                    missing_image_path=missing_image_path
+                    missing_image_path=missing_image_path,
+                    resize_type=full_screen_grid_resize_type
                 )
             case ViewType.CAROUSEL:
                 return CarouselView(

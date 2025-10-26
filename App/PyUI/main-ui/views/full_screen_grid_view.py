@@ -9,6 +9,7 @@ from display.resize_type import ResizeType
 from display.y_render_option import YRenderOption
 from controller.controller import Controller
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -19,11 +20,15 @@ class FullScreenGridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], selected_bg: str = None,
                  selected_index=0, show_grid_text=True,
                  set_top_bar_text_to_selection=False, 
-                 unselected_bg = None, missing_image_path=None):
+                 unselected_bg = None, missing_image_path=None,
+                 resize_type = ResizeType.ZOOM):
         super().__init__()
         self.resized_width = int(Device.screen_width() * 1.0)
         self.resized_height = int(Device.screen_height() * 0.75)
-        self.resize_type = ResizeType.ZOOM
+        self.resize_type = resize_type
+        if(self.resize_type is None):
+            self.resize_type = ResizeType.ZOOM
+
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.options: List[GridOrListEntry] = options
@@ -144,7 +149,7 @@ class FullScreenGridView(View):
                                    render_mode=render_mode,
                                    target_width=target_width,
                                    target_height=target_height,
-                                   resize_type=resize_type)
+                                   resize_type=resize_type,)
         
         if(w == 0):
             w,h = Display.render_image(image_path=self.missing_image_path,
@@ -162,7 +167,11 @@ class FullScreenGridView(View):
         image_path = imageTextPair.get_image_path_selected() 
         primary_text = imageTextPair.get_primary_text_long()
         secondary_text = imageTextPair.get_description()
-        render_mode = RenderMode.TOP_LEFT_ALIGNED
+        if(self.resize_type is ResizeType.FIT):
+            render_mode = RenderMode.TOP_CENTER_ALIGNED
+            x_offset += Device.screen_width() // 2
+        else:
+            render_mode = RenderMode.TOP_LEFT_ALIGNED
         
         self._render_primary_image( image_path,
                                     x_offset,
@@ -172,7 +181,7 @@ class FullScreenGridView(View):
                                     target_height=self.resized_height,
                                     resize_type=self.resize_type)
         
-        if(render_text_overlay):
+        if(render_text_overlay and not self.set_top_bar_text_to_selection):
             self._render_shadowed_text(primary_text, Device.screen_height() * 0.68, FontPurpose.SHADOWED_BACKDROP, FontPurpose.SHADOWED, 25,text_alpha)
             self._render_shadowed_text(secondary_text, Device.screen_height() * 0.78, FontPurpose.SHADOWED_BACKDROP_SMALL, FontPurpose.SHADOWED_SMALL, 27,text_alpha)
         

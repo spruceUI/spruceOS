@@ -9,6 +9,7 @@ import sdl2
 from utils import throttle
 
 from utils.config_copier import ConfigCopier
+from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(TrimUIDevice):
@@ -105,3 +106,6 @@ class TrimUIBrick(TrimUIDevice):
 
     def supports_hue_calibration(self):
         return True
+
+    def get_image_utils(self):
+        return PilImageUtils()
