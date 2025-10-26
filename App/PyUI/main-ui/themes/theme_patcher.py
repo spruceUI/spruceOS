@@ -12,7 +12,7 @@ class ThemePatcher():
     # Add properties you want to scale (case-sensitive)
     SCALABLE_KEYS = {"grid1x4","grid3x4","FontSize","gameSelectImgWidth","gameSelectImgHeight","gridGameSelectImgWidth",
                      "gridGameSelectImgHeight","listGameSelectImgWidth","listGameSelectImgHeight","gridMultiRowSelBgResizePadWidth",
-                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad"}
+                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset"}
 
     @classmethod
     def patch_theme(cls, path, target_width, target_height):
