@@ -39,15 +39,15 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 [System]
-<Developer> <Designer>
-"" "Reapply Developer/Designer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
+<Developer>
+"" "Reapply Developer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
 
 <Not_simple>
 "" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
 @"Spruce will check periodically on startup"
 
 <Not_simple>
-"" "Run application on boot:" "MainUI|Random|Switcher|Splore" "MainUI|Random|Switcher|Splore" "$HELP$ get boot_to 'MainUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
+"" "Run application on boot:" "spruceUI|Random|Switcher|Splore" "spruceUI|Random|Switcher|Splore" "$HELP$ get boot_to 'spruceUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
 @"Will apply on next boot"
 
 <Not_simple>
@@ -80,18 +80,11 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 <Not_simple>
 "" "Show battery percentage" "|" "on|off" "$HELP$ check show_battery_percent" "$HELP$ update show_battery_percent _VALUE_" ""
 
-<Not_simple>
-"" "Enable Recents in main menu" "|" "on|off" "$HELP$ check recentsTile" "$RECENTS$ _VALUE_" ""
-
 "" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
 @"For system notifications"
 
 <A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
-
-<Not_simple>
-"" "Sort Themes" "|" "run|off" "echo -n off" "$SORT_THEMES$|" "$SORT_THEMES$ _INDEX_"
-@"Use this to re-sort themes alphabetically."
 
 <Not_simple>
 "" "Allow a reinstall" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
@@ -116,7 +109,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 @"Excludes NDS, PICO8 & ports"
 
 <Not_simple>
-"" "Home opens RA menu" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
+"" "Home opens RA menu directly" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
 <Not_simple>
@@ -156,10 +149,6 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 <Pico>
 "" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
-
-<Not_simple>
-"" "Enable Fake08 to play PNGs" "|" "on|off" "$HELP$ check fake08_allow_png" "$HELP$ update fake08_allow_png _VALUE_ && $F8_PNG$ _VALUE_" ""
-@"Also uses cart as box art for Fake08"
 
 <Not_simple>
 "" "Reset RetroArch hotkeys" "|" "run|off" "echo -n off" "$RESET_RAHOTKEY$|" "$RESET_RAHOTKEY$ _INDEX_"

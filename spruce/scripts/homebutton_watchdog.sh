@@ -467,7 +467,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         ;;
     # R2 take screenshot
     *"key $B_R2 1"*)
-        if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode" || flag_check "designer_mode"; }; then
+        if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode"; }; then
             take_screenshot
         fi
         ;;

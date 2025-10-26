@@ -55,10 +55,6 @@ if flag_check "developer_mode"; then
     MODES="$MODES -m Developer"
 fi
 
-if flag_check "designer_mode"; then
-    MODES="$MODES -m Designer"
-fi
-
 PICO_DIR="/mnt/SDCARD/Emu/PICO8/bin"
 BIOS_DIR="/mnt/SDCARD/BIOS"
 if [ -f "$PICO_DIR/pico8.dat" ] || [ -f "$BIOS_DIR/pico8.dat" ]; then
@@ -69,11 +65,6 @@ if flag_check "simple_mode"; then
     MODES="$MODES -m Simple"
 else
     MODES="$MODES -m Not_simple"
-fi
-
-# Not currently in use, but leaving it here in case we wanna bring it back eventually
-if [ "$($HELPER_PATH check expert_settings)" = "on" ] && ! flag_check "simple_mode"; then
-    MODES="$MODES -m Expert"
 fi
 
 # Add a mode based on which device spruce is running on
