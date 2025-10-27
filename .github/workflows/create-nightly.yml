@@ -80,6 +80,8 @@ jobs:
           rm -f spruce/flip/muOS-pixie-reduced.sqsh
           cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
           rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
+          cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
+          rm -f spruce/flip/scummvm_libretro.so.part*
 
       - name: Create 7z archive
         run: |
