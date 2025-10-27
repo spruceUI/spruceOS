@@ -22,5 +22,7 @@
   "sortOrder": 1200,
   "brand": "modernengine",
   "type": "Other",
-  "releaseYear": 2016
+  "releaseYear": 2016,
+  "default_emulator": "chailove",
+  "scaling_min_freq": 1008000
 }

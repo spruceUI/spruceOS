@@ -22,5 +22,7 @@
   "sortOrder": 6300,
   "brand": "Nintendo",
   "type": "homeconsole",
-  "releaseYear": 1996
+  "releaseYear": 1996,
+  "default_emulator": "snes9x",
+  "scaling_min_freq": 816000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 6800,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 2010
+  "releaseYear": 2010,
+  "default_emulator": "tic80",
+  "scaling_min_freq": 816000
 }

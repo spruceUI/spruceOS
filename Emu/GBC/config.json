@@ -32,5 +32,7 @@
   "sortOrder": 2900,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 1998
+  "releaseYear": 1998,
+  "default_emulator": "gambatte",
+  "scaling_min_freq": 312000
 }

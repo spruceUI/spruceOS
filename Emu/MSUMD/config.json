@@ -22,5 +22,7 @@
   "sortOrder": 3700,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1991
+  "releaseYear": 1991,
+  "default_emulator": "genesis_plus_gx",
+  "scaling_min_freq": 816000
 }

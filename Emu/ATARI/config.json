@@ -22,5 +22,7 @@
   "sortOrder": 500,
   "brand": "Atari",
   "type": "homeconsole",
-  "releaseYear": 1977
+  "releaseYear": 1977,
+  "default_emulator": "stella2014",
+  "scaling_min_freq": 408000
 }

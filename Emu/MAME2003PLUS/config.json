@@ -22,5 +22,7 @@
   "sortOrder": 3200,
   "brand": "modernengine",
   "type": "arcade",
-  "releaseYear": 2003
+  "releaseYear": 2003,
+  "default_emulator": "mame2003_plus",
+  "scaling_min_freq": 816000
 }

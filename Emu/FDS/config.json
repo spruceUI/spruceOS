@@ -31,5 +31,7 @@
   "sortOrder": 2400,
   "brand": "Nintendo",
   "type": "homeconsole",
-  "releaseYear": 1986
+  "releaseYear": 1986,
+  "default_emulator": "fceumm",
+  "scaling_min_freq": 408000
 }

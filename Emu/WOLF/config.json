@@ -22,5 +22,7 @@
   "sortOrder": 7500,
   "brand": "Other",
   "type": "pc",
-  "releaseYear": 1992
+  "releaseYear": 1992,
+  "default_emulator": "ecwolf",
+  "scaling_min_freq": 480000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 6900,
   "brand": "General Consumer Electronics",
   "type": "homeconsole",
-  "releaseYear": 1982
+  "releaseYear": 1982,
+  "default_emulator": "vecx",
+  "scaling_min_freq": 408000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 6500,
   "brand": "Watara",
   "type": "handheld",
-  "releaseYear": 1992
+  "releaseYear": 1992,
+  "default_emulator": "potator",
+  "scaling_min_freq": 240000
 }

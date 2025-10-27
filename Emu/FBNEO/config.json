@@ -22,5 +22,7 @@
   "sortOrder": 2300,
   "brand": "modernengine",
   "type": "arcade",
-  "releaseYear": 2003
+  "releaseYear": 2003,
+  "default_emulator": "fbneo",
+  "scaling_min_freq": 816000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 4600,
   "brand": "Magnavox",
   "type": "homeconsole",
-  "releaseYear": 1972
+  "releaseYear": 1972,
+  "default_emulator": "o2em",
+  "scaling_min_freq": 480000
 }

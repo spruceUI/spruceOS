@@ -30,5 +30,7 @@
   "sortOrder": 1800,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1998
+  "releaseYear": 1998,
+  "default_emulator": "flycast",
+  "scaling_min_freq": 1008000
 }

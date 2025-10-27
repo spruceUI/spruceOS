@@ -22,5 +22,7 @@
   "sortOrder": 2500,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 1980
+  "releaseYear": 1980,
+  "default_emulator": "gw",
+  "scaling_min_freq": 480000
 }

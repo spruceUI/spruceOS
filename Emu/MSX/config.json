@@ -31,5 +31,7 @@
   "sortOrder": 3800,
   "brand": "Misc",
   "type": "pc",
-  "releaseYear": 1983
+  "releaseYear": 1983,
+  "default_emulator": "bluemsx",
+  "scaling_min_freq": 408000
 }

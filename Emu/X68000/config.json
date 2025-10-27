@@ -22,5 +22,7 @@
   "sortOrder": 7600,
   "brand": "Sharp",
   "type": "pc",
-  "releaseYear": 1987
+  "releaseYear": 1987,
+  "default_emulator": "px68k",
+  "scaling_min_freq": 816000
 }

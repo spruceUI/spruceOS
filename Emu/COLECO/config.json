@@ -31,5 +31,7 @@
   "sortOrder": 1400,
   "brand": "Coleco",
   "type": "homeconsole",
-  "releaseYear": 1982
+  "releaseYear": 1982,
+  "default_emulator": "bluemsx",
+  "scaling_min_freq": 480000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 5700,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "picodrive",
+  "scaling_min_freq": 816000
 }

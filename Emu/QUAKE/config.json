@@ -22,5 +22,7 @@
   "sortOrder": 5300,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 1996
+  "releaseYear": 1996,
+  "default_emulator": "tyrquake",
+  "scaling_min_freq": 816000
 }

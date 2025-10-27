@@ -37,5 +37,7 @@
   "sortOrder": 4800,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 2015
+  "releaseYear": 2015,
+  "default_emulator": "mednafen_pce_fast",
+  "scaling_min_freq": 816000
 }

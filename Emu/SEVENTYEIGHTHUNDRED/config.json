@@ -22,5 +22,7 @@
   "sortOrder": 700,
   "brand": "Atari",
   "type": "homeconsole",
-  "releaseYear": 1986
+  "releaseYear": 1986,
+  "default_emulator": "prosystem",
+  "scaling_min_freq": 480000
 }

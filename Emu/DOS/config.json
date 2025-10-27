@@ -22,5 +22,7 @@
   "sortOrder": 3500,
   "brand": "Microsoft",
   "type": "pc",
-  "releaseYear": 1981
+  "releaseYear": 1981,
+  "default_emulator": "dosbox_pure",
+  "scaling_min_freq": 816000
 }

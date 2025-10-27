@@ -22,5 +22,7 @@
   "sortOrder": 5100,
   "brand": "Sony",
   "type": "handheld",
-  "releaseYear": 2004
+  "releaseYear": 2004,
+  "default_emulator": "standalone",
+  "scaling_min_freq": 1008000
 }

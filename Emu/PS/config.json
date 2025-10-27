@@ -31,5 +31,7 @@
   "sortOrder": 5200,
   "brand": "Sony",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "pcsx_rearmed",
+  "scaling_min_freq": 1008000
 }

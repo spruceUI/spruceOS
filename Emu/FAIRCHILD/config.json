@@ -22,5 +22,7 @@
   "sortOrder": 1300,
   "brand": "Fairchild",
   "type": "homeconsole",
-  "releaseYear": 1976
+  "releaseYear": 1976,
+  "default_emulator": "freechaf",
+  "scaling_min_freq": 480000
 }

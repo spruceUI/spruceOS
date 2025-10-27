@@ -22,5 +22,7 @@
   "sortOrder": 6400,
   "brand": "NEC",
   "type": "homeconsole",
-  "releaseYear": 1989
+  "releaseYear": 1989,
+  "default_emulator": "mednafen_supergrafx",
+  "scaling_min_freq": 816000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 7100,
   "brand": "Phillips",
   "type": "homeconsole",
-  "releaseYear": 1983
+  "releaseYear": 1983,
+  "default_emulator": "o2em",
+  "scaling_min_freq": 408000
 }

@@ -10,5 +10,7 @@
   "sortOrder": 3300,
   "brand": "Misc",
   "type": "mediaplayer",
-  "releaseYear": 9999
+  "releaseYear": 9999,
+  "default_emulator": "ffplay",
+  "scaling_min_freq": 816000
 }

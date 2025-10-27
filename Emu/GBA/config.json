@@ -31,5 +31,7 @@
   "sortOrder": 2800,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 2001
+  "releaseYear": 2001,
+  "default_emulator": "mgba",
+  "scaling_min_freq": 816000
 }

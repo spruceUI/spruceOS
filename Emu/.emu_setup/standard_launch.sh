@@ -22,69 +22,9 @@ export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 ##### GENERAL FUNCTIONS #####
 
 use_default_emulator() {
-
-	case "$EMU_NAME" in
-		"AMIGA")			default_core="uae4arm";;
-		"ARCADE"|"FBNEO")	default_core="fbneo";;
-		"ARDUBOY")			default_core="ardens";;
-		"ATARI")			default_core="stella2014";;
-		"ATARIST")			default_core="hatari";;
-		"CHAI")				default_core="chailove";;
-		"COLECO"|"MSX")		default_core="bluemsx";;
-		"COMMODORE")		default_core="vice_x64";;
-		"CPC")				default_core="cap32";;
-		"CPS1"|"CPS2"|"CPS3"|"NEOGEO")	default_core="fbalpha2012";;
-		"DC")				default_core="flycast";;
-		"DOOM")				default_core="prboom";;
-		"DOS")				default_core="dosbox_pure";;
-		"EASYRPG")			default_core="easyrpg";;
-		"EIGHTHUNDRED")		default_core="atari800";;
-		"FAIRCHILD")		default_core="freechaf";;
-		"FAKE08")			default_core="fake08";;
-		"FC"|"FDS")			default_core="fceumm";;
-		"FIFTYTWOHUNDRED")	default_core="a5200";;
-		"GAMETANK")			default_core="gametank";;
-		"GB"|"GBC")			default_core="gambatte";;
-		"GBA"|"SGB")		default_core="mgba";;
-		"GG"|"MS"|"MSUMD"|"SEGASGONE")	default_core="genesis_plus_gx";;
-		"GW")				default_core="gw";;
-		"INTELLIVISION")	default_core="freeintv";;
-		"LYNX")				default_core="handy";;
-		"MAME2003PLUS")		default_core="mame2003_plus";;
-		"MD"|"SEGACD"|"THIRTYTWOX")	default_core="picodrive";;
-		"MEGADUCK")			default_core="sameduck";;
-		"MSU1"|"SATELLAVIEW"|"SUFAMI")	default_core="snes9x";;
-		"N64")				default_core="km_ludicrousn64_2k22_xtreme_amped";;
-		"NDS")				default_core="DraStic-original";;
-		"NEOCD")			default_core="neocd";;
-		"NGP"|"NGPC")		default_core="mednafen_ngp";;
-		"ODYSSEY"|"VIDEOPAC")	default_core="o2em";;
-		"PCE"|"PCECD")		default_core="mednafen_pce_fast";;
-		"POKE")				default_core="pokemini";;
-		"PS")				default_core="pcsx_rearmed";;
-		"PSP")				default_core="PPSSPP-standalone";;
-		"QUAKE")			default_core="tyrquake";;
-		"SATURN")			default_core="yabasanshiro";;
-		"SCUMMVM")			default_core="scummvm";;
-		"SEVENTYEIGHTHUNDRED")	default_core="prosystem";;
-		"SFC")				default_core="chimerasnes";;
-		"SGFX")				default_core="mednafen_supergrafx";;
-		"SUPERVISION")		default_core="potator";;
-		"TIC")				default_core="tic80";;
-		"VB")				default_core="mednafen_vb";;
-		"VECTREX")			default_core="vecx";;
-		"VIC20")			default_core="vice_xvic";;
-		"WOLF")				default_core="ecwolf";;
-		"WS"|"WSC")			default_core="mednafen_wswan";;
-		"X68000")			default_core="px68k";;
-		"ZXS")				default_core="fuse";;
-		*)					default_core="";;
-	esac
-
-	export CORE="$default_core"
+	export CORE="$(jq -r '.default_emulator' "$EMU_JSON_PATH")"
 	log_message "Using default core of $CORE to run $EMU_NAME"
 }
-
 
 get_core_override() {
 	local core_override="$(jq -r --arg game "$GAME" '.menuOptions.Emulator.overrides[$game]' "$EMU_JSON_PATH")"
@@ -110,6 +50,7 @@ set_cpu_mode() {
 	fi
 
 	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
+		export scaling_min_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 	fi
 }

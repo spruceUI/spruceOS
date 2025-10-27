@@ -23,5 +23,7 @@
   "sortOrder": 2100,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 2008
+  "releaseYear": 2008,
+  "default_emulator": "easyrpg",
+  "scaling_min_freq": 480000
 }

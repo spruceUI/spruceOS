@@ -27,5 +27,7 @@
   "sortOrder": 6700,
   "brand": "NEC",
   "type": "homeconsole",
-  "releaseYear": 1988
+  "releaseYear": 1988,
+  "default_emulator": "mednafen_pce_fast",
+  "scaling_min_freq": 816000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 600,
   "brand": "Atari",
   "type": "homeconsole",
-  "releaseYear": 1982
+  "releaseYear": 1982,
+  "default_emulator": "a5200",
+  "scaling_min_freq": 312000
 }

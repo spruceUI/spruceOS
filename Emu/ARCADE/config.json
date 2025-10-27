@@ -32,5 +32,7 @@
   "sortOrder": 300,
   "brand": "Arcade",
   "type": "arcade",
-  "releaseYear": 1971
+  "releaseYear": 1971,
+  "default_emulator": "fbneo",
+  "scaling_min_freq": 816000
 }

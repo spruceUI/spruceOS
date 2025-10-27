@@ -22,5 +22,7 @@
   "sortOrder": 7200,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 1995
+  "releaseYear": 1995,
+  "default_emulator": "mednafen_vb",
+  "scaling_min_freq": 816000
 }

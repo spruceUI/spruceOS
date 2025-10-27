@@ -22,5 +22,7 @@
   "sortOrder": 4900,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 2001
+  "releaseYear": 2001,
+  "default_emulator": "pokemini",
+  "scaling_min_freq": 408000
 }

@@ -22,5 +22,7 @@
   "sortOrder": 7700,
   "brand": "Sinclair",
   "type": "homeconsole",
-  "releaseYear": 1982
+  "releaseYear": 1982,
+  "default_emulator": "fuse",
+  "scaling_min_freq": 408000
 }

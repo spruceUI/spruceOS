@@ -31,5 +31,7 @@
   "sortOrder": 100,
   "brand": "Commodore",
   "type": "pc",
-  "releaseYear": 1985
+  "releaseYear": 1985,
+  "default_emulator": "uae4arm",
+  "scaling_min_freq": 816000
 }

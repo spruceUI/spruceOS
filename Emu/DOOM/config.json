@@ -22,5 +22,7 @@
   "sortOrder": 2000,
   "brand": "idSoftware",
   "type": "modernengine",
-  "releaseYear": 1995
+  "releaseYear": 1995,
+  "default_emulator": "prboom",
+  "scaling_min_freq": 480000
 }

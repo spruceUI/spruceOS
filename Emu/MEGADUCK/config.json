@@ -22,5 +22,7 @@
   "sortOrder": 3400,
   "brand": "Welback",
   "type": "handheld",
-  "releaseYear": 1993
+  "releaseYear": 1993,
+  "default_emulator": "sameduck",
+  "scaling_min_freq": 1008000
 }

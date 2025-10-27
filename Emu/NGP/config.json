@@ -31,5 +31,7 @@
   "sortOrder": 4400,
   "brand": "SNK",
   "type": "handheld",
-  "releaseYear": 1998
+  "releaseYear": 1998,
+  "default_emulator": "mednafen_ngp",
+  "scaling_min_freq": 408000
 }

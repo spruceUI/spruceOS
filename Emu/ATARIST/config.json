@@ -22,5 +22,7 @@
   "sortOrder": 1000,
   "brand": "Atari",
   "type": "homeconsole",
-  "releaseYear": 1985
+  "releaseYear": 1985,
+  "default_emulator": "hatari",
+  "scaling_min_freq": 480000
 }

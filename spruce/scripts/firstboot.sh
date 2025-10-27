@@ -24,9 +24,6 @@ log_message "First boot flag detected"
 log_message "Running developer mode check" -v
 /mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
 
-log_message "Running emu_setup.sh"
-/mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
-
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
@@ -66,6 +63,14 @@ mkdir -p /mnt/SDCARD/Persistent/
 
 if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
   mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster
+fi
+
+# create splore launcher if it doesn't already exist
+SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
+if [ ! -f "$SPLORE_CART" ]; then
+	touch "$SPLORE_CART" && log_message "firstboot.sh: created $SPLORE_CART"
+else
+	log_message "firstboot.sh: $SPLORE_CART already found."
 fi
 
 log_message "Displaying enjoy image"

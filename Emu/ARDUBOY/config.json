@@ -22,5 +22,7 @@
   "sortOrder": 400,
   "brand": "other",
   "type": "handheld",
-  "releaseYear": 2014
+  "releaseYear": 2014,
+  "default_emulator": "ardens",
+  "scaling_min_freq": 816000
 }

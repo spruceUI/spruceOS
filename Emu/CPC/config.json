@@ -31,5 +31,7 @@
   "sortOrder": 200,
   "brand": "Amstrad",
   "type": "pc",
-  "releaseYear": 1984
+  "releaseYear": 1984,
+  "default_emulator": "cap32",
+  "scaling_min_freq": 816000
 }

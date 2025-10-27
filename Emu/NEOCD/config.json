@@ -27,5 +27,7 @@
   "sortOrder": 4100,
   "brand": "SNK",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "neocd",
+  "scaling_min_freq": 1008000
 }

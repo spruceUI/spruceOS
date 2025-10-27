@@ -31,5 +31,7 @@
   "sortOrder": 5500,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "yabasanshiro",
+  "scaling_min_freq": 1008000
 }

@@ -31,5 +31,7 @@
   "sortOrder": 1600,
   "brand": "Capcom",
   "type": "arcade",
-  "releaseYear": 1993
+  "releaseYear": 1993,
+  "default_emulator": "fbalpha2012",
+  "scaling_min_freq": 816000
 }

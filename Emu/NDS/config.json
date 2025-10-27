@@ -21,18 +21,23 @@
     },
     "Emulator": {
       "display": "Emulator",
-      "devices": ["MIYOO_FLIP", "TRIMUI_BRICK"],
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_BRICK"
+      ],
       "options": [
         "DraStic-original",
         "DraStic-Steward",
         "DraStic-trngaje"
       ],
-      "selected": "drastic-original",
+      "selected": "DraStic-original",
       "overrides": {}
     }
   },
   "sortOrder": 4000,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 2004
+  "releaseYear": 2004,
+  "default_emulator": "DraStic-original",
+  "scaling_min_freq": 816000
 }

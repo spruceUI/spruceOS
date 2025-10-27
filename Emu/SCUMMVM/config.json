@@ -22,5 +22,7 @@
   "sortOrder": 5600,
   "brand": "modernengine",
   "type": "pc",
-  "releaseYear": 2001
+  "releaseYear": 2001,
+  "default_emulator": "scummvm",
+  "scaling_min_freq": 816000
 }
