@@ -10,20 +10,20 @@
     {
       "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
   "sortOrder": 3900,
   "brand": "Nintendo",
   "type": "homeconsole",
