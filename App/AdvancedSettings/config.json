@@ -2,5 +2,6 @@
   "label": "Advanced Settings",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/menuswitch.png",
   "launch": "launch.sh",
-  "description": "Change spruce configurations and apps"
+  "description": "Change spruce configurations and apps",
+  "hide": false
 }

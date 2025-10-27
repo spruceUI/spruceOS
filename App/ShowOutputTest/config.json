@@ -2,5 +2,6 @@
   "#label": "Show Output Test",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/menuswitch.png",
   "launch": "launch.sh",
-  "description": "Demo Program for ShowOutput Binary"
+  "description": "Demo Program for ShowOutput Binary",
+  "hide": true
 }

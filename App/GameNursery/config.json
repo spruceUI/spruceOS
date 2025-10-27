@@ -2,5 +2,6 @@
   "label": "Game Nursery",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/iconfresh.png",
   "launch": "launch.sh",
-  "description": "Download free games directly to your device"
+  "description": "Download free games directly to your device",
+  "hide": false
 }

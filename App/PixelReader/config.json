@@ -2,5 +2,6 @@
   "label": "E-Reader",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/ereader.png",
   "launch": "launch.sh",
-  "description": "Read Ebooks on your device"
+  "description": "Read Ebooks on your device",
+  "hide": false
 }
