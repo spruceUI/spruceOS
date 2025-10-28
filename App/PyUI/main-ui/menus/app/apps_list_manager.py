@@ -13,10 +13,6 @@ class AppEntry:
     launch: str
     hidden: bool
 
-    def __init__(self, app_config: AppConfig, hidden: bool = False):
-        self.launch = app_config.get_launch()
-        self.hidden = hidden
-
     def __init__(self, launch: str, hidden: bool = False):
         self.launch = launch
         self.hidden = hidden
@@ -28,7 +24,7 @@ class AppListManager():
         self.load_from_file()
 
     def _add_app(self, app_config: AppConfig):
-        new_entry = AppEntry(app_config)
+        new_entry = AppEntry(app_config.get_launch())
         if not (any(existing.launch == new_entry.launch for existing in self._entries)):
             self._entries.insert(0, new_entry)
 
@@ -36,10 +32,10 @@ class AppListManager():
 
     def save_to_file(self):
         try:
-            with open(self.entries_file, 'w') as f:
+            with open(self.entries_file, 'w') as outfile:
                 json.dump(
-                    [f.__dict__ for f in self._entries],
-                    f,
+                    [entry.__dict__ for entry in self._entries],
+                    outfile,
                     indent=4
                 )
         except Exception as e:

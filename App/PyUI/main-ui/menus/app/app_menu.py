@@ -42,9 +42,10 @@ class AppMenu:
         return self.get_first_existing_path(icon_priority)
     
     def save_app_selection(self, selected):
-        filepath = selected.get_selection().get_value().get_launch()
-        directory = selected.get_selection().get_value().get_folder()
-        PyUiState.set_last_app_selection(directory,filepath)
+        if(selected.get_selection() is not None):
+            filepath = selected.get_selection().get_value().get_launch()
+            directory = selected.get_selection().get_value().get_folder()
+            PyUiState.set_last_app_selection(directory,filepath)
 
     def run_app_selection(self) :
         running = True
@@ -103,7 +104,10 @@ class AppMenu:
                         running = False
                 elif(ControllerInput.MENU == selected.get_input()):
                     self.save_app_selection(selected)
-                    self.show_all_apps = AppMenuPopup(self.show_all_apps).run_app_menu_popup(selected.get_selection().get_value())
+                    if(selected.get_selection()):
+                        self.show_all_apps = AppMenuPopup(self.show_all_apps).run_app_menu_popup(selected.get_selection().get_value())
+                    else:
+                        self.show_all_apps = AppMenuPopup(self.show_all_apps).run_app_menu_popup(None)
                 elif(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):
                     self.save_app_selection(selected)
                     self.save_app_selection(selected)
