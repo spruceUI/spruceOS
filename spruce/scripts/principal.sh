@@ -113,7 +113,7 @@ while [ 1 ]; do
                 killall -q -USR1 joystickinput
                 touch /tmp/fbdisplay_exit
                 cat /dev/zero > /dev/fb0
-                export PYSDL2_DLL_PATH="/usr/miyoo/lib"
+                export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/a30/sdl2"
                 export LD_LIBRARY_PATH="/usr/miyoo/lib"
                 /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" >> /dev/null 2>&1
 

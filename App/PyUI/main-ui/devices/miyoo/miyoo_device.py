@@ -242,7 +242,10 @@ class MiyooDevice(DeviceCommon):
     
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
-    
+        
+    def get_apps_config_path(self):
+        return "/mnt/SDCARD/Saves/pyui-apps.json"
+
     def get_collections_path(self):
         return "/mnt/SDCARD/Collections/"
     
