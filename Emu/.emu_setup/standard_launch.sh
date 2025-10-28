@@ -16,8 +16,17 @@ export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
-export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
+
+if [ "$EMU_NAME" = "DC" ]; then
+	if [ "$PLATFORM" = "A30" ]; then
+		export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
+	else
+		export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
+	fi
+else
+	export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
+fi
 
 ##### GENERAL FUNCTIONS #####
 
@@ -725,8 +734,11 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
 	"DC")
-		if [ "$CORE" = "flycast_xtreme" ] && [ ! "$PLATFORM" = "A30" ]; then
+		if [ "$CORE" = "Flycast-standalone" ]; then
 			run_flycast_standalone
+		elif [ ! "$PLATFORM" = "A30" ]; then
+			export CORE="flycast"
+			run_retroarch
 		else
 			run_retroarch
 		fi
