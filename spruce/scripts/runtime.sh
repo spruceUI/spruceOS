@@ -375,9 +375,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
         done
     done
 
-    # mask stock USB file transfer app
-    mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
-
     # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
     mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
