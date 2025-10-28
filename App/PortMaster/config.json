@@ -1,6 +1,6 @@
 {
   "label": "PortMaster",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/portmaster.png",
+  "icon": "portmaster.png",
   "launch": "launch.sh",
   "description": "PortMaster Menu"
 }

@@ -1,6 +1,6 @@
 {
   "#label": "BitPal",
-  "icon": "/mnt/SDCARD/Updater/imgs/recents.png",
+  "icon": "recents.png",
   "launch": "launch.sh",
   "description": "Play with your bits!"
 }

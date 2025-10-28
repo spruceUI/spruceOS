@@ -1,6 +1,6 @@
 {
   "label": "Boxart Scraper",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/scraper.png",
+  "icon": "scraper.png",
   "launch": "launch.sh",
   "description": "Scrape game boxart"
 }
