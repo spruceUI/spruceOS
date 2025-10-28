@@ -4,7 +4,6 @@ $FLAGS=/mnt/SDCARD/spruce/flags$
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
 # Function specific scripts
-$F8_PNG=/mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh$
 $BOOT_TO=/mnt/SDCARD/spruce/scripts/applySetting/bootAction.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $GENESIS_PLUS_GX_WIDE=/mnt/SDCARD/spruce/scripts/applySetting/genesisPlusGXWide.sh$
@@ -18,7 +17,6 @@ $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh
 $RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
 $RAREWIND=/mnt/SDCARD/spruce/scripts/applySetting/retroArchRewind.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
-$RECENTS=/mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh$
 $RUMBLE=/mnt/SDCARD/spruce/scripts/applySetting/rumbleIntensity.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SETTINGS=/mnt/SDCARD/spruce/settings$
@@ -36,7 +34,6 @@ $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
 $SIMPLE_MODE=/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh$
 $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
-$SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 [System]
 <Developer>
@@ -59,7 +56,7 @@ $SORT_THEMES=/mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh$
 
 <Not_simple>
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown '_VALUE_'" ""
-@"Excludes ports
+@"Excludes ports"
 
 <Not_simple>
 "" "Low power warning percent" "Off|4|8|12|16|20" "Off|4|8|12|16|20" "$HELP$ get low_power_warning_percent 4" "$HELP$ update low_power_warning_percent '_VALUE_'" ""

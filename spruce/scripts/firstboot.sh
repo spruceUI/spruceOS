@@ -30,15 +30,6 @@ log_message "Running emu_setup.sh"
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
-log_message "Sorting themes"
-sh /mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh
-
-# restore fake08 extlist and imgpath modification if needed
-if setting_get "fake08_allow_png"; then
-    log_message "restoring fake08_allow_png setting"
-    /mnt/SDCARD/spruce/scripts/applySetting/fake08_allow_png.sh on
-fi
-
 sleep 3 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Displaying wiki image"

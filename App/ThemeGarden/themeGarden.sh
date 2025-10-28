@@ -222,18 +222,6 @@ redownload_installed_themes() {
     fi
 }
 
-update_theme_order() {
-    if flag_check "pre_menu_unpacking"; then
-        display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        flag_remove "silentUnpacker"
-        while [ -f "$FLAGS_DIR/pre_menu_unpacking.lock" ]; do
-            : # null operation (no sleep needed)
-        done
-    fi
-    display --icon "$ICON_PATH" -t "Sorting themes..."
-    sh /mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh
-}
-
 # Initial setup
 setup_previews
 
@@ -275,7 +263,6 @@ while true; do
         display_kill
         sh "$UNPACKER"
         flag_remove "silentUnpacker"
-        update_theme_order
         exit 0
         ;;
     "START")
