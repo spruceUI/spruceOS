@@ -166,16 +166,29 @@ class FullScreenGridView(View):
         imageTextPair = self.options[index]
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()
-        secondary_text = imageTextPair.get_description()
+        secondary_text = imageTextPair.get_description()  
+        y_offset = Display.get_top_bar_height(False)
         if(self.resize_type is ResizeType.FIT):
             render_mode = RenderMode.TOP_CENTER_ALIGNED
             x_offset += Device.screen_width() // 2
         else:
-            render_mode = RenderMode.TOP_LEFT_ALIGNED
+            top_aligned = False
+            bottom_aligned = False
+            if(top_aligned):
+                render_mode = RenderMode.TOP_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+            elif(bottom_aligned):
+                render_mode = RenderMode.BOTTOM_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+                y_offset = Device.screen_height() - Display.get_top_bar_height(False)
+            else:
+                render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+                y_offset = Display.get_top_bar_height(False) + (Display.get_usable_screen_height(False))//2
         
         self._render_primary_image( image_path,
                                     x_offset,
-                                    Display.get_top_bar_height(False),
+                                    y_offset,
                                     render_mode,
                                     target_width=self.resized_width,
                                     target_height=self.resized_height,

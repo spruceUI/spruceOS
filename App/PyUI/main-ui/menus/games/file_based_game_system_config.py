@@ -34,6 +34,9 @@ class FileBasedGameSystemConfig():
     def get_launch(self):
         return self._data.get('launch')
 
+    def get_devices(self):
+        return self._data.get('devices', [])
+
     def get_extlist(self):
         return {f".{ext}" for ext in (self._data.get('extlist') or '').lower().split("|") if ext}
 

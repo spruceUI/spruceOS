@@ -141,6 +141,10 @@ class Device:
         return Device._impl.get_collections_path()
 
     @staticmethod
+    def get_apps_config_path():
+        return Device._impl.get_apps_config_path()
+
+    @staticmethod
     def parse_favorites():
         return Device._impl.parse_favorites()
 
@@ -379,4 +383,9 @@ class Device:
     @staticmethod
     def get_device_name():
         return Device._impl.get_device_name()
+
+    @staticmethod
+    def supports_tga():
+        return Device._impl.supports_tga()
+
 

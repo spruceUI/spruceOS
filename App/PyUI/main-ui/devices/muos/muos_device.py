@@ -225,7 +225,10 @@ class MuosDevice(DeviceCommon):
     
     def get_recents_path(self):
         return os.path.join(self.parent_dir,"/pyui-recents.json")
-    
+            
+    def get_apps_config_path(self):
+        return os.path.join(self.parent_dir,"/pyui-apps.json")
+
     def get_collections_path(self):
         return os.path.join(self.parent_dir,"/Collections/")
 
