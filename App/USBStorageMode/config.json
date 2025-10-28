@@ -1,6 +1,6 @@
 {
   "label": "USB Storage Mode",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/app/usb.png",
+  "icon": "usb.png",
   "launch": "launch.sh",
   "description": "Transfer files over USB",
   "hide": false

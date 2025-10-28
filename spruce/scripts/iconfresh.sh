@@ -22,7 +22,6 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 
 	# Paths
 	THEME_SRC="/mnt/SDCARD/Themes/${THEME_PATH}/skin"
-	# What should this be for the brick?
 	DEFAULT_SRC="/mnt/SDCARD/miyoo355/app/skin"
 	CFG="/mnt/SDCARD/Themes/${THEME_PATH}/config.json"
 	DST="/usr/miyoo/bin/skin"
@@ -73,7 +72,6 @@ else
 	fi
 
 	EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
-	APP_BASE_PATH="/mnt/SDCARD/App/"
 
 	case "$PLATFORM" in
 		"A30" )
@@ -109,8 +107,6 @@ else
 
 	DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
 	DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
-	APP_DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/app/"
-	APP_THEME_ICON_PATH="${THEME_PATH}${ICONS}/app/"
 
 	update_emulator_icons() {
 		local CONFIG_FILE=$1
@@ -144,27 +140,6 @@ else
 		sed -i "s|${OLD_ICON_SEL_PATH}|${NEW_ICON_SEL_PATH}|g" "$CONFIG_FILE"
 	}
 
-	update_app_icons() {
-		local CONFIG_FILE=$1
-
-	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-		OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
-	else
-		OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
-	fi
-		ICON_FILE_NAME=$(basename "$OLD_ICON_PATH")
-
-		THEME_APP_ICON_PATH="${APP_THEME_ICON_PATH}${ICON_FILE_NAME}"
-		DEFAULT_APP_ICON_PATH="${APP_DEFAULT_ICON_PATH}${ICON_FILE_NAME}"
-
-		if [ -f "$THEME_APP_ICON_PATH" ]; then
-			NEW_ICON_PATH="$THEME_APP_ICON_PATH"
-		else
-			NEW_ICON_PATH="$DEFAULT_APP_ICON_PATH"
-		fi
-
-		sed -i "s|$OLD_ICON_PATH|$NEW_ICON_PATH|g" "$CONFIG_FILE"
-	}
 
 	update_skin_images() {
 		local ALL_IMAGES_PRESENT=true
@@ -204,13 +179,7 @@ else
 		update_emulator_icons "$CONFIG_FILE"
 	done
 
-	find "$APP_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
-		update_app_icons "$CONFIG_FILE"
-	done
-
 	update_skin_images
-
-	/mnt/SDCARD/spruce/scripts/powerdisplay.sh
 
 	# Only kill images if not in silent mode
 	if [ $silent_mode -eq 0 ]; then

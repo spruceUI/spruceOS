@@ -2,19 +2,25 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-if [ ! "$PLATFORM" = "A30"]; then
+if [ "$PLATFORM" = "A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
+    SET_OR_CSET="set"
+    NAME_QUALIFIER=""
+    AMIXER_CONTROL="'Soft Volume Master'"
+else
     BIN_PATH="/mnt/SDCARD/spruce/bin64"
+    SET_OR_CSET="cset"
+    NAME_QUALIFIER="name="
+    AMIXER_CONTROL="'SPK Volume'"
 fi
-SET_OR_CSET="cset"
-[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
-NAME_QUALIFIER="name="
-[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
-AMIXER_CONTROL="'SPK Volume'"
-[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
+
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+if [ "$PLATFORM" = "SmartPro" ]; then 
+    BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
+else
+    BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+fi
 
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
@@ -56,7 +62,7 @@ if (flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null) &&
 	
     if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
         # If skip_shutdown_confirm is set, proceed directly with shutdown
-        rm "${FLAGS_DIR}/lastgame.lock"
+        flag_remove "lastgame"
         if flag_check "forced_shutdown"; then
             display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
             flag_remove "forced_shutdown"
@@ -100,7 +106,7 @@ pgrep -f "lid_watchdog.sh" | xargs -r kill
 # notify user with led
 echo heartbeat > "$LED_PATH"/trigger
 
-# kill principle and runtime first so no new app / MainUI will be loaded anymore
+# kill principal and runtime first so no new app / MainUI will be loaded anymore
 killall -q -15 runtime.sh
 killall -q -15 principal.sh
 
@@ -114,11 +120,8 @@ if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/E
     rm "${FLAGS_DIR}/lastgame.lock"
 fi
 
-# kill PICO8 if PICO8 is running
-if pgrep "pico8_dyn" >/dev/null; then
-    killall -q -15 pico8_dyn
-    killall -q -15 pico8_64
-fi
+# Kill PICO8 if running
+killall -q -15 pico8_dyn pico8_64
 
 # trigger auto save and send kill signal
 if pgrep -f "PPSSPPSDL" >/dev/null; then

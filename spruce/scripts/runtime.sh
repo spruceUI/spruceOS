@@ -130,13 +130,6 @@ log_message " " -v
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
 
-# Sanitize system JSON if needed
-if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
-    log_message "Runtime: Invalid System JSON detected, sanitizing..."
-    jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/system.json /tmp/system.json.clean
-    mv /tmp/system.json.clean "$SYSTEM_JSON"
-fi
-
 # Use appropriate RA config per platform
 [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
 
@@ -315,14 +308,10 @@ elif [ "$PLATFORM" = "Flip" ]; then
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
     )
 
-    #motor
+    # Initialize rumble motor
     echo 20 > /sys/class/gpio/export
     echo -n out > /sys/class/gpio/gpio20/direction
     echo -n 0 > /sys/class/gpio/gpio20/value
-    # sleep 0.05
-    # echo -n 1 > /sys/class/gpio/gpio20/value
-    # sleep 0.05
-    # echo -n 0 > /sys/class/gpio/gpio20/value
 
     #joypad
     echo -1 > /sys/class/miyooio_chr_dev/joy_type
@@ -336,14 +325,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     else
         /usr/bin/fbdisplay /usr/miyoo/bin/skin/app_loading_bg.png &
     fi
-
-    mkdir -p /tmp/miyoo_inputd
-
-    for btn in A B X Y L R L2 R2; do
-        val=$(/usr/miyoo/bin/jsonval turbo$btn)
-        file="/tmp/miyoo_inputd/turbo_$(echo $btn | tr '[:upper:]' '[:lower:]')"
-        [ "$val" = "1" ] && touch "$file" || unlink "$file"
-    done
 
     miyoo_fw_update=0
     miyoo_fw_dir=/media/sdcard0
@@ -374,9 +355,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
             mount --bind "$flip_file" "$base_file"
         done
     done
-
-    # mask stock USB file transfer app
-    mount --bind /mnt/SDCARD/spruce/spruce /usr/miyoo/apps/usb_mass_storage/config.json
 
     # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
     mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"

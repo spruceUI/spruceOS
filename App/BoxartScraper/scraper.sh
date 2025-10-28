@@ -18,7 +18,7 @@ get_ra_alias() {
         AMIGA)               ra_name="Commodore - Amiga" ;;
         ATARI)               ra_name="Atari - 2600" ;;
         ATARIST)             ra_name="Atari - ST" ;;
-        ARCADE)              ra_name="MAME" ;;
+        ARCADE|CPS1|CPS2|CPS3)    ra_name="MAME" ;;
         ARDUBOY)             ra_name="Arduboy Inc - Arduboy" ;;
         CHAI)                ra_name="ChaiLove" ;;
         COLECO)              ra_name="Coleco - ColecoVision" ;;
