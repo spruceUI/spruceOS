@@ -140,26 +140,29 @@ class GameConfigMenu:
             menu_options = self.game_system.game_system_config.get_menu_options()
 
             for name, option in menu_options.items():
-                effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
-                display_name = option.get('display')
-                contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
-                if(contains_override):
-                    display_name = display_name + "*"
-                config_list.append(
-                                GridOrListEntry(
-                                primary_text=display_name,
-                                value_text="<    " + effective_value + "    >",
-                                image_path=None,
-                                image_path_selected=None,
-                                description=None,
-                                icon=None,
-                                value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
-                                all_options=option.get('options', []), current_value=effective_value,
-                                    update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
-                                    remove_override=self.game_system.game_system_config.delete_menu_override
-                                    : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
-                        )
-                )
+                devices = option.get("devices")
+                supported_device = not devices or Device.get_device_name() in devices
+                if(supported_device):
+                    effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
+                    display_name = option.get('display')
+                    contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
+                    if(contains_override):
+                        display_name = display_name + "*"
+                    config_list.append(
+                                    GridOrListEntry(
+                                    primary_text=display_name,
+                                    value_text="<    " + effective_value + "    >",
+                                    image_path=None,
+                                    image_path_selected=None,
+                                    description=None,
+                                    icon=None,
+                                    value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
+                                    all_options=option.get('options', []), current_value=effective_value,
+                                        update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
+                                        remove_override=self.game_system.game_system_config.delete_menu_override
+                                        : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
+                            )
+                    )
 
             if(view is None):        
                 view = ViewCreator.create_view(
