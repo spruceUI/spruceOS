@@ -17,6 +17,10 @@ class AppEntry:
         self.launch = app_config.get_launch()
         self.hidden = hidden
 
+    def __init__(self, launch: str, hidden: bool = False):
+        self.launch = launch
+        self.hidden = hidden
+
 class AppListManager():
     def __init__(self, entries_file):
         self.entries_file = entries_file
