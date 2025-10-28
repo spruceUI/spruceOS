@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import subprocess
 
+from devices.miyoo.system_config import SystemConfig
 from games.utils.game_entry import GameEntry
+from utils.image_utils import ImageUtils
 
 class AbstractDevice(ABC):
  
@@ -267,11 +269,23 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def shrink_text_if_needed(self, text):
+    def get_text_width_measurement_multiplier(self):
         pass
 
     @abstractmethod
-    def get_system_config(self):
+    def max_texture_width(self):
+        pass
+
+    @abstractmethod
+    def max_texture_height(self):
+        pass
+
+    @abstractmethod
+    def get_guaranteed_safe_max_text_char_count(self):
+        pass
+
+    @abstractmethod
+    def get_system_config(self) -> SystemConfig:
         pass
 
     @abstractmethod
@@ -293,3 +307,30 @@ class AbstractDevice(ABC):
     @abstractmethod
     def supports_hue_calibration(self):
         pass
+
+    @abstractmethod
+    def supports_popup_menu(self):
+        pass
+
+    @abstractmethod
+    def get_image_utils(self) -> ImageUtils:
+        pass
+
+    @abstractmethod
+    def get_boxart_medium_resize_dimensions(self):
+        pass
+
+    @abstractmethod
+    def get_boxart_small_resize_dimensions(self):
+        pass
+
+    @abstractmethod
+    def get_boxart_large_resize_dimensions(self):
+        pass
+
+    @abstractmethod
+    def get_device_name(self):
+        pass
+
+
+

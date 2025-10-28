@@ -1,16 +1,63 @@
 import json
 import os
 import shutil
+import time
+from devices.device import Device
 from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 
 
 class ThemePatcher():
-
+    _last_display_time = 0
     # Add properties you want to scale (case-sensitive)
     SCALABLE_KEYS = {"grid1x4","grid3x4","FontSize","gameSelectImgWidth","gameSelectImgHeight","gridGameSelectImgWidth",
                      "gridGameSelectImgHeight","listGameSelectImgWidth","listGameSelectImgHeight","gridMultiRowSelBgResizePadWidth",
-                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad"}
+                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset"}
+
+    @classmethod
+    def convert_to_tga(cls, path):
+        from display.display import Display
+        PyUiLogger().get_logger().info(f"Checking if theme is patched")
+        if(cls.contains_tga(path)):
+            PyUiLogger().get_logger().info(f"Theme was patched")
+            return False
+
+        Display.clear("Patching Theme")
+        Display.display_message("Patching theme to faster assets")
+        for dirpath, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                if filename.lower().endswith(".png"):
+                    full_path = os.path.join(dirpath, filename)
+                    cls.convert_png_to_tga(full_path)      
+        return True   
+       
+    @classmethod
+    def contains_tga(cls,path):
+        """Return True if any .tga file exists under path (including subdirectories)."""
+        try:
+            for entry in os.scandir(path):
+                if entry.is_file(follow_symlinks=False):
+                    # Check last 4 characters, case-insensitive
+                    if entry.name[-4:].lower() == ".tga":
+                        return True
+                elif entry.is_dir(follow_symlinks=False):
+                    # Recurse into subdirectory
+                    if cls.contains_tga(entry.path):
+                        return True
+        except PermissionError:
+            pass  # Skip directories we can't access
+        return False        
+
+    @classmethod
+    def convert_png_to_tga(cls,png_path):
+        from display.display import Display
+        now = time.time()
+        if now - cls._last_display_time >= 1.0:
+            Display.display_message(f"Converting {os.path.basename(png_path)}")
+            cls._last_display_time = now
+        image_utils = Device.get_image_utils()
+        image_utils.convert_from_png_to_tga(png_path)
+
 
     @classmethod
     def patch_theme(cls, path, target_width, target_height):
@@ -61,6 +108,7 @@ class ThemePatcher():
 
     @classmethod
     def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):
+        from display.display import Display
         PyUiLogger().get_logger().error(f"Patching theme [{input_folder}] to [{input_folder}] with scale factor [{scale}]")
         # Ensure the output directory exists
         os.makedirs(output_folder, exist_ok=True)
@@ -73,24 +121,28 @@ class ThemePatcher():
                 # Recursively patch subfolders
                 cls.patch_folder(input_path, output_path, scale, theme_width, theme_height, target_width, target_height)
             elif os.path.isfile(input_path):
+                now = time.time()
+                if now - cls._last_display_time >= 1.0:
+                    Display.display_message(f"Patching {os.path.basename(input_path)}")
+                    cls._last_display_time = now
                 # Process image file
                 cls.scale_image(input_path, output_path, scale, theme_width, theme_height, target_width, target_height)
 
     @staticmethod
     def scale_image(input_file, output_file, scale, theme_width, theme_height, target_width, target_height):
-        from PIL import Image
-        try:
-            with Image.open(input_file) as img:
-                new_width = int(img.width * scale)
-                if(img.width == theme_width and img.height != theme_height):
-                    new_width = target_width
-                new_height = int(img.height * scale)
-                if(img.height == theme_height and img.width != theme_width):
-                    new_height = target_height
 
-                resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                resized_img.save(output_file)
-                PyUiLogger().get_logger().info(f"Scaled and saved: {output_file}")
+        image_utils = Device.get_image_utils()
+        try:
+            img_width ,img_height = image_utils.get_image_dimensions(input_file)
+            new_width = int(img_width * scale)
+            if(img_width == theme_width and img_height != theme_height):
+                new_width = target_width
+            new_height = int(img_height * scale)
+            if(img_height == theme_height and img_width != theme_width):
+                new_height = target_height
+
+            image_utils.resize_image(input_file, output_file, new_width, new_height)
+
         except Exception as e:
             # Copy the file instead of scaling if something fails
             try:

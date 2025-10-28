@@ -17,6 +17,7 @@ from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
 from ctypes import c_double
+import traceback
 
 @dataclass
 class CachedImageTexture:
@@ -115,6 +116,25 @@ class Display:
             Display.deinit_display()
             Display.reinitialize()
 
+        #Debug prints
+        if(False):
+            scale_x = ctypes.c_float()
+            scale_y = ctypes.c_float()
+            sdl2.SDL_RenderGetScale(cls.renderer.renderer, ctypes.byref(scale_x), ctypes.byref(scale_y))
+            PyUiLogger.get_logger().info(f"Renderer scale: {scale_x.value}, {scale_y.value}")
+
+            window_w = ctypes.c_int()
+            window_h = ctypes.c_int()
+            drawable_w = ctypes.c_int()
+            drawable_h = ctypes.c_int()
+
+            sdl2.SDL_GetWindowSize(cls.window.window, ctypes.byref(window_w), ctypes.byref(window_h))
+            sdl2.SDL_GL_GetDrawableSize(cls.window.window, ctypes.byref(drawable_w), ctypes.byref(drawable_h))
+
+            PyUiLogger.get_logger().info(
+                f"Window size: {window_w.value}x{window_h.value}, Drawable size: {drawable_w.value}x{drawable_h.value}"
+            )
+
     @classmethod
     def init_fonts(cls):
         cls.fonts = {
@@ -194,7 +214,7 @@ class Display:
         cls._init_display()
         cls.init_fonts()
         cls.restore_bg(bg)
-        cls.clear("reinitialize")
+        cls.clear("")
         cls.present()
 
 
@@ -218,7 +238,7 @@ class Display:
         cls.bg_path = bg_path
         PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
         if(bg_path is not None):
-            surface = sdl2.sdlimage.IMG_Load(cls.bg_path.encode('utf-8'))
+            surface = Display.image_load(cls.bg_path)
             if not surface:
                 PyUiLogger.get_logger().error(f"Failed to load image: {cls.bg_path}")
                 return
@@ -265,6 +285,7 @@ class Display:
 
     @classmethod
     def lock_current_image(cls):
+        PyUiLogger.get_logger().info("Locking current image as background")
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -282,6 +303,7 @@ class Display:
 
     @classmethod
     def unlock_current_image(cls):
+        PyUiLogger.get_logger().warning("Unlocking current iamge as background")
         if cls.bg_canvas:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
@@ -298,6 +320,8 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
         elif cls.background_texture is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
+        else:
+            PyUiLogger.get_logger().warning("No background texture to render")
 
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
@@ -411,11 +435,19 @@ class Display:
 
             return render_w, render_h
 
+    @classmethod
+    def log_sdl_error_and_clear_cache(cls):
+        err = sdl2.sdlttf.TTF_GetError()
+        err_msg = err.decode('utf-8') if err else "Unknown error"
+        PyUiLogger.get_logger().warning(f"Clearing cache : {err_msg}")
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
+
 
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None):
-        text = Device.shrink_text_if_needed(text)
+        text = Display.split_message(text, purpose)[0]
         if(len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
@@ -428,9 +460,7 @@ class Display:
             sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
             surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
             if not surface:
-                PyUiLogger.get_logger().error(f"Clearing cache")
-                cls._text_texture_cache.clear_cache()
-                cls._image_texture_cache.clear_cache()
+                cls.log_sdl_error_and_clear_cache()
                 surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
@@ -438,13 +468,14 @@ class Display:
 
             texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
             if not texture:
-                PyUiLogger.get_logger().error(f"Clearing cache")
-                cls._text_texture_cache.clear_cache()
-                cls._image_texture_cache.clear_cache()
+                cls.log_sdl_error_and_clear_cache()
                 texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
                 if not texture:
+                    err = sdl2.sdlttf.TTF_GetError()
+                    err_msg = err.decode('utf-8') if err else "Unknown error"
+                    PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')} : {err_msg}")
+                    PyUiLogger.get_logger().error(f"Surface w,h: {surface.contents.w},{surface.contents.h}")
                     sdl2.SDL_FreeSurface(surface)
-                    PyUiLogger.get_logger().error(f"Failed to create texture from surface {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
                     return 0, 0
 
             if(alpha is not None):
@@ -486,6 +517,11 @@ class Display:
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
     @classmethod
+    def image_load(cls, image_path):
+        #PyUiLogger.get_logger().info(f"Loading {image_path}")
+        return sdl2.sdlimage.IMG_Load(image_path.encode("utf-8"))
+    
+    @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):
         if(image_path is None):
             return 0, 0
@@ -496,24 +532,34 @@ class Display:
             surface = cache.surface
             texture = cache.texture
         else:
-            surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+            surface = Display.image_load(image_path)
             if not surface:
-                PyUiLogger.get_logger().error(f"Clearing cache")
-                cls._text_texture_cache.clear_cache()
-                cls._image_texture_cache.clear_cache()
-                surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+                cls.log_sdl_error_and_clear_cache()
+                surface = Display.image_load(image_path)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
                     return 0, 0
 
             texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
+
+            surface_width = surface.contents.w
+            surface_height = surface.contents.h
+
+            if(surface_width > Device.max_texture_width() or surface_height > Device.max_texture_height()):
+                sdl2.SDL_FreeSurface(surface)
+                PyUiLogger.get_logger().warning(
+                    f"Image is too large to render. Skipping {image_path}\n"
+                    f"Stack trace:\n{''.join(traceback.format_stack())}"
+                ) 
+                return 0, 0
+
+
             if not texture:
-                PyUiLogger.get_logger().error(f"Clearing cache")
-                cls._text_texture_cache.clear_cache()
-                cls._image_texture_cache.clear_cache()
+                cls.log_sdl_error_and_clear_cache()
                 texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
                 if not texture:
                     sdl2.SDL_FreeSurface(surface)
+                    PyUiLogger.get_logger().info(f"{image_path} : {surface_width} x {surface_height}")
                     PyUiLogger.get_logger().error("Failed to create texture from surface")
                     cls._text_texture_cache.clear_cache()
                     cls._image_texture_cache.clear_cache()
@@ -797,7 +843,7 @@ class Display:
         if(img is None):
             return 0, 0
         
-        surface = sdl2.sdlimage.IMG_Load(img.encode('utf-8'))
+        surface = Display.image_load(img)
         if not surface:
             return 0, 0
         width, height = surface.contents.w, surface.contents.h
@@ -806,14 +852,11 @@ class Display:
 
     @classmethod
     def get_text_dimensions(cls, purpose, text="A"):
-        sdl_color = sdl2.SDL_Color(0, 0, 0)
-        surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(cls.fonts[purpose].font, text.encode('utf-8'), sdl_color)
-        if not surface:
-            return 0, 0
-        width, height = surface.contents.w, surface.contents.h
-        sdl2.SDL_FreeSurface(surface)
-        return width, height
-
+        w = sdl2.Sint32()
+        h = sdl2.Sint32()
+        sdl2.sdlttf.TTF_SizeUTF8(cls.fonts[purpose].font, text.encode('utf-8'), w, h)
+        return int(w.value * Device.get_text_width_measurement_multiplier()), h.value
+    
     @classmethod
     def add_index_text(cls, index, total, force_include_index = False, letter = None):
         if(force_include_index or Theme.show_index_text()):
@@ -861,3 +904,74 @@ class Display:
     def volume_changed(cls, vol):
         cls.top_bar.volume_changed(vol)
 
+    @classmethod
+    def is_text_too_long(cls, line: str, font_purpose, clip_to_device_width) -> bool:
+        try:
+            if(Device.get_guaranteed_safe_max_text_char_count() >= len(line)):
+                return False
+            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
+            max_width = Device.max_texture_width()
+            if(clip_to_device_width):
+                max_width = min(max_width, Device.screen_width())
+            max_width = max_width - int(10 * Device.screen_height()/480)
+            return text_w > max_width
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Error checking text length: {e}")
+            return False
+
+    @classmethod
+    def split_message(cls, message: str, font_purpose, clip_to_device_width=False) -> list[str]:
+        if not message:
+            return [message]
+
+        if not cls.is_text_too_long(message, font_purpose,clip_to_device_width):
+            return [message]
+        
+        words = message.split()
+        lines = []
+        current_line = ""
+
+        for word in words:
+            tentative_line = (current_line + " " + word).strip()
+
+            # If adding this word makes the line too long, start a new one
+            if current_line and cls.is_text_too_long(tentative_line, font_purpose,clip_to_device_width):
+                lines.append(current_line)
+                current_line = word
+            else:
+                current_line = tentative_line
+
+        if current_line:
+            lines.append(current_line)
+
+        return lines
+
+
+    @classmethod
+    def display_message_multiline(cls,split_message, duration_ms=0):
+        Display.clear("")
+        text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+
+        height_per_line = text_h + int(5 * Device.screen_height()/480)
+        starting_height = Device.screen_height()//2 - (len(split_message) * height_per_line)//2
+
+        for i, line in enumerate(split_message):
+            Display.render_text_centered(f"{line}",Device.screen_width()//2, starting_height + i * height_per_line,
+                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+
+        Display.present()
+        # Sleep for the specified duration in milliseconds
+        time.sleep(duration_ms / 1000)
+
+    @classmethod
+    def display_message(cls,message, duration_ms=0):
+        split_message = Display.split_message(message, FontPurpose.LIST,clip_to_device_width=True)
+        cls.display_message_multiline(split_message,duration_ms)
+        
+    @classmethod
+    def display_image(cls,image_path, duration_ms=0):
+        Display.clear("")
+        Display.render_image(image_path,Device.screen_width()//2,Device.screen_height()//2,RenderMode.MIDDLE_CENTER_ALIGNED)
+        Display.present()
+        # Sleep for the specified duration in milliseconds
+        time.sleep(duration_ms / 1000)

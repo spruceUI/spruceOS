@@ -1,0 +1,26 @@
+
+from abc import ABC, abstractmethod
+
+
+class ImageUtils(ABC):
+    @abstractmethod
+    def convert_from_jpg_to_tga(self, jpg_path, png_path):
+        pass
+
+    @abstractmethod
+    def shrink_image_if_needed(self, input_path, output_path, width, height):
+        pass
+
+    @abstractmethod
+    def resize_image(self, input_path, output_path, width, height):
+        pass
+
+    @abstractmethod
+    def get_image_dimensions(self, path):
+        pass
+
+    @abstractmethod
+    def convert_from_png_to_tga(self, png_path):
+        pass
+
+    

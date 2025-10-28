@@ -1,4 +1,6 @@
 
+import os
+from pathlib import Path
 from controller.controller_inputs import ControllerInput
 from display.display import Display
 from menus.app.app_menu import AppMenu
@@ -153,8 +155,32 @@ class MainMenu:
             # Don't save state for settings
             self.settings_menu.show_menu()
 
+    def check_for_gameswitcher(self):
+        py_ui_dir = Path(__file__).resolve().parent.parent.parent
+        gs_trigger_file = py_ui_dir / "pyui_gs_trigger"
+        if (gs_trigger_file).exists():
+            gs_trigger_file.unlink()
+            from controller.controller import Controller
+            from menus.games.recents_menu_gs import RecentsMenuGS
+            Controller.gs_triggered = True
+            RecentsMenuGS().run_rom_selection()
+            Controller.gs_triggered = False
+        else:
+            PyUiLogger.get_logger().info(f"No GS Trigger file found at {gs_trigger_file}")         
+
+    def check_for_boxart_resizing(self):
+        from games.utils.box_art_resizer import BoxArtResizer
+        py_ui_dir = Path(__file__).resolve().parent.parent.parent
+        boxart_resize_trigger_file = py_ui_dir / "pyui_resize_boxart_trigger"
+        if (boxart_resize_trigger_file).exists():
+            boxart_resize_trigger_file.unlink()
+            BoxArtResizer.process_rom_folders()
+
 
     def run_main_menu_selection(self):
+        self.check_for_gameswitcher()
+        self.check_for_boxart_resizing()
+
         self.launch_selection(PyUiState.get_last_main_menu_selection())            
 
         if(Theme.skip_main_menu()):
@@ -198,6 +224,7 @@ class MainMenu:
                     if(ControllerInput.A == selected.get_input()): 
                         self.launch_selection(selected.get_selection().get_value())
                     elif(ControllerInput.MENU == selected.get_input()):
+                        PyUiLogger.get_logger().info(f"Launching Main Menu Popup")  
                         self.popup_menu.run_popup_menu_selection()
 
                     if(selected.get_input() is not None):

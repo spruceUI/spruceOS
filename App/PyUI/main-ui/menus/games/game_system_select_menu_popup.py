@@ -130,7 +130,7 @@ class GameSystemSelectMenuPopup:
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
-            top_bar_text=Template(Language.system_menu_sub_options()).substitute(system=game_system),
+            top_bar_text=Template(Language.system_menu_sub_options()).substitute(system=game_system.display_name),
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())

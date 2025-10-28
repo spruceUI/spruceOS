@@ -5,6 +5,7 @@ from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.rom_info import RomInfo
 from utils.logger import PyUiLogger
+from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -47,8 +48,26 @@ class CollectionsMenu(RomsMenuCommon):
     #    else:
     #s        return None
 
-    def _menu_pressed(self, selection):
+    def _menu_pressed(self, selection, rom_list):
         if(selection.is_collection):
             pass        
         else:
-            super()._menu_pressed(selection)
+            super()._menu_pressed(selection,rom_list)
+
+    def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
+        if(last_subfolder == ''):
+            return None
+        elif(getattr(self, 'subfolder', '') == last_subfolder):
+            return None
+        else:
+            collections = CollectionsManager.get_collection_names()
+            for collection in collections:
+                PyUiLogger.get_logger().info(f"collection: {collection}")
+                if collection == last_subfolder:
+                    self._load_collection_menu(RomInfo(None, collection, is_collection=True))
+                    PyUiState.set_last_game_selection(
+                        "Collections",
+                        '',
+                        getattr(self, 'subfolder', '') or ''
+                    )
+            return None

@@ -72,7 +72,7 @@ class RomsMenuCommon(ABC):
         rom_list = []
 
         for rom_info in raw_rom_list:
-            rom_file_name = os.path.basename(rom_info.rom_file_path)
+            rom_file_name = self.rom_select_options_builder.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
             img_path = self._get_image_path(rom_info)
             rom_list.append(
                 GridOrListEntry(
@@ -85,9 +85,18 @@ class RomsMenuCommon(ABC):
             )
         return rom_list
 
+    def get_view_type(self):
+        return Theme.get_game_selection_view_type()
+
+    def full_screen_grid_resize_type(self):
+        return Theme.get_full_screen_grid_game_menu_resize_type()
+
+    def get_set_top_bar_text_to_game_selection(self):
+        return Theme.get_set_top_bar_text_to_game_selection()
+
     def create_view(self, page_name, rom_list, selected):
         return ViewCreator.create_view(
-                        view_type=Theme.get_game_selection_view_type(),
+                        view_type=self.get_view_type(),
                         top_bar_text=page_name,
                         options=rom_list,
                         selected_index=selected.get_index(),
@@ -98,7 +107,7 @@ class RomsMenuCommon(ABC):
                         use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),
                         hide_grid_bg=not Theme.get_game_select_show_sel_bg_grid_mode(),
                         show_grid_text=Theme.get_game_select_show_text_grid_mode(),
-                        set_top_bar_text_to_selection=Theme.get_set_top_bar_text_to_game_selection(), 
+                        set_top_bar_text_to_selection=self.get_set_top_bar_text_to_game_selection(), 
                         set_bottom_bar_text_to_selection=not Theme.get_set_top_bar_text_to_game_selection() and (Theme.get_game_selection_view_type() == ViewType.CAROUSEL or Theme.get_game_selection_view_type() == ViewType.GRID),
                         grid_selected_bg=Theme.get_grid_game_selected_bg(),
                         grid_resize_type=Theme.get_grid_game_selected_resize_type(),
@@ -106,7 +115,9 @@ class RomsMenuCommon(ABC):
                         carousel_selected_entry_width_percent=Theme.get_carousel_game_select_primary_img_width(),
                         carousel_shrink_further_away=Theme.get_carousel_game_select_shrink_further_away(),
                         carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off(),
-                        missing_image_path=Theme.get_missing_image_path()
+                        missing_image_path=Theme.get_missing_image_path(),
+                        allow_scrolling_text=True, # roms select is allowed to scroll
+                        full_screen_grid_resize_type=self.full_screen_grid_resize_type()
                         )
 
     def _run_rom_selection(self, page_name) :
@@ -122,11 +133,7 @@ class RomsMenuCommon(ABC):
     def _get_menu_button_game_options(self, selection, rom_list):
         return self.popup_menu.get_game_options(selection, self.get_additional_menu_options(), rom_list, use_full_text=True)
 
-    def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
-        selected = Selection(None,None,0)
-        view = None
-        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name)
-
+    def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
         if (
             last_subfolder != '' and
             getattr(self, 'subfolder', '') != last_subfolder and
@@ -139,9 +146,23 @@ class RomsMenuCommon(ABC):
             if(return_value is not None):
                 return return_value
 
-        for index, entry in enumerate(rom_list):
-            if(entry.get_value().rom_file_path == last_game_file_path):
-                selected = Selection(None,None,index)
+    def default_to_last_game_selection(self):
+        return True
+   
+    def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
+        selected = Selection(None,None,0)
+        view = None
+        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name)
+
+        last_subfolder = self._check_for_last_subfolder_existance(last_subfolder, rom_list)
+
+        if(last_subfolder is not None):
+            return last_subfolder
+
+        if(self.default_to_last_game_selection()):
+            for index, entry in enumerate(rom_list):
+                if(entry.get_value().rom_file_path == last_game_file_path):
+                    selected = Selection(None,None,index)
 
         while(selected is not None):
             Display.set_page_bg(page_name)

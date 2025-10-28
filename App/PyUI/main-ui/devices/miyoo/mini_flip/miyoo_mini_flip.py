@@ -28,6 +28,7 @@ from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -44,7 +45,8 @@ class MiyooMiniFlip(MiyooDevice):
     SOUND_DISABLED = 0
 
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo Mini Flip")        
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -295,10 +297,10 @@ class MiyooMiniFlip(MiyooDevice):
             data = json.loads(result.stdout.strip())
             charging = int(data.get("charging", 0))
             
-            if charging == 1:
-                return ChargeStatus.CHARGING
-            else:
+            if charging == 0:
                 return ChargeStatus.DISCONNECTED
+            else:
+                return ChargeStatus.CHARGING
         except Exception:
             return ChargeStatus.DISCONNECTED
 
@@ -370,8 +372,11 @@ class MiyooMiniFlip(MiyooDevice):
         return "/appconfigs/wpa_supplicant.conf"
 
     def get_volume(self):
-        return self.mainui_volume * 5
-
+        try:
+            return self.mainui_volume * 5
+        except:
+            return 0
+        
     def _set_volume_raw(self, value: int, add: int = 0) -> int:
         try:
             fd = os.open("/dev/mi_ao", os.O_RDWR)
@@ -441,14 +446,23 @@ class MiyooMiniFlip(MiyooDevice):
     def double_init_sdl_display(self):
         return True
             
-    def shrink_text_if_needed(self, text):
-        return text[:40]
-    
+    def max_texture_width(self):
+        return 800
+                    
+    def max_texture_height(self):
+        return 600
+
+    def get_guaranteed_safe_max_text_char_count(self):
+        return 35
+
     def supports_volume(self):
         return True #can read but not write
 
     def supports_analog_calibration(self):
         return False
+
+    def supports_image_resizing(self):
+        return True
 
     def supports_brightness_calibration(self):
         return False
@@ -461,3 +475,21 @@ class MiyooMiniFlip(MiyooDevice):
 
     def supports_hue_calibration(self):
         return False
+    
+    def supports_popup_menu(self):
+        return False
+    
+    def get_image_utils(self):
+        return FfmpegImageUtils()
+
+    def get_boxart_medium_resize_dimensions(self):
+        return 350, 350
+
+    def get_boxart_small_resize_dimensions(self):
+        return 280, 280
+
+    def get_boxart_large_resize_dimensions(self):
+        return 180, 180
+    
+    def get_device_name(self):
+        return self.device_name

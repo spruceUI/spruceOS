@@ -19,6 +19,7 @@ from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -26,7 +27,8 @@ class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo A30")        
         
         self.sdl_button_to_input = {
@@ -269,6 +271,9 @@ class MiyooA30(MiyooDevice):
     def supports_analog_calibration(self):
         return False
 
+    def supports_image_resizing(self):
+        return True
+
     def supports_brightness_calibration(self):
         return False
 
@@ -280,3 +285,9 @@ class MiyooA30(MiyooDevice):
 
     def supports_hue_calibration(self):
         return False
+
+    def get_image_utils(self):
+        return FfmpegImageUtils()
+
+    def get_device_name(self):
+        return self.device_name

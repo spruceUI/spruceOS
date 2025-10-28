@@ -24,15 +24,8 @@ if flag_check "developer_mode"; then
     # App visibility
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
     /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/ShowOutputTest/config.json
-else
-    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh hide /mnt/SDCARD/App/ShowOutputTest/config.json
-fi
-
-if flag_check "designer_mode"; then
-    log_message "Designer mode enabled"
-    # Remove @ from Theme Packer label
     sed -i 's/"#label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
 else
-    # Restore @ in Theme Packer label
+    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh hide /mnt/SDCARD/App/ShowOutputTest/config.json
     sed -i 's/"label"/"#label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi

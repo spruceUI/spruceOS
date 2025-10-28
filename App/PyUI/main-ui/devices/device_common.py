@@ -6,6 +6,7 @@ import sys
 import time
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
+from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
@@ -311,9 +312,34 @@ class DeviceCommon(AbstractDevice):
 
     def supports_volume(self):
         return True
-    
-    def shrink_text_if_needed(self, text):
-        return text
+        
+    def get_text_width_measurement_multiplier(self):
+        return 1
+        
+    def max_texture_width(self):
+        #No known limit?
+        return sys.maxsize
+        
+    def max_texture_height(self):
+        #No known limit?
+        return sys.maxsize
+        
+    def get_guaranteed_safe_max_text_char_count(self):
+        #No known limit?
+        return sys.maxsize
 
     def get_system_config(self):
         return self.system_config
+    
+    def supports_popup_menu(self):
+        return True
+
+    def get_boxart_medium_resize_dimensions(self):
+        return 640, 480
+
+    def get_boxart_small_resize_dimensions(self):
+        return 320, 240
+
+    def get_boxart_large_resize_dimensions(self):
+        return 1024, 1024
+

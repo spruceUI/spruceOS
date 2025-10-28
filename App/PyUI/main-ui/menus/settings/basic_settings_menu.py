@@ -8,10 +8,8 @@ from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
-from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.theme.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
-from menus.settings.timezone_menu import TimezoneMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
@@ -214,6 +212,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_extra_settings
                     )
             )
+
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.exit_py_ui(),
@@ -225,6 +224,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.exit
                     )
             )
+        
 
         return option_list
 

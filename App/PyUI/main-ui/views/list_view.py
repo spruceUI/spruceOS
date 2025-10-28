@@ -7,6 +7,7 @@ from display.display import Display
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from views.selection import Selection
+from views.text_utils import TextUtils
 from views.view import View
 
 
@@ -99,7 +100,7 @@ class ListView(View):
         self.adjust_selected_top_bottom_for_overflow()
 
         self._render()
-        if(self.include_index_text):
+        if(Theme.include_index_text()):
             Display.add_index_text(self.selected+1, len(self.options), force_include_index = True, 
                                    letter=self.options[self.selected].get_primary_text()[0])
         Display.present()
@@ -141,3 +142,11 @@ class ListView(View):
             if amount > 1:
                 self.current_top += amount
                 self.current_bottom += amount
+
+    def scroll_string(self,text, amt, text_available_width):
+        if(Theme.scroll_rom_selection_text()):
+            return TextUtils.scroll_string(text=text,
+                                    amt=amt,
+                                    text_available_width=text_available_width)
+        else:
+            return text

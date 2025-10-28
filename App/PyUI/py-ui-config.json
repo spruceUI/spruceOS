@@ -6,5 +6,6 @@
     "enableWifiMonitor": true,
     "mainMenuTitle": "spruceOS",
     "gameSystemSortMode": "SortOrderKey",
-    "include_stock_os_launch_option": false
+    "includeStockOsLaunchOption": false,
+    "allowPyUiGameSwitcher": false
 }

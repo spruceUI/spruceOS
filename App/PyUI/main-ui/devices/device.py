@@ -1,4 +1,6 @@
 from devices.abstract_device import AbstractDevice
+from devices.miyoo.system_config import SystemConfig
+from utils.image_utils import ImageUtils
 
 
 class Device:
@@ -311,11 +313,23 @@ class Device:
         return Device._impl.double_init_sdl_display()
 
     @staticmethod
-    def shrink_text_if_needed(text):
-        return Device._impl.shrink_text_if_needed(text)
+    def get_text_width_measurement_multiplier():
+        return Device._impl.get_text_width_measurement_multiplier()
+    
+    @staticmethod
+    def max_texture_width():
+        return Device._impl.max_texture_width()
+    
+    @staticmethod
+    def max_texture_height():
+        return Device._impl.max_texture_height()
 
     @staticmethod
-    def get_system_config():
+    def get_guaranteed_safe_max_text_char_count():
+        return Device._impl.get_guaranteed_safe_max_text_char_count()
+
+    @staticmethod
+    def get_system_config() -> SystemConfig:
         return Device._impl.get_system_config()
 
     @staticmethod
@@ -337,3 +351,28 @@ class Device:
     @staticmethod
     def supports_hue_calibration():
         return Device._impl.supports_hue_calibration()
+
+    @staticmethod
+    def supports_popup_menu():
+        return Device._impl.supports_popup_menu()
+
+    @staticmethod
+    def get_image_utils() -> ImageUtils:
+        return Device._impl.get_image_utils()
+
+    @staticmethod
+    def get_boxart_medium_resize_dimensions():
+        return Device._impl.get_boxart_medium_resize_dimensions()
+    
+    @staticmethod
+    def get_boxart_small_resize_dimensions():
+        return Device._impl.get_boxart_small_resize_dimensions()
+
+    @staticmethod
+    def get_boxart_large_resize_dimensions():
+        return Device._impl.get_boxart_large_resize_dimensions()
+
+    @staticmethod
+    def get_device_name():
+        return Device._impl.get_device_name()
+

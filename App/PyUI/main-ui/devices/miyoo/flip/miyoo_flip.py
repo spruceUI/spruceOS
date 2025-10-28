@@ -20,6 +20,7 @@ import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 from concurrent.futures import ThreadPoolExecutor
 
@@ -27,7 +28,8 @@ class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo Flip")        
         
         self.sdl_button_to_input = {
@@ -424,3 +426,9 @@ class MiyooFlip(MiyooDevice):
 
     def supports_hue_calibration(self):
         return True
+
+    def get_image_utils(self):
+        return PilImageUtils()
+
+    def get_device_name(self):
+        return self.device_name

@@ -25,7 +25,8 @@ class Controller:
     render_required_callback = None
     last_controller_input = None
 
-    controller_interface = None;
+    controller_interface = None
+    gs_triggered = False
 
     @staticmethod
     def init():
@@ -102,7 +103,10 @@ class Controller:
             time.sleep(POLL_INTERVAL_SECONDS)
 
         was_hotkey = False
+        started_held_down = Controller.still_held_down()
         if not Controller.still_held_down():
+            #if(Controller.last_controller_input is not None):
+            #    PyUiLogger.get_logger().info(f"Controller input is not longer held down")
             # Reset hold delay and clear any lingering event
             Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
 
@@ -122,6 +126,7 @@ class Controller:
                 if Controller.last_controller_input is not None:
                     if Controller.last_controller_input == ControllerInput.MENU:
                         if not Controller.is_check_for_hotkey and not Controller.check_for_hotkey():
+                            Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
                         else:
                             was_hotkey = True
@@ -130,15 +135,38 @@ class Controller:
                     else:
                         break  # Valid non-hotkey input
 
-        elif(ControllerInput.MENU == Controller.last_input()):
-            was_hotkey = True
-            Controller.check_for_hotkey()
-        else:
-            Controller.hold_delay = 0.0  # No input was released yet
+
+
+        # Wait if the input is being held down (anti-repeat logic)
+        while Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
+            Controller.controller_interface.force_refresh()
+            time.sleep(POLL_INTERVAL_SECONDS)
+
+        if Controller.still_held_down():
+            if(ControllerInput.MENU == Controller.last_input()):
+                was_hotkey = Controller.check_for_hotkey()
+                if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
+                    Controller.gs_triggered = True
+                    PyUiLogger.get_logger().info(f"GS Triggered")
+                    from menus.games.recents_menu_gs import RecentsMenuGS
+                    Controller.clear_last_input()
+                    RecentsMenuGS().run_rom_selection()
+                    Controller.clear_last_input()
+                    Controller.gs_triggered = False
+            elif(started_held_down):
+                #if(Controller.last_controller_input is not None):
+                #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
+                Controller.hold_delay = 0.0  # No input was released yet
 
         Controller.last_input_time = time.time()
+        #if(Controller.last_controller_input is not None):
+        #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 
         return Controller.last_controller_input is not None and not was_hotkey
+
+    @staticmethod
+    def allow_pyui_game_switcher():
+        return PyUiConfig.allow_pyui_game_switcher() and Device.get_system_config().game_switcher_enabled()
 
     @staticmethod
     def clear_input_queue():
@@ -146,6 +174,8 @@ class Controller:
 
     @staticmethod
     def last_input():
+        #if(Controller.last_controller_input is not None):
+        #    PyUiLogger.get_logger().info(f"Returning last input: {Controller.last_controller_input}")
         return Controller.last_controller_input
 
     @staticmethod 
@@ -219,3 +249,15 @@ class Controller:
                     Device.special_input(controller_input, 0)
 
             Controller.last_press_time_map.pop(controller_input,None)
+
+    @staticmethod
+    def wait_for_input(wanted_inputs):
+        last_input = None
+        Controller.clear_last_input()
+        while(last_input not in wanted_inputs):
+            Controller.get_input()
+            last_input = Controller.last_input()
+
+        PyUiLogger.get_logger().debug(f"Input was : {last_input}")
+
+        return last_input

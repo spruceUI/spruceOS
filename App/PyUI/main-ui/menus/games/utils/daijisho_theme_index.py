@@ -1,5 +1,6 @@
 import json
 import os
+from devices.device import Device
 from utils.logger import PyUiLogger
 
 class DaijishoThemeIndex:
@@ -106,31 +107,22 @@ class DaijishoThemeIndex:
         # Check if filename ends with .jpg or .jpeg (case-insensitive)
         if filename.lower().endswith((".jpg", ".jpeg")):
             jpg_path = os.path.join(self.foldername, filename)
-            png_filename = os.path.splitext(filename)[0] + ".png"
-            png_path = os.path.join(self.foldername, png_filename)
-            if os.path.exists(png_path):
-                return png_path
-            # Try to import PIL, skip conversion if not installed
-            try:
-                from PIL import Image
-            except ImportError:
-                PyUiLogger.get_logger().warning(
-                    f"PIL not available, skipping conversion of {jpg_path}"
-                )
-                return None  # fallback: return original JPG
+            tga_filename = os.path.splitext(filename)[0] + ".tga"
+            tga_path = os.path.join(self.foldername, tga_filename)
+            if os.path.exists(tga_path):
+                return tga_path
 
-            if not os.path.exists(png_path):
-                PyUiLogger.get_logger().info(f"Converting {jpg_path} to {png_path}")
+            if not os.path.exists(tga_path):
+                PyUiLogger.get_logger().info(f"Converting {jpg_path} to {tga_path}")
                 try:
-                    with Image.open(jpg_path) as img:
-                        img.save(png_path, "PNG")
+                    Device.get_image_utils().convert_from_jpg_to_tga(jpg_path, tga_path)
                 except Exception as e:
                     PyUiLogger.get_logger().warning(
                         f"Failed to convert {jpg_path} to PNG: {e}"
                     )
                     return jpg_path  # fallback: return original JPG
 
-            return png_path  # Return full path to PNG
+            return tga_path  # Return full path to PNG
 
         # For non-jpg/jpeg files, return full path to original file
         return os.path.join(self.foldername, filename)

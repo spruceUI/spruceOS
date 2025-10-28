@@ -1,3 +1,4 @@
+import time
 from typing import List
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -115,8 +116,7 @@ class GridView(View):
 
     def _render_cell(self, visible_index, imageTextPair):
         actual_index = self.current_left + visible_index
-        image_path = imageTextPair.get_image_path_selected(
-        ) if actual_index == self.selected else imageTextPair.get_image_path()
+        image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) if actual_index == self.selected else imageTextPair.get_image_path_ideal(self.resized_width, self.resized_height)
 
         x_index = visible_index % self.cols
         x_offset = int(self.x_pad + (x_index) * (self.icon_width)) + self.icon_width//2
@@ -322,7 +322,7 @@ class GridView(View):
 
                     y_image_offset = Display.get_center_of_usable_screen_height()
                     
-                    self._render_image(imageTextPair.get_image_path(), 
+                    self._render_image(imageTextPair.get_image_path_ideal(frame_widths[visible_index], Display.get_usable_screen_height()), 
                                             x_offset, 
                                             y_image_offset,
                                             render_mode,

@@ -131,9 +131,12 @@ Please do not adjust the RetroArch configurations unless you are already familia
 
 ## Credits and Thanks
   - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
+  - Chrisj951: Creating the Python based UI that enabled us to get rid of MainUI. You turned a pipedream into reality.
   - All past and present Team Members!
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   - Shauninman: Help, support and Bootlogo function (and so much more!).
+  - MustardOS and team, we borrowed kind of a lot from you guys thank you (looking at you AntiKK, SCUMMVM)!
+  - Knulli and the rest of the Open Handheld Collective for amazing collaboration and sharing. It takes a village! 
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
   - Ndguardian, XanXic, and XK9274: Syncthing App.
@@ -171,6 +174,7 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## The Current Team (Alphabetical order):
    - 369px
    - Basecase - Stefan Ayala
+   - Chrisj951 - Discord @chrisbastion
    - Cinethezs
    - Cobaltdsc4102
    - Dandon
@@ -197,5 +201,3 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 ## News
 The "soon" to happen release of the Miyoo Flip has us excited! We are planning on trying to do something for it but have not gotten ahold of any test units yet.
 [Gogamegeek.com](https://www.gogamegeek.com/) has kindly offered to send us a few units as soon as they recieve them. Expect updates on our progress "soon"!
-
-# Test - Having a laugh with Sun in VC - Lonko

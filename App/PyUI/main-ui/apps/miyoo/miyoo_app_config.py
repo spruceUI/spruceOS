@@ -21,6 +21,8 @@ class MiyooAppConfig(AppConfig):
             self.launch = os.path.join(self.folder,self.launch)
 
         self.description = data.get("description")
+        self.hide = data.get("hide", False)
+        self.devices = data.get("devices", [])
 
     def get_label(self):
         return self.label
@@ -39,3 +41,10 @@ class MiyooAppConfig(AppConfig):
     
     def get_folder(self):
         return self.folder
+    
+    def is_hidden(self):
+        return self.hide
+    
+    def get_devices(self):
+        return self.devices
+

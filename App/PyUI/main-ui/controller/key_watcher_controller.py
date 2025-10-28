@@ -90,6 +90,7 @@ class KeyWatcherController(ControllerInterface):
 
                     if len(data) == EVENT_SIZE:
                         _, _, event_type, code, value = struct.unpack(EVENT_FORMAT, data)
+                        #PyUiLogger.get_logger().error(f"event_type: {event_type}, code: {code}, value: {value}")
                         key_event = KeyEvent(event_type, code, value)
                         if key_event in self.key_mappings:
                             mapped_events = self.key_mappings[key_event]

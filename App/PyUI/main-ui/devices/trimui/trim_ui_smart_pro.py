@@ -36,7 +36,8 @@ from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartPro(TrimUIDevice):
     
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         self.path = self
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -118,4 +119,6 @@ class TrimUISmartPro(TrimUIDevice):
             return 1.5
         else:
             return 1
-        
+
+    def get_device_name(self):
+        return self.device_name

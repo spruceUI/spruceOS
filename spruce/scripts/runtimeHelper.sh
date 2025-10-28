@@ -83,7 +83,7 @@ check_and_move_p8_bins() {
 }
 
 developer_mode_task() {
-    if flag_check "developer_mode" || flag_check "designer_mode"; then
+    if flag_check "developer_mode"; then
         if setting_get "samba" || setting_get "dropbear"; then
             # Loop until WiFi is connected
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do

@@ -29,3 +29,11 @@ class AppConfig(ABC):
     @abstractmethod
     def get_folder(self):
         pass
+    
+    @abstractmethod
+    def is_hidden(self):
+        pass
+    
+    @abstractmethod
+    def get_devices(self):
+        pass
