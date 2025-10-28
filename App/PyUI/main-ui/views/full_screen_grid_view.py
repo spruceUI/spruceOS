@@ -164,7 +164,7 @@ class FullScreenGridView(View):
 
     def _render_image(self, index=None, x_offset=0, render_text_overlay=True, text_alpha=None):
         imageTextPair = self.options[index]
-        image_path = imageTextPair.get_image_path_selected() 
+        image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()
         secondary_text = imageTextPair.get_description()
         if(self.resize_type is ResizeType.FIT):

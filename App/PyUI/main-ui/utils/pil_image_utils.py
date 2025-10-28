@@ -1,4 +1,5 @@
 
+import os
 import shutil
 from utils.image_utils import ImageUtils
 from PIL import Image
@@ -6,9 +7,9 @@ from utils.logger import PyUiLogger
 
 
 class PilImageUtils(ImageUtils):
-    def convert_from_jpg_to_png(self, jpg_path, png_path):
+    def convert_from_jpg_to_tga(self, jpg_path, png_path):
         with Image.open(jpg_path) as img:
-            img.save(png_path, "PNG")
+            img.save(png_path, "TGA")
 
     def shrink_image_if_needed(self, input_path, output_path, width, height):
         img = Image.open(input_path)
@@ -29,7 +30,13 @@ class PilImageUtils(ImageUtils):
             img = img.resize((new_width, new_height), Image.LANCZOS)
             img.save(output_path)
             PyUiLogger().get_logger().info(f"Scaled: {input_path} to {output_path} -> {new_width}x{new_height}")
-
+        else:
+            # Image is already small enough; just copy
+            shutil.copyfile(input_path, output_path)
+            PyUiLogger().get_logger().info(
+                f"Copied without scaling: {input_path} → {output_path} ({actual_width}x{actual_height})"
+            )
+            
     def resize_image(self, input_path, output_path, width, height):
         img = Image.open(input_path)
         actual_width, actual_height = img.size
@@ -55,3 +62,27 @@ class PilImageUtils(ImageUtils):
         except Exception as e:
             PyUiLogger().get_logger().warning(f"Unable to get image dimensions for {path}")
             return 0,0
+        
+        
+    def convert_from_png_to_tga(self, png_path):
+        """
+        Converts a PNG file to a 32-bit RGBA TGA using ffmpeg.
+        The TGA will be in the same directory with the same basename.
+        """
+        if not png_path.lower().endswith(".png"):
+            PyUiLogger().get_logger().info(f"{png_path} is not a png")
+            return
+        PyUiLogger().get_logger().info(f"Converting {png_path} to tga")
+
+        tga_path = os.path.splitext(png_path)[0] + ".tga"
+
+        # Open PNG
+        with Image.open(png_path) as img:
+            # Ensure 32-bit RGBA
+            img = img.convert("RGBA")
+            # Save as TGA
+            img.save(tga_path, format="TGA")
+
+        PyUiLogger().get_logger().info(f"Converted {png_path} ==> {tga_path}")
+
+        return tga_path

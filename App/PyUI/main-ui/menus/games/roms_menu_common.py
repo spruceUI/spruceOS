@@ -89,7 +89,7 @@ class RomsMenuCommon(ABC):
         return Theme.get_game_selection_view_type()
 
     def full_screen_grid_resize_type(self):
-        return None
+        return Theme.get_full_screen_grid_game_menu_resize_type()
 
     def get_set_top_bar_text_to_game_selection(self):
         return Theme.get_set_top_bar_text_to_game_selection()

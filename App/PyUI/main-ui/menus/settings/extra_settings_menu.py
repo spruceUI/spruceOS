@@ -130,7 +130,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_image_resizing()):
             option_list.append(
                 GridOrListEntry(
-                    primary_text="Resize Boxart",
+                    primary_text="Optimize Boxart",
                     value_text=None,
                     image_path=None,
                     image_path_selected=None,

@@ -3,7 +3,11 @@
 import os
 from pathlib import Path
 from typing import Callable
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.display import Display
+from games.utils.box_art_resizer import BoxArtResizer
 from games.utils.rom_utils import RomUtils
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.miyoo_game_list import MiyooGameList
@@ -14,6 +18,8 @@ from views.grid_or_list_entry import GridOrListEntry
 
 
 class RomSelectOptionsBuilder:
+    _user_doesnt_want_to_resize = False
+
     def __init__(self):
         self.roms_path = Device.get_roms_dir()
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
@@ -48,23 +54,48 @@ class RomSelectOptionsBuilder:
 
         # Build path to the image using the extracted directory
         root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
+
+        tga_path = os.path.join(root_dir, "Imgs", base_name + ".tga")
+        if os.path.exists(tga_path):
+            return tga_path
+
         image_path = os.path.join(root_dir, "Imgs", base_name + ".png")
 
         if os.path.exists(image_path):
-            return image_path
-        else:
-            # Attempt to construct alternate path by replacing "Roms" with "Imgs"
-            imgs_older_equal_to_roms_parts = parts.copy()
-            imgs_older_equal_to_roms_parts[roms_index] = "Imgs"
-            imgs_folder_equal_to_roms_path = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + ".png")
+            if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
+                if(Device.get_system_config().never_prompt_boxart_resize()):
+                    RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                else:
+                    Display.display_message_multiline([f"Would you like to optimize boxart?", "A = Yes, B = No, X/Y = Never Prompt","","You can manually do this in:","Settings -> Extra Settings -> Optimize BoxArt"], 0)
+                    input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
+                    
+                    if(input == ControllerInput.B):
+                        RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                    elif(input == ControllerInput.X or input == ControllerInput.Y):
+                        Device.get_system_config().set_never_prompt_boxart_resize(True)
+                        RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
 
-            if os.path.exists(imgs_folder_equal_to_roms_path):
-                return imgs_folder_equal_to_roms_path
+            if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
+                RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                BoxArtResizer.process_rom_folders()
+            if os.path.exists(tga_path):
+                return tga_path
             else:
-                #Check for png in same dir
-                same_dir_png = os.path.join(root_dir, base_name + ".png")
-                if os.path.exists(same_dir_png):
-                    return same_dir_png
+                return image_path
+
+        
+        # Attempt to construct alternate path by replacing "Roms" with "Imgs"
+        imgs_older_equal_to_roms_parts = parts.copy()
+        imgs_older_equal_to_roms_parts[roms_index] = "Imgs"
+        imgs_folder_equal_to_roms_path = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + ".png")
+
+        if os.path.exists(imgs_folder_equal_to_roms_path):
+            return imgs_folder_equal_to_roms_path
+        else:
+            #Check for png in same dir
+            same_dir_png = os.path.join(root_dir, base_name + ".png")
+            if os.path.exists(same_dir_png):
+                return same_dir_png
                 
         # Else try the muOS location
         muos_image_path_sd2 = os.path.join("/mnt/sdcard/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
