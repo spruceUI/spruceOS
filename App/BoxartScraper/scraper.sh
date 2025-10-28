@@ -261,4 +261,6 @@ for sys_dir in "$roms_dir"/*/; do
     log_message "BoxartScraper: $sys_name: Scraped: $scraped_count, Skipped: $skip_count, Not Found: $non_found_count"
 done
 
+
+touch /mnt/SDCARD/App/PyUI/pyui_resize_boxart_trigger
 auto_regen_tmp_update
