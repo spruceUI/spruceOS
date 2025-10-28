@@ -69,3 +69,6 @@ class MuosAppConfig(AppConfig):
     
     def get_folder(self):
         return self.folder
+    
+    def is_hidden(self):
+        return False
