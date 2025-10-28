@@ -113,7 +113,7 @@ class BoxArtResizer():
                             patched_count = patched_count + 1
 
         cls._monitoring = False
-        Display.display_message(f"All boxart is resized", 2000)
+        Display.display_message(f"All boxart is optimized", 2000)
 
 
     @classmethod
