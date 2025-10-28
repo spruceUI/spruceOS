@@ -116,8 +116,7 @@ class GridView(View):
 
     def _render_cell(self, visible_index, imageTextPair):
         actual_index = self.current_left + visible_index
-        image_path = imageTextPair.get_image_path_selected(
-        ) if actual_index == self.selected else imageTextPair.get_image_path()
+        image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) if actual_index == self.selected else imageTextPair.get_image_path_ideal(self.resized_width, self.resized_height)
 
         x_index = visible_index % self.cols
         x_offset = int(self.x_pad + (x_index) * (self.icon_width)) + self.icon_width//2

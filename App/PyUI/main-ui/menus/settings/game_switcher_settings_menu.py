@@ -2,7 +2,9 @@
 import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.resize_type import get_next_resize_type
 from menus.settings import settings_menu
+from themes.theme import Theme
 from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -41,7 +43,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
             
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Game Switcher Game Count",
+                        primary_text="Game Count",
                         value_text="<    " + str(Device.get_system_config().game_switcher_game_count()) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -50,7 +52,17 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                         value=self.update_game_switcher_game_count
                     )
             )
-        
+
+            
+        option_list.append(
+            self.build_enum_entry(
+                primary_text="Full Screen Resize Type",
+                get_value_func=Theme.get_resize_type_for_game_switcher,
+                set_value_func=Theme.set_resize_type_for_game_switcher,
+                get_next_enum_type=get_next_resize_type
+            )
+        )
+
         menu_options = self.build_options_list_from_config_menu_options(GameSwitcherSettingsMenu.SETTINGS_NAME)
         option_list.extend(menu_options)
 

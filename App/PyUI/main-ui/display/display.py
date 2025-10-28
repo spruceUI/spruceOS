@@ -18,6 +18,7 @@ from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
 from ctypes import c_double
+import traceback
 
 @dataclass
 class CachedImageTexture:
@@ -238,7 +239,7 @@ class Display:
         cls.bg_path = bg_path
         PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
         if(bg_path is not None):
-            surface = sdl2.sdlimage.IMG_Load(cls.bg_path.encode('utf-8'))
+            surface = Display.image_load(cls.bg_path)
             if not surface:
                 PyUiLogger.get_logger().error(f"Failed to load image: {cls.bg_path}")
                 return
@@ -517,6 +518,11 @@ class Display:
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
     @classmethod
+    def image_load(cls, image_path):
+        #PyUiLogger.get_logger().info(f"Loading {image_path}")
+        return sdl2.sdlimage.IMG_Load(image_path.encode("utf-8"))
+    
+    @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):
         if(image_path is None):
             return 0, 0
@@ -527,10 +533,10 @@ class Display:
             surface = cache.surface
             texture = cache.texture
         else:
-            surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+            surface = Display.image_load(image_path)
             if not surface:
                 cls.log_sdl_error_and_clear_cache()
-                surface = sdl2.sdlimage.IMG_Load(image_path.encode('utf-8'))
+                surface = Display.image_load(image_path)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
                     return 0, 0
@@ -542,7 +548,10 @@ class Display:
 
             if(surface_width > Device.max_texture_width() or surface_height > Device.max_texture_height()):
                 sdl2.SDL_FreeSurface(surface)
-                PyUiLogger.get_logger().warning(f"Image is too large to render. Skipping {image_path}")
+                PyUiLogger.get_logger().warning(
+                    f"Image is too large to render. Skipping {image_path}\n"
+                    f"Stack trace:\n{''.join(traceback.format_stack())}"
+                ) 
                 return 0, 0
 
 
@@ -835,7 +844,7 @@ class Display:
         if(img is None):
             return 0, 0
         
-        surface = sdl2.sdlimage.IMG_Load(img.encode('utf-8'))
+        surface = Display.image_load(img)
         if not surface:
             return 0, 0
         width, height = surface.contents.w, surface.contents.h
@@ -940,11 +949,10 @@ class Display:
 
 
     @classmethod
-    def display_message(cls,message, duration_ms=0):
+    def display_message_multiline(cls,split_message, duration_ms=0):
         Display.clear("")
         text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
 
-        split_message = Display.split_message(message, FontPurpose.LIST,clip_to_device_width=True)
         height_per_line = text_h + int(5 * Device.screen_height()/480)
         starting_height = Device.screen_height()//2 - (len(split_message) * height_per_line)//2
 
@@ -956,6 +964,10 @@ class Display:
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
 
+    @classmethod
+    def display_message(cls,message, duration_ms=0):
+        split_message = Display.split_message(message, FontPurpose.LIST,clip_to_device_width=True)
+        cls.display_message_multiline(split_message,duration_ms)
         
     @classmethod
     def display_image(cls,image_path, duration_ms=0):

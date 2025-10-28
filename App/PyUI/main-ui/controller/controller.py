@@ -249,3 +249,15 @@ class Controller:
                     Device.special_input(controller_input, 0)
 
             Controller.last_press_time_map.pop(controller_input,None)
+
+    @staticmethod
+    def wait_for_input(wanted_inputs):
+        last_input = None
+        Controller.clear_last_input()
+        while(last_input not in wanted_inputs):
+            Controller.get_input()
+            last_input = Controller.last_input()
+
+        PyUiLogger.get_logger().debug(f"Input was : {last_input}")
+
+        return last_input
