@@ -1,7 +1,7 @@
 {
   "label": "DOOM",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/doom.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/doom.png",
+  "icon": "doom.png",
+  "iconsel": "doom_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

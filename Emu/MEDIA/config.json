@@ -1,7 +1,7 @@
 {
   "label": "Media",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ffplay.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ffplay.png",
+  "icon": "ffplay.png",
+  "iconsel": "ffplay_sel.png",
   "background": "",
   "themecolor": "DDEEFF",
   "launch": "../.emu_setup/standard_launch.sh",

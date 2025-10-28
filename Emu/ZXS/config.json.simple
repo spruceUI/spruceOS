@@ -1,7 +1,7 @@
 {
   "label": "ZXS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/zxs.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/zxs.png",
+  "icon": "zxs.png",
+  "iconsel": "zxs_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

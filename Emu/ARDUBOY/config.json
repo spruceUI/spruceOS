@@ -1,7 +1,7 @@
 {
   "label": "Arduboy",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arduboy.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arduboy.png",
+  "icon": "arduboy.png",
+  "iconsel": "arduboy_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "SGB",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgb.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgb.png",
+  "icon": "sgb.png",
+  "iconsel": "sgb_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

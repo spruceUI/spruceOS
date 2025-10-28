@@ -1,7 +1,7 @@
 {
   "label": "DC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
+  "icon": "dc.png",
+  "iconsel": "dc_sel.png",
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
@@ -24,7 +24,9 @@
     },
     "Emulator_A30": {
       "display": "Retroarch Core",
-      "devices": ["MIYOO_A30"],
+      "devices": [
+        "MIYOO_A30"
+      ],
       "options": [
         "flycast",
         "km_flycast_xtreme"
@@ -34,7 +36,11 @@
     },
     "Emulator_64": {
       "display": "Emulator",
-      "devices": ["MIYOO_FLIP", "TRIMUI_SMART_PRO", "TRIMUI_BRICK"],
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_BRICK"
+      ],
       "options": [
         "Flycast-libretro",
         "Flycast-standalone"

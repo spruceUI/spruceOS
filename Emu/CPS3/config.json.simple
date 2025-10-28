@@ -1,7 +1,7 @@
 {
   "label": "CPS3",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps3.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/cps3_sel.png",
   "background": "",
   "themecolor": "FF4400",
   "launch": "../.emu_setup/standard_launch.sh",

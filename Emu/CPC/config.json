@@ -1,7 +1,7 @@
 {
   "label": "Amst CPC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cpc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cpc.png",
+  "icon": "cpc.png",
+  "iconsel": "cpc_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

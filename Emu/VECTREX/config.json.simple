@@ -1,7 +1,7 @@
 {
   "label": "Vectrex",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vectrex.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/vectrex.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/vectrex_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

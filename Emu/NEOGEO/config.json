@@ -1,7 +1,7 @@
 {
   "label": "NeoGeo",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neogeo.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neogeo.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/neogeo_sel.png",
   "background": "",
   "themecolor": "FFD200",
   "launch": "../.emu_setup/standard_launch.sh",

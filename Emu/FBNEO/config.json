@@ -1,7 +1,7 @@
 {
   "label": "FBNEO",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/arcade.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/arcade.png",
+  "icon": "arcade.png",
+  "iconsel": "arcade_sel.png",
   "background": "",
   "themecolor": "EC7063",
   "launch": "../.emu_setup/standard_launch.sh",

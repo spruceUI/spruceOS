@@ -1,7 +1,7 @@
 {
   "label": "NDS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/nds.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/nds.png",
+  "icon": "nds.png",
+  "iconsel": "nds_sel.png",
   "background": "",
   "themecolor": "FF8800",
   "launch": "../.emu_setup/standard_launch.sh",

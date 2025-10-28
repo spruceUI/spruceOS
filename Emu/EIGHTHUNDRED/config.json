@@ -1,7 +1,7 @@
 {
   "label": "Atari 800",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari800.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari800.png",
+  "icon": "atari800.png",
+  "iconsel": "atari800_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

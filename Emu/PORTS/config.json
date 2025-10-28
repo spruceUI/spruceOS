@@ -1,7 +1,7 @@
 {
   "label": "PORTS",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ports.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/ports_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

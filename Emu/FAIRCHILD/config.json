@@ -1,7 +1,7 @@
 {
   "label": "ChannelF",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fairchild.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fairchild.png",
+  "icon": "fairchild.png",
+  "iconsel": "fairchild_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

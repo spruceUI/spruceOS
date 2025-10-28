@@ -1,7 +1,7 @@
 {
   "label": "Sufami",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sufami.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sufami.png",
+  "icon": "sufami.png",
+  "iconsel": "sufami_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

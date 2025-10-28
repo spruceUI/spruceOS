@@ -1,7 +1,7 @@
 {
   "label": "Genesis",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/md.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/md.png",
+  "icon": "md.png",
+  "iconsel": "md_sel.png",
   "background": "",
   "themecolor": "0088CF",
   "launch": "../.emu_setup/standard_launch.sh",

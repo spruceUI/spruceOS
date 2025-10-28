@@ -1,7 +1,7 @@
 {
   "label": "SG-1000",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segasgone.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segasgone.png",
+  "icon": "segasgone.png",
+  "iconsel": "segasgone_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

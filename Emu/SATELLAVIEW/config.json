@@ -1,7 +1,7 @@
 {
   "label": "Satella",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/satella.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/satella.png",
+  "icon": "satella.png",
+  "iconsel": "satella_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

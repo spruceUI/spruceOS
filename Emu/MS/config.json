@@ -1,7 +1,7 @@
 {
   "label": "Sega MS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ms.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ms.png",
+  "icon": "ms.png",
+  "iconsel": "ms_sel.png",
   "background": "",
   "themecolor": "740009",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "WndrSwnC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wsc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wsc.png",
+  "icon": "wsc.png",
+  "iconsel": "wsc_sel.png",
   "background": "",
   "themecolor": "3C4593",
   "launch": "../.emu_setup/standard_launch.sh",

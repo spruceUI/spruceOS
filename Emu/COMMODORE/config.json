@@ -1,7 +1,7 @@
 {
   "label": "C64",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
+  "icon": "c64.png",
+  "iconsel": "c64_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

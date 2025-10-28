@@ -1,7 +1,7 @@
 {
   "label": "FDS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fds.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fds.png",
+  "icon": "fds.png",
+  "iconsel": "fds_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

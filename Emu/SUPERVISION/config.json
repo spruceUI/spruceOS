@@ -1,7 +1,7 @@
 {
   "label": "Supervision",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/supervision.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

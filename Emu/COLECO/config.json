@@ -1,7 +1,7 @@
 {
   "label": "ColecoVis",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/col.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/col.png",
+  "icon": "col.png",
+  "iconsel": "col_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

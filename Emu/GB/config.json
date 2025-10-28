@@ -1,7 +1,7 @@
 {
   "label": "GB",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gb.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gb.png",
+  "icon": "gb.png",
+  "iconsel": "gb_sel.png",
   "background": "",
   "themecolor": "00FF00",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "PSX",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ps.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ps.png",
+  "icon": "ps.png",
+  "iconsel": "ps_sel.png",
   "background": "",
   "themecolor": "00FF00",
   "launch": "../.emu_setup/standard_launch.sh",

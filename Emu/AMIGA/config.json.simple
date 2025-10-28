@@ -1,7 +1,7 @@
 {
   "label": "Amiga",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
+  "icon": "amiga.png",
+  "iconsel": "amiga_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

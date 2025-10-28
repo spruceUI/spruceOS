@@ -1,7 +1,7 @@
 {
   "label": "GBC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gbc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gbc.png",
+  "icon": "gbc.png",
+  "iconsel": "gbc_sel.png",
   "background": "",
   "themecolor": "FFB800",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "SNES",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
+  "icon": "sfc.png",
+  "iconsel": "sfc_sel.png",
   "background": "",
   "themecolor": "FF0000",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "GBA",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
+  "icon": "gba.png",
+  "iconsel": "gba_sel.png",
   "background": "",
   "themecolor": "FF00FF",
   "launch": "../.emu_setup/standard_launch.sh",

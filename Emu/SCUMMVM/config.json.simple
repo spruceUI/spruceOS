@@ -1,7 +1,7 @@
 {
   "label": "ScummVM",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
+  "icon": "scummvm.png",
+  "iconsel": "scummvm_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

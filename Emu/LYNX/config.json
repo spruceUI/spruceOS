@@ -1,7 +1,7 @@
 {
   "label": "Atari Lynx",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/lynx.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/lynx.png",
+  "icon": "lynx.png",
+  "iconsel": "lynx_sel.png",
   "background": "",
   "themecolor": "88FF88",
   "launch": "../.emu_setup/standard_launch.sh",

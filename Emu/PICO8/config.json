@@ -1,7 +1,7 @@
 {
   "label": "Pico-8",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+  "icon": "pico.png",
+  "iconsel": "pico_sel.png",
   "themecolor": "00FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "requiredfiles": [

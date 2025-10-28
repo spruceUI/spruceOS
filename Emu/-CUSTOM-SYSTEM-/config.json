@@ -1,7 +1,7 @@
 {
   "label": "Display Name",
   "icon": "/mnt/SDCARD/path/to/icon/while/not/selected.png",
-  "iconsel": "/mnt/SDCARD/path/to/icon/while/selected.png",
+  "iconsel": "/mnt/SDCARD/path/to/icon/while/not/selected_sel.png",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
   "launchlist": [

@@ -1,7 +1,7 @@
 {
   "label": "Game Tank",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gametank.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gametank.png",
+  "icon": "gametank.png",
+  "iconsel": "gametank_sel.png",
   "launch": "../.emu_setup/standard_launch.sh",
   "rompath": "../../Roms/GAMETANK",
   "imgpath": "../../Roms/GAMETANK/Imgs",
