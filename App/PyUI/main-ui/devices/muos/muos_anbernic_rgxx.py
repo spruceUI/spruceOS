@@ -22,7 +22,8 @@ from utils.py_ui_config import PyUiConfig
 
 class MuosAnbernicRGXX(MuosDevice):
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing MuosAnbernicRGXX")        
         
         self.setup_system_config()
@@ -139,3 +140,6 @@ class MuosAnbernicRGXX(MuosDevice):
 
     def get_image_utils(self):
         return PilImageUtils()
+
+    def get_device_name(self):
+        return self.device_name

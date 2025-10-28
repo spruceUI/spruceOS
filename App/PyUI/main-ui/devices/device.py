@@ -375,3 +375,8 @@ class Device:
     @staticmethod
     def get_boxart_large_resize_dimensions():
         return Device._impl.get_boxart_large_resize_dimensions()
+
+    @staticmethod
+    def get_device_name():
+        return Device._impl.get_device_name()
+

@@ -49,30 +49,30 @@ def log_renderer_info():
         print(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
 
 def initialize_device(device):
-    if "MIYOO_FLIP" == device:
+    if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
-        Device.init(MiyooFlip())
+        Device.init(MiyooFlip(device))
     elif "MIYOO_MINI_FLIP" == device or "SPRIG_MIYOO_MINI_FLIP" == device:
         from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
-        Device.init(MiyooMiniFlip())
-    elif "TRIMUI_BRICK" == device:
+        Device.init(MiyooMiniFlip(device))
+    elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
-        Device.init(TrimUIBrick())
-    elif "TRIMUI_SMART_PRO" == device:
+        Device.init(TrimUIBrick(device))
+    elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
-        Device.init(TrimUISmartPro())
-    elif "MIYOO_A30" == device:
+        Device.init(TrimUISmartPro(device))
+    elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.flip.miyoo_a30 import MiyooA30
-        Device.init(MiyooA30())
+        Device.init(MiyooA30(device))
     elif "ANBERNIC_RG34XXSP" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX())
+        Device.init(MuosAnbernicRGXX(device))
     elif "ANBERNIC_RG28XX" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX())
+        Device.init(MuosAnbernicRGXX(device))
     elif "ANBERNIC_MUOS" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX())
+        Device.init(MuosAnbernicRGXX(device))
     else:
         raise RuntimeError(f"{device} is not a supported device")
 

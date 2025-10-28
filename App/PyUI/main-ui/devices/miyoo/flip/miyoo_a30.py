@@ -27,7 +27,8 @@ class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo A30")        
         
         self.sdl_button_to_input = {
@@ -287,3 +288,6 @@ class MiyooA30(MiyooDevice):
 
     def get_image_utils(self):
         return FfmpegImageUtils()
+
+    def get_device_name(self):
+        return self.device_name

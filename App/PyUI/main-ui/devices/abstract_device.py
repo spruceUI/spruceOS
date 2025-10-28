@@ -332,5 +332,9 @@ class AbstractDevice(ABC):
     def get_boxart_large_resize_dimensions(self):
         pass
 
+    @abstractmethod
+    def get_device_name(self):
+        pass
+
 
 

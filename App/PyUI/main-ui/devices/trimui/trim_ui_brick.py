@@ -16,7 +16,8 @@ from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(TrimUIDevice):
     
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         self.path = self
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -150,3 +151,6 @@ class TrimUIBrick(TrimUIDevice):
         key_mappings[KeyEvent(1, 314, 1)] = [InputResult(ControllerInput.SELECT, KeyState.PRESS)]   
 
         return KeyWatcherController(event_path="/dev/input/event3", key_mappings=key_mappings)
+    
+    def get_device_name(self):
+        return self.device_name
