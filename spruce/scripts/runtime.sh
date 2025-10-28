@@ -76,6 +76,7 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
         mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
         mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
         mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+        /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
 
     )
 
