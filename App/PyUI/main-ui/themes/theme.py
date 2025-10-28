@@ -156,7 +156,6 @@ class Theme():
     @classmethod
     def _icon(cls, *parts):
         path = os.path.join(cls._path, cls._icon_folder, *parts)
-        PyUiLogger.get_logger().info(f"{path}")
         # If the file doesn't exist and ends with .tga, try the PNG fallback
         if not os.path.exists(path) or not Device.supports_tga():
             png_path = path[:-4] + ".png" 
@@ -1024,9 +1023,6 @@ class Theme():
 
     @classmethod
     def get_app_icon(cls, app_name):
-        app_icon_path = cls._icon("app",app_name)
-        PyUiLogger.get_logger().info(f"App icon path is {app_icon_path}")
-
         return cls._icon("app",app_name)
 
     @classmethod
