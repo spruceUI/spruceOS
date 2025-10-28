@@ -6,12 +6,7 @@
   "themecolor": "FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    }
-  ],
+  "launchlist": [],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -21,6 +16,35 @@
         "Overclock"
       ],
       "selected": "Smart",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "km_ludicrousn64_2k22_xtreme_amped",
+        "km_parallel_n64_xtreme_amped_turbo",
+        "mupen64plus"
+      ],
+      "selected": "km_ludicrousn64_2k22_xtreme_amped",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_BRICK"
+      ],
+      "options": [
+        "km_ludicrousn64_2k22_xtreme_amped",
+        "parallel_n64",
+        "mupen64plus",
+        "mupen64plus-standalone"
+      ],
+      "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}
     }
   },

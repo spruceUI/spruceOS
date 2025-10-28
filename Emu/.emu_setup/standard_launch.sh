@@ -18,7 +18,7 @@ export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 
-if [ "$EMU_NAME" = "DC" ]; then
+if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ]; then
 	if [ "$PLATFORM" = "A30" ]; then
 		export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
 	else
@@ -775,7 +775,7 @@ case $EMU_NAME in
 		fi
 		;;
 	"N64")
-			if [ "$CORE" = "mupen64plus" ] && [ ! "$PLATFORM" = "A30" ]; then
+			if [ "$CORE" = "mupen64plus-standalone" ]; then
 				run_mupen_standalone
 			else
 				load_n64_controller_profile
