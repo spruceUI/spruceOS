@@ -111,7 +111,7 @@ class Display:
         sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         cls.restore_bg()
-        cls.clear("init")
+        cls.clear("")
         cls.present()
         if(Device.double_init_sdl_display()):
             Display.deinit_display()
