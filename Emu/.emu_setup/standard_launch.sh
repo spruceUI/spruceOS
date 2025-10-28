@@ -24,6 +24,12 @@ if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ]; then
 	else
 		export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
 	fi
+elif [ "$EMU_NAME" = "NDS" ]; then
+	if [ "$PLATFORM" = "Flip" ]; then
+		export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"
+	elif [ "$PLATFORM" = "Brick" ]; then	
+		export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")"
+	fi
 else
 	export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
 fi
@@ -232,7 +238,7 @@ run_drastic() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 
-	if [ "$PLATFORM" = "A30" ]; then # only Steward is available; core switching does nothing
+	if [ "$PLATFORM" = "A30" ]; then # only Steward is available.
 
 		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
@@ -263,7 +269,7 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			if [ "$CORE" = "drastic-steward" ]; then
+			if [ "$CORE" = "DraStic-Steward" ]; then
 				kill_runner
 				LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
 				sleep 1
@@ -694,7 +700,7 @@ run_yabasanshiro() {
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
 		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
-	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "sa_bios" ]; then
+	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
@@ -768,9 +774,10 @@ case $EMU_NAME in
 		save_ppsspp_configs
 		;;
 	"SATURN")
-		if [ "$CORE" = "sa_hle" ] || [ "$CORE" = "sa_bios" ]; then
+		if [ "$CORE" = "yabasanshiro-standalone-bios" ] || [ "$CORE" = "yabasanshiro-standalone-hle" ]; then
 			run_yabasanshiro
 		else
+			export CORE="yabasanshiro"
 			run_retroarch
 		fi
 		;;

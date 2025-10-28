@@ -19,16 +19,27 @@
       "selected": "Smart",
       "overrides": {}
     },
-    "Emulator": {
+    "Emulator_Flip": {
       "display": "Emulator",
       "devices": [
-        "MIYOO_FLIP",
-        "TRIMUI_BRICK"
+        "MIYOO_FLIP"
       ],
       "options": [
         "DraStic-original",
         "DraStic-Steward",
         "DraStic-trngaje"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
+    },
+    "Emulator_Brick": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-Steward"
       ],
       "selected": "DraStic-original",
       "overrides": {}

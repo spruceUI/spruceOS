@@ -8,10 +8,6 @@
   "extlist": "chd|zip|mds|ccd|iso|cue",
   "launchlist": [
     {
-      "name": "Emu Core: (✓LIBRETRO)-sa_bios-sa_hle",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
       "name": "Generate M3U playlists for multi-disc games",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
     }
@@ -26,12 +22,22 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Emulator": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro-libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "selected": "fbalpha2012",
+      "overrides": {}
     }
   },
   "sortOrder": 5500,
   "brand": "Sega",
   "type": "homeconsole",
   "releaseYear": 1994,
-  "default_emulator": "yabasanshiro",
+  "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000
 }
