@@ -50,7 +50,10 @@ class AppMenu:
         last_selected_dir, last_selected_file = PyUiState.get_last_app_selection()
         idx = 0
         for app in self.appFinder.get_apps():
-            if(app.get_label() is not None and not app.is_hidden()):
+            hidden = app.is_hidden()
+            devices = app.get_devices()
+            supported_device = not devices or Device.get_device_name() in devices
+            if(app.get_label() is not None and not hidden and supported_device):
                 icon = self.get_icon(app.get_folder(),app.get_icon())
                 app_list.append(
                     GridOrListEntry(

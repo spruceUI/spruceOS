@@ -33,3 +33,7 @@ class AppConfig(ABC):
     @abstractmethod
     def is_hidden(self):
         pass
+    
+    @abstractmethod
+    def get_devices(self):
+        pass

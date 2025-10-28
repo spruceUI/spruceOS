@@ -72,3 +72,6 @@ class MuosAppConfig(AppConfig):
     
     def is_hidden(self):
         return False
+
+    def get_devices(self):
+        return []

@@ -45,7 +45,8 @@ class MiyooMiniFlip(MiyooDevice):
     SOUND_DISABLED = 0
 
 
-    def __init__(self):
+    def __init__(self, device_name):
+        self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo Mini Flip")        
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
@@ -490,3 +491,5 @@ class MiyooMiniFlip(MiyooDevice):
     def get_boxart_large_resize_dimensions(self):
         return 180, 180
     
+    def get_device_name(self):
+        return self.device_name
