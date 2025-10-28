@@ -69,7 +69,7 @@ class FileBasedGameSystemConfig():
     
     def get_release_year(self):
         return self._data.get('releaseYear', 9999999)
-    
+        
     def save_config(self):
         with open(self.config_path, 'w', encoding='utf-8') as f:
             json.dump(self._data, f, indent=4)
