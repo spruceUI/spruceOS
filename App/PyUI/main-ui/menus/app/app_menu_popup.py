@@ -36,14 +36,15 @@ class AppMenuPopup:
     def run_app_menu_popup(self, app: AppConfig):
         popup_options = []
 
-        popup_options.append(GridOrListEntry(
-                primary_text="Show App" if AppsManager.is_hidden(app) else "Hide App",
-                image_path=Theme.settings(),
-                image_path_selected=Theme.settings_selected(),
-                description="",
-                icon=None,
-                value=lambda input_value, app=app: self.toggle_hiding_app(app, input_value)
-        ))
+        if(app):
+            popup_options.append(GridOrListEntry(
+                    primary_text="Show App" if AppsManager.is_hidden(app) else "Hide App",
+                    image_path=Theme.settings(),
+                    image_path_selected=Theme.settings_selected(),
+                    description="",
+                    icon=None,
+                    value=lambda input_value, app=app: self.toggle_hiding_app(app, input_value)
+            ))
 
         popup_options.append(GridOrListEntry(
                 primary_text="Hide Hidden Apps" if self.current_show_all_apps_setting else "Show Hidden Apps",
@@ -54,10 +55,13 @@ class AppMenuPopup:
                 value=lambda input_value: self.toggle_show_all_apps(input_value)
         ))
 
+        top_bar_text = "App Options"
+        if(app):
+            top_bar_text = f"{app.get_label()} Sub Options"
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
-            top_bar_text=f"{app.get_label()} Sub Options",
+            top_bar_text=top_bar_text,
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
