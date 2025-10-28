@@ -18,7 +18,7 @@ export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 
-if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ]; then
+if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ] || [ "$EMU_NAME" = "PS" ]; then
 	if [ "$PLATFORM" = "A30" ]; then
 		export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
 	else
@@ -549,11 +549,12 @@ run_retroarch() {
 			if [ "$CORE" = "yabasanshiro" ]; then
 				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 				export RA_BIN="ra64.miyoo"
-			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			elif setting_get "expertRA" || [ "$CORE" = "parallel_n64" ]; then
 				export RA_BIN="retroarch-flip"
 			else
 				export RA_BIN="ra64.miyoo"
 			fi
+			
 			if [ "$CORE" = "easyrpg" ]; then
 				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			elif [ "$CORE" = "yabasanshiro" ]; then
@@ -561,13 +562,6 @@ run_retroarch() {
 			fi
 		;;
 		"A30" )
-			# handle different version of ParaLLEl N64 core and flycast xtreme core for A30
-			if [ "$CORE" = "parallel_n64" ]; then
-				CORE="km_parallel_n64_xtreme_amped_turbo"
-			elif [ "$CORE" = "flycast_xtreme" ]; then
-				CORE="km_flycast_xtreme"
-			fi
-
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch"
 			else
