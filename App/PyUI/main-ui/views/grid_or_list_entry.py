@@ -151,6 +151,9 @@ class GridOrListEntry:
         elif(target_height is not None and target_height > Device.max_texture_height()):
             #PyUiLogger.get_logger().info(f"Going with large due to source being too large  {target_height} > {Device.max_texture_height()}")
             return self.get_image_path_large(image_path)       
+        elif(Device.max_texture_height() < 1000 or Device.max_texture_width() < 1000):
+            #PyUiLogger.get_logger().info(f"Going with large for safety concern of base image being too large")
+            return self.get_image_path_large(image_path)       
         else :
             #PyUiLogger.get_logger().info(f"Going with full size image. Target dimensions are  {target_width} x {target_height}")
             return image_path
