@@ -225,6 +225,8 @@ class GameSystemSelectMenu:
             if(PyUiState.get_in_game_selection_screen()):
                 return_value = self.rom_select_menu.run_rom_selection(self.selected.get_selection().get_value())
                 if(return_value is not None):
+                    if(ControllerInput.B == return_value):
+                        PyUiState.set_in_game_selection_screen(None)
                     return return_value
 
         else:
@@ -257,12 +259,16 @@ class GameSystemSelectMenu:
                 PyUiState.set_last_system_selection(self.selected.get_selection().get_value().display_name)
                 return_value = self.rom_select_menu.run_rom_selection(self.selected.get_selection().get_value())
                 if(return_value is not None):
-                    return return_value
+                    if(ControllerInput.B == return_value):
+                        PyUiState.set_in_game_selection_screen(None)
+                    if(Theme.skip_main_menu()):
+                        return return_value
             elif(ControllerInput.MENU == self.selected.get_input()):
                 return_value = self.game_system_select_menu_popup.run_popup_menu_selection(self.selected.get_selection().get_value())
                 if(return_value is not None):
                     return return_value
             elif(ControllerInput.B == self.selected.get_input() and not Theme.skip_main_menu()):
+                PyUiState.set_in_game_selection_screen(None)
                 exit = True
             elif(Theme.skip_main_menu() and ControllerInput.L1 == self.selected.get_input()):
                 return ControllerInput.L1

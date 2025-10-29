@@ -155,12 +155,16 @@ class DaijishoThemeIndex:
                 shortname = self.shortname_map.get(name)
                 uniquename = self.uniqueid_map.get(name)
                 if(shortname is not None):
-                    return self._convert_if_needed(shortname)
+                    file_name = self._convert_if_needed(shortname)
+                    #PyUiLogger.get_logger().info(f"Returning {file_name} for {system}")
+                    return file_name
                 elif(uniquename is not None):
-                    return self._convert_if_needed(uniquename)
+                    file_name = self._convert_if_needed(uniquename)
+                    #PyUiLogger.get_logger().info(f"Returning {file_name} for {system}")
+                    return file_name
         
-        PyUiLogger.get_logger().info(f"No theme image found for {system}")
-        return None
+        #PyUiLogger.get_logger().info(f"No theme image found for {system}")
+        return self.get_default_filename()
 
     def get_default_filename(self):
         return self._convert_if_needed(self.default_filename)
