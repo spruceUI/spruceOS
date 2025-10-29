@@ -1,25 +1,26 @@
 {
   "label": "Display Name",
-  "icon": "selected.png",
-  "iconsel": "selected_sel.png",
+  "icon": "iconname.png",
+  "iconsel": "iconname_sel.png",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 1900,
   "brand": "-CUSTOM-SYSTEM-",
   "type": "other",
-  "releaseYear": 9999
+  "releaseYear": 9999,
+  "default_emulator": "libgametank",
+  "scaling_min_freq": 1008000
 }

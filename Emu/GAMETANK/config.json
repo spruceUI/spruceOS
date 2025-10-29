@@ -3,8 +3,6 @@
   "icon": "gametank.png",
   "iconsel": "gametank_sel.png",
   "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/GAMETANK",
-  "imgpath": "../../Roms/GAMETANK/Imgs",
   "gamelist": "../../Roms/GAMETANK/miyoogamelist.xml",
   "extlist": "gtr",
   "launchlist": [],
