@@ -243,7 +243,8 @@ class GameSystemSelectMenu:
                 selected_index=self.selected.get_index(),
                 use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_system_select_show_sel_bg_grid_mode(),
                 hide_grid_bg=not Theme.get_system_select_show_sel_bg_grid_mode(),
-                show_grid_text=Theme.get_system_select_show_text_grid_mode()
+                show_grid_text=Theme.get_system_select_show_text_grid_mode(),
+                full_screen_grid_render_text_overlay=Theme.get_system_select_render_full_screen_grid_text_overlay()
             )
         else:
             view.set_options(self.systems_list)

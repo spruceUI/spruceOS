@@ -41,5 +41,12 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                         Theme.set_system_select_show_sel_bg_grid_mode)
             )
             
+        if(ViewType.FULLSCREEN_GRID == Theme.get_view_type_for_system_select_menu()):
+            option_list.append(
+                self.build_enabled_disabled_entry("Show Text", 
+                                        Theme.get_system_select_render_full_screen_grid_text_overlay, 
+                                        Theme.set_system_select_render_full_screen_grid_text_overlay)
+            )
+                
             
         return option_list
