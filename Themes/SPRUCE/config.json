@@ -40,7 +40,9 @@
         "color": "#FBF1C7",
         "selectedcolor": "#FBF1C7"
     },
-    "bindOverMiyooTheme":true,
+    "bindOverMiyooTheme": true,
     "recentsEnabled": false,
-    "topBarInitialXOffset": 60
+    "topBarInitialXOffset": 60,
+    "setTopBarTextToGameSelection": true,
+    "fullScreenGridGameMenuResizeType": "FIT"
 }
