@@ -23,5 +23,7 @@
   "sortOrder": 2650,
   "brand": "other",
   "type": "fantasy",
-  "releaseYear": 2023
+  "releaseYear": 2023,
+  "default_emulator": "libgametank",
+  "scaling_min_freq": 1008000
 }
