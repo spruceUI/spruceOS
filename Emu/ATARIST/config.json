@@ -1,7 +1,7 @@
 {
   "label": "Atari ST",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atarist.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/atarist_sel.png",
+  "icon": "atarist.png",
+  "iconsel": "atarist_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
