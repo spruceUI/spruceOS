@@ -17,8 +17,6 @@ libSDL2_mixer-2.0.so.0 \
 libSDL2_mixer-2.0.so.0.0.1 \
 libSDL2_ttf-2.0.so.0 \
 libSDL2_ttf-2.0.so.0.14.1 \
-libSDL_image-1.2.so.0 \
-libSDL_image-1.2.so.0.8.4 \
 libSDL_mixer-1.2.so.0 \
 libSDL_mixer-1.2.so.0.12.0 \
 libSDL_ttf-2.0.so.0 \
