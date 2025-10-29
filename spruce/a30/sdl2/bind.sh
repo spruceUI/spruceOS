@@ -6,7 +6,6 @@ for f in \
 libSDL-1.2.so.0 \
 libSDL2-2.0.so.0 \
 libSDL2_gfx-1.0.so.0 \
-libSDL2_image-2.0.so.0 \
 libSDL2_mixer-2.0.so.0 \
 libSDL2_ttf-2.0.so.0 \
 libSDL_mixer-1.2.so.0 \
