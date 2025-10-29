@@ -1,7 +1,7 @@
 {
   "label": "X68000",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/x68000.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/x68000_sel.png",
+  "icon": "x68000.png",
+  "iconsel": "x68000_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "TG-16",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pce.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/pce_sel.png",
+  "icon": "pce.png",
+  "iconsel": "pce_sel.png",
   "background": "",
   "themecolor": "EA483F",
   "launch": "../.emu_setup/standard_launch.sh",

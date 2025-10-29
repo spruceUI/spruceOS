@@ -1,7 +1,7 @@
 {
   "label": "G&W",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gw.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/gw_sel.png",
+  "icon": "gw.png",
+  "iconsel": "gw_sel.png",
   "background": "",
   "themecolor": "FF0000",
   "launch": "../.emu_setup/standard_launch.sh",

@@ -1,7 +1,7 @@
 {
   "label": "VirtualBoy",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vb.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/vb_sel.png",
+  "icon": "vb.png",
+  "iconsel": "vb_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

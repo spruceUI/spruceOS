@@ -1,7 +1,7 @@
 {
   "label": "PSP",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/psp_sel.png",
+  "icon": "psp.png",
+  "iconsel": "psp_sel.png",
   "background": "",
   "themecolor": "64A8BD",
   "launch": "../.emu_setup/standard_launch.sh",

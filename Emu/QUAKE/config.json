@@ -1,7 +1,7 @@
 {
   "label": "Quake",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/quake.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/quake_sel.png",
+  "icon": "quake.png",
+  "iconsel": "quake_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

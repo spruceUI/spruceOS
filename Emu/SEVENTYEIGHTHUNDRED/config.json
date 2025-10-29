@@ -1,7 +1,7 @@
 {
   "label": "Atari 7800",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/7800.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/7800_sel.png",
+  "icon": "7800.png",
+  "iconsel": "7800_sel.png",
   "background": "",
   "themecolor": "A569BD",
   "launch": "../.emu_setup/standard_launch.sh",

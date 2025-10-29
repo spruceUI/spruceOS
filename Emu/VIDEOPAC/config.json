@@ -1,7 +1,7 @@
 {
   "label": "VideoPac",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/vdp.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/vdp_sel.png",
+  "icon": "vdp.png",
+  "iconsel": "vdp_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
