@@ -642,21 +642,29 @@ class Theme():
     @classmethod
     def get_system_select_show_text_grid_mode(cls):
         return cls._data.get("systemSelectShowTextGridMode", True)
-    
+        
     @classmethod
     def set_system_select_show_text_grid_mode(cls, value):
         cls._data["systemSelectShowTextGridMode"] = value
         cls.save_changes()
 
     @classmethod
+    def get_system_select_render_full_screen_grid_text_overlay(cls):
+        return cls._data.get("systemSelectFullScreenGridTextOverlay", True)
+    
+    @classmethod
+    def set_system_select_render_full_screen_grid_text_overlay(cls, value):
+        cls._data["systemSelectFullScreenGridTextOverlay"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_game_select_show_text_grid_mode(cls):
         return cls._data.get("gameSelectShowTextGridMode", False)
-    
+
     @classmethod
     def set_game_select_show_text_grid_mode(cls, value):
         cls._data["gameSelectShowTextGridMode"] = value
         cls.save_changes()
-
 
     @classmethod
     def get_game_select_show_sel_bg_grid_mode(cls):

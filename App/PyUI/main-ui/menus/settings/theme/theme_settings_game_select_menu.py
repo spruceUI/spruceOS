@@ -24,6 +24,8 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
             option_list += self.build_grid_specific_options()
         elif (ViewType.CAROUSEL == Theme.get_game_selection_view_type()):
             option_list += self.build_carousel_specific_options()
+        elif(ViewType.FULLSCREEN_GRID == Theme.get_game_selection_view_type()):
+            option_list += self.build_full_screen_grid_specific_options()
         return option_list
 
     def build_grid_specific_options(self):
@@ -120,4 +122,24 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
                     Theme.get_carousel_game_select_sides_hang_off,
                     Theme.set_carousel_game_select_sides_hang_off)
             )
+        return option_list
+
+    def build_full_screen_grid_specific_options(self):
+        option_list = []
+        option_list.append(
+            self.build_enabled_disabled_entry(
+                "TopBar = GameName",
+                Theme.get_set_top_bar_text_to_game_selection,
+                Theme.set_set_top_bar_text_to_game_selection)
+        )
+
+        option_list.append(
+            self.build_enum_entry(
+                primary_text="BoxArt Resize Type",
+                get_value_func=Theme.get_full_screen_grid_game_menu_resize_type,
+                set_value_func=Theme.set_full_screen_grid_game_menu_resize_type,
+                get_next_enum_type=get_next_resize_type
+            )
+        )
+        
         return option_list

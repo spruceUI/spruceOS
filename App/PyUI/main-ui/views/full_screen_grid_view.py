@@ -21,8 +21,12 @@ class FullScreenGridView(View):
                  selected_index=0, show_grid_text=True,
                  set_top_bar_text_to_selection=False, 
                  unselected_bg = None, missing_image_path=None,
-                 resize_type = ResizeType.ZOOM):
+                 resize_type = ResizeType.ZOOM,
+                 render_text_overlay = True):
         super().__init__()
+        if(render_text_overlay is None):
+            render_text_overlay = True
+        self.render_text_overlay = render_text_overlay
         self.resized_width = int(Device.screen_width() * 1.0)
         self.resized_height = int(Device.screen_height() * 0.75)
         self.resize_type = resize_type
@@ -30,7 +34,7 @@ class FullScreenGridView(View):
             self.resize_type = ResizeType.ZOOM
 
         self.top_bar_text = top_bar_text
-        self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
+        self.set_top_bar_text_to_selection = set_top_bar_text_to_selection and not Theme.skip_main_menu()
         self.options: List[GridOrListEntry] = options
 
         self.max_img_height = self.resized_height
@@ -85,54 +89,54 @@ class FullScreenGridView(View):
             self.current_right +=1
 
     def _render_shadowed_text(self, primary_text, y_offset_base, backdrop_font, front_font, x_offset, alpha=None):
+        if(self.render_text_overlay):
+            #TODO hardcoded values of 25        
+            shadow_color =  Theme.text_color(backdrop_font)
+            # Render black text surfaces at offsets for the "outline"
+            shift_amt = 5
+            if(alpha is None):
+                for dx in range (1,shift_amt):
+                    for dy in range(1,shift_amt):
+                        Display.render_text(primary_text,
+                                                x_offset + dx,
+                                                y_offset_base + dy,
+                                                shadow_color,
+                                                backdrop_font,
+                                                render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                                                alpha=alpha)
+                        Display.render_text(primary_text,
+                                                x_offset - dx,
+                                                y_offset_base + dy,
+                                                shadow_color,
+                                                backdrop_font,
+                                                render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                                                alpha=alpha)
+                        Display.render_text(primary_text,
+                                                x_offset + dx,
+                                                y_offset_base - dy,
+                                                shadow_color,
+                                                backdrop_font,
+                                                render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                                                alpha=alpha)
+                        Display.render_text(primary_text,
+                                                x_offset - dx,
+                                                y_offset_base - dy,
+                                                shadow_color,
+                                                backdrop_font,
+                                                render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                                                alpha=alpha)
+            primary_color =  Theme.text_color(front_font)
 
-        #TODO hardcoded values of 25        
-        shadow_color =  Theme.text_color(backdrop_font)
-        # Render black text surfaces at offsets for the "outline"
-        shift_amt = 5
-        if(alpha is None):
-            for dx in range (1,shift_amt):
-                for dy in range(1,shift_amt):
-                    Display.render_text(primary_text,
-                                            x_offset + dx,
-                                            y_offset_base + dy,
-                                            shadow_color,
-                                            backdrop_font,
-                                            render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                                            alpha=alpha)
-                    Display.render_text(primary_text,
-                                            x_offset - dx,
-                                            y_offset_base + dy,
-                                            shadow_color,
-                                            backdrop_font,
-                                            render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                                            alpha=alpha)
-                    Display.render_text(primary_text,
-                                            x_offset + dx,
-                                            y_offset_base - dy,
-                                            shadow_color,
-                                            backdrop_font,
-                                            render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                                            alpha=alpha)
-                    Display.render_text(primary_text,
-                                            x_offset - dx,
-                                            y_offset_base - dy,
-                                            shadow_color,
-                                            backdrop_font,
-                                            render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                                            alpha=alpha)
-        primary_color =  Theme.text_color(front_font)
-
-        # Render text in primary color
-        offsets = [(0,0)]  # diagonal directions
-        for dx, dy in offsets:
-            Display.render_text(primary_text,
-                                    x_offset + dx,
-                                    y_offset_base + dy,
-                                    primary_color,
-                                    front_font,
-                                    render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                                    alpha=alpha)
+            # Render text in primary color
+            offsets = [(0,0)]  # diagonal directions
+            for dx, dy in offsets:
+                Display.render_text(primary_text,
+                                        x_offset + dx,
+                                        y_offset_base + dy,
+                                        primary_color,
+                                        front_font,
+                                        render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                                        alpha=alpha)
 
     def _render_primary_image(self,
                               image_path: str,
