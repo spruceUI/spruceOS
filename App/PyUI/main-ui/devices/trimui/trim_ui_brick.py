@@ -120,8 +120,8 @@ class TrimUIBrick(TrimUIDevice):
         key_mappings[KeyEvent(1, 304, 1)] = [InputResult(ControllerInput.B, KeyState.PRESS)]
         key_mappings[KeyEvent(1, 305, 0)] = [InputResult(ControllerInput.A, KeyState.RELEASE)]  
         key_mappings[KeyEvent(1, 305, 1)] = [InputResult(ControllerInput.A, KeyState.PRESS)]   
-        key_mappings[KeyEvent(1, 306, 0)] = [InputResult(ControllerInput.X, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 306, 1)] = [InputResult(ControllerInput.X, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 308, 0)] = [InputResult(ControllerInput.X, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 308, 1)] = [InputResult(ControllerInput.X, KeyState.PRESS)]  
         key_mappings[KeyEvent(1, 307, 0)] = [InputResult(ControllerInput.Y, KeyState.RELEASE)]  
         key_mappings[KeyEvent(1, 307, 1)] = [InputResult(ControllerInput.Y, KeyState.PRESS)]  
 
@@ -154,3 +154,5 @@ class TrimUIBrick(TrimUIDevice):
     
     def get_device_name(self):
         return self.device_name
+        
+    

@@ -7,6 +7,7 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from utils.logger import PyUiLogger
 
 
 class BoxArtResizer():
@@ -127,9 +128,10 @@ class BoxArtResizer():
         
 
         Device.get_image_utils().shrink_image_if_needed(image_file,output_path,target_width, target_height)
-        Device.get_image_utils().convert_from_png_to_tga(output_path)
         #Remove the png
         try:
+            Device.get_image_utils().convert_from_png_to_tga(output_path)
             os.remove(output_path)
-        except Exception:
+        except Exception as e:
+            PyUiLogger().get_logger().warning(f"Unable to convert {output_path} : {e}")
             pass

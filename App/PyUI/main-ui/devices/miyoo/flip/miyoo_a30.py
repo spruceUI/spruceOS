@@ -291,3 +291,4 @@ class MiyooA30(MiyooDevice):
 
     def get_device_name(self):
         return self.device_name
+

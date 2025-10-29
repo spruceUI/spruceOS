@@ -122,7 +122,7 @@ class RomsMenuCommon(ABC):
 
     def _run_rom_selection(self, page_name) :
         rom_list = self._get_rom_list()
-        self._run_rom_selection_for_rom_list(page_name,rom_list)
+        return self._run_rom_selection_for_rom_list(page_name,rom_list)
 
     def get_additional_menu_options(self):
         return []
@@ -237,6 +237,22 @@ class RomsMenuCommon(ABC):
                     if(Theme.get_game_selection_view_type() != prev_view or original_length != new_length):
                         view = self.create_view(page_name,rom_list,selected)
                 elif(ControllerInput.B == selected.get_input()):
+                    
+                    PyUiState.set_last_game_selection(
+                        page_name,
+                        selected.get_selection().get_value().rom_file_path,
+                        getattr(self, 'subfolder', '') or ''
+                    )
+
+                    if(selected.get_selection().get_value().is_collection):
+                        PyUiState.set_last_game_selection(
+                            page_name,
+                            "Collection",
+                            selected.get_selection().get_value().rom_file_path
+                        )
+                        
+
+
                     return ControllerInput.B
                 elif(ControllerInput.SELECT == selected.get_input()):
                     if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):

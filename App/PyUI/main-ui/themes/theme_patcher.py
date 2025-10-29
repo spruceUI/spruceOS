@@ -27,8 +27,12 @@ class ThemePatcher():
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.lower().endswith(".png"):
-                    full_path = os.path.join(dirpath, filename)
-                    cls.convert_png_to_tga(full_path)      
+                    try:
+                        full_path = os.path.join(dirpath, filename)
+                        cls.convert_png_to_tga(full_path)      
+                    except Exception as e:
+                        PyUiLogger().get_logger().warning(f"Unable to convert {full_path} : {e}")
+
         return True   
        
     @classmethod

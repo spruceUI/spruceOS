@@ -145,7 +145,7 @@ class Theme():
     def _asset(cls, *parts):
         path = os.path.join(cls._path, cls._skin_folder, *parts)
         # If the file doesn't exist and ends with .tga, try the PNG fallback
-        if not os.path.exists(path):
+        if not os.path.exists(path) or not Device.supports_tga():
             png_path = path[:-4] + ".png" 
             if os.path.exists(png_path):
                 return png_path
@@ -155,7 +155,15 @@ class Theme():
         
     @classmethod
     def _icon(cls, *parts):
-        return os.path.join(cls._path, cls._icon_folder, *parts)
+        path = os.path.join(cls._path, cls._icon_folder, *parts)
+        # If the file doesn't exist and ends with .tga, try the PNG fallback
+        if not os.path.exists(path) or not Device.supports_tga():
+            png_path = path[:-4] + ".png" 
+            if os.path.exists(png_path):
+                return png_path
+
+        # Otherwise return the original path
+        return path
 
     @classmethod
     def background(cls, page = None):
@@ -329,7 +337,7 @@ class Theme():
         if(cls._daijisho_theme_index is not None):
             return cls._daijisho_theme_index.get_file_name_for_system(system)
         else:
-            return os.path.join(cls._path, cls._icon_folder, system + ".tga")
+            return cls._icon(system + ".tga")
 
     @classmethod
     def get_default_system_icon(cls):
@@ -343,7 +351,7 @@ class Theme():
         if(cls._daijisho_theme_index is not None):
             return cls._daijisho_theme_index.get_file_name_for_system(system)
         else:
-            return os.path.join(cls._path, cls._icon_folder, "sel", system + ".tga")
+            return cls._icon("sel",system + ".tga")
 
     @classmethod
     def get_font(cls, font_purpose : FontPurpose):
@@ -1015,9 +1023,6 @@ class Theme():
 
     @classmethod
     def get_app_icon(cls, app_name):
-        app_icon_path = cls._icon("app",app_name)
-        PyUiLogger.get_logger().info(f"App icon path is {app_icon_path}")
-
         return cls._icon("app",app_name)
 
     @classmethod

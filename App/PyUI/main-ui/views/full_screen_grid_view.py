@@ -63,7 +63,7 @@ class FullScreenGridView(View):
 
         self.last_selected = self.selected
         self.last_start = 0
-
+        self.animated_count = 0
 
     def set_options(self, options):
         self.options = options
@@ -166,16 +166,29 @@ class FullScreenGridView(View):
         imageTextPair = self.options[index]
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()
-        secondary_text = imageTextPair.get_description()
+        secondary_text = imageTextPair.get_description()  
+        y_offset = Display.get_top_bar_height(False)
         if(self.resize_type is ResizeType.FIT):
             render_mode = RenderMode.TOP_CENTER_ALIGNED
             x_offset += Device.screen_width() // 2
         else:
-            render_mode = RenderMode.TOP_LEFT_ALIGNED
+            top_aligned = False
+            bottom_aligned = False
+            if(top_aligned):
+                render_mode = RenderMode.TOP_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+            elif(bottom_aligned):
+                render_mode = RenderMode.BOTTOM_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+                y_offset = Device.screen_height() - Display.get_top_bar_height(False)
+            else:
+                render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
+                x_offset += Device.screen_width() // 2
+                y_offset = Display.get_top_bar_height(False) + (Display.get_usable_screen_height(False))//2
         
         self._render_primary_image( image_path,
                                     x_offset,
-                                    Display.get_top_bar_height(False),
+                                    y_offset,
                                     render_mode,
                                     target_width=self.resized_width,
                                     target_height=self.resized_height,
@@ -246,6 +259,7 @@ class FullScreenGridView(View):
             self._render_entire_screen(index=self.selected,x_offset=0)
         else:
             self._render_entire_screen(index=self.selected,x_offset=0)
+            self.animated_count = 0
 
         self.last_selected = self.selected
         Display.present()
@@ -287,7 +301,8 @@ class FullScreenGridView(View):
     def animate_transition(self):
         if not PyUiConfig.animations_enabled():
             return
-        animation_duration = 0.20  # seconds
+
+        animation_duration = 0.20 - self.animated_count *0.04  # seconds
         start_time = time.time()
         total_shift = Device.screen_width()
         last_frame_time = 0
@@ -295,7 +310,7 @@ class FullScreenGridView(View):
 
         diff = (self.selected - self.last_selected) % (len(self.options) + 1)
         rotate_left = diff > (len(self.options) + 1) // 2
-        while True:
+        while animation_duration > 0:
             elapsed = time.time() - start_time
             t = min(elapsed / animation_duration, 1.0)  # clamp to [0, 1]
 
@@ -326,3 +341,4 @@ class FullScreenGridView(View):
                 break
 
             last_frame_time = time.time()
+        self.animated_count += 1

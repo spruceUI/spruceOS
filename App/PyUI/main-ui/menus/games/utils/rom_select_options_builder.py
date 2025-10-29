@@ -56,30 +56,33 @@ class RomSelectOptionsBuilder:
         root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
 
         tga_path = os.path.join(root_dir, "Imgs", base_name + ".tga")
-        if os.path.exists(tga_path):
+        if os.path.exists(tga_path) and Device.supports_tga():
             return tga_path
 
         image_path = os.path.join(root_dir, "Imgs", base_name + ".png")
 
         if os.path.exists(image_path):
-            if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
-                if(Device.get_system_config().never_prompt_boxart_resize()):
-                    RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
-                else:
-                    Display.display_message_multiline([f"Would you like to optimize boxart?", "A = Yes, B = No, X/Y = Never Prompt","","You can manually do this in:","Settings -> Extra Settings -> Optimize BoxArt"], 0)
-                    input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
-                    
-                    if(input == ControllerInput.B):
+            if(Device.supports_tga()):
+                if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
+                    if(Device.get_system_config().never_prompt_boxart_resize()):
                         RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
-                    elif(input == ControllerInput.X or input == ControllerInput.Y):
-                        Device.get_system_config().set_never_prompt_boxart_resize(True)
-                        RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                    else:
+                        Display.display_message_multiline([f"Would you like to optimize boxart?", "A = Yes, B = No, X/Y = Never Prompt","","You can manually do this in:","Settings -> Extra Settings -> Optimize BoxArt"], 0)
+                        input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
+                        
+                        if(input == ControllerInput.B):
+                            RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                        elif(input == ControllerInput.X or input == ControllerInput.Y):
+                            Device.get_system_config().set_never_prompt_boxart_resize(True)
+                            RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
 
-            if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
-                RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
-                BoxArtResizer.process_rom_folders()
-            if os.path.exists(tga_path):
-                return tga_path
+                if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
+                    RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
+                    BoxArtResizer.process_rom_folders()
+                if os.path.exists(tga_path) and Device.supports_tga():
+                    return tga_path
+                else:
+                    return image_path
             else:
                 return image_path
 
@@ -126,7 +129,10 @@ class RomSelectOptionsBuilder:
         if os.path.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
             return imgs_folder_equal_to_roms_path_with_thumb_suffix
 
-
+        #File itself is a png
+        if rom_info.rom_file_path.lower().endswith(".png"):
+            return rom_info.rom_file_path
+        
         return None
 
     def _build_favorites_dict(self):

@@ -105,24 +105,44 @@ class DaijishoThemeIndex:
 
     def _convert_if_needed(self, filename):
         # Check if filename ends with .jpg or .jpeg (case-insensitive)
-        if filename.lower().endswith((".jpg", ".jpeg")):
-            jpg_path = os.path.join(self.foldername, filename)
-            tga_filename = os.path.splitext(filename)[0] + ".tga"
-            tga_path = os.path.join(self.foldername, tga_filename)
-            if os.path.exists(tga_path):
-                return tga_path
+        if(Device.supports_tga()):
+            if filename.lower().endswith((".jpg", ".jpeg")):
+                jpg_path = os.path.join(self.foldername, filename)
+                tga_filename = os.path.splitext(filename)[0] + ".tga"
+                tga_path = os.path.join(self.foldername, tga_filename)
+                if os.path.exists(tga_path):
+                    return tga_path
 
-            if not os.path.exists(tga_path):
-                PyUiLogger.get_logger().info(f"Converting {jpg_path} to {tga_path}")
-                try:
-                    Device.get_image_utils().convert_from_jpg_to_tga(jpg_path, tga_path)
-                except Exception as e:
-                    PyUiLogger.get_logger().warning(
-                        f"Failed to convert {jpg_path} to PNG: {e}"
-                    )
-                    return jpg_path  # fallback: return original JPG
+                if not os.path.exists(tga_path):
+                    PyUiLogger.get_logger().info(f"Converting {jpg_path} to {tga_path}")
+                    try:
+                        Device.get_image_utils().convert_from_jpg_to_tga(jpg_path, tga_path)
+                    except Exception as e:
+                        PyUiLogger.get_logger().warning(
+                            f"Failed to convert {jpg_path} to PNG: {e}"
+                        )
+                        return jpg_path  # fallback: return original JPG
 
-            return tga_path  # Return full path to PNG
+                return tga_path  # Return full path to PNG
+        else:
+            if filename.lower().endswith((".jpg", ".jpeg")):
+                jpg_path = os.path.join(self.foldername, filename)
+                png_filename = os.path.splitext(filename)[0] + ".png"
+                png_path = os.path.join(self.foldername, png_filename)
+                if os.path.exists(png_path):
+                    return png_path
+
+                if not os.path.exists(png_path):
+                    PyUiLogger.get_logger().info(f"Converting {jpg_path} to {png_path}")
+                    try:
+                        Device.get_image_utils().convert_from_jpg_to_png(jpg_path, png_path)
+                    except Exception as e:
+                        PyUiLogger.get_logger().warning(
+                            f"Failed to convert {jpg_path} to PNG: {e}"
+                        )
+                        return jpg_path  # fallback: return original JPG
+
+                return png_path  # Return full path to PNG
 
         # For non-jpg/jpeg files, return full path to original file
         return os.path.join(self.foldername, filename)
@@ -135,12 +155,16 @@ class DaijishoThemeIndex:
                 shortname = self.shortname_map.get(name)
                 uniquename = self.uniqueid_map.get(name)
                 if(shortname is not None):
-                    return self._convert_if_needed(shortname)
+                    file_name = self._convert_if_needed(shortname)
+                    #PyUiLogger.get_logger().info(f"Returning {file_name} for {system}")
+                    return file_name
                 elif(uniquename is not None):
-                    return self._convert_if_needed(uniquename)
+                    file_name = self._convert_if_needed(uniquename)
+                    #PyUiLogger.get_logger().info(f"Returning {file_name} for {system}")
+                    return file_name
         
-        PyUiLogger.get_logger().info(f"No theme image found for {system}")
-        return None
+        #PyUiLogger.get_logger().info(f"No theme image found for {system}")
+        return self.get_default_filename()
 
     def get_default_filename(self):
         return self._convert_if_needed(self.default_filename)

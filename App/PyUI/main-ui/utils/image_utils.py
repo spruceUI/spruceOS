@@ -8,6 +8,10 @@ class ImageUtils(ABC):
         pass
 
     @abstractmethod
+    def convert_from_jpg_to_png(self, jpg_path, png_path):
+        pass
+
+    @abstractmethod
     def shrink_image_if_needed(self, input_path, output_path, width, height):
         pass
 

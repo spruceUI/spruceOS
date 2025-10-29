@@ -9,17 +9,23 @@ from utils.logger import PyUiLogger
 
 class FfmpegImageUtils(ImageUtils):
 
-    def convert_from_jpg_to_tga(self,jpg_path, png_path):
-        """Convert a JPG image to PNG using ffmpeg."""
+    def convert_type(self, input_path, output_path):
         try:
             subprocess.run([
                 "ffmpeg",
                 "-y",           # overwrite if exists
-                "-i", jpg_path,
-                png_path
+                "-i", input_path,
+                output_path
             ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
-            PyUiLogger().get_logger().error(f"Error converting {jpg_path} to {png_path}: {e}")
+            PyUiLogger().get_logger().error(f"Error converting {input_path} to {output_path}: {e}")
+
+    def convert_from_jpg_to_tga(self,jpg_path, tga_path):
+       self.convert_type(jpg_path,tga_path)
+
+
+    def convert_from_jpg_to_png(self,jpg_path, png_path):
+       self.convert_type(jpg_path,png_path)
 
     def shrink_image_if_needed(self,input_path, output_path, max_width, max_height):
         temp_path = output_path + ".tmp.png"

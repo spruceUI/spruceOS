@@ -110,7 +110,7 @@ class Display:
         sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
         PyUiLogger.get_logger().info(f"sdl2.SDL_GetError() : {sdl2.SDL_GetError()}")
         cls.restore_bg()
-        cls.clear("init")
+        cls.clear("")
         cls.present()
         if(Device.double_init_sdl_display()):
             Display.deinit_display()
@@ -379,24 +379,33 @@ class Display:
         adj_y = y
                 
         if resize_type == ResizeType.ZOOM and scale_width and scale_height:
-
-            if XRenderOption.CENTER == render_mode.x_mode:
-                adj_x = x - (scale_width or render_w) // 2
-            elif XRenderOption.RIGHT == render_mode.x_mode:
-                adj_x = x - (scale_width or render_w)
+            src_w = int(scale_width * (orig_w / render_w))
+            src_h = int(scale_height * (orig_h / render_h))
 
             if YRenderOption.CENTER == render_mode.y_mode:
                 adj_y = y - (scale_height or render_h) // 2
+                src_y = max(0, (orig_h - src_h) // 2)
             elif YRenderOption.BOTTOM == render_mode.y_mode:
                 adj_y = y - (scale_height or render_h)
+                src_y = max(0, (orig_h - src_h))
+            elif(YRenderOption.TOP == render_mode.y_mode):
+                src_y = 0
+            else:
+                src_y = max(0, (orig_h - src_h) // 2)
+
+            if XRenderOption.CENTER == render_mode.x_mode:
+                adj_x = x - (scale_width or render_w) // 2
+                src_x = max(0, (orig_w - src_w) // 2)
+            elif XRenderOption.RIGHT == render_mode.x_mode:
+                adj_x = x - (scale_width or render_w)
+                src_x = max(0, orig_w - src_w)
+            elif(XRenderOption.LEFT == render_mode.x_mode):
+                src_x = 0
+            else:
+                src_x = max(0, (orig_w - src_w) // 2)
 
             adj_x = int(adj_x)
             adj_y = int(adj_y)
-            # Calculate cropping to center the zoomed image
-            src_w = int(scale_width * (orig_w / render_w))
-            src_h = int(scale_height * (orig_h / render_h))
-            src_x = max(0, (orig_w - src_w) // 2)
-            src_y = max(0, (orig_h - src_h) // 2)
 
             src_rect = sdl2.SDL_Rect(src_x, src_y, src_w, src_h)
             dst_rect = sdl2.SDL_Rect(adj_x, adj_y, scale_width, scale_height)

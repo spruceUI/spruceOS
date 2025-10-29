@@ -7,6 +7,7 @@ import sys
 import threading
 from devices.device import Device
 from devices.miyoo.system_config import SystemConfig
+from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -81,6 +82,7 @@ def background_startup():
     FavoritesManager.initialize(Device.get_favorites_path())
     RecentsManager.initialize(Device.get_recents_path())
     CollectionsManager.initialize(Device.get_collections_path())
+    AppsManager.initialize(Device.get_apps_config_path())
 
 def start_background_threads():
     startup_thread = threading.Thread(target=Device.perform_startup_tasks)
