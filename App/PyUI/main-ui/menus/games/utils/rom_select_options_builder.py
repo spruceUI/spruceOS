@@ -39,7 +39,8 @@ class RomSelectOptionsBuilder:
 
     def get_image_path(self, rom_info: RomInfo, game_entry = None) -> str:
         if(game_entry is not None):
-            return game_entry.image
+            if(os.path.exists(game_entry.image)):
+                return game_entry.image
         # Get the base filename without extension
         base_name = self.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
