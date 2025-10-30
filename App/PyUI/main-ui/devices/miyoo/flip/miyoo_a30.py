@@ -6,8 +6,10 @@ import subprocess
 import threading
 import time
 from controller.controller_inputs import ControllerInput
+from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
 import os
+from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -292,3 +294,43 @@ class MiyooA30(MiyooDevice):
     def get_device_name(self):
         return self.device_name
 
+
+    def get_controller_interface(self):
+        key_mappings = {}  
+        key_mappings[KeyEvent(1, 57, 1)] = [InputResult(ControllerInput.A, KeyState.PRESS)]   
+        key_mappings[KeyEvent(1, 57, 0)] = [InputResult(ControllerInput.A, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 29, 1)] = [InputResult(ControllerInput.B, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 29, 0)] = [InputResult(ControllerInput.B, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 56, 1)] = [InputResult(ControllerInput.Y, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 56, 0)] = [InputResult(ControllerInput.Y, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 42, 1)] = [InputResult(ControllerInput.X, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 42, 0)] = [InputResult(ControllerInput.X, KeyState.RELEASE)]
+
+        key_mappings[KeyEvent(1, 103, 1)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 103, 0)] = [InputResult(ControllerInput.DPAD_UP, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 108, 1)] = [InputResult(ControllerInput.DPAD_DOWN, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 108, 0)] = [InputResult(ControllerInput.DPAD_DOWN, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 105, 1)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 105, 0)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 106, 1)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 106, 0)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
+
+        key_mappings[KeyEvent(1, 15, 1)] = [InputResult(ControllerInput.L1, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 15, 0)] = [InputResult(ControllerInput.L1, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 18, 1)] = [InputResult(ControllerInput.L2, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 18, 0)] = [InputResult(ControllerInput.L2, KeyState.RELEASE)]  
+
+        key_mappings[KeyEvent(1, 14, 1)] = [InputResult(ControllerInput.R1, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 14, 0)] = [InputResult(ControllerInput.R1, KeyState.RELEASE)]  
+        key_mappings[KeyEvent(1, 115, 1)] = [InputResult(ControllerInput.R2, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 115, 0)] = [InputResult(ControllerInput.R2, KeyState.RELEASE)]  
+
+        key_mappings[KeyEvent(1, 28, 1)] = [InputResult(ControllerInput.START, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 28, 0)] = [InputResult(ControllerInput.START, KeyState.RELEASE)]
+        key_mappings[KeyEvent(1, 97, 1)] = [InputResult(ControllerInput.SELECT, KeyState.PRESS)]  
+        key_mappings[KeyEvent(1, 97, 0)] = [InputResult(ControllerInput.SELECT, KeyState.RELEASE)]
+
+        key_mappings[KeyEvent(1, 1, 1)] = [InputResult(ControllerInput.MENU, KeyState.PRESS)]
+        key_mappings[KeyEvent(1, 1, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]  
+
+        return KeyWatcherController(event_path="/dev/input/event3", key_mappings=key_mappings)
