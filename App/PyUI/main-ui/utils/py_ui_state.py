@@ -23,6 +23,12 @@ class PyUiState:
         cls._read_from_file(cls._config_path)
 
     @classmethod
+    def clear(cls):
+        cls._data = {}
+        cls._write_to_file(cls._config_path)
+        cls.load()
+
+    @classmethod
     def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)

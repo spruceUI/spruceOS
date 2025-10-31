@@ -169,16 +169,21 @@ def main():
     check_for_msg_display(args)
     check_for_msg_display_realtime(args)
     
+    
     main_menu = MainMenu()
 
     start_background_threads()
 
-    main_menu.run_main_menu_selection()
-
+    while(True):
+        try:
+            main_menu.run_main_menu_selection()
+        except Exception as e:
+            PyUiLogger.get_logger().exception("Unhandled exception occurred")
+            PyUiState.clear()
 
 def sigterm_handler(signum, frame):
     print(f"Received SIGTERM (Signal {signum}). Shutting down...")
-    sys.exit(0) # Exit gracefully
+    sys.exit() # Exit gracefully
 
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
