@@ -4,6 +4,7 @@ import os
 import random
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu
 from menus.games.utils.favorites_manager import FavoritesManager
@@ -28,9 +29,20 @@ class GameSelectMenuPopup:
     def collections_management_view(self, rom_info : RomInfo, input_value):
         CollectionsManagementMenu(rom_info).show_menu()
 
+
     def launch_random_game(self, input_value, rom_list):
-        if(ControllerInput.A == input_value):
-            Device.run_game(random.choice(rom_list).get_value())
+        if ControllerInput.A != input_value:
+            return
+
+        # Filter out directories
+        roms_only = [rom for rom in rom_list if not os.path.isdir(rom.get_value().rom_file_path)]
+
+        if not roms_only:
+            Display.display_message("No valid ROMs available to launch.", duration_ms=2000)
+            return
+
+        selected_rom = random.choice(roms_only)
+        Device.run_game(selected_rom.get_value())
 
     def execute_game_search(self, game_system, input_value):
         from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu

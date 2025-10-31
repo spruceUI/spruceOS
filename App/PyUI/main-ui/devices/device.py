@@ -265,6 +265,10 @@ class Device:
         return Device._impl.supports_analog_calibration()
     
     @staticmethod  
+    def supports_image_resizing():
+        return Device._impl.supports_image_resizing()
+    
+    @staticmethod  
     def calibrate_sticks():
         return Device._impl.calibrate_sticks()
     
