@@ -200,7 +200,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 value=self.change_language_setting
             )
         )        
-
                     
         if(PyUiConfig.include_stock_os_launch_option()):
             option_list.append(
@@ -214,7 +213,5 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                             value=self.launch_stock_os_menu
                         )
                 )
-
-
-
+                    
         return option_list

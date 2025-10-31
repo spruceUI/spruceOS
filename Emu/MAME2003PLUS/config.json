@@ -1,27 +1,28 @@
 {
   "label": "MAME 03+",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
+  "icon": "mame.png",
+  "iconsel": "mame_sel.png",
   "background": "",
   "themecolor": "00CCFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 3200,
   "brand": "modernengine",
   "type": "arcade",
-  "releaseYear": 2003
+  "releaseYear": 2003,
+  "default_emulator": "mame2003_plus",
+  "scaling_min_freq": 816000
 }

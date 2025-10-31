@@ -1,7 +1,7 @@
 {
   "label": "Neo CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

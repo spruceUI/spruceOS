@@ -1,32 +1,54 @@
 {
   "label": "NDS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/nds.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/nds.png",
+  "icon": "nds.png",
+  "iconsel": "nds_sel.png",
   "background": "",
   "themecolor": "FF8800",
   "launch": "../.emu_setup/standard_launch.sh",
   "noaudiofix": 1,
   "extlist": "nds|zip|7z|rar",
-  "launchlist": [
-    {
-      "name": "Emu Core: TRNGAJE-steward-(✓original)",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
+    "Emulator_Flip": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-Steward",
+        "DraStic-trngaje"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
     },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator_Brick": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-Steward"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 4000,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 2004
+  "releaseYear": 2004,
+  "default_emulator": "DraStic-original",
+  "scaling_min_freq": 816000
 }

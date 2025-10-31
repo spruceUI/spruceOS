@@ -1,27 +1,28 @@
 {
   "label": "SuperGfx",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sgfx.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sgfx.png",
+  "icon": "sgfx.png",
+  "iconsel": "sgfx_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|pce|sgx|cue|ccd|chd",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 6400,
   "brand": "NEC",
   "type": "homeconsole",
-  "releaseYear": 1989
+  "releaseYear": 1989,
+  "default_emulator": "mednafen_supergrafx",
+  "scaling_min_freq": 816000
 }

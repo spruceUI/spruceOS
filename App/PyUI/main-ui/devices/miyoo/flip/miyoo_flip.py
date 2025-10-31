@@ -414,10 +414,7 @@ class MiyooFlip(MiyooDevice):
 
     def supports_analog_calibration(self):
         return True
-
-    def supports_image_resizing(self):
-        return True
-
+    
     def supports_brightness_calibration(self):
         return True
 

@@ -1,6 +1,7 @@
 {
-	"#label":        "Theme Packer",
-	"icon":	        "emufresh.png",
-	"launch":       "launch.sh",
-	"description":  "Pack themes into 7z archives"
+  "#label": "Theme Packer",
+  "icon": "emufresh.png",
+  "launch": "launch.sh",
+  "description": "Pack themes into 7z archives",
+  "hide": true
 }

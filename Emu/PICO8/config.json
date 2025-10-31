@@ -1,7 +1,7 @@
 {
   "label": "Pico-8",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+  "icon": "pico.png",
+  "iconsel": "pico_sel.png",
   "themecolor": "00FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "requiredfiles": [
@@ -20,22 +20,24 @@
     {
       "name": "Import carts from Splore to MainUI",
       "launch": "import.sh"
-    },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
   "sortOrder": 4800,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 2015
+  "releaseYear": 2015,
+  "default_emulator": "mednafen_pce_fast",
+  "scaling_min_freq": 816000
 }

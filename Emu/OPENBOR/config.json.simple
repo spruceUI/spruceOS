@@ -1,7 +1,7 @@
 {
   "label": "OpenBOR",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/openbor.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/openbor.png",
+  "icon": "openbor.png",
+  "iconsel": "openbor_sel.png",
   "background": "",
   "themecolor": "FFFF00",
   "launch": "../.emu_setup/standard_launch.sh",

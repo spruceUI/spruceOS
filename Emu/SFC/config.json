@@ -1,31 +1,38 @@
 {
   "label": "SNES",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
+  "icon": "sfc.png",
+  "iconsel": "sfc_sel.png",
   "background": "",
   "themecolor": "FF0000",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|smc|sfc|fig|gd3|gd7|dx2|bsx|bs|swc|st",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "chimerasnes",
+        "mednafen_supafaust",
+        "snes9x"
+      ],
+      "selected": "chimerasnes",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 6200,
   "brand": "Nintendo",
   "type": "homeconsole",
-  "releaseYear": 1990
+  "releaseYear": 1990,
+  "default_emulator": "chimerasnes",
+  "scaling_min_freq": 816000
 }

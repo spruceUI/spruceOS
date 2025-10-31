@@ -1,27 +1,28 @@
 {
   "label": "MSU1",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msu1.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msu1.png",
+  "icon": "msu1.png",
+  "iconsel": "msu1_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "sfc|smc|zip|7z|fig|bs|st",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 3600,
   "brand": "Nintendo",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "snes9x",
+  "scaling_min_freq": 1008000
 }

@@ -4,19 +4,51 @@ ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+get_theme_path() {
+	jq -r '.theme' "$SYSTEM_JSON"
+}
+
+update_skin_images() {
+	local ALL_IMAGES_PRESENT=true
+	# List of images to check
+	IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png"
+	for IMAGE_NAME in $IMAGES_LIST; do
+		THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
+		DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
+		FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
+		if [ ! -f "$THEME_IMAGE_PATH" ]; then
+			ALL_IMAGES_PRESENT=false
+			break
+		fi
+	done
+	if [ "$ALL_IMAGES_PRESENT" = true ]; then
+		for IMAGE_NAME in $IMAGES_LIST; do
+			THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
+			DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
+			cp "$THEME_IMAGE_PATH" "$DEFAULT_IMAGE_PATH"
+			log_message "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
+		done
+	else
+		for IMAGE_NAME in $IMAGES_LIST; do
+			FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
+			DEST_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
+			if [ -f "$FALLBACK_IMAGE_PATH" ]; then
+				cp "$FALLBACK_IMAGE_PATH" "$DEST_IMAGE_PATH"
+				log_message "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
+			else
+				log_message "Fallback image not found: $FALLBACK_IMAGE_PATH"
+			fi
+		done
+	fi
+}
 
 if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
-	# Function to extract the current theme path
-	get_theme_path() {
-		awk -F'"' '/"theme":/ {print $4}' "$SYSTEM_JSON" | sed 's:/*$::'
-	}
 
-	# Get the theme path
 	THEME_PATH=$(get_theme_path)
 
 	# Check if THEME_PATH is valid
-	if [ -z "$THEME_PATH" ]; then
-		echo "Error: Could not determine theme path from $SYSTEM_JSON"
+	if [ -z "$THEME_PATH" ] || [ "$THEME_PATH" = "null" ]; then
+		log_message "Error: Could not determine theme path from $SYSTEM_JSON"
 		exit 1
 	fi
 
@@ -78,15 +110,6 @@ else
 			SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" 
 			ICONS="icons"
 			;;
-		"Flip" )
-			SKIN_PATH="/mnt/SDCARD/miyoo355/app/skin"
-			ICONS="icons"
-			;;
-		"Brick" )
-			SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin" 
-			ICONS="icontop"
-			;;
-			
 		"SmartPro" )
 			SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin"
 			ICONS="icontop"
@@ -104,80 +127,6 @@ else
 	if [ "${THEME_PATH: -1}" != "/" ]; then
 		THEME_PATH="${THEME_PATH}/"
 	fi
-
-	DEFAULT_ICON_PATH="/mnt/SDCARD/Icons/Default/"
-	DEFAULT_ICON_SEL_PATH="${DEFAULT_ICON_PATH}sel/"
-
-	update_emulator_icons() {
-		local CONFIG_FILE=$1
-
-	if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-		OLD_ICON_PATH=$(awk -F'"' '/"icontop":/ {print $4}' "$CONFIG_FILE")
-	else
-		OLD_ICON_PATH=$(awk -F'"' '/"icon":/ {print $4}' "$CONFIG_FILE")
-	fi
-		OLD_ICON_SEL_PATH=$(awk -F'"' '/"iconsel":/ {print $4}' "$CONFIG_FILE")
-
-		ICON_FILE_NAME=$(basename "$OLD_ICON_PATH")
-		ICON_SEL_FILE_NAME=$(basename "$OLD_ICON_SEL_PATH")
-
-		THEME_ICON_PATH="${THEME_PATH}${ICONS}/${ICON_FILE_NAME}"
-		THEME_ICON_SEL_PATH="${THEME_PATH}${ICONS}/sel/${ICON_SEL_FILE_NAME}"
-
-		if [ -f "$THEME_ICON_PATH" ]; then
-			NEW_ICON_PATH="$THEME_ICON_PATH"
-		else
-			NEW_ICON_PATH="${DEFAULT_ICON_PATH}${ICON_FILE_NAME}"
-		fi
-
-		if [ -f "$THEME_ICON_SEL_PATH" ]; then
-			NEW_ICON_SEL_PATH="$THEME_ICON_SEL_PATH"
-		else
-			NEW_ICON_SEL_PATH="${DEFAULT_ICON_SEL_PATH}${ICON_SEL_FILE_NAME}"
-		fi
-
-		sed -i "s|${OLD_ICON_PATH}|${NEW_ICON_PATH}|g" "$CONFIG_FILE"
-		sed -i "s|${OLD_ICON_SEL_PATH}|${NEW_ICON_SEL_PATH}|g" "$CONFIG_FILE"
-	}
-
-
-	update_skin_images() {
-		local ALL_IMAGES_PRESENT=true
-		# List of images to check
-		IMAGES_LIST="app_loading_01.png app_loading_02.png app_loading_03.png app_loading_04.png app_loading_05.png app_loading_bg.png"
-		for IMAGE_NAME in $IMAGES_LIST; do
-			THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
-			DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-			FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
-			if [ ! -f "$THEME_IMAGE_PATH" ]; then
-				ALL_IMAGES_PRESENT=false
-				break
-			fi
-		done
-		if [ "$ALL_IMAGES_PRESENT" = true ]; then
-			for IMAGE_NAME in $IMAGES_LIST; do
-				THEME_IMAGE_PATH="${THEME_PATH}skin/${IMAGE_NAME}"
-				DEFAULT_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-				cp "$THEME_IMAGE_PATH" "$DEFAULT_IMAGE_PATH"
-				log_message "Updated $DEFAULT_IMAGE_PATH with $THEME_IMAGE_PATH"
-			done
-		else
-			for IMAGE_NAME in $IMAGES_LIST; do
-				FALLBACK_IMAGE_PATH="${DEFAULT_SKIN_PATH}/${IMAGE_NAME}"
-				DEST_IMAGE_PATH="${SKIN_PATH}/${IMAGE_NAME}"
-				if [ -f "$FALLBACK_IMAGE_PATH" ]; then
-					cp "$FALLBACK_IMAGE_PATH" "$DEST_IMAGE_PATH"
-					log_message "Used fallback image $FALLBACK_IMAGE_PATH for $DEST_IMAGE_PATH"
-				else
-					log_message "Fallback image not found: $FALLBACK_IMAGE_PATH"
-				fi
-			done
-		fi
-	}
-
-	find "$EMULATOR_BASE_PATH" -name "config.json" | while read CONFIG_FILE; do
-		update_emulator_icons "$CONFIG_FILE"
-	done
 
 	update_skin_images
 

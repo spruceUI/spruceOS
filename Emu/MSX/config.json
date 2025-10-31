@@ -1,31 +1,37 @@
 {
   "label": "MSX",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
+  "icon": "msx.png",
+  "iconsel": "msx_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓BLUEMSX)-fmsx",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "bluemsx",
+        "fmsx"
+      ],
+      "selected": "bluemsx",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 3800,
   "brand": "Misc",
   "type": "pc",
-  "releaseYear": 1983
+  "releaseYear": 1983,
+  "default_emulator": "bluemsx",
+  "scaling_min_freq": 408000
 }

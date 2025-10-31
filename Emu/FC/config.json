@@ -1,31 +1,38 @@
 {
   "label": "NES",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fc.png",
+  "icon": "fc.png",
+  "iconsel": "fc_sel.png",
   "background": "",
   "themecolor": "991615",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|nes|fds|unif|unf",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓FCEUMM)-nestopia-quicknes",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "fceumm",
+        "nestopia",
+        "quicknes"
+      ],
+      "selected": "fceumm",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 4300,
   "brand": "Nintendo",
   "type": "homeconsole",
-  "releaseYear": 1983
+  "releaseYear": 1983,
+  "default_emulator": "fceumm",
+  "scaling_min_freq": 312000
 }

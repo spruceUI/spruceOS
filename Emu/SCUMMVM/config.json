@@ -1,27 +1,28 @@
 {
   "label": "ScummVM",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
+  "icon": "scummvm.png",
+  "iconsel": "scummvm_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "scummvm",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 5600,
   "brand": "modernengine",
   "type": "pc",
-  "releaseYear": 2001
+  "releaseYear": 2001,
+  "default_emulator": "scummvm",
+  "scaling_min_freq": 816000
 }

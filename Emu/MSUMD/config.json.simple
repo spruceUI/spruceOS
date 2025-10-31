@@ -1,7 +1,7 @@
 {
   "label": "MSUMD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msumd.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

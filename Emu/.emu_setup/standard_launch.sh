@@ -9,46 +9,54 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
-log_message "-----Launching Emulator-----" -v
-log_message "trying: $0 $@" -v
+log_message "-----Launching Emulator-----"
+log_message "trying: $0 $@"
+
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
-export GAME="$(basename "$1")"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
-export DEF_DIR="/mnt/SDCARD/Emu/.emu_setup/defaults"
-export OPT_DIR="/mnt/SDCARD/Emu/.emu_setup/options"
-export OVR_DIR="/mnt/SDCARD/Emu/.emu_setup/overrides"
-export DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
-export OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
-export OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-export CUSTOM_DEF_FILE="$EMU_DIR/default.opt"
+export EMU_JSON_PATH="${EMU_DIR}/config.json"
+export GAME="$(basename "$1")"
+export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
+
+if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ] || [ "$EMU_NAME" = "PS" ]; then
+	if [ "$PLATFORM" = "A30" ]; then
+		export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
+	else
+		export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
+	fi
+elif [ "$EMU_NAME" = "NDS" ]; then
+	if [ "$PLATFORM" = "Flip" ]; then
+		export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"
+	elif [ "$PLATFORM" = "Brick" ]; then	
+		export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")"
+	fi
+else
+	export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
+fi
 
 ##### GENERAL FUNCTIONS #####
 
-import_launch_options() {
-	if [ -f "$DEF_FILE" ]; then
-		. "$DEF_FILE"
-	elif [ -f "$CUSTOM_DEF_FILE" ]; then
-		. "$CUSTOM_DEF_FILE"
-	else
-		log_message "WARNING: Default .opt file not found for $EMU_NAME!" -v
-	fi
+use_default_emulator() {
+	export CORE="$(jq -r '.default_emulator' "$EMU_JSON_PATH")"
+	log_message "Using default core of $CORE to run $EMU_NAME"
+}
 
-	if [ -f "$OPT_FILE" ]; then
-		. "$OPT_FILE"
-	else
-		log_message "WARNING: System .opt file not found for $EMU_NAME!" -v
+get_core_override() {
+	local core_override="$(jq -r --arg game "$GAME" '.menuOptions.Emulator.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
+		export CORE=$core_override
 	fi
+}
 
-	if [ -f "$OVR_FILE" ]; then
-		. "$OVR_FILE";
-		log_message "Launch setting OVR_FILE detected @ $OVR_FILE" -v
-	else
-		log_message "No launch OVR_FILE detected. Using current system settings." -v
+get_mode_override() {
+	local mode_override="$(jq -r --arg game "$GAME" '.menuOptions.Governor.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$mode_override" ] && [ "$mode_override" != "null" ]; then
+		export MODE=$mode_override
 	fi
 }
 
 set_cpu_mode() {
-	if [ "$MODE" = "overclock" ]; then
+	if [ "$MODE" = "Overclock" ]; then
 		if [ "$EMU_NAME" = "NDS" ]; then
 			( sleep 33 && set_overclock ) &
 		else
@@ -56,7 +64,8 @@ set_cpu_mode() {
 		fi
 	fi
 
-	if [ "$MODE" != "overclock" ] && [ "$MODE" != "performance" ]; then
+	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
+		export scaling_min_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
 	fi
 }
@@ -218,8 +227,8 @@ run_ffplay() {
 	fi
 }
 
-function kill_runner() {
-    PID=`pidof runner`
+kill_runner() {
+    PID="$(pidof runner)"
     if [ "$PID" != "" ]; then
         kill -9 $PID
     fi
@@ -229,7 +238,7 @@ run_drastic() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 
-	if [ "$PLATFORM" = "A30" ]; then # only Steward is available; core switching does nothing
+	if [ "$PLATFORM" = "A30" ]; then # only Steward is available.
 
 		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
 		# the SDL library is hard coded to open ttyS0 for joystick raw input 
@@ -248,11 +257,6 @@ run_drastic() {
 		export SDL_AUDIODRIVER=mmiyoo
 		export EGL_VIDEODRIVER=mmiyoo
 
-		if [ -f 'libs/libEGL.so' ]; then
-			rm -rf libs/libEGL.so
-			rm -rf libs/libGLESv1_CM.so
-			rm -rf libs/libGLESv2.so
-		fi
 		./drastic32 "$ROM_FILE"
 		# remove soft link and resume joystickinput
 		rm /dev/ttyS0
@@ -265,7 +269,7 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			if [ "$CORE" = "drastic_steward" ]; then
+			if [ "$CORE" = "DraStic-Steward" ]; then
 				kill_runner
 				LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
 				sleep 1
@@ -290,12 +294,12 @@ run_drastic() {
 
 		elif [ "$PLATFORM" = "Flip" ]; then
 
-			if [ -d /usr/l32 ] && [ "$CORE" = "drastic_steward" ]; then
+			if [ -d /usr/l32 ] && [ "$CORE" = "DraStic-Steward" ]; then
 				export SDL_VIDEODRIVER=NDS
 				export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
 				./drastic32 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-steward-flip.log 2>&1
 
-			elif [ "$CORE" = "drastic_trngaje" ]; then
+			elif [ "$CORE" = "DraStic-trngaje" ]; then
 				export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
 				mv ./drastic64 ./drastic
 				./drastic "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-trngaje-flip.log 2>&1
@@ -545,11 +549,12 @@ run_retroarch() {
 			if [ "$CORE" = "yabasanshiro" ]; then
 				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 				export RA_BIN="ra64.miyoo"
-			elif setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			elif setting_get "expertRA" || [ "$CORE" = "parallel_n64" ]; then
 				export RA_BIN="retroarch-flip"
 			else
 				export RA_BIN="ra64.miyoo"
 			fi
+			
 			if [ "$CORE" = "easyrpg" ]; then
 				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 			elif [ "$CORE" = "yabasanshiro" ]; then
@@ -557,13 +562,6 @@ run_retroarch() {
 			fi
 		;;
 		"A30" )
-			# handle different version of ParaLLEl N64 core and flycast xtreme core for A30
-			if [ "$CORE" = "parallel_n64" ]; then
-				CORE="km_parallel_n64_xtreme_amped_turbo"
-			elif [ "$CORE" = "flycast_xtreme" ]; then
-				CORE="km_flycast_xtreme"
-			fi
-
 			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch"
 			else
@@ -696,7 +694,7 @@ run_yabasanshiro() {
 		"Flip") YABASANSHIRO="./yabasanshiro" ;;
 		"Brick"|"SmartPro") YABASANSHIRO="./yabasanshiro.trimui" ;; # todo: add yabasanshiro-sa for trimui devices
 	esac
-	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "sa_bios" ]; then
+	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
 	else
 		$YABASANSHIRO -r 3 -i "$ROM_FILE" >./log.txt 2>&1
@@ -721,7 +719,9 @@ run_flycast_standalone() {
 ##### MAIN EXECUTION #####
  ########################
 
-import_launch_options
+if [ -z "$CORE" ] || [ "$CORE" = "null" ]; then	use_default_emulator ; fi
+get_core_override
+get_mode_override
 set_cpu_mode
 record_session_start_time
 handle_network_services
@@ -734,8 +734,11 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
 	"DC")
-		if [ "$CORE" = "flycast_xtreme" ] && [ ! "$PLATFORM" = "A30" ]; then
+		if [ "$CORE" = "Flycast-standalone" ]; then
 			run_flycast_standalone
+		elif [ ! "$PLATFORM" = "A30" ]; then
+			export CORE="flycast"
+			run_retroarch
 		else
 			run_retroarch
 		fi
@@ -765,14 +768,15 @@ case $EMU_NAME in
 		save_ppsspp_configs
 		;;
 	"SATURN")
-		if [ "$CORE" = "sa_hle" ] || [ "$CORE" = "sa_bios" ]; then
+		if [ "$CORE" = "yabasanshiro-standalone-bios" ] || [ "$CORE" = "yabasanshiro-standalone-hle" ]; then
 			run_yabasanshiro
 		else
+			export CORE="yabasanshiro"
 			run_retroarch
 		fi
 		;;
 	"N64")
-			if [ "$CORE" = "mupen64plus" ] && [ ! "$PLATFORM" = "A30" ]; then
+			if [ "$CORE" = "mupen64plus-standalone" ]; then
 				run_mupen_standalone
 			else
 				load_n64_controller_profile

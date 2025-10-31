@@ -1,27 +1,28 @@
 {
   "label": "ChaiLove",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/chai.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/chai.png",
+  "icon": "chai.png",
+  "iconsel": "chai_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chailove",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 1200,
   "brand": "modernengine",
   "type": "Other",
-  "releaseYear": 2016
+  "releaseYear": 2016,
+  "default_emulator": "chailove",
+  "scaling_min_freq": 1008000
 }

@@ -1,7 +1,7 @@
 {
   "label": "PORTS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ports.png",
+  "icon": "ports.png",
+  "iconsel": "ports_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
@@ -9,24 +9,26 @@
   "extlist": "sh",
   "launchlist": [
     {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
       "name": "Controls: (✓X360)-Nintendo",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/control_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
   "sortOrder": 5000,
   "brand": "Other",
   "type": "other",
-  "releaseYear": 2000
+  "releaseYear": 2000,
+  "default_emulator": "sh",
+  "scaling_min_freq": 648000
 }

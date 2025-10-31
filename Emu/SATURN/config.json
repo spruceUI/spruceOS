@@ -1,35 +1,43 @@
 {
   "label": "Saturn",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/saturn.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/saturn.png",
+  "icon": "saturn.png",
+  "iconsel": "saturn_sel.png",
   "background": "",
   "themecolor": "E4007F",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chd|zip|mds|ccd|iso|cue",
   "launchlist": [
     {
-      "name": "Emu Core: (✓LIBRETRO)-sa_bios-sa_hle",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU: (✓PERF)-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
       "name": "Generate M3U playlists for multi-disc games",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    },
+    "Emulator": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro-libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "selected": "fbalpha2012",
+      "overrides": {}
+    }
+  },
   "sortOrder": 5500,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "yabasanshiro-libretro",
+  "scaling_min_freq": 1008000
 }

@@ -1,7 +1,7 @@
 {
   "label": "MSX",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msx.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msx.png",
+  "icon": "msx.png",
+  "iconsel": "msx_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

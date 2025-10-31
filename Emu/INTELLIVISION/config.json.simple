@@ -1,7 +1,7 @@
 {
   "label": "Intellivis.",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/itv.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/itv.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/itv_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

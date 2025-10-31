@@ -1,7 +1,7 @@
 {
   "label": "Sega 32X",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/32x.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/32x.png",
+  "icon": "32x.png",
+  "iconsel": "32x_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

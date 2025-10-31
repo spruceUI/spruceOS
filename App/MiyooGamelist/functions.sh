@@ -4,7 +4,6 @@
 delete_gamelist_files() {
     rootdir="$1"
 
-    echo "Deleting existing miyoogamelist.xml files..."
     for system in "$rootdir"/*; do
         if [ -d "$system" ]; then
             # Exclude specific directories
@@ -14,29 +13,15 @@ delete_gamelist_files() {
                     ;;
             esac
             # Find and delete miyoogamelist.xml files in non-excluded directories
-            _system_name=$(basename "$system")
-            _count=$(find "$system" -name "miyoogamelist.xml" | wc -l)
-            if [ $_count -gt 0 ]; then
-                echo "  Removing $_count file(s) from $_system_name"
-                find "$system" -name "miyoogamelist.xml" -exec rm {} +
-            fi
+            find "$system" -name "miyoogamelist.xml" -exec rm {} +
         fi
     done
-    echo "Done deleting miyoogamelist.xml files"
 }
 
 # Function to delete cache files
 delete_cache_files() {
     rootdir="$1"
-    echo "Deleting cache files..."
-    _cache_count=$(find "$rootdir" -name "*cache6.db" | wc -l)
-    if [ $_cache_count -gt 0 ]; then
-        echo "  Removing $_cache_count cache file(s)"
-        find "$rootdir" -name "*cache6.db" -exec rm {} \;
-    else
-        echo "  No cache files found"
-    fi
-    echo "Done deleting cache files"
+    find "$rootdir" -name "*cache6.db" -exec rm {} \;
 }
 
 # Function to clean ROM names
@@ -84,19 +69,6 @@ clean_name() {
     echo "$name"
 }
 
-# Sanitize a string for safe inclusion in XML (remove invalid chars and escape specials)
-sanitize_xml() {
-    _sx_input="$1"
-    _sx_clean=$(printf '%s' "$_sx_input" | tr -d '\000-\010\013\014\016-\037')
-    _sx_clean=$(printf '%s' "$_sx_clean" \
-        | sed -e 's/&/\&amp;/g' \
-              -e 's/</\&lt;/g' \
-              -e 's/>/\&gt;/g' \
-              -e 's/"/\&quot;/g' \
-              -e "s/'/\&apos;/g")
-    echo "$_sx_clean"
-}
-
 # Helper function to process games recursively
 process_roms_recursive() {
     _pr_current_dir="$1"
@@ -104,15 +76,11 @@ process_roms_recursive() {
     _pr_imgpath="$3"
     _pr_extlist="$4"
     _pr_out="$5"
+    _pr_tempfile="$6"
 
     # Get relative path from base
     _pr_rel_path="${_pr_current_dir#$_pr_base_path}"
     _pr_rel_path="${_pr_rel_path#/}"
-
-    # Show directory being processed
-    if [ -n "$_pr_rel_path" ]; then
-        echo "  Scanning subdirectory: $_pr_rel_path"
-    fi
 
     # Process files in current directory
     for _pr_item in "$_pr_current_dir"/*; do
@@ -128,7 +96,7 @@ process_roms_recursive() {
                 continue
             fi
             # Recursively process subdirectory
-            process_roms_recursive "$_pr_item" "$_pr_base_path" "$_pr_imgpath" "$_pr_extlist" "$_pr_out"
+            process_roms_recursive "$_pr_item" "$_pr_base_path" "$_pr_imgpath" "$_pr_extlist" "$_pr_out" "$_pr_tempfile"
         else
             # Check if file matches any extension
             _pr_match=0
@@ -162,18 +130,29 @@ process_roms_recursive() {
             # Clean the name for display
             _pr_digest=$(clean_name "$_pr_item_name" "$_pr_extlist")
 
-            _pr_name_to_use="$_pr_digest"
+            # Prefix with subdirectory for namespacing if in subdirectory
+            if [ -n "$_pr_rel_path" ]; then
+                _pr_digest="$_pr_rel_path/$_pr_digest"
+            fi
 
-            # Sanitize values before writing XML
-            _pr_file_rel_path_xml=$(sanitize_xml "$_pr_file_rel_path")
-            _pr_name_to_use_xml=$(sanitize_xml "$_pr_name_to_use")
-            _pr_img_rel_path_xml=$(sanitize_xml "$_pr_img_rel_path")
+            # Check if the cleaned name has already been used
+            if grep -q "^$_pr_digest$" "$_pr_tempfile"; then
+                # Use the full path without extension if it's a duplicate
+                if [ -z "$_pr_rel_path" ]; then
+                    _pr_name_to_use="$_pr_filename"
+                else
+                    _pr_name_to_use="$_pr_rel_path/$_pr_filename"
+                fi
+            else
+                _pr_name_to_use="$_pr_digest"
+                echo "$_pr_digest" >> "$_pr_tempfile"
+            fi
 
             cat <<EOF >>$_pr_out
     <game>
-        <path>$_pr_file_rel_path_xml</path>
-        <name>$_pr_name_to_use_xml</name>
-        <image>$_pr_img_rel_path_xml</image>
+        <path>$_pr_file_rel_path</path>
+        <name>$_pr_name_to_use</name>
+        <image>$_pr_img_rel_path</image>
     </game>
 EOF
         fi
@@ -191,7 +170,6 @@ generate_miyoogamelist() {
 
     cd "$rompath"
 
-    echo "Generating $out..."
     echo '<?xml version="1.0"?>' >$out
     echo '<gameList>' >>$out
 
@@ -201,11 +179,7 @@ generate_miyoogamelist() {
     # Process ROMs recursively
     process_roms_recursive "$rompath" "$rompath" "$imgpath" "$extlist" "$out" "$tempfile"
 
-    _game_count=$(grep -c '<game>' "$out")
-    echo "  Found $_game_count game(s)"
-
     echo '</gameList>' >>$out
     rm "$tempfile"
     rm "$tempfile_original_names"
-    echo "  Saved to: $rompath/$out"
 }

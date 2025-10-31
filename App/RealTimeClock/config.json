@@ -2,5 +2,6 @@
   "label": "Real Time Clock",
   "icon": "rtc.png",
   "launch": "launch.sh",
-  "description": "Set the time"
+  "description": "Set the time",
+  "hide": false
 }

@@ -1,31 +1,37 @@
 {
   "label": "Amiga",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/amiga.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/amiga.png",
+  "icon": "amiga.png",
+  "iconsel": "amiga_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|rp9",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓UAE4ARM)-puae2021",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "uae4arm",
+        "puae2021"
+      ],
+      "selected": "uae4arm",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 100,
   "brand": "Commodore",
   "type": "pc",
-  "releaseYear": 1985
+  "releaseYear": 1985,
+  "default_emulator": "uae4arm",
+  "scaling_min_freq": 816000
 }

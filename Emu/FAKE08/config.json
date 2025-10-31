@@ -1,27 +1,28 @@
 {
   "label": "Fake08",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
+  "icon": "pico.png",
+  "iconsel": "pico_sel.png",
   "background": "",
   "themecolor": "00FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "p8|png",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 2200,
   "brand": "modernengine",
   "type": "fantasy",
-  "releaseYear": 2013
+  "releaseYear": 2013,
+  "default_emulator": "fake08",
+  "scaling_min_freq": 480000
 }

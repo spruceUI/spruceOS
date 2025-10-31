@@ -1,27 +1,28 @@
 {
   "label": "Sega 32X",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/32X.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/32X.png",
+  "icon": "32X.png",
+  "iconsel": "32X_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|gen|smd|md|32x|bin|iso|sms|68k|chd",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 5700,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "picodrive",
+  "scaling_min_freq": 816000
 }

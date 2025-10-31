@@ -2,5 +2,6 @@
   "label": "PortMaster",
   "icon": "portmaster.png",
   "launch": "launch.sh",
-  "description": "PortMaster Menu"
+  "description": "PortMaster Menu",
+  "hide": false
 }

@@ -243,11 +243,7 @@ class AbstractDevice(ABC):
     @staticmethod  
     def supports_analog_calibration(self):
         pass
-        
-    @staticmethod  
-    def supports_image_resizing(self):
-        pass
-
+    
     @staticmethod  
     def calibrate_sticks(self):
         pass

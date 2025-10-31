@@ -1,7 +1,7 @@
 {
   "label": "Sega CD",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

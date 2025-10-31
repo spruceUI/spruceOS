@@ -1,7 +1,7 @@
 {
   "label": "Pokemini",
   "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/poke.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/poke.png",
+  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/poke_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

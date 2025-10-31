@@ -1,27 +1,28 @@
 {
   "label": "Supervision",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/supervision.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/supervision.png",
+  "icon": "supervision.png",
+  "iconsel": "supervision_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|sv|bin",
-  "launchlist": [
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 6500,
   "brand": "Watara",
   "type": "handheld",
-  "releaseYear": 1992
+  "releaseYear": 1992,
+  "default_emulator": "potator",
+  "scaling_min_freq": 240000
 }

@@ -1,35 +1,42 @@
 {
   "label": "Sega CD",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/segacd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/segacd.png",
+  "icon": "segacd.png",
+  "iconsel": "segacd_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chd|m3u|zip|7z|gen|smd|md|32x|cue|iso|sms|68k",
   "launchlist": [
     {
-      "name": "Emu Core: (✓PICODRIVE)-genesis+gx",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
       "name": "Generate M3U playlists for multi-disc games",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    },
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "picodrive",
+        "genesis_plus_gx"
+      ],
+      "selected": "picodrive",
+      "overrides": {}
+    }
+  },
   "sortOrder": 5800,
   "brand": "Sega",
   "type": "homeconsole",
-  "releaseYear": 1991
+  "releaseYear": 1991,
+  "default_emulator": "picodrive",
+  "scaling_min_freq": 816000
 }

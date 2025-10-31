@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="flycast"
-export MODE="performance"
-
-export scaling_min_freq=1008000

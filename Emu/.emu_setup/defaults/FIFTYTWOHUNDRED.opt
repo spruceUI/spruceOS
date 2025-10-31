@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="a5200"
-export MODE="smart"
-
-export scaling_min_freq=312000

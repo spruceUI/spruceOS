@@ -1,7 +1,7 @@
 {
   "label": "MS-DOS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dos.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dos.png",
+  "icon": "dos.png",
+  "iconsel": "dos_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

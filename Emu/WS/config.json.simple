@@ -1,7 +1,7 @@
 {
   "label": "WndrSwan",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ws.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ws.png",
+  "icon": "ws.png",
+  "iconsel": "ws_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",

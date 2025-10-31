@@ -1,31 +1,33 @@
 {
   "label": "Neo CD",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/neocd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/neocd.png",
+  "icon": "neocd.png",
+  "iconsel": "neocd_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "cue|chd|m3u",
   "launchlist": [
     {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
       "name": "Generate M3U playlists for multi-disc games",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
   ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
   "sortOrder": 4100,
   "brand": "SNK",
   "type": "homeconsole",
-  "releaseYear": 1994
+  "releaseYear": 1994,
+  "default_emulator": "neocd",
+  "scaling_min_freq": 1008000
 }

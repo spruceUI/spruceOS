@@ -1,31 +1,37 @@
 {
   "label": "Amst CPC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cpc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cpc.png",
+  "icon": "cpc.png",
+  "iconsel": "cpc_sel.png",
   "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|sna|dsk|kcr|bin",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓CAP32)-crocods",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "cap32",
+        "crocods"
+      ],
+      "selected": "cap32",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 200,
   "brand": "Amstrad",
   "type": "pc",
-  "releaseYear": 1984
+  "releaseYear": 1984,
+  "default_emulator": "cap32",
+  "scaling_min_freq": 816000
 }

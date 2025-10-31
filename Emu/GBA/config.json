@@ -1,31 +1,37 @@
 {
   "label": "GBA",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/gba.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/gba.png",
+  "icon": "gba.png",
+  "iconsel": "gba_sel.png",
   "background": "",
   "themecolor": "FF00FF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gba|zip|7z|bin",
-  "launchlist": [
-    {
-      "name": "Emu Core: (✓MGBA)-gpsp",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "CPU: (✓SMART)-Perf-Max",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "mgba",
+        "gpsp"
+      ],
+      "selected": "mgba",
+      "overrides": {}
     }
-  ],
+  },
   "sortOrder": 2800,
   "brand": "Nintendo",
   "type": "handheld",
-  "releaseYear": 2001
+  "releaseYear": 2001,
+  "default_emulator": "mgba",
+  "scaling_min_freq": 816000
 }
