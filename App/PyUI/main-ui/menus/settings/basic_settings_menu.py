@@ -6,12 +6,14 @@ from devices.device import Device
 from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.cfw_system_settings_menu import CfwSystemSettingsMenu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.theme.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
+from utils.cfw_system_config import CfwSystemConfig
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -100,6 +102,11 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             Device.get_system_config().set_theme(theme_folders[selected_index])
             self.theme_changed = True
             Display.restore_bg()
+
+
+    def launch_cfw_system_settings(self,input):
+        if(ControllerInput.A == input):
+            CfwSystemSettingsMenu().show_menu()
 
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
@@ -200,7 +207,20 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_theme_settings
                     )
             )
-            
+
+        if(len(CfwSystemConfig.get_categories()) > 0):
+            option_list.append(
+                GridOrListEntry(
+                            primary_text="CFW System Settings",
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_cfw_system_settings
+                )
+            )
+
         option_list.append(
                 GridOrListEntry(
                         primary_text="Extra Settings",

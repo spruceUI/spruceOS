@@ -67,10 +67,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 PyUiConfig.set_language(lang)
                 Language.load()
 
-    def launch_cfw_system_settings(self,input):
-        if(ControllerInput.A == input):
-            CfwSystemSettingsMenu().show_menu()
-
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
             from games.utils.box_art_resizer import BoxArtResizer
@@ -164,19 +160,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         )
 
         option_list.extend(Device.get_extra_settings_options())
-
-        if(len(CfwSystemConfig.get_categories()) > 0):
-            option_list.append(
-                GridOrListEntry(
-                            primary_text="CFW System Settings",
-                            value_text=None,
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.launch_cfw_system_settings
-                )
-            )
 
         option_list.append(
                 GridOrListEntry(
