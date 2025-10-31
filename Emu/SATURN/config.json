@@ -40,5 +40,5 @@
   "releaseYear": 1994,
   "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000,
-  "devices": ["TRIMUI_BRICK, TRIMUI_SMART_PRO, MIYOO_FLIP"]
+  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "MIYOO_FLIP"]
 }
