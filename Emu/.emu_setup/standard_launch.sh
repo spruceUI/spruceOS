@@ -456,6 +456,7 @@ is_retroarch_port() {
 
 set_port_mode() {
     rm "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+	PORT_CONTROL="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
     if [ "$PORT_CONTROL" = "X360" ]; then
         cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
     else

@@ -7,12 +7,7 @@
   "launch": "../.emu_setup/standard_launch.sh",
   "ingamemenu": 1,
   "extlist": "sh",
-  "launchlist": [
-    {
-      "name": "Controls: (✓X360)-Nintendo",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/control_switch.sh"
-    }
-  ],
+  "launchlist": [],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -22,6 +17,15 @@
         "Overclock"
       ],
       "selected": "Smart",
+      "overrides": {}
+    },
+    "controlMode": {
+      "display": "Controller Mode",
+      "options": [
+        "X360",
+        "Nintendo"
+      ],
+      "selected": "X360",
       "overrides": {}
     }
   },
