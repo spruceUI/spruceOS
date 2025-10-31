@@ -6,7 +6,7 @@
   "rompath": "../../Roms/GAMETANK",
   "imgpath": "../../Roms/GAMETANK/Imgs",
   "gamelist": "../../Roms/GAMETANK/miyoogamelist.xml",
-  "extlist": "gtr",
+  "extlist": "gtr|zip|7z",
   "launchlist": [
     {
       "name": "CPU Mode: (✓SMART)-Performance-Overclock",
