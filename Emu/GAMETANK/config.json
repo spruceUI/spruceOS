@@ -2,8 +2,9 @@
   "label": "Game Tank",
   "icon": "gametank.png",
   "iconsel": "gametank_sel.png",
+  "background": "",
+  "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
-  "gamelist": "../../Roms/GAMETANK/miyoogamelist.xml",
   "extlist": "gtr|zip|7z",
   "launchlist": [],
   "menuOptions": {
