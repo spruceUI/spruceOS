@@ -244,6 +244,9 @@ class MuosDevice(DeviceCommon):
     def supports_analog_calibration(self):
         return False
     
+    def supports_image_resizing(self):
+        return True
+
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 import os
+import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
