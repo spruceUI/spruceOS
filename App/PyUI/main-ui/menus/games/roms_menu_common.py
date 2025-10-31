@@ -143,7 +143,7 @@ class RomsMenuCommon(ABC):
             PyUiLogger.get_logger().info(f"Subfolder does not match {last_subfolder} vs {getattr(self, 'subfolder', '') }")
             rom_info_subfolder = RomInfo(game_system=rom_list[0].get_value().game_system,rom_file_path=last_subfolder)
             return_value = self._run_subfolder_menu(rom_info_subfolder)
-            if(return_value is not None):
+            if(return_value is not None and return_value != ControllerInput.B):
                 return return_value
 
     def default_to_last_game_selection(self):
@@ -209,7 +209,7 @@ class RomsMenuCommon(ABC):
                             selected.get_selection().get_value().rom_file_path
                         )
                         return_value = self._run_subfolder_menu(selected.get_selection().get_value())
-                        if(return_value is not None):
+                        if(return_value is not None and return_value != ControllerInput.B):
                             return return_value
                         else:
                             PyUiState.set_last_game_selection(
@@ -238,21 +238,20 @@ class RomsMenuCommon(ABC):
                         view = self.create_view(page_name,rom_list,selected)
                 elif(ControllerInput.B == selected.get_input()):
                     
-                    PyUiState.set_last_game_selection(
-                        page_name,
-                        selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
-                    )
-
-                    if(selected.get_selection().get_value().is_collection):
+                    if(selected is not None):
                         PyUiState.set_last_game_selection(
                             page_name,
-                            "Collection",
-                            selected.get_selection().get_value().rom_file_path
+                            selected.get_selection().get_value().rom_file_path,
+                            getattr(self, 'subfolder', '') or ''
                         )
+
+                        if(selected.get_selection().get_value().is_collection):
+                            PyUiState.set_last_game_selection(
+                                page_name,
+                                "Collection",
+                                selected.get_selection().get_value().rom_file_path
+                            )
                         
-
-
                     return ControllerInput.B
                 elif(ControllerInput.SELECT == selected.get_input()):
                     if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):

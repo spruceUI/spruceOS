@@ -87,7 +87,10 @@ class MiyooTrimCommon():
     def run_app(device, folder,launch, run_prefix =""):
         device.fix_sleep_sound_bug()
         #cd /mnt/SDCARD/App/Commander_Italic; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh 
-        MiyooTrimCommon.write_cmd_to_run(f'cd "{folder}"; chmod a+x "{launch}"; {run_prefix}"{launch}"''')
+        if '"' in launch:
+            MiyooTrimCommon.write_cmd_to_run(f'cd "{folder}"; {run_prefix}{launch}''')
+        else:
+            MiyooTrimCommon.write_cmd_to_run(f'cd "{folder}"; chmod a+x "{launch}"; {run_prefix}"{launch}"''')
         Device.exit_pyui()
 
     @staticmethod

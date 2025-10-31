@@ -79,7 +79,10 @@ class BoxArtResizer():
                                 Display.display_message_multiline([f"Optimizing boxart {os.path.basename(file)}", f"Scanned {scan_count}, Patched {patched_count}","","Press B to Abort"])
                                 cls._last_display_time = now
                                 
-                            Device.get_image_utils().convert_from_png_to_tga(full_path)
+                            try:
+                                Device.get_image_utils().convert_from_png_to_tga(full_path)
+                            except Exception as e:
+                                PyUiLogger().get_logger().warning(f"Unable to convert {full_path} : {e}")
 
                             try:
                                 # Replace 'Imgs' with 'Imgs_small' in the path
@@ -134,4 +137,4 @@ class BoxArtResizer():
             os.remove(output_path)
         except Exception as e:
             PyUiLogger().get_logger().warning(f"Unable to convert {output_path} : {e}")
-            pass
+

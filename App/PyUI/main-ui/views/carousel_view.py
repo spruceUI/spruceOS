@@ -253,11 +253,17 @@ class CarouselView(View):
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
                 self.adjust_selected(1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
-                self.skip_next_animation = True
-                self.adjust_selected(-1* self.cols, skip_by_letter=False)
+                if(Theme.skip_main_menu()):
+                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+                else:
+                    self.skip_next_animation = True
+                    self.adjust_selected(-1* self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R1:
-                self.skip_next_animation = True
-                self.adjust_selected(self.cols, skip_by_letter=False)
+                if(Theme.skip_main_menu()):
+                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+                else:
+                    self.skip_next_animation = True
+                    self.adjust_selected(self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L2:
                 self.skip_next_animation = True
                 self.adjust_selected(-1* self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())

@@ -4,7 +4,7 @@
   "iconsel": "gametank_sel.png",
   "launch": "../.emu_setup/standard_launch.sh",
   "gamelist": "../../Roms/GAMETANK/miyoogamelist.xml",
-  "extlist": "gtr",
+  "extlist": "gtr|zip|7z",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
