@@ -35,7 +35,7 @@
     "Emulator_Brick": {
       "display": "Emulator",
       "devices": [
-        "MIYOO_FLIP"
+        "TRIMUI_BRICK"
       ],
       "options": [
         "DraStic-original",
