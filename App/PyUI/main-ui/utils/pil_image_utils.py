@@ -7,9 +7,9 @@ from utils.logger import PyUiLogger
 
 
 class PilImageUtils(ImageUtils):
-    def convert_from_jpg_to_tga(self, jpg_path, png_path):
+    def convert_from_jpg_to_qoi(self, jpg_path, png_path):
         with Image.open(jpg_path) as img:
-            img.save(png_path, "TGA")
+            img.save(png_path, "QOI")
 
     def convert_from_jpg_to_png(self, jpg_path, png_path):
         with Image.open(jpg_path) as img:
@@ -70,26 +70,26 @@ class PilImageUtils(ImageUtils):
             return 0,0
         
         
-    def convert_from_png_to_tga(self, png_path, tga_path=None):
+    def convert_from_png_to_qoi(self, png_path, qoi_path=None):
         """
-        Converts a PNG file to a 32-bit RGBA TGA using ffmpeg.
-        The TGA will be in the same directory with the same basename.
+        Converts a PNG file to a 32-bit RGBA QOI using ffmpeg.
+        The QOI will be in the same directory with the same basename.
         """
         if not png_path.lower().endswith(".png"):
             PyUiLogger().get_logger().info(f"{png_path} is not a png")
             return
-        PyUiLogger().get_logger().info(f"Converting {png_path} to tga")
+        PyUiLogger().get_logger().info(f"Converting {png_path} to qoi")
 
-        if(tga_path is None):
-            tga_path = os.path.splitext(png_path)[0] + ".tga"
+        if(qoi_path is None):
+            qoi_path = os.path.splitext(png_path)[0] + ".qoi"
 
         # Open PNG
         with Image.open(png_path) as img:
             # Ensure 32-bit RGBA
             img = img.convert("RGBA")
-            # Save as TGA
-            img.save(tga_path, format="TGA")
+            # Save as QOI
+            img.save(qoi_path, format="QOI")
 
-        PyUiLogger().get_logger().info(f"Converted {png_path} ==> {tga_path}")
+        PyUiLogger().get_logger().info(f"Converted {png_path} ==> {qoi_path}")
 
-        return tga_path
+        return qoi_path

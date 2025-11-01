@@ -11,7 +11,7 @@ import sdl2
 from utils import throttle
 
 from utils.config_copier import ConfigCopier
-from utils.pil_image_utils import PilImageUtils
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(TrimUIDevice):
@@ -111,7 +111,7 @@ class TrimUIBrick(TrimUIDevice):
         return True
 
     def get_image_utils(self):
-        return PilImageUtils()
+        return FfmpegImageUtils()
 
 
     def get_controller_interface(self):

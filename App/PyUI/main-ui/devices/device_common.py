@@ -343,5 +343,5 @@ class DeviceCommon(AbstractDevice):
     def get_boxart_large_resize_dimensions(self):
         return 640, 480
 
-    def supports_tga(self):
+    def supports_qoi(self):
         return True

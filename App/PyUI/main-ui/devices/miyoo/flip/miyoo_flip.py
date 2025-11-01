@@ -19,8 +19,8 @@ from menus.games.utils.rom_info import RomInfo
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
-from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 from concurrent.futures import ThreadPoolExecutor
 
@@ -431,7 +431,7 @@ class MiyooFlip(MiyooDevice):
         return True
 
     def get_image_utils(self):
-        return PilImageUtils()
+        return FfmpegImageUtils()
 
     def get_device_name(self):
         return self.device_name

@@ -56,20 +56,20 @@ class RomSelectOptionsBuilder:
         # Build path to the image using the extracted directory
         root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
 
-        tga_path = os.path.join(root_dir, "Imgs", base_name + ".tga")
-        if os.path.exists(tga_path) and Device.supports_tga():
-            return tga_path
+        qoi_path = os.path.join(root_dir, "Imgs", base_name + ".qoi")
+        if os.path.exists(qoi_path) and Device.supports_qoi():
+            return qoi_path
 
         image_path = os.path.join(root_dir, "Imgs", base_name + ".png")
 
         if os.path.exists(image_path):
-            if(Device.supports_tga()):
+            if(Device.supports_qoi()):
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     if(Device.get_system_config().never_prompt_boxart_resize()):
                         RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     else:
                         Display.display_message_multiline([f"Would you like to optimize boxart?",
-                                                           "Originals will be deleted, be sure to backup!",
+                                                           "Originals will be converted, be sure to backup!",
                                                            "A = Yes, B = No, X/Y = Never Prompt",
                                                            "",
                                                            "You can manually do this in:",
@@ -85,8 +85,8 @@ class RomSelectOptionsBuilder:
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     BoxArtResizer.process_rom_folders()
-                if os.path.exists(tga_path) and Device.supports_tga():
-                    return tga_path
+                if os.path.exists(qoi_path) and Device.supports_qoi():
+                    return qoi_path
                 else:
                     return image_path
             else:

@@ -341,7 +341,7 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def supports_tga(self):
+    def supports_qoi(self):
         pass
 
 

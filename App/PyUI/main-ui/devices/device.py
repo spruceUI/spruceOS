@@ -385,7 +385,7 @@ class Device:
         return Device._impl.get_device_name()
 
     @staticmethod
-    def supports_tga():
-        return Device._impl.supports_tga()
+    def supports_qoi():
+        return Device._impl.supports_qoi()
 
 

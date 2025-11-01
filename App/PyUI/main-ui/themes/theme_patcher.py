@@ -15,10 +15,10 @@ class ThemePatcher():
                      "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset"}
 
     @classmethod
-    def convert_to_tga(cls, path):
+    def convert_to_qoi(cls, path):
         from display.display import Display
         PyUiLogger().get_logger().info(f"Checking if theme is patched")
-        if(cls.contains_tga(path)):
+        if(cls.contains_qoi(path)):
             PyUiLogger().get_logger().info(f"Theme was patched")
             return False
 
@@ -29,38 +29,38 @@ class ThemePatcher():
                 if filename.lower().endswith(".png"):
                     try:
                         full_path = os.path.join(dirpath, filename)
-                        cls.convert_png_to_tga(full_path)      
+                        cls.convert_png_to_qoi(full_path)      
                     except Exception as e:
                         PyUiLogger().get_logger().warning(f"Unable to convert {full_path} : {e}")
 
         return True   
        
     @classmethod
-    def contains_tga(cls,path):
-        """Return True if any .tga file exists under path (including subdirectories)."""
+    def contains_qoi(cls,path):
+        """Return True if any .qoi file exists under path (including subdirectories)."""
         try:
             for entry in os.scandir(path):
                 if entry.is_file(follow_symlinks=False):
                     # Check last 4 characters, case-insensitive
-                    if entry.name[-4:].lower() == ".tga":
+                    if entry.name[-4:].lower() == ".qoi":
                         return True
                 elif entry.is_dir(follow_symlinks=False):
                     # Recurse into subdirectory
-                    if cls.contains_tga(entry.path):
+                    if cls.contains_qoi(entry.path):
                         return True
         except PermissionError:
             pass  # Skip directories we can't access
         return False        
 
     @classmethod
-    def convert_png_to_tga(cls,png_path):
+    def convert_png_to_qoi(cls,png_path):
         from display.display import Display
         now = time.time()
         if now - cls._last_display_time >= 1.0:
             Display.display_message(f"Converting {os.path.basename(png_path)}")
             cls._last_display_time = now
         image_utils = Device.get_image_utils()
-        image_utils.convert_from_png_to_tga(png_path)
+        image_utils.convert_from_png_to_qoi(png_path)
 
 
     @classmethod
