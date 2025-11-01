@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class ImageUtils(ABC):
     @abstractmethod
-    def convert_from_jpg_to_tga(self, jpg_path, png_path):
+    def convert_from_jpg_to_qoi(self, jpg_path, png_path):
         pass
 
     @abstractmethod
@@ -24,7 +24,7 @@ class ImageUtils(ABC):
         pass
 
     @abstractmethod
-    def convert_from_png_to_tga(self, png_path,tga_path=None):
+    def convert_from_png_to_qoi(self, png_path,qoi_path=None):
         pass
 
     

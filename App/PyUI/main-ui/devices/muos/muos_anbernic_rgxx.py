@@ -139,6 +139,7 @@ class MuosAnbernicRGXX(MuosDevice):
         ProcessRunner.run(["dd", "if=/dev/zero", "of=/dev/fb0", "bs=4096"])
 
     def get_image_utils(self):
+        #TODO see if ffmpeg is available
         return PilImageUtils()
 
     def get_device_name(self):
