@@ -24,7 +24,7 @@ class ImageUtils(ABC):
         pass
 
     @abstractmethod
-    def convert_from_png_to_tga(self, png_path):
+    def convert_from_png_to_tga(self, png_path,tga_path=None):
         pass
 
     

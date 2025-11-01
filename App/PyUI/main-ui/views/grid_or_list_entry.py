@@ -104,17 +104,16 @@ class GridOrListEntry:
             if os.path.exists(variant_path):
                 return variant_path
 
-        return image_path
-
+        if("small" == variant_name):
+            return self.get_image_path_variant(image_path,"med")
+        else:
+            return image_path
 
     def get_image_path_small(self,image_path: str):
         return self.get_image_path_variant(image_path,"small")
 
     def get_image_path_medium(self,image_path: str):
         return self.get_image_path_variant(image_path, "med")
-
-    def get_image_path_large(self,image_path: str):
-        return self.get_image_path_variant(image_path, "large")
     
     def get_image_path_ideal(self, target_width, target_height):
         return self.get_properly_sized_image(self.get_image_path(), target_width, target_height)
@@ -125,7 +124,6 @@ class GridOrListEntry:
     def get_properly_sized_image(self, image_path, target_width, target_height):
         small_width, small_height = Device.get_boxart_small_resize_dimensions()
         medium_width, medium_height = Device.get_boxart_medium_resize_dimensions()
-        large_width, large_height = Device.get_boxart_large_resize_dimensions()
 
         if(target_width is not None and target_width <= small_width):
             #PyUiLogger.get_logger().info(f"Going with small due to width {target_width} <= {small_width}")
@@ -139,25 +137,9 @@ class GridOrListEntry:
         elif(target_height is not None and target_height <= medium_height):
             #PyUiLogger.get_logger().info(f"Going with medium due to width {target_height} <= {medium_height}")
             return self.get_image_path_medium(image_path)
-        elif(target_width is not None and target_width <= large_width):
-            #PyUiLogger.get_logger().info(f"Going with large due to width {target_width} <= {large_width}")
-            return self.get_image_path_large(image_path)
-        elif(target_height is not None and target_height <= large_height):
-            #PyUiLogger.get_logger().info(f"Going with large due to width {target_height} <= {large_height}")
-            return self.get_image_path_large(image_path)
-        elif(target_width is not None and target_width > Device.max_texture_width()):
-            #PyUiLogger.get_logger().info(f"Going with large due to source being too large  {target_width} > {Device.max_texture_width()}")
-            return self.get_image_path_large(image_path)
-        elif(target_height is not None and target_height > Device.max_texture_height()):
-            #PyUiLogger.get_logger().info(f"Going with large due to source being too large  {target_height} > {Device.max_texture_height()}")
-            return self.get_image_path_large(image_path)       
-        elif(Device.max_texture_height() < 1000 or Device.max_texture_width() < 1000):
-            #PyUiLogger.get_logger().info(f"Going with large for safety concern of base image being too large")
-            return self.get_image_path_large(image_path)       
         else :
             #PyUiLogger.get_logger().info(f"Going with full size image. Target dimensions are  {target_width} x {target_height}")
             return image_path
-
 
     def get_primary_text(self):
         return self.primary_text

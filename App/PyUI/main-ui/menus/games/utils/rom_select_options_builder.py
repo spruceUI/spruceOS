@@ -68,7 +68,12 @@ class RomSelectOptionsBuilder:
                     if(Device.get_system_config().never_prompt_boxart_resize()):
                         RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     else:
-                        Display.display_message_multiline([f"Would you like to optimize boxart?", "A = Yes, B = No, X/Y = Never Prompt","","You can manually do this in:","Settings -> Extra Settings -> Optimize BoxArt"], 0)
+                        Display.display_message_multiline([f"Would you like to optimize boxart?",
+                                                           "Originals will be deleted, be sure to backup!",
+                                                           "A = Yes, B = No, X/Y = Never Prompt",
+                                                           "",
+                                                           "You can manually do this in:",
+                                                           "Settings -> Extra Settings -> Optimize BoxArt"], 0)
                         input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
                         
                         if(input == ControllerInput.B):

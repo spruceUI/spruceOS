@@ -3,6 +3,7 @@ import math
 import os
 import shutil
 import subprocess
+import sys
 from utils.image_utils import ImageUtils
 from utils.logger import PyUiLogger
 
@@ -27,27 +28,64 @@ class FfmpegImageUtils(ImageUtils):
     def convert_from_jpg_to_png(self,jpg_path, png_path):
        self.convert_type(jpg_path,png_path)
 
-    def shrink_image_if_needed(self,input_path, output_path, max_width, max_height):
-        temp_path = output_path + ".tmp.png"
-        
-        scale_filter = f"scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease"
+    def get_image_dimensions_ffmpeg(self, path: str):
+        """
+        Returns (width, height) of an image using ffmpeg only.
+        Works without ffprobe.
+        """
         try:
-            subprocess.run([
-                "ffmpeg",
-                "-y",
-                "-i", input_path,
-                "-vf", scale_filter,
-                temp_path
-            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # ffmpeg prints the resolution line, e.g. "Stream #0: Video: png, 1920x1080 ..."
+            result = subprocess.run(
+                ["ffmpeg", "-v", "info", "-i", path, "-f", "null", "-"],
+                capture_output=True, text=True
+            )
+            # Combine stdout and stderr (metadata usually appears on stderr)
+            output = result.stderr + result.stdout
 
-            # Replace original file
-            shutil.move(temp_path, output_path)
-            PyUiLogger().get_logger().info(f"Scaled: {input_path} → {output_path} within {max_width}x{max_height}")
-        except subprocess.CalledProcessError as e:
-            PyUiLogger().get_logger().error(f"Error resizing {input_path}: {e}")
-            # Clean up temp file if it exists
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            # Find pattern like "1920x1080"
+            import re
+            match = re.search(r'(\d{2,5})x(\d{2,5})', output)
+            if match:
+                width, height = map(int, match.groups())
+                return width, height
+
+            return sys.maxsize, sys.maxsize
+
+        except Exception as e:
+            PyUiLogger.get_logger().exception(f"ffmpeg dimension detection failed for {path}")
+            return sys.maxsize, sys.maxsize
+        
+    def shrink_image_if_needed(self,input_path, output_path, max_width, max_height):
+        
+        actual_width,actual_height = self.get_image_dimensions_ffmpeg(input_path)
+        if actual_width > max_width or actual_height > max_height:
+            temp_path = output_path + ".tmp.png"
+            
+            scale_filter = f"scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease"
+            try:
+                subprocess.run([
+                    "ffmpeg",
+                    "-y",
+                    "-i", input_path,
+                    "-vf", scale_filter,
+                    temp_path
+                ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+                # Replace original file
+                shutil.move(temp_path, output_path)
+                PyUiLogger().get_logger().info(f"Scaled: {input_path} → {output_path} to {max_width}x{max_height}")
+            except subprocess.CalledProcessError as e:
+                PyUiLogger().get_logger().error(f"Error resizing {input_path}: {e}")
+                # Clean up temp file if it exists
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            
+            return True
+        else:
+            PyUiLogger().get_logger().info(
+                f"Skipping as already small enough: {input_path} → {output_path} ({actual_width}x{actual_height})"
+            )
+            return False
 
     def resize_image(self, input_path, output_path, max_width, max_height):
         """
@@ -145,7 +183,7 @@ class FfmpegImageUtils(ImageUtils):
             PyUiLogger().get_logger().info(f"Error getting dimens of {path} : {e}")
             return 0, 0
 
-    def convert_from_png_to_tga(self, png_path):
+    def convert_from_png_to_tga(self, png_path, tga_path=None):
         """
         Converts a PNG file to a 32-bit RGBA TGA using ffmpeg.
         The TGA will be in the same directory with the same basename.
@@ -155,7 +193,8 @@ class FfmpegImageUtils(ImageUtils):
             return
         PyUiLogger().get_logger().info(f"Converting {png_path} to tga")
 
-        tga_path = os.path.splitext(png_path)[0] + ".tga"
+        if(tga_path is None):
+            tga_path = os.path.splitext(png_path)[0] + ".tga"
 
         # Call ffmpeg to convert PNG → 32-bit RGBA TGA
         subprocess.run([
