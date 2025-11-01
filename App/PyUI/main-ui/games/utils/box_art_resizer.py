@@ -1,6 +1,7 @@
 
 
 import os
+import shutil
 import threading
 import time
 from controller.controller import Controller
@@ -14,7 +15,7 @@ class BoxArtResizer():
     _last_display_time = 0  # class-level timestamp
     _aborted = False
     _monitoring = False
-
+    _to_delete = []
     @classmethod
     def patch_boxart(cls):
         cls.process_rom_folders()
@@ -57,11 +58,11 @@ class BoxArtResizer():
                 os.makedirs(os.path.join(folder_path, "Imgs_small"), exist_ok=True)
                 os.makedirs(os.path.join(folder_path, "Imgs_med"), exist_ok=True)
                 os.makedirs(os.path.join(folder_path, "Imgs_large"), exist_ok=True)
-
                 for root, _, files in os.walk(imgs_path):
                     for file in files:
                         if file.lower().endswith((".png", ".jpg", ".jpeg")):
                             scan_count = scan_count + 1
+                            cls._to_delete = []
                             if(cls._aborted):
                                 Display.display_message(f"Aborting boxart patching", 2000)
                                 cls._monitoring = False
@@ -69,9 +70,12 @@ class BoxArtResizer():
 
 
                             full_path = os.path.join(root, file)
-                            tga_path = os.path.splitext(full_path)[0] + ".tga"
-                            if os.path.exists(tga_path):
+                            tga_full_path = os.path.splitext(full_path)[0] + ".tga"
+                            if os.path.exists(tga_full_path):
+                                #If so this has been already optimized
                                 continue
+
+                            patched_count = patched_count + 1
 
 
                             now = time.time()
@@ -80,20 +84,31 @@ class BoxArtResizer():
                                 cls._last_display_time = now
                                 
                             try:
-                                Device.get_image_utils().convert_from_png_to_tga(full_path)
-                            except Exception as e:
-                                PyUiLogger().get_logger().warning(f"Unable to convert {full_path} : {e}")
-
-                            try:
-                                # Replace 'Imgs' with 'Imgs_small' in the path
-                                small_image_path = full_path.replace(
+                                # Replace 'Imgs' with 'Imgs_large' in the path
+                                large_image_path = full_path.replace(
                                     os.path.join(folder_path, "Imgs"),
-                                    os.path.join(folder_path, "Imgs_small"),
+                                    os.path.join(folder_path, "Imgs_large"),
                                 )
+                                tga_large_path = tga_full_path                                
+                                if(not cls.scale_and_convert_image(full_path,large_image_path, target_large_width, target_large_height,tga_large_path)):
+                                    #Convert it
+                                    try:
+                                        Device.get_image_utils().convert_from_png_to_tga(full_path)
+                                        tga_full_path = os.path.splitext(full_path)[0] + ".tga"
+                                    except Exception as e:
+                                        PyUiLogger().get_logger().warning(f"Unable to convert {full_path} : {e}")
+                                        continue
+                                    
+                                   
+                                    large_image_path = full_path
+                                else:
+                                    tga_full_path = os.path.splitext(full_path)[0] + ".tga"
+                                    shutil.move(tga_full_path, tga_large_path)
 
-                                cls.scale_image(full_path,small_image_path, target_small_width, target_small_height)
                             except Exception as e:
-                                print(f"Error processing {full_path}: {e}")
+                                print(f"Error converting for large image {full_path} : {e}")
+                                continue
+
 
                             try:
                                 # Replace 'Imgs' with 'Imgs_med' in the path
@@ -101,40 +116,65 @@ class BoxArtResizer():
                                     os.path.join(folder_path, "Imgs"),
                                     os.path.join(folder_path, "Imgs_med"),
                                 )
-                                cls.scale_image(full_path,medium_image_path, target_medium_width, target_medium_height)
+                                if(not cls.scale_and_convert_image(large_image_path,medium_image_path, target_medium_width, target_medium_height)):
+                                    medium_image_path = full_path
                             except Exception as e:
-                                print(f"Error processing {full_path}: {e}")
+                                print(f"Error converting for medium image {full_path} : {e}")
+                                continue
 
                             try:
-                                # Replace 'Imgs' with 'Imgs_large' in the path
-                                large_image_path = full_path.replace(
+                                # Replace 'Imgs' with 'Imgs_small' in the path
+                                small_image_path = full_path.replace(
                                     os.path.join(folder_path, "Imgs"),
-                                    os.path.join(folder_path, "Imgs_large"),
+                                    os.path.join(folder_path, "Imgs_small"),
                                 )
-                                cls.scale_image(full_path,large_image_path, target_large_width, target_large_height)
+                                cls.scale_and_convert_image(medium_image_path,small_image_path, target_small_width, target_small_height)
                             except Exception as e:
-                                print(f"Error processing {full_path}: {e}")
-                            patched_count = patched_count + 1
+                                print(f"Error converting for small image {full_path} : {e}")
+                                continue
+
+                            os.remove(full_path)
+                            for output_path in cls._to_delete:
+                                try:
+                                    os.remove(output_path)
+                                except Exception as e:
+                                    print(f"Error deleting {output_path}")
+
+
+                #This is always temporary
+                shutil.rmtree(os.path.join(folder_path, "Imgs_large"))
+                #If medium and large are the same size, get rid of Imgs_med as it unused
+                if(target_large_width == target_medium_width and target_large_height == target_medium_height):
+                    shutil.rmtree(os.path.join(folder_path, "Imgs_med"))
+
+                #If small and medium are the same size, get rid of Imgs_small as it unused
+                if(target_medium_width == target_small_width and target_medium_height == target_small_height):
+                    shutil.rmtree(os.path.join(folder_path, "Imgs_small"))
 
         cls._monitoring = False
         Display.display_message(f"All boxart is optimized", 2000)
 
 
+    #Don't want to clean this up but be aware resize_png_path will be deleted
     @classmethod
-    def scale_image(cls, image_file, output_path, target_width, target_height):
+    def scale_and_convert_image(cls, image_file, resize_png_path, target_width, target_height, tga_path=None):
         """Open an image and shrink it (preserving aspect ratio) to fit within target size."""
 
-        # Early return if the TGA version already exists
-        tga_path = os.path.splitext(output_path)[0] + ".tga"
+        if(tga_path is None):
+            # Early return if the TGA version already exists
+            tga_path = os.path.splitext(resize_png_path)[0] + ".tga"
+
         if os.path.exists(tga_path):
-            return
+            return True
         
 
-        Device.get_image_utils().shrink_image_if_needed(image_file,output_path,target_width, target_height)
-        #Remove the png
-        try:
-            Device.get_image_utils().convert_from_png_to_tga(output_path)
-            os.remove(output_path)
-        except Exception as e:
-            PyUiLogger().get_logger().warning(f"Unable to convert {output_path} : {e}")
+        needed_shrink = Device.get_image_utils().shrink_image_if_needed(image_file,resize_png_path,target_width, target_height)
+        if(needed_shrink):
+            try:
+                Device.get_image_utils().convert_from_png_to_tga(resize_png_path,tga_path)
+                cls._to_delete.append(resize_png_path)
+                return needed_shrink
+            except Exception as e:
+                PyUiLogger().get_logger().warning(f"Unable to convert {resize_png_path} : {e}")
 
+        return needed_shrink

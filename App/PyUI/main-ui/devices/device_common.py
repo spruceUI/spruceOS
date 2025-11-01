@@ -335,13 +335,13 @@ class DeviceCommon(AbstractDevice):
         return True
 
     def get_boxart_small_resize_dimensions(self):
-        return 320, 240
+        return 640, 480
 
     def get_boxart_medium_resize_dimensions(self):
         return 640, 480
 
     def get_boxart_large_resize_dimensions(self):
-        return 1024, 1024
+        return 640, 480
 
     def supports_tga(self):
         return True
