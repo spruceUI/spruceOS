@@ -9,6 +9,7 @@ from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.hidden_apps_manager import AppsManager
 from menus.language.language import Language
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -36,6 +37,7 @@ class AppMenu:
         icon_priority = []
         if(icon_path_from_config is not None):
             icon_priority.append(self._convert_to_theme_version_of_icon(icon_path_from_config))
+            PyUiLogger().get_logger().info(f"{self._convert_to_theme_version_of_icon(icon_path_from_config)}")
             icon_priority.append(icon_path_from_config)
             icon_priority.append(os.path.join(app_folder,icon_path_from_config))
         icon_priority.append(os.path.join(app_folder,"icon.png"))

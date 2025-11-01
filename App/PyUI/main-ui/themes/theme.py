@@ -1031,7 +1031,8 @@ class Theme():
 
     @classmethod
     def get_app_icon(cls, app_name):
-        return cls._icon("app",app_name)
+        tga_name = os.path.splitext(app_name)[0] + ".tga"
+        return cls._icon("app",tga_name)
 
     @classmethod
     def include_index_text(cls):
