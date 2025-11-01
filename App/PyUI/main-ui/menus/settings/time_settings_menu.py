@@ -14,9 +14,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def set_timezone(self, input):
         if (ControllerInput.A == input):
-            tz = TimezoneMenu().ask_user_for_timezone()
-            if (tz is not None):
-                PyUiConfig.set_timezone(tz)
+            Device.prompt_timezone_update()
 
     def change_show_clock(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
@@ -35,17 +33,18 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def build_options_list(self):
         option_list = []
-        option_list.append(
-            GridOrListEntry(
-                primary_text="Set Timezone",
-                value_text=None,
-                image_path=None,
-                image_path_selected=None,
-                description=None,
-                icon=None,
-                value=self.set_timezone
+        if(Device.supports_timezone_setting()):
+            option_list.append(
+                GridOrListEntry(
+                    primary_text="Set Timezone",
+                    value_text=None,
+                    image_path=None,
+                    image_path_selected=None,
+                    description=None,
+                    icon=None,
+                    value=self.set_timezone
+                )
             )
-        )
 
         option_list.append(
             GridOrListEntry(

@@ -333,6 +333,16 @@ class DeviceCommon(AbstractDevice):
     
     def supports_popup_menu(self):
         return True
+    
+    def supports_timezone_setting(self):
+        return False
+
+    def apply_timezone(self, timezone):
+        pass
+
+    def prompt_timezone_update(self):
+        #Unsupported by default
+        pass
 
     def get_boxart_small_resize_dimensions(self):
         return 640, 480

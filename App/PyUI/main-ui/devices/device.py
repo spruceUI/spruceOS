@@ -1,5 +1,6 @@
 from devices.abstract_device import AbstractDevice
 from devices.miyoo.system_config import SystemConfig
+from menus.games.utils.rom_info import RomInfo
 from utils.image_utils import ImageUtils
 
 
@@ -387,5 +388,22 @@ class Device:
     @staticmethod
     def supports_qoi():
         return Device._impl.supports_qoi()
+
+    @staticmethod
+    def get_save_state_image(rom_info: RomInfo):
+        return Device._impl.get_save_state_image(rom_info)
+
+    @staticmethod
+    def supports_timezone_setting():
+        return Device._impl.supports_timezone_setting()
+
+    @staticmethod
+    def prompt_timezone_update():
+        return Device._impl.prompt_timezone_update()
+    
+    @staticmethod
+    def apply_timezone(timezone):
+        return Device._impl.apply_timezone(timezone)
+
 
 

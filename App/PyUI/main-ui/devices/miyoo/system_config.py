@@ -2,6 +2,7 @@ import json
 import threading
 
 from controller.controller_inputs import ControllerInput
+from utils.consts import GAME_SWITCHER, RECENTS
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -232,3 +233,22 @@ class SystemConfig:
             self.save_config()
         else:
             PyUiLogger.get_logger().info("'theme' entry not found in user config; nothing to delete")
+
+    def use_savestate_screenshots(self, screen):
+        default_value_if_missing = False
+        if(RECENTS == screen or GAME_SWITCHER == screen):
+            default_value_if_missing = True
+            
+        return self.config.get("preferSaveStateScreenshots"+screen, default_value_if_missing)
+
+    def set_use_savestate_screenshots(self,screen, value):
+        self.config["preferSaveStateScreenshots"+screen] = value
+        self.save_config()
+
+
+    def get_timezone(self):
+        return self.config.get("timezone",'America/New_York')
+       
+    def set_timezone(self, value):
+        self.config["timezone"] = value
+        self.save_config()

@@ -50,12 +50,15 @@ class TopBar:
 
         #Battery Text
         x_offset = Device.screen_width() - img_padding
-        w, h = Display.render_text(str(battery_percent)+"%",x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-        x_offset = x_offset - w - img_padding
-        #Battery Icon
-        w, h = Display.render_image(
-            battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
-        x_offset = x_offset - w - img_padding
+        if(Theme.display_battery_percent()):
+            w, h = Display.render_text(str(battery_percent)+"%",x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - w - img_padding
+
+        if(Theme.display_battery_icon()):
+            #Battery Icon
+            w, h = Display.render_image(
+                battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - w - img_padding
 
         #Wifi
         if(Device.supports_wifi()):
@@ -97,15 +100,19 @@ class TopBar:
         center_of_bar = self.top_bar_h //2
 
         #TODO Allow specifying which side which icon is on    
+        x_offset = Device.screen_width() - padding*2
         if(not hide_top_bar_icons):
-            #Battery Text
-            x_offset = Device.screen_width() - padding*2
-            w, h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - w - padding
-            #Battery Icon
-            w, h = Display.render_image(
-                battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - w - padding
+            if(Theme.display_battery_percent()):
+                #Battery Text
+                w, h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+                x_offset = x_offset - w - padding
+
+            if(Theme.display_battery_icon()):
+                #Battery Icon
+                w, h = Display.render_image(
+                    battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
+                x_offset = x_offset - w - padding
+
             if(Device.supports_wifi()):
                 #Wifi
                 w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
@@ -129,12 +136,13 @@ class TopBar:
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
     def get_current_time_hhmm(self):
+        local_time = datetime.fromtimestamp(time.time())  # Uses system clock & local TZ
         if(PyUiConfig.use_24_hour_clock()):
-            return datetime.now().strftime("%H:%M")
+            return local_time.strftime("%H:%M")
         elif(PyUiConfig.show_am_pm()):
-            return datetime.now().strftime("%I:%M %p") 
+            return local_time.strftime("%I:%M %p") 
         else:
-            return datetime.now().strftime("%I:%M") 
+            return local_time.strftime("%I:%M") 
 
     def get_top_bar_height(self):
         return self.top_bar_h

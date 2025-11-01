@@ -1,6 +1,7 @@
 
 import os
 import subprocess
+import traceback
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -34,7 +35,9 @@ class RomsMenuCommon(ABC):
     
     def _get_image_path(self, rom_path):
         # Get the base filename without extension (e.g., "DKC")
-        return self.rom_select_options_builder.get_image_path(rom_path)
+        traceback.print_exc()
+        PyUiLogger.get_logger().info(f"self.prefer_savestate_screenshot() = {self.prefer_savestate_screenshot()}")
+        return self.rom_select_options_builder.get_image_path(rom_path, prefer_savestate_screenshot=self.prefer_savestate_screenshot())
         
     def _extract_game_system(self, rom_path):
         rom_path = os.path.abspath(os.path.normpath(rom_path))

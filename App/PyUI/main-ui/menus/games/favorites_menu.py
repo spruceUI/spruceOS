@@ -6,6 +6,7 @@ from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.rom_info import RomInfo
+from utils.consts import FAVORITES
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -53,3 +54,6 @@ class FavoritesMenu(RomsMenuCommon):
             value=lambda input_value: self.sort_favorites_alphabetically(input_value)
         ))
         return popup_options
+        
+    def prefer_savestate_screenshot(self):
+        return Device.get_system_config().use_savestate_screenshots(FAVORITES)

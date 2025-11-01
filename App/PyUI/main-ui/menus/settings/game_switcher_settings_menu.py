@@ -6,6 +6,7 @@ from display.resize_type import get_next_resize_type
 from menus.settings import settings_menu
 from themes.theme import Theme
 from utils.cfw_system_config import CfwSystemConfig
+from utils.consts import GAME_SWITCHER
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -19,6 +20,11 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
     def toggle_game_switcher(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
             Device.get_system_config().set_game_switcher_enabled(not Device.get_system_config().game_switcher_enabled())
+
+    def toggle_game_switcher_screenshot_preference(self, input, screen):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
+            Device.get_system_config().set_use_savestate_screenshots(screen,
+                not Device.get_system_config().use_savestate_screenshots(screen))
 
     def update_game_switcher_game_count(self, input):
         if(ControllerInput.DPAD_LEFT == input):
@@ -40,6 +46,20 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                         value=self.toggle_game_switcher
                     )
             )
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Prefer SaveState Screenshots",
+                        value_text="<    " + str(Device.get_system_config().use_savestate_screenshots(GAME_SWITCHER)) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=lambda input_value, screen=GAME_SWITCHER: self.toggle_game_switcher_screenshot_preference(input_value, screen)
+                    )
+            )
+
+        
             
         option_list.append(
                 GridOrListEntry(

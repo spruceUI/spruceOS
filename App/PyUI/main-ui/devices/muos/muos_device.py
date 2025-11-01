@@ -349,3 +349,7 @@ class MuosDevice(DeviceCommon):
 
     def take_snapshot(self, path):
         return None
+    
+    def get_save_state_image(self, rom_info: RomInfo):
+        #TODO, where does it store this?
+        return None

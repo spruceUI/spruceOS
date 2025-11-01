@@ -25,4 +25,17 @@ class ThemeSettingsTopBar(ThemeSettingsMenuCommon):
             )
         )
                 
+        option_list.append(
+            self.build_enabled_disabled_entry("Show Battery Percent",
+                                              Theme.display_battery_percent,
+                                              Theme.set_display_battery_percent)
+        )
+
+        option_list.append(
+            self.build_enabled_disabled_entry("Show Battery Icon",
+                                              Theme.display_battery_icon,
+                                              Theme.set_display_battery_icon)
+        )
+
+                
         return option_list

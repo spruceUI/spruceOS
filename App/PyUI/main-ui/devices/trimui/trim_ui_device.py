@@ -15,6 +15,7 @@ from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
+from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
@@ -328,3 +329,6 @@ class TrimUIDevice(DeviceCommon):
 
     def supports_hue_calibration():
         return True
+
+    def get_save_state_image(self, rom_info: RomInfo):
+        return self.get_game_system_utils().get_save_state_image(rom_info)

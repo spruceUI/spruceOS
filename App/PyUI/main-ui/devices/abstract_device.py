@@ -3,6 +3,7 @@ import subprocess
 
 from devices.miyoo.system_config import SystemConfig
 from games.utils.game_entry import GameEntry
+from menus.games.utils.rom_info import RomInfo
 from utils.image_utils import ImageUtils
 
 class AbstractDevice(ABC):
@@ -321,6 +322,18 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def supports_timezone_setting(self):
+        pass
+
+    @abstractmethod
+    def apply_timezone(self, timezone):
+        pass
+
+    @abstractmethod
+    def prompt_timezone_update(self):
+        pass
+
+    @abstractmethod
     def get_image_utils(self) -> ImageUtils:
         pass
 
@@ -344,6 +357,7 @@ class AbstractDevice(ABC):
     def supports_qoi(self):
         pass
 
-
-
+    @abstractmethod
+    def get_save_state_image(self, rom_info: RomInfo):
+        pass
 
