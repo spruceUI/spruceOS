@@ -81,8 +81,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
     def change_theme(self, input):
         self.theme_ever_changed = True
         theme_folders = self.get_theme_folders()
-        selected_index = theme_folders.index(PyUiConfig.get("theme"))
-
+        selected_index = theme_folders.index(Device.get_system_config().get_theme())
         if(ControllerInput.DPAD_LEFT == input):
             selected_index-=1
             if(selected_index < 0):
@@ -95,6 +94,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
             selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(theme_folders, "Themes")
+
 
         if(selected_index is not None):
             Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
