@@ -78,9 +78,9 @@ class Theme():
         elif ThemePatcher.patch_theme(path,width, height) and os.path.exists(config_path):
             resolution_converted = True
 
-        qoi_converted = ThemePatcher.convert_to_qoi(path)
+        #qoi_converted = ThemePatcher.convert_to_qoi(path)
 
-        if(resolution_converted or qoi_converted):
+        if(resolution_converted): # or qoi_converted):
             cls.set_theme_path(path,width,height)
 
     @classmethod
