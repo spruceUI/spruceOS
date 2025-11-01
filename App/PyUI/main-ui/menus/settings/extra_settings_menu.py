@@ -8,6 +8,7 @@ from menus.settings import settings_menu
 from menus.settings.cfw_system_settings_menu import CfwSystemSettingsMenu
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
+from menus.settings.game_art_display_settings_menu import GameArtDisplaySettingsMenu
 from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
@@ -66,6 +67,10 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if (lang is not None):
                 PyUiConfig.set_language(lang)
                 Language.load()
+
+    def launch_game_art_display_settings(self,input):
+        if(ControllerInput.A == input):
+            GameArtDisplaySettingsMenu().show_menu()
 
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
@@ -147,6 +152,18 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                             value=self.launch_gammeswitcher_settings
                     )
             )
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Game Art Display Settings",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_game_art_display_settings
+                )
+        )
+
+                    
 
         option_list.append(
                 GridOrListEntry(

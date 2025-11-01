@@ -4,6 +4,7 @@ from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.rom_info import RomInfo
+from utils.consts import COLLECTIONS
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
@@ -71,3 +72,6 @@ class CollectionsMenu(RomsMenuCommon):
                         getattr(self, 'subfolder', '') or ''
                     )
             return None
+        
+    def prefer_savestate_screenshot(self):
+        return Device.get_system_config().use_savestate_screenshots(COLLECTIONS)

@@ -137,7 +137,6 @@ class GameSystemSelectMenuPopup:
                         
 
         while (popup_selection := popup_view.get_selection()):
-            PyUiLogger.get_logger().info(f"Waiting for input")
             if(popup_selection.get_input() is not None):
                 PyUiLogger.get_logger().info(f"Received {popup_selection.get_input()}")
                 break

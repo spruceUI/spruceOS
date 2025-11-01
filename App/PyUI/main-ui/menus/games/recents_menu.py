@@ -6,6 +6,7 @@ from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
+from utils.consts import RECENTS
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -42,3 +43,7 @@ class RecentsMenu(RomsMenuCommon):
 
     def run_rom_selection(self) :
         return self._run_rom_selection("Recents")
+
+
+    def prefer_savestate_screenshot(self):
+        return Device.get_system_config().use_savestate_screenshots(RECENTS)
