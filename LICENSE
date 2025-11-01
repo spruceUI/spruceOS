@@ -8,14 +8,14 @@ Permission is hereby granted, free of charge, to use, copy, modify, merge, publi
    You may use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software only for non-commercial purposes. For the purposes of this license, "commercial use" refers to any use of the Software that is primarily intended for or directed toward commercial advantage or monetary compensation.
 
 2. Commercial Use by Permission
-   If you wish to use the Software for commercial purposes, you must obtain written permission from SpruceOS (through SpruceUI). Commercial use includes but is not limited to:
+   If you wish to use the Software for commercial purposes, you must obtain written permission from the spruceUI organization. Commercial use includes but is not limited to:
    - Selling or licensing the Software.
    - Using the Software as part of a commercial service or product.
    - Any other use that generates revenue or financial gain.
 
 3. Modification and Distribution
    - You may modify the Software and distribute your modifications under the same terms as this license, provided that the modifications are not used commercially without permission.
-   - If you distribute modified versions of the Software for non-commercial purposes, you may do so under this license. However, if you intend to distribute modified versions for commercial purposes, you must first obtain permission from the original authors (SpruceOS/SpruceUI).
+   - If you distribute modified versions of the Software for non-commercial purposes, you may do so under this license. However, if you intend to distribute modified versions for commercial purposes, you must first obtain permission from the original authors spruceUI.
 
 4. Attribution
    When using or distributing the Software (modified or unmodified), you must include the following attribution in a prominent place:
@@ -24,7 +24,7 @@ Permission is hereby granted, free of charge, to use, copy, modify, merge, publi
    - A statement that the Software is used under the terms of this license.
 
 5. No Warranty
-   The Software is provided "as-is," without any warranties or conditions, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, or non-infringement. In no event shall SpruceOS or SpruceUI be liable for any claim, damages, or other liability arising from, out of, or in connection with the Software or the use or other dealings in the Software.
+   The Software is provided "as-is," without any warranties or conditions, express or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, or non-infringement. In no event shall spruceUI be liable for any claim, damages, or other liability arising from, out of, or in connection with the Software or the use or other dealings in the Software.
 
 6. Commercial Use Permissions
 
