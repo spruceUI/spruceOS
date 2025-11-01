@@ -393,4 +393,17 @@ class Device:
     def get_save_state_image(rom_info: RomInfo):
         return Device._impl.get_save_state_image(rom_info)
 
+    @staticmethod
+    def supports_timezone_setting():
+        return Device._impl.supports_timezone_setting()
+
+    @staticmethod
+    def prompt_timezone_update():
+        return Device._impl.prompt_timezone_update()
+    
+    @staticmethod
+    def apply_timezone(timezone):
+        return Device._impl.apply_timezone(timezone)
+
+
 

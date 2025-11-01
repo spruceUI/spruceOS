@@ -244,3 +244,11 @@ class SystemConfig:
     def set_use_savestate_screenshots(self,screen, value):
         self.config["preferSaveStateScreenshots"+screen] = value
         self.save_config()
+
+
+    def get_timezone(self):
+        return self.config.get("timezone",'America/New_York')
+       
+    def set_timezone(self, value):
+        self.config["timezone"] = value
+        self.save_config()

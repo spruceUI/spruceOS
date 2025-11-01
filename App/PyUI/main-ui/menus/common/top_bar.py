@@ -136,12 +136,13 @@ class TopBar:
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
     def get_current_time_hhmm(self):
+        local_time = datetime.fromtimestamp(time.time())  # Uses system clock & local TZ
         if(PyUiConfig.use_24_hour_clock()):
-            return datetime.now().strftime("%H:%M")
+            return local_time.strftime("%H:%M")
         elif(PyUiConfig.show_am_pm()):
-            return datetime.now().strftime("%I:%M %p") 
+            return local_time.strftime("%I:%M %p") 
         else:
-            return datetime.now().strftime("%I:%M") 
+            return local_time.strftime("%I:%M") 
 
     def get_top_bar_height(self):
         return self.top_bar_h

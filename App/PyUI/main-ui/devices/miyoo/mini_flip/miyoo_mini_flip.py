@@ -1,14 +1,12 @@
-from concurrent.futures import Future
 import ctypes
 import fcntl
 import json
 import math
 from pathlib import Path
-import struct
 import subprocess
-import sys
 import threading
 import time
+from zoneinfo import reset_tzpath
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -25,6 +23,7 @@ from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from menus.games.utils.rom_info import RomInfo
+from menus.settings.timezone_menu import TimezoneMenu
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
@@ -48,6 +47,8 @@ class MiyooMiniFlip(MiyooDevice):
     def __init__(self, device_name):
         self.device_name = device_name
         PyUiLogger.get_logger().info("Initializing Miyoo Mini Flip")        
+        os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
+        reset_tzpath()  # reload TZPATH
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
             sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
@@ -131,6 +132,7 @@ class MiyooMiniFlip(MiyooDevice):
         if(self.is_wifi_enabled()):
             self.start_wifi_services()
         self.on_mainui_config_change()
+        self.apply_timezone(self.system_config.get_timezone())
 
     def get_controller_interface(self):
         key_mappings = {}  
@@ -493,3 +495,20 @@ class MiyooMiniFlip(MiyooDevice):
     
     def get_device_name(self):
         return self.device_name
+    
+    def supports_timezone_setting(self):
+        return True
+
+    def prompt_timezone_update(self):
+        timezone_menu = TimezoneMenu()
+        tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/mnt/SDCARD/miyoo285/zoneinfo/', verify_via_datetime=False))
+
+        if (tz is not None):
+            self.system_config.set_timezone(tz)
+            self.apply_timezone(tz)
+            Display.display_message_multiline(["Timezone changed","Reloading UI..."],2000)           
+            self.exit_pyui()
+
+    def apply_timezone(self, timezone):
+        ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
+        ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
