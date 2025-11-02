@@ -4,12 +4,7 @@
 
 
 SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
-
-if [ "$PLATFORM" = "A30" ]; then
-    ST_BIN=$SYNCTHING_DIR/bin/syncthing
-else
-    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
-fi
+ST_BIN=$SYNCTHING_DIR/bin/syncthing
 
 # Generic Startup
 # Should only be used in contexts where firststart has already been called

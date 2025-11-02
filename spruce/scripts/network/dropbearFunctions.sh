@@ -2,12 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
-else
-    SSH_DIR="/mnt/SDCARD/spruce/bin64/SSH"
-fi
-
+SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
 SSH_KEYS="/mnt/SDCARD/spruce/etc/ssh/keys"
 dropbear_check(){
     if setting_get "dropbear"; then
