@@ -339,6 +339,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     if [ ${miyoo_fw_update} -eq 1 ] ; then
         cd $miyoo_fw_dir
         /usr/miyoo/apps/fw_update/miyoo_fw_update
+        rm "${miyoo_fw_dir}/miyoo355_fw.img"
     fi
 	
     # fix keys map image for each theme folder

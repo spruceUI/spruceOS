@@ -18,6 +18,10 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 NEW_PAYLOAD_VERSION=$(cat $DIR/payload/runmiyoo.sh | grep PAYLOAD_VERSION | awk '{print $3}')
 echo "New payload version $NEW_PAYLOAD_VERSION"
 
+# delete FW image from SD card if we make it to this script, which would imply we are already
+# on a fresh FW flash and want to install our .tmp_update hook and not immediately reflash the FW.
+[ -f "/mnt/SDCARD/miyoo355_fw.img" ] && rm "/mnt/SDCARD/miyoo355_fw.img"
+
 # Check for existing install
 if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
 	# Payload not installed
