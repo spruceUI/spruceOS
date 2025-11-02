@@ -3,5 +3,6 @@
   "icon": "portmaster.png",
   "launch": "launch.sh",
   "description": "PortMaster Menu",
+  "devices": ["MIYOO_FLIP"],
   "hide": false
 }
