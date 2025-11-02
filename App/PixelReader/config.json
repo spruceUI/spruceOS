@@ -5,4 +5,5 @@
   "description": "Read Ebooks on your device",
   "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "MIYOO_FLIP"],
   "hide": false
+  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "MIYOO_FLIP"]
 }
