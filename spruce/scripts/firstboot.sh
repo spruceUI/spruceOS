@@ -64,6 +64,14 @@ else
 	log_message "firstboot.sh: $SPLORE_CART already found."
 fi
 
+if [ "$PLATFORM" = "A30" ]; then
+    #Since we renamed python to MainUI...
+    /mnt/SDCARD/spruce/bin/python/bin/MainUI -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
+else
+    #Since we renamed python to MainUI...
+    /mnt/SDCARD/spruce/flip/bin/MainUI -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
+fi
+
 log_message "Displaying enjoy image"
 display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
 
