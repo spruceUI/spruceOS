@@ -1,0 +1,7 @@
+{
+    "label":"Fn Key and Switch Settings",
+    "icon":"fnkey.png",
+    "launch":"launch.sh",
+    "description":"Change Brick-specific functions",
+    "devices": ["TRIMUI_BRICK"]
+}
