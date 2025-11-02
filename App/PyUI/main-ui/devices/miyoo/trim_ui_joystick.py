@@ -10,7 +10,6 @@ class TrimUIJoystick:
     TM_PLAYER_MAGIC_END = 0xFE # example, replace with actual magic from your C code
 
     def __init__(self, port="/dev/ttyS1", baudrate=9600):
-        import serial
         self.port = port
         self.baudrate = baudrate
         self.serial = None
@@ -39,7 +38,6 @@ class TrimUIJoystick:
         self.thread.start()
     
     def close(self):
-        import serial
         self.running = False
         if self.thread.is_alive():
             self.thread.join()
@@ -47,7 +45,6 @@ class TrimUIJoystick:
             self.serial.close()
     
     def _poll_thread(self):
-        import serial
         while self.running:
             # read exactly TRIMUI_PAD_FRAME_LEN bytes
             frame = self.serial.read(self.TRIMUI_PAD_FRAME_LEN)

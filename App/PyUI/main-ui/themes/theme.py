@@ -30,15 +30,13 @@ class Theme():
 
     @classmethod
     def set_theme_path(cls,path, width = 0, height = 0):
-        cls.load_defaults_so_user_can_see_at_least(path)
+        #Uneeded due to moving where we convert?
+        #cls.load_defaults_so_user_can_see_at_least(path)
 
         resolution_specific_config = f"config_{width}x{height}.json"
         config_path = os.path.join(path, resolution_specific_config)
-        if os.path.exists(config_path):
-            PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
-        else:
+        if not os.path.exists(config_path):
             config_path = "config.json"
-            PyUiLogger.get_logger().info(f"No resolution specific config {config_path} found, using config.json")
 
 
         cls._data.clear()
@@ -53,13 +51,12 @@ class Theme():
         if os.path.exists(daijisho_theme_index_file):
             try:
                 cls._daijisho_theme_index = DaijishoThemeIndex(daijisho_theme_index_file)
-                PyUiLogger.get_logger().info(f"Using DaijishoThemeIndex from {daijisho_theme_index_file}")
+                #PyUiLogger.get_logger().info(f"Using DaijishoThemeIndex from {daijisho_theme_index_file}")
             except Exception:
                 PyUiLogger.get_logger().error(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}:")
                 logging.exception(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}")
                 cls._daijisho_theme_index = None
         else:
-            PyUiLogger.get_logger().info(f"DaijishoThemeIndex does not exist at: {daijisho_theme_index_file} (Assuming non daijisho theme)")
             cls._daijisho_theme_index = None
 
         scale_width = Device.screen_width() / width
@@ -81,6 +78,9 @@ class Theme():
         #qoi_converted = ThemePatcher.convert_to_qoi(path)
 
         if(resolution_converted): # or qoi_converted):
+            from display.display import Display
+            Display.clear_image_cache()
+            Display.clear_text_cache()
             cls.set_theme_path(path,width,height)
 
     @classmethod
@@ -104,10 +104,10 @@ class Theme():
         folder = f"{base_folder}_{width}x{height}"
         full_path = os.path.join(cls._path, folder)
         if os.path.isdir(full_path):
-            PyUiLogger.get_logger().info(f"Resolution specific assets found, using {folder}")
+            #PyUiLogger.get_logger().info(f"Resolution specific assets found, using {folder}")
             return folder
         else:
-            PyUiLogger.get_logger().info(f"No resolution specific assets {folder} found, using {base_folder}")
+            #PyUiLogger.get_logger().info(f"No resolution specific assets {folder} found, using {base_folder}")
             return base_folder
 
     @classmethod
@@ -121,7 +121,6 @@ class Theme():
             with open(file_path, 'r', encoding='utf-8') as f:
                 cls._data.update(json.load(f))
             desc = cls._data.get("description", "UNKNOWN")
-            PyUiLogger.get_logger().info(f"Loaded Theme : {desc}")
         except Exception as e:
             PyUiLogger.get_logger().error(
                 f"Unexpected error while loading {file_path}: {e}\n{traceback.format_exc()}"
@@ -398,7 +397,7 @@ class Theme():
             else:
                 return Theme.get_fallback_font()
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback font.")
+            #PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback font.")
             return Theme.get_fallback_font()
 
     @classmethod
@@ -459,8 +458,8 @@ class Theme():
                 case _:
                     return cls._data["list"]["font"]
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback value of 20.")
-            return 20
+            # PyUiLogger.get_logger().warning(f"No font specified for {font_purpose} or error loading it {e}. Using fallback value of 20.")
+            return int(20 * cls._default_multiplier)
 
 
     @classmethod

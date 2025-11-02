@@ -20,7 +20,7 @@ class Language:
     def load(cls):
         language = PyUiConfig.get_language()
         if(language is not None):
-            PyUiLogger.get_logger().info(f"language is {language}")
+            #PyUiLogger.get_logger().info(f"language is {language}")
             base_dir = os.path.abspath(sys.path[0])
             parent_dir = os.path.dirname(base_dir)
             lang_dir = os.path.join(parent_dir, "lang")
@@ -35,7 +35,7 @@ class Language:
             try:
                 with open(filepath, 'r') as f:
                     cls._data = json.load(f)
-                    PyUiLogger.get_logger().info(f"Languages loaded from {filepath}")
+                    #PyUiLogger.get_logger().info(f"Languages loaded from {filepath}")
             except FileNotFoundError:
                 PyUiLogger.get_logger().error(f"Languages file not found: {filepath}, using defaults.")
                 cls._data = {}

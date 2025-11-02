@@ -1,11 +1,9 @@
 
 import os
-import subprocess
 from devices.device import Device
 from games.utils.game_system import GameSystem
 from menus.games.roms_menu_common import RomsMenuCommon
-from menus.games.utils.rom_info import RomInfo
-from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.consts import GAME_SELECT
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -13,7 +11,6 @@ from views.grid_or_list_entry import GridOrListEntry
 class SearchGamesForSystemMenu(RomsMenuCommon):
     def __init__(self, game_system : GameSystem, search_str):
         super().__init__()
-        self.rom_select_options_builder = RomSelectOptionsBuilder()
         self.game_system = game_system
         self.search_str = search_str
 
@@ -26,7 +23,7 @@ class SearchGamesForSystemMenu(RomsMenuCommon):
         def _collect_roms_recursively(game_system, directory=None):
 
             """Recursively collect roms for a given game_system and directory."""
-            rom_list = self.rom_select_options_builder.build_rom_list(
+            rom_list = get_rom_select_options_builder().build_rom_list(
                 game_system,
                 self.include_rom,
                 subfolder=directory, 

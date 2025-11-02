@@ -1,6 +1,5 @@
 
 from menus.settings import settings_menu
-from utils.cfw_system_config import CfwSystemConfig
 
 
 class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):

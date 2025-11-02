@@ -1,6 +1,5 @@
 from datetime import datetime
 import time
-import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode

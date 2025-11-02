@@ -16,7 +16,6 @@ class ConfigCopier:
         """
         dest = Path(file_path)
         if dest.exists() and dest.stat().st_size > 0:
-            PyUiLogger.get_logger().info(f"{file_path} already exists")
             return  # Nothing to do
 
         if not default_config_file.exists():

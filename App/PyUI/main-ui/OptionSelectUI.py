@@ -4,8 +4,6 @@ import subprocess
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-import sdl2
-import sdl2.ext
 
 from controller.controller import Controller
 from display.display import Display

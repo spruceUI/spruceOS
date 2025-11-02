@@ -1,12 +1,10 @@
 import argparse
 import os
 from pathlib import Path
-import shutil
 import signal
 import sys
 import threading
 from devices.device import Device
-from devices.miyoo.system_config import SystemConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
@@ -141,11 +139,11 @@ def main():
     args = parse_arguments()
 
     PyUiLogger.init(args.logDir, "PyUI")
-    PyUiLogger.get_logger().info(f"logDir: {args.logDir}")
-    PyUiLogger.get_logger().info(f"pyUiConfig: {args.pyUiConfig}")
-    PyUiLogger.get_logger().info(f"device: {args.device}")
+    #PyUiLogger.get_logger().info(f"logDir: {args.logDir}")
+    #PyUiLogger.get_logger().info(f"pyUiConfig: {args.pyUiConfig}")
+    #PyUiLogger.get_logger().info(f"device: {args.device}")
 
-    log_renderer_info()
+    #log_renderer_info()
 
     verify_config_exists(args.pyUiConfig)
     PyUiConfig.init(args.pyUiConfig)
@@ -155,14 +153,11 @@ def main():
     PyUiState.init(Device.get_state_path())
 
     selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
-    PyUiLogger.get_logger().info(f"{selected_theme}")
 
     Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
     Display.init()
     #2nd init is just to allow scaling if needed
     Theme.convert_theme_if_needed(selected_theme, Device.screen_width(), Device.screen_height())
-    Display.clear_image_cache()
-    Display.clear_text_cache()
     Controller.init()
     Language.init()
 

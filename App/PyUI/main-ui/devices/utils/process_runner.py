@@ -14,7 +14,7 @@ def get_caller_info(skip=2):
 
 class ProcessRunner:
     @classmethod
-    def run(cls, args, check = False, timeout=None, print=True):
+    def run(cls, args, check = False, timeout=None, print=False):
         caller = get_caller_info()
         if(print):
             PyUiLogger.get_logger().debug(f"{caller} Executing {args}")

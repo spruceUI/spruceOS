@@ -3,10 +3,6 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.bluetooth.bluetooth_scanner import BluetoothScanner
-from display.display import Display
-from display.font_purpose import FontPurpose
-from display.render_mode import RenderMode
-from themes.theme import Theme
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection

@@ -1,9 +1,7 @@
 
-import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
-from menus.settings.timezone_menu import TimezoneMenu
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 

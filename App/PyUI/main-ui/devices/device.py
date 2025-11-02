@@ -405,5 +405,8 @@ class Device:
     def apply_timezone(timezone):
         return Device._impl.apply_timezone(timezone)
 
+    @staticmethod
+    def supports_caching_rom_lists():
+        return Device._impl.supports_caching_rom_lists()
 
-
+    

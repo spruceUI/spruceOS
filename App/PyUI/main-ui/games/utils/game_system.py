@@ -1,10 +1,9 @@
 import os
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
-from utils.logger import PyUiLogger
 
 class GameSystem:
     def __init__(self, folder_paths, display_name, game_system_config : FileBasedGameSystemConfig):
-        self._folder_paths = folder_paths
+        self._folder_paths = tuple(folder_paths)
         self._display_name = display_name
         self._game_system_config : FileBasedGameSystemConfig = game_system_config
 
@@ -40,3 +39,12 @@ class GameSystem:
     def game_system_config(self) -> FileBasedGameSystemConfig:
         return self._game_system_config
     
+    # Equality: two systems are equal if their folder_paths are the same
+    def __eq__(self, other):
+        if not isinstance(other, GameSystem):
+            return False
+        return self._folder_paths == other._folder_paths
+
+    # Hash: use folder_paths tuple
+    def __hash__(self):
+        return hash(self._folder_paths)

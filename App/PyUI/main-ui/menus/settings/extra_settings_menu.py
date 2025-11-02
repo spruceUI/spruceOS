@@ -1,11 +1,9 @@
 
-import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.language.language import Language
 from menus.settings import settings_menu
-from menus.settings.cfw_system_settings_menu import CfwSystemSettingsMenu
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.game_art_display_settings_menu import GameArtDisplaySettingsMenu
@@ -14,8 +12,6 @@ from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
-from utils.cfw_system_config import CfwSystemConfig
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 

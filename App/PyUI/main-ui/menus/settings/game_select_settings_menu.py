@@ -1,5 +1,4 @@
 
-import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu

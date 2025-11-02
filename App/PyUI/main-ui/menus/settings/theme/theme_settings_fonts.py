@@ -1,5 +1,4 @@
 
-from controller.controller_inputs import ControllerInput
 from display.display import Display
 from display.font_purpose import FontPurpose
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon

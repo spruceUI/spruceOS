@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 import os
 import struct
-import select
 import threading
 import time
 from typing import OrderedDict

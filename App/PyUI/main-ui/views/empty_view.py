@@ -1,15 +1,10 @@
-import time
-from typing import List
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.display import Display
-from display.render_mode import RenderMode
 from menus.language.language import Language
-import sdl2
 from controller.controller import Controller
 from themes.theme import Theme
-from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
 

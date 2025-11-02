@@ -24,10 +24,10 @@ class Sdl2ControllerInterface(ControllerInterface):
 
         sdl2.SDL_GameControllerEventState(SDL_ENABLE)
         sdl2.SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)
-        PyUiLogger.get_logger().info("Checking for a controller")
+        #PyUiLogger.get_logger().info("Checking for a controller")
         count = sdl2.SDL_NumJoysticks()
         for index in range(count):
-            PyUiLogger.get_logger().info(f"Checking index {index}")
+           # PyUiLogger.get_logger().info(f"Checking index {index}")
             if sdl2.SDL_IsGameController(index):
                 controller = sdl2.SDL_GameControllerOpen(index)
                 if controller:
@@ -35,8 +35,8 @@ class Sdl2ControllerInterface(ControllerInterface):
                     self.index = index
                     self.name = sdl2.SDL_GameControllerName(controller).decode()
                     self.mapping = sdl2.SDL_GameControllerMapping(controller).decode()
-                    PyUiLogger.get_logger().info(f"Opened GameController {index}: {self.name}")
-                    PyUiLogger.get_logger().info(f" {self.mapping}")
+                    #PyUiLogger.get_logger().info(f"Opened GameController {index}: {self.name}")
+                    #PyUiLogger.get_logger().info(f" {self.mapping}")
     
     def re_init_controller(self):
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)

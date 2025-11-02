@@ -164,7 +164,7 @@ class RomSelectOptionsBuilder:
         file_rom_list = []
         folder_rom_list = []
         valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
-        
+
 
         miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
         
@@ -211,3 +211,11 @@ class RomSelectOptionsBuilder:
         folder_rom_list.sort(key=lambda entry: entry.get_primary_text())   
 
         return folder_rom_list + file_rom_list
+
+_rom_select_options_builder_instance = None
+
+def get_rom_select_options_builder():
+    global _rom_select_options_builder_instance
+    if _rom_select_options_builder_instance is None:
+        _rom_select_options_builder_instance = RomSelectOptionsBuilder()
+    return _rom_select_options_builder_instance

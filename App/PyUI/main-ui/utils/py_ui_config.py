@@ -37,7 +37,7 @@ class PyUiConfig:
         try:
             with open(filepath, 'r') as f:
                 cls._data = json.load(f)
-                PyUiLogger.get_logger().info(f"Settings loaded from {filepath}")
+                #PyUiLogger.get_logger().info(f"Settings loaded from {filepath}")
         except FileNotFoundError:
             PyUiLogger.get_logger().error(f"Settings file not found: {filepath}, using defaults.")
             cls._data = {}

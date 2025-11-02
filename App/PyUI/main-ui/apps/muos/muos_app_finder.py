@@ -1,7 +1,6 @@
 
 import os
 
-from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from apps.muos.muos_app_config import MuosAppConfig
 from utils.logger import PyUiLogger
 

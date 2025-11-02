@@ -3,7 +3,6 @@ from typing import List
 from display.display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
-import sdl2
 from views.grid_or_list_entry import GridOrListEntry
 from views.list_view import ListView
 

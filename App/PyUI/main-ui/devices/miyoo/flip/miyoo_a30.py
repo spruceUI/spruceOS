@@ -1,4 +1,3 @@
-from concurrent.futures import Future
 import fcntl
 from pathlib import Path
 import struct
@@ -11,7 +10,6 @@ from controller.key_watcher import KeyWatcher
 import os
 from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
 from devices.charge.charge_status import ChargeStatus
-from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
@@ -33,7 +31,6 @@ class MiyooA30(MiyooDevice):
 
     def __init__(self, device_name):
         self.device_name = device_name
-        PyUiLogger.get_logger().info("Initializing Miyoo A30")        
         
         self.sdl_button_to_input = {
             sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,

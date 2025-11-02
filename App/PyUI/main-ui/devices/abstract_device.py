@@ -334,6 +334,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def supports_caching_rom_lists(self):
+        pass
+
+    @abstractmethod
     def get_image_utils(self) -> ImageUtils:
         pass
 

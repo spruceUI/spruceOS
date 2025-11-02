@@ -6,11 +6,9 @@ from games.utils.device_specific.game_system_utils import GameSystemUtils
 from games.utils.game_system import GameSystem
 from menus.games.game_select_menu import GameSelectMenu
 from menus.games.game_system_select_menu_popup import GameSystemSelectMenuPopup
-from menus.games.utils.rom_select_options_builder import RomSelectOptionsBuilder
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
 from themes.theme import Theme
-from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -186,7 +184,7 @@ class GameSystemSelectMenu:
             return None, None
 
     def get_rom_count_text(self, game_system):
-        roms = RomSelectOptionsBuilder().build_rom_list(game_system, subfolder=None)
+        roms = get_rom_select_options_builder().build_rom_list(game_system, subfolder=None)
         rom_count = len(roms)
         if(rom_count > 1):
                return f"{len(roms)} games"  

@@ -1,9 +1,6 @@
 import time
 from controller.controller_inputs import ControllerInput
-from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.device import Device
-import ctypes
-from ctypes import byref
 
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig

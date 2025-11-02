@@ -6,10 +6,8 @@ from display.font_purpose import FontPurpose
 from display.display import Display
 from display.render_mode import RenderMode
 from display.resize_type import ResizeType
-from display.y_render_option import YRenderOption
 from controller.controller import Controller
 from themes.theme import Theme
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection

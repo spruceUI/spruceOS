@@ -18,7 +18,6 @@ class FileWatcher():
                     callback()
             except FileNotFoundError:
                 PyUiLogger.get_logger().warning(f"{path} not found for file watcher.")        
-                pass
             time.sleep(interval)
 
     def start_file_watcher(self,path, callback, interval=1.0):

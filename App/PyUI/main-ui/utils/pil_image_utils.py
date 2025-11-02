@@ -1,6 +1,5 @@
 
 import os
-import shutil
 from utils.image_utils import ImageUtils
 from PIL import Image
 from utils.logger import PyUiLogger

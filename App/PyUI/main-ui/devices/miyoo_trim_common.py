@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import re
 import subprocess
-import sys
 import time
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
@@ -142,8 +141,6 @@ class MiyooTrimCommon():
                 with conf_path.open("w") as f:
                     f.write(conf_content)
                 PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
-            else:
-                PyUiLogger.get_logger().info("wpa_supplicant.conf already exists.")
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error creating /userdata/cfg/wpa_supplicant.conf: {e}")
 

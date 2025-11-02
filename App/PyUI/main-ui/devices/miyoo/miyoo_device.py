@@ -1,12 +1,8 @@
-import re
 import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
-from devices.bluetooth.bluetooth_scanner import BluetoothScanner
-from devices.charge.charge_status import ChargeStatus
-import os
 from devices.device_common import DeviceCommon
 from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.miyoo_trim_common import MiyooTrimCommon
@@ -17,7 +13,6 @@ from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 import sdl2
-from utils import throttle
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
@@ -29,6 +24,7 @@ class MiyooDevice(DeviceCommon):
 
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
+        self.game_utils = MiyooTrimGameSystemUtils()
 
     def get_controller_interface(self):
         return Sdl2ControllerInterface()
@@ -277,7 +273,7 @@ class MiyooDevice(DeviceCommon):
         return True
     
     def get_game_system_utils(self):
-        return MiyooTrimGameSystemUtils()
+        return self.game_utils
     
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
