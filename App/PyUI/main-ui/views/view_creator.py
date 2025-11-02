@@ -3,7 +3,6 @@ from typing import List
 from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
-from display.resize_type import ResizeType
 from themes.theme import Theme
 from views.carousel_view import CarouselView
 from views.descriptive_list_view import DescriptiveListView

@@ -1,16 +1,8 @@
 
 
-import os
-import random
 from apps.app_config import AppConfig
 from controller.controller_inputs import ControllerInput
-from devices.device import Device
-from display.display import Display
-from display.on_screen_keyboard import OnScreenKeyboard
 from menus.app.hidden_apps_manager import AppsManager
-from menus.games.collections.collections_management_menu import CollectionsManagementMenu
-from menus.games.utils.favorites_manager import FavoritesManager
-from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry

@@ -1,5 +1,4 @@
 from devices.device import Device
-from devices.abstract_device import AbstractDevice
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme

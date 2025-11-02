@@ -1,29 +1,20 @@
-from concurrent.futures import Future
 import json
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import sys
-import time
-from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from apps.muos.muos_app_finder import MuosAppFinder
 from controller.controller_inputs import ControllerInput
-from controller.key_watcher_controller import KeyWatcherController
-from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
 from devices.miyoo.system_config import SystemConfig
-from devices.miyoo.trim_ui_joystick import TrimUIJoystick
-from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.device_specific.muos_game_system_utils import MuosGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
-import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger

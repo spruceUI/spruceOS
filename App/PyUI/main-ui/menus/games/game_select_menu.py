@@ -1,15 +1,13 @@
 
-import os
 from pathlib import Path
 from devices.device import Device
 from games.utils.game_entry import GameEntry
 from menus.games.roms_menu_common import RomsMenuCommon
-from menus.games.utils.collections_manager import CollectionsManager
 from utils.consts import GAME_SELECT
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from games.utils.game_system import GameSystem 
-
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 
 class GameSelectMenu(RomsMenuCommon):
     def __init__(self):
@@ -19,7 +17,7 @@ class GameSelectMenu(RomsMenuCommon):
         return any(Path(rom_file_path).resolve() == Path(fav.rom_path).resolve() for fav in favorites)
 
     def _get_rom_list(self) -> list[GridOrListEntry]:
-        return self.rom_select_options_builder.build_rom_list(self.game_system, subfolder=self.subfolder, prefer_savestate_screenshot=self.prefer_savestate_screenshot())
+        return get_rom_select_options_builder().build_rom_list(self.game_system, subfolder=self.subfolder, prefer_savestate_screenshot=self.prefer_savestate_screenshot())
 
     def run_rom_selection(self,game_system : GameSystem, subfolder = None) :
         self.game_system = game_system

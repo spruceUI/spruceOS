@@ -13,7 +13,6 @@ from controller.key_watcher import KeyWatcher
 import os
 from controller.key_watcher_controller_miyoo_mini import InputResult, KeyEvent, KeyWatcherControllerMiyooMini
 from devices.charge.charge_status import ChargeStatus
-from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.mini_flip.miyoo_mini_flip_shared_memory_writer import MiyooMiniFlipSharedMemoryWriter
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -46,7 +45,6 @@ class MiyooMiniFlip(MiyooDevice):
 
     def __init__(self, device_name):
         self.device_name = device_name
-        PyUiLogger.get_logger().info("Initializing Miyoo Mini Flip")        
         os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
         reset_tzpath()  # reload TZPATH
         self.sdl_button_to_input = {
@@ -512,3 +510,6 @@ class MiyooMiniFlip(MiyooDevice):
     def apply_timezone(self, timezone):
         ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
         ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
+
+    def supports_caching_rom_lists(self):
+        return True #Is there enough RAM

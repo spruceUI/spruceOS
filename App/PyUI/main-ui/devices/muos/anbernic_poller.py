@@ -1,7 +1,5 @@
 
 import time
-from devices.utils.process_runner import ProcessRunner
-from utils.logger import PyUiLogger
 
 
 class AnbernicPoller:

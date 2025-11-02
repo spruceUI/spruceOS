@@ -6,7 +6,6 @@ import sys
 import time
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
-from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
@@ -343,6 +342,9 @@ class DeviceCommon(AbstractDevice):
     def prompt_timezone_update(self):
         #Unsupported by default
         pass
+
+    def supports_caching_rom_lists(self):
+        return True
 
     def get_boxart_small_resize_dimensions(self):
         return 640, 480

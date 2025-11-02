@@ -4,8 +4,6 @@ import threading
 from typing import Callable, TypeVar
 
 from devices.device import Device
-from menus.games.utils.rom_info import RomInfo
-from utils.logger import PyUiLogger
 
 T = TypeVar('T')  # Generic input type
 

@@ -1,5 +1,4 @@
 
-from controller.controller_inputs import ControllerInput
 from display.resize_type import get_next_resize_type
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon
 from themes.theme import Theme

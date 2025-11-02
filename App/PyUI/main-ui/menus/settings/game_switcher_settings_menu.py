@@ -1,13 +1,10 @@
 
-import os
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.resize_type import get_next_resize_type
 from menus.settings import settings_menu
 from themes.theme import Theme
-from utils.cfw_system_config import CfwSystemConfig
 from utils.consts import GAME_SWITCHER
-from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 
 

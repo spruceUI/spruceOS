@@ -37,7 +37,6 @@ class AppMenu:
         icon_priority = []
         if(icon_path_from_config is not None):
             icon_priority.append(self._convert_to_theme_version_of_icon(icon_path_from_config))
-            PyUiLogger().get_logger().info(f"{self._convert_to_theme_version_of_icon(icon_path_from_config)}")
             icon_priority.append(icon_path_from_config)
             icon_priority.append(os.path.join(app_folder,icon_path_from_config))
         icon_priority.append(os.path.join(app_folder,"icon.png"))
@@ -79,6 +78,7 @@ class AppMenu:
                     if(app.get_folder() == last_selected_dir and app.get_launch() == last_selected_file):
                         selected = Selection(None,None,idx)
                     idx +=1
+            PyUiLogger.get_logger().info(f"Finish app list building")
 
             if(view is None):
                 view = ViewCreator.create_view(

@@ -1,14 +1,12 @@
 
 
-from abc import ABC, abstractmethod
-import sys
+from abc import abstractmethod
 from controller.controller_inputs import ControllerInput
 from menus.settings.settings_menu import SettingsMenu
-from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
-from views.view_type import ViewType, get_next_view_type
+from views.view_type import ViewType
 
 
 class ThemeSettingsMenuCommon(SettingsMenu):

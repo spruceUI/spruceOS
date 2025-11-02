@@ -20,7 +20,6 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
             
         if(os.path.exists("/media/sdcard1/Roms/")):
             self.roms_paths.append("/media/sdcard1/Roms/")
-        PyUiLogger().get_logger().info(f"Emu folder is {self.emu_path}")
         self.rom_utils = RomUtils(self.roms_paths[0])
     
     def get_game_system_by_name(self, system_name) -> GameSystem:

@@ -1,10 +1,8 @@
 
 import threading
-from typing import List, Optional
+from typing import Optional
 from apps.app_config import AppConfig
 from menus.app.apps_list_manager import AppListManager
-from menus.games.utils.rom_info import RomInfo
-from menus.games.utils.roms_list_manager import RomsListManager
 
 class AppsManager:
     _appsManager = Optional[AppListManager]

@@ -1,21 +1,13 @@
-from pathlib import Path
-import subprocess
-import sys
 import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-import os
 from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
-from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
 from devices.muos.muos_device import MuosDevice
 from devices.utils.process_runner import ProcessRunner
-import sdl2
 from utils import throttle
-from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
@@ -24,7 +16,6 @@ class MuosAnbernicRGXX(MuosDevice):
 
     def __init__(self, device_name):
         self.device_name = device_name
-        PyUiLogger.get_logger().info("Initializing MuosAnbernicRGXX")        
         
         self.setup_system_config()
 

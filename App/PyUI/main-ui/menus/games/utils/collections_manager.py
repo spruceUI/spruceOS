@@ -3,10 +3,10 @@ from dataclasses import dataclass
 import json
 import os
 import threading
-from typing import List, Optional
+from typing import List
 from devices.device import Device
 from menus.games.utils.rom_info import RomInfo
-from menus.games.utils.roms_list_manager import RomsListEntry, RomsListManager
+from menus.games.utils.roms_list_manager import RomsListEntry
 from utils.logger import PyUiLogger
 
 

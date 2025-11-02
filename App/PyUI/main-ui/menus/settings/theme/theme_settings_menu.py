@@ -1,14 +1,12 @@
 
 
 from controller.controller_inputs import ControllerInput
-from display.display import Display
 from menus.settings.theme.theme_settings_fonts import ThemeSettingsFonts
 from menus.settings.theme.theme_settings_game_select_menu import ThemeSettingsGameSelectMenu
 from menus.settings.theme.theme_settings_grid_view import ThemeSettingsGridView
 from menus.settings.theme.theme_settings_main_menu import ThemeSettingsMainMenu
 from menus.settings.theme.theme_settings_system_select_menu import ThemeSettingsSystemSelectMenu
 from menus.settings.theme.theme_settings_top_bar import ThemeSettingsTopBar
-from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator

@@ -1,6 +1,5 @@
 import sys
 from controller.controller_inputs import ControllerInput
-from display.display import Display
 from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry

@@ -2,7 +2,6 @@
 
 from display.display import Display
 from display.font_purpose import FontPurpose
-from themes.theme import Theme
 
 
 class TextUtils():
