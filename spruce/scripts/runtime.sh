@@ -363,22 +363,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
-    
-    # Remount second SD card if it's present (stock FW sometimes mount as something different than sdcard1)
-    umount /dev/mmcblk2p1
-    mount /dev/mmcblk2p1 /media/sdcard1
-
-    # Mount BIOS and Roms folders if they're found on the second SD Card
-    [ -d "/media/sdcard1/BIOS" ] && mount --bind /media/sdcard1/BIOS /mnt/SDCARD/BIOS
-    if [ -d "/media/sdcard1/Roms" ]; then
-        mount --bind /media/sdcard1/Roms /mnt/SDCARD/Roms
-
-        # Move saves to the second SD card as well
-        mkdir -p /media/sdcard1/Saves/saves
-        mkdir -p /media/sdcard1/Saves/states
-        mount --bind /media/sdcard1/Saves/saves /mnt/SDCARD/Saves/saves
-        mount --bind /media/sdcard1/Saves/states /mnt/SDCARD/Saves/states
-    fi
 
     if [ -d "/mnt/SDCARD/Roms/PORTS" ]; then
         mkdir -p "/mnt/SDCARD/Roms/PORTS64/ports"
@@ -408,6 +392,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
      # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
+    
+    # Monitor second SD card and bind BIOS/Roms/Saves dynamically
+    ${SCRIPTS_DIR}/sd2_watchdog.sh "/dev/mmcblk2p1" & 
 
     # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
     GPIO=150
