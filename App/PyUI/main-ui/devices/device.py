@@ -409,4 +409,8 @@ class Device:
     def supports_caching_rom_lists():
         return Device._impl.supports_caching_rom_lists()
 
+    @staticmethod
+    def keep_running_on_error():
+        return Device._impl.keep_running_on_error()
+
     

@@ -26,13 +26,14 @@ printf '%s\n' "$ACT" >"$ACT_GO"
 echo "root" >$EX_CARD
 
 LAST_APP_FILE="/opt/muos/config/boot/last_app"
-if [[ -f "$LAST_APP_FILE" ]]; then
+if [ -f "$LAST_APP_FILE" ]; then
 	LAST_APP=$(cat "$LAST_APP_FILE")
 	LOG_INFO "$0" 0 "FRONTEND" "LAST_APP read as '${LAST_APP}'"
 else
 	LOG_INFO "$0" 0 "FRONTEND" "${LAST_APP_FILE} does not exist"
     LAST_APP=""
 fi
+
 
 LAST_PLAY=$(cat "/opt/muos/config/boot/last_play")
 
@@ -41,33 +42,46 @@ SET_DEFAULT_GOVERNOR
 
 handle_app_go() {
     # Only proceed if the APP_GO file exists and is not empty
-    if [[ -s "$APP_GO" ]]; then
+    if [ -s "$APP_GO" ]; then
         # Read app name
         IFS= read -r RUN_APP <"$APP_GO"
 
         # Save last run app
         echo "$RUN_APP" >"$LAST_APP_FILE"
 
-        # Remove APP_GO after reading
         ENSURE_REMOVED "$APP_GO"
 
-        # Launch the app
-        "$(GET_VAR "device" "storage/rom/mount")/MUOS/application/${RUN_APP}/mux_launch.sh"
+        "$RUN_APP"/mux_launch.sh "$RUN_APP"
+        echo appmenu >$ACT_GO
 
-        # Switch back to app menu
-        echo "appmenu" >"$ACT_GO"
-
-        # Clear temporary governor and control scheme files
         LOG_INFO "$0" 0 "FRONTEND" "Clearing Governor and Control Scheme files"
-        [[ -e "$GOV_GO" ]] && ENSURE_REMOVED "$GOV_GO"
-        [[ -e "$CON_GO" ]] && ENSURE_REMOVED "$CON_GO"
+        [ -e "$GOV_GO" ] && ENSURE_REMOVED "$GOV_GO"
+        [ -e "$CON_GO" ] && ENSURE_REMOVED "$CON_GO"
 
-        # Reset governor to default
         LOG_INFO "$0" 0 "FRONTEND" "Setting Governor back to default"
         SET_DEFAULT_GOVERNOR
     fi
 }
 
+restore_app_or_game_cleanup() {
+	# We'll set a few extra things here so that the user doesn't get
+	# a stupid "yOu UsEd tHe ReSeT bUtToN" message because ultimately
+	# we don't really care in this particular instance...
+	[ -e "/tmp/safe_quit" ] && ENSURE_REMOVED "/tmp/safe_quit"
+	[ ! -e "/tmp/done_reset" ] && printf 1 >"/tmp/done_reset"
+	[ ! -e "/tmp/chime_done" ] && printf 1 >"/tmp/chime_done"
+	SET_VAR "config" "system/used_reset" 0
+
+	# Reset audio control status
+	RESET_AMIXER
+
+
+}
+
+#:] ### Wait for audio stack
+#:] Don't proceed to the frontend until PipeWire reports that it is ready.
+LOG_INFO "$0" 0 "BOOTING" "Waiting for Pipewire Init"
+until [ "$(GET_VAR "device" "audio/ready")" -eq 1 ]; do TBOX sleep 0.01; done
 
 if [ $SKIP -eq 0 ]; then
 	LOG_INFO "$0" 0 "FRONTEND" "Checking for last or resume startup"
@@ -135,12 +149,12 @@ if [ $SKIP -eq 0 ]; then
 				for TYPE in "governor" "control scheme"; do
 					case "$TYPE" in
 						"governor")
-							CONTENT_FILE="${BASE}.gov"
+							CONTENT_FILE="${DIR}/${BASE}.gov"
 							FALLBACK_FILE="${DIR}/core.gov"
 							OUTPUT_FILE="$GOV_GO"
 							;;
 						"control scheme")
-							CONTENT_FILE="${BASE}.con"
+							CONTENT_FILE="${DIR}/${BASE}.con"
 							FALLBACK_FILE="${DIR}/core.con"
 							OUTPUT_FILE="$CON_GO"
 							;;
@@ -155,13 +169,7 @@ if [ $SKIP -eq 0 ]; then
 					fi
 				done
 
-				# We'll set a few extra things here so that the user doesn't get
-				# a stupid "yOu UsEd tHe ReSeT bUtToN" message because ultimately
-				# we don't really care in this particular instance...
-				[ -e "/tmp/safe_quit" ] && ENSURE_REMOVED "/tmp/safe_quit"
-				[ ! -e "/tmp/done_reset" ] && printf 1 >"/tmp/done_reset"
-				[ ! -e "/tmp/chime_done" ] && printf 1 >"/tmp/chime_done"
-				SET_VAR "config" "system/used_reset" 0
+				restore_app_or_game_cleanup
 
 				# Okay we're all set, time to launch whatever we were playing last
 				/opt/muos/script/mux/launch.sh
@@ -169,24 +177,27 @@ if [ $SKIP -eq 0 ]; then
 		fi
 
 		echo launcher >$ACT_GO
-	elif [ "$(GET_VAR "config" "settings/general/startup")" = "lastapp" ]; then
-		LOG_INFO "$0" 0 "FRONTEND" "Startup is last app and LAST_APP is ${LAST_APP}"
-		# Check if LAST_APP is not an empty string
-		if [[ -n "$LAST_APP" ]]; then
-			# Write LAST_APP to the file path stored in $APP_GO
-			echo "$LAST_APP" > "$APP_GO"
-			echo app > $ACT_GO
+    elif [ "$(GET_VAR "config" "settings/general/startup")" = "lastapp" ]; then
+        LOG_INFO "$0" 0 "FRONTEND" "Startup is last app and LAST_APP is ${LAST_APP}"
+        # Check if LAST_APP is not an empty string
+        if [ -n "$LAST_APP" ]; then
+			restore_app_or_game_cleanup
+            # Write LAST_APP to the file path stored in $APP_GO
+            echo "$LAST_APP" > "$APP_GO"
+            echo app >"$ACT_GO"
 
-			# Call the function to handle APP_GO
-			handle_app_go "$APP_GO"
-		fi
-
+            # Call the function to handle APP_GO
+            handle_app_go
+        fi
 	fi
 fi
 
 cp /opt/muos/log/*.log "$(GET_VAR "device" "storage/rom/mount")/MUOS/log/boot/." &
 
-LOG_INFO "$0" 0 "FRONTEND" "Starting frontend launcher"
+LOG_INFO "$0" 0 "FRONTEND" "Starting Frontend Launcher"
+
+read -r START_TIME _ </proc/uptime
+SET_VAR "system" "start_time" "$START_TIME"
 
 while :; do
 	killall -9 "gptokeyb" "gptokeyb2" >/dev/null 2>&1
@@ -200,6 +211,9 @@ while :; do
 			;;
 		*) ;;
 	esac
+
+	# Reset audio control status
+	RESET_AMIXER
 
 	# Content Loader
 	[ -s "$ROM_GO" ] && /opt/muos/script/mux/launch.sh
@@ -219,9 +233,6 @@ while :; do
 				SET_DEFAULT_GOVERNOR
 
 				touch /tmp/pdi_go
-
-				[ -s "$MUX_AUTH" ] && ENSURE_REMOVED "$MUX_AUTH"
-				[ -s "$MUX_LAUNCHER_AUTH" ] && ENSURE_REMOVED "$MUX_LAUNCHER_AUTH"
 
 				EXEC_MUX "launcher" "muxfrontend"
 				;;
@@ -252,7 +263,7 @@ while :; do
 			"info") EXEC_MUX "info" "muxfrontend" ;;
 
 			"credits")
-				/opt/muos/bin/nosefart /opt/muos/share/media/support.nsf &
+				/opt/muos/bin/nosefart "$MUOS_SHARE_DIR/media/support.nsf" &
 				EXEC_MUX "info" "muxcredits"
 				pkill -9 -f "nosefart" &
 				;;

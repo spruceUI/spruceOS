@@ -29,7 +29,7 @@ TITLE=$(basename "$FILE")
 TITLE="${TITLE%.*}"
 
 # ---------- 4. Read assign.json and map to console/system ----------
-ASSIGN_JSON="/mnt/mmc/MUOS/info/assign/assign.json"
+ASSIGN_JSON="/opt/muos/share/info/assign/assign.json"
 if [ ! -f "$ASSIGN_JSON" ]; then
     echo "Error: $ASSIGN_JSON not found."
     exit 1
@@ -48,7 +48,7 @@ if [ -z "$CONSOLE" ] || [ "$CONSOLE" = "null" ]; then
 fi
 
 # ---------- 5. Read global.ini ----------
-TARGET_DIR="/mnt/mmc/MUOS/info/assign/$CONSOLE"
+TARGET_DIR="/opt/muos/share/info/assign/$CONSOLE"
 GLOBAL_INI="$TARGET_DIR/global.ini"
 
 if [ ! -f "$GLOBAL_INI" ]; then
@@ -62,14 +62,8 @@ DEFAULT_VALUE=$(awk -F= '
     found && $1=="default" {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}
 ' "$GLOBAL_INI")
 
-GOVERNOR_VALUE=$(awk -F= '
-    /\[global\]/ {found=1; next}
-    /^\[/ && found {exit}
-    found && $1=="governor" {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}
-' "$GLOBAL_INI")
-
-if [ -z "$DEFAULT_VALUE" ] || [ -z "$GOVERNOR_VALUE" ]; then
-    echo "Error: Could not parse 'default' or 'governor' from $GLOBAL_INI"
+if [ -z "$DEFAULT_VALUE" ]; then
+    echo "Error: Could not parse 'default' from $GLOBAL_INI"
     exit 1
 fi
 
@@ -79,6 +73,26 @@ if [ ! -f "$DEFAULT_FILE" ]; then
     echo "Error: Default ini file '$DEFAULT_FILE' not found."
     exit 1
 fi
+
+GOVERNOR_VALUE=$(awk -F= '
+    /\[global\]/ {found=1; next}
+    /^\[/ && found {exit}
+    found && $1=="governor" {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}
+' "$DEFAULT_FILE")
+
+if [ -z "$GOVERNOR_VALUE" ]; then
+    GOVERNOR_VALUE=$(awk -F= '
+        /\[global\]/ {found=1; next}
+        /^\[/ && found {exit}
+        found && $1=="governor" {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}
+    ' "$GLOBAL_INI")
+
+    if [ -z "$GOVERNOR_VALUE" ]; then
+        echo "No governor found, using performance."
+        GOVERNOR_VALUE="performance"
+    fi
+fi
+
 
 CORE_VALUE=$(awk -F= -v section="$DEFAULT_VALUE" '
     $0 ~ "\\["section"\\]" {found=1; next}

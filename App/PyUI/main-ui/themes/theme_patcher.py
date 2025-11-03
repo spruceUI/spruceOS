@@ -70,25 +70,26 @@ class ThemePatcher():
             background_image = os.path.join(path, "skin","background.png")
             theme_width, theme_height = Display.get_image_dimensions(background_image)
             if(theme_width != 0 and theme_width != target_width):
-                PyUiLogger().get_logger().error(f"Patching theme {path}")
                 cls.scale_theme(path, theme_width, theme_height, target_width, target_height)
             return True
         except Exception as e:
-            PyUiLogger().get_logger().error(f"Failed to process {path}: {e}")
+            PyUiLogger().get_logger().exception(f"Failed to process {path}: {e}")
             return False
 
     @classmethod
     def scale_theme(cls, config_path, theme_width, theme_height, target_width, target_height):
         from display.display import Display
-        from themes.theme import Theme
-        from devices.device import Device
         scale_width = target_width / theme_width
         scale_height = target_height / theme_height
         scale = min(scale_width, scale_height)
+        PyUiLogger().get_logger().info(f"Patching theme {config_path} from {theme_width}x{theme_height} to {target_width}x{target_height} w/ a scale factor of {scale}")
 
         Display.clear("Theme Patch")
-        Display.render_text_centered(f"Theme is missing correctly sized assets so patching",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-        Display.render_text_centered(f"Patching main assets",Device.screen_width()//2, Device.screen_height()//2 + 100,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.display_message_multiline([
+            f"Theme is missing correctly sized assets so patching",
+            f"Scale factor is {scale}"
+            f"Patching main assets"
+        ])
         Display.present()
 
         cls.patch_folder(os.path.join(config_path,"skin"),
@@ -97,8 +98,11 @@ class ThemePatcher():
                      theme_width, theme_height, target_width, target_height)
         
         Display.clear("Theme Patch")
-        Display.render_text_centered(f"Theme is missing correctly sized assets so caling",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-        Display.render_text_centered(f"Patching icons",Device.screen_width()//2, Device.screen_height()//2 + 100,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.display_message_multiline([
+            f"Theme is missing correctly sized assets so patching",
+            f"Scale factor is {scale}"
+            f"Patching icons"
+        ])
         Display.present()
 
         cls.patch_folder(os.path.join(config_path,"icons"),
@@ -113,7 +117,7 @@ class ThemePatcher():
     @classmethod
     def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):
         from display.display import Display
-        PyUiLogger().get_logger().error(f"Patching theme [{input_folder}] to [{input_folder}] with scale factor [{scale}]")
+        PyUiLogger().get_logger().info(f"Patching theme [{input_folder}] to [{input_folder}] with scale factor [{scale}]")
         # Ensure the output directory exists
         os.makedirs(output_folder, exist_ok=True)
 
@@ -127,7 +131,10 @@ class ThemePatcher():
             elif os.path.isfile(input_path):
                 now = time.time()
                 if now - cls._last_display_time >= 1.0:
-                    Display.display_message(f"Patching {os.path.basename(input_path)}")
+                    Display.display_message_multiline([
+                        f"Patching {os.path.basename(input_path)}",
+                        f"Scale factor is {scale}"
+                    ])
                     cls._last_display_time = now
                 # Process image file
                 cls.scale_image(input_path, output_path, scale, theme_width, theme_height, target_width, target_height)
@@ -139,13 +146,22 @@ class ThemePatcher():
         try:
             img_width ,img_height = image_utils.get_image_dimensions(input_file)
             new_width = int(img_width * scale)
+            new_height = int(img_height * scale)
+            preserve_aspect_ratio = True
+
             if(img_width == theme_width and img_height != theme_height):
                 new_width = target_width
-            new_height = int(img_height * scale)
+                preserve_aspect_ratio = False
+
             if(img_height == theme_height and img_width != theme_width):
                 new_height = target_height
+                preserve_aspect_ratio = False
 
-            image_utils.resize_image(input_file, output_file, new_width, new_height)
+            image_utils.resize_image(input_file, output_file, new_width, new_height,preserve_aspect_ratio=preserve_aspect_ratio)
+
+            if not os.path.exists(output_file):
+                # Means non image -- should this be raised as an error as part of resize?
+                shutil.copyfile(input_file, output_file)
 
         except Exception as e:
             # Copy the file instead of scaling if something fails
@@ -153,7 +169,7 @@ class ThemePatcher():
                 shutil.copyfile(input_file, output_file)
                 PyUiLogger().get_logger().warning(f"Scaling failed for {input_file}, copied original instead: {e}")
             except Exception as copy_err:
-                PyUiLogger().get_logger().error(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
+                PyUiLogger().get_logger().exception(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
                         
     @classmethod
     def scale_config_json(cls, config_path, output_config_path, scale):
@@ -169,7 +185,7 @@ class ThemePatcher():
 
             print(f"Scaled config written to: {output_config_path}")
         except Exception as e:
-            print(f"Failed to process JSON config {config_path}: {e}")
+            PyUiLogger().get_logger().exception(f"Failed to process JSON config {config_path}: {e}")    
 
     @classmethod
     def _scale_json_values(cls, obj, scale):

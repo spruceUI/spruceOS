@@ -149,6 +149,7 @@ class DaijishoThemeIndex:
 
 
     def get_file_name_for_system(self, system):
+        #PyUiLogger.get_logger().info(f"Looking up {system}")
         if(system in self.name_mapping):
             names_to_try = self.name_mapping[system]
             for name in names_to_try:

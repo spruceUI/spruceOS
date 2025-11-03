@@ -8,8 +8,8 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.muos.muos_device import MuosDevice
 from devices.utils.process_runner import ProcessRunner
 from utils import throttle
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
-from utils.pil_image_utils import PilImageUtils
 from utils.py_ui_config import PyUiConfig
 
 class MuosAnbernicRGXX(MuosDevice):
@@ -130,8 +130,7 @@ class MuosAnbernicRGXX(MuosDevice):
         ProcessRunner.run(["dd", "if=/dev/zero", "of=/dev/fb0", "bs=4096"])
 
     def get_image_utils(self):
-        #TODO see if ffmpeg is available
-        return PilImageUtils()
+        return FfmpegImageUtils()
 
     def get_device_name(self):
         return self.device_name

@@ -53,11 +53,11 @@ class Theme():
                 cls._daijisho_theme_index = DaijishoThemeIndex(daijisho_theme_index_file)
                 #PyUiLogger.get_logger().info(f"Using DaijishoThemeIndex from {daijisho_theme_index_file}")
             except Exception:
-                PyUiLogger.get_logger().error(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}:")
-                logging.exception(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}")
+                PyUiLogger.get_logger().exception(f"Failed to load DaijishoThemeIndex from {daijisho_theme_index_file}")
                 cls._daijisho_theme_index = None
         else:
             cls._daijisho_theme_index = None
+            #PyUiLogger.get_logger().info(f"Using Miyoo style theme")
 
         scale_width = Device.screen_width() / width
         scale_height = Device.screen_height() / height
@@ -153,6 +153,9 @@ class Theme():
             if os.path.exists(tga_path):
                 return tga_path
 
+            # Theme is missing the image
+            return None
+
         # Otherwise return the original path
         return path
         
@@ -167,7 +170,9 @@ class Theme():
             tga_path = path[:-4] + ".tga" 
             if os.path.exists(tga_path):
                 return tga_path
-
+            # Theme is missing the image
+            return None
+        
         # Otherwise return the original path
         return path
 
