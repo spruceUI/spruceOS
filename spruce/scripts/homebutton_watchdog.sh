@@ -24,7 +24,7 @@ kill_port(){
     while $scan; do
 
         # Run the ps command, filter for 'box86', and exclude the grep process itself
-        pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader" | grep -v "grep" | awk 'NR==1 {print $1}')
+        pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader|love.aarch64" | grep -v "grep" | awk 'NR==1 {print $1}')
 
         # Check if a PID was found
         if [ -n "$pid" ]; then
