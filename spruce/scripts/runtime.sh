@@ -364,13 +364,29 @@ elif [ "$PLATFORM" = "Flip" ]; then
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
     [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
     
-    # Mask Roms/PORTS with non-A30 version
-    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
-    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+    # Remount second SD card if it's present (stock FW sometimes mount as something different than sdcard1)
+    umount /dev/mmcblk2p1
+    mount /dev/mmcblk2p1 /media/sdcard1
 
-	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+    # Mount BIOS and Roms folders if they're found on the second SD Card
+    [ -d "/media/sdcard1/BIOS" ] && mount --bind /media/sdcard1/BIOS /mnt/SDCARD/BIOS
+    if [ -d "/media/sdcard1/Roms" ]; then
+        mount --bind /media/sdcard1/Roms /mnt/SDCARD/Roms
+
+        # Move saves to the second SD card as well
+        mkdir -p /media/sdcard1/Saves/saves
+        mkdir -p /media/sdcard1/Saves/states
+        mount --bind /media/sdcard1/Saves/saves /mnt/SDCARD/Saves/saves
+        mount --bind /media/sdcard1/Saves/states /mnt/SDCARD/Saves/states
+    fi
+
+    if [ -d "/mnt/SDCARD/Roms/PORTS" ]; then
+        mkdir -p "/mnt/SDCARD/Roms/PORTS64/ports"
+        # Mask Roms/PORTS with non-A30 version
+        mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+        # PortMaster ports location
+        mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+    fi
 	
 	# Treat /spruce/flip/ as the 'root' for any application that needs it.
 	# (i.e. PortMaster looks here for config information which is device specific)
