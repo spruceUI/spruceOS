@@ -51,9 +51,12 @@ def initialize_device(device):
     if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
         Device.init(MiyooFlip(device))
-    elif "MIYOO_MINI_FLIP" == device or "SPRIG_MIYOO_MINI_FLIP" == device:
+    elif "MIYOO_MINI_FLIP" == device:
         from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
         Device.init(MiyooMiniFlip(device))
+    elif "SPRIG_MIYOO_MINI_FLIP" == device:
+        from devices.miyoo.mini_flip.sprig_miyoo_mini_flip import SprigMiyooMiniFlip
+        Device.init(SprigMiyooMiniFlip(device))
     elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick(device))
@@ -168,13 +171,15 @@ def main():
     main_menu = MainMenu()
 
     start_background_threads()
-
-    while(True):
+    keep_running = True
+    while(keep_running):
         try:
             main_menu.run_main_menu_selection()
         except Exception as e:
             PyUiLogger.get_logger().exception("Unhandled exception occurred")
             PyUiState.clear()
+            if(not Device.keep_running_on_error()):
+                keep_running = False
 
 def sigterm_handler(signum, frame):
     print(f"Received SIGTERM (Signal {signum}). Shutting down...")

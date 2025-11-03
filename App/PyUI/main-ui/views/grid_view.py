@@ -330,8 +330,9 @@ class GridView(View):
                                             target_height=None,
                                             resize_type=self.resize_type)
 
-                if time.time() - last_frame_time < frame_duration:
-                    time.sleep(frame_duration - (time.time() - last_frame_time))
+                delta_time = time.time() - last_frame_time
+                if delta_time < frame_duration:
+                    time.sleep(frame_duration - (delta_time))
                 if(self.include_index_text):
                     Display.add_index_text(self.selected%self.options_length +1, self.options_length,
                                            letter=self.options[self.selected].get_primary_text()[0])

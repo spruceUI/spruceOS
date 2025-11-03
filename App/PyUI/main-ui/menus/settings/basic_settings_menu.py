@@ -198,7 +198,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Current Theme Settings",
+                        primary_text="Theme Settings",
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,

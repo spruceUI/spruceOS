@@ -87,7 +87,7 @@ class FfmpegImageUtils(ImageUtils):
             )
             return False
 
-    def resize_image(self, input_path, output_path, max_width, max_height):
+    def resize_image(self, input_path, output_path, max_width, max_height, preserve_aspect_ratio=True):
         """
         Resize the image to fit within max_width/max_height preserving aspect ratio.
         This WILL enlarge the image if it is smaller than the requested bounds.
@@ -99,14 +99,18 @@ class FfmpegImageUtils(ImageUtils):
                 PyUiLogger().get_logger().warning(f"Can't determine dimensions for {input_path}; skipping resize.")
                 return
 
-            # compute scale factor allowing both shrink and enlarge
-            scale_w = float(max_width) / float(actual_width)
-            scale_h = float(max_height) / float(actual_height)
-            scale = min(scale_w, scale_h)
+            if(preserve_aspect_ratio):
+                # compute scale factor allowing both shrink and enlarge
+                scale_w = float(max_width) / float(actual_width)
+                scale_h = float(max_height) / float(actual_height)
+                scale = min(scale_w, scale_h)
 
-            # compute new dimensions (ensure at least 1)
-            new_width = max(1, int(math.floor(actual_width * scale)))
-            new_height = max(1, int(math.floor(actual_height * scale)))
+                # compute new dimensions (ensure at least 1)
+                new_width = int(math.floor(actual_width * scale))
+                new_height = int(math.floor(actual_height * scale))
+            else:
+                new_width = max_width
+                new_height = max_height
 
             # If already the desired size, just copy (or move) the file
             if new_width == actual_width and new_height == actual_height:

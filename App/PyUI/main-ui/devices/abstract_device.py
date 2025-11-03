@@ -338,6 +338,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def keep_running_on_error(self):
+        pass
+
+    @abstractmethod
     def get_image_utils(self) -> ImageUtils:
         pass
 

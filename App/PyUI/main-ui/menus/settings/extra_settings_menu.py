@@ -21,10 +21,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         super().__init__()
         self.on_screen_keyboard = OnScreenKeyboard()
 
-    def reboot(self, input: ControllerInput):
-        if(ControllerInput.A == input):
-            Device.run_cmd(Device.reboot_cmd())
-
     def launch_display_settings(self,input):
         if(ControllerInput.A == input):
             DisplaySettingsMenu().show_menu()
@@ -173,17 +169,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         )
 
         option_list.extend(Device.get_extra_settings_options())
-
-        option_list.append(
-                GridOrListEntry(
-                        primary_text="Reboot",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.reboot
-                )
-        )
 
         option_list.append(
             GridOrListEntry(
