@@ -71,17 +71,6 @@ while read -r CMD; do
 
             LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
             EMU_DIR="$SD_FOLDER_PATH/Emu/${EMU_NAME}"
-            DEF_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/defaults"
-            OPT_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/options"
-            OVR_DIR="$SD_FOLDER_PATH/Emu/.emu_setup/overrides"
-            DEF_FILE="$DEF_DIR/${EMU_NAME}.opt"
-            OPT_FILE="$OPT_DIR/${EMU_NAME}.opt"
-            OVR_FILE="$OVR_DIR/$EMU_NAME/$GAME.opt"
-                . "$DEF_FILE"
-                . "$OPT_FILE"
-            if [ -f "$OVR_FILE" ]; then
-                . "$OVR_FILE"
-            fi
             core_info="$INFO_DIR/${CORE}_libretro.info"
             core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
             core_name="$(echo ${core_name} | tr -d '"')"
