@@ -19,6 +19,9 @@ LIST_FILE="$SETTINGS_PATH/gs_list"
 TEMP_FILE="$TEMP_PATH/gs_list_temp"
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
+# Pattern for checking emulator usage
+EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
+
 kill_port(){
 	scan=true
     while $scan; do
@@ -115,7 +118,7 @@ prepare_game_switcher() {
 
         # check command is emulator
         # exit if not emulator is in command
-        if echo "$CMD" | grep -q -v "$SD_FOLDER_PATH/Emu"; then
+        if echo "$CMD" | grep -q -v -E "$EMU_PATTERN"; then
             return 0
         fi
 
