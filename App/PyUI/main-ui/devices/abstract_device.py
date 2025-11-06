@@ -314,6 +314,34 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def supports_rgb_calibration(self):
+        pass
+
+    @abstractmethod
+    def set_disp_red(self,value):
+        pass
+
+    @abstractmethod
+    def set_disp_blue(self,value):
+        pass
+
+    @abstractmethod
+    def set_disp_green(self,value):
+        pass
+
+    @abstractmethod
+    def get_disp_red(self):
+        pass
+
+    @abstractmethod
+    def get_disp_blue(self):
+        pass
+
+    @abstractmethod
+    def get_disp_green(self):
+        pass
+
+    @abstractmethod
     def supports_hue_calibration(self):
         pass
 

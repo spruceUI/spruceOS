@@ -252,6 +252,9 @@ class MiyooMiniFlip(MiyooDevice):
         #self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.brightness)
         pass
 
+    def _set_hue_to_config(self):
+        pass
+    
     def take_snapshot(self, path):
         return None
     

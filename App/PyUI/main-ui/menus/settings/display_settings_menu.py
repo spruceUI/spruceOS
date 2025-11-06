@@ -39,8 +39,32 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
             Device.raise_hue()
 
+    
+    def hue_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            Device.lower_hue()
+        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            Device.raise_hue()
 
+    def adjust_rgb(self, input: ControllerInput, getter, setter):
+        delta = 0
+        if(ControllerInput.DPAD_LEFT == input):
+            delta = -1
+        elif(ControllerInput.L1== input):
+            delta = -10
+        elif(ControllerInput.DPAD_RIGHT == input):
+            delta = +1
+        elif(ControllerInput.R1 == input):
+            delta = +10
 
+        new_value = getter() + delta
+        if(new_value < 0): 
+            new_value = 255
+        elif(new_value > 255): 
+            new_value = 0
+        
+        setter(new_value)
+            
     def build_options_list(self):
         option_list = []
 
@@ -103,6 +127,41 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                             description=None,
                             icon=None,
                             value=self.hue_adjust
+                        )
+                )          
+        
+        if(Device.supports_rgb_calibration()):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Red",
+                            value_text="<    " + str(Device.get_disp_red()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=lambda input_value, getter=Device.get_disp_red, setter=Device.set_disp_red: self.adjust_rgb(input_value,getter,setter)
+                        )
+                )          
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Blue",
+                            value_text="<    " + str(Device.get_disp_blue()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=lambda input_value, getter=Device.get_disp_blue, setter=Device.set_disp_blue: self.adjust_rgb(input_value,getter,setter)
+                        )
+                )          
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Green",
+                            value_text="<    " + str(Device.get_disp_green()) + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=lambda input_value, getter=Device.get_disp_green, setter=Device.set_disp_green: self.adjust_rgb(input_value,getter,setter)
                         )
                 )          
         

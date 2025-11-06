@@ -18,6 +18,11 @@ class SprigMiyooMiniFlip(MiyooMiniFlip):
         self.sprig_config_thread, self.sprig_config_thread_stop_event = FileWatcher().start_file_watcher(
             self.sprig_config_path, self.on_sprig_config_change, interval=0.2)
     
+    
+    def startup_init(self):
+        super().startup_init()
+        self._set_screen_values_to_config()
+
     def on_sprig_config_change(self):
         """Called when button_watchdog or other scripts change the config"""
         try:
@@ -139,3 +144,60 @@ class SprigMiyooMiniFlip(MiyooMiniFlip):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to set Sprig volume: {e}")
             return volume
+
+    def supports_saturation_calibration(self):
+        return True
+    
+    def supports_contrast_calibration(self):
+        return True
+    
+    def supports_hue_calibration(self):
+        return True
+    
+    def supports_brightness_calibration(self):
+        return True
+
+    
+    def _set_screen_values_to_config(self):
+        #Config is 1-20
+        #Device is 0-100
+        #max is to ensure screen isn't on but just black
+        #Do not need to worry about min all maxed as it still is usable
+        brightness = max(5,self.system_config.brightness) * 5
+        contrast = max(5,self.system_config.contrast) * 5
+        saturation = self.system_config.saturation * 5
+        hue = self.system_config.hue * 5
+        red = max(48,self.get_disp_red())
+        green = max(48,self.get_disp_green())
+        blue = max(48,self.get_disp_blue())
+        
+        ProcessRunner.run(["/mnt/SDCARD/sprig/scripts/display_control.sh", 
+                           str(brightness),str(saturation),str(contrast),str(hue),
+                           str(red),str(green),str(blue)])
+
+
+    def _set_contrast_to_config(self):
+        self._set_screen_values_to_config()
+    
+    def _set_saturation_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_brightness_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_hue_to_config(self):
+        self._set_screen_values_to_config()
+
+    def supports_rgb_calibration(self):
+        return True
+    
+    def _set_disp_red_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_blue_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_green_to_config(self):
+        self._set_screen_values_to_config()
+
+        
