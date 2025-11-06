@@ -1,0 +1,10 @@
+{
+  "label": "PC 98",
+  "icon": "pc98.png",
+  "iconsel": "pc98_sel.png",
+  "background": "",
+  "themecolor": "",
+  "launch": "../.emu_setup/standard_launch.sh",
+  "extlist": "d98|zip|98d|fdi|fdd|2hd|tfd|d88|88d|hdm|xdf|dup|cmd|hdi|thd|nhd|hdd|hdn",
+  "launchlist": [],
+}
