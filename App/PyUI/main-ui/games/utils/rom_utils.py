@@ -62,12 +62,11 @@ class RomUtils:
                         if Path(entry.name).suffix.lower() in valid_suffix_set:
                             return True
 
-                return False  # No valid files found
             except Exception as e:
                 PyUiLogger.get_logger().error(f"Error scanning directory '{dir_to_search}': {e}")
 
-        return False
-    
+        return False # No valid files found
+
 
     def get_roms(self, game_system: GameSystem, directory=None):
         cache_key = (game_system, directory)

@@ -116,8 +116,9 @@ fi
 RELATIVE_PATH=$(echo "$FILE" | awk -F'/(R|r)(O|o)(M|m)(S|s)/' '{print $2}')
 
 # 2) Build equivalent folder structure under /mnt/mmc/MUOS/info/core
-CORE_BASE="/mnt/mmc/MUOS/info/core/$RELATIVE_PATH"
+CORE_BASE="/opt/muos/share/info/core/$RELATIVE_PATH"
 CORE_DIR=$(dirname "$CORE_BASE")
+echo "CORE_DIR: $CORE_DIR"
 
 # Ensure directory exists before checking files
 if [ -d "$CORE_DIR" ]; then
@@ -126,17 +127,17 @@ if [ -d "$CORE_DIR" ]; then
     # --- Core override files ---
     CFG_GAME="$CORE_DIR/${GAME_BASENAME}.cfg"   # Highest priority
     CFG_CORE="$CORE_DIR/${CORE_VALUE}.cfg"      # Middle priority
-    CFG_SYSTEM="$CORE_DIR/${SYSTEM_NAME}.cfg"   # Lowest priority
+    CFG_SYSTEM="$CORE_DIR/core.cfg"   # Lowest priority
 
     # --- Governor override files ---
     GOV_GAME="$CORE_DIR/${GAME_BASENAME}.gov"   # Highest priority
     GOV_CORE="$CORE_DIR/${CORE_VALUE}.gov"      # Middle priority
-    GOV_SYSTEM="$CORE_DIR/${SYSTEM_NAME}.gov"   # Lowest priority
+    GOV_SYSTEM="$CORE_DIR/core.gov"   # Lowest priority
 
     # Helper function to safely read the core value (second line only)
     read_core_from_cfg() {
         local cfg_file="$1"
-        sed -n '2p' "$cfg_file" | tr -d '\r\n'
+        sed -n '1p' "$cfg_file" | tr -d '\r\n'
     }
 
     # Helper function to read governor value (entire file, trim CRLF)

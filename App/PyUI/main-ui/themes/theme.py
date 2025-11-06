@@ -153,9 +153,6 @@ class Theme():
             if os.path.exists(tga_path):
                 return tga_path
 
-            # Theme is missing the image
-            return None
-
         # Otherwise return the original path
         return path
         
@@ -170,8 +167,6 @@ class Theme():
             tga_path = path[:-4] + ".tga" 
             if os.path.exists(tga_path):
                 return tga_path
-            # Theme is missing the image
-            return None
         
         # Otherwise return the original path
         return path

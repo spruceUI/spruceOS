@@ -10,6 +10,7 @@ from menus.games.game_select_menu_popup import GameSelectMenuPopup
 from menus.games.in_game_menu_listener import InGameMenuListener
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.recents_manager import RecentsManager
+from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from themes.theme import Theme
@@ -70,7 +71,7 @@ class RomsMenuCommon(ABC):
         rom_list = []
 
         for rom_info in raw_rom_list:
-            rom_file_name = get_rom_select_options_builder().get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+            rom_file_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
             img_path = self._get_image_path(rom_info)
             rom_list.append(
                 GridOrListEntry(
@@ -236,7 +237,8 @@ class RomsMenuCommon(ABC):
                         view = self.create_view(page_name,rom_list,selected)
                 elif(ControllerInput.B == selected.get_input()):
                     
-                    if(selected is not None):
+                    #What is happening on muOS where this is becoming None?
+                    if(selected is not None and selected.get_selection() is not None and selected.get_selection().get_value() is not None):
                         PyUiState.set_last_game_selection(
                             page_name,
                             selected.get_selection().get_value().rom_file_path,

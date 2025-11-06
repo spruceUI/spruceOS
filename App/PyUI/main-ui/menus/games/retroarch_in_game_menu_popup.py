@@ -1,6 +1,7 @@
 
 
 import socket
+import time
 from controller.controller_inputs import ControllerInput
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
@@ -35,7 +36,7 @@ class RetroarchInGameMenuPopup:
     
     def fast_forward(self, input):
         if(ControllerInput.A == input):
-            self.send_cmd_to_ra(b'FAST_FORWARD')
+            self.send_cmd_to_ra(b'FAST_FORWARD_HOLD')
         return True
     
     def ra_menu(self, input):
@@ -44,8 +45,8 @@ class RetroarchInGameMenuPopup:
         return True
 
     def run_in_game_menu(self):
+        time.sleep(0.1)
         popup_options = []
-        self.send_cmd_to_ra(b'PAUSE_TOGGLE')
         popup_options.append(GridOrListEntry(
             primary_text="Save State",
             image_path=Theme.settings(),
