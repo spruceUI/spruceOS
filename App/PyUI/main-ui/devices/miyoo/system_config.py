@@ -76,6 +76,36 @@ class SystemConfig:
 
     def set_hue(self, value):
         self.config["hue"] = value
+
+    @property
+    def disp_red(self):
+        return self.config.get("disp_red", 128)
+
+    def get_disp_red(self):
+        return self.config.get("disp_red", 128)
+
+    def set_disp_red(self, value):
+        self.config["disp_red"] = value  
+        
+    @property
+    def disp_blue(self):
+        return self.config.get("disp_blue", 128)
+
+    def get_disp_blue(self):
+        return self.config.get("disp_blue", 128)
+
+    def set_disp_blue(self, value):
+        self.config["disp_blue"] = value   
+
+    @property
+    def disp_green(self):
+        return self.config.get("disp_green", 128)
+
+    def get_disp_green(self):
+        return self.config.get("disp_green", 128)
+
+    def set_disp_green(self, value):
+        self.config["disp_green"] = value        
     
     def set_volume(self, value):
         if(value == 0):

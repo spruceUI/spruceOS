@@ -366,3 +366,43 @@ class DeviceCommon(AbstractDevice):
 
     def supports_qoi(self):
         return True
+
+    def set_disp_red(self,value):
+        self.system_config.reload_config()
+        self.system_config.set_disp_red(value)
+        self.system_config.save_config()
+        self._set_disp_red_to_config()
+
+    def set_disp_blue(self,value):
+        self.system_config.reload_config()
+        self.system_config.set_disp_blue(value)
+        self.system_config.save_config()
+        self._set_disp_blue_to_config()
+
+    def set_disp_green(self,value):
+        self.system_config.reload_config()
+        self.system_config.set_disp_green(value)
+        self.system_config.save_config()
+        self._set_disp_green_to_config()
+
+    def supports_rgb_calibration(self):
+        return False
+    
+    def _set_disp_red_to_config(self):
+        pass
+
+    def _set_disp_blue_to_config(self):
+        pass
+
+    def _set_disp_green_to_config(self):
+        pass
+
+    def get_disp_red(self):
+        return self.system_config.get_disp_red()
+
+    def get_disp_blue(self):
+        return self.system_config.get_disp_blue()
+
+    def get_disp_green(self):
+        return self.system_config.get_disp_green()
+

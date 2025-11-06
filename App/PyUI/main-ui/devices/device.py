@@ -358,6 +358,34 @@ class Device:
         return Device._impl.supports_saturation_calibration()
 
     @staticmethod
+    def supports_rgb_calibration():
+        return Device._impl.supports_rgb_calibration()
+
+    @staticmethod
+    def set_disp_red(value):
+        return Device._impl.set_disp_red(value)
+
+    @staticmethod
+    def get_disp_red():
+        return Device._impl.get_disp_red()
+
+    @staticmethod
+    def set_disp_blue(value):
+        return Device._impl.set_disp_blue(value)
+
+    @staticmethod
+    def get_disp_blue():
+        return Device._impl.get_disp_blue()
+
+    @staticmethod
+    def set_disp_green(value):
+        return Device._impl.set_disp_green(value)
+
+    @staticmethod
+    def get_disp_green():
+        return Device._impl.get_disp_green()
+
+    @staticmethod
     def supports_hue_calibration():
         return Device._impl.supports_hue_calibration()
 
