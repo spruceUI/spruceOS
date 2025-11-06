@@ -1,10 +1,17 @@
 #! /bin/sh
 
+export STGUIADDRESS="http://0.0.0.0:8384"
+export STNOUPGRADE="true"
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-
 SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
-ST_BIN=$SYNCTHING_DIR/bin/syncthing
+
+if [ "$PLATFORM" = "A30" ]; then
+    ST_BIN=$SYNCTHING_DIR/bin/syncthing
+else
+    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
+fi
 
 # Generic Startup
 # Should only be used in contexts where firststart has already been called
@@ -13,11 +20,15 @@ start_syncthing_process(){
         log_message "Syncthing: Already running, skipping start"
         return
     fi
+
+    if grep -q "<address>127.0.0.1:8384</address>" $SYNCTHING_DIR/config/config.xml; then
+      repair_config
+      changeguiip
+    fi
     
     log_message "Syncthing: Starting Syncthing..."
-    $ST_BIN serve --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
+    $ST_BIN serve --no-upgrade --gui-address="$STGUIADDRESS" --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/serve.log 2>&1 &
 }
-
 
 stop_syncthing_process(){
     killall -9 syncthing
@@ -32,7 +43,6 @@ syncthing_startup_process() {
     start_syncthing_process
 }
 
-
 firststart() {
     if [ ! -f $SYNCTHING_DIR/config/config.xml ]; then
         log_message "Syncthing: Config file not found, generating..."
@@ -42,7 +52,7 @@ firststart() {
         sleep 5
         ifconfig lo up
         sleep 5
-        $ST_BIN generate --no-default-folder --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/generate.log 2>&1 &
+        $ST_BIN generate --gui-user=spruce --gui-password=happygaming --no-default-folder --home=$SYNCTHING_DIR/config/ > $SYNCTHING_DIR/generate.log 2>&1 &
         sleep 5
 
         repair_config # check if the config was generated correctly
