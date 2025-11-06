@@ -15,10 +15,10 @@ class MiyooTrimCommon():
         
     @staticmethod
     def convert_game_path_to_miyoo_path(original_path, remap_sdcard_path):
-        # Define the possible base directories
+        # Define the base directories we want to convert
+        # (currently do not update/map secondary sdcards)
         base_dirs = {
-            "/mnt/SDCARD/": "/media/sdcard0/",
-            "/media/sdcard1/": "/media/sdcard1/"
+            "/mnt/SDCARD/": "/media/sdcard0/"
         }
         for base_dir, sdcard_mount in base_dirs.items():
             # Check if the original path starts with the base directory
