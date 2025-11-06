@@ -83,6 +83,13 @@ restore_app_or_game_cleanup() {
 LOG_INFO "$0" 0 "BOOTING" "Waiting for Pipewire Init"
 until [ "$(GET_VAR "device" "audio/ready")" -eq 1 ]; do TBOX sleep 0.01; done
 
+
+# If you want to keep pm_libs on the sdcard
+if [ -d /mnt/sdcard/pm_libs ]; then
+    mkdir -p /mnt/mmc/MUOS/PortMaster/libs
+    mount --bind /mnt/sdcard/pm_libs /mnt/mmc/MUOS/PortMaster/libs
+fi
+
 if [ $SKIP -eq 0 ]; then
 	LOG_INFO "$0" 0 "FRONTEND" "Checking for last or resume startup"
 	if [ "$(GET_VAR "config" "settings/general/startup")" = "last" ] || [ "$(GET_VAR "config" "settings/general/startup")" = "resume" ]; then

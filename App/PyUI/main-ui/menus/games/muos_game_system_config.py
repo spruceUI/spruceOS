@@ -2,6 +2,7 @@ import os
 import sys
 
 from menus.games.utils.rom_extensions import RomFolders
+from utils.logger import PyUiLogger
 
 class MuosGameSystemConfig():
     def __init__(self, display_name, system_name):
@@ -38,10 +39,11 @@ class MuosGameSystemConfig():
         return []
     
     def run_in_game_menu(self):
-        return "PORTS" == self.label
-    
+        return str(self.label).lower() == "ports"
+
     def uses_retroarch(self):
-        return "PORTS" != self.label and "PSP" != self.label
+        lower_label = str(self.label).lower()
+        return "ports" != lower_label and "psp" != lower_label
     
     
     def subfolder_launch_file(self):

@@ -66,7 +66,11 @@ class InGameMenuListener:
                     if(held_down):
                         PyUiLogger.get_logger().debug(f"Held down detected, ignoring menu button")
                     else:
-                        self.send_signal(game_process, signal.SIGSTOP)
+                        if(uses_retroarch):
+                            self.ra_popup_menu.send_cmd_to_ra(b'PAUSE_TOGGLE')
+                        else:
+                            self.send_signal(game_process, signal.SIGSTOP)
+
                         PyUiLogger.get_logger().info(f"Taking snapshot before in-game menu")
                         snapshot = Device.take_snapshot("/tmp/screenshot.png")
                         PyUiLogger.get_logger().info(f"Finished Taking snapshot before in-game menu")
