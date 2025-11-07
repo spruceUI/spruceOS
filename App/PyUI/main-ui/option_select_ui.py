@@ -1,11 +1,13 @@
 from collections import defaultdict
 import json
 import os
+from pathlib import Path
 import subprocess
 import sys
 from controller.controller_inputs import ControllerInput
 
 from display.display import Display
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -38,6 +40,7 @@ class OptionSelectUI:
             return defaultdict(tree)
         root = tree()
 
+        folder = str(Path(input_json).parent)
         for key, value in data.items():
             parts = key.split("/")
             node = root
@@ -46,23 +49,25 @@ class OptionSelectUI:
             node[parts[-1]] = value  # leaf value = path string
 
         # --- Recursive menu navigation ---
-        def navigate_menu(menu_dict, title, is_root=False):
+        def navigate_menu(menu_dict, title, folder, is_root=False):
             if isinstance(menu_dict, str):
                 # Should never happen (we only call navigate_menu on dicts)
                 return
 
             option_list = []
             for key, val in menu_dict.items():
+                img_path = folder+"/Imgs/"+key+".png"
                 option_list.append(
                     GridOrListEntry(
                         primary_text=key,
-                        value=key
+                        value=key,
+                        image_path=img_path
                     )
                 )
 
             selected = Selection(None, None, 0)
             view = ViewCreator.create_view(
-                view_type=ViewType.TEXT_ONLY,
+                view_type=ViewType.TEXT_AND_IMAGE,
                 top_bar_text=title,
                 options=option_list,
                 selected_index=selected.get_index()
@@ -93,10 +98,10 @@ class OptionSelectUI:
                         sys.exit(0)
                     else:
                         # Submenu
-                        result = navigate_menu(val, key, is_root=False)
+                        result = navigate_menu(val, key, folder, is_root=False)
                         if result is not None:
                             return result
                         # else stay in current menu after backing out
 
         # --- Start navigation at root level ---
-        navigate_menu(root, title, is_root=True)
+        navigate_menu(root, title, folder, is_root=True)
