@@ -183,8 +183,8 @@ class MiyooTrimCommon():
         Display.present()
 
         centered_stats = joystick.sample_axes_stats()
-        print("rotate_stats keys:", rotate_stats.keys())
-        print("centered_stats keys:", rotate_stats.keys())
+        PyUiLogger.get_logger().info("rotate_stats keys:", rotate_stats.keys())
+        PyUiLogger.get_logger().info("centered_stats keys:", rotate_stats.keys())
         
         x_min = f"x_min={round(rotate_stats['axisX'+leftOrRight]['min'])}"
         x_max = f"x_max={round(rotate_stats['axisX'+leftOrRight]['max'])}"

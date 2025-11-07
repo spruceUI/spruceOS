@@ -1,6 +1,7 @@
 import os
 
 from apps.app_config import AppConfig
+from utils.logger import PyUiLogger
 
 GLYPH_BASE = "/opt/muos/default/MUOS/theme/active/1280x720/glyph/muxapp/"
 
@@ -35,7 +36,7 @@ class MuosAppConfig(AppConfig):
                         #
                         return os.path.join(GLYPH_BASE, icon_value + ".png")
         except Exception as e:
-            print(f"Error reading {self.launch}: {e}")
+            PyUiLogger.get_logger().warning(f"Could not read {self.launch}: {e}")
             
         return "/opt/muos/default/MUOS/theme/active/1280x720/glyph/muxapp/app.png"
         #return "/opt/muos/default/MUOS/theme/active/glyph/muxapp/app.png"
@@ -48,7 +49,7 @@ class MuosAppConfig(AppConfig):
                     if line.startswith("# HELP:"):
                         return line.split(":", 1)[1].strip()
         except Exception as e:
-            print(f"Error reading {self.launch}: {e}")
+            PyUiLogger.get_logger().warning(f"Could not read {self.launch}: {e}")
             
         return ""
 

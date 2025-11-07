@@ -162,7 +162,7 @@ class MiyooA30(MiyooDevice):
         try:
             fd = os.open("/dev/disp", os.O_RDWR)
         except OSError as e:
-            print(f"Failed to open /dev/disp: {e}")
+            PyUiLogger.get_logger().warning(f"Failed to open /dev/disp: {e}")
             return
 
         param = struct.pack('LLLL', 0, self.map_backlight_from_10_to_full_255(self.system_config.backlight, min_level=10), 0, 0)
@@ -170,7 +170,7 @@ class MiyooA30(MiyooDevice):
         try:
             fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
         except OSError as e:
-            print(f"ioctl failed: {e}")
+            PyUiLogger.get_logger().warning(f"ioctl failed: {e}")
         finally:
             os.close(fd)
 

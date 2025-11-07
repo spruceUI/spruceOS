@@ -321,9 +321,9 @@ class MuosDevice(DeviceCommon):
             
             try:
                 shutil.copyfile(updated_frontend, muos_frontend_sh_path)
-                print(f"Copied {updated_frontend} to {muos_frontend_sh_path}")
+                PyUiLogger.get_logger().info(f"Copied {updated_frontend} to {muos_frontend_sh_path}")
             except OSError as e:
-                print(f"Failed to copy file: {e}")
+                PyUiLogger.get_logger().warning(f"Failed to copy file: {e}")
                 
             startup_path = "/opt/muos/config/settings/general/startup"
             try:
@@ -332,7 +332,7 @@ class MuosDevice(DeviceCommon):
                 
                 Display.display_message("Last muOS launched App will launch on startup",2000)
             except OSError as e:
-                print(f"Failed to write to {startup_path}: {e}")
+                PyUiLogger.get_logger().warning(f"Failed to write to {startup_path}: {e}")
                 Display.display_message("Error updating startup script",2000)
 
 

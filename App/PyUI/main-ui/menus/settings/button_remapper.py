@@ -2,6 +2,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.miyoo.system_config import SystemConfig
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -86,7 +87,7 @@ class ButtonRemapper:
             selected = list_view.get_selection(control_options)
 
             if(selected.get_input() in control_options):
-                print(f"Remapping {button.name} to {selected.get_selection().get_value().name}")
+                PyUiLogger.get_logger().info(f"Remapping {button.name} to {selected.get_selection().get_value().name}")
                 self.button_mapping[button] = selected.get_selection().get_value()
                 self.system_config.set_button_mapping(self.button_mapping)
                 self.system_config.save_config()
