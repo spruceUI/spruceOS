@@ -10,6 +10,7 @@ from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
+from option_select_ui import OptionSelectUI
 import sdl2
 import sdl2.ext
 
@@ -34,6 +35,8 @@ def parse_arguments():
     parser.add_argument('-msgDisplay', type=str, default=None, help='A message to display and then exit')
     parser.add_argument('-msgDisplayTimeMs', type=str, default=None, help='How long to display the message')
     parser.add_argument('-msgDisplayRealtime', type=str, default=None, help='Reads from stdin to display messages')
+    parser.add_argument('-optionListFile', type=str, default=None, help='Runs in a mode to just display a list of options')
+    parser.add_argument('-optionListTitle', type=str, default=None, help='Title to display if option list is provided')
     return parser.parse_args()
 
 def log_renderer_info():
@@ -116,6 +119,10 @@ def check_for_msg_display(args):
 
         sys.exit(0)
 
+def check_for_option_list_file(args):
+    if(args.optionListFile):
+        OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile)
+
 def check_for_msg_display_realtime(args):
     if(args.msgDisplayRealtime):
         try:
@@ -142,6 +149,7 @@ def main():
     args = parse_arguments()
 
     PyUiLogger.init(args.logDir, "PyUI")
+    PyUiLogger.get_logger().info(f"{args}")
     #PyUiLogger.get_logger().info(f"logDir: {args.logDir}")
     #PyUiLogger.get_logger().info(f"pyUiConfig: {args.pyUiConfig}")
     #PyUiLogger.get_logger().info(f"device: {args.device}")
@@ -166,7 +174,7 @@ def main():
 
     check_for_msg_display(args)
     check_for_msg_display_realtime(args)
-    
+    check_for_option_list_file(args)
     
     main_menu = MainMenu()
 

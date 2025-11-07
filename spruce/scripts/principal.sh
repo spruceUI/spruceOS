@@ -99,7 +99,7 @@ while [ 1 ]; do
 
         flag_add "in_menu"
 
-        /mnt/SDCARD/App/PyUI/run.sh
+        /mnt/SDCARD/App/PyUI/launch.sh
 
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         if flag_check "pre_cmd_unpacking"; then
