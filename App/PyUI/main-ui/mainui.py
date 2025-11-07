@@ -44,11 +44,11 @@ def log_renderer_info():
     for i in range(num):
         info = sdl2.SDL_RendererInfo()
         sdl2.SDL_GetRenderDriverInfo(i, info)
-        print(f"Found Renderer {i}: {info.name.decode()}")
+        PyUiLogger.get_logger().info(f"Found Renderer {i}: {info.name.decode()}")
 
     num = sdl2.SDL_GetNumVideoDrivers()
     for i in range(num):
-        print(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
+        PyUiLogger.get_logger().info(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
 
 def initialize_device(device):
     if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
@@ -190,7 +190,7 @@ def main():
                 keep_running = False
 
 def sigterm_handler(signum, frame):
-    print(f"Received SIGTERM (Signal {signum}). Shutting down...")
+    PyUiLogger.get_logger().info(f"Received SIGTERM (Signal {signum}). Shutting down...")
     sys.exit() # Exit gracefully
 
 if __name__ == "__main__":

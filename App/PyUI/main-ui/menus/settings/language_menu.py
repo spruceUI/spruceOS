@@ -3,6 +3,7 @@
 import os
 import sys
 from controller.controller_inputs import ControllerInput
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -43,7 +44,7 @@ class LanguageMenu():
                 )
             except Exception as e:
                 # If timezone fails to load for any reason, skip it
-                print(f"Failed to load language {language}: {e}")
+                PyUiLogger.get_logger().warning(f"Failed to load language {language}: {e}")
 
         view = ViewCreator.create_view(
             view_type=ViewType.ICON_AND_DESC,

@@ -106,7 +106,7 @@ class BoxArtResizer():
                                     shutil.move(qoi_full_path, qoi_large_path)
 
                             except Exception as e:
-                                print(f"Error converting for large image {full_path} : {e}")
+                                PyUiLogger.get_logger().warning(f"Issue converting for large image {full_path} : {e}")
                                 continue
 
 
@@ -119,7 +119,7 @@ class BoxArtResizer():
                                 if(not cls.scale_and_convert_image(large_image_path,medium_image_path, target_medium_width, target_medium_height)):
                                     medium_image_path = full_path
                             except Exception as e:
-                                print(f"Error converting for medium image {full_path} : {e}")
+                                PyUiLogger.get_logger().warning(f"Issue converting for medium image {full_path} : {e}")
                                 continue
 
                             try:
@@ -130,7 +130,7 @@ class BoxArtResizer():
                                 )
                                 cls.scale_and_convert_image(medium_image_path,small_image_path, target_small_width, target_small_height)
                             except Exception as e:
-                                print(f"Error converting for small image {full_path} : {e}")
+                                PyUiLogger.get_logger().warning(f"Issue converting for small image {full_path} : {e}")
                                 continue
 
                             os.remove(full_path)
@@ -138,7 +138,7 @@ class BoxArtResizer():
                                 try:
                                     os.remove(output_path)
                                 except Exception as e:
-                                    print(f"Error deleting {output_path}")
+                                    PyUiLogger.get_logger().warning(f"Issue deleting {output_path}")
 
 
                 #This is always temporary

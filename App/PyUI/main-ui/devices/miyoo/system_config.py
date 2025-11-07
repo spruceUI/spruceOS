@@ -239,7 +239,7 @@ class SystemConfig:
                 val_enum = ControllerInput(v)
                 mapping[key_enum] = val_enum
             except ValueError:
-                print(f"Skipping invalid enum mapping: {k} -> {v}")
+                PyUiLogger.get_logger().info(f"Skipping invalid enum mapping: {k} -> {v}")
                 continue
 
         return mapping

@@ -48,7 +48,7 @@ class TimezoneMenu():
 
             except Exception as e:
                 # If timezone fails to load for any reason, skip it
-                print(f"Failed to load timezone {entry}: {e}")
+                PyUiLogger.get_logger().warning(f"Failed to load timezone {entry}: {e}")
 
         return timezone_entries
 
@@ -70,7 +70,7 @@ class TimezoneMenu():
                 )
             except Exception as e:
                 # If timezone fails to load for any reason, skip it
-                print(f"Failed to load timezone {timezone}: {e}")
+                PyUiLogger.get_logger().warning(f"Failed to load timezone {timezone}: {e}")
 
         view = ViewCreator.create_view(
             view_type=ViewType.ICON_AND_DESC,

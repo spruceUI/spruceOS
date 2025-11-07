@@ -183,7 +183,7 @@ class ThemePatcher():
             with open(output_config_path, 'w') as f:
                 json.dump(scaled_config, f, indent=4)
 
-            print(f"Scaled config written to: {output_config_path}")
+            PyUiLogger.get_logger().info(f"Scaled config written to: {output_config_path}")
         except Exception as e:
             PyUiLogger().get_logger().exception(f"Failed to process JSON config {config_path}: {e}")    
 

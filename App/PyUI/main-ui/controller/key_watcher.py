@@ -5,6 +5,7 @@ import select
 import time
 
 from devices.device import Device
+from utils.logger import PyUiLogger
 
 
 
@@ -26,7 +27,7 @@ class KeyWatcher:
         try:
             self.fd = os.open(self.event_path, os.O_RDONLY | os.O_NONBLOCK)
         except OSError as e:
-            print(f"Error opening {self.event_path}: {e}")
+            PyUiLogger.get_logger().warning(f"Unable to open {self.event_path}: {e}")
             return (None, None)
 
     def read_keyboard_input(self, timeout=1.0):
@@ -56,7 +57,7 @@ class KeyWatcher:
                             self.held_keys.pop(code, None)
                             return (code, False)
         except Exception as e:
-            print(f"Error reading input: {e}")
+            PyUiLogger.get_logger().warning(f"Could not read input: {e}")
 
         # Simulate repeat for held keys
         for code, last_time in list(self.held_keys.items()):
