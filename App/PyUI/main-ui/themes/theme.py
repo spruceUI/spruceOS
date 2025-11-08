@@ -900,7 +900,7 @@ class Theme():
     @classmethod
     def get_game_select_img_width(cls):
         from devices.device import Device
-        return cls._data.get("gameSelectImgWidth", int(Device.screen_width() * 294 / 640))
+        return cls._data.get("gameSelectImgWidth", int(Device.screen_width() * 320 / 640))
     
     @classmethod
     def set_game_select_img_width(cls, value):

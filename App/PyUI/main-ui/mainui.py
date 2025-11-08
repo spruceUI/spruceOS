@@ -23,6 +23,7 @@ from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
+from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
 
 
 
@@ -35,6 +36,7 @@ def parse_arguments():
     parser.add_argument('-msgDisplay', type=str, default=None, help='A message to display and then exit')
     parser.add_argument('-msgDisplayTimeMs', type=str, default=None, help='How long to display the message')
     parser.add_argument('-msgDisplayRealtime', type=str, default=None, help='Reads from stdin to display messages')
+    parser.add_argument('-msgDisplayRealtimePort', type=str, default=None, help='Reads from the passed in port to display messages')
     parser.add_argument('-optionListFile', type=str, default=None, help='Runs in a mode to just display a list of options')
     parser.add_argument('-optionListTitle', type=str, default=None, help='Title to display if option list is provided')
     return parser.parse_args()
@@ -121,7 +123,7 @@ def check_for_msg_display(args):
 
 def check_for_option_list_file(args):
     if(args.optionListFile):
-        OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile)
+        OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile, True)
 
 def check_for_msg_display_realtime(args):
     if(args.msgDisplayRealtime):
@@ -134,9 +136,13 @@ def check_for_msg_display_realtime(args):
                     break
 
                 if message.startswith("RENDER_IMAGE:"):
-                    image_path = message[len("RENDER_IMAGE:"):].strip()
-                    PyUiLogger.get_logger().info(f"Rendering image from path: {image_path}")
-                    Display.display_image(image_path)
+                    option_list_file = message[len("RENDER_IMAGE:"):].strip()
+                    PyUiLogger.get_logger().info(f"Rendering image from path: {option_list_file}")
+                    Display.display_image(option_list_file)
+                elif message.startswith("OPTION_LIST:"):
+                    option_list_file = message[len("OPTION_LIST:"):].strip()
+                    PyUiLogger.get_logger().info(f"Option list file: {option_list_file}")
+                    OptionSelectUI.display_option_list("",option_list_file, False)
                 else:
                     Display.display_message(message)
                     
@@ -144,6 +150,11 @@ def check_for_msg_display_realtime(args):
             PyUiLogger.get_logger().error("Error processing messages: ", exc_info=True)
         PyUiLogger.get_logger().info(f"Exitting...")
         sys.exit(0)
+
+def check_for_msg_display_socket_based(args):
+    if(args.msgDisplayRealtimePort):
+        RealtimeMessageNetworkListener(args.msgDisplayRealtimePort).start()
+
 
 def main():
     args = parse_arguments()
@@ -174,6 +185,7 @@ def main():
 
     check_for_msg_display(args)
     check_for_msg_display_realtime(args)
+    check_for_msg_display_socket_based(args)
     check_for_option_list_file(args)
     
     main_menu = MainMenu()

@@ -30,7 +30,7 @@ Sample Input
 class OptionSelectUI:
 
     @staticmethod
-    def display_option_list(title, input_json):
+    def display_option_list(title, input_json, exit_after_running):
         # --- Load JSON file ---
         with open(input_json, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -48,15 +48,28 @@ class OptionSelectUI:
                 node = node[part]
             node[parts[-1]] = value  # leaf value = path string
 
+
         # --- Recursive menu navigation ---
         def navigate_menu(menu_dict, title, folder, is_root=False):
+            def write_result(result):
+                script_dir = Path(__file__).resolve().parent.parent
+                result_file = script_dir / 'selection.txt'
+                PyUiLogger.get_logger().info(f"Writing {result} to {result_file}")
+                try:
+                    with result_file.open('w', encoding='utf-8') as f:
+                        f.write(result)
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Error writing result to file: {e}")
+                    
             if isinstance(menu_dict, str):
                 # Should never happen (we only call navigate_menu on dicts)
                 return
 
             option_list = []
             for key, val in menu_dict.items():
-                img_path = folder+"/Imgs/"+key+".png"
+                img_path = f"{folder}/Imgs/{key}.png"
+                if not os.path.exists(img_path):
+                    img_path = f"{folder}/Imgs/{key}.qoi"
                 option_list.append(
                     GridOrListEntry(
                         primary_text=key,
@@ -83,8 +96,12 @@ class OptionSelectUI:
 
                 if inp == ControllerInput.B:
                     if is_root:
-                        Display.deinit_display()
-                        sys.exit(1)
+                        if(exit_after_running):
+                            Display.deinit_display()
+                            sys.exit(1)
+                        else:
+                            write_result("EXIT")
+                            return "EXIT"
                     else:
                         return None  # go up a level
 
@@ -93,9 +110,13 @@ class OptionSelectUI:
                     val = menu_dict[key]
                     if isinstance(val, str):
                         # Final executable task
-                        subprocess.run(val, shell=True)
-                        Display.deinit_display()
-                        sys.exit(0)
+                        if(exit_after_running):
+                            Display.deinit_display()
+                            subprocess.run(val, shell=True)
+                            sys.exit(0)
+                        else:
+                            write_result(val)
+                            return val
                     else:
                         # Submenu
                         result = navigate_menu(val, key, folder, is_root=False)
