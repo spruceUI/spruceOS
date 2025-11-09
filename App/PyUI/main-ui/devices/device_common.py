@@ -247,6 +247,9 @@ class DeviceCommon(AbstractDevice):
                 ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
             ) * 100
 
+            # Ensure signal and settings stay in sync
+            self.get_ip_addr_text()
+            
             if score >= 80:
                 return WifiStatus.GREAT
             elif score >= 60:
@@ -289,7 +292,7 @@ class DeviceCommon(AbstractDevice):
             self.start_udhcpc()
 
 
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import psutil
         if self.is_wifi_enabled():
