@@ -61,6 +61,15 @@ class AppListManager:
     def get_apps(self) -> List[AppEntry]:
         return self._entries
 
-    def get_app(self, app_config: AppConfig) -> Optional[AppEntry]:
-        """Return app if exists, do NOT add or save."""
-        return self._entries_dict.get(app_config.get_launch())
+    def get_app(self, app_config: AppConfig) -> AppEntry:
+        """Return the AppEntry for the given AppConfig, creating and saving it if missing."""
+        launch = app_config.get_launch()
+        entry = self._entries_dict.get(launch)
+
+        if entry is None:
+            entry = AppEntry(launch)
+            self._entries.insert(0, entry)
+            self._entries_dict[launch] = entry
+            self.save_to_file()
+
+        return entry
