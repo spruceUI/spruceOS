@@ -31,7 +31,7 @@ class CollectionsMenu(RomsMenuCommon):
                         primary_text=collection,
                         image_path=img_path,
                         image_path_selected=img_path,
-                        description="Collections", 
+                        description=None, 
                         icon=None,
                         value=rom_info)
                 )
