@@ -200,4 +200,5 @@ class SprigMiyooMiniFlip(MiyooMiniFlip):
     def _set_disp_green_to_config(self):
         self._set_screen_values_to_config()
 
-        
+    def supports_timezone_setting(self):
+        return False

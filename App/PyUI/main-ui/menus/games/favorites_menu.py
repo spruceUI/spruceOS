@@ -27,7 +27,7 @@ class FavoritesMenu(RomsMenuCommon):
                     primary_text=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
                     image_path=img_path,
                     image_path_selected=img_path,
-                    description="Favorite", 
+                    description=None, 
                     icon=None,
                     value=rom_info)
             )
@@ -45,9 +45,9 @@ class FavoritesMenu(RomsMenuCommon):
         popup_options = []
         popup_options.append(GridOrListEntry(
             primary_text="Sort Favorites",
+            description=None,
             image_path=None,
             image_path_selected=None,
-            description=f"Sort Favorites",
             icon=None,
             value=lambda input_value: self.sort_favorites_alphabetically(input_value)
         ))
