@@ -71,19 +71,16 @@ class SprigMiyooMiniFlip(MiyooMiniFlip):
 
     def get_volume(self):
         """Get volume from system config, always reload to catch external changes"""
-        self.system_config.reload_config()
         return self.system_config.get_volume()
     
     @property
     def lumination(self):
         """Get backlight from system config, always reload to catch external changes"""
-        self.system_config.reload_config()
         return self.system_config.get_backlight()
 
     def change_volume(self, amount):
         """Override to handle Sprig's 0-50 volume range (displays as 0-10)"""
         from display.display import Display
-        self.system_config.reload_config()
         
         # Get current volume (0-50 range for display as 0-10)
         volume = self.get_volume() + amount
