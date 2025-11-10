@@ -261,5 +261,43 @@ runtime_mounts_Flip() {
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
+    # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
+    mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 
+    # use appropriate loading images
+    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
+    [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
+    
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+
+	# PortMaster ports location
+    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+	
+	# Treat /spruce/flip/ as the 'root' for any application that needs it.
+	# (i.e. PortMaster looks here for config information which is device specific)
+    mount --bind /mnt/sdcard/spruce/flip/ /root 
+
+    # Bind the correct version of retroarch so it can be accessed by PM
+    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
+}
+
+perform_fw_update_Flip() {
+    miyoo_fw_update=0
+    miyoo_fw_dir=/media/sdcard0
+    if [ -f /media/sdcard0/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard0
+    elif [ -f /media/sdcard1/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard1
+    fi
+
+    if [ ${miyoo_fw_update} -eq 1 ] ; then
+        cd $miyoo_fw_dir
+        /usr/miyoo/apps/fw_update/miyoo_fw_update
+        rm "${miyoo_fw_dir}/miyoo355_fw.img"
+    fi
 }

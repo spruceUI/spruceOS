@@ -32,7 +32,6 @@ if [ "$PLATFORM" = "A30" ]; then
     BIN_DIR="${SDCARD_PATH}/spruce/bin"
 
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
-    export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 
     runtime_mounts_A30
@@ -42,21 +41,20 @@ if [ "$PLATFORM" = "A30" ]; then
 
 elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/trimui"
-    export PATH="$SYSTEM_PATH/app:${PATH}"
-    BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
     runtime_mounts_Brick
 
 elif [ "$PLATFORM" = "Flip" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
-    export PATH="$SYSTEM_PATH/app:${PATH}"
-    BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
-	log_message "Check for payload updates"
-	./update_miyoo_payload.sh
+	log_message "Checking for payload updates"
+	"$SCRIPTS_DIR"/update_miyoo_payload.sh
 
     runtime_mounts_Flip
 fi
+
+export PATH="$SYSTEM_PATH/app:${PATH}"
+
 
 # Flag cleanup
 flag_remove "themeChanged"
@@ -149,15 +147,6 @@ if [ "$PLATFORM" = "A30" ]; then
     # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 
-    # check whether to auto-resume into a game
-    if flag_check "save_active"; then
-        ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
-        log_message "Auto Resume executed"
-    else
-        log_message "Auto Resume skipped (no save_active flag)"
-    fi
-
-
     # Run scripts for initial setup
     ${SCRIPTS_DIR}/credits_watchdog.sh &
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
@@ -234,29 +223,8 @@ elif [ "$PLATFORM" = "Flip" ]; then
     #keyboard
     #echo 0 > /sys/class/miyooio_chr_dev/joy_type
 
-    sleep 0.1
-    hdmipugin=$(cat /sys/class/drm/card0-HDMI-A-1/status)
-    if [ "$hdmipugin" == "connected" ] ; then
-        /usr/bin/fbdisplay /usr/miyoo/bin/skin_1080p/app_loading_bg.png &
-    else
-        /usr/bin/fbdisplay /usr/miyoo/bin/skin/app_loading_bg.png &
-    fi
-
-    miyoo_fw_update=0
-    miyoo_fw_dir=/media/sdcard0
-    if [ -f /media/sdcard0/miyoo355_fw.img ] ; then
-        miyoo_fw_update=1
-        miyoo_fw_dir=/media/sdcard0
-    elif [ -f /media/sdcard1/miyoo355_fw.img ] ; then
-        miyoo_fw_update=1
-        miyoo_fw_dir=/media/sdcard1
-    fi
-
-    if [ ${miyoo_fw_update} -eq 1 ] ; then
-        cd $miyoo_fw_dir
-        /usr/miyoo/apps/fw_update/miyoo_fw_update
-        rm "${miyoo_fw_dir}/miyoo355_fw.img"
-    fi
+    # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
+    perform_fw_update_Flip
 	
     # fix keys map image for each theme folder
     for theme_dir in /mnt/sdcard/Themes/*/; do
@@ -272,28 +240,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
             mount --bind "$flip_file" "$base_file"
         done
     done
-
-    # Use shared RA config between Miyoo in-game menu and non-Miyoo RA bins
-    mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg" "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
-
-    # use appropriate loading images
-    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
-    [ -d "/mnt/SDCARD/miyoo355/app/lang" ] && mount --bind /mnt/SDCARD/miyoo355/app/lang /usr/miyoo/bin/lang
-    
-    # Mask Roms/PORTS with non-A30 version
-    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
-    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
-
-	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
-	
-	# Treat /spruce/flip/ as the 'root' for any application that needs it.
-	# (i.e. PortMaster looks here for config information which is device specific)
-    mount --bind /mnt/sdcard/spruce/flip/ /root 
-
-    # Bind the correct version of retroarch so it can be accessed by PM
-    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
 
     # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
@@ -319,15 +265,15 @@ elif [ "$PLATFORM" = "Flip" ]; then
 
     echo in > /sys/class/gpio/gpio$GPIO/direction
 
-    # check whether to auto-resume into a game
-    if flag_check "save_active"; then
-        ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
-        log_message "Auto Resume executed"
-    else
-        log_message "Auto Resume skipped (no save_active flag)"
-    fi
-
     killall runmiyoo.sh
+fi
+
+# check whether to auto-resume into a game
+if flag_check "save_active"; then
+    ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
+    log_message "Auto Resume executed"
+else
+    log_message "Auto Resume skipped (no save_active flag)"
 fi
 
 # check whether to run first boot procedure
