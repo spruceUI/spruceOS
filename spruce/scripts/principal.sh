@@ -71,13 +71,7 @@ while [ 1 ]; do
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"
-
-        # Check for the themeChanged flag
-        if flag_check "themeChanged"; then
-            /mnt/SDCARD/spruce/scripts/iconfresh.sh --silent
-            flag_remove "themeChanged"
-        fi
-
+        
         # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat $BATTERY/capacity)

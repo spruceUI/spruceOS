@@ -201,8 +201,6 @@ fi
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
-else
-    log_message "First boot procedures skipped"
 fi
 
 ${SCRIPTS_DIR}/homebutton_watchdog.sh &
@@ -220,8 +218,6 @@ if flag_check "save_active"; then
 else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
-
-
 
 check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 

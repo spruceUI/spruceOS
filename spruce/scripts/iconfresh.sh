@@ -91,19 +91,7 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 		exit 1
 	fi
 
-
 else
-
-	# Add silent mode flag
-	silent_mode=0
-	[ "$1" = "--silent" ] && silent_mode=1
-
-	# Only show image if not in silent mode
-	if [ $silent_mode -eq 0 ]; then
-		display --icon "$ICONFRESH_ICON" -t "Refreshing icons... please wait......"
-	fi
-
-	EMULATOR_BASE_PATH="/mnt/SDCARD/Emu/"
 
 	case "$PLATFORM" in
 		"A30" )
@@ -129,9 +117,4 @@ else
 	fi
 
 	update_skin_images
-
-	# Only kill images if not in silent mode
-	if [ $silent_mode -eq 0 ]; then
-		display_kill
-	fi
 fi
