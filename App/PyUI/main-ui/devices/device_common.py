@@ -333,8 +333,7 @@ class DeviceCommon(AbstractDevice):
         return sys.maxsize
         
     def get_guaranteed_safe_max_text_char_count(self):
-        #No known limit?
-        return sys.maxsize
+        return 35
 
     def get_system_config(self):
         return self.system_config
