@@ -128,15 +128,14 @@ log_message "---------Starting up---------"
 log_message " " -v
 
 # import multipass.cfg and start watchdog for new network additions via MainUI
-nice -n 15 ${SCRIPTS_DIR}/wpa_watchdog.sh > /dev/null &
+nice -n 15 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 
 # Use appropriate RA config per platform
 [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
 
 if [ "$PLATFORM" = "A30" ]; then
     # Check if WiFi is enabled
-    wifi=$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')
-    if [ "$wifi" -eq 0 ]; then
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
         log_message "WiFi turned off"
     else
@@ -149,11 +148,11 @@ fi
 
 # Bring up network and services
 
-if [ "$(grep '"wifi"' "$SYSTEM_JSON" | awk -F ':' '{print $2}' | tr -d ' ,')" -eq 1 ]; then
+if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
 
-${SCRIPTS_DIR}/wifi_watchdog.sh > /dev/null &
+${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 
 unstage_archives_$PLATFORM
 

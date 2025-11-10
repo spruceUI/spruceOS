@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# TODO: probably rename this to multipass.sh or sth like that, since its function has changed.
-
-
-##### GENERAL #####
-
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 MULTIPASS="/mnt/SDCARD/multipass.cfg"
@@ -15,8 +10,6 @@ if [ ! -f "$WPA_SUPPLICANT_FILE" ]; then
     log_message "Creating new $WPA_SUPPLICANT_FILE"
     echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$WPA_SUPPLICANT_FILE"
 fi
-
-##### MULTIPASS.CFG #####
 
 append_network_from_multipass() {
     echo ""
