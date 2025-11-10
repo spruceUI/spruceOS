@@ -40,10 +40,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Reapply Developer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
 
 <Not_simple>
-"" "Automatically check for updates" "|" "on|off" "$HELP$ check checkForUpdates" "$HELP$ update checkForUpdates _VALUE_" ""
-@"Spruce will check periodically on startup"
-
-<Not_simple>
 "" "Run application on boot:" "spruceUI|Random|Switcher|Splore" "spruceUI|Random|Switcher|Splore" "$HELP$ get boot_to 'spruceUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
 @"Will apply on next boot"
 

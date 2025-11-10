@@ -8,8 +8,8 @@ CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
-    # Check if updates are enabled in settings
-    if ! setting_get "checkForUpdates"; then
+    local should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
+    if [ "$should_check" = "False" ]; then
         return 1
     fi
 

@@ -1,0 +1,14 @@
+{
+    "menuOptions": {
+        "System Settings": {
+            "checkForUpdates": {
+                "display": "Check for spruce updates at boot",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            }
+        }
+    }
+}

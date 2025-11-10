@@ -1044,6 +1044,21 @@ settings_organize() {
     log_message "Settings file organized and cleaned up" -v
 }
 
+##########     NEW PYUI-BASED SETTING SYSTEM     ##########
+
+# Get spruce-specific settings from spruce-config.json
+# example usage:
+# SMB_ENABLED="$(get_config_value '.menuOptions."Network Settings".enableSMB.selected' "True")"
+get_config_value() {
+    local key="$1"
+    local default="$2"
+    local file="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+    jq -r "${key} // \"$default\"" "$file"
+}
+
+###########################################################
+
 # Vibrate the device
 # Usage: vibrate [duration] [--intensity Strong|Medium|Weak]
 #        vibrate [--intensity Strong|Medium|Weak] [duration]
