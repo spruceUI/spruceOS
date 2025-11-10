@@ -5,7 +5,6 @@
 
 
 $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
-  log_message "*** homebutton_watchdog.sh: $line" -v
     home_key_down () {
         touch /tmp/kill_scraper 
     }
