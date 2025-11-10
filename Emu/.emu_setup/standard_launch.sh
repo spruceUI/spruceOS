@@ -7,7 +7,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
-. /mnt/SDCARD/App/BitPal/BitPalFunctions.sh
 
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
@@ -17,6 +16,8 @@ export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
+
+log_message "got to 1" -v
 
 case "$EMU_NAME" in
     DC|NAOMI|N64|PS)
@@ -41,6 +42,7 @@ case "$EMU_NAME" in
         ;;
 esac
 
+log_message "got to 2" -v
 
 ##### GENERAL FUNCTIONS #####
 
@@ -126,13 +128,14 @@ handle_network_services() {
 	fi
 }
 
+log_message "got to 3" -v
+
 ##### TIME TRACKING FUNCTIONS #####
 
 export START_TIME_PATH="/tmp/start_time"
 export END_TIME_PATH="/tmp/end_time"
 export DURATION_PATH="/tmp/session_duration"
 export TRACKER_JSON_PATH="/mnt/SDCARD/Saves/spruce/gtt.json"
-export MISSION_JSON_PATH="/mnt/SDCARD/Saves/spruce/bitpal_data/active_missions.json"
 
 record_session_start_time() {
     date +%s > "$START_TIME_PATH"
@@ -149,7 +152,7 @@ calculate_current_session_duration() {
     echo "$DURATION" > "$DURATION_PATH"
 }
 
-update_gtt_and_bp() {
+update_gtt() {
     # Initialize GTT JSON if needed
     if [ ! -f "$TRACKER_JSON_PATH" ] || [ -z "$(cat "$TRACKER_JSON_PATH")" ]; then
         jq -n '{ games: {} }' > "$TRACKER_JSON_PATH"
@@ -184,37 +187,13 @@ update_gtt_and_bp() {
            last_played: $lastPlayed
        }' "$TRACKER_JSON_PATH" > "$tmpfile" && mv "$tmpfile" "$TRACKER_JSON_PATH"
 
-	# update any BitPal missions for the given rompath
-	for i in $(jq -r --arg path "$ROM_FILE" '
-		.missions
-		| to_entries[]
-		| select(.value.rompath == $path)
-		| .key
-	' "$MISSION_JSON"); do
-
-		PREVIOUS_PLAYTIME="$(get_mission_time_spent "$i")"
-    	NEW_PLAYTIME=$((PREVIOUS_PLAYTIME + SESSION_DURATION))
-		set_mission_time_spent "$i" "$NEW_PLAYTIME"
-
-		MISSION_DURATION="$(get_mission_duration "$i")"
-		MISSION_DURATION_SECONDS=$((60 * MISSION_DURATION))
-		if [ "$NEW_PLAYTIME" -ge "$MISSION_DURATION_SECONDS" ]; then
-
-			current_xp=$(get_bitpal_xp)
-			gained_xp=$(get_mission_xp_reward "$i")
-			new_current_xp=$((current_xp + gained_xp))
-			set_bitpal_xp "$new_current_xp"
-
-			set_mission_enddate "$i" "$(date +%s)"
-			move_mission_to_completed_json "$i"
-		fi
-
-	done
 
 	# clean up temp files to prevent accidental cross-pollination
 	rm "$START_TIME_PATH" "$END_TIME_PATH" "$DURATION_PATH" 2>/dev/null
 }
 
+
+log_message "got to 4" -v
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
@@ -724,6 +703,8 @@ run_flycast_standalone() {
 	umount $HOME/.local/share/flycast
 }
 
+log_message "got to 5" -v
+
  ########################
 ##### MAIN EXECUTION #####
  ########################
@@ -740,6 +721,8 @@ flag_add 'emulator_launched'
 # Sanitize the rom path
 ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
+
+log_message "got to 6" -v
 
 case $EMU_NAME in
 	"DC"|"NAOMI")
@@ -802,10 +785,12 @@ case $EMU_NAME in
 		;;
 esac
 
+log_message "got to 7" -v
+
 kill -9 $(pgrep -f enforceSmartCPU.sh)
 record_session_end_time
 calculate_current_session_duration
-update_gtt_and_bp
+update_gtt
 log_message "-----Closing Emulator-----" -v
 
 auto_regen_tmp_update
