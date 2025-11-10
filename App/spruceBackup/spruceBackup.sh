@@ -14,13 +14,21 @@ FLAGS_DIR=/mnt/SDCARD/spruce/flags
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
-# set_performance
 
 # Modify display function to respect silent mode
 display_message() {
     if [ "$silent_mode" -eq 0 ]; then
         display "$@"
     fi
+}
+
+backup_emu_settings() {
+    mkdir -p "/mnt/SDCARD/Saves/spruce/emu_backups"
+    for config in /mnt/SDCARD/Emu/*/config.json; do
+        emu_name="$(basename "$(dirname "$config")")"
+        cp -f "$config" "/mnt/SDCARD/Saves/spruce/emu_backups/$emu_name.json"
+        log_message "Backed up config.json for $emu_name"
+    done
 }
 
 display_message --icon "$ICON_PATH" -t "Backing up your spruce configs and files.........."
@@ -65,7 +73,6 @@ $SYSTEM_JSON
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
-/mnt/SDCARD/Emu/.emu_setup/overrides
 /mnt/SDCARD/Emu/DC/.config
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32
@@ -111,26 +118,29 @@ fi
 log_message "Sufficient free space available. Proceeding with backup."
 
 for item in $folders; do
-  if [ -e "$item" ]; then
-    log_message "Adding $item to backup list"
-    echo "$item" >> "$temp_file"
-  else
-    log_message "Warning: $item does not exist, skipping..."
-  fi
+    if [ -e "$item" ]; then
+        log_message "Adding $item to backup list"
+        echo "$item" >> "$temp_file"
+    else
+        log_message "Warning: $item does not exist, skipping..."
+    fi
 done
+
+log_message "Backing up Emu config.json files"
+backup_emu_settings
 
 log_message "Creating 7z archive"
 7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 rm "$temp_file"
 
 if [ $? -eq 0 ]; then
-  log_message "Backup process completed successfully. Backup file: $seven_z_file"
-  display_message --icon "$ICON_PATH" -t "Backup completed successfully! 
+    log_message "Backup process completed successfully. Backup file: $seven_z_file"
+    display_message --icon "$ICON_PATH" -t "Backup completed successfully! 
 Backup file: $seven_z_filename
 Located in /Saves/spruce/backups/" -d 4
 else
-  log_message "Error while creating backup."
-  display --icon "$ICON_PATH" -t "Backup failed
+    log_message "Error while creating backup."
+    display --icon "$ICON_PATH" -t "Backup failed
 Check '/Saves/spruce/spruceBackup.log' for more details" --okay
 fi
 
@@ -143,6 +153,5 @@ ls -t spruceBackup_*.7z | tail -n +8 | while read -r old_backup; do
 done
 
 log_message "Backup process finished running"
-
 
 auto_regen_tmp_update

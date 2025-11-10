@@ -20,6 +20,35 @@ display_message() {
     fi
 }
 
+restore_emu_settings() {
+    if [ ! -d "/mnt/SDCARD/Saves/spruce/emu_backups" ]; then
+        log_message "No emu_backups folder to restore settings from."
+        return 1
+    fi
+    for configjson in /mnt/SDCARD/Saves/spruce/emu_backups/*.json; do
+
+        emu_name="$(basename "$configjson" .json)"
+        new_json="/mnt/SDCARD/Emu/$emu_name/config.json"
+
+        [ -f "$new_json" ] || continue    # Skip if new config doesn’t exist
+
+        if jq -e '.menuOptions.Emulator' "$new_json" >/dev/null; then
+            selected_core="$(jq -r '.menuOptions.Emulator.selected' "$configjson")"
+            overrides="$(jq '.menuOptions.Emulator.overrides' "$configjson")"
+            [ "$overrides" = "null" ] && overrides='{}'
+            log_message "$emu_name: selected core: $selected_core"
+            log_message "$emu_name: overrides section: $overrides"
+            tmpfile="$(mktemp)"
+            jq \
+                --arg selected "$selected_core" \
+                --argjson overrides "$overrides" \
+                '.menuOptions.Emulator.selected = $selected
+                | .menuOptions.Emulator.overrides = $overrides' \
+                "$new_json" > "$tmpfile" && mv -f "$tmpfile" "$new_json"
+        fi
+    done
+}
+
 log_message "----------Starting Restore script----------"
 # set_performance
 display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
@@ -217,8 +246,9 @@ display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 # Apply settings
 
-log_message "Applying recentsTile setting"
-sh /mnt/SDCARD/spruce/scripts/applySetting/recentsTile.sh reapply
+log_message "Restoring emulator settings"
+restore_emu_settings
+
 log_message "Applying idlemon setting"
 sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
 
