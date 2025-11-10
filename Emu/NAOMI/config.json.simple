@@ -1,0 +1,10 @@
+{
+  "label": "DC",
+  "icon": "dc.png",
+  "iconsel": "dc_sel.png",
+  "background": "",
+  "themecolor": "FFFFFF",
+  "launch": "../.emu_setup/standard_launch.sh",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u",
+  "launchlist": []
+}
