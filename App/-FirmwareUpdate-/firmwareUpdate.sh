@@ -138,7 +138,7 @@ else
 fi
 
 # Check whether they have the update file on their card already
-if [ -f "$FW_DIR/$FW_FILE" ]; then
+if [ -f "$FW_DIR/$FW_FILE.7z" ]; then
 	log_message "firmwareUpdate.sh: FW file already found on device. No need to download."
 else
 	mkdir -p "$FW_DIR"
