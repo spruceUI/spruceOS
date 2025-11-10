@@ -301,3 +301,33 @@ perform_fw_update_Flip() {
         rm "${miyoo_fw_dir}/miyoo355_fw.img"
     fi
 }
+
+init_gpio_Flip() {
+    # Initialize rumble motor
+    echo 20 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio20/direction
+    echo -n 0 > /sys/class/gpio/gpio20/value
+
+    # Initialize headphone jack
+    if [ ! -d /sys/class/gpio/gpio150 ]; then
+        echo 150 > /sys/class/gpio/export
+        sleep 0.1
+    fi
+    echo in > /sys/class/gpio/gpio150/direction
+}
+
+init_gpio_Brick() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}

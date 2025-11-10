@@ -135,19 +135,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     chmod a+x /usr/bin/notify
     INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
 
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
+    init_gpio_Brick
 
     mkdir $INPUTD_SETTING_DIR_NAME
 
@@ -188,14 +176,10 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
-    LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
-
     export LD_LIBRARY_PATH=/usr/miyoo/lib
+    /usr/miyoo/bin/miyoo_inputd &
 
-    # Initialize rumble motor
-    echo 20 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio20/direction
-    echo -n 0 > /sys/class/gpio/gpio20/value
+    init_gpio_Flip
 
     #joypad
     echo -1 > /sys/class/miyooio_chr_dev/joy_type
@@ -230,19 +214,9 @@ elif [ "$PLATFORM" = "Flip" ]; then
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
     ${SCRIPTS_DIR}/lid_watchdog.sh &
 
-     # Load idle monitors before game resume or MainUI
+    # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/credits_watchdog.sh &
-
-    # headphone jack gpio isn't set up until MainUI launches, hook it up for autoRA
-    GPIO=150
-
-    if [ ! -d /sys/class/gpio/gpio$GPIO ]; then
-        echo $GPIO > /sys/class/gpio/export
-        sleep 0.1
-    fi
-
-    echo in > /sys/class/gpio/gpio$GPIO/direction
 
     killall runmiyoo.sh
 fi
