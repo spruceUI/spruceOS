@@ -10,18 +10,14 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
+
 rotate_logs
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
+log_message "---------Starting up---------"
+
 SDCARD_PATH="/mnt/SDCARD"
 export HOME="${SDCARD_PATH}"
 SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
-
-case "$PLATFORM" in
-    "A30" | "Brick" | "SmartPro" ) SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
-    "Flip") SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
-esac
-
-# Resetting log file location
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
@@ -39,22 +35,7 @@ if [ "$PLATFORM" = "A30" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
 
-    # Create directories and mount in parallel
-    (
-        mkdir -p /var/lib/alsa
-        mkdir -p /mnt/SDCARD/spruce/dummy
-        mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
-        mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
-        mount -o bind /mnt/SDCARD/miyoo/res /usr/miyoo/res &
-        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
-        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
-        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-        /mnt/SDCARD/spruce/a30/sdl2/bind.sh &
-        wait
-    )
-
-    touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
+    runtime_mounts_A30
     
     # Stop NTPD
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
@@ -64,22 +45,7 @@ elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
     export PATH="$SYSTEM_PATH/app:${PATH}"
     BIN_DIR="${SDCARD_PATH}/spruce/bin64"
 
-    # Create directories and mount in parallel
-    (
-        # Mask Roms/PORTS with non-A30 version
-        mkdir -p "/mnt/SDCARD/Roms/PORTS64"
-        mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
-        wait
-
-        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
-        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
-        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-        /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
-
-    )
-
-    touch /mnt/SDCARD/spruce/flip/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
+    runtime_mounts_Brick
 
 elif [ "$PLATFORM" = "Flip" ]; then
     export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
@@ -89,32 +55,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
 	log_message "Check for payload updates"
 	./update_miyoo_payload.sh
 
-    if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
-        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
-        mkdir /mnt/sdcard/Saves/userdata-flip
-        cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/bluetooth
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/cfg
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/localtime
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/timezone
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
-        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
-    fi
-
-    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
-    mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
-    mkdir -p /run/bluetooth_fix
-    mount --bind /run/bluetooth_fix /userdata/bluetooth
-    touch /mnt/SDCARD/spruce/flip/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
-
-    /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-    /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-    /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-
+    runtime_mounts_Flip
 fi
 
 # Flag cleanup
@@ -122,10 +63,6 @@ flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
-
-log_message " " -v
-log_message "---------Starting up---------"
-log_message " " -v
 
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
@@ -252,29 +189,15 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     echo 1000 > /sys/class/led_anim/effect_duration_lr
     echo 1 >  /sys/class/led_anim/effect_lr
 
-    [ -d "/mnt/SDCARD/trimui/res/lang" ] && mount --bind /mnt/SDCARD/trimui/res/lang /usr/trimui/res/lang
-
     syslogd -S
 
     /etc/bluetooth/bluetoothd start
 
-    usbmode=$(/usr/trimui/bin/systemval usbmode)
-
-    if [ "$usbmode" == "dock" ] ; then
-        /usr/trimui/bin/usb_dock.sh
-    elif [ "$usbmode" == "host" ] ; then
-        /usr/trimui/bin/usb_host.sh
-    else
-        /usr/trimui/bin/usb_device.sh
-    fi
-
-    wifion=$(/usr/trimui/bin/systemval wifi)
-    if [ "$wifion" != "1" ] ; then
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         ifconfig wlan0 down
         killall -15 wpa_supplicant
         killall -9 udhcpc    
     fi
-
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
@@ -300,12 +223,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     LD_LIBRARY_PATH=/usr/miyoo/lib /usr/miyoo/bin/miyoo_inputd &
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib
-
-    (
-        mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
-        mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
-        mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-    )
 
     # Initialize rumble motor
     echo 20 > /sys/class/gpio/export
