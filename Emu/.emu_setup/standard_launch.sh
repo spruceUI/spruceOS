@@ -18,21 +18,29 @@ export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 
-if [ "$EMU_NAME" = "DC" ] || [ "$EMU_NAME" = "N64" ] || [ "$EMU_NAME" = "PS" ]; then
-	if [ "$PLATFORM" = "A30" ]; then
-		export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
-	else
-		export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
-	fi
-elif [ "$EMU_NAME" = "NDS" ]; then
-	if [ "$PLATFORM" = "Flip" ]; then
-		export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"
-	elif [ "$PLATFORM" = "Brick" ]; then	
-		export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")"
-	fi
-else
-	export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
-fi
+case "$EMU_NAME" in
+    DC|NAOMI|N64|PS)
+        if [ "$PLATFORM" = "A30" ]; then
+            export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
+        else
+            export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
+        fi
+        ;;
+    NDS)
+        case "$PLATFORM" in
+            Flip)
+                export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"
+                ;;
+            Brick)
+                export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")"
+                ;;
+        esac
+        ;;
+    *)
+        export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
+        ;;
+esac
+
 
 ##### GENERAL FUNCTIONS #####
 
@@ -703,17 +711,17 @@ run_yabasanshiro() {
 }
 
 run_flycast_standalone() {
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64"
-	export HOME="$EMU_DIR"
+	export HOME="/mnt/SDCARD/Emu/DC"
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64"
 
-	mkdir -p "$EMU_DIR/.local/share/flycast"
+	mkdir -p "$HOME/.local/share/flycast"
 	mkdir -p "/mnt/SDCARD/BIOS/dc"
-	mount --bind /mnt/SDCARD/BIOS/dc $EMU_DIR/.local/share/flycast
+	mount --bind /mnt/SDCARD/BIOS/dc $HOME/.local/share/flycast
 
-	cd "$EMU_DIR"
+	cd "$HOME"
 	./flycast "$ROM_FILE"
 
-	umount $EMU_DIR/.local/share/flycast
+	umount $HOME/.local/share/flycast
 }
 
  ########################
@@ -734,7 +742,7 @@ ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 case $EMU_NAME in
-	"DC")
+	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ]; then
 			run_flycast_standalone
 		elif [ ! "$PLATFORM" = "A30" ]; then

@@ -45,7 +45,7 @@
         "Flycast-libretro",
         "Flycast-standalone"
       ],
-      "selected": "flycast-libretro",
+      "selected": "Flycast-libretro",
       "overrides": {}
     }
   },
