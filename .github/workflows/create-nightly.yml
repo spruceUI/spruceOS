@@ -1,8 +1,8 @@
 name: Create Nightly
 
 on:
-  schedule:
-    - cron: '10 10 * * *'
+#  schedule:
+#    - cron: '10 10 * * *'
   workflow_dispatch:
 #  push:
 #    branches: [ Development ]
@@ -171,4 +171,5 @@ jobs:
             if [ $COUNT -gt 3 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
+
           done
