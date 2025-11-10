@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Remove broken old setting
+sed -i '/^boot_to=MainUI$/d' /mnt/sdcard/spruce/settings/spruce.cfg
+
 # Copy of platform detection from helperFunctions.sh
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
