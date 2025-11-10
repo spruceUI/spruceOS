@@ -27,34 +27,29 @@ if flag_check "reboot-update"; then
     /mnt/SDCARD/Updater/updater.sh
 fi
 
+runtime_mounts_$PLATFORM
+
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    BIN_DIR="${SDCARD_PATH}/spruce/bin"
+    nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &  # Stop NTPD
 
-    export SYSTEM_PATH="${SDCARD_PATH}/miyoo"
-    export LD_LIBRARY_PATH="$SYSTEM_PATH/lib:${LD_LIBRARY_PATH}"
+    # Check if WiFi is enabled
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+        touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
+        log_message "WiFi turned off"
+    else
+        touch /tmp/wifion
+        log_message "WiFi turned on"
+    fi
 
-    runtime_mounts_A30
-    
-    # Stop NTPD
-    nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &
-
-elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]; then
-    export SYSTEM_PATH="${SDCARD_PATH}/trimui"
-
-    runtime_mounts_Brick
+    killall -9 main ### SUPER important in preventing .tmp_update suicide
 
 elif [ "$PLATFORM" = "Flip" ]; then
-    export SYSTEM_PATH="${SDCARD_PATH}/miyoo355"
-
 	log_message "Checking for payload updates"
 	"$SCRIPTS_DIR"/update_miyoo_payload.sh
-
-    runtime_mounts_Flip
 fi
 
 export PATH="$SYSTEM_PATH/app:${PATH}"
-
 
 # Flag cleanup
 flag_remove "themeChanged"
@@ -68,21 +63,7 @@ nice -n 15 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 # Use appropriate RA config per platform
 [ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
 
-if [ "$PLATFORM" = "A30" ]; then
-    # Check if WiFi is enabled
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
-        log_message "WiFi turned off"
-    else
-        touch /tmp/wifion
-        log_message "WiFi turned on"
-    fi
-
-    killall -9 main ### SUPER important in preventing .tmp_update suicide
-fi
-
 # Bring up network and services
-
 if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
@@ -126,7 +107,7 @@ if [ "$PLATFORM" = "A30" ]; then
     mv /dev/ttyS0 /dev/ttyS2
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-    cd ${BIN_DIR}
+    cd "${SDCARD_PATH}/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
 
     # read joystick raw data from serial input and apply calibration,
@@ -141,8 +122,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # start watchdog for konami code
     ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
-
-    check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
     # Load idle monitors before game resume or MainUI
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
@@ -201,7 +180,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     # TODO: verify that we can call this via absolute path
-    cd ${BIN_DIR}
+    cd "${SDCARD_PATH}/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
 
 elif [ "$PLATFORM" = "Flip" ]; then
@@ -282,6 +261,8 @@ if flag_check "first_boot_${PLATFORM}"; then
 else
     log_message "First boot procedures skipped"
 fi
+
+check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
 ${SCRIPTS_DIR}/set_up_swap.sh
 ${SCRIPTS_DIR}/low_power_warning.sh &
