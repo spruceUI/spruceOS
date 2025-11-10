@@ -459,7 +459,7 @@ class Display:
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None):
-        text = Display.split_message(text, purpose)[0]
+        text = Display.split_message(text, purpose, clip_to_device_width=False)[0]
         if(len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
@@ -932,7 +932,7 @@ class Display:
             return False
 
     @classmethod
-    def split_message(cls, message: str, font_purpose, clip_to_device_width=False) -> list[str]:
+    def split_message(cls, message: str, font_purpose, clip_to_device_width) -> list[str]:
         if not message:
             return [message]
 

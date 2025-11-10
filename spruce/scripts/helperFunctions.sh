@@ -1175,3 +1175,77 @@ take_screenshot() {
 
     log_message "Screenshot saved to: $screenshot_path" -v
 }
+
+
+
+start_pyui_message_writer() {
+    # Check if PyUI is already running with the realtime port argument
+    if ps -ef | grep "[m]sgDisplayRealtimePort" >/dev/null; then
+        log_message "Real Time message listener already running."
+        return
+    fi
+    
+    log_message "Starting Real Time message listener on port 50980"
+    /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
+    sleep 3
+}
+
+kill_pyui_message_writer() {
+
+    # Check if PyUI is already running with the realtime port argument
+    pids=$(ps -ef | grep "[m]sgDisplayRealtimePort" | awk '{print $1}')
+
+    if [ -n "$pids" ]; then
+        log_message "Real Time message listener already running. Killing it..."
+        # Kill all matching PIDs
+        for pid in $pids; do
+            kill "$pid" 2>/dev/null
+        done
+        # Optionally wait for processes to exit
+        sleep 1
+    fi    
+
+}
+
+stop_pyui_message_writer() {
+    display_message "EXIT_APP"
+    sleep 0.5
+    kill_pyui_message_writer
+    freemma
+}
+
+get_python_path() {
+    if [ "$PLATFORM" = "A30" ]; then
+        echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10"
+    elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
+        echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
+    fi
+}
+
+display_message() {
+    local message="$1"
+    local python_path
+    python_path="$(get_python_path)"
+
+    if [ -z "$python_path" ]; then
+        echo "Error: unknown platform '$PLATFORM'" >&2
+        return 1
+    fi
+
+    MESSAGE="$message" "$python_path" - <<'EOF'
+import os, socket, sys
+msg = os.environ.get("MESSAGE", "")
+try:
+    with socket.create_connection(("127.0.0.1", 50980), timeout=1) as s:
+        s.sendall((msg + "\n").encode("utf-8"))
+except Exception as e:
+    print(f"Error sending message: {e}", file=sys.stderr)
+EOF
+}
+
+
+
+log_and_display_message(){
+    log_message "$1"
+    display_message "$1"
+}

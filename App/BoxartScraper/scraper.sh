@@ -3,7 +3,21 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
-IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
+
+$BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
+  log_message "*** homebutton_watchdog.sh: $line" -v
+    home_key_down () {
+        touch /tmp/kill_scraper 
+    }
+    case $line in
+    # Home key down
+    *"key $B_MENU 1"*)
+            home_key_down
+        ;;
+    esac
+done
+
+
 
 # ==========================================================
 # Box Art Scraper Script
@@ -140,37 +154,38 @@ find_image_name() {
     fi
 }
 
+is_wifi_connected() {
+    if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
+        log_message "Cloudflare ping successful; device is online."
+        return 0
+    else
+        log_and_display_message "Cloudflare ping failed; device is offline. Aborting."
+        return 1
+    fi
+}
+
 # Directories and files
-messages_file="/var/log/messages"
 
 roms_dir="/mnt/SDCARD/Roms"
 
-display --icon "/mnt/SDCARD/spruce/imgs/image.png" -t "Scraping box art..." --add-image "$IMAGE_EXIT" 1.05 195 middle
+start_pyui_message_writer
+log_and_display_message "Scraping box art. Please be patient, especially with large libraries! Press MENU at any time to stop scraping."
+sleep 2
 
-# Check if WiFi is enabled in system config
-wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
-if [ "$wifi_enabled" -eq 0 ]; then
-    log_message "BoxartScraper: WiFi is disabled in system settings"
-    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "WiFi is disabled in system settings" -o
-    exit
-fi
-
-# Ping google DNS to check for internet connection
-if ! ping -c 2 8.8.8.8 > /dev/null 2>&1; then
-    log_message "BoxartScraper: No internet connection detected"
-    display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "No internet connection detected" -o
-    exit
-fi
+is_wifi_connected || exit 1
 
 # Check if the thumbnails service is accessible, if not try to fall back to GitHub libretro-thumbnails
 if ! ping -c 2 thumbnails.libretro.com > /dev/null 2>&1; then
-    log_message "BoxartScraper: Libretro thumbnail service unavailable, attempting fallback"
+    log_and_display_message "Libretro thumbnail service unavailable; trying fallback."
+    sleep 3
     if ! ping -c 2 github.com > /dev/null 2>&1; then
-        log_message "BoxartScraper: GitHub unreachable"
-        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Libretro thumbnail service is currently unavailable. Please try again later." -o
-        exit
+        log_and_display_message "Libretro thumbnail GitHub repo is also currently unavailable. Please try again later."
+        sleep 3
+        exit 2
     fi
 fi
+
+start_menu_button_watchdog
 
 # Process each system directory
 for sys_dir in "$roms_dir"/*/; do
@@ -178,13 +193,20 @@ for sys_dir in "$roms_dir"/*/; do
         continue
     fi
 
+    if [ -f /tmp/kill_scraper ]; then
+        kill "$WATCHDOG_PID"
+        rm -f /tmp/kill_scraper
+        log_and_display_message "Stopping scraping."
+        sleep 2
+        exit 5
+    fi
+
     sys_name="$(basename "$sys_dir")"
-    log_message "BoxartScraper: Scraping box art for $sys_name"
 
     # Get remote alias name
     get_ra_alias "$sys_name"
     if [ -z "$ra_name" ]; then
-        log_message "BoxartScraper: Remote system name not found, skipping $sys_name"
+        log_message "BoxartScraper: Remote system name not found - skipping $sys_name."
         continue
     fi
 
@@ -192,28 +214,20 @@ for sys_dir in "$roms_dir"/*/; do
     games="$(find "$sys_dir" -maxdepth 2 -type f -regex ".*\.\($(echo "$extensions" | sed 's/ /\\\|/g')\)$")"
     amount_games="$(echo "$games" | wc -l)"
     sys_label="$(jq ".label" "/mnt/SDCARD/Emu/$sys_name/config.json")"
-    icon_path="$(jq ".iconsel" "/mnt/SDCARD/Emu/$sys_name/config.json")"
 
-    display --icon "\"$icon_path\"" -t "System: $sys_label 
-    Scraping boxart for $amount_games games..." --add-image "$IMAGE_EXIT" 1.05 195 middle
     if [ -z "$extensions" ]; then
-        log_message "BoxartScraper: No supported extensions found for directory $sys_name, skipping"
+        log_message "BoxartScraper: No supported extensions found for directory $sys_name - skipping."
         continue
     fi
 
-    skip_count=0
-    scraped_count=0
-    non_found_count=0
+    first_game=0
 
-    printf "$games" | while IFS= read -r file; do
-        # Check if the user pressed B to exit
-        if tail -n1 "$messages_file" | grep -q "key $B_B"; then
-            log_message "BoxartScraper: User pressed B, exiting."
-            display --icon "/mnt/SDCARD/Themes/SPRUCE/icons/app/scraper.png" -t "Now exiting scraper. You can pick up where you left off at any time" -d 3
-            echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            exit
+    for file in $games ; do
+
+        if [ $first_game -eq 0 ]; then
+            log_and_display_message "BoxartScraper: Scraping box art for $sys_name"
+            first_game=1
         fi
-
         rom_file_name="$(basename "$file")"
 
         # Skip directories, dot files, and non-supported files
@@ -222,45 +236,56 @@ for sys_dir in "$roms_dir"/*/; do
             continue
         fi
 
-        rom_name="${rom_file_name%.*}"
-        image_path="${sys_dir}Imgs/$rom_name.png"
-
         # Create Imgs directory if it doesn't exist
         mkdir -p "${sys_dir}Imgs"
 
-        if [ -f "$image_path" ]; then
-            skip_count=$((skip_count + 1))
+        rom_name="${rom_file_name%.*}"
+        image_path="${sys_dir}Imgs/$rom_name.png"
+
+        if find "${sys_dir}Imgs" -maxdepth 1 -type f -name "$rom_name.*" | grep -q .; then
             continue
         fi
-
+        
         remote_image_name=$(find_image_name "$sys_name" "$rom_file_name")
 
         if [ -z "$remote_image_name" ]; then
-            non_found_count=$((non_found_count + 1))
             continue
         fi
+
+        log_and_display_message "System: $sys_label - Scraping boxart for $rom_name."
 
         boxart_url=$(echo "http://thumbnails.libretro.com/$ra_name/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g')
         fallback_url=$(echo "https://raw.githubusercontent.com/libretro-thumbnails/$(echo "$ra_name" | sed 's/ /_/g')/master/Named_Boxarts/$remote_image_name" | sed 's/ /%20/g') 
         log_message "BoxartScraper: Downloading $boxart_url" -v
-        if ! curl -f -g -k -s -o "$image_path" "$boxart_url"; then
+        if ! wget -q -O "$image_path" "$boxart_url"; then
             log_message "BoxartScraper: failed to scrape $boxart_url, falling back to libretro thumbnails GitHub repo."
             rm -f "$image_path"
-            if ! curl -f -g -k -s -o "$image_path" "$fallback_url"; then
+            if ! wget -q -O "$image_path" "$fallback_url"; then
                 log_message "BoxartScraper: failed to scrape $fallback_url."
                 rm -f "$image_path"
             fi
         fi
 
-        if [ -f "$image_path" ]; then
-            scraped_count=$((scraped_count + 1))
-        else
-            non_found_count=$((non_found_count + 1))
+        if [ -f /tmp/kill_scraper ]; then
+            kill "$WATCHDOG_PID"
+            rm -f /tmp/kill_scraper
+            log_and_display_message "Stopping scraping."
+            sleep 2
+            exit 5
         fi
+
     done
-    log_message "BoxartScraper: $sys_name: Scraped: $scraped_count, Skipped: $skip_count, Not Found: $non_found_count"
 done
 
+kill "$WATCHDOG_PID"
+rm -f /tmp/kill_scraper
 
+log_and_display_message "Scraping complete!"
+sleep 2
+
+stop_pyui_message_writer
 touch /mnt/SDCARD/App/PyUI/pyui_resize_boxart_trigger
+
+
+
 auto_regen_tmp_update
