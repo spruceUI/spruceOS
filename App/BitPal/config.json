@@ -1,7 +1,0 @@
-{
-  "#label": "BitPal",
-  "icon": "recents.png",
-  "launch": "launch.sh",
-  "description": "Play with your bits!",
-  "hide": true
-}
