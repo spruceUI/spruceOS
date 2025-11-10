@@ -15,9 +15,8 @@ rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
 
-SDCARD_PATH="/mnt/SDCARD"
-export HOME="${SDCARD_PATH}"
-SCRIPTS_DIR="${SDCARD_PATH}/spruce/scripts"
+export HOME="/mnt/SDCARD"
+SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
@@ -107,7 +106,7 @@ if [ "$PLATFORM" = "A30" ]; then
     mv /dev/ttyS0 /dev/ttyS2
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-    cd "${SDCARD_PATH}/spruce/bin"
+    cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
 
     # read joystick raw data from serial input and apply calibration,
@@ -154,7 +153,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     # TODO: verify that we can call this via absolute path
-    cd "${SDCARD_PATH}/spruce/bin"
+    cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
 
 elif [ "$PLATFORM" = "Flip" ]; then
@@ -199,11 +198,20 @@ elif [ "$PLATFORM" = "Flip" ]; then
     killall runmiyoo.sh
 fi
 
+# check whether to run first boot procedure
+if flag_check "first_boot_${PLATFORM}"; then
+    "${SCRIPTS_DIR}/firstboot.sh"
+else
+    log_message "First boot procedures skipped"
+fi
+
 ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 ${SCRIPTS_DIR}/lid_watchdog.sh &
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &
+${SCRIPTS_DIR}/low_power_warning.sh &
+${SCRIPTS_DIR}/set_up_swap.sh
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
@@ -213,17 +221,10 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-# check whether to run first boot procedure
-if flag_check "first_boot_${PLATFORM}"; then
-    "${SCRIPTS_DIR}/firstboot.sh"
-else
-    log_message "First boot procedures skipped"
-fi
+
 
 check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
 
-${SCRIPTS_DIR}/set_up_swap.sh
-${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
