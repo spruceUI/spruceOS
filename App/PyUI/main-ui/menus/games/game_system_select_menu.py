@@ -225,7 +225,8 @@ class GameSystemSelectMenu:
                 if(return_value is not None):
                     if(ControllerInput.B == return_value):
                         PyUiState.set_in_game_selection_screen(None)
-                    return return_value
+                    elif(Theme.skip_main_menu() and (ControllerInput.L1 == return_value or ControllerInput.R1 == return_value)):
+                        return return_value
 
         else:
             self.selected = Selection(None,None,0)
