@@ -117,17 +117,6 @@ if [ "$PLATFORM" = "A30" ]; then
     # and send kill signal USR2 to switch to KEYBOARD_MODE
     ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
-    # run game switcher watchdog before auto load game is loaded
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
-
-    # start watchdog for konami code
-    ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
-
-    # Load idle monitors before game resume or MainUI
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-
-    # Run scripts for initial setup
-    ${SCRIPTS_DIR}/credits_watchdog.sh &
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
@@ -155,8 +144,6 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
         killall -9 udhcpc    
     fi
 
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
-
     # start all the trimui things and sleep long enough for the input devices to get
     # registered correctly before creating the virtual joypad on /dev/input/event4
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
@@ -164,7 +151,6 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
     sleep 0.3 ### wait long enough to create the virtual joypad
-
 
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     # TODO: verify that we can call this via absolute path
@@ -210,16 +196,14 @@ elif [ "$PLATFORM" = "Flip" ]; then
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
     ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
-    ${SCRIPTS_DIR}/simple_mode_watchdog.sh &
-    ${SCRIPTS_DIR}/lid_watchdog.sh &
-
-    # Load idle monitors before game resume or MainUI
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/credits_watchdog.sh &
-
     killall runmiyoo.sh
 fi
+
+${SCRIPTS_DIR}/homebutton_watchdog.sh &
+${SCRIPTS_DIR}/simple_mode_watchdog.sh &
+${SCRIPTS_DIR}/lid_watchdog.sh &
+${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+${SCRIPTS_DIR}/credits_watchdog.sh &
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
