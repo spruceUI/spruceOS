@@ -22,51 +22,49 @@ display_message() {
 
 restore_emu_settings() {
     local backup_dir="/mnt/SDCARD/Saves/spruce/emu_backups"
+    local emu_dir="/mnt/SDCARD/Emu"
+    local menu_fields="Emulator Governor Emulator_A30 Emulator_Flip Emulator_Brick Emulator_64 Stretch controlMode"
+
     if [ ! -d "$backup_dir" ]; then
         log_message "No emu_backups folder to restore settings from."
         return 1
     fi
+
     for configjson in "$backup_dir"/*.json; do
         emu_name="$(basename "$configjson" .json)"
-        new_json="/mnt/SDCARD/Emu/$emu_name/config.json"
+        new_json="$emu_dir/$emu_name/config.json"
 
         [ -f "$new_json" ] || continue  # Skip if emulator no longer exists
 
-        if jq -e '.menuOptions.Emulator' "$new_json" >/dev/null; then
-            selected_core="$(jq -r '.menuOptions.Emulator.selected' "$configjson")"
-            core_overrides="$(jq '.menuOptions.Emulator.overrides' "$configjson")"
-            [ "$core_overrides" = "null" ] && core_overrides='{}'
+        jq_expr="."
+        jq_args=()
 
-            log_message "$emu_name: restoring Emulator → $selected_core"
-        fi
+        for field in $menu_fields; do
+            if jq -e ".menuOptions.$field" "$new_json" >/dev/null 2>&1; then
+                selected_val="$(jq -r ".menuOptions.$field.selected" "$configjson")"
+                overrides_val="$(jq ".menuOptions.$field.overrides" "$configjson")"
+                [ "$overrides_val" = "null" ] && overrides_val='{}'
 
-        if jq -e '.menuOptions.Governor' "$new_json" >/dev/null; then
-            selected_gov="$(jq -r '.menuOptions.Governor.selected' "$configjson")"
-            gov_overrides="$(jq '.menuOptions.Governor.overrides' "$configjson")"
-            [ "$gov_overrides" = "null" ] && gov_overrides='{}'
+                log_message "$emu_name: restoring $field → $selected_val"
 
-            log_message "$emu_name: restoring Governor → $selected_gov"
-        fi
+                jq_expr="$jq_expr
+                    | if .menuOptions.${field} then
+                        .menuOptions.${field}.selected = \$${field}_selected |
+                        .menuOptions.${field}.overrides = \$${field}_overrides
+                      else . end"
+
+                jq_args+=( --arg "${field}_selected" "$selected_val" )
+                jq_args+=( --argjson "${field}_overrides" "$(printf '%s' "$overrides_val")" )
+            fi
+        done
+
+        [ "${#jq_args[@]}" -eq 0 ] && continue
 
         tmpfile="$(mktemp)"
-        jq \
-            --arg core_selected "$selected_core" \
-            --argjson core_overrides "$core_overrides" \
-            --arg gov_selected "$selected_gov" \
-            --argjson gov_overrides "$gov_overrides" \
-            '
-            if .menuOptions.Emulator then
-                .menuOptions.Emulator.selected = $core_selected |
-                .menuOptions.Emulator.overrides = $core_overrides
-            else . end
-            |
-            if .menuOptions.Governor then
-                .menuOptions.Governor.selected = $gov_selected |
-                .menuOptions.Governor.overrides = $gov_overrides
-            else . end
-            ' "$new_json" > "$tmpfile" && mv -f "$tmpfile" "$new_json"
+        jq "${jq_args[@]}" "$jq_expr" "$new_json" > "$tmpfile" && mv -f "$tmpfile" "$new_json"
     done
 }
+
 
 log_message "----------Starting Restore script----------"
 # set_performance
