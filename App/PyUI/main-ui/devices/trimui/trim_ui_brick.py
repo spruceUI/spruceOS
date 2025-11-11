@@ -6,6 +6,7 @@ from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
 import sdl2
 from utils import throttle
@@ -16,6 +17,8 @@ from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(TrimUIDevice):
     
+    TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
+
     def __init__(self, device_name):
         self.device_name = device_name
         self.path = self
@@ -41,6 +44,8 @@ class TrimUIBrick(TrimUIDevice):
         source = script_dir / 'brick-system.json'
         ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
         self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
+        trim_stock_json_file = script_dir / 'stock/brick.json'
+        ConfigCopier.ensure_config(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
 
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
@@ -155,4 +160,5 @@ class TrimUIBrick(TrimUIDevice):
     def get_device_name(self):
         return self.device_name
         
-    
+    def set_theme(self, theme_path: str):
+        MiyooTrimCommon.set_theme(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)

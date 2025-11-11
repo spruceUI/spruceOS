@@ -347,6 +347,9 @@ class DeviceCommon(AbstractDevice):
     def apply_timezone(self, timezone):
         pass
 
+    def set_theme(self, theme_path):
+        pass
+    
     def prompt_timezone_update(self):
         #Unsupported by default
         pass

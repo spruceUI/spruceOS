@@ -1,4 +1,5 @@
 import inspect
+import json
 from pathlib import Path
 import subprocess
 import threading
@@ -28,6 +29,7 @@ from utils.py_ui_config import PyUiConfig
 class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
+    MIYOO_STOCK_CONFIG_LOCATION = "/userdata/system.json"
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -58,7 +60,9 @@ class MiyooFlip(MiyooDevice):
         ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
         self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-   
+        miyoo_stock_json_file = script_dir.parent / 'stock/flip.json'
+        ConfigCopier.ensure_config(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
+
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
         threading.Thread(target=self.startup_init, daemon=True).start()
@@ -454,3 +458,5 @@ class MiyooFlip(MiyooDevice):
         #If we set the time be sure to
         #export TZ='{timezone}'
 
+    def set_theme(self, theme_path: str):
+        MiyooTrimCommon.set_theme(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, theme_path)
