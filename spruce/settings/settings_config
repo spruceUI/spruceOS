@@ -21,7 +21,6 @@ $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SETTINGS=/mnt/SDCARD/spruce/settings$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
-$SHOW_HIDE=/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 $BLFILTER=/mnt/SDCARD/spruce/scripts/applySetting/blfilter.sh$
 
@@ -62,7 +61,7 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Extended brightness controls" "|" "on|off" "$HELP$ check extended_brightness" "$HELP$ update extended_brightness _VALUE_" ""
 @"Start + L/R change contrast at minimum brightness"
 
-<Not_simple>
+<A30>
 "" "Blue Light Filter" "Off|Low|Moderate|Strong|Very strong" "Off|Low|Moderate|Strong|Very strong" "$HELP$ get blf_intensity 'Off'" "$HELP$ update blf_intensity '_VALUE_'" "$BLFILTER$ '_VALUE_'"
 
 <Not_simple>
@@ -218,65 +217,3 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
 <Not_simple>
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
-
-
-[Visible Apps]
-
-<Not_simple>
-"" "Boot Logo App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BootLogo/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BootLogo/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BootLogo/config.json" ""
-@"Change the boot logo"
-
-<Not_simple>
-"" "Boxart Scraper" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/BoxartScraper/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/BoxartScraper/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/BoxartScraper/config.json" ""
-@"Download boxart for your games"
-
-<Not_simple>
-"" "File Management" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/FileManagement/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/FileManagement/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/FileManagement/config.json" ""
-@"Manage files on your device"
-
-<Not_simple>
-"" "Game Nursery" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/GameNursery/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/GameNursery/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/GameNursery/config.json" ""
-@"Download free games directly to your device"
-
-<Not_simple>
-"" "Miyoo GameList Generator" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/MiyooGamelist/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/MiyooGamelist/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/MiyooGamelist/config.json" ""
-@"Clean up displayed game names"
-
-<Flip>
-"" "PortMaster" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PortMaster/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PortMaster/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PortMaster/config.json" ""
-@"The ultimate Linux ports manager"
-
-<Brick> <SmartPro> <Flip>
-"" "E-Book Reader" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/PixelReader/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/PixelReader/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/PixelReader/config.json" ""
-@"E-Book reader for 64-bit devices"
-
-<Not_simple>
-"" "Random Game Launcher" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RandomGame/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RandomGame/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RandomGame/config.json" ""
-@"Launch a random game"
-
-<Not_simple>
-"" "Real Time Clock" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/RealTimeClock/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/RealTimeClock/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/RealTimeClock/config.json" ""
-@"Set the current time and date"
-
-<Not_simple>
-"" "Sapling Guide" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceHelp/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceHelp/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceHelp/config.json" ""
-
-<Not_simple>
-"" "Spruce Update App" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/-OTA/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/-OTA/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/-OTA/config.json" ""
-@"Check for updates over Wi-Fi"
-
-<Not_simple>
-"" "Spruce Backup" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceBackup/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceBackup/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceBackup/config.json" ""
-@"Create a backup of your spruce install"
-
-<Not_simple>
-"" "Spruce Restore" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/spruceRestore/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/spruceRestore/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/spruceRestore/config.json" ""
-@"Restore spruce from a backup file"
-
-<Not_simple>
-"" "Theme Garden" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/ThemeGarden/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/ThemeGarden/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/ThemeGarden/config.json" ""
-@"Download and install themes from our theme repo"
-
-<A30> <Brick> <Flip>
-"" "USB Storage Mode" "|" "on|off" "$SHOW_HIDE$ check /mnt/SDCARD/App/USBStorageMode/config.json" "$SHOW_HIDE$ show /mnt/SDCARD/App/USBStorageMode/config.json|$SHOW_HIDE$ hide /mnt/SDCARD/App/USBStorageMode/config.json" ""
-@"Transfer files safely over USB"
