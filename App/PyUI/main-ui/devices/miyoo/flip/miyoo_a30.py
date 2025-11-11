@@ -28,6 +28,7 @@ from utils.py_ui_config import PyUiConfig
 class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
+    MIYOO_STOCK_CONFIG_LOCATION = "/config/system.json"
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -61,6 +62,9 @@ class MiyooA30(MiyooDevice):
         self._set_brightness_to_config()
         self.ensure_wpa_supplicant_conf()
         self.init_gpio()
+        miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
+        ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
+
         threading.Thread(target=self.monitor_wifi, daemon=True).start()
         #self.hardware_poller = MiyooFlipPoller(self)
         #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
@@ -344,3 +348,7 @@ class MiyooA30(MiyooDevice):
         key_mappings[KeyEvent(1, 1, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]  
 
         return KeyWatcherController(event_path="/dev/input/event3", key_mappings=key_mappings)
+
+    def set_theme(self, theme_path: str):
+        MiyooTrimCommon.set_theme(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, theme_path)
+

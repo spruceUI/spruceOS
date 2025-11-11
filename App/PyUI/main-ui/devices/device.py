@@ -441,4 +441,8 @@ class Device:
     def keep_running_on_error():
         return Device._impl.keep_running_on_error()
 
+    @staticmethod
+    def set_theme(theme_path):
+        return Device._impl.set_theme(theme_path)
+
     

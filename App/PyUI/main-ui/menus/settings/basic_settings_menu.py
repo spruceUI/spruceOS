@@ -100,6 +100,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
             Display.init_fonts()   
             Device.get_system_config().set_theme(theme_folders[selected_index])
+            Device.set_theme(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]))
             self.theme_changed = True
             Display.restore_bg()
 

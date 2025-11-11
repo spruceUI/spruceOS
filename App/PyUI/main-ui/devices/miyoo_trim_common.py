@@ -1,4 +1,5 @@
 
+import json
 import os
 from pathlib import Path
 import re
@@ -209,3 +210,20 @@ class MiyooTrimCommon():
             f.write(y_max + "\n")
             f.write(x_zero + "\n")
             f.write(y_zero + "\n")
+
+    @staticmethod
+    def set_theme(json_path, theme_path: str):
+        json_path = "/userdata/system.json"
+        # Read the existing JSON
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}  # start with empty if file doesn't exist
+
+        # Update the "Theme" entry
+        data["theme"] = theme_path
+
+        # Write back to the file
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)

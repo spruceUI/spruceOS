@@ -358,6 +358,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def set_theme(self, theme_path):
+        pass
+
+    @abstractmethod
     def prompt_timezone_update(self):
         pass
 
