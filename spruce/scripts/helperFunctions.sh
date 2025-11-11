@@ -1193,6 +1193,8 @@ take_screenshot() {
 
 
 
+##########     PYUI MESSAGE WRITER     ##########
+
 start_pyui_message_writer() {
     # Check if PyUI is already running with the realtime port argument
     if ps -ef | grep "[m]sgDisplayRealtimePort" >/dev/null; then

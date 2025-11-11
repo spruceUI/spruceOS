@@ -85,8 +85,7 @@ LAST_LOG=$(date +%s)
 
 while true; do
     CAPACITY=$(cat $BATTERY/capacity)
-    PERCENT="$(setting_get "low_power_warning_percent")"
-
+    PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
     # Add battery logging
     CURRENT_TIME=$(date +%s)
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
@@ -126,7 +125,7 @@ while true; do
             fi
 
             CAPACITY=$(cat $BATTERY/capacity)
-            PERCENT="$(setting_get "low_power_warning_percent")"
+            PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
 
             hard_shutdown $CAPACITY
 

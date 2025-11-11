@@ -1,5 +1,19 @@
 {
     "menuOptions": {
+        "Battery Settings": {
+            "lowPowerWarningPercent": {
+                "display": "Low power warning percent",
+                "options": [
+                    "Off",
+                    "4",
+                    "8",
+                    "12",
+                    "16",
+                    "20"
+                ],
+                "selected": "4"
+            }
+        },
         "Boot Settings": {
             "checkForUpdates": {
                 "display": "Check for spruce updates on startup",
