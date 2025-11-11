@@ -209,11 +209,9 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             )
 
         if(len(CfwSystemConfig.get_categories()) > 0):
-            cfw_name = PyUiConfig.get_cfw_name()
-            cfw_name = cfw_name[:1].upper() + cfw_name[1:] if cfw_name else "CFW"
             option_list.append(
                 GridOrListEntry(
-                            primary_text=cfw_name + " Settings",
+                            primary_text=PyUiConfig.get_cfw_name() + " Settings",
                             value_text=None,
                             image_path=None,
                             image_path_selected=None,

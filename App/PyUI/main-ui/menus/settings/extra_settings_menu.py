@@ -2,6 +2,7 @@
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
+from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
@@ -12,6 +13,7 @@ from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
+from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -64,9 +66,14 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             GameArtDisplaySettingsMenu().show_menu()
 
+    def scrape_box_art(self,input):
+        if(ControllerInput.A == input):
+            BoxArtScraper().scrape_boxart()
+
+
+
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
-            from games.utils.box_art_resizer import BoxArtResizer
             BoxArtResizer.patch_boxart()
             
     def build_options_list(self):
@@ -154,6 +161,19 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_game_art_display_settings
                 )
         )
+
+        #Future
+        if(False):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text="Download BoxArt",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.scrape_box_art
+                    )
+            )    
 
                     
 
