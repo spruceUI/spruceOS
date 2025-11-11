@@ -32,6 +32,15 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Stretch": {
+      "display": "Stretch to Full Screen",
+      "options": [
+        "True",
+        "False"
+      ],
+      "selected": "False",
+      "overrides": {}
     }
   },
   "sortOrder": 4800,

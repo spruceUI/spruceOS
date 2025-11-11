@@ -344,7 +344,8 @@ run_pico8() {
 	export HOME="$EMU_DIR"
 	export PATH=$WGET_PATH"$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
 
-	if setting_get "pico8_stretch"; then
+	STRETCH="$(jq -r '.menuOptions.Stretch.selected' "$EMU_JSON_PATH")"
+	if [ "$STRETCH" = "True" ]; then
 		case "$PLATFORM" in
 			"A30") SCALING="-draw_rect 0,0,$DISPLAY_HEIGHT,$DISPLAY_WIDTH" ;; # handle A30's rotated screen
 			*) SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT" ;;

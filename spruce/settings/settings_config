@@ -135,9 +135,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Pico-8 Control Profile" "||||||" "Doubled|Doubled 2|Racing|Racing 2|One-handed|One-handed 2|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ '_VALUE_'"
 @"A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ"
 
-<Pico>
-"" "Stretch Pico-8 to fullscreen" "|" "on|off" "$HELP$ check pico8_stretch" "$HELP$ update pico8_stretch '_VALUE_'" ""
-
 <Not_simple>
 "" "Reset RetroArch hotkeys" "|" "run|off" "echo -n off" "$RESET_RAHOTKEY$|" "$RESET_RAHOTKEY$ _INDEX_"
 @"Applies Spruce hotkey layout."
