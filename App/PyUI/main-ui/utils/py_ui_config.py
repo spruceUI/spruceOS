@@ -94,6 +94,10 @@ class PyUiConfig:
         return cls._data.get("mainMenuTitle", "PyUI")
 
     @classmethod
+    def get_cfw_name(cls):
+        return cls._data.get("mainMenuTitle", "CFW")
+
+    @classmethod
     def show_clock(cls):
         return cls.get("showClock",True)
 
