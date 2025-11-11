@@ -20,12 +20,4 @@ if flag_check "developer_mode"; then
 
     # Dropbear first time setup and start
     first_time_setup &
-
-    # App visibility
-    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/FileManagement/config.json
-    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show /mnt/SDCARD/App/ShowOutputTest/config.json
-    sed -i 's/"#label"/"label"/' /mnt/SDCARD/App/ThemePacker/config.json
-else
-    /mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh hide /mnt/SDCARD/App/ShowOutputTest/config.json
-    sed -i 's/"label"/"#label"/' /mnt/SDCARD/App/ThemePacker/config.json
 fi
