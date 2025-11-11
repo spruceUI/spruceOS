@@ -13,12 +13,6 @@ esac
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
 
-    # Always hide firmware app in simple mode; don't bother checking platform
-    if flag_check "simple_mode"; then
-        mount -o bind /mnt/SDCARD/spruce/spruce /mnt/SDCARD/App/-FirmwareUpdate-/config.json
-        return 0
-    fi
-
     case "$PLATFORM" in
         "A30" )
             VERSION="$(cat /usr/miyoo/version)"
@@ -192,7 +186,7 @@ update_notification(){
         exit 1
     fi
 
-    if flag_check "update_available" && ! flag_check "simple_mode"; then
+    if flag_check "update_available"; then
         available_version=$(cat "$(flag_path update_available)")
         display --icon "$UPDATE_ICON" -t "Update available!
 Version ${available_version} is ready to install

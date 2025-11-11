@@ -281,10 +281,6 @@ long_press_handler() {
         log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" 
         [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
 
-        if flag_check "simple_mode" && flag_check "in_menu"; then
-            HOLD_HOME="Game Switcher"
-        fi
-
         case $HOLD_HOME in
         "Game Switcher")
             prepare_game_switcher
@@ -380,10 +376,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             # get setting
             TAP_HOME=$(setting_get "tap_home")
             [ -z "$TAP_HOME" ] && TAP_HOME="In-game menu"
-
-            if flag_check "simple_mode" && flag_check "in_menu"; then
-                TAP_HOME="Game Switcher"
-            fi
 
             # handle short press
             case $TAP_HOME in
@@ -482,21 +474,18 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
     *"key"*"0")
         log_message "*** Catch-all key case matched: $line" -v
         if [ -f "$TEMP_PATH/gs.longpress" ]; then
-            # Only remove homeheld flag if NOT in simple_mode and in_menu
-            if ! { flag_check "simple_mode" && flag_check "in_menu"; }; then
-                # Clear all long press related flags
-                rm -f "$TEMP_PATH/gs.longpress"
-                rm -f "$TEMP_PATH/homeheld.$HELD_ID"
-                rm -f "$TEMP_PATH/longpress_activated"
+            # Clear all long press related flags
+            rm -f "$TEMP_PATH/gs.longpress"
+            rm -f "$TEMP_PATH/homeheld.$HELD_ID"
+            rm -f "$TEMP_PATH/longpress_activated"
 
-                # Resume paused processes
-                killall -q -CONT PPSSPPSDL pico8_dyn MainUI
-                if [ "$PLATFORM" = "A30" ]; then
-                    send_virtual_key_R3
-                fi
-
-                log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
+            # Resume paused processes
+            killall -q -CONT PPSSPPSDL pico8_dyn MainUI
+            if [ "$PLATFORM" = "A30" ]; then
+                send_virtual_key_R3
             fi
+
+            log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
         fi
         ;;
     esac

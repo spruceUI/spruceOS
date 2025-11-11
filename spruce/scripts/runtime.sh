@@ -80,11 +80,7 @@ else
 fi
 
 check_and_handle_firmware_app &
-
-# don't hide or unhide apps in simple_mode
-if ! flag_check "simple_mode"; then
-    check_and_hide_update_app &
-fi
+check_and_hide_update_app &
 
 if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
@@ -204,7 +200,6 @@ if flag_check "first_boot_${PLATFORM}"; then
 fi
 
 ${SCRIPTS_DIR}/homebutton_watchdog.sh &
-${SCRIPTS_DIR}/simple_mode_watchdog.sh &
 ${SCRIPTS_DIR}/lid_watchdog.sh &
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 ${SCRIPTS_DIR}/credits_watchdog.sh &

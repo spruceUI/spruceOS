@@ -118,8 +118,6 @@ while [ 1 ]; do
 
         set_performance # lead with this to speed up launching
 
-        kill -9 $(pgrep -f simple_mode_watchdog.sh) 2>/dev/null # Kill simple mode watchdog
-
         udpbcast -f /tmp/host_msg 2>/dev/null &
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
@@ -135,8 +133,6 @@ while [ 1 ]; do
         # reset CPU settings to defaults in case an emulator changes anything
         scaling_min_freq=1008000 ### default value, may be overridden in specific script
         set_smart
-
-        /mnt/SDCARD/spruce/scripts/simple_mode_watchdog.sh & # Long live simple mode watchdog
     fi
 
     # set gs.lock flag if last loaded program is real game and gs.fix flag is set

@@ -980,7 +980,6 @@ set_overclock() {
 }
 
 CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
-SIMPLE_CFG_FILE="/mnt/SDCARD/spruce/settings/simple_mode.cfg"
 
 # For simple settings that use 0/1 putting this in an if statement is the easiest usage
 # For complex values, you can use setting_get and then use the value in your script by capturing it
@@ -990,15 +989,10 @@ SIMPLE_CFG_FILE="/mnt/SDCARD/spruce/settings/simple_mode.cfg"
 #        do complex tasks
 #    fi
 #
-# If simple_mode.lock exists, this function will look to simple_mode.cfg to see if the setting is defined, before looking for that setting in the standard spruce.cfg
 setting_get() {
     [ $# -eq 1 ] || return 1
 
-    if flag_check "simple_mode" && grep -q "$1" "$SIMPLE_CFG_FILE"; then
-        CFG="$SIMPLE_CFG_FILE"
-    else
-        CFG="$CFG_FILE"
-    fi
+    CFG="$CFG_FILE"
 
     value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
     if [ -z "$value" ]; then

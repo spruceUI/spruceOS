@@ -51,12 +51,6 @@ if [ -f "$PICO_DIR/pico8.dat" ] || [ -f "$BIOS_DIR/pico8.dat" ]; then
     MODES="$MODES -m Pico"
 fi
 
-if flag_check "simple_mode"; then
-    MODES="$MODES -m Simple"
-else
-    MODES="$MODES -m Not_simple"
-fi
-
 # Add a mode based on which device spruce is running on
 MODES="$MODES -m $PLATFORM"
 

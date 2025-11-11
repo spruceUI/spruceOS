@@ -25,16 +25,13 @@ $DELETE_MAC_FILES=/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh$
 $RESET_RA=/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh$
 $RESET_RAHOTKEY=/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh$
 $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
-$SIMPLE_MODE=/mnt/SDCARD/spruce/scripts/applySetting/simple_mode.sh$
 $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 [System]
 
-<Not_simple>
 "" "Shutdown after sleep" "Off|Instant|2m|5m|10m|30m|60m" "Off|Instant|2m|5m|10m|30m|60m" "$HELP$ get sleep_powerdown '5m'" "$HELP$ update sleep_powerdown '_VALUE_'" ""
 @"Excludes ports"
 
-<Not_simple>
 "" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm _VALUE_" ""
 @"While in main menu or native PICO-8"
 
@@ -48,7 +45,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 <A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
-<Not_simple>
 "" "Allow a reinstall" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
 @"Only run this task if needed."
 
@@ -56,52 +52,36 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Delete macOS junk files from SD card" "|" "run|off" "echo -n off" "$DELETE_MAC_FILES$|" "$DELETE_MAC_FILES$ _INDEX_"
 @"Use this to delete any junk files created by macOS."
 
-<Not_simple>
-"" "Activate Simple Mode" "|" "run|off" "echo -n off" "$SIMPLE_MODE$ apply|" ""
-@"Remove some options to make it harder to break stuff. Konami Code in menu to restore full control."
 
 [Emulators]
 
-<Not_simple>
 "" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home '_VALUE_'" ""
 @"Excludes NDS, PICO8 & ports"
 
-<Not_simple>
 "" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home '_VALUE_'" ""
 @"Excludes NDS, PICO8 & ports"
 
-<Not_simple>
 "" "Home opens RA menu directly" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
-<Not_simple>
 "" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_" "$PERFECT_OVERLAYS$ _INDEX_"
 @"Would apply to GB, GBC, and GBA consoles"
 
-<Not_simple>
 "" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
 @"Automatically save and load states on game exit/start"
 
-<Not_simple>
 "" "RetroArch: Use Rewind" "|" "on|off" "$RAREWIND$ check" "$RAREWIND$ assign _VALUE_" "$RAREWIND$ hint _VALUE_"
 @"Replaces Slow Mo mode with Rewind"
 
-<Simple>
-"" "RetroArch: Disable hotkeys" "|" "on|off" "$RAHOTKEY$ check_simple" "$RAHOTKEY$ assign _VALUE_" ""
-
-<Not_simple>
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
 
-<Not_simple>
 "" "Genesis Plus GX: Enable widescreen" "|" "on|off" "$HELP$ check genesis_plus_gx_wide" "$GENESIS_PLUS_GX_WIDE$ _VALUE_" "$GENESIS_PLUS_GX_WIDE$ _INDEX_"
 @"Use Genesis Plus GX Wide core when available"
 
-<Not_simple>
 "" "N64 Control Profile" "||" "Classic|Action|Custom" "$HELP$ get n64_control_profile 'Custom'" "$HELP$ update n64_control_profile '_VALUE_'" "$N64_CONTROLLER$ '_VALUE_'"
 @"C Buttons = R2 + A, B, X, Y"
 
-<Not_simple>
 "" "PPSSPP: Exit when game closed" "|" "on|off" "$HELP$ check ppsspp_pause_exit" "$PPSSPP_PAUSE_EXIT$ _VALUE_" "$PPSSPP_PAUSE_EXIT$ _INDEX_"
 @"PPSSPP will return to the emulator menu when exiting from the pause menu"
 
@@ -109,15 +89,12 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 "" "Pico-8 Control Profile" "||||||" "Doubled|Doubled 2|Racing|Racing 2|One-handed|One-handed 2|Steward" "$HELP$ get pico8_control_profile 'Racing'" "$HELP$ update pico8_control_profile '_VALUE_'" "$P8_CONTROLLER$ '_VALUE_'"
 @"A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ"
 
-<Not_simple>
 "" "Reset RetroArch hotkeys" "|" "run|off" "echo -n off" "$RESET_RAHOTKEY$|" "$RESET_RAHOTKEY$ _INDEX_"
 @"Applies Spruce hotkey layout."
 
-<Not_simple>
 "" "Reset RetroArch to spruce defaults" "|" "run|off" "echo -n off" "$RESET_RA$|" "$RESET_RA$ _INDEX_"
 @"We recommend backing up first."
 
-<Not_simple>
 "" "Reset PPSSPP to spruce defaults" "|" "run|off" "echo -n off" "$RESET_PPSSPP$|" "$RESET_PPSSPP$ _INDEX_"
 @"We recommend backing up first."
 
@@ -129,66 +106,50 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 %"/mnt/SDCARD/spruce/scripts/applySetting/IP.sh"
 %"/mnt/SDCARD/spruce/scripts/applySetting/MAC.sh"
 
-<Not_simple>
 "" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on && $GEOTIME$ && hwclock -w|$HELP$ update enableNetworkTimeSync off" ""
 
-<Not_simple>
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ _VALUE_" "$SAMBA$ _INDEX_"
 @"Network file-sharing"
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh samba"
 
-<Not_simple>
 "" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ _VALUE_" "$SSH$ _INDEX_"
 @"Secure Shell for remote login"
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh dropbear"
 
-<Not_simple>
 "" "Enable Syncthing" "|" "on|off" "$HELP$ check syncthing" "$SYNCTHING$ _VALUE_" "$SYNCTHING$ _INDEX_"
 @"Sync files across devices"
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh syncthing"
 
-<Not_simple>
 "" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ _VALUE_" "$SFTPGO$ _INDEX_"
 @"User: spruce, Password: happygaming"
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh sftpgo"
 
-<Not_simple>
 "" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame _VALUE_" ""
 @"Auto restart when in main menu"
 
-<Not_simple>
 "" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame _VALUE_" ""
 @"Improves battery life"
 
-<Not_simple>
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
 
 
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 
-<Not_simple>
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit _VALUE_" ""
 
 "" "Use boxart instead of screenshots" "|" "on|off" "$HELP$ check alwaysUseBoxartInGS" "$HELP$ update alwaysUseBoxartInGS _VALUE_" ""
 
 "" "Maximum number of games" "||" "5|10|20" "$HELP$ get maxGamesInGS 10" "$HELP$ update maxGamesInGS _VALUE_" ""
 
-<Not_simple>
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
-<Not_simple>
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
-<Not_simple>
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""
-<Not_simple>
 "-n" "Display item index" "on|off" "on|off" "on" "" ""
-<Not_simple>
 "-d" "Enable item deletion" "on|off" "on|off" "on" "" ""
-<Not_simple>
 "-s" "Image scrolling speed" "30|20|10" "Slow|Normal|Fast" "Fast" "" ""
-<Not_simple>
 "-ts" "Title scrolling speed" "2|4|8" "Slow|Normal|Fast" "Normal" "" ""
