@@ -141,12 +141,6 @@ while [ 1 ]; do
         touch /mnt/SDCARD/spruce/flags/gs.lock
     fi
 
-    # Set up by spruce/scripts/credits_watchdog.sh
-    if [ -f /mnt/SDCARD/spruce/flags/credits.lock ]; then
-        /mnt/SDCARD/App/Credits/launch.sh
-        rm /mnt/SDCARD/spruce/flags/credits.lock
-    fi
-
     if flag_check "tmp_update_repair_attempted"; then
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."

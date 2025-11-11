@@ -202,7 +202,6 @@ fi
 ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 ${SCRIPTS_DIR}/lid_watchdog.sh &
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-${SCRIPTS_DIR}/credits_watchdog.sh &
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/set_up_swap.sh
 
