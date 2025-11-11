@@ -242,6 +242,10 @@ runtime_mounts_Flip() {
         mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
     fi
 
+	if [ ! -f /mnt/SDCARD/Saves/userdata-flip/system.json ]; then
+		cp /mnt/SDCARD/spruce/flip/miyoo_system.json /mnt/SDCARD/Saves/userdata-flip/system.json
+	fi
+
     log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
     mkdir -p /run/bluetooth_fix
