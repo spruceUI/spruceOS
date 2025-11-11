@@ -21,6 +21,27 @@
                     "20"
                 ],
                 "selected": "4"
+            },
+            "idlemonInMenu": {
+                "display": "Shutdown while idle in menu",
+                "options": [
+                    "Off",
+                    "2m",
+                    "5m",
+                    "10m"
+                ],
+                "selected": "Off"
+            },
+            "idlemonInGame": {
+                "display": "Shutdown while idle in game",
+                "options": [
+                    "Off",
+                    "2m",
+                    "5m",
+                    "10m",
+                    "30m"
+                ],
+                "selected": "Off"
             }
         },
         "Boot Settings": {

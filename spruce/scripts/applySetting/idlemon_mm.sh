@@ -19,7 +19,7 @@ start_idlemon() {
     in_menu)
       case "$timeout_value" in
         Off)
-		  pgrep -f 'idlemon.*MainUI' | xargs kill -9
+		      pgrep -f 'idlemon.*MainUI' | xargs kill -9
           return 0
           ;;
         2m)
@@ -39,8 +39,9 @@ start_idlemon() {
           ;;
       esac
       # Kill all processes with 'idlemon' and 'MainUI' in the name
-	  pgrep -f 'idlemon.*MainUI' | xargs kill -9
-	  # Start idlemon for in_menu with MainUI
+      pgrep -f 'idlemon.*MainUI' | xargs kill -9
+
+      # Start idlemon for in_menu with MainUI
       idlemon -p "MainUI,switcher" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
@@ -62,7 +63,7 @@ start_idlemon() {
           idle_time=600
           idle_count=40
           ;;
-		30m)
+		    30m)
           idle_time=1800
           idle_count=300
           ;;
@@ -86,22 +87,14 @@ start_idlemon() {
 # Function to reapply both settings
 reapply_settings() {
   # Handle in_menu setting
-  IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
-  if [ "$IDLE_MENU_VALUE" != "Off" ]; then
-    timeout_value="$IDLE_MENU_VALUE"
-  else
-    timeout_value="Off"
-  fi
-  start_idlemon "in_menu" "$timeout_value"
+  IDLE_MENU_VALUE="$(get_config_value '.menuOptions."Battery Settings".idlemonInMenu.selected' "5m")"
+
+  start_idlemon "in_menu" "$IDLE_MENU_VALUE"
 
   # Handle in_game setting
-  IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
-  if [ "$IDLE_GAME_VALUE" != "Off" ]; then
-    timeout_value="$IDLE_GAME_VALUE"
-  else
-    timeout_value="Off"
-  fi
-  start_idlemon "in_game" "$timeout_value"
+  IDLE_GAME_VALUE="$(get_config_value '.menuOptions."Battery Settings".idlemonInGame.selected' "Off")"
+
+  start_idlemon "in_game" "$IDLE_GAME_VALUE"
 }
 
 # Main script logic
@@ -117,23 +110,13 @@ case "$1" in
             if [ -z "$timeout_value" ]; then
                 case "$idle_type" in
                     in_menu)
-                        IDLE_MENU_VALUE=$(setting_get "idlemon_in_menu")
-                        if [ "$IDLE_MENU_VALUE" != "Off" ]; then
-                            timeout_value="$IDLE_MENU_VALUE"
-                        else
-                            timeout_value="Off"
-                        fi
+                        timeout_value="$(get_config_value '.menuOptions."Battery Settings".idlemonInMenu.selected' "5m")"
                         ;;
                     in_game)
-                        IDLE_GAME_VALUE=$(setting_get "idlemon_in_game")
-                        if [ "$IDLE_GAME_VALUE" != "Off" ]; then
-                            timeout_value="$IDLE_GAME_VALUE"
-                        else
-                            timeout_value="Off"
-                        fi
+                        timeout_value="$(get_config_value '.menuOptions."Battery Settings".idlemonInGame.selected' "Off")"
                         ;;
                     *)
-                        echo "Unsupported idle type: $idle_type"
+                        log_message "Unsupported idle type: $idle_type"
                         exit 1
                         ;;
                 esac

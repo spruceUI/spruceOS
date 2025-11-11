@@ -6,9 +6,6 @@
 
 if flag_check "developer_mode"; then
     log_message "Developer mode enabled"
-    # Turn off idle monitors
-    update_setting "idlemon_in_game" "Off"
-    update_setting "idlemon_in_menu" "Off"
 
     sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
 
