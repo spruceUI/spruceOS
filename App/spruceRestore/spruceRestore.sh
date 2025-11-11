@@ -65,6 +65,43 @@ restore_emu_settings() {
     done
 }
 
+restore_spruce_config() {
+    local old_config="/mnt/SDCARD/Saves/spruce/backups/spruce-config.json"
+    local new_config="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+    [ -f "$old_config" ] || { log_message "Old config not found: $old_config"; return 1; }
+    [ -f "$new_config" ] || { log_message "New config not found: $new_config"; return 1; }
+
+    tmpfile="$(mktemp)"
+    jq --argfile old "$old_config" '
+      .menuOptions as $newMenus |
+      ($old.menuOptions // {}) as $oldMenus |
+      .menuOptions |=
+        with_entries(
+          # For each top-level category, like "Battery Settings"
+          .value |= with_entries(
+            # For each sub-field, like "ledMode"
+            .value |= (
+              if has("selected") and ($oldMenus[.key] // {})[.key] != null then
+                # oldSelected = old value’s selected
+                ($oldVal := $oldMenus[.key][.key];
+                 $oldSelected := $oldVal.selected;
+                 # only set if still valid in new options
+                 if (.options | index($oldSelected)) != null then
+                   .selected = $oldSelected
+                 else
+                   .
+                 end)
+              else
+                .
+              end
+            )
+          )
+        )
+    ' "$new_config" > "$tmpfile" && mv -f "$tmpfile" "$new_config"
+
+    log_message "Config restore complete."
+}
 
 log_message "----------Starting Restore script----------"
 # set_performance
@@ -265,6 +302,9 @@ display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
 
 log_message "Restoring emulator settings"
 restore_emu_settings
+
+log_message "Restoring compatible values from previous spruce-config.json"
+restore_spruce_config
 
 log_message "Applying idlemon setting"
 sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply

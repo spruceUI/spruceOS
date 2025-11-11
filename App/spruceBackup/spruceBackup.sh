@@ -31,6 +31,12 @@ backup_emu_settings() {
     done
 }
 
+backup_spruce_config() {
+    mkdir -p "/mnt/SDCARD/Saves/spruce/backups"
+    cp -f "/mnt/SDCARD/Saves/spruce/spruce-config.json"  "/mnt/SDCARD/Saves/spruce/backups/spruce-config.json"
+    log_message "Backed up spruce-config.json"
+}
+
 display_message --icon "$ICON_PATH" -t "Backing up your spruce configs and files.........."
 echo mmc0 > "$LED_PATH"/trigger &
 
@@ -128,6 +134,8 @@ done
 
 log_message "Backing up Emu config.json files"
 backup_emu_settings
+log_message "Backing up spruce-specific PyUI config"
+backup_spruce_config
 
 log_message "Creating 7z archive"
 7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
