@@ -1,13 +1,23 @@
 {
     "menuOptions": {
-        "System Settings": {
+        "Boot Settings": {
             "checkForUpdates": {
-                "display": "Check for spruce updates at boot",
+                "display": "Check for spruce updates on startup",
                 "options": [
                     "True",
                     "False"
                 ],
                 "selected": "True"
+            },
+            "bootTo": {
+                "display": "Launch application on startup",
+                "options": [
+                    "spruceUI",
+                    "Random Game",
+                    "Game Switcher",
+                    "Splore"
+                ],
+                "selected": "spruceUI"
             }
         }
     }

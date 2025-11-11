@@ -8,7 +8,7 @@ CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
 
 check_for_update() {
-    local should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
+    local should_check="$(get_config_value '.menuOptions."Boot Settings".checkForUpdates.selected' "True")"
     if [ "$should_check" = "False" ]; then
         return 1
     fi

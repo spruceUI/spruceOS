@@ -27,14 +27,14 @@ runifnecessary(){
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Set up the boot_to action prior to getting into the principal loop
-BOOT_ACTION="$(setting_get "boot_to")"
+BOOT_ACTION="$(get_config_value '.menuOptions."Boot Settings".bootTo.selected' "spruceUI")"
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in
-        "Random")
+        "Random Game")
             log_message "Booting to random game selection"
             echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
             ;;
-        "Switcher")
+        "Game Switcher")
             touch /mnt/SDCARD/spruce/flags/gs.lock
             ;;
         "Splore")
@@ -48,7 +48,7 @@ if ! flag_check "save_active"; then
                 ( [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ] ); then
                 echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
             else
-                log_message "Pico-8 binaries not found, booting to MainUI instead"
+                log_message "Pico-8 binaries not found; booting to spruceUI instead."
             fi
             ;;
     esac
@@ -71,7 +71,7 @@ while [ 1 ]; do
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"
-        
+
         # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat $BATTERY/capacity)

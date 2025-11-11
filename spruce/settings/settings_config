@@ -4,7 +4,6 @@ $FLAGS=/mnt/SDCARD/spruce/flags$
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
 # Function specific scripts
-$BOOT_TO=/mnt/SDCARD/spruce/scripts/applySetting/bootAction.sh$
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $GENESIS_PLUS_GX_WIDE=/mnt/SDCARD/spruce/scripts/applySetting/genesisPlusGXWide.sh$
 $IDLEMON_MM=/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh$
@@ -38,10 +37,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 [System]
 <Developer>
 "" "Reapply Developer mode" "|" "run|off" "echo -n off" "/mnt/SDCARD/spruce/scripts/devconf.sh|" ""
-
-<Not_simple>
-"" "Run application on boot:" "spruceUI|Random|Switcher|Splore" "spruceUI|Random|Switcher|Splore" "$HELP$ get boot_to 'spruceUI'" "$HELP$ update boot_to '_VALUE_'" "$BOOT_TO$ _INDEX_"
-@"Will apply on next boot"
 
 <Not_simple>
 "" "Shutdown when idle in menu" "Off|2m|5m|10m" "Off|2m|5m|10m" "$HELP$ get idlemon_in_menu '5m'" "$HELP$ update idlemon_in_menu '_VALUE_' && $IDLEMON_MM$ in_menu _VALUE_" ""
