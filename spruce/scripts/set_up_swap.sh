@@ -8,7 +8,7 @@ BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 case "$PLATFORM" in
     "A30") MIN_MB=128 ;;
-    * ) log_message "no swap needed for $PLATFORM. Exiting."; exit 0 # MIN_MB=512 ;;
+    * ) log_message "no swap needed for $PLATFORM. Exiting."; exit 0 ;; # MIN_MB=512 ;;
 esac
 
 if [ -f "${SWAPFILE}" ]; then

@@ -1,6 +1,15 @@
 {
     "menuOptions": {
         "Battery Settings": {
+            "ledMode": {
+                "display": "Power indicator LED mode",
+                "options": [
+                    "Always off",
+                    "On in menu only",
+                    "Always on"
+                ],
+                "selected": "Always off"
+            },
             "lowPowerWarningPercent": {
                 "display": "Low power warning percent",
                 "options": [

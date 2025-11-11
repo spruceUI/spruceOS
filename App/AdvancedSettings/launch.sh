@@ -79,7 +79,5 @@ kill -9 "$(pidof gptokeyb)" 2>/dev/null
 # send signal USR1 to joystickinput to switch to ANALOG MODE
 killall -q -USR1 joystickinput
 
-# bring this back if we ever decide to import helperFunctions.sh
-# auto_regen_tmp_update
 # Copy spruce.cfg to www folder so the landing page can read it.
 cp "$SETTINGS_PATH/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"

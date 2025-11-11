@@ -1,5 +1,6 @@
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+#!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Launch (and subsequently close) MainUI with various quirks depending on PLATFORM
 case "$PLATFORM" in

@@ -86,6 +86,8 @@ LAST_LOG=$(date +%s)
 while true; do
     CAPACITY=$(cat $BATTERY/capacity)
     PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
+    LED_MODE="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
+    
     # Add battery logging
     CURRENT_TIME=$(date +%s)
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
@@ -133,20 +135,20 @@ while true; do
             [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
         done
 
-    elif flag_check "ledon"; then
-        echo 1 >${LED_PATH}/brightness
-        flag_remove "low_battery"
-        SLEEP=30
-
-    elif flag_check "tlon" && flag_check "in_menu"; then
+    elif [ "$LED_MODE" = "Always on" ]; then
         echo 1 >${LED_PATH}/brightness
         flag_remove "low_battery"
         SLEEP=10
 
-    else
+    elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
+        echo 1 >${LED_PATH}/brightness
+        flag_remove "low_battery"
+        SLEEP=10
+
+    else # if [ "$LED_MODE" = "Always Off" ]; then
         echo 0 >${LED_PATH}/brightness
         flag_remove "low_battery"
-        SLEEP=30
+        SLEEP=10
     fi
 
     sleep $SLEEP
