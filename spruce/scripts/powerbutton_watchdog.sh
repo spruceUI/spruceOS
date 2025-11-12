@@ -5,16 +5,17 @@
 
 log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
 
-BIN_PATH="/mnt/SDCARD/spruce/bin64"
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
+    SET_OR_CSET="set"
+    NAME_QUALIFIER=""
+    AMIXER_CONTROL="'Soft Volume Master'"
+else
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+    SET_OR_CSET="cset"
+    NAME_QUALIFIER="name="
+    AMIXER_CONTROL="'SPK Volume'"
 fi
-SET_OR_CSET="cset"
-[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
-NAME_QUALIFIER="name="
-[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
-AMIXER_CONTROL="'SPK Volume'"
-[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAG_PATH="/mnt/SDCARD/spruce/flags"
@@ -23,14 +24,9 @@ RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
 EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
 
 long_press_handler() {
-    # setup flag for long pressed event
     flag_add "pb.longpress"
     sleep 2
     flag_remove "pb.longpress"
-
-    # now here long press is detected
-    # trigger auto save and then power down the device
-
     /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 }
 
@@ -107,7 +103,7 @@ while true; do
                     fi
                 fi
 
-                # PAUSE pany process that may crash the system during wakeup
+                # PAUSE any process that may crash the system during wakeup
                 killall -q -19 enforceSmartCPU.sh
 
                 # PAUSE any other running emulator or MainUI
@@ -126,18 +122,11 @@ while true; do
         esac
     done
 
-    # notify MainUI (if it is running) the system is going to sleep
-    touch /tmp/ui_sleeped_notification
-
-    # ensure all cache is written to SD card
-    sync
+    sync    # ensure all cache is written to SD card
 
     # suspend to memory
     [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
-
-    # wait long enough to ensure device enter sleep mode
-    # sleep 1
 
     if flag_check "wake.alarm"; then
 
@@ -155,9 +144,6 @@ while true; do
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
         [ "$PLATFORM" = "Flip" ] && reset_playback_pack
     fi
-
-    # wait long enough to ensure wakeup task is finished
-    # sleep 2
 
     # RESUME any running emulator or MainUI
     for EMU in $EMULATORS; do
