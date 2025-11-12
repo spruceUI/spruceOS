@@ -277,16 +277,15 @@ long_press_handler() {
         vibrate
 
         # get setting
-        HOLD_HOME=$(setting_get "hold_home")
+        HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
         log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" 
-        [ -z "$HOLD_HOME" ] && HOLD_HOME="Game Switcher"
 
         case $HOLD_HOME in
         "Game Switcher")
             prepare_game_switcher
             check_and_kill_pyui
             ;;
-        "In-game menu")
+        "Emulator menu")
             if pgrep "ra32.miyoo" >/dev/null; then
                 send_virtual_key_L3
             elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
@@ -374,8 +373,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             fi
 
             # get setting
-            TAP_HOME=$(setting_get "tap_home")
-            [ -z "$TAP_HOME" ] && TAP_HOME="In-game menu"
+            TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
 
             # handle short press
             case $TAP_HOME in
@@ -384,7 +382,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                 prepare_game_switcher
                 check_and_kill_pyui
                 ;;
-            "In-game menu")
+            "Emulator menu")
               log_message "*** homebutton_watchdog.sh: In-game menu" -v
                 if pgrep "ra32.miyoo" >/dev/null; then
                   log_message "*** homebutton_watchdog.sh: Miyoo RA32" -v

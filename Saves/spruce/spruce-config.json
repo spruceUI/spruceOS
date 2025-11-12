@@ -76,6 +76,26 @@
                 ],
                 "selected": "spruceUI"
             }
+        },
+        "Emulator Settings": {
+            "tapHomeAction": {
+                "display": "Tap home key action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game"
+                ],
+                "selected": "Emulator Menu"
+            },
+            "holdHomeAction": {
+                "display": "Hold home key action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game"
+                ],
+                "selected": "Game Switcher"
+            }
         }
     }
 }

@@ -52,12 +52,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 [Emulators]
 
-"" "Tap home key action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get tap_home 'In-game menu'" "$HELP$ update tap_home '_VALUE_'" ""
-@"Excludes NDS, PICO8 & ports"
-
-"" "Hold home key Action" "||" "Game Switcher|In-game menu|Exit game" "$HELP$ get hold_home 'Game Switcher'" "$HELP$ update hold_home '_VALUE_'" ""
-@"Excludes NDS, PICO8 & ports"
-
 "" "Home opens RA menu directly" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
 @"In systems using RetroArch"
 
