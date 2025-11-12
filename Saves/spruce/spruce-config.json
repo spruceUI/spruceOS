@@ -95,6 +95,14 @@
                     "Exit game"
                 ],
                 "selected": "Game Switcher"
+            },
+            "raInGameMenu": {
+                "display": "RA: use in-game menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
             }
         }
     }

@@ -522,6 +522,7 @@ save_ppsspp_configs() {
 
 run_retroarch() {
 
+	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 	case "$PLATFORM" in
 		"Brick" | "SmartPro" )
 			export RA_BIN="ra64.trimui_$PLATFORM"
@@ -538,7 +539,7 @@ run_retroarch() {
 			if [ "$CORE" = "yabasanshiro" ]; then
 				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 				export RA_BIN="ra64.miyoo"
-			elif setting_get "expertRA" || [ "$CORE" = "parallel_n64" ]; then
+			elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
 				export RA_BIN="retroarch-flip"
 			else
 				export RA_BIN="ra64.miyoo"
@@ -551,7 +552,7 @@ run_retroarch() {
 			fi
 		;;
 		"A30" )
-			if setting_get "expertRA" || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+			if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
 				export RA_BIN="retroarch"
 			else
 				export RA_BIN="ra32.miyoo"

@@ -52,9 +52,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 [Emulators]
 
-"" "Home opens RA menu directly" "|" "on|off" "$HELP$ check expertRA" "$HELP$ update expertRA _VALUE_" ""
-@"In systems using RetroArch"
-
 "" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_" "$PERFECT_OVERLAYS$ _INDEX_"
 @"Would apply to GB, GBC, and GBA consoles"
 
