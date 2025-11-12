@@ -1,11 +1,14 @@
 import json
 import logging
 import os
+import subprocess
 import sys
 import traceback
 
+from audio.audio_player import AudioPlayer
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
+from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
@@ -21,8 +24,9 @@ class Theme():
     _icon_folder = ""
     _loaded_file_path = ""
     _daijisho_theme_index = None
-
+    _button_press_wav = None
     _default_multiplier = 1.0
+    _play_button_press_sounds = True
 
     @classmethod
     def init(cls, path, width, height):
@@ -63,6 +67,46 @@ class Theme():
         scale_height = Device.screen_height() / height
         cls._default_multiplier = min(scale_width, scale_height)
 
+#        if not os.path.exists(bgm_wav):
+#            if os.path.exists(bgm_mp3):
+#                AudioPlayer.loop_wav(bgm_wav)
+#                PyUiLogger.get_logger().info("Converting bgm.mp3 to bgm.wav")
+#                ProcessRunner.run([
+#                    "ffmpeg",
+#                    "-y",  # overwrite if exists
+#                    "-i", bgm_mp3,
+#                    "-ar", "44100",      # sample rate
+#                    "-ac", "2",          # stereo
+#                    "-acodec", "pcm_s16le",  # WAV PCM 16-bit
+#                    bgm_wav
+#                ],check=False, timeout=None, print=True)
+        cls.bgm_setting_changed()
+        cls.button_press_sounds_changed()
+
+
+    @classmethod
+    def bgm_setting_changed(cls):
+        AudioPlayer.stop_loop()
+        if(Device.get_system_config().play_bgm()):
+            bgm_wav = os.path.join(cls._path, "sound", "bgm.wav")
+            bgm_mp3 = os.path.join(cls._path, "sound", "bgm.mp3")
+            AudioPlayer.set_volume(Device.get_system_config().bgm_volume())
+            if os.path.exists(bgm_wav) and os.path.getsize(bgm_wav) > 0:
+                AudioPlayer.loop_wav(bgm_wav)
+            elif os.path.exists(bgm_mp3) and os.path.getsize(bgm_mp3) > 0:
+                AudioPlayer.loop_mp3(bgm_mp3)
+
+    @classmethod
+    def button_press_sounds_changed(cls):
+        cls._play_button_press_sounds = Device.get_system_config().play_button_press_sound()
+        button_press_wav = os.path.join(cls._path, "sound", "change.wav")
+        if(os.path.exists(button_press_wav)) and os.path.getsize(button_press_wav) > 0:
+            cls._button_press_wav = button_press_wav
+
+    @classmethod
+    def controller_button_pressed(cls, input):
+        if(cls._play_button_press_sounds and cls._button_press_wav is not None):
+            AudioPlayer.play_wav(cls._button_press_wav)
 
     @classmethod
     def convert_theme_if_needed(cls, path, width, height):

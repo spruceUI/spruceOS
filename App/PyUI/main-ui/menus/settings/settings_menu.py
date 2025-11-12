@@ -91,6 +91,7 @@ class SettingsMenu(ABC):
 
         for name, option in menu_options.items():
             display_name = option.get('display')
+            description = option.get('description')
             selected_value = CfwSystemConfig.get_selected_value(category,name)
 
             option_list.append(
@@ -99,7 +100,7 @@ class SettingsMenu(ABC):
                             value_text="<    " + selected_value + "    >",
                             image_path=None,
                             image_path_selected=None,
-                            description=None,
+                            description=description,
                             icon=None,
                             value=lambda 
                                 input_value, 

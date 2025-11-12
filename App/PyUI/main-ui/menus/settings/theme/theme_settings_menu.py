@@ -42,7 +42,6 @@ class ThemeSettingsMenu():
             ThemeSettingsTopBar().show_theme_options_menu()
 
 
-
     def build_options_list(self):
         option_list = []
 
