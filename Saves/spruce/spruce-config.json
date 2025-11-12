@@ -22,6 +22,19 @@
                 ],
                 "selected": "4"
             },
+            "shutdownFromSleep": {
+                "display": "Shutdown after sleeping",
+                "options": [
+                    "Off",
+                    "Instant",
+                    "2m",
+                    "5m",
+                    "10m",
+                    "30m",
+                    "60m"
+                ],
+                "selected": "5m"
+            },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
                 "options": [

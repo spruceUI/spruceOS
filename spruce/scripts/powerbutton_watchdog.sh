@@ -68,7 +68,7 @@ while true; do
 
                 # Check settings to determine how long to set RTC wake timer
 
-                sleep_setting=$(setting_get "sleep_powerdown")
+                sleep_setting=$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "5m")
                 # Map to corresponding seconds
                 case "$sleep_setting" in
                 Instant) WAKE_ALARM_SEC=-1 ;;
