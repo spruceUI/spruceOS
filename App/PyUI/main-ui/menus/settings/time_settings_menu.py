@@ -2,6 +2,7 @@
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
+from menus.settings.set_time_menu import SetTimeMenu
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -29,8 +30,28 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             PyUiConfig.set_show_am_pm(
                 not PyUiConfig.show_am_pm())
 
+
+    def set_time(self, input):
+        if (ControllerInput.A == input):
+            SetTimeMenu().show_menu()
+
+
     def build_options_list(self):
         option_list = []
+
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Set Time & Date",
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.set_time
+            )
+        )
+
         if(Device.supports_timezone_setting()):
             option_list.append(
                 GridOrListEntry(

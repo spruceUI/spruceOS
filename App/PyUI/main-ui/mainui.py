@@ -18,6 +18,7 @@ from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
+from utils.button_listener import ButtonListener
 from utils.cfw_system_config import CfwSystemConfig
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
@@ -39,6 +40,7 @@ def parse_arguments():
     parser.add_argument('-msgDisplayRealtimePort', type=str, default=None, help='Reads from the passed in port to display messages')
     parser.add_argument('-optionListFile', type=str, default=None, help='Runs in a mode to just display a list of options')
     parser.add_argument('-optionListTitle', type=str, default=None, help='Title to display if option list is provided')
+    parser.add_argument('-buttonListenerMode', type=str, default=None, help='Just run and output button presses')
     return parser.parse_args()
 
 def log_renderer_info():
@@ -155,6 +157,11 @@ def check_for_msg_display_socket_based(args):
     if(args.msgDisplayRealtimePort):
         RealtimeMessageNetworkListener(args.msgDisplayRealtimePort).start()
 
+def check_for_button_listener_mode(args):
+    if(args.buttonListenerMode):
+        print("Running in button listener mode")
+        ButtonListener().start()
+
 
 def main():
     args = parse_arguments()
@@ -187,7 +194,8 @@ def main():
     check_for_msg_display_realtime(args)
     check_for_msg_display_socket_based(args)
     check_for_option_list_file(args)
-    
+    check_for_button_listener_mode(args)
+
     main_menu = MainMenu()
 
     start_background_threads()
@@ -198,8 +206,7 @@ def main():
         except Exception as e:
             PyUiLogger.get_logger().exception("Unhandled exception occurred")
             PyUiState.clear()
-            if(not Device.keep_running_on_error()):
-                keep_running = False
+            sys.exit()
 
 def sigterm_handler(signum, frame):
     PyUiLogger.get_logger().info(f"Received SIGTERM (Signal {signum}). Shutting down...")

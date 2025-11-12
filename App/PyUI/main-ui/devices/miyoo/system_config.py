@@ -282,3 +282,24 @@ class SystemConfig:
     def set_timezone(self, value):
         self.config["timezone"] = value
         self.save_config()
+
+    def play_button_press_sound(self):
+        return self.config.get("playButtonPressSound", True)
+
+    def set_play_button_press_sound(self,value):
+        self.config["playButtonPressSound"] = value
+        self.save_config()
+
+    def play_bgm(self):
+        return self.config.get("playBgm", True)
+
+    def set_play_bgm(self,value):
+        self.config["playBgm"] = value
+        self.save_config()
+
+    def bgm_volume(self):
+        return self.config.get("bgmVolume", 10)
+
+    def set_bgm_volume(self,value):
+        self.config["bgmVolume"] = value
+        self.save_config()

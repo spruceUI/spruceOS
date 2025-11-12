@@ -5,15 +5,19 @@ import sys
 
 class StreamToLogger:
     """Redirect writes to a logger."""
-    def __init__(self, logger, level):
+    def __init__(self, logger, level, stream=None):
+        import sys
         self.logger = logger
         self.level = level
+        self.stream = stream or getattr(sys, "__stdout__", sys.stdout)
         self._buffer = ""
-
+        
     def write(self, message):
         message = message.strip()
         if message:
             self.logger.log(self.level, message)
+            self.stream.write(message + "\n")
+            self.stream.flush()
 
     def flush(self):
         pass  # Not needed
@@ -40,6 +44,7 @@ class PyUiLogger:
             console_handler = logging.StreamHandler()
             console_handler.setLevel(logging.DEBUG)
             console_handler.setFormatter(formatter)
+            console_handler = logging.StreamHandler(sys.__stdout__)
 
             # File handler
             file_handler = RotatingFileHandler(os.path.join(log_dir,"pyui.log"),
@@ -53,8 +58,8 @@ class PyUiLogger:
             logger.addHandler(file_handler)
             
         # Redirect stdout and stderr to logger
-        sys.stdout = StreamToLogger(logger, logging.INFO)
-        sys.stderr = StreamToLogger(logger, logging.ERROR)
+        sys.stdout = StreamToLogger(logger, logging.INFO, sys.__stdout__)
+        sys.stderr = StreamToLogger(logger, logging.ERROR, sys.__stderr__)
 
         cls._logger = logger
         return cls._logger

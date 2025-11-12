@@ -2,6 +2,7 @@ import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 
+from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -121,6 +122,7 @@ class Controller:
                 Controller.set_last_input(input)
 
                 if Controller.last_controller_input is not None:
+                    Theme.controller_button_pressed(Controller.last_controller_input)
                     if Controller.last_controller_input == ControllerInput.MENU:
                         if not Controller.is_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
@@ -133,7 +135,7 @@ class Controller:
                         break  # Valid non-hotkey input
 
 
-
+        #TODO i think this loop is in the wrong place
         # Wait if the input is being held down (anti-repeat logic)
         while Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
             Controller.controller_interface.force_refresh()
