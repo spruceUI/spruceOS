@@ -4,18 +4,15 @@
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 
-$BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
-    home_key_down () {
-        touch /tmp/kill_scraper 
-    }
-    case $line in
-    # Home key down
-    *"key $B_MENU 1"*)
-            home_key_down
-        ;;
-    esac
-done
-
+(
+    /mnt/SDCARD/App/PyUI/launch.sh -buttonListenerMode True | while read -r line; do
+        case "$line" in
+            *"KEY,ControllerInput.MENU,PRESS"*)
+                touch /tmp/kill_scraper
+                ;;
+        esac
+    done
+) &
 
 
 # ==========================================================
