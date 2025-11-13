@@ -16,8 +16,6 @@ class StreamToLogger:
         message = message.strip()
         if message:
             self.logger.log(self.level, message)
-            self.stream.write(message + "\n")
-            self.stream.flush()
 
     def flush(self):
         pass  # Not needed

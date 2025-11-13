@@ -43,52 +43,9 @@ class MiyooMiniFlip(MiyooDevice):
     SOUND_DISABLED = 0
 
 
-    def __init__(self, device_name):
+    def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
-        reset_tzpath()  # reload TZPATH
-        self.sdl_button_to_input = {
-            sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
-            sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
-            sdl2.SDL_CONTROLLER_BUTTON_X: ControllerInput.Y,
-            sdl2.SDL_CONTROLLER_BUTTON_Y: ControllerInput.X,
-            sdl2.SDL_CONTROLLER_BUTTON_GUIDE: ControllerInput.MENU,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP: ControllerInput.DPAD_UP,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_DOWN: ControllerInput.DPAD_DOWN,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_LEFT: ControllerInput.DPAD_LEFT,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT: ControllerInput.DPAD_RIGHT,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSHOULDER: ControllerInput.L1,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: ControllerInput.R1,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSTICK: ControllerInput.L3,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSTICK: ControllerInput.R3,
-            sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
-            sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
-        }
-
-        script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'mini-flip-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
-        self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
-        self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self.ensure_wpa_supplicant_conf()
-        self.init_gpio()
-        #self.hardware_poller = MiyooFlipPoller(self)
-        #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
-
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
-
+        self.controller_interface = self.build_controller_interface()
         self.unknown_axis_ranges = {}  # axis -> (min, max)
         self.unknown_axis_stats = {}   # axis -> (sum, count)
         self.sdl_axis_names = {
@@ -99,10 +56,42 @@ class MiyooMiniFlip(MiyooDevice):
             4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
             5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
         }
-        self.mainui_volume = None
-        threading.Thread(target=self.startup_init, daemon=True).start()
-        self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-            "/appconfigs/system.json", self.on_mainui_config_change, interval=1.0)
+
+
+        self.system_config = None
+        if(main_ui_mode):
+            os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
+            reset_tzpath()  # reload TZPATH
+            script_dir = Path(__file__).resolve().parent
+            source = script_dir / 'mini-flip-system.json'
+            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", source)
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
+            self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
+            self.miyoo_games_file_parser = MiyooGamesFileParser()        
+            self._set_lumination_to_config()
+            self._set_contrast_to_config()
+            self._set_saturation_to_config()
+            self._set_brightness_to_config()
+            self.ensure_wpa_supplicant_conf()
+            self.init_gpio()
+            self.mainui_volume = None
+            self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
+                "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2)
+            threading.Thread(target=self.startup_init, daemon=True).start()
+    
+        if(self.system_config is None):
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
+
+        
+        if(PyUiConfig.enable_button_watchers()):
+            from controller.controller import Controller
+            #/dev/miyooio if we want to get rid of miyoo_inputd
+            # debug in terminal: hexdump  /dev/miyooio
+            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+
         super().__init__()
 
     def on_mainui_config_change(self):
@@ -132,7 +121,7 @@ class MiyooMiniFlip(MiyooDevice):
         self.on_mainui_config_change()
         self.apply_timezone(self.system_config.get_timezone())
 
-    def get_controller_interface(self):
+    def build_controller_interface(self):
         key_mappings = {}  
         key_mappings[KeyEvent(1, 57, 0)] = [InputResult(ControllerInput.A, KeyState.RELEASE)]
         key_mappings[KeyEvent(1, 57, 1)] = [InputResult(ControllerInput.A, KeyState.PRESS)]
@@ -171,6 +160,10 @@ class MiyooMiniFlip(MiyooDevice):
 
         
         return KeyWatcherControllerMiyooMini(event_path="/dev/input/event0", key_mappings=key_mappings)
+
+
+    def get_controller_interface(self):
+        return self.controller_interface
 
     def init_gpio(self):
         #self.init_sleep_gpio()

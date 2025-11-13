@@ -401,3 +401,6 @@ class AbstractDevice(ABC):
     def get_save_state_image(self, rom_info: RomInfo):
         pass
 
+    @abstractmethod
+    def get_audio_system(self):
+        pass

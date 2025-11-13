@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import time
+from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
 from devices.utils.process_runner import ProcessRunner
@@ -410,4 +411,7 @@ class DeviceCommon(AbstractDevice):
 
     def get_disp_green(self):
         return self.system_config.get_disp_green()
+
+    def get_audio_system(self):
+        return AudioPlayerNone()
 

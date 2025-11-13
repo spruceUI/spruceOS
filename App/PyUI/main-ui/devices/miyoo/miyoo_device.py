@@ -2,7 +2,6 @@ import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
-from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.device_common import DeviceCommon
 from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.miyoo_trim_common import MiyooTrimCommon
@@ -25,9 +24,6 @@ class MiyooDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
-
-    def get_controller_interface(self):
-        return Sdl2ControllerInterface()
 
     def clear_framebuffer(self):
         pass

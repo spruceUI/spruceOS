@@ -1,5 +1,6 @@
 from pathlib import Path
 import threading
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -19,57 +20,46 @@ class TrimUIBrick(TrimUIDevice):
     
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
 
-    def __init__(self, device_name):
+    def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        self.path = self
-        self.sdl_button_to_input = {
-            sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
-            sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
-            sdl2.SDL_CONTROLLER_BUTTON_X: ControllerInput.Y,
-            sdl2.SDL_CONTROLLER_BUTTON_Y: ControllerInput.X,
-            sdl2.SDL_CONTROLLER_BUTTON_GUIDE: ControllerInput.MENU,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP: ControllerInput.DPAD_UP,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_DOWN: ControllerInput.DPAD_DOWN,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_LEFT: ControllerInput.DPAD_LEFT,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT: ControllerInput.DPAD_RIGHT,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSHOULDER: ControllerInput.L1,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: ControllerInput.R1,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSTICK: ControllerInput.L3,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSTICK: ControllerInput.R3,
-            sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
-            sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
-        }
+        self.audio_player = AudioPlayerDelegateSdl2()
 
-        script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'brick-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
-        trim_stock_json_file = script_dir / 'stock/brick.json'
-        ConfigCopier.ensure_config(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
+        self.system_config = None
+        if(main_ui_mode):
+            script_dir = Path(__file__).resolve().parent
+            source = script_dir / 'brick-system.json'
+            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
+            trim_stock_json_file = script_dir / 'stock/brick.json'
+            ConfigCopier.ensure_config(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
 
-        self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self._set_hue_to_config()
-        self.ensure_wpa_supplicant_conf()
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event3")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
-            self.power_key_watcher = KeyWatcher("/dev/input/event1")
-            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-            power_key_polling_thread.start()
-            
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
+            self.miyoo_games_file_parser = MiyooGamesFileParser()        
+            self._set_lumination_to_config()
+            self._set_contrast_to_config()
+            self._set_saturation_to_config()
+            self._set_brightness_to_config()
+            self._set_hue_to_config()
+            self.ensure_wpa_supplicant_conf()
+            threading.Thread(target=self.monitor_wifi, daemon=True).start()
+            if(PyUiConfig.enable_button_watchers()):
+                from controller.controller import Controller
+                #/dev/miyooio if we want to get rid of miyoo_inputd
+                # debug in terminal: hexdump  /dev/miyooio
+                self.volume_key_watcher = KeyWatcher("/dev/input/event3")
+                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+                volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+                volume_key_polling_thread.start()
+                self.power_key_watcher = KeyWatcher("/dev/input/event1")
+                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+                power_key_polling_thread.start()
+                
+            config_volume = self.system_config.get_volume()
+            self._set_volume(config_volume)
+
+        if(self.system_config is None):
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
+
         super().__init__()
             
     #Untested
@@ -162,3 +152,6 @@ class TrimUIBrick(TrimUIDevice):
         
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)
+
+    def get_audio_system(self):
+        return self.audio_player

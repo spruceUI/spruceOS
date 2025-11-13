@@ -445,4 +445,7 @@ class Device:
     def set_theme(theme_path):
         return Device._impl.set_theme(theme_path)
 
-    
+    @staticmethod
+    def get_audio_system():
+        return Device._impl.get_audio_system()
+

@@ -54,25 +54,25 @@ def log_renderer_info():
     for i in range(num):
         PyUiLogger.get_logger().info(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
 
-def initialize_device(device):
+def initialize_device(device, main_ui_mode):
     if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
-        Device.init(MiyooFlip(device))
+        Device.init(MiyooFlip(device, main_ui_mode))
     elif "MIYOO_MINI_FLIP" == device:
         from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
-        Device.init(MiyooMiniFlip(device))
+        Device.init(MiyooMiniFlip(device,main_ui_mode))
     elif "SPRIG_MIYOO_MINI_FLIP" == device:
         from devices.miyoo.mini_flip.sprig_miyoo_mini_flip import SprigMiyooMiniFlip
-        Device.init(SprigMiyooMiniFlip(device))
+        Device.init(SprigMiyooMiniFlip(device, main_ui_mode))
     elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
-        Device.init(TrimUIBrick(device))
+        Device.init(TrimUIBrick(device,main_ui_mode))
     elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
         Device.init(TrimUISmartPro(device))
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.flip.miyoo_a30 import MiyooA30
-        Device.init(MiyooA30(device))
+        Device.init(MiyooA30(device, main_ui_mode))
     elif "ANBERNIC_RG34XXSP" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX(device))
@@ -165,7 +165,6 @@ def check_for_button_listener_mode(args):
 
 def main():
     args = parse_arguments()
-
     PyUiLogger.init(args.logDir, "PyUI")
     PyUiLogger.get_logger().info(f"{args}")
     #PyUiLogger.get_logger().info(f"logDir: {args.logDir}")
@@ -178,10 +177,16 @@ def main():
     PyUiConfig.init(args.pyUiConfig)
     CfwSystemConfig.init(args.cfwConfig)
 
-    initialize_device(args.device)
+    main_ui_mode = True
+
+    if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
+        main_ui_mode = False
+
+    initialize_device(args.device, main_ui_mode)
     PyUiState.init(Device.get_state_path())
 
     selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
+    check_for_button_listener_mode(args)
 
     Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
     Display.init()
@@ -194,7 +199,6 @@ def main():
     check_for_msg_display_realtime(args)
     check_for_msg_display_socket_based(args)
     check_for_option_list_file(args)
-    check_for_button_listener_mode(args)
 
     main_menu = MainMenu()
 

@@ -30,73 +30,61 @@ class MiyooA30(MiyooDevice):
     SOUND_DISABLED = 0
     MIYOO_STOCK_CONFIG_LOCATION = "/config/system.json"
 
-    def __init__(self, device_name):
+    def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        
-        self.sdl_button_to_input = {
-            sdl2.SDL_CONTROLLER_BUTTON_A: ControllerInput.B,
-            sdl2.SDL_CONTROLLER_BUTTON_B: ControllerInput.A,
-            sdl2.SDL_CONTROLLER_BUTTON_X: ControllerInput.Y,
-            sdl2.SDL_CONTROLLER_BUTTON_Y: ControllerInput.X,
-            sdl2.SDL_CONTROLLER_BUTTON_GUIDE: ControllerInput.MENU,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP: ControllerInput.DPAD_UP,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_DOWN: ControllerInput.DPAD_DOWN,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_LEFT: ControllerInput.DPAD_LEFT,
-            sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT: ControllerInput.DPAD_RIGHT,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSHOULDER: ControllerInput.L1,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: ControllerInput.R1,
-            sdl2.SDL_CONTROLLER_BUTTON_LEFTSTICK: ControllerInput.L3,
-            sdl2.SDL_CONTROLLER_BUTTON_RIGHTSTICK: ControllerInput.R3,
-            sdl2.SDL_CONTROLLER_BUTTON_START: ControllerInput.START,
-            sdl2.SDL_CONTROLLER_BUTTON_BACK: ControllerInput.SELECT,
-        }
-                
-        script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'a30-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
-        self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self.ensure_wpa_supplicant_conf()
-        self.init_gpio()
-        miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
-        ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
+        self.system_config = None
+        if(main_ui_mode):
+            script_dir = Path(__file__).resolve().parent
+            source = script_dir / 'a30-system.json'
+            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
+            self.miyoo_games_file_parser = MiyooGamesFileParser()        
+            self._set_lumination_to_config()
+            self._set_contrast_to_config()
+            self._set_saturation_to_config()
+            self._set_brightness_to_config()
+            self.ensure_wpa_supplicant_conf()
+            self.init_gpio()
+            miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
+            ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
 
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
-        #self.hardware_poller = MiyooFlipPoller(self)
-        #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+            threading.Thread(target=self.monitor_wifi, daemon=True).start()
+            #self.hardware_poller = MiyooFlipPoller(self)
+            #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
-            self.power_key_watcher = KeyWatcher("/dev/input/event2")
-            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-            power_key_polling_thread.start()
+            if(PyUiConfig.enable_button_watchers()):
+                from controller.controller import Controller
+                #/dev/miyooio if we want to get rid of miyoo_inputd
+                # debug in terminal: hexdump  /dev/miyooio
+                self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+                volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+                volume_key_polling_thread.start()
+                self.power_key_watcher = KeyWatcher("/dev/input/event2")
+                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+                power_key_polling_thread.start()
 
-        self.unknown_axis_ranges = {}  # axis -> (min, max)
-        self.unknown_axis_stats = {}   # axis -> (sum, count)
-        self.sdl_axis_names = {
-            0: "SDL_CONTROLLER_AXIS_LEFTX",
-            1: "SDL_CONTROLLER_AXIS_LEFTY",
-            2: "SDL_CONTROLLER_AXIS_RIGHTX",
-            3: "SDL_CONTROLLER_AXIS_RIGHTY",
-            4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
-            5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
-        }
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
-        super().__init__()
-        # Done to try to account for external systems editting the config file
-        self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-            "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=1.0)
+            self.unknown_axis_ranges = {}  # axis -> (min, max)
+            self.unknown_axis_stats = {}   # axis -> (sum, count)
+            self.sdl_axis_names = {
+                0: "SDL_CONTROLLER_AXIS_LEFTX",
+                1: "SDL_CONTROLLER_AXIS_LEFTY",
+                2: "SDL_CONTROLLER_AXIS_RIGHTX",
+                3: "SDL_CONTROLLER_AXIS_RIGHTY",
+                4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
+                5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
+            }
+            config_volume = self.system_config.get_volume()
+            self._set_volume(config_volume)
+            super().__init__()
+            # Done to try to account for external systems editting the config file
+            self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+                "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=1.0)
+
+        if(self.system_config is None):
+            self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
+
+
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -260,7 +248,7 @@ class MiyooA30(MiyooDevice):
     def _set_volume(self, volume):
         try:
             ProcessRunner.run(["amixer","set","headphone volume",str(volume)+"%"], print=True)            
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         return volume 

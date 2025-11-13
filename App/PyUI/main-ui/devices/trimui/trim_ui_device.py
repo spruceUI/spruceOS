@@ -24,9 +24,10 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.sdl2_controller_interface = Sdl2ControllerInterface()
 
     def get_controller_interface(self):
-        return Sdl2ControllerInterface()
+        return self.sdl2_controller_interface
 
     def ensure_wpa_supplicant_conf(self):
         MiyooTrimCommon.ensure_wpa_supplicant_conf("/userdata/cfg/wpa_supplicant.conf")

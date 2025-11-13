@@ -5,7 +5,6 @@ import subprocess
 import sys
 import traceback
 
-from audio.audio_player import AudioPlayer
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
@@ -86,15 +85,15 @@ class Theme():
 
     @classmethod
     def bgm_setting_changed(cls):
-        AudioPlayer.stop_loop()
+        Device.get_audio_system().audio_stop_loop()
         if(Device.get_system_config().play_bgm()):
             bgm_wav = os.path.join(cls._path, "sound", "bgm.wav")
             bgm_mp3 = os.path.join(cls._path, "sound", "bgm.mp3")
-            AudioPlayer.set_volume(Device.get_system_config().bgm_volume())
+            Device.get_audio_system().audio_set_volume(Device.get_system_config().bgm_volume())
             if os.path.exists(bgm_wav) and os.path.getsize(bgm_wav) > 0:
-                AudioPlayer.loop_wav(bgm_wav)
+                Device.get_audio_system().audio_loop_wav(bgm_wav)
             elif os.path.exists(bgm_mp3) and os.path.getsize(bgm_mp3) > 0:
-                AudioPlayer.loop_mp3(bgm_mp3)
+                Device.get_audio_system().audio_loop_mp3(bgm_mp3)
 
     @classmethod
     def button_press_sounds_changed(cls):
@@ -106,7 +105,7 @@ class Theme():
     @classmethod
     def controller_button_pressed(cls, input):
         if(cls._play_button_press_sounds and cls._button_press_wav is not None):
-            AudioPlayer.play_wav(cls._button_press_wav)
+            Device.get_audio_system().audio_play_wav(cls._button_press_wav)
 
     @classmethod
     def convert_theme_if_needed(cls, path, width, height):
