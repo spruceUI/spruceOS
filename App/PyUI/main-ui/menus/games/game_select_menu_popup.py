@@ -69,7 +69,7 @@ class GameSelectMenuPopup:
                 primary_text="Remove Favorite" if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description="",
+                description=None,
                 icon=None,
                 value=lambda input_value, rom_info=rom_info: self.remove_favorite(rom_info, input_value)
             ))
@@ -78,7 +78,7 @@ class GameSelectMenuPopup:
                 primary_text="Add Favorite" if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description="",
+                description=None,
                 icon=None,
                 value=lambda input_value, rom_info=rom_info: self.add_favorite(rom_info, input_value)
             ))
@@ -88,7 +88,7 @@ class GameSelectMenuPopup:
             primary_text="Add/Remove Collection" if use_full_text else "+/- Collection",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
-            description="",
+            description=None,
             icon=None,
             value=lambda input_value, rom_info=rom_info: self.collections_management_view(rom_info, input_value)
         ))
@@ -97,7 +97,7 @@ class GameSelectMenuPopup:
                 primary_text="Launch Random Game",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
-                description="",
+                description=None,
                 icon=None,
                 value=lambda input_value, rom_list=rom_list: self.launch_random_game(input_value, rom_list)
         ))
@@ -111,7 +111,7 @@ class GameSelectMenuPopup:
             primary_text=f"{rom_info.game_system.display_name} Game Search",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
-            description="",
+            description=None,
             icon=None,
             value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
         ))
@@ -123,7 +123,7 @@ class GameSelectMenuPopup:
             primary_text=f"Toggle View",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
-            description="",
+            description=None,
             icon=None,
             value=lambda input_value: self.toggle_view()
         ))

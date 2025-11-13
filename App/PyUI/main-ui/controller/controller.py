@@ -137,7 +137,7 @@ class Controller:
 
         #TODO i think this loop is in the wrong place
         # Wait if the input is being held down (anti-repeat logic)
-        while Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
+        while started_held_down and Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
             Controller.controller_interface.force_refresh()
             time.sleep(POLL_INTERVAL_SECONDS)
 
