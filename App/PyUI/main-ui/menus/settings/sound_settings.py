@@ -1,5 +1,4 @@
 
-from audio.audio_player import AudioPlayer
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
@@ -31,11 +30,11 @@ class SoundSettings(SettingsMenu):
         if (input == ControllerInput.DPAD_LEFT):
             curr_volume = max(curr_volume-1, 1)
             Device.get_system_config().set_bgm_volume(curr_volume)
-            AudioPlayer.set_volume(curr_volume)
+            Device.get_audio_system().audio_set_volume(curr_volume)
         elif(input == ControllerInput.DPAD_RIGHT):
             curr_volume = min(curr_volume+1, 10)
             Device.get_system_config().set_bgm_volume(curr_volume)
-            AudioPlayer.set_volume(curr_volume)
+            Device.get_audio_system().audio_set_volume(curr_volume)
 
 
     def build_options_list(self) -> list[GridOrListEntry]:

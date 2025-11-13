@@ -1,6 +1,7 @@
 
 
 from controller.controller import Controller
+from devices.device import Device
 
 
 class ButtonListener:
@@ -8,7 +9,7 @@ class ButtonListener:
         pass
 
     def start(self):
+        controller_interface = Device.get_controller_interface()
+        controller_interface.print_key_state_changes()
         while(True):
-            Controller.get_input()
-            if(Controller.last_controller_input is not None):
-                print(Controller.last_input())
+            controller_interface.get_input(1000)

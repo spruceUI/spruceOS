@@ -13,10 +13,13 @@ class Sdl2ControllerInterface(ControllerInterface):
     def __init__(self):
         self.event = sdl2.SDL_Event()
         self.controller = None
+        self.print_key_changes = False
 
         self.clear_input_queue()
         self.init_controller()
 
+    def print_key_state_changes(self):
+        self.print_key_changes = True
 
     def init_controller(self):
         SDL_ENABLE = 1
@@ -64,6 +67,7 @@ class Sdl2ControllerInterface(ControllerInterface):
         event_available = sdl2.SDL_WaitEventTimeout(byref(self.event), timeout)
         
         if event_available:
+            self.print_last_event()
             if self.event.type == sdl2.SDL_CONTROLLERDEVICEADDED:
                 PyUiLogger.get_logger().info("New controller detected")
                 self.init_controller()
@@ -71,6 +75,21 @@ class Sdl2ControllerInterface(ControllerInterface):
                 return self.last_input()
         
         return None
+    
+    def print_last_event(self):
+        if(self.print_key_changes):
+            if self.event.type == sdl2.SDL_CONTROLLERBUTTONDOWN:
+                mapping = Device.map_digital_input(self.event.cbutton.button)
+                if(mapping is not None):
+                    print(f"KEY,{mapping},PRESS")
+            elif self.event.type == sdl2.SDL_CONTROLLERBUTTONUP:
+                mapping = Device.map_digital_input(self.event.cbutton.button)
+                if(mapping is not None):
+                    print(f"KEY,{mapping},RELEASE")
+            elif self.event.type == sdl2.SDL_CONTROLLERAXISMOTION:
+                mapping = Device.map_analog_input(self.event.cbutton.button,self.event.caxis.value)
+                if(mapping is not None):
+                    print(f"ANALOG,{mapping}")
 
     def last_input(self):
         if self.event.type == sdl2.SDL_CONTROLLERBUTTONDOWN:

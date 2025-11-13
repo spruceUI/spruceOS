@@ -50,17 +50,23 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
             self.fd = None
         
         self.last_held_input = None
+        self.lock = threading.Lock()  # add a lock
         self.input_polling_thread = threading.Thread(target=self.poll_keyboard, daemon=True)
         self.input_polling_thread.start()
+        self.print_key_changes = False
+
+    def print_key_state_changes(self):
+        self.print_key_changes = True
 
     def still_held_down(self):
         
-        if(self.last_held_input is None):
-            return False
-        elif(self.last_held_input in self.held_controller_inputs):
-            return True
-        else:
-            return False
+        with self.lock:
+            if(self.last_held_input is None):
+                return False
+            elif(self.last_held_input in self.held_controller_inputs):
+                return True
+            else:
+                return False
 
 
     def last_input(self):
@@ -77,6 +83,7 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
 
     def restore_cached_event(self):
         self.last_held_input = self.cached_input
+        
     def read_event(self, fd):
         """Read exactly one input_event from fd (blocking)."""
         buf = b''
@@ -117,8 +124,12 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
                     if mapped_events:
                         for mapped_event in mapped_events:
                             if mapped_event.key_state == KeyState.PRESS:
-                                self.held_controller_inputs[mapped_event.controller_input] = now
+                                with self.lock:
+                                    self.held_controller_inputs[mapped_event.controller_input] = now
+                                self.key_change(mapped_event.controller_input,"PRESS")
                             elif mapped_event.key_state == KeyState.RELEASE:
+                                with self.lock:
+                                    self.key_change(mapped_event.controller_input,"RELEASE")
                                 self.held_controller_inputs.pop(mapped_event.controller_input, None)
                     else:
                         logger.error("No mapping for event: %s", key_event)
@@ -129,18 +140,28 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
             except Exception as e:
                 logger.exception("Error reading input: %s", e)
 
+    def key_change(self, controller_input, direction):
+        if(self.print_key_changes):
+            print(f"KEY,{controller_input},{direction}")
+        pass
 
     def get_input(self, timeoutInMilliseconds):
         start_time = time.time()
         timeout = timeoutInMilliseconds / 1000.0
 
-        self.last_held_input = next(iter(self.held_controller_inputs), None)
+        # Loop until we get input or timeout
+        last_held = None
+        while (time.time() - start_time) < timeout:
+            # Create a snapshot of keys safely
+            with self.lock:
+                keys_snapshot = list(self.held_controller_inputs.keys())
+            if keys_snapshot:
+                last_held = keys_snapshot[0]  # just pick the first key
+                break
+            time.sleep(0.05)  # wait a bit and retry
 
-        while self.last_held_input is None and (time.time() - start_time) < timeout:
-            time.sleep(0.05)  # 1/20 of a second delay
-            self.last_held_input = next(iter(self.held_controller_inputs), None)
-
-        return self.last_held_input
+        self.last_held_input = last_held
+        return last_held
     
     def clear_input_queue(self):
         pass

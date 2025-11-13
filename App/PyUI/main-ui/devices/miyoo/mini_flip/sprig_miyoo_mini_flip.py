@@ -10,13 +10,14 @@ import subprocess
 
 
 class SprigMiyooMiniFlip(MiyooMiniFlip):
-    def __init__(self, device_name):
-        super().__init__(device_name)
+    def __init__(self, device_name, main_ui_mode):
+        super().__init__(device_name, main_ui_mode)
         self.sprig_config_path = "/mnt/SDCARD/Saves/mini-flip-system.json"
         self.last_volume = None
         self.last_backlight = None
-        self.sprig_config_thread, self.sprig_config_thread_stop_event = FileWatcher().start_file_watcher(
-            self.sprig_config_path, self.on_sprig_config_change, interval=0.2)
+        if(main_ui_mode):
+            self.sprig_config_thread, self.sprig_config_thread_stop_event = FileWatcher().start_file_watcher(
+                self.sprig_config_path, self.on_sprig_config_change, interval=0.2)
     
     
     def startup_init(self):

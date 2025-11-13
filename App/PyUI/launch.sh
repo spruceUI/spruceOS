@@ -2,6 +2,15 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Check for -buttonListenerMode in arguments
+redirect_output=1
+for arg in "$@"; do
+    if [ "$arg" = "-buttonListenerMode" ]; then
+        redirect_output=0
+        break
+    fi
+done
+
 # Launch (and subsequently close) MainUI with various quirks depending on PLATFORM
 case "$PLATFORM" in
     "A30" )
@@ -18,11 +27,24 @@ case "$PLATFORM" in
         cat /dev/zero > /dev/fb0
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/a30/sdl2"
         export LD_LIBRARY_PATH="/usr/miyoo/lib"
-        /mnt/SDCARD/spruce/bin/python/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_A30 -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" -cfwConfig "/mnt/SDCARD/Saves/spruce/spruce-config.json" "$@" >> /dev/null 2>&1
+
+
+        cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device MIYOO_A30 \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        if [ $redirect_output -eq 1 ]; then
+            sh -c "$cmd \"\$@\" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1" sh "$@"
+        else
+            # Run normally
+            sh -c "$cmd \"\$@\"" sh "$@"
+        fi
 
         # remove soft link
         rm /dev/ttyS0
-
     ;;
 
     "Brick" | "SmartPro" )
@@ -49,7 +71,21 @@ case "$PLATFORM" in
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
         export LD_LIBRARY_PATH="/usr/trimui/lib"
         /mnt/SDCARD/spruce/scripts/iconfresh.sh
-        /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device TRIMUI_BRICK -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" -cfwConfig "/mnt/SDCARD/Saves/spruce/spruce-config.json" "$@" >> /dev/null 2>&1
+
+        cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device TRIMUI_BRICK \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        if [ $redirect_output -eq 1 ]; then
+            # Redirect stdout/stderr to /dev/null
+            sh -c "$cmd \"\$@\" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1" sh "$@"
+        else
+            # Run normally
+            sh -c "$cmd \"\$@\"" sh "$@"
+        fi
 
         preload.sh
 
@@ -71,6 +107,21 @@ case "$PLATFORM" in
         cd /usr/miyoo/bin/
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
         /mnt/SDCARD/spruce/scripts/iconfresh.sh
-        /mnt/SDCARD/spruce/flip/bin/MainUI /mnt/SDCARD/App/PyUI/main-ui/mainui.py -device MIYOO_FLIP -logDir "/mnt/SDCARD/Saves/spruce" -pyUiConfig "/mnt/SDCARD/App/PyUI/py-ui-config.json" -cfwConfig "/mnt/SDCARD/Saves/spruce/spruce-config.json" "$@" >> /dev/null 2>&1
+        
+        cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device MIYOO_FLIP \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        if [ $redirect_output -eq 1 ]; then
+            # Redirect stdout and stderr to /dev/null
+            sh -c "$cmd \"\$@\" >> /dev/null 2>&1" sh "$@"
+        else
+            # Run normally (no redirection)
+            sh -c "$cmd \"\$@\"" sh "$@"
+        fi
+
     ;;
 esac

@@ -51,17 +51,23 @@ class KeyWatcherController(ControllerInterface):
             self.fd = None
         
         self.last_held_input = None
+        self.lock = threading.Lock()  # add a lock
         self.input_polling_thread = threading.Thread(target=self.poll_keyboard, daemon=True)
         self.input_polling_thread.start()
+        self.print_key_changes = False
+
+    def print_key_state_changes(self):
+        self.print_key_changes = True
 
     def still_held_down(self):
         
-        if(self.last_held_input is None):
-            return False
-        elif(self.last_held_input in self.held_controller_inputs):
-            return True
-        else:
-            return False
+        with self.lock:
+            if(self.last_held_input is None):
+                return False
+            elif(self.last_held_input in self.held_controller_inputs):
+                return True
+            else:
+                return False
 
 
     def last_input(self):
@@ -97,10 +103,14 @@ class KeyWatcherController(ControllerInterface):
                             if(mapped_events is not None and len(mapped_events) > 0):
                                 for mapped_event in mapped_events:
                                     if mapped_event.key_state == KeyState.PRESS:
-                                        self.held_controller_inputs[mapped_event.controller_input] = now
+                                        with self.lock:
+                                            self.held_controller_inputs[mapped_event.controller_input] = now
+                                        self.key_change(mapped_event.controller_input,"PRESS")
                                         #PyUiLogger.get_logger().debug(f"Adding {mapped_event.controller_input} to held inputs")
                                     elif mapped_event.key_state == KeyState.RELEASE:
-                                        self.held_controller_inputs.pop(mapped_event.controller_input, None)
+                                        with self.lock:
+                                            self.held_controller_inputs.pop(mapped_event.controller_input, None)
+                                        self.key_change(mapped_event.controller_input,"RELEASE")
                                         #PyUiLogger.get_logger().debug(f"Removing {mapped_event.controller_input} from held inputs")
                             else:
                                 PyUiLogger.get_logger().error(f"No mapping for event: {key_event}")
@@ -108,15 +118,21 @@ class KeyWatcherController(ControllerInterface):
             except Exception as e:
                 PyUiLogger.get_logger().error(f"Error reading input: {e}")
 
+    def key_change(self, controller_input, direction):
+        if(self.print_key_changes):
+            print(f"KEY,{controller_input},{direction}")
+
     def get_input(self, timeoutInMilliseconds):
         start_time = time.time()
         timeout = timeoutInMilliseconds / 1000.0
-
-        self.last_held_input = next(iter(self.held_controller_inputs), None)
+        
+        with self.lock:
+            self.last_held_input = next(iter(self.held_controller_inputs), None)
 
         while self.last_held_input is None and (time.time() - start_time) < timeout:
             time.sleep(0.05)  # 1/20 of a second delay
-            self.last_held_input = next(iter(self.held_controller_inputs), None)
+            with self.lock:
+                self.last_held_input = next(iter(self.held_controller_inputs), None)
 
         return self.last_held_input
 
