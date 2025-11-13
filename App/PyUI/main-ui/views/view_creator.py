@@ -59,7 +59,7 @@ class ViewCreator:
                 selected_bg = Theme.get_list_small_selected_bg()
                 for option in options:
                     icon = option.get_icon()
-                    if icon is not None:
+                    if icon is not None or option.get_description() is not None:
                         selected_bg = Theme.get_list_large_selected_bg()
 
                 return DescriptiveListView(
