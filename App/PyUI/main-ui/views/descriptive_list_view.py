@@ -65,12 +65,19 @@ class DescriptiveListView(ListView):
                                     target_height=int(self.each_entry_height*0.8))
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_TITLE) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE)
+            title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y()
+            title_render_mode = RenderMode.TOP_LEFT_ALIGNED
+            if(gridOrListEntry.get_description() is None):
+                title_y_offset = row_offset_y + self.each_entry_height // 2
+                title_render_mode = RenderMode.MIDDLE_LEFT_ALIGNED
+
             title_w, title_h = Display.render_text(
                 gridOrListEntry.get_primary_text(), 
                 row_offset_x + icon_w + Theme.get_descriptive_list_text_from_icon_offset(), 
-                row_offset_y + Theme.get_descriptive_list_text_offset_y(), 
+                title_y_offset, 
                 color, 
-                FontPurpose.DESCRIPTIVE_LIST_TITLE)
+                FontPurpose.DESCRIPTIVE_LIST_TITLE,
+                render_mode=title_render_mode)
 
             if(gridOrListEntry.get_value_text() is not None):
                 Display.render_text(
