@@ -1,3 +1,4 @@
+import math
 from typing import List
 from devices.device import Device
 from display.display import Display
@@ -22,10 +23,19 @@ class DescriptiveListView(ListView):
 
         self.selected_bg = selected_bg
         self.each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
+        PyUiLogger.get_logger().info(f"Usable height = {Display.get_usable_screen_height(force_include_top_bar=True)}, each_entry_height = {self.each_entry_height}")
         self.each_entry_height = max(self.each_entry_height, self.calculate_max_text_height(options))
 
         # TODO is there a bettter way? Apps are getting set to 3 instead of 4 
-        self.max_rows = (Display.get_usable_screen_height(force_include_top_bar=True) // self.each_entry_height)
+        PyUiLogger.get_logger().info(f"Usable height = {Display.get_usable_screen_height(force_include_top_bar=True)}, each_entry_height = {self.each_entry_height}")
+        rows = (Display.get_usable_screen_height(force_include_top_bar=True) / self.each_entry_height)
+        fractional = rows - int(rows)
+        #Try to account for theme differences from miyoo
+        if fractional >= 0.95:
+            self.max_rows = math.ceil(rows)
+        else:
+            self.max_rows = int(rows)
+            
         self.current_top = 0
         self.current_bottom = min(self.max_rows,len(options))
         self.center_selection()
@@ -35,7 +45,7 @@ class DescriptiveListView(ListView):
         for option in options:
             if(option.get_description() is not None and option.get_description() != ''):
                 desc_text_width, desc_text_height = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)
-                return Theme.get_descriptive_list_text_offset_y() *2 + main_text_height + desc_text_height
+                return Theme.get_descriptive_list_text_offset_y()*2 + main_text_height + desc_text_height
 
         return Theme.get_descriptive_list_text_offset_y() + main_text_height
 
