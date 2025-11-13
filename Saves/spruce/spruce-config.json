@@ -85,7 +85,7 @@
                     "Game Switcher",
                     "Exit game"
                 ],
-                "selected": "Emulator Menu"
+                "selected": "Emulator menu"
             },
             "holdHomeAction": {
                 "display": "Hold home key action",
