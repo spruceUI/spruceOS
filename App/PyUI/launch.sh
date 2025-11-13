@@ -117,7 +117,7 @@ case "$PLATFORM" in
 
         if [ $redirect_output -eq 1 ]; then
             # Redirect stdout and stderr to /dev/null
-            sh -c "$cmd \"\$@\" >> /dev/null 2>&1" sh "$@"
+            sh -c "$cmd \"\$@\" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1" sh "$@"
         else
             # Run normally (no redirection)
             sh -c "$cmd \"\$@\"" sh "$@"
