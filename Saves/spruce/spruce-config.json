@@ -113,6 +113,17 @@
                 ],
                 "selected": "False"
             }
+        },
+        "Network Settings": {
+            "otaSkipVersionCheck": {
+                "display": "OTA: skip version check",
+                "description":"allows reinstall of same spruce version",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            }
         }
     }
 }

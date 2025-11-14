@@ -197,11 +197,11 @@ if ls "$FLAG_DIR"/tester_mode* >/dev/null 2>&1; then
 fi
 
 # Compare versions using awk
-SKIP_VERSION_CHECK=false
+SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaskipVersionCheck.selected' "True")"
 BETA_UPDATE=false
 
 if [ "$DEVELOPER_MODE" -eq 1 ] || [ "$TESTER_MODE" -eq 1 ]; then
-    SKIP_VERSION_CHECK=true
+    SKIP_VERSION_CHECK="True"
     log_update_message "Version check skipped due to developer/tester mode"
 fi
 
@@ -212,7 +212,7 @@ if echo "$UPDATE_FILE" | grep -q -- "-beta"; then
 fi
 
 log_update_message "Comparing versions: $UPDATE_VERSION vs $CURRENT_VERSION"
-if [ "$SKIP_VERSION_CHECK" = true ]; then
+if [ "$SKIP_VERSION_CHECK" = "True" ]; then
     log_update_message "Proceeding with update (version check skipped)"
 elif [ "$BETA_UPDATE" = true ]; then
     # For beta updates, only proceed if version is same or greater

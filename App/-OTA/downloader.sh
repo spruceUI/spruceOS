@@ -146,10 +146,10 @@ elif flag_check "tester_mode"; then
     fi
 fi
 
-SKIP_VERSION_CHECK=false
-# Set SKIP_VERSION_CHECK to true if developer mode or tester mode is enabled
+SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaskipVersionCheck.selected' "True")"
+# Set SKIP_VERSION_CHECK to True if developer mode or tester mode is enabled
 if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
-    SKIP_VERSION_CHECK=true
+    SKIP_VERSION_CHECK="True"
 fi
 
 # Fallback to default release URL if INFO is not available
@@ -170,7 +170,7 @@ fi
 
 # Compare versions
 log_update_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
-if [ "$SKIP_VERSION_CHECK" = true ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
+if [ "$SKIP_VERSION_CHECK" = "True" ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
     log_update_message "Proceeding with update"
 else
     log_update_message "Current version is up to date"

@@ -41,9 +41,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 <A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
-"" "Allow a reinstall" "|" "run|off" "echo -n off" "$SKIP_VERSION$|" "$SKIP_VERSION$ _INDEX_"
-@"Only run this task if needed."
-
 <Mac>
 "" "Delete macOS junk files from SD card" "|" "run|off" "echo -n off" "$DELETE_MAC_FILES$|" "$DELETE_MAC_FILES$ _INDEX_"
 @"Use this to delete any junk files created by macOS."
@@ -122,11 +119,8 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 [Game Switcher] [/mnt/SDCARD/spruce/flags/gs_options]
 
 "" "Run GS when you exit a game" "|" "on|off" "$HELP$ check runGSOnGameExit" "$HELP$ update runGSOnGameExit _VALUE_" ""
-
 "" "Use boxart instead of screenshots" "|" "on|off" "$HELP$ check alwaysUseBoxartInGS" "$HELP$ update alwaysUseBoxartInGS _VALUE_" ""
-
 "" "Maximum number of games" "||" "5|10|20" "$HELP$ get maxGamesInGS 10" "$HELP$ update maxGamesInGS _VALUE_" ""
-
 "-b" "Swap left/right buttons" "on|off" "on|off" "off" "" ""
 "-m" "Display title in multiple lines" "on|off" "on|off" "off" "" ""
 "-t" "Display title and options" "on|off" "on|off" "on" "" ""

@@ -93,6 +93,14 @@ check_installation_validity() {
     return 0
 }
 
+get_config_value() {
+    local key="$1"
+    local default="$2"
+    local file="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+    jq -r "${key} // \"$default\"" "$file"
+}
+
 kill_network_services() {
     killall -9 dropbear
     killall -9 smbd
