@@ -5,7 +5,7 @@
   "background": "",
   "themecolor": "FFFFFF",
   "launch": "../.emu_setup/standard_launch.sh",
-  "extlist": "chd|cdi|gdi|cue|iso|m3u",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
