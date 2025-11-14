@@ -197,6 +197,8 @@ log_message "got to 4" -v
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
+### MEDIA ###
+
 run_ffplay() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
@@ -220,6 +222,8 @@ kill_runner() {
         kill -9 $PID
     fi
 }
+
+### NDS ###
 
 run_drastic() {
 	export HOME=$EMU_DIR
@@ -312,6 +316,8 @@ save_drastic_configs() {
 	cp -f "$DS_DIR/drastic.cfg" "$DS_DIR/drastic-$PLATFORM.cfg"
 }
 
+### OPENBOR ###
+
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
@@ -330,6 +336,8 @@ run_openbor() {
 	fi
 	sync
 }
+
+### PICO8 ###
 
 run_pico8() {
     # send signal USR2 to joystickinput to switch to KEYBOARD MODE
@@ -421,6 +429,8 @@ load_pico8_control_profile() {
 	esac
 }
 
+### PORTS ###
+
 extract_game_dir(){
     # long-term come up with better method.
     # this is short term for testing
@@ -482,6 +492,8 @@ run_port() {
     fi
 }
 
+### PSP ###
+
 move_dotconfig_into_place() {
 	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]; then
 		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/.config" && log_message "Copied .config folder to root of SD card."
@@ -519,6 +531,8 @@ save_ppsspp_configs() {
 	cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-$PLATFORM.ini"
 	cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-$PLATFORM.ini"
 }
+
+### EVERYTHING ELSE ###
 
 run_retroarch() {
 
@@ -643,6 +657,8 @@ save_custom_n64_controller_profile() {
 	fi
 }
 
+### N64 ###
+
 run_mupen_standalone() {
 
 	export HOME="$EMU_DIR/mupen64plus"
@@ -674,6 +690,8 @@ run_mupen_standalone() {
 
 	rm -f "$TEMP_ROM"
 }
+
+### SATURN ###
 
 run_yabasanshiro() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
@@ -780,6 +798,10 @@ case $EMU_NAME in
 				save_custom_n64_controller_profile
 			fi
 		;;
+	"GB"*)
+		APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
+		/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh "$APPLY_PO"
+		run_retroarch
 	*)
 		ready_architecture_dependent_states
 		run_retroarch

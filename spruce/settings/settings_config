@@ -51,9 +51,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 [Emulators]
 
-"" "Use Perfect Overlays" "|" "on|off" "$HELP$ check perfect_overlays" "$PERFECT_OVERLAYS$ _VALUE_" "$PERFECT_OVERLAYS$ _INDEX_"
-@"Would apply to GB, GBC, and GBA consoles"
-
 "" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
 @"Automatically save and load states on game exit/start"
 

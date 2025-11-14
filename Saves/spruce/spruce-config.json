@@ -103,6 +103,15 @@
                     "False"
                 ],
                 "selected": "True"
+            },
+            "perfectOverlays": {
+                "display": "GB[C/A]: use Perfect Overlays",
+                "description": "provided by 1PlayerInsertCoin and Mugwomp93",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         }
     }
