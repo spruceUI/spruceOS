@@ -46,6 +46,16 @@
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}
+    },
+    "controlMode": {
+      "display": "RA: C-button Mode",
+      "options": [
+        "Custom",
+        "Classic (R2 + A, B, X, Y)",
+        "Action (A, X, Select, R1)"
+      ],
+      "selected": "Custom",
+      "overrides": {}
     }
   },
   "sortOrder": 3900,

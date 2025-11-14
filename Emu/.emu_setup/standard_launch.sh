@@ -623,7 +623,10 @@ stash_architecture_dependent_states() {
 }
 
 load_n64_controller_profile() {
-	PROFILE="$(setting_get "n64_control_profile")"
+	PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	[ "$PROFILE" = "Classic (R2 + A, B, X, Y)" ] && PROFILE="Classic"
+	[ "$PROFILE" = "Action (A, X, Select, R1)" ] && PROFILE="Action"
+
 	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 	LUDI="LudicrousN64 Xtreme Amped"
@@ -635,7 +638,10 @@ load_n64_controller_profile() {
 }
 
 save_custom_n64_controller_profile() {
-	PROFILE="$(setting_get "n64_control_profile")"
+	PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	[ "$PROFILE" = "Classic (R2 + A, B, X, Y)" ] && PROFILE="Classic"
+	[ "$PROFILE" = "Action (A, X, Select, R1)" ] && PROFILE="Action"
+	
 	if [ "$PROFILE" = "Custom" ]; then
 		SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
 		DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
@@ -808,7 +814,7 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
-		
+
 	*)
 		ready_architecture_dependent_states
 		run_retroarch
