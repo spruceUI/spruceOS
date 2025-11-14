@@ -118,6 +118,8 @@ update_gameswitcher_json() {
     game_system_name="$(printf '%s' "$CMD" | sed -n 's:.*Emu/\([^/]*\)/.*:\1:p')"
     rom_file_path="$(printf '%s' "$CMD" | sed 's:.*"\([^"]*\)" *$:\1:')"
     rom_file_path=$(readlink -f "$rom_file_path")
+    # Keep consistent between devices
+    rom_file_path="${rom_file_path//\/sdcard\//\/SDCARD\/}"
     gameswitcher_json="/mnt/SDCARD/Saves/gameswitcher.json"
 
     # Create file if missing
