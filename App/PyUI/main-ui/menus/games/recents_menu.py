@@ -6,8 +6,10 @@ from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from utils.consts import RECENTS
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from typing import List
 
 class RecentsMenu(RomsMenuCommon):
     def __init__(self):
@@ -19,9 +21,12 @@ class RecentsMenu(RomsMenuCommon):
     def get_amount_of_recents_to_allow(self):
         return sys.maxsize
     
+    def get_rom_list(self) -> List[RomInfo]:
+        return RecentsManager.get_recents()
+    
     def _get_rom_list(self) -> list[GridOrListEntry]:
         rom_list = []
-        recents : list[RomInfo] = RecentsManager.get_recents()[:self.get_amount_of_recents_to_allow()]
+        recents : list[RomInfo] = self.get_rom_list()[:self.get_amount_of_recents_to_allow()]
         for rom_info in recents:
             img_path = self._get_image_path(rom_info)
 
