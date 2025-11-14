@@ -1,0 +1,15 @@
+{
+    "Games" : "Gry",
+    "Recents": "Ostatnie",
+    "Apps": "Aplikacje",
+    "Collections": "Kolekcje",
+    "Favorites": "Ulubione",
+    "Settings": "Ustawienia",
+    "noEntriesFound": "Brak wpisów",
+    "systemGameSearch": "$system Wyszukiwanie gier",
+    "allSystemGameSearch": "Globalne wyszukiwanie gier",
+    "systemMenuSubOptions" : "$system Opcje podrzędne menu",
+    "gameSearch": "Wyszukiwanie gier:",
+    "exitPyUi": "Przeładuj UI"
+    
+}

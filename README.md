@@ -1,9 +1,6 @@
 ![sprucetreelogo](https://github.com/tenlevels/spruce/assets/139886575/f248b441-835c-4f2e-b849-cec145b3ffcf)
+# spruce: *SD Card Overhaul for Miyoo A30 and Flip* 
 
-# spruce: *SD Card Overhaul for Miyoo A30* 
-
-  - Spruce is not an operating system (OS) on its own.
-  - Spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
 
     _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
@@ -33,36 +30,34 @@ Plus many more enhancements over the original stock operating system!
   - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
 
 ## What was done:
-
+ - Featuring an all new highly customizable Python based front end UI.
  - All emulators and cores are pre-configured with performance considered.
  - Emulator systems are automatically detected games and show in the Games menu.
- - Advanced Settings App added.
- - Auto Save/Quick Shutdown + Resume feature added.
+ - Advanced Settings App.
+ - Auto Save/Quick Shutdown + Resume feature.
  - GameSwitcher App added.
  - Multiple WiFi networks can be remembered.
- - Automatic Firmware Updater App added.
- - Syncthing App added.
- - Random Game Apps added.
- - Bootlogo App added.
- - Miyoo Gamelist App added.
- - Boxart Scraper App added.
- - WiFi File Transfer App added.
- - SSH App added.
- - Samba App added.
+ - Automatic Firmware Updater App.
+ - Syncthing function added.
+ - Random Game App.
+ - Bootlogo App.
+ - Gamelist.xml App.
+ - Boxart Scraper App.
+ - WiFi File Transfer function.
+ - SSH.
+ - Samba.
  - Backup/Restore Apps added.
  - Auto-updater App added.
- - Battery% shown in Main Menu.
- - Auto Shutdown when idle function added.
- - Recents tab is optional via Advanced Settings toggle.
+ - Battery % shown in Main Menu.
+ - Auto Shutdown when idle function.
+ - Recents tab is optional.
  - Performance and overclock adjustments are preset and adjustable.
- - Removed RApp (RetroArch/Expert) from Main Menu.
  - In-game menu matches that of the theme loaded.
- - Imgs folders for box art are now located inside each Rom folder.
+ - Imgs folders for box art are located inside each Rom folder.
  - BIOS folder has been created on the root of SD card.
  - Auto save state/load states enabled.
- - Joystick function enabled on all systems and Main Menu.
- - Configuration of RetroArch with almost no notifications or hotkeys.
- - LED Control App added.
+ - LED Control functionality.
+ - Over The Air updates.
 
 ## Installation
   - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
@@ -85,7 +80,6 @@ Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and cal
 
 ### Main Menu
 
-* Refresh ROMs/Search: HOME
 * Search: SELECT
 * Shutdown: Hold POWER until *Power Off* pop-up display (press A to confirm)
 * Emulator/CPU clock/Random Game selection menu: X while over a game title
@@ -167,34 +161,29 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - Aemiii91, tGecko and QuackWalks: Being awesome!
   - Russ from RGC: His YouTube channel is an inspiration.
   - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
+  - [Miyoo](https://lomiyoo.com/) for sending us development units.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## The Current Team (Alphabetical order):
    - 369px
-   - Basecase - Stefan Ayala
    - Chrisj951 - Discord @chrisbastion
-   - Cinethezs
+   - Chris Cromer
+   - Cilantro
    - Cobaltdsc4102
    - Dandon
-   - Decojon
-   - Fragbait79
+   - German Tacos
    - Lonko
-   - Metallic77
-   - Mike C
-   - Oscarkcau
    - Ry - Ryan Sartor
-   - SamuraiCowboy
+   - Spiken
    - SundownerSport
-   - Veckia9x
-   - XanXic
 
 ## SUPPORTED GAME SYSTEMS
 
-*Amiga / Amstrad CPC / Arcade / Arduboy / (FBNEO & Mame 2003+) / Atari 800 / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
+*Amiga / Amstrad CPC / Arcade / Arduboy / (FBNEO & Mame 2003+) / Atari 800 / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game Tank / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega Saturn / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
 
-  - N64/DC/PSP:
+  - N64/DC/Naomi/PSP/Saturn:
 
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
 
