@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 import os
+from pathlib import Path
 from typing import List, Tuple
 from devices.device import Device
 from menus.games.utils.rom_info import RomInfo
@@ -27,7 +28,7 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def _entry_key(self, rom_file_path: str, game_system_name: str) -> Tuple[str, str]:
-        return (rom_file_path, game_system_name)
+        return (str(Path(rom_file_path).resolve()), game_system_name)
 
     def add_game(self, rom_info: RomInfo):
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.folder_name)

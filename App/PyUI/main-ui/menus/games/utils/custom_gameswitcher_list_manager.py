@@ -23,8 +23,8 @@ class CustomGameSwitcherListManager:
 
     @classmethod
     def add_game(cls, rom_info: RomInfo):
+        cls._wait_for_init()
         if(cls._exists):
-            cls._wait_for_init()
             cls._recentsManager.add_game(rom_info)
             games = cls._recentsManager.get_games()
             if len(games) > 20:
@@ -33,8 +33,8 @@ class CustomGameSwitcherListManager:
                 
     @classmethod
     def get_recents(cls) -> List[RomInfo]:
+        cls._wait_for_init()
         if(cls._exists):
-            cls._wait_for_init()
             return cls._recentsManager.get_games()
         else:
             return []

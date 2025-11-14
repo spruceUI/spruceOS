@@ -148,6 +148,7 @@ class Controller:
                     Controller.gs_triggered = True
                     from menus.games.recents_menu_gs import RecentsMenuGS
                     Controller.clear_last_input()
+                    PyUiLogger.get_logger().info("Starting GS().run_rom_selection()")
                     RecentsMenuGS().run_rom_selection()
                     Controller.clear_last_input()
                     Controller.gs_triggered = False
