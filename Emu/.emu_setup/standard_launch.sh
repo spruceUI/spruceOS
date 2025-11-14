@@ -506,18 +506,13 @@ run_ppsspp() {
 	export HOME=/mnt/SDCARD
 	cd $EMU_DIR
 
-	PPSSPP_CMDLINE="--fullscreen"
-	if setting_get "ppsspp_pause_exit"; then
-		PPSSPP_CMDLINE="$PPSSPP_CMDLINE --pause-menu-exit"
-	fi
-
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 	case "$PLATFORM" in
 		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
 		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
 		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
 	esac
-	"$PPSSPPSDL" "$ROM_FILE" "$PPSSPP_CMDLINE"
+	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit
 }
 
 load_ppsspp_configs() {
