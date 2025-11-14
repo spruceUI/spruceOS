@@ -7,6 +7,7 @@ import threading
 from devices.device import Device
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
+from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
@@ -89,6 +90,7 @@ def initialize_device(device, main_ui_mode):
 def background_startup():
     FavoritesManager.initialize(Device.get_favorites_path())
     RecentsManager.initialize(Device.get_recents_path())
+    CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_collections_path())
     AppsManager.initialize(Device.get_apps_config_path())
 

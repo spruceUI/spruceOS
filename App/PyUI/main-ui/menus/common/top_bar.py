@@ -15,7 +15,8 @@ class TopBar:
         self.volume_changed_time = time.time()
         self.volume = 0
         self.selected_tab = "Games"
-        
+        self.top_bar_h = 0
+
     def render_top_bar(self, title, hide_top_bar_icons = False) :
         if(Theme.skip_main_menu()):
             self.render_top_bar_menu_skipped(title, hide_top_bar_icons)

@@ -6,7 +6,7 @@ from themes.theme import Theme
 
 class BottomBar:
     def __init__(self):
-        pass
+        self.bottom_bar_h = 0
 
     def render_bottom_bar(self, bottom_bar_text=None,render_bottom_bar_icons_and_images=True) :
         from display.display import Display

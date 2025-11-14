@@ -46,7 +46,9 @@ class ViewCreator:
                     missing_image_path=None,
                     allow_scrolling_text=False,
                     full_screen_grid_resize_type=None,
-                    full_screen_grid_render_text_overlay=None) -> object:
+                    full_screen_grid_render_text_overlay=None,
+                    image_resize_height_multiplier=None,
+                    render_bottom_bar_text_enabled=None) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -205,7 +207,9 @@ class ViewCreator:
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
                     missing_image_path=missing_image_path,
                     resize_type=full_screen_grid_resize_type,
-                    render_text_overlay=full_screen_grid_render_text_overlay
+                    render_text_overlay=full_screen_grid_render_text_overlay,
+                    image_resize_height_multiplier=image_resize_height_multiplier,
+                    render_bottom_bar_text_enabled=render_bottom_bar_text_enabled
                 )
             case ViewType.CAROUSEL:
                 return CarouselView(
