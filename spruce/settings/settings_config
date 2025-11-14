@@ -10,7 +10,6 @@ $PERFECT_OVERLAYS=/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyP
 $PPSSPP_PAUSE_EXIT=/mnt/SDCARD/spruce/scripts/applySetting/ppssppPauseExit.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
-$RAREWIND=/mnt/SDCARD/spruce/scripts/applySetting/retroArchRewind.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
 $RUMBLE=/mnt/SDCARD/spruce/scripts/applySetting/rumbleIntensity.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
@@ -57,9 +56,6 @@ $SKIP_VERSION=/mnt/SDCARD/spruce/scripts/tasks/skipVersion.sh$
 
 "" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
 @"Automatically save and load states on game exit/start"
-
-"" "RetroArch: Use Rewind" "|" "on|off" "$RAREWIND$ check" "$RAREWIND$ assign _VALUE_" "$RAREWIND$ hint _VALUE_"
-@"Replaces Slow Mo mode with Rewind"
 
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"
