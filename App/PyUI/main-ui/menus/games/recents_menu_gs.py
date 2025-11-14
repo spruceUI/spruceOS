@@ -1,8 +1,14 @@
 
+from typing import List
 from devices.device import Device
 from menus.games.recents_menu import RecentsMenu
+from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
+from menus.games.utils.recents_manager import RecentsManager
+from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
 from utils.consts import GAME_SWITCHER
+from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class RecentsMenuGS(RecentsMenu):
@@ -29,3 +35,10 @@ class RecentsMenuGS(RecentsMenu):
    
     def prefer_savestate_screenshot(self):
         return Device.get_system_config().use_savestate_screenshots(GAME_SWITCHER)
+
+    def get_rom_list(self) -> List[RomInfo]:
+        if(PyUiConfig.get_gameswitcher_path() is not None and Device.get_system_config().use_custom_gameswitcher_path()):
+            return CustomGameSwitcherListManager.get_recents()
+        else:
+            return RecentsManager.get_recents()
+        
