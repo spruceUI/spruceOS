@@ -740,6 +740,7 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 log_message "got to 6" -v
 
 case $EMU_NAME in
+
 	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ]; then
 			run_flycast_standalone
@@ -750,30 +751,55 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
+
+	"GB"*)
+		APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
+		/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh "$APPLY_PO"
+		run_retroarch
+		;;
+
 	"MEDIA")
 		run_ffplay
 		;;
+
 	"NDS")
 		load_drastic_configs
 		run_drastic
 		save_drastic_configs
 		;;
+
+	"N64")
+		if [ "$CORE" = "mupen64plus-standalone" ]; then
+			run_mupen_standalone
+		else
+			load_n64_controller_profile
+			ready_architecture_dependent_states
+			run_retroarch
+			stash_architecture_dependent_states
+			save_custom_n64_controller_profile
+		fi
+		;;
+
 	"OPENBOR")
 		run_openbor
 		;;
+
 	"PICO8")
 		load_pico8_control_profile
 		run_pico8
 		;;
+
 	"PORTS")
 		run_port
 		;;
+
 	"PSP")
 		[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
 		load_ppsspp_configs
 		run_ppsspp
 		save_ppsspp_configs
 		;;
+
 	"SATURN")
 		if [ "$CORE" = "yabasanshiro-standalone-bios" ] || [ "$CORE" = "yabasanshiro-standalone-hle" ]; then
 			run_yabasanshiro
@@ -782,21 +808,7 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
-	"N64")
-			if [ "$CORE" = "mupen64plus-standalone" ]; then
-				run_mupen_standalone
-			else
-				load_n64_controller_profile
-				ready_architecture_dependent_states
-				run_retroarch
-				stash_architecture_dependent_states
-				save_custom_n64_controller_profile
-			fi
-		;;
-	"GB"*)
-		APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
-		/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh "$APPLY_PO"
-		run_retroarch
+		
 	*)
 		ready_architecture_dependent_states
 		run_retroarch

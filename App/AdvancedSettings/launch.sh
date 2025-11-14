@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Remove broken old setting
-sed -i '/^boot_to=MainUI$/d' /mnt/sdcard/spruce/settings/spruce.cfg
-
 # Copy of platform detection from helperFunctions.sh
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
@@ -10,7 +7,6 @@ case $INFO in
     *"TG5040"*) export PLATFORM="SmartPro" ;;
     *"TG3040"*) export PLATFORM="Brick" ;;
     *"0xd05"*)  export PLATFORM="Flip" ;;
-    *)          export PLATFORM="A30" ;;
 esac
 
 if [ "$PLATFORM" = "A30" ]; then
@@ -21,7 +17,6 @@ fi
 
 SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-HELPER_PATH="/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh"
 
 # Copy of just flag_check from helperFunctions.sh here to keep launch time short
 flag_check() {
