@@ -17,11 +17,7 @@ class RecentsMenuGS(RecentsMenu):
 
     
     def run_rom_selection(self) :
-        original_value = Theme.skip_main_menu()
-        Theme.set_skip_main_menu(True)
-        return_value = self._run_rom_selection("Game Switcher")
-        Theme.set_skip_main_menu(original_value)
-        return return_value
+        return self._run_rom_selection("Game Switcher")
     
     def get_amount_of_recents_to_allow(self):
         return Device.get_system_config().game_switcher_game_count()
