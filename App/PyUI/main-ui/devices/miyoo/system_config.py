@@ -303,3 +303,12 @@ class SystemConfig:
     def set_bgm_volume(self,value):
         self.config["bgmVolume"] = value
         self.save_config()
+
+    def use_custom_gameswitcher_path(self):
+        return self.config.get("useCustomGameSwitcherPath", True)
+
+    def set_use_custom_gameswitcher_path(self,value):
+        self.config["useCustomGameSwitcherPath"] = value
+        self.save_config()
+
+
