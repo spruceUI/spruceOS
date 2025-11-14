@@ -158,7 +158,7 @@ prepare_game_switcher() {
         fi
 
         # capture screenshot
-        GAME_PATH=$(echo $CMD | cut -d\" -f4)
+        GAME_PATH=$(echo $CMD | cut -d\" -f6)
         [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
         log_message "*** homebutton_watchdog.sh: 'GAME_PATH': $GAME_PATH" -v
         GAME_NAME="${GAME_PATH##*/}"
@@ -182,11 +182,12 @@ prepare_game_switcher() {
         fi
 
         if [ "$PLATFORM" = "A30" ]; then
-            $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w "$WIDTH" -h "$HEIGHT" -b 32 -l "$WIDTH" "$SCREENSHOT_NAME" 2>/dev/null &
+            /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" &
         else
             $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
         fi
-       
+
+        
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
