@@ -20,17 +20,13 @@ class FullScreenGridView(View):
                  set_top_bar_text_to_selection=False, 
                  unselected_bg = None, missing_image_path=None,
                  resize_type = ResizeType.ZOOM,
-                 render_text_overlay = True,
-                 image_resize_height_multiplier = None,
-                 render_bottom_bar_text_enabled = None):
+                 render_text_overlay = True):
         super().__init__()
         if(render_text_overlay is None):
             render_text_overlay = True
         self.render_text_overlay = render_text_overlay
         self.resized_width = int(Device.screen_width() * 1.0)
-        if(image_resize_height_multiplier is None):
-            image_resize_height_multiplier = 0.75
-        self.resized_height = int(Device.screen_height() * image_resize_height_multiplier)
+        self.resized_height = int(Device.screen_height() * 0.75)
         self.resize_type = resize_type
         if(self.resize_type is None):
             self.resize_type = ResizeType.ZOOM
@@ -70,10 +66,6 @@ class FullScreenGridView(View):
         self.last_selected = self.selected
         self.last_start = 0
         self.animated_count = 0
-
-        self.render_bottom_bar_text_enabled = render_bottom_bar_text_enabled
-        if(self.render_bottom_bar_text_enabled is None):
-            self.render_bottom_bar_text_enabled = True
 
     def set_options(self, options):
         self.options = options
@@ -172,18 +164,12 @@ class FullScreenGridView(View):
 
         return w,h
 
-    def get_top_bar_height(self):
-        if(self.render_bottom_bar_text_enabled):
-            return Display.get_top_bar_height(False)
-        else:
-            return 0
-
     def _render_image(self, index=None, x_offset=0, render_text_overlay=True, text_alpha=None):
         imageTextPair = self.options[index]
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()
         secondary_text = imageTextPair.get_description()  
-        y_offset = self.get_top_bar_height()
+        y_offset = Display.get_top_bar_height(False)
         if(self.resize_type is ResizeType.FIT):
             render_mode = RenderMode.TOP_CENTER_ALIGNED
             x_offset += Device.screen_width() // 2
@@ -196,7 +182,7 @@ class FullScreenGridView(View):
             elif(bottom_aligned):
                 render_mode = RenderMode.BOTTOM_CENTER_ALIGNED
                 x_offset += Device.screen_width() // 2
-                y_offset = Device.screen_height() - self.get_top_bar_height()
+                y_offset = Device.screen_height() - Display.get_top_bar_height(False)
             else:
                 render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
                 x_offset += Device.screen_width() // 2
@@ -228,33 +214,32 @@ class FullScreenGridView(View):
         return start_index
         
     def _render_bottom_bar_text(self):
-        if(self.render_bottom_bar_text_enabled):
-            start_index = self.calculate_start_index()
-            if(self.last_start > start_index):
-                if(self.selected >= self.last_start):
-                    start_index = self.last_start
-                else:
-                    while(self.last_start < start_index):
-                        start_index = self.last_start - 1
+        start_index = self.calculate_start_index()
+        if(self.last_start > start_index):
+            if(self.selected >= self.last_start):
+                start_index = self.last_start
+            else:
+                while(self.last_start < start_index):
+                    start_index = self.last_start - 1
 
-            visible_text_options = self.options[start_index:len(self.options)]
+        visible_text_options = self.options[start_index:len(self.options)]
 
-            y_offset = Device.screen_height() - 10 #TODO
-            x_offset = self.x_text_pad
+        y_offset = Device.screen_height() - 10 #TODO
+        x_offset = self.x_text_pad
 
-            for visible_index, imageTextPair in enumerate(visible_text_options):
-                actual_index = start_index + visible_index
-                color = Theme.text_color_selected(
-                    self.font_purpose) if actual_index == self.selected else Theme.text_color(self.font_purpose)
-                w, h = Display.render_text(imageTextPair.get_primary_text()[:10],
-                                    x_offset,
-                                    y_offset,
-                                    color,
-                                    self.font_purpose,
-                                    render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
-                x_offset += self.x_text_pad + w
+        for visible_index, imageTextPair in enumerate(visible_text_options):
+            actual_index = start_index + visible_index
+            color = Theme.text_color_selected(
+                self.font_purpose) if actual_index == self.selected else Theme.text_color(self.font_purpose)
+            w, h = Display.render_text(imageTextPair.get_primary_text()[:10],
+                                 x_offset,
+                                 y_offset,
+                                 color,
+                                 self.font_purpose,
+                                 render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
+            x_offset += self.x_text_pad + w
 
-            self.last_start = start_index
+        self.last_start = start_index
 
     def _clear(self):
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:

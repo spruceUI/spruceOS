@@ -146,9 +146,9 @@ class Controller:
                 was_hotkey = Controller.check_for_hotkey()
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
                     Controller.gs_triggered = True
+                    PyUiLogger.get_logger().info(f"GS Triggered")
                     from menus.games.recents_menu_gs import RecentsMenuGS
                     Controller.clear_last_input()
-                    PyUiLogger.get_logger().info("Starting GS().run_rom_selection()")
                     RecentsMenuGS().run_rom_selection()
                     Controller.clear_last_input()
                     Controller.gs_triggered = False
