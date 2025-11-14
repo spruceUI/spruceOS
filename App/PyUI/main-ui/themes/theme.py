@@ -79,8 +79,9 @@ class Theme():
 #                    "-acodec", "pcm_s16le",  # WAV PCM 16-bit
 #                    bgm_wav
 #                ],check=False, timeout=None, print=True)
-        cls.bgm_setting_changed()
+
         cls.button_press_sounds_changed()
+        cls.bgm_setting_changed()
 
 
     @classmethod
@@ -101,6 +102,7 @@ class Theme():
         button_press_wav = os.path.join(cls._path, "sound", "change.wav")
         if(os.path.exists(button_press_wav)) and os.path.getsize(button_press_wav) > 0:
             cls._button_press_wav = button_press_wav
+            Device.get_audio_system().load_wav(button_press_wav)
 
     @classmethod
     def controller_button_pressed(cls, input):

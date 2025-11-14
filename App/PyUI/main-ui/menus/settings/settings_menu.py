@@ -100,7 +100,7 @@ class SettingsMenu(ABC):
                             value_text="<    " + selected_value + "    >",
                             image_path=None,
                             image_path_selected=None,
-                            description=description,
+                            description=None,
                             icon=None,
                             value=lambda 
                                 input_value, 
@@ -230,3 +230,32 @@ class SettingsMenu(ABC):
         value += delta
         if(min <= value <= max):
             set_value_func(value)
+
+    def get_selected_index(self, title, options):
+        selected = Selection(None, None, 0)
+        self.should_scan_for_bluetooth = True
+        option_list = []
+        for index, opt in enumerate(options):
+            option_list.append(
+                GridOrListEntry(
+                    primary_text=opt,
+                    value=index
+                )
+            )
+
+        #convert to text and desc and show the theme desc
+        #maybe preview too if theyre common
+        view = ViewCreator.create_view(
+            view_type=ViewType.TEXT_ONLY,
+            top_bar_text=title,
+            options=option_list,
+            selected_index=selected.get_index())
+
+        accepted_inputs = [ControllerInput.A, ControllerInput.B]
+
+        while (True):
+            selected = view.get_selection(accepted_inputs)
+            if (ControllerInput.A == selected.get_input()):
+                return selected.get_selection().get_value()
+            elif (ControllerInput.B == selected.get_input()):
+                return None

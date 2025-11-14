@@ -21,3 +21,6 @@ class AudioPlayerDelegateSdl2:
 
     def audio_stop_loop(self):
         Sdl2AudioPlayer.audio_stop_loop()
+
+    def load_wav(self,file_path: str):
+        Sdl2AudioPlayer.load_wav(file_path)

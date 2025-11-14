@@ -4,6 +4,7 @@ import struct
 import subprocess
 import threading
 import time
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -47,6 +48,7 @@ class MiyooA30(MiyooDevice):
             self.init_gpio()
             miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
             ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
+            self.audio_player = AudioPlayerDelegateSdl2()
 
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             #self.hardware_poller = MiyooFlipPoller(self)
@@ -340,3 +342,5 @@ class MiyooA30(MiyooDevice):
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, theme_path)
 
+    def get_audio_system(self):
+        return self.audio_player
