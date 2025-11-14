@@ -135,9 +135,6 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
 
         saves_root = os.sep.join(parts[:roms_index]) + os.sep + "Saves" + os.sep + "states"
         for root, dirs, files in os.walk(saves_root):
-            dirs.sort(reverse=True)   # sort subdirectories alphabetically in-place
-            files.sort(reverse=True)  # sort files alphabetically in-place
-            
             state_png = os.path.join(root, base_name + ".state.auto.png")
             if os.path.exists(state_png):
                 return state_png

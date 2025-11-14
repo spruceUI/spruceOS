@@ -108,39 +108,6 @@ kill_current_app() {
     fi
 }
 
-update_gameswitcher_json() {
-    CMD="$1"
-    SCREENSHOT_NAME="$2"
-
-    # -------------------------------
-    # Extract system + rom path
-    # -------------------------------
-    game_system_name="$(printf '%s' "$CMD" | sed -n 's:.*Emu/\([^/]*\)/.*:\1:p')"
-    rom_file_path="$(printf '%s' "$CMD" | sed 's:.*"\([^"]*\)" *$:\1:')"
-    rom_file_path=$(readlink -f "$rom_file_path")
-    gameswitcher_json="/mnt/SDCARD/Saves/gameswitcher.json"
-
-    # Create file if missing
-    [ ! -f "$gameswitcher_json" ] && echo "[]" > "$gameswitcher_json"
-
-    tmpfile="$(mktemp)"
-
-    # -------------------------------
-    # Update JSON (remove duplicates + add new entry to top)
-    # -------------------------------
-    jq --arg rom_file_path "$rom_file_path" \
-       --arg game_system_name "$game_system_name" '
-        map(select(.rom_file_path != $rom_file_path)) |
-        ([{
-            rom_file_path: $rom_file_path,
-            game_system_name: $game_system_name
-        }] + .)
-       ' "$gameswitcher_json" > "$tmpfile"
-
-    mv "$tmpfile" "$gameswitcher_json"
-}
-
-
 prepare_game_switcher() {
     # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ]; then
@@ -165,9 +132,7 @@ prepare_game_switcher() {
         log_message "*** homebutton_watchdog.sh: 'SHORT_NAME': $SHORT_NAME" -v
         EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
         log_message "*** homebutton_watchdog.sh: 'EMU_NAME': $EMU_NAME" -v
-        mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
-        SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
-
+        SCREENSHOT_NAME="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
         log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
         # ensure folder exists
         mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
@@ -187,7 +152,21 @@ prepare_game_switcher() {
        
         log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
-        update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
+        # update switcher game list
+        if [ -f "$LIST_FILE" ]; then
+            # if game list file exists
+            # get all commands except the current game
+            log_message "*** homebutton_watchdog.sh: Appending command to list file" 
+            grep -Fxv "$CMD" "$LIST_FILE" >"$TEMP_FILE"
+            mv "$TEMP_FILE" "$LIST_FILE"
+            # append the command for current game to the end of game list file
+            echo "$CMD" >>"$LIST_FILE"
+        else
+            # if game list file does not exist
+            # put command to new game list file
+            log_message "*** homebutton_watchdog.sh: Creating new list file" 
+            echo "$CMD" >"$LIST_FILE"
+        fi
 
     # if in MainUI menu
     elif pgrep "MainUI" >/dev/null; then
@@ -232,13 +211,11 @@ prepare_game_switcher() {
 
     # kill RA or other emulator or MainUI
     kill_emulator
+    killall -q -9 MainUI
 
-    if pgrep "MainUI" >/dev/null; then
-        log_message "*** homebutton_watchdog.sh: letting PyUI handle menu button" 
-    else
-        touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
-        killall -q -9 MainUI
-    fi
+    # set flag file for principal.sh to load game switcher later
+    flag_add "gs"
+    log_message "*** homebutton_watchdog.sh: flag file created for gs" 
 }
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
@@ -361,7 +338,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         PID=$!
 
         # pause PPSSPP, PICO8 or MainUI if it is running
-        killall -q -STOP PPSSPPSDL PPSSPPSDL_$PLATFORM pico8_dyn pico8_64
+        killall -q -STOP PPSSPPSDL PPSSPPSDL_$PLATFORM pico8_dyn pico8_64 MainUI
 
         # copy framebuffer to memory temp file
         cp /dev/fb0 /tmp/fb0

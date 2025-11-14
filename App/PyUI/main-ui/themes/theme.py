@@ -1121,7 +1121,7 @@ class Theme():
 
     @classmethod
     def get_set_top_bar_text_to_game_selection_for_game_switcher(cls):
-        return cls._data.get("gameSwitcherSetTopBarTextToGameSelection", False)
+        return cls._data.get("gameSwitcherSetTopBarTextToGameSelection", True)
     
     @classmethod
     def set_set_top_bar_text_to_game_selection_for_game_switcher(cls, value):

@@ -93,26 +93,14 @@ class RomsMenuCommon(ABC):
     def get_set_top_bar_text_to_game_selection(self):
         return Theme.get_set_top_bar_text_to_game_selection()
 
-    def get_game_select_row_count(self):
-        return Theme.get_game_select_row_count()
-    
-    def get_game_select_col_count(self):
-        return Theme.get_game_select_col_count()
-    
-    def get_image_resize_height_multiplier(self):
-        return None
-    
-    def get_render_bottom_bar_text_enabled(self):
-        return None
-
     def create_view(self, page_name, rom_list, selected):
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
                         options=rom_list,
                         selected_index=selected.get_index(),
-                        rows=self.get_game_select_row_count(),
-                        cols=self.get_game_select_col_count(),
+                        rows=Theme.get_game_select_row_count(),
+                        cols=Theme.get_game_select_col_count(),
                         grid_resized_width=Theme.get_grid_game_select_img_width(),
                         grid_resized_height=Theme.get_grid_game_select_img_height(),
                         use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),
@@ -128,9 +116,7 @@ class RomsMenuCommon(ABC):
                         carousel_sides_hang_off_edge=Theme.get_carousel_game_select_sides_hang_off(),
                         missing_image_path=Theme.get_missing_image_path(),
                         allow_scrolling_text=True, # roms select is allowed to scroll
-                        full_screen_grid_resize_type=self.full_screen_grid_resize_type(),
-                        image_resize_height_multiplier=self.get_image_resize_height_multiplier(),
-                        render_bottom_bar_text_enabled=self.get_render_bottom_bar_text_enabled()
+                        full_screen_grid_resize_type=self.full_screen_grid_resize_type()
                         )
 
     def _run_rom_selection(self, page_name) :

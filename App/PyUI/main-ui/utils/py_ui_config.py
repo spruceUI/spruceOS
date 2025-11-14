@@ -199,7 +199,3 @@ class PyUiConfig:
     def allow_pyui_game_switcher(cls):
         return cls.get("allowPyUiGameSwitcher",True)
 
-    @classmethod
-    def get_gameswitcher_path(cls):
-        return cls.get("gameSwitcherPath",None)
-

@@ -7,6 +7,5 @@
     "mainMenuTitle": "spruceOS",
     "gameSystemSortMode": "SortOrderKey",
     "includeStockOsLaunchOption": false,
-    "allowPyUiGameSwitcher": true,
-    "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json"
+    "allowPyUiGameSwitcher": false
 }
