@@ -24,9 +24,6 @@ $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
 
 [System]
 
-"" "Skip shutdown confirmation" "|" "on|off" "$HELP$ check skip_shutdown_confirm" "$HELP$ update skip_shutdown_confirm _VALUE_" ""
-@"While in main menu or native PICO-8"
-
 <Flip>
 "" "Extended brightness controls" "|" "on|off" "$HELP$ check extended_brightness" "$HELP$ update extended_brightness _VALUE_" ""
 @"Start + L/R change contrast at minimum brightness"

@@ -44,62 +44,6 @@ else
     cat "$DEVICE_BRIGHTNESS_PATH" >/mnt/SDCARD/spruce/settings/sys_brightness_level
 fi
 
-if pgrep -f gameswitcher.sh >/dev/null; then
-    # pause game switcher
-    killall -q -19 switcher
-    # remove lastgame flag to prevent loading any App after next boot
-    flag_remove "lastgame"
-    # add flag to load game switcher after next boot
-    flag_add "gs"
-    # display blank tree screen while shutting down
-    display -i "$BG_TREE"
-    dim_screen &
-fi
-
-# Check if MainUI or PICO8 is running and skip_shutdown_confirm is not set
-# NOTE: Flip uses KMSDRM so we just always skip the prompt
-if (flag_check "in_menu" || pgrep "pico8_dyn" || pgrep "pico8_64" >/dev/null) && [ "$PLATFORM" != "Flip" ]; then
-	
-    if setting_get "skip_shutdown_confirm" || flag_check "forced_shutdown"; then
-        # If skip_shutdown_confirm is set, proceed directly with shutdown
-        flag_remove "lastgame"
-        if flag_check "forced_shutdown"; then
-            display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
-            flag_remove "forced_shutdown"
-        else
-            display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        fi
-        dim_screen &
-    else
-        # Pause MainUI or pico8
-        killall -q -19 MainUI
-        killall -q -19 pico8_dyn
-        killall -q -19 pico8_64
-
-        if ! flag_check "sleep.powerdown"; then
-            # Show confirmation screen
-            display --text "Are you sure you want to shutdown?" --image "$BG_TREE" --confirm
-
-            # Wait for user confirmation
-            if confirm 30 0; then
-                rm "${FLAGS_DIR}/lastgame.lock"
-                display -i "$BG_TREE"
-                dim_screen &
-            else
-                display_kill
-                # Resume MainUI or pico8_dyn
-                killall -q -18 MainUI
-                killall -q -18 pico8_dyn
-                killall -q -18 pico8_64
-                return 0
-            fi
-        else
-            # If sleep powerdown, proceed with shutdown
-            rm "${FLAGS_DIR}/lastgame.lock"
-        fi
-    fi
-fi
-
 # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
 pgrep -f "lid_watchdog.sh" | xargs -r kill
 
@@ -119,9 +63,6 @@ if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/E
     # remove lastgame flag to prevent loading any App after next boot
     rm "${FLAGS_DIR}/lastgame.lock"
 fi
-
-# Kill PICO8 if running
-killall -q -15 pico8_dyn pico8_64
 
 # trigger auto save and send kill signal
 if pgrep -f "PPSSPPSDL" >/dev/null; then
@@ -144,6 +85,8 @@ else
     killall -q -15 ra64.trimui_$PLATFORM
     killall -q -15 drastic32
     killall -q -15 drastic64
+    killall -q -15 pico8_dyn
+    killall -q -15 pico8_64
     killall -q -15 flycast
     killall -q -15 yabasanshiro
     killall -q -15 yabasanshiro.trimui
@@ -169,17 +112,27 @@ while killall -q -0 ra32.miyoo ||
     sleep 0.3
 done
 
-# show saving screen
+# Display appropriate image and message depending on whether it's a forced safe shutdown, or else whether user is in-game or in-menu.
 if flag_check "forced_shutdown"; then
-    display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Battery level is below 1%. Shutting down to prevent progress loss."
+    display -i "$BG_TREE" -t "Battery level is below 1%. Shutting down to prevent progress loss."
     flag_remove "forced_shutdown"
-    dim_screen &
+
+elif pgrep -f gameswitcher.sh >/dev/null; then
+    killall -q -15 switcher
+    flag_remove "lastgame"      # remove lastgame flag to prevent loading any App after next boot
+    flag_add "gs"               # add flag to load game switcher after next boot
+    display -i "$BG_TREE"
+
+elif flag_check "in_menu"; then
+    display -i "$BG_TREE"
+
 elif ! pgrep "display_text.elf" >/dev/null && ! flag_check "sleep.powerdown"; then
     display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
-    dim_screen &
 fi
 
-# Created save_active flag
+dim_screen &
+
+# Set flag to trigger autoresume on boot if appropriate
 if flag_check "in_menu"; then
     flag_remove "save_active"
 else
@@ -205,6 +158,7 @@ if setting_get "syncthing" && flag_check "emulator_launched"; then
     flag_remove "syncthing_startup_synced"
 fi
 
+flag_remove "sleep.powerdown"
 flag_remove "emulator_launched"
 
 # Save current sound settings
@@ -212,8 +166,6 @@ if flag_check "sleep.powerdown"; then
     amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
 fi
 alsactl store
-
-flag_remove "sleep.powerdown"
 
 # All processes should have been killed, safe to update time if enabled
 /mnt/SDCARD/spruce/scripts/geoip_timesync.sh

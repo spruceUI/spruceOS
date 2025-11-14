@@ -67,14 +67,14 @@ while true; do
                 sleep_setting=$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "5m")
                 # Map to corresponding seconds
                 case "$sleep_setting" in
-                Instant) WAKE_ALARM_SEC=-1 ;;
-                Off) WAKE_ALARM_SEC=0 ;;
-                2m) WAKE_ALARM_SEC=120 ;;
-                5m) WAKE_ALARM_SEC=300 ;;
-                10m) WAKE_ALARM_SEC=600 ;;
-                30m) WAKE_ALARM_SEC=1800 ;;
-                60m) WAKE_ALARM_SEC=3600 ;;
-                *) WAKE_ALARM_SEC=300 ;; # Default to 5m if no match
+                    Instant) WAKE_ALARM_SEC=-1 ;;
+                    Off) WAKE_ALARM_SEC=0 ;;
+                    2m) WAKE_ALARM_SEC=120 ;;
+                    5m) WAKE_ALARM_SEC=300 ;;
+                    10m) WAKE_ALARM_SEC=600 ;;
+                    30m) WAKE_ALARM_SEC=1800 ;;
+                    60m) WAKE_ALARM_SEC=3600 ;;
+                    *) WAKE_ALARM_SEC=300 ;; # Default to 5m if no match
                 esac
 
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
