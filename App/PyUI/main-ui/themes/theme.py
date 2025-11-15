@@ -287,10 +287,10 @@ class Theme():
     def render_top_and_bottom_bar_last(cls): return cls._data.get("renderTopAndBottomBarLast", False)
     
     @classmethod
-    def confirm_text(cls): return "Okay"
+    def confirm_text(cls): return cls._data.get("confirmText", "Okay")
     
     @classmethod
-    def back_text(cls): return "Back"
+    def back_text(cls): return cls._data.get("backText", "Back")
     
     @classmethod
     def favorite_icon(cls): return cls._asset("ic-favorite-mark.qoi")
