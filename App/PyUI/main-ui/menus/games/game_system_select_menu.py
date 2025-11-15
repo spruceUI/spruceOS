@@ -177,7 +177,7 @@ class GameSystemSelectMenu:
         if(index is not None):
             icon = icon_system_name_priority[index]
             selected_icon = selected_icon_system_name_priority[index]
-            if not os.path.isfile(selected_icon):
+            if selected_icon is None or not os.path.isfile(selected_icon):
                 selected_icon = icon    
             return icon, selected_icon
         else:
