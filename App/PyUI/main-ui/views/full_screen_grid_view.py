@@ -21,8 +21,7 @@ class FullScreenGridView(View):
                  unselected_bg = None, missing_image_path=None,
                  resize_type = ResizeType.ZOOM,
                  render_text_overlay = True,
-                 image_resize_height_multiplier = None,
-                 render_bottom_bar_text_enabled = None):
+                 image_resize_height_multiplier = None):
         super().__init__()
         if(render_text_overlay is None):
             render_text_overlay = True
@@ -71,9 +70,8 @@ class FullScreenGridView(View):
         self.last_start = 0
         self.animated_count = 0
 
-        self.render_bottom_bar_text_enabled = render_bottom_bar_text_enabled
-        if(self.render_bottom_bar_text_enabled is None):
-            self.render_bottom_bar_text_enabled = True
+        self.render_bottom_bar_text_enabled = image_resize_height_multiplier != 1.0
+        self.image_resize_height_multiplier = image_resize_height_multiplier
 
     def set_options(self, options):
         self.options = options
@@ -210,7 +208,7 @@ class FullScreenGridView(View):
                                     target_height=self.resized_height,
                                     resize_type=self.resize_type)
         
-        if(render_text_overlay and not self.set_top_bar_text_to_selection):
+        if(render_text_overlay and (not self.set_top_bar_text_to_selection or self.image_resize_height_multiplier == 1.0)):
             self._render_shadowed_text(primary_text, Device.screen_height() * 0.68, FontPurpose.SHADOWED_BACKDROP, FontPurpose.SHADOWED, 25,text_alpha)
             self._render_shadowed_text(secondary_text, Device.screen_height() * 0.78, FontPurpose.SHADOWED_BACKDROP_SMALL, FontPurpose.SHADOWED_SMALL, 27,text_alpha)
         
