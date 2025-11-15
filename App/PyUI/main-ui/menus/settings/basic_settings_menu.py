@@ -189,31 +189,31 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             )
                     )
                 
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Theme",
+                        value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.change_theme
+                    )
+        )
+            
+
+        if(not Device.get_system_config().simple_mode_enabled()):
             option_list.append(
                         GridOrListEntry(
-                                primary_text="Theme",
-                                value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                                primary_text="Theme Settings",
+                                value_text=None,
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
                                 icon=None,
-                                value=self.change_theme
-                            )
+                                value=self.launch_theme_settings
+                        )
             )
-            
-        option_list.append(
-                    GridOrListEntry(
-                            primary_text="Theme Settings",
-                            value_text=None,
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.launch_theme_settings
-                    )
-        )
-
-        if(not Device.get_system_config().simple_mode_enabled()):
 
             option_list.append(
                 GridOrListEntry(
