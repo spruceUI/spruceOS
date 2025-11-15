@@ -6,7 +6,6 @@ from devices.device import Device
 from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
-from menus.settings.cfw_system_settings_menu import CfwSystemSettingsMenu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
@@ -105,11 +104,6 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             self.theme_changed = True
             Display.restore_bg()
 
-
-    def launch_cfw_system_settings(self,input):
-        if(ControllerInput.A == input):
-            CfwSystemSettingsMenu().show_menu()
-
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
             if(ExtraSettingsMenu().show_menu()):
@@ -166,17 +160,6 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         )
                 )
         
-        option_list.append(
-                    GridOrListEntry(
-                            primary_text="Theme",
-                            value_text="<    " + Device.get_system_config().get_theme() + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.change_theme
-                        )
-        )
 
         if(not Device.get_system_config().simple_mode_enabled()):
 
@@ -206,8 +189,19 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             )
                     )
                 
-            
             option_list.append(
+                        GridOrListEntry(
+                                primary_text="Theme",
+                                value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                                image_path=None,
+                                image_path_selected=None,
+                                description=None,
+                                icon=None,
+                                value=self.change_theme
+                            )
+            )
+            
+        option_list.append(
                     GridOrListEntry(
                             primary_text="Theme Settings",
                             value_text=None,
@@ -216,8 +210,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             description=None,
                             icon=None,
                             value=self.launch_theme_settings
-                        )
-                )
+                    )
+        )
+
+        if(not Device.get_system_config().simple_mode_enabled()):
 
             option_list.append(
                 GridOrListEntry(
@@ -231,22 +227,9 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 )
             )
 
-            if(len(CfwSystemConfig.get_categories()) > 0):
-                option_list.append(
-                    GridOrListEntry(
-                                primary_text=PyUiConfig.get_cfw_name() + " Settings",
-                                value_text=None,
-                                image_path=None,
-                                image_path_selected=None,
-                                description=None,
-                                icon=None,
-                                value=self.launch_cfw_system_settings
-                    )
-                )
-
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Extra Settings",
+                            primary_text="Additional Settings",
                             value_text=None,
                             image_path=None,
                             image_path_selected=None,
