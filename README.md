@@ -155,7 +155,7 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
   - Hoo: Testing and encouragement.
   - All of out Beta testers!
-  - SundownerSport: Team Lead, Wiki and testing.
+  - SundownerSport: Team Lead, Wiki and testing and most of the GitHub related mistakes and blunders.
   - Metallic77: Shaders and core adjustments.
   - Supermodi064: Photos, testing and support.
   - Aemiii91, tGecko and QuackWalks: Being awesome!
