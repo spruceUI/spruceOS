@@ -27,6 +27,7 @@ class Controller:
     gs_triggered = False
     first_check_after_gs_triggered = False
     controller_interface = None
+    _watch_for_secret_code = False
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -60,6 +61,7 @@ class Controller:
     @staticmethod
     def init():
         Controller.controller_interface = Device.get_controller_interface()
+        Controller._watch_for_secret_code = Device.get_system_config().game_selection_only_mode_enabled() or Device.get_system_config().simple_mode_enabled()
 
     @staticmethod
     def init_controller():
@@ -104,8 +106,7 @@ class Controller:
     def set_last_input(last_input):
         Controller.last_controller_input = last_input
 
-        if(Device.get_system_config().basic_mode_enabled() and last_input is not None):
-
+        if(Controller._watch_for_secret_code and last_input is not None):
             if(Controller._matches_secret_prefix() and Controller.last_controller_input == ControllerInput.A):
                 PyUiLogger().get_logger().info(f"Prefix matched so blocking A press")
                 Controller.last_controller_input = None
@@ -122,7 +123,8 @@ class Controller:
             # Check for match
             if Controller._input_history == Controller._SECRET_CODE:
                 PyUiLogger().get_logger().info(f"Secret code entered")
-                Device.get_system_config().set_basic_mode_enabled(False)
+                Device.get_system_config().set_game_selection_only_mode_enabled(False)
+                Device.get_system_config().set_simple_mode_enabled(False)
                 Device.exit_pyui()
 
 

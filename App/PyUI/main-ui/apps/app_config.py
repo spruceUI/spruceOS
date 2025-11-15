@@ -37,3 +37,8 @@ class AppConfig(ABC):
     @abstractmethod
     def get_devices(self):
         pass
+    
+    @abstractmethod
+    def get_hide_in_simple_mode(self):
+        pass
+

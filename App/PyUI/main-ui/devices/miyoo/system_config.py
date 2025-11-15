@@ -311,10 +311,17 @@ class SystemConfig:
         self.config["useCustomGameSwitcherPath"] = value
         self.save_config()
 
-    def basic_mode_enabled(self):
-        return self.config.get("basicMode", False)
+    def game_selection_only_mode_enabled(self):
+        return self.config.get("gameSelectionOnlyMode", False)
 
-    def set_basic_mode_enabled(self,value):
-        self.config["basicMode"] = value
+    def set_game_selection_only_mode_enabled(self,value):
+        self.config["gameSelectionOnlyMode"] = value
+        self.save_config()
+
+    def simple_mode_enabled(self):
+        return self.config.get("simpleMode", False)
+
+    def set_simple_mode_enabled(self,value):
+        self.config["simpleMode"] = value
         self.save_config()
 

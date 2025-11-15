@@ -3,5 +3,6 @@
   "icon": "updater.png",
   "launch": "launch.sh",
   "description": "Download and install updates over Wi-Fi",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

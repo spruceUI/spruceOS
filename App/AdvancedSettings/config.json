@@ -3,5 +3,6 @@
   "icon": "menuswitch.png",
   "launch": "launch.sh",
   "description": "Change spruce configurations and apps",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

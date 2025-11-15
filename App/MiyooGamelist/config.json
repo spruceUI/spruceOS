@@ -3,5 +3,6 @@
   "icon": "gamelist.png",
   "launch": "launch.sh",
   "description": "Clean up displayed rom names",
-  "hide": true
+  "hide": true,
+  "hideInSimpleMode": true
 }

@@ -177,7 +177,7 @@ class MainMenu:
 
 
     def run_main_menu_selection(self):
-        if Device.get_system_config().basic_mode_enabled():
+        if Device.get_system_config().game_selection_only_mode_enabled():
             while(True):
                 JustGamesMenu().run_rom_selection()
 

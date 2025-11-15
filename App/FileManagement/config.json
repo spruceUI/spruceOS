@@ -3,5 +3,6 @@
   "icon": "file.png",
   "launch": "launch.sh",
   "description": "View and edit files on your SD card",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

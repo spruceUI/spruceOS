@@ -10,7 +10,7 @@ from views.grid_or_list_entry import GridOrListEntry
 
 class JustGamesMenu(RomsMenuCommon):
     def __init__(self):
-        super().__init__(support_only_game_launching=True)
+        super().__init__()
 
     def include_rom(self,rom_file_name, rom_file_path):
         return not os.path.isdir(rom_file_path)
@@ -50,6 +50,7 @@ class JustGamesMenu(RomsMenuCommon):
             roms.extend(roms_for_system)
 
         return roms
+    
     def run_rom_selection(self) :
         return self._run_rom_selection("Game List")
 
