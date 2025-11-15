@@ -1,28 +1,13 @@
-You need to place your pico8.dat, pico8_64 and pico8_dyn files directly in the BIOS folder at the root of the SD card for Pico-8 games to launch using native Pico-8.
+To gain access to native Pico-8 on a spruce-enabled device, please place your pico8.dat,
+pico8_64, and pico8_dyn files directly in the BIOS folder at the root of the SD card.
+These files need to come from the Rasberry Pi version of an official Pico-8 release.
+These can be purchased here: https://www.lexaloffle.com/pico-8.php?#getpico8
 
-These files need to cone from the Rasberry Pi version of the official Pico-8.
+Adding these files to your BIOS folder will populate the Pico-8 system in the spruceUI
+games menu, with an option to launch Splore, a wonderful repository stuffed with hundreds
+if not thousands of free games. You can also add your own Pico-8 carts to play offline
+by simply dropping them in your Roms/PICO8 folder.
 
-We strongly encourage you to buy and support Pico-8. https://www.lexaloffle.com/pico-8.php?#getpico8
-
-
-If you do not have the dat, _64 and dyn files to play Pico-8 here then you need to use FAKE08. Please reference that Rom folder.
-  
-
-USING THIS PICO8
-
-PICO-8 games will launch native from the roms folder. Place your games in the PICO8 Roms folder as they are from the Pico-8 website. You need to provide your own dat, _64 and dyn files and place them in the bin folder located in sdcard/BIOS. You can also use splore with Wi-Fi to browse and play games! There are so many wonderful games and they seem to just keep getting better. Pico-8 is a great way for indie game makers to create and share with the world. We cannot say enough good things about Pico-8. Enjoy!
-
-
-
-### Controls
-
-- in joypad mode:
-
-	- dpad and stick = direction.
-	- A = button X.
-	- B = button O.
-	- X = Escape (options).
-	- Menu = Escape (options).
-	- Start = Option
-	-L and R also serve as X and O, we forget which is which though :p
-   
+If you do not have access to these commercial files, you can still emulate Pico-8 games using the
+fake08 libretro core. In that case, simply drop your Pico-8 cart files in the Roms/FAKE08 folder
+instead. However, for the best experience, we strongly encourage you to pick up the real deal! :)
