@@ -1,3 +1,4 @@
+import sys
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -22,6 +23,34 @@ class Controller:
     special_non_sdl_event = False
     render_required_callback = None
     last_controller_input = None
+    _input_history = []
+    # The sequence we want to detect
+    _SECRET_CODE = [
+        ControllerInput.DPAD_UP,
+        ControllerInput.DPAD_UP,
+        ControllerInput.DPAD_DOWN,
+        ControllerInput.DPAD_DOWN,
+        ControllerInput.DPAD_LEFT,
+        ControllerInput.DPAD_RIGHT,
+        ControllerInput.DPAD_LEFT,
+        ControllerInput.DPAD_RIGHT,
+        ControllerInput.B,
+        ControllerInput.A,
+        ControllerInput.START,
+        ControllerInput.SELECT,
+    ]
+    _SECRET_CODE_PREFIX = [
+        ControllerInput.DPAD_UP,
+        ControllerInput.DPAD_UP,
+        ControllerInput.DPAD_DOWN,
+        ControllerInput.DPAD_DOWN,
+        ControllerInput.DPAD_LEFT,
+        ControllerInput.DPAD_RIGHT,
+        ControllerInput.DPAD_LEFT,
+        ControllerInput.DPAD_RIGHT,
+        ControllerInput.B,
+        ControllerInput.A,
+    ]
 
     controller_interface = None
     gs_triggered = False
@@ -59,12 +88,40 @@ class Controller:
         Controller.controller_interface.clear_input()
 
     @staticmethod
+    def _matches_secret_prefix():
+        h = Controller._input_history
+        p = Controller._SECRET_CODE_PREFIX
+        plen = len(p)
+
+        if len(h) < plen:
+            return False
+
+        return h[-plen:] == p     
+       
+    @staticmethod
     def set_last_input(last_input):
-        #if(last_input is not None):            
-        #    PyUiLogger.get_logger().info(f"Setting last input to {last_input}")
-        #elif(Controller.last_controller_input is not None):
-        #    PyUiLogger.get_logger().info(f"Setting last input to {last_input}")
         Controller.last_controller_input = last_input
+
+        if(Device.get_system_config().basic_mode_enabled() and last_input is not None):
+            # Add input to history
+            Controller._input_history.append(last_input)
+
+            # Keep history trimmed to the length of the code
+            max_len = len(Controller._SECRET_CODE)
+            if len(Controller._input_history) > max_len:
+                Controller._input_history.pop(0)
+
+            # Check for match
+            if Controller._input_history == Controller._SECRET_CODE:
+                PyUiLogger().get_logger().info(f"Secret code entered")
+                Device.get_system_config().set_basic_mode_enabled(False)
+                Device.exit_pyui()
+
+
+            if(Controller._matches_secret_prefix()):
+                PyUiLogger().get_logger().info(f"Prefix matched so blocking A press")
+                Controller.last_controller_input = None
+
 
     @staticmethod
     def get_input(timeout=-2):
