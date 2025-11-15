@@ -24,6 +24,10 @@ class Controller:
     render_required_callback = None
     last_controller_input = None
     _input_history = []
+    gs_triggered = False
+    first_check_after_gs_triggered = False
+    controller_interface = None
+
     # The sequence we want to detect
     _SECRET_CODE = [
         ControllerInput.DPAD_UP,
@@ -52,8 +56,6 @@ class Controller:
         ControllerInput.A,
     ]
 
-    controller_interface = None
-    gs_triggered = False
 
     @staticmethod
     def init():
@@ -130,7 +132,11 @@ class Controller:
 
 
     @staticmethod
-    def get_input(timeout=-2):
+    def get_input(timeout=-2, called_from_check_for_hotkey=False):
+        if(Controller.first_check_after_gs_triggered):
+            #Let user stop holding menu
+            Controller.first_check_after_gs_triggered = False
+            time.sleep(0.3)
         DEFAULT_TIMEOUT_FLAG = -2
         INPUT_DEBOUNCE_SECONDS = 0.2
         POLL_INTERVAL_SECONDS = 0.005
@@ -187,12 +193,12 @@ class Controller:
                 if Controller.last_controller_input is not None:
                     Theme.controller_button_pressed(Controller.last_controller_input)
                     if Controller.last_controller_input == ControllerInput.MENU:
-                        if not Controller.is_check_for_hotkey and not Controller.check_for_hotkey():
+                        if not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
                         else:
                             was_hotkey = True
-                            while Controller.still_held_down():
+                            while Controller.still_held_down() and not called_from_check_for_hotkey:
                                 Controller.check_for_hotkey()
                     else:
                         break  # Valid non-hotkey input
@@ -206,9 +212,10 @@ class Controller:
 
         if Controller.still_held_down():
             if(ControllerInput.MENU == Controller.last_input()):
-                was_hotkey = Controller.check_for_hotkey()
+                was_hotkey = called_from_check_for_hotkey or Controller.check_for_hotkey()
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
                     Controller.gs_triggered = True
+                    Controller.first_check_after_gs_triggered = True
                     from menus.games.recents_menu_gs import RecentsMenuGS
                     Controller.clear_last_input()
                     PyUiLogger.get_logger().info("Starting GS().run_rom_selection()")
@@ -256,7 +263,7 @@ class Controller:
         start_time = time.time()
 
         while(not was_hotkey and time.time() - start_time < 0.3):
-            if(Controller.get_input(timeout=0.05)):
+            if(Controller.get_input(timeout=0.05, called_from_check_for_hotkey=True)):
                 Controller.perform_hotkey(Controller.last_input())
                 time.sleep(0.1)
                 was_hotkey = True 
