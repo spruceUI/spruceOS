@@ -103,6 +103,12 @@ class Controller:
         Controller.last_controller_input = last_input
 
         if(Device.get_system_config().basic_mode_enabled() and last_input is not None):
+
+            if(Controller._matches_secret_prefix() and Controller.last_controller_input == ControllerInput.A):
+                PyUiLogger().get_logger().info(f"Prefix matched so blocking A press")
+                Controller.last_controller_input = None
+                return
+
             # Add input to history
             Controller._input_history.append(last_input)
 
