@@ -29,9 +29,7 @@ class RomsMenuCommon(ABC):
         self.in_game_menu_listener = InGameMenuListener()
         self.popup_menu = GameSelectMenuPopup()
         
-        system_config = Device.get_system_config()
-        self.support_only_game_launching = system_config.game_selection_only_mode_enabled() or system_config.simple_mode_enabled()
-        self.force_allow_b_button = not system_config.game_selection_only_mode_enabled() 
+        self.support_only_game_launching = Device.get_system_config().game_selection_only_mode_enabled()
 
     def _remove_extension(self,file_name):
         return os.path.splitext(file_name)[0]
@@ -248,7 +246,7 @@ class RomsMenuCommon(ABC):
                     new_length = len(rom_list)
                     if(Theme.get_game_selection_view_type() != prev_view or original_length != new_length):
                         view = self.create_view(page_name,rom_list,selected)
-                elif(ControllerInput.B == selected.get_input() and (not self.support_only_game_launching or self.force_allow_b_button)):
+                elif(ControllerInput.B == selected.get_input() and (not self.support_only_game_launching)):
                     
                     #What is happening on muOS where this is becoming None?
                     if(selected is not None and selected.get_selection() is not None and selected.get_selection().get_value() is not None):

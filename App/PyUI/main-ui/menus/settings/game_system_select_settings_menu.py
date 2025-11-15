@@ -1,7 +1,7 @@
 
 from controller.controller_inputs import ControllerInput
 from menus.settings import settings_menu
-from menus.settings.theme.list_of_options_selection_menu import ListOfOptionsSelectionMenu
+from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
