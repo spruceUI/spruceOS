@@ -119,14 +119,15 @@ class GameSelectMenuPopup:
 
         popup_options.extend(self.get_game_options(rom_info, additional_popup_options, rom_list, use_full_text=False)) 
 
-        popup_options.append(GridOrListEntry(
-            primary_text=f"Toggle View",
-            image_path=Theme.settings(),
-            image_path_selected=Theme.settings_selected(),
-            description=None,
-            icon=None,
-            value=lambda input_value: self.toggle_view()
-        ))
+        if(not Device.get_system_config().simple_mode_enabled()):
+            popup_options.append(GridOrListEntry(
+                primary_text=f"Toggle View",
+                image_path=Theme.settings(),
+                image_path_selected=Theme.settings_selected(),
+                description=None,
+                icon=None,
+                value=lambda input_value: self.toggle_view()
+            ))
 
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,

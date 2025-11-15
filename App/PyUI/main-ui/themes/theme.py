@@ -26,6 +26,7 @@ class Theme():
     _button_press_wav = None
     _default_multiplier = 1.0
     _play_button_press_sounds = True
+    _asset_cache = {}  # shared cache for asset + icon lookups
 
     @classmethod
     def init(cls, path, width, height):
@@ -184,38 +185,50 @@ class Theme():
         PyUiLogger.get_logger().info(f"Wrote Theme : {cls._data.get('description', 'UNKNOWN')}")
         from display.display import Display
         Display.clear_cache()
+        
+    @classmethod
+    def _resolve_file(cls, base_folder, parts):
+        """
+        Shared resolver:
+        - Checks full path
+        - If missing and ends in .qoi, tries .png then .tga fallback
+        - Caches results
+        """
+        key = (base_folder, parts)
+        if key in cls._asset_cache:
+            return cls._asset_cache[key]
+
+        path = os.path.join(cls._path, base_folder, *parts)
+
+        # Direct hit
+        if os.path.exists(path):
+            cls._asset_cache[key] = path
+            return path
+
+        # Fallback only makes sense for .qoi assets/icons
+        if path.endswith(".qoi"):
+            png_path = path[:-4] + ".png"
+            if os.path.exists(png_path):
+                cls._asset_cache[key] = png_path
+                return png_path
+
+            tga_path = path[:-4] + ".tga"
+            if os.path.exists(tga_path):
+                cls._asset_cache[key] = tga_path
+                return tga_path
+
+        # Nothing found
+        cls._asset_cache[key] = None
+        return None
 
     @classmethod
     def _asset(cls, *parts):
-        path = os.path.join(cls._path, cls._skin_folder, *parts)
-        # If the file doesn't exist and ends with .qoi, try the PNG fallback
-        if not os.path.exists(path):
-            png_path = path[:-4] + ".png" 
-            if os.path.exists(png_path):
-                return png_path
+        return cls._resolve_file(cls._skin_folder, parts)
 
-            tga_path = path[:-4] + ".tga" 
-            if os.path.exists(tga_path):
-                return tga_path
-
-        # Otherwise return the original path
-        return path
-        
     @classmethod
     def _icon(cls, *parts):
-        path = os.path.join(cls._path, cls._icon_folder, *parts)
-        # If the file doesn't exist and ends with .qoi, try the PNG fallback
-        if not os.path.exists(path):
-            png_path = path[:-4] + ".png" 
-            if os.path.exists(png_path):
-                return png_path
-            tga_path = path[:-4] + ".tga" 
-            if os.path.exists(tga_path):
-                return tga_path
-        
-        # Otherwise return the original path
-        return path
-
+        return cls._resolve_file(cls._icon_folder, parts)
+    
     @classmethod
     def background(cls, page = None):
         if(page is None):
@@ -287,10 +300,10 @@ class Theme():
     def render_top_and_bottom_bar_last(cls): return cls._data.get("renderTopAndBottomBarLast", False)
     
     @classmethod
-    def confirm_text(cls): return "Okay"
+    def confirm_text(cls): return cls._data.get("confirmText", "Okay")
     
     @classmethod
-    def back_text(cls): return "Back"
+    def back_text(cls): return cls._data.get("backText", "Back")
     
     @classmethod
     def favorite_icon(cls): return cls._asset("ic-favorite-mark.qoi")

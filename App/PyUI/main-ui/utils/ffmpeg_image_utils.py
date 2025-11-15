@@ -130,6 +130,7 @@ class FfmpegImageUtils(ImageUtils):
                 "-y",                 # overwrite temp if exists
                 "-i", input_path,
                 "-vf", f"scale={new_width}:{new_height}",
+                "-pix_fmt", "rgba",
                 tmp_output
             ]
 

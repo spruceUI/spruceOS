@@ -9,7 +9,8 @@ from menus.settings import settings_menu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
-from menus.settings.theme.list_of_options_selection_menu import ListOfOptionsSelectionMenu
+from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
+from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
@@ -90,10 +91,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             selected_index+=1
             if(selected_index == len(theme_folders)):
                 selected_index = 0
-        elif(ControllerInput.X == input):
+        elif(ControllerInput.X == input and not Device.get_system_config().simple_mode_enabled()):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
-            selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(theme_folders, "Themes")
+            selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, "Themes")
 
 
         if(selected_index is not None):
@@ -189,31 +190,31 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             )
                     )
                 
+        option_list.append(
+                GridOrListEntry(
+                        primary_text="Theme",
+                        value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.change_theme
+                    )
+        )
+            
+
+        if(not Device.get_system_config().simple_mode_enabled()):
             option_list.append(
                         GridOrListEntry(
-                                primary_text="Theme",
-                                value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                                primary_text="Theme Settings",
+                                value_text=None,
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
                                 icon=None,
-                                value=self.change_theme
-                            )
+                                value=self.launch_theme_settings
+                        )
             )
-            
-        option_list.append(
-                    GridOrListEntry(
-                            primary_text="Theme Settings",
-                            value_text=None,
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.launch_theme_settings
-                    )
-        )
-
-        if(not Device.get_system_config().simple_mode_enabled()):
 
             option_list.append(
                 GridOrListEntry(
