@@ -3,5 +3,6 @@
   "icon": "updater.png",
   "launch": "../../Updater/updater.sh",
   "description": "Update file found, install to update to spruce",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

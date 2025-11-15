@@ -3,5 +3,6 @@
   "icon": "retroarch.png",
   "launch": "launch.sh",
   "description": "Core and game configuration",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

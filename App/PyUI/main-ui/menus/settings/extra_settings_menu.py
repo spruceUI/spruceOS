@@ -15,6 +15,7 @@ from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
+from menus.settings.modes_menu import ModesMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
@@ -74,20 +75,9 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             BoxArtScraper().scrape_boxart()
 
-    def prompt_basic_mode(self,input):
+    def launch_modes_menu(self,input):
         if(ControllerInput.A == input):
-            while(True):
-                Display.clear("Basic Mode")
-                Display.display_message_multiline(["Would you like to enter basic mode?", "To exit enter the Konami Code", "↑↑↓↓←→←→BA,START,SELECT","","A = Yes, B = No"])
-                Display.present()
-                if(Controller.get_input()):
-                    if(Controller.last_input() == ControllerInput.A):
-                        Device.get_system_config().set_basic_mode_enabled(True)
-                        Device.exit_pyui()
-                    elif(Controller.last_input() == ControllerInput.B):
-                        return
-
-
+            ModesMenu().show_menu()
 
 
     def resize_boxart(self, input):
@@ -236,13 +226,13 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Enter Basic Mode",
+                primary_text="Locked Down Modes",
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,
                 description=None,
                 icon=None,
-                value=self.prompt_basic_mode
+                value=self.launch_modes_menu
                 )
             )
 

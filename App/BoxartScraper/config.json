@@ -3,5 +3,6 @@
   "icon": "scraper.png",
   "launch": "launch.sh",
   "description": "Scrape game boxart",
-  "hide": false
+  "hide": false,
+  "hideInSimpleMode": true
 }

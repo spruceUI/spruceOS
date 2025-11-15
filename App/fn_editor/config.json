@@ -3,5 +3,6 @@
     "icon":"fnkey.png",
     "launch":"launch.sh",
     "description":"Change Brick-specific functions",
-    "devices": ["TRIMUI_BRICK"]
+    "devices": ["TRIMUI_BRICK"],
+    "hideInSimpleMode": true
 }

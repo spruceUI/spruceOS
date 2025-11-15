@@ -1,0 +1,72 @@
+
+
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
+from devices.device import Device
+from display.display import Display
+from menus.settings import settings_menu
+from utils.user_prompt import UserPrompt
+from views.grid_or_list_entry import GridOrListEntry
+
+
+class ModesMenu(settings_menu.SettingsMenu):
+    def __init__(self):
+        super().__init__()
+
+    def prompt_games_only_mode(self,input):
+        if(ControllerInput.A == input):
+            if UserPrompt.prompt_yes_no("Game Selection Only Mode",
+                                        ["Would you like to enter game selection only mode?", 
+                                         "Boot straight into the game selection screen", 
+                                         "To exit enter the Konami Code", 
+                                         "↑↑↓↓←→←→BA,START,SELECT",
+                                         "",
+                                         "A = Yes, B = No"]):
+                Device.get_system_config().set_game_selection_only_mode_enabled(True)
+                Device.exit_pyui()
+            else:
+                return
+
+    def prompt_simple_mode(self,input):
+        if(ControllerInput.A == input):
+            if UserPrompt.prompt_yes_no("Simple Mode",
+                                        ["Would you like to enter simple mode?", 
+                                         "It has restricted access to settings", 
+                                         "To exit enter the Konami Code", 
+                                         "↑↑↓↓←→←→BA,START,SELECT",
+                                         "",
+                                         "A = Yes, B = No"]):
+                Device.get_system_config().set_simple_mode_enabled(True)
+                Device.exit_pyui()
+            else:
+                return
+
+    def build_options_list(self):
+        option_list = []
+        
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Enter Game Selection Only Mode",
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.prompt_games_only_mode
+                )
+            )
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Enter Simple Mode",
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.prompt_simple_mode
+                )
+            )
+
+
+        return option_list

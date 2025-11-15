@@ -76,3 +76,6 @@ class MuosAppConfig(AppConfig):
 
     def get_devices(self):
         return []
+
+    def get_hide_in_simple_mode(self):
+        return False
