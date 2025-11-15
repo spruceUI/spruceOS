@@ -1,6 +1,9 @@
 
+from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.display import Display
+from display.font_purpose import FontPurpose
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
@@ -13,6 +16,7 @@ from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
+from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -69,6 +73,20 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def scrape_box_art(self,input):
         if(ControllerInput.A == input):
             BoxArtScraper().scrape_boxart()
+
+    def prompt_basic_mode(self,input):
+        if(ControllerInput.A == input):
+            while(True):
+                Display.clear("Basic Mode")
+                Display.display_message_multiline(["Would you like to enter basic mode?", "To exit enter the Konami Code", "↑↑↓↓←→←→BA,START,SELECT","","A = Yes, B = No"])
+                Display.present()
+                if(Controller.get_input()):
+                    if(Controller.last_input() == ControllerInput.A):
+                        Device.get_system_config().set_basic_mode_enabled(True)
+                        Device.exit_pyui()
+                    elif(Controller.last_input() == ControllerInput.B):
+                        return
+
 
 
 
@@ -216,6 +234,17 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         )
                 )
 
+        option_list.append(
+            GridOrListEntry(
+                primary_text="Enter Basic Mode",
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.prompt_basic_mode
+                )
+            )
 
 
         return option_list

@@ -1,11 +1,13 @@
 
 from pathlib import Path
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from display.display import Display
 from menus.app.app_menu import AppMenu
 from menus.games.collections_menu import CollectionsMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.game_system_select_menu import GameSystemSelectMenu
+from menus.games.just_games_menu import JustGamesMenu
 from menus.language.language import Language
 from menus.main_menu_popup import MainMenuPopup
 from menus.settings.basic_settings_menu import BasicSettingsMenu
@@ -175,6 +177,10 @@ class MainMenu:
 
 
     def run_main_menu_selection(self):
+        if Device.get_system_config().basic_mode_enabled():
+            while(True):
+                JustGamesMenu().run_rom_selection()
+
         self.check_for_gameswitcher()
         self.check_for_boxart_resizing()
 

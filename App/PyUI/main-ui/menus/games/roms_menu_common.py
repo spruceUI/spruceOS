@@ -25,9 +25,10 @@ from views.view_type import ViewType
 
 
 class RomsMenuCommon(ABC):
-    def __init__(self):
+    def __init__(self, support_only_game_launching=False):
         self.in_game_menu_listener = InGameMenuListener()
         self.popup_menu = GameSelectMenuPopup()
+        self.support_only_game_launching = support_only_game_launching
 
     def _remove_extension(self,file_name):
         return os.path.splitext(file_name)[0]
@@ -229,13 +230,13 @@ class RomsMenuCommon(ABC):
                     else:
                         RecentsManager.add_game(selected.get_selection().get_value())
                         self.run_game(selected.get_selection().get_value())
-                elif(ControllerInput.X == selected.get_input()):
+                elif(ControllerInput.X == selected.get_input() and not self.support_only_game_launching):
                     gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
                     GameConfigMenu(selected.get_selection().get_value().game_system, 
                                    selected.get_selection().get_value(), gen_additional_game_options).show_config(os.path.basename(selected.get_selection().get_value().rom_file_path))
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
-                elif(ControllerInput.MENU == selected.get_input()):
+                elif(ControllerInput.MENU == selected.get_input() and not self.support_only_game_launching):
                     prev_view = Theme.get_game_selection_view_type()
                     self._menu_pressed(selected.get_selection().get_value(), rom_list)
                     # Regenerate as game config menu might've changed something
@@ -244,7 +245,7 @@ class RomsMenuCommon(ABC):
                     new_length = len(rom_list)
                     if(Theme.get_game_selection_view_type() != prev_view or original_length != new_length):
                         view = self.create_view(page_name,rom_list,selected)
-                elif(ControllerInput.B == selected.get_input()):
+                elif(ControllerInput.B == selected.get_input() and not self.support_only_game_launching):
                     
                     #What is happening on muOS where this is becoming None?
                     if(selected is not None and selected.get_selection() is not None and selected.get_selection().get_value() is not None):
@@ -262,7 +263,7 @@ class RomsMenuCommon(ABC):
                             )
                         
                     return ControllerInput.B
-                elif(ControllerInput.SELECT == selected.get_input()):
+                elif(ControllerInput.SELECT == selected.get_input() and not self.support_only_game_launching):
                     if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
                         Theme.set_game_selection_view_type(ViewType.GRID)
                         view = self.create_view(page_name,rom_list,selected)
