@@ -17,7 +17,7 @@ export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
 
-log_message "got to 1" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 1" -v
 
 case "$EMU_NAME" in
     DC|NAOMI|N64|PS)
@@ -42,7 +42,7 @@ case "$EMU_NAME" in
         ;;
 esac
 
-log_message "got to 2" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 2" -v
 
 ##### GENERAL FUNCTIONS #####
 
@@ -128,7 +128,7 @@ handle_network_services() {
 	fi
 }
 
-log_message "got to 3" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 3" -v
 
 ##### TIME TRACKING FUNCTIONS #####
 
@@ -193,7 +193,7 @@ update_gtt() {
 }
 
 
-log_message "got to 4" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 4" -v
 
 ##### EMULATOR LAUNCH FUNCTIONS #####
 
@@ -724,7 +724,7 @@ run_flycast_standalone() {
 	umount $HOME/.local/share/flycast
 }
 
-log_message "got to 5" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 5" -v
 
  ########################
 ##### MAIN EXECUTION #####
@@ -743,7 +743,7 @@ flag_add 'emulator_launched'
 ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
-log_message "got to 6" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 6" -v
 
 case $EMU_NAME in
 
@@ -822,7 +822,7 @@ case $EMU_NAME in
 		;;
 esac
 
-log_message "got to 7" -v
+log_message "---DEBUG---: standard_launch.sh checkpoint 7" -v
 
 kill -9 $(pgrep -f enforceSmartCPU.sh)
 record_session_end_time

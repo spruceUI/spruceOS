@@ -41,7 +41,11 @@ restore_emu_settings() {
 
         for field in $menu_fields; do
             if jq -e ".menuOptions.$field" "$new_json" >/dev/null 2>&1; then
-                selected_val="$(jq -r ".menuOptions.$field.selected" "$configjson")"
+                selected_val="$(jq -r ".menuOptions.$field.selected // empty" "$configjson")"
+                if [ "$selected_val" = "null" ] || [ -z "$selected_val" ]; then
+                    log_message "$emu_name: $field missing in backup — leaving current default"
+                    continue
+                fi
                 overrides_val="$(jq ".menuOptions.$field.overrides" "$configjson")"
                 [ "$overrides_val" = "null" ] && overrides_val='{}'
 
@@ -101,6 +105,25 @@ restore_spruce_config() {
     ' "$new_config" > "$tmpfile" && mv -f "$tmpfile" "$new_config"
 
     log_message "Config restore complete."
+}
+
+restore_theme_configs() {
+    local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
+    [ -d "$backup_root" ] || log_message "No theme configs to restore." && return 1
+
+    for theme_name in "$backup_root"/*; do
+        [ -d "$theme_name" ] || continue
+
+        base_theme="$(basename "$theme_name")"
+        dest_dir="/mnt/SDCARD/Themes/$base_theme"
+
+        if [ -d "$dest_dir" ]; then
+            cp -f "$theme_name"/config*json "$dest_dir"/
+            log_message "Restored configs for theme $base_theme"
+        else
+            log_message "Skipping restore for missing theme: $base_theme"
+        fi
+    done
 }
 
 log_message "----------Starting Restore script----------"
@@ -305,6 +328,9 @@ restore_emu_settings
 
 log_message "Restoring compatible values from previous spruce-config.json"
 restore_spruce_config
+
+log_message "Restoring theme customizations"
+restore_theme_configs
 
 log_message "Applying idlemon setting"
 sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
