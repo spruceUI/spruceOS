@@ -1,9 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
 import os
 import threading
+import time
 from typing import Callable, TypeVar
 
 from devices.device import Device
+from utils.logger import PyUiLogger
 
 T = TypeVar('T')  # Generic input type
 
@@ -80,12 +82,15 @@ class GridOrListEntry:
     
     def get_image_path(self):
         if self.image_path is None and self.image_path_searcher is not None:
-            return self.image_path_searcher(self.value)
+            self.image_path = self.image_path_searcher(self.value)
+            self.image_path_searcher = None
+
         return self.image_path
     
     def get_image_path_selected(self):
         if self.image_path_selected is None and self.image_path_selected_searcher is not None:
-            return self.image_path_selected_searcher(self.value)
+            self.image_path_selected = self.image_path_selected_searcher(self.value)
+            self.image_path_selected_searcher = None
         return self.image_path_selected
         
     def get_image_path_variant(self, image_path: str, variant_name: str):
