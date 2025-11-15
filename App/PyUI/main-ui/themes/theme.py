@@ -1121,11 +1121,20 @@ class Theme():
 
     @classmethod
     def get_set_top_bar_text_to_game_selection_for_game_switcher(cls):
-        return cls._data.get("gameSwitcherSetTopBarTextToGameSelection", False)
+        return cls._data.get("gameSwitcherSetTopBarTextToGameSelection", True)
     
     @classmethod
     def set_set_top_bar_text_to_game_selection_for_game_switcher(cls, value):
         cls._data["gameSwitcherSetTopBarTextToGameSelection"] = value
+        cls.save_changes()
+
+    @classmethod
+    def true_full_screen_game_switcher(cls):
+        return cls._data.get("gameSwitcherTrueFullScreen", True)
+    
+    @classmethod
+    def set_true_full_screen_game_switcher(cls, value):
+        cls._data["gameSwitcherTrueFullScreen"] = value
         cls.save_changes()
 
     @classmethod

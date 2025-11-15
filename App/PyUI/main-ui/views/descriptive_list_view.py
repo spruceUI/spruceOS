@@ -16,8 +16,7 @@ class DescriptiveListView(ListView):
                  options: List[GridOrListEntry], selected_bg, selected : int = 0):
         super().__init__()
         self.top_bar_text = top_bar_text
-        self.options : List[GridOrListEntry] = options
-
+        self.set_options(options)
         self.selected : int = selected
         PyUiLogger.get_logger().info(f"selected_bg = {selected_bg}")
 
@@ -32,7 +31,11 @@ class DescriptiveListView(ListView):
 
     def set_options(self, options):
         self.options = options
+        self.options_are_sorted = self.is_alphabetized(options)
 
+    def options_are_alphabetized(self):
+        return self.options_are_sorted
+    
     def _render(self):
         visible_options: List[GridOrListEntry] = self.options[self.current_top:self.current_bottom]
 

@@ -8,6 +8,7 @@ from display.render_mode import RenderMode
 from display.y_render_option import YRenderOption
 from controller.controller import Controller
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -26,7 +27,7 @@ class GridView(View):
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.set_bottom_bar_text_to_selection = set_bottom_bar_text_to_selection
-        self.options: List[GridOrListEntry] = options
+        self.set_options(options)
 
         self.max_img_height = resized_height
         if (self.max_img_height is None):
@@ -62,6 +63,7 @@ class GridView(View):
 
     def set_options(self, options):
         self.options = options
+        self.options_are_sorted = self.is_alphabetized(options)
 
     def correct_selected_for_off_list(self):
         while (self.selected < 0):
@@ -214,7 +216,10 @@ class GridView(View):
 
         # Don't display indexing for single row grids
         if (self.rows > 1):
-            Display.add_index_text(self.selected+1, len(self.options),letter=self.options[self.selected].get_primary_text()[0])
+            letter = ''
+            if(self.options_are_sorted):
+                letter = self.options[self.selected].get_primary_text()[0]
+            Display.add_index_text(self.selected+1, len(self.options),letter=letter)
         Display.present()
 
     def get_selected_option(self):
@@ -334,8 +339,12 @@ class GridView(View):
                 if delta_time < frame_duration:
                     time.sleep(frame_duration - (delta_time))
                 if(self.include_index_text):
+                    letter = ''
+                    if(self.options_are_sorted):
+                        letter = self.options[self.selected].get_primary_text()[0]
+
                     Display.add_index_text(self.selected%self.options_length +1, self.options_length,
-                                           letter=self.options[self.selected].get_primary_text()[0])
+                                           letter)
                 Display.present()
                 last_frame_time = time.time()
         

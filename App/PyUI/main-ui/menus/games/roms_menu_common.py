@@ -102,9 +102,6 @@ class RomsMenuCommon(ABC):
     def get_image_resize_height_multiplier(self):
         return None
     
-    def get_render_bottom_bar_text_enabled(self):
-        return None
-
     def create_view(self, page_name, rom_list, selected):
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
@@ -129,9 +126,7 @@ class RomsMenuCommon(ABC):
                         missing_image_path=Theme.get_missing_image_path(),
                         allow_scrolling_text=True, # roms select is allowed to scroll
                         full_screen_grid_resize_type=self.full_screen_grid_resize_type(),
-                        image_resize_height_multiplier=self.get_image_resize_height_multiplier(),
-                        render_bottom_bar_text_enabled=self.get_render_bottom_bar_text_enabled()
-                        )
+                        image_resize_height_multiplier=self.get_image_resize_height_multiplier())
 
     def _run_rom_selection(self, page_name) :
         rom_list = self._get_rom_list()

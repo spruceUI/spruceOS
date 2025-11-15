@@ -15,7 +15,7 @@ class NonDescriptiveListView(ListView):
                  selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None):
         super().__init__()
         self.top_bar_text = top_bar_text
-        self.options = options
+        self.set_options(options)
         self.selected = selected_index
         while(self.selected > len(options) and self.selected > 0):
             self.selected -= 1
@@ -35,7 +35,11 @@ class NonDescriptiveListView(ListView):
 
     def set_options(self, options):
         self.options = options
+        self.options_are_sorted = self.is_alphabetized(options)
 
+    def options_are_alphabetized(self):
+        return self.options_are_sorted
+    
     def _calculate_line_height(self):
         text_line_height = Display.get_line_height(FontPurpose.LIST) + 10  # add 10px padding between lines
         icon_line_height = 0

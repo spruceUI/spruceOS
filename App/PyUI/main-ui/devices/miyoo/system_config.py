@@ -194,7 +194,7 @@ class SystemConfig:
         self.save_config()
 
     def game_switcher_game_count(self):
-        return self.config.get("gameSwitcherGameCount", 5)
+        return self.config.get("gameSwitcherGameCount", 8)
 
     def never_prompt_boxart_resize(self):
         return self.config.get("neverPromptBoxartResize", False)

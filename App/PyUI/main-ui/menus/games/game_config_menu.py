@@ -88,6 +88,21 @@ class GameConfigMenu:
                     PyUiLogger.get_logger().info(f"Updating {entry_name} to {all_options[selected_index]}")
                     update_value(entry_name, all_options[selected_index])
 
+    def toggle_overridable_entries(self,input_value, rom_file_path, overridable_entries):
+        if(ControllerInput.A == input):
+            all_overriden = True
+            for entry_name in overridable_entries:
+                if not self.game_system.game_system_config.contains_menu_override(entry_name,rom_file_path):
+                    all_overriden = False
+                    break
+
+            for entry_name in overridable_entries:
+                if(all_overriden):
+                    self.game_system.game_system_config.delete_menu_override(entry_name, rom_file_path)
+                else:
+                    current_value = self.game_system.game_system_config.get_effective_menu_selection(entry_name,rom_file_path)
+                    self.game_system.game_system_config.set_menu_override(entry_name,rom_file_path, current_value)
+
     def run_launch_option(self, input_value, launch_option):
         if(ControllerInput.A == input_value):
 
@@ -135,10 +150,12 @@ class GameConfigMenu:
                     )
                 )
 
+
             config_list.extend(self.gen_additional_game_options())
 
             menu_options = self.game_system.game_system_config.get_menu_options()
 
+            overridable_entries = []
             for name, option in menu_options.items():
                 devices = option.get("devices")
                 supported_device = not devices or Device.get_device_name() in devices
@@ -148,6 +165,8 @@ class GameConfigMenu:
                     contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
                     if(contains_override):
                         display_name = display_name + "*"
+                    
+                    overridable_entries.append(name)
                     config_list.append(
                                     GridOrListEntry(
                                     primary_text=display_name,
@@ -162,6 +181,19 @@ class GameConfigMenu:
                                         remove_override=self.game_system.game_system_config.delete_menu_override
                                         : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
                             )
+                    )
+
+            if(overridable_entries):
+                config_list.append(
+                    GridOrListEntry(
+                        primary_text="Toggle Settings as Game Specific Override",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=lambda input_value,rom_file_path=rom_file_path, overridable_entries=overridable_entries,
+                                    : self.toggle_overridable_entries(input_value,rom_file_path,overridable_entries)
+                        )
                     )
 
             if(view is None):        

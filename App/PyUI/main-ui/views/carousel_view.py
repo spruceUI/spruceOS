@@ -26,6 +26,7 @@ class CarouselView(View):
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.options : List[GridOrListEntry] = list(options)
+        self.options_are_sorted = self.is_alphabetized(options)
         self.font_purpose = FontPurpose.GRID_ONE_ROW
         self.show_grid_text = show_grid_text
         self.selected_entry_width_percent = selected_entry_width_percent
@@ -58,6 +59,7 @@ class CarouselView(View):
         self.include_index_text = True
         self.missing_image_path = missing_image_path
         self.skip_next_animation = False
+
 
     def set_options(self, options):
         #Carousel breaks but the options shouldn't change the view
@@ -230,8 +232,11 @@ class CarouselView(View):
         self.prev_x_offsets = x_offsets
         self.prev_widths = widths
         if(self.include_index_text):
+            letter = ''
+            if(self.options_are_sorted):
+                letter = self.options[self.selected].get_primary_text()[0]
             Display.add_index_text(self.selected%self.options_length + 1, self.options_length, 
-                                   letter=self.options[self.selected].get_primary_text()[0])
+                                   letter=letter)
 
         Display.present()
 
@@ -346,8 +351,12 @@ class CarouselView(View):
                     if delta_time < frame_duration:
                         time.sleep(frame_duration - (delta_time))
                     if(self.include_index_text):
+                        letter = ''
+                        if(self.options_are_sorted):
+                            letter = self.options[self.selected].get_primary_text()[0]
+
                         Display.add_index_text(self.selected%self.options_length +1, self.options_length,
-                                            letter=self.options[self.selected].get_primary_text()[0])
+                                            letter=letter)
                     Display.present()
                     last_frame_time = time.time()
             

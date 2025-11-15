@@ -87,21 +87,23 @@ class ListView(View):
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
 
-            self._render_common()
-
-
         return Selection(self.get_selected_option(), None, self.selected)
     
+    def options_are_alphabetized(self):
+        return False
+    
     def _render_common(self):
-        #if(self.clear_display_each_render_cycle):
         Display.clear(self.top_bar_text)
         
         self.adjust_selected_top_bottom_for_overflow()
 
         self._render()
         if(Theme.include_index_text()):
+            letter = ''
+            if(self.options_are_alphabetized()):
+                letter=self.options[self.selected].get_primary_text()[0]
             Display.add_index_text(self.selected+1, len(self.options), force_include_index = True, 
-                                   letter=self.options[self.selected].get_primary_text()[0])
+                                   letter=letter)
         Display.present()
 
     def adjust_selected_top_bottom_for_overflow(self):
