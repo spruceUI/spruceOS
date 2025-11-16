@@ -1,0 +1,12 @@
+{
+"Immediate": "touch /mnt/SDCARD/Immediate.txt",
+"Folder/A":  "touch /mnt/SDCARD/A.txt",
+"Folder/B/Option in B": "touch /mnt/SDCARD/B.txt",
+"descriptions": {
+    "Immediate": "This option creates a file named Immediate.txt in the SDCARD root directory.",
+    "Folder": "This folder contains options A and B.",
+    "A": "This option creates a file named A.txt in the SDCARD root directory.",
+    "B": "This is the B folder.",
+    "Option in B": "This option creates a file named B.txt in the SDCARD root directory."
+  }
+}

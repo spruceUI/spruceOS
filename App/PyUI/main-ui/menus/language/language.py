@@ -271,6 +271,11 @@ class Language:
     def additional_settings(cls):
         return cls._data.get("additionalSettings","Additional Settings")
 
+
+    @classmethod
+    def tasks(cls):
+        return cls._data.get("tasks","Tasks")
+
     @classmethod
     def status(cls):
         return cls._data.get("Status","Status")
@@ -357,7 +362,7 @@ class Language:
 
     @classmethod
     def locked_down_modes(cls):
-        return cls._data.get("lockedDownModes","Locked Down Modes")
+        return cls._data.get("lockedDownModes","Enable Locked Down Modes")
 
     @classmethod
     def l2_r2_skip_by_letter_for_daijisho_themes(cls):
