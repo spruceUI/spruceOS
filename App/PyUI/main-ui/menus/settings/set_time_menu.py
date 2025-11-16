@@ -11,6 +11,8 @@ from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class SetTimeMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -104,7 +106,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Year",
+                primary_text=Language.year(),
                 value_text="<    " + str(self.year) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -116,7 +118,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Month",
+                primary_text=Language.month(),
                 value_text="<    " + str(self.month) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -128,7 +130,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Day",
+                primary_text=Language.day(),
                 value_text="<    " + str(self.day) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -140,7 +142,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Hour 24",
+                primary_text=Language.hour24(),
                 value_text="<    " + str(self.hour) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -152,7 +154,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
         
         option_list.append(
             GridOrListEntry(
-                primary_text="Minute",
+                primary_text=Language.minute(),
                 value_text="<    " + str(self.minute) + "    >",
                 image_path=None,
                 image_path_selected=None,

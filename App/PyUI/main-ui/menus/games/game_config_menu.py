@@ -12,6 +12,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 # Would like this to be generic in the future but this is so Miyoo specific right now 
 # Due to the oddities in how its handled
 class GameConfigMenu:
@@ -189,7 +191,7 @@ class GameConfigMenu:
                 if(overridable_entries):
                     config_list.append(
                         GridOrListEntry(
-                            primary_text="Toggle Settings as Game Specific Override",
+                            primary_text=Language.toggle_settings_as_game_specific_override(),
                             image_path=None,
                             image_path_selected=None,
                             description=None,

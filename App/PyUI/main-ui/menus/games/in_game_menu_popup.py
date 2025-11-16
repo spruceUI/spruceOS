@@ -6,6 +6,8 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
+from menus.language.language import Language
+
 CONTINUE_RUNNING = True
 
 class InGameMenuPopup:
@@ -19,7 +21,7 @@ class InGameMenuPopup:
         popup_options = []
     
         popup_options.append(GridOrListEntry(
-            primary_text="Exit Game",
+            primary_text=Language.exit_game(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",

@@ -6,6 +6,8 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
     def __init__(self):
         super().__init__()
@@ -14,7 +16,7 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_view_type_entry(
-                primary_text="Game Sel Menu",
+                primary_text=Language.game_sel_menu(),
                 get_value_func=Theme.get_game_selection_view_type,
                 set_value_func=Theme.set_game_selection_view_type
             )
@@ -31,7 +33,7 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_enum_entry(
-                primary_text="Img Mode",
+                primary_text=Language.img_mode(),
                 get_value_func=Theme.get_grid_game_selected_resize_type,
                 set_value_func=Theme.set_grid_game_selected_resize_type,
                 get_next_enum_type=get_next_resize_type
@@ -39,28 +41,28 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         )
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Rows",
+                primary_text=Language.rows(),
                 get_value_func=Theme.get_game_select_row_count,
                 set_value_func=Theme.set_game_select_row_count
             )
         )
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Cols",
+                primary_text=Language.cols(),
                 get_value_func=Theme.get_game_select_col_count,
                 set_value_func=Theme.set_game_select_col_count
             )
         )
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Img Width",
+                primary_text=Language.img_width(),
                 get_value_func=Theme.get_game_select_img_width,
                 set_value_func=Theme.set_game_select_img_width
             )
         )
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Img Height",
+                primary_text=Language.img_height(),
                 get_value_func=Theme.get_game_select_img_height,
                 set_value_func=Theme.set_game_select_img_height
             )
@@ -87,14 +89,14 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Cols",
+                primary_text=Language.cols(),
                 get_value_func=Theme.get_game_select_col_count,
                 set_value_func=Theme.set_game_select_col_count
             )
         )
         option_list.append(
             self.build_percent_entry(
-                primary_text="Prim Img Width %",
+                primary_text=Language.prim_img_width(),
                 get_value_func=Theme.get_carousel_game_select_primary_img_width,
                 set_value_func=Theme.set_carousel_game_select_primary_img_width
             )
@@ -108,7 +110,7 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         if (Theme.get_game_select_col_count() > 3):
             option_list.append(
                 self.build_enabled_disabled_entry(
-                    primary_text="Shrink Further Away",
+                    primary_text=Language.shrink_further_away(),
                     get_value_func=Theme.get_carousel_game_select_shrink_further_away,
                     set_value_func=Theme.set_carousel_game_select_shrink_further_away
                 )
@@ -134,7 +136,7 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
 
         option_list.append(
             self.build_enum_entry(
-                primary_text="BoxArt Resize Type",
+                primary_text=Language.boxart_resize_type(),
                 get_value_func=Theme.get_full_screen_grid_game_menu_resize_type,
                 set_value_func=Theme.set_full_screen_grid_game_menu_resize_type,
                 get_next_enum_type=get_next_resize_type

@@ -5,6 +5,8 @@ from menus.settings import settings_menu
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class ControllerSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -23,7 +25,7 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_analog_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Calibrate Analog Sticks",
+                            primary_text=Language.calibrate_analog_sticks(),
                             value_text=None,
                             image_path=None,
                             image_path_selected=None,
@@ -35,7 +37,7 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Remap Buttons",
+                        primary_text=Language.remap_buttons(),
                         image_path=None,
                         image_path_selected=None,
                         description=None,

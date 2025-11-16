@@ -10,6 +10,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class AppMenuPopup:
     def __init__(self, current_show_all_apps_setting):
         self.current_show_all_apps_setting = current_show_all_apps_setting
@@ -30,7 +32,7 @@ class AppMenuPopup:
 
         if(app):
             popup_options.append(GridOrListEntry(
-                    primary_text="Show App" if AppsManager.is_hidden(app) else "Hide App",
+                    primary_text=Language.show_app() if AppsManager.is_hidden(app) else "Hide App",
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
                     description="",
@@ -39,7 +41,7 @@ class AppMenuPopup:
             ))
 
         popup_options.append(GridOrListEntry(
-                primary_text="Hide Hidden Apps" if self.current_show_all_apps_setting else "Show Hidden Apps",
+                primary_text=Language.hide_hidden_apps() if self.current_show_all_apps_setting else "Show Hidden Apps",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
