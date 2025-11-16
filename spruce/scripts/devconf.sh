@@ -13,7 +13,6 @@ if flag_check "developer_mode"; then
     update_setting "samba" "on"
     update_setting "dropbear" "on"
     update_setting "sftpgo" "on"
-    #update_setting "enableNetworkTimeSync" "on"
 
     # Dropbear first time setup and start
     first_time_setup &

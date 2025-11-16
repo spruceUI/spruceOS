@@ -167,9 +167,6 @@ if flag_check "sleep.powerdown"; then
 fi
 alsactl store
 
-# All processes should have been killed, safe to update time if enabled
-/mnt/SDCARD/spruce/scripts/geoip_timesync.sh
-
 # Now that nothing might need it, organize settings file
 settings_organize
 

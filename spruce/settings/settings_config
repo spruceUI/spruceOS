@@ -1,6 +1,5 @@
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
-$GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $GENESIS_PLUS_GX_WIDE=/mnt/SDCARD/spruce/scripts/applySetting/genesisPlusGXWide.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
@@ -30,8 +29,6 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 # info text should start with % and follow with quoted command
 %"/mnt/SDCARD/spruce/scripts/applySetting/IP.sh"
 %"/mnt/SDCARD/spruce/scripts/applySetting/MAC.sh"
-
-"" "Sync Time/RTC with network" "|" "on|off" "$HELP$ check enableNetworkTimeSync" "$HELP$ update enableNetworkTimeSync on && $GEOTIME$ && hwclock -w|$HELP$ update enableNetworkTimeSync off" ""
 
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ _VALUE_" "$SAMBA$ _INDEX_"
 @"Network file-sharing"
