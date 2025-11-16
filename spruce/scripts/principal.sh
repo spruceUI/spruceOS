@@ -27,7 +27,7 @@ runifnecessary(){
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Set up the boot_to action prior to getting into the principal loop
-BOOT_ACTION="$(get_config_value '.menuOptions."Boot Settings".bootTo.selected' "spruceUI")"
+BOOT_ACTION="$(get_config_value '.menuOptions."System Settings".bootTo.selected' "spruceUI")"
 if ! flag_check "save_active"; then
     case "$BOOT_ACTION" in
         "Random Game")

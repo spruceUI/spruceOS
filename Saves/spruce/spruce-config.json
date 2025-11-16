@@ -75,7 +75,7 @@
                 "selected": "False"
             }
         },
-        "Boot Settings": {
+        "System Settings": {
             "checkForUpdates": {
                 "display": "Check for spruce updates on startup",
                 "options": [
