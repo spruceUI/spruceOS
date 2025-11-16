@@ -93,6 +93,17 @@
                     "Splore"
                 ],
                 "selected": "spruceUI"
+            },
+            "rumbleIntensity": {
+                "display": "Rumble intensity",
+                "description": "for system notifications",
+                "options": [
+                    "Strong",
+                    "Medium",
+                    "Weak",
+                    "Off"
+                ],
+                "selected": "Medium"
             }
         },
         "Emulator Settings": {

@@ -1060,6 +1060,7 @@ get_config_value() {
 # If no intensity is provided, gets value from settings
 vibrate() {
     duration=50
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
 
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
@@ -1075,23 +1076,18 @@ vibrate() {
         shift
     done
 
-    # If no intensity was specified, get from settings
     case "$PLATFORM" in
         "A30")
-            if [ -z "$intensity" ]; then
-                intensity="$(setting_get "rumble_intensity")"
-            fi
-
-            if [ "$intensity" = "Strong" ]; then
+            if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
                 echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
-            elif [ "$intensity" = "Medium" ]; then
+            elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
                     echo 5 >/sys/devices/virtual/timed_output/vibrator/enable
                     sleep 0.006
                     timer=$(($timer + 6))
                 done &
-            elif [ "$intensity" = "Weak" ]; then
+            elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
                     echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
@@ -1104,11 +1100,7 @@ vibrate() {
             ;;
         "Flip") 
             # todo: figure out how to make lengths equal across intensity
-            if [ -z "$intensity" ]; then
-                intensity="$(setting_get "rumble_intensity")"
-            fi
-
-            if [ "$intensity" = "Strong" ]; then
+            if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
                 timer=0
                 echo -n 1 > /sys/class/gpio/gpio20/value
                 while [ $timer -lt $duration ]; do
@@ -1116,7 +1108,7 @@ vibrate() {
                     timer=$(($timer + 2))
                 done
                 echo -n 0 > /sys/class/gpio/gpio20/value
-            elif [ "$intensity" = "Medium" ]; then
+            elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
                     echo -n 1 > /sys/class/gpio/gpio20/value
@@ -1125,7 +1117,7 @@ vibrate() {
                     sleep 0.001
                     timer=$(($timer + 6))
                 done &
-            elif [ "$intensity" = "Weak" ]; then
+            elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
                     echo -n 1 > /sys/class/gpio/gpio20/value
@@ -1137,7 +1129,7 @@ vibrate() {
             fi
             ;;
         "Brick" | "SmartPro") 
-            # todo: properly implement duration timer
+            # todo: properly implement duration timer and intensity
             timer=0
             while [ $timer -lt $duration ]; do
                 echo -n 1 > /sys/class/gpio/gpio227/value

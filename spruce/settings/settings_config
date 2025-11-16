@@ -8,7 +8,6 @@ $JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
-$RUMBLE=/mnt/SDCARD/spruce/scripts/applySetting/rumbleIntensity.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
@@ -26,9 +25,6 @@ $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
 <Flip>
 "" "Extended brightness controls" "|" "on|off" "$HELP$ check extended_brightness" "$HELP$ update extended_brightness _VALUE_" ""
 @"Start + L/R change contrast at minimum brightness"
-
-"" "Rumble intensity" "Strong|Medium|Weak|Off" "Strong|Medium|Weak|Off" "$HELP$ get rumble_intensity 'Medium'" "$HELP$ update rumble_intensity '_VALUE_'" "$RUMBLE$ _INDEX_"
-@"For system notifications"
 
 <A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
