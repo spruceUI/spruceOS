@@ -15,6 +15,7 @@ from views.popup_text_list_view import PopupTextListView
 from views.text_list_view import TextListView
 from views.text_to_image_relationship import TextToImageRelationship
 from views.view_type import ViewType
+from utils.logger import PyUiLogger
 
 class ViewCreator:
 

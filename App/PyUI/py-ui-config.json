@@ -8,5 +8,6 @@
     "gameSystemSortMode": "SortOrderKey",
     "includeStockOsLaunchOption": false,
     "allowPyUiGameSwitcher": true,
-    "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json"
+    "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
+    "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json"
 }

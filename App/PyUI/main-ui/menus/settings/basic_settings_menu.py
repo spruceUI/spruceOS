@@ -10,6 +10,7 @@ from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
 from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
+from menus.settings.tasks_menu import TasksMenu
 from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.wifi_menu import WifiMenu
@@ -109,6 +110,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             if(ExtraSettingsMenu().show_menu()):
                 self.theme_changed = True
+
+    def launch_tasks(self,input):
+        if(ControllerInput.A == input):
+            TasksMenu().show_menu()
 
     def launch_theme_settings(self,input):
         if(ControllerInput.A == input):
@@ -237,6 +242,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             description=None,
                             icon=None,
                             value=self.launch_extra_settings
+                        )
+                )
+
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text=Language.tasks(),
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_tasks
                         )
                 )
 

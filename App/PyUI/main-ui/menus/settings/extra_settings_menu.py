@@ -73,16 +73,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):
             GameArtDisplaySettingsMenu().show_menu()
-
-    def scrape_box_art(self,input):
-        if(ControllerInput.A == input):
-            BoxArtScraper().scrape_boxart()
-
-    def launch_modes_menu(self,input):
-        if(ControllerInput.A == input):
-            ModesMenu().show_menu()
-
-
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
             BoxArtResizer.patch_boxart()
@@ -167,18 +157,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
         )
 
-        #Future
-        if(False):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.download_boxart(),
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.scrape_box_art
-                    )
-            )    
 
                     
 
@@ -248,31 +226,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                             )
                     )
 
-
-        if(Device.supports_image_resizing()):
-            option_list.append(
-                GridOrListEntry(
-                    primary_text=Language.optimize_boxart(),
-                    value_text=None,
-                    image_path=None,
-                    image_path_selected=None,
-                    description=None,
-                    icon=None,
-                    value=self.resize_boxart
-                )
-            )        
-
-        option_list.append(
-            GridOrListEntry(
-                primary_text=Language.locked_down_modes(),
-                value_text=None,
-                image_path=None,
-                image_path_selected=None,
-                description=None,
-                icon=None,
-                value=self.launch_modes_menu
-                )
-            )
-
+      
 
         return option_list

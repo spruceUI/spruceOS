@@ -203,3 +203,7 @@ class PyUiConfig:
     def get_gameswitcher_path(cls):
         return cls.get("gameSwitcherPath",None)
 
+    @classmethod
+    def cfw_tasks_json(cls):
+        return cls.get("cfwTasks",None)
+
