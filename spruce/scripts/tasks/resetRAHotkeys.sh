@@ -1,13 +1,4 @@
 #!/bin/sh
-if [ "$1" == "0" ]; then
-    echo -n "Your RetroArch hotkeys will be reset to Spruce defaults on save and exit."
-    return 0
-fi
-
-if [ "$1" == "1" ]; then
-    echo -n "Applies Spruce hotkey layout."
-    return 0
-fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 

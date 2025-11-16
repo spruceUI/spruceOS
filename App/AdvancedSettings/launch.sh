@@ -35,23 +35,9 @@ killall -q -USR2 joystickinput
 # Initialize empty string for modes
 MODES=""
 
-# Add modes based on flag checks
-if flag_check "developer_mode"; then
-    MODES="$MODES -m Developer"
-fi
-
-PICO_DIR="/mnt/SDCARD/Emu/PICO8/bin"
-BIOS_DIR="/mnt/SDCARD/BIOS"
-if [ -f "$PICO_DIR/pico8.dat" ] || [ -f "$BIOS_DIR/pico8.dat" ]; then
-    MODES="$MODES -m Pico"
-fi
 
 # Add a mode based on which device spruce is running on
 MODES="$MODES -m $PLATFORM"
-
-if [ -f "/mnt/SDCARD/.DS_Store" ]; then
-    MODES="$MODES -m Mac"
-fi
 
 [ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
 

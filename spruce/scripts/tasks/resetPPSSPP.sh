@@ -1,13 +1,4 @@
 #!/bin/sh
-if [ "$1" == "0" ]; then
-    echo -n "Your PPSSPP config will be reset on save and exit."
-    return 0
-fi
-
-if [ "$1" == "1" ]; then
-    echo -n "We recommend backing up first."
-    return 0
-fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -18,5 +9,5 @@ BACKUP_PPSSPP_CONTROLS_FILE="/mnt/SDCARD/Emu/.emu_setup/.config/ppsspp/PSP/SYSTE
 
 
 log_message "Resetting PPSSPP config to default."
-cp $BACKUP_PPSSPP_FILE $ORIGINAL_PPSSPP_FILE
-cp $BACKUP_PPSSPP_CONTROLS_FILE $ORIGINAL_PPSSPP_CONTROLS_FILE
+cp -f $BACKUP_PPSSPP_FILE $ORIGINAL_PPSSPP_FILE
+cp -f $BACKUP_PPSSPP_CONTROLS_FILE $ORIGINAL_PPSSPP_CONTROLS_FILE
