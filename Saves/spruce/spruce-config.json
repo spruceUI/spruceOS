@@ -104,6 +104,16 @@
                     "Off"
                 ],
                 "selected": "Medium"
+            },
+            "extendedBrightness": {
+                "devices": ["MIYOO_FLIP"],
+                "display": "Extended brightness controls",
+                "description": "Start + L/R change contrast at minimum brightness",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "Emulator Settings": {

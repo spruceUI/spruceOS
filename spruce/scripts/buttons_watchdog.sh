@@ -153,6 +153,8 @@ brightness_down() {
     BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
 
+    extended_brightness="$(get_config_value 'menuOptions."System Settings".extendedBrightness.selected' "False")"
+
     # setsharedmem binary on A30 does not accept a contrast argument (yet?)
     if [ "$PLATFORM" = "Flip" ]; then
         CONTRAST_LV=$(get_contrast)
@@ -178,7 +180,7 @@ brightness_down() {
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
 
-    elif [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness"; then   ### also, brightness is <= 0 from failing previous condition
+    elif [ "$PLATFORM" = "Flip" ] && [ "$extended_brightness" = "True" ]; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
         if [ "$CONTRAST_LV" -ge 2 ]; then # never let contrast go down to 0
 
@@ -201,6 +203,8 @@ brightness_up() {
     BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
 
+    extended_brightness="$(get_config_value 'menuOptions."System Settings".extendedBrightness.selected' "False")"
+
     # setsharedmem binary on A30 does not accept a contrast argument (yet?)
     if [ "$PLATFORM" = "Flip" ]; then
         CONTRAST_LV=$(get_contrast)
@@ -208,7 +212,7 @@ brightness_up() {
         unset CONTRAST_LV
     fi
 
-    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$PLATFORM" = "Flip" ] && setting_get "extended_brightness" && [ "$CONTRAST_LV" -le 9 ]; then
+    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$PLATFORM" = "Flip" ] && [ "$extended_brightness" = "True" ] && [ "$CONTRAST_LV" -le 9 ]; then
 
         # update system.json
         CONTRAST_LV=$((CONTRAST_LV + 1))

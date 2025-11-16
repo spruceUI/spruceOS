@@ -16,10 +16,6 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 
 [System]
 
-<Flip>
-"" "Extended brightness controls" "|" "on|off" "$HELP$ check extended_brightness" "$HELP$ update extended_brightness _VALUE_" ""
-@"Start + L/R change contrast at minimum brightness"
-
 <A30>
 "" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
