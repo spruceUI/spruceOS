@@ -55,6 +55,24 @@
                     "30m"
                 ],
                 "selected": "Off"
+            },
+            "disableNetworkServicesInGame": {
+                "display": "Disable network services in game",
+                "description": "including samba, ssh, etc.",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "disableWifiInGame": {
+                "display": "Disable wifi in game",
+                "description": "reduces battery consumption",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "Boot Settings": {
@@ -117,7 +135,7 @@
         "Network Settings": {
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
-                "description":"allows reinstall of same spruce version",
+                "description": "allows reinstall of same spruce version",
                 "options":[
                     "True",
                     "False"

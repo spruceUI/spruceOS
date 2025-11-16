@@ -85,9 +85,11 @@ handle_network_services() {
 	wifi_needed=false
 	syncthing_enabled=false
 	wifi_connected=false
+	disable_wifi_in_game="$(get_config_value '.menuOptions."Battery Settings".disableWifiInGame.selected' "False")"
+	disable_net_serv_in_game="$(get_config_value '.menuOptions."Battery Settings".disableNetworkServicesInGame.selected' "False")"
 
 	##### RAC Check #####
-	if ! setting_get "disableWifiInGame" && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+	if [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 		log_message "Retro Achievements enabled, WiFi connection needed"
 		wifi_needed=true
 	fi
@@ -115,10 +117,10 @@ handle_network_services() {
 	fi
 
 	# Handle network service disabling
-	if setting_get "disableNetworkServicesInGame" || setting_get "disableWifiInGame"; then
+	if [ "$disable_wifi_in_game" = "True" ] || [ "$disable_net_serv_in_game" = "True" ]; then
 		/mnt/SDCARD/spruce/scripts/networkservices.sh off
 		
-		if setting_get "disableWifiInGame"; then
+		if [ "$disable_wifi_in_game" = "True" ]; then
 			if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
 				ifconfig wlan0 down &
 			fi

@@ -92,11 +92,5 @@ $RESET_PPSSPP=/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh$
 <Simple>
 %"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh sftpgo"
 
-"" "Disable network services in game" "|" "on|off" "$HELP$ check disableNetworkServicesInGame" "$HELP$ update disableNetworkServicesInGame _VALUE_" ""
-@"Auto restart when in main menu"
-
-"" "Disable WiFi in game" "|" "on|off" "$HELP$ check disableWifiInGame" "$HELP$ update disableWifiInGame _VALUE_" ""
-@"Improves battery life"
-
 "" "Forget all WiFi networks" "|" "run|off" "echo -n off" "$CLEAR_WIFI$|" ""
 @"Disconnect and clear all networks"
