@@ -539,9 +539,9 @@ run_retroarch() {
 			export RA_BIN="ra64.trimui_$PLATFORM"
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$PLATFORM" = "SmartPro" ] && \
-				setting_get "genesis_plus_gx_wide"; then
-				CORE="genesis_plus_gx_wide"
+			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$PLATFORM" = "SmartPro" ]; then
+				use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
+				[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
 			fi
 			# TODO: remove this once profile is set up
 			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH

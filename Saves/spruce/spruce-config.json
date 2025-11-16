@@ -161,6 +161,16 @@
                     "False"
                 ],
                 "selected": "False"
+            },
+            "genesisPlusGXWide": {
+                "devices": ["TRIMUI_SMART_PRO"],
+                "display": "Genesis Plus GX: enable widescreen",
+                "description": "use widescreen hacked core when available",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "Network Settings": {
