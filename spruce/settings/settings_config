@@ -1,10 +1,7 @@
-#Generic helpers
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
-# Function specific scripts
 $GEOTIME=/mnt/SDCARD/spruce/scripts/geoip_timesync.sh$
 $GENESIS_PLUS_GX_WIDE=/mnt/SDCARD/spruce/scripts/applySetting/genesisPlusGXWide.sh$
-$JOYSTICK=/mnt/SDCARD/spruce/scripts/applySetting/joystick.sh$
 $P8_CONTROLLER=/mnt/SDCARD/spruce/scripts/applySetting/pico8_control_profiles.sh$
 $RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
@@ -13,11 +10,7 @@ $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 
-
 [System]
-
-<A30>
-"" "Disable joystick" "|" "on|off" "$HELP$ check disableJoystick" "$JOYSTICK$ _VALUE_" ""
 
 "" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
 @"Automatically save and load states on game exit/start"
@@ -42,16 +35,12 @@ $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 
 "" "Enable Samba" "|" "on|off" "$HELP$ check samba" "$SAMBA$ _VALUE_" "$SAMBA$ _INDEX_"
 @"Network file-sharing"
-%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh samba"
 
 "" "Enable SSH" "|" "on|off" "$HELP$ check dropbear" "$SSH$ _VALUE_" "$SSH$ _INDEX_"
 @"Secure Shell for remote login"
-%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh dropbear"
 
 "" "Enable Syncthing" "|" "on|off" "$HELP$ check syncthing" "$SYNCTHING$ _VALUE_" "$SYNCTHING$ _INDEX_"
 @"Sync files across devices"
-%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh syncthing"
 
 "" "Enable WiFi File Transfer" "|" "on|off" "$HELP$ check sftpgo" "$SFTPGO$ _VALUE_" "$SFTPGO$ _INDEX_"
 @"User: spruce, Password: happygaming"
-%"/mnt/SDCARD/spruce/scripts/applySetting/networkServices.sh sftpgo"

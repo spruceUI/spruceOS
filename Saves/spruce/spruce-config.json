@@ -114,6 +114,16 @@
                     "False"
                 ],
                 "selected": "False"
+            },
+            "disableJoystick": {
+                "devices": ["MIYOO_A30"],
+                "display": "Disable joystick",
+                "description": "can help with stick delete mod bugs",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "Emulator Settings": {

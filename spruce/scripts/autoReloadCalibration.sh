@@ -19,7 +19,8 @@ while true; do
         killall -q -TERM joystickinput
 
         # start new joystickinput process with new calibration values
-        if ! setting_get "disableJoystick"; then
+        disable_joystick="$(get_config_value '.menuOptions."System Settings".disableJoystick.selected' "False")"
+        if [ "$disable_joystick" = "False" ]; then
             /mnt/SDCARD/spruce/bin/joystickinput /dev/ttyS2 /config/joypad.config -axis $EVENT_PATH_JOYPAD -key $EVENT_PATH_KEYBOARD &
         fi
 

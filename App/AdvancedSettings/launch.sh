@@ -32,12 +32,6 @@ flag_check() {
 # this allows joystick to be used as DPAD in setting app
 killall -q -USR2 joystickinput
 
-# Initialize empty string for modes
-MODES=""
-
-
-# Add a mode based on which device spruce is running on
-MODES="$MODES -m $PLATFORM"
 
 [ "$PLATFORM" = "Flip" ] && echo -1 > /sys/class/miyooio_chr_dev/joy_type
 
@@ -47,7 +41,7 @@ if [ ! "$PLATFORM" = "A30" ]; then
 fi
 
 cd "$BIN_PATH"
-./easyConfig "$SETTINGS_PATH/settings_config" $MODES
+./easyConfig "$SETTINGS_PATH/settings_config"
 
 kill -9 "$(pidof gptokeyb)" 2>/dev/null
 
