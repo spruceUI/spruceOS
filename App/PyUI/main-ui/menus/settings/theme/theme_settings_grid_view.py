@@ -4,6 +4,8 @@ from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class ThemeSettingsGridView(ThemeSettingsMenuCommon):
     def __init__(self):
         super().__init__()
@@ -12,14 +14,14 @@ class ThemeSettingsGridView(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Sel BG Resize Pad Width",
+                primary_text=Language.sel_bg_resize_pad_width(),
                 get_value_func=Theme.get_grid_multi_row_sel_bg_resize_pad_width,
                 set_value_func=Theme.set_grid_multi_row_sel_bg_resize_pad_width
             )
         )
         option_list.append(
             self.build_numeric_entry(
-                primary_text="Sel BG Resize Pad Height",
+                primary_text=Language.sel_bg_resize_pad_height(),
                 get_value_func=Theme.get_grid_multi_row_sel_bg_resize_pad_height,
                 set_value_func=Theme.set_grid_multi_row_sel_bg_resize_pad_height
             )

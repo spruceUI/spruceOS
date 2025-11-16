@@ -9,6 +9,8 @@ from utils.user_prompt import UserPrompt
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class ModesMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -47,7 +49,7 @@ class ModesMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Enter Game Selection Only Mode",
+                primary_text=Language.enter_game_selection_only_mode(),
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,
@@ -58,7 +60,7 @@ class ModesMenu(settings_menu.SettingsMenu):
             )
         option_list.append(
             GridOrListEntry(
-                primary_text="Enter Simple Mode",
+                primary_text=Language.enter_simple_mode(),
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,

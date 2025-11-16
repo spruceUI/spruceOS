@@ -7,6 +7,8 @@ from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class SoundSettings(SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -43,7 +45,7 @@ class SoundSettings(SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Play Button Press Sound",
+                primary_text=Language.play_button_press_sound(),
                 value_text="<    " + str(Device.get_system_config().play_button_press_sound()) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -55,7 +57,7 @@ class SoundSettings(SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Play BGM",
+                primary_text=Language.play_bgm(),
                 value_text="<    " + str(Device.get_system_config().play_bgm()) + "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -67,7 +69,7 @@ class SoundSettings(SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="BGM Volume",
+                primary_text=Language.bgm_volume(),
                 value_text="<    " + str(Device.get_system_config().bgm_volume()) + "    >",
                 image_path=None,
                 image_path_selected=None,

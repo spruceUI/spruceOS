@@ -10,6 +10,8 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.view_type import ViewType, get_next_view_type
 
 
+from menus.language.language import Language
+
 class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
     SETTINGS_NAME = "Game Switcher Settings"
 
@@ -40,7 +42,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Hold Menu for GameSwitcher",
+                        primary_text=Language.hold_menu_for_gameswitcher(),
                         value_text="<    " + str(Device.get_system_config().game_switcher_enabled()) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -52,7 +54,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Prefer SaveState Screenshots",
+                        primary_text=Language.prefer_savestate_screenshots(),
                         value_text="<    " + str(Device.get_system_config().use_savestate_screenshots(GAME_SWITCHER)) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -64,7 +66,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Game Count",
+                        primary_text=Language.game_count(),
                         value_text="<    " + str(Device.get_system_config().game_switcher_game_count()) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -78,7 +80,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                     
         option_list.append(
             self.build_enum_entry(
-                primary_text="View Type",
+                primary_text=Language.view_type(),
                 get_value_func=Theme.get_view_type_for_game_switcher,
                 set_value_func=Theme.set_view_type_for_game_switcher,
                 get_next_enum_type=get_next_view_type
@@ -88,7 +90,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         if(ViewType.FULLSCREEN_GRID == Theme.get_view_type_for_game_switcher()):
             option_list.append(
                 self.build_enum_entry(
-                    primary_text="Full Screen Resize Type",
+                    primary_text=Language.full_screen_resize_type(),
                     get_value_func=Theme.get_resize_type_for_game_switcher,
                     set_value_func=Theme.set_resize_type_for_game_switcher,
                     get_next_enum_type=get_next_resize_type
@@ -98,7 +100,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
             if(ResizeType.ZOOM == Theme.get_resize_type_for_game_switcher()):
                 option_list.append(
                     self.build_enabled_disabled_entry(
-                        primary_text="True Full Screen",
+                        primary_text=Language.true_full_screen(),
                         get_value_func=Theme.true_full_screen_game_switcher,
                         set_value_func=Theme.set_true_full_screen_game_switcher,
                     )
@@ -106,7 +108,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
 
             option_list.append(
                 self.build_enabled_disabled_entry(
-                    primary_text="TopBar = GameName",
+                    primary_text=Language.topbar_gamename(),
                     get_value_func=Theme.get_set_top_bar_text_to_game_selection,
                     set_value_func=Theme.set_set_top_bar_text_to_game_selection,
                 )
@@ -116,7 +118,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         if(ViewType.CAROUSEL == Theme.get_view_type_for_game_switcher()):
             option_list.append(
                 self.build_enabled_disabled_entry(
-                    primary_text="TopBar = GameName",
+                    primary_text=Language.topbar_gamename(),
                     get_value_func=Theme.get_set_top_bar_text_to_game_selection,
                     set_value_func=Theme.set_set_top_bar_text_to_game_selection,
                 )
@@ -126,7 +128,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         if(PyUiConfig.get_gameswitcher_path() is not None ):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Use Recents for GameSwitcher",
+                            primary_text=Language.use_recents_for_gameswitcher(),
                             value_text="<    " + ("No" if Device.get_system_config().use_custom_gameswitcher_path() else "Yes") + "    >",
                             image_path=None,
                             image_path_selected=None,

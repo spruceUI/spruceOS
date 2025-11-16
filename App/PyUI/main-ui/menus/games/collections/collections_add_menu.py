@@ -11,6 +11,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class CollectionsAddMenu():
     def __init__(self, rom_info : RomInfo):
         self.rom_info = rom_info
@@ -26,7 +28,7 @@ class CollectionsAddMenu():
         option_list = []
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Create New Collection",
+                        primary_text=Language.create_new_collection(),
                         value_text="",
                         image_path=None,
                         image_path_selected=None,

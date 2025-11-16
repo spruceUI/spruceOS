@@ -13,6 +13,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class ThemeSettingsMenu():
     def __init__(self):
         pass
@@ -47,7 +49,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Main Menu Theme Options",
+                primary_text=Language.main_menu_theme_options(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,
@@ -59,7 +61,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="System Select Theme Options",
+                primary_text=Language.system_select_theme_options(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,
@@ -72,7 +74,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Game Select Menu Theme Options",
+                primary_text=Language.game_select_menu_theme_options(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,
@@ -84,7 +86,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Fonts",
+                primary_text=Language.fonts(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,
@@ -96,7 +98,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Grid View Theme Options",
+                primary_text=Language.grid_view_theme_options(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,
@@ -108,7 +110,7 @@ class ThemeSettingsMenu():
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Top Bar Options",
+                primary_text=Language.top_bar_options(),
                 value_text="",
                 image_path=None,
                 image_path_selected=None,

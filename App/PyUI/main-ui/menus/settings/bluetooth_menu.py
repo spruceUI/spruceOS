@@ -10,6 +10,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class BluetoothMenu:
     def __init__(self):
         self.bluetooth_scanner = BluetoothScanner()
@@ -33,7 +35,7 @@ class BluetoothMenu:
             option_list = []
             option_list.append(
                 GridOrListEntry(
-                        primary_text="Status",
+                        primary_text=Language.status(),
                         value_text="<    " + ("Scanning" if bluetooth_enabled else "Off") + "    >",
                         image_path=None,
                         image_path_selected=None,

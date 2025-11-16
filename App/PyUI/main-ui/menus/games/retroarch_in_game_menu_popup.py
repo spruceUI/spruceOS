@@ -8,6 +8,8 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
+from menus.language.language import Language
+
 CONTINUE_RUNNING = True
 
 class RetroarchInGameMenuPopup:
@@ -48,7 +50,7 @@ class RetroarchInGameMenuPopup:
         time.sleep(0.1)
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text="Save State",
+            primary_text=Language.save_state(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
@@ -57,7 +59,7 @@ class RetroarchInGameMenuPopup:
         ))
 
         popup_options.append(GridOrListEntry(
-            primary_text="Load State",
+            primary_text=Language.load_state(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
@@ -66,7 +68,7 @@ class RetroarchInGameMenuPopup:
         ))
 
         popup_options.append(GridOrListEntry(
-            primary_text="Toggle Fast Forward",
+            primary_text=Language.toggle_fast_forward(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
@@ -75,7 +77,7 @@ class RetroarchInGameMenuPopup:
         ))
 
         popup_options.append(GridOrListEntry(
-            primary_text="RA Menu",
+            primary_text=Language.ra_menu(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
@@ -84,7 +86,7 @@ class RetroarchInGameMenuPopup:
         ))
 
         popup_options.append(GridOrListEntry(
-            primary_text="Exit Game",
+            primary_text=Language.exit_game(),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description="",
