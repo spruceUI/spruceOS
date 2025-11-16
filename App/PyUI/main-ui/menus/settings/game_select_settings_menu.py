@@ -5,6 +5,8 @@ from menus.settings import settings_menu
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class GameSelectSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -19,7 +21,7 @@ class GameSelectSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="L2/R2 Skip By Letter for Daijisho Themes",
+                        primary_text=Language.l2_r2_skip_by_letter_for_daijisho_themes(),
                         value_text="<    " + str(Device.get_system_config().get_skip_by_letter()) + "    >",
                         image_path=None,
                         image_path_selected=None,

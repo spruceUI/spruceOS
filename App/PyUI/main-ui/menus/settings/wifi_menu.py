@@ -16,6 +16,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class WifiMenu:
     def __init__(self):
         self.wifi_scanner = WiFiScanner()
@@ -101,7 +103,7 @@ class WifiMenu:
             option_list = []
             option_list.append(
                 GridOrListEntry(
-                        primary_text="Status",
+                        primary_text=Language.status(),
                         value_text="<    " + ("On" if wifi_enabled else "Off") + "    >",
                         image_path=None,
                         image_path_selected=None,

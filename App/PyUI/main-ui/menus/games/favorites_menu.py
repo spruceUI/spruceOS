@@ -8,6 +8,8 @@ from menus.games.utils.rom_info import RomInfo
 from utils.consts import FAVORITES
 from views.grid_or_list_entry import GridOrListEntry
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from menus.language.language import Language
+
 class FavoritesMenu(RomsMenuCommon):
     def __init__(self):
         super().__init__()
@@ -44,7 +46,7 @@ class FavoritesMenu(RomsMenuCommon):
     def get_additional_menu_options(self):
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text="Sort Favorites",
+            primary_text=Language.sort_favorites(),
             description=None,
             image_path=None,
             image_path_selected=None,

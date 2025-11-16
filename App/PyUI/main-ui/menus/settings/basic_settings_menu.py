@@ -128,7 +128,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list = []
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Power Off",
+                        primary_text=Language.power_off(),
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -138,7 +138,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             )
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Backlight",
+                        primary_text=Language.backlight(),
                         value_text="<    " + str(Device.lumination()) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -151,7 +151,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_volume()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Volume",
+                            primary_text=Language.volume(),
                             value_text="<    " + str(Device.get_volume()//5) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -167,7 +167,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             if(Device.supports_wifi()):
                 option_list.append(
                         GridOrListEntry(
-                                primary_text="WiFi",
+                                primary_text=Language.wifi(),
                                 value_text="<    " + (Device.get_ip_addr_text()) + "    >",
                                 image_path=None,
                                 image_path_selected=None,
@@ -180,7 +180,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             if(Device.get_bluetooth_scanner() is not None):
                 option_list.append(
                         GridOrListEntry(
-                                primary_text="Bluetooth",
+                                primary_text=Language.bluetooth(),
                                 value_text="<    " + ("On" if Device.is_bluetooth_enabled() else "Off") + "    >",
                                 image_path=None,
                                 image_path_selected=None,
@@ -192,7 +192,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Theme",
+                        primary_text=Language.theme(),
                         value_text="<    " + Device.get_system_config().get_theme() + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -206,7 +206,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(not Device.get_system_config().simple_mode_enabled()):
             option_list.append(
                         GridOrListEntry(
-                                primary_text="Theme Settings",
+                                primary_text=Language.theme_settings(),
                                 value_text=None,
                                 image_path=None,
                                 image_path_selected=None,
@@ -218,7 +218,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
             option_list.append(
                 GridOrListEntry(
-                    primary_text="Sound Settings",
+                    primary_text=Language.sound_settings(),
                     value_text="",
                     image_path=None,
                     image_path_selected=None,
@@ -230,7 +230,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Additional Settings",
+                            primary_text=Language.additional_settings(),
                             value_text=None,
                             image_path=None,
                             image_path_selected=None,

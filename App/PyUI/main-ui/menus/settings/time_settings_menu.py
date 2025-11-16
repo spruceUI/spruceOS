@@ -7,6 +7,8 @@ from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class TimeSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -42,7 +44,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Set Time & Date",
+                primary_text=Language.set_time_date(),
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,
@@ -55,7 +57,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_timezone_setting()):
             option_list.append(
                 GridOrListEntry(
-                    primary_text="Set Timezone",
+                    primary_text=Language.set_timezone(),
                     value_text=None,
                     image_path=None,
                     image_path_selected=None,
@@ -67,7 +69,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Clock",
+                primary_text=Language.clock(),
                 value_text="<    " +
                 ("On" if PyUiConfig.show_clock() else "Off") + "    >",
                 image_path=None,
@@ -80,7 +82,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
         if (PyUiConfig.show_clock()):
             option_list.append(
                 GridOrListEntry(
-                    primary_text="24 Hour Clock",
+                    primary_text=Language.twenty_four_hour_clock(),
                     value_text="<    " +
                     ("On" if PyUiConfig.use_24_hour_clock() else "Off") + "    >",
                     image_path=None,
@@ -93,7 +95,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             if (not PyUiConfig.use_24_hour_clock()):
                 option_list.append(
                     GridOrListEntry(
-                        primary_text="Show AM/PM",
+                        primary_text=Language.show_am_pm(),
                         value_text="<    " +
                         ("On" if PyUiConfig.show_am_pm() else "Off") + "    >",
                         image_path=None,

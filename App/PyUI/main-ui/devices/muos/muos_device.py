@@ -23,6 +23,8 @@ from devices.device_common import DeviceCommon
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class MuosDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
@@ -340,7 +342,7 @@ class MuosDevice(DeviceCommon):
         option_list = []
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Set PyUI as Startup",
+                        primary_text=Language.set_pyui_as_startup(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,

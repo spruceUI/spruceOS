@@ -99,7 +99,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Display Settings",
+                        primary_text=Language.display_settings(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -111,7 +111,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Time Settings",
+                        primary_text=Language.time_settings(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -123,7 +123,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Game System Select Settings",
+                        primary_text=Language.game_system_select_settings(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -135,7 +135,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Game Select Settings",
+                        primary_text=Language.game_select_settings(),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -148,7 +148,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(PyUiConfig.allow_pyui_game_switcher()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Game Switcher Settings",
+                            primary_text=Language.game_switcher_settings(),
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -158,7 +158,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             )
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Game Art Display Settings",
+                        primary_text=Language.game_art_display_settings(),
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -171,7 +171,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(False):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Download BoxArt",
+                            primary_text=Language.download_boxart(),
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -184,7 +184,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Controller Settings",
+                        primary_text=Language.controller_settings(),
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -197,7 +197,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Language Settings",
+                primary_text=Language.language_settings(),
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,
@@ -211,7 +211,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(PyUiConfig.include_stock_os_launch_option()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Stock OS Menu",
+                            primary_text=Language.stock_os_menu(),
                             value_text=None,
                             image_path=None,
                             image_path_selected=None,
@@ -252,7 +252,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_image_resizing()):
             option_list.append(
                 GridOrListEntry(
-                    primary_text="Optimize Boxart",
+                    primary_text=Language.optimize_boxart(),
                     value_text=None,
                     image_path=None,
                     image_path_selected=None,
@@ -264,7 +264,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Locked Down Modes",
+                primary_text=Language.locked_down_modes(),
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,

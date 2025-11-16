@@ -16,6 +16,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class GameSelectMenuPopup:
     def __init__(self):
         pass
@@ -66,7 +68,7 @@ class GameSelectMenuPopup:
         
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
-                primary_text="Remove Favorite" if use_full_text else "+/- Favorite",
+                primary_text=Language.remove_favorite() if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -75,7 +77,7 @@ class GameSelectMenuPopup:
             ))
         else:
             popup_options.append(GridOrListEntry(
-                primary_text="Add Favorite" if use_full_text else "+/- Favorite",
+                primary_text=Language.add_favorite() if use_full_text else "+/- Favorite",
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -85,7 +87,7 @@ class GameSelectMenuPopup:
             
         
         popup_options.append(GridOrListEntry(
-            primary_text="Add/Remove Collection" if use_full_text else "+/- Collection",
+            primary_text=Language.add_remove_collection() if use_full_text else "+/- Collection",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description=None,
@@ -94,7 +96,7 @@ class GameSelectMenuPopup:
         ))
 
         popup_options.append(GridOrListEntry(
-                primary_text="Launch Random Game",
+                primary_text=Language.launch_random_game(),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,

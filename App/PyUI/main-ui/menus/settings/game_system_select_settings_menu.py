@@ -6,6 +6,8 @@ from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 GAME_SYSTEM_SORT_MODE_OPTIONS = ["Alphabetical","SortOrderKey","Custom"]
 
 class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
@@ -92,7 +94,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Show All Systems",
+                primary_text=Language.show_all_systems(),
                 value_text="<    " +
                 ("On" if PyUiConfig.show_all_game_systems() else "Off") + "    >",
                 image_path=None,
@@ -105,7 +107,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text="Game System Sorting",
+                primary_text=Language.game_system_sorting(),
                 value_text="<    " + PyUiConfig.game_system_sort_mode()+ "    >",
                 image_path=None,
                 image_path_selected=None,
@@ -118,7 +120,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         if(PyUiConfig.game_system_sort_mode() == "Custom"):
             option_list.append(
                 GridOrListEntry(
-                    primary_text="System Type Priority",
+                    primary_text=Language.system_type_priority(),
                     value_text="<    " + str(PyUiConfig.game_system_sort_type_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
@@ -129,7 +131,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             )
             option_list.append(
                 GridOrListEntry(
-                    primary_text="System Brand Priority",
+                    primary_text=Language.system_brand_priority(),
                     value_text="<    " + str(PyUiConfig.game_system_sort_brand_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
@@ -140,7 +142,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             )
             option_list.append(
                 GridOrListEntry(
-                    primary_text="System Year Priority",
+                    primary_text=Language.system_year_priority(),
                     value_text="<    " + str(PyUiConfig.game_system_sort_year_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
@@ -151,7 +153,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             )
             option_list.append(
                 GridOrListEntry(
-                    primary_text="System Name Priority",
+                    primary_text=Language.system_name_priority(),
                     value_text="<    " + str(PyUiConfig.game_system_sort_name_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,

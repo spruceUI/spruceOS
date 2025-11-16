@@ -5,6 +5,8 @@ from menus.settings import settings_menu
 from views.grid_or_list_entry import GridOrListEntry
 
 
+from menus.language.language import Language
+
 class DisplaySettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
@@ -70,7 +72,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
                 GridOrListEntry(
-                        primary_text="Backlight",
+                        primary_text=Language.backlight(),
                         value_text="<    " + str(Device.lumination()) + "    >",
                         image_path=None,
                         image_path_selected=None,
@@ -83,7 +85,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_brightness_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Brightness",
+                            primary_text=Language.brightness(),
                             value_text="<    " + str(Device.get_brightness()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -95,7 +97,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_contrast_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Contrast",
+                            primary_text=Language.contrast(),
                             value_text="<    " + str(Device.get_contrast()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -107,7 +109,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_saturation_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Saturation",
+                            primary_text=Language.saturation(),
                             value_text="<    " + str(Device.get_saturation()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -120,7 +122,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_hue_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Hue",
+                            primary_text=Language.hue(),
                             value_text="<    " + str(Device.get_hue()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -133,7 +135,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         if(Device.supports_rgb_calibration()):
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Red",
+                            primary_text=Language.red(),
                             value_text="<    " + str(Device.get_disp_red()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -144,7 +146,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                 )          
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Blue",
+                            primary_text=Language.blue(),
                             value_text="<    " + str(Device.get_disp_blue()) + "    >",
                             image_path=None,
                             image_path_selected=None,
@@ -155,7 +157,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                 )          
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Green",
+                            primary_text=Language.green(),
                             value_text="<    " + str(Device.get_disp_green()) + "    >",
                             image_path=None,
                             image_path_selected=None,

@@ -11,6 +11,8 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 
+from menus.language.language import Language
+
 class MainMenuPopup:
     def __init__(self):
         pass
@@ -41,7 +43,7 @@ class MainMenuPopup:
     def run_popup_menu_selection(self):
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text="Rom Search",
+            primary_text=Language.rom_search(),
             image_path=None,
             image_path_selected=None,
             description="",
@@ -49,7 +51,7 @@ class MainMenuPopup:
             value=self.rom_search
         ))
         popup_options.append(GridOrListEntry(
-            primary_text="Settings",
+            primary_text=Language.settings_1(),
             image_path=None,
             image_path_selected=None,
             description="",
@@ -60,7 +62,7 @@ class MainMenuPopup:
         if(not Theme.get_recents_enabled()):
             popup_options.append(
                     GridOrListEntry(
-                        primary_text="Recents",
+                        primary_text=Language.recents_1(),
                         image_path=None,
                         image_path_selected=None,
                         description="",
@@ -72,7 +74,7 @@ class MainMenuPopup:
         if(not Theme.get_favorites_enabled()):            
             popup_options.append(
                     GridOrListEntry(
-                        primary_text="Favorites",
+                        primary_text=Language.favorites_1(),
                         image_path=None,
                         image_path_selected=None,
                         description="",
@@ -84,7 +86,7 @@ class MainMenuPopup:
         if(not Theme.get_collections_enabled()):
             popup_options.append(
                     GridOrListEntry(
-                        primary_text="Collections",
+                        primary_text=Language.collections_1(),
                         image_path=None,
                         image_path_selected=None,
                         description="",
