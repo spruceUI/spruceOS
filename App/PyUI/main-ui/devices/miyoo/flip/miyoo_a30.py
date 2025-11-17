@@ -168,20 +168,43 @@ class MiyooA30(MiyooDevice):
         finally:
             os.close(fd)
 
+    def supports_brightness_calibration(self):
+        return True
+
+    def supports_contrast_calibration(self):
+        return True
+
+    def supports_saturation_calibration(self):
+        return True
+
+    def supports_hue_calibration(self):
+        return True
+
     def _set_contrast_to_config(self):
-#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-#                                    "179:contrast:"+str(self.system_config.contrast * 5)])
-        pass
+        self._set_screen_settings_to_config()
     
     def _set_saturation_to_config(self):
-#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-#                                    "179:saturation:"+str(self.system_config.saturation * 5)])
-        pass
+        self._set_screen_settings_to_config()
 
     def _set_brightness_to_config(self):
-#        ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-#                                     "179:brightness:"+str(self.system_config.brightness * 5)])
-        pass
+        self._set_screen_settings_to_config()
+
+    def _set_hue_to_config(self):
+        self._set_screen_settings_to_config()
+
+    def _set_screen_settings_to_config(self):
+        try:
+            enable = "1"
+            brightness = str(self.system_config.brightness*5)
+            contrast = str(self.system_config.contrast*5)
+            saturation = str(self.system_config.saturation*5)
+            hue = str(self.system_config.hue*5)
+            values = ",".join([enable, brightness, contrast, saturation, hue])
+
+            with open("/sys/devices/virtual/disp/disp/attr/enhance", "w") as f:
+                f.write(values)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Failed to set screen settings: {e}")
 
     def take_snapshot(self, path):
         return None
@@ -280,17 +303,6 @@ class MiyooA30(MiyooDevice):
     def supports_image_resizing(self):
         return True
 
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False
 
     def get_image_utils(self):
         return FfmpegImageUtils()
