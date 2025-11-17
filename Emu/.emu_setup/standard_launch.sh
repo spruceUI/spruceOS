@@ -218,12 +218,6 @@ run_ffplay() {
 	fi
 }
 
-kill_runner() {
-    PID="$(pidof runner)"
-    if [ "$PID" != "" ]; then
-        kill -9 $PID
-    fi
-}
 
 ### NDS ###
 
@@ -308,6 +302,13 @@ run_drastic() {
 	sync
 }
 
+kill_runner() {
+    PID="$(pidof runner)"
+    if [ "$PID" != "" ]; then
+        kill -9 $PID
+    fi
+}
+
 load_drastic_configs() {
 	DS_DIR="/mnt/SDCARD/Emu/NDS/config"
 	cp -f "$DS_DIR/drastic-$PLATFORM.cfg" "$DS_DIR/drastic.cfg"
@@ -389,13 +390,14 @@ run_pico8() {
 }
 
 load_pico8_control_profile() {
-	HOME="$EMU_DIR"
+	export HOME="$EMU_DIR"
 	P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
-	CONTROL_PROFILE="$(setting_get "pico8_control_profile")"
+	CONTROL_PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	STEWARD_MODE="$(jq -r '.menuOptions.stewardMode.selected' "$EMU_JSON_PATH")"
 
 	case "$PLATFORM" in
 		"A30")
-			if [ "$CONTROL_PROFILE" = "Steward" ]; then
+			if [ "$STEWARD_MODE" = "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse" ]; then
 				export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
 			else
 				export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
@@ -410,24 +412,12 @@ load_pico8_control_profile() {
 	esac
 
 	case "$CONTROL_PROFILE" in
-		"Doubled") 
-			cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt"
-			;;
-		"One-handed")
-			cp -f "$P8_DIR/sdl_controllers.onehand" "$P8_DIR/sdl_controllers.txt"
-			;;
-		"Racing")
-			cp -f "$P8_DIR/sdl_controllers.racing" "$P8_DIR/sdl_controllers.txt"
-			;;
-		"Doubled 2") 
-			cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt"
-			;;
-		"One-handed 2")
-			cp -f "$P8_DIR/sdl_controllers.onehand_reverse" "$P8_DIR/sdl_controllers.txt"
-			;;
-		"Racing 2")
-			cp -f "$P8_DIR/sdl_controllers.racing_reverse" "$P8_DIR/sdl_controllers.txt"
-			;;
+		"Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ")	cp -f "$P8_DIR/sdl_controllers.facebuttons" "$P8_DIR/sdl_controllers.txt" ;;
+		"One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ")	cp -f "$P8_DIR/sdl_controllers.onehand" 	"$P8_DIR/sdl_controllers.txt" ;;
+		"Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ")	cp -f "$P8_DIR/sdl_controllers.racing" 		"$P8_DIR/sdl_controllers.txt" ;;
+		"Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ") cp -f "$P8_DIR/sdl_controllers.facebuttons_reverse" "$P8_DIR/sdl_controllers.txt" ;;
+		"One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ") cp -f "$P8_DIR/sdl_controllers.onehand_reverse"	"$P8_DIR/sdl_controllers.txt" ;;
+		"Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ") cp -f "$P8_DIR/sdl_controllers.racing_reverse" 	"$P8_DIR/sdl_controllers.txt" ;;
 	esac
 }
 

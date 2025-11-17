@@ -41,12 +41,35 @@
       ],
       "selected": "False",
       "overrides": {}
+    },
+    "controlMode": {
+      "display": "Control Profile",
+      "options": [
+        "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+        "Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ",
+        "One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ",
+        "One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ",
+        "Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ",
+        "Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ"
+      ],
+      "selected": "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+      "overrides": {}
+    },
+    "stewardMode": {
+      "display": "Steward Mode (overrides control profile)",
+      "devices": ["MIYOO_A30"],
+      "options": [
+        "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse",
+        "Off - follow control profile"
+      ],
+      "selected": "Off - follow control profile",
+      "overrides": {}
     }
   },
   "sortOrder": 4800,
   "brand": "modernengine",
   "type": "fantasy",
   "releaseYear": 2015,
-  "default_emulator": "mednafen_pce_fast",
+  "default_emulator": "pico8",
   "scaling_min_freq": 816000
 }
