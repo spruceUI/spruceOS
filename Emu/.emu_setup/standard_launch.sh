@@ -521,30 +521,48 @@ save_ppsspp_configs() {
 
 ### EVERYTHING ELSE ###
 
-run_retroarch() {
+prepare_ra_config() {
+	PLATFORM_CFG="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
+	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
-	RETROARCH_CFG="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
-
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
+	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "True")"
-	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "True")"
 	log_message "auto save setting is $auto_save" -v
-	log_message "auto load setting is $auto_load" -v
-
 	TMP_CFG="$(mktemp)"
 	if [ "$auto_save" = "True" ]; then
-	    sed 's|savestate_auto_save.*|savestate_auto_save = "true"|' "$RETROARCH_CFG" > "$TMP_CFG"
+	    sed 's|savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	else
-	    sed 's|savestate_auto_save.*|savestate_auto_save = "false"|' "$RETROARCH_CFG" > "$TMP_CFG"
+	    sed 's|savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	fi
-	mv "$TMP_CFG" "$RETROARCH_CFG"
+	mv "$TMP_CFG" "$PLATFORM_CFG"
+
+	# Set auto load state based on spruceUI config
+	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "True")"
+	log_message "auto load setting is $auto_load" -v
 	TMP_CFG="$(mktemp)"
 	if [ "$auto_load" = "True" ]; then
-	    sed 's|savestate_auto_load.*|savestate_auto_load = "true"|' "$RETROARCH_CFG" > "$TMP_CFG"
+	    sed 's|savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	else
-	    sed 's|savestate_auto_load.*|savestate_auto_load = "false"|' "$RETROARCH_CFG" > "$TMP_CFG"
+	    sed 's|savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	fi
-	mv "$TMP_CFG" "$RETROARCH_CFG"
+	mv "$TMP_CFG" "$PLATFORM_CFG"
+
+	# copy platform-specific RA config into place where RA wants it to be
+	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
+}
+
+backup_ra_config() {
+	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
+	PLATFORM_CFG="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
+	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
+}
+
+run_retroarch() {
+
+	prepare_ra_config 2>/dev/null
+
+	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
 	case "$PLATFORM" in
 		"Brick" | "SmartPro" )
@@ -601,6 +619,8 @@ run_retroarch() {
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
+
+	backup_ra_config 2>/dev/null
 }
 
 ready_architecture_dependent_states() {

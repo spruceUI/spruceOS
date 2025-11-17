@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-RA_FILE="/mnt/SDCARD/RetroArch/retroarch.cfg"
+RA_FILE="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
 
 update_file() {
     file="$1"

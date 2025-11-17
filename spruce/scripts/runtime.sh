@@ -59,9 +59,6 @@ flag_remove "in_menu"
 # import multipass.cfg and start watchdog for new network additions via MainUI
 nice -n 15 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 
-# Use appropriate RA config per platform
-[ -f "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" ] && mount --bind "/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg" "/mnt/SDCARD/RetroArch/retroarch.cfg" &
-
 # Bring up network and services
 if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
