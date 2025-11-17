@@ -64,7 +64,7 @@ check_and_handle_firmware_app() {
             ;;
         "Flip" )
             VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge 20250228101926 ] && need_fw_update="false"
+            [ "$VERSION" -ge 20250627233124 ] && need_fw_update="false"
             ;;
         "Brick" )
             current_fw_is="$(compare_current_version_to_version "1.1.0")"
