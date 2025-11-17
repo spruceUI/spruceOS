@@ -1,6 +1,5 @@
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
-$RA_AUTO_SAVE_LOAD=/mnt/SDCARD/spruce/scripts/applySetting/autoSaveLoadToggle.sh$
 $RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
@@ -8,9 +7,6 @@ $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
 
 [System]
-
-"" "RetroArch: Auto save/load state" "|" "on|off" "$HELP$ check ra_auto_state" "$HELP$ update ra_auto_state _VALUE_ && $RA_AUTO_SAVE_LOAD$ _VALUE_" ""
-@"Automatically save and load states on game exit/start"
 
 "" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
 @"Combine with other keys for quick actions in RetroArch"

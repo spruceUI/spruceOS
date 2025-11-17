@@ -153,6 +153,22 @@
                 ],
                 "selected": "True"
             },
+            "raAutoSave": {
+                "display": "RA: auto save state on close",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "raAutoLoad": {
+                "display": "RA: auto load state on launch",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
             "perfectOverlays": {
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",

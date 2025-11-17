@@ -523,7 +523,23 @@ save_ppsspp_configs() {
 
 run_retroarch() {
 
+	RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
+	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "True")"
+	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "True")"
+
+	if [ "$auto_save" = "True" ]; then
+	    sed -i 's/^savestate_auto_save = .*/savestate_auto_save = "true"/' "$RETROARCH_CFG"
+	else
+	    sed -i 's/^savestate_auto_save = .*/savestate_auto_save = "false"/' "$RETROARCH_CFG"
+	fi
+	if [ "$auto_load" = "True" ]; then
+	    sed -i 's/^savestate_auto_load = .*/savestate_auto_load = "true"/' "$RETROARCH_CFG"
+	else
+	    sed -i 's/^savestate_auto_load = .*/savestate_auto_load = "false"/' "$RETROARCH_CFG"
+	fi
+
 	case "$PLATFORM" in
 		"Brick" | "SmartPro" )
 			export RA_BIN="ra64.trimui_$PLATFORM"

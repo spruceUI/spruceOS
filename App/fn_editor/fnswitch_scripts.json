@@ -1,32 +1,26 @@
 [
     {
         "name":"LED off",
-        "name.ch.lang":"关闭氛围灯",
         "launch":"com.trimui.ledc.sh"
     },
     {
         "name":"Quiet Mode",
-        "name.ch.lang":"减弱音量",
         "launch":"com.trimui.quiet.sh"
     },
     {
         "name":"Silent Mode",
-        "name.ch.lang":"静音",
         "launch":"com.trimui.silent.sh"
     },
     {
         "name":"CPU Power Save",
-        "name.ch.lang":"保持低功耗模式",
         "launch":"com.trimui.cpusave.sh"
     },
     {
         "name":"CPU Performance Mode",
-        "name.ch.lang":"保持性能模式",
         "launch":"com.trimui.cpuperformance.sh"
     },
     {
         "name":"Joystick Toggle",
-        "name.ch.lang":"全局连发按键 R2",
         "launch":"spruce_toggle_joystick.sh"
     }
 ]
