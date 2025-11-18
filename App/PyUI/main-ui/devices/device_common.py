@@ -415,3 +415,21 @@ class DeviceCommon(AbstractDevice):
     def get_audio_system(self):
         return AudioPlayerNone()
 
+    def get_device_specific_about_info_entries(self):
+        return []
+
+    def get_mac_address(self,iface="wlan0"):
+        try:
+            with open(f"/sys/class/net/{iface}/address") as f:
+                return f.read().strip()
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read MAC address for interface {iface} : {e}")
+            return "Unknown"
+
+
+    def get_about_info_entries(self):
+        about_info_entries = []
+        about_info_entries.append( ("IP Address", self.get_ip_addr_text()) )
+        about_info_entries.append( ("Mac Address", self.get_mac_address()) )
+        about_info_entries.extend(self.get_device_specific_about_info_entries())
+        return about_info_entries

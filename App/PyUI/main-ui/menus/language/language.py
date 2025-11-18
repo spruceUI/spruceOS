@@ -604,3 +604,7 @@ class Language:
     def left_side_initial_x_offset(cls):
         return cls._data.get("leftSideInitialXOffset","Left Side Initial X Offset")
 
+    @classmethod
+    def aboutThisDevice(cls):
+        return cls._data.get("aboutThisDevice","About this Device")
+
