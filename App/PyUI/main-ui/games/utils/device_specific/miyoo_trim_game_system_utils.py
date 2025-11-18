@@ -12,6 +12,110 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class MiyooTrimGameSystemUtils(GameSystemUtils):
+    CORE_TO_FOLDER_LOOKUP = {
+        "2048": "2048",
+        "81": "81",
+        "a5200": "a5200",
+        "ardens": "Ardens",
+        "atari800": "Atari800",
+        "bk": "bk",
+        "bluemsx": "blueMSX",
+        "cap32": "Caprice32",
+        "chailove": "ChaiLove",
+        "chimerasnes": "ChimeraSNES",
+        "crocods": "CrocoDS",
+        "daphne": "Daphne",
+        "dosbox_pure": "DOSBox",
+        "duckstation": "DuckStation",
+        "easyrpg": "EasyRPG Player",
+        "ecwolf": "ECWolf",
+        "fake08": "FAKE-08",
+        "fbalpha2012": "FB Alpha 2012",
+        "fbneo": "FinalBurn Neo",
+        "fceumm": "FCEUmm",
+        "flycast": "Flycast",
+        "fmsx": "fMSX",
+        "freechaf": "FreeChaF",
+        "freeintv": "FreeIntv",
+        "frodo": "Frodo",
+        "fuse": "Fuse",
+        "gambatte": "Gambatte",
+        "gearboy": "Gearboy",
+        "gearcoleco": "Gearcoleco",
+        "gearsystem": "Gearsystem",
+        "genesis_plus_gx": "Genesis Plus GX",
+        "gme": "Game Music Emu",
+        "gpsp": "gpSP",
+        "gw": "GW",
+        "handy": "Handy",
+        "hatari": "Hatari",
+        "km_duckswanstation_xtreme_amped": "DuckSwanStation Xtreme Amped",
+        "km_flycast_xtreme": "Flycast Xtreme",
+        "km_ludicrousn64_2k22_xtreme_amped": "LudicrousN64 2K22 Xtreme Amped",
+        "km_parallel_n64_xtreme_amped_turbo": "ParaLLEl N64 Xtreme Amped Turbo",
+        "libgametank": "GameTank (Rust)",
+        "lowresnx": "lowresnx",
+        "lutro": "Lutro",
+        "mame2003_plus": "MAME 2003-Plus",
+        "mame2003_xtreme": "mame2003_xtreme",
+        "mednafen_lynx": "Beetle Lynx",
+        "mednafen_ngp": "Beetle NeoPop",
+        "mednafen_pce_fast": "Beetle PCE Fast",
+        "mednafen_pce": "Beetle PCE",
+        "mednafen_pcfx": "Beetle PC-FX",
+        "mednafen_supafaust": "Beetle Supafaust",
+        "mednafen_supergrafx": "Beetle SuperGrafx",
+        "mednafen_vb": "Beetle VB",
+        "mednafen_wswan": "Beetle WonderSwan",
+        "mgba": "mGBA",
+        "mu": "Mu",
+        "neocd": "NeoCD",
+        "nestopia": "Nestopia",
+        "np2kai": "Neko Project II",
+        "numero": "Numero",
+        "o2em": "O2EM",
+        "opera": "Opera",
+        "parallel_n64": "ParaLLEl N64",
+        "pcsx_rearmed": "PCSX-ReARMed",
+        "picodrive": "PicoDrive",
+        "pokemini": "PokeMini",
+        "potator": "Potator",
+        "ppsspp": "PPSSPP",
+        "prboom": "PrBoom",
+        "prosystem": "ProSystem",
+        "puae2021": "PUAE 2021",
+        "puzzlescript": "puzzlescript",
+        "px68k": "PX68k",
+        "quasi88": "QUASI88",
+        "quicknes": "QuickNES",
+        "race": "RACE",
+        "reminiscence": "REminiscence",
+        "retro8": "Retro8",
+        "sameduck": "SameDuck",
+        "scummvm": "ScummVM",
+        "snes9x2002": "Snes9x 2002",
+        "snes9x2005": "Snes9x 2005",
+        "snes9x2005_plus": "Snes9x 2005 Plus",
+        "snes9x2010": "Snes9x 2010",
+        "snes9x": "Snes9x",
+        "squirreljme": "SquirrelJME",
+        "stella2014": "Stella 2014",
+        "swanstation": "SwanStation",
+        "tgbdual": "TGB Dual",
+        "theodore": "theodore",
+        "tic80": "TIC-80",
+        "tyrquake": "TyrQuake",
+        "uae4arm": "UAE4ARM",
+        "uw8": "MicroW8",
+        "uzem": "uzem",
+        "vecx": "vecx",
+        "vemulator": "VeMUlator",
+        "vice_x64": "VICE x64",
+        "vice_xvic": "VICE xvic",
+        "x1": "x1",
+        "yabasanshiro": "YabaSanshiro"
+    }
+
     def __init__(self):
         self.roms_paths = ["/mnt/SDCARD/Roms/"]
         self.emu_path = "/mnt/SDCARD/Emu/"
@@ -21,7 +125,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         if(os.path.exists("/media/sdcard1/Roms/")):
             self.roms_paths.append("/media/sdcard1/Roms/")
         self.rom_utils = RomUtils(self.roms_paths[0])
-    
+
     def get_game_system_by_name(self, system_name) -> GameSystem:
         game_system_config = FileBasedGameSystemConfig(system_name)
 
@@ -122,41 +226,15 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         
         return True  # All groups passed
     
-    def fix_case_path(self, path: str) -> str | None:
-        """
-        Return the actual on-disk path with correct casing.
-        If anything fails, return the original path.
-        """
-        path = os.path.normpath(path)
-
-        # Absolute path? Start from root "/"
-        if path.startswith(os.sep):
-            repaired = os.sep
-            parts = path.split(os.sep)[1:]  # skip leading ""
-        else:
-            # relative path
-            parts = path.split(os.sep)
-            repaired = parts[0]
-            parts = parts[1:]
-
-        for part in parts:
-            if not os.path.isdir(repaired):
-                PyUiLogger.get_logger().info(f"In {path} : part {part} is not a dir")
-                return path
-
-            try:
-                entries = os.listdir(repaired)
-            except Exception:
-                return path
-
-            match = next((e for e in entries if e.lower() == part.lower()), None)
-            if match is None:
-                PyUiLogger.get_logger().info(f"In {path} no match for {part}")
-                return path
-
-            repaired = os.path.join(repaired, match)
-
-        return repaired
+    def check_for_image_with_core(self, core, saves_root, base_name, rom_info):
+        if(core is not None):
+            state_png = os.path.join(saves_root, core, base_name + ".state.auto.png")
+            if os.path.exists(state_png):
+                PyUiLogger.get_logger().info(f"Found Save state image {state_png}, rom_file: {rom_info.rom_file_path}")
+                return state_png
+            else:
+                PyUiLogger.get_logger().warning(f"Save state image not found at {state_png}, core: {core}, rom_file: {rom_info.rom_file_path}")
+                return None
 
     def get_save_state_image(self, rom_info: RomInfo):
         # Get the base filename without extension
@@ -171,23 +249,14 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         saves_root = os.sep.join(parts[:roms_index]) + os.sep + "Saves" + os.sep + "states"
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
-        core = rom_info.game_system.game_system_config.get_effective_menu_selection("Emulator",rom_info.rom_file_path)
-        if(core is not None):
-            state_png = os.path.join(saves_root, core, base_name + ".state.auto.png")
-            #Remove once cores are properly cased
-            state_png = self.fix_case_path(state_png)
-            if os.path.exists(state_png):
-                return state_png
-            else:
-                PyUiLogger.get_logger().warning(f"Save state image not found at {state_png}, core: {core}, rom_file: {rom_info.rom_file_path}")
-        else:
-            PyUiLogger.get_logger().warning(f"No core found for {rom_info.rom_file_path}")
+        core = self.CORE_TO_FOLDER_LOOKUP.get(rom_info.game_system.game_system_config.get_effective_menu_selection("Emulator",rom_info.rom_file_path))
+        if(core is not None):       
+            cores_to_try = Device.get_core_name_overrides(core)
+        
+            for core_to_try in cores_to_try:
+                state_png = self.check_for_image_with_core(core_to_try, saves_root, base_name, rom_info)
+                if(state_png is not None):
+                    return state_png
 
-
-        for root, dirs, files in os.walk(saves_root):
-            dirs.sort(reverse=True)   # sort subdirectories alphabetically in-place
-            files.sort(reverse=True)  # sort files alphabetically in-place
-                
-            state_png = os.path.join(root, base_name + ".state.auto.png")
-            if os.path.exists(state_png):
-                return state_png
+        # This is SPRUCE specific but shouldn't add much slowdown / create issues as a fallback
+        return self.check_for_image_with_core(".gameswitcher", saves_root, base_name, rom_info)

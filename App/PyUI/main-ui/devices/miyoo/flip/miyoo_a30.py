@@ -363,3 +363,6 @@ class MiyooA30(MiyooDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
             return "Unknown"
+
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name+"-32"]
