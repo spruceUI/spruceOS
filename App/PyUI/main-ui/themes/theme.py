@@ -817,7 +817,8 @@ class Theme():
 
     @classmethod
     def get_game_system_select_col_count(cls):
-        return cls._data.get("gameSystemSelectColCount", min(5,int(4*cls._default_multiplier))) # why doesnt pure multiplier work?
+        #default_value = int(4*cls._default_multiplier)
+        return cls._data.get("gameSystemSelectColCount", 4) # why doesnt pure multiplier work?
 
     @classmethod
     def get_game_system_select_row_count(cls):
@@ -948,7 +949,8 @@ class Theme():
 
     @classmethod
     def get_game_select_col_count(cls):
-        return cls._data.get("gameSelectColCount", min(5,int(4*cls._default_multiplier))) # why doesnt pure multiplier work?
+        #default_value = int(4*cls._default_multiplier)
+        return cls._data.get("gameSelectColCount", 4) 
 
     @classmethod
     def set_game_select_col_count(cls, value):

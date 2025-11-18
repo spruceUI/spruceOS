@@ -42,8 +42,9 @@ class BoxArtScraper:
     def __init__(self):
         self.base_dir = "/mnt/SDCARD"
         self.roms_dir = Device.get_roms_dir()
-        script_dir = Path(__file__).resolve().parent
-        self.db_dir = os.path.join(script_dir,"db")
+        script_dir = Path(__file__).resolve().parent.parent.parent.parent
+        self.db_dir = os.path.join(script_dir,"boxartdb")
+        PyUiLogger.get_logger().info(f"BoxArtScraper: Using boxart db directory at {self.db_dir}")
         self.game_system_utils = Device.get_game_system_utils()
         self.preferred_region = Device.get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)

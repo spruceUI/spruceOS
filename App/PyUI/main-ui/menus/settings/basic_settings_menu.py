@@ -6,6 +6,7 @@ from devices.device import Device
 from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.about_menu import AboutMenu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
@@ -114,6 +115,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
     def launch_tasks(self,input):
         if(ControllerInput.A == input):
             TasksMenu().show_menu()
+
+    def launch_about(self,input):
+        if(ControllerInput.A == input):
+            AboutMenu().show_menu()
 
     def launch_theme_settings(self,input):
         if(ControllerInput.A == input):
@@ -254,6 +259,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             description=None,
                             icon=None,
                             value=self.launch_tasks
+                        )
+                )
+
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text=Language.aboutThisDevice(),
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_about
                         )
                 )
 
