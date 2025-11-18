@@ -449,3 +449,6 @@ class Device:
     def get_audio_system():
         return Device._impl.get_audio_system()
 
+    @staticmethod
+    def get_about_info_entries():
+        return Device._impl.get_about_info_entries()

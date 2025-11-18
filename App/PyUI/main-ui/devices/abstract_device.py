@@ -404,3 +404,8 @@ class AbstractDevice(ABC):
     @abstractmethod
     def get_audio_system(self):
         pass
+    
+    @abstractmethod
+    def get_about_info_entries(self):
+        pass
+
