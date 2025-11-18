@@ -8,12 +8,6 @@ else
 	SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
 fi
 
-samba_check(){
-    if setting_check "samba"; then
-        start_samba_process
-    fi
-}
-
 start_samba_process(){
     log_message "Starting Samba..."
 	

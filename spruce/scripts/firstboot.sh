@@ -1,7 +1,9 @@
 #!/bin/sh
 
-. "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
+. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
+
 
 flag_remove "first_boot_$PLATFORM"
 log_message "Removed first boot flag for $PLATFORM"
@@ -21,8 +23,8 @@ cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.ba
 display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
 log_message "First boot flag detected"
 
-log_message "Running developer mode check" -v
-/mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
+log_message "Preparing SSH keys if necessary"
+dropbear_generate_keys &
 
 log_message "Running iconfresh.sh"
 /mnt/SDCARD/spruce/scripts/iconfresh.sh
@@ -51,7 +53,6 @@ if flag_check "pre_menu_unpacking"; then
 fi
 
 mkdir -p /mnt/SDCARD/Persistent/
-
 if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
   mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster
 fi
