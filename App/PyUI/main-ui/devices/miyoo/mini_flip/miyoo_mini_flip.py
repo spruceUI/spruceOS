@@ -509,3 +509,26 @@ class MiyooMiniFlip(MiyooDevice):
 
     def supports_caching_rom_lists(self):
         return True #Is there enough RAM
+
+    
+    def get_fw_version(self):
+        try:
+            # Run fw_printenv and capture output
+            result = subprocess.run(
+                ["/etc/fw_printenv", "miyoo_version"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            output = result.stdout.strip()
+
+            # Expected format: "miyoo_version=202510011046"
+            if "=" in output:
+                return output.split("=", 1)[1].strip()
+
+            return output
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
+            return "Unknown"
+

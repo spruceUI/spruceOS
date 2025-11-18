@@ -309,10 +309,7 @@ class TrimUIDevice(DeviceCommon):
     
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
-    
-    def get_extra_settings_options(self):
-        return []
-    
+
     def take_snapshot(self, path):
         return None
     
@@ -333,3 +330,11 @@ class TrimUIDevice(DeviceCommon):
 
     def get_save_state_image(self, rom_info: RomInfo):
         return self.get_game_system_utils().get_save_state_image(rom_info)
+
+    def get_fw_version(self):
+        try:
+            with open(f"/etc/version") as f:
+                return f.read().strip()
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
+            return "Unknown"

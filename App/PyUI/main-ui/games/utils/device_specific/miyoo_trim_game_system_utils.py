@@ -122,9 +122,44 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         
         return True  # All groups passed
     
+    def fix_case_path(self, path: str) -> str | None:
+        """
+        Return the actual on-disk path with correct casing.
+        If anything fails, return the original path.
+        """
+        path = os.path.normpath(path)
+
+        # Absolute path? Start from root "/"
+        if path.startswith(os.sep):
+            repaired = os.sep
+            parts = path.split(os.sep)[1:]  # skip leading ""
+        else:
+            # relative path
+            parts = path.split(os.sep)
+            repaired = parts[0]
+            parts = parts[1:]
+
+        for part in parts:
+            if not os.path.isdir(repaired):
+                PyUiLogger.get_logger().info(f"In {path} : part {part} is not a dir")
+                return path
+
+            try:
+                entries = os.listdir(repaired)
+            except Exception:
+                return path
+
+            match = next((e for e in entries if e.lower() == part.lower()), None)
+            if match is None:
+                PyUiLogger.get_logger().info(f"In {path} no match for {part}")
+                return path
+
+            repaired = os.path.join(repaired, match)
+
+        return repaired
+
     def get_save_state_image(self, rom_info: RomInfo):
         # Get the base filename without extension
-        base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
         # Normalize and split the path into components
         parts = os.path.normpath(rom_info.rom_file_path).split(os.sep)
         try:
@@ -134,10 +169,25 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
             return None  # "Roms" not in path or nothing after "Roms"
 
         saves_root = os.sep.join(parts[:roms_index]) + os.sep + "Saves" + os.sep + "states"
+        base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+
+        core = rom_info.game_system.game_system_config.get_effective_menu_selection("Emulator",rom_info.rom_file_path)
+        if(core is not None):
+            state_png = os.path.join(saves_root, core, base_name + ".state.auto.png")
+            #Remove once cores are properly cased
+            state_png = self.fix_case_path(state_png)
+            if os.path.exists(state_png):
+                return state_png
+            else:
+                PyUiLogger.get_logger().warning(f"Save state image not found at {state_png}, core: {core}, rom_file: {rom_info.rom_file_path}")
+        else:
+            PyUiLogger.get_logger().warning(f"No core found for {rom_info.rom_file_path}")
+
+
         for root, dirs, files in os.walk(saves_root):
             dirs.sort(reverse=True)   # sort subdirectories alphabetically in-place
             files.sort(reverse=True)  # sort files alphabetically in-place
-            
+                
             state_png = os.path.join(root, base_name + ".state.auto.png")
             if os.path.exists(state_png):
                 return state_png
