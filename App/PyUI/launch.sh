@@ -72,13 +72,19 @@ case "$PLATFORM" in
         export LD_LIBRARY_PATH="/usr/trimui/lib"
         /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
+        if [ "$PLATFORM" = "Brick" ]; then
+            DEVICE="TRIMUI_BRICK"
+        else
+            DEVICE="TRIMUI_SMART_PRO"
+        fi
+
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-            -device TRIMUI_BRICK \
+            -device $DEVICE \
             -logDir /mnt/SDCARD/Saves/spruce \
             -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
-
+            
         if [ $redirect_output -eq 1 ]; then
             # Redirect stdout/stderr to /dev/null
             sh -c "$cmd \"\$@\" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1" sh "$@"
