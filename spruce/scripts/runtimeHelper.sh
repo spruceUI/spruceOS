@@ -262,6 +262,10 @@ runtime_mounts_Brick() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+runtime_mounts_SmartPro() {
+   runtime_mounts_Brick
+}
+
 runtime_mounts_Flip() {
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
