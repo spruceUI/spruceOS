@@ -415,6 +415,9 @@ class DeviceCommon(AbstractDevice):
     def get_audio_system(self):
         return AudioPlayerNone()
 
+    def get_extra_settings_options(self):
+        return []
+    
     def get_device_specific_about_info_entries(self):
         return []
 
@@ -426,10 +429,13 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().error(f"Could not read MAC address for interface {iface} : {e}")
             return "Unknown"
 
+    def get_fw_version(self):
+        return "Unknown"
 
     def get_about_info_entries(self):
         about_info_entries = []
         about_info_entries.append( ("IP Address", self.get_ip_addr_text()) )
         about_info_entries.append( ("Mac Address", self.get_mac_address()) )
+        about_info_entries.append( ("FW Version",self.get_fw_version()) )
         about_info_entries.extend(self.get_device_specific_about_info_entries())
         return about_info_entries
