@@ -70,7 +70,7 @@ def initialize_device(device, main_ui_mode):
         Device.init(TrimUIBrick(device,main_ui_mode))
     elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
-        Device.init(TrimUISmartPro(device))
+        Device.init(TrimUISmartPro(device,main_ui_mode))
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.flip.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
