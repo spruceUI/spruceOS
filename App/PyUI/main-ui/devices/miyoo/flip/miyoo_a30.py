@@ -354,3 +354,12 @@ class MiyooA30(MiyooDevice):
 
     def get_audio_system(self):
         return self.audio_player
+    
+        
+    def get_fw_version(self):
+        try:
+            with open(f"/usr/miyoo/version") as f:
+                return f.read().strip()
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
+            return "Unknown"
