@@ -281,7 +281,7 @@ fi
 
 rm -rf "$TMP_DIR"
 # Show updater app
-/mnt/SDCARD/spruce/scripts/applySetting/showHideApp.sh show "$SD_CARD/App/-Updater/config.json"
+sed -i 's|"#label"|"label"|' /mnt/SDCARD/App/-Updater/config.json"
 
 # Check battery level before asking to update
 if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then

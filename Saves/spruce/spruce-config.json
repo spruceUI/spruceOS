@@ -132,7 +132,8 @@
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
-                    "Exit game"
+                    "Exit game",
+                    "Nothing"
                 ],
                 "selected": "Emulator menu"
             },
@@ -141,7 +142,8 @@
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
-                    "Exit game"
+                    "Exit game",
+                    "Nothing"
                 ],
                 "selected": "Game Switcher"
             },
@@ -200,6 +202,42 @@
             }
         },
         "Network Settings": {
+            "enableSamba": {
+                "display": "Enable Samba",
+                "description": "smb://{ip_addr}/SDCARD (user/pass=sprig/happygaming)",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSSH": {
+                "display": "Enable SSH",
+                "description": "ssh sprig@{ip_addr} (password=happygaming)",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSyncthing": {
+                "display": "Enable Syncthing",
+                "description": "http://{ip_addr}:8384",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSFTPGo": {
+                "display": "Enable WiFi File Transfer",
+                "description": "http://{ip_addr}:8080",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
                 "description": "allows reinstall of same spruce version",

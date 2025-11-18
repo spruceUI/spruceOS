@@ -135,12 +135,6 @@ while [ 1 ]; do
         set_smart
     fi
 
-    # set gs.lock flag if last loaded program is real game and gs.fix flag is set
-    if setting_get "runGSOnGameExit" && \
-       grep -q /mnt/SDCARD/Emu/*/../.emu_setup/standard_launch.sh "$FLAGS_DIR/lastgame.lock" ; then
-        touch /mnt/SDCARD/spruce/flags/gs.lock
-    fi
-
     if flag_check "tmp_update_repair_attempted"; then
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."

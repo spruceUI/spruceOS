@@ -235,15 +235,6 @@ if [ -d "/mnt/SDCARD/App/PICO/" ]; then
     rm -rf "/mnt/SDCARD/App/PICO"
 fi
 
-# Check if legacy Syncthing config folder exists and run launch script if it does
-if [ -d "/mnt/SDCARD/App/Syncthing/config" ]; then
-    log_message "Syncthing legacy location config folder found."
-    # Move it to the new location
-    mv "/mnt/SDCARD/App/Syncthing/config" "$SYNCTHING_DIR/config"
-    rm -rf "/mnt/SDCARD/App/Syncthing"
-    setting_update "syncthing" "true"
-fi
-
 #-----Upgrade-----
 UPDATE_IMAGE_PATH="$APP_DIR/imgs/spruceUpdate.png"
 UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"

@@ -25,10 +25,6 @@ DEFAULT_IMG="/mnt/SDCARD/Themes/SPRUCE/icons/ports.png"
 # changing this needs the binary to also update this path in the source code
 EMPTY_IMG="res/gs_empty.png"
 
-# get setting always use box art 
-setting_get "alwaysUseBoxartInGS"
-USEBOXART=$?
-
 # remove flag for game switcher
 flag_remove "gs"
 log_message "***** gameswitcher.sh: Removed game switcher flag file" -v
@@ -60,33 +56,30 @@ while read -r CMD; do
     BOX_ART_PATH="$(dirname "$GAME_PATH")/Imgs/$(basename "$GAME_PATH" | sed 's/\.[^.]*$/.png/')"
     log_message "***** gameswitcher.sh: BOX_ART_PATH: $BOX_ART_PATH" -v
 
-    # try get screenshot file path only if boxart flag does not exist
-    if [ $USEBOXART -eq 1 ]; then
-        # try get our screenshot
-        OWN_SCREENSHOT_PATH="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
-        log_message "***** gameswitcher.sh: OWN_SCREENSHOT_PATH: $OWN_SCREENSHOT_PATH" -v
+    # try get our screenshot
+    OWN_SCREENSHOT_PATH="$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}/${SHORT_NAME}.png"
+    log_message "***** gameswitcher.sh: OWN_SCREENSHOT_PATH: $OWN_SCREENSHOT_PATH" -v
 
-        # try get RA screenshot if our screenshot does not exist
-        if [ ! -f "${OWN_SCREENSHOT_PATH}" ]; then
+    # try get RA screenshot if our screenshot does not exist
+    if [ ! -f "${OWN_SCREENSHOT_PATH}" ]; then
 
-            LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
-            EMU_DIR="$SD_FOLDER_PATH/Emu/${EMU_NAME}"
-            core_info="$INFO_DIR/${CORE}_libretro.info"
-            core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
-            core_name="$(echo ${core_name} | tr -d '"')"
-            state_dir="$SD_FOLDER_PATH/Saves/states/$core_name"
-            # default path for non-architecture-dependent states
-            SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
-            # arch-dependent state paths for race, fake08, pcsx-r, and chimera
-            if [ ! -f "$SCREENSHOT_PATH" ]; then
-                if [ "$PLATFORM" = "A30" ]; then
-                    SCREENSHOT_PATH="${state_dir}-32/${SHORT_NAME}.state.auto.png"
-                else ### 64-bit platform
-                    SCREENSHOT_PATH="${state_dir}-64/${SHORT_NAME}.state.auto.png"
-                fi
+        LAUNCH="$(echo "$CMD" | awk '{print $1}' | tr -d '"')"
+        EMU_DIR="$SD_FOLDER_PATH/Emu/${EMU_NAME}"
+        core_info="$INFO_DIR/${CORE}_libretro.info"
+        core_name="$(awk -F' = ' '/corename/ {print $2}' "$core_info")"
+        core_name="$(echo ${core_name} | tr -d '"')"
+        state_dir="$SD_FOLDER_PATH/Saves/states/$core_name"
+        # default path for non-architecture-dependent states
+        SCREENSHOT_PATH="${state_dir}/${SHORT_NAME}.state.auto.png"
+        # arch-dependent state paths for race, fake08, pcsx-r, and chimera
+        if [ ! -f "$SCREENSHOT_PATH" ]; then
+            if [ "$PLATFORM" = "A30" ]; then
+                SCREENSHOT_PATH="${state_dir}-32/${SHORT_NAME}.state.auto.png"
+            else ### 64-bit platform
+                SCREENSHOT_PATH="${state_dir}-64/${SHORT_NAME}.state.auto.png"
             fi
-            log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
         fi
+        log_message "***** gameswitcher.sh: SCREENSHOT_PATH: $SCREENSHOT_PATH" -v
     fi
 
     # store screenshot / box art / default image to file
