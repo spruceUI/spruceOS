@@ -63,9 +63,9 @@ class Theme():
             cls._daijisho_theme_index = None
             #PyUiLogger.get_logger().info(f"Using Miyoo style theme")
 
-        scale_width = Device.screen_width() / width
-        scale_height = Device.screen_height() / height
-        cls._default_multiplier = min(scale_width, scale_height)
+        cls.scale_width = Device.screen_width() / 640
+        cls.scale_height = Device.screen_height() / 480
+        cls._default_multiplier = min(cls.scale_width, cls.scale_height)
 
 #        if not os.path.exists(bgm_wav):
 #            if os.path.exists(bgm_mp3):
@@ -468,27 +468,27 @@ class Theme():
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
-                    return cls._data.get("topBarFontSize", cls._data["list"].get("size", 24))
+                    return cls._data.get("topBarFontSize", cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.BATTERY_PERCENT:
-                    return cls._data.get("batteryPercentFontSize", cls._data["list"].get("size", 24))
+                    return cls._data.get("batteryPercentFontSize", cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.ON_SCREEN_KEYBOARD:
-                    return cls._data["list"].get("size", 24)
+                    return cls._data["list"].get("size", int(24*cls._default_multiplier))
                 case FontPurpose.GRID_ONE_ROW:
-                    return cls._data.get("gridSingleRowFontSize", cls._data["grid"].get("grid1x4", cls._data["grid"].get("size",25)))
+                    return cls._data.get("gridSingleRowFontSize", cls._data["grid"].get("grid1x4", cls._data["grid"].get("size",int(25*cls._default_multiplier))))
                 case FontPurpose.GRID_MULTI_ROW:
-                    return cls._data.get("gridMultiRowFontSize", cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18)))
+                    return cls._data.get("gridMultiRowFontSize", cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",int(18*cls._default_multiplier))))
                 case FontPurpose.LIST:
-                    return cls._data.get("listFontSize",cls._data["list"].get("size", 24))
+                    return cls._data.get("listFontSize",cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.DESCRIPTIVE_LIST_TITLE:
-                    return cls._data.get("descListFontSize",cls._data["list"].get("size", 24))
+                    return cls._data.get("descListFontSize",cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.MESSAGE:
-                    return cls._data.get("messageFontSize",cls._data["list"].get("size", 24))
+                    return cls._data.get("messageFontSize",cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
-                    return cls._data.get("descriptionFontSize",cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",18)))
+                    return cls._data.get("descriptionFontSize",cls._data["grid"].get("grid3x4", cls._data["grid"].get("size",int(18*cls._default_multiplier))))
                 case FontPurpose.LIST_INDEX:
-                    return cls._data.get("indexSelectedFontSize",cls._data["list"].get("size", 20))
+                    return cls._data.get("indexSelectedFontSize",cls._data["list"].get("size", int(20*cls._default_multiplier)))
                 case FontPurpose.LIST_TOTAL:
-                    return cls._data.get("indexTotalSize",cls._data["list"].get("size", 20))
+                    return cls._data.get("indexTotalSize",cls._data["list"].get("size", int(20*cls._default_multiplier)))
                 case FontPurpose.SHADOWED:
                     try:
                         return cls._data["shadowed"]["shadowedFontSize"] 
@@ -676,23 +676,23 @@ class Theme():
 
     @classmethod
     def get_descriptive_list_icon_offset_x(cls):
-        return cls._data.get("descriptiveListIconOffsetX", 10)
+        return cls._data.get("descriptiveListIconOffsetX", int(10*cls._default_multiplier))
 
     @classmethod
     def get_descriptive_list_icon_offset_y(cls):
-        return cls._data.get("descriptiveListIconOffsetY", 10)
+        return cls._data.get("descriptiveListIconOffsetY", int(10*cls._default_multiplier))
 
     @classmethod
     def get_descriptive_list_text_offset_y(cls):
-        return cls._data.get("descriptiveListTextOffsetY", 15)
+        return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
 
     @classmethod
     def get_descriptive_list_text_from_icon_offset(cls):
-        return cls._data.get("descriptiveListTextFromIconOffset", 10)
+        return cls._data.get("descriptiveListTextFromIconOffset", int(10*cls._default_multiplier))
 
     @classmethod
     def get_grid_multirow_text_offset_y_percent(cls):
-        return cls._data.get("gridMultirowTextOffsetYPercent", -15)
+        return cls._data.get("gridMultirowTextOffsetYPercent", int(-15*cls._default_multiplier))
 
     @classmethod
     def get_system_select_show_sel_bg_grid_mode(cls):
@@ -817,11 +817,11 @@ class Theme():
 
     @classmethod
     def get_game_system_select_col_count(cls):
-        return cls._data.get("gameSystemSelectColCount", 4)
+        return cls._data.get("gameSystemSelectColCount", int(4*cls._default_multiplier))
 
     @classmethod
     def get_game_system_select_row_count(cls):
-        return cls._data.get("gameSystemSelectRowCount", 2)
+        return cls._data.get("gameSystemSelectRowCount", 2) # Why does multiplying this one by the scaling not work properly?
 
     @classmethod
     def set_game_system_select_col_count(cls, count):
@@ -847,7 +847,7 @@ class Theme():
 
     @classmethod
     def pop_menu_text_padding(cls):
-        return cls._data.get("popupMenuTextPad", 20)
+        return cls._data.get("popupMenuTextPad", int(20*cls._default_multiplier))
 
     @classmethod
     def popup_menu_cols(cls):
@@ -939,7 +939,7 @@ class Theme():
 
     @classmethod
     def get_game_select_row_count(cls):
-        return cls._data.get("gameSelectRowCount", 2)
+        return cls._data.get("gameSelectRowCount", 2) #Why does multiplying this one by the scaling not work properly?
 
     @classmethod
     def set_game_select_row_count(cls, value):
@@ -948,7 +948,7 @@ class Theme():
 
     @classmethod
     def get_game_select_col_count(cls):
-        return cls._data.get("gameSelectColCount", 4)
+        return cls._data.get("gameSelectColCount", int(4*cls._default_multiplier))
 
     @classmethod
     def set_game_select_col_count(cls, value):
@@ -958,7 +958,7 @@ class Theme():
     @classmethod
     def get_game_select_img_width(cls):
         from devices.device import Device
-        return cls._data.get("gameSelectImgWidth", int(Device.screen_width() * 320 / 640))
+        return cls._data.get("gameSelectImgWidth", int(320 * cls.scale_width))
     
     @classmethod
     def set_game_select_img_width(cls, value):
@@ -968,7 +968,7 @@ class Theme():
     @classmethod
     def get_grid_game_select_img_width(cls):
         from devices.device import Device
-        return cls._data.get("gridGameSelectImgWidth", int(Device.screen_width() * 140 / 640))
+        return cls._data.get("gridGameSelectImgWidth", int(140 * cls.scale_width))
     
     @classmethod
     def set_grid_game_select_img_width(cls, value):
@@ -1014,7 +1014,7 @@ class Theme():
     @classmethod
     def get_game_select_img_height(cls):
         from devices.device import Device
-        return cls._data.get("gameSelectImgHeight", int(Device.screen_height() * 300 / 640))
+        return cls._data.get("gameSelectImgHeight", int(300 * cls._default_multiplier))
     
     @classmethod
     def set_game_select_img_height(cls, value):
@@ -1024,7 +1024,7 @@ class Theme():
     @classmethod
     def get_grid_game_select_img_height(cls):
         from devices.device import Device
-        return cls._data.get("gridGameSelectImgHeight", int(Device.screen_width() * 140 / 640))
+        return cls._data.get("gridGameSelectImgHeight", int(140 * cls._default_multiplier))
     
     @classmethod
     def set_grid_game_select_img_height(cls, value):
@@ -1060,7 +1060,7 @@ class Theme():
 
     @classmethod
     def get_grid_multi_row_sel_bg_resize_pad_width(cls):
-        return cls._data.get("gridMultiRowSelBgResizePadWidth", 20)
+        return cls._data.get("gridMultiRowSelBgResizePadWidth", int(20*cls.scale_width))
     
     @classmethod
     def set_grid_multi_row_sel_bg_resize_pad_width(cls, value):
@@ -1069,7 +1069,7 @@ class Theme():
 
     @classmethod
     def get_grid_multi_row_sel_bg_resize_pad_height(cls):
-        return cls._data.get("gridMultiRowSelBgResizePadHeight", 20)
+        return cls._data.get("gridMultiRowSelBgResizePadHeight", int(20*cls.scale_height))
     
     @classmethod
     def set_grid_multi_row_sel_bg_resize_pad_height(cls, value):
@@ -1078,7 +1078,7 @@ class Theme():
 
     @classmethod
     def get_top_bar_initial_x_offset(cls):
-        return cls._data.get("topBarInitialXOffset", 20)
+        return cls._data.get("topBarInitialXOffset", int(20*cls.scale_width))
 
     @classmethod
     def set_top_bar_initial_x_offset(cls, value):

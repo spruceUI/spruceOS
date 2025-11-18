@@ -7,6 +7,7 @@ from display.render_mode import RenderMode
 from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
@@ -30,6 +31,7 @@ class ImageListView(NonDescriptiveListView):
         self.img_offset_x = img_offset_x
         self.img_offset_y = img_offset_y
         self.img_width = img_width
+        PyUiLogger.get_logger().info(f"ImageListView: img_width={img_width}, img_height={img_height}")
         self.img_height = img_height
         self.text_to_image_relationship = text_to_image_relationship
         self.prev_index = -1
