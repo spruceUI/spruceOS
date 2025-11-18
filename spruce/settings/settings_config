@@ -1,15 +1,9 @@
 $HELP=/mnt/SDCARD/spruce/scripts/applySetting/settingHelpers.sh$
 
-$RAHOTKEY=/mnt/SDCARD/spruce/scripts/applySetting/retroArchHotkey.sh$
 $SAMBA=/mnt/SDCARD/spruce/scripts/applySetting/SAMBA.sh$
 $SFTPGO=/mnt/SDCARD/spruce/scripts/applySetting/sftpgo.sh$
 $SYNCTHING=/mnt/SDCARD/spruce/scripts/applySetting/syncthing.sh$
 $SSH=/mnt/SDCARD/spruce/scripts/applySetting/SSH.sh$
-
-[System]
-
-"" "RetroArch: hotkey enable key" "||||" "Select|Start|Home|Off|Custom" "$RAHOTKEY$ check" "$RAHOTKEY$ assign _VALUE_" "$RAHOTKEY$ init _VALUE_"
-@"Combine with other keys for quick actions in RetroArch"
 
 [Network]
 

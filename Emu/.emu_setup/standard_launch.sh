@@ -547,6 +547,39 @@ prepare_ra_config() {
 	fi
 	mv "$TMP_CFG" "$PLATFORM_CFG"
 
+	# Set hotkey enable button based on spruceUI config
+	hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkey.selected' "True")"
+	log_message "ra hotkey enable button is $hotkey_enable" -v
+	TMP_CFG="$(mktemp)"
+	case "$PLATFORM" in
+		"A30")
+			HOTKEY_LINE="input_enable_hotkey"
+			SELECT_VAL="rctrl"
+			START_VAL="enter"
+			HOME_VAL="escape"
+			;;
+		*)
+			HOTKEY_LINE="input_enable_hotkey_btn"
+			SELECT_VAL="4"
+			START_VAL="6"
+			HOME_VAL="5"
+			;;
+	esac
+	case "$hotkey_enable" in
+		"Select")
+			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+			;;
+		"Start")
+			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+			;;
+		"Menu")
+			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+		;;
+		*) ;;
+	esac
 	# copy platform-specific RA config into place where RA wants it to be
 	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
 }

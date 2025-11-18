@@ -153,6 +153,16 @@
                 ],
                 "selected": "True"
             },
+            "raHotkey": {
+                "display": "RA: hotkey enable button",
+                "options": [
+                    "Select",
+                    "Start",
+                    "Menu",
+                    "Custom"
+                ],
+                "selected": "Select"
+            },
             "raAutoSave": {
                 "display": "RA: auto save state on close",
                 "options": [
