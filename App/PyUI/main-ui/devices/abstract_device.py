@@ -362,6 +362,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def get_core_name_overrides(self, core_name):
+        pass
+
+    @abstractmethod
     def prompt_timezone_update(self):
         pass
 

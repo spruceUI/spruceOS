@@ -452,3 +452,9 @@ class Device:
     @staticmethod
     def get_about_info_entries():
         return Device._impl.get_about_info_entries()
+    
+    @staticmethod
+    def get_core_name_overrides(core_name):
+        return Device._impl.get_core_name_overrides(core_name)
+
+    

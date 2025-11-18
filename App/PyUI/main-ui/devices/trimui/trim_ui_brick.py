@@ -155,3 +155,6 @@ class TrimUIBrick(TrimUIDevice):
 
     def get_audio_system(self):
         return self.audio_player
+    
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name+"-64"]

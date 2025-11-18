@@ -350,6 +350,9 @@ class DeviceCommon(AbstractDevice):
 
     def set_theme(self, theme_path):
         pass
+
+    def get_core_name_overrides(self, core_name):
+        return [core_name]
     
     def prompt_timezone_update(self):
         #Unsupported by default
