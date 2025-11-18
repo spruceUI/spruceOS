@@ -63,11 +63,6 @@ while [ 1 ]; do
         /mnt/SDCARD/spruce/scripts/gameswitcher.sh
     fi
 
-    if [ -f /mnt/SDCARD/spruce/flags/bitpal.lock ]; then
-        /mnt/SDCARD/App/BitPal/bitpal.sh
-        rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
-    fi
-
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag
         flag_remove "lastgame"

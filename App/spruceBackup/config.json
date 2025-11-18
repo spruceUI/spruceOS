@@ -1,5 +1,5 @@
 {
-  "#label": "Spruce Backup",
+  "label": "Spruce Backup",
   "icon": "backup.png",
   "launch": "launch.sh",
   "description": "Save your configs and settings",

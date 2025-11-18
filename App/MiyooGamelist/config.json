@@ -1,5 +1,5 @@
 {
-  "#label": "Miyoo Gamelist",
+  "label": "Miyoo Gamelist",
   "icon": "gamelist.png",
   "launch": "launch.sh",
   "description": "Clean up displayed rom names",

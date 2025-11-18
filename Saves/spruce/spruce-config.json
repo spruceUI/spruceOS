@@ -270,6 +270,16 @@
                     "False"
                 ],
                 "selected": "True"
+            },
+            "disableLEDs": {
+                "display": "Disable RGB LEDs in all contexts",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO"],
+                "description": "requires reboot to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         }
     }
