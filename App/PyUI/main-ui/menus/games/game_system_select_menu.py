@@ -274,4 +274,5 @@ class GameSystemSelectMenu:
                 return ControllerInput.L1
             elif(Theme.skip_main_menu() and ControllerInput.R1 == self.selected.get_input()):
                 return ControllerInput.R1
-                        
+                    
+        

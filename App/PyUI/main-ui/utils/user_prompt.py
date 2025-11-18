@@ -10,6 +10,7 @@ class UserPrompt():
 
     @staticmethod
     def prompt_yes_no(title, messages):
+        messages.extend(["","A = Yes, B = No"])
         while(True):
             Display.clear(title)
             Display.display_message_multiline(messages)

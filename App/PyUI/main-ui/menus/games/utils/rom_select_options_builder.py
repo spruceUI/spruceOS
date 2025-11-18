@@ -26,6 +26,23 @@ class RomSelectOptionsBuilder:
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
         
     
+    def get_default_image_path(self, game_system, rom_file_path):
+        parts = os.path.normpath(rom_file_path).split(os.sep)
+        try:
+            roms_index = next(i for i, part in enumerate(parts) if part.lower() == "roms")
+        except (ValueError, IndexError):
+            PyUiLogger.get_logger().info(f"Roms not found in {rom_file_path}")
+            return None  # "Roms" not in path or nothing after "Roms"
+
+        # Get the base filename without extension
+        base_name = RomFileNameUtils.get_rom_name_without_extensions(game_system, rom_file_path)
+
+        # Build path to the image using the extracted directory
+        root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
+
+        return os.path.join(root_dir, "Imgs", base_name + ".png")
+
+
     def get_image_path(self, rom_info: RomInfo, game_entry = None, prefer_savestate_screenshot = False) -> str:
 
         if(prefer_savestate_screenshot):

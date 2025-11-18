@@ -56,7 +56,7 @@ class TasksMenu(settings_menu.SettingsMenu):
         option_list = []
 
         #Future
-        if(False):
+        if(True):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.download_boxart(),

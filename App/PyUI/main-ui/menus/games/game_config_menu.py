@@ -5,7 +5,9 @@ from devices.device import Device
 from display.display import Display
 from games.utils.game_system import GameSystem
 from menus.games.utils.rom_info import RomInfo
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.logger import PyUiLogger
+from utils.user_prompt import UserPrompt
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -128,6 +130,27 @@ class GameConfigMenu:
             Display.reinitialize()
             self.game_system.game_system_config.reload_config()
 
+    def delete_rom(self, input_value):
+        if(ControllerInput.A == input_value):
+            if UserPrompt.prompt_yes_no(Language.delete_rom(), [f"Would you like to permanently delete", f"{self.game.display_name}?"]):
+                os.remove(self.game.rom_file_path)
+                self.perform_boxart_deletion()
+                Display.display_message(f"{self.game.rom_file_path} deleted.",2000)
+    
+    def perform_boxart_deletion(self):
+        PyUiLogger.get_logger().info(f"Deleting boxart for {self.game.rom_file_path}")
+        img_path = get_rom_select_options_builder().get_image_path(self.game)
+        while(img_path is not None):
+            os.remove(img_path)
+            img_path = get_rom_select_options_builder().get_image_path(self.game)
+            Display.clear_image_cache()
+
+    def delete_boxart(self, input_value):
+        if(ControllerInput.A == input_value):
+            if UserPrompt.prompt_yes_no(Language.delete_boxart(), [f"Would you like to permanently delete the boxart for", f"{self.game.display_name}?"]):
+                self.perform_boxart_deletion()
+                Display.display_message(f"Boxart for {self.game.display_name} deleted.",2000)
+
     def show_config(self, rom_file_path) :
         selected = Selection(None, None, 0)
         view = None
@@ -152,9 +175,6 @@ class GameConfigMenu:
                             
                         )
                     )
-
-
-            config_list.extend(self.gen_additional_game_options())
 
             menu_options = self.game_system.game_system_config.get_menu_options()
 
@@ -201,6 +221,29 @@ class GameConfigMenu:
                             )
                         )
 
+            if(not Device.get_system_config().simple_mode_enabled()):
+                # Might add back in later, makes it annoying as we would
+                # need to invalidate system caches. Just delete in dingux?
+                if(False):
+                    config_list.append(
+                        GridOrListEntry(
+                            primary_text=Language.delete_rom(),
+                            value=lambda input_value
+                                    : self.delete_rom(input_value)
+                        )
+                    )                
+                # What about this one?
+                config_list.append(
+                    GridOrListEntry(
+                        primary_text=Language.delete_boxart(),
+                        value=lambda input_value
+                                : self.delete_boxart(input_value)
+                    )
+                )
+
+
+            config_list.extend(self.gen_additional_game_options())
+
             if(view is None):        
                 view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
@@ -217,3 +260,5 @@ class GameConfigMenu:
                 selected = None
             elif(selected.get_input() is not None):
                 selected.get_selection().get_value()(selected.get_input()) 
+                if(not os.path.exists(self.game.rom_file_path)):
+                    selected = None

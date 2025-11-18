@@ -21,9 +21,7 @@ class ModesMenu(settings_menu.SettingsMenu):
                                         ["Would you like to enter game selection only mode?", 
                                          "Boot straight into the game selection screen", 
                                          "To exit enter the Konami Code", 
-                                         "↑↑↓↓←→←→BA,START,SELECT",
-                                         "",
-                                         "A = Yes, B = No"]):
+                                         "↑↑↓↓←→←→BA,START,SELECT"]):
                 Device.get_system_config().set_game_selection_only_mode_enabled(True)
                 Device.exit_pyui()
             else:
@@ -35,9 +33,7 @@ class ModesMenu(settings_menu.SettingsMenu):
                                         ["Would you like to enter simple mode?", 
                                          "It has restricted access to settings", 
                                          "To exit enter the Konami Code", 
-                                         "↑↑↓↓←→←→BA,START,SELECT",
-                                         "",
-                                         "A = Yes, B = No"]):
+                                         "↑↑↓↓←→←→BA,START,SELECT"]):
                 Device.get_system_config().set_simple_mode_enabled(True)
                 Device.exit_pyui()
             else:
