@@ -10,8 +10,8 @@ class ListOfOptionsSelectionMenu:
     def __init__(self):
         pass
 
-    def get_selected_option_index(self, options, title):
-        selected = Selection(None, None, 0)
+    def get_selected_option_index(self, options, title, default_index=0):
+        selected = Selection(None, None, default_index)
         option_list = []
         for index, opt in enumerate(options):
             option_list.append(

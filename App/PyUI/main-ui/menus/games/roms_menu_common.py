@@ -185,7 +185,7 @@ class RomsMenuCommon(ABC):
             if(Theme.skip_main_menu()):
                 accepted_inputs += [ControllerInput.L1, ControllerInput.R1]
             selected = view.get_selection(accepted_inputs)
-            if(selected is not None):
+            if(selected is not None and (selected.get_selection() is not None or ControllerInput.B == selected.get_input())):
                 if(ControllerInput.A == selected.get_input()):
                     PyUiState.set_last_game_selection(
                         page_name,

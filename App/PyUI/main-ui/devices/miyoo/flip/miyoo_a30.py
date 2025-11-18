@@ -41,9 +41,7 @@ class MiyooA30(MiyooDevice):
             self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self._set_lumination_to_config()
-            self._set_contrast_to_config()
-            self._set_saturation_to_config()
-            self._set_brightness_to_config()
+            self._set_screen_settings_to_config()
             self.ensure_wpa_supplicant_conf()
             self.init_gpio()
             miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'

@@ -1,5 +1,6 @@
 
 
+import os
 from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
@@ -9,9 +10,12 @@ from menus.games.favorites_menu import FavoritesMenu
 from menus.games.recents_menu import RecentsMenu
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
+from menus.games.utils.rom_file_name_utils import RomFileNameUtils
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
 from menus.settings.basic_settings_menu import BasicSettingsMenu
 from themes.theme import Theme
+from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
@@ -52,6 +56,24 @@ class GameSystemSelectMenuPopup:
         if (ControllerInput.A == input):
             CollectionsMenu().run_rom_selection()
 
+    def download_boxart(self, input, game_system : GameSystem):
+        if (ControllerInput.A == input):
+            rom_select_options_builder = get_rom_select_options_builder()
+
+            roms = rom_select_options_builder.build_rom_list(game_system, subfolder=None)
+            rom_image_list = []
+            for rom in roms:
+                if(rom.get_image_path() is not None and os.path.exists(rom.get_image_path())):
+                    continue
+                img_path = rom_select_options_builder.get_default_image_path(game_system, rom.get_value().rom_file_path)
+                name_without_ext = RomFileNameUtils.get_rom_name_without_extensions(
+                    rom.get_value().game_system,
+                    rom.get_value().rom_file_path
+                )
+                rom_image_list.append((name_without_ext, img_path))
+            
+            BoxArtScraper().download_boxart_batch(game_system.folder_name, rom_image_list)
+
     def run_popup_menu_selection(self, game_system : GameSystem):
         popup_options = []
 
@@ -86,8 +108,6 @@ class GameSystemSelectMenuPopup:
                     value=self.open_collections
                 )
             )
-
-        if (Theme.skip_main_menu()):
             popup_options.append(
                 GridOrListEntry(
                     primary_text=Language.apps(),
@@ -126,6 +146,16 @@ class GameSystemSelectMenuPopup:
             icon=Theme.settings(),
             value=self.all_system_game_search
         ))
+        popup_options.append(GridOrListEntry(
+            primary_text=Language.download_boxart(),
+            image_path=Theme.settings(),
+            image_path_selected=Theme.settings_selected(),
+            description="",
+            icon=Theme.settings(),
+            value=lambda input_value, game_system=game_system : self.download_boxart(input_value, game_system)
+        ))
+
+        
 
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,

@@ -1,18 +1,39 @@
+from collections.abc import Set
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
+from pathlib import Path
 import subprocess
 import json
 import re
+import threading
 import time
 import urllib.request
-from typing import Optional
+from typing import List, Optional
 
 from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from utils.logger import PyUiLogger
-
+import re
+import difflib
+from typing import Optional
 
 class BoxArtScraper:
+    # optional abbreviation mapping
+    ABBREVIATIONS = {
+        "ff": "final fantasy",
+        "zelda": "legend of zelda",
+        "mario": "super mario",
+        # add more as needed
+    }
+
+    # numbers → roman numerals
+    NUM_TO_ROMAN = {
+        "2": "ii", "3": "iii", "4": "iv", "5": "v",
+        "6": "vi", "7": "vii", "8": "viii", "9": "ix", "10": "x"
+    }
+
+    STOPWORDS = {"and", "the", "of", "in", "is", "a", "an"}
     """
     Python version of the box art scraper script, converted into a class.
     Matches original shell behavior but without watchdog logic.
@@ -20,11 +41,12 @@ class BoxArtScraper:
 
     def __init__(self):
         self.base_dir = "/mnt/SDCARD"
-        self.sprig_dir = os.path.join(self.base_dir, "sprig")
-        self.emu_dir = os.path.join(self.base_dir, "Emu")
-        self.roms_dir = os.path.join(self.base_dir, "Roms")
-        self.db_dir = os.path.join(self.sprig_dir, "db")
-
+        self.roms_dir = Device.get_roms_dir()
+        script_dir = Path(__file__).resolve().parent
+        self.db_dir = os.path.join(script_dir,"db")
+        self.game_system_utils = Device.get_game_system_utils()
+        self.preferred_region = Device.get_system_config().get_preferred_region()
+        self._cache = {}  # sys_name -> list of (filename, token_set)
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -130,55 +152,281 @@ class BoxArtScraper:
 
     def _get_supported_extensions(self, sys_name: str) -> list[str]:
         """Get extensions from Emu config.json."""
-        config_path = os.path.join(self.emu_dir, sys_name, "config.json")
-        if not os.path.exists(config_path):
+        game_system = self.game_system_utils.get_game_system_by_name(sys_name)
+        if(game_system is None):
             return []
-
-        try:
-            with open(config_path, "r") as f:
-                data = json.load(f)
-                extlist = data.get("extlist", "")
-                return [ext.strip() for ext in extlist.split("|") if ext.strip()]
-        except Exception as e:
-            self.log_message(f"BoxartScraper: Failed to read extensions for {sys_name}: {e}")
-            return []
+        else:
+            return game_system.game_system_config.get_extlist()
 
     def find_image_name(self, sys_name: str, rom_file_name: str) -> Optional[str]:
         """Match ROM to image name based on db/<system>_games.txt."""
         image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
         if not os.path.exists(image_list_file):
+            PyUiLogger.get_logger().warning(f"BoxartScraper: Image list file not found for {sys_name}.")
             return None
 
         rom_without_ext = os.path.splitext(rom_file_name)[0]
         with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
             image_list = f.read().splitlines()
 
-        # Try exact match
-        exact = f"{rom_without_ext}.png"
-        for name in image_list:
-            if name.lower() == exact.lower():
-                return name
+        return self.find_image_from_list(sys_name, rom_without_ext, image_list)
 
-        # Fuzzy match: remove brackets and region info
-        search_term = re.sub(r"\[.*?\]|\(.*?\)", "", rom_without_ext).strip()
-        matches = [n for n in image_list if n.lower().startswith(search_term.lower())]
-        if matches:
-            usa_matches = [m for m in matches if "(USA)" in m]
-            return usa_matches[0] if usa_matches else matches[0]
-        return None
+    def get_image_list_for_system(self, sys_name: str) -> List[str]:
+        """Match ROM to image name based on db/<system>_games.txt."""
+        image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
+        if not os.path.exists(image_list_file):
+            self.log_and_display_message(f"Image list file not found for {sys_name}.")
+            time.sleep(2)
+            return None
 
+        with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
+            image_list = f.read().splitlines()
+
+        return image_list
+    
+
+    def preprocess_token(self, token: str) -> str:
+        token = token.lower()
+        if token in self.ABBREVIATIONS:
+            return self.ABBREVIATIONS[token]
+        if token in self.NUM_TO_ROMAN:
+            return self.NUM_TO_ROMAN[token]
+        return token
+
+    def split_long_token(self, token: str) -> Set[str]:
+        """
+        For long concatenated words with no spaces, generate simple split.
+        Example: "dragonball" -> {"dragonball", "dragon", "ball"}
+        """
+        token = token.lower()
+        if len(token) < 6 or " " in token:
+            return {token}
+
+        # Simple heuristic: split near the middle
+        mid = len(token) // 2
+        return {token, token[:mid], token[mid:]}
+
+    def strip_parentheses(self, s: str) -> str:
+        """Remove all (...) and normalize spaces/symbols"""
+        s = re.sub(r"\(.*?\)", "", s)
+        s = re.sub(r"[\s\-_,]+", " ", s)
+        return s.strip()
+
+    def tokenize(self, s: str) -> Set[str]:
+        """Convert string to set of tokens, preprocess abbreviations/numbers, remove stopwords"""
+        s = s.replace("[_-]", " ").lower()
+        s = re.sub(r"[^\w\s]+", " ", s)  # remove punctuation
+        tokens = set()
+        for t in s.split():
+            if t in self.STOPWORDS:
+                continue
+            t = self.preprocess_token(t)
+            tokens |= self.split_long_token(t)
+        return tokens
+        
+    def weighted_similarity(self, target_tokens: Set[str], candidate_tokens: Set[str]) -> float:
+        matched_tokens = set()
+        for t in target_tokens:
+            for c in candidate_tokens:
+                if t in c or c in t:  # substring-aware match
+                    matched_tokens.add(t)
+                    break
+
+        # missing tokens are target tokens that didn't match any candidate token
+        missing_tokens = target_tokens - matched_tokens
+        penalty = sum(0 if t in {"1", "i"} else 0.3 for t in missing_tokens)
+
+        # union for score denominator can remain the original union
+        score = len(matched_tokens) / len(target_tokens | candidate_tokens)
+
+        return max(score - penalty, 0.0)    
+    
+    def find_image_from_list(
+        self,
+        sys_name: str,
+        rom_without_ext: str,
+        image_list: List[str],
+    ) -> Optional[str]:
+
+        # Precompute token sets for this system if not already cached
+        if sys_name not in self._cache:
+            self._cache[sys_name] = [
+                (name, self.tokenize(self.strip_parentheses(name.replace(".png", ""))))
+                for name in image_list
+            ]
+
+        target_tokens = self.tokenize(self.strip_parentheses(rom_without_ext))
+        best_score = 0.0
+        best_candidates = []
+
+        for name, candidate_tokens in self._cache[sys_name]:
+            score = self.weighted_similarity(target_tokens, candidate_tokens)
+            if score > best_score:
+                best_score = score
+                best_candidates = [name]
+            elif score == best_score:
+                best_candidates.append(name)
+
+        if not best_candidates or best_score < 0.3:
+            return None
+
+        # Preferred region tie-breaker
+        if self.preferred_region:
+            for candidate in best_candidates:
+                matches = re.findall(r"\(([^)]*?)\)", candidate, re.IGNORECASE)
+                for match in matches:
+                    if self.preferred_region in match.upper():
+                        return candidate
+
+        # Shortest filename tie-breaker
+        return min(best_candidates, key=len)
     # ==========================================================
     # Main Scraper Logic
     # ==========================================================
+    
+    # Function to process a single ROM file
+    def process_rom(self,sys_name, ra_name, root, file):
+                
+        if not os.path.exists(os.path.join(root, "Imgs")):
+            os.makedirs(os.path.join(root, "Imgs"), exist_ok=True)
 
-    def scrape_boxart(self):
+        rom_name = os.path.splitext(file)[0]
+        image_path = os.path.join(root, "Imgs", f"{rom_name}.png")
+
+        self.download_boxart(sys_name, rom_name, image_path)
+
+    def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str) -> bool:
+        ra_name = self.get_ra_alias(sys_name)
+        if not ra_name:
+            self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
+            return
+
+        remote_image_name = self.find_image_name(sys_name, rom_file_name)
+        if not remote_image_name:
+            self.log_message(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
+            return
+        self.download_remote_image(ra_name, remote_image_name, image_path)
+
+    def download_remote_image_for_system(self, sys_name: str, remote_image_name: str, image_path: str):
+        ra_name = self.get_ra_alias(sys_name)
+        self.download_remote_image(ra_name, remote_image_name, image_path)
+
+    def download_remote_image(self, ra_name, remote_image_name, image_path):
+
+        boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
+        fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
+
+        self.log_message(f"BoxartScraper: Downloading {boxart_url}")
+        success = self._download_file(boxart_url, image_path)
+        if not success:
+            self.log_message(f"BoxartScraper: failed {boxart_url}, trying fallback.")
+            if not self._download_file(fallback_url, image_path):
+                self.log_message(f"BoxartScraper: failed {fallback_url}.")
+
+
+    def download_boxart_batch(
+        self,
+        sys_name: str,
+        roms_and_paths: list[tuple[str, str]],
+        max_workers: int = 8,
+    ):
+        """
+        Run download_boxart() concurrently for a batch of ROM/image pairs.
+
+        roms_and_paths: list of (rom_file_name, image_path)
+        """
+        self.log_and_display_message("Scraping box art. Please be patient, especially with large libraries!")
+        if not roms_and_paths:
+            self.log_and_display_message(f"No roms are missing boxart for {sys_name}.")
+            time.sleep(2)
+            return
+
+        ra_name = self.get_ra_alias(sys_name)
+        if not ra_name:
+            self.log_and_display_message(f"Remote system name not found - unable to download box art for {sys_name}.")
+            time.sleep(2)
+            return
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(self.download_boxart, sys_name, rom_file_name, image_path)
+                for rom_file_name, image_path in roms_and_paths
+            ]
+
+            count = 0
+
+            for future in as_completed(futures):
+                count = count +1
+                self.log_and_display_message(f"Scraping box art... ({count}/{len(roms_and_paths)})")
+                try:
+                    future.result()  # triggers exception if any occurred
+                except Exception as e:
+                    self.log_message(f"BoxartScraper: Error in batch download - {e}")
+
+        BoxArtResizer.patch_boxart()
+
+    def run_scraper_tasks(self, max_workers, tasks):
+
+        # Run tasks concurrently
+        count = 0
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(self.process_rom, *t) for t in tasks]
+
+            for future in as_completed(futures):
+                count = count +1
+                if(count % 10 == 0):
+                    self.log_and_display_message(f"Scraping box art... ({count}/{len(tasks)})")
+                try:
+                    future.result()
+                except Exception as e:
+                    self.log_message(f"BoxartScraper: Error processing a ROM - {e}")
+
+        self.log_and_display_message("Scraping complete!")
+        time.sleep(2)
+        BoxArtResizer.patch_boxart()
+
+
+    def get_scrape_tasks_for_system(self, sys_dir: str) -> List[tuple]:
+        tasks = []
+
+        sys_path = os.path.join(self.roms_dir, sys_dir)
+        sys_name = os.path.basename(sys_path)
+
+        ra_name = self.get_ra_alias(sys_name)
+        if not ra_name:
+            self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
+            return tasks
+
+        extensions = self._get_supported_extensions(sys_name)
+        if not extensions:
+            self.log_message(f"BoxartScraper: No supported extensions found for {sys_name}.")
+            return tasks
+
+        for root, _, files in os.walk(sys_path):
+            if "Imgs" in root:
+                continue
+
+            for file in files:
+                if not any(file.lower().endswith(ext.lower()) for ext in extensions):
+                    continue
+
+                rom_name = os.path.splitext(file)[0]
+                image_dir = os.path.join(root, "Imgs")
+
+                # Skip if image already exists
+                if os.path.exists(image_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(image_dir)):
+                    continue
+
+                tasks.append((sys_name, ra_name, root, file))
+        return tasks
+
+    def scrape_boxart(self, max_workers=8):
         self.log_and_display_message(
             "Scraping box art. Please be patient, especially with large libraries!"
         )
-        #time.sleep(1)
 
         if not Device.is_wifi_enabled():
-            Display.display_message("Wifi must be connected",2000)
+            Display.display_message("Wifi must be connected", 2000)
 
         if not self._ping("thumbnails.libretro.com"):
             self.log_and_display_message("Libretro thumbnail service unavailable; trying fallback.")
@@ -189,64 +437,14 @@ class BoxArtScraper:
                 time.sleep(3)
                 return
 
+        tasks = []
+        # First, collect all ROM files for all systems
         for sys_dir in [d for d in os.listdir(self.roms_dir) if os.path.isdir(os.path.join(self.roms_dir, d))]:
-            sys_path = os.path.join(self.roms_dir, sys_dir)
-            sys_name = os.path.basename(sys_path)
+            tasks.extend(self.get_scrape_tasks_for_system(sys_dir))
 
-            ra_name = self.get_ra_alias(sys_name)
-            if not ra_name:
-                self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
-                continue
+        self.run_scraper_tasks(max_workers, tasks)
+        
 
-            extensions = self._get_supported_extensions(sys_name)
-            if not extensions:
-                self.log_message(f"BoxartScraper: No supported extensions found for {sys_name}.")
-                continue
-
-            first_game = True
-            for root, _, files in os.walk(sys_path):
-                for file in files:
-                    if not any(file.lower().endswith(f".{ext.lower()}") for ext in extensions):
-                        continue
-
-                    if not os.path.exists(os.path.join(root, "Imgs")):
-                        os.makedirs(os.path.join(root, "Imgs"), exist_ok=True)
-
-                    rom_name = os.path.splitext(file)[0]
-                    image_path = os.path.join(root, "Imgs", f"{rom_name}.png")
-
-                    # Skip if any image already exists
-                    existing = [
-                        f for f in os.listdir(os.path.join(root, "Imgs"))
-                        if f.startswith(rom_name + ".")
-                    ]
-                    if existing:
-                        continue
-
-                    if first_game:
-                        self.log_and_display_message(f"BoxartScraper: Scraping box art for {sys_name}")
-
-                        for f in files[:5]:  # just print the first 5
-                            self.log_message(f"{f.get_name()}, {f.get_download_url()}")
-                        first_game = False
-
-                    remote_image_name = self.find_image_name(sys_name, file)
-                    if not remote_image_name:
-                        continue
-
-                    boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
-                    fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
-
-                    self.log_message(f"BoxartScraper: Downloading {boxart_url}")
-                    success = self._download_file(boxart_url, image_path)
-                    if not success:
-                        self.log_message(f"BoxartScraper: failed {boxart_url}, trying fallback.")
-                        if not self._download_file(fallback_url, image_path):
-                            self.log_message(f"BoxartScraper: failed {fallback_url}.")
-
-        self.log_and_display_message("Scraping complete!")
-        time.sleep(2)
-        BoxArtResizer.patch_boxart()
 
     # ==========================================================
     # File Download

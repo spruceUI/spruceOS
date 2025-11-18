@@ -325,3 +325,10 @@ class SystemConfig:
         self.config["simpleMode"] = value
         self.save_config()
 
+    def get_preferred_region(self):
+        return self.config.get("preferredRegion", "USA")
+
+    def set_preferred_region(self,value):
+        self.config["preferredRegion"] = value
+        self.save_config()
+

@@ -70,9 +70,9 @@ class ListView(View):
                     self.adjust_selected(-1*self.max_rows+1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L2:
                 if(Theme.skip_main_menu()):
-                    self.adjust_selected(-1*self.max_rows+1, skip_by_letter=True)
-                else:
                     self.adjust_selected(-1*self.max_rows+1, skip_by_letter=Device.get_system_config().get_skip_by_letter())
+                else:
+                    self.adjust_selected(-1*self.max_rows+1, skip_by_letter=True)
             elif Controller.last_input() == ControllerInput.R1:
                 if(Theme.skip_main_menu()):
                     return Selection(self.get_selected_option(),Controller.last_input(), self.selected)

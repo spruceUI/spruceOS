@@ -345,6 +345,18 @@ class Language:
         return cls._data.get("downloadBoxart","Download BoxArt")
 
     @classmethod
+    def select_boxart(cls):
+        return cls._data.get("selectBoxart","Select BoxArt Download")
+
+    @classmethod
+    def delete_boxart(cls):
+        return cls._data.get("deleteBoxart","Delete Box Art")
+
+    @classmethod
+    def delete_rom(cls):
+        return cls._data.get("deleteRom","Delete ROM")
+
+    @classmethod
     def controller_settings(cls):
         return cls._data.get("controllerSettings","Controller Settings")
 
