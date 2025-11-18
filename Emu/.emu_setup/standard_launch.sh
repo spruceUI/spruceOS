@@ -87,6 +87,7 @@ handle_network_services() {
 	wifi_connected=false
 	disable_wifi_in_game="$(get_config_value '.menuOptions."Battery Settings".disableWifiInGame.selected' "False")"
 	disable_net_serv_in_game="$(get_config_value '.menuOptions."Battery Settings".disableNetworkServicesInGame.selected' "False")"
+	syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
 
 	##### RAC Check #####
 	if [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
@@ -95,7 +96,7 @@ handle_network_services() {
 	fi
 
 	##### Syncthing Sync Check, perform only once per session #####
-	if setting_get "syncthing" && ! flag_check "syncthing_startup_synced"; then
+	if ["$syncthing_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
 		log_message "Syncthing is enabled, WiFi connection needed"
 		wifi_needed=true
 		syncthing_enabled=true

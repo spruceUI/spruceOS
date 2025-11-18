@@ -119,18 +119,21 @@ check_and_move_p8_bins() {
 
 developer_mode_task() {
     if flag_check "developer_mode"; then
-        if setting_get "samba" || setting_get "dropbear"; then
+        samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
+        ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+
+        if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
             # Loop until WiFi is connected
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
                 sleep 0.2
             done
             
-            if setting_get "samba" && ! pgrep "smbd" > /dev/null; then
+            if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
                 log_message "Dev Mode: Samba starting..."
                 start_samba_process
             fi
 
-            if setting_get "dropbear" && ! pgrep "dropbearmulti" > /dev/null; then
+            if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" > /dev/null; then
                 log_message "Dev Mode: Dropbear starting..."
                 start_dropbear_process
             fi

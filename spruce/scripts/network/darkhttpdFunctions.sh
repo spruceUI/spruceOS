@@ -25,8 +25,16 @@ start_darkhttpd_process() {
     return
   fi
 
+  samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
+  ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+  sftpgo_enabled="$(get_config_value '.menuOptions."Network Settings".enableSFTPGo.selected' "False")"
+  syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
+
   # Check if at least one network service is enabled
-  if ! (setting_get "samba" || setting_get "dropbear" || setting_get "sftpgo" || setting_get "syncthing"); then
+  if [ "$syncthing_enabled" = "False" ] && \
+     [ "$sftpgo_enabled" = "False" ] && \
+     [ "$ssh_enabled" = "False" ] && \
+     [ "$sftpgo_enabled" = "False" ]; then
     log_message "darkhttpd: No network services enabled, skipping start" -v
     return
   fi

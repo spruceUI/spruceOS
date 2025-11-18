@@ -225,12 +225,7 @@ prepare_game_switcher() {
         echo "$CMD" >>"$TEMP_FILE"
     done <$LIST_FILE
 
-    # TODO: i don't think this works anymore, TEMP_FILE is long gone
-    # trim the game list to only recent 5/10/20 games
-    COUNT=$(setting_get "maxGamesInGS")
-    if [ -z "$COUNT" ]; then
-        COUNT=10
-    fi
+    COUNT=10
     tail -$COUNT "$TEMP_FILE" >"$LIST_FILE"
 
     # kill RA or other emulator or MainUI

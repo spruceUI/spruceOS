@@ -10,7 +10,12 @@ if [ $PLATFORM = "A30" ]; then
 	SFTP_SERVICE_NAME=sftp-server 
 else
 	SFTP_SERVICE_NAME=sftpgo
-fi	
+fi
+
+samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
+ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+sftpgo_enabled="$(get_config_value '.menuOptions."Network Settings".enableSFTPGo.selected' "False")"
+syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
 
 connect_services() {
 
@@ -22,28 +27,28 @@ connect_services() {
 	done
 
 	# Samba check
-	if setting_get "samba" && ! pgrep "smbd" >/dev/null; then
+	if [ "$syncthing_enabled" = "True" ] && ! pgrep "smbd" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: Samba detected not running, starting..."
 		start_samba_process
 	fi
 
 	# SSH check
-	if setting_get "dropbear" && ! pgrep "dropbearmulti" >/dev/null; then
+	if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: Dropbear detected not running, starting..."
 		start_dropbear_process
 	fi
 
 	# SFTPGo check
-	if setting_get "sftpgo" && ! pgrep "$SFTP_SERVICE_NAME" >/dev/null; then
+	if [ "$sftpgo_enabled" = "True" ] && ! pgrep "$SFTP_SERVICE_NAME" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: SFTPGo detected not running, starting..."
 		start_sftpgo_process
 	fi
 
 	# Syncthing check
-	if setting_get "syncthing" && ! pgrep "syncthing" >/dev/null; then
+	if [ "$syncthing_enabled" = "True" ] && ! pgrep "syncthing" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: Syncthing detected not running, starting..."
 		start_syncthing_process

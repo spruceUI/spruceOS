@@ -139,7 +139,8 @@ else
     flag_add "save_active"
 fi
 
-if setting_get "syncthing" && flag_check "emulator_launched"; then
+syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
+if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
     log_message "Syncthing is enabled, WiFi connection needed"
 
     # Restore brightness and sound if sleep->powerdown for syncthing
@@ -166,9 +167,6 @@ if flag_check "sleep.powerdown"; then
     amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
 fi
 alsactl store
-
-# Now that nothing might need it, organize settings file
-settings_organize
 
 # sync files and power off device
 sync

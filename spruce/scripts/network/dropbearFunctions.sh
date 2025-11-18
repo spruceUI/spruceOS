@@ -5,7 +5,8 @@
 SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
 SSH_KEYS="/mnt/SDCARD/spruce/etc/ssh/keys"
 dropbear_check(){
-    if setting_get "dropbear"; then
+    ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+    if [ "$ssh_enabled" = "True" ]; then
         start_dropbear_process
     fi
 }

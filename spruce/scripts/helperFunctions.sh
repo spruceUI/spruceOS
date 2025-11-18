@@ -19,10 +19,6 @@
 # set_smart: CPU set to conservative gov, max 1344 MHz for A30, 1800MHz for Flip/Brick, sampling 2.5Hz
 # set_performance: CPU set to performance gov @ 1344 MHz for A30, 1800MHz for Flip/Brick
 # set_overclock: CPU set to performance gov @ 1512 MHz for A30, 1992MHz for Flip/Brick
-# setting_get: get value of key from /mnt/SDCARD/spruce/settings/spruce.cfg
-# setting_update: set value of key in /mnt/SDCARD/spruce/settings/spruce.cfg
-# settings_organize: sort and clean up /mnt/SDCARD/spruce/settings/spruce.cfg
-
 # vibrate: Vibrates the device for a specified duration
 
 # This is a collection of functions that are used in multiple scripts
@@ -977,65 +973,6 @@ set_overclock() {
         log_message "CPU Mode now locked to OVERCLOCK" -v
         flag_remove "setting_cpu"
     fi
-}
-
-CFG_FILE="/mnt/SDCARD/spruce/settings/spruce.cfg"
-
-# For simple settings that use 0/1 putting this in an if statement is the easiest usage
-# For complex values, you can use setting_get and then use the value in your script by capturing it
-# For example:
-#    VALUE=$(setting_get "my_setting")
-#    if [ "$VALUE" = "complex value" ]; then
-#        do complex tasks
-#    fi
-#
-setting_get() {
-    [ $# -eq 1 ] || return 1
-
-    CFG="$CFG_FILE"
-
-    value=$(grep "^$1=" "$CFG" | cut -d'=' -f2 | tr -d '\r\n')
-    if [ -z "$value" ]; then
-        echo ""
-        return 1
-    else
-        echo "$value"
-        # Return 1 if value is "1", 0 otherwise
-        [ "$value" = "1" ] && return 1
-        return 0
-    fi
-}
-
-setting_update() {
-    [ $# -eq 2 ] || return 1
-    key="$1"
-    value="$2"
-
-    case "$value" in
-    "on" | "true" | "1") value=0 ;;
-    "off" | "false" | "0") value=1 ;;
-    esac
-
-    if grep -q "^$key=" "$CFG_FILE"; then
-        sed -i "s/^$key=.*/$key=$value/" "$CFG_FILE"
-    else
-        # Ensure there's a newline at the end of the file before appending
-        sed -i -e '$a\' "$CFG_FILE"
-        echo "$key=$value" >>"$CFG_FILE"
-    fi
-}
-
-settings_organize() {
-    # Create a temporary file
-    temp_file=$(mktemp)
-
-    # Sort the file, remove empty lines, and preserve a single newline at the end
-    sort "$CFG_FILE" | sed '/^$/d' | sed '$a\' >"$temp_file"
-
-    # Replace the original file with the sorted and cleaned version
-    mv "$temp_file" "$CFG_FILE"
-
-    log_message "Settings file organized and cleaned up" -v
 }
 
 ##########     NEW PYUI-BASED SETTING SYSTEM     ##########
