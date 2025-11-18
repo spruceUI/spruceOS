@@ -44,6 +44,22 @@ esac
 
 log_message "---DEBUG---: standard_launch.sh checkpoint 2" -v
 
+##### TRIMUI LED FUNCTIONS #####
+
+led_effect() {
+	use_effect="$(get_config_value '.menuOptions."RGB LED Settings".emulatorLEDeffect.selected' "True")"
+	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$use_effect" = "False" ]; then
+		return 0	# exit if device has no LEDs to twinkle or user opts out
+	fi
+	COLOR="$(jq -r '.menuOptions.themecolor.selected' "$EMU_JSON_PATH")"
+	[ -z "$COLOR" ] || [ "$COLOR" = "null" ] && COLOR="FFFFFF"
+	echo 1 > /sys/class/led_anim/effect_enable 
+	echo "$COLOR" > /sys/class/led_anim/effect_rgb_hex_lr
+	echo 1 > /sys/class/led_anim/effect_cycles_lr
+	echo 1000 > /sys/class/led_anim/effect_duration_lr
+	echo 1 >  /sys/class/led_anim/effect_lr
+}
+
 ##### GENERAL FUNCTIONS #####
 
 use_default_emulator() {
@@ -811,7 +827,7 @@ get_mode_override
 set_cpu_mode
 record_session_start_time
 handle_network_services
-
+led_effect
 flag_add 'emulator_launched'
 
 # Sanitize the rom path

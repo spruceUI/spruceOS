@@ -259,6 +259,18 @@
                 ],
                 "selected":"False"
             }
+        },
+        "RGB LED Settings": {
+            "emulatorLEDeffect": {
+                "display": "Trigger LEDs on emulator launch",
+                "devices": [ "TRIMUI_BRICK", "TRIMUI_SMART_PRO" ],
+                "description": "different color per emulated system",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            }
         }
     }
 }
