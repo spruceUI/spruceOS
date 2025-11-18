@@ -159,36 +159,18 @@ prepare_game_switcher() {
 
         # capture screenshot
         GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        log_message "*** homebutton_watchdog.sh: 'GAME_PATH': $GAME_PATH" -v
         GAME_NAME="${GAME_PATH##*/}"
-        log_message "*** homebutton_watchdog.sh: 'GAME_NAME': $GAME_NAME" -v
         SHORT_NAME="${GAME_NAME%.*}"
-        log_message "*** homebutton_watchdog.sh: 'SHORT_NAME': $SHORT_NAME" -v
-        EMU_NAME="$(echo "$GAME_PATH" | cut -d'/' -f5)"
-        log_message "*** homebutton_watchdog.sh: 'EMU_NAME': $EMU_NAME" -v
         mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
         SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
         log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
-        # ensure folder exists
-        mkdir -p "$SD_FOLDER_PATH/Saves/screenshots/${EMU_NAME}"
-        # covert and compress framebuffer to PNG in background
-        WIDTH="$DISPLAY_WIDTH"
-        HEIGHT="$DISPLAY_HEIGHT"
-        if [ "$PLATFORM" = "A30" ]; then # A30 is rotated 270 degrees, swap width and height
-            WIDTH=$DISPLAY_HEIGHT
-            HEIGHT=$DISPLAY_WIDTH
-        fi
 
         if [ "$PLATFORM" = "A30" ]; then
             /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" &
         else
             $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
         fi
-
-        
-        log_message "*** homebutton_watchdog.sh: capture screenshot" -v
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
 
@@ -205,42 +187,13 @@ prepare_game_switcher() {
         return 0
     fi
 
-    # makesure all emulators and games in list exist
-    # remove all non existing games from list file
-    rm -f "$TEMP_FILE"
-    while read -r CMD; do
-        EMU_PATH=$(echo $CMD | cut -d\" -f2)
-        log_message "*** homebutton_watchdog.sh: EMU_PATH = $EMU_PATH" 
-        GAME_PATH=$(echo $CMD | cut -d\" -f4)
-        [ "$PLATFORM" = "Flip" ] && GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        log_message "*** homebutton_watchdog.sh: GAME_PATH = $GAME_PATH" 
-        if [ ! -f "$EMU_PATH" ]; then
-            log_message "*** homebutton_watchdog.sh: EMU_PATH does not exist!" 
-            continue
-        fi
-        if [ ! -f "$GAME_PATH" ]; then
-            log_message "*** homebutton_watchdog.sh: GAME_PATH does not exist!" 
-            continue
-        fi
-        echo "$CMD" >>"$TEMP_FILE"
-    done <$LIST_FILE
-
-    # TODO: i don't think this works anymore, TEMP_FILE is long gone
-    # trim the game list to only recent 5/10/20 games
-    COUNT=$(setting_get "maxGamesInGS")
-    if [ -z "$COUNT" ]; then
-        COUNT=10
-    fi
-    tail -$COUNT "$TEMP_FILE" >"$LIST_FILE"
-
-    # kill RA or other emulator or MainUI
+    # kill RA or other emulator
     kill_emulator
 
     if pgrep "MainUI" >/dev/null; then
         log_message "*** homebutton_watchdog.sh: letting PyUI handle menu button" 
     else
         touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
-        killall -q -9 MainUI
     fi
 }
 
