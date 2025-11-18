@@ -132,7 +132,8 @@
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
-                    "Exit game"
+                    "Exit game",
+                    "Nothing"
                 ],
                 "selected": "Emulator menu"
             },
@@ -141,7 +142,8 @@
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
-                    "Exit game"
+                    "Exit game",
+                    "Nothing"
                 ],
                 "selected": "Game Switcher"
             },
