@@ -155,8 +155,9 @@
                 ],
                 "selected": "True"
             },
-            "raHotkey": {
+            "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
                 "options": [
                     "Select",
                     "Start",
@@ -164,6 +165,17 @@
                     "Custom"
                 ],
                 "selected": "Select"
+            },
+            "raHotkeyTrimUI": {
+                "display": "RA: hotkey enable button",
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK"],
+                "options": [
+                    "Select",
+                    "Start",
+                    "Menu",
+                    "Custom"
+                ],
+                "selected": "Menu"
             },
             "raAutoSave": {
                 "display": "RA: auto save state on close",

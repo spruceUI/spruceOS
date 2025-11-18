@@ -549,7 +549,14 @@ prepare_ra_config() {
 	mv "$TMP_CFG" "$PLATFORM_CFG"
 
 	# Set hotkey enable button based on spruceUI config
-	hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkey.selected' "True")"
+	case "$PLATFORM" in
+		"Brick"|"SmartPro")
+			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
+			;;
+		"A30"|"Flip")
+			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
+			;;
+	esac
 	log_message "ra hotkey enable button is $hotkey_enable" -v
 	TMP_CFG="$(mktemp)"
 	case "$PLATFORM" in
