@@ -35,13 +35,9 @@ class TrimUIBrick(TrimUIDevice):
 
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self._set_lumination_to_config()
-            self._set_contrast_to_config()
-            self._set_saturation_to_config()
-            self._set_brightness_to_config()
-            self._set_hue_to_config()
             self.ensure_wpa_supplicant_conf()
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
+            threading.Thread(target=self.startup_init, daemon=True).start()
             if(PyUiConfig.enable_button_watchers()):
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd
@@ -54,14 +50,22 @@ class TrimUIBrick(TrimUIDevice):
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
                 
-            config_volume = self.system_config.get_volume()
-            self._set_volume(config_volume)
 
         if(self.system_config is None):
             self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
 
         super().__init__()
             
+
+    def startup_init(self, include_wifi=True):
+        self._set_lumination_to_config()
+        self._set_contrast_to_config()
+        self._set_saturation_to_config()
+        self._set_brightness_to_config()
+        self._set_hue_to_config()
+        config_volume = self.system_config.get_volume()
+        self._set_volume(config_volume)
+
     #Untested
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):

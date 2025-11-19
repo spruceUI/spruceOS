@@ -366,6 +366,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        pass
+    
+    @abstractmethod
     def prompt_timezone_update(self):
         pass
 
@@ -413,3 +417,6 @@ class AbstractDevice(ABC):
     def get_about_info_entries(self):
         pass
 
+    @abstractmethod
+    def startup_init(self, include_wifi):
+        pass

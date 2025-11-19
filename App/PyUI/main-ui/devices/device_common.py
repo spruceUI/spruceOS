@@ -354,6 +354,9 @@ class DeviceCommon(AbstractDevice):
     def get_core_name_overrides(self, core_name):
         return [core_name]
     
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        return None
+
     def prompt_timezone_update(self):
         #Unsupported by default
         pass
@@ -442,3 +445,6 @@ class DeviceCommon(AbstractDevice):
         about_info_entries.append( ("FW Version",self.get_fw_version()) )
         about_info_entries.extend(self.get_device_specific_about_info_entries())
         return about_info_entries
+    
+    def startup_init(self, include_wifi):
+        pass

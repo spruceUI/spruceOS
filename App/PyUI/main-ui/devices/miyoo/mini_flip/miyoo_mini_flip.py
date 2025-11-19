@@ -113,7 +113,7 @@ class MiyooMiniFlip(MiyooDevice):
             PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
             return None
 
-    def startup_init(self):
+    def startup_init(self, include_wifi=True):
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
         if(self.is_wifi_enabled()):
@@ -532,3 +532,7 @@ class MiyooMiniFlip(MiyooDevice):
             PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
             return "Unknown"
 
+
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        core = game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+        return core

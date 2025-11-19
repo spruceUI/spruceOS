@@ -457,4 +457,11 @@ class Device:
     def get_core_name_overrides(core_name):
         return Device._impl.get_core_name_overrides(core_name)
 
+    @staticmethod
+    def get_core_for_game(game_system_config, rom_file_path):
+        return Device._impl.get_core_for_game(game_system_config, rom_file_path)
+
     
+    @staticmethod
+    def startup_init(include_wifi):
+        return Device._impl.startup_init(include_wifi)

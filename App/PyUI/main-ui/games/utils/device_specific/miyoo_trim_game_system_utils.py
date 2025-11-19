@@ -230,10 +230,10 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         if(core is not None):
             state_png = os.path.join(saves_root, core, base_name + ".state.auto.png")
             if os.path.exists(state_png):
-                PyUiLogger.get_logger().info(f"Found Save state image {state_png}, rom_file: {rom_info.rom_file_path}")
+                #PyUiLogger.get_logger().info(f"Found Save state image {state_png}, rom_file: {rom_info.rom_file_path}")
                 return state_png
             else:
-                PyUiLogger.get_logger().warning(f"Save state image not found at {state_png}, core: {core}, rom_file: {rom_info.rom_file_path}")
+                #PyUiLogger.get_logger().warning(f"Save state image not found at {state_png}, core: {core}, rom_file: {rom_info.rom_file_path}")
                 return None
 
     def get_save_state_image(self, rom_info: RomInfo):
@@ -249,7 +249,10 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         saves_root = os.sep.join(parts[:roms_index]) + os.sep + "Saves" + os.sep + "states"
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
-        core = self.CORE_TO_FOLDER_LOOKUP.get(rom_info.game_system.game_system_config.get_effective_menu_selection("Emulator",rom_info.rom_file_path))
+    
+        core_selection_in_config = Device.get_core_for_game(rom_info.game_system.game_system_config, rom_info.rom_file_path)
+       
+        core = self.CORE_TO_FOLDER_LOOKUP.get(core_selection_in_config)
         if(core is not None):       
             cores_to_try = Device.get_core_name_overrides(core)
         
@@ -257,6 +260,9 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                 state_png = self.check_for_image_with_core(core_to_try, saves_root, base_name, rom_info)
                 if(state_png is not None):
                     return state_png
+        else:
+            #PyUiLogger.get_logger().warning(f"{rom_info.rom_file_path} : No core mapping found for emulator {core_selection_in_config}, emu: {rom_info.game_system.display_name}")
+            pass
 
         # This is SPRUCE specific but shouldn't add much slowdown / create issues as a fallback
         return self.check_for_image_with_core(".gameswitcher", saves_root, base_name, rom_info)

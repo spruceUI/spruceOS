@@ -114,7 +114,7 @@ class MiyooFlip(MiyooDevice):
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
 
-    def startup_init(self):
+    def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
         self._set_contrast_to_config()
         self._set_saturation_to_config()
@@ -123,7 +123,7 @@ class MiyooFlip(MiyooDevice):
         self.ensure_wpa_supplicant_conf()
         self.init_gpio()
 
-        if(PyUiConfig.enable_wifi_monitor()):
+        if(PyUiConfig.enable_wifi_monitor() and include_wifi):
             PyUiLogger.get_logger().info(f"Starting wifi monitor")
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             if(self.is_wifi_enabled()):
@@ -486,3 +486,9 @@ class MiyooFlip(MiyooDevice):
 
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-64"]
+
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        core = game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+        if(core is None):
+            core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
+        return core
