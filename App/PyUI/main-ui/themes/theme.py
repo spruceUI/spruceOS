@@ -14,6 +14,7 @@ from display.resize_type import ResizeType
 from menus.games.utils.daijisho_theme_index import DaijishoThemeIndex
 from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from views.view_type import ViewType
 
 class Theme():
@@ -1159,5 +1160,14 @@ class Theme():
     @classmethod
     def set_display_battery_icon(cls, value):
         cls._data["displayBatteryIcon"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_main_menu_title(cls):
+        return cls._data.get("mainMenuTitle", PyUiConfig.get_main_menu_title())
+    
+    @classmethod
+    def set_main_menu_title(cls, value):
+        cls._data["mainMenuTitle"] = value
         cls.save_changes()
 
