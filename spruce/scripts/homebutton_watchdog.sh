@@ -272,15 +272,9 @@ send_menu_button_to_emu() {
         fi
     elif pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
-
+    fi
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
-    else
-        #TODO This seems wrong
-        # resume MainUI if it is running
-        # and it will then read menu up event and show popup menu
-        killall -q -CONT MainUI
-    fi
 }
 
 perform_action() {
