@@ -1,10 +1,12 @@
 from abc import abstractmethod
+import traceback
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.text_utils import TextUtils
 from views.view import View
@@ -54,7 +56,7 @@ class ListView(View):
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render_common()
-        
+        #PyUiLogger.get_logger().error("".join(traceback.format_stack()))
         if(Controller.get_input()):
             if Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(-1, skip_by_letter=False)
