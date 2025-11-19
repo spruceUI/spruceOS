@@ -216,7 +216,7 @@
         "Network Settings": {
             "enableSamba": {
                 "display": "Enable Samba",
-                "description": "smb://{ip_addr}/SDCARD (user/pass=sprig/happygaming)",
+                "description": "smb://{ip_addr}/SDCARD (user/pass=spruce/happygaming)",
                 "options":[
                     "True",
                     "False"
@@ -225,7 +225,7 @@
             },
             "enableSSH": {
                 "display": "Enable SSH",
-                "description": "ssh sprig@{ip_addr} (password=happygaming)",
+                "description": "ssh spruce@{ip_addr} (password=happygaming)",
                 "options":[
                     "True",
                     "False"
