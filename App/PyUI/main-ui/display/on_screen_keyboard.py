@@ -27,14 +27,14 @@ class OnScreenKeyboard:
             [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "] 
         ]
 
-    def get_input(self, title_text):
+    def get_input(self, title_text, starting_text=""):
         from display.display import Display
         self.shifted = False
         self.caps = False
         running = True  
         self.selected_row_index = 0
         self.selected_key_index = 0
-        self.entered_text = ""
+        self.entered_text = starting_text
         key_w = Device.screen_width() // 16 #13 keys, set to 16 for spacing
         key_w_offset = Device.screen_width() // 13
         key_h = key_w

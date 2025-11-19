@@ -118,7 +118,7 @@ class MainMenu:
     def build_main_menu_view(self, options, selected):
         return ViewCreator.create_view(
             view_type=Theme.get_view_type_for_main_menu(),
-            top_bar_text=PyUiConfig.get_main_menu_title(), 
+            top_bar_text=Theme.get_main_menu_title(), 
             options=options, 
             cols=Theme.get_main_menu_column_count(), 
             rows=1,
