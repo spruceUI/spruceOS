@@ -202,8 +202,13 @@ ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/set_up_swap.sh
 
+
+
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
+    # Ensure device is properly initialized (volume, wifi, etc) before launching auto-resume
+    /mnt/SDCARD/App/PyUI/launch.sh -startupInitOnly True
+
     ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
     log_message "Auto Resume executed"
 else
