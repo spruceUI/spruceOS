@@ -452,6 +452,27 @@ display_kill() {
     kill -9 $(pgrep display) 2> /dev/null
 }
 
+# used in principal.sh
+enable_or_disable_rgb() {
+    case "$PLATFORM" in
+        "Brick"|"SmartPro")
+            enable_file="/sys/class/led_anim/enable"
+        	disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLED.selected' "False")"
+            if [ "$disable_rgb" = "True" ]; then
+                chmod 777 "$enable_file" 2>/dev/null
+                echo 0 > "$enable_file" 2>/dev/null
+                chmod 000 "$enable_file" 2>/dev/null
+            else
+                chmod 777 "$enable_file" 2>/dev/null
+                echo 1 > "$enable_file" 2>/dev/null
+                # don't lock them back afterwards
+            fi
+            ;;
+        *)
+            ;;
+    esac
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
 flag_add() {

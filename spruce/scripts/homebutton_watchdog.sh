@@ -251,7 +251,6 @@ send_virtual_key_R3() {
 check_and_kill_pyui() {
     if ps -f | grep -q "[/]mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py"; then
         rm -f /tmp/cmd_to_run.sh
-        touch /mnt/SDCARD/spruce/flags/gs.lock
         killall -9 python3
     fi
 }

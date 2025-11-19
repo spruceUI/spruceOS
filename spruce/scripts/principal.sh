@@ -35,7 +35,7 @@ if ! flag_check "save_active"; then
             echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
             ;;
         "Game Switcher")
-            touch /mnt/SDCARD/spruce/flags/gs.lock
+            ### @Chris, add the pyui GS trigger here!
             ;;
         "Splore")
             log_message "Attempting to boot into Pico-8. Checking for binaries"
@@ -58,10 +58,7 @@ flag_remove "save_active"
 
 while [ 1 ]; do
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ]; then
-        log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
-        /mnt/SDCARD/spruce/scripts/gameswitcher.sh
-    fi
+    enable_or_disable_rgb
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag

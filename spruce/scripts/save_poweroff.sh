@@ -117,12 +117,6 @@ if flag_check "forced_shutdown"; then
     display -i "$BG_TREE" -t "Battery level is below 1%. Shutting down to prevent progress loss."
     flag_remove "forced_shutdown"
 
-elif pgrep -f gameswitcher.sh >/dev/null; then
-    killall -q -15 switcher
-    flag_remove "lastgame"      # remove lastgame flag to prevent loading any App after next boot
-    flag_add "gs"               # add flag to load game switcher after next boot
-    display -i "$BG_TREE"
-
 elif flag_check "in_menu"; then
     display -i "$BG_TREE"
 
