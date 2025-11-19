@@ -24,6 +24,7 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
 	scan=true
+    take_screenshot
     while $scan; do
 
         # Run the ps command, filter for 'box86', and exclude the grep process itself
@@ -38,6 +39,8 @@ kill_port(){
         fi
     done
 }
+
+
 
 kill_emulator() {
 
@@ -142,6 +145,29 @@ update_gameswitcher_json() {
     mv "$tmpfile" "$gameswitcher_json"
 }
 
+take_screenshot(){
+    # capture screenshot
+    CMD=$(cat /tmp/cmd_to_run.sh)
+    echo "*** homebutton_watchdog.sh: 'CMD': $CMD" 
+    GAME_PATH=$(echo "$CMD" | grep -o '".*"' | tail -n1 | tr -d '"')
+    GAME_NAME="${GAME_PATH##*/}"
+    SHORT_NAME="${GAME_NAME%.*}"
+    mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
+    SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
+
+    log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
+
+    if [ "$PLATFORM" = "A30" ]; then
+        /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
+    else
+        $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" 
+    fi
+
+    log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
+    echo "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
+
+    echo "$SCREENSHOT_NAME"
+}
 
 prepare_game_switcher() {
     # if in game or app now
@@ -157,20 +183,7 @@ prepare_game_switcher() {
             return 0
         fi
 
-        # capture screenshot
-        GAME_PATH=$(echo $CMD | cut -d\" -f6)
-        GAME_NAME="${GAME_PATH##*/}"
-        SHORT_NAME="${GAME_NAME%.*}"
-        mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
-        SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
-
-        log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
-
-        if [ "$PLATFORM" = "A30" ]; then
-            /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" &
-        else
-            $SD_FOLDER_PATH/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" &
-        fi
+        SCREENSHOT_NAME=$(take_screenshot)
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
 
@@ -439,9 +452,9 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         ;;
     # R2 take screenshot
     *"key $B_R2 1"*)
-        if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode"; }; then
-            take_screenshot
-        fi
+        #if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode"; }; then
+        #     take_screenshot 
+        #fi
         ;;
     # Don't react to dpad presses or analog sticks
     *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*| \
