@@ -72,16 +72,14 @@ kill_drastic() {
         echo $B_L1 0 # L1 up
         echo $B_MENU 0  # MENU up
         echo 0 0 0  # tell sendevent to exit
-    } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
+    } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD &
 
     killall -q -15 drastic drastic64 drastic32
 }
 
-
 kill_ppsspp() {
-	log_message "*** homebutton_watchdog.sh: Killing PPSSPPSDL!" 
-    killall -q -CONT PPSSPPSDL
-    killall -q -CONT PPSSPPSDL_$PLATFORM
+	log_message "*** homebutton_watchdog.sh: Killing PPSSPP!" 
+
     # use sendevent to send SELECT + R1 combo buttons to PPSSPP
     {
         # send autosave hot key
@@ -149,6 +147,30 @@ update_gameswitcher_json() {
     mv "$tmpfile" "$gameswitcher_json"
 }
 
+close_ppsspp_menu() {
+
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        log_message "*** homebutton_watchdog.sh: Closing PPSPP Menu"
+        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
+        {
+            echo $B_RIGHT 1  
+            echo $B_RIGHT 0  
+            echo $B_A 1  
+            echo $B_A 0  
+        } > /tmp/ppsspp_events.txt
+
+
+        # run sendevent in a fully detached subshell
+        (
+            $BIN_PATH/sendevent $EVENT_PATH_JOYPAD < /tmp/ppsspp_events.txt
+        ) < /dev/null > /dev/null 2>&1 &
+
+        sleep 0.5
+    fi
+
+}
+
+
 take_screenshot(){
     # capture screenshot
     CMD=$(cat /tmp/cmd_to_run.sh)
@@ -158,6 +180,7 @@ take_screenshot(){
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
+    close_ppsspp_menu
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
     else
@@ -165,7 +188,6 @@ take_screenshot(){
     fi
 
     log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
-
 }
 
 prepare_game_switcher() {
@@ -174,7 +196,7 @@ prepare_game_switcher() {
 
         # get game path
         CMD=$(cat /tmp/cmd_to_run.sh)
-        log_message "*** homebutton_watchdog.sh: 'CMD': $CMD"
+
 
         # check command is emulator
         # exit if not emulator is in command
@@ -187,6 +209,7 @@ prepare_game_switcher() {
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
         touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+
         kill_emulator
 
     # if in MainUI menu
@@ -249,7 +272,6 @@ send_menu_button_to_emu() {
         fi
     elif pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
-        killall -q -CONT PPSSPPSDL
 
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
@@ -265,15 +287,12 @@ perform_action() {
     # handle short press
     case $1 in
     "Game Switcher")
-        log_message "*** homebutton_watchdog.sh: Game Switcher" -v
         prepare_game_switcher
         ;;
     "Emulator menu")
-        log_message "*** homebutton_watchdog.sh: In-game menu" -v
         send_menu_button_to_emu
         ;;
     "Exit game")
-        log_message "*** homebutton_watchdog.sh: Exit game" -v
         # resume MainUI if it is running
         # and it will then read menu up event and show popup menu
         killall -q -CONT MainUI
@@ -293,7 +312,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
         if [ ! -e /tmp/menubtn ]; then
             pause_drastic
             menu_btn_press_time=$(date +%s)
-            log_message "Menu button pressed at $menu_btn_press_time" -v
+            log_message "Menu button pressed at $menu_btn_press_time" 
             touch /tmp/menubtn
 
             # Launch background timer that waits required seconds, then triggers the action
@@ -321,7 +340,7 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
     }
 
     home_key_up () {
-        log_message "Menu button released at $(date +%s)"  -v
+        log_message "Menu button released at $(date +%s)"  
         if [ -e /tmp/menubtn ]; then
             rm -f /tmp/menubtn
             # Kill background hold timer if still running
@@ -335,8 +354,6 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
             log_message "*** homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
             perform_action "$TAP_HOME"
             resume_drastic
-        else
-            log_message "*** homebutton_watchdog.sh: Already performed long, skipping tap"
         fi
 
     }
