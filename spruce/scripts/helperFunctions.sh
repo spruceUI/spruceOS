@@ -1308,3 +1308,12 @@ rgb_led() {
 		echo "$effect" > /sys/class/led_anim/effect_$zone 2>/dev/null
 	done
 }
+
+rainbreathe() {
+    for color in FF0000 FF8000 FFFF00 80FF00 \
+                 00FF00 00FF80 00FFFF 0080FF \
+                 0000FF 8000FF FF00FF FF0080; do
+        rgb_led lrm12 breathe $color ${1:-2000}
+        sleep ${2:-3}
+    done
+}
