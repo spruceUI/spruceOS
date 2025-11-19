@@ -107,6 +107,9 @@ class GameSelectMenuPopup:
     def select_specific_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
             scraper = BoxArtScraper()
+            if(not scraper.check_wifi()):
+                return
+
             image_list = scraper.get_image_list_for_system(rom_info.game_system.folder_name)
             if(image_list is not None):
                 name_without_ext = RomFileNameUtils.get_rom_name_without_extensions(
@@ -121,7 +124,7 @@ class GameSelectMenuPopup:
                     box_art = image_list[boxart_download]
                     img_path = get_rom_select_options_builder().get_default_image_path(rom_info.game_system, rom_info.rom_file_path)
                     existing_image = get_rom_select_options_builder().get_image_path(rom_info)
-                    if(os.path.exists(existing_image)):
+                    if(existing_image is not None and os.path.exists(existing_image)):
                         os.remove(existing_image)
                         Display.clear_image_cache()
                     PyUiLogger().get_logger().info(f"Downloading {box_art} to {img_path}")

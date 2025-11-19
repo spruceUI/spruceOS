@@ -74,12 +74,11 @@ class PyUiState:
 
     @classmethod
     def get_last_app_selection(cls):
-        return cls._data.get("lastAppSelectionDir", None), cls._data.get("lastAppSelectionFile", None)
+        return cls._data.get("lastAppSelection", None)
 
     @classmethod
-    def set_last_app_selection(cls, directory,filepath):
-        cls._data["lastAppSelectionDir"] = directory
-        cls._data["lastAppSelectionFile"] = filepath
+    def set_last_app_selection(cls, app_label):
+        cls._data["lastAppSelection"] = app_label
         cls.save()
 
     @classmethod

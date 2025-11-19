@@ -1,8 +1,0 @@
-{
-  "label": "Boxart Scraper",
-  "icon": "scraper.png",
-  "launch": "launch.sh",
-  "description": "Scrape game boxart",
-  "hide": false,
-  "hideInSimpleMode": true
-}
