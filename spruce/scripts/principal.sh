@@ -29,13 +29,13 @@ runifnecessary(){
 # Set up the boot_to action prior to getting into the principal loop
 BOOT_ACTION="$(get_config_value '.menuOptions."System Settings".bootTo.selected' "spruceUI")"
 if ! flag_check "save_active"; then
+    log_message "Selected boot action is $BOOT_ACTION."
     case "$BOOT_ACTION" in
         "Random Game")
-            log_message "Booting to random game selection"
             echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
             ;;
         "Game Switcher")
-            ### @Chris, add the pyui GS trigger here!
+            touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
             ;;
         "Splore")
             log_message "Attempting to boot into Pico-8. Checking for binaries"
