@@ -60,7 +60,7 @@ class TasksMenu(settings_menu.SettingsMenu):
                         primary_text=Language.download_boxart(),
                         image_path=None,
                         image_path_selected=None,
-                        description=None,
+                        description="Scan entire library for missing boxart",
                         icon=None,
                         value=self.scrape_box_art
                 )
@@ -73,7 +73,7 @@ class TasksMenu(settings_menu.SettingsMenu):
                     value_text=None,
                     image_path=None,
                     image_path_selected=None,
-                    description=None,
+                    description="Resize boxart and convert to QOI for faster loading",
                     icon=None,
                     value=self.resize_boxart
                 )
@@ -85,7 +85,7 @@ class TasksMenu(settings_menu.SettingsMenu):
                 value_text=None,
                 image_path=None,
                 image_path_selected=None,
-                description=None,
+                description="Simpler modes for new users or kids",
                 icon=None,
                 value=self.launch_modes_menu
                 )

@@ -331,6 +331,9 @@ class BoxArtScraper:
         roms_and_paths: list[tuple[str, str]],
         max_workers: int = 8,
     ):
+        if(not self.check_wifi()):
+            return
+
         """
         Run download_boxart() concurrently for a batch of ROM/image pairs.
 
@@ -421,13 +424,10 @@ class BoxArtScraper:
                 tasks.append((sys_name, ra_name, root, file))
         return tasks
 
-    def scrape_boxart(self, max_workers=8):
-        self.log_and_display_message(
-            "Scraping box art. Please be patient, especially with large libraries!"
-        )
-
+    def check_wifi(self):
         if not Device.is_wifi_enabled():
             Display.display_message("Wifi must be connected", 2000)
+            return False
 
         if not self._ping("thumbnails.libretro.com"):
             self.log_and_display_message("Libretro thumbnail service unavailable; trying fallback.")
@@ -436,8 +436,17 @@ class BoxArtScraper:
                     "Libretro thumbnail GitHub repo is also currently unavailable. Please try again later."
                 )
                 time.sleep(3)
-                return
+                return False
+        return True
+            
+    def scrape_boxart(self, max_workers=8):
+        self.log_and_display_message(
+            "Scraping box art. Please be patient, especially with large libraries!"
+        )
 
+        if(not self.check_wifi()):
+            return
+        
         tasks = []
         # First, collect all ROM files for all systems
         for sys_dir in [d for d in os.listdir(self.roms_dir) if os.path.isdir(os.path.join(self.roms_dir, d))]:

@@ -61,7 +61,7 @@ class DaijishoThemeIndex:
             "mame": ["mame"],
             "md": ["genesis"],
             #"megaduck": ["aaaaa"],
-            #"ms": ["aaaaa"],
+            "ms": ["master"],
             #"msu1": ["aaaaa"],
             #"msumd": ["aaaaa"],
             "msx": ["msx"],
