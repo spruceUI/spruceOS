@@ -354,6 +354,9 @@ class DeviceCommon(AbstractDevice):
     def get_core_name_overrides(self, core_name):
         return [core_name]
     
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        return None
+
     def prompt_timezone_update(self):
         #Unsupported by default
         pass

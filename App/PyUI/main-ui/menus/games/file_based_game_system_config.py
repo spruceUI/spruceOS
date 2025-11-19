@@ -126,6 +126,7 @@ class FileBasedGameSystemConfig():
         menu_options = self._data.get('menuOptions', {})
         option = menu_options.get(option_name)
         if not option:
+            PyUiLogger.get_logger().info(f"No menu option found for {option_name}")
             return None
 
         if override_key is None:
