@@ -53,12 +53,12 @@ led_effect() {
 	fi
 	COLOR="$(jq -r '.themecolor' "$EMU_JSON_PATH")"
 	[ -z "$COLOR" ] || [ "$COLOR" = "null" ] && COLOR="FFFFFF"
-	echo 1 > /sys/class/led_anim/effect_enable
+	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
 	for zone in lr m f1 f2; do
 		echo "$COLOR" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
-		echo 1 > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
-		echo 1500 > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
-		echo 1 > /sys/class/led_anim/effect_$zone 2>/dev/null
+		echo 3 > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
+		echo 1000 > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
+		echo 2 > /sys/class/led_anim/effect_$zone 2>/dev/null
 	done
 }
 
