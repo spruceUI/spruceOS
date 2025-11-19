@@ -51,6 +51,14 @@ class AppMenu:
         if(selected.get_selection() is not None):
             PyUiState.set_last_app_selection(selected.get_selection().get_extra_data().get_label())
 
+    def handle_app_selection(self, app):
+        launch = app.get_launch()
+        folder = app.get_folder()
+        Display.deinit_display()
+        Device.run_app(folder,launch)
+        Controller.clear_input_queue()
+        Display.reinitialize()
+        
     def append_pyui_apps(self, app_list):
         boxart_scraper_config = PyUiAppConfig("Boxart Scraper")
         
