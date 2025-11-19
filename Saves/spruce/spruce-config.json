@@ -1,5 +1,27 @@
 {
     "menuOptions": {
+        "Game Switcher Settings": {
+            "menuHoldTime": {
+                "display": "Menu Hold Time",
+                "options": [
+                    "0",
+                    "0.5",
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "selected": "1"
+            },
+            "menuShouldVibrate": {
+                "display": "Vibrate on Menu Hold",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            }
+        },
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
