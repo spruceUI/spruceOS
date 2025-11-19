@@ -177,8 +177,9 @@
                 ],
                 "selected": "True"
             },
-            "raHotkey": {
+            "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
                 "options": [
                     "Select",
                     "Start",
@@ -186,6 +187,17 @@
                     "Custom"
                 ],
                 "selected": "Select"
+            },
+            "raHotkeyTrimUI": {
+                "display": "RA: hotkey enable button",
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK"],
+                "options": [
+                    "Select",
+                    "Start",
+                    "Menu",
+                    "Custom"
+                ],
+                "selected": "Menu"
             },
             "raAutoSave": {
                 "display": "RA: auto save state on close",
@@ -226,7 +238,7 @@
         "Network Settings": {
             "enableSamba": {
                 "display": "Enable Samba",
-                "description": "smb://{ip_addr}/SDCARD (user/pass=sprig/happygaming)",
+                "description": "smb://{ip_addr}/SDCARD (user/pass=spruce/happygaming)",
                 "options":[
                     "True",
                     "False"
@@ -235,7 +247,7 @@
             },
             "enableSSH": {
                 "display": "Enable SSH",
-                "description": "ssh sprig@{ip_addr} (password=happygaming)",
+                "description": "ssh spruce@{ip_addr} (password=happygaming)",
                 "options":[
                     "True",
                     "False"
@@ -268,6 +280,28 @@
                     "False"
                 ],
                 "selected":"False"
+            }
+        },
+        "RGB LED Settings": {
+            "emulatorLEDeffect": {
+                "display": "Trigger LEDs on emulator launch",
+                "devices": [ "TRIMUI_BRICK", "TRIMUI_SMART_PRO" ],
+                "description": "different color per emulated system",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "disableLEDs": {
+                "display": "Disable RGB LEDs in all contexts",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO"],
+                "description": "reload UI to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         }
     }

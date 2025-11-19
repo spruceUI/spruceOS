@@ -1,5 +1,5 @@
 {
-    "label": "spruceUI Credits",
+    "#label": "spruceUI Credits",
     "icon": "led.png",
     "launch": "launch.sh",
     "description": "Jam out with Jim",

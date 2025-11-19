@@ -29,13 +29,13 @@ runifnecessary(){
 # Set up the boot_to action prior to getting into the principal loop
 BOOT_ACTION="$(get_config_value '.menuOptions."System Settings".bootTo.selected' "spruceUI")"
 if ! flag_check "save_active"; then
+    log_message "Selected boot action is $BOOT_ACTION."
     case "$BOOT_ACTION" in
         "Random Game")
-            log_message "Booting to random game selection"
             echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
             ;;
         "Game Switcher")
-            touch /mnt/SDCARD/spruce/flags/gs.lock
+            touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
             ;;
         "Splore")
             log_message "Attempting to boot into Pico-8. Checking for binaries"
@@ -58,15 +58,7 @@ flag_remove "save_active"
 
 while [ 1 ]; do
 
-    if [ -f /mnt/SDCARD/spruce/flags/gs.lock ]; then
-        log_message "***** GAME SWITCHER: GS enabled and flag file detected! Launching! *****"
-        /mnt/SDCARD/spruce/scripts/gameswitcher.sh
-    fi
-
-    if [ -f /mnt/SDCARD/spruce/flags/bitpal.lock ]; then
-        /mnt/SDCARD/App/BitPal/bitpal.sh
-        rm -f /mnt/SDCARD/spruce/flags/bitpal.lock
-    fi
+    enable_or_disable_rgb
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         # create in menu flag and remove last played game flag

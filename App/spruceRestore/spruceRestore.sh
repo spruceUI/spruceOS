@@ -221,19 +221,6 @@ else
     exit 1
 fi
 
-# Move PICO files from legacy location to Emu folder if they exist
-if [ -f "/mnt/SDCARD/App/PICO/bin/pico8.dat" ]; then
-    mv "/mnt/SDCARD/App/PICO/bin/pico8.dat" "/mnt/SDCARD/Emu/PICO8/bin/pico8.dat"
-fi
-if [ -f "/mnt/SDCARD/App/PICO/bin/pico8_dyn" ]; then
-    mv "/mnt/SDCARD/App/PICO/bin/pico8_dyn" "/mnt/SDCARD/Emu/PICO8/bin/pico8_dyn"
-fi
-
-# Check legacy PICO folder and delete it if it exists
-if [ -d "/mnt/SDCARD/App/PICO/" ]; then
-    log_message "PICO files moved. Deleting /mnt/SDCARD/App/PICO/ folder..."
-    rm -rf "/mnt/SDCARD/App/PICO"
-fi
 
 #-----Upgrade-----
 UPDATE_IMAGE_PATH="$APP_DIR/imgs/spruceUpdate.png"

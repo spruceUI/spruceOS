@@ -44,6 +44,20 @@ esac
 
 log_message "---DEBUG---: standard_launch.sh checkpoint 2" -v
 
+##### TRIMUI LED FUNCTIONS #####
+
+led_effect() {
+	use_effect="$(get_config_value '.menuOptions."RGB LED Settings".emulatorLEDeffect.selected' "True")"
+	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$use_effect" = "False" ]; then
+		return 0	# exit if device has no LEDs to twinkle or user opts out
+	fi
+	COLOR="$(jq -r '.themecolor' "$EMU_JSON_PATH")"
+	if [ -z "$COLOR" ] || [ "$COLOR" = "null" ]; then
+		COLOR="FFFFFF"
+	fi
+	rgb_led lrm12 breathe "$COLOR" 1000 3
+}
+
 ##### GENERAL FUNCTIONS #####
 
 use_default_emulator() {
@@ -549,7 +563,14 @@ prepare_ra_config() {
 	mv "$TMP_CFG" "$PLATFORM_CFG"
 
 	# Set hotkey enable button based on spruceUI config
-	hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkey.selected' "True")"
+	case "$PLATFORM" in
+		"Brick"|"SmartPro")
+			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
+			;;
+		"A30"|"Flip")
+			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
+			;;
+	esac
 	log_message "ra hotkey enable button is $hotkey_enable" -v
 	TMP_CFG="$(mktemp)"
 	case "$PLATFORM" in
@@ -804,7 +825,7 @@ get_mode_override
 set_cpu_mode
 record_session_start_time
 handle_network_services
-
+led_effect
 flag_add 'emulator_launched'
 
 # Sanitize the rom path

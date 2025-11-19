@@ -452,6 +452,27 @@ display_kill() {
     kill -9 $(pgrep display) 2> /dev/null
 }
 
+# used in principal.sh
+enable_or_disable_rgb() {
+    case "$PLATFORM" in
+        "Brick"|"SmartPro")
+            enable_file="/sys/class/led_anim/enable"
+        	disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
+            if [ "$disable_rgb" = "True" ]; then
+                chmod 777 "$enable_file" 2>/dev/null
+                echo 0 > "$enable_file" 2>/dev/null
+                chmod 000 "$enable_file" 2>/dev/null
+            else
+                chmod 777 "$enable_file" 2>/dev/null
+                echo 1 > "$enable_file" 2>/dev/null
+                # don't lock them back afterwards
+            fi
+            ;;
+        *)
+            ;;
+    esac
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
 flag_add() {
@@ -1183,9 +1204,116 @@ except Exception as e:
 EOF
 }
 
-
-
 log_and_display_message(){
     log_message "$1"
     display_message "$1"
+}
+
+# ---------------------------------------------------------------------------
+# rgb_led <zones> <effect> [color] [duration_ms] [cycles]
+#
+# Controls RGB LEDs on TrimUI Brick / Smart Pro.
+#
+# PARAMETERS:
+#   <zones>        A string containing any combination of: l r m 1 2
+#                  (order does not matter)
+#                  Zones resolve to:
+#                     l  → left LED
+#                     r  → right LED
+#                     m  → middle LED
+#                     1  → front LED f1
+#                     2  → front LED f2
+#                  Example: "lrm12", "m1", "r2", "l"
+#
+#   <effect>       One of the following keywords or numeric equivalents:
+#                     0 | off | disable      → off
+#                     1 | linear | rise      → linear rise
+#                     2 | breath*            → breathing pattern
+#                     3 | sniff              → "sniff" animation
+#                     4 | static | on        → solid color
+#                     5 | blink*1            → blink pattern 1
+#                     6 | blink*2            → blink pattern 2
+#                     7 | blink*3            → blink pattern 3
+#
+#   [color]        Hex RGB color (default: "FFFFFF")
+#
+#   [duration_ms]  Animation duration in milliseconds (default: 1000)
+#
+#   [cycles]       Number of animation cycles (default: 1)
+#
+# EXAMPLES:
+#   rgb_led lrm breathe FF8800 2000 3
+#   rgb_led m2 blink1 00FFAA
+#   rgb_led 12 static
+#   rgb_led r off
+# ---------------------------------------------------------------------------
+
+rgb_led() {
+
+    log_message "rgb_led $*"
+
+    # early out
+	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
+	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$disable" = "True" ]; then
+		return 0	# exit if device has no LEDs to twinkle or user opts out
+	fi
+
+    # parse led zones to affect from first argument
+    if [ -n "$1" ]; then
+        zones=""
+        for z in l r m 1 2; do
+            case "$1" in
+                *"$z"*) zones="$zones $z";;
+            esac
+        done
+    else
+        zones="l r m 1 2"
+    fi
+
+    # translate 1 → f1 and 2 → f2
+    new_zones=""
+    for z in $zones; do
+        case "$z" in
+            1) new_zones="$new_zones f1" ;;
+            2) new_zones="$new_zones f2" ;;
+            *) new_zones="$new_zones $z" ;;
+        esac
+    done
+    zones="$new_zones"
+
+    # parse effect to use from second argument
+    case "$2" in
+        0|off|disable) effect=0 ;;
+        1|linear|rise) effect=1 ;;
+        2|breath*) effect=2 ;;
+        3|sniff) effect=3 ;;
+        4|static|on) effect=4 ;;
+        5|blink*1) effect=5 ;;
+        6|blink*2) effect=6 ;;
+        7|blink*3) effect=7 ;;
+        *) effect=4 ;;
+    esac
+
+    # get color, duration, and cycles literally from args 3,4,5, with fallbacks if missing
+    color=${3:-"FFFFFF"}
+    duration=${4:-1000}
+    cycles=${5:-1}
+
+    # do the things
+   	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
+	for zone in $zones; do
+		echo "$color" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
+		echo "$cycles" > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
+		echo "$duration" > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
+		echo "$effect" > /sys/class/led_anim/effect_$zone 2>/dev/null
+	done
+}
+
+rainbreathe() {
+    for color in FF0000 FF8000 FFFF00 80FF00 \
+                 00FF00 00FF80 00FFFF 0080FF \
+                 0000FF 8000FF FF00FF FF0080; do
+        rgb_led lrm12 breathe $color ${1:-2000}
+        sleep ${2:-3}
+    done
 }
