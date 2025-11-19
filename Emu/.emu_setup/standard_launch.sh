@@ -52,14 +52,10 @@ led_effect() {
 		return 0	# exit if device has no LEDs to twinkle or user opts out
 	fi
 	COLOR="$(jq -r '.themecolor' "$EMU_JSON_PATH")"
-	[ -z "$COLOR" ] || [ "$COLOR" = "null" ] && COLOR="FFFFFF"
-	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
-	for zone in lr m f1 f2; do
-		echo "$COLOR" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
-		echo 3 > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
-		echo 1000 > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
-		echo 2 > /sys/class/led_anim/effect_$zone 2>/dev/null
-	done
+	if [ -z "$COLOR" ] || [ "$COLOR" = "null" ]; then
+		COLOR="FFFFFF"
+	fi
+	rgb_led lrm12 breathe "$COLOR" 1000 3
 }
 
 ##### GENERAL FUNCTIONS #####
