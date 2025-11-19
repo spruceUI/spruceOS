@@ -462,3 +462,6 @@ class Device:
         return Device._impl.get_core_for_game(game_system_config, rom_file_path)
 
     
+    @staticmethod
+    def startup_init(include_wifi):
+        return Device._impl.startup_init(include_wifi)

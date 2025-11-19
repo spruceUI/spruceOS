@@ -417,3 +417,6 @@ class AbstractDevice(ABC):
     def get_about_info_entries(self):
         pass
 
+    @abstractmethod
+    def startup_init(self, include_wifi):
+        pass

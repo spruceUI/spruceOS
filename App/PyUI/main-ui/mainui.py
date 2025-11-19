@@ -42,6 +42,7 @@ def parse_arguments():
     parser.add_argument('-optionListFile', type=str, default=None, help='Runs in a mode to just display a list of options')
     parser.add_argument('-optionListTitle', type=str, default=None, help='Title to display if option list is provided')
     parser.add_argument('-buttonListenerMode', type=str, default=None, help='Just run and output button presses')
+    parser.add_argument('-startupInitOnly', type=str, default=None, help='Only run startup sequences for the device')
     return parser.parse_args()
 
 def log_renderer_info():
@@ -164,6 +165,11 @@ def check_for_button_listener_mode(args):
         print("Running in button listener mode")
         ButtonListener().start()
 
+def check_for_startup_init_only(args):
+    if(args.startupInitOnly):
+        print("Running in startup init only mode")
+        Device.startup_init(include_wifi=False)
+        sys.exit(0)
 
 def main():
     args = parse_arguments()
@@ -189,6 +195,7 @@ def main():
 
     selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
     check_for_button_listener_mode(args)
+    check_for_startup_init_only(args)
 
     Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
     Display.init()

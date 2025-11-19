@@ -445,3 +445,6 @@ class DeviceCommon(AbstractDevice):
         about_info_entries.append( ("FW Version",self.get_fw_version()) )
         about_info_entries.extend(self.get_device_specific_about_info_entries())
         return about_info_entries
+    
+    def startup_init(self, include_wifi):
+        pass
