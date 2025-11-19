@@ -164,66 +164,6 @@ verify_7z_content() {
     return 0
 }
 
-save_app_states() {
-    local states_file="${1:-/tmp/app_states.txt}"
-    
-    # Clear existing states file if it exists
-    : > "$states_file"
-    
-    # Find all config.json files in APP_DIR and process them
-    find "$APP_DIR" -name "config.json" -type f | while read -r config_file; do
-        # Get the parent directory name (app name)
-        app_dir=$(dirname "$config_file")
-        app_name=$(basename "$app_dir")
-        
-        # Skip if app_name starts with '-'
-        case "$app_name" in
-            -*) continue ;;
-        esac
-        
-        # Check if the app is hidden (#label) or shown (label)
-        if grep -q '"#label"' "$config_file"; then
-            echo "$app_name:hidden" >> "$states_file"
-        else
-            echo "$app_name:shown" >> "$states_file"
-        fi
-    done
-    
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - App states saved to $states_file"
-}
-
-restore_app_states() {
-    local states_file="${1:-/tmp/app_states.txt}"
-    
-    if [ ! -f "$states_file" ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - No app states file found"
-        return 1
-    fi
-    
-    while IFS=: read -r app_name state; do
-        # Skip if app_name starts with '-'
-        case "$app_name" in
-            -*) continue ;;
-        esac
-        
-        local config_file="$APP_DIR/$app_name/config.json"
-        
-        if [ -f "$config_file" ]; then
-            if [ "$state" = "hidden" ]; then
-                # Hide the app by replacing "label" with "#label"
-                sed -i 's/"label"/"#label"/' "$config_file"
-            else
-                # Show the app by replacing "#label" with "label"
-                sed -i 's/"#label"/"label"/' "$config_file"
-            fi
-        fi
-    done < "$states_file"
-    
-    # Clean up the states file
-    rm -f "$states_file"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - App states restored and temporary file removed"
-}
-
 unmount_binds() {
     PRESERVE="/mnt/sdcard /userdata /mnt/SDCARD"
     echo "[INFO] Scanning /proc/self/mountinfo for bind mounts from $SD_DEV..."
@@ -250,4 +190,65 @@ unmount_binds() {
         fi
     fi
     done
+}
+
+rgb_led() {
+
+    log_message "rgb_led $*"
+
+    # early out
+	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
+	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$disable" = "True" ]; then
+		return 0	# exit if device has no LEDs to twinkle or user opts out
+	fi
+
+    # parse led zones to affect from first argument
+    if [ -n "$1" ]; then
+        zones=""
+        for z in l r m 1 2; do
+            case "$1" in
+                *"$z"*) zones="$zones $z";;
+            esac
+        done
+    else
+        zones="l r m 1 2"
+    fi
+
+    # translate 1 → f1 and 2 → f2
+    new_zones=""
+    for z in $zones; do
+        case "$z" in
+            1) new_zones="$new_zones f1" ;;
+            2) new_zones="$new_zones f2" ;;
+            *) new_zones="$new_zones $z" ;;
+        esac
+    done
+    zones="$new_zones"
+
+    # parse effect to use from second argument
+    case "$2" in
+        0|off|disable) effect=0 ;;
+        1|linear|rise) effect=1 ;;
+        2|breath*) effect=2 ;;
+        3|sniff) effect=3 ;;
+        4|static|on) effect=4 ;;
+        5|blink*1) effect=5 ;;
+        6|blink*2) effect=6 ;;
+        7|blink*3) effect=7 ;;
+        *) effect=4 ;;
+    esac
+
+    # get color, duration, and cycles literally from args 3,4,5, with fallbacks if missing
+    color=${3:-"FFFFFF"}
+    duration=${4:-1000}
+    cycles=${5:-1}
+
+    # do the things
+   	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
+	for zone in $zones; do
+		echo "$color" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
+		echo "$cycles" > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
+		echo "$duration" > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
+		echo "$effect" > /sys/class/led_anim/effect_$zone 2>/dev/null
+	done
 }

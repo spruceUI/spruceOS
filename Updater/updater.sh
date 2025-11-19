@@ -95,6 +95,7 @@ fi
 log_update_message "Update process started"
 display -t "Checking for update file..."
 echo mmc0 > "$LED_PATH"/trigger &
+rgb_led lrm12 breathe 0000FF 3000 "-1"
 
 # Create fresh updater.log and start logging
 echo "Update process started" >"$LOG_LOCATION"
@@ -263,8 +264,6 @@ kill_network_services
 display -t "Creating a backup of user data and configs..."
 /mnt/SDCARD/App/spruceBackup/spruceBackup.sh --silent
 
-save_app_states
-
 # Delete all folders and files except Updater, update zip, BIOS, Roms, Saves, miyoo/app, and miyoo/lib
 PERFORM_DELETION=true
 echo heartbeat > "$LED_PATH"/trigger &
@@ -348,7 +347,7 @@ if [ "$DELETE_UPDATE" = true ]; then
     log_update_message "All update files deleted"
 fi
 
-restore_app_states
+rgb_led lrm12 breathe 00FF00 2500 "-1"
 
 # Restore backup
 display -t "Restoring user data..."
