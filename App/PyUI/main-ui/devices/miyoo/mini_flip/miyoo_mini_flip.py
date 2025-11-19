@@ -532,3 +532,7 @@ class MiyooMiniFlip(MiyooDevice):
             PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
             return "Unknown"
 
+
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        core = game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+        return core

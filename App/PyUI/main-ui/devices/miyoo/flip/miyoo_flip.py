@@ -486,3 +486,9 @@ class MiyooFlip(MiyooDevice):
 
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-64"]
+
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        core = game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+        if(core is None):
+            core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
+        return core
