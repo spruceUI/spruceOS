@@ -51,7 +51,7 @@ led_effect() {
 	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$use_effect" = "False" ]; then
 		return 0	# exit if device has no LEDs to twinkle or user opts out
 	fi
-	COLOR="$(jq -r '.menuOptions.themecolor.selected' "$EMU_JSON_PATH")"
+	COLOR="$(jq -r '.themecolor' "$EMU_JSON_PATH")"
 	[ -z "$COLOR" ] || [ "$COLOR" = "null" ] && COLOR="FFFFFF"
 	echo 1 > /sys/class/led_anim/effect_enable
 	for zone in lr m f1 f2; do
