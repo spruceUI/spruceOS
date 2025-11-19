@@ -23,91 +23,95 @@ RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
-	scan=true
-    take_screenshot
-    while $scan; do
+    CMD=$(cat /tmp/cmd_to_run.sh)
+    if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
+        rm -f /tmp/menubtn
+        scan=true
+        take_screenshot
+        while $scan; do
 
-        # Run the ps command, filter for 'box86', and exclude the grep process itself
-        pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader|love.aarch64" | grep -v "grep" | awk 'NR==1 {print $1}')
+            # Run the ps command, filter for 'box86', and exclude the grep process itself
+            pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader|love.aarch64" | grep -v "grep" | awk 'NR==1 {print $1}')
 
-        # Check if a PID was found
-        if [ -n "$pid" ]; then
-            log_message "Killing $pid ..." -v
-            kill -9 $pid
-        else
-            scan=false
-        fi
-    done
-}
-
-
-
-kill_emulator() {
-
-    if pgrep -f "./drastic" >/dev/null; then
-	    log_message "*** homebutton_watchdog.sh: Killing drastic!" 
-
-        # use sendevent to send MENU + L1 combo buttons to drastic
-        {
-            #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-            echo $B_MENU 1  # MENU down
-            echo $B_L1 1 # L1 down
-            echo $B_L1 0 # L1 up
-            echo $B_MENU 0  # MENU up
-            echo 0 0 0  # tell sendevent to exit
-        } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
-    elif pgrep -f "./PPSSPPSDL" >/dev/null; then
-	    log_message "*** homebutton_watchdog.sh: Killing PPSSPPSDL!" 
-        killall -q -CONT PPSSPPSDL
-        killall -q -CONT PPSSPPSDL_$PLATFORM
-        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
-        {
-            # send autosave hot key
-            echo $B_SELECT 1 # SELECT down
-            echo $B_R1 1 # R1 down
-            echo $B_R1 0 # R1 up
-            echo $B_SELECT 0 # SELECT up
-            echo 0 0 0   # tell sendevent to exit
-        } | $BIN_PATH/sendevent $EVENT_PATH_JOYPAD
-        # wait 1 seconds for ensuring saving is started
-        sleep 1
-        # kill PPSSPP with signal 15, it should exit after saving is done
-        killall -q -15 PPSSPPSDL
-        killall -q -15 PPSSPPSDL_$PLATFORM
-
-    else
-	    log_message "*** homebutton_watchdog.sh: Killing all Emus and MainUI!" 
-        pid=$(ps -f | grep -E "MainUI.py" | grep -v "grep" | awk 'NR==1 {print $1}')
-        if [ -n "$pid" ]; then
-            log_message "Killing MainUI.py with PID: $pid"
-            kill -9 $pid
-        fi
-
-        killall -q -CONT pico8_dyn pico8_64
-        killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui mupen64plus
+            # Check if a PID was found
+            if [ -n "$pid" ]; then
+                log_message "Killing $pid ..." -v
+                kill -9 $pid
+            else
+                scan=false
+            fi
+        done
     fi
 }
 
-kill_current_app() {
-    # Check if there's a running command
-    if [ -f "/tmp/cmd_to_run.sh" ]; then
-        CMD=$(cat /tmp/cmd_to_run.sh)
 
-        # If it's an emulator (but not Ports or Media), use emulator killing logic
-        if echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu" && ! echo "$CMD" | grep -q "$SD_FOLDER_PATH/Emu/\(PORTS\|MEDIA\)"; then
-            kill_emulator
-        else
-            rm /tmp/cmd_to_run.sh
+# TODO bypass all of this if drastic original as killall -15 does not work on it
+pause_drastic(){
+    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+        log_message "*** homebutton_watchdog.sh: Pausing drastic!" 
+        killall -q -STOP drastic drastic64 drastic32
+    fi
+}
 
-            # Look for any process running with "./" prefix
-            for PID in /proc/[0-9]*; do
-                if grep -q "^\./\|^\./" "$PID/cmdline" 2>/dev/null; then
-                    KILL_PID=$(basename "$PID")
-                    log_message "Killing local process with PID: $KILL_PID"
-                    kill -9 "$KILL_PID" 2>/dev/null
-                fi
-            done
-        fi
+resume_drastic(){
+    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+        log_message "*** homebutton_watchdog.sh: Resuming drastic!" 
+        killall -q -CONT drastic drastic64 drastic32
+    fi
+}
+
+kill_drastic() {
+
+    resume_drastic 
+	log_message "*** homebutton_watchdog.sh: Killing drastic!" 
+    # use sendevent to send MENU + L1 combo buttons to drastic
+    {
+        #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
+        echo $B_MENU 1  # MENU down
+        echo $B_L1 1 # L1 down
+        echo $B_L1 0 # L1 up
+        echo $B_MENU 0  # MENU up
+        echo 0 0 0  # tell sendevent to exit
+    } | $BIN_PATH/sendevent $EVENT_PATH_KEYBOARD
+
+    killall -q -15 drastic drastic64 drastic32
+}
+
+
+kill_ppsspp() {
+	log_message "*** homebutton_watchdog.sh: Killing PPSSPPSDL!" 
+    killall -q -CONT PPSSPPSDL
+    killall -q -CONT PPSSPPSDL_$PLATFORM
+    # use sendevent to send SELECT + R1 combo buttons to PPSSPP
+    {
+        # send autosave hot key
+        echo $B_SELECT 1 # SELECT down
+        echo $B_R1 1 # R1 down
+        echo $B_R1 0 # R1 up
+        echo $B_SELECT 0 # SELECT up
+        echo 0 0 0   # tell sendevent to exit
+    } | $BIN_PATH/sendevent $EVENT_PATH_JOYPAD
+    # wait 1 seconds for ensuring saving is started
+    sleep 1
+    # kill PPSSPP with signal 15, it should exit after saving is done
+    killall -q -15 PPSSPPSDL
+    killall -q -15 PPSSPPSDL_$PLATFORM
+}
+
+kill_ra_and_standard_emulators() { 
+	log_message "*** homebutton_watchdog.sh: Killing miscelaneous emus!" 
+    # Why CONT here?
+    killall -q -CONT pico8_dyn pico8_64
+    killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui mupen64plus
+}
+
+kill_emulator() {
+    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+        kill_drastic
+    elif pgrep -f "./PPSSPPSDL" >/dev/null; then
+        kill_ppsspp
+    else
+        kill_ra_and_standard_emulators
     fi
 }
 
@@ -148,14 +152,11 @@ update_gameswitcher_json() {
 take_screenshot(){
     # capture screenshot
     CMD=$(cat /tmp/cmd_to_run.sh)
-    echo "*** homebutton_watchdog.sh: 'CMD': $CMD" 
     GAME_PATH=$(echo "$CMD" | grep -o '".*"' | tail -n1 | tr -d '"')
     GAME_NAME="${GAME_PATH##*/}"
     SHORT_NAME="${GAME_NAME%.*}"
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
-
-    log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
 
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
@@ -164,9 +165,7 @@ take_screenshot(){
     fi
 
     log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
-    echo "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
 
-    echo "$SCREENSHOT_NAME"
 }
 
 prepare_game_switcher() {
@@ -180,34 +179,23 @@ prepare_game_switcher() {
         # check command is emulator
         # exit if not emulator is in command
         if echo "$CMD" | grep -q -v -E "$EMU_PATTERN"; then
+            log_message "*** homebutton_watchdog.sh: Not in game, bypassing game switcher." 
             return 0
         fi
 
         SCREENSHOT_NAME=$(take_screenshot)
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
+        touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+        kill_emulator
 
     # if in MainUI menu
     elif pgrep "MainUI" >/dev/null; then
 
-        # exit if list file does not exist
-        if [ ! -f "$LIST_FILE" ]; then
-            return 0
-        fi
-
-    # otherwise other program is running, exit normally
-    else
-        return 0
-    fi
-
-    # kill RA or other emulator
-    kill_emulator
-
-    if pgrep "MainUI" >/dev/null; then
         log_message "*** homebutton_watchdog.sh: letting PyUI handle menu button" 
-    else
-        touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+    # otherwise other program is running, exit normally
     fi
+
 }
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
@@ -248,187 +236,109 @@ send_virtual_key_R3() {
     fi
 }
 
-check_and_kill_pyui() {
-    if ps -f | grep -q "[/]mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/App/PyUI/main-ui/mainui.py"; then
-        rm -f /tmp/cmd_to_run.sh
-        touch /mnt/SDCARD/spruce/flags/gs.lock
-        killall -9 python3
+send_menu_button_to_emu() {
+    if pgrep "ra32.miyoo" >/dev/null; then
+        send_virtual_key_L3
+    elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+        echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
+    elif pgrep -f "retroarch" >/dev/null; then
+        if [ "$PLATFORM" = "A30" ]; then
+            send_virtual_key_L3R3
+        else
+            echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1
+        fi
+    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+        send_virtual_key_L3
+        killall -q -CONT PPSSPPSDL
+
+    # PICO8 has no in-game menu and
+    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
+    else
+        #TODO This seems wrong
+        # resume MainUI if it is running
+        # and it will then read menu up event and show popup menu
+        killall -q -CONT MainUI
     fi
 }
 
-long_press_handler() {
-    HELD_ID="$1"
-    # setup flag for long pressed event
-    touch "$TEMP_PATH/gs.longpress"
-    touch "$TEMP_PATH/homeheld.$HELD_ID"
-    sleep 1.5
-
-    # Only proceed if menu was the only key pressed with our specific ID
-    if [ -f "$TEMP_PATH/homeheld.$HELD_ID" ]; then
-        touch "$TEMP_PATH/longpress_activated"
-        vibrate
-
-        # get setting
-        HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
-        log_message "*** homebutton_watchdog.sh: HOLD_HOME = $HOLD_HOME" 
-
-        case $HOLD_HOME in
-        "Game Switcher")
-            prepare_game_switcher
-            check_and_kill_pyui
-            ;;
-        "Emulator menu")
-            if pgrep "ra32.miyoo" >/dev/null; then
-                send_virtual_key_L3
-            elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-            elif pgrep -f "retroarch" >/dev/null; then
-                if [ "$PLATFORM" = "A30" ]; then
-                    send_virtual_key_L3R3
-                else
-                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1
-                fi
-            elif pgrep -f "PPSSPPSDL" >/dev/null; then
-                send_virtual_key_L3
-                killall -q -CONT PPSSPPSDL
-
-            # PICO8 has no in-game menu and
-            # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
-            else
-                # resume MainUI if it is running
-                # and it will then read menu up event and show popup menu
-                killall -q -CONT MainUI
-                # or kill NDS or PICO8
-                kill_emulator
-            fi
-            ;;
-        "Exit game")
-            # resume MainUI if it is running
-            # and it will then read menu up event and show popup menu
-            killall -q -CONT MainUI
-            # or kill any emulator
-            kill_emulator
-            ;;
-        esac
-    fi
-
-    rm -f "$TEMP_PATH/gs.longpress"
-    rm -f "$TEMP_PATH/homeheld.$HELD_ID"
-    rm -f "$TEMP_PATH/longpress_activated"
+perform_action() {
+    # handle short press
+    case $1 in
+    "Game Switcher")
+        log_message "*** homebutton_watchdog.sh: Game Switcher" -v
+        prepare_game_switcher
+        ;;
+    "Emulator menu")
+        log_message "*** homebutton_watchdog.sh: In-game menu" -v
+        send_menu_button_to_emu
+        ;;
+    "Exit game")
+        log_message "*** homebutton_watchdog.sh: Exit game" -v
+        # resume MainUI if it is running
+        # and it will then read menu up event and show popup menu
+        killall -q -CONT MainUI
+        # or kill any emulator
+        kill_emulator
+        ;;
+    esac
 }
+
 
 # listen to log file and handle key press events
 # the keypress logs are generated by keymon
 $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
     log_message "*** homebutton_watchdog.sh: $line" -v
     home_key_down () {
-        # Generate random ID for this press
-        HELD_ID="$(date +%s%N)"
-        # start long press handler with ID
-        log_message "*** homebutton_watchdog.sh: LAUNCHING LONG PRESS HANDLER" -v
-        long_press_handler "$HELD_ID" &
-        PID=$!
 
-        # pause PPSSPP, PICO8 or MainUI if it is running
-        killall -q -STOP PPSSPPSDL PPSSPPSDL_$PLATFORM pico8_dyn pico8_64
+        if [ ! -e /tmp/menubtn ]; then
+            pause_drastic
+            menu_btn_press_time=$(date +%s)
+            log_message "Menu button pressed at $menu_btn_press_time" -v
+            touch /tmp/menubtn
 
-        # copy framebuffer to memory temp file
-        cp /dev/fb0 /tmp/fb0
+            # Launch background timer that waits required seconds, then triggers the action
+            (
+                menu_hold_time=$(get_config_value '.menuOptions."Game Switcher Settings".menuHoldTime.selected' 2)
+                sleep "$menu_hold_time"
+                # Check if the menubtn file still exists (i.e., not released)
+                if [ -e /tmp/menubtn ]; then
+                    rm -f /tmp/menubtn
+                    do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
+                    # Only vibrate if enabled
+                    if [ "$do_vibrate" = "True" ]; then
+                        vibrate 
+                    fi
+                    HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
+                    log_message "*** homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
+                    perform_action "$HOLD_HOME"
 
-        # pause RA after screen capture
-        if [ "$PLATFORM" = "A30" ]; then
-          send_virtual_key_R3
+                fi
+            ) &
+            menu_hold_pid=$!
+
+            kill_port
         fi
-
-        # fallback to stop ports
-        kill_port
     }
 
     home_key_up () {
-        # Clean up ALL homeheld flags
-        rm -f "$TEMP_PATH"/homeheld.*
-        
-        # if NOT long press
-        if [ -f "$TEMP_PATH/gs.longpress" ]; then
-            # Only kill the long press handler if vibrate hasn't happened yet
-            if [ ! -f "$TEMP_PATH/longpress_activated" ]; then
-                kill $PID
-                rm -f "$TEMP_PATH/gs.longpress"
-                log_message "*** homebutton_watchdog.sh: LONG PRESS HANDLER ABORTED" -v
-            else
-                rm -f "$TEMP_PATH/longpress_activated"
+        log_message "Menu button released at $(date +%s)"  -v
+        if [ -e /tmp/menubtn ]; then
+            rm -f /tmp/menubtn
+            # Kill background hold timer if still running
+            if [ -n "$menu_hold_pid" ]; then
+                kill "$menu_hold_pid" 2>/dev/null
+                wait "$menu_hold_pid" 2>/dev/null
+                menu_hold_pid=""
             fi
 
-            # skip mainUI and NDS, they need short press for their hotkeys
-            if pgrep "drastic" >/dev/null; then
-                continue
-            fi
-
-            # get setting
             TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
-
-            # handle short press
-            case $TAP_HOME in
-            "Game Switcher")
-              log_message "*** homebutton_watchdog.sh: Game Switcher" -v
-                prepare_game_switcher
-                check_and_kill_pyui
-                ;;
-            "Emulator menu")
-              log_message "*** homebutton_watchdog.sh: In-game menu" -v
-                if pgrep "ra32.miyoo" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: Miyoo RA32" -v
-                    send_virtual_key_L3
-                elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: $PLATFORM RA" -v
-                    echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-                elif pgrep -f "retroarch" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: RetroArch" -v
-                    if [ "$PLATFORM" = "A30" ]; then
-                        send_virtual_key_L3R3
-                    else
-                        echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
-                    fi 
-                elif pgrep -f "PPSSPPSDL" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: PPSSPPSDL" -v
-                    send_virtual_key_L3
-                    killall -q -CONT PPSSPPSDL
-                    killall -q -CONT PPSSPPSDL_$PLATFORM
-
-                # PICO8 has no in-game menu
-                elif pgrep -f "pico8" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: PICO8" -v
-                    kill_emulator
-
-                # resume MainUI and it will then read menu up event and show popup menu
-                elif pgrep "MainUI" >/dev/null; then
-                    log_message "*** homebutton_watchdog.sh: MainUI" -v
-                    killall -q -CONT MainUI
-                fi
-                ;;
-            "Exit game")
-                log_message "*** homebutton_watchdog.sh: Exit game" -v
-                # resume MainUI if it is running
-                # and it will then read menu up event and show popup menu
-                killall -q -CONT MainUI
-                # or kill any emulator
-                kill_emulator
-                ;;
-            esac
+            log_message "*** homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
+            perform_action "$TAP_HOME"
+            resume_drastic
+        else
+            log_message "*** homebutton_watchdog.sh: Already performed long, skipping tap"
         fi
-    }
 
-    start_button_down () {
-        log_message "*** Start button case matched: $line" -v
-        if [ -f "$TEMP_PATH/gs.longpress" ] && ! flag_check "in_menu"; then
-            log_message "Exit hotkey hit"
-            killall -q -CONT MainUI
-            # TODO: need to fix vibrate for Brick
-            if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
-              vibrate
-            fi
-            kill_current_app
-        fi
     }
 
     case $line in
@@ -440,43 +350,9 @@ $BIN_PATH/getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
     *"key $B_MENU 0"*)
             home_key_up
         ;;
-    # Start button down
-    *"key $B_START 1"*)
-            start_button_down
-        ;;
-    # R1 in menu toggles recording
-    *"key $B_R1 1"*)
-        if [ -f "$TEMP_PATH/gs.longpress" ] && flag_check "developer_mode" && flag_check "in_menu"; then
-            record_video &
-        fi
-        ;;
-    # R2 take screenshot
-    *"key $B_R2 1"*)
-        #if [ -f "$TEMP_PATH/gs.longpress" ] && { flag_check "developer_mode"; }; then
-        #     take_screenshot 
-        #fi
-        ;;
-    # Don't react to dpad presses or analog sticks
-    *"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"*| \
-    *"key $STICK_LEFT"*| *"key $STICK_RIGHT"*| *"key $STICK_UP"*| *"key $STICK_DOWN"*| \
-    *"key $STICK_LEFT_2"*| *"key $STICK_RIGHT_2"*| *"key $STICK_UP_2"*| *"key $STICK_DOWN_2"*) ;;
-    # Any other key press while menu is held
-    *"key"*"0")
-        log_message "*** Catch-all key case matched: $line" -v
-        if [ -f "$TEMP_PATH/gs.longpress" ]; then
-            # Clear all long press related flags
-            rm -f "$TEMP_PATH/gs.longpress"
-            rm -f "$TEMP_PATH/homeheld.$HELD_ID"
-            rm -f "$TEMP_PATH/longpress_activated"
-
-            # Resume paused processes
-            killall -q -CONT PPSSPPSDL pico8_dyn MainUI
-            if [ "$PLATFORM" = "A30" ]; then
-                send_virtual_key_R3
-            fi
-
-            log_message "*** homebutton_watchdog.sh: Additional key pressed during menu hold" -v
-        fi
-        ;;
+    *"key $B_START 1"* | *"key $B_SELECT 1"* |*"key $B_R1 1"* | *"key $B_R2 1"* |*"key $B_LEFT"* | *"key $B_RIGHT"* | *"key $B_UP"* | *"key $B_DOWN"* ) 
+        resume_drastic
+    ;;
+    
     esac
 done
