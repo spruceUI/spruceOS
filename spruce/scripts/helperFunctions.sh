@@ -1250,7 +1250,7 @@ log_and_display_message(){
 
 rgb_led() {
 
-    log_message "rgb_led $@"
+    log_message "rgb_led $*"
 
     # early out
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
