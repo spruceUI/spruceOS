@@ -113,7 +113,7 @@ class MiyooMiniFlip(MiyooDevice):
             PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
             return None
 
-    def startup_init(self):
+    def startup_init(self, include_wifi=True):
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
         if(self.is_wifi_enabled()):

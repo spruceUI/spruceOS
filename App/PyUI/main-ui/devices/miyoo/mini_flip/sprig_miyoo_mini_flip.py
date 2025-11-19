@@ -20,7 +20,7 @@ class SprigMiyooMiniFlip(MiyooMiniFlip):
                 self.sprig_config_path, self.on_sprig_config_change, interval=0.2)
     
     
-    def startup_init(self):
+    def startup_init(self, include_wifi=True):
         super().startup_init()
         self._set_screen_values_to_config()
 
