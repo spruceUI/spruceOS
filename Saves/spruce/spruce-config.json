@@ -179,6 +179,7 @@
             },
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
+                "description": "custom allows to set in RA itself",
                 "devices": ["MIYOO_A30", "MIYOO_FLIP"],
                 "options": [
                     "Select",
@@ -190,6 +191,7 @@
             },
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
+                "description": "custom allows to set in RA itself",
                 "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK"],
                 "options": [
                     "Select",
@@ -201,19 +203,23 @@
             },
             "raAutoSave": {
                 "display": "RA: auto save state on close",
+                "description": "custom allows to set in RA itself",
                 "options": [
                     "True",
-                    "False"
+                    "False",
+                    "Custom"
                 ],
-                "selected": "True"
+                "selected": "Custom"
             },
             "raAutoLoad": {
-                "display": "RA: auto load state on launch",
+                "display": "custom allows to set in RA itself",
+                "description": "",
                 "options": [
                     "True",
-                    "False"
+                    "False",
+                    "Custom"
                 ],
-                "selected": "True"
+                "selected": "Custom"
             },
             "perfectOverlays": {
                 "display": "GB[C/A]: use Perfect Overlays",

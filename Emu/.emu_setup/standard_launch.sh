@@ -541,23 +541,23 @@ prepare_ra_config() {
 	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 	# Set auto save state based on spruceUI config
-	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "True")"
+	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
 	TMP_CFG="$(mktemp)"
 	if [ "$auto_save" = "True" ]; then
 	    sed 's|savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
-	else
+	elif [ "$auto_save" = "False" ]; then
 	    sed 's|savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	fi
 	mv "$TMP_CFG" "$PLATFORM_CFG"
 
 	# Set auto load state based on spruceUI config
-	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "True")"
+	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "Custom")"
 	log_message "auto load setting is $auto_load" -v
 	TMP_CFG="$(mktemp)"
 	if [ "$auto_load" = "True" ]; then
 	    sed 's|savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
-	else
+	elif [ "$auto_load" = "False" ]; then
 	    sed 's|savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 	fi
 	mv "$TMP_CFG" "$PLATFORM_CFG"
