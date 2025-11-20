@@ -44,5 +44,6 @@
     "recentsEnabled": false,
     "topBarInitialXOffset": 60,
     "setTopBarTextToGameSelection": true,
-    "fullScreenGridGameMenuResizeType": "FIT"
+    "fullScreenGridGameMenuResizeType": "FIT",
+    "mainMenuTitle": ""
 }
