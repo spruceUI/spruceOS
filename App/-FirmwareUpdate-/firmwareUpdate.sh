@@ -15,29 +15,29 @@ NEEDS_UPDATE=true
 
 case "$PLATFORM" in
 	"A30" )
+		BRAND="Miyoo"
 		FW_FILE="miyoo282_fw.img"
-		CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
 		SPACE_NEEDED=48
 		VERSION="$(cat /usr/miyoo/version)"
 		[ "$VERSION" -ge 20240713100458 ] && NEEDS_UPDATE=false
 		;;
 	"Flip" )
+		BRAND="Miyoo"
 		FW_FILE="miyoo355_fw.img"
-		CAPACITY="$(cat /sys/class/power_supply/battery/capacity)"
 		SPACE_NEEDED=384
 		VERSION="$(cat /usr/miyoo/version)"
 		[ "$VERSION" -ge 20250627233124 ] && NEEDS_UPDATE="false"
 		;;
 	"Brick" )
+		BRAND="TrimUI"
 		FW_FILE="trimui_tg3040.awimg"
-		CAPACITY="$(cat /sys/class/power_supply/axp2202-battery/capacity)"
 		SPACE_NEEDED=1280
         current_fw_is="$(compare_current_version_to_version "1.1.0")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
 	"SmartPro" )
+		BRAND="TrimUI"
 		FW_FILE="trimui_tg5040.awimg"
-		CAPACITY="$(cat /sys/class/power_supply/axp2202-battery/capacity)"
 		SPACE_NEEDED=1280
         current_fw_is="$(compare_current_version_to_version "1.1.0")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
@@ -52,7 +52,7 @@ SKIP_APPLY=false
 
 log_message "firmwareUpdate.sh: free space: $FREE_SPACE"
 log_message "firmwareUpdate.sh: charging status: $(get_charging_status)"
-log_message "firmwareUpdate.sh: current charge percent: $CAPACITY"
+log_message "firmwareUpdate.sh: current charge percent: $(get_battery_percent)"
 log_message "firmwareUpdate.sh: current FW version: $VERSION"
 
 get_charging_status() {
@@ -61,6 +61,15 @@ get_charging_status() {
 		"Flip" ) cat /sys/class/power_supply/usb/online ;;
 		"Brick" ) cat /sys/class/power_supply/axp2202-usb/online ;;
 		"SmartPro" ) cat /sys/class/power_supply/axp2202-usb/online ;;
+	esac
+}
+
+get_battery_percent() {
+	case "$PLATFORM" in
+		"A30" ) cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity ;;
+		"Flip" ) cat /sys/class/power_supply/battery/capacity ;;
+		"Brick" ) cat /sys/class/power_supply/axp2202-battery/capacity ;;
+		"SmartPro" ) cat /sys/class/power_supply/axp2202-battery/capacity ;;
 	esac
 }
 
@@ -114,17 +123,20 @@ check_for_connection() {
     log_message "FirmwareUpdate.sh: Device is online. Proceeding."
 }
 
+
+##### MAIN EXECUTION #####
+
 # Early out if firmware is already up to date
 if [ "$SKIP_VERSION_CHECK" = false ] && [ "$NEEDS_UPDATE" = false ]; then
 	log_message "firmwareUpdate.sh: Firmware already up to date. Hiding -FirmwareUpdate- App."
 	display -i "$BG_IMAGE" -o -t "Firmware is up to date - happy gaming!!!!!!!!!!"
-	sed -i 's|"label":|"#label":|' "$CONFIG"
+	sed -i 's|"label":|"#label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 	exit 0
 else
 	log_message "firmwareUpdate.sh: Firmware requires update. Continuing."
 fi
 
-display -i "$BG_IMAGE" -t "A firmware update from the manufacturer is ready for your device. We'll check your device's status and prepare the manufacturer update file. Once set up, the manufacturer firmware updater will install it." -o -p 160
+display -i "$BG_IMAGE" -t "A firmware update from $BRAND is ready for your device. We'll check your device's status and prepare the $BRAND update file. Once set up, the $BRAND firmware updater will install it." -o -p 160
 
 # Do not allow them to update if they don't have enough space to copy and extract the update file
 if [ "$FREE_SPACE" -lt "$SPACE_NEEDED" ]; then
@@ -136,7 +148,7 @@ else
 fi
 
 # Do not allow them to update if their battery level is low, to help avoid bricking
-if [ "$CAPACITY" -lt 10 ]; then
+if [ "$(get_battery_percent)" -lt 10 ]; then
 	log_message "firmwareUpdate.sh: Not enough charge on device. Aborting."
 	display -i "$BG_IMAGE" -o -t "As a precaution, please charge your $PLATFORM to at least 10% capacity, then try again."
 	exit 1
@@ -177,7 +189,7 @@ if [ "$(get_charging_status)" -eq 0 ]; then
 		display -i "$BG_IMAGE" -t "Please connect your device to a power source to proceed with the update process." --confirm
 		if confirm; then
 			# Re-evaluate charging status
-			if [ "$(get_charging_status)" -eq 1 ]; then
+			if [ "$(get_charging_status)" -eq 1 ] || [ "$PLATFORM" != "A30" ] && [ "$(get_battery_percent)" -ge 35 ]; then
 				log_message "firmwareUpdate.sh: Device is now plugged in. Continuing."
 				break
 			else
@@ -194,9 +206,9 @@ else
 fi
 
 # Give them one last warning, and a chance to proceed with or cancel the FW update.
-if [ "$(get_charging_status)" -eq 1 ]; then
+if [ "$(get_charging_status)" -eq 1 ] || [ "$PLATFORM" != "A30" ]; then
 	log_message "firmwareUpdate.sh: Device is plugged in. Prompting for A to proceed or B to cancel."
-	display -i "$BG_IMAGE" -t "WARNING: If unplugged or powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software." --okay
+	display -i "$BG_IMAGE" -t "WARNING: If powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software." --okay
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."
 		if [ "$SKIP_APPLY" = false ]; then
