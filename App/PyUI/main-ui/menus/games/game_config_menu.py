@@ -152,6 +152,7 @@ class GameConfigMenu:
                 Display.display_message(f"Boxart for {self.game.display_name} deleted.",2000)
 
     def show_config(self, rom_file_path) :
+        self.game_system.game_system_config.reload_config()
         selected = Selection(None, None, 0)
         view = None
         #Loop is weird here due to how these options are handled.
