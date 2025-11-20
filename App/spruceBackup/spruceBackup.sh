@@ -15,6 +15,8 @@ ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 
 log_message "----------Running Backup script----------"
 
+rgb_led lrm12 breathe FFFF00 2100 "-1"
+
 # Modify display function to respect silent mode
 display_message() {
     if [ "$silent_mode" -eq 0 ]; then
@@ -89,9 +91,7 @@ $SYSTEM_JSON
 /mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
 /mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
-/mnt/SDCARD/Roms/favourite.json
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
-/mnt/SDCARD/Emu/PICO8/bin
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
 /mnt/SDCARD/Emu/DC/.config
 /mnt/SDCARD/Emu/NDS/backup
@@ -107,12 +107,10 @@ $SYSTEM_JSON
 /mnt/SDCARD/RetroArch/.retroarch/cheats
 /mnt/SDCARD/spruce/etc/SSH/keys
 /mnt/SDCARD/spruce/bin/Syncthing/config
-/mnt/SDCARD/spruce/settings/gs_list
-/mnt/SDCARD/spruce/settings/spruce.cfg
-/mnt/SDCARD/spruce/settings/platform/retroarch-A30.cfg
-/mnt/SDCARD/spruce/settings/platform/retroarch-Brick.cfg
-/mnt/SDCARD/spruce/settings/platform/retroarch-Flip.cfg
-/mnt/SDCARD/spruce/settings/platform/retroarch-SmartPro.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg
 "
 
 log_message "Folders to backup: $folders"

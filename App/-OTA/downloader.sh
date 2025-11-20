@@ -17,7 +17,7 @@ BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
 CHARGING="$(cat $BATTERY/online)"
 
 display --icon "$IMAGE_PATH" -t "Checking for updates..."
-rgb_led lrm12 blink2 0000FF 2000 "-1"
+rgb_led lrm12 blink2 0000FF 1500 "-1"
 
 VERSION="$(cat /usr/miyoo/version)"
 if [ "$VERSION" -lt 20240713100458 ]; then

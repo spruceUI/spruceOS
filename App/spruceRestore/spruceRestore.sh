@@ -137,6 +137,9 @@ log_file="$BACKUP_DIR/spruceRestore.log"
 >"$log_file" # Empty out or create the log file
 
 log_message "Starting spruceRestore script..."
+
+rgb_led lrm12 breathe 00FF00 1900 "-1"
+
 log_message "Looking for backup files..."
 
 # Check if backups folder exists

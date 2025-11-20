@@ -95,7 +95,7 @@ fi
 log_update_message "Update process started"
 display -t "Checking for update file..."
 echo mmc0 > "$LED_PATH"/trigger &
-rgb_led lrm12 breathe 0000FF 3000 "-1"
+rgb_led lrm12 breathe 0000FF 2000 "-1"
 
 # Create fresh updater.log and start logging
 echo "Update process started" >"$LOG_LOCATION"
@@ -346,8 +346,6 @@ if [ "$DELETE_UPDATE" = true ]; then
     find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
     log_update_message "All update files deleted"
 fi
-
-rgb_led lrm12 breathe 00FF00 2500 "-1"
 
 # Restore backup
 display -t "Restoring user data..."
