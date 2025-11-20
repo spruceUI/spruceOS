@@ -537,7 +537,7 @@ save_ppsspp_configs() {
 ### EVERYTHING ELSE ###
 
 prepare_ra_config() {
-	PLATFORM_CFG="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
+	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 	# Set auto save state based on spruceUI config
@@ -608,7 +608,7 @@ prepare_ra_config() {
 
 backup_ra_config() {
 	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
-	PLATFORM_CFG="/mnt/SDCARD/spruce/settings/platform/retroarch-$PLATFORM.cfg"
+	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
 }
