@@ -36,7 +36,6 @@ class BoxArtResizer():
 
         qoi_full_path = os.path.splitext(full_path)[0] + ".qoi"
         if os.path.exists(qoi_full_path):
-            PyUiLogger.get_logger().info(f"{qoi_full_path} already exists")
             # If so this has been already optimized
             return False
 
