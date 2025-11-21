@@ -237,7 +237,7 @@ class FullScreenGridView(View):
 
             visible_text_options = self.options[start_index:len(self.options)]
 
-            y_offset = Device.screen_height() - 10 #TODO
+            y_offset = int(Device.screen_height() - 10 * Theme._default_multiplier)
             x_offset = self.x_text_pad
 
             for visible_index, imageTextPair in enumerate(visible_text_options):

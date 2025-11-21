@@ -130,7 +130,7 @@ class GameSelectMenuPopup:
                     PyUiLogger().get_logger().info(f"Downloading {box_art} to {img_path}")
                     Display.display_message(f"Downloading {box_art} to {img_path}")
                     scraper.download_remote_image_for_system(rom_info.game_system.folder_name, box_art,img_path)
-                    BoxArtResizer.patch_boxart()
+                    BoxArtResizer.patch_boxart_list([img_path])
 
     def get_game_options(self, rom_info : RomInfo, additional_popup_options = [], rom_list= [], use_full_text = True):
         popup_options = []
