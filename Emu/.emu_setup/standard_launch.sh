@@ -550,11 +550,11 @@ prepare_ra_config() {
 	log_message "auto save setting is $auto_save" -v
 	if [ "$auto_save" = "True" ]; then
 		TMP_CFG="$(mktemp)"
-	    sed 's|savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
+	    sed 's|^savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
 	elif [ "$auto_save" = "False" ]; then
 		TMP_CFG="$(mktemp)"
-	    sed 's|savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
+	    sed 's|^savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
 	fi
 
@@ -563,11 +563,11 @@ prepare_ra_config() {
 	log_message "auto load setting is $auto_load" -v
 	if [ "$auto_load" = "True" ]; then
 		TMP_CFG="$(mktemp)"
-	    sed 's|savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
+	    sed 's|^savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
 	elif [ "$auto_load" = "False" ]; then
 		TMP_CFG="$(mktemp)"
-	    sed 's|savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
+	    sed 's|^savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
 	fi
 
@@ -581,7 +581,6 @@ prepare_ra_config() {
 			;;
 	esac
 	log_message "ra hotkey enable button is $hotkey_enable" -v
-	TMP_CFG="$(mktemp)"
 	case "$PLATFORM" in
 		"A30")
 			HOTKEY_LINE="input_enable_hotkey"
@@ -598,14 +597,17 @@ prepare_ra_config() {
 	esac
 	case "$hotkey_enable" in
 		"Select")
+			TMP_CFG="$(mktemp)"
 			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 			;;
 		"Start")
+			TMP_CFG="$(mktemp)"
 			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 			;;
 		"Menu")
+			TMP_CFG="$(mktemp)"
 			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 		;;
