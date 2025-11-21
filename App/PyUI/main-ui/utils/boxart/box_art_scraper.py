@@ -294,23 +294,26 @@ class BoxArtScraper:
         rom_name = os.path.splitext(file)[0]
         image_path = os.path.join(root, "Imgs", f"{rom_name}.png")
 
-        self.download_boxart(sys_name, rom_name, image_path)
-
+        if self.download_boxart(sys_name, rom_name, image_path):
+            return image_path
+        else:
+            return None
+        
     def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str) -> bool:
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
             self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
-            return
+            return False
 
         remote_image_name = self.find_image_name(sys_name, rom_file_name)
         if not remote_image_name:
             self.log_message(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
-            return
-        self.download_remote_image(ra_name, remote_image_name, image_path)
+            return False
+        return self.download_remote_image(ra_name, remote_image_name, image_path)
 
     def download_remote_image_for_system(self, sys_name: str, remote_image_name: str, image_path: str):
         ra_name = self.get_ra_alias(sys_name)
-        self.download_remote_image(ra_name, remote_image_name, image_path)
+        return self.download_remote_image(ra_name, remote_image_name, image_path)
 
     def download_remote_image(self, ra_name, remote_image_name, image_path):
 
@@ -323,7 +326,7 @@ class BoxArtScraper:
             self.log_message(f"BoxartScraper: failed {boxart_url}, trying fallback.")
             if not self._download_file(fallback_url, image_path):
                 self.log_message(f"BoxartScraper: failed {fallback_url}.")
-
+        return success
 
     def download_boxart_batch(
         self,
@@ -366,11 +369,11 @@ class BoxArtScraper:
                     future.result()  # triggers exception if any occurred
                 except Exception as e:
                     self.log_message(f"BoxartScraper: Error in batch download - {e}")
-
-        BoxArtResizer.patch_boxart()
+        
+        BoxArtResizer.patch_boxart_list([p for _, p in roms_and_paths])
 
     def run_scraper_tasks(self, max_workers, tasks):
-
+        downloaded_files = []
         # Run tasks concurrently
         count = 0
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -381,13 +384,15 @@ class BoxArtScraper:
                 if(count % 10 == 0):
                     self.log_and_display_message(f"Scraping box art... ({count}/{len(tasks)})")
                 try:
-                    future.result()
+                    result = future.result()
+                    if result: 
+                        downloaded_files.append(result)
                 except Exception as e:
                     self.log_message(f"BoxartScraper: Error processing a ROM - {e}")
 
         self.log_and_display_message("Scraping complete!")
         time.sleep(2)
-        BoxArtResizer.patch_boxart()
+        BoxArtResizer.patch_boxart_list(downloaded_files)
 
 
     def get_scrape_tasks_for_system(self, sys_dir: str) -> List[tuple]:
