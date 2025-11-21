@@ -539,7 +539,7 @@ save_ppsspp_configs() {
 prepare_ra_config() {
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	if ["$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
+	if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 	else
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
@@ -548,24 +548,28 @@ prepare_ra_config() {
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
-	TMP_CFG="$(mktemp)"
 	if [ "$auto_save" = "True" ]; then
+		TMP_CFG="$(mktemp)"
 	    sed 's|savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
+		mv "$TMP_CFG" "$PLATFORM_CFG"
 	elif [ "$auto_save" = "False" ]; then
+		TMP_CFG="$(mktemp)"
 	    sed 's|savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
+		mv "$TMP_CFG" "$PLATFORM_CFG"
 	fi
-	mv "$TMP_CFG" "$PLATFORM_CFG"
 
 	# Set auto load state based on spruceUI config
 	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "Custom")"
 	log_message "auto load setting is $auto_load" -v
-	TMP_CFG="$(mktemp)"
 	if [ "$auto_load" = "True" ]; then
+		TMP_CFG="$(mktemp)"
 	    sed 's|savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
+		mv "$TMP_CFG" "$PLATFORM_CFG"
 	elif [ "$auto_load" = "False" ]; then
+		TMP_CFG="$(mktemp)"
 	    sed 's|savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
+		mv "$TMP_CFG" "$PLATFORM_CFG"
 	fi
-	mv "$TMP_CFG" "$PLATFORM_CFG"
 
 	# Set hotkey enable button based on spruceUI config
 	case "$PLATFORM" in
@@ -615,7 +619,7 @@ backup_ra_config() {
 	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	if ["$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
+	if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
 	else
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
