@@ -106,6 +106,7 @@ class GameSelectMenuPopup:
 
     def select_specific_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
+            Display.display_message("Loading boxart list...")
             scraper = BoxArtScraper()
             if(not scraper.check_wifi()):
                 return
