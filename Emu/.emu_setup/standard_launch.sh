@@ -537,8 +537,13 @@ save_ppsspp_configs() {
 ### EVERYTHING ELSE ###
 
 prepare_ra_config() {
+	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+	if ["$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
+		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+	else
+		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+	fi
 
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
@@ -608,8 +613,13 @@ prepare_ra_config() {
 
 backup_ra_config() {
 	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
+	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+	if ["$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
+		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+	else
+		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+	fi
 	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
 }
 
