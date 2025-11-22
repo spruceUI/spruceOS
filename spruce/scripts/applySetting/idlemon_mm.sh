@@ -42,7 +42,7 @@ start_idlemon() {
       pgrep -f 'idlemon.*MainUI' | xargs kill -9
 
       # Start idlemon for in_menu with MainUI
-      idlemon -p "MainUI,switcher" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "MainUI" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     in_game)
@@ -74,7 +74,7 @@ start_idlemon() {
       # Kill all processes with 'idlemon' and 'miyoo' in the name
 	  pgrep -f 'idlemon.*miyoo' | xargs kill -9
 	  # Start idlemon for in_game with multiple processes
-      idlemon -p "ra32.miyoo,ra64.miyoo,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)

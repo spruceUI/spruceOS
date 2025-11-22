@@ -3,6 +3,7 @@
         "Game Switcher Settings": {
             "menuHoldTime": {
                 "display": "Menu Hold Time",
+                "description": "seconds before GS launch from menu",
                 "options": [
                     "0",
                     "0.5",
@@ -15,6 +16,7 @@
             },
             "menuShouldVibrate": {
                 "display": "Vibrate on Menu Hold",
+                "description": "when launching GS from menu",
                 "options": [
                     "True",
                     "False"
@@ -25,6 +27,8 @@
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "description": "for non-red status LED",
                 "options": [
                     "Always off",
                     "On in menu only",
@@ -34,6 +38,7 @@
             },
             "lowPowerWarningPercent": {
                 "display": "Low power warning percent",
+                "description": "flash LED below threshold",
                 "options": [
                     "Off",
                     "4",
@@ -46,6 +51,7 @@
             },
             "shutdownFromSleep": {
                 "display": "Shutdown after sleeping",
+                "description": "off sleeps indefinitely",
                 "options": [
                     "Off",
                     "Instant",
@@ -59,6 +65,7 @@
             },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
+                "description": "only applies in main UI",
                 "options": [
                     "Off",
                     "2m",
@@ -69,6 +76,7 @@
             },
             "idlemonInGame": {
                 "display": "Shutdown while idle in game",
+                "description": "in RA, PPSSPP, or DraStic",
                 "options": [
                     "Off",
                     "2m",
@@ -100,6 +108,7 @@
         "System Settings": {
             "checkForUpdates": {
                 "display": "Check for spruce updates on startup",
+                "description": "if connected to Wi-Fi",
                 "options": [
                     "True",
                     "False"
@@ -108,6 +117,7 @@
             },
             "bootTo": {
                 "display": "Launch application on startup",
+                "description": "if not autoresuming last game",
                 "options": [
                     "spruceUI",
                     "Random Game",
