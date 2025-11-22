@@ -212,8 +212,8 @@
                 "selected": "Custom"
             },
             "raAutoLoad": {
-                "display": "custom allows to set in RA itself",
-                "description": "",
+                "display": "RA: auto load state on launch",
+                "description": "custom allows to set in RA itself",
                 "options": [
                     "True",
                     "False",
