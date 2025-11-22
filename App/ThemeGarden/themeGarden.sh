@@ -5,9 +5,9 @@ ICON_PATH="/mnt/SDCARD/spruce/imgs/themegallery.png"
 CACHE_DIR=/mnt/SDCARD/spruce/cache/themegarden
 UNPACKER=/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
-IMAGE_CONFIRM_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayConfirmExit.png"
-IMAGE_EXIT="/mnt/SDCARD/miyoo/res/imgs/displayExit.png"
-DIRECTION_PROMPTS="/mnt/SDCARD/miyoo/res/imgs/displayLeftRight.png"
+IMAGE_CONFIRM_EXIT="/mnt/SDCARD/spruce/imgs/displayConfirmExit.png"
+IMAGE_EXIT="/mnt/SDCARD/spruce/imgs/displayExit.png"
+DIRECTION_PROMPTS="/mnt/SDCARD/spruce/imgs/displayLeftRight.png"
 PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/Resources/theme_previews.7z"
 THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/PackedThemes"
 

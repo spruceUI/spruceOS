@@ -311,9 +311,9 @@ dim_screen() {
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    [ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayText.png"
-    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
-    CONFIRM_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayConfirm.png"
+    [ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
+    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/spruce/imgs/displayAcknowledge.png"
+    CONFIRM_IMAGE="/mnt/SDCARD/spruce/imgs/displayConfirm.png"
     DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 
     if [ "$PLATFORM" = "Brick" ]; then

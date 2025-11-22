@@ -19,7 +19,7 @@ log_update_message() {
 # Simplified display function
 display() {
     DISPLAY="$BIN_DIR/display_text.elf"
-    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/miyoo/res/imgs/displayAcknowledge.png"
+    ACKNOWLEDGE_IMAGE="/mnt/SDCARD/spruce/imgs/displayAcknowledge.png"
 
     if [ "$PLATFORM" = "Brick" ]; then
         width=960
