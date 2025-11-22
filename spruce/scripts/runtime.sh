@@ -51,13 +51,12 @@ fi
 export PATH="$SYSTEM_PATH/app:${PATH}"
 
 # Flag cleanup
-flag_remove "themeChanged"
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
 
-# import multipass.cfg and start watchdog for new network additions via MainUI
-nice -n 15 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
+# import multipass.cfg
+${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 
 # Bring up network and services
 if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then

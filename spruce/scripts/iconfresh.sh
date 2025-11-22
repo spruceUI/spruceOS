@@ -94,15 +94,10 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 else
 
 	case "$PLATFORM" in
-		"A30" )
-			SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" 
-			ICONS="icons"
-			;;
-		"SmartPro" )
-			SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin"
-			ICONS="icontop"
-			;;
+		"A30" )	SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" ;;
+		"SmartPro" ) SKIN_PATH="/mnt/SDCARD/Themes/SPRUCE/skin"	;;
 	esac
+	
 	DEFAULT_SKIN_PATH="/mnt/SDCARD/Icons/Default/skin"
 
 	if [ ! -f "$SYSTEM_JSON" ]; then
