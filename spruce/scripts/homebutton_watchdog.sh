@@ -269,7 +269,7 @@ send_menu_button_to_emu() {
         if [ "$PLATFORM" = "A30" ]; then
             send_virtual_key_L3R3
         else
-            echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1
+            echo "MENU_TOGGLE" | $BIN_PATH/netcat -u -w0.1 127.0.0.1 55355
         fi
     elif pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
