@@ -240,7 +240,6 @@ runtime_mounts_A30() {
     mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
     mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
     mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
-    mount -o bind /mnt/SDCARD/miyoo/res/skin_640_480 /usr/miyoo/res/skin_640_480 &
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
