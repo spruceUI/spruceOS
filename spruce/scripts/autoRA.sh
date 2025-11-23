@@ -23,9 +23,6 @@ if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
 # move command to cmd_to_run.sh so game switcher can work correctly
 $MOVE_OR_COPY "${FLAGS_DIR}/lastgame.lock" /tmp/cmd_to_run.sh && sync
 
-# load a dummy SDL program and try to initialize GPU and other hardware before loading game
-./easyConfig &> /dev/null &
-
 log_message "AutoRA: load game to play"
 sleep 5
 nice -n -20 /tmp/cmd_to_run.sh &> /dev/null

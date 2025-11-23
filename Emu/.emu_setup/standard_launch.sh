@@ -362,13 +362,8 @@ run_pico8() {
 	# this allows joystick to be used as DPAD in MainUI
 	killall -q -USR2 joystickinput
 
-	# set 64-bit wget for BBS
-	if ! [ "$PLATFORM" = "A30" ]; then
-		WGET_PATH="$HOME"/bin64:
-	fi
-
 	export HOME="$EMU_DIR"
-	export PATH=$WGET_PATH"$HOME"/bin:$PATH:"/mnt/SDCARD/BIOS"
+	export PATH="$PATH:/mnt/SDCARD/BIOS"
 
 	STRETCH="$(jq -r '.menuOptions.Stretch.selected' "$EMU_JSON_PATH")"
 	if [ "$STRETCH" = "True" ]; then
