@@ -920,14 +920,6 @@ record_video() {
     fi
 }
 
-sanitize_system_json() {
-    if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
-        log_message "$0: Invalid System JSON detected, sanitizing..."
-        jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/scripts/platform/system-${PLATFORM}.json /tmp/system.json.clean
-        mv /tmp/system.json.clean "$SYSTEM_JSON"
-    fi
-}
-
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"

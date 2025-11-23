@@ -103,6 +103,7 @@ while true; do
 
     # TODO: switch to something that watches getevent, inotifywait doesn't work on GPIO and the hall sensor doesn't trigger interrupts
     # so we can't use gpiowait
-    /mnt/SDCARD/spruce/bin64/inotifywait "$GPIO_PATH" -e modify -t 1 >/dev/null 2>&1
+    # /mnt/SDCARD/spruce/bin64/inotifywait "$GPIO_PATH" -e modify -t 1 >/dev/null 2>&1
+    sleep 1
 done
 

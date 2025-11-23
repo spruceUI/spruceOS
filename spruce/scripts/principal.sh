@@ -132,6 +132,4 @@ while [ 1 ]; do
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
     fi
 
-    sanitize_system_json
-
 done
