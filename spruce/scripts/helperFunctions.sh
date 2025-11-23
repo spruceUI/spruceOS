@@ -974,7 +974,7 @@ set_overclock() {
         chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         case "$PLATFORM" in
             "A30")
-                /mnt/SDCARD/miyoo/utils/utils "performance" 4 1512 384 1080 1
+                /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
                 ;;
             "Brick"|"Flip"|"SmartPro")
                 echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
