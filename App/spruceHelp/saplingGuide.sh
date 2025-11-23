@@ -4,7 +4,6 @@ APP_DIR=/mnt/SDCARD/App/spruceHelp
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-ICON_IMAGE="/mnt/SDCARD/spruce/imgs/expertappswitch.png"
 HOMEKEY_IMAGE="$APP_DIR/imgs/homeKey.png"
 POWERKEY_IMAGE="$APP_DIR/imgs/powerKey.png"
 HOTKEY_IMAGE="$APP_DIR/imgs/hotkeyDefaults.png"
@@ -38,9 +37,6 @@ show_slide() {
     display -t "Spruce has an auto save and shutdown feature. Hold the power key for 2 seconds and spruce will save your game. Next time you turn it on spruce will automatically resume your game." -s 27 -p 70 --add-image "$POWERKEY_IMAGE" 1.0 210 middle --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
     ;;
   5)
-    display --icon "$ICON_IMAGE" -t "Be sure to check the Advanced Settings app for so many options to customize your spruce experience." -p 70 --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
-    ;;
-  6)
     display -t "Scan the QR Code to check out the wiki.
 Or go to: github.com/spruceUI/spruceOS/wiki
 There's plenty of guides and information there!" --qr "$WIKI_QR_CODE" -s 27 --add-image "$IMAGE_EXIT" 1.0 240 middle --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
@@ -56,7 +52,7 @@ There's plenty of guides and information there!" --qr "$WIKI_QR_CODE" -s 27 --ad
 
 # UPDATE THESE VALUES WHEN YOU ADD OR REMOVE SLIDES
 current_slide=1
-total_slides=6
+total_slides=5
 
 # Main loop
 current_slide=1
@@ -71,7 +67,7 @@ while true; do
       show_slide $current_slide
     else
       display_kill
-      record_stop &
+      # record_stop &
       exit 0
     fi
     ;;
