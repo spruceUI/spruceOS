@@ -9,7 +9,6 @@ BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 FLAGS_DIR=/mnt/SDCARD/spruce/flags
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 

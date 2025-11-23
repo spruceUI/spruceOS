@@ -1,6 +1,5 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 export PATH=/tmp/bin:$PATH
 export LD_LIBRARY_PATH=/tmp/lib:$LD_LIBRARY_PATH

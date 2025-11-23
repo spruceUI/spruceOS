@@ -1,7 +1,6 @@
 #! /bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 
 if [ "$PLATFORM" = "A30" ]; then
   DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd

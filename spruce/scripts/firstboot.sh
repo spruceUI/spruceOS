@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
 
