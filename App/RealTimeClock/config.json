@@ -1,8 +1,0 @@
-{
-  "label": "Real Time Clock",
-  "icon": "rtc.png",
-  "launch": "launch.sh",
-  "description": "Set the time",
-  "devices": ["MIYOO_A30", "MIYOO_FLIP"],
-  "hide": false
-}

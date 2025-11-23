@@ -3,6 +3,5 @@
   "icon": "bootlogo.png",
   "launch": "launch.sh",
   "description": "Swap the boot logo at start up",
-  "hide": true,
   "hideInSimpleMode": true
 }

@@ -4,6 +4,5 @@
   "launch": "launch.sh",
   "description": "Transfer files over USB",
   "devices": ["TRIMUI_BRICK", "MIYOO_A30", "MIYOO_FLIP"],
-  "hide": false,
   "hideInSimpleMode": true
 }

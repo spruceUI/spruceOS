@@ -58,6 +58,7 @@ flag_remove "save_active"
 
 while [ 1 ]; do
 
+    stop_pyui_message_writer
     enable_or_disable_rgb
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then

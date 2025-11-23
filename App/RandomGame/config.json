@@ -3,5 +3,5 @@
   "icon": "random.png",
   "launch": "launch.sh",
   "description": "Launch a random game",
-  "hide": false
+  "hideInSimpleMode": false
 }

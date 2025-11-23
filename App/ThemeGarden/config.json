@@ -3,6 +3,5 @@
   "icon": "themegallery.png",
   "launch": "launch.sh",
   "description": "Check out the latest themes for your device!",
-  "hide": false,
   "hideInSimpleMode": true
 }

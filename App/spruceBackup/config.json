@@ -3,5 +3,5 @@
   "icon": "backup.png",
   "launch": "launch.sh",
   "description": "Save your configs and settings",
-  "hide": true
+  "hideInSimpleMode": true
 }

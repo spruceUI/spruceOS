@@ -3,6 +3,5 @@
   "icon": "firmwareupdate.png",
   "launch": "launch.sh",
   "description": "Run this to get the latest fixes",
-  "hide": false,
   "hideInSimpleMode": true
 }

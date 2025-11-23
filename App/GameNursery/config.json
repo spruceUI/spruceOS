@@ -3,5 +3,5 @@
   "icon": "iconfresh.png",
   "launch": "launch.sh",
   "description": "Download free games directly to your device",
-  "hide": false
+  "hideInSimpleMode": false
 }

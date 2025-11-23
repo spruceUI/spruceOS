@@ -4,5 +4,5 @@
   "launch": "launch.sh",
   "description": "PortMaster Menu",
   "devices": ["MIYOO_FLIP"],
-  "hide": false
+  "hideInSimpleMode": false
 }
