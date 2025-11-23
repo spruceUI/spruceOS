@@ -7,7 +7,7 @@ UPDATE_FILE=""
 LOG_LOCATION="/mnt/SDCARD/Updater/updater.log"
 
 . /mnt/SDCARD/Updater/updaterFunctions.sh
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
+. /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 
 CHARGING="$(cat $BATTERY/online)"
 

@@ -48,7 +48,7 @@ case $INFO in
     *) export PLATFORM="A30" ;;
 esac
 
-. /mnt/SDCARD/spruce/settings/platform/$PLATFORM.cfg
+. /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 
 [ "$PLATFORM" = "A30" ] && export PATH="/mnt/SDCARD/spruce/bin:$PATH" || \
                            export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
@@ -923,7 +923,7 @@ record_video() {
 sanitize_system_json() {
     if ! jq '.' "$SYSTEM_JSON" > /dev/null 2>&1; then
         log_message "$0: Invalid System JSON detected, sanitizing..."
-        jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/settings/platform/system-${PLATFORM}.json /tmp/system.json.clean
+        jq '.' "$SYSTEM_JSON" > /tmp/system.json.clean 2>/dev/null || cp /mnt/SDCARD/spruce/scripts/platform/system-${PLATFORM}.json /tmp/system.json.clean
         mv /tmp/system.json.clean "$SYSTEM_JSON"
     fi
 }
