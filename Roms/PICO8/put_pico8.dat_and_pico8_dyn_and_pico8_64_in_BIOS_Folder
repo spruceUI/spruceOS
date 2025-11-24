@@ -1,5 +1,0 @@
-You need to place your pico8.dat, pico8_64 and pico8_dyn files directly in the BIOS folder at the root of the SD card for Pico-8 games to launch using native Pico-8.
-
-These files need to cone from the Rasberry Pi version of the official Pico-8.
-
-We strongly encourage you to buy and support Pico-8. https://www.lexaloffle.com/pico-8.php?#getpico8
