@@ -64,6 +64,12 @@ Plus many more enhancements over the original stock operating system!
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
+## All In One Installer
+  - Download [The new SpruceBurner program](https://github.com/spruceUI/spruceSource/releases/download/SpruceBurnerV1.0/SpruceBurner.exe)
+  - Simply insert your SD card into your Windows computer and run the program, be sure to select the correct drive!
+  - It formats your card, downloads the latest official spruce release, and installs it in one click!
+  - HUGE props to spycat from the Rocknix team for developing this for us!
+
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
@@ -76,7 +82,6 @@ Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and cal
 ### Global
 
 * Brightness: START + L1/R1 (to lower/increase brightness respectively)
-* Volume: SELECT + L1/R1 (to lower/increase volume respectively)
 
 ### Main Menu
 
@@ -189,5 +194,11 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
 
 ## News
-The "soon" to happen release of the Miyoo Flip has us excited! We are planning on trying to do something for it but have not gotten ahold of any test units yet.
-[Gogamegeek.com](https://www.gogamegeek.com/) has kindly offered to send us a few units as soon as they recieve them. Expect updates on our progress "soon"!
+The release of the Miyoo Flip has us excited! We are working on spruceOS 4.0 that will be multi platform! One SD card with our software will boot/play on the Miyoo A30, Flip, Trimui Brick and Smart Pro. 
+[Gogamegeek.com](https://www.gogamegeek.com/) as well as Miyoo themselves has kindly sent us a few units. Expect updates on our progress "soon"!
+
+## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
+
+[![spruce logo](https://github.com/user-attachments/assets/ee3ce8fa-87f2-455a-adf6-c071f7ce4e7a)
+](https://discord.gg/KjR5uMQQt9)
+
