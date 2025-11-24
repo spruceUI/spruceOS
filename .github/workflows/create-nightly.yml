@@ -56,21 +56,21 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Update version in language files
-        run: |
-          # Get the version-date string
-          VERSION="${{ steps.get_version.outputs.version }}"
-          
-          # Find and update all .lang files
-          find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
-            for file do
-              # Create temp file
-              tmp=$(mktemp)
-              # Replace version string, preserving the v prefix
-              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
-              mv "$tmp" "$file"
-            done
-          ' sh "$VERSION" {} +
+#      - name: Update version in language files
+#        run: |
+#          # Get the version-date string
+#          VERSION="${{ steps.get_version.outputs.version }}"
+#          
+#          # Find and update all .lang files
+#          find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
+#            for file do
+#              # Create temp file
+#              tmp=$(mktemp)
+#              # Replace version string, preserving the v prefix
+#              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
+#              mv "$tmp" "$file"
+#            done
+#          ' sh "$VERSION" {} +
 
       - name: Recombine large files
         run: |
@@ -173,3 +173,4 @@ jobs:
             fi
 
           done
+
