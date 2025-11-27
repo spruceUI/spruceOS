@@ -2,17 +2,25 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin64"
-[ "$PLATFORM" = "A30" ] && BIN_PATH="/mnt/SDCARD/spruce/bin"
-# TODO: maybe rename these to setsharedmem-$PLATFORM if we need brick/tsp ones?
-SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
-[ "$PLATFORM" = "A30" ] && SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
-SET_OR_CSET="cset"
-[ "$PLATFORM" = "A30" ] && SET_OR_CSET="set"
-NAME_QUALIFIER="name="
-[ "$PLATFORM" = "A30" ] && NAME_QUALIFIER=""
-AMIXER_CONTROL="'SPK Volume'"
-[ "$PLATFORM" = "A30" ] && AMIXER_CONTROL="'Soft Volume Master'"
+if [ "$PLATFORM" = "A30" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin"
+    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
+    SET_OR_CSET="set"
+    NAME_QUALIFIER=""
+    AMIXER_CONTROL="'Soft Volume Master'"
+elif [ "$PLATFORM" = "Flip" ]; then
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
+    SET_OR_CSET="cset"
+    NAME_QUALIFIER="name="
+    AMIXER_CONTROL="'SPK Volume'"
+else    # trimui
+    BIN_PATH="/mnt/SDCARD/spruce/bin64"
+    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"     # this doesn't work yet. setsharedmem-flip is too high glibc
+    SET_OR_CSET="set"                                   # need to double check this 
+    NAME_QUALIFIER=""                                   # also need to check if this is necessary
+    AMIXER_CONTROL="'Soft Volume Master'"
+fi
 
 START_DOWN=false
 
