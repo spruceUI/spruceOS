@@ -17,8 +17,6 @@ else
     AMIXER_CONTROL="'SPK Volume'"
 fi
 
-SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
 WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
 EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
@@ -33,9 +31,6 @@ long_press_handler() {
 # ensure no flag files before main loop started
 flag_remove "pb.longpress"
 flag_remove "pb.sleep"
-
-POWER_EVENT="/dev/input/event0"
-[ "$PLATFORM" = "Flip" ] && POWER_EVENT="/dev/input/event2"
 
 while true; do
 

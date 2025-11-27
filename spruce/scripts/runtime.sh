@@ -92,7 +92,6 @@ if [ "$PLATFORM" = "A30" ]; then
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
@@ -178,7 +177,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/mixer_watchdog.sh &
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
     ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     killall runmiyoo.sh
@@ -189,6 +187,7 @@ if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
 fi
 
+${SCRIPTS_DIR}/powerbutton_watchdog.sh &
 ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 ${SCRIPTS_DIR}/lid_watchdog.sh &
 ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
