@@ -37,7 +37,6 @@ class FavoritesMenu(RomsMenuCommon):
     def run_rom_selection(self) :
         return self._run_rom_selection("Favorites")
 
-
     def sort_favorites_alphabetically(self, input_value):
         if(ControllerInput.A == input_value):
             FavoritesManager.sort_favorites_alphabetically()

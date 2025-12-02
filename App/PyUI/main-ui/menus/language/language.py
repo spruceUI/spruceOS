@@ -192,6 +192,14 @@ class Language:
         return cls._data.get("addFavorite","Add Favorite")
 
     @classmethod
+    def remove_gameswitcher_game(cls):
+        return cls._data.get("removeGameSwitcherGame","Remove from GameSwitcher")
+    
+    @classmethod
+    def add_gameswitcher_game(cls):
+        return cls._data.get("addGameSwitcherGame","Add to GameSwitcher")
+
+    @classmethod
     def add_remove_collection(cls):
         return cls._data.get("addRemoveCollection","Add/Remove Collection")
 

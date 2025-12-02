@@ -38,3 +38,19 @@ class CustomGameSwitcherListManager:
             return cls._recentsManager.get_games()
         else:
             return []
+        
+    @classmethod
+    def contains_game(cls, rom_info: RomInfo) -> bool:
+        cls._wait_for_init()
+        if(cls._exists):
+            return cls._recentsManager.is_on_list(rom_info)
+        else:
+            return False  
+              
+    @classmethod
+    def remove_game(cls, rom_info: RomInfo) -> bool:
+        cls._wait_for_init()
+        if(cls._exists):
+            return cls._recentsManager.remove_game(rom_info)
+        else:
+            return False
