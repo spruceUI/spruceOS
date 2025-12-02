@@ -1,4 +1,7 @@
-export PATH="/usr/bin:/usr/sbin"
+#!/bin/sh
+
+export PATH="/mnt/SDCARD/spruce/bin64:/usr/bin:/usr/sbin:/bin:/sbin:$PATH"
+export LD_LIBRARY_PATH="/usr/miyoo/lib:/usr/lib:/lib:$LD_LIBRARY_PATH"
 
 if [ "$PS1" ]; then
   if [ "$BASH" ]; then

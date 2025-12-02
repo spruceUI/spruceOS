@@ -110,7 +110,7 @@ if [ "$PLATFORM" = "A30" ]; then
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
-    export LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
     INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
 
@@ -146,7 +146,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     echo 3 > /proc/sys/kernel/printk
     chmod a+x /usr/bin/notify
 
-    export LD_LIBRARY_PATH=/usr/miyoo/lib
+    export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
     /usr/miyoo/bin/miyoo_inputd &
 
     init_gpio_Flip

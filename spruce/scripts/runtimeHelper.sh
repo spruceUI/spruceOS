@@ -6,8 +6,9 @@
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 case "$PLATFORM" in
-    "A30" | "Brick" | "SmartPro" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
+    "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
     "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
+    "Brick" | "SmartPro" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
 esac
 
 hide_fw_app() {
