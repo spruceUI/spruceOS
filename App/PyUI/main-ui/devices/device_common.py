@@ -242,11 +242,14 @@ class DeviceCommon(AbstractDevice):
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
-            score = (
-                (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
-                (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
-                ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
-            ) * 100
+            if(wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0):
+                return WifiStatus.OFF
+            else:
+                score = (
+                    (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
+                    (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
+                    ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
+                ) * 100
 
             # Ensure signal and settings stay in sync
             self.get_ip_addr_text()
