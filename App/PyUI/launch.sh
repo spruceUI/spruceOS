@@ -2,6 +2,13 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+runifnecessary() {
+    a=$(pgrep "$1")
+    if [ "$a" = "" ] ; then
+        $2 &
+    fi
+}
+
 # Check for -buttonListenerMode in arguments
 redirect_output=1
 for arg in "$@"; do
@@ -92,8 +99,6 @@ case "$PLATFORM" in
             # Run normally
             sh -c "$cmd \"\$@\"" sh "$@"
         fi
-
-        preload.sh
 
         if [ -f /tmp/trimui_inputd_restart ] ; then
             #restart before emulator run

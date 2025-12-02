@@ -16,13 +16,6 @@
 # Throughout this process, it monitors various system flags and
 # responds accordingly, managing the overall system state.
 
-runifnecessary(){
-    a=$(pgrep "$1")
-    if [ "$a" = "" ] ; then
-        $2 &
-    fi
-}
-
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
