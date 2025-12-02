@@ -61,7 +61,7 @@ class TopBar:
             x_offset = x_offset - w - img_padding
 
         #Wifi
-        if(Device.supports_wifi()):
+        if(Device.supports_wifi() and Device.is_wifi_enabled()):
             wifi_status = Device.get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
             w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
