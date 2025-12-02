@@ -1,13 +1,10 @@
 import json
-import logging
 import os
-import subprocess
 import sys
 import traceback
 
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
-from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
@@ -393,6 +390,10 @@ class Theme():
         return cls._asset("grid-game-selected.qoi")
 
     @classmethod
+    def get_grid_system_selected_bg(cls):
+        return cls._asset("grid-system-selected.qoi")
+
+    @classmethod
     def get_system_icon(cls, system):
         if(cls._daijisho_theme_index is not None):
             return cls._daijisho_theme_index.get_file_name_for_system(system)
@@ -700,6 +701,24 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_system_selection_set_top_bar_text(cls):
+        return cls._data.get("systemSelectionSetTopBarText", False)
+    
+    @classmethod
+    def set_system_selection_set_top_bar_text(cls, value):
+        cls._data["systemSelectionSetTopBarText"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_system_selection_set_bottom_bar_text(cls):
+        return cls._data.get("systemSelectionSetBottomBarText", False)
+    
+    @classmethod
+    def set_system_selection_set_bottom_bar_text(cls, value):
+        cls._data["systemSelectionSetBottomBarText"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_system_select_show_text_grid_mode(cls):
         return cls._data.get("systemSelectShowTextGridMode", True)
         
@@ -798,12 +817,31 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_grid_system_selected_resize_type(cls):
+        view_type_str = cls._data.get("systemSelectGridResizeType", "NONE")
+        return getattr(ResizeType, view_type_str, ResizeType.NONE)
+
+    @classmethod
+    def set_grid_system_selected_resize_type(cls, view_type):
+        cls._data["systemSelectGridResizeType"] = view_type.name
+        cls.save_changes()
+
+    @classmethod
     def get_grid_game_img_y_offset(cls):
         return cls._data.get("gridGameImageYOffset", 0)
 
     @classmethod
     def set_grid_game_img_y_offset(cls, value):
         cls._data["gridGameImageYOffset"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_system_img_y_offset(cls):
+        return cls._data.get("gridSystemImageYOffset", 0)
+
+    @classmethod
+    def set_grid_system_img_y_offset(cls, value):
+        cls._data["gridSystemImageYOffset"] = value
         cls.save_changes()
 
     @classmethod
@@ -953,7 +991,6 @@ class Theme():
 
     @classmethod
     def get_game_select_img_width(cls):
-        from devices.device import Device
         return cls._data.get("gameSelectImgWidth", int(320 * cls._default_multiplier))
     
     @classmethod
@@ -980,12 +1017,39 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_grid_system_select_img_width(cls):
+        return cls._data.get("gridSystemSelectImgWidth", int(cls._grid_game_default_size * cls._default_multiplier))
+    
+    @classmethod
+    def set_grid_system_select_img_width(cls, value):
+        cls._data["gridSystemSelectImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_list_system_select_img_width(cls):
+        return cls._data.get("listSystemSelectImgWidth", cls.get_game_select_img_width())
+    
+    @classmethod
+    def set_list_system_select_img_width(cls, value):
+        cls._data["listSystemSelectImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_carousel_game_select_primary_img_width(cls):
         return cls._data.get("carouselGameSelectPrimaryImgWidth", 40)
     
     @classmethod
     def set_carousel_game_select_primary_img_width(cls, value):
         cls._data["carouselGameSelectPrimaryImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_carousel_system_select_primary_img_width(cls):
+        return cls._data.get("carouselSystemSelectPrimaryImgWidth", 40)
+    
+    @classmethod
+    def set_carousel_system_select_primary_img_width(cls, value):
+        cls._data["carouselSystemSelectPrimaryImgWidth"] = value
         cls.save_changes()
 
     @classmethod
@@ -998,17 +1062,34 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_carousel_system_select_shrink_further_away(cls):
+        return cls._data.get("carouselSystemSelectShrinkFurtherAway", False)
+    
+    @classmethod
+    def set_carousel_system_select_shrink_further_away(cls, value):
+        cls._data["carouselSystemSelectShrinkFurtherAway"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_carousel_game_select_sides_hang_off(cls):
         return cls._data.get("carouselGameSelectSidesHangOff", True)
 
     @classmethod
     def set_carousel_game_select_sides_hang_off(cls, value):
         cls._data["carouselGameSelectSidesHangOff"] = value
+        cls.save_changes()   
+
+    @classmethod
+    def get_carousel_system_select_sides_hang_off(cls):
+        return cls._data.get("carouselSystemSelectSidesHangOff", True)
+
+    @classmethod
+    def set_carousel_system_select_sides_hang_off(cls, value):
+        cls._data["carouselSystemSelectSidesHangOff"] = value
         cls.save_changes()    
 
     @classmethod
     def get_game_select_img_height(cls):
-        from devices.device import Device
         return cls._data.get("gameSelectImgHeight", int(300 * cls._default_multiplier))
     
     @classmethod
@@ -1032,6 +1113,24 @@ class Theme():
     @classmethod
     def set_list_game_select_img_height(cls, value):
         cls._data["listGameSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_system_select_img_height(cls):
+        return cls._data.get("gridSystemSelectImgHeight", int(cls._grid_game_default_size * cls._default_multiplier))
+    
+    @classmethod
+    def set_grid_system_select_img_height(cls, value):
+        cls._data["gridSystemSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_list_system_select_img_height(cls):
+        return cls._data.get("listSystemSelectImgHeight", cls.get_game_select_img_height())
+    
+    @classmethod
+    def set_list_system_select_img_height(cls, value):
+        cls._data["listSystemSelectImgHeight"] = value
         cls.save_changes()
 
     @classmethod
@@ -1119,12 +1218,24 @@ class Theme():
     @classmethod
     def get_full_screen_grid_game_menu_resize_type(cls):
         view_type_str = cls._data.get("fullScreenGridGameMenuResizeType", "ZOOM")
-        return getattr(ResizeType, view_type_str, ResizeType.ZOOM)
+        return getattr(ResizeType, view_type_str, ResizeType.ZOOM)    
 
     @classmethod
     def set_full_screen_grid_game_menu_resize_type(cls, resize_type):
         cls._data["fullScreenGridGameMenuResizeType"] = resize_type.name
         cls.save_changes()
+
+    @classmethod
+    def get_full_screen_grid_system_select_menu_resize_type(cls):
+        view_type_str = cls._data.get("fullScreenGridSystemSelectMenuResizeType", "ZOOM")
+        return getattr(ResizeType, view_type_str, ResizeType.ZOOM)
+
+
+    @classmethod
+    def set_full_screen_grid_system_select_menu_resize_type(cls, resize_type):
+        cls._data["fullScreenGridSystemSelectMenuResizeType"] = resize_type.name
+        cls.save_changes()
+
 
     @classmethod
     def get_set_top_bar_text_to_game_selection_for_game_switcher(cls):

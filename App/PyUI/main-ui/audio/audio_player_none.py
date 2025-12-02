@@ -1,5 +1,4 @@
 
-from audio.sdl2_audio_player import Sdl2AudioPlayer
 
 
 class AudioPlayerNone:

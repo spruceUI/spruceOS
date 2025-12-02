@@ -7,7 +7,6 @@ from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from utils.consts import FAVORITES
 from views.grid_or_list_entry import GridOrListEntry
-from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
 
 class FavoritesMenu(RomsMenuCommon):

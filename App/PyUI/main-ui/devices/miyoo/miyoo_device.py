@@ -46,10 +46,6 @@ class MiyooDevice(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    @property
-    def power_off_cmd(self):
-        return "poweroff"
-
 
     def run_cmd(self, args, dir = None):
         MiyooTrimCommon.run_cmd(self, args, dir)

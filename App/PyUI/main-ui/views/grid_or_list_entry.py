@@ -1,11 +1,9 @@
 from concurrent.futures import ThreadPoolExecutor
 import os
 import threading
-import time
 from typing import Callable, TypeVar
 
 from devices.device import Device
-from utils.logger import PyUiLogger
 
 T = TypeVar('T')  # Generic input type
 

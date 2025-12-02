@@ -8,7 +8,6 @@ from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
 from utils.consts import GAME_SWITCHER
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 

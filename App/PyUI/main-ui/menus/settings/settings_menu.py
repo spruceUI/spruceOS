@@ -91,6 +91,7 @@ class SettingsMenu(ABC):
             description = description.format(ip_addr=Device.get_ip_addr_text())
         return description
 
+
     def build_options_list_from_config_menu_options(self, category):
         option_list = []
         menu_options = CfwSystemConfig.get_menu_options(category=category)

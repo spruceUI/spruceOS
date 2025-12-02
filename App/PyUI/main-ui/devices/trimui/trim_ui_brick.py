@@ -9,7 +9,6 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
-import sdl2
 from utils import throttle
 
 from utils.config_copier import ConfigCopier

@@ -3,7 +3,6 @@ import os
 import shutil
 import time
 from devices.device import Device
-from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 
 

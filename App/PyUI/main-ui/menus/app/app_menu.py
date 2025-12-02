@@ -5,7 +5,6 @@ from apps.pyui_app import PyUiAppConfig
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from devices.miyoo.system_config import SystemConfig
 from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.hidden_apps_manager import AppsManager

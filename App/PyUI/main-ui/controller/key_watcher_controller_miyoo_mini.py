@@ -143,7 +143,6 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
     def key_change(self, controller_input, direction):
         if(self.print_key_changes):
             print(f"KEY,{controller_input},{direction}")
-        pass
 
     def get_input(self, timeoutInMilliseconds):
         start_time = time.time()

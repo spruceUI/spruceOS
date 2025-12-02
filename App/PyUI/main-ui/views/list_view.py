@@ -1,12 +1,10 @@
 from abc import abstractmethod
-import traceback
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from themes.theme import Theme
-from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.text_utils import TextUtils
 from views.view import View

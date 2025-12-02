@@ -1,5 +1,4 @@
 import inspect
-import json
 from pathlib import Path
 import subprocess
 import threading
@@ -103,6 +102,9 @@ class MiyooFlip(MiyooDevice):
 
         super().__init__()
 
+    @property
+    def power_off_cmd(self):
+        return "poweroff"
 
     def get_controller_interface(self):
         return self.sdl2_controller_interface
