@@ -8,6 +8,7 @@ from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu
+from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
@@ -16,6 +17,7 @@ from menus.settings.list_of_options_selection_menu import ListOfOptionsSelection
 from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
@@ -32,7 +34,7 @@ class GameSelectMenuPopup:
 
     def remove_favorite(self, rom_info : RomInfo, input_value):
         FavoritesManager.remove_favorite(rom_info)
-    
+        
     def collections_management_view(self, rom_info : RomInfo, input_value):
         CollectionsManagementMenu(rom_info).show_menu()
 
@@ -138,6 +140,28 @@ class GameSelectMenuPopup:
         popup_options.extend(additional_popup_options)
         rom_name = os.path.basename(rom_info.rom_file_path)
         
+        if(PyUiConfig.get_gameswitcher_path() is not None 
+           and Device.get_system_config().use_custom_gameswitcher_path()):
+            if(CustomGameSwitcherListManager.contains_game(rom_info)):
+                popup_options.append(GridOrListEntry(
+                    primary_text=Language.remove_gameswitcher_game() if use_full_text else "+/- GameSwitcher",
+                    image_path=Theme.settings(),
+                    image_path_selected=Theme.settings_selected(),
+                    description=None,
+                    icon=None,
+                    value=lambda input_value, rom_info=rom_info: CustomGameSwitcherListManager.remove_game(rom_info)
+                ))
+            else:
+                popup_options.append(GridOrListEntry(
+                    primary_text=Language.add_gameswitcher_game() if use_full_text else "+/- GameSwitcher",
+                    image_path=Theme.settings(),
+                    image_path_selected=Theme.settings_selected(),
+                    description=None,
+                    icon=None,
+                    value=lambda input_value, rom_info=rom_info: CustomGameSwitcherListManager.add_game(rom_info)
+                ))
+
+
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
                 primary_text=Language.remove_favorite() if use_full_text else "+/- Favorite",
