@@ -1,9 +1,6 @@
 
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
-from display.font_purpose import FontPurpose
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
@@ -16,10 +13,7 @@ from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
-from menus.settings.modes_menu import ModesMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
-from themes.theme import Theme
-from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -82,6 +76,12 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             CfwSystemSettingsMenuForCategory(category).show_menu()
 
+
+    def is_excluded_setting(self,category):
+        excluded_settings = [
+            GameSwitcherSettingsMenu.SETTINGS_NAME
+        ]
+        return category in excluded_settings
 
 
     def build_options_list(self):
@@ -211,7 +211,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                     contains_entry_for_device = True
                     break
 
-            if(contains_entry_for_device):
+            if(contains_entry_for_device and not self.is_excluded_setting(category)):
                 option_list.append(
                         GridOrListEntry(
                                 primary_text=category,

@@ -5,6 +5,7 @@ import signal
 import sys
 import threading
 from devices.device import Device
+from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MIYOO_MINI_FLIP_VARIABLES, MIYOO_MINI_PLUS, MIYOO_MINI_V1_V2_V3_VARIABLES, MIYOO_MINI_V4_VARIABLES
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
@@ -60,12 +61,30 @@ def initialize_device(device, main_ui_mode):
     if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
         Device.init(MiyooFlip(device, main_ui_mode))
+    elif "MIYOO_MINI" == device:
+        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
+        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_V1_V2_V3_VARIABLES))
+    elif "MIYOO_MINI_V4" == device:
+        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
+        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_V4_VARIABLES))
+    elif "MIYOO_MINI_PLUS" == device:
+        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
+        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_PLUS))
     elif "MIYOO_MINI_FLIP" == device:
-        from devices.miyoo.mini_flip.miyoo_mini_flip import MiyooMiniFlip
-        Device.init(MiyooMiniFlip(device,main_ui_mode))
+        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
+        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_FLIP_VARIABLES))
+    elif "SPRIG_MIYOO_MINI" == device:
+        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
+        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_V1_V2_V3_VARIABLES))
+    elif "SPRIG_MIYOO_MINI_V4" == device:
+        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
+        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_V4_VARIABLES))
+    elif "SPRIG_MIYOO_MINI_PLUS" == device:
+        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
+        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_PLUS))
     elif "SPRIG_MIYOO_MINI_FLIP" == device:
-        from devices.miyoo.mini_flip.sprig_miyoo_mini_flip import SprigMiyooMiniFlip
-        Device.init(SprigMiyooMiniFlip(device, main_ui_mode))
+        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
+        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_FLIP_VARIABLES))
     elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick(device,main_ui_mode))

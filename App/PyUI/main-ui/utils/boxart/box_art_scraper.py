@@ -3,9 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from pathlib import Path
 import subprocess
-import json
 import re
-import threading
 import time
 import urllib.request
 from typing import List, Optional
@@ -15,7 +13,6 @@ from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from utils.logger import PyUiLogger
 import re
-import difflib
 from typing import Optional
 
 class BoxArtScraper:

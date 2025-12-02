@@ -1,6 +1,5 @@
 
 
-from controller.controller import Controller
 from devices.device import Device
 
 

@@ -218,6 +218,7 @@ class ViewCreator:
                     selected_index=selected_index,
                     show_grid_text=show_grid_text,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
+                    set_bottom_bar_text_to_selection=set_bottom_bar_text_to_selection,
                     selected_entry_width_percent=carousel_selected_entry_width_percent,
                     shrink_further_away=carousel_shrink_further_away,
                     sides_hang_off_edge=carousel_sides_hang_off_edge,

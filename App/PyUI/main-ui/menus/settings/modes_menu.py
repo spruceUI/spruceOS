@@ -1,9 +1,7 @@
 
 
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
 from menus.settings import settings_menu
 from utils.user_prompt import UserPrompt
 from views.grid_or_list_entry import GridOrListEntry

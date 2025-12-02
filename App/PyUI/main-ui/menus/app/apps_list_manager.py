@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import json
 import os
-from typing import List, Optional
+from typing import List
 from apps.app_config import AppConfig
 from utils.logger import PyUiLogger
 

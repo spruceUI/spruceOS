@@ -14,7 +14,6 @@ from menus.settings.basic_settings_menu import BasicSettingsMenu
 from menus.games.recents_menu import RecentsMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection

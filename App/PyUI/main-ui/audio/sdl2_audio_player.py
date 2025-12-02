@@ -2,7 +2,6 @@ import sdl2
 import sdl2.sdlmixer as sdlmixer
 import threading
 import queue
-import time
 from typing import Optional
 from utils.logger import PyUiLogger
 
