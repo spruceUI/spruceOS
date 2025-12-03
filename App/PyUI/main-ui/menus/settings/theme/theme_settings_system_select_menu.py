@@ -121,7 +121,8 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
             option_list.append(
                 self.build_numeric_entry("Image Spacing", 
                                         Theme.get_carousel_system_x_pad, 
-                                        Theme.set_carousel_system_x_pad)
+                                        Theme.set_carousel_system_x_pad,
+                                        min=-99999)
             )
 
         if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu() or ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu()):        
