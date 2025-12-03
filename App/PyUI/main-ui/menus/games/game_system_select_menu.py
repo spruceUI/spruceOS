@@ -212,7 +212,7 @@ class GameSystemSelectMenu:
                 return return_value
 
     def add_extras_to_systems_list(self, systems_list):
-        if(Theme.skip_main_menu() and Theme.show_extras_in_system_select_menu()):
+        if((Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()) and Theme.show_extras_in_system_select_menu()):
             if(Theme.get_apps_enabled()):
                 systems_list.append(GridOrListEntry(
                         primary_text="Apps",
@@ -253,7 +253,7 @@ class GameSystemSelectMenu:
                         icon=None,
                         value=lambda input_value: self.collections_menu.run_rom_selection() if ControllerInput.A == input_value else None
                     )          )    
-            if(Theme.get_settings_enabled()):
+            if(Theme.get_settings_enabled() or Theme.merge_main_menu_and_game_menu()):
                 systems_list.append(GridOrListEntry(
                         primary_text="Settings",
                         primary_text_long="Settings",
