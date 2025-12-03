@@ -636,6 +636,7 @@ run_retroarch() {
 				export RA_BIN="ra64.trimui_$PLATFORM"
 			else
 				export RA_BIN="retroarch.trimui"
+				export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
 			fi
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
