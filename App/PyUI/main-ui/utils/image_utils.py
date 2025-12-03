@@ -16,7 +16,7 @@ class ImageUtils(ABC):
         pass
 
     @abstractmethod
-    def resize_image(self, input_path, output_path, width, height, preserve_aspect_ratio=True):
+    def resize_image(self, input_path, output_path, width, height, preserve_aspect_ratio=True, target_alpha_channel=None):
         pass
 
     @abstractmethod

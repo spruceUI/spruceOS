@@ -9,6 +9,7 @@ from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from display.font_purpose import FontPurpose
 from menus.games.utils.rom_info import RomInfo
+from themes.theme import Theme
 from utils.logger import PyUiLogger
 
 
@@ -59,6 +60,7 @@ class MiyooTrimCommon():
 
     @staticmethod
     def run_game(device, rom_info: RomInfo, remap_sdcard_path = False, run_prefix ="") -> subprocess.Popen:
+        Theme.check_and_create_ra_assets()
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8

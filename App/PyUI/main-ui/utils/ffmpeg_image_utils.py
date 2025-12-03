@@ -89,7 +89,7 @@ class FfmpegImageUtils(ImageUtils):
             )
             return False
 
-    def resize_image(self, input_path, output_path, max_width, max_height, preserve_aspect_ratio=True):
+    def resize_image(self, input_path, output_path, max_width, max_height, preserve_aspect_ratio=True, target_alpha_channel=None):
         """
         Resize the image to fit within max_width/max_height preserving aspect ratio.
         This WILL enlarge the image if it is smaller than the requested bounds.
@@ -127,14 +127,23 @@ class FfmpegImageUtils(ImageUtils):
             # Use a temp file to avoid "cannot overwrite input" problems
             tmp_output = output_path + ".tmp.png"
 
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-y",                 # overwrite temp if exists
-                "-i", input_path,
-                "-vf", f"scale={new_width}:{new_height}",
-                "-pix_fmt", "rgba",
-                tmp_output
-            ]
+
+            if(target_alpha_channel is None):                
+                ffmpeg_cmd = [
+                    "ffmpeg",
+                    "-y",                 # overwrite temp if exists
+                    "-i", input_path,
+                    "-vf", f"scale={new_width}:{new_height}",
+                    "-pix_fmt", "rgba",
+                    tmp_output
+                ]
+            else:
+                ffmpeg_cmd = [
+                    "ffmpeg",
+                    "-i", input_path,
+                    "-vf", f"scale={new_width}:{new_height},format=rgba,colorchannelmixer=aa={target_alpha_channel}",
+                    tmp_output
+                ]
 
             subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
