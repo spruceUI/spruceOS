@@ -845,6 +845,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_carousel_system_x_pad(cls):
+        return cls._data.get("carouselSystemXPad", 0)
+
+    @classmethod
+    def set_carousel_system_x_pad(cls, value):
+        cls._data["carouselSystemXPad"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_view_type_for_app_menu(cls):
         view_type_str = cls._data.get("appMenuViewType", "DESCRIPTIVE_LIST_VIEW")
         return getattr(ViewType, view_type_str, ViewType.ICON_AND_DESC)
@@ -1145,10 +1154,19 @@ class Theme():
     @classmethod
     def skip_main_menu(cls):
         return cls._data.get("skipMainMenu", False)
-    
+
     @classmethod
     def set_skip_main_menu(cls, value):
         cls._data["skipMainMenu"] = value
+        cls.save_changes()
+
+    @classmethod
+    def show_extras_in_system_select_menu(cls):
+        return cls._data.get("showExtrasInSystemSelectMenu", False)
+
+    @classmethod
+    def set_show_extras_in_system_select_menu(cls, value):
+        cls._data["showExtrasInSystemSelectMenu"] = value
         cls.save_changes()
 
     @classmethod
