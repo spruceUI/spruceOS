@@ -48,7 +48,8 @@ class ViewCreator:
                     allow_scrolling_text=False,
                     full_screen_grid_resize_type=None,
                     full_screen_grid_render_text_overlay=None,
-                    image_resize_height_multiplier=None) -> object:
+                    image_resize_height_multiplier=None,
+                    carousel_x_pad = None) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -222,7 +223,8 @@ class ViewCreator:
                     selected_entry_width_percent=carousel_selected_entry_width_percent,
                     shrink_further_away=carousel_shrink_further_away,
                     sides_hang_off_edge=carousel_sides_hang_off_edge,
-                    missing_image_path=missing_image_path
+                    missing_image_path=missing_image_path,
+                    x_pad=carousel_x_pad
                 )
 
             case _:

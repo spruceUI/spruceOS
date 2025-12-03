@@ -34,13 +34,14 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                 set_value_func=Theme.set_list_system_select_img_height
                             )
                         )                       
-
-        if(ViewType.GRID == Theme.get_view_type_for_system_select_menu()):
+        if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu() or ViewType.GRID == Theme.get_view_type_for_system_select_menu()):        
             option_list.append(
                 self.build_numeric_entry("Columns", 
                                         Theme.get_game_system_select_col_count, 
                                         Theme.set_game_system_select_col_count)
             )
+
+        if(ViewType.GRID == Theme.get_view_type_for_system_select_menu()):
             option_list.append(
                 self.build_numeric_entry("Rows", 
                                         Theme.get_game_system_select_row_count, 
@@ -117,6 +118,11 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                         Theme.get_carousel_system_select_sides_hang_off,
                         Theme.set_carousel_system_select_sides_hang_off)
                 )
+            option_list.append(
+                self.build_numeric_entry("Image Spacing", 
+                                        Theme.get_carousel_system_x_pad, 
+                                        Theme.set_carousel_system_x_pad)
+            )
 
         if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu() or ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu()):        
             option_list.append(

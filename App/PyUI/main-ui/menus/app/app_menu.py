@@ -133,8 +133,7 @@ class AppMenu:
                     selected.get_selection().get_value()()
                 elif(ControllerInput.B == selected.get_input()):
                     self.save_app_selection(selected)
-                    if(not Theme.skip_main_menu()):
-                        running = False
+                    running = False
                 elif(ControllerInput.MENU == selected.get_input()):
                     self.save_app_selection(selected)
                     if(selected.get_selection()):

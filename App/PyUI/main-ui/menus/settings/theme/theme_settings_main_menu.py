@@ -35,6 +35,15 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
             )
         )
 
+        if(Theme.skip_main_menu()):
+            option_list.append(
+                self.build_enabled_disabled_entry(
+                    primary_text=Language.show_extras_in_system_select_menu(),
+                    get_value_func=Theme.show_extras_in_system_select_menu,
+                    set_value_func=Theme.set_show_extras_in_system_select_menu
+                )
+            )
+
         if(not Theme.skip_main_menu()):
             option_list.append(
                 self.build_view_type_entry(
@@ -60,6 +69,7 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     )
                 )
             
+        if(not Theme.skip_main_menu() or Theme.show_extras_in_system_select_menu()):
             option_list.append(
                 self.build_enabled_disabled_entry(
                     primary_text=Language.show_recents(),

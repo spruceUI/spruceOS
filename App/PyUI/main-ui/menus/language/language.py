@@ -553,6 +553,10 @@ class Language:
         return cls._data.get("skipMainMenu","Skip Main Menu")
 
     @classmethod
+    def show_extras_in_system_select_menu(cls):
+        return cls._data.get("showExtrasInSystemSelectMenu","Show Apps/Settings/etc")
+
+    @classmethod
     def main_menu(cls):
         return cls._data.get("mainMenu","Main Menu")
 
