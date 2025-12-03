@@ -338,7 +338,8 @@ class GameSystemSelectMenu:
                         carousel_selected_entry_width_percent=Theme.get_carousel_system_select_primary_img_width(),
                         carousel_shrink_further_away=Theme.get_carousel_system_select_shrink_further_away(),
                         carousel_sides_hang_off_edge=Theme.get_carousel_system_select_sides_hang_off(),
-                        carousel_x_pad=Theme.get_carousel_system_x_pad()
+                        carousel_x_pad=Theme.get_carousel_system_x_pad(),
+                        carousel_x_offset=Theme.get_carousel_system_external_x_offset()
                      )
         else:
             view.set_options(self.systems_list)

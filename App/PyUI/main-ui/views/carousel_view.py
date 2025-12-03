@@ -23,7 +23,8 @@ class CarouselView(View):
                   shrink_further_away = None,
                   sides_hang_off_edge = None,
                   missing_image_path = None,
-                  x_pad = None):
+                  x_pad = None,
+                  x_offset = None):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -43,10 +44,15 @@ class CarouselView(View):
         self.options_length = len(options)
         if(self.selected_entry_width_percent is None):
             self.selected_entry_width_percent = 40
+        
 
         if(x_pad is None):
             x_pad = 10
+        if(x_offset is None):
+            x_offset = 0
+
         self.x_pad = x_pad
+        self.x_offset = x_offset
 
         self.selected = selected_index
         if(cols < 3):
@@ -220,6 +226,7 @@ class CarouselView(View):
         #TODO Get hard coded values for padding from theme
         usable_width = Device.screen_width()
         image_width_percentages = self.get_width_percentages()
+        #PyUiLogger.get_logger().debug(f"image_width_percentages  = {image_width_percentages}")
 
         widths = [int(round(percent/100 * usable_width)) for percent in image_width_percentages]
         # x_offset[0] = 0; for i>0, sum of widths[0] through widths[i-1]
@@ -237,9 +244,9 @@ class CarouselView(View):
         x_offsets = [x + w // 2 for x, w in zip(x_offsets, widths)]
 
         # now handle padding
-        
+
         widths = [w - 2* self.x_pad for w in widths]
-        #x_offsets = [x + i * self.x_pad for i, x in enumerate(x_offsets)]
+        x_offsets = [x + i * self.x_offset for i, x in enumerate(x_offsets)]
 
         visible_options: List[GridOrListEntry] = self.get_visible_options()
 

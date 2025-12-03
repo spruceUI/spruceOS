@@ -854,6 +854,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_carousel_system_external_x_offset(cls):
+        return cls._data.get("carouselSystemExternalXPad", 0)
+
+    @classmethod
+    def set_carousel_system_external_x_offset(cls, value):
+        cls._data["carouselSystemExternalXPad"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_view_type_for_app_menu(cls):
         view_type_str = cls._data.get("appMenuViewType", "DESCRIPTIVE_LIST_VIEW")
         return getattr(ViewType, view_type_str, ViewType.ICON_AND_DESC)

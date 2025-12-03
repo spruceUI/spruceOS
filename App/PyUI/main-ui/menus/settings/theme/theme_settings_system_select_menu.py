@@ -119,12 +119,17 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                         Theme.set_carousel_system_select_sides_hang_off)
                 )
             option_list.append(
-                self.build_numeric_entry("Image Spacing", 
+                self.build_numeric_entry("Internal Padding", 
                                         Theme.get_carousel_system_x_pad, 
                                         Theme.set_carousel_system_x_pad,
+                                        min=0)
+            )
+            option_list.append(
+                self.build_numeric_entry("X-Offset", 
+                                        Theme.get_carousel_system_external_x_offset, 
+                                        Theme.set_carousel_system_external_x_offset,
                                         min=-99999)
             )
-
         if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu() or ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu()):        
             option_list.append(
                 self.build_enabled_disabled_entry(
