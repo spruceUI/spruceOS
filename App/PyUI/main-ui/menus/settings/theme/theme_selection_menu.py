@@ -1,6 +1,7 @@
 
 import os
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -24,13 +25,16 @@ class ThemeSelectionMenu:
                 qoi_path = os.path.join(theme_dir,opt,"preview.qoi")
                 image_path = qoi_path
             PyUiLogger.get_logger().info(f"{opt} : {image_path}")
-            option_list.append(
-                GridOrListEntry(
+            option = GridOrListEntry(
                     primary_text=opt,
                     value=index,
                     image_path=image_path
                 )
+            option_list.append(
+                option
             )
+            if(opt == Device.get_system_config().get_theme()):
+                selected = Selection(option, None, index)
 
         #convert to text and desc and show the theme desc
         #maybe preview too if theyre common
