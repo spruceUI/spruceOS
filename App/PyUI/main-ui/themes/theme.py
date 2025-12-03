@@ -178,9 +178,20 @@ class Theme():
         PyUiLogger.get_logger().info(f"Wrote Theme : {cls._data.get('description', 'UNKNOWN')}")
         from display.display import Display
         Display.clear_cache()
+    
         
     @classmethod
-    def _resolve_file(cls, base_folder, parts):
+    def _resolve_png_path(cls, base_folder, parts):
+        path = os.path.join(cls._path, base_folder, *parts)
+
+        if path.endswith(".qoi"):
+            png_path = path[:-4] + ".png"
+            return png_path
+
+        return path
+        
+    @classmethod
+    def _resolve_file(cls, base_folder, parts, cache_missing=True):
         """
         Shared resolver:
         - Checks full path
@@ -211,12 +222,13 @@ class Theme():
                 return tga_path
 
         # Nothing found
-        cls._asset_cache[key] = None
+        if(cache_missing):
+            cls._asset_cache[key] = None
         return None
 
     @classmethod
-    def _asset(cls, *parts):
-        return cls._resolve_file(cls._skin_folder, parts)
+    def _asset(cls, *parts, cache_missing=True):
+        return cls._resolve_file(cls._skin_folder, parts, cache_missing)
 
     @classmethod
     def _icon(cls, *parts):
@@ -305,10 +317,27 @@ class Theme():
     def get_list_large_selected_bg(cls): return cls._asset("bg-list-l.qoi")
    
     @classmethod
-    def menu_popup_bg_large(cls): return cls._asset("bg-pop-menu-4.qoi")
-    
+    def menu_popup_bg_large(cls): 
+        menu_selected_bg = cls._asset("bg-pop-menu-4.qoi", cache_missing=False)
+        if(menu_selected_bg is None):
+            cls.create_bg_pop_menu_4()
+        return cls._asset("bg-pop-menu-4.qoi")
+
     @classmethod
-    def keyboard_bg(cls): return cls._asset("bg-grid-s.qoi")
+    def create_bg_pop_menu_4(cls):  
+        #Background isn't the best but its the only one that often doesnt have transparency on the bottom
+        input_image = cls._resolve_png_path(cls._skin_folder,["background.png"])
+        output_image = cls._resolve_png_path(cls._skin_folder,["bg-pop-menu-4.png"])
+        PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
+        Device.get_image_utils().resize_image(input_image,
+                                              output_image,
+                                              320,
+                                              240,
+                                              preserve_aspect_ratio=False)
+ 
+    @classmethod
+    def keyboard_bg(cls): 
+        return cls._asset("bg-grid-s.qoi")
     
     @classmethod
     def keyboard_entry_bg(cls): return cls._asset("bg-list-l.qoi")
@@ -323,7 +352,22 @@ class Theme():
     def get_list_small_selected_bg(cls): return cls._asset("bg-list-s.qoi")
     
     @classmethod
-    def get_popup_menu_selected_bg(cls): return cls._asset("bg-list-s2.qoi")
+    def create_bg_list_s2(cls):  
+        input_image = cls._resolve_png_path(cls._skin_folder,["bg-list-s.png"])
+        output_image = cls._resolve_png_path(cls._skin_folder,["bg-list-s2.png"])
+        PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
+        Device.get_image_utils().resize_image(input_image,
+                                              output_image,
+                                              320,
+                                              60,
+                                              preserve_aspect_ratio=False)
+
+    @classmethod
+    def get_popup_menu_selected_bg(cls): 
+        menu_selected_bg = cls._asset("bg-list-s2.qoi", cache_missing=False)
+        if(menu_selected_bg is None):
+            cls.create_bg_list_s2()
+        return cls._asset("bg-list-s2.qoi")
     
     @classmethod
     def get_missing_image_path(cls): return cls._asset("missing_image.qoi")
@@ -1309,3 +1353,28 @@ class Theme():
         cls._data["mainMenuTitle"] = value
         cls.save_changes()
 
+
+    @classmethod
+    def check_and_create_asset(cls, output_image, input_image, target_width, target_height, target_alpha_channel):
+        if(not os.path.exists(output_image)):
+            PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
+            Device.get_image_utils().resize_image(input_image,
+                                                  output_image,
+                                                  target_width,
+                                                  target_height,
+                                                  preserve_aspect_ratio=False,
+                                                  target_alpha_channel=target_alpha_channel)
+
+    @classmethod
+    def check_and_create_ra_assets(cls):  
+        cls.check_and_create_asset( cls._resolve_png_path(cls._skin_folder,["menu-6line-bg.png"]),
+                                    cls._resolve_png_path(cls._skin_folder,["background.png"]),
+                                    320,
+                                    420,
+                                    0.75)
+
+        cls.check_and_create_asset( cls._resolve_png_path(cls._skin_folder,["list-item-select-bg-short.png"]),
+                                    cls._resolve_png_path(cls._skin_folder,["bg-list-s.png"]),
+                                    320,
+                                    60,
+                                    1.00)

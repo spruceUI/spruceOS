@@ -42,7 +42,7 @@ class PilImageUtils(ImageUtils):
             )
             return False
             
-    def resize_image(self, input_path, output_path, width, height):
+    def resize_image(self, input_path, output_path, width, height, target_alpha_channel):
         img = Image.open(input_path)
         actual_width, actual_height = img.size
 
