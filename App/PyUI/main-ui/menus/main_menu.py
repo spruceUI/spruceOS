@@ -185,7 +185,7 @@ class MainMenu:
         self.check_for_boxart_resizing()
     
 
-        if(Theme.skip_main_menu()):
+        if(Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()):
 
             selection = PyUiState.get_last_main_menu_selection()
             if(selection not in ["Game","App","Setting"]):

@@ -1214,6 +1214,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def merge_main_menu_and_game_menu(cls):
+        return cls._data.get("mergeMainMenuAndGameMenu", False)
+
+    @classmethod
+    def set_merge_main_menu_and_game_menu(cls, value):
+        cls._data["mergeMainMenuAndGameMenu"] = value
+        cls.save_changes()
+
+    @classmethod
     def show_extras_in_system_select_menu(cls):
         return cls._data.get("showExtrasInSystemSelectMenu", False)
 
