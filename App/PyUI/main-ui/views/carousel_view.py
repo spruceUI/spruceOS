@@ -337,11 +337,9 @@ class CarouselView(View):
 
     def animate_transition(self):
         if(not self.skip_next_animation):
-            animation_frames = 10 - self.animated_count*2
-
+            animation_frames = 10 - self.animated_count
             if PyUiConfig.animations_enabled() and animation_frames > 1:
                 render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
-                animation_frames = 10
                 frame_duration = 1 / 60.0  # 60 FPS
                 last_frame_time = 0
 
@@ -363,8 +361,10 @@ class CarouselView(View):
                         x_offsets_for_animation.append(x_offsets_for_animation[-1] + x_offsets_for_animation[-1] - x_offsets_for_animation[-2])
                         widths_for_animation.append(widths_for_animation[-1])
 
+                PyUiLogger.get_logger().debug(f"Animating carousel transition with {animation_frames} frames")
         
                 for frame in range(animation_frames):
+                    PyUiLogger.get_logger().debug(f"Animating carousel transition frame {frame}")
                     self._clear()
 
                     frame_x_offset = []
@@ -421,10 +421,6 @@ class CarouselView(View):
                                                 target_height=Display.get_usable_screen_height(),
                                                 resize_type=self.resize_type)
 
-                    curr_time = time.time()
-                    delta_time = curr_time - last_frame_time
-                    if delta_time < frame_duration:
-                        time.sleep(frame_duration - (delta_time))
                     if(self.include_index_text):
                         letter = ''
                         if(self.options_are_sorted):
@@ -432,8 +428,13 @@ class CarouselView(View):
 
                         Display.add_index_text(self.selected%self.options_length +1, self.options_length,
                                             letter=letter)
+
+                    #curr_time = time.time()
+                    #delta_time = curr_time - last_frame_time
+                    #if delta_time < frame_duration:
+                    #    time.sleep(frame_duration - (delta_time))
                     Display.present()
-                    last_frame_time = time.time()
+                    #last_frame_time = time.time()
             
             self.animated_count += 1
         else:
