@@ -6,9 +6,7 @@ from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from utils.consts import RECENTS
-from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
-from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from typing import List
 
 class RecentsMenu(RomsMenuCommon):

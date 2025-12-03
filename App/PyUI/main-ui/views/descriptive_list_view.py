@@ -1,4 +1,3 @@
-import math
 from typing import List
 from devices.device import Device
 from display.display import Display

@@ -6,6 +6,7 @@ from enum import Enum, auto
 class ResizeType(Enum):
     FIT = auto(), #e.g. aspect ratio will remain identical
     ZOOM = auto(), #e.g.  The smaller dimension will be used as the base and the larger dimension cropped
+    NONE = auto(), #e.g. no resizing, image will be the same size as the passed in asset
 
 def get_next_resize_type(current_type: ResizeType, direction: int, exclude: list[ResizeType] = []) -> ResizeType:
     exclude = exclude or []

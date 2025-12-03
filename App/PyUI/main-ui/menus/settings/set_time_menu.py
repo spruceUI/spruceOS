@@ -3,11 +3,9 @@ import calendar
 from datetime import datetime
 import subprocess
 from controller.controller_inputs import ControllerInput
-from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from menus.settings import settings_menu
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 

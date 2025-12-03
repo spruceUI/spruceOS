@@ -10,13 +10,11 @@ from menus.settings.about_menu import AboutMenu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
-from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from menus.settings.tasks_menu import TasksMenu
 from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
 from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
-from utils.cfw_system_config import CfwSystemConfig
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
