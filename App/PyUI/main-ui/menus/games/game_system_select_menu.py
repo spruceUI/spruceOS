@@ -211,6 +211,13 @@ class GameSystemSelectMenu:
             if(return_value is not None):
                 return return_value
 
+    def run_extra(self, input_value, primary_text, run_function):
+        PyUiState.set_last_system_selection(primary_text)
+        if(ControllerInput.A == input_value):
+            PyUiState.set_in_game_selection_screen(True)
+            run_function()
+            PyUiState.set_in_game_selection_screen(False)
+
     def add_extras_to_systems_list(self, systems_list):
         if((Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()) and Theme.show_extras_in_system_select_menu()):
             if(Theme.get_apps_enabled()):
@@ -221,8 +228,8 @@ class GameSystemSelectMenu:
                         image_path_selected=Theme.get_system_icon_selected("apps"),
                         description = "Launch Applications",
                         icon=None,
-                        value=lambda input_value: self.app_menu.run_app_selection() if ControllerInput.A == input_value else None
-                    ))        
+                        value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
+             ))        
             if(Theme.get_favorites_enabled()):
                 systems_list.append(GridOrListEntry(
                         primary_text="Favorites",
@@ -231,7 +238,7 @@ class GameSystemSelectMenu:
                         image_path_selected=Theme.get_system_icon_selected("favorites"),
                         description = "Launch Favorites",
                         icon=None,
-                        value=lambda input_value: self.favorites_menu.run_rom_selection() if ControllerInput.A == input_value else None
+                        value=lambda input_value: self.run_extra(input_value, "Favorites", self.favorites_menu.run_rom_selection)
                     ) )         
             if(Theme.get_recents_enabled()):
                 systems_list.append(GridOrListEntry(
@@ -241,7 +248,7 @@ class GameSystemSelectMenu:
                         image_path_selected=Theme.get_system_icon_selected("recents"),
                         description = "Launch Recents",
                         icon=None,
-                        value=lambda input_value: self.recents_menu.run_rom_selection() if ControllerInput.A == input_value else None
+                        value=lambda input_value: self.run_extra(input_value, "Recents", self.recents_menu.run_rom_selection)
                     )  )
             if(Theme.get_collections_enabled()):
                 systems_list.append(GridOrListEntry(
@@ -251,7 +258,7 @@ class GameSystemSelectMenu:
                         image_path_selected=Theme.get_system_icon_selected("collections"),
                         description = "Launch Collections",
                         icon=None,
-                        value=lambda input_value: self.collections_menu.run_rom_selection() if ControllerInput.A == input_value else None
+                        value=lambda input_value: self.run_extra(input_value, "Collections", self.collections_menu.run_rom_selection)
                     )          )    
             if(Theme.get_settings_enabled() or Theme.merge_main_menu_and_game_menu()):
                 systems_list.append(GridOrListEntry(
@@ -286,8 +293,6 @@ class GameSystemSelectMenu:
                     value=lambda input_value, game_system=game_system: self.game_system_selected(input_value, game_system)
                 )          
             systems_list.append(option)
-            if(game_system.display_name == PyUiState.get_last_system_selection()):
-                selected = Selection(option,None,index-1)
 
         self.add_extras_to_systems_list(systems_list)        
 
