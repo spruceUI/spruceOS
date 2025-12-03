@@ -144,7 +144,7 @@ class CarouselView(View):
             #    2^(k−1),2^(k−2),…,2^0, scaled to sum to 25
             right = [(2**(k - 1 - i)) * scale for i in range(k)]
 
-            return left + mid + right
+            image_widths = left + mid + right
         else:
             k = self.cols // 2
             if(self.sides_hang_off_edge):
@@ -157,7 +157,28 @@ class CarouselView(View):
             left = [secondary_width_percent for i in range(k)]
             right = [secondary_width_percent for i in range(k)]
 
-            return left + mid + right
+            image_widths = left + mid + right
+        
+        if(self.sides_hang_off_edge):
+            n = len(image_widths)
+
+            first = image_widths[0]
+            last = image_widths[-1]
+            middle = image_widths[1:-1]
+
+            weighted_sum = 0.5*first + sum(middle) + 0.5*last
+
+            x = (100 - weighted_sum) / (n - 1)
+
+            new_widths = [w + x for w in image_widths]
+        else:
+            total = sum(image_widths)
+            target = 100 
+            extra_per_item = (target - total) / len(image_widths)
+
+            new_widths = [w + extra_per_item for w in image_widths]
+
+        return new_widths
 
 
     def _clear(self):
@@ -216,8 +237,10 @@ class CarouselView(View):
         x_offsets = [x + w // 2 for x, w in zip(x_offsets, widths)]
 
         # now handle padding
-        widths = [w - 2* self.x_pad for w in widths]
         
+        widths = [w - 2* self.x_pad for w in widths]
+        #x_offsets = [x + i * self.x_pad for i, x in enumerate(x_offsets)]
+
         visible_options: List[GridOrListEntry] = self.get_visible_options()
 
         if(self.prev_visible_options is not None and self.selected != self.prev_selected):
