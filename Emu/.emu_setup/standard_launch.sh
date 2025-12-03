@@ -632,7 +632,11 @@ run_retroarch() {
 
 	case "$PLATFORM" in
 		"Brick" | "SmartPro" )
-			export RA_BIN="ra64.trimui_$PLATFORM"
+			if [ "$use_igm" = "True" ]; then
+				export RA_BIN="ra64.trimui_$PLATFORM"
+			else
+				export RA_BIN="retroarch.trimui"
+			fi
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
 			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$PLATFORM" = "SmartPro" ]; then
