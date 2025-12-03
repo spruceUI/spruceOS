@@ -361,10 +361,7 @@ class CarouselView(View):
                         x_offsets_for_animation.append(x_offsets_for_animation[-1] + x_offsets_for_animation[-1] - x_offsets_for_animation[-2])
                         widths_for_animation.append(widths_for_animation[-1])
 
-                PyUiLogger.get_logger().debug(f"Animating carousel transition with {animation_frames} frames")
-        
                 for frame in range(animation_frames):
-                    PyUiLogger.get_logger().debug(f"Animating carousel transition frame {frame}")
                     self._clear()
 
                     frame_x_offset = []
