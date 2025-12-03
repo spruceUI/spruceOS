@@ -85,7 +85,8 @@ class TopBar:
             self.top_bar_w = max(self.top_bar_w, text_w)
             self.top_bar_h = max(self.top_bar_h, text_h)
 
-        if(Device.supports_wifi()):
+        wifi_icon = None
+        if(Device.supports_wifi() and Device.is_wifi_enabled()):
             wifi_status = Device.get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
             wifi_w, wifi_h = Display.get_image_dimensions(wifi_icon)
@@ -113,7 +114,7 @@ class TopBar:
                     battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
 
-            if(Device.supports_wifi()):
+            if(wifi_icon is not None):
                 #Wifi
                 w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
