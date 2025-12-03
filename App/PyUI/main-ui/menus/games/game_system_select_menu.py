@@ -300,7 +300,7 @@ class GameSystemSelectMenu:
     def run_system_selection(self) :
         if(self.selected is not None):
             if(PyUiState.get_in_game_selection_screen()):
-                return_value = self.rom_select_menu.run_rom_selection(self.selected.get_selection().get_value())
+                return_value = self.selected.get_selection().get_value()(ControllerInput.A)
                 if(return_value is not None):
                     if(ControllerInput.B == return_value):
                         PyUiState.set_in_game_selection_screen(None)
