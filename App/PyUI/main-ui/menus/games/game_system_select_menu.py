@@ -345,6 +345,7 @@ class GameSystemSelectMenu:
                         carousel_sides_hang_off_edge=Theme.get_carousel_system_select_sides_hang_off(),
                         carousel_x_pad=Theme.get_carousel_system_x_pad(),
                         carousel_x_offset=Theme.get_carousel_system_external_x_offset(),
+                        carousel_fixed_width=Theme.get_carousel_system_fixed_width() if not Theme.get_carousel_system_use_percentage_mode() else None,
                         grid_view_wrap_around_single_row=Theme.get_system_select_grid_wrap_around_single_row()
                      )
         else:

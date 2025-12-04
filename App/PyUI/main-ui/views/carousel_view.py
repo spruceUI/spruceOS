@@ -24,7 +24,8 @@ class CarouselView(View):
                   sides_hang_off_edge = None,
                   missing_image_path = None,
                   x_pad = None,
-                  x_offset = None):
+                  x_offset = None,
+                  fixed_width=None):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -44,7 +45,7 @@ class CarouselView(View):
         self.options_length = len(options)
         if(self.selected_entry_width_percent is None):
             self.selected_entry_width_percent = 40
-        
+        self.fixed_width = fixed_width        
 
         if(x_pad is None):
             x_pad = 10
@@ -225,28 +226,53 @@ class CarouselView(View):
         
         #TODO Get hard coded values for padding from theme
         usable_width = Device.screen_width()
-        image_width_percentages = self.get_width_percentages()
-        #PyUiLogger.get_logger().debug(f"image_width_percentages  = {image_width_percentages}")
+        if(self.fixed_width is None):
+            image_width_percentages = self.get_width_percentages()
+            #PyUiLogger.get_logger().debug(f"image_width_percentages  = {image_width_percentages}")
+            widths = [int(round(percent/100 * usable_width)) for percent in image_width_percentages]
+            x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
+            if(self.sides_hang_off_edge and not self.shrink_further_away):
+                #Add one extra that is offscreen
+                x_offsets = [-x_offsets[1]] + x_offsets + [x_offsets[len(x_offsets)-1] + (x_offsets[len(x_offsets)-1] - x_offsets[len(x_offsets)-2])]
+                widths = [widths[0]] + widths + [widths[len(widths)-1]]
+                x_offsets = [x - widths[0]//2 for x in x_offsets]
 
-        widths = [int(round(percent/100 * usable_width)) for percent in image_width_percentages]
-        # x_offset[0] = 0; for i>0, sum of widths[0] through widths[i-1]
-        x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
+        else:
+            widths = [self.fixed_width for _ in range(self.cols)]
+                
 
+            # Step 1: cumulative offsets
+            x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
-        if(self.sides_hang_off_edge and not self.shrink_further_away):
-            #Add one extra that is offscreen
-            x_offsets = [-x_offsets[1]] + x_offsets + [x_offsets[len(x_offsets)-1] + (x_offsets[len(x_offsets)-1] - x_offsets[len(x_offsets)-2])]
-            widths = [widths[0]] + widths + [widths[len(widths)-1]]
-            #PyUiLogger.get_logger().info(f"x_offsets = {x_offsets}")
-            x_offsets = [x - widths[0]//2 for x in x_offsets]
+            # Step 2: center the middle image
+            screen_center = Device.screen_width() // 2
+            mid = len(x_offsets) // 2
+            middle_width = widths[mid]
+
+            middle_center_x = screen_center - (middle_width // 2)
+            shift = middle_center_x - x_offsets[mid]
+
+            # Apply shift
+            x_offsets = [x + shift for x in x_offsets]
+
+            # Step 3: fan outward from the center
+            x_offsets = [
+                x + (i - mid) * self.x_offset
+                for i, x in enumerate(x_offsets)
+            ]
 
         #Center the x_offset in its spot
         x_offsets = [x + w // 2 for x, w in zip(x_offsets, widths)]
 
         # now handle padding
-
         widths = [w - 2* self.x_pad for w in widths]
-        x_offsets = [x + i * self.x_offset for i, x in enumerate(x_offsets)]
+
+        if(self.fixed_width is not None):
+            mid = len(x_offsets) // 2
+            x_offsets = [
+                x + (i - mid) * self.x_offset
+                for i, x in enumerate(x_offsets)
+            ]
 
         visible_options: List[GridOrListEntry] = self.get_visible_options()
 
@@ -340,8 +366,8 @@ class CarouselView(View):
             animation_frames = 10 - self.animated_count
             if PyUiConfig.animations_enabled() and animation_frames > 1:
                 render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
-                frame_duration = 1 / 60.0  # 60 FPS
-                last_frame_time = 0
+                #frame_duration = 1 / 60.0  # 60 FPS
+                #last_frame_time = 0
 
                 diff = (self.selected - self.prev_selected) % (len(self.options) + 1)
                 rotate_left = diff > (len(self.options) + 1) // 2
@@ -353,7 +379,7 @@ class CarouselView(View):
                 if(not self.sides_hang_off_edge):
                     if rotate_left:
                         image_list.insert(0,new_visible_options[0])
-                        x_offsets_for_animation.insert(0, - x_offsets_for_animation[0])
+                        x_offsets_for_animation.insert(0, x_offsets_for_animation[0] - (x_offsets_for_animation[1] - x_offsets_for_animation[0]))
                         widths_for_animation.insert(0, widths_for_animation[0])
                         image_list = list(reversed(image_list))
                     else:
