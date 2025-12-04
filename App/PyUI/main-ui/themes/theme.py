@@ -1205,6 +1205,29 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_system_select_grid_wrap_around_single_row(cls):
+        return cls._data.get("systemSelectGridWrapAroundSingleRow", True)
+    
+    @classmethod
+    def set_system_select_grid_wrap_around_single_row(cls, value):
+        cls._data["systemSelectGridWrapAroundSingleRow"] = value
+        cls.save_changes()
+        
+    @classmethod
+    def set_set_top_bar_text_to_game_selection(cls, value):
+        cls._data["setTopBarTextToGameSelection"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_main_menu_grid_wrap_around_single_row(cls):
+        return cls._data.get("mainMenuGridWrapAroundSingleRow", True)
+    
+    @classmethod
+    def set_main_menu_grid_wrap_around_single_row(cls, value):
+        cls._data["mainMenuGridWrapAroundSingleRow"] = value
+        cls.save_changes()
+
+    @classmethod
     def skip_main_menu(cls):
         return cls._data.get("skipMainMenu", False)
 

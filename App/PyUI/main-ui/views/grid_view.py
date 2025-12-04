@@ -18,7 +18,8 @@ class GridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str = None,
                  selected_index=0, show_grid_text=True, resized_width=None, resized_height=None,
                  set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None, 
-                 unselected_bg = None, grid_img_y_offset=None, missing_image_path=None):
+                 unselected_bg = None, grid_img_y_offset=None, missing_image_path=None,
+                 wrap_around_single_row=None):
         super().__init__()
         self.resized_width = resized_width
         self.resized_height = resized_height
@@ -48,6 +49,10 @@ class GridView(View):
             self.font_purpose = FontPurpose.GRID_MULTI_ROW
         else:
             self.font_purpose = FontPurpose.GRID_ONE_ROW
+
+        if(wrap_around_single_row is None):
+            wrap_around_single_row = True
+        self.wrap_around_single_row = wrap_around_single_row
 
         self.selected_bg = selected_bg
         self.unselected_bg = unselected_bg
@@ -88,24 +93,33 @@ class GridView(View):
             while (self.selected >= self.current_right):
                 self.current_left += (self.cols)
                 self.current_right += (self.cols)
-        elif(len(self.options) > self.cols):
-            N = len(self.options)  # total number of items
-            self.selected = self.selected % N
+        elif(self.wrap_around_single_row):
+            if(len(self.options) > self.cols):
+                N = len(self.options)  # total number of items
+                self.selected = self.selected % N
 
-            # normalize current_left/right to wrap properly
-            self.current_left  %= N
-            self.current_right = (self.current_left + self.cols) % N
-            while not self.single_row_in_window():
-                # shift window toward sel
-                if (self.current_left - self.selected) % N < (self.selected - self.current_left) % N:
-                    # sel is "to the left" in circular sense
-                    self.current_left  = (self.current_left - 1) % N
-                    self.current_right = (self.current_right - 1) % N
-                else:
-                    # sel is "to the right"
-                    self.current_left  = (self.current_left + 1) % N
-                    self.current_right = (self.current_right + 1) % N
-                    
+                # normalize current_left/right to wrap properly
+                self.current_left  %= N
+                self.current_right = (self.current_left + self.cols) % N
+                while not self.single_row_in_window():
+                    # shift window toward sel
+                    if (self.current_left - self.selected) % N < (self.selected - self.current_left) % N:
+                        # sel is "to the left" in circular sense
+                        self.current_left  = (self.current_left - 1) % N
+                        self.current_right = (self.current_right - 1) % N
+                    else:
+                        # sel is "to the right"
+                        self.current_left  = (self.current_left + 1) % N
+                        self.current_right = (self.current_right + 1) % N
+        else:
+            while (self.selected < self.current_left):
+                self.current_left -= 1
+                self.current_right -= 1
+
+            while (self.selected >= self.current_right):
+                self.current_left += 1
+                self.current_right += 1
+
     def _render_primary_image(self,
                               image_path: str,
                               x: int, 
