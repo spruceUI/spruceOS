@@ -78,7 +78,14 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                 get_value_func=Theme.get_grid_system_select_img_height,
                                 set_value_func=Theme.set_grid_system_select_img_height
                             )
-                        )                       
+                        )                  
+            if(Theme.get_game_system_select_row_count() == 1):
+                option_list.append(
+                    self.build_enabled_disabled_entry("Wrap-Around", 
+                                            Theme.get_system_select_grid_wrap_around_single_row, 
+                                            Theme.set_system_select_grid_wrap_around_single_row)
+                )
+
         if(ViewType.FULLSCREEN_GRID == Theme.get_view_type_for_system_select_menu()):
             option_list.append(
                 self.build_enabled_disabled_entry("Show Text", 
