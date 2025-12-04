@@ -168,18 +168,39 @@ generate_miyoogamelist() {
     tempfile=${5:-used_names.txt}
     tempfile_original_names=${6:-original_names.txt}
 
+    # Save current directory
+    _orig_dir="$(pwd)"
+
+    # Convert relative paths to absolute paths before changing directory
+    case "$out" in
+        /*) out_abs="$out" ;;
+        *) out_abs="$_orig_dir/$out" ;;
+    esac
+    case "$tempfile" in
+        /*) tempfile_abs="$tempfile" ;;
+        *) tempfile_abs="$_orig_dir/$tempfile" ;;
+    esac
+    case "$tempfile_original_names" in
+        /*) tempfile_original_names_abs="$tempfile_original_names" ;;
+        *) tempfile_original_names_abs="$_orig_dir/$tempfile_original_names" ;;
+    esac
+
     cd "$rompath"
 
-    echo '<?xml version="1.0"?>' >$out
-    echo '<gameList>' >>$out
+    echo '<?xml version="1.0"?>' >"$out_abs"
+    echo '<gameList>' >>"$out_abs"
 
-    > "$tempfile"
-    > "$tempfile_original_names"
+    > "$tempfile_abs"
+    > "$tempfile_original_names_abs"
 
-    # Process ROMs recursively
-    process_roms_recursive "$rompath" "$rompath" "$imgpath" "$extlist" "$out" "$tempfile"
+    # Process ROMs recursively (use . since we're already in rompath)
+    _current_abs_path="$(pwd)"
+    process_roms_recursive "$_current_abs_path" "$_current_abs_path" "$imgpath" "$extlist" "$out_abs" "$tempfile_abs"
 
-    echo '</gameList>' >>$out
-    rm "$tempfile"
-    rm "$tempfile_original_names"
+    echo '</gameList>' >>"$out_abs"
+    rm -f "$tempfile_abs"
+    rm -f "$tempfile_original_names_abs"
+
+    # Return to original directory
+    cd "$_orig_dir"
 }
