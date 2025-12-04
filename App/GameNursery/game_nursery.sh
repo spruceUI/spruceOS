@@ -12,6 +12,16 @@ JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
 JSON_CACHE_VALID_MINUTES=20
 
+case "$PLATFORM" in
+    "A30") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
+    "Flip") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
+    "Brick") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib" ;;
+    "SmartPro") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib" ;;
+esac
+
+log_message "--DEBUG-- PATH: $PATH"
+log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+
 is_wifi_connected() {
     if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
         log_message "Cloudflare ping successful; device is online."
@@ -155,9 +165,17 @@ resize_image() {
 
 get_system_icon_from_theme() {
     local category="$1"
-    local config="/mnt/SDCARD/Saves/mini-flip-system.json"
     local current_theme icon_name emu_name selected_icon ext
     local theme_dir fallback_dir dest_path
+
+    case "$PLATFORM" in
+        "A30") local cfgname="a30" ;;
+        "Flip") local cfgname="flip" ;;
+        "Brick") local cfgname="brick" ;;
+        "SmartPro") local cfgname="smartpro" ;;
+    esac
+
+    local config="/mnt/SDCARD/Saves/${cfgname}-system.json"
 
     current_theme="$(jq -r '.theme // "spruce"' "$config")"
 
