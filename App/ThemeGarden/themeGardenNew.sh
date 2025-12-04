@@ -8,8 +8,8 @@ ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
 IMAGE_CONFIRM_EXIT="/mnt/SDCARD/spruce/imgs/displayConfirmExit.png"
 IMAGE_EXIT="/mnt/SDCARD/spruce/imgs/displayExit.png"
 DIRECTION_PROMPTS="/mnt/SDCARD/spruce/imgs/displayLeftRight.png"
-PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/Resources/theme_previews.7z"
-THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/PackedThemes"
+PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/Resources/theme_previews.7z"
+THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/PackedThemes"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -17,11 +17,18 @@ THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/Themes/main/PackedThe
 mkdir -p "$CACHE_DIR"
 mkdir -p "$ARCHIVE_DIR"
 
-# Add new variables for tracking seen themes
-SEEN_THEMES_FILE="$CACHE_DIR/seen_themes.txt"
-touch "$SEEN_THEMES_FILE"
+##### FUNCTIONS #####
 
-# Modified setup_previews to handle first-time downloads
+is_wifi_connected() {
+    if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
+        log_message "Cloudflare ping successful; device is online."
+        return 0
+    else
+        log_and_display_message "Cloudflare ping failed; device is offline. Aborting."
+        return 1
+    fi
+}
+
 setup_previews() {
     local timestamp_file="$CACHE_DIR/last_update"
     local max_age=1200 # 20 minutes in seconds
@@ -39,20 +46,19 @@ setup_previews() {
 
     # Update previews if needed
     if [ $should_update -eq 1 ] || [ ! -d "$CACHE_DIR/previews" ] || [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
-        display --icon "$ICON_PATH" -t "Downloading theme previews..."
+        log_and_display_message "Downloading theme previews.........."
         rm -rf "$CACHE_DIR/previews"
         mkdir -p "$CACHE_DIR/previews"
 
         if ! curl -s -k -L -o "$CACHE_DIR/theme_previews.7z" "$PREVIEW_PACK_URL"; then
-            display --icon "$ICON_PATH" -t "Failed to download theme previews!" -d 2
-            exit 1
+            log_and_display_message "Unable to download preview pack. Please try again later."
+            return 1
         fi
 
         if ! 7zr x "$CACHE_DIR/theme_previews.7z" -o"$CACHE_DIR/previews" 2>&1; then
-            display --icon "$ICON_PATH" -t "Failed to extract theme previews!" -d 2
-            log_message "Theme Nursery: 7z extraction error output: $?"
+            log_and_display_message "Unable to extract theme previews from archive. Please try again later."
             rm -f "$CACHE_DIR/theme_previews.7z"
-            exit 1
+            return 1
         fi
         rm -f "$CACHE_DIR/theme_previews.7z"
 
@@ -62,84 +68,21 @@ setup_previews() {
 
     # Final check if we have any preview files
     if [ -z "$(find "$CACHE_DIR/previews" -name "*.png" 2>/dev/null)" ]; then
-        display --icon "$ICON_PATH" -t "No theme previews found!" -d 2
-        exit 1
-    fi
-
-    # After successful preview extraction, mark new themes
-    if [ $should_update -eq 1 ]; then
-        # Create temporary file of current themes
-        find "$CACHE_DIR/previews" -name "*.png" -exec basename {} .png \; >"$CACHE_DIR/current_themes.txt"
-
-        # Only mark new themes if this isn't first run (seen_themes file has content)
-        if [ -s "$SEEN_THEMES_FILE" ]; then
-            while read -r theme; do
-                if ! grep -q "^${theme}$" "$SEEN_THEMES_FILE"; then
-                    mv "$CACHE_DIR/previews/${theme}.png" "$CACHE_DIR/previews/${theme}.new.png"
-                    echo "$theme" >>"$SEEN_THEMES_FILE"
-                fi
-            done <"$CACHE_DIR/current_themes.txt"
-        else
-            # First time run - just populate seen_themes file without marking as new
-            cat "$CACHE_DIR/current_themes.txt" >"$SEEN_THEMES_FILE"
-        fi
-
-        rm -f "$CACHE_DIR/current_themes.txt"
-    fi
-}
-
-# Modified get_theme_list to prioritize new themes
-get_theme_list() {
-    # First list new themes
-    find "$CACHE_DIR/previews" -name "*.new.png" -exec basename {} .new.png \; | sort >"$CACHE_DIR/theme_list.txt"
-    # Then list regular themes
-    find "$CACHE_DIR/previews" -name "*.png" ! -name "*.new.png" -exec basename {} .png \; | sort >>"$CACHE_DIR/theme_list.txt"
-    cat "$CACHE_DIR/theme_list.txt"
-    rm -f "$CACHE_DIR/theme_list.txt"
-}
-
-# Modified show_theme_preview to include index with proper newlines
-show_theme_preview() {
-    local theme_name="$1"
-    local preview_path
-    local display_name="$theme_name"
-
-    # Check if it's a new theme
-    if [ -f "$CACHE_DIR/previews/${theme_name}.new.png" ]; then
-        preview_path="$CACHE_DIR/previews/${theme_name}.new.png"
-        display_name="${theme_name} - New!"
-    else
-        preview_path="$CACHE_DIR/previews/${theme_name}.png"
-    fi
-
-    # Check if theme is installed
-    if [ -d "/mnt/SDCARD/Themes/${theme_name}" ]; then
-        display_name="${display_name} - Installed"
-    fi
-
-    # Check if file exists and log details
-    if [ ! -f "$preview_path" ]; then
-        log_message "Theme Nursery: Preview file not found!"
-        display --icon "$ICON_PATH" -t "Preview image not found!"
+        log_and_display_message "No theme previews found!"
         return 1
     fi
 
-    display_kill
-    display -t "$display_name
-
-
-
-
-
-
-
-
-
-${current_theme}/${total_themes}" -p 10 -s 30 -w 600 -a middle \
-        --add-image "$preview_path" 0.73 240 middle \
-        --add-image "$IMAGE_CONFIRM_EXIT" 1.0 240 middle \
-        --add-image "$DIRECTION_PROMPTS" 1.0 240 middle
+    return 0    # hooray! we made it!
 }
+
+construct_config() {
+    echo "" > "$CACHE_DIR/garden.json"
+    for theme in "$CACHE_DIR/previews"/* ; do
+        theme_name="$(basename $theme .png)"
+        echo "\"$theme_name\": \"$DOWNLOAD $theme\"," > "$CACHE_DIR/garden.json"
+    done
+}
+
 
 download_theme() {
     local theme_name="$1"
@@ -222,8 +165,15 @@ redownload_installed_themes() {
     fi
 }
 
-# Initial setup
-setup_previews
+
+
+##### MAIN EXECUTION #####
+
+start_pyui_message_writer
+log_and_display_message "Welcome to the spruceOS Theme Garden. We hope you enjoy your visit as you stop and smell the artwork. Please wait.........."
+
+if ! is_wifi_connected; then sleep 3; exit 1; fi
+if ! setup_previews; then sleep 3; exit 1; fi
 
 # Get theme list and count
 THEME_LIST=$(get_theme_list)
