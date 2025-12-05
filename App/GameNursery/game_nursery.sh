@@ -17,8 +17,8 @@ case "$PLATFORM" in
     "SmartPro") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
 esac
 
-log_message "--DEBUG-- PATH: $PATH"
-log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+log_message "--DEBUG-- PATH: $PATH" -v
+log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH" -v
 
 ##### FUNCTIONS #####
 

@@ -4,7 +4,14 @@
 export PATH=/tmp/bin:$PATH
 export LD_LIBRARY_PATH=/tmp/lib:$LD_LIBRARY_PATH
 
+log_message "--Debug-- PATH = $PATH"
+log_message "--Debug-- LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
+log_message "--Debug-- DISPLAY_WIDTH = $DISPLAY_WIDTH"
+log_message "--Debug-- DISPLAY_HEIGHT = $DISPLAY_HEIGHT"
+
 LOGO_NAME="$1"
+
+log_message "--Debug-- LOGO_NAME = $LOGO_NAME"
 
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
 ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -15,7 +22,7 @@ DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
 
 display_logo() {
-    display -i "$DIR/$1.png" -d 1
+    display -i "$DIR/Imgs/$1.png" -d 1
 }
 
 # Check for input image in BMP or PNG format
@@ -25,32 +32,36 @@ if [ -f "${LOGO_PATH}.bmp" ]; then
 elif [ -f "${LOGO_PATH}.png" ]; then
     LOGO_PATH="${LOGO_PATH}.png"
 else
-    echo "Error: Neither $LOGO_NAME.bmp nor $LOGO_NAME.png exist in the directory: $DIR"
+    log_message "Error: Neither $LOGO_NAME.bmp nor $LOGO_NAME.png exist in the directory: $DIR"
     display --icon "$ERROR_IMAGE_PATH" -t "Boot logo not found. Cancelling boot logo swap." -d 1
     exit 1
 fi
+
+log_message "--Debug-- LOGO_PATH = $LOGO_PATH"
 
 # Convert image to BMP if not already
 EXTENSION="${LOGO_PATH##*.}"
 BOOTLOGO_IMAGE_INFO="$(/mnt/SDCARD/spruce/bin/ffprobe -v error -select_streams v:0 -show_entries stream=width,height,pix_fmt -of compact=p=0:nk=1 -i "$LOGO_PATH")"
 if [ "$EXTENSION" != "bmp" ] || [ "$BOOTLOGO_IMAGE_INFO" != "$DISPLAY_WIDTH|$DISPLAY_HEIGHT|bgr24" ]; then
-    echo "Converting image to BMP format with resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}..."
+    log_message "Converting image to BMP format with resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}..."
     ffmpeg -y -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
+        log_message "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
         display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
         exit 1
     fi
     LOGO_PATH="$TEMP_BMP"
 fi
 
+log_message "--Debug-- new LOGO_PATH = $LOGO_PATH"
+
 case "$PLATFORM" in
     A30)
         # Image conversion: rotation, resizing, compression
-        echo "Processing image..."
+        log_message "Processing image..."
         ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to process image with FFmpeg."
+            log_message "Error: Unable to process image with FFmpeg."
             display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
@@ -63,7 +74,7 @@ case "$PLATFORM" in
 
         # Check dimensions of compressed image
         if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
-            echo "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
+            log_message "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
             display --icon "$ERROR_IMAGE_PATH" -t "Image is too large. Cancelling boot logo swap." -d 1
             rm "$PROCESSED_PATH" boot0 boot0-suffix
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
@@ -71,10 +82,10 @@ case "$PLATFORM" in
         fi
 
         # Backup partition
-        echo "Creating backup of original partition..."
+        log_message "Creating backup of original partition..."
         cp /dev/mtdblock0 boot0
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to create a backup of the partition."
+            log_message "Error: Unable to create a backup of the partition."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't back up boot partition. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
@@ -84,7 +95,7 @@ case "$PLATFORM" in
         VERSION=$(cat /usr/miyoo/version)
         OFFSET_PATH="res/offset-$VERSION"
         if [ ! -f "$OFFSET_PATH" ]; then
-            echo "Error: Offset not found for firmware version ($VERSION)."
+            log_message "Error: Offset not found for firmware version ($VERSION)."
             display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             rm "$PROCESSED_PATH" boot0
@@ -93,20 +104,20 @@ case "$PLATFORM" in
         OFFSET=$(cat "$OFFSET_PATH")
 
         # Display update image
-        echo "Displaying update image..."
+        log_message "Displaying update image..."
         display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
 
         # Update bootlogo in memory
-        echo "Updating BootLogo..."
+        log_message "Updating BootLogo..."
         OFFSET_PART=$((OFFSET + LOGO_SIZE))
         dd if=boot0 of=boot0-suffix bs=1 skip=$OFFSET_PART > /dev/null 2>&1
         dd if="$PROCESSED_PATH" of=boot0 bs=1 seek=$OFFSET > /dev/null 2>&1
         dd if=boot0-suffix of=boot0 bs=1 seek=$OFFSET_PART > /dev/null 2>&1
 
-        echo "Writing updated partition..."
+        log_message "Writing updated partition..."
         mtd write "$DIR/boot0" boot > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to write updated partition."
+            log_message "Error: Unable to write updated partition."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
             rm "$PROCESSED_PATH" "$PROCESSED_NAME" "$TEMP_BMP" boot0 boot0-suffix
             exit 1
@@ -119,12 +130,12 @@ case "$PLATFORM" in
         display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
 
         # Setting up environment
-        echo "Preparing system..."
+        log_message "Preparing system..."
         DIR="$(cd "$(dirname "$0")" && pwd)"
         cd "$DIR" || exit 1
         cp -r payload/* /tmp
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to write to disk."
+            log_message "Error: Unable to write to disk."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP"
             exit 1
@@ -132,19 +143,19 @@ case "$PLATFORM" in
         cd /tmp
 
         # Extracting Boot Image
-        echo "Extracting Boot files..."
+        log_message "Extracting Boot files..."
         dd if=/dev/mtd2ro of=boot.img bs=131072
 
         # Unpacking Boot Image
-        echo "Unpacking Boot files..."
+        log_message "Unpacking Boot files..."
         mkdir -p bootimg
         unpackbootimg -i boot.img -o bootimg
 
         # Unpacking Resources
-        echo "Unpacking Boot resources..."
+        log_message "Unpacking Boot resources..."
         mkdir -p bootres
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to write to disk."
+            log_message "Error: Unable to write to disk."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP"
             exit 1
@@ -154,38 +165,38 @@ case "$PLATFORM" in
         rsce_tool -u boot.img-second
 
         # Replacing logo
-        echo "Replacing Boot logo..."
+        log_message "Replacing Boot logo..."
         cp -f "$LOGO_PATH" ./logo.bmp
         cp -f "$LOGO_PATH" ./logo_kernel.bmp
 
         # Packing Resources
-        echo "Packing updated Boot resources..."
+        log_message "Packing updated Boot resources..."
         for file in *; do
             [ "$(basename "$file")" != "boot.img-second" ] && set -- "$@" -p "$file"
         done
         rsce_tool "$@"
 
         # Packing Boot Image
-        echo "Packing updated Boot files..."
+        log_message "Packing updated Boot files..."
         cp -f boot-second ../bootimg
         cd ../
         rm boot.img
         mkbootimg --kernel bootimg/boot.img-kernel --second bootimg/boot-second --base 0x10000000 --kernel_offset 0x00008000 --ramdisk_offset 0xf0000000 --second_offset 0x00f00000 --pagesize 2048 --hashtype sha1 -o boot.img
         if [ $? -ne 0 ]; then
-            echo "Error: Unable to create new boot image."
+            log_message "Error: Unable to create new boot image."
             display --icon "$ERROR_IMAGE_PATH" -t "Couldn't pack new boot image. Cancelling boot logo swap." -d 1
             rm -f "$TEMP_BMP"
             exit 1
         fi
 
         # Flash new Boot Image
-        echo "Flashing updated Boot files..."
+        log_message "Flashing updated Boot files..."
         flashcp boot.img /dev/mtd2 && sync
 
         # Clean up
-        echo "Cleaning temporal files..."
+        log_message "Cleaning temporal files..."
         cd ../
-        rm -r /tmp
+        rm -rf /tmp/bootimg /tmp/bootres /tmp/payload /tmp/boot.img 2>/dev/null
         rm -f "$TEMP_BMP"
         ;;
     "Brick" | "SmartPro")
@@ -216,7 +227,7 @@ esac
 
 # Clean up temporary files
 
-echo "Bootlogo updated successfully!"
+log_message "Bootlogo updated successfully!"
 display --icon "$IMAGE_PATH" -t "Boot logo updated successfully!" -d 1
 
 # Visualizza immagine finale
