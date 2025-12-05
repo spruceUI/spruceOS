@@ -94,18 +94,18 @@ jobs:
 
           echo "Copying selected themes..."
 
-          cp pyui_themes/PackedThemes/ALEKFULL_NX.7z Themes/
-          cp pyui_themes/PackedThemes/CONSOLED.7z Themes/
-          cp pyui_themes/PackedThemes/Grape.7z Themes/
-          cp pyui_themes/PackedThemes/M.7z Themes/
-          cp pyui_themes/PackedThemes/MinUInspired_Grey.7z Themes/
-          cp pyui_themes/PackedThemes/Retro_TV.7z Themes/
-          cp pyui_themes/PackedThemes/SPRUCE_simple.7z Themes/
-          cp pyui_themes/PackedThemes/Avocado.7z Themes/
-          cp pyui_themes/PackedThemes/Cosy_by_KyleBing.7z Themes/
-          cp pyui_themes/PackedThemes/HeyDWs_Blue.7z Themes/
-          cp pyui_themes/PackedThemes/MINIMAL.7z Themes/
-          cp pyui_themes/PackedThemes/Pico-8.7z Themes/
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/
+          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/
+          cp "pyui_themes/PackedThemes/CONSOLED.7z" Themes/
+          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/
+          cp "pyui_themes/PackedThemes/Grape.7z" Themes/
+          cp "pyui_themes/PackedThemes/HeyDW\'s Blue.7z" Themes/
+          cp "pyui_themes/PackedThemes/M.7z" Themes/
+          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/
+          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/
+          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/
+          cp "pyui_themes/PackedThemes/Retro TV.7z" Themes/
+          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/
 
           echo "Themes copied:"
           ls -lh Themes
@@ -203,4 +203,5 @@ jobs:
             fi
 
           done
+
 
