@@ -56,32 +56,62 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-#      - name: Update version in language files
-#        run: |
-#          # Get the version-date string
-#          VERSION="${{ steps.get_version.outputs.version }}"
-#          
-#          # Find and update all .lang files
-#          find miyoo/res/lang -name "*.lang" -type f -exec sh -c '
-#            for file do
-#              # Create temp file
-#              tmp=$(mktemp)
-#              # Replace version string, preserving the v prefix
-#              sed "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v$1/" "$file" > "$tmp"
-#              mv "$tmp" "$file"
-#            done
-#          ' sh "$VERSION" {} +
-
       - name: Recombine large files
         run: |
-          rm -f spruce/flip/miyoo355_rootfs_32.img
-          cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
-          rm -f spruce/flip/miyoo355_rootfs_32.img_part*
-          rm -f spruce/flip/muOS-pixie-reduced.sqsh
-          cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
-          rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
-          cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
-          rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
+          # Miyoo rootfs
+          if ls spruce/flip/miyoo355_rootfs_32.img_part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/miyoo355_rootfs_32.img
+            cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
+            rm -f spruce/flip/miyoo355_rootfs_32.img_part*
+          fi
+
+          # muOS pixie
+          if ls spruce/flip/muOS-pixie-reduced.sqsh-part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh
+            cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
+          fi
+
+          # scummvm libretro core
+          if ls RetroArch/.retroarch/cores64/scummvm_libretro.so.part* 1>/dev/null 2>&1; then
+            cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
+            rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
+          fi
+
+      - name: Create RetroArch core archives
+        run: |
+          7z a -t7z -mx=9 spruce/archives/staging/cores.7z RetroArch/.retroarch/cores
+          7z a -t7z -mx=9 spruce/archives/staging/cores64.7z RetroArch/.retroarch/cores64
+          rm -rf RetroArch/.retroarch/cores
+          rm -rf RetroArch/.retroarch/cores64
+
+      - name: Pull selected PyUI Themes
+        run: |
+          echo "Cloning PyUI-Themes repo..."
+          git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
+
+          mkdir -p Themes
+
+          echo "Copying selected themes..."
+
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/
+          cp "pyui_themes/PackedThemes/CONSOLED.7z" Themes/
+          cp "pyui_themes/PackedThemes/Grape.7z" Themes/
+          cp "pyui_themes/PackedThemes/M.7z" Themes/
+          cp "pyui_themes/PackedThemes/MinUInspired (Grey).7z" Themes/
+          cp "pyui_themes/PackedThemes/Retro TV.7z" Themes/
+          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/
+          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/
+          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/
+          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/
+          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/
+          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/
+
+          echo "Themes copied:"
+          ls -lh Themes
+
+          echo "Removing cloned PyUI Themes repo"
+          rm -rf pyui_themes
 
       - name: Create 7z archive
         run: |
@@ -173,4 +203,3 @@ jobs:
             fi
 
           done
-
