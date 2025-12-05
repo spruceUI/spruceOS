@@ -99,7 +99,7 @@ jobs:
           cp "pyui_themes/PackedThemes/CONSOLED.7z" Themes/
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/
           cp "pyui_themes/PackedThemes/Grape.7z" Themes/
-          cp "pyui_themes/PackedThemes/HeyDW\'s Blue.7z" Themes/
+          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/
           cp "pyui_themes/PackedThemes/M.7z" Themes/
           cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/
           cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/
@@ -203,5 +203,6 @@ jobs:
             fi
 
           done
+
 
 
