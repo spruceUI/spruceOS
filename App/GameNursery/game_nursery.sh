@@ -4,8 +4,6 @@
 
 ##### CONSTANTS #####
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-[ "$(uname -m)" = "aarch64" ] && BIN_PATH="${BIN_PATH}64"
 DOWNLOAD="/mnt/SDCARD/App/GameNursery/download_game.sh"
 CONFIG_DIR="/mnt/SDCARD/Saves/GameNursery"
 JSON_DIR="/tmp/nursery-json"
@@ -21,6 +19,8 @@ esac
 
 log_message "--DEBUG-- PATH: $PATH"
 log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+
+##### FUNCTIONS #####
 
 is_wifi_connected() {
     if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
@@ -242,27 +242,27 @@ construct_config() {
     # Initialize config json with open bracket
     echo "{" > "$CONFIG_DIR"/nursery_config
 
-# loop through each folder of game jsons
-for group_dir in "$JSON_DIR"/*; do
+    # loop through each folder of game jsons
+    for group_dir in "$JSON_DIR"/*; do
 
-    # make sure it's a non-empty directory before trying to do stuff
-    if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
+        # make sure it's a non-empty directory before trying to do stuff
+        if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
 
-        tab_name="$(basename "$group_dir")"
+            tab_name="$(basename "$group_dir")"
 
-        # Exclude Ports if PLATFORM is NOT A30
-        if [ "$PLATFORM" != "A30" ] && [ "$tab_name" = "Ports" ]; then
-            continue
+            # Exclude Ports if PLATFORM is NOT A30
+            if [ "$PLATFORM" != "A30" ] && [ "$tab_name" = "Ports" ]; then
+                continue
+            fi
+
+            # iterate through each json for the current group
+            get_system_icon_from_theme "$tab_name"
+            for filename in "$group_dir"/*.json; do
+                interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
+                download_boxart "$filename"
+            done
         fi
-
-        # iterate through each json for the current group
-        get_system_icon_from_theme "$tab_name"
-        for filename in "$group_dir"/*.json; do
-            interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
-            download_boxart "$filename"
-        done
-    fi
-done
+    done
 
     sed -i '$ s/,$//' "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
     echo "}" >> "$CONFIG_DIR"/nursery_config            # Finish config json with a closing bracket
