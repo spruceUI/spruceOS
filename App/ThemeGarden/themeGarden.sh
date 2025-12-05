@@ -123,3 +123,5 @@ while true; do
     fi
 
 done
+
+/mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
