@@ -10,7 +10,7 @@ construct_config() {
     cd "$IMG_DIR" || return 1
     echo "{" > "$APP_DIR/bootlogo.json"
 
-    for logo in ./* ; do
+    for logo in /mnt/SDCARD/App/BootLogo/Imgs/* ; do
         file_ext=""
         case "$logo" in
             *"Yes, flash"*) continue ;; # ignore confirmation images
@@ -20,7 +20,7 @@ construct_config() {
         esac
         logo_name="$(basename "$logo" "$file_ext")" 
         cp -f "$logo" "$IMG_DIR/Yes, flash ${logo_name}${file_ext}"
-        echo "\"$logo_name/Yes, flash $logo_name\": \"$INSTALL '$logo_name'\"," >> "$APP_DIR/bootlogo.json"
+        echo "\"$logo_name/Yes, flash $logo_name\": \"cp -f '$logo' '$APP_DIR/bootlogo${file_ext}'\"," >> "$APP_DIR/bootlogo.json"
     done
 
     sed -i '$ s/,$//' "$APP_DIR/bootlogo.json"      # strip away final trailing comma
@@ -29,6 +29,8 @@ construct_config() {
 }
 
 ##### MAIN EXECUTION #####
+
+mv -f /mnt/SDCARD/App/BootLogo/bootlogo.png /mnt/SDCARD/App/BootLogo/bootlogo.png.bak 2>/dev/null
 
 start_pyui_message_writer
 log_and_display_message "Preparing boot logo selection menu. Please wait.........."
@@ -56,7 +58,10 @@ while true; do
             # Execute the content of the file as a command
             eval "$content"
             rm -f "$RESULT_FILE"
+            "$INSTALL"
             break
         fi
     fi
 done
+
+mv -f /mnt/SDCARD/App/BootLogo/bootlogo.png.bak /mnt/SDCARD/App/BootLogo/bootlogo.png 2>/dev/null

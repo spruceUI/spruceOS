@@ -4,17 +4,9 @@
 export PATH=/tmp/bin:$PATH
 export LD_LIBRARY_PATH=/tmp/lib:$LD_LIBRARY_PATH
 
-log_message "--Debug-- PATH = $PATH"
-log_message "--Debug-- LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
-log_message "--Debug-- DISPLAY_WIDTH = $DISPLAY_WIDTH"
-log_message "--Debug-- DISPLAY_HEIGHT = $DISPLAY_HEIGHT"
-
-LOGO_NAME="$1"
-
-log_message "--Debug-- LOGO_NAME = $LOGO_NAME"
-
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/image.png"
 ERROR_IMAGE_PATH="/mnt/SDCARD/spruce/imgs/notfound.png"
+LOGO_NAME="bootlogo"
 PROCESSED_NAME="bootlogo_processed.bmp"
 TEMP_BMP="/mnt/SDCARD/App/BootLogo/temp_logo.bmp"
 MAX_SIZE=62234
@@ -22,11 +14,17 @@ DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
 
 display_logo() {
-    display -i "$DIR/Imgs/$1.png" -d 1
+    display -i "$DIR/$1.png" -d 1
 }
 
+log_message "--Debug-- PATH = $PATH"
+log_message "--Debug-- LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
+log_message "--Debug-- DISPLAY_WIDTH = $DISPLAY_WIDTH"
+log_message "--Debug-- DISPLAY_HEIGHT = $DISPLAY_HEIGHT"
+log_message "--Debug-- LOGO_NAME = $LOGO_NAME"
+
 # Check for input image in BMP or PNG format
-LOGO_PATH="/mnt/SDCARD/App/BootLogo/Imgs/$LOGO_NAME"
+LOGO_PATH="/mnt/SDCARD/App/BootLogo/$LOGO_NAME"
 if [ -f "${LOGO_PATH}.bmp" ]; then
     LOGO_PATH="${LOGO_PATH}.bmp"
 elif [ -f "${LOGO_PATH}.png" ]; then
