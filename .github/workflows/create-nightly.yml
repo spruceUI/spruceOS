@@ -104,7 +104,7 @@ jobs:
           cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/
           cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/
           cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/
-          cp "pyui_themes/PackedThemes/Retro TV.7z" Themes/
+          cp "pyui_themes/PackedThemes/RETRO TV.7z" Themes/
           cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/
 
           echo "Themes copied:"
@@ -203,6 +203,7 @@ jobs:
             fi
 
           done
+
 
 
 
