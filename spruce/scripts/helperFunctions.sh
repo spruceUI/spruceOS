@@ -44,7 +44,6 @@ case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
     *"TG5040"*)	export PLATFORM="SmartPro" ;;
     *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *) export PLATFORM="A30" ;;
 esac
@@ -1142,8 +1141,12 @@ take_screenshot() {
 ##########     PYUI MESSAGE WRITER     ##########
 
 start_pyui_message_writer() {
+    if [ "$PLATFORM" = "A30" ]; then
+        ifconfig lo up
+        ifconfig lo 127.0.0.1
+    fi
     # Check if PyUI is already running with the realtime port argument
-    if ps -ef | grep "[m]sgDisplayRealtimePort" >/dev/null; then
+    if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
         log_message "Real Time message listener already running."
         return
     fi
@@ -1156,7 +1159,7 @@ start_pyui_message_writer() {
 kill_pyui_message_writer() {
 
     # Check if PyUI is already running with the realtime port argument
-    pids=$(ps -ef | grep "[m]sgDisplayRealtimePort" | awk '{print $1}')
+    pids=$(pgrep -f "sgDisplayRealtimePort" | awk '{print $1}')
 
     if [ -n "$pids" ]; then
         log_message "Real Time message listener already running. Killing it..."
@@ -1171,7 +1174,7 @@ kill_pyui_message_writer() {
 }
 
 stop_pyui_message_writer() {
-    display_message "EXIT_APP"
+    display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
     sleep 0.5
     kill_pyui_message_writer
     freemma
@@ -1208,7 +1211,35 @@ EOF
 
 log_and_display_message(){
     log_message "$1"
-    display_message "$1"
+    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$1")"
+}
+
+display_option_list(){
+    log_message "Display option list $1"
+    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$1")"
+}
+
+display_top_image_bottom_text(){
+    #$1 = Img e.g. /mnt/SDCARD/spruce/tmp/image.png
+    #$2 = Up to what % of the scren height should be used for the image e.g. 75
+    #$3 = Bottom text e.g. "World"
+    log_message "Display top image bottom text $1 $2 $3"
+    display_message "$(printf '{"cmd":"TOP_IMAGE_BOTTOM_TEXT","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+}
+
+display_top_text_bottom_image(){
+    #$1 = Img e.g. /mnt/SDCARD/spruce/tmp/image.png
+    #$2 = Up to what % of the scren height should be used for the image e.g. 75 starting from the bottom
+    #$3 = Top text e.g. "World"
+    log_message "Display top image bottom text $1 $2 $3"
+    display_message "$(printf '{"cmd":"TOP_TEXT_BOTTOM_IMAGE","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+}
+
+display_text_with_percentage_bar(){
+    #$1 = Text e.g. "Hello"
+    #$2 = The percentage complete e.g. 75
+    log_message "Display text with percentage bar $1 $2"
+    display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
 }
 
 # ---------------------------------------------------------------------------
