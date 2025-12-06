@@ -93,7 +93,7 @@ class GameConfigMenu:
                     update_value(entry_name, all_options[selected_index])
 
     def toggle_overridable_entries(self,input_value, rom_file_path, overridable_entries):
-        if(ControllerInput.A == input):
+        if(ControllerInput.A == input_value):
             all_overriden = True
             for entry_name in overridable_entries:
                 if not self.game_system.game_system_config.contains_menu_override(entry_name,rom_file_path):
