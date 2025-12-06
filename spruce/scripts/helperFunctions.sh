@@ -1223,6 +1223,14 @@ display_top_image_bottom_text(){
     display_message "$(printf '{"cmd":"TOP_IMAGE_BOTTOM_TEXT","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
 }
 
+display_top_text_bottom_image(){
+    #$1 = Img e.g. /mnt/SDCARD/spruce/tmp/image.png
+    #$2 = Up to what % of the scren height should be used for the image e.g. 75 starting from the bottom
+    #$3 = Top text e.g. "World"
+    log_message "Display top image bottom text $1 $2 $3"
+    display_message "$(printf '{"cmd":"TOP_TEXT_BOTTOM_IMAGE","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+}
+
 display_text_with_percentage_bar(){
     #$1 = Text e.g. "Hello"
     #$2 = The percentage complete e.g. 75
