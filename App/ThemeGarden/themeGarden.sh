@@ -102,7 +102,7 @@ construct_config
 RESULT_FILE="/mnt/SDCARD/App/PyUI/selection.txt"
 rm -f "$RESULT_FILE"
 
-log_and_display_message "OPTION_LIST:$CONFIG_DIR"/garden.json
+display_option_list "$CONFIG_DIR/garden.json"
 
 while true; do
     if [ -f "$RESULT_FILE" ]; then
@@ -118,7 +118,7 @@ while true; do
             eval "$content"
             # Remove the file after running
             rm -f "$RESULT_FILE"
-            log_and_display_message "OPTION_LIST:$CONFIG_DIR"/garden.json
+            display_option_list "$CONFIG_DIR/garden.json"
         fi
     fi
 
