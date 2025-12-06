@@ -1395,6 +1395,17 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def display_volume_numbers(cls):
+        return cls._data.get("displayVolumeNumbers", False)
+    
+    @classmethod
+    def set_display_volume_numbers(cls, value):
+        cls._data["displayVolumeNumbers"] = value
+        cls.save_changes()
+
+        
+
+    @classmethod
     def get_main_menu_title(cls):
         return cls._data.get("mainMenuTitle", PyUiConfig.get_main_menu_title())
     

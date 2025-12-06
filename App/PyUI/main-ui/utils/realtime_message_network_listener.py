@@ -3,7 +3,9 @@ import threading
 import sys
 import queue
 import json
+from devices.device import Device
 from display.display import Display
+from display.render_mode import RenderMode
 from option_select_ui import OptionSelectUI
 from utils.logger import PyUiLogger
 
@@ -90,6 +92,21 @@ class RealtimeMessageNetworkListener:
         except queue.Empty:
             pass
 
+    def _progress_bar(self, percent):
+        """
+        Returns an ASCII progress bar rounded to nearest 5%.
+        Example: progress_bar(34) → "[███████···········] 35%"
+        """
+        # Round to nearest 5%
+        rounded = round(percent / 5) * 5
+
+        # Total bar resolution: 20 segments (20 × 5% = 100%)
+        total_segments = 20
+        filled = rounded // 5  # each block is 5%
+
+        bar = "█" * filled + "·" * (total_segments - filled)
+        return f"[{bar}] {rounded}%"
+
     def _handle_ui_message(self, raw_message: str):
         """
         Handle a JSON-formatted UI command.
@@ -126,6 +143,35 @@ class RealtimeMessageNetworkListener:
                 Display.display_image(image_path)
             else:
                 self.logger.error("RENDER_IMAGE missing args")
+
+        elif cmd == "TOP_IMAGE_BOTTOM_TEXT":
+            if args:
+                image_path = args[0]
+                image_height_percent = args[1] / 100
+                image_y = (Device.screen_height()*image_height_percent)//2
+                image_height = int(Device.screen_height()*image_height_percent)
+                text = args[2]
+                text_y = int(Device.screen_height() * (((100 - args[1]) / 2) + args[1]) / 100)
+
+                self.logger.info(f"Rendering image from path: {image_path} with text: {text}")
+                Display.clear("")
+                Display.render_image(image_path,Device.screen_width()//2,image_y,RenderMode.MIDDLE_CENTER_ALIGNED,
+                                     Device.screen_width(), image_height)
+                Display.write_message_multiline(text, text_y)
+                Display.present()
+            else:
+                self.logger.error("TOP_IMAGE_BOTTOM_TEXT missing args")
+        elif cmd == "TEXT_WITH_PERCENTAGE_BAR":
+            if args:
+                text = args[0]
+                percentage = args[1]
+                self.logger.info(f"Rendering text: {text} w/ perc(entage bar: {percentage}%")
+                Display.clear("")
+                Display.write_message_multiline(text, Device.screen_height()//3)
+                Display.write_message_multiline(self._progress_bar(percentage), (Device.screen_height()*2)//3)
+                Display.present()
+            else:
+                self.logger.error("TEXT_WITH_PERCENTAGE_BAR missing args")
 
         elif cmd == "OPTION_LIST":
             if args:

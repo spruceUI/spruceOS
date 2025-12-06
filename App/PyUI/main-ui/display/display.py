@@ -961,19 +961,23 @@ class Display:
 
     @classmethod
     def display_message_multiline(cls,split_message, duration_ms=0):
-        Display.clear("")
+        Display.clear("")        
+        cls.write_message_multiline(split_message, Device.screen_height()//2)
+        Display.present()
+        # Sleep for the specified duration in milliseconds
+        time.sleep(duration_ms / 1000)
+
+    @classmethod
+    def write_message_multiline(cls,split_message, middle_height):
         text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
 
         height_per_line = text_h + int(5 * Device.screen_height()/480)
-        starting_height = Device.screen_height()//2 - (len(split_message) * height_per_line)//2
+        starting_height = middle_height - (len(split_message) * height_per_line)//2
 
         for i, line in enumerate(split_message):
             Display.render_text_centered(f"{line}",Device.screen_width()//2, starting_height + i * height_per_line,
                                          Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
 
-        Display.present()
-        # Sleep for the specified duration in milliseconds
-        time.sleep(duration_ms / 1000)
 
     @classmethod
     def display_message(cls,message, duration_ms=0):
