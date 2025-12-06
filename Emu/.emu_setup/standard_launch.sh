@@ -110,7 +110,7 @@ handle_network_services() {
 	fi
 
 	##### Syncthing Sync Check, perform only once per session #####
-	if ["$syncthing_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
+	if [ "$syncthing_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
 		log_message "Syncthing is enabled, WiFi connection needed"
 		wifi_needed=true
 		syncthing_enabled=true
@@ -124,7 +124,7 @@ handle_network_services() {
 	fi
 
 	# Handle Syncthing sync if enabled
-	if $syncthing_enabled && $wifi_connected; then
+	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
 		start_syncthing_process
 		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced"
