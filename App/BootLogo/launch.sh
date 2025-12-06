@@ -45,7 +45,7 @@ fi
 RESULT_FILE="/mnt/SDCARD/App/PyUI/selection.txt"
 rm -f "$RESULT_FILE"
 
-log_and_display_message "OPTION_LIST:$APP_DIR"/bootlogo.json
+display_option_list "$APP_DIR/bootlogo.json"
 while true; do
     if [ -f "$RESULT_FILE" ]; then
         content=$(cat "$RESULT_FILE" 2>/dev/null)
