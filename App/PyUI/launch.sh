@@ -33,7 +33,7 @@ case "$PLATFORM" in
         touch /tmp/fbdisplay_exit
         cat /dev/zero > /dev/fb0
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/a30/sdl2"
-        export LD_LIBRARY_PATH="/usr/miyoo/lib"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/miyoo/lib:/usr/miyoo/lib:/usr/lib:/lib"
 
 
         cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
@@ -76,7 +76,7 @@ case "$PLATFORM" in
         touch /tmp/fbdisplay_exit
         cat /dev/zero > /dev/fb0
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
-        export LD_LIBRARY_PATH="/usr/trimui/lib"
+        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
         /mnt/SDCARD/spruce/scripts/iconfresh.sh
 
         if [ "$PLATFORM" = "Brick" ]; then
@@ -110,7 +110,7 @@ case "$PLATFORM" in
     ;;
 
     "Flip" )
-        export LD_LIBRARY_PATH=/usr/miyoo/lib:$LD_LIBRARY_PATH
+        export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
         insmod /lib/modules/rtk_btusb.ko
         runifnecessary "btmanager" /usr/miyoo/bin/btmanager
         runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
