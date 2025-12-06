@@ -197,7 +197,7 @@ case "$PLATFORM" in
         rm -rf /tmp/bootimg /tmp/bootres /tmp/payload /tmp/boot.img 2>/dev/null
         rm -f "$TEMP_BMP"
         ;;
-    "Brick" | "SmartPro")
+    "Brick" | "SmartPro" | "SmartProS")
         # A much faster and more simple implementation than Miyoo's devices
         # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
         if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
