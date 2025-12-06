@@ -42,9 +42,9 @@ case "$PLATFORM" in
 
 		for f in \
 		/usr/lib/libSDL-1.2.so.0 \
-		/usr/lib/llibSDL-1.2.so.0.11.4 \
-		/usr/lib/llibSDL2-2.0.so.0 \
-		/usr/lib/llibSDL2-2.0.so.0.3200.6 \
+		/usr/lib/libSDL-1.2.so.0.11.4 \
+		/usr/lib/libSDL2-2.0.so.0 \
+		/usr/lib/libSDL2-2.0.so.0.3200.6 \
 		/usr/lib/libSDL2_mixer-2.0.so.0 \
 		/usr/lib/libSDL2_mixer-2.0.so.0.2.2 \
 		/usr/lib/libSDL2_ttf-2.0.so.0 \
