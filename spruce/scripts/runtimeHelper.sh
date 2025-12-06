@@ -240,6 +240,7 @@ runtime_mounts_A30() {
     mkdir -p /mnt/SDCARD/spruce/dummy
     mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
     mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
+    mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
