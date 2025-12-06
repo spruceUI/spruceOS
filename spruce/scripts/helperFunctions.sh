@@ -241,7 +241,7 @@ cores_online() {
     chmod a-w /sys/devices/system/cpu/cpu0/online
 
     # Set the state for CPU1-3 based on num_cores
-    for i in 1 2 3; do
+    for i in $(seq 1 $((num_cores - 1))); do
         chmod a+w /sys/devices/system/cpu/cpu$i/online
         if [ "$i" -lt "$num_cores" ]; then
             echo 1 >/sys/devices/system/cpu/cpu$i/online
@@ -924,37 +924,76 @@ record_video() {
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        cores_online
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
         case "$PLATFORM" in
-            "A30")
-                scaling_max_freq=1344000
-                CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
-                ;;
-            "Flip")
-                scaling_max_freq=1800000
-                CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/policy0/conservative"
-                ;;
-            "Brick"|"SmartPro")
-                scaling_max_freq=1800000
-                CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
-                ;;
+        SmartProS)
+            cores_online 8
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+            big_max_freq=1800000
+            little_max_freq=1416000
+            echo conservative >/sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+            echo conservative >/sys/devices/system/cpu/cpufreq/policy4/scaling_governor
+            echo 45 >/sys/devices/system/cpu/cpufreq/policy0/down_threshold
+            echo 75 >/sys/devices/system/cpu/cpufreq/policy0/up_threshold
+            echo 3 >/sys/devices/system/cpu/cpufreq/policy0/freq_step
+            echo 1 >/sys/devices/system/cpu/cpufreq/policy0/sampling_down_factor
+            echo 400000 >/sys/devices/system/cpu/cpufreq/policy0/sampling_rate
+            echo 45 >/sys/devices/system/cpu/cpufreq/policy4/down_threshold
+            echo 75 >/sys/devices/system/cpu/cpufreq/policy4/up_threshold
+            echo 3 >/sys/devices/system/cpu/cpufreq/policy4/freq_step
+            echo 1 >/sys/devices/system/cpu/cpufreq/policy4/sampling_down_factor
+            echo 400000 >/sys/devices/system/cpu/cpufreq/policy4/sampling_rate
+            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+            echo $big_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            cho "$little_max_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+            log_message "CPU Mode now locked to SMART" -v
+            flag_remove "setting_cpu"
+            ;;
+        *)
+            cores_online
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            case "$PLATFORM" in
+                "A30")
+                    scaling_max_freq=1344000
+                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
+                    ;;
+                "Flip")
+                    scaling_max_freq=1800000
+                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/policy0/conservative"
+                    ;;
+                "Brick"|"SmartPro")
+                    scaling_max_freq=1800000
+                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
+                    ;;
+            esac
+            echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
+            echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
+            echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
+            echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
+            echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
+            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            log_message "CPU Mode now locked to SMART" -v
+            flag_remove "setting_cpu"
+            ;;
         esac
-        echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
-        echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
-        echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
-        echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
-        echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
-        echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-        echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        log_message "CPU Mode now locked to SMART" -v
-        flag_remove "setting_cpu"
     fi
 }
 
