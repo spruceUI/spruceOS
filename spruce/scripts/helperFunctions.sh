@@ -44,6 +44,7 @@ case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
     *"TG5040"*)	export PLATFORM="SmartPro" ;;
     *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *) export PLATFORM="A30" ;;
 esac
