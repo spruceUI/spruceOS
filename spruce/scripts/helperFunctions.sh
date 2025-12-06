@@ -1141,6 +1141,10 @@ take_screenshot() {
 ##########     PYUI MESSAGE WRITER     ##########
 
 start_pyui_message_writer() {
+    if [ "$PLATFORM" = "A30" ]; then
+        ifconfig lo up
+        ifconfig lo 127.0.0.1
+    fi
     # Check if PyUI is already running with the realtime port argument
     if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
         log_message "Real Time message listener already running."
