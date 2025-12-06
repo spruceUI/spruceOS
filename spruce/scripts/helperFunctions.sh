@@ -1170,7 +1170,7 @@ kill_pyui_message_writer() {
 }
 
 stop_pyui_message_writer() {
-    display_message "EXIT_APP"
+    display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
     sleep 0.5
     kill_pyui_message_writer
     freemma
@@ -1207,7 +1207,12 @@ EOF
 
 log_and_display_message(){
     log_message "$1"
-    display_message "$1"
+    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$1")"
+}
+
+display_option_list(){
+    log_message "Display option list $1"
+    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$1")"
 }
 
 # ---------------------------------------------------------------------------

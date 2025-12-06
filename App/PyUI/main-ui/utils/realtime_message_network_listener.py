@@ -2,9 +2,11 @@ import socket
 import threading
 import sys
 import queue
+import json
 from display.display import Display
 from option_select_ui import OptionSelectUI
 from utils.logger import PyUiLogger
+
 
 class RealtimeMessageNetworkListener:
     def __init__(self, port: int):
@@ -26,16 +28,15 @@ class RealtimeMessageNetworkListener:
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(5)
         self.logger.info(f"Listening for connections on {self.host}:{self.port}")
-        #Display.display_message(f"Listening for connections on {self.host}:{self.port}")
 
         try:
             while not self.stop_event.is_set():
                 self.server_socket.settimeout(0.2)
 
-                # ---- Process any queued messages safely on the main thread ----
+                # Process any queued messages safely on the main thread
                 self._process_queued_messages()
 
-                # ---- Accept new clients (with timeout so we can poll the queue) ----
+                # Accept new clients (with timeout so we can poll the queue)
                 try:
                     conn, addr = self.server_socket.accept()
                     thread = threading.Thread(
@@ -45,6 +46,7 @@ class RealtimeMessageNetworkListener:
                     self.threads.append(thread)
                 except socket.timeout:
                     continue
+
         except KeyboardInterrupt:
             self.logger.info("Keyboard interrupt received, shutting down...")
         finally:
@@ -63,47 +65,88 @@ class RealtimeMessageNetworkListener:
                     buf += data
                     while b"\n" in buf:
                         line, buf = buf.split(b"\n", 1)
-                        message = line.decode("utf-8", errors="ignore").strip()
-                        self._enqueue_message(message)
+                        raw_message = line.decode("utf-8", errors="ignore").strip()
+                        self._enqueue_message(raw_message)
+
                         if self.stop_event.is_set():
                             break
+
         except Exception:
             self.logger.error(f"Error handling client {addr}", exc_info=True)
         finally:
             self.logger.info(f"Client {addr} disconnected")
 
-    def _enqueue_message(self, message: str):
-        """Push a message into the main-thread queue."""
-        self.logger.info(f"Received Message: {message}")
-        self.message_queue.put(message)
+    def _enqueue_message(self, raw_message: str):
+        """Push a message into the main-thread queue (raw JSON string)."""
+        self.logger.info(f"Received Raw Message: {raw_message}")
+        self.message_queue.put(raw_message)
 
     def _process_queued_messages(self):
-        """Run on main thread: drain and handle queued messages."""
+        """Main thread: drain and process queued messages."""
         try:
             while True:
-                message = self.message_queue.get_nowait()
-                self._handle_ui_message(message)
+                raw_message = self.message_queue.get_nowait()
+                self._handle_ui_message(raw_message)
         except queue.Empty:
             pass
 
-    def _handle_ui_message(self, message: str):
-        """Perform SDL/UI operations safely (main thread only)."""
-        if message == "EXIT_APP":
+    def _handle_ui_message(self, raw_message: str):
+        """
+        Handle a JSON-formatted UI command.
+        """
+        # ---------------------------
+        # Parse JSON
+        # ---------------------------
+        try:
+            data = json.loads(raw_message)
+            cmd = str(data.get("cmd", "")).upper()
+            args = data.get("args", [])
+            if not isinstance(args, list):
+                args = [args]
+
+            self.logger.info(f"Parsed cmd={cmd}, args={args}")
+
+        except Exception:
+            self.logger.error(f"Invalid JSON received: {raw_message}", exc_info=True)
+            Display.display_message(raw_message)
+            return
+
+        # ---------------------------
+        # Handle Commands
+        # ---------------------------
+        if cmd == "EXIT_APP":
             self.logger.info("Received EXIT_APP command, shutting down...")
             self.stop_event.set()
             return
 
-        if message.startswith("RENDER_IMAGE:"):
-            image_path = message[len("RENDER_IMAGE:"):].strip()
-            self.logger.info(f"Rendering image from path: {image_path}")
-            Display.display_image(image_path)
-        elif message.startswith("OPTION_LIST:"):
-            option_list_file = message[len("OPTION_LIST:"):].strip()
-            self.logger.info(f"Option list file: {option_list_file}")
-            OptionSelectUI.display_option_list("", option_list_file, False)
+        elif cmd == "RENDER_IMAGE":
+            if args:
+                image_path = args[0]
+                self.logger.info(f"Rendering image from path: {image_path}")
+                Display.display_image(image_path)
+            else:
+                self.logger.error("RENDER_IMAGE missing args")
+
+        elif cmd == "OPTION_LIST":
+            if args:
+                file_path = args[0]
+                self.logger.info(f"Option list file: {file_path}")
+                OptionSelectUI.display_option_list("", file_path, False)
+            else:
+                self.logger.error("OPTION_LIST missing args")
+        elif cmd == "MESSAGE":
+            if args:
+                msg = " ".join(str(a) for a in args)
+                self.logger.info(f"Displaying message: {msg}")
+                Display.display_message(msg)
+            else:
+                self.logger.error("MESSAGE missing args")
+
         else:
-            self.logger.info(f"Displaying message: {message}")
-            Display.display_message(message)
+            # Default handler for unknown commands
+            msg = " ".join(str(a) for a in args) if args else cmd
+            self.logger.info(f"Displaying message: {msg}")
+            Display.display_message(msg)
 
     def stop(self):
         """Gracefully stop the server and all threads."""
@@ -113,6 +156,7 @@ class RealtimeMessageNetworkListener:
                 self.server_socket.close()
             except Exception:
                 pass
+
         self.logger.info("RealtimeMessageNetworkListener shutting down")
 
         for t in self.threads:
