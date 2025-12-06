@@ -941,12 +941,12 @@ set_smart() {
             echo 75 >/sys/devices/system/cpu/cpufreq/policy0/up_threshold
             echo 3 >/sys/devices/system/cpu/cpufreq/policy0/freq_step
             echo 1 >/sys/devices/system/cpu/cpufreq/policy0/sampling_down_factor
-            echo 400000 >/sys/devices/system/cpu/cpufreq/policy0/sampling_rate
+            echo 100000 >/sys/devices/system/cpu/cpufreq/policy0/sampling_rate
             echo 45 >/sys/devices/system/cpu/cpufreq/policy4/down_threshold
             echo 75 >/sys/devices/system/cpu/cpufreq/policy4/up_threshold
             echo 3 >/sys/devices/system/cpu/cpufreq/policy4/freq_step
             echo 1 >/sys/devices/system/cpu/cpufreq/policy4/sampling_down_factor
-            echo 400000 >/sys/devices/system/cpu/cpufreq/policy4/sampling_rate
+            echo 100000 >/sys/devices/system/cpu/cpufreq/policy4/sampling_rate
             echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
             echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
             echo $big_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
@@ -984,7 +984,7 @@ set_smart() {
             echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
             echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
             echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
-            echo 400000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
+            echo 100000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
             echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
             echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
