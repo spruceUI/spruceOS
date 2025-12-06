@@ -5,6 +5,7 @@ import subprocess
 import threading
 import time
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
+from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -33,6 +34,7 @@ class MiyooA30(MiyooDevice):
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
         self.system_config = None
+        self.audio_player = AudioPlayerDelegateSdl2()
         if(main_ui_mode):
             script_dir = Path(__file__).resolve().parent
             source = script_dir / 'a30-system.json'
@@ -42,7 +44,6 @@ class MiyooA30(MiyooDevice):
             self.ensure_wpa_supplicant_conf()
             miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
             ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
-            self.audio_player = AudioPlayerDelegateSdl2()
 
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             #self.hardware_poller = MiyooFlipPoller(self)

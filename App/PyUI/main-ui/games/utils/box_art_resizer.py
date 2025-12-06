@@ -51,6 +51,7 @@ class BoxArtResizer():
             # Replace 'Imgs' with 'Imgs_large' in the path
             large_image_path = full_path.replace("Imgs", "Imgs_large", 1)
             qoi_large_path = qoi_full_path
+            cls.create_interim_folders(full_path)
             if (not cls.scale_and_convert_image(full_path, large_image_path, target_large_width, target_large_height, qoi_large_path)):
                 # Convert it
                 try:
@@ -107,13 +108,14 @@ class BoxArtResizer():
         parts = img_path.split(os.sep)
         if "Imgs" in parts:
             idx = parts.index("Imgs")
-            folder_path = os.sep.join(parts[:idx - 1]) if idx > 1 else os.sep
-            os.makedirs(os.path.join(
-                folder_path, "Imgs_small"), exist_ok=True)
-            os.makedirs(os.path.join(
-                folder_path, "Imgs_med"), exist_ok=True)
-            os.makedirs(os.path.join(
-                folder_path, "Imgs_large"), exist_ok=True)
+            # Take everything up to the parent of 'Imgs'
+            parent_folder = os.sep.join(parts[:idx])
+
+            for size in ["Imgs_small", "Imgs_med", "Imgs_large"]:
+                new_folder = os.path.join(parent_folder, size)
+                os.makedirs(new_folder, exist_ok=True)
+        else:
+            PyUiLogger.get_logger().warning(f"'Imgs' folder not found in path: {img_path}")
 
     @classmethod
     def clear_interim_folders(cls, img_path):
@@ -171,7 +173,6 @@ class BoxArtResizer():
         cls.patched_count = 0
 
         threading.Thread(target=cls.monitor_for_input, daemon=True).start()
-
         for base_path in rom_paths:
             if not os.path.exists(base_path):
                 continue
@@ -186,6 +187,7 @@ class BoxArtResizer():
                 imgs_path = os.path.join(folder_path, "Imgs")
                 if not os.path.exists(imgs_path):
                     continue
+                cls.create_interim_folders(imgs_path)
                 for root, _, files in os.walk(imgs_path):
                     for file in files:
                         if file.lower().endswith((".png", ".jpg", ".jpeg")):

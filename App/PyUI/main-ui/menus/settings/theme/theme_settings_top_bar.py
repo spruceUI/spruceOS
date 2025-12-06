@@ -37,5 +37,12 @@ class ThemeSettingsTopBar(ThemeSettingsMenuCommon):
                                               Theme.set_display_battery_icon)
         )
 
+        option_list.append(
+            self.build_enabled_disabled_entry("Show Volume Numbers",
+                                              Theme.display_volume_numbers,
+                                              Theme.set_display_volume_numbers)
+        )
+
+
                 
         return option_list
