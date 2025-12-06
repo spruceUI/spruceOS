@@ -21,9 +21,9 @@ display_message() {
 }
 
 restore_emu_settings() {
-    local backup_dir="/mnt/SDCARD/Saves/spruce/emu_backups"
-    local emu_dir="/mnt/SDCARD/Emu"
-    local menu_fields="Emulator Governor Emulator_A30 Emulator_Flip Emulator_Brick Emulator_64 Stretch controlMode"
+    backup_dir="/mnt/SDCARD/Saves/spruce/emu_backups"
+    emu_dir="/mnt/SDCARD/Emu"
+    menu_fields="Emulator Governor Emulator_A30 Emulator_Flip Emulator_Brick Emulator_64 Stretch controlMode"
 
     if [ ! -d "$backup_dir" ]; then
         log_message "No emu_backups folder to restore settings from."
@@ -31,41 +31,58 @@ restore_emu_settings() {
     fi
 
     for configjson in "$backup_dir"/*.json; do
+        [ -f "$configjson" ] || continue
         emu_name="$(basename "$configjson" .json)"
         new_json="$emu_dir/$emu_name/config.json"
 
         [ -f "$new_json" ] || continue  # Skip if emulator no longer exists
 
         jq_expr="."
-        jq_args=()
+        # clear positional params for accumulating jq args
+        set --
 
         for field in $menu_fields; do
-            if jq -e ".menuOptions.$field" "$new_json" >/dev/null 2>&1; then
-                selected_val="$(jq -r ".menuOptions.$field.selected // empty" "$configjson")"
-                if [ "$selected_val" = "null" ] || [ -z "$selected_val" ]; then
+            # test whether the field exists in the target JSON
+            if jq -e ".menuOptions.\"$field\"" "$new_json" >/dev/null 2>&1; then
+                selected_val="$(jq -r ".menuOptions.\"$field\".selected // empty" "$configjson")"
+                if [ -z "$selected_val" ] || [ "$selected_val" = "null" ]; then
                     log_message "$emu_name: $field missing in backup — leaving current default"
                     continue
                 fi
-                overrides_val="$(jq ".menuOptions.$field.overrides" "$configjson")"
-                [ "$overrides_val" = "null" ] && overrides_val='{}'
+
+                overrides_val="$(jq ".menuOptions.\"$field\".overrides // {}" "$configjson" 2>/dev/null || echo '{}')"
 
                 log_message "$emu_name: restoring $field → $selected_val"
 
+                # extend jq expression (note: use double quotes to allow variable expansion)
                 jq_expr="$jq_expr
-                    | if .menuOptions.${field} then
-                        .menuOptions.${field}.selected = \$${field}_selected |
-                        .menuOptions.${field}.overrides = \$${field}_overrides
+                    | if .menuOptions.\"${field}\" then
+                        .menuOptions.\"${field}\".selected = \$${field}_selected |
+                        .menuOptions.\"${field}\".overrides = \$${field}_overrides
                       else . end"
 
-                jq_args+=( --arg "${field}_selected" "$selected_val" )
-                jq_args+=( --argjson "${field}_overrides" "$(printf '%s' "$overrides_val")" )
+                # append --arg and --argjson into positional params safely
+                set -- "$@" --arg "${field}_selected" "$selected_val"
+                # pass the overrides JSON as literal for --argjson; ensure it's valid JSON
+                set -- "$@" --argjson "${field}_overrides" "$(printf '%s' "$overrides_val")"
             fi
         done
 
-        [ "${#jq_args[@]}" -eq 0 ] && continue
+        # if no positional args were added, skip
+        if [ $# -eq 0 ]; then
+            continue
+        fi
 
         tmpfile="$(mktemp)"
-        jq "${jq_args[@]}" "$jq_expr" "$new_json" > "$tmpfile" && mv -f "$tmpfile" "$new_json"
+        # run jq with accumulated args
+        if jq "$@" "$jq_expr" "$new_json" > "$tmpfile" 2>>"$log_file"; then
+            mv -f "$tmpfile" "$new_json"
+        else
+            log_message "Failed to apply settings for $emu_name (jq exit $?). See $log_file"
+            rm -f "$tmpfile"
+        fi
+        # clear positional params for next iteration
+        set --
     done
 }
 
@@ -321,6 +338,6 @@ log_message "----------Restore and Upgrade completed----------"
 auto_regen_tmp_update
 
 # Copy spruce.cfg to www folder so the landing page can read it.
-cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
+# cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
 
 exit 0
