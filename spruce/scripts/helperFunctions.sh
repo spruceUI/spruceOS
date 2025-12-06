@@ -1217,7 +1217,7 @@ stop_pyui_message_writer() {
     display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
     sleep 0.5
     kill_pyui_message_writer
-    freemma
+    freemma &>/dev/null # I don't think we have this bin on any spruce devices
 }
 
 get_python_path() {
