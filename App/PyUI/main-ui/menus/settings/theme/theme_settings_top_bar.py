@@ -7,7 +7,7 @@ from views.grid_or_list_entry import GridOrListEntry
 
 from menus.language.language import Language
 
-class ThemeSettingsTopBar(ThemeSettingsMenuCommon):
+class ThemeSettingsTopAndBottomBar(ThemeSettingsMenuCommon):
     def __init__(self):
         super().__init__()
 
@@ -43,6 +43,17 @@ class ThemeSettingsTopBar(ThemeSettingsMenuCommon):
                                               Theme.set_display_volume_numbers)
         )
 
+        option_list.append(
+            self.build_enabled_disabled_entry("Show Bottom Bar Buttons",
+                                              Theme.show_bottom_bar_buttons,
+                                              Theme.set_show_bottom_bar_buttons)
+        )
+
+        option_list.append(
+            self.build_enabled_disabled_entry("Show Clock",
+                                              Theme.show_clock,
+                                              Theme.set_show_clock)
+        )
 
                 
         return option_list

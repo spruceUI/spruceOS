@@ -37,27 +37,29 @@ class BottomBar:
             confirm_icon, x_offset, bottom_icons_y, RenderMode.BOTTOM_LEFT_ALIGNED)
 
         x_offset += padding + confirm_icon_w
-        confirm_text_y = bottom_icons_y - confirm_icon_h//2
-        confirm_text_w, confirm_text_h = Display.render_text(Theme.confirm_text(),
-                                                             x_offset,
-                                                             confirm_text_y,
-                                                             Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
-                                                             FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                                                             RenderMode.MIDDLE_LEFT_ALIGNED)
-        x_offset += padding + confirm_text_w 
 
-        back_icon = Theme.back_icon()
-        back_icon_w, back_icon_h = Display.render_image(
-            back_icon, x_offset, bottom_icons_y, RenderMode.BOTTOM_LEFT_ALIGNED)
-        x_offset += padding + back_icon_w 
-        back_text_y = bottom_icons_y - back_icon_h//2
-        back_text_w, back_text_h = Display.render_text(Theme.back_text(),
-                                                       x_offset,
-                                                       back_text_y,
-                                                       Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
-                                                        FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                                                        RenderMode.MIDDLE_LEFT_ALIGNED)
-        x_offset += padding + back_text_w 
+        if(Theme.show_bottom_bar_buttons()):
+            confirm_text_y = bottom_icons_y - confirm_icon_h//2
+            confirm_text_w, confirm_text_h = Display.render_text(Theme.confirm_text(),
+                                                                x_offset,
+                                                                confirm_text_y,
+                                                                Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
+                                                                FontPurpose.DESCRIPTIVE_LIST_TITLE,
+                                                                RenderMode.MIDDLE_LEFT_ALIGNED)
+            x_offset += padding + confirm_text_w 
+
+            back_icon = Theme.back_icon()
+            back_icon_w, back_icon_h = Display.render_image(
+                back_icon, x_offset, bottom_icons_y, RenderMode.BOTTOM_LEFT_ALIGNED)
+            x_offset += padding + back_icon_w 
+            back_text_y = bottom_icons_y - back_icon_h//2
+            back_text_w, back_text_h = Display.render_text(Theme.back_text(),
+                                                        x_offset,
+                                                        back_text_y,
+                                                        Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
+                                                            FontPurpose.DESCRIPTIVE_LIST_TITLE,
+                                                            RenderMode.MIDDLE_LEFT_ALIGNED)
+            x_offset += padding + back_text_w 
 
     def render_bottom_bar_text(self, text):
         from display.display import Display

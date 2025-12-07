@@ -549,6 +549,18 @@ class Language:
         return cls._data.get("selBgResizePadHeight","Sel BG Resize Pad Height")
 
     @classmethod
+    def set_single_row_grid_text_y_offset(cls):
+        return cls._data.get("setSingleRowGridTextYOffset","1 Row Grid Text Y Offset")
+
+    @classmethod
+    def set_multi_row_grid_text_y_offset(cls):
+        return cls._data.get("setMultiRowGridTextYOffset",">1 Row Grid Text Y Offset")
+
+    @classmethod
+    def set_grid_multi_row_img_y_offset(cls):
+        return cls._data.get("setGridMultiRowImageYOffset",">1 Row Grid Image Y Offset")
+
+    @classmethod
     def skip_main_menu(cls):
         return cls._data.get("skipMainMenu","Skip Main Menu")
 
@@ -613,8 +625,8 @@ class Language:
         return cls._data.get("gridViewThemeOptions","Grid View Theme Options")
 
     @classmethod
-    def top_bar_options(cls):
-        return cls._data.get("topBarOptions","Top Bar Options")
+    def top_and_bottom_bar_options(cls):
+        return cls._data.get("topAndBottomBarOptions","Top and Bottom Bar Options")
 
     @classmethod
     def left_side_initial_x_offset(cls):

@@ -98,15 +98,6 @@ class PyUiConfig:
         return cls._data.get("mainMenuTitle", "CFW")
 
     @classmethod
-    def show_clock(cls):
-        return cls.get("showClock",True)
-
-    @classmethod
-    def set_show_clock(cls, value):
-        cls._data["showClock"] = value
-        cls.save()
-
-    @classmethod
     def use_24_hour_clock(cls):
         return cls.get("use24HourClock",False)
 

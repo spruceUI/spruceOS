@@ -174,12 +174,10 @@ class GridView(View):
         else:
             text_height = 0
         
-        if(self.img_offset is not None):
-            img_offset = self.img_offset
-        elif(self.rows == 1):
-            img_offset = 0
+        if(self.rows == 1):
+            img_offset = self.img_offset if self.img_offset is not None else 0
         else:
-            img_offset = Theme.get_system_select_grid_img_y_offset(text_height)
+            img_offset = Theme.get_grid_multi_row_img_y_offset(text_height)
             
         bg_offset = 0
         if (self.resized_width is not None):
@@ -219,9 +217,10 @@ class GridView(View):
 
         if (self.show_grid_text):
             if(self.rows == 1) : 
-                y_text = int(Device.screen_height() * 360/480)
+                y_text = int(Device.screen_height() * 310/480) + Theme.single_row_grid_text_y_offset()
             else:
-                y_text = bottom_row_y - text_height
+                y_text = bottom_row_y - text_height + Theme.multi_row_grid_text_y_offset()
+                
             Display.render_text(imageTextPair.get_primary_text(),
                                  x_offset,
                                  y_text,

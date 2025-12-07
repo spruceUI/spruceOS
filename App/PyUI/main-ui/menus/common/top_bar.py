@@ -131,7 +131,7 @@ class TopBar:
                 w,h = Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
 
-            if(PyUiConfig.show_clock()):   
+            if(Theme.show_clock()):   
                 x_offset = Theme.get_top_bar_initial_x_offset()
                 w, h = Display.render_text(str(self.get_current_time_hhmm()),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_LEFT_ALIGNED)
                 x_offset += w +padding

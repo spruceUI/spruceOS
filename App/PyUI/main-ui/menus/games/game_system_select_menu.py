@@ -226,7 +226,7 @@ class GameSystemSelectMenu:
         return preferred_path
 
     def get_main_menu_icon_selected(self, name, backup):
-        preferred_path = Theme.get_system_icon(name)
+        preferred_path = Theme.get_system_icon_selected(name)
     
         if(preferred_path is None):
             return backup

@@ -702,7 +702,7 @@ class Theme():
                 case _:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
         except Exception as e:
-            PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
+            #PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
             return cls.text_color(font_purpose)
 
     @classmethod
@@ -1238,7 +1238,7 @@ class Theme():
 
     @classmethod
     def get_main_menu_grid_wrap_around_single_row(cls):
-        return cls._data.get("mainMenuGridWrapAroundSingleRow", True)
+        return cls._data.get("mainMenuGridWrapAroundSingleRow", False)
     
     @classmethod
     def set_main_menu_grid_wrap_around_single_row(cls, value):
@@ -1300,12 +1300,21 @@ class Theme():
         cls.save_changes()
     
     @classmethod
-    def get_system_select_grid_img_y_offset(cls, text_height):
+    def get_grid_multi_row_img_y_offset(cls, text_height):
         default_height = -25
         if(0 != text_height):
             default_height = -1 * text_height        
 
-        return cls._data.get("systemSelectGridImageYOffset", default_height)
+        return default_height + cls._data.get("gridMultiRowImageYOffset", 0)
+
+    @classmethod
+    def get_grid_multi_row_img_y_offset_raw(cls):
+        return cls._data.get("gridMultiRowImageYOffset", 0)
+
+    @classmethod
+    def set_grid_multi_row_img_y_offset(cls, value):
+        cls._data["gridMultiRowImageYOffset"] = value
+        cls.save_changes()
 
     @classmethod
     def get_app_icon(cls, app_name):
@@ -1397,13 +1406,20 @@ class Theme():
     @classmethod
     def display_volume_numbers(cls):
         return cls._data.get("displayVolumeNumbers", False)
-    
+        
     @classmethod
     def set_display_volume_numbers(cls, value):
         cls._data["displayVolumeNumbers"] = value
         cls.save_changes()
 
+    @classmethod
+    def show_bottom_bar_buttons(cls):
+        return cls._data.get("showBottomBarButtons", True)
         
+    @classmethod
+    def set_show_bottom_bar_buttons(cls, value):
+        cls._data["showBottomBarButtons"] = value
+        cls.save_changes()
 
     @classmethod
     def get_main_menu_title(cls):
@@ -1414,6 +1430,32 @@ class Theme():
         cls._data["mainMenuTitle"] = value
         cls.save_changes()
 
+    @classmethod
+    def show_clock(cls):
+        return cls._data.get("showClock", True)
+
+    @classmethod
+    def set_show_clock(cls, value):
+        cls._data["showClock"] = value
+        cls.save_changes()
+
+    @classmethod
+    def single_row_grid_text_y_offset(cls):
+        return cls._data.get("singleRowGridTextYOffset", 0)
+
+    @classmethod
+    def set_single_row_grid_text_y_offset(cls, value):
+        cls._data["singleRowGridTextYOffset"] = value
+        cls.save_changes()
+
+    @classmethod
+    def multi_row_grid_text_y_offset(cls):
+        return cls._data.get("multiRowGridTextYOffset", 0)
+
+    @classmethod
+    def set_multi_row_grid_text_y_offset(cls, value):
+        cls._data["multiRowGridTextYOffset"] = value
+        cls.save_changes()
 
     @classmethod
     def check_and_create_asset(cls, output_image, input_image, target_width, target_height, target_alpha_channel):
@@ -1439,3 +1481,5 @@ class Theme():
                                     320,
                                     60,
                                     1.00)
+
+

@@ -10,6 +10,7 @@ class ThemeSettingsGridView(ThemeSettingsMenuCommon):
     def __init__(self):
         super().__init__()
 
+
     def build_options_list(self) -> list[GridOrListEntry]:
         option_list = []
         option_list.append(
@@ -26,5 +27,34 @@ class ThemeSettingsGridView(ThemeSettingsMenuCommon):
                 set_value_func=Theme.set_grid_multi_row_sel_bg_resize_pad_height
             )
         )
+        option_list.append(
+            self.build_numeric_entry(
+                primary_text=Language.set_single_row_grid_text_y_offset(),
+                get_value_func=Theme.single_row_grid_text_y_offset,
+                set_value_func=Theme.set_single_row_grid_text_y_offset,
+                min=-1000,
+                max=10000
+            )
+        )
+        option_list.append(
+            self.build_numeric_entry(
+                primary_text=Language.set_multi_row_grid_text_y_offset(),
+                get_value_func=Theme.multi_row_grid_text_y_offset,
+                set_value_func=Theme.set_multi_row_grid_text_y_offset,
+                min=-1000,
+                max=10000
+            )
+        )
+        option_list.append(
+            self.build_numeric_entry(
+                primary_text=Language.set_grid_multi_row_img_y_offset(),
+                get_value_func=Theme.get_grid_multi_row_img_y_offset_raw,
+                set_value_func=Theme.set_grid_multi_row_img_y_offset,
+                min=-1000,
+                max=10000
+            )
+        )
+
+        
 
         return option_list
