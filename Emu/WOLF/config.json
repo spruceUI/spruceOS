@@ -2,7 +2,6 @@
   "label": "Wolf3D",
   "icon": "wolf.png",
   "iconsel": "wolf_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "ecwolf|exe",

@@ -2,7 +2,6 @@
   "label": "NDS",
   "icon": "nds.png",
   "iconsel": "nds_sel.png",
-  "background": "",
   "themecolor": "FF8800",
   "launch": "../.emu_setup/standard_launch.sh",
   "noaudiofix": 1,

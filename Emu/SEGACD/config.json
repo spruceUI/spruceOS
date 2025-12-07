@@ -2,7 +2,6 @@
   "label": "Sega CD",
   "icon": "segacd.png",
   "iconsel": "segacd_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chd|m3u|zip|7z|gen|smd|md|32x|cue|iso|sms|68k",

@@ -2,7 +2,6 @@
   "label": "PSX",
   "icon": "ps.png",
   "iconsel": "ps_sel.png",
-  "background": "",
   "themecolor": "00FF00",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "m3u|chd|cue|img|mdf|pbp|PBP|toc|cbn",

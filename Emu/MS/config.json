@@ -2,7 +2,6 @@
   "label": "Sega MS",
   "icon": "ms.png",
   "iconsel": "ms_sel.png",
-  "background": "",
   "themecolor": "740009",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gen|smd|md|32x|bin|iso|sms|68k|chd|zip|7z",

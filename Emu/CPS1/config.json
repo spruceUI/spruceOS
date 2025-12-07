@@ -2,7 +2,6 @@
   "label": "CPS1",
   "icon": "cps1.png",
   "iconsel": "cps1_sel.png",
-  "background": "",
   "themecolor": "0000FF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|cue",

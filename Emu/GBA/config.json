@@ -2,7 +2,6 @@
   "label": "GBA",
   "icon": "gba.png",
   "iconsel": "gba_sel.png",
-  "background": "",
   "themecolor": "FF00FF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gba|zip|7z|bin",

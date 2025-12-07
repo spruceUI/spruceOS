@@ -2,7 +2,6 @@
   "label": "Atari 5200",
   "icon": "5200.png",
   "iconsel": "5200_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "a52|zip|7z|atr|bin",

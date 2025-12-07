@@ -2,7 +2,6 @@
   "label": "Arcade",
   "icon": "arcade.png",
   "iconsel": "arcade_sel.png",
-  "background": "",
   "themecolor": "CD6155",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",

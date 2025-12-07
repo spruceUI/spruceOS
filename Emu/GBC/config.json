@@ -2,7 +2,6 @@
   "label": "GBC",
   "icon": "gbc.png",
   "iconsel": "gbc_sel.png",
-  "background": "",
   "themecolor": "FFB800",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gb|gbc|zip|7z|bin|dmg",

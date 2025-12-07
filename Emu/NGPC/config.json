@@ -2,7 +2,6 @@
   "label": "NGPC",
   "icon": "ngpc.png",
   "iconsel": "ngpc_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "ngp|ngc|zip|7z",

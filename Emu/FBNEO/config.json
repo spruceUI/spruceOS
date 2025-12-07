@@ -2,7 +2,6 @@
   "label": "FBNEO",
   "icon": "arcade.png",
   "iconsel": "arcade_sel.png",
-  "background": "",
   "themecolor": "EC7063",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",

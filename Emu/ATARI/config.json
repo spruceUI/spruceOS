@@ -2,7 +2,6 @@
   "label": "Atari 2600",
   "icon": "atari.png",
   "iconsel": "atari_sel.png",
-  "background": "",
   "themecolor": "AF7AC5",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "a26|zip|7z|bin",

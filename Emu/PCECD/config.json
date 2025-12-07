@@ -2,7 +2,6 @@
   "label": "TG-CD",
   "icon": "pcecd.png",
   "iconsel": "pcecd_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "iso|img|chd|pce|ccd|cue|zip|7z",

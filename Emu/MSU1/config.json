@@ -2,7 +2,6 @@
   "label": "MSU1",
   "icon": "msu1.png",
   "iconsel": "msu1_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "sfc|smc|zip|7z|fig|bs|st",

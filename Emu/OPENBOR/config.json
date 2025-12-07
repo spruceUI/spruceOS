@@ -2,7 +2,6 @@
   "label": "OpenBOR",
   "icon": "openbor.png",
   "iconsel": "openbor_sel.png",
-  "background": "",
   "themecolor": "FFFF00",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "pak",

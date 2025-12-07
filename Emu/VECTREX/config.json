@@ -2,7 +2,6 @@
   "label": "Vectrex",
   "icon": "vectrex.png",
   "iconsel": "vectrex_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "vec|zip|7z",

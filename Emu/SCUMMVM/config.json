@@ -2,7 +2,6 @@
   "label": "ScummVM",
   "icon": "scummvm.png",
   "iconsel": "scummvm_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "scummvm",

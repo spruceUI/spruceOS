@@ -2,7 +2,6 @@
   "label": "C64",
   "icon": "c64.png",
   "iconsel": "c64_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",

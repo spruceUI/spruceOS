@@ -2,7 +2,6 @@
   "label": "Neo CD",
   "icon": "neocd.png",
   "iconsel": "neocd_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "cue|chd|m3u",

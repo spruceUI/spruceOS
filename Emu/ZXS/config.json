@@ -2,7 +2,6 @@
   "label": "ZXS",
   "icon": "zxs.png",
   "iconsel": "zxs_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|tzx|tap|z80|rzx|scl|trd",

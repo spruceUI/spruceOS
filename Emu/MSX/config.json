@@ -2,7 +2,6 @@
   "label": "MSX",
   "icon": "msx.png",
   "iconsel": "msx_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",

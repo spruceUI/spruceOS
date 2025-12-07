@@ -2,7 +2,6 @@
   "label": "Pokemini",
   "icon": "poke.png",
   "iconsel": "poke_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "min|zip|7z",

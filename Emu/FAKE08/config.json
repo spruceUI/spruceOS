@@ -2,7 +2,6 @@
   "label": "Fake08",
   "icon": "pico.png",
   "iconsel": "pico_sel.png",
-  "background": "",
   "themecolor": "00FF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "p8|png",

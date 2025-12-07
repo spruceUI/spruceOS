@@ -2,7 +2,6 @@
   "label": "PORTS",
   "icon": "ports.png",
   "iconsel": "ports_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "ingamemenu": 1,

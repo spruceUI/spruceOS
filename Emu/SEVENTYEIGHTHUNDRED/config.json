@@ -2,7 +2,6 @@
   "label": "Atari 7800",
   "icon": "7800.png",
   "iconsel": "7800_sel.png",
-  "background": "",
   "themecolor": "A569BD",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "a78|zip|7z",

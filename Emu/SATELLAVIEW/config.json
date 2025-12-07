@@ -2,7 +2,6 @@
   "label": "Satella",
   "icon": "satella.png",
   "iconsel": "satella_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|7z|bs|sfc|smc|swc|fig|st",

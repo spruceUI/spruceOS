@@ -2,7 +2,6 @@
   "label": "Arduboy",
   "icon": "arduboy.png",
   "iconsel": "arduboy_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "hex",

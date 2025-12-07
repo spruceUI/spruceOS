@@ -2,7 +2,6 @@
   "label": "Sufami",
   "icon": "sufami.png",
   "iconsel": "sufami_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "smc|zip|7z",

@@ -2,7 +2,6 @@
   "label": "TG-16",
   "icon": "pce.png",
   "iconsel": "pce_sel.png",
-  "background": "",
   "themecolor": "EA483F",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",

@@ -2,7 +2,6 @@
   "label": "EasyRPG",
   "icon": "easyrpg.png",
   "iconsel": "easyrpg_sel.png",
-  "background": "",
   "themecolor": "FFFF88",
   "launch": "../.emu_setup/standard_launch.sh",
   "subfolder_launch_file": "RPG_RT.ldb",

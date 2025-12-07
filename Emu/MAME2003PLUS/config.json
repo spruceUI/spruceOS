@@ -2,7 +2,6 @@
   "label": "MAME 03+",
   "icon": "mame.png",
   "iconsel": "mame_sel.png",
-  "background": "",
   "themecolor": "00CCFF",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip",

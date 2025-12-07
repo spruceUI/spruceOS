@@ -2,7 +2,6 @@
   "label": "Saturn",
   "icon": "saturn.png",
   "iconsel": "saturn_sel.png",
-  "background": "",
   "themecolor": "E4007F",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "chd|zip|mds|ccd|iso|cue",

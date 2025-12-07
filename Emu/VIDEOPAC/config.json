@@ -2,7 +2,6 @@
   "label": "VideoPac",
   "icon": "vdp.png",
   "iconsel": "vdp_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "bin|zip|7z",

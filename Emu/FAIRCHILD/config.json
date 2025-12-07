@@ -2,7 +2,6 @@
   "label": "ChannelF",
   "icon": "fairchild.png",
   "iconsel": "fairchild_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "zip|bin|rom|chf",

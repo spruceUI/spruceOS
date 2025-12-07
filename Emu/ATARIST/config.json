@@ -2,7 +2,6 @@
   "label": "Atari ST",
   "icon": "atarist.png",
   "iconsel": "atarist_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "st|msa|stx|dim|ipf|zip|7z",

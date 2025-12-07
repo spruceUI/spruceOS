@@ -2,7 +2,6 @@
   "label": "Game Tank",
   "icon": "gametank.png",
   "iconsel": "gametank_sel.png",
-  "background": "",
   "themecolor": "",
   "launch": "../.emu_setup/standard_launch.sh",
   "extlist": "gtr|zip|7z",
