@@ -43,7 +43,7 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
             )
         )
 
-        if(Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()):
+        if(Theme.skip_main_menu()):
             option_list.append(
                 self.build_enabled_disabled_entry(
                     primary_text=Language.show_extras_in_system_select_menu(),

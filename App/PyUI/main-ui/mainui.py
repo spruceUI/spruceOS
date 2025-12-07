@@ -27,6 +27,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
+from utils.time_logger import log_timing
 
 
 
@@ -91,6 +92,9 @@ def initialize_device(device, main_ui_mode):
     elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
         Device.init(TrimUISmartPro(device,main_ui_mode))
+    elif "TRIMUI_SMART_PRO_S" == device or "SPRUCE_TRIMUI_SMART_PRO_S" == device:
+        from devices.trimui.trim_ui_smart_pro_s import TrimUISmartProS
+        Device.init(TrimUISmartProS(device,main_ui_mode))
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.flip.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
@@ -200,38 +204,49 @@ def main():
 
     #log_renderer_info()
 
-    verify_config_exists(args.pyUiConfig)
-    PyUiConfig.init(args.pyUiConfig)
-    CfwSystemConfig.init(args.cfwConfig)
+    PyUiLogger.get_logger().info(f"{args}")
+    with log_timing("Entire Startup initialization", PyUiLogger.get_logger()):    
 
-    main_ui_mode = True
+        with log_timing("Config initialization", PyUiLogger.get_logger()):    
+            verify_config_exists(args.pyUiConfig)
+            PyUiConfig.init(args.pyUiConfig)
+            CfwSystemConfig.init(args.cfwConfig)
 
-    if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
-        main_ui_mode = False
+        main_ui_mode = True
 
-    initialize_device(args.device, main_ui_mode)
-    PyUiState.init(Device.get_state_path())
+        if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
+            main_ui_mode = False
 
-    selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
-    check_for_button_listener_mode(args)
-    check_for_startup_init_only(args)
+        with log_timing("Device initialization", PyUiLogger.get_logger()):    
+            initialize_device(args.device, main_ui_mode)
 
-    Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
-    Display.init()
-    #2nd init is just to allow scaling if needed
-    Theme.convert_theme_if_needed(selected_theme, Device.screen_width(), Device.screen_height())
-    Controller.init()
-    Language.init()
+        PyUiState.init(Device.get_state_path())
 
-    check_for_msg_display(args)
-    check_for_msg_display_realtime(args)
-    check_for_msg_display_socket_based(args)
-    check_for_option_list_file(args)
+        selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
+        check_for_button_listener_mode(args)
+        check_for_startup_init_only(args)
 
-    main_menu = MainMenu()
+        with log_timing("Theme initialization", PyUiLogger.get_logger()):    
+            Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
 
-    start_background_threads()
+        with log_timing("Display initialization", PyUiLogger.get_logger()):    
+            Display.init()
+        
+        #2nd init is just to allow scaling if needed
+        Theme.convert_theme_if_needed(selected_theme, Device.screen_width(), Device.screen_height())
+        Controller.init()
+        Language.init()
+
+        check_for_msg_display(args)
+        check_for_msg_display_realtime(args)
+        check_for_msg_display_socket_based(args)
+        check_for_option_list_file(args)
+
+        main_menu = MainMenu()
+
+        start_background_threads()
     keep_running = True
+    PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):
         try:
             main_menu.run_main_menu_selection()

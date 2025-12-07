@@ -7,16 +7,19 @@ from controller.controller_interface import ControllerInterface
 from utils.logger import PyUiLogger
 from ctypes import byref
 
+from utils.time_logger import log_timing
+
 
 class Sdl2ControllerInterface(ControllerInterface):
 
     def __init__(self):
-        self.event = sdl2.SDL_Event()
-        self.controller = None
-        self.print_key_changes = False
+        with log_timing("SDL2 Controller initialization", PyUiLogger.get_logger()):    
+            self.event = sdl2.SDL_Event()
+            self.controller = None
+            self.print_key_changes = False
 
-        self.clear_input_queue()
-        self.init_controller()
+            self.clear_input_queue()
+            self.init_controller()
 
     def print_key_state_changes(self):
         self.print_key_changes = True
