@@ -12,14 +12,6 @@
         "launch":"com.trimui.silent.sh"
     },
     {
-        "name":"CPU Power Save",
-        "launch":"com.trimui.cpusave.sh"
-    },
-    {
-        "name":"CPU Performance Mode",
-        "launch":"com.trimui.cpuperformance.sh"
-    },
-    {
         "name":"Joystick Toggle",
         "launch":"spruce_toggle_joystick.sh"
     }

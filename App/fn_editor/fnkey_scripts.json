@@ -1,8 +1,4 @@
-[
-    {
-        "name":"D-Pad & Joystick toggle",
-        "launch":"com.trimui.toggle.dpad_joystick.sh"
-    },    
+[  
     {
         "name":"CPU clock swither",
         "launch":"com.trimui.switch.cpufreq.sh"
