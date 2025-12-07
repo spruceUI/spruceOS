@@ -17,12 +17,14 @@ class DescriptiveListView(ListView):
         self.top_bar_text = top_bar_text
         self.set_options(options)
         self.selected : int = selected
-        PyUiLogger.get_logger().info(f"selected_bg = {selected_bg}")
 
         self.selected_bg = selected_bg
         self.each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
 
-        self.max_rows = (Display.get_usable_screen_height(force_include_top_bar=True) // self.each_entry_height)
+        usable = Display.get_usable_screen_height(force_include_top_bar=True) / self.each_entry_height
+        PyUiLogger.get_logger().info(f"selected_bg = {selected_bg}, usable = {usable}, each_entry_height = {self.each_entry_height}, usable_screen_height = {Display.get_usable_screen_height(force_include_top_bar=True)}")
+
+        self.max_rows = int(usable + (1 if usable % 1 >= 0.80 else 0))
 
         self.current_top = 0
         self.current_bottom = min(self.max_rows,len(options))

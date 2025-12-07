@@ -17,10 +17,6 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
         if (ControllerInput.A == input):
             Device.prompt_timezone_update()
 
-    def change_show_clock(self, input):
-        if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            PyUiConfig.set_show_clock(not PyUiConfig.show_clock())
-
     def change_24_hour_clock_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
             PyUiConfig.set_use_24_hour_clock(
@@ -69,41 +65,27 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
         option_list.append(
             GridOrListEntry(
-                primary_text=Language.clock(),
+                primary_text=Language.twenty_four_hour_clock(),
                 value_text="<    " +
-                ("On" if PyUiConfig.show_clock() else "Off") + "    >",
-                image_path=None,
-                image_path_selected=None,
-                description=None,
-                icon=None,
-                value=self.change_show_clock
+                 ("On" if PyUiConfig.use_24_hour_clock() else "Off") + "    >",
+                 image_path=None,
+                 image_path_selected=None,
+                 description=None,
+                 icon=None,
+                 value=self.change_24_hour_clock_setting
             )
         )
-        if (PyUiConfig.show_clock()):
-            option_list.append(
+        option_list.append(
                 GridOrListEntry(
-                    primary_text=Language.twenty_four_hour_clock(),
+                    primary_text=Language.show_am_pm(),
                     value_text="<    " +
-                    ("On" if PyUiConfig.use_24_hour_clock() else "Off") + "    >",
+                    ("On" if PyUiConfig.show_am_pm() else "Off") + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
                     icon=None,
-                    value=self.change_24_hour_clock_setting
-                )
-            )
-            if (not PyUiConfig.use_24_hour_clock()):
-                option_list.append(
-                    GridOrListEntry(
-                        primary_text=Language.show_am_pm(),
-                        value_text="<    " +
-                        ("On" if PyUiConfig.show_am_pm() else "Off") + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.change_am_pm_setting
-                    )
-                )
+                    value=self.change_am_pm_setting
+               )
+        )
 
         return option_list
