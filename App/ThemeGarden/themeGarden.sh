@@ -81,7 +81,7 @@ construct_config() {
     for theme in "$CONFIG_DIR/previews"/*.png ; do
         theme_name="$(basename "$theme" .png)"
         mv "$theme" "$CONFIG_DIR/Imgs/"
-        echo "\"$theme_name\": \"$DOWNLOAD $theme_name\"," >> "$CONFIG_DIR/garden.json"
+        echo "\"$theme_name\": \"$DOWNLOAD '$theme_name'\"," >> "$CONFIG_DIR/garden.json"
     done
 
     sed -i '$ s/,$//' "$CONFIG_DIR"/garden.json      # strip away final trailing comma
