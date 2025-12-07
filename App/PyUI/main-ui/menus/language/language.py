@@ -558,7 +558,7 @@ class Language:
 
     @classmethod
     def show_extras_in_system_select_menu(cls):
-        return cls._data.get("showExtrasInSystemSelectMenu","Show Apps/Settings/etc")
+        return cls._data.get("showExtrasInSystemSelectMenu","Show Apps/Recents/Favs/Collections")
 
     @classmethod
     def main_menu(cls):

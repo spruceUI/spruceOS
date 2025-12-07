@@ -4,6 +4,7 @@ import threading
 import queue
 from typing import Optional
 from utils.logger import PyUiLogger
+from utils.time_logger import log_timing
 
 # Commands for the worker
 class _Cmd:
@@ -56,15 +57,16 @@ class Sdl2AudioPlayer:
     # Public API: these post commands to the worker and return immediately (or return result)
     @staticmethod
     def _init():
-        # Move init into worker; main thread asks worker to init
-        res = Sdl2AudioPlayer._send_cmd("init", expect_reply=True)
-        # res will be True/False or None on timeout
-        if res is True:
-            Sdl2AudioPlayer._initialized = True
-            Sdl2AudioPlayer._init_failed = False
-        else:
-            Sdl2AudioPlayer._initialized = False
-            Sdl2AudioPlayer._init_failed = True
+        with log_timing("SDL2 Audio initialization", PyUiLogger.get_logger()):    
+            # Move init into worker; main thread asks worker to init
+            res = Sdl2AudioPlayer._send_cmd("init", expect_reply=True)
+            # res will be True/False or None on timeout
+            if res is True:
+                Sdl2AudioPlayer._initialized = True
+                Sdl2AudioPlayer._init_failed = False
+            else:
+                Sdl2AudioPlayer._initialized = False
+                Sdl2AudioPlayer._init_failed = True
 
     @staticmethod
     def audio_set_volume(volume: int):
