@@ -220,8 +220,8 @@ run_ffplay() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 	if [ "$PLATFORM" = "A30" ]; then
-		export PATH="$EMU_DIR"/bin:"$PATH"
-		export LD_LIBRARY_PATH="$EMU_DIR"/libs:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
+		export PATH="$EMU_DIR"/bin32:"$PATH"
+		export LD_LIBRARY_PATH="$EMU_DIR"/lib32:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
 		ffplay -vf transpose=2 -fs -i "$ROM_FILE" > ffplay.log 2>&1
 	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
