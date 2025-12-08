@@ -2,6 +2,7 @@ from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 
 
 class BottomBar:
@@ -14,7 +15,11 @@ class BottomBar:
             bottom_bar_bg = Theme.bottom_bar_bg()
             
             self.bottom_bar_w, self.bottom_bar_h = Display.render_image(bottom_bar_bg,0,Device.screen_height(),render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
-            
+            back_icon = Theme.back_icon()
+            icon_w, icon_h =Display.get_image_dimensions(back_icon)
+            if(icon_h > self.bottom_bar_h):
+                self.bottom_bar_h = icon_h 
+
             if(bottom_bar_text is not None):
                 self.render_bottom_bar_text(bottom_bar_text)
             elif(render_bottom_bar_icons_and_images):

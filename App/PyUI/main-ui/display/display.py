@@ -980,6 +980,17 @@ class Display:
 
 
     @classmethod
+    def write_message_multiline_starting_height_specified(cls,split_message, starting_height):
+        text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+
+        height_per_line = text_h + int(5 * Device.screen_height()/480)
+
+        for i, line in enumerate(split_message):
+            Display.render_text_centered(f"{line}",Device.screen_width()//2, starting_height + i * height_per_line,
+                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+
+
+    @classmethod
     def display_message(cls,message, duration_ms=0):
         split_message = Display.split_message(message, FontPurpose.LIST,clip_to_device_width=True)
         cls.display_message_multiline(split_message,duration_ms)
