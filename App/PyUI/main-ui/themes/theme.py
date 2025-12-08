@@ -999,7 +999,7 @@ class Theme():
 
     @classmethod
     def get_main_menu_column_count(cls):
-        return cls._data.get("mainMenuColCount", 4)
+        return cls._data.get("mainMenuColCount", int(4 * cls.width_multiplier))
 
     @classmethod
     def set_main_menu_column_count(cls, count):
