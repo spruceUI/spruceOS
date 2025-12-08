@@ -147,24 +147,23 @@ class RealtimeMessageNetworkListener:
                 else:
                     self.logger.error("RENDER_IMAGE missing args")
 
-            elif cmd == "TOP_IMAGE_BOTTOM_TEXT":
+            elif cmd == "IMAGE_AND_TEXT":
                 if args:
-                    image_path = args[0]
-                    height_percent = int(args[1])  # convert safely
-                    text = args[2]
-
                     padding = Display.get_top_bar_height()
 
+                    image_path = args[0]
+                    text = args[1]
+                    height_percent = int(args[2])  
+                    
                     # Use usable height (excluding top bar)
                     usable_height = Display.get_usable_screen_height()
 
                     # Image metrics
                     image_height = int(usable_height * (height_percent / 100))
-                    image_y = padding + (image_height // 2)
 
-                    # Text placement: centered in remaining space
-                    remaining_height = usable_height - image_height
-                    text_y = padding + image_height + (remaining_height // 2)
+                    image_y = int(int(args[3])/100 * usable_height) + padding
+                    text_y = int(int(args[4])/100 * usable_height) + padding
+
 
                     self.logger.info(f"Rendering image from path: {image_path} with text: {text}")
 
@@ -174,52 +173,12 @@ class RealtimeMessageNetworkListener:
                         image_path,
                         Device.screen_width() // 2,
                         image_y,
-                        RenderMode.MIDDLE_CENTER_ALIGNED,
+                        RenderMode.TOP_CENTER_ALIGNED,
                         Device.screen_width(),
                         image_height
                     )
 
-                    Display.write_message_multiline(
-                        Display.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
-                        text_y
-                    )
-
-                    Display.present()
-                else:
-                    self.logger.error("TOP_IMAGE_BOTTOM_TEXT missing args")
-            elif cmd == "TOP_TEXT_BOTTOM_IMAGE":
-                if args:
-                    image_path = args[0]
-                    height_percent = int(args[1])  # convert safely
-                    text = args[2]
-
-                    padding = Display.get_top_bar_height()
-
-                    # Use usable height (excluding top bar)
-                    usable_height = Display.get_usable_screen_height()
-
-                    # Image metrics
-                    image_height = int(usable_height * (height_percent / 100))
-                    text_y = padding + (image_height // 2)
-
-                    # Text placement: centered in remaining space
-                    remaining_height = usable_height - image_height
-                    image_y = padding + image_height + (remaining_height // 2)
-
-                    self.logger.info(f"Rendering image from path: {image_path} with text: {text}")
-
-                    Display.clear("")
-
-                    Display.render_image(
-                        image_path,
-                        Device.screen_width() // 2,
-                        image_y,
-                        RenderMode.MIDDLE_CENTER_ALIGNED,
-                        Device.screen_width(),
-                        image_height
-                    )
-
-                    Display.write_message_multiline(
+                    Display.write_message_multiline_starting_height_specified(
                         Display.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
                         text_y
                     )
