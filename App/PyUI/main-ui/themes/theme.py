@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import traceback
+from turtle import color
 
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
@@ -680,8 +681,11 @@ class Theme():
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.LIST | FontPurpose.DESCRIPTIVE_LIST_TITLE | FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION:
                     if(cls._data.get("list") and cls._data.get("list").get("selectedcolor")):
-                        return cls.hex_to_color(cls._data.get("list").get("selectedcolor"))
+                        color = cls.hex_to_color(cls._data.get("list").get("selectedcolor"))
+                        #PyUiLogger.get_logger().error(f"list selected color is {color}")                        
+                        return color
                     else:
+                        #PyUiLogger.get_logger().error(f"list selectedcolor not found, using grid")
                         return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
                 case FontPurpose.MESSAGE:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
@@ -702,7 +706,7 @@ class Theme():
                 case _:
                     return cls.hex_to_color(cls._data["grid"]["selectedcolor"])
         except Exception as e:
-            #PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
+            PyUiLogger.get_logger().error(f"text_color error occurred: {e}")
             return cls.text_color(font_purpose)
 
     @classmethod
@@ -995,7 +999,7 @@ class Theme():
 
     @classmethod
     def get_main_menu_column_count(cls):
-        return cls._data.get("mainMenuColCount", 4)
+        return cls._data.get("mainMenuColCount", int(4 * cls.width_multiplier))
 
     @classmethod
     def set_main_menu_column_count(cls, count):
