@@ -2,7 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-theme_name="$1"
+encoded_name="$1"
+theme_name=$(echo "$encoded_name" | sed 's/%20/ /g' | sed "s/%27/'/g")
 
 THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/PackedThemes"
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
