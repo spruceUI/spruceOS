@@ -96,7 +96,10 @@ $SYSTEM_JSON
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32
 /mnt/SDCARD/Emu/NDS/backup-64
-/mnt/SDCARD/Emu/NDS/config
+/mnt/SDCARD/Emu/NDS/config/drastic-A30.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-Brick.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-SmartPro.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-Flip.cfg
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings.json
 /mnt/SDCARD/Emu/SATURN/.yabasanshiro
