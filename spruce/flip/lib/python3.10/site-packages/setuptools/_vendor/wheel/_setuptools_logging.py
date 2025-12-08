@@ -5,11 +5,11 @@ import logging
 import sys
 
 
-def _not_warning(record: logging.LogRecord) -> bool:
+def _not_warning(record):
     return record.levelno < logging.WARNING
 
 
-def configure() -> None:
+def configure():
     """
     Configure logging to emit warning and above to stderr
     and everything else to stdout. This behavior is provided

@@ -19,7 +19,6 @@ from packaging.utils import canonicalize_name, canonicalize_version
 from packaging.version import Version
 
 from . import _normalization, _reqs
-from ._static import is_static
 from .warnings import SetuptoolsDeprecationWarning
 
 from distutils.util import rfc822_escape
@@ -28,7 +27,7 @@ from distutils.util import rfc822_escape
 def get_metadata_version(self):
     mv = getattr(self, 'metadata_version', None)
     if mv is None:
-        mv = Version('2.4')
+        mv = Version('2.1')
         self.metadata_version = mv
     return mv
 
@@ -88,7 +87,6 @@ def read_pkg_file(self, file):
     self.url = _read_field_from_msg(msg, 'home-page')
     self.download_url = _read_field_from_msg(msg, 'download-url')
     self.license = _read_field_unescaped_from_msg(msg, 'license')
-    self.license_expression = _read_field_unescaped_from_msg(msg, 'license-expression')
 
     self.long_description = _read_field_unescaped_from_msg(msg, 'description')
     if self.long_description is None and self.metadata_version >= Version('2.1'):
@@ -152,7 +150,7 @@ def write_pkg_file(self, file):  # noqa: C901  # is too complex (14)  # FIXME
     version = self.get_metadata_version()
 
     def write_field(key, value):
-        file.write(f"{key}: {value}\n")
+        file.write("%s: %s\n" % (key, value))
 
     write_field('Metadata-Version', str(version))
     write_field('Name', self.get_name())
@@ -176,13 +174,12 @@ def write_pkg_file(self, file):  # noqa: C901  # is too complex (14)  # FIXME
         if attr_val is not None:
             write_field(field, attr_val)
 
-    if license_expression := self.license_expression:
-        write_field('License-Expression', license_expression)
-    elif license := self.get_license():
+    license = self.get_license()
+    if license:
         write_field('License', rfc822_escape(license))
 
-    for label, url in self.project_urls.items():
-        write_field('Project-URL', f'{label}, {url}')
+    for project_url in self.project_urls.items():
+        write_field('Project-URL', '%s, %s' % project_url)
 
     keywords = ','.join(self.get_keywords())
     if keywords:
@@ -207,17 +204,12 @@ def write_pkg_file(self, file):  # noqa: C901  # is too complex (14)  # FIXME
     if self.long_description_content_type:
         write_field('Description-Content-Type', self.long_description_content_type)
 
-    safe_license_files = map(_safe_license_file, self.license_files or [])
-    self._write_list(file, 'License-File', safe_license_files)
+    self._write_list(file, 'License-File', self.license_files or [])
     _write_requirements(self, file)
-
-    for field, attr in _POSSIBLE_DYNAMIC_FIELDS.items():
-        if (val := getattr(self, attr, None)) and not is_static(val):
-            write_field('Dynamic', field)
 
     long_description = self.get_long_description()
     if long_description:
-        file.write(f"\n{long_description}")
+        file.write("\n%s" % long_description)
         if not long_description.endswith("\n"):
             file.write("\n")
 
@@ -292,46 +284,3 @@ def _distribution_fullname(name: str, version: str) -> str:
         canonicalize_name(name).replace('-', '_'),
         canonicalize_version(version, strip_trailing_zero=False),
     )
-
-
-def _safe_license_file(file):
-    # XXX: Do we need this after the deprecation discussed in #4892, #4896??
-    normalized = os.path.normpath(file).replace(os.sep, "/")
-    if "../" in normalized:
-        return os.path.basename(normalized)  # Temporarily restore pre PEP639 behaviour
-    return normalized
-
-
-_POSSIBLE_DYNAMIC_FIELDS = {
-    # Core Metadata Field x related Distribution attribute
-    "author": "author",
-    "author-email": "author_email",
-    "classifier": "classifiers",
-    "description": "long_description",
-    "description-content-type": "long_description_content_type",
-    "download-url": "download_url",
-    "home-page": "url",
-    "keywords": "keywords",
-    "license": "license",
-    # XXX: License-File is complicated because the user gives globs that are expanded
-    #      during the build. Without special handling it is likely always
-    #      marked as Dynamic, which is an acceptable outcome according to:
-    #      https://github.com/pypa/setuptools/issues/4629#issuecomment-2331233677
-    "license-file": "license_files",
-    "license-expression": "license_expression",  # PEP 639
-    "maintainer": "maintainer",
-    "maintainer-email": "maintainer_email",
-    "obsoletes": "obsoletes",
-    # "obsoletes-dist": "obsoletes_dist",  # NOT USED
-    "platform": "platforms",
-    "project-url": "project_urls",
-    "provides": "provides",
-    # "provides-dist": "provides_dist",  # NOT USED
-    "provides-extra": "extras_require",
-    "requires": "requires",
-    "requires-dist": "install_requires",
-    # "requires-external": "requires_external",  # NOT USED
-    "requires-python": "python_requires",
-    "summary": "description",
-    # "supported-platform": "supported_platforms",  # NOT USED
-}

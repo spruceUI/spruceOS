@@ -6,12 +6,9 @@ import os
 import sys
 from configparser import ConfigParser
 from pathlib import Path
-from typing import TYPE_CHECKING, NoReturn
+from typing import Iterator, NoReturn
 
 from .api import PlatformDirsABC
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
 
 if sys.platform == "win32":
 
@@ -220,6 +217,12 @@ class Unix(PlatformDirsABC):  # noqa: PLR0904
     def site_cache_path(self) -> Path:
         """:return: cache path shared by users. Only return the first item, even if ``multipath`` is set to ``True``"""
         return self._first_item_as_path_if_multipath(self.site_cache_dir)
+
+    def _first_item_as_path_if_multipath(self, directory: str) -> Path:
+        if self.multipath:
+            # If multipath is True, the first path is returned.
+            directory = directory.split(os.pathsep)[0]
+        return Path(directory)
 
     def iter_config_dirs(self) -> Iterator[str]:
         """:yield: all user and site configuration directories."""

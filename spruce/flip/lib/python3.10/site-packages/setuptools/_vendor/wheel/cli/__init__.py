@@ -14,25 +14,25 @@ class WheelError(Exception):
     pass
 
 
-def unpack_f(args: argparse.Namespace) -> None:
+def unpack_f(args):
     from .unpack import unpack
 
     unpack(args.wheelfile, args.dest)
 
 
-def pack_f(args: argparse.Namespace) -> None:
+def pack_f(args):
     from .pack import pack
 
     pack(args.directory, args.dest_dir, args.build_number)
 
 
-def convert_f(args: argparse.Namespace) -> None:
+def convert_f(args):
     from .convert import convert
 
     convert(args.files, args.dest_dir, args.verbose)
 
 
-def tags_f(args: argparse.Namespace) -> None:
+def tags_f(args):
     from .tags import tags
 
     names = (
@@ -51,10 +51,10 @@ def tags_f(args: argparse.Namespace) -> None:
         print(name)
 
 
-def version_f(args: argparse.Namespace) -> None:
+def version_f(args):
     from .. import __version__
 
-    print(f"wheel {__version__}")
+    print("wheel %s" % __version__)
 
 
 def parse_build_tag(build_tag: str) -> str:

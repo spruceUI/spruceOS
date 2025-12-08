@@ -2,18 +2,19 @@
 
 Implements the Distutils 'build' command."""
 
-from __future__ import annotations
-
 import os
 import sys
 import sysconfig
-from collections.abc import Callable
-from typing import ClassVar
 
-from ..ccompiler import show_compilers
 from ..core import Command
 from ..errors import DistutilsOptionError
 from ..util import get_platform
+
+
+def show_compilers():
+    from ..ccompiler import show_compilers
+
+    show_compilers()
 
 
 class build(Command):
@@ -42,9 +43,9 @@ class build(Command):
         ('executable=', 'e', "specify final destination interpreter path (build.py)"),
     ]
 
-    boolean_options: ClassVar[list[str]] = ['debug', 'force']
+    boolean_options = ['debug', 'force']
 
-    help_options: ClassVar[list[tuple[str, str | None, str, Callable[[], object]]]] = [
+    help_options = [
         ('help-compiler', None, "list available compilers", show_compilers),
     ]
 
@@ -64,7 +65,7 @@ class build(Command):
         self.executable = None
         self.parallel = None
 
-    def finalize_options(self) -> None:  # noqa: C901
+    def finalize_options(self):  # noqa: C901
         if self.plat_name is None:
             self.plat_name = get_platform()
         else:
@@ -112,8 +113,7 @@ class build(Command):
             self.build_temp = os.path.join(self.build_base, 'temp' + plat_specifier)
         if self.build_scripts is None:
             self.build_scripts = os.path.join(
-                self.build_base,
-                f'scripts-{sys.version_info.major}.{sys.version_info.minor}',
+                self.build_base, 'scripts-%d.%d' % sys.version_info[:2]
             )
 
         if self.executable is None and sys.executable:
@@ -125,7 +125,7 @@ class build(Command):
             except ValueError:
                 raise DistutilsOptionError("parallel should be an integer")
 
-    def run(self) -> None:
+    def run(self):
         # Run all relevant sub-commands.  This will be some subset of:
         #  - build_py      - pure Python modules
         #  - build_clib    - standalone C libraries

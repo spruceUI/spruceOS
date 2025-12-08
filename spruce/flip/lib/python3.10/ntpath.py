@@ -30,8 +30,7 @@ __all__ = ["normcase","isabs","join","splitdrive","split","splitext",
            "ismount", "expanduser","expandvars","normpath","abspath",
            "curdir","pardir","sep","pathsep","defpath","altsep",
            "extsep","devnull","realpath","supports_unicode_filenames","relpath",
-           "samefile", "sameopenfile", "samestat", "commonpath",
-           "ALLOW_MISSING"]
+           "samefile", "sameopenfile", "samestat", "commonpath"]
 
 def _get_bothseps(path):
     if isinstance(path, bytes):
@@ -572,10 +571,9 @@ try:
     from nt import _getfinalpathname, readlink as _nt_readlink
 except ImportError:
     # realpath is a no-op on systems without _getfinalpathname support.
-    def realpath(path, *, strict=False):
-        return abspath(path)
+    realpath = abspath
 else:
-    def _readlink_deep(path, ignored_error=OSError):
+    def _readlink_deep(path):
         # These error codes indicate that we should stop reading links and
         # return the path we currently have.
         # 1: ERROR_INVALID_FUNCTION
@@ -608,7 +606,7 @@ else:
                         path = old_path
                         break
                     path = normpath(join(dirname(old_path), path))
-            except ignored_error as ex:
+            except OSError as ex:
                 if ex.winerror in allowed_winerror:
                     break
                 raise
@@ -617,7 +615,7 @@ else:
                 break
         return path
 
-    def _getfinalpathname_nonstrict(path, ignored_error=OSError):
+    def _getfinalpathname_nonstrict(path):
         # These error codes indicate that we should stop resolving the path
         # and return the value we currently have.
         # 1: ERROR_INVALID_FUNCTION
@@ -644,18 +642,17 @@ else:
             try:
                 path = _getfinalpathname(path)
                 return join(path, tail) if tail else path
-            except ignored_error as ex:
+            except OSError as ex:
                 if ex.winerror not in allowed_winerror:
                     raise
                 try:
                     # The OS could not resolve this path fully, so we attempt
                     # to follow the link ourselves. If we succeed, join the tail
                     # and return.
-                    new_path = _readlink_deep(path,
-                                              ignored_error=ignored_error)
+                    new_path = _readlink_deep(path)
                     if new_path != path:
                         return join(new_path, tail) if tail else new_path
-                except ignored_error:
+                except OSError:
                     # If we fail to readlink(), let's keep traversing
                     pass
                 path, name = split(path)
@@ -686,24 +683,16 @@ else:
             if normcase(path) == normcase(devnull):
                 return '\\\\.\\NUL'
         had_prefix = path.startswith(prefix)
-
-        if strict is ALLOW_MISSING:
-            ignored_error = FileNotFoundError
-            strict = True
-        elif strict:
-            ignored_error = ()
-        else:
-            ignored_error = OSError
-
         if not had_prefix and not isabs(path):
             path = join(cwd, path)
         try:
             path = _getfinalpathname(path)
             initial_winerror = 0
-        except ignored_error as ex:
+        except OSError as ex:
+            if strict:
+                raise
             initial_winerror = ex.winerror
-            path = _getfinalpathname_nonstrict(path,
-                                               ignored_error=ignored_error)
+            path = _getfinalpathname_nonstrict(path)
         # The path returned by _getfinalpathname will always start with \\?\ -
         # strip off that prefix unless it was already provided on the original
         # path.

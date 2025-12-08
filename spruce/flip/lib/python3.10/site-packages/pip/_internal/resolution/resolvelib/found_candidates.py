@@ -8,11 +8,10 @@ absolutely need, and not "download the world" when we only need one version of
 something.
 """
 
-from __future__ import annotations
-
+import functools
 import logging
-from collections.abc import Iterator, Sequence
-from typing import Any, Callable, Optional
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Callable, Iterator, Optional, Set, Tuple
 
 from pip._vendor.packaging.version import _BaseVersion
 
@@ -22,7 +21,22 @@ from .base import Candidate
 
 logger = logging.getLogger(__name__)
 
-IndexCandidateInfo = tuple[_BaseVersion, Callable[[], Optional[Candidate]]]
+IndexCandidateInfo = Tuple[_BaseVersion, Callable[[], Optional[Candidate]]]
+
+if TYPE_CHECKING:
+    SequenceCandidate = Sequence[Candidate]
+else:
+    # For compatibility: Python before 3.9 does not support using [] on the
+    # Sequence class.
+    #
+    # >>> from collections.abc import Sequence
+    # >>> Sequence[str]
+    # Traceback (most recent call last):
+    #   File "<stdin>", line 1, in <module>
+    # TypeError: 'ABCMeta' object is not subscriptable
+    #
+    # TODO: Remove this block after dropping Python 3.8 support.
+    SequenceCandidate = Sequence
 
 
 def _iter_built(infos: Iterator[IndexCandidateInfo]) -> Iterator[Candidate]:
@@ -31,7 +45,7 @@ def _iter_built(infos: Iterator[IndexCandidateInfo]) -> Iterator[Candidate]:
     This iterator is used when the package is not already installed. Candidates
     from index come later in their normal ordering.
     """
-    versions_found: set[_BaseVersion] = set()
+    versions_found: Set[_BaseVersion] = set()
     for version, func in infos:
         if version in versions_found:
             continue
@@ -67,7 +81,7 @@ def _iter_built_with_prepended(
     normal ordering, except skipped when the version is already installed.
     """
     yield installed
-    versions_found: set[_BaseVersion] = {installed.version}
+    versions_found: Set[_BaseVersion] = {installed.version}
     for version, func in infos:
         if version in versions_found:
             continue
@@ -91,7 +105,7 @@ def _iter_built_with_inserted(
     the installed candidate exactly once before we start yielding older or
     equivalent candidates, or after all other candidates if they are all newer.
     """
-    versions_found: set[_BaseVersion] = set()
+    versions_found: Set[_BaseVersion] = set()
     for version, func in infos:
         if version in versions_found:
             continue
@@ -110,7 +124,7 @@ def _iter_built_with_inserted(
         yield installed
 
 
-class FoundCandidates(Sequence[Candidate]):
+class FoundCandidates(SequenceCandidate):
     """A lazy sequence to provide candidates to the resolver.
 
     The intended usage is to return this from `find_matches()` so the resolver
@@ -122,15 +136,14 @@ class FoundCandidates(Sequence[Candidate]):
     def __init__(
         self,
         get_infos: Callable[[], Iterator[IndexCandidateInfo]],
-        installed: Candidate | None,
+        installed: Optional[Candidate],
         prefers_installed: bool,
-        incompatible_ids: set[int],
+        incompatible_ids: Set[int],
     ):
         self._get_infos = get_infos
         self._installed = installed
         self._prefers_installed = prefers_installed
         self._incompatible_ids = incompatible_ids
-        self._bool: bool | None = None
 
     def __getitem__(self, index: Any) -> Any:
         # Implemented to satisfy the ABC check. This is not needed by the
@@ -154,13 +167,8 @@ class FoundCandidates(Sequence[Candidate]):
         # performance reasons).
         raise NotImplementedError("don't do this")
 
+    @functools.lru_cache(maxsize=1)
     def __bool__(self) -> bool:
-        if self._bool is not None:
-            return self._bool
-
         if self._prefers_installed and self._installed:
-            self._bool = True
             return True
-
-        self._bool = any(self)
-        return self._bool
+        return any(self)

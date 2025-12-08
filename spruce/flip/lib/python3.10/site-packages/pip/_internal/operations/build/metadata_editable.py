@@ -1,4 +1,5 @@
-"""Metadata generation logic for source distributions."""
+"""Metadata generation logic for source distributions.
+"""
 
 import os
 
@@ -37,5 +38,4 @@ def generate_editable_metadata(
             except InstallationSubprocessError as error:
                 raise MetadataGenerationFailed(package_details=details) from error
 
-    assert distinfo_dir is not None
     return os.path.join(metadata_dir, distinfo_dir)

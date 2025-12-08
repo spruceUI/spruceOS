@@ -35,7 +35,7 @@ __all__ = ["normcase","isabs","join","splitdrive","split","splitext",
            "samefile","sameopenfile","samestat",
            "curdir","pardir","sep","pathsep","defpath","altsep","extsep",
            "devnull","realpath","supports_unicode_filenames","relpath",
-           "commonpath", "ALLOW_MISSING"]
+           "commonpath"]
 
 
 def _get_sep(path):
@@ -407,15 +407,6 @@ def _joinrealpath(path, rest, strict, seen):
         sep = '/'
         curdir = '.'
         pardir = '..'
-        getcwd = os.getcwd
-    if strict is ALLOW_MISSING:
-        ignored_error = FileNotFoundError
-    elif strict:
-        ignored_error = ()
-    else:
-        ignored_error = OSError
-
-    maxlinks = None
 
     if isabs(rest):
         rest = rest[1:]
@@ -438,7 +429,9 @@ def _joinrealpath(path, rest, strict, seen):
         newpath = join(path, name)
         try:
             st = os.lstat(newpath)
-        except ignored_error:
+        except OSError:
+            if strict:
+                raise
             is_link = False
         else:
             is_link = stat.S_ISLNK(st.st_mode)

@@ -11,17 +11,17 @@ import re
 import textwrap
 from email.message import Message
 from email.parser import Parser
-from typing import Generator, Iterable, Iterator, Literal
+from typing import Iterator
 
 from .vendored.packaging.requirements import Requirement
 
 
-def _nonblank(str: str) -> bool | Literal[""]:
+def _nonblank(str):
     return str and not str.startswith("#")
 
 
 @functools.singledispatch
-def yield_lines(iterable: Iterable[str]) -> Iterator[str]:
+def yield_lines(iterable):
     r"""
     Yield valid lines of a string or iterable.
     >>> list(yield_lines(''))
@@ -39,13 +39,11 @@ def yield_lines(iterable: Iterable[str]) -> Iterator[str]:
 
 
 @yield_lines.register(str)
-def _(text: str) -> Iterator[str]:
+def _(text):
     return filter(_nonblank, map(str.strip, text.splitlines()))
 
 
-def split_sections(
-    s: str | Iterator[str],
-) -> Generator[tuple[str | None, list[str]], None, None]:
+def split_sections(s):
     """Split a string or iterable thereof into (section, content) pairs
     Each ``section`` is a stripped version of the section header ("[section]")
     and each ``content`` is a list of stripped lines excluding blank lines and
@@ -53,7 +51,7 @@ def split_sections(
     header, they're returned in a first ``section`` of ``None``.
     """
     section = None
-    content: list[str] = []
+    content = []
     for line in yield_lines(s):
         if line.startswith("["):
             if line.endswith("]"):
@@ -70,7 +68,7 @@ def split_sections(
     yield section, content
 
 
-def safe_extra(extra: str) -> str:
+def safe_extra(extra):
     """Convert an arbitrary string to a standard 'extra' name
     Any runs of non-alphanumeric characters are replaced with a single '_',
     and the result is always lowercased.
@@ -78,7 +76,7 @@ def safe_extra(extra: str) -> str:
     return re.sub("[^A-Za-z0-9.-]+", "_", extra).lower()
 
 
-def safe_name(name: str) -> str:
+def safe_name(name):
     """Convert an arbitrary string to a standard distribution name
     Any runs of non-alphanumeric/. characters are replaced with a single '-'.
     """
@@ -87,10 +85,10 @@ def safe_name(name: str) -> str:
 
 def requires_to_requires_dist(requirement: Requirement) -> str:
     """Return the version specifier for a requirement in PEP 345/566 fashion."""
-    if requirement.url:
+    if getattr(requirement, "url", None):
         return " @ " + requirement.url
 
-    requires_dist: list[str] = []
+    requires_dist = []
     for spec in requirement.specifier:
         requires_dist.append(spec.operator + spec.version)
 
@@ -113,7 +111,7 @@ def convert_requirements(requirements: list[str]) -> Iterator[str]:
 
 
 def generate_requirements(
-    extras_require: dict[str | None, list[str]],
+    extras_require: dict[str, list[str]],
 ) -> Iterator[tuple[str, str]]:
     """
     Convert requirements from a setup()-style dictionary to
@@ -133,14 +131,13 @@ def generate_requirements(
             yield "Provides-Extra", extra
             if condition:
                 condition = "(" + condition + ") and "
-            condition += f"extra == '{extra}'"
+            condition += "extra == '%s'" % extra
 
         if condition:
             condition = " ; " + condition
 
         for new_req in convert_requirements(depends):
-            canonical_req = str(Requirement(new_req + condition))
-            yield "Requires-Dist", canonical_req
+            yield "Requires-Dist", new_req + condition
 
 
 def pkginfo_to_metadata(egg_info_path: str, pkginfo_path: str) -> Message:

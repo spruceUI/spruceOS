@@ -12,7 +12,7 @@ import path
 import pytest
 from test.support import unix_shell
 
-from .compat import py39 as os_helper
+from .compat import py38 as os_helper
 
 
 class TestSpawn(support.TempdirManager):
@@ -73,12 +73,9 @@ class TestSpawn(support.TempdirManager):
         # PATH='': no match, except in the current directory
         with os_helper.EnvironmentVarGuard() as env:
             env['PATH'] = ''
-            with (
-                mock.patch(
-                    'distutils.spawn.os.confstr', return_value=tmp_dir, create=True
-                ),
-                mock.patch('distutils.spawn.os.defpath', tmp_dir),
-            ):
+            with mock.patch(
+                'distutils.spawn.os.confstr', return_value=tmp_dir, create=True
+            ), mock.patch('distutils.spawn.os.defpath', tmp_dir):
                 rv = find_executable(program)
                 assert rv is None
 
@@ -90,10 +87,9 @@ class TestSpawn(support.TempdirManager):
         # PATH=':': explicitly looks in the current directory
         with os_helper.EnvironmentVarGuard() as env:
             env['PATH'] = os.pathsep
-            with (
-                mock.patch('distutils.spawn.os.confstr', return_value='', create=True),
-                mock.patch('distutils.spawn.os.defpath', ''),
-            ):
+            with mock.patch(
+                'distutils.spawn.os.confstr', return_value='', create=True
+            ), mock.patch('distutils.spawn.os.defpath', ''):
                 rv = find_executable(program)
                 assert rv is None
 
@@ -107,22 +103,16 @@ class TestSpawn(support.TempdirManager):
             env.pop('PATH', None)
 
             # without confstr
-            with (
-                mock.patch(
-                    'distutils.spawn.os.confstr', side_effect=ValueError, create=True
-                ),
-                mock.patch('distutils.spawn.os.defpath', tmp_dir),
-            ):
+            with mock.patch(
+                'distutils.spawn.os.confstr', side_effect=ValueError, create=True
+            ), mock.patch('distutils.spawn.os.defpath', tmp_dir):
                 rv = find_executable(program)
                 assert rv == filename
 
             # with confstr
-            with (
-                mock.patch(
-                    'distutils.spawn.os.confstr', return_value=tmp_dir, create=True
-                ),
-                mock.patch('distutils.spawn.os.defpath', ''),
-            ):
+            with mock.patch(
+                'distutils.spawn.os.confstr', return_value=tmp_dir, create=True
+            ), mock.patch('distutils.spawn.os.defpath', ''):
                 rv = find_executable(program)
                 assert rv == filename
 

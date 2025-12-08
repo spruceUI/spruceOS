@@ -8,14 +8,11 @@ additional features:
   * options set attributes of a passed-in object
 """
 
-from __future__ import annotations
-
 import getopt
 import re
 import string
 import sys
-from collections.abc import Sequence
-from typing import Any
+from typing import Any, Sequence
 
 from .errors import DistutilsArgError, DistutilsGetoptError
 
@@ -170,7 +167,8 @@ class FancyGetopt:
 
             if not ((short is None) or (isinstance(short, str) and len(short) == 1)):
                 raise DistutilsGetoptError(
-                    f"invalid short option '{short}': must a single character or None"
+                    f"invalid short option '{short}': "
+                    "must a single character or None"
                 )
 
             self.repeat[long] = repeat
@@ -221,7 +219,7 @@ class FancyGetopt:
                 self.short_opts.append(short)
                 self.short2long[short[0]] = long
 
-    def getopt(self, args: Sequence[str] | None = None, object=None):  # noqa: C901
+    def getopt(self, args=None, object=None):  # noqa: C901
         """Parse command-line options in args. Store as attributes on object.
 
         If 'args' is None or not supplied, uses 'sys.argv[1:]'.  If
@@ -353,18 +351,18 @@ class FancyGetopt:
             # Case 1: no short option at all (makes life easy)
             if short is None:
                 if text:
-                    lines.append(f"  --{long:<{max_opt}}  {text[0]}")
+                    lines.append("  --%-*s  %s" % (max_opt, long, text[0]))
                 else:
-                    lines.append(f"  --{long:<{max_opt}}")
+                    lines.append("  --%-*s  " % (max_opt, long))
 
             # Case 2: we have a short option, so we have to include it
             # just after the long option
             else:
                 opt_names = f"{long} (-{short})"
                 if text:
-                    lines.append(f"  --{opt_names:<{max_opt}}  {text[0]}")
+                    lines.append("  --%-*s  %s" % (max_opt, opt_names, text[0]))
                 else:
-                    lines.append(f"  --{opt_names:<{max_opt}}")
+                    lines.append("  --%-*s" % opt_names)
 
             for ell in text[1:]:
                 lines.append(big_indent + ell)
@@ -377,7 +375,7 @@ class FancyGetopt:
             file.write(line + "\n")
 
 
-def fancy_getopt(options, negative_opt, object, args: Sequence[str] | None):
+def fancy_getopt(options, negative_opt, object, args):
     parser = FancyGetopt(options)
     parser.set_negative_aliases(negative_opt)
     return parser.getopt(args, object)
@@ -466,6 +464,6 @@ How *do* you spell that odd word, anyways?
 say, "How should I know?"].)"""
 
     for w in (10, 20, 30, 40):
-        print(f"width: {w}")
+        print("width: %d" % w)
         print("\n".join(wrap_text(text, w)))
         print()

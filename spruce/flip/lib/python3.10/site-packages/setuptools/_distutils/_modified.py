@@ -1,23 +1,12 @@
 """Timestamp comparison of files and groups of files."""
 
-from __future__ import annotations
-
 import functools
 import os.path
-from collections.abc import Callable, Iterable
-from typing import Literal, TypeVar
 
 from jaraco.functools import splat
 
 from .compat.py39 import zip_strict
 from .errors import DistutilsFileError
-
-_SourcesT = TypeVar(
-    "_SourcesT", bound="str | bytes | os.PathLike[str] | os.PathLike[bytes]"
-)
-_TargetsT = TypeVar(
-    "_TargetsT", bound="str | bytes | os.PathLike[str] | os.PathLike[bytes]"
-)
 
 
 def _newer(source, target):
@@ -26,10 +15,7 @@ def _newer(source, target):
     )
 
 
-def newer(
-    source: str | bytes | os.PathLike[str] | os.PathLike[bytes],
-    target: str | bytes | os.PathLike[str] | os.PathLike[bytes],
-) -> bool:
+def newer(source, target):
     """
     Is source modified more recently than target.
 
@@ -39,16 +25,12 @@ def newer(
     Raises DistutilsFileError if 'source' does not exist.
     """
     if not os.path.exists(source):
-        raise DistutilsFileError(f"file {os.path.abspath(source)!r} does not exist")
+        raise DistutilsFileError(f"file '{os.path.abspath(source)}' does not exist")
 
     return _newer(source, target)
 
 
-def newer_pairwise(
-    sources: Iterable[_SourcesT],
-    targets: Iterable[_TargetsT],
-    newer: Callable[[_SourcesT, _TargetsT], bool] = newer,
-) -> tuple[list[_SourcesT], list[_TargetsT]]:
+def newer_pairwise(sources, targets, newer=newer):
     """
     Filter filenames where sources are newer than targets.
 
@@ -61,11 +43,7 @@ def newer_pairwise(
     return tuple(map(list, zip(*newer_pairs))) or ([], [])
 
 
-def newer_group(
-    sources: Iterable[str | bytes | os.PathLike[str] | os.PathLike[bytes]],
-    target: str | bytes | os.PathLike[str] | os.PathLike[bytes],
-    missing: Literal["error", "ignore", "newer"] = "error",
-) -> bool:
+def newer_group(sources, target, missing='error'):
     """
     Is target out-of-date with respect to any file in sources.
 

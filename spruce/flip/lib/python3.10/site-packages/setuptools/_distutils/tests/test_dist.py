@@ -13,7 +13,6 @@ import warnings
 from distutils.cmd import Command
 from distutils.dist import Distribution, fix_help_options
 from distutils.tests import support
-from typing import ClassVar
 
 import jaraco.path
 import pytest
@@ -24,7 +23,7 @@ pydistutils_cfg = '.' * (os.name == 'posix') + 'pydistutils.cfg'
 class test_dist(Command):
     """Sample distutils extension command."""
 
-    user_options: ClassVar[list[tuple[str, str, str]]] = [
+    user_options = [
         ("sample-option=", "S", "help text"),
     ]
 
@@ -246,12 +245,6 @@ class TestDistributionBehavior(support.TempdirManager):
 
         # make sure --no-user-cfg disables the user cfg file
         assert len(all_files) - 1 == len(files)
-
-    def test_script_args_list_coercion(self):
-        d = Distribution(attrs={'script_args': ('build', '--no-user-cfg')})
-
-        # make sure script_args is a list even if it started as a different iterable
-        assert d.script_args == ['build', '--no-user-cfg']
 
     @pytest.mark.skipif(
         'platform.system() == "Windows"',

@@ -133,9 +133,9 @@ class TextFile:
             line = self.current_line
         outmsg.append(self.filename + ", ")
         if isinstance(line, (list, tuple)):
-            outmsg.append("lines {}-{}: ".format(*line))
+            outmsg.append("lines %d-%d: " % tuple(line))
         else:
-            outmsg.append(f"line {int(line)}: ")
+            outmsg.append("line %d: " % line)
         outmsg.append(str(msg))
         return "".join(outmsg)
 

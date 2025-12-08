@@ -16,8 +16,8 @@ itcl_VERSION='4.2.4'
 ITCL_VERSION='4.2.4'
 
 # The name of the Itcl library (may be either a .a file or a shared library):
-itcl_LIB_FILE=libitcl4.2.4.so
-ITCL_LIB_FILE=libitcl4.2.4.so
+itcl_LIB_FILE=libitcl4.2.4.a
+ITCL_LIB_FILE=libitcl4.2.4.a
 
 # String to pass to linker to pick up the Itcl library from its
 # build directory.

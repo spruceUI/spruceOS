@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import TypeVar
-
-_IterableT = TypeVar("_IterableT", bound="Iterable[str]")
+from .py38 import removeprefix
 
 
-def consolidate_linker_args(args: _IterableT) -> _IterableT | str:
+def consolidate_linker_args(args: list[str]) -> list[str] | str:
     """
     Ensure the return value is a string for backward compatibility.
 
@@ -15,4 +12,4 @@ def consolidate_linker_args(args: _IterableT) -> _IterableT | str:
 
     if not all(arg.startswith('-Wl,') for arg in args):
         return args
-    return '-Wl,' + ','.join(arg.removeprefix('-Wl,') for arg in args)
+    return '-Wl,' + ','.join(removeprefix(arg, '-Wl,') for arg in args)

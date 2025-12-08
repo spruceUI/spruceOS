@@ -8,7 +8,8 @@ from distutils.core import Distribution
 from distutils.tests import support
 
 import pytest
-from test.support import requires_zlib
+
+from .compat.py38 import requires_zlib
 
 SETUP_PY = """\
 from distutils.core import setup

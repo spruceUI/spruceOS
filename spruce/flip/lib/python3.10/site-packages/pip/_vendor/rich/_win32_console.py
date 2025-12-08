@@ -2,7 +2,6 @@
 
 The API that this module wraps is documented at https://docs.microsoft.com/en-us/windows/console/console-functions
 """
-
 import ctypes
 import sys
 from typing import Any
@@ -381,7 +380,7 @@ class LegacyWindowsTerm:
             WindowsCoordinates: The current cursor position.
         """
         coord: COORD = GetConsoleScreenBufferInfo(self._handle).dwCursorPosition
-        return WindowsCoordinates(row=coord.Y, col=coord.X)
+        return WindowsCoordinates(row=cast(int, coord.Y), col=cast(int, coord.X))
 
     @property
     def screen_size(self) -> WindowsCoordinates:
@@ -391,7 +390,9 @@ class LegacyWindowsTerm:
             WindowsCoordinates: The width and height of the screen as WindowsCoordinates.
         """
         screen_size: COORD = GetConsoleScreenBufferInfo(self._handle).dwSize
-        return WindowsCoordinates(row=screen_size.Y, col=screen_size.X)
+        return WindowsCoordinates(
+            row=cast(int, screen_size.Y), col=cast(int, screen_size.X)
+        )
 
     def write_text(self, text: str) -> None:
         """Write text directly to the terminal without any modification of styles

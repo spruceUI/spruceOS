@@ -8,7 +8,7 @@ by import rather than matching pre-defined names.
 """
 
 import shutil
-from collections.abc import Sequence
+from typing import Sequence
 
 
 def missing_compiler_executable(cmd_names: Sequence[str] = []):  # pragma: no cover
