@@ -11,7 +11,10 @@ class ThemePatcher():
     # Add properties you want to scale (case-sensitive)
     SCALABLE_KEYS = {"grid1x4","grid3x4","FontSize","gameSelectImgWidth","gameSelectImgHeight","gridGameSelectImgWidth",
                      "gridGameSelectImgHeight","listGameSelectImgWidth","listGameSelectImgHeight","gridMultiRowSelBgResizePadWidth",
-                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset"}
+                     "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset","gridMultiRowImageYOffset",
+                     "singleRowGridTextYOffset","multiRowGridTextYOffset","carouselSystemExternalXPad","carouselSystemXPad",
+                     "gridSystemImageYOffset","gridSystemSelectImgWidth","listSystemSelectImgWidth","carouselSystemSelectPrimaryImgWidth",
+                     "gridSystemSelectImgHeight","listSystemSelectImgHeight"}
 
     @classmethod
     def convert_to_qoi(cls, path):
@@ -104,10 +107,11 @@ class ThemePatcher():
         ])
         Display.present()
 
-        cls.patch_folder(os.path.join(config_path,"icons"),
-                     os.path.join(config_path,f"icons_{target_width}x{target_height}"),
-                     scale,
-                     theme_width, theme_height, target_width, target_height)
+        if(os.path.exists(os.path.join(config_path,"icons"))):
+            cls.patch_folder(os.path.join(config_path,"icons"),
+                        os.path.join(config_path,f"icons_{target_width}x{target_height}"),
+                        scale,
+                        theme_width, theme_height, target_width, target_height)
     
         cls.scale_config_json(os.path.join(config_path,"config.json"),
                      os.path.join(config_path,f"config_{target_width}x{target_height}.json"),
@@ -140,35 +144,37 @@ class ThemePatcher():
 
     @staticmethod
     def scale_image(input_file, output_file, scale, theme_width, theme_height, target_width, target_height):
-
-        image_utils = Device.get_image_utils()
-        try:
-            img_width ,img_height = image_utils.get_image_dimensions(input_file)
-            new_width = int(img_width * scale)
-            new_height = int(img_height * scale)
-            preserve_aspect_ratio = True
-
-            if(img_width == theme_width and img_height != theme_height):
-                new_width = target_width
-                preserve_aspect_ratio = False
-
-            if(img_height == theme_height and img_width != theme_width):
-                new_height = target_height
-                preserve_aspect_ratio = False
-
-            image_utils.resize_image(input_file, output_file, new_width, new_height,preserve_aspect_ratio=preserve_aspect_ratio)
-
-            if not os.path.exists(output_file):
-                # Means non image -- should this be raised as an error as part of resize?
-                shutil.copyfile(input_file, output_file)
-
-        except Exception as e:
-            # Copy the file instead of scaling if something fails
+        if os.path.exists(output_file):
+            PyUiLogger().get_logger().info(f"Scaled version of {output_file} already exists, skipping scaling.")
+        else:
+            image_utils = Device.get_image_utils()
             try:
-                shutil.copyfile(input_file, output_file)
-                PyUiLogger().get_logger().warning(f"Scaling failed for {input_file}, copied original instead: {e}")
-            except Exception as copy_err:
-                PyUiLogger().get_logger().exception(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
+                img_width ,img_height = image_utils.get_image_dimensions(input_file)
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+                preserve_aspect_ratio = True
+
+                if(img_width == theme_width and img_height != theme_height):
+                    new_width = target_width
+                    preserve_aspect_ratio = False
+
+                if(img_height == theme_height and img_width != theme_width):
+                    new_height = target_height
+                    preserve_aspect_ratio = False
+
+                image_utils.resize_image(input_file, output_file, new_width, new_height,preserve_aspect_ratio=preserve_aspect_ratio)
+
+                if not os.path.exists(output_file):
+                    # Means non image -- should this be raised as an error as part of resize?
+                    shutil.copyfile(input_file, output_file)
+
+            except Exception as e:
+                # Copy the file instead of scaling if something fails
+                try:
+                    shutil.copyfile(input_file, output_file)
+                    PyUiLogger().get_logger().warning(f"Scaling failed for {input_file}, copied original instead: {e}")
+                except Exception as copy_err:
+                    PyUiLogger().get_logger().exception(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
                         
     @classmethod
     def scale_config_json(cls, config_path, output_config_path, scale):
