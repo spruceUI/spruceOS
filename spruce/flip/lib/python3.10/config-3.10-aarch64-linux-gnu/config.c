@@ -36,11 +36,9 @@ extern PyObject* PyInit__codecs_tw(void);
 extern PyObject* PyInit__contextvars(void);
 extern PyObject* PyInit__csv(void);
 extern PyObject* PyInit__ctypes(void);
-extern PyObject* PyInit__ctypes_test(void);
 extern PyObject* PyInit__curses(void);
 extern PyObject* PyInit__curses_panel(void);
 extern PyObject* PyInit__datetime(void);
-extern PyObject* PyInit__dbm(void);
 extern PyObject* PyInit__decimal(void);
 extern PyObject* PyInit__elementtree(void);
 extern PyObject* PyInit__hashlib(void);
@@ -70,7 +68,6 @@ extern PyObject* PyInit__testbuffer(void);
 extern PyObject* PyInit__testimportmultiple(void);
 extern PyObject* PyInit__testinternalcapi(void);
 extern PyObject* PyInit__testmultiphase(void);
-extern PyObject* PyInit__tkinter(void);
 extern PyObject* PyInit__uuid(void);
 extern PyObject* PyInit__xxsubinterpreters(void);
 extern PyObject* PyInit__xxtestfuzz(void);
@@ -141,11 +138,9 @@ struct _inittab _PyImport_Inittab[] = {
     {"_contextvars", PyInit__contextvars},
     {"_csv", PyInit__csv},
     {"_ctypes", PyInit__ctypes},
-    {"_ctypes_test", PyInit__ctypes_test},
     {"_curses", PyInit__curses},
     {"_curses_panel", PyInit__curses_panel},
     {"_datetime", PyInit__datetime},
-    {"_dbm", PyInit__dbm},
     {"_decimal", PyInit__decimal},
     {"_elementtree", PyInit__elementtree},
     {"_hashlib", PyInit__hashlib},
@@ -175,7 +170,6 @@ struct _inittab _PyImport_Inittab[] = {
     {"_testimportmultiple", PyInit__testimportmultiple},
     {"_testinternalcapi", PyInit__testinternalcapi},
     {"_testmultiphase", PyInit__testmultiphase},
-    {"_tkinter", PyInit__tkinter},
     {"_uuid", PyInit__uuid},
     {"_xxsubinterpreters", PyInit__xxsubinterpreters},
     {"_xxtestfuzz", PyInit__xxtestfuzz},
