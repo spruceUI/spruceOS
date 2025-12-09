@@ -3,6 +3,8 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+start_pyui_message_writer
+
 SD_ROOT="/mnt/SDCARD"
 FW_DIR="/mnt/SDCARD/spruce/FIRMWARE_UPDATE"
 
@@ -42,6 +44,11 @@ case "$PLATFORM" in
         current_fw_is="$(compare_current_version_to_version "1.1.0")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
+	*)
+		log_and_display_message "The firmware updater app does not currently support the $PLATFORM"
+		sleep 4
+		exit 1
+		;;
 esac
 
 FW_URL="https://github.com/spruceUI/spruceSource/releases/download/firmware/${FW_FILE}.7z"
@@ -50,6 +57,7 @@ FW_URL="https://github.com/spruceUI/spruceSource/releases/download/firmware/${FW
 SKIP_VERSION_CHECK=false
 SKIP_APPLY=false
 
+log_message "firmwareUpdate.sh: current device: $PLATFORM"
 log_message "firmwareUpdate.sh: free space: $FREE_SPACE"
 log_message "firmwareUpdate.sh: charging status: $(get_charging_status)"
 log_message "firmwareUpdate.sh: current charge percent: $(get_battery_percent)"
