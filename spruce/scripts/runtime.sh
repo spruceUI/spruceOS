@@ -107,7 +107,7 @@ if [ "$PLATFORM" = "A30" ]; then
     # and send kill signal USR2 to switch to KEYBOARD_MODE
     ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
-elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
+elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]|| [ $PLATFORM = "SmartProS" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
