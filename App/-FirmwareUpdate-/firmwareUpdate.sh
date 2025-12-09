@@ -44,7 +44,7 @@ case "$PLATFORM" in
 		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the $PLATFORM"
-		sleep 4
+		sleep 5
 		exit 1
 		;;
 esac
@@ -81,8 +81,7 @@ get_battery_percent() {
 
 cancel_update() {
 	log_and_display_message "Firmware update cancelled."
-	sleep 1
-	acknowledge
+	sleep 5
 	if [ -f "$SD_ROOT/$FW_FILE" ]; then
 		rm "$SD_ROOT/$FW_FILE"
 		log_message "firmwareUpdate.sh: Removing FW image from root of card."
@@ -103,10 +102,11 @@ confirm_update() {
 		"Flip")
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
-		"Brick"|"SmartPro")
+		"Brick"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
 	esac
+	conf_msg="$conf_msg Press A to proceed."
 	log_and_display_message "$conf_msg"
 	sleep 1
 	acknowledge
@@ -119,13 +119,13 @@ check_for_connection() {
     wifi_enabled="$(jq -r '.wifi' "$SYSTEM_JSON")"
     if [ $wifi_enabled -eq 0 ]; then
 		display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 25 25 "Wi-Fi not enabled. You must enable Wi-Fi to download the firmware update." 75
-		sleep 4
+		sleep 5
         exit 1
     fi
 
     if ! ping -c 3 github.com > /dev/null 2>&1; then
 		display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 25 25 "Unable to connect to GitHub repository. Please check your connection and try again." 75
-		sleep 4
+		sleep 5
         exit 1
     fi
     log_message "FirmwareUpdate.sh: Device is online. Proceeding."
@@ -137,22 +137,21 @@ check_for_connection() {
 # Early out if firmware is already up to date
 if [ "$SKIP_VERSION_CHECK" = false ] && [ "$NEEDS_UPDATE" = false ]; then
 	log_and_display_message "Firmware is up to date - happy gaming!!!!!!!!!!"
-	sleep 4
+	sleep 5
 	sed -i 's|"label":|"#label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 	exit 0
 else
 	log_message "firmwareUpdate.sh: Firmware requires update. Continuing."
 fi
 
-log_and_display_message "A firmware update from $BRAND is ready for your device. We'll check your device's status and prepare the $BRAND update file. Once set up, the $BRAND firmware updater will install it."
+log_and_display_message "A firmware update from $BRAND is ready for your device. We'll check your device's status and prepare the $BRAND update file. Once set up, the $BRAND firmware updater will install it. Press A to proceed."
 sleep 1
 acknowledge
 
 # Do not allow them to update if they don't have enough space to copy and extract the update file
 if [ "$FREE_SPACE" -lt "$SPACE_NEEDED" ]; then
 	log_and_display_message "Not enough free space. Please ensure at least $SPACE_NEEDED MiB of space is available on your SD card, then try again."
-	sleep 1
-	acknowledge
+	sleep 5
 	exit 1
 else
 	log_message "firmwareUpdate.sh: SD card contains at least $SPACE_NEEDED MiB free space. Continuing."
@@ -161,8 +160,7 @@ fi
 # Do not allow them to update if their battery level is low, to help avoid bricking
 if [ "$(get_battery_percent)" -lt 15 ]; then
 	log_and_display_message "As a precaution, please charge your $PLATFORM to at least 15% capacity, then try again."
-	sleep 1
-	acknowledge
+	sleep 5
 	exit 1
 else
 	log_message "firmwareUpdate.sh: Device has at least 10% charge. Continuing."
@@ -222,5 +220,5 @@ if [ "$(get_charging_status)" -eq 1 ] || [ "$PLATFORM" != "A30" ]; then
 	fi
 else
 	log_and_display_message "Exiting Firmware Update app. Please try again once you have plugged in your $PLATFORM."
-	sleep 3
+	sleep 5
 fi
