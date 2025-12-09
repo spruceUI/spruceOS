@@ -44,11 +44,26 @@ rm -rf "$TMP_DIR"/* 2>/dev/null
 # attempt to download the theme
 
 log_and_display_message "Now downloading $theme_name!"
+{
+	sleep 0.1
+	while ps | grep '[w]get' >/dev/null; do
+		CURRENT_SIZE=$(ls -ln "$temp_path" 2>/dev/null | awk '{print $5}')
+		[ -z "$CURRENT_SIZE" ] && CURRENT_SIZE=0
+		[ -z "$TARGET_SIZE_BYTES" ] && TARGET_SIZE_BYTES=1
+		PERCENT_COMPLETE="$(((CURRENT_SIZE * 100) / TARGET_SIZE_BYTES))"
+		[ "$PERCENT_COMPLETE" -gt 100 ] && PERCENT_COMPLETE=100
+		display_text_with_percentage_bar "Now downloading $theme_name!" "$PERCENT_COMPLETE"
+		sleep 0.1
+	done 
+} &
 if ! wget --quiet --no-check-certificate --output-document="$temp_path" "$theme_url"; then
 	log_and_display_message "Unable to download $theme_name from repository. Please try again later."
     sleep 4
 	rm -f "$temp_path"
 	exit 1
+else
+	log_and_display_message "Successfully downloaded $theme_name!"
+	sleep 2
 fi
 
 mkdir -p "$ARCHIVE_DIR/preMenu"

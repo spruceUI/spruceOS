@@ -111,7 +111,7 @@ while true; do
         
         if [ "$content" = "EXIT" ]; then
             log_and_display_message "happy theming.........."
-            sleep 2
+            sleep 3
             break
         else
             log_message "$content"
