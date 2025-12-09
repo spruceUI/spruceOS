@@ -1223,7 +1223,7 @@ stop_pyui_message_writer() {
 get_python_path() {
     if [ "$PLATFORM" = "A30" ]; then
         echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10"
-    elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
+    elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "SmartProS" ] || [ "$PLATFORM" = "Flip" ]; then
         echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
     fi
 }

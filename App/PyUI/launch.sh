@@ -54,7 +54,7 @@ case "$PLATFORM" in
         rm /dev/ttyS0
     ;;
 
-    "Brick" | "SmartPro" )
+    "Brick" | "SmartPro" | "SmartProS" )
         tinymix set 9 1
         tinymix set 1 0
 
@@ -81,6 +81,8 @@ case "$PLATFORM" in
 
         if [ "$PLATFORM" = "Brick" ]; then
             DEVICE="TRIMUI_BRICK"
+        elif [ "$PLATFORM" = "SmartProS" ]; then
+            DEVICE="TRIMUI_SMART_PRO_S"
         else
             DEVICE="TRIMUI_SMART_PRO"
         fi
