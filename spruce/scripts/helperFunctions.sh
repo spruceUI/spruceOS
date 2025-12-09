@@ -1260,10 +1260,39 @@ display_option_list(){
 }
 
 display_text_with_percentage_bar(){
-    #$1 = Text e.g. "Hello"
-    #$2 = The percentage complete e.g. 75
+    # $1 = Text e.g. "Hello"
+    # $2 = The percentage complete e.g. 75
     log_message "Display text with percentage bar $1 $2"
     display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+}
+
+download_and_display_progress() {
+	BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
+    remote_url="$1"
+    local_path="$2"
+    display_name="$3"
+    final_size_bytes="$4"
+
+	{
+		sleep 0.1
+		while ps | grep '[w]get' >/dev/null; do
+			current_size=$(ls -ln "$local_path" 2>/dev/null | awk '{print $5}')
+			[ -z "$current_size" ] && current_size=0
+			[ -z "$final_size_bytes" ] && final_size_bytes=1
+			percent_complete="$(((current_size * 100) / final_size_bytes))"
+			[ "$percent_complete" -gt 100 ] && percent_complete=100
+			display_text_with_percentage_bar "Now downloading $display_name" "$percent_complete"
+			sleep 0.1
+		done 
+	} &
+	if ! wget --quiet --no-check-certificate --output-document="$local_path" "$remote_url"; then
+		display_image_and_text "$BAD_IMG" 25 25 "Unable to download $display_name. Please try again later." 75
+		sleep 4
+		rm -f "$local_path" 2>/dev/null
+		return 1
+    else
+        return 0
+	fi
 }
 
 display_image_and_text() {
