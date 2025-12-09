@@ -1282,6 +1282,16 @@ display_text_with_percentage_bar(){
     display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
 }
 
+display_image_and_text() {
+    # $1 = image path
+    # $2 = image size (percentage of screen height)
+    # $3 = image height (percentage from top of screen)
+    # $4 = text
+    # $5 = text height (percentage from top of screen)
+    log message "Display image and text $1 $2 $3 $4 $5"
+    display_message "$(printf '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' "$1" "$4" "$2" "$3" "$5")"
+}
+
 # ---------------------------------------------------------------------------
 # rgb_led <zones> <effect> [color] [duration_ms] [cycles]
 #

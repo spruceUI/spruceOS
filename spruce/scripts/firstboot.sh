@@ -17,7 +17,7 @@ SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 
 
-display_top_image_bottom_text "$SPRUCE_LOGO" 25 "Installing spruce $SPRUCE_VERSION"
+display_image_and_text "$SPRUCE_LOGO" 25 25 "Installing spruce $SPRUCE_VERSION" 75
 sleep 5 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Preparing SSH keys if necessary"
@@ -28,7 +28,7 @@ if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
   mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster &
 fi
 
-display_top_image_bottom_text "$WIKI_ICON" 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!"
+display_image_and_text "$WIKI_ICON" 25 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
 
 # A30's firmware check
@@ -65,7 +65,7 @@ else
     /mnt/SDCARD/spruce/flip/bin/MainUI -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
 fi
 
-display_top_image_bottom_text "$HAPPY_ICON" 25 "Happy gaming.........."
+display_image_and_text "$HAPPY_ICON" 25 25 "Happy gaming.........." 75
 sleep 5
 
 log_message "Finished firstboot script"
