@@ -43,29 +43,12 @@ cd "$TMP_DIR"
 rm -r ./* 2>/dev/null
 
 # attempt to download the game
-
 log_and_display_message "Now downloading $GAME_NAME!"
-{
-	sleep 0.1
-	while ps | grep '[w]get' >/dev/null; do
-		CURRENT_SIZE=$(ls -ln "$TMP_DIR/$ZIP_NAME" 2>/dev/null | awk '{print $5}')
-		[ -z "$CURRENT_SIZE" ] && CURRENT_SIZE=0
-		[ -z "$TARGET_SIZE_BYTES" ] && TARGET_SIZE_BYTES=1
-		PERCENT_COMPLETE="$(((CURRENT_SIZE * 100) / TARGET_SIZE_BYTES))"
-		[ "$PERCENT_COMPLETE" -gt 100 ] && PERCENT_COMPLETE=100
-		display_text_with_percentage_bar "Now downloading $GAME_NAME!" "$PERCENT_COMPLETE"
-		sleep 0.1
-	done 
-} &
-if ! wget --quiet --no-check-certificate --output-document="$TMP_DIR/$ZIP_NAME" "$GAME_URL"; then
-	log_and_display_message "Unable to download $GAME_NAME from repository. Please try again later."
-    sleep 4
-	rm -f "$TMP_DIR/$ZIP_NAME" 2>/dev/null
+if ! download_and_display_progress "$GAME_URL" "$TMP_DIR/$ZIP_NAME" "$GAME_NAME" "$TARGET_SIZE_BYTES"; then
 	exit 1
 fi
 
 # attempt to unzip the game
-
 log_and_display_message "Now installing $GAME_NAME!"
 cd "/mnt/SDCARD"
 if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
