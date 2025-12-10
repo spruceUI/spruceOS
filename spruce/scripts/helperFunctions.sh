@@ -853,7 +853,7 @@ qr_code() {
 
 read_only_check() {
     log_message "Performing read-only check"
-    SD_or_sd=$(mount | grep -q SDCARD && echo "SDCARD" || echo "sdcard")
+    SD_or_sd=$(mount | grep -q sdcard && echo "sdcard" || echo "SDCARD")
     log_message "Device uses /mnt/$SD_or_sd for its SD card path" -v
     MNT_LINE=$(mount | grep "$SD_or_sd")
     if [ -n "$MNT_LINE" ]; then
