@@ -4,9 +4,9 @@
 
 APP_DIR="/mnt/SDCARD/App/-Updater"
 UPDATE_FILE=""
-LOG_LOCATION="/mnt/SDCARD/Updater/updater.log"
+LOG_LOCATION="/mnt/SDCARD/App/-Updater/updater.log"
 
-. /mnt/SDCARD/Updater/updaterFunctions.sh
+. /mnt/SDCARD/App/-Updater/updaterFunctions.sh
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 
 CHARGING="$(cat $BATTERY/online)"
@@ -31,7 +31,7 @@ display() {
         width=600
     fi
 
-    image="/mnt/SDCARD/Updater/imgs/back.png"
+    image="/mnt/SDCARD/App/-Updater/imgs/back.png"
     text=" " 
             delay=0
     size=30 
@@ -56,7 +56,7 @@ display() {
         shift
     done
 
-    [ "$use_acknowledge" = true ] && image=/mnt/SDCARD/Updater/imgs/acknowledge.png
+    [ "$use_acknowledge" = true ] && image=/mnt/SDCARD/App/-Updater/imgs/acknowledge.png
 
     command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" $DISPLAY "
     command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "

@@ -23,7 +23,7 @@ echo mmc0 > "$LED_PATH"/trigger
 
 if flag_check "reboot-update"; then
     log_message "Updater continuing!"
-    /mnt/SDCARD/Updater/updater.sh
+    /mnt/SDCARD/App/-Updater/updater.sh
 fi
 
 runtime_mounts_$PLATFORM

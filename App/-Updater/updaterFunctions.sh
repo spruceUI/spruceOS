@@ -13,7 +13,7 @@ case $INFO in
 esac
 
 if [ "$PLATFORM" = "A30" ]; then
-    export BIN_DIR=/mnt/SDCARD/Updater/bin
+    export BIN_DIR=/mnt/SDCARD/App/-Updater/bin
     export PATH="/mnt/SDCARD/spruce/bin:$BIN_DIR:$PATH"
     export SD_DEV="/dev/mmcblk0p1"
 
@@ -23,7 +23,7 @@ if [ "$PLATFORM" = "A30" ]; then
     export B_START_2="enter_pressed" # only registers 0 on release, no 1 on press
 
 else # if [ "$PLATFORM" = "Brick" ] || [ $PLATFORM = "SmartPro" ] || [ "$PLATFORM" = "Flip" ]; then
-    export BIN_DIR=/mnt/SDCARD/Updater/bin64
+    export BIN_DIR=/mnt/SDCARD/App/-Updater/bin64
     export PATH="/mnt/SDCARD/spruce/bin64:$BIN_DIR:$PATH"
     export SD_DEV="/dev/mmcblk1p1"
 
