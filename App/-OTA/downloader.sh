@@ -15,39 +15,76 @@ TMP_DIR="$SD_CARD/App/-OTA/tmp"
 BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
 CHARGING="$(cat $BATTERY/online)"
 
-display --icon "$IMAGE_PATH" -t "Checking for updates..."
-rgb_led lrm12 blink2 0000FF 1500 "-1"
+##### FUNCTIONS #####
 
-VERSION="$(cat /usr/miyoo/version)"
-if [ "$VERSION" -lt 20240713100458 ]; then
-    sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
-    display --icon "$IMAGE_PATH" -t "Firmware version is too old. Please update your firmware to 20240713100458 or later." --okay
-    exit 1
+is_wifi_connected() {
+    if ping -c 3 -W 2 spruceui.github.io > /dev/null 2>&1; then
+        log_message "GitHub ping successful; device is online."
+        return 0
+    else
+        log_and_display_message "GitHub ping failed; device is offline. Aborting."
+        return 1
+    fi
+}
+
+download_release_info() {
+    local url="$1"
+    local output_file="$2"
+    local tmp_dir="$3"
+    
+    # Try to download the file
+    if ! curl -k -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"; then
+        error_msg=$(cat "$tmp_dir/curl_error")
+        log_message "OTA: Failed to download from $url - Error: $error_msg"
+        return 1
+    fi
+    
+    # Verify we got valid content
+    if ! grep -q "RELEASE_VERSION=" "$output_file"; then
+        log_message "OTA: Invalid or empty release info file from $url"
+        return 1
+    fi
+    
+    return 0
+}
+
+##### MAIN EXECUTION #####
+
+start_pyui_message_writer
+display_image_and_text "$IMAGE_PATH" 25 25 "Checking for updates..." 75
+case "$PLATFORM" in
+    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
+    "Brick"|"SmartPro"*) rgb_led lrm12 blink2 0000FF 1500 "-1" ;;
+esac
+
+# Fix the wifi first if using an A30 with outdated firmware
+if [ "$PLATFORM" = "A30" ]; then
+    VERSION="$(cat /usr/miyoo/version)"
+    if [ "$VERSION" -lt 20240713100458 ]; then
+        sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+        display_image_and_text "$IMAGE_PATH" 25 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
+        sleep 5
+        exit 1
+    fi
 fi
 
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
-wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
-if [ "$wifi_enabled" -eq 0 ] || ! ping -c 3 spruceui.github.io >/dev/null 2>&1; then
-    log_message "OTA: No active network connection, exiting."
-    display --icon "$IMAGE_PATH" -t "No active network connection detected, please turn on WiFi and try again." --okay
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
+if ! is_wifi_connected; then sleep 3; exit 1; fi
 
-CURRENT_VERSION=$(get_version)
-
-read_only_check
+CURRENT_VERSION=$(get_version)  # this comes from helperFunctions.sh
+read_only_check                 # this too is from helperFunctions.sh
 
 # Try primary and backup URLs
 if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
-    log_message "OTA: Primary URL failed, trying backup URL"
+    log_message "OTA: Primary URL failed; trying backup URL"
     if ! download_release_info "$OTA_URL_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
-        log_message "OTA: First backup URL failed, trying second backup URL"
+        log_message "OTA: First backup URL failed; trying second backup URL"
         if ! download_release_info "$OTA_URL_BACKUP_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
-            display --icon "$IMAGE_PATH" -t "Update check failed, could not get valid update info. Please try again later." --okay
+            display_image_and_text "$IMAGE_PATH" 25 25 "Update check failed; could not get valid update info. Please try again later." 75
+            sleep 5
             rm -rf "$TMP_DIR"
             exit 1
         fi
@@ -77,21 +114,6 @@ BETA_LINK=$(sed -n 's/BETA_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 BETA_SIZE=$(sed -n 's/BETA_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 BETA_INFO=$(sed -n 's/BETA_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
-# Function to offer version choice
-offer_version() {
-    local prompt="$1"
-    local version1="$2"
-    local version1_name="$3"
-    local version2="$4"
-    local version2_name="$5"
-    
-    display --icon "$IMAGE_PATH" -t "$prompt
-$version1_name: $version1
-$version2_name: $version2" -p 220 --confirm
-    confirm
-    return $?
-}
-
 # Set default target to release
 TARGET_VERSION="$RELEASE_VERSION"
 TARGET_CHECKSUM="$RELEASE_CHECKSUM"
@@ -117,32 +139,39 @@ set_target() {
 # Handle version selection based on flags
 if flag_check "developer_mode"; then
     # Developer mode: offer nightly -> beta -> release
-    if offer_version "Developer mode detected. Would you like to use the latest nightly build?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
+    display_image_and_text "$IMAGE_PATH" 25 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+    if confirm 30 0; then
         set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     elif [ -n "$BETA_VERSION" ]; then
-        if offer_version "Would you like to use the beta build instead?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+        display_image_and_text "$IMAGE_PATH" 25 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
+        if confirm 30 1; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
     fi
 elif flag_check "beta"; then
     # Beta mode: offer beta (if exists) -> release
     if [ -n "$BETA_VERSION" ]; then
-        if offer_version "Beta mode detected. Would you like to use the beta build?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+        display_image_and_text "$IMAGE_PATH" 25 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
     fi
 elif flag_check "tester_mode"; then
     # Tester mode: offer beta (if exists) -> nightly -> release
     if [ -n "$BETA_VERSION" ]; then
-        if offer_version "Tester mode detected. Would you like to use the beta build?" "$BETA_VERSION" "Beta version" "$RELEASE_VERSION" "Public release"; then
+        display_image_and_text "$IMAGE_PATH" 25 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
-        elif offer_version "Would you like to use the latest nightly instead?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
-            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
+        else
+            display_image_and_text "$IMAGE_PATH" 25 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
+            if confirm 30 0; then
+                set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
+            fi
         fi
     else
-        if offer_version "Tester mode detected. Would you like to use the latest nightly build?" "$NIGHTLY_VERSION" "Latest nightly" "$RELEASE_VERSION" "Public release"; then
-            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
-        fi
+    display_image_and_text "$IMAGE_PATH" 25 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+    if confirm; then
+        set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     fi
 fi
 
@@ -163,21 +192,20 @@ if [ -z "$TARGET_VERSION" ] || [ -z "$TARGET_CHECKSUM" ] || [ -z "$TARGET_LINK" 
     Target checksum: $TARGET_CHECKSUM
     Target link: $TARGET_LINK
     Target size: $TARGET_SIZE"
-    display --icon "$IMAGE_PATH" -t "Update check failed: Invalid release info" --okay
+    display_image_and_text "$IMAGE_PATH" "Update check failed: Invalid release info."
+    sleep 5
     rm -rf "$TMP_DIR"
     exit 1
 fi
 
 # Compare versions
-log_update_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
+log_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
 if [ "$SKIP_VERSION_CHECK" = "True" ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
-    log_update_message "Proceeding with update"
+    log_message "Proceeding with update"
 else
-    log_update_message "Current version is up to date"
-    display --icon "$IMAGE_PATH" -t "System is up to date
-Installed version: $CURRENT_VERSION
-Latest version: $TARGET_VERSION" --okay
+    display_image_and_text "$IMAGE_PATH" "System is up to date. Installed version: $CURRENT_VERSION"
     rm -rf "$TMP_DIR"
+    sleep 5
     exit 0
 fi
 

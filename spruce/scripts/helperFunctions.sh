@@ -1296,13 +1296,37 @@ download_and_display_progress() {
 }
 
 display_image_and_text() {
+    # Full form (5 args):
     # $1 = image path
-    # $2 = image size (percentage of screen height)
-    # $3 = image height (percentage from top of screen)
+    # $2 = image size (%)
+    # $3 = image vertical offset (%)
     # $4 = text
-    # $5 = text height (percentage from top of screen)
-    log_message "Display image and text $1 $2 $3 $4 $5"
-    display_message "$(printf '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' "$1" "$4" "$2" "$3" "$5")"
+    # $5 = text height (%)
+
+    # Abridged form (only 2 args):
+    # $1 = image path
+    # $2 = text
+
+    if [ $# -eq 2 ]; then
+        img="$1"
+        text="$2"
+        size="25"
+        img_y="25"
+        text_y="75"
+    else
+        img="$1"
+        size="${2:-25}"
+        img_y="${3:-25}"
+        text="$4"
+        text_y="${5:-75}"
+    fi
+
+    log_message "Display image and text $img $size $img_y $text $text_y"
+
+    display_message "$(printf \
+        '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' \
+        "$img" "$text" "$size" "$img_y" "$text_y"
+    )"
 }
 
 # ---------------------------------------------------------------------------

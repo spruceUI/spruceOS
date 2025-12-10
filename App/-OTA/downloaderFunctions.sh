@@ -309,24 +309,3 @@ $PERCENTAGE%" -p 55 --add-image $downloadFill 0.$(printf '%02d' $fill_scale_int)
         sleep 5
     done
 }
-
-download_release_info() {
-    local url="$1"
-    local output_file="$2"
-    local tmp_dir="$3"
-    
-    # Try to download the file
-    if ! curl -k -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"; then
-        error_msg=$(cat "$tmp_dir/curl_error")
-        log_message "OTA: Failed to download from $url - Error: $error_msg"
-        return 1
-    fi
-    
-    # Verify we got valid content
-    if ! grep -q "RELEASE_VERSION=" "$output_file"; then
-        log_message "OTA: Invalid or empty release info file from $url"
-        return 1
-    fi
-    
-    return 0
-}
