@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
 case "$PLATFORM" in
     "A30") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
@@ -293,7 +292,7 @@ if [ "$goto_install" != "true" ]; then  # do the downloadin'
 
     # Download update file
     display_image_and_text "$IMAGE_PATH" 30 25 "Downloading update..." 75
-    if ! download_and_display_progress "$TARGET_LINK" "$SD_CARD/$FILENAME" "update file" "$TARGET_SIZE"; then
+    if ! download_and_display_progress "$TARGET_LINK" "$SD_CARD/$FILENAME" "spruce v${TARGET_VERSION}" "$((TARGET_SIZE * 1024 * 1024))"; then
         exit 1
     fi
 

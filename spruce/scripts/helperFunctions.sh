@@ -1281,7 +1281,9 @@ download_and_display_progress() {
 			[ -z "$final_size_bytes" ] && final_size_bytes=1
 			percent_complete="$(((current_size * 100) / final_size_bytes))"
 			[ "$percent_complete" -gt 100 ] && percent_complete=100
-			display_text_with_percentage_bar "Now downloading $display_name" "$percent_complete"
+            current_mb="$((current_size / 1024 / 1024))"
+            final_mb="$((final_size_bytes / 1024 / 1024))"
+			display_text_with_percentage_bar "Now downloading $display_name!\n\n$current_mb MB / $final_mb MB" "$percent_complete"
 			sleep 0.1
 		done 
 	} &
