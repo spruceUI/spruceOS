@@ -196,7 +196,7 @@ confirm() {
         fi
 
         # Wait for log message update (with a shorter timeout to allow frequent timeout checks)
-        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
+        if ! inotifywait -t 5 "$MESSAGES_FILE" >/dev/null 2>&1; then
             continue
         fi
 

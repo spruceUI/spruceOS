@@ -6,6 +6,7 @@
 SD_CARD="/mnt/SDCARD"
 
 IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
+BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
@@ -22,7 +23,7 @@ is_wifi_connected() {
         log_message "GitHub ping successful; device is online."
         return 0
     else
-        log_and_display_message "GitHub ping failed; device is offline. Aborting."
+        display_image_and_text "$BAD_IMG" 25 25 "GitHub ping failed; device is offline. Aborting." 75
         return 1
     fi
 }
@@ -48,10 +49,40 @@ download_release_info() {
     return 0
 }
 
+set_target() {
+    local version="$1"
+    local checksum="$2"
+    local link="$3"
+    local size="$4"
+    local info="$5"
+    
+    TARGET_VERSION="$version"
+    TARGET_CHECKSUM="$checksum"
+    TARGET_LINK="$link"
+    TARGET_SIZE="$size"
+    TARGET_INFO="$info"
+}
+
+verify_checksum() {
+    local file="$1"
+    local expected_checksum="$2"
+    local downloaded_checksum
+
+    downloaded_checksum=$(md5sum "$file" | cut -d' ' -f1)
+
+    if [ "$(printf '%s' "$downloaded_checksum")" = "$(printf '%s' "$expected_checksum")" ]; then
+        return 0 # Success
+    else
+        log_message "OTA: Checksum verification failed, received: $downloaded_checksum, expected: $expected_checksum"
+        rm -f "$file"
+        return 1 # Failure
+    fi
+}
+
 ##### MAIN EXECUTION #####
 
 start_pyui_message_writer
-display_image_and_text "$IMAGE_PATH" 25 25 "Checking for updates..." 75
+display_image_and_text "$IMAGE_PATH" 30 25 "Checking for updates..." 75
 case "$PLATFORM" in
     "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
     "Brick"|"SmartPro"*) rgb_led lrm12 blink2 0000FF 1500 "-1" ;;
@@ -62,7 +93,7 @@ if [ "$PLATFORM" = "A30" ]; then
     VERSION="$(cat /usr/miyoo/version)"
     if [ "$VERSION" -lt 20240713100458 ]; then
         sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
-        display_image_and_text "$IMAGE_PATH" 25 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
+        display_image_and_text "$IMAGE_PATH" 30 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
         sleep 5
         exit 1
     fi
@@ -83,7 +114,7 @@ if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
     if ! download_release_info "$OTA_URL_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
         log_message "OTA: First backup URL failed; trying second backup URL"
         if ! download_release_info "$OTA_URL_BACKUP_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
-            display_image_and_text "$IMAGE_PATH" 25 25 "Update check failed; could not get valid update info. Please try again later." 75
+            display_image_and_text "$IMAGE_PATH" 30 25 "Update check failed; could not get valid update info. Please try again later." 75
             sleep 5
             rm -rf "$TMP_DIR"
             exit 1
@@ -121,29 +152,14 @@ TARGET_LINK="$RELEASE_LINK"
 TARGET_SIZE="$RELEASE_SIZE"
 TARGET_INFO="$RELEASE_INFO"
 
-# Function to set target version
-set_target() {
-    local version="$1"
-    local checksum="$2"
-    local link="$3"
-    local size="$4"
-    local info="$5"
-    
-    TARGET_VERSION="$version"
-    TARGET_CHECKSUM="$checksum"
-    TARGET_LINK="$link"
-    TARGET_SIZE="$size"
-    TARGET_INFO="$info"
-}
-
 # Handle version selection based on flags
 if flag_check "developer_mode"; then
     # Developer mode: offer nightly -> beta -> release
-    display_image_and_text "$IMAGE_PATH" 25 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+    display_image_and_text "$IMAGE_PATH" 30 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
     if confirm 30 0; then
         set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     elif [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 25 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 30 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
         if confirm 30 1; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
@@ -151,7 +167,7 @@ if flag_check "developer_mode"; then
 elif flag_check "beta"; then
     # Beta mode: offer beta (if exists) -> release
     if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 25 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 30 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
         if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
@@ -159,19 +175,20 @@ elif flag_check "beta"; then
 elif flag_check "tester_mode"; then
     # Tester mode: offer beta (if exists) -> nightly -> release
     if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 25 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 30 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
         if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         else
-            display_image_and_text "$IMAGE_PATH" 25 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
+            display_image_and_text "$IMAGE_PATH" 30 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
             if confirm 30 0; then
                 set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
             fi
         fi
     else
-    display_image_and_text "$IMAGE_PATH" 25 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
-    if confirm; then
-        set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
+        display_image_and_text "$IMAGE_PATH" 30 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+        if confirm; then
+            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
+        fi
     fi
 fi
 
@@ -192,7 +209,7 @@ if [ -z "$TARGET_VERSION" ] || [ -z "$TARGET_CHECKSUM" ] || [ -z "$TARGET_LINK" 
     Target checksum: $TARGET_CHECKSUM
     Target link: $TARGET_LINK
     Target size: $TARGET_SIZE"
-    display_image_and_text "$IMAGE_PATH" "Update check failed: Invalid release info."
+    display_image_and_text "$IMAGE_PATH" 30 25 "Update check failed: Invalid release info." 75
     sleep 5
     rm -rf "$TMP_DIR"
     exit 1
@@ -203,53 +220,34 @@ log_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
 if [ "$SKIP_VERSION_CHECK" = "True" ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
     log_message "Proceeding with update"
 else
-    display_image_and_text "$IMAGE_PATH" "System is up to date. Installed version: $CURRENT_VERSION"
+    display_image_and_text "$IMAGE_PATH" 30 25 "System is up to date. Installed version: $CURRENT_VERSION" 75
     rm -rf "$TMP_DIR"
     sleep 5
     exit 0
 fi
 
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
-    log_message "OTA: Battery level too low for update"
-    display --icon "$IMAGE_PATH" -t "Battery too low for update.
-You can still download the update, but you will need to charge your device to at least 20% or plug it in.
-Afterwards you may use the EZ Updater app to install the update." -p 220 --okay
-log_message "OTA: Battery level: $BATTERY_CAPACITY%
-Charging: $CHARGING"
+    display_image_and_text "$IMAGE_PATH" 30 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
+    sleep 5
+    log_message "OTA: Battery level: $BATTERY_CAPACITY%
+    Charging: $CHARGING"
 fi
 
+update_qr_code="$(qr_code -t "$TARGET_INFO")"
+display_image_and_text "$update_qr_code" 50 5 "Scan QR code for release notes. New version available: $TARGET_VERSION. Press A to download and install, or B to cancel." 75
 
-display -t "Scan QR code for release notes.
-Newer version available: $TARGET_VERSION
-Download and install?" --confirm --qr "$TARGET_INFO"
 if confirm 300; then
     log_message "OTA: User confirmed"
 else
     log_message "OTA: User did not confirm"
-    display --icon "$IMAGE_PATH" -t "Update cancelled" -d 3
+    display_image_and_text "$BAD_IMG" 25 25 "Update cancelled." 75
+    sleep 5
     rm -rf "$TMP_DIR"
     exit 0
 fi
 
 # Extract filename from TARGET_LINK
 FILENAME=$(echo "$TARGET_LINK" | sed 's/.*\///')
-
-# Function to verify checksum and handle file cleanup
-verify_checksum() {
-    local file="$1"
-    local expected_checksum="$2"
-    local downloaded_checksum
-
-    downloaded_checksum=$(md5sum "$file" | cut -d' ' -f1)
-
-    if [ "$(printf '%s' "$downloaded_checksum")" = "$(printf '%s' "$expected_checksum")" ]; then
-        return 0 # Success
-    else
-        log_message "OTA: Checksum verification failed, received: $downloaded_checksum, expected: $expected_checksum"
-        rm -f "$file"
-        return 1 # Failure
-    fi
-}
 
 # Check if update file already exists
 if [ -f "$SD_CARD/$FILENAME" ]; then
