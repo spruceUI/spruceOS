@@ -1,27 +1,13 @@
 #!/bin/sh
 
-# Add silent mode flag
-silent_mode=0
-[ "$1" = "--silent" ] && silent_mode=1
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 APP_DIR=/mnt/SDCARD/App/spruceBackup
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
-FLAGS_DIR=/mnt/SDCARD/spruce/flags
-
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
+BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
-log_message "----------Running Backup script----------"
-
-rgb_led lrm12 breathe FFFF00 2100 "-1"
-
-# Modify display function to respect silent mode
-display_message() {
-    if [ "$silent_mode" -eq 0 ]; then
-        display "$@"
-    fi
-}
+##### FUNCTIONS #####
 
 backup_emu_settings() {
     mkdir -p "/mnt/SDCARD/Saves/spruce/emu_backups"
@@ -52,10 +38,20 @@ backup_theme_configs() {
     done
 }
 
-display_message --icon "$ICON_PATH" -t "Backing up your spruce configs and files.........."
-echo mmc0 > "$LED_PATH"/trigger &
 
-# Create the 'spruce' directory and 'backups' subdirectory if they don't exist
+##### MAIN EXECUTION #####
+
+log_message "----------Running Backup script----------"
+start_pyui_message_writer
+
+display_image_and_text "$ICON_PATH" 25 25 "Backing up your spruce configs and files! Please wait.........." 75
+# twinkle them lights
+case "$PLATFORM" in
+    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
+    "Brick"|"SmartPro"*) rgb_led lrm12 breathe FFFF00 2100 "-1" ;;
+esac
+
+# Create Saves/spruce directory and 'backups' subdirectory if they don't exist
 mkdir -p "$BACKUP_DIR/backups"
 
 # Set up logging
@@ -107,12 +103,15 @@ $SYSTEM_JSON
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/RetroArch/.retroarch/shaders
 /mnt/SDCARD/RetroArch/.retroarch/cheats
-/mnt/SDCARD/spruce/etc/SSH/keys
-/mnt/SDCARD/spruce/bin/Syncthing/config
 /mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg
+/mnt/SDCARD/Saves/spruce/backups/spruce-config.json
+/mnt/SDCARD/Saves/spruce/emu_backups
+/mnt/SDCARD/Saves/spruce/theme_backups
+/mnt/SDCARD/spruce/bin/Syncthing/config
+/mnt/SDCARD/spruce/etc/SSH/keys
 "
 
 log_message "Folders to backup: $folders"
@@ -129,9 +128,8 @@ log_message "Required space: $required_space bytes"
 log_message "Available space: $available_space bytes"
 
 if [ "$available_space" -lt "$required_space" ]; then
-    log_message "Error: Not enough free space. Required: 50 MB, Available: $((available_space / 1024 / 1024)) MB"
-    display --icon "$ICON_PATH" -t "Backup failed, not enough space.
-You need at least 50 MB free space to backup your files." --okay
+    display_image_and_text "$BAD_IMG" 25 25 "Backup failed. Only $((available_space / 1024 / 1024)) MB available. You need at least 50 MB free space to backup your files." 75
+    sleep 5
     exit 1
 fi
 
@@ -157,23 +155,20 @@ backup_theme_configs
 
 log_message "Creating 7z archive"
 7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
-rm "$temp_file"
 
-if [ $? -eq 0 ]; then
-    log_message "Backup process completed successfully. Backup file: $seven_z_file"
-    display_message --icon "$ICON_PATH" -t "Backup completed successfully! 
-Backup file: $seven_z_filename
-Located in /Saves/spruce/backups/" -d 4
-else
-    log_message "Error while creating backup."
-    display --icon "$ICON_PATH" -t "Backup failed
-Check '/Saves/spruce/spruceBackup.log' for more details" --okay
+if [ $? -eq 0 ] || [ $? -eq 1 ]; then   # exit code 1 is with warnings, but still creates a valid archive.
+    display_image_and_text "$ICON_PATH" 25 25 "Backup completed successfully! Backups can be found in the Saves/spruce/backups/ directory." 75
+else    # exit codes 2+ are various actual failures
+    display_image_and_text "$BAD_IMG" 25 25 "Backup failed. Check Saves/spruce/spruceBackup.log for more details." 75
 fi
 
-# Clean up old backups, keeping only the 7 most recent
+rm "$temp_file"
+sleep 5
+
+# Clean up old backups, keeping only the 9 most recent
 log_message "Cleaning up old backups..."
 cd "$BACKUP_DIR/backups" || exit
-ls -t spruceBackup_*.7z | tail -n +8 | while read -r old_backup; do
+ls -t spruceBackup_*.7z | tail -n +10 | while read -r old_backup; do
     log_message "Removing old backup: $old_backup"
     rm "$old_backup"
 done

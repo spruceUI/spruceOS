@@ -1,23 +1,37 @@
 #!/bin/sh
 
-# Add silent mode flag
-silent_mode=0
-[ "$1" = "--silent" ] && silent_mode=1
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 APP_DIR=/mnt/SDCARD/App/spruceRestore
 UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
-SYNCTHING_DIR=/mnt/SDCARD/spruce/bin/Syncthing
-
-. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
-
 ICON_PATH="/mnt/SDCARD/spruce/imgs/restore.png"
+BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
-display_message() {
-    if [ $silent_mode -eq 0 ]; then
-        display "$@"
-    fi
+##### FUNCTIONS #####
+
+compare_versions() {
+    echo "$1 $2" | awk '{
+        split($1, a, ".")
+        split($2, b, ".")
+        for (i = 1; i <= 3; i++) {
+            if (a[i] < b[i]) {
+                print "older"
+                exit
+            } else if (a[i] > b[i]) {
+                print "newer"
+                exit
+            }
+        }
+        print "equal"
+    }'
+}
+
+kill_network_services() {
+    killall -9 dropbear
+    #killall -9 smbd
+    #killall -9 sftpgo
+    killall -9 syncthing
 }
 
 restore_emu_settings() {
@@ -143,27 +157,27 @@ restore_theme_configs() {
     done
 }
 
-log_message "----------Starting Restore script----------"
-# set_performance
-display_message --icon "$ICON_PATH" -t "Restoring from your most recent backup..."
+##### MAIN EXECUTION #####
 
-#-----Main-----
+log_message "----------Starting Restore script----------"
+start_pyui_message_writer
+
+display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75
+# twinkle them lights
+case "$PLATFORM" in
+    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
+    "Brick"|"SmartPro"*) rgb_led lrm12 breathe 00FF00 1900 "-1" ;;
+esac
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
 >"$log_file" # Empty out or create the log file
-
-log_message "Starting spruceRestore script..."
-
-rgb_led lrm12 breathe 00FF00 1900 "-1"
-
 log_message "Looking for backup files..."
 
 # Check if backups folder exists
 if [ ! -d "$BACKUP_DIR/backups" ]; then
-    log_message "Backup folder not found at $BACKUP_DIR/backups"
-    display_message --icon "$ICON_PATH" -t "No backup found. Make sure you've ran the backup app or have a recent backup located in
-    $BACKUP_DIR/backups" -o
+    display_image_and_text "$BAD_IMG" 25 25 "No backup found. Make sure you've ran the backup app or have a recent backup located in $BACKUP_DIR/backups" 75
+    sleep 5
     exit 1
 fi
 
@@ -171,8 +185,8 @@ fi
 backup_files=$(find "$BACKUP_DIR/backups" -name "spruceBackup*.7z" | sort -r | tr '\n' ' ')
 
 if [ -z "$backup_files" ]; then
-    log_message "No spruceBackup 7z files found in $BACKUP_DIR/backups"
-    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_image_and_text "$BAD_IMG" 25 25 "No spruceBackup 7z files found in $BACKUP_DIR/backups. Unable to restore." 75
+    sleep 5
     exit 1
 fi
 
@@ -185,41 +199,16 @@ log_message "Verifying the integrity of the backup file..."
 7zr t "$most_recent_backup" 2>>"$log_file"
 
 if [ $? -ne 0 ]; then
-    log_message "Backup file integrity check failed. The file may be corrupted."
-    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_image_and_text "$BAD_IMG" 25 25 "Backup file integrity check failed. The file may be corrupted." 75
+    sleep 5
     exit 1
 fi
-
 
 # Define the path for the .lastUpdate file
 last_update_file="$APP_DIR/.lastUpdate"
 
-compare_versions() {
-    echo "$1 $2" | awk '{
-        split($1, a, ".")
-        split($2, b, ".")
-        for (i = 1; i <= 3; i++) {
-            if (a[i] < b[i]) {
-                print "older"
-                exit
-            } else if (a[i] > b[i]) {
-                print "newer"
-                exit
-            }
-        }
-        print "equal"
-    }'
-}
-
-kill_network_services() {
-    killall -9 dropbear
-    #killall -9 smbd
-    #killall -9 sftpgo
-    killall -9 syncthing
-}
-
 kill_network_services
-rm -f "$last_update_file"
+rm -f "$last_update_file" # wipe this so we can restore it and see what version the backup was made on
 
 # Actual restore process
 log_message "Starting actual restore process..."
@@ -229,15 +218,14 @@ log_message "Extracting backup file: $most_recent_backup"
 7zr x -y "$most_recent_backup" 2>>"$log_file"
 
 if [ $? -eq 0 ]; then
-    log_message "Restore completed successfully"
-    display_message --icon "$ICON_PATH" -t "Restore completed successfully!" -d 3
+    display_image_and_text "$ICON_PATH" 25 25 "Restore completed successfully!" 75
+    sleep 5
     rm -f "$backupdir/removed_flags.tmp"
 else
-    log_message "Error during restore process. Check $log_file for details."
     log_message "7zr exit code: $?"
     log_message "7zr output: $(7zr x -y "$most_recent_backup" 2>&1)"
-    restore_flags_on_failure
-    display_message --icon "$ICON_PATH" -t "Restore failed, check $log_file for details." -o
+    display_image_and_text "$ICON_PATH" 25 25 "Restore failed! Check $log_file for details." 75
+    sleep 5
     exit 1
 fi
 
@@ -248,9 +236,8 @@ UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
 UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
-display_message --icon "$ICON_PATH" -t "Applying upgrades to your system..."
-
-
+display_image_and_text "$ICON_PATH" 25 25  "Applying upgrades to your system..." 75
+sleep 2
 # Read the current version from .lastUpdate file
 if [ -f "$last_update_file" ]; then
     current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
@@ -273,7 +260,7 @@ allow_same_version=0
 
 if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
     allow_same_version=1
-    log_message "Dev/Tester mode detected, allowing same version upgrades"
+    log_message "Dev/Tester mode detected; allowing same version upgrades"
 fi
 
 # Modify the version comparison logic in the upgrade loop
@@ -287,7 +274,7 @@ for script in *.sh; do
     # Run if version is older OR if same version and in developer/tester mode
     if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
         log_message "Starting upgrade script: $script_name"
-        display_message --icon "$ICON_PATH" -t "Applying $script_name upgrades to your system..."
+        display_image_and_text "$ICON_PATH" 25 25 "Applying $script_name upgrades to your system..." 75
 
         log_message "Executing $script_name..."
         output=$(sh "$script" 2>&1)
@@ -303,7 +290,8 @@ for script in *.sh; do
         else
             log_message "Error running $script_name. Exit status: $exit_status"
             log_message "Error details: $output"
-            display_message --icon "$ICON_PATH" -t "Upgrade failed, check $log_file for details." -o
+            display_image_and_text "$ICON_PATH" 25 25 "Migration failed; check $log_file for details." 75
+
             cd - >/dev/null
             exit 1
         fi
@@ -316,10 +304,13 @@ done
 cd - >/dev/null
 
 log_message "Upgrade process completed. Current version: $current_version"
-display_message --icon "$ICON_PATH" -t "Upgrades successful!" -d 2
+display_image_and_text "$ICON_PATH" 25 25 "Upgrades successful!" 75
+sleep 2
 
 
 # Apply settings
+
+display_image_and_text "$ICON_PATH" 25 25 "Restoring emulator, theme, and system settings..." 75
 
 log_message "Restoring emulator settings"
 restore_emu_settings
