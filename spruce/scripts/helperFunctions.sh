@@ -1286,7 +1286,7 @@ download_and_display_progress() {
 		done 
 	} &
 	if ! wget --quiet --no-check-certificate --output-document="$local_path" "$remote_url"; then
-		display_image_and_text "$BAD_IMG" 25 25 "Unable to download $display_name. Please try again later." 75
+		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null
 		return 1

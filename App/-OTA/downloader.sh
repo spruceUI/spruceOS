@@ -3,7 +3,11 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/App/-OTA/downloaderFunctions.sh
 
-SD_CARD="/mnt/SDCARD"
+if [ "$PLATFORM" = "Flip" ]; then
+    SD_CARD="/mnt/sdcard"   # this only really matters for the mountpoint check towards the end
+else
+    SD_CARD="/mnt/SDCARD"
+fi
 
 IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -13,9 +17,6 @@ OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/re
 OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
 TMP_DIR="$SD_CARD/App/-OTA/tmp"
 
-BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
-CHARGING="$(cat $BATTERY/online)"
-
 ##### FUNCTIONS #####
 
 is_wifi_connected() {
@@ -23,7 +24,7 @@ is_wifi_connected() {
         log_message "GitHub ping successful; device is online."
         return 0
     else
-        display_image_and_text "$BAD_IMG" 25 25 "GitHub ping failed; device is offline. Aborting." 75
+        display_image_and_text "$BAD_IMG" 35 20 "GitHub ping failed; device is offline. Aborting." 75
         return 1
     fi
 }
@@ -209,7 +210,7 @@ if [ -z "$TARGET_VERSION" ] || [ -z "$TARGET_CHECKSUM" ] || [ -z "$TARGET_LINK" 
     Target checksum: $TARGET_CHECKSUM
     Target link: $TARGET_LINK
     Target size: $TARGET_SIZE"
-    display_image_and_text "$IMAGE_PATH" 30 25 "Update check failed: Invalid release info." 75
+    display_image_and_text "$BAD_IMG" 35 20 "Update check failed: Invalid release info." 75
     sleep 5
     rm -rf "$TMP_DIR"
     exit 1
@@ -226,6 +227,8 @@ else
     exit 0
 fi
 
+BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
+CHARGING="$(cat $BATTERY/online)"
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
     display_image_and_text "$IMAGE_PATH" 30 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
     sleep 5
@@ -240,8 +243,8 @@ if confirm 300; then
     log_message "OTA: User confirmed"
 else
     log_message "OTA: User did not confirm"
-    display_image_and_text "$BAD_IMG" 25 25 "Update cancelled." 75
-    sleep 5
+    display_image_and_text "$BAD_IMG" 35 20 "Update cancelled." 75
+    sleep 3
     rm -rf "$TMP_DIR"
     exit 0
 fi
@@ -251,10 +254,10 @@ FILENAME=$(echo "$TARGET_LINK" | sed 's/.*\///')
 
 # Check if update file already exists
 if [ -f "$SD_CARD/$FILENAME" ]; then
-    display --icon "$IMAGE_PATH" -t "Update file already exists. Verifying..."
+    display_image_and_text "$IMAGE_PATH" 30 25 "Update file already exists. Verifying..." 75
     log_message "OTA: Update file already exists"
     if verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
-        display --icon "$IMAGE_PATH" -t "Valid update file already exists. Download again anyways?" --confirm
+        display_image_and_text "$IMAGE_PATH" 30 25 "Valid update file already exists. Download again anyways? Press A to redownload, or B to use existing file for update."
         if ! confirm; then
             log_message "OTA: User chose to use existing file"
             rm -rf "$TMP_DIR"
@@ -263,42 +266,35 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
             rm -rf "$SD_CARD/$FILENAME"
         fi
     else
-        display --icon "$IMAGE_PATH" -t "Existing update file isn't valid. Will download fresh copy." -d 3
+        display_image_and_text "$IMAGE_PATH" 30 25 "Existing update file isn't valid. Will download fresh copy." 75
+        sleep 3
     fi
 fi
 
-if [ "$goto_install" != "true" ]; then
+if [ "$goto_install" != "true" ]; then  # do the downloadin'
     # Check free disk space
     sdcard_mountpoint="$(mount | grep -m 1 "$SD_CARD" | awk '{print $1}')"
     sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
     min_install_space=$(((TARGET_SIZE * 2) + 128))
     if [ "$free_space" -lt "$min_install_space" ]; then
         log_message "OTA: Not enough free space on SD card (at least ${min_install_space}MB should be free)"
-        display --icon "$IMAGE_PATH" -t "Insufficient space on SD card. At least ${min_install_space}MB of space should be free." --okay
+        display_image_and_text "$IMAGE_PATH" 30 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
+        sleep 5
         rm -rf "$TMP_DIR"
         exit 1
     fi
 
     # Download update file
-    display --icon "$IMAGE_PATH" -t "Downloading update..."
-    download_progress "$SD_CARD/$FILENAME" "$TARGET_SIZE" &
-    download_pid=$! # Store the PID of the background process
-
-    if ! curl -k -L -o "$SD_CARD/$FILENAME" "$TARGET_LINK" 2>"$TMP_DIR/curl_error"; then
-        kill $download_pid
-        error_msg=$(cat "$TMP_DIR/curl_error")
-        log_message "OTA: Failed to download update file - Error: $error_msg"
-        display --icon "$IMAGE_PATH" -t "Update download failed" --okay
-        rm -rf "$TMP_DIR"
+    display_image_and_text "$IMAGE_PATH" 30 25 "Downloading update..." 75
+    if ! download_and_display_progress "$TARGET_LINK" "$SD_CARD/$FILENAME" "update file" "$TARGET_SIZE"; then
         exit 1
     fi
 
-    kill $download_pid # Kill the progress display after successful download
-
     # Verify checksum
-    display --icon "$IMAGE_PATH" -t "Download complete! Verifying..."
+    display_image_and_text "$IMAGE_PATH" 30 25 "Download complete! Verifying..." 75
     if ! verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
-        display --icon "$IMAGE_PATH" -t "File downloaded but not verified. Try again..." --okay
+        display_image_and_text "$BAD_IMG" 35 25 "File downloaded but failed verification. Try again..." 75
+        sleep 5
         rm -rf "$TMP_DIR"
         exit 1
     fi
@@ -310,15 +306,16 @@ rm -rf "$TMP_DIR"
 sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
 
 # Check battery level before asking to update
+BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
+CHARGING="$(cat $BATTERY/online)"
 if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then
-    log_message "OTA: Battery level too low for update"
-    display --icon "$IMAGE_PATH" -t "Battery too low for update.
-Please charge to at least 30% or plug in your device. You can run the EZ Updater app to install the already downloaded update." -p 220 --okay
+    display_image_and_text "$BAD_IMG" 35 25 "Battery too low to safely update. Please charge to at least 20% or plug in your device. You can run the EZ Updater app to install the already downloaded update." 75
+    sleep 5
     exit 0
 fi
 
 # Update script call
-display --icon "$IMAGE_PATH" -t "Download successful! Install now?" --confirm
+display_image_and_text "$IMAGE_PATH" 30 25 "Download successful! Press A to install now, or B to exit and install later." 75
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
     /mnt/SDCARD/Updater/updater.sh
