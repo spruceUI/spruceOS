@@ -295,26 +295,6 @@ check_and_hide_update_app() {
     . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 }
 
-check_and_move_p8_bins() {
-    [ -f "/mnt/SDCARD/pico8.dat" ] && \
-    [ ! -f "/mnt/SDCARD/BIOS/pico8.dat" ] && \
-    mv "/mnt/SDCARD/pico8.dat" "/mnt/SDCARD/BIOS/pico8.dat" && \
-    display -d 1.5 -t "pico8.dat found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
-    log_message "pico8.dat found at SD root and moved into place"
-    
-    [ -f "/mnt/SDCARD/pico8_dyn" ] && \
-    [ ! -f "/mnt/SDCARD/BIOS/pico8_dyn" ] && \
-    mv "/mnt/SDCARD/pico8_dyn" "/mnt/SDCARD/BIOS/pico8_dyn" && \
-    display -d 1.5 -t "pico8_dyn found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
-    log_message "pico8_dyn found at SD root and moved into place"
-
-    [ -f "/mnt/SDCARD/pico8_64" ] && \
-    [ ! -f "/mnt/SDCARD/BIOS/pico8_64" ] && \
-    mv "/mnt/SDCARD/pico8_64" "/mnt/SDCARD/BIOS/pico8_64" && \
-    display -d 1.5 -t "pico8_64 found and moved into place." --icon "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png" && \
-    log_message "pico8_64 found at SD root and moved into place"
-}
-
 developer_mode_task() {
     if flag_check "developer_mode"; then
         samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"

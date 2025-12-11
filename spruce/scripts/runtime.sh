@@ -192,8 +192,6 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-check_and_move_p8_bins # don't background because we want the display call to block so the user knows it worked (right?)
-
 ${SCRIPTS_DIR}/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
