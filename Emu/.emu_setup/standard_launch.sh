@@ -247,12 +247,6 @@ run_drastic() {
 		# so we pause joystickinput and create soft link to serial port
 		killall -q -STOP joystickinput
 		ln -s /dev/ttyS2 /dev/ttyS0
-
-		cd $EMU_DIR
-		if [ ! -f "/tmp/.show_hotkeys" ]; then
-			touch /tmp/.show_hotkeys
-			LD_LIBRARY_PATH=libs2:/usr/miyoo/lib ./show_hotkeys
-		fi
 		
 		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
 		export SDL_VIDEODRIVER=mmiyoo
