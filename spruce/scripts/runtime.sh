@@ -17,6 +17,8 @@ log_message "---------Starting up---------"
 
 export HOME="/mnt/SDCARD"
 SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
+TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
+TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
 cores_online &
 echo mmc0 > "$LED_PATH"/trigger
@@ -43,9 +45,9 @@ if [ "$PLATFORM" = "A30" ]; then
 
     killall -9 main ### SUPER important in preventing .tmp_update suicide
 
-elif [ "$PLATFORM" = "Flip" ]; then
-	log_message "Checking for payload updates"
-	"$SCRIPTS_DIR"/update_miyoo_payload.sh
+# elif [ "$PLATFORM" = "Flip" ]; then
+#	log_message "Checking for payload updates"
+#	"$SCRIPTS_DIR"/update_miyoo_payload.sh
 fi
 
 export PATH="$SYSTEM_PATH/app:${PATH}"
@@ -82,12 +84,14 @@ if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
 
     # Restore and monitor brightness
-    if [ -f "/mnt/SDCARD/spruce/settings/sys_brightness_level" ]; then
-        BRIGHTNESS=$(cat /mnt/SDCARD/spruce/settings/sys_brightness_level)
+    if [ -f "$TMP_BACKLIGHT_PATH)" ]; then
+        BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
         # only set non zero brightness value
-        if [ $BRIGHTNESS -ne 0 ]; then 
-            echo ${BRIGHTNESS} > /sys/devices/virtual/disp/disp/attr/lcdbl
+        if [ "$BRIGHTNESS" -ne 0 ]; then 
+            echo "$BRIGHTNESS" > /sys/devices/virtual/disp/disp/attr/lcdbl
         fi
+    else
+        echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
     fi
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
