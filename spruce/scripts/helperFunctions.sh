@@ -1202,7 +1202,7 @@ kill_pyui_message_writer() {
     pids=$(pgrep -f "sgDisplayRealtimePort" | awk '{print $1}')
 
     if [ -n "$pids" ]; then
-        log_message "Real Time message listener already running. Killing it..."
+        log_message "Real Time message listener is running. Killing it..."
         # Kill all matching PIDs
         for pid in $pids; do
             kill "$pid" 2>/dev/null

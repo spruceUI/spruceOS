@@ -37,9 +37,11 @@ elif [ -n "$1" ]; then
     RUN_MODE="$1"
 fi
 
+flag_check "silentUnpacker" || start_pyui_message_writer
+
 # Function to display text if not in silent mode
 display_if_not_silent() {
-    flag_check "silentUnpacker" || display "$@"
+    flag_check "silentUnpacker" || display_image_and_text "$ICON" 35 25 "$archive_name archive detected. Unpacking.........." 75
 }
 
 # Function to unpack archives from a specified directory
@@ -52,7 +54,7 @@ unpack_archives() {
     for archive in "$dir"/*.7z; do
         if [ -f "$archive" ]; then
             archive_name=$(basename "$archive" .7z)
-            display_if_not_silent --icon "$ICON" -t "$archive_name archive detected. Unpacking.........."
+            display_if_not_silent
 
             if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
                 if 7zr x -aoa "$archive" -o/; then
