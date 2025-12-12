@@ -20,8 +20,12 @@ SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
 TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
-cores_online &
-echo mmc0 > "$LED_PATH"/trigger
+cores_online
+set_performance
+
+case "$PLATFORM" in
+    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
+esac
 
 if flag_check "reboot-update"; then
     log_message "Updater continuing!"
@@ -184,13 +188,24 @@ ${SCRIPTS_DIR}/low_power_warning.sh &
 ${SCRIPTS_DIR}/set_up_swap.sh
 
 
-
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
+    log_message "save_active flag detected. Autoresuming game."
+
     # Ensure device is properly initialized (volume, wifi, etc) before launching auto-resume
     /mnt/SDCARD/App/PyUI/launch.sh -startupInitOnly True
 
-    ${SCRIPTS_DIR}/autoRA.sh  &> /dev/null
+    # moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
+    # copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
+    MOVE_OR_COPY=cp
+    if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
+
+    # move command to cmd_to_run.sh so game switcher can work correctly
+    $MOVE_OR_COPY "/mnt/SDCARD/spruce/flags/lastgame.lock" /tmp/cmd_to_run.sh && sync
+
+    sleep 4
+    nice -n -20 /tmp/cmd_to_run.sh &> /dev/null
+    rm -f /tmp/cmd_to_run.sh # remove tmp command file after game exit; otherwise the game will load again in principal.sh later
     log_message "Auto Resume executed"
 else
     log_message "Auto Resume skipped (no save_active flag)"
