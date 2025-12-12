@@ -3,6 +3,7 @@ import threading
 import sys
 import queue
 import json
+from pathlib import Path
 from devices.device import Device
 from display.display import Display
 from display.font_purpose import FontPurpose
@@ -22,6 +23,17 @@ class RealtimeMessageNetworkListener:
         self.threads = []
         self.message_queue = queue.Queue()  # thread-safe message handoff
 
+    def _write_to_file(self,result):
+        """Write selection result to selection.txt next to package root (two levels up)."""
+        script_dir = Path(__file__).resolve().parent.parent.parent
+        result_file = script_dir / "realtime_message_network_listener.txt"
+        PyUiLogger.get_logger().info(f"Writing {result} to {result_file}")
+        try:
+            with result_file.open("w", encoding="utf-8") as f:
+                f.write(result)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error writing result to file: {e}")
+
     def start(self):
         """Start the message listener server (runs on main thread)."""
         self.logger.info(f"Starting RealtimeMessageNetworkListener on port {self.port}...")
@@ -32,7 +44,7 @@ class RealtimeMessageNetworkListener:
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(5)
         self.logger.info(f"Listening for connections on {self.host}:{self.port}")
-
+        self._write_to_file("Listening on port " + str(self.port))
         try:
             while not self.stop_event.is_set():
                 self.server_socket.settimeout(0.2)

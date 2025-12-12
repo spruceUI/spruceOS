@@ -1181,20 +1181,34 @@ take_screenshot() {
 ##########     PYUI MESSAGE WRITER     ##########
 
 start_pyui_message_writer() {
+    # $1 = 1 to wait, 0 (or empty) to not wait
+    wait_for_listener="$1"
+
     if [ "$PLATFORM" = "A30" ]; then
         ifconfig lo up
         ifconfig lo 127.0.0.1
     fi
+
     # Check if PyUI is already running with the realtime port argument
     if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
         log_message "Real Time message listener already running."
         return
     fi
     
+    rm -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
-    sleep 3
+
+    # Optional wait for the listener file
+    if [ "$wait_for_listener" != "0" ]; then
+        log_message "Waiting for realtime_message_network_listener to appear..."
+        while [ ! -e "/mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt" ]; do
+            sleep 0.1
+        done
+        log_message "Realtime message network listener detected."
+    fi
 }
+
 
 kill_pyui_message_writer() {
 
