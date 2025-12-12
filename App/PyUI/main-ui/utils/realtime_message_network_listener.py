@@ -107,7 +107,7 @@ class RealtimeMessageNetworkListener:
         filled = rounded // 5  # each block is 5%
 
         bar = "█" * filled + "·" * (total_segments - filled)
-        return f"[{bar}] {rounded}%"
+        return f"[{bar}] {percent}%"
 
     def _handle_ui_message(self, raw_message: str):
         """
@@ -193,8 +193,10 @@ class RealtimeMessageNetworkListener:
                     percentage = args[1]
                     self.logger.info(f"Rendering text: {text} w/ perc(entage bar: {percentage}%")
                     Display.clear("")
-                    Display.write_message_multiline(Display.split_message(text, FontPurpose.LIST,clip_to_device_width=True), Device.screen_height()//3)
-                    Display.write_message_multiline([self._progress_bar(percentage)], (Device.screen_height()*2)//3)
+                    Display.write_message_multiline(Display.split_message(text, FontPurpose.LIST,clip_to_device_width=True), Device.screen_height()*0.35)
+                    Display.write_message_multiline([self._progress_bar(percentage)], (Device.screen_height()*0.6))                    
+                    if(len(args) > 2):
+                        Display.write_message_multiline(Display.split_message(args[2], FontPurpose.LIST,clip_to_device_width=True), Device.screen_height()*0.7)
                     Display.present()
                 else:
                     self.logger.error("TEXT_WITH_PERCENTAGE_BAR missing args")
