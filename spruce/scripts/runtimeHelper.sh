@@ -281,9 +281,20 @@ check_for_update() {
     fi
 }
 
+check_for_update_file() {
+    echo "Searching for update file"
+    UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{print $2, $0}' | sort -n | tail -n1 | cut -d' ' -f2-)
+    echo "Found update file: $UPDATE_FILE"
+
+    if [ -z "$UPDATE_FILE" ]; then
+        echo "No update file found"
+        return 1
+    fi
+    return 0
+}
+
 # Function to check and hide the Update App if necessary
 check_and_hide_update_app() {
-    . /mnt/SDCARD/App/-Updater/updaterFunctions.sh
     if ! check_for_update_file; then
         sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
         log_message "No update file found; hiding Updater app"
@@ -291,8 +302,6 @@ check_and_hide_update_app() {
         sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
     fi
-    # override updaterFunctions keycodes
-    . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 }
 
 developer_mode_task() {
@@ -379,6 +388,11 @@ unstage_archives_Brick() {
 }
 
 unstage_archives_SmartPro() {
+    unstage_archive "autoconfig.7z" "preCmd"
+    unstage_archive "cores64.7z" "preCmd"
+}
+
+unstage_archives_SmartProS() {
     unstage_archive "autoconfig.7z" "preCmd"
     unstage_archive "cores64.7z" "preCmd"
 }
