@@ -30,3 +30,9 @@ class RecentsManager:
     def get_recents(cls) -> List[RomInfo]:
         cls._wait_for_init()
         return cls._recentsManager.get_games()
+
+
+    @classmethod
+    def remove_game(cls, rom_info: RomInfo):
+        cls._wait_for_init()
+        cls._recentsManager.remove_game(rom_info)
