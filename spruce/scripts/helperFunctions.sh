@@ -1262,8 +1262,13 @@ display_option_list(){
 display_text_with_percentage_bar(){
     # $1 = Text e.g. "Hello"
     # $2 = The percentage complete e.g. 75
+    # $3 = Optional bottom text
     log_message "Display text with percentage bar $1 $2"
-    display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+    if [ $# -eq 2 ]; then
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+    else
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+    fi
 }
 
 download_and_display_progress() {

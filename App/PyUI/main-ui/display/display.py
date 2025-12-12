@@ -934,29 +934,42 @@ class Display:
     @classmethod
     def split_message(cls, message: str, font_purpose, clip_to_device_width) -> list[str]:
         if not message:
-            return [message]
+            return [""]
 
-        if not cls.is_text_too_long(message, font_purpose,clip_to_device_width):
-            return [message]
-        
-        words = message.split()
-        lines = []
-        current_line = ""
+        # First split on explicit newlines
+        raw_lines = message.split("\n")
+        final_lines = []
 
-        for word in words:
-            tentative_line = (current_line + " " + word).strip()
+        for raw_line in raw_lines:
+            # If the line is empty (because of "\n\n"), preserve it
+            if raw_line.strip() == "":
+                final_lines.append("")
+                continue
 
-            # If adding this word makes the line too long, start a new one
-            if current_line and cls.is_text_too_long(tentative_line, font_purpose,clip_to_device_width):
-                lines.append(current_line)
-                current_line = word
-            else:
-                current_line = tentative_line
+            # If line fits as-is, keep it
+            if not cls.is_text_too_long(raw_line, font_purpose, clip_to_device_width):
+                final_lines.append(raw_line)
+                continue
 
-        if current_line:
-            lines.append(current_line)
+            # Otherwise word-wrap this raw_line
+            words = raw_line.split()
+            current_line = ""
 
-        return lines
+            for word in words:
+                tentative_line = (current_line + " " + word).strip()
+
+                # If adding this word makes the line too long, start a new one
+                if current_line and cls.is_text_too_long(tentative_line, font_purpose, clip_to_device_width):
+                    final_lines.append(current_line)
+                    current_line = word
+                else:
+                    current_line = tentative_line
+
+            if current_line:
+                final_lines.append(current_line)
+
+        return final_lines
+
 
 
     @classmethod
