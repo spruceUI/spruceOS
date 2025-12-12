@@ -1,12 +1,8 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-log_message "*** homebutton_watchdog.sh: helperFunctions imported." -v
+log_message "homebutton_watchdog.sh: Started up."
 
-SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
-TEMP_PATH="/tmp"
-LIST_FILE="$SETTINGS_PATH/gs_list"
-TEMP_FILE="$TEMP_PATH/gs_list_temp"
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
 # Pattern for checking emulator usage
@@ -34,18 +30,17 @@ kill_port(){
     fi
 }
 
-
 # TODO bypass all of this if drastic original as killall -15 does not work on it
 pause_drastic(){
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
-        log_message "*** homebutton_watchdog.sh: Pausing drastic!" 
+        log_message "homebutton_watchdog.sh: Pausing DraStic." 
         killall -q -STOP drastic drastic64 drastic32
     fi
 }
 
 resume_drastic(){
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
-        log_message "*** homebutton_watchdog.sh: Resuming drastic!" 
+        log_message "homebutton_watchdog.sh: Resuming DraStic." 
         killall -q -CONT drastic drastic64 drastic32
     fi
 }
@@ -53,34 +48,33 @@ resume_drastic(){
 kill_drastic() {
 
     resume_drastic 
-	log_message "*** homebutton_watchdog.sh: Killing drastic!" 
+	log_message "homebutton_watchdog.sh: Killing DraStic!" 
     # use sendevent to send MENU + L1 combo buttons to drastic
     {
-        #echo 1 28 0  # START up, to avoid screen brightness is changed by L1 key press below
-        echo $B_MENU 1  # MENU down
-        echo $B_L1 1 # L1 down
-        echo $B_L1 0 # L1 up
-        echo $B_MENU 0  # MENU up
-        echo 0 0 0  # tell sendevent to exit
+        echo $B_MENU 1  # MENU press
+        echo $B_L1 1    # L1 press
+        echo $B_L1 0    # L1 release
+        echo $B_MENU 0  # MENU release
+        echo 0 0 0      # tell sendevent to exit
     } | sendevent $EVENT_PATH_KEYBOARD &
 
     killall -q -15 drastic drastic64 drastic32
 }
 
 kill_ppsspp() {
-	log_message "*** homebutton_watchdog.sh: Killing PPSSPP!" 
+	log_message "homebutton_watchdog.sh: Killing PPSSPP!" 
 
     # use sendevent to send SELECT + R1 combo buttons to PPSSPP
     {
         # send autosave hot key
-        echo $B_SELECT 1 # SELECT down
-        echo $B_R1 1 # R1 down
-        echo $B_R1 0 # R1 up
-        echo $B_SELECT 0 # SELECT up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
-    # wait 1 seconds for ensuring saving is started
-    sleep 1
+        echo $B_SELECT 1 # SELECT press
+        echo $B_R1 1     # R1 press
+        echo $B_R1 0     # R1 release
+        echo $B_SELECT 0 # SELECT release
+        echo 0 0 0       # tell sendevent to exit
+    } | sendevent $EVENT_PATH_KEYBOARD
+    
+    sleep 1 # wait to ensure save process is started
     # kill PPSSPP with signal 15, it should exit after saving is done
     killall -q -15 PPSSPPSDL
     killall -q -15 PPSSPPSDL_$PLATFORM
@@ -88,7 +82,7 @@ kill_ppsspp() {
 }
 
 kill_ra_and_standard_emulators() { 
-	log_message "*** homebutton_watchdog.sh: Killing miscelaneous emus!" 
+	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!" 
     # Why CONT here?
     killall -q -CONT pico8_dyn pico8_64
     killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui mupen64plus
@@ -141,7 +135,7 @@ update_gameswitcher_json() {
 close_ppsspp_menu() {
 
     if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "*** homebutton_watchdog.sh: Closing PPSPP Menu"
+        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
         # use sendevent to send SELECT + R1 combo buttons to PPSSPP
         {
             echo $B_RIGHT 1  
@@ -171,14 +165,14 @@ take_screenshot(){
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
-    close_ppsspp_menu
+    # close_ppsspp_menu
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
     else
         /mnt/SDCARD/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" 
     fi
 
-    log_message "*** homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
+    log_message "homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
 }
 
 prepare_game_switcher() {
@@ -192,7 +186,7 @@ prepare_game_switcher() {
         # check command is emulator
         # exit if not emulator is in command
         if echo "$CMD" | grep -q -v -E "$EMU_PATTERN"; then
-            log_message "*** homebutton_watchdog.sh: Not in game, bypassing game switcher." 
+            log_message "homebutton_watchdog.sh: Not in game, bypassing game switcher." 
             return 0
         fi
 
@@ -206,7 +200,7 @@ prepare_game_switcher() {
     # if in MainUI menu
     elif pgrep "MainUI" >/dev/null; then
 
-        log_message "*** homebutton_watchdog.sh: letting PyUI handle menu button" 
+        log_message "homebutton_watchdog.sh: letting PyUI handle menu button" 
     # otherwise other program is running, exit normally
     fi
 
@@ -285,6 +279,7 @@ perform_action() {
         kill_emulator
         ;;
     esac
+    killall sendevent
 }
 
 cancel_menu_hold() {
@@ -302,7 +297,7 @@ cancel_menu_hold() {
 # listen to log file and handle key press events
 # the keypress logs are generated by keymon
 getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
-    log_message "*** homebutton_watchdog.sh: $line" -v
+    log_message "homebutton_watchdog.sh: $line" -v
 
     home_key_down () {
 
@@ -326,7 +321,7 @@ getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                         vibrate 
                     fi
                     HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
-                    log_message "*** homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
+                    log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                     perform_action "$HOLD_HOME"
 
                 fi
@@ -357,7 +352,7 @@ getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
 
             if [ "$was_cancelled" = false ]; then
                 TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
-                log_message "*** homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
+                log_message "homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
                 perform_action "$TAP_HOME"
             fi
 

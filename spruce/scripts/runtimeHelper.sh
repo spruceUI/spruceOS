@@ -281,6 +281,11 @@ check_for_update() {
     fi
 }
 
+update_checker(){
+    sleep 20
+    check_for_update
+}
+
 check_for_update_file() {
     echo "Searching for update file"
     UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{print $2, $0}' | sort -n | tail -n1 | cut -d' ' -f2-)
@@ -401,11 +406,6 @@ unstage_archives_Flip() {
     unstage_archive "Overlays.7z" "preCmd"
     unstage_archive "autoconfig.7z" "preCmd"
     unstage_archive "cores64.7z" "preCmd"
-}
-
-update_checker(){
-    sleep 20
-    check_for_update
 }
 
 UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
