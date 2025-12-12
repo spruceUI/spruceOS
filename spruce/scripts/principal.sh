@@ -79,7 +79,16 @@ while [ 1 ]; do
 
         flag_add "in_menu"
 
+        if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
+            killall -q -USR2 joystickinput 
+        elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
+            rm -f /tmp/trimui_inputd/input_no_dpad
+            rm -f /tmp/trimui_inputd/input_dpad_to_joystick
+        fi
+
         /mnt/SDCARD/App/PyUI/launch.sh
+
+        [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
 
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         if flag_check "pre_cmd_unpacking"; then

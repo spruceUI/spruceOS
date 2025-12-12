@@ -120,15 +120,10 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]|| [ $PLATFORM = "Smar
     export PATH="/usr/trimui/bin:$PATH"
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
-    INPUTD_SETTING_DIR_NAME=/tmp/trimui_inputd
 
     init_gpio_Brick
 
-    mkdir $INPUTD_SETTING_DIR_NAME
-
     syslogd -S
-
-    /etc/bluetooth/bluetoothd start
 
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         ifconfig wlan0 down
@@ -138,7 +133,10 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]|| [ $PLATFORM = "Smar
 
     # start all the trimui things and sleep long enough for the input devices to get
     # registered correctly before creating the virtual joypad on /dev/input/event4
+    mkdir /tmp/trimui_inputd
+    /etc/bluetooth/bluetoothd start
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_inputd &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
@@ -157,6 +155,11 @@ elif [ "$PLATFORM" = "Flip" ]; then
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
     init_gpio_Flip
+
+    insmod /lib/modules/rtk_btusb.ko
+    /usr/miyoo/bin/btmanager &
+    /usr/miyoo/bin/hardwareservice &
+    /usr/miyoo/bin/miyoo_inputd &
 
     #joypad
     echo -1 > /sys/class/miyooio_chr_dev/joy_type
