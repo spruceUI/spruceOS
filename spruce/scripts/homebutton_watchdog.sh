@@ -83,8 +83,6 @@ kill_ppsspp() {
 
 kill_ra_and_standard_emulators() { 
 	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!" 
-    # Why CONT here?
-    killall -q -CONT pico8_dyn pico8_64
     killall -q -15 ra32.miyoo retroarch retroarch-flip ra64.trimui_$PLATFORM ra64.miyoo pico8_dyn pico8_64 flycast yabasanshiro yabasanshiro.trimui mupen64plus
 }
 
