@@ -117,6 +117,8 @@ case "$PLATFORM" in
         runifnecessary "btmanager" /usr/miyoo/bin/btmanager
         runifnecessary "hardwareservice" /usr/miyoo/bin/hardwareservice
         runifnecessary "miyoo_inputd" /usr/miyoo/bin/miyoo_inputd
+        echo -1 > /sys/class/miyooio_chr_dev/joy_type
+
         cd /usr/miyoo/bin/
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
         /mnt/SDCARD/spruce/scripts/iconfresh.sh

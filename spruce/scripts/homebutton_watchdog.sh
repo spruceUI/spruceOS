@@ -147,7 +147,7 @@ close_ppsspp_menu() {
 
         # run sendevent in a fully detached subshell
         (
-            sendevent $EVENT_PATH_JOYPAD < /tmp/ppsspp_events.txt
+            sendevent $EVENT_PATH_KEYBOARD < /tmp/ppsspp_events.txt
         ) < /dev/null > /dev/null 2>&1 &
 
         sleep 0.5
@@ -165,7 +165,7 @@ take_screenshot(){
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
-    # close_ppsspp_menu
+    [ "$PLATFORM" = "Flip" ] && close_ppsspp_menu
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
     else

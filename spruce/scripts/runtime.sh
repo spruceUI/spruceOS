@@ -155,7 +155,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     chmod a+x /usr/bin/notify
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
-    /usr/miyoo/bin/miyoo_inputd &
 
     init_gpio_Flip
 
