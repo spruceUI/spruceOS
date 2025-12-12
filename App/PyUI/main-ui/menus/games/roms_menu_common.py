@@ -101,6 +101,9 @@ class RomsMenuCommon(ABC):
     def get_game_select_col_count(self):
         return Theme.get_game_select_col_count()
     
+    def get_game_select_carousel_col_count(self):
+        return Theme.get_game_select_carousel_col_count()
+    
     def get_image_resize_height_multiplier(self):
         return None
     
@@ -112,6 +115,7 @@ class RomsMenuCommon(ABC):
                         selected_index=selected.get_index(),
                         rows=self.get_game_select_row_count(),
                         cols=self.get_game_select_col_count(),
+                        carousel_cols=Theme.get_game_select_carousel_col_count(),
                         grid_resized_width=Theme.get_grid_game_select_img_width(),
                         grid_resized_height=Theme.get_grid_game_select_img_height(),
                         use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_game_select_show_sel_bg_grid_mode(),

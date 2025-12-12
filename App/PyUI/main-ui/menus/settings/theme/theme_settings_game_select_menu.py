@@ -90,8 +90,8 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         option_list.append(
             self.build_numeric_entry(
                 primary_text=Language.cols(),
-                get_value_func=Theme.get_game_select_col_count,
-                set_value_func=Theme.set_game_select_col_count
+                get_value_func=Theme.get_game_select_carousel_col_count,
+                set_value_func=Theme.set_game_select_carousel_col_count
             )
         )
         option_list.append(

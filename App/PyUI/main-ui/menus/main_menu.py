@@ -121,6 +121,7 @@ class MainMenu:
             top_bar_text=Theme.get_main_menu_title(), 
             options=options, 
             cols=Theme.get_main_menu_column_count(), 
+            carousel_cols=Theme.get_main_menu_column_count(), #TODO do we care these are the same?
             rows=1,
             selected_index=selected.get_index(),
             show_grid_text=Theme.get_main_menu_show_text_grid_mode(),

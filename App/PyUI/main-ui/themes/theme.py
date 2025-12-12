@@ -946,6 +946,16 @@ class Theme():
         cls._data["gameSystemSelectColCount"] = count
         cls.save_changes()
 
+
+    @classmethod
+    def get_game_system_select_carousel_col_count(cls):
+        return cls._data.get("gameSystemSelectCarouselColCount", cls.get_game_system_select_col_count())
+    
+    @classmethod
+    def set_game_system_select_carousel_col_count(cls, count):
+        cls._data["gameSystemSelectCarouselColCount"] = count
+        cls.save_changes()
+
     @classmethod
     def set_game_system_select_row_count(cls, count):
         cls._data["gameSystemSelectRowCount"] = count
@@ -1071,6 +1081,15 @@ class Theme():
     @classmethod
     def set_game_select_col_count(cls, value):
         cls._data["gameSelectColCount"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_carousel_col_count(cls):
+        return cls._data.get("gameSelectCarouselColCount", cls.get_game_select_col_count()) 
+
+    @classmethod
+    def set_game_select_carousel_col_count(cls, value):
+        cls._data["gameSelectCarouselColCount"] = value
         cls.save_changes()
 
     @classmethod

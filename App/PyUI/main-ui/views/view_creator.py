@@ -28,6 +28,7 @@ class ViewCreator:
                     options: List[GridOrListEntry],
                     top_bar_text,
                     selected_index: int = None,
+                    carousel_cols=None,
                     cols=None,
                     rows=None,
                     use_mutli_row_grid_select_as_backup_for_single_row_grid_select=False,
@@ -219,7 +220,7 @@ class ViewCreator:
                 return CarouselView(
                     top_bar_text=top_bar_text,
                     options=options,
-                    cols=cols,
+                    cols=carousel_cols,
                     selected_index=selected_index,
                     show_grid_text=show_grid_text,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,

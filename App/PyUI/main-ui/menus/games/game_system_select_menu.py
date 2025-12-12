@@ -339,6 +339,7 @@ class GameSystemSelectMenu:
                         selected_index=self.selected.get_index(),
                         cols=Theme.get_game_system_select_col_count(), 
                         rows=Theme.get_game_system_select_row_count(),
+                        carousel_cols=Theme.get_game_system_select_carousel_col_count(),
                         use_mutli_row_grid_select_as_backup_for_single_row_grid_select=Theme.get_system_select_show_sel_bg_grid_mode(),
                         hide_grid_bg=not Theme.get_system_select_show_sel_bg_grid_mode(),
                         show_grid_text=Theme.get_system_select_show_text_grid_mode(),

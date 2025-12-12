@@ -34,14 +34,19 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                 set_value_func=Theme.set_list_system_select_img_height
                             )
                         )                       
-        if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu() or ViewType.GRID == Theme.get_view_type_for_system_select_menu()):        
+        if(ViewType.CAROUSEL == Theme.get_view_type_for_system_select_menu()):        
+            option_list.append(
+                self.build_numeric_entry("Columns", 
+                                        Theme.get_game_system_select_carousel_col_count, 
+                                        Theme.set_game_system_select_carousel_col_count)
+            )
+
+        if(ViewType.GRID == Theme.get_view_type_for_system_select_menu()):
             option_list.append(
                 self.build_numeric_entry("Columns", 
                                         Theme.get_game_system_select_col_count, 
                                         Theme.set_game_system_select_col_count)
             )
-
-        if(ViewType.GRID == Theme.get_view_type_for_system_select_menu()):
             option_list.append(
                 self.build_numeric_entry("Rows", 
                                         Theme.get_game_system_select_row_count, 
@@ -117,7 +122,7 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                         set_value_func=Theme.set_carousel_system_select_primary_img_width
                     )
                 )
-                if (Theme.get_game_system_select_col_count() > 3):
+                if (Theme.get_game_system_select_carousel_col_count() > 3):
                     option_list.append(
                         self.build_enabled_disabled_entry(
                             primary_text=Language.shrink_further_away(),
