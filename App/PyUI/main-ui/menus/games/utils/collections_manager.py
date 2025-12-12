@@ -192,3 +192,30 @@ class CollectionsManager:
             if not any(game.rom_file_path == rom_file_path for game in coll.game_list):
                 matching_collections.append(coll.collection_name)
         return matching_collections
+    
+    @classmethod
+    def remove_game_from_collections(cls, rom_info: RomInfo):
+        cls._wait_for_init()
+
+        to_delete = []
+
+        # Remove this ROM from all collections
+        for coll in cls._collections:
+            original_len = len(coll.game_list)
+
+            coll.game_list = [
+                g for g in coll.game_list if g.rom_file_path != rom_info.rom_file_path
+            ]
+
+            # If this collection became empty, mark it for deletion
+            if original_len > 0 and len(coll.game_list) == 0:
+                to_delete.append(coll)
+
+        # Delete empty collections
+        for coll in to_delete:
+            cls._collections.remove(coll)
+
+        # Save and reload
+        cls.save_to_file()
+        cls.load_from_file()
+
