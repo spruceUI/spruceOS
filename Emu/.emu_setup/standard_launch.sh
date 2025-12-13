@@ -681,6 +681,11 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
+	{	# ensure RA runs entirely on cores 2 and 3 to reduce chance of cache misses
+		sleep 1
+		pin_cpu 2-3 -n "$RA_BIN"
+	} &
+
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
