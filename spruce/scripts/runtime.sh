@@ -15,6 +15,12 @@ rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
 
+if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
+    log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."
+    chmod 777 /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh
+    /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh run
+fi
+
 export HOME="/mnt/SDCARD"
 SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
