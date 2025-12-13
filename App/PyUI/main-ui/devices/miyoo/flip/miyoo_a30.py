@@ -33,13 +33,13 @@ class MiyooA30(MiyooDevice):
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        self.system_config = None
         self.audio_player = AudioPlayerDelegateSdl2()
+        script_dir = Path(__file__).resolve().parent
+        source = script_dir / 'a30-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
+
         if(main_ui_mode):
-            script_dir = Path(__file__).resolve().parent
-            source = script_dir / 'a30-system.json'
-            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.ensure_wpa_supplicant_conf()
             miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
@@ -75,10 +75,6 @@ class MiyooA30(MiyooDevice):
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=1.0)
-
-        if(self.system_config is None):
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
-
 
     @property
     def power_off_cmd(self):
