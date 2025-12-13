@@ -58,12 +58,11 @@ class MiyooMiniCommon(MiyooDevice):
         }
 
 
-        self.system_config = None
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
         if(main_ui_mode):
             os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
             reset_tzpath()  # reload TZPATH
-            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self._set_lumination_to_config()
@@ -76,10 +75,6 @@ class MiyooMiniCommon(MiyooDevice):
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
                 "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2)
             threading.Thread(target=self.startup_init, daemon=True).start()
-    
-        if(self.system_config is None):
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
-
         
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller
