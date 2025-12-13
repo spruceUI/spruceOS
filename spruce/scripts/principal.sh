@@ -126,7 +126,7 @@ while [ 1 ]; do
         killall -9 udpbcast 2>/dev/null
 
         # reset CPU settings to defaults in case an emulator changes anything
-        scaling_min_freq=648000 ### default value, may be overridden in specific script
+        scaling_min_freq="$DEVICE_SMART_FREQ" ### default value, may be overridden in specific script
         set_smart
     fi
 
