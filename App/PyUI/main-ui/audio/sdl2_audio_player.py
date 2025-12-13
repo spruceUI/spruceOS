@@ -1,3 +1,5 @@
+from pathlib import Path
+import subprocess
 import sdl2
 import sdl2.sdlmixer as sdlmixer
 import threading
@@ -84,6 +86,48 @@ class Sdl2AudioPlayer:
         # stops any existing loop and starts a new looping WAV
         Sdl2AudioPlayer._send_cmd("start_loop_wav", file_path)
 
+    @staticmethod
+    def mp3_to_safe_ogg(mp3_path: str) -> Optional[str]:
+        """
+        Convert MP3 to OGG once. Returns path to OGG or None on failure.
+        """
+        src = Path(mp3_path)
+        if not src.exists():
+            return None
+
+        safe_path = src.with_suffix(".__safe__.ogg")
+
+        # Already converted?
+        if safe_path.exists():
+            return str(safe_path)
+
+        PyUiLogger.get_logger().warning(f"Converting MP3 to safe OGG: {src.name}")
+
+        try:
+            result = subprocess.run(
+                [
+                    "ffmpeg",
+                    "-y",                 # overwrite if partial exists
+                    "-v", "error",
+                    "-i", str(src),
+                    "-c:a", "libvorbis",
+                    "-q:a", "4",
+                    str(safe_path),
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=10,
+            )
+            if result.returncode != 0:
+                PyUiLogger.get_logger().warning(f"FFmpeg failed converting {src}")
+                return None
+
+            return str(safe_path)
+
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"MP3 conversion exception for {src}: {e}")
+            return None           
+         
     @staticmethod
     def audio_loop_mp3(file_path: str):
         Sdl2AudioPlayer._send_cmd("start_loop_music", file_path)
@@ -309,21 +353,38 @@ class Sdl2AudioPlayer:
                         PyUiLogger.get_logger().warning(f"start_loop_wav exception: {e}")
                         reply_ok(cmd.resp_q, False)
                 elif name == "start_loop_music":
-                    path = cmd.args[0]
-                    # stop channel loop if present
+                    original_path = cmd.args[0]
+
+                    # Stop anything currently playing
                     stop_loop_internal()
-                    m = safe_load_music(path)
+
+                    # Convert MP3 → OGG (or reuse cached)
+                    safe_path = Sdl2AudioPlayer.mp3_to_safe_ogg(original_path)
+                    if not safe_path:
+                        PyUiLogger.get_logger().warning(
+                            f"start_loop_music: could not obtain safe audio for {original_path}"
+                        )
+                        reply_ok(cmd.resp_q, False)
+                        continue
+
+                    # Load ONLY the safe format
+                    m = safe_load_music(safe_path)
                     if not m:
                         reply_ok(cmd.resp_q, False)
                         continue
+
                     try:
                         sdlmixer.Mix_VolumeMusic(Sdl2AudioPlayer._current_volume)
                         if sdlmixer.Mix_PlayMusic(m, -1) == -1:
-                            PyUiLogger.get_logger().warning(f"start_loop_music: Mix_PlayMusic failed for {path}: {sdlmixer.Mix_GetError().decode()}")
+                            PyUiLogger.get_logger().warning(
+                                f"Mix_PlayMusic failed for {safe_path}: {sdlmixer.Mix_GetError().decode()}"
+                            )
                             reply_ok(cmd.resp_q, False)
                             continue
-                        loop_music_path = path
+
+                        loop_music_path = safe_path
                         reply_ok(cmd.resp_q, True)
+
                     except Exception as e:
                         PyUiLogger.get_logger().warning(f"start_loop_music exception: {e}")
                         reply_ok(cmd.resp_q, False)
