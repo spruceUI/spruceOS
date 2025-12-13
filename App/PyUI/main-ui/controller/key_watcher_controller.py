@@ -113,7 +113,7 @@ class KeyWatcherController(ControllerInterface):
                                         self.key_change(mapped_event.controller_input,"RELEASE")
                                         #PyUiLogger.get_logger().debug(f"Removing {mapped_event.controller_input} from held inputs")
                             else:
-                                PyUiLogger.get_logger().error(f"No mapping for event: {key_event}")
+                                PyUiLogger.get_logger().exception(f"No mapping for event: {key_event}")
 
             except Exception as e:
                 PyUiLogger.get_logger().error(f"Error reading input: {e}")
