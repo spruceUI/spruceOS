@@ -849,12 +849,8 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 log_message "---DEBUG---: standard_launch.sh checkpoint 6" -v
 
-if [ "$PLATFORM" = "A30" ]; then
-	killall -q -USR2 joystickinput
-	killall -q -USR1 joystickinput
-fi
-
 case $EMU_NAME in
+
 	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ]; then
 			run_flycast_standalone
