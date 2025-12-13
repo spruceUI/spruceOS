@@ -217,7 +217,7 @@ update_checker &
 # update_notification
 
 # Initialize CPU settings
-scaling_min_freq=1008000 ### default value, may be overridden in specific script
+scaling_min_freq=648000 ### default value, may be overridden in specific script
 set_smart
 
 # start main loop
