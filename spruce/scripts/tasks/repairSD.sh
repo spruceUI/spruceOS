@@ -1,7 +1,8 @@
 #!/bin/sh
 
 EXPERT_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/expertappswitch.png"
-LOG_LOCATION="/mnt/SDCARD/SDCARD_REPAIR.log"
+TMP_LOG_PATH=/tmp/SDCARD_REPAIR.log
+FINAL_LOG_PATH="/mnt/SDCARD/SDCARD_REPAIR.log"
 FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 
 
@@ -22,12 +23,12 @@ if [ -z "$1" ]; then
     fi
 
     start_pyui_message_writer 
-    display_image_and_text "$EXPERT_ICON" 30 25 "$msg" 75
+    display_image_and_text "$EXPERT_ICON" 35 5 "$msg" 45
     if confirm 60; then
         log_message "User confirmed running repairSD.sh."
         touch /mnt/SDCARD/FIX_MY_SDCARD
         sync
-        poweroff
+        [ "$PLATFORM" = "A30" ] && poweroff || reboot
     else
         log_message "User declined running repairSD.sh."
         exit 1
@@ -129,6 +130,23 @@ tmp_blink() {
     fi
 }
 
+tmp_debug_info() {
+    echo ""
+    echo "DEBUG"
+    echo ""
+
+    echo "ps:"
+    echo ""
+    ps
+    echo ""
+
+    echo "mount:"
+    echo ""
+    mount
+    echo ""
+
+}
+
 tmp_display() {
     text="$1"
 
@@ -136,7 +154,7 @@ tmp_display() {
 
     command="LD_LIBRARY_PATH=$LD_LIBRARY_PATH /tmp/sdfix/display_text.elf"
     command="$command $DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION"
-    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0 /tmp/sdfix/expertappswitch.png 0.20 center middle"
+    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0" # /tmp/sdfix/expertappswitch.png 0.25 top middle"
 
     echo "displaying: $command"
     eval "$command" &
@@ -146,6 +164,16 @@ tmp_display() {
 tmp_display_kill() {
     [ -n "$DISPLAY_PID" ] && kill "$DISPLAY_PID" 2>/dev/null
     sleep 0.1
+}
+
+tmp_kill_boot_scripts() {
+    echo "Attempting to kill any boot scripts."
+    for script in main tee runmiyoo.sh runtrimui.sh runmagicx.sh updater runtime.sh ; do
+        if killall -9 "$script" ; then
+            echo "Killed ${script}."
+        fi
+        sleep 0.1
+    done
 }
 
 tmp_read_only_check() {
@@ -201,13 +229,16 @@ tmp_set_performance() {
 
 if [ "$1" = "run" ]; then
 
+    mkdir -p /tmp/sdfix     # do this first so the tmp log path is valid
+    cd /tmp/sdfix
+
     {
         tmp_blink
+        tmp_kill_boot_scripts
         tmp_read_only_check
         tmp_set_performance
         rm -f /mnt/SDCARD/FIX_MY_SDCARD
 
-        mkdir -p /tmp/sdfix
         cp "$BIN_DIR/fsck.fat" /tmp/sdfix/ && echo "copied fsck.fat to /tmp/sdfix/"
         cp "$BIN_DIR/display_text.elf" /tmp/sdfix/ && echo "copied display_text.elf to /tmp/sdfix/"
         cp "$EXPERT_ICON" /tmp/sdfix/ && echo "copied expertappswitch.png to /tmp/sdfix/"
@@ -217,13 +248,17 @@ if [ "$1" = "run" ]; then
         chmod 777 /tmp/sdfix/fsck.fat
 
         tmp_display "Attempting to repair SD card. This may take some time."
-        
+
+        tmp_debug_info    # uncomment to see `ps` and `mount` outputs in your log
+
         if umount "$SD_DEV"; then
             echo "$SD_DEV unmounted successfully."
         else
             echo "Unable to unmount $SD_DEV."
             tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
             sleep 10
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
+            sync
             poweroff
         fi
         
@@ -233,19 +268,21 @@ if [ "$1" = "run" ]; then
             msg="SD card repair appears to have been successful."
             if [ "$PLATFORM" = "A30" ]; then
                 msg="$msg After 10 seconds, your device will shut itself down."
-                cmd=poweroff
             else
                 msg="$msg After 10 seconds, your device will reboot."
-                cmd=reboot
             fi
             tmp_display "$msg"
             sleep 10
+            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
-            $cmd
+            [ "$PLATFORM" = "A30" ] && poweroff || reboot
         else
             echo "fsck.fat reported errors. Unable to repair $SD_DEV."
             tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
             sleep 10
+            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             poweroff
         fi
@@ -253,7 +290,7 @@ if [ "$1" = "run" ]; then
     tmp_display_kill
     sync
     poweroff
-    while true; do : ; done
+    while true; do sleep 1 ; done
 
-    } > "$LOG_LOCATION" 2>&1
+    } > "$TMP_LOG_PATH" 2>&1
 fi

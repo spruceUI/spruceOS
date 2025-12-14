@@ -17,8 +17,10 @@ log_message "---------Starting up---------"
 
 if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
     log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."
-    chmod 777 /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh
-    /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh run
+    mkdir -p /tmp/sdfix
+    cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
+    chmod 777 /tmp/sdfix/repairSD.sh
+    /tmp/sdfix/repairSD.sh run
 fi
 
 export HOME="/mnt/SDCARD"
