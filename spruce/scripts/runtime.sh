@@ -166,6 +166,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /usr/miyoo/bin/btmanager &
     /usr/miyoo/bin/hardwareservice &
     /usr/miyoo/bin/miyoo_inputd &
+    sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
 
     #joypad
     echo -1 > /sys/class/miyooio_chr_dev/joy_type
