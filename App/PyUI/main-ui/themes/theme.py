@@ -1141,7 +1141,7 @@ class Theme():
 
     @classmethod
     def get_carousel_game_select_primary_img_width(cls):
-        return cls._data.get("carouselGameSelectPrimaryImgWidth", 60)
+        return cls._data.get("carouselGameSelectPrimaryImgWidth", 50)
     
     @classmethod
     def set_carousel_game_select_primary_img_width(cls, value):
