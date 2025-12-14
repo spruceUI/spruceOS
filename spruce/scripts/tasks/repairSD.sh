@@ -104,6 +104,31 @@ case $INFO in
         ;;
 esac
 
+tmp_blink() {
+    if [ "$PLATFORM" = "A30" ]; then
+        echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
+    elif [ "$PLATFORM" = "Flip" ]; then
+        echo heartbeat > /sys/class/leds/work/trigger
+    else
+        zones="l r m f1 f2"
+        effect=2           # breathe
+        color="FF0000"     # red
+        duration=1000      # 1000 ms
+        cycles=-1          # infinite
+
+        # Enable LED effects globally
+        echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
+
+        # Apply to all zones
+        for zone in $zones; do
+            echo "$color" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
+            echo "$cycles" > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
+            echo "$duration" > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
+            echo "$effect" > /sys/class/led_anim/effect_$zone 2>/dev/null
+        done
+    fi
+}
+
 tmp_display() {
     text="$1"
 
@@ -177,6 +202,7 @@ tmp_set_performance() {
 if [ "$1" = "run" ]; then
 
     {
+        tmp_blink
         tmp_read_only_check
         tmp_set_performance
         rm -f /mnt/SDCARD/FIX_MY_SDCARD
