@@ -22,12 +22,11 @@ class TrimUISmartPro(TrimUIDevice):
         self.device_name = device_name
         self.audio_player = AudioPlayerDelegateSdl2()
 
-        self.system_config = None
+        script_dir = Path(__file__).resolve().parent
+        source = script_dir / 'brick-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
         if(main_ui_mode):
-            script_dir = Path(__file__).resolve().parent
-            source = script_dir / 'brick-system.json'
-            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
             trim_stock_json_file = script_dir / 'stock/brick.json'
             ConfigCopier.ensure_config(TrimUISmartPro.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
@@ -50,9 +49,6 @@ class TrimUISmartPro(TrimUIDevice):
                 
             config_volume = self.system_config.get_volume()
             self._set_volume(config_volume)
-
-        if(self.system_config is None):
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
 
         super().__init__()
 

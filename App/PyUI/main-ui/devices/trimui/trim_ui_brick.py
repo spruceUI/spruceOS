@@ -22,13 +22,12 @@ class TrimUIBrick(TrimUIDevice):
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
         self.audio_player = AudioPlayerDelegateSdl2()
+        script_dir = Path(__file__).resolve().parent
+        source = script_dir / 'brick-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
 
-        self.system_config = None
         if(main_ui_mode):
-            script_dir = Path(__file__).resolve().parent
-            source = script_dir / 'brick-system.json'
-            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/brick-system.json", source)
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
             trim_stock_json_file = script_dir / 'stock/brick.json'
             ConfigCopier.ensure_config(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
@@ -49,10 +48,6 @@ class TrimUIBrick(TrimUIDevice):
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
                 
-
-        if(self.system_config is None):
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/brick-system.json")
-
         super().__init__()
             
 

@@ -73,12 +73,12 @@ class MiyooFlip(MiyooDevice):
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_OPENGL_SHADERS, b"1")
         sdl2.SDL_SetHint(sdl2.SDL_HINT_FRAMEBUFFER_ACCELERATION, b"1")
         
-        self.system_config = None
+        script_dir = Path(__file__).resolve().parent
+        source = script_dir / 'flip-system.json'
+        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
+        self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
+
         if(main_ui_mode):
-            script_dir = Path(__file__).resolve().parent
-            source = script_dir / 'flip-system.json'
-            ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             miyoo_stock_json_file = script_dir.parent / 'stock/flip.json'
             ConfigCopier.ensure_config(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
@@ -100,9 +100,6 @@ class MiyooFlip(MiyooDevice):
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/flip-system.json", self.on_system_config_changed, interval=1.0)
-
-        if(self.system_config is None):
-            self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
 
         super().__init__()
 
