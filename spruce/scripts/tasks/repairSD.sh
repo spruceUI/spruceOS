@@ -114,7 +114,7 @@ tmp_blink() {
         zones="l r m f1 f2"
         effect=2           # breathe
         color="FF0000"     # red
-        duration=1000      # 1000 ms
+        duration=1500      # 1000 ms
         cycles=-1          # infinite
 
         # Enable LED effects globally
@@ -262,8 +262,11 @@ if [ "$1" = "run" ]; then
             poweroff
         fi
         
-        if /tmp/sdfix/fsck.fat -av "$SD_DEV"; then
-            echo "fsck.fat has been run on $SD_DEV and appears successful."
+        /tmp/sdfix/fsck.fat -av "$SD_DEV"
+        FSCK_EXIT_CODE=$?
+        echo "fsck.fat exited with code $FSCK_EXIT_CODE"
+        if [ "$FSCK_EXIT_CODE" -eq 0 ]; then
+            echo "fsck.fat has been run on $SD_DEV and reports a clean SD card."
 
             msg="SD card repair appears to have been successful."
             if [ "$PLATFORM" = "A30" ]; then
@@ -277,6 +280,23 @@ if [ "$1" = "run" ]; then
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             [ "$PLATFORM" = "A30" ] && poweroff || reboot
+
+        elif [ "$FSCK_EXIT_CODE" -eq 1 ]; then
+            echo "fsck.fat has been run on $SD_DEV and has corrected some filesystem errors."
+
+            msg="SD card repair utility has corrected some filesystem errors. If problems persist after this, please use a PC to repair your card."
+            if [ "$PLATFORM" = "A30" ]; then
+                msg="$msg After 10 seconds, your device will shut itself down."
+            else
+                msg="$msg After 10 seconds, your device will reboot."
+            fi
+            tmp_display "$msg"
+            sleep 10
+            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
+            sync
+            [ "$PLATFORM" = "A30" ] && poweroff || reboot
+
         else
             echo "fsck.fat reported errors. Unable to repair $SD_DEV."
             tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
