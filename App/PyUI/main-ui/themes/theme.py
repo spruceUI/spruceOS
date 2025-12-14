@@ -1075,7 +1075,9 @@ class Theme():
         cls.save_changes()
 
     @classmethod
-    def get_game_select_col_count(cls):
+    def get_game_select_col_count(cls, default_value=None):
+        if default_value is not None:
+            return cls._data.get("gameSelectColCount", default_value)
         return cls._data.get("gameSelectColCount", int(4*cls.width_multiplier)) 
 
     @classmethod
@@ -1085,7 +1087,7 @@ class Theme():
 
     @classmethod
     def get_game_select_carousel_col_count(cls):
-        return cls._data.get("gameSelectCarouselColCount", cls.get_game_select_col_count()) 
+        return cls._data.get("gameSelectCarouselColCount", cls.get_game_select_col_count(int(3*cls.width_multiplier))) 
 
     @classmethod
     def set_game_select_carousel_col_count(cls, value):
@@ -1139,7 +1141,7 @@ class Theme():
 
     @classmethod
     def get_carousel_game_select_primary_img_width(cls):
-        return cls._data.get("carouselGameSelectPrimaryImgWidth", 40)
+        return cls._data.get("carouselGameSelectPrimaryImgWidth", 60)
     
     @classmethod
     def set_carousel_game_select_primary_img_width(cls, value):
@@ -1175,7 +1177,7 @@ class Theme():
 
     @classmethod
     def get_carousel_game_select_sides_hang_off(cls):
-        return cls._data.get("carouselGameSelectSidesHangOff", True)
+        return cls._data.get("carouselGameSelectSidesHangOff", False)
 
     @classmethod
     def set_carousel_game_select_sides_hang_off(cls, value):
