@@ -91,7 +91,7 @@ if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
 		exit 1
 	fi
 
-else
+elif [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ]; then
 
 	case "$PLATFORM" in
 		"A30" )	SKIN_PATH="/mnt/SDCARD/miyoo/res/skin" ;;
