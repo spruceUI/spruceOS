@@ -305,6 +305,15 @@ flag_remove() {
     rm -f "$FLAGS_DIR/${flag_name}.lock"
 }
 
+# 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
+get_charging_status() {
+	cat "$BATTERY/status"
+}
+
+get_battery_percent() {
+	cat "$BATTERY/capacity"
+}
+
 # Call this to get the last button pressed
 # Returns the name of the button pressed, or "" if no matching button was pressed
 # Returned strings are simplified, so "B_L1" would return "L1"

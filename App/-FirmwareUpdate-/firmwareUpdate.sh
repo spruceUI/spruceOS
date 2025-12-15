@@ -49,24 +49,6 @@ log_message "firmwareUpdate.sh: charging status: $(get_charging_status)"
 log_message "firmwareUpdate.sh: current charge percent: $(get_battery_percent)"
 log_message "firmwareUpdate.sh: current FW version: $VERSION"
 
-get_charging_status() {
-	case "$PLATFORM" in
-		"A30" ) cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online ;;
-		"Flip" ) cat /sys/class/power_supply/usb/online ;;
-		"Brick" ) cat /sys/class/power_supply/axp2202-usb/online ;;
-		"SmartPro" ) cat /sys/class/power_supply/axp2202-usb/online ;;
-	esac
-}
-
-get_battery_percent() {
-	case "$PLATFORM" in
-		"A30" ) cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity ;;
-		"Flip" ) cat /sys/class/power_supply/battery/capacity ;;
-		"Brick" ) cat /sys/class/power_supply/axp2202-battery/capacity ;;
-		"SmartPro" ) cat /sys/class/power_supply/axp2202-battery/capacity ;;
-	esac
-}
-
 cancel_update() {
 	log_and_display_message "Firmware update cancelled."
 	sleep 5
@@ -170,15 +152,15 @@ else
 fi
 
 # Require them to be plugged into power (requisite for A30 update to even occur).
-if [ "$(get_charging_status)" -eq 0 ]; then
+if [ "$(get_charging_status)" = "Discharging" ]; then
 	log_message "firmwareUpdate.sh: Device not plugged in. Prompting user to plug in their $PLATFORM."
 	while true; do
 		log_and_display_message "Please connect your device to a power source to proceed with the update process. Press A to continue, or B to cancel."
 		sleep 1
 		if confirm; then
 			# Re-evaluate charging status
-			if [ "$(get_charging_status)" -eq 1 ] || [ "$PLATFORM" != "A30" ] && [ "$(get_battery_percent)" -ge 35 ]; then
-				log_message "firmwareUpdate.sh: Device is now plugged in. Continuing."
+			if [ "$(get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ] && [ "$(get_battery_percent)" -ge 35 ]; then
+				log_message "firmwareUpdate.sh: Device is now plugged in, or at least >35% capacity. Continuing."
 				break
 			else
 				log_and_display_message "Did not detect device charging. You must plug in your device before continuing."
@@ -194,7 +176,7 @@ else
 fi
 
 # Give them one last warning, and a chance to proceed with or cancel the FW update.
-if [ "$(get_charging_status)" -eq 1 ] || [ "$PLATFORM" != "A30" ]; then
+if [ "$(get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ]; then
 	log_and_display_message "WARNING: If powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software. Press A to continue, or B to cancel."
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."
