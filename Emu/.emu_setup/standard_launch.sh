@@ -55,7 +55,9 @@ led_effect() {
 	if [ -z "$COLOR" ] || [ "$COLOR" = "null" ]; then
 		COLOR="FFFFFF"
 	fi
-	rgb_led lrm12 breathe "$COLOR" 1000 3
+	rgb_led lrm12 breathe "$COLOR" 1200 3
+	sleep 5
+	rgb_led lrm12 breathe "$COLOR" 4000 -1
 }
 
 ##### GENERAL FUNCTIONS #####
@@ -790,7 +792,7 @@ run_mupen_standalone() {
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 	sleep 0.3
-	./mupen64plus "$ROM_PATH"
+	./mupen64plus "$ROM_PATH" > /mnt/SDCARD/Saves/spruce/mupen64plus-$PLATFORM.log 2>&1
 	kill -9 $(pidof gptokeyb2)
 
 	rm -f "$TEMP_ROM"
@@ -819,9 +821,9 @@ run_yabasanshiro() {
 	jq --arg guid "$GUID" '.player1.deviceGUID = $guid' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
 
 	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
-		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" >./log.txt 2>&1
+		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > /mnt/SDCARD/Saves/spruce/yabasanshiro-$PLATFORM.log 2>&1
 	else
-		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" >./log.txt 2>&1
+		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/yabasanshiro-$PLATFORM.log 2>&1
 	fi
 }
 
@@ -834,7 +836,7 @@ run_flycast_standalone() {
 	mount --bind /mnt/SDCARD/BIOS/dc $HOME/.local/share/flycast
 
 	cd "$HOME"
-	./flycast "$ROM_FILE"
+	./flycast "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/flycast-$PLATFORM.log 2>&1
 
 	umount $HOME/.local/share/flycast
 }
@@ -851,7 +853,7 @@ get_mode_override
 set_cpu_mode
 record_session_start_time
 handle_network_services
-led_effect
+led_effect &
 flag_add 'emulator_launched'
 
 # Sanitize the rom path
