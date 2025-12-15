@@ -167,15 +167,8 @@ get_system_icon_from_theme() {
     local category="$1"
     local current_theme icon_name emu_name selected_icon ext
     local theme_dir fallback_dir dest_path
-
-    case "$PLATFORM" in
-        "A30") local cfgname="a30" ;;
-        "Flip") local cfgname="flip" ;;
-        "Brick") local cfgname="brick" ;;
-        "SmartPro") local cfgname="smartpro" ;;
-    esac
-
-    local config="/mnt/SDCARD/Saves/${cfgname}-system.json"
+    local config
+    config=$(get_config_path)
 
     current_theme="$(jq -r '.theme // "spruce"' "$config")"
 

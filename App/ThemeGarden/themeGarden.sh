@@ -8,12 +8,7 @@ DOWNLOAD="/mnt/SDCARD/App/ThemeGarden/download_theme.sh"
 CONFIG_DIR=/mnt/SDCARD/Saves/ThemeGarden
 PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/Resources/theme_previews.7z"
 
-case "$PLATFORM" in
-    "A30") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
-    "Flip") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
-    "Brick") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
-    "SmartPro"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
-esac
+export_ld_library_path
 
 ##### FUNCTIONS #####
 

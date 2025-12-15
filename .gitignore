@@ -3,3 +3,5 @@
 .vscode
 *.pyc
 .idea
+current.txt
+sync.bat
