@@ -23,27 +23,6 @@ applicable_process_is_running() {
     pgrep -f "mupen64plus" >/dev/null
 }
 
-enter_sleep() {
-    log_message "powerbutton_watchdog.sh: Entering sleep."
-    [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
-    echo -n mem >/sys/power/state
-}
-
-get_current_volume() {
-    case "$PLATFORM" in
-        "Flip" ) amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%' ;;
-        * ) amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%' ;;
-    esac
-}
-
-set_volume() {
-    new_vol="${1:-0}" # default to mute if no value supplied
-    case "$PLATFORM" in
-        "Flip" ) amixer cset name='SPK Volume' "$new_vol" ;;
-        * ) amixer set 'Soft Volume Master' "$new_vol" ;;
-    esac
-}
-
 get_wake_alarm() {
     sleep_setting=$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "5m")
     # Map to corresponding seconds
