@@ -1228,6 +1228,29 @@ export_ld_library_path() {
     esac
 }
 
+get_sd_card_path() {
+    if [ "$PLATFORM" = "Flip" ]; then
+        echo "/mnt/sdcard"
+    else
+        echo "/mnt/SDCARD"
+    fi
+}
+
+get_config_path() {
+    local cfgname
+    case "$PLATFORM" in
+        "A30") cfgname="a30" ;;
+        "Flip") cfgname="flip" ;;
+        "Brick") cfgname="brick" ;;
+        "SmartPro") cfgname="smartpro" ;;
+        *) cfgname="unknown" ;;  # optional default
+    esac
+
+    # Return the full path
+    echo "/mnt/SDCARD/Saves/${cfgname}-system.json"
+}
+
+
 display_message() {
     local message="$1"
     local python_path
