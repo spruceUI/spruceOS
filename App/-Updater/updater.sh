@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -427,7 +427,7 @@ if [ "$TESTER_MODE" -eq 1 ]; then
     log_update_message "Restored tester mode flag"
 fi
 
-if [ "$BETA_UPDATE" -eq 1 ]; then
+if [ "$BETA_UPDATE" = true ]; then
     touch "$FLAG_DIR/beta"
     log_update_message "Restored beta update flag"
 fi
