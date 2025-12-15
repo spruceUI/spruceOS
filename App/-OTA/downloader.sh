@@ -4,11 +4,7 @@
 
 export_ld_library_path
 
-if [ "$PLATFORM" = "Flip" ]; then
-    SD_CARD="/mnt/sdcard"   # this only really matters for the mountpoint check towards the end
-else
-    SD_CARD="/mnt/SDCARD"
-fi
+SD_CARD=$(get_sd_card_path)
 
 IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
