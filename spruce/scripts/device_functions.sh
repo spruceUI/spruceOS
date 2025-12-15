@@ -659,3 +659,25 @@ set_playback_path() {
       && amixer sset 'SPK' 1% > /dev/null && amixer sset 'SPK' "$volume_lv%" > /dev/null
   fi
 }
+
+
+run_mixer_watchdog() {
+  # TODO: will need to fix for brick and tsp
+  JACK_PATH=/sys/class/gpio/gpio150/value
+
+  [ "$PLATFORM" = "Flip" ] && while true; do
+    /mnt/SDCARD/spruce/bin64/inotifywait -e modify "$SYSTEM_JSON" >/dev/null 2>&1 &
+    PID_INOTIFY=$!
+
+    /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
+    PID_GPIO=$!
+
+    wait -n
+
+    log_message "*** mixer watchdog: change detected" -v
+
+    kill $PID_INOTIFY $PID_GPIO 2>/dev/null
+
+    set_playback_path
+  done
+}
