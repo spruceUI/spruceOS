@@ -81,10 +81,9 @@ verify_checksum() {
 
 start_pyui_message_writer
 display_image_and_text "$IMAGE_PATH" 30 25 "Checking for updates..." 75
-case "$PLATFORM" in
-    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
-    "Brick"|"SmartPro"*) rgb_led lrm12 blink2 0000FF 1500 "-1" ;;
-esac
+
+# twinkle them lights
+rgb_led lrm12 blink2 0000FF 1500 "-1" mmc0
 
 # Fix the wifi first if using an A30 with outdated firmware
 if [ "$PLATFORM" = "A30" ]; then

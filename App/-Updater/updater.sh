@@ -148,10 +148,8 @@ fi
 
 # Start
 
-case "$PLATFORM" in
-    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
-    "Brick"|"SmartPro"*) rgb_led lrm12 breathe 0000FF 2000 "-1" ;;
-esac
+# twinkle them lights
+rgb_led lrm12 breathe 0000FF 2000 "-1" mmc0
 
 # Create fresh updater.log and start logging
 echo "Update process started" >"$LOG_LOCATION"

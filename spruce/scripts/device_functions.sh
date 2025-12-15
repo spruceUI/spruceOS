@@ -424,7 +424,7 @@ display() {
 
 
 # ---------------------------------------------------------------------------
-# rgb_led <zones> <effect> [color] [duration_ms] [cycles]
+# rgb_led <zones> <effect> [color] [duration_ms] [cycles] [A30/Flip led trigger]
 #
 # Controls RGB LEDs on TrimUI Brick / Smart Pro.
 #
@@ -455,8 +455,17 @@ display() {
 #
 #   [cycles]       Number of animation cycles (default: 1)
 #
+#   [led trigger]  none rfkill-any rfkill-none kbd-scrolllock kbd-numlock 
+#                  kbd-capslock kbd-kanalock kbd-shiftlock kbd-altgrlock 
+#                  kbd-ctrllock kbd-altlock kbd-shiftllock kbd-shiftrlock 
+#                  kbd-ctrlllock kbd-ctrlrlock battery-charging-or-full 
+#                  battery-charging battery-full battery-charging-blink-full-solid
+#                  usb-online ac-online mmc2 timer oneshot heartbeat gpio cpu 
+#                  cpu0 cpu1 cpu2 cpu3 activity default-on mmc1 mmc0 rfkill2 rfkill3
+#
+#
 # EXAMPLES:
-#   rgb_led lrm breathe FF8800 2000 3
+#   rgb_led lrm breathe FF8800 2000 3 heartbeat
 #   rgb_led m2 blink1 00FFAA
 #   rgb_led 12 static
 #   rgb_led r off
@@ -464,11 +473,15 @@ display() {
 
 rgb_led() {
 
-    # early out
+    # early out if disabled
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-	if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ] || [ "$disable" = "True" ]; then
-		return 0	# exit if device has no LEDs to twinkle or user opts out
-	fi
+	[ "$disable" = "True" ] && return 0
+
+    # handle platforms with no rgb zones
+    case "$PLATFORM" in "A30"|"Flip") 
+        [ -n "$6" ] && echo "$6" > "$LED_PATH/trigger"
+        return 0
+    ;; esac
 
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then

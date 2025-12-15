@@ -45,11 +45,9 @@ log_message "----------Running Backup script----------"
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Backing up your spruce configs and files! Please wait.........." 75
+
 # twinkle them lights
-case "$PLATFORM" in
-    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
-    "Brick"|"SmartPro"*) rgb_led lrm12 breathe FFFF00 2100 "-1" ;;
-esac
+rgb_led lrm12 breathe FFFF00 2100 "-1" mmc0
 
 # Create Saves/spruce directory and 'backups' subdirectory if they don't exist
 mkdir -p "$BACKUP_DIR/backups"

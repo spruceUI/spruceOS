@@ -163,11 +163,9 @@ log_message "----------Starting Restore script----------"
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75
+
 # twinkle them lights
-case "$PLATFORM" in
-    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
-    "Brick"|"SmartPro"*) rgb_led lrm12 breathe 00FF00 1900 "-1" ;;
-esac
+rgb_led lrm12 breathe 00FF00 1900 "-1" mmc0
 
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
