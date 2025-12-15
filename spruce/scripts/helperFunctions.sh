@@ -1184,10 +1184,8 @@ start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
 
-    if [ "$PLATFORM" = "A30" ]; then
-        ifconfig lo up
-        ifconfig lo 127.0.0.1
-    fi
+    ifconfig lo up
+    ifconfig lo 127.0.0.1
 
     # Check if PyUI is already running with the realtime port argument
     if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
