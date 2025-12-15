@@ -35,11 +35,6 @@ case "$PLATFORM" in
     "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
 esac
 
-if flag_check "reboot-update"; then
-    log_message "Updater continuing!"
-    /mnt/SDCARD/App/-Updater/updater.sh
-fi
-
 runtime_mounts_$PLATFORM
 
 if [ "$PLATFORM" = "A30" ]; then
