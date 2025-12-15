@@ -3,6 +3,7 @@
   "icon": "file.png",
   "launch": "launch.sh",
   "description": "View and edit files on your SD card",
+  "devices": ["MIYOO_A30", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO","MIYOO_FLIP"],
   "hide": false,
   "hideInSimpleMode": true
 }
