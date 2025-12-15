@@ -129,15 +129,15 @@ unmount_binds() {
 start_pyui_message_writer
 
 # Execute this section prior to reboot (if applicable). Skip it if reboot has already occurred.
-if [ ! "$PLATFORM" = "A30" ] && ! flag_check "reboot-update" ; then
-    mkdir -p "$FLAG_DIR"
-    flag_add "reboot-update"
-    display_image_and_text "$LOGO" 35 25 "Your $PLATFORM will now reboot to allow for a safe update. Please wait!" 75
-    sleep 5
-    log_message "Initial checks complete. Rebooting device to allow update to occur before mounting over important system files."
-    reboot
-    while true; do true; done
-fi
+#if [ ! "$PLATFORM" = "A30" ] && ! flag_check "reboot-update" ; then
+ #   mkdir -p "$FLAG_DIR"
+  #  flag_add "reboot-update"
+   # display_image_and_text "$LOGO" 35 25 "Your $PLATFORM will now reboot to allow for a safe update. Please wait!" 75
+    #sleep 5
+    #log_message "Initial checks complete. Rebooting device to allow update to occur before mounting over important system files."
+    #reboot
+    #while true; do true; done
+#fi
 
 # remove reboot-update flag after rebooting so that we don't skip the above section if a failure occurs
 # further into the update script.
