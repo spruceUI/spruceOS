@@ -358,7 +358,7 @@ if [ "$PERFORM_DELETION" = true ]; then
         if [ "$item" != "$(basename "$UPDATE_FILE")" ] && [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ] && [ "$item" != "Persistent" ] && [ "$item" != "Collections" ]; then
             if [ "$item" = "spruce" ]; then
                 log_update_message "Handling spruce folder"
-                find "$item" -mindepth 1 -maxdepth 1 ! -name "bin" ! -name "bin64" -exec rm -rf {} +
+                find "$item" -mindepth 1 -maxdepth 1 ! -name "bin" ! -name "bin64"  ! -name "flip"  ! -name "a30" ! -name "brick" -exec rm -rf {} +
             else
                 log_update_message "Deleting: $item"
                 rm -rf "$item"
