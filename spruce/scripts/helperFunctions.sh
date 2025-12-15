@@ -670,27 +670,6 @@ get_current_theme() {
     fi
 }
 
-#
-#       restore_theme()
-#
-# This function returns the user's theme path if it's not the default theme
-# Meant to be used on installations and updates only
-get_theme_path_to_restore(){
-    current_theme_path=$(get_current_theme_path)
-    spruce_theme="/mnt/SDCARD/Themes/SPRUCE/"
-    default_theme="../res/"
-    default_theme_2="./"
-
-    # if the current theme is equal to the default miyoo theme
-    if [ "$current_theme_path" = "$default_theme" ]; then # that's ugly!
-        echo "$spruce_theme"                                 # Switch to the spruce theme ASAP
-    elif [ "$current_theme_path" = "$default_theme_2" ]; then # that's ugly!
-        echo "$spruce_theme"                                     # Switch to the spruce theme ASAP
-    else # If not, give back the user his loved theme <3
-        echo "$current_theme_path"
-    fi
-}
-
 
 get_event() {
     "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_KEYBOARD

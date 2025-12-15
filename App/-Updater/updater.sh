@@ -147,8 +147,6 @@ if flag_check "reboot-update"; then
 fi
 
 # Start
-log_update_message "Update process started"
-display_image_and_text "$LOGO" 35 25 "Checking for update file..." 75
 
 case "$PLATFORM" in
     "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
@@ -159,7 +157,21 @@ esac
 echo "Update process started" >"$LOG_LOCATION"
 exec >>"$LOG_LOCATION" 2>&1
 
+display_image_and_text "$LOGO" 35 25 "Checking for update file..." 75
+
 read_only_check
+
+# debug info
+echo "Update is being performed on a $PLATFORM."
+echo "Device firmware is version: $(cat /etc/version)"
+echo "Currently running processes:"
+ps
+echo "Current mounts:"
+mount
+echo "SD Card root contents:"
+ls -Al /mnt/SDCARD
+echo "PATH: $PATH"
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
 # Check SD Card health
 TEST_FILE="/mnt/SDCARD/.sd_test_$$"
