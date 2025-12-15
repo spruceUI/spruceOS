@@ -240,6 +240,7 @@ vibrate() {
             ;;
         "Brick" | "SmartPro") 
             # todo: properly implement duration timer and intensity
+            # also todo: add TSP S vibration
             timer=0
             while [ $timer -lt $duration ]; do
                 echo -n 1 > /sys/class/gpio/gpio227/value
@@ -297,7 +298,7 @@ display() {
         LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
         DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
 
-    elif [ "$PLATFORM" = "SmartPro" ]; then
+    elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
         width=1200
         LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
         DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
@@ -543,7 +544,7 @@ rainbreathe() {
 # used in principal.sh
 enable_or_disable_rgb() {
     case "$PLATFORM" in
-        "Brick"|"SmartPro")
+        "Brick"|"SmartPro"|"SmartProS")
             enable_file="/sys/class/led_anim/enable"
         	disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
             if [ "$disable_rgb" = "True" ]; then

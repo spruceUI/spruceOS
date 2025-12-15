@@ -99,7 +99,7 @@ cd $RA_DIR/
 case "$PLATFORM" in
 	"A30") RA_BIN="ra32.miyoo" ;;
 	"Flip") RA_BIN="ra64.miyoo" ;;
-	"Brick"|"SmartPro") RA_BIN="ra64.trimui_$PLATFORM" ;;
+	"Brick"|"SmartPro"|"SmartProS") RA_BIN="ra64.trimui_$PLATFORM" ;;
 esac
 
 prepare_ra_config 2>/dev/null

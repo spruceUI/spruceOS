@@ -282,7 +282,7 @@ run_drastic() {
 				./drastic64 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-og-brick.log 2>&1
 			fi
 
-		elif [ "$PLATFORM" = "SmartPro" ]; then
+		elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
 
 			##### TODO: HOOK UP CORE SWITCH B/T TRNGAJE AND OG DRASTIC on SMART PRO; no Steward available
 
@@ -412,7 +412,7 @@ load_pico8_control_profile() {
 		"Flip")
 			export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
 			;;
-		"Brick" | "SmartPro")
+		"Brick" | "SmartPro" | "SmartProS")
 			export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
 			;;
 	esac
@@ -508,7 +508,7 @@ run_ppsspp() {
 	case "$PLATFORM" in
 		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
 		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
-		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
+		"Brick"|"SmartPro"|"SmartProS") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
 	esac
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit
 }
@@ -564,7 +564,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$PLATFORM" in
-		"Brick"|"SmartPro")
+		"Brick"|"SmartPro"|"SmartProS")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"A30"|"Flip")
@@ -627,7 +627,7 @@ run_retroarch() {
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
 	case "$PLATFORM" in
-		"Brick" | "SmartPro" )
+		"Brick" | "SmartPro" | "SmartProS")
 			if [ "$use_igm" = "True" ]; then
 				export RA_BIN="ra64.trimui_$PLATFORM"
 			else
@@ -636,7 +636,7 @@ run_retroarch() {
 			fi
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$PLATFORM" = "SmartPro" ]; then
+			elif [ "$CORE" = "genesis_plus_gx" ] && { [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; }; then
 				use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
 				[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
 			fi
@@ -811,7 +811,7 @@ run_yabasanshiro() {
 			YABASANSHIRO="./yabasanshiro" 
 			GUID=030000005e0400008e02000014010000
 			;;
-		"Brick"|"SmartPro")
+		"Brick"|"SmartPro"|"SmartProS")
 			YABASANSHIRO="./yabasanshiro.trimui" 
 			GUID=0300a3845e0400008e02000014010000
 			;;

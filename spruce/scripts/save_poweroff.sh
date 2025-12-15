@@ -16,7 +16,7 @@ fi
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-if [ "$PLATFORM" = "SmartPro" ]; then 
+if [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then 
     BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
 else
     BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
