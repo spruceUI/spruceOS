@@ -48,7 +48,7 @@ log_battery() {
     CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 
     # Check charging status
-    CHARGING=$(cat $BATTERY/status)
+    CHARGING=$(get_charging_status)
 
     # Append new log entry with appropriate status
     if [ "$CHARGING" = "Charging" ]; then
@@ -83,7 +83,7 @@ fi
 LAST_LOG=$(date +%s)
 
 while true; do
-    CAPACITY=$(cat $BATTERY/capacity)
+    CAPACITY=$(get_battery_percent)
     PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
     LED_MODE="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
     
@@ -125,7 +125,7 @@ while true; do
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
             fi
 
-            CAPACITY=$(cat $BATTERY/capacity)
+            CAPACITY=$(get_battery_percent)
             PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
 
             hard_shutdown $CAPACITY

@@ -128,26 +128,6 @@ unmount_binds() {
 
 start_pyui_message_writer
 
-# Execute this section prior to reboot (if applicable). Skip it if reboot has already occurred.
-#if [ ! "$PLATFORM" = "A30" ] && ! flag_check "reboot-update" ; then
- #   mkdir -p "$FLAG_DIR"
-  #  flag_add "reboot-update"
-   # display_image_and_text "$LOGO" 35 25 "Your $PLATFORM will now reboot to allow for a safe update. Please wait!" 75
-    #sleep 5
-    #log_message "Initial checks complete. Rebooting device to allow update to occur before mounting over important system files."
-    #reboot
-    #while true; do true; done
-#fi
-
-# remove reboot-update flag after rebooting so that we don't skip the above section if a failure occurs
-# further into the update script.
-if flag_check "reboot-update"; then
-    log_message "Update continuing post-reboot!"
-    flag_remove "reboot-update"
-fi
-
-# Start
-
 # twinkle them lights
 rgb_led lrm12 breathe 0000FF 2000 "-1" mmc0
 
@@ -225,11 +205,11 @@ UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{pr
 
 # Check battery level
 log_update_message "Checking battery level"
-BATTERY_CAPACITY=$(cat $BATTERY/capacity)
-CHARGING="$(cat $BATTERY/online)"
+BATTERY_CAPACITY="$(get_battery_percent)"
+CHARGING="$(get_charging_status)"
 log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
-if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" = "Discharging" ]; then
     log_update_message "Battery level too low for update"
     display_image_and_text "$BAD_IMG" 35 25 "Battery too low for update.
     Please charge to at least 20% or plug in your device, then try again." 75
