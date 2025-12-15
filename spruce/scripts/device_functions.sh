@@ -551,3 +551,41 @@ enable_or_disable_rgb() {
             ;;
     esac
 }
+
+restart_wifi() {
+    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
+    if [ "$PLATFORM" = "Flip" ]; then
+        log_message "Restarting Wi-Fi interface wlan0 on Flip"
+
+        # Bring the interface down and kill any running services
+        ifconfig wlan0 down
+        killall wpa_supplicant 2>/dev/null
+        killall udhcpc 2>/dev/null
+
+        # Bring the interface back up and reconnect
+        ifconfig wlan0 up
+        wpa_supplicant -B -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        udhcpc -i wlan0 &
+    else
+        log_message "Letting stock OS restart wifi for the FLIP"
+    fi
+}
+
+QRENCODE_PATH="/mnt/SDCARD/spruce/bin/qrencode"
+QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
+
+get_qr_bin_path() {
+    if [ "$PLATFORM" = "A30" ]; then
+        echo "$QRENCODE_PATH"
+    else
+        echo "$QRENCODE64_PATH"
+    fi
+}
+
+set_path_variable() {
+    if [ "$PLATFORM" = "A30" ]; then
+        export PATH="/mnt/SDCARD/spruce/bin:$PATH"
+    else
+        export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+    fi
+}

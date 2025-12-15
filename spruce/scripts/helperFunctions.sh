@@ -52,8 +52,7 @@ esac
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
-[ "$PLATFORM" = "A30" ] && export PATH="/mnt/SDCARD/spruce/bin:$PATH" || \
-                           export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
+set_path_variable
 
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
@@ -108,19 +107,7 @@ check_and_connect_wifi() {
     if [ $connection_active -eq 0 ]; then
         log_message "Attempting to connect to WiFi"
 
-        # Bring the existing interface down cleanly if its running
-        if [ "$PLATFORM" = "Flip" ]; then
-            ifconfig wlan0 down
-            killall wpa_supplicant
-            killall udhcpc
-
-            # Restart the interface and try to connect
-            ifconfig wlan0 up
-            wpa_supplicant -B -i wlan0 -c $WPA_SUPPLICANT_FILE
-            udhcpc -i wlan0 &
-        else
-            log_message "Letting stock OS restart wifi for the FLIP"
-        fi
+        restart_wifi
 		
         display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
 Press START to continue anyway."
@@ -595,8 +582,6 @@ log_precise() {
 # If no output is provided, the QR code will be saved to /tmp/tmp/qr.png
 #   QR_CODE=$(qr_code -t "https://www.google.com")
 #   display -i "$QR_CODE" -t "DT: QR Code" -d 5
-QRENCODE_PATH="/mnt/SDCARD/spruce/bin/qrencode"
-QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
 qr_code() {
     text=""
     size=3
@@ -624,10 +609,7 @@ qr_code() {
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
-    qr_bin_path=$QRENCODE_PATH
-    if [ ! "$PLATFORM" = "A30" ]; then
-      qr_bin_path=$QRENCODE64_PATH
-    fi
+    qr_bin_path=$(get_qr_bin_path)
 
     # Generate QR code
     if "$qr_bin_path" -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
@@ -725,45 +707,6 @@ get_config_value() {
 }
 
 ###########################################################
-
-# Takes a screenshot and saves it to the specified path
-# Usage: take_screenshot [output_path] [game_name]
-# If no output_path is provided, saves to /mnt/SDCARD/Saves/screenshots/
-# If game_name is provided, it will be used as the filename (without extension)
-take_screenshot() {
-    output_path="${1:-/mnt/SDCARD/Saves/screenshots}"
-    game_name="$2"
-
-    # Ensure the screenshots directory exists
-    mkdir -p "$output_path"
-
-    # If game name provided, use it for filename
-    if [ -n "$game_name" ]; then
-        screenshot_path="$output_path/${game_name}.png"
-    else
-        # Generate timestamp-based filename if no game name
-        timestamp=$(date +%Y%m%d_%H%M%S)
-        screenshot_path="$output_path/screenshot_${timestamp}.png"
-    fi
-
-    # Copy framebuffer to temp file
-    cp /dev/fb0 /tmp/fb0
-    vibrate 50
-    # Convert and compress framebuffer to PNG in background
-    # -a: auto detection of framebuffer device
-    # -f: source file
-    # -w: width
-    # -h: height
-    # -b: bits per pixel
-    # -l: line length in pixels
-    [ "$PLATFORM" = "A30" ] && WIDTH=$DISPLAY_HEIGHT HEIGHT=$DISPLAY_WIDTH || WIDTH=$DISPLAY_WIDTH HEIGHT=$DISPLAY_HEIGHT # handle A30 rotation
-    $BIN_PATH/fbgrab -a -f "/tmp/fb0" -w $WIDTH -h $HEIGHT -b 32 -l $WIDTH "$screenshot_path" 2>/dev/null &
-
-    log_message "Screenshot saved to: $screenshot_path" -v
-}
-
-
-
 ##########     PYUI MESSAGE WRITER     ##########
 
 start_pyui_message_writer() {
