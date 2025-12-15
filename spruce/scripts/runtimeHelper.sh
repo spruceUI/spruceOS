@@ -74,6 +74,9 @@ check_and_handle_firmware_app() {
             current_fw_is="$(compare_current_version_to_version "1.1.0")"
             [ "$current_fw_is" != "older" ] && need_fw_update="false"
             ;;
+        * )
+            need_fw_update="false"
+        ;;
     esac
 
     if [ "$need_fw_update" = "true" ]; then
