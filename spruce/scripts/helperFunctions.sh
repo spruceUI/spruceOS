@@ -1181,7 +1181,7 @@ take_screenshot() {
 ##########     PYUI MESSAGE WRITER     ##########
 
 start_pyui_message_writer() {
-    # $1 = 1 to wait, 0 (or empty) to not wait
+    # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
 
     if [ "$PLATFORM" = "A30" ]; then

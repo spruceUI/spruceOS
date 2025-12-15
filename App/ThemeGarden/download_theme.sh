@@ -9,7 +9,6 @@ THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/Pack
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
 TMP_DIR="/mnt/SDCARD/App/ThemeGarden/tmp"
 
-encoded_name=$(echo "$theme_name" | sed 's/ /%20/g' | sed "s/'/%27/g")
 theme_url="${THEME_BASE_URL}/${encoded_name}.7z"
 temp_path="$TMP_DIR/${theme_name}.7z"
 final_path="$ARCHIVE_DIR/preMenu/${theme_name}.7z"
