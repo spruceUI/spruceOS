@@ -455,13 +455,9 @@ display() {
 #
 #   [cycles]       Number of animation cycles (default: 1)
 #
-#   [led trigger]  none rfkill-any rfkill-none kbd-scrolllock kbd-numlock 
-#                  kbd-capslock kbd-kanalock kbd-shiftlock kbd-altgrlock 
-#                  kbd-ctrllock kbd-altlock kbd-shiftllock kbd-shiftrlock 
-#                  kbd-ctrlllock kbd-ctrlrlock battery-charging-or-full 
-#                  battery-charging battery-full battery-charging-blink-full-solid
-#                  usb-online ac-online mmc2 timer oneshot heartbeat gpio cpu 
-#                  cpu0 cpu1 cpu2 cpu3 activity default-on mmc1 mmc0 rfkill2 rfkill3
+#   [led trigger]  none battery-charging-or-full battery-charging battery-full 
+#                  battery-charging-blink-full-solid usb-online ac-online 
+#                  timer heartbeat gpio default-on mmc1 mmc0
 #
 #
 # EXAMPLES:
