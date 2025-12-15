@@ -15,35 +15,23 @@ NEEDS_UPDATE=true
 
 case "$PLATFORM" in
 	"A30" )
-		BRAND="Miyoo"
-		FW_FILE="miyoo282_fw.img"
-		SPACE_NEEDED=48
 		VERSION="$(cat /usr/miyoo/version)"
 		[ "$VERSION" -ge 20240713100458 ] && NEEDS_UPDATE=false
 		;;
 	"Flip" )
-		BRAND="Miyoo"
-		FW_FILE="miyoo355_fw.img"
-		SPACE_NEEDED=384
 		VERSION="$(cat /usr/miyoo/version)"
 		[ "$VERSION" -ge 20250627233124 ] && NEEDS_UPDATE="false"
 		;;
 	"Brick" )
-		BRAND="TrimUI"
-		FW_FILE="trimui_tg3040.awimg"
-		SPACE_NEEDED=1280
         current_fw_is="$(compare_current_version_to_version "1.1.0")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
 	"SmartPro" )
-		BRAND="TrimUI"
-		FW_FILE="trimui_tg5040.awimg"
-		SPACE_NEEDED=1280
         current_fw_is="$(compare_current_version_to_version "1.1.0")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
 	*)
-		log_and_display_message "The firmware updater app does not currently support the $PLATFORM"
+		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
 		sleep 5
 		exit 1
 		;;
@@ -149,12 +137,12 @@ sleep 1
 acknowledge
 
 # Do not allow them to update if they don't have enough space to copy and extract the update file
-if [ "$FREE_SPACE" -lt "$SPACE_NEEDED" ]; then
-	log_and_display_message "Not enough free space. Please ensure at least $SPACE_NEEDED MiB of space is available on your SD card, then try again."
+if [ "$FREE_SPACE" -lt "$REQ_MB_TO_UPDATE_FW" ]; then
+	log_and_display_message "Not enough free space. Please ensure at least $REQ_MB_TO_UPDATE_FW MiB of space is available on your SD card, then try again."
 	sleep 5
 	exit 1
 else
-	log_message "firmwareUpdate.sh: SD card contains at least $SPACE_NEEDED MiB free space. Continuing."
+	log_message "firmwareUpdate.sh: SD card contains at least $REQ_MB_TO_UPDATE_FW MiB free space. Continuing."
 fi
 
 # Do not allow them to update if their battery level is low, to help avoid bricking
