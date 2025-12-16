@@ -49,8 +49,8 @@ class Theme():
         cls._load_from_file(os.path.join(path, config_path))
 
         cls._path = path
-        cls._skin_folder = cls._get_asset_folder("skin", width, height)
-        cls._icon_folder = cls._get_asset_folder("icons", width, height)
+        cls._skin_folder = cls._get_asset_folder(cls._path, "skin", width, height)
+        cls._icon_folder = cls._get_asset_folder(cls._path, "icons", width, height)
         daijisho_theme_index_file = os.path.join(cls._path, cls._icon_folder,"index.json")
         if os.path.exists(daijisho_theme_index_file):
             try:
@@ -132,17 +132,17 @@ class Theme():
         cls._load_from_file(os.path.join(path, "config.json"))
 
         cls._path = path
-        cls._skin_folder = cls._get_asset_folder("skin", -1, -1)
-        cls._icon_folder = cls._get_asset_folder("icons", -1, -1)
+        cls._skin_folder = cls._get_asset_folder(cls._path,"skin", -1, -1)
+        cls._icon_folder = cls._get_asset_folder(cls._path,"icons", -1, -1)
 
     @classmethod
     def get_theme_path(cls):
         return cls._path
 
     @classmethod
-    def _get_asset_folder(cls, base_folder, width, height):
+    def _get_asset_folder(cls, path, base_folder, width, height):
         folder = f"{base_folder}_{width}x{height}"
-        full_path = os.path.join(cls._path, folder)
+        full_path = os.path.join(path, folder)
         if os.path.isdir(full_path):
             #PyUiLogger.get_logger().info(f"Resolution specific assets found, using {folder}")
             return folder
@@ -1508,3 +1508,31 @@ class Theme():
                                     1.00)
 
 
+
+    @classmethod
+    def get_cfw_default_icon(cls, icon_name):
+        cfw_theme = PyUiConfig.get("theme")
+        PyUiLogger.get_logger().debug(f"Getting CFW default icon '{icon_name}' for theme '{cfw_theme}'")
+        if(cfw_theme is None):
+            PyUiLogger.get_logger().debug(f"CFW theme is None, cannot get icon")
+            return None
+        else:
+            cfw_theme_path = os.path.join(PyUiConfig.get("themeDir"),cfw_theme)
+            PyUiLogger.get_logger().debug(f"cfw_theme_path is '{cfw_theme_path}'")
+            path = os.path.join(cfw_theme_path, 
+                                cls._get_asset_folder(cfw_theme_path, "icons", 
+                                                      Device.screen_width(), 
+                                                      Device.screen_height()), 
+                                "app",icon_name)
+
+            PyUiLogger.get_logger().debug(f"icon path resolved to '{path}'")
+            if os.path.exists(path):
+                return path
+
+            # Fallback only makes sense for .qoi assets/icons
+            if path.endswith(".qoi"):
+                png_path = path[:-4] + ".png"
+                if os.path.exists(png_path):
+                    return png_path
+
+            return None

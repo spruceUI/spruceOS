@@ -278,6 +278,9 @@ class MiyooMiniCommon(MiyooDevice):
         else:
             return "Unsupported"
 
+    def supports_wifi(self):
+        return self.miyoo_mini_specific_model_variables.supports_wifi
+
     def get_charge_status(self):
         return self.miyoo_mini_specific_model_variables.get_charge_status()
 

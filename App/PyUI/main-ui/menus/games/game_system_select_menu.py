@@ -238,8 +238,8 @@ class GameSystemSelectMenu:
                 systems_list.append(GridOrListEntry(
                         primary_text="Apps",
                         primary_text_long="Applications",
-                        image_path=self.get_main_menu_icon("apps",Theme.settings()),
-                        image_path_selected=self.get_main_menu_icon_selected("apps",Theme.settings_selected()),
+                        image_path=self.get_main_menu_icon("apps",Theme.app()),
+                        image_path_selected=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
                         description = "Launch Applications",
                         icon=None,
                         value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
