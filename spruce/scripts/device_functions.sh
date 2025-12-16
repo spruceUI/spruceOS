@@ -6,13 +6,11 @@
 #  we can try to make the file import chain cleaner)
 
 get_python_path() {
-    if [ "$PLATFORM" = "A30" ]; then
-        echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10"
-    elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "SmartProS" ] || [ "$PLATFORM" = "Flip" ]; then
-        echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
-    elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-        echo "/mnt/SDCARD/spruce/miyoomini/bin/python"
-    fi
+    case "$PLATFORM" in
+        A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
+        Brick|SmartPro|SmartProS|Flip)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
+        MIYOO_MINI_FLIP)                echo "/mnt/SDCARD/spruce/miyoomini/bin/python" ;;
+    esac
 }
 
 export_ld_library_path() {
@@ -48,12 +46,12 @@ get_config_path() {
     echo "/mnt/SDCARD/Saves/${cfgname}-system.json"
 }
 
-
-
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        else #  official spruce device
             case "$PLATFORM" in
             SmartProS)
                 cores_online 8
@@ -124,8 +122,6 @@ set_smart() {
                 flag_remove "setting_cpu"
                 ;;
             esac
-        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-            echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         fi
     fi
 }
@@ -133,7 +129,9 @@ set_smart() {
 set_performance() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor        
+        else #  official spruce device
             cores_online
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -146,8 +144,7 @@ set_performance() {
             chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             log_message "CPU Mode now locked to PERFORMANCE" -v
-        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
         fi
         flag_remove "setting_cpu"
     fi
@@ -156,7 +153,9 @@ set_performance() {
 set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        else #  official spruce device
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             case "$PLATFORM" in
@@ -171,8 +170,6 @@ set_overclock() {
             chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             log_message "CPU Mode now locked to OVERCLOCK" -v
-        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         fi
 
         flag_remove "setting_cpu"
@@ -616,18 +613,17 @@ get_qr_bin_path() {
 }
 
 set_path_variable() {
-    if [ "$PLATFORM" = "A30" ]; then
-        export PATH="/mnt/SDCARD/spruce/bin:$PATH"
-    elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-        export PATH="/mnt/SDCARD/spruce/miyoomini/bin/:$PATH"
-    else
-        export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
-    fi
+    case "$PLATFORM" in
+        A30)               export PATH="/mnt/SDCARD/spruce/bin:$PATH" ;;
+        MIYOO_MINI_FLIP)   export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH" ;;
+        *)                 export PATH="/mnt/SDCARD/spruce/bin64:$PATH" ;;
+    esac
 }
 
 
+
 enter_sleep() {
-    if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+    if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
         log_message "powerbutton_watchdog.sh: Entering sleep."
         [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
         echo -n mem >/sys/power/state
