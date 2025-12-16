@@ -269,7 +269,6 @@ update_checker &
 # update_notification
 
 # Initialize CPU settings
-scaling_min_freq="$DEVICE_SMART_FREQ" ### default value, may be overridden in specific script
 set_smart
 
 # start main loop

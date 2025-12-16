@@ -93,6 +93,8 @@ SMART_DOWN_FACTOR=1
 SMART_SAMPLING_RATE=100000
 
 set_smart() {
+    scaling_min_freq="${1:-DEVICE_SMART_FREQ}"
+
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
@@ -107,12 +109,12 @@ set_smart() {
             done
 
             echo "conservative" > "$CPU_0_DIR/scaling_governor"
-            echo "$DEVICE_SMART_FREQ" > "$CPU_0_DIR/scaling_min_freq"
+            echo "$scaling_min_freq" > "$CPU_0_DIR/scaling_min_freq"
             echo "$DEVICE_PERF_FREQ" > "$CPU_0_DIR/scaling_max_freq"
 
             if [ -e "$CPU_4_DIR" ]; then
                 echo "conservative" > "$CPU_4_DIR/scaling_governor"
-                echo "$DEVICE_SMART_FREQ" > "$CPU_4_DIR/scaling_min_freq"
+                echo "$scaling_min_freq" > "$CPU_4_DIR/scaling_min_freq"
                 echo "$DEVICE_PERF_FREQ" > "$CPU_4_DIR/scaling_max_freq"
             fi
 

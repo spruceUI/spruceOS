@@ -125,8 +125,6 @@ while [ 1 ]; do
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
         killall -9 udpbcast 2>/dev/null
 
-        # reset CPU settings to defaults in case an emulator changes anything
-        scaling_min_freq="$DEVICE_SMART_FREQ" ### default value, may be overridden in specific script
         set_smart
     fi
 

@@ -93,8 +93,8 @@ set_cpu_mode() {
 	fi
 
 	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
-		export scaling_min_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
-		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh &
+		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
+		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &
 	fi
 }
 
