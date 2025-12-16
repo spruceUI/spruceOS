@@ -10,6 +10,8 @@ get_python_path() {
         echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10"
     elif [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "SmartPro" ]|| [ "$PLATFORM" = "SmartProS" ] || [ "$PLATFORM" = "Flip" ]; then
         echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
+    elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        echo "/mnt/SDCARD/spruce/miyoomini/bin/python"
     fi
 }
 
@@ -18,6 +20,7 @@ export_ld_library_path() {
         "A30") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "Flip") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "Brick") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
+        "MIYOO_MINI_FLIP") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib" ;;
         "SmartPro"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
     esac
 }
@@ -37,6 +40,7 @@ get_config_path() {
         "Flip") cfgname="flip" ;;
         "Brick") cfgname="brick" ;;
         "SmartPro") cfgname="smartpro" ;;
+        "MIYOO_MINI_FLIP") cfgname="mini-flip" ;;
         *) cfgname="unknown" ;;  # optional default
     esac
 
@@ -49,94 +53,102 @@ get_config_path() {
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        case "$PLATFORM" in
-        SmartProS)
-            cores_online 8
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-            chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
-            big_max_freq=1800000
-            little_max_freq=1416000
-            echo conservative >/sys/devices/system/cpu/cpufreq/policy0/scaling_governor
-            echo conservative >/sys/devices/system/cpu/cpufreq/policy4/scaling_governor
-            echo 45 >/sys/devices/system/cpu/cpufreq/policy0/down_threshold
-            echo 75 >/sys/devices/system/cpu/cpufreq/policy0/up_threshold
-            echo 3 >/sys/devices/system/cpu/cpufreq/policy0/freq_step
-            echo 1 >/sys/devices/system/cpu/cpufreq/policy0/sampling_down_factor
-            echo 100000 >/sys/devices/system/cpu/cpufreq/policy0/sampling_rate
-            echo 45 >/sys/devices/system/cpu/cpufreq/policy4/down_threshold
-            echo 75 >/sys/devices/system/cpu/cpufreq/policy4/up_threshold
-            echo 3 >/sys/devices/system/cpu/cpufreq/policy4/freq_step
-            echo 1 >/sys/devices/system/cpu/cpufreq/policy4/sampling_down_factor
-            echo 100000 >/sys/devices/system/cpu/cpufreq/policy4/sampling_rate
-            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-            echo $big_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-            cho "$little_max_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-            chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
-            log_message "CPU Mode now locked to SMART" -v
-            flag_remove "setting_cpu"
-            ;;
-        *)
-            cores_online
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
             case "$PLATFORM" in
-                "A30")
-                    scaling_max_freq=1344000
-                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
-                    ;;
-                "Flip")
-                    scaling_max_freq=1800000
-                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/policy0/conservative"
-                    ;;
-                "Brick"|"SmartPro")
-                    scaling_max_freq=1800000
-                    CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
-                    ;;
+            SmartProS)
+                cores_online 8
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+                chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+                chmod a+w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+                big_max_freq=1800000
+                little_max_freq=1416000
+                echo conservative >/sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+                echo conservative >/sys/devices/system/cpu/cpufreq/policy4/scaling_governor
+                echo 45 >/sys/devices/system/cpu/cpufreq/policy0/down_threshold
+                echo 75 >/sys/devices/system/cpu/cpufreq/policy0/up_threshold
+                echo 3 >/sys/devices/system/cpu/cpufreq/policy0/freq_step
+                echo 1 >/sys/devices/system/cpu/cpufreq/policy0/sampling_down_factor
+                echo 100000 >/sys/devices/system/cpu/cpufreq/policy0/sampling_rate
+                echo 45 >/sys/devices/system/cpu/cpufreq/policy4/down_threshold
+                echo 75 >/sys/devices/system/cpu/cpufreq/policy4/up_threshold
+                echo 3 >/sys/devices/system/cpu/cpufreq/policy4/freq_step
+                echo 1 >/sys/devices/system/cpu/cpufreq/policy4/sampling_down_factor
+                echo 100000 >/sys/devices/system/cpu/cpufreq/policy4/sampling_rate
+                echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+                echo $big_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                cho "$little_max_freq" >/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+                chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+                chmod a-w /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+                log_message "CPU Mode now locked to SMART" -v
+                flag_remove "setting_cpu"
+                ;;
+            *)
+                cores_online
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                case "$PLATFORM" in
+                    "A30")
+                        scaling_max_freq=1344000
+                        CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
+                        ;;
+                    "Flip")
+                        scaling_max_freq=1800000
+                        CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/policy0/conservative"
+                        ;;
+                    "Brick"|"SmartPro")
+                        scaling_max_freq=1800000
+                        CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
+                        ;;
+                esac
+                echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
+                echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
+                echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
+                echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
+                echo 100000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
+                echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+                chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                log_message "CPU Mode now locked to SMART" -v
+                flag_remove "setting_cpu"
+                ;;
             esac
-            echo conservative >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            echo 45 >$CONSERVATIVE_POLICY_DIR/down_threshold
-            echo 75 >$CONSERVATIVE_POLICY_DIR/up_threshold
-            echo 3 >$CONSERVATIVE_POLICY_DIR/freq_step
-            echo 1 >$CONSERVATIVE_POLICY_DIR/sampling_down_factor
-            echo 100000 >$CONSERVATIVE_POLICY_DIR/sampling_rate
-            echo "$scaling_min_freq" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-            log_message "CPU Mode now locked to SMART" -v
-            flag_remove "setting_cpu"
-            ;;
-        esac
+        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        fi
     fi
 }
 
 set_performance() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        cores_online
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        case "$PLATFORM" in
-            "A30") scaling_max_freq=1344000 ;;
-            "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
-        esac
-        echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        log_message "CPU Mode now locked to PERFORMANCE" -v
+        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+            cores_online
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            case "$PLATFORM" in
+                "A30") scaling_max_freq=1344000 ;;
+                "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
+            esac
+            echo $scaling_max_freq >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            log_message "CPU Mode now locked to PERFORMANCE" -v
+        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        fi
         flag_remove "setting_cpu"
     fi
 }
@@ -144,20 +156,25 @@ set_performance() {
 set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        case "$PLATFORM" in
-            "A30")
-                /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
-                ;;
-            "Brick"|"Flip"|"SmartPro")
-                echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-                echo 2000000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-                ;;
-        esac
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-        chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-        log_message "CPU Mode now locked to OVERCLOCK" -v
+        if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            case "$PLATFORM" in
+                "A30")
+                    /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
+                    ;;
+                "Brick"|"Flip"|"SmartPro")
+                    echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+                    echo 2000000 >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+                    ;;
+            esac
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+            chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            log_message "CPU Mode now locked to OVERCLOCK" -v
+        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+            echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        fi
+
         flag_remove "setting_cpu"
     fi
 }
@@ -256,7 +273,9 @@ vibrate() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    kill -9 $(pgrep display) 2> /dev/null
+    if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        kill -9 $(pgrep display) 2> /dev/null
+    fi
 }
 
 # Call this to display text on the screen
@@ -480,6 +499,10 @@ rgb_led() {
         return 0
     ;; esac
 
+    if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        return 0
+    fi
+
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
         zones=""
@@ -595,6 +618,8 @@ get_qr_bin_path() {
 set_path_variable() {
     if [ "$PLATFORM" = "A30" ]; then
         export PATH="/mnt/SDCARD/spruce/bin:$PATH"
+    elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        export PATH="/mnt/SDCARD/spruce/miyoomini/bin/:$PATH"
     else
         export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
     fi
@@ -602,9 +627,11 @@ set_path_variable() {
 
 
 enter_sleep() {
-    log_message "powerbutton_watchdog.sh: Entering sleep."
-    [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
-    echo -n mem >/sys/power/state
+    if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        log_message "powerbutton_watchdog.sh: Entering sleep."
+        [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
+        echo -n mem >/sys/power/state
+    fi
 }
 
 get_current_volume() {
@@ -631,10 +658,12 @@ reset_playback_pack() {
     current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
     system_json_volume=$(cat $SYSTEM_JSON | grep -o '"vol":\s*[0-9]*' | grep -o [0-9]*)
     current_vol_name="SYSTEM_VOLUME_$system_json_volume"
-    amixer sset 'SPK' 1% > /dev/null
+    
+    eval vol_value=\$$current_vol_name
+    
+    amixer sset 'SPK' "$vol_value%" > /dev/null
     amixer cset name='Playback Path' 0 > /dev/null
     amixer cset name='Playback Path' "$current_path" > /dev/null
-    amixer sset 'SPK' "$SYSTEM_VOLUME_${!current_vol_name}"% > /dev/null
   fi 
 }
 
@@ -663,22 +692,31 @@ set_playback_path() {
 
 
 run_mixer_watchdog() {
-  # TODO: will need to fix for brick and tsp
-  JACK_PATH=/sys/class/gpio/gpio150/value
+    if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+        # TODO: will need to fix for brick and tsp
+        JACK_PATH=/sys/class/gpio/gpio150/value
 
-  [ "$PLATFORM" = "Flip" ] && while true; do
-    /mnt/SDCARD/spruce/bin64/inotifywait -e modify "$SYSTEM_JSON" >/dev/null 2>&1 &
-    PID_INOTIFY=$!
+        [ "$PLATFORM" = "Flip" ] && while true; do
+            /mnt/SDCARD/spruce/bin64/inotifywait -e modify "$SYSTEM_JSON" >/dev/null 2>&1 &
+            PID_INOTIFY=$!
 
-    /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
-    PID_GPIO=$!
+            /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
+            PID_GPIO=$!
 
-    wait -n
+            wait -n
 
-    log_message "*** mixer watchdog: change detected" -v
+            log_message "*** mixer watchdog: change detected" -v
 
-    kill $PID_INOTIFY $PID_GPIO 2>/dev/null
+            kill $PID_INOTIFY $PID_GPIO 2>/dev/null
 
-    set_playback_path
-  done
+            set_playback_path
+        done
+    fi
+}
+
+new_execution_loop() {
+    if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        # Only run if not already running
+        pidof audioserver >/dev/null || audioserver &
+    fi
 }
