@@ -567,3 +567,42 @@ init_gpio_Brick() {
     echo 243 > /sys/class/gpio/export
     echo -n in > /sys/class/gpio/gpio243/direction
 }
+
+init_gpio_SmartProS() {
+    #5V enable
+    # echo 335 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio335/direction
+    # echo -n 1 > /sys/class/gpio/gpio335/value
+
+    #fan off
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state 
+
+    #rumble motor PH12
+    echo 236 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio236/direction
+    echo -n 0 > /sys/class/gpio/gpio236/value
+
+    #Left/Right Pad PK12/PK16 , run in trimui_inputd
+    # echo 332 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio332/direction
+    # echo -n 1 > /sys/class/gpio/gpio332/value
+
+    # echo 336 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio336/direction
+    # echo -n 1 > /sys/class/gpio/gpio336/value
+
+    #DIP Switch PL11 , run in trimui_inputd
+    # echo 363 > /sys/class/gpio/export
+    # echo -n in > /sys/class/gpio/gpio363/direction
+
+    # load wifi and low power bluetooth modules
+    modprobe aic8800_fdrv.ko
+    modprobe aic8800_btlpm.ko
+
+    mkdir /tmp/trimui_inputd
+
+    #splash rumble
+    echo 32768 > /sys/class/motor/level 
+    sleep 0.2
+    echo 0 > /sys/class/motor/level 
+}

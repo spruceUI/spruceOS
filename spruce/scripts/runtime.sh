@@ -118,7 +118,7 @@ if [ "$PLATFORM" = "A30" ]; then
     # and send kill signal USR2 to switch to KEYBOARD_MODE
     ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
-elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]|| [ $PLATFORM = "SmartProS" ]; then
+elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     export PATH="/usr/trimui/bin:$PATH"
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
@@ -149,6 +149,33 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]|| [ $PLATFORM = "Smar
     # TODO: verify that we can call this via absolute path
     cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
+
+elif [ "$PLATFORM" = "SmartProS" ]; then
+
+    export PATH=/usr/trimui/bin:$PATH
+    export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+    chmod a+x /usr/bin/notify
+
+    init_gpio_SmartProS
+
+    #syslogd -S
+
+    btenable=`/usr/trimui/bin/systemval bluetooth`
+    if [ "$btenable" == "1" ] ; then
+        /etc/bluetooth/bt_init.sh start
+        hpid=`pgrep hciattach`
+        if [ "$hpid" == "" ] ; then
+            hciattach -n ttyAS1 aic &
+        fi        
+        /etc/bluetooth/bluetoothd start
+    fi
+
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_inputd &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_thermald &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
 
 elif [ "$PLATFORM" = "Flip" ]; then
 
@@ -221,8 +248,6 @@ update_checker &
 # update_notification
 
 # Initialize CPU settings
-
-
 scaling_min_freq="$DEVICE_SMART_FREQ" ### default value, may be overridden in specific script
 set_smart
 
