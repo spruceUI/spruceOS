@@ -1,25 +1,6 @@
 #!/bin/sh
 
-# Function summaries:
-
-# acknowledge: Waits for user to press A, B, or Start button
-# auto_regen_tmp_update: makes .tmp_update/updater if needed
-# check_and_connect_wifi: Polls for Wifi, Cancels on Start Press
-# cores_online: Sets the number of CPU cores to be online
-# display: Displays text on the screen with various options
-# flag_check: Checks if a flag exists
-# flag_add: Adds a flag
-# flag_remove: Removes a flag
-# get_button_press: Returns the name of the last button pressed
-# get_current_theme: Unlocks dynamic variables for fast access to assets of current theme
-# get_current_theme_path: Returns path of the current theme
-# log_message: Logs a message to a file
-# log_precise: Logs messages with greater precision for performance testing
-# log_verbose: Turns on or off verbose logging for debug purposes
-# set_smart: CPU set to conservative gov, max 1344 MHz for A30, 1800MHz for Flip/Brick, sampling 2.5Hz
-# set_performance: CPU set to performance gov @ 1344 MHz for A30, 1800MHz for Flip/Brick
-# set_overclock: CPU set to performance gov @ 1512 MHz for A30, 1992MHz for Flip/Brick
-# vibrate: Vibrates the device for a specified duration
+# TODO: add updated table of contents/function summaries here
 
 # This is a collection of functions that are used in multiple scripts
 # Please do not add any dependencies here, this file is meant to be self-contained
@@ -28,8 +9,9 @@
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!!
-
+######################################################################################
+# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
+######################################################################################
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
@@ -204,39 +186,6 @@ confirm() {
             return 0
             ;;
         esac
-    done
-}
-
-# Call this to set the number of CPU cores to be online
-# Usage: cores_online [number of cores]
-# Default is 4 cores (all cores online)
-cores_online() {
-    min_cores=4                # Minimum number of cores to keep online
-    num_cores=${1:-$min_cores} # Default to min_cores if no argument is provided
-
-    # Ensure the input is between min_cores and 4
-    if [ "$num_cores" -lt "$min_cores" ]; then
-        num_cores=$min_cores
-    elif [ "$num_cores" -gt 4 ]; then
-        num_cores=4
-    fi
-
-    echo "Setting $num_cores CPU core(s) online"
-
-    # Always keep CPU0 online
-    chmod a+w /sys/devices/system/cpu/cpu0/online
-    echo 1 >/sys/devices/system/cpu/cpu0/online
-    chmod a-w /sys/devices/system/cpu/cpu0/online
-
-    # Set the state for CPU1-3 based on num_cores
-    for i in $(seq 1 $((num_cores - 1))); do
-        chmod a+w /sys/devices/system/cpu/cpu$i/online
-        if [ "$i" -lt "$num_cores" ]; then
-            echo 1 >/sys/devices/system/cpu/cpu$i/online
-        else
-            echo 0 >/sys/devices/system/cpu/cpu$i/online
-        fi
-        chmod a-w /sys/devices/system/cpu/cpu$i/online
     done
 }
 

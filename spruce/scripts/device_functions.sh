@@ -46,15 +46,46 @@ get_config_path() {
     echo "/mnt/SDCARD/Saves/${cfgname}-system.json"
 }
 
+# Usage:
+#   cores_online            -> defaults to cores 0-3
+#   cores_online "0135"     -> online cores 0,1,3,5; offline others
+cores_online() {
+    core_string="${1:-0123}"
+
+    # Silently fall back on invalid input
+    case "$core_string" in (*[!0-7]*) core_string=0123 ;; esac
+
+    for cpu_path in /sys/devices/system/cpu/cpu[0-7]*; do
+        [ -e "$cpu_path/online" ] || continue
+
+        cpu="${cpu_path##*cpu}"
+
+        # cpu0 must stay online
+        if [ "$cpu" = "0" ]; then
+            val=1
+        else
+            case "$core_string" in
+                (*"$cpu"*) val=1 ;;
+                (*)        val=0 ;;
+            esac
+        fi
+
+        # lock requested cpus online and all others offline
+        chmod a+w "$cpu_path/online" 2>/dev/null
+        echo "$val" >"$cpu_path/online" 2>/dev/null
+        chmod a-w "$cpu_path/online" 2>/dev/null
+    done
+}
+
 set_smart() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         else #  official spruce device
+            cores_online "$DEVICE_CORES_ONLINE"
             case "$PLATFORM" in
             SmartProS)
-                cores_online 8
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
@@ -89,7 +120,6 @@ set_smart() {
                 flag_remove "setting_cpu"
                 ;;
             *)
-                cores_online
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
                 chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
@@ -132,7 +162,7 @@ set_performance() {
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor        
         else #  official spruce device
-            cores_online
+            cores_online "$DEVICE_CORES_ONLINE"
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -156,6 +186,7 @@ set_overclock() {
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         else #  official spruce device
+            cores_online "$DEVICE_CORES_ONLINE"
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
             chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
             case "$PLATFORM" in
