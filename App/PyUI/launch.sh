@@ -120,4 +120,52 @@ case "$PLATFORM" in
             "$@" >/dev/null 2>&1
         fi
     ;;
+############################################################
+# Miyoo Mini Flip
+############################################################
+    "MIYOO_MINI_FLIP" )
+
+        skip_freemma=0
+        redirect_output=1
+
+        for arg in "$@"; do
+            if [ "$arg" = "-buttonListenerMode" ]; then
+                skip_freemma=1
+                redirect_output=0
+                break
+            fi
+        done
+
+        export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib"
+        export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/miyoomini/lib"
+
+        export SDL_VIDEODRIVER=mmiyoo
+        export SDL_AUDIODRIVER=mmiyoo
+        export EGL_VIDEODRIVER=mmiyoo
+        export SDL_MMIYOO_DOUBLE_BUFFER=1
+
+        if [ $skip_freemma -eq 0 ]; then
+            freemma
+        fi
+
+        cmd="/mnt/SDCARD/spruce/miyoomini/bin/MainUI \
+                /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+                -device MIYOO_MINI_FLIP \
+                -logDir /mnt/SDCARD/Saves/spruce \
+                -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+                -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        set -- $cmd "$@"
+
+        log_message "Starting PyUI on $PLATFORM"
+
+        if [ "$redirect_output" -eq 1 ]; then
+            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
+        else
+            "$@" >/dev/null 2>&1
+        fi
+
+
+    ;;
 esac

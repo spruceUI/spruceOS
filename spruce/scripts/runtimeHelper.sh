@@ -19,12 +19,13 @@ show_fw_app() {
 }
 
 compare_current_version_to_version() {
-    local target_version="$1"
-    local current_version="$(cat /etc/version)"
+    target_version="$1"
+    current_version="$(cat /etc/version 2>/dev/null)"
 
     [ -z "$target_version" ] && target_version="1.0.0"
     [ -z "$current_version" ] && current_version="1.0.0"
 
+    # Split versions into components
     C_1=$(echo "$current_version" | cut -d. -f1)
     C_2=$(echo "$current_version" | cut -d. -f2)
     C_3=$(echo "$current_version" | cut -d. -f3)
@@ -37,17 +38,21 @@ compare_current_version_to_version() {
     T_2=${T_2:-0}
     T_3=${T_3:-0}
 
-    for i in 1 2 3; do
+    i=1
+    while [ $i -le 3 ]; do
         eval C=\$C_$i
         eval T=\$T_$i
-        if [ "$C" -gt "$T" ]; then 
+
+        if [ "$C" -gt "$T" ]; then
             echo "newer"
             return 0
         elif [ "$C" -lt "$T" ]; then
             echo "older"
             return 2
         fi
+        i=$((i + 1))
     done
+
     echo "same"
     return 1
 }
@@ -93,13 +98,13 @@ check_for_update() {
     TMP_DIR="$SD_CARD/App/-OTA/tmp"
     CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
-    local should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
+    should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
     if [ "$should_check" = "False" ]; then
         return 1
     fi
 
-    local timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
-    local check_interval=86400  # 24 hours in seconds
+    timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
+    check_interval=86400  # 24 hours in seconds
 
     # If update was previously prompted, check the timestamp
     if flag_check "update_prompted"; then
@@ -336,10 +341,26 @@ developer_mode_task() {
     fi
 }
 
+rotate_logs_background() {
+        # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
+        i=$((max_log_files - 1))
+        while [ $i -ge 1 ]; do
+            if [ -f "$log_dir/spruce${i}.log" ]; then
+                mv "$log_dir/spruce${i}.log" "$log_dir/spruce$((i+1)).log"
+            fi
+            i=$((i - 1))
+        done
+
+        # Move the temporary file to spruce1.log
+        if [ -f "$log_target.tmp" ]; then
+            mv "$log_target.tmp" "$log_dir/spruce1.log"
+        fi
+}
+
 rotate_logs() {
-    local log_dir="/mnt/SDCARD/Saves/spruce"
-    local log_target="$log_dir/spruce.log"
-    local max_log_files=5
+    log_dir="/mnt/SDCARD/Saves/spruce"
+    log_target="$log_dir/spruce.log"
+    max_log_files=5
 
     # Create the log directory if it doesn't exist
     if [ ! -d "$log_dir" ]; then
@@ -355,21 +376,7 @@ rotate_logs() {
     touch "$log_target"
 
     # Perform log rotation in the background
-    (
-        # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
-        i=$((max_log_files - 1))
-        while [ $i -ge 1 ]; do
-            if [ -f "$log_dir/spruce${i}.log" ]; then
-                mv "$log_dir/spruce${i}.log" "$log_dir/spruce$((i+1)).log"
-            fi
-            i=$((i - 1))
-        done
-
-        # Move the temporary file to spruce1.log
-        if [ -f "$log_target.tmp" ]; then
-            mv "$log_target.tmp" "$log_dir/spruce1.log"
-        fi
-    ) &
+    rotate_logs_background &
 }
 
 unstage_archive() {
@@ -463,6 +470,11 @@ runtime_mounts_SmartPro() {
 
 runtime_mounts_SmartProS() {
    runtime_mounts_Brick
+}
+
+runtime_mounts_MIYOO_MINI_FLIP() {
+    mount --bind /mnt/SDCARD/spruce/miyoomini/Emu /mnt/SDCARD/Emu
+    mount --bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
 }
 
 runtime_mounts_Flip() {
