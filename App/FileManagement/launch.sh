@@ -1,4 +1,8 @@
 #!/bin/sh
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+export_ld_library_path
+
 export HOME="$(dirname "$0")"
 cd "$HOME"
 

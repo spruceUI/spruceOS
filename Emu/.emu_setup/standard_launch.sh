@@ -8,6 +8,8 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
+export_ld_library_path
+
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
 
@@ -632,7 +634,7 @@ run_retroarch() {
 				export RA_BIN="ra64.trimui_$PLATFORM"
 			else
 				export RA_BIN="retroarch.trimui"
-				export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+				export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
 			fi
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
