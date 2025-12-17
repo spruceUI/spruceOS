@@ -580,6 +580,31 @@ init_gpio_Brick() {
     echo -n in > /sys/class/gpio/gpio243/direction
 }
 
+init_gpio_SmartPro() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #Left/Right Pad PD14/PD18
+    echo 110 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio110/direction
+    echo -n 1 > /sys/class/gpio/gpio110/value
+
+    echo 114 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio114/direction
+    echo -n 1 > /sys/class/gpio/gpio114/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}
+
 init_gpio_SmartProS() {
     #5V enable
     # echo 335 > /sys/class/gpio/export

@@ -124,7 +124,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 
-    init_gpio_Brick
+    init_gpio_${PLATFORM}
 
     syslogd -S
 
