@@ -195,6 +195,14 @@ set_overclock() {
     fi
 }
 
+# use these in conjunction with the pin_cpu binary, e.g.:
+#   pin_cpu "$EMU_CPUS" -n drastic32
+# would set drastic's affinity to cpus 2 and 3 on the A30.
+export SYSTEM_CPU="${DEVICE_CORES_ONLINE%"${DEVICE_CORES_ONLINE#?}"}"
+EMU_CPUS="${DEVICE_CORES_ONLINE#${DEVICE_CORES_ONLINE%??}}"
+export EMU_CPUS="${EMU_CPUS%?},${EMU_CPUS#?}"
+
+
 ###############################################################################
 
 # Vibrate the device
