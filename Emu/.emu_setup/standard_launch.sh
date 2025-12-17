@@ -98,6 +98,17 @@ set_cpu_mode() {
 	fi
 }
 
+pin_to_dedicated_cores() {
+	comm="$1"
+	delay="$2:-1"
+    {
+        sleep "$delay"
+        pgrep "$comm" | while read -r pid; do
+            pin_cpu "$EMU_CPUS" -p "$pid"
+        done
+    } &
+}
+
 handle_network_services() {
 
 	wifi_needed=false
@@ -257,6 +268,8 @@ run_drastic() {
 		export SDL_AUDIODRIVER=mmiyoo
 		export EGL_VIDEODRIVER=mmiyoo
 
+		pin_to_dedicated_cores drastic32 2
+
 		./drastic32 "$ROM_FILE"
 		# remove soft link and resume joystickinput
 		rm /dev/ttyS0
@@ -288,6 +301,7 @@ run_drastic() {
 
 			##### TODO: HOOK UP CORE SWITCH B/T TRNGAJE AND OG DRASTIC on SMART PRO; no Steward available
 
+			pin_to_dedicated_cores drastic64 2
 			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
 			export SDL_AUDIODRIVER=dsp
 			./drastic64 "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/drastic-og-smartpro.log 2>&1
@@ -685,10 +699,7 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
-	{	# ensure RA runs entirely on cores 2 and 3 to reduce chance of cache misses
-		sleep 1
-		pin_cpu "$EMU_CPUS" -n "$RA_BIN"
-	} &
+	pin_to_dedicated_cores "$RA_BIN"
 
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
@@ -821,6 +832,8 @@ run_yabasanshiro() {
 
 	[ -n "$GUID" ] && \
 	jq --arg guid "$GUID" '.player1.deviceGUID = $guid' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
+
+	pin_to_dedicated_cores "$YABASANSHIRO"
 
 	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
 		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > /mnt/SDCARD/Saves/spruce/yabasanshiro-$PLATFORM.log 2>&1
