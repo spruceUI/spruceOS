@@ -82,16 +82,10 @@ cores_online() {
         [ -e "$cpu_path/online" ] || continue
 
         cpu="${cpu_path##*cpu}"
-
-        # cpu0 must stay online
-        if [ "$cpu" = "0" ]; then
-            val=1
-        else
-            case "$core_string" in
-                (*"$cpu"*) val=1 ;;
-                (*)        val=0 ;;
-            esac
-        fi
+        case "$core_string" in
+            (*"$cpu"*) val=1 ;;
+            (*)        val=0 ;;
+        esac
 
         # lock requested cpus online and all others offline
         chmod a+w "$cpu_path/online" 2>/dev/null
@@ -114,7 +108,7 @@ set_smart() {
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo ondemand > $CPU_0_DIR/scaling_governor
         else #  official spruce device
-
+            cores_online 01234567   # bring all up before potentially offlining cpu0
             cores_online "$DEVICE_CORES_ONLINE"
 
             unlock_governor 2>/dev/null
@@ -149,6 +143,7 @@ set_performance() {
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo performance > $CPU_0_DIR/scaling_governor        
         else #  official spruce device
+            cores_online 01234567   # bring all up before potentially offlining cpu0
             cores_online "$DEVICE_CORES_ONLINE"
 
             unlock_governor 2>/dev/null
@@ -175,6 +170,7 @@ set_overclock() {
         if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
             echo performance > $CPU_0_DIR/scaling_governor
         else #  official spruce device
+            cores_online 01234567   # bring all up before potentially offlining cpu0
             cores_online "$DEVICE_CORES_ONLINE"
             unlock_governor 2>/dev/null
 
