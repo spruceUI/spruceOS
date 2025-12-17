@@ -178,6 +178,13 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
 
+    tinymix set 23 1
+    tinymix set 18 23
+    tinymix set 26 1
+    tinymix set 27 1
+    tinymix set 28 1
+    tinymix set 29 1
+
 elif [ "$PLATFORM" = "Flip" ]; then
 
     echo 3 > /proc/sys/kernel/printk
