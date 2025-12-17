@@ -833,8 +833,6 @@ run_yabasanshiro() {
 	[ -n "$GUID" ] && \
 	jq --arg guid "$GUID" '.player1.deviceGUID = $guid' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
 
-	pin_to_dedicated_cores "$YABASANSHIRO"
-
 	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
 		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > /mnt/SDCARD/Saves/spruce/yabasanshiro-$PLATFORM.log 2>&1
 	else
