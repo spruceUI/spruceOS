@@ -185,6 +185,9 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     tinymix set 28 1
     tinymix set 29 1
 
+    echo 1 > /sys/class/drm/card0-DSI-1/rotate
+    echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+
 elif [ "$PLATFORM" = "Flip" ]; then
 
     echo 3 > /proc/sys/kernel/printk
