@@ -45,5 +45,6 @@
     "topBarInitialXOffset": 60,
     "setTopBarTextToGameSelection": true,
     "fullScreenGridGameMenuResizeType": "FIT",
-    "mainMenuTitle": ""
+    "mainMenuTitle": "",
+    "displayVolumeNumbers": true
 }
