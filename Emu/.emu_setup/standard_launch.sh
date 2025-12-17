@@ -687,7 +687,7 @@ run_retroarch() {
 
 	{	# ensure RA runs entirely on cores 2 and 3 to reduce chance of cache misses
 		sleep 1
-		pin_cpu 2-3 -n "$RA_BIN"
+		pin_cpu "$EMU_CPUS" -n "$RA_BIN"
 	} &
 
 	#Swap below if debugging new cores
