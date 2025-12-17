@@ -15,11 +15,11 @@ get_python_path() {
 
 export_ld_library_path() {
     case "$PLATFORM" in
-        "A30") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
-        "Flip") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
-        "Brick") export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
+        "A30")             export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
+        "Flip")            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
+        "Brick")           export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
+        "SmartPro"*)       export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
         "MIYOO_MINI_FLIP") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib" ;;
-        "SmartPro"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
     esac
 }
 
@@ -46,9 +46,28 @@ get_config_path() {
     echo "/mnt/SDCARD/Saves/${cfgname}-system.json"
 }
 
-################
+###############################################################################
 # CPU CONTROLS #
 ################
+
+CPU_0_DIR=/sys/devices/system/cpu/cpu0/cpufreq
+CPU_4_DIR=/sys/devices/system/cpu/cpu4/cpufreq
+CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
+[ "$PLATFORM" = "Flip" ] && CONSERVATIVE_POLICY_DIR="$CPU_0_DIR/conservative"
+
+unlock_governor() {
+    for file in scaling_governor scaling_min_freq scaling_max_freq; do
+        chmod a+w "$CPU_0_DIR/$file"
+        [ -e "$CPU_4_DIR" ] && chmod a+w "$CPU_4_DIR/$file"
+    done
+}
+
+lock_governor() {
+    for file in scaling_governor scaling_min_freq scaling_max_freq; do
+        chmod a-w "$CPU_0_DIR/$file"
+        [ -e "$CPU_4_DIR" ] && chmod a-w "$CPU_4_DIR/$file"
+    done
+}
 
 # Usage:
 #   cores_online            -> defaults to cores 0-3
@@ -81,11 +100,6 @@ cores_online() {
     done
 }
 
-CPU_0_DIR=/sys/devices/system/cpu/cpu0/cpufreq
-CPU_4_DIR=/sys/devices/system/cpu/cpu4/cpufreq
-CONSERVATIVE_POLICY_DIR="/sys/devices/system/cpu/cpufreq/conservative"
-[ "$PLATFORM" = "Flip" ] && CONSERVATIVE_POLICY_DIR="$CPU_0_DIR/conservative"
-
 SMART_DOWN_THRESH=45
 SMART_UP_THRESH=75
 SMART_FREQ_STEP=3
@@ -103,10 +117,7 @@ set_smart() {
 
             cores_online "$DEVICE_CORES_ONLINE"
 
-            for file in scaling_governor scaling_min_freq scaling_max_freq; do
-                chmod a+w "$CPU_0_DIR/$file"
-                [ -e "$CPU_4_DIR" ] && chmod a+w "$CPU_4_DIR/$file"
-            done
+            unlock_governor 2>/dev/null
 
             echo "conservative" > "$CPU_0_DIR/scaling_governor"
             echo "$scaling_min_freq" > "$CPU_0_DIR/scaling_min_freq"
@@ -121,13 +132,10 @@ set_smart() {
             echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
             echo "$SMART_UP_THRESH" > $CONSERVATIVE_POLICY_DIR/up_threshold
             echo "$SMART_FREQ_STEP" > $CONSERVATIVE_POLICY_DIR/freq_step
-            echo 1 > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
-            echo 100000 > $CONSERVATIVE_POLICY_DIR/sampling_rate
+            echo "$SMART_DOWN_FACTOR" > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
+            echo "$SMART_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
 
-            for file in scaling_governor scaling_min_freq scaling_max_freq; do
-                chmod a-w "$CPU_0_DIR/$file"
-                [ -e "$CPU_4_DIR" ] && chmod a-w "$CPU_4_DIR/$file"
-            done
+            lock_governor 2>/dev/null
 
             log_message "CPU Mode now locked to SMART" -v
         fi
@@ -142,18 +150,20 @@ set_performance() {
             echo performance > $CPU_0_DIR/scaling_governor        
         else #  official spruce device
             cores_online "$DEVICE_CORES_ONLINE"
-            chmod a+w $CPU_0_DIR/scaling_max_freq
-            chmod a+w $CPU_0_DIR/scaling_governor
-            echo performance >$CPU_0_DIR/scaling_governor
-            case "$PLATFORM" in
-                "A30") scaling_max_freq=1344000 ;;
-                "Brick"|"Flip"|"SmartPro") scaling_max_freq=1800000 ;;
-            esac
-            echo $scaling_max_freq >$CPU_0_DIR/scaling_max_freq
-            chmod a-w $CPU_0_DIR/scaling_max_freq
-            chmod a-w $CPU_0_DIR/scaling_governor
-            log_message "CPU Mode now locked to PERFORMANCE" -v
 
+            unlock_governor 2>/dev/null
+
+            echo "performance" > "$CPU_0_DIR/scaling_governor"
+            echo "$DEVICE_PERF_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+
+            if [ -e "$CPU_4_DIR" ]; then
+                echo "performance" > "$CPU_4_DIR/scaling_governor"
+                echo "$DEVICE_PERF_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+            fi
+
+            lock_governor 2>/dev/null
+
+            log_message "CPU Mode now locked to PERFORMANCE" -v
         fi
         flag_remove "setting_cpu"
     fi
@@ -166,26 +176,30 @@ set_overclock() {
             echo performance > $CPU_0_DIR/scaling_governor
         else #  official spruce device
             cores_online "$DEVICE_CORES_ONLINE"
-            chmod a+w $CPU_0_DIR/scaling_max_freq
-            chmod a+w $CPU_0_DIR/scaling_governor
+            unlock_governor 2>/dev/null
+
             case "$PLATFORM" in
-                "A30")
+                "A30")    ### A30 requires special bin to overclock beyond 1344
                     /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
                     ;;
-                "Brick"|"Flip"|"SmartPro")
-                    echo performance >$CPU_0_DIR/scaling_governor
-                    echo 2000000 >$CPU_0_DIR/scaling_max_freq
+                *)
+                    echo performance > "$CPU_0_DIR/scaling_governor"
+                    echo "$DEVICE_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+                    if [ -e "$CPU_4_DIR" ]; then
+                        echo "performance" > "$CPU_4_DIR/scaling_governor"
+                        echo "$DEVICE_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+                    fi
                     ;;
             esac
-            chmod a-w $CPU_0_DIR/scaling_max_freq
-            chmod a-w $CPU_0_DIR/scaling_governor
+
+            lock_governor 2>/dev/null
             log_message "CPU Mode now locked to OVERCLOCK" -v
         fi
-
         flag_remove "setting_cpu"
     fi
 }
 
+###############################################################################
 
 # Vibrate the device
 # Usage: vibrate [duration] [--intensity Strong|Medium|Weak]
