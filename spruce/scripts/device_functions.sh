@@ -321,30 +321,16 @@ display_kill() {
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    [ "$PLATFORM" = "SmartPro" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
+    [ "$PLATFORM" = "MIYOO_MINI_FLIP" ] && return 64
+    [ "$DISPLAY_WIDTH" = "1280" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
+    if [ "$BRAND" = "TrimUI" ]; then
+        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
+    fi
     ACKNOWLEDGE_IMAGE="/mnt/SDCARD/spruce/imgs/displayAcknowledge.png"
     CONFIRM_IMAGE="/mnt/SDCARD/spruce/imgs/displayConfirm.png"
     DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
 
-    if [ "$PLATFORM" = "Brick" ]; then
-        width=960
-        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
-        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
-
-    elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
-        width=1200
-        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
-        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
-
-    elif [ "$PLATFORM" = "Flip" ]; then
-        width=600
-        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin64/display_text.elf"
-
-    elif [ "$PLATFORM" = "A30" ]; then
-        DISPLAY_TEXT_FILE="/mnt/SDCARD/spruce/bin/display_text.elf"
-        width=600
-    fi
-
+    width="$DISPLAY_TEXT_ELF_WIDTH" # from ${PLATFORM}.cfg
     image="$DEFAULT_IMAGE" text=" " delay=0 size=30 position=50 align="middle" color="ebdbb2" font=""
     use_acknowledge_image=false
     use_confirm_image=false
@@ -405,7 +391,7 @@ display() {
         font="$DEFAULT_FONT"
     fi
 
-    command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" $DISPLAY_TEXT_FILE "
+    command="LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\" display_text.elf "
     command="$command""$DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION "
 
     # Construct the command
