@@ -157,6 +157,10 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 
+    # Enable wireless drivers
+    modprobe aic8800_btlpm.ko
+    modprobe aic8800_fdrv.ko
+
     init_gpio_SmartProS
 
     #syslogd -S
@@ -177,6 +181,8 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
     LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
+    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/musicserver &
+    #LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/osd/trimui_osdd &
 
     tinymix set 23 1
     tinymix set 18 23
@@ -184,10 +190,6 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     tinymix set 27 1
     tinymix set 28 1
     tinymix set 29 1
-
-    # Enable wireless drivers
-    modprobe aic8800_btlpm.ko
-    modprobe aic8800_fdrv.ko
 
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
