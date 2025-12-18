@@ -23,20 +23,15 @@ log_message "---DEBUG---: standard_launch.sh checkpoint 1" -v
 
 case "$EMU_NAME" in
     DC|NAOMI|N64|PS)
-        if [ "$PLATFORM" = "A30" ]; then
-            export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")"
-        else
-            export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")"
-        fi
+        case "$PLATFORM" in
+			"A30")    export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")" ;;
+			*)        export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")" ;;
+        esac
         ;;
     NDS)
         case "$PLATFORM" in
-            Flip)
-                export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"
-                ;;
-            Brick)
-                export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")"
-                ;;
+            "Flip")	  export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"  ;;
+            "Brick")  export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")" ;;
         esac
         ;;
     *)
@@ -348,6 +343,7 @@ save_drastic_configs() {
 
 ### OPENBOR ###
 
+# TODO: SET UP TSP AND TSPS FOR OPENBOR!!
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
@@ -379,9 +375,9 @@ run_pico8() {
 
 	STRETCH="$(jq -r '.menuOptions.Stretch.selected' "$EMU_JSON_PATH")"
 	if [ "$STRETCH" = "True" ]; then
-		case "$PLATFORM" in
-			"A30") SCALING="-draw_rect 0,0,$DISPLAY_HEIGHT,$DISPLAY_WIDTH" ;; # handle A30's rotated screen
-			*) SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT" ;;
+		case "$DISPLAY_ROTATION" in
+			"90"|"270") SCALING="-draw_rect 0,0,$DISPLAY_HEIGHT,$DISPLAY_WIDTH" ;; # handle A30's rotated screen
+			"0"|"180")  SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT" ;;
 		esac
 	else
 		SCALING=""
@@ -579,11 +575,11 @@ prepare_ra_config() {
 	fi
 
 	# Set hotkey enable button based on spruceUI config
-	case "$PLATFORM" in
-		"Brick"|"SmartPro"|"SmartProS")
+	case "$BRAND" in
+		"TrimUI")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
-		"A30"|"Flip")
+		"Miyoo")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
 			;;
 	esac
@@ -652,7 +648,7 @@ run_retroarch() {
 			fi
 			if [ "$CORE" = "uae4arm" ]; then
 				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-			elif [ "$CORE" = "genesis_plus_gx" ] && { [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; }; then
+			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then
 				use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
 				[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
 			fi

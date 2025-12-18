@@ -5,7 +5,7 @@
 BBS_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/bbs"
 ROM_PATH="/mnt/SDCARD/Roms/PICO8"
 FAVE_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/favourites.txt"
-[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
 {
 for cart in "$BBS_PATH"/*/*.p8.png ; do

@@ -16,7 +16,7 @@ fi
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-if [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then 
+if [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then 
     BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
 else
     BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"

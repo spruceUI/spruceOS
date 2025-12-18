@@ -287,7 +287,7 @@ vibrate() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+    if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
         kill -9 $(pgrep display) 2> /dev/null
     fi
 }
@@ -322,7 +322,7 @@ display_kill() {
 
 display() {
     [ "$PLATFORM" = "MIYOO_MINI_FLIP" ] && return 64
-    [ "$DISPLAY_WIDTH" = "1280" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
+    [ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
     if [ "$BRAND" = "TrimUI" ]; then
         LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
     fi

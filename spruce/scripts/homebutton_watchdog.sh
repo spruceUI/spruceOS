@@ -163,10 +163,10 @@ take_screenshot(){
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
-    [ "$PLATFORM" = "A30" ] || close_ppsspp_menu
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
     else
+        close_ppsspp_menu
         /mnt/SDCARD/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" 
     fi
 
