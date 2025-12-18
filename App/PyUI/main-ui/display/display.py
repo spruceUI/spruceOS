@@ -88,6 +88,10 @@ class Display:
     top_bar_text = None
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
+    _problematic_images = set()  # Class-level set to track images that won't load properly
+    _problematic_image_keywords = [
+        "No such file or directory",
+    ]
 
     @classmethod
     def init(cls):
@@ -489,12 +493,19 @@ class Display:
             return render_w, render_h
 
     @classmethod
-    def log_sdl_error_and_clear_cache(cls):
+    def log_sdl_error_and_clear_cache(cls, image_path=None):
         err = sdl2.sdlttf.TTF_GetError()
         err_msg = err.decode('utf-8') if err else "Unknown error"
-        PyUiLogger.get_logger().warning(f"Clearing cache : {err_msg}")
-        cls._text_texture_cache.clear_cache()
-        cls._image_texture_cache.clear_cache()
+        PyUiLogger.get_logger().warning(f"SDL Error received on loading {image_path} : {err_msg}")
+        
+        if any(keyword in err_msg for keyword in cls._problematic_image_keywords):
+            if(image_path is not None):
+                cls._problematic_images.add(image_path)
+                PyUiLogger.get_logger().warning(f"Marking as image to permanently stop trying to load: {image_path}")
+        else:
+            PyUiLogger.get_logger().warning(f"Clearing cache : {err_msg}")
+            cls._text_texture_cache.clear_cache()
+            cls._image_texture_cache.clear_cache()
 
 
     @classmethod
@@ -576,7 +587,7 @@ class Display:
     
     @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):
-        if(image_path is None):
+        if(image_path is None or image_path in cls._problematic_images):
             return 0, 0
 
         cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
@@ -587,7 +598,7 @@ class Display:
         else:
             surface = Display.image_load(image_path)
             if not surface:
-                cls.log_sdl_error_and_clear_cache()
+                cls.log_sdl_error_and_clear_cache(image_path)
                 surface = Display.image_load(image_path)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
