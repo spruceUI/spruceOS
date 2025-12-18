@@ -8,6 +8,7 @@
 #   DISPLAY_HEIGHT
 #   LD_LIBRARY_PATH
 #   PATH
+#   LOG_DIR
 #
 # Provides:
 #   run_ffplay
@@ -24,7 +25,6 @@ run_ffplay() {
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
 		/mnt/SDCARD/spruce/bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
-		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -i "$ROM_FILE" > ffplay.log 2>&1 # trimui devices crash after about 30 seconds when not outputting to a log???
-		kill -9 "$(pidof gptokeyb)"
+		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -i "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	fi
 }

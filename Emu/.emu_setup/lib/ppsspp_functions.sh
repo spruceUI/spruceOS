@@ -5,6 +5,7 @@
 #   EMU_DIR
 #   ROM_FILE
 #   LD_LIBRARY_PATH
+#   LOG_DIR
 #
 # Requires functions:
 #   log_message
@@ -33,7 +34,7 @@ run_ppsspp() {
 		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
 		"Brick"|"SmartPro"|"SmartProS") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
 	esac
-	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit
+	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 
 load_ppsspp_configs() {

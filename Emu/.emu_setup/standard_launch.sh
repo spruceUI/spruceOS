@@ -13,6 +13,7 @@ export_ld_library_path
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
 
+export LOG_DIR=/mnt/SDCARD/Saves/spruce
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export EMU_JSON_PATH="${EMU_DIR}/config.json"

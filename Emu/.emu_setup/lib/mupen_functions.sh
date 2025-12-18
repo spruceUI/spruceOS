@@ -7,6 +7,7 @@
 #   DISPLAY_WIDTH
 #   DISPLAY_HEIGHT
 #   LD_LIBRARY_PATH
+#   LOG_DIR
 #
 # Provides:
 #   run_mupen_standalone
@@ -37,7 +38,7 @@ run_mupen_standalone() {
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 	sleep 0.3
-	./mupen64plus "$ROM_PATH" > /mnt/SDCARD/Saves/spruce/mupen64plus-$PLATFORM.log 2>&1
+	./mupen64plus "$ROM_PATH" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	kill -9 $(pidof gptokeyb2)
 
 	rm -f "$TEMP_ROM"

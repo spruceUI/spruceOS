@@ -11,6 +11,7 @@
 #   DISPLAY_ROTATION
 #   PATH
 #   LD_LIBRARY_PATH
+#   LOG_DIR
 #
 # Requires functions:
 #   check_and_connect_wifi
@@ -51,9 +52,9 @@ run_pico8() {
 
 	if [ "${GAME##*.}" = "splore" ]; then
 		check_and_connect_wifi
-		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING
+		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	else
-		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING
+		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	fi
 	sync
 

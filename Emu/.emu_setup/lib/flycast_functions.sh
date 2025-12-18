@@ -4,6 +4,7 @@
 #   ROM_FILE
 #   PLATFORM
 #   LD_LIBRARY_PATH
+#   LOG_DIR
 #
 # Provides:
 #   run_flycast_standalone
@@ -17,7 +18,7 @@ run_flycast_standalone() {
 	mount --bind /mnt/SDCARD/BIOS/dc $HOME/.local/share/flycast
 
 	cd "$HOME"
-	./flycast "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/flycast-$PLATFORM.log 2>&1
+	./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
 	umount $HOME/.local/share/flycast
 }
