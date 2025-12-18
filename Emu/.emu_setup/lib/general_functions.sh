@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# Requires:
+#   EMU_NAME, EMU_JSON_PATH, GAME
+#   CORE, MODE, EMU_CPUS (globals set/used by functions)
+#   log_message, set_overclock, pin_cpu
+#   jq, pgrep, sleep
+#   /mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh
+#
+# Provides:
+#   set_emu_core_from_emu_json
+#   get_cpu_mode_from_emu_json
+#   use_default_emulator
+#   get_core_override
+#   get_mode_override
+#   set_cpu_mode
+#   pin_to_dedicated_cores
+
+set_emu_core_from_emu_json() {
+    case "$EMU_NAME" in
+        DC|NAOMI|N64|PS)
+            case "$PLATFORM" in
+                "A30")    export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")" ;;
+                *)        export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")" ;;
+            esac
+            ;;
+        NDS)
+            case "$PLATFORM" in
+                "Flip")	  export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"  ;;
+                "Brick")  export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")" ;;
+            esac
+            ;;
+        *)
+            export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
+            ;;
+    esac
+}
+
+get_cpu_mode_from_emu_json() {
+    jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH"
+}
+
+use_default_emulator() {
+	export CORE="$(jq -r '.default_emulator' "$EMU_JSON_PATH")"
+	log_message "Using default core of $CORE to run $EMU_NAME"
+}
+
+get_core_override() {
+	local core_override="$(jq -r --arg game "$GAME" '.menuOptions.Emulator.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
+		export CORE=$core_override
+	fi
+}
+
+get_mode_override() {
+	local mode_override="$(jq -r --arg game "$GAME" '.menuOptions.Governor.overrides[$game]' "$EMU_JSON_PATH")"
+	if [ -n "$mode_override" ] && [ "$mode_override" != "null" ]; then
+		export MODE=$mode_override
+	fi
+}
+
+set_cpu_mode() {
+	if [ "$MODE" = "Overclock" ]; then
+		if [ "$EMU_NAME" = "NDS" ]; then
+			( sleep 33 && set_overclock ) &
+		else
+			set_overclock
+		fi
+	fi
+
+	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
+		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
+		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &
+	fi
+}
+
+pin_to_dedicated_cores() {
+	comm="$1"
+	delay="$2:-1"
+    {
+        sleep "$delay"
+        pgrep "$comm" | while read -r pid; do
+            pin_cpu "$EMU_CPUS" -p "$pid"
+        done
+    } &
+}
