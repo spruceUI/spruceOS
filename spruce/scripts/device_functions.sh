@@ -546,12 +546,12 @@ rgb_led() {
 
     # do the things
    	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
-	for zone in $zones; do
-		echo "$color" > /sys/class/led_anim/effect_rgb_hex_$zone 2>/dev/null
-		echo "$cycles" > /sys/class/led_anim/effect_cycles_$zone 2>/dev/null
-		echo "$duration" > /sys/class/led_anim/effect_duration_$zone 2>/dev/null
-		echo "$effect" > /sys/class/led_anim/effect_$zone 2>/dev/null
-	done
+    for zone in $zones; do
+        [ -w "/sys/class/led_anim/effect_rgb_hex_$zone" ] && echo "$color" > "/sys/class/led_anim/effect_rgb_hex_$zone"
+        [ -w "/sys/class/led_anim/effect_cycles_$zone" ] && echo "$cycles" > "/sys/class/led_anim/effect_cycles_$zone"
+        [ -w "/sys/class/led_anim/effect_duration_$zone" ] && echo "$duration" > "/sys/class/led_anim/effect_duration_$zone"
+        [ -w "/sys/class/led_anim/effect_$zone" ] && echo "$effect" > "/sys/class/led_anim/effect_$zone"
+    done
 }
 
 rainbreathe() {
