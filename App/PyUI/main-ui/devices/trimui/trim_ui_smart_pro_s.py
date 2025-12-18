@@ -1,3 +1,5 @@
+import json
+import os
 from pathlib import Path
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
@@ -9,10 +11,13 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
+from devices.utils.file_watcher import FileWatcher
+from display.display import Display
 from utils import throttle
 from utils.config_copier import ConfigCopier
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartProS(TrimUIDevice):
@@ -26,10 +31,15 @@ class TrimUISmartProS(TrimUIDevice):
         source = script_dir / 'brick-system.json'
         ConfigCopier.ensure_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
         self.system_config = SystemConfig("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json")
+        self.mainui_volume = 0
+
         if(main_ui_mode):
+            self.on_mainui_config_change()
             trim_stock_json_file = script_dir / 'stock/brick.json'
             ConfigCopier.ensure_config(TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
+            self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
+                TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.ensure_wpa_supplicant_conf()
@@ -59,6 +69,10 @@ class TrimUISmartProS(TrimUIDevice):
         self._set_hue_to_config()
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
+
+    def _set_volume(self, user_volume):
+        # Investigate sending volume key
+        pass
 
     #Untested
     @throttle.limit_refresh(5)
@@ -159,6 +173,27 @@ class TrimUISmartProS(TrimUIDevice):
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-64"]
 
-    def _set_lumination_to_config(self):
-        with open("/sys/class/backlight/backlight0/brightness", "w") as f:
-            f.write(str((self.system_config.brightness * 255) // 20))
+    def get_volume(self):
+        try:
+            return self.mainui_volume * 5
+        except:
+            return 0
+        
+    def on_mainui_config_change(self):
+        path = TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION
+        if not os.path.exists(path):
+            PyUiLogger.get_logger().warning(f"File not found: {path}")
+            return
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            old_volume = self.mainui_volume
+            self.mainui_volume = data.get("vol")
+            if(old_volume != self.mainui_volume):
+                Display.volume_changed(self.mainui_volume * 5)
+
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
+            return None

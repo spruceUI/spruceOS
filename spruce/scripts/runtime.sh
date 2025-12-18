@@ -157,10 +157,6 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 
-    # Enable wireless drivers
-    modprobe aic8800_btlpm.ko
-    modprobe aic8800_fdrv.ko
-
     init_gpio_SmartProS
 
     #syslogd -S
