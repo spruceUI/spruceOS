@@ -185,6 +185,10 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     tinymix set 28 1
     tinymix set 29 1
 
+    # Enable wireless drivers
+    modprobe aic8800_btlpm.ko
+    modprobe aic8800_fdrv.ko
+
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
 
