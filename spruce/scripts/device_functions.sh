@@ -250,46 +250,35 @@ vibrate() {
                 log_message "this is where I'd put my vibration... IF I HAD ONE"
             fi
             ;;
-        "Flip") 
+        "Brick" | "SmartPro" | "SmartProS" | "Flip")  
             # todo: figure out how to make lengths equal across intensity
             if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
                 timer=0
-                echo -n 1 > /sys/class/gpio/gpio20/value
+                echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
                 while [ $timer -lt $duration ]; do
                     sleep 0.002
                     timer=$(($timer + 2))
                 done
-                echo -n 0 > /sys/class/gpio/gpio20/value
+                echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
             elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
-                    echo -n 1 > /sys/class/gpio/gpio20/value
+                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
                     sleep 0.005
-                    echo -n 0 > /sys/class/gpio/gpio20/value
+                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
                     sleep 0.001
                     timer=$(($timer + 6))
                 done &
             elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
                 timer=0
                 while [ $timer -lt $duration ]; do
-                    echo -n 1 > /sys/class/gpio/gpio20/value
+                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
                     sleep 0.003
-                    echo -n 0 > /sys/class/gpio/gpio20/value
+                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
                     sleep 0.001
                     timer=$(($timer + 4))
                 done &
             fi
-            ;;
-        "Brick" | "SmartPro") 
-            # todo: properly implement duration timer and intensity
-            # also todo: add TSP S vibration
-            timer=0
-            while [ $timer -lt $duration ]; do
-                echo -n 1 > /sys/class/gpio/gpio227/value
-                sleep 0.006
-                echo -n 0 > /sys/class/gpio/gpio227/value
-                timer=$(($timer + 6))
-            done &
             ;;
     esac
 }
