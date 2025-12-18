@@ -202,7 +202,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK"],
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S"],
                 "options": [
                     "Select",
                     "Start",
@@ -241,7 +241,7 @@
                 "selected": "False"
             },
             "genesisPlusGXWide": {
-                "devices": ["TRIMUI_SMART_PRO"],
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "display": "Genesis Plus GX: enable widescreen",
                 "description": "use widescreen hacked core when available",
                 "options": [
@@ -301,7 +301,7 @@
         "RGB LED Settings": {
             "emulatorLEDeffect": {
                 "display": "Trigger LEDs on emulator launch",
-                "devices": [ "TRIMUI_BRICK", "TRIMUI_SMART_PRO" ],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "description": "different color per emulated system",
                 "options": [
                     "True",
@@ -311,13 +311,13 @@
             },
             "disableLEDs": {
                 "display": "Disable RGB LEDs in all contexts",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "description": "reload UI to apply",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False"
+                "selected": "True"
             }
         }
     }
