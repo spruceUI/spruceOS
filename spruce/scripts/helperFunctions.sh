@@ -28,7 +28,7 @@ case $INFO in
     *"TG3040"*)	export PLATFORM="Brick"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
-    *) export PLATFORM="MIYOO_MINI_FLIP" ;;
+    *) export PLATFORM="MiyooMini" ;;
 esac
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg

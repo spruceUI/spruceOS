@@ -131,7 +131,7 @@ case "$PLATFORM" in
 ############################################################
 # Miyoo Mini Flip
 ############################################################
-    "MIYOO_MINI_FLIP" )
+    "MiyooMini" )
 
         skip_freemma=0
         redirect_output=1
