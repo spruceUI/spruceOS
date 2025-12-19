@@ -762,12 +762,17 @@ display_text_with_percentage_bar(){
     fi
 }
 
+
 download_and_display_progress() {
 	BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
     remote_url="$1"
     local_path="$2"
     display_name="$3"
     final_size_bytes="$4"
+
+    if [ -z "$final_size_bytes" ]; then
+        final_size_bytes="$(wget --spider --server-response --no-check-certificate "$remote_url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n')"
+    fi
 
 	{
 		sleep 0.1
@@ -779,7 +784,7 @@ download_and_display_progress() {
 			[ "$percent_complete" -gt 100 ] && percent_complete=100
             current_mb="$((current_size / 1024 / 1024))"
             final_mb="$((final_size_bytes / 1024 / 1024))"
-			display_text_with_percentage_bar "Now downloading $display_name!\n\n$current_mb MB / $final_mb MB" "$percent_complete"
+			display_text_with_percentage_bar "Now downloading $display_name!" "$percent_complete" "$current_mb MB / $final_mb MB"
 			sleep 0.1
 		done 
 	} &
