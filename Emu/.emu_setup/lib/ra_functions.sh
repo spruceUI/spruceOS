@@ -29,13 +29,15 @@ prepare_ra_config() {
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+	elif [ "$PLATFORM" = "MiyooMini" ]; then
+		CURRENT_CFG="/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 	else
 		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 	fi
 
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
-	log_message "auto save setting is $auto_save" -v
+	log_message "auto save setting is $auto_save"
 	if [ "$auto_save" = "True" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
@@ -48,7 +50,7 @@ prepare_ra_config() {
 
 	# Set auto load state based on spruceUI config
 	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "Custom")"
-	log_message "auto load setting is $auto_load" -v
+	log_message "auto load setting is $auto_load"
 	if [ "$auto_load" = "True" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
@@ -59,50 +61,56 @@ prepare_ra_config() {
 		mv "$TMP_CFG" "$PLATFORM_CFG"
 	fi
 
-	# Set hotkey enable button based on spruceUI config
-	case "$BRAND" in
-		"TrimUI")
-			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
+
+	if [ "$PLATFORM" != "MiyooMini" ]; then
+
+		# Set hotkey enable button based on spruceUI config
+		case "$BRAND" in
+			"TrimUI")
+				hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
+				;;
+			"Miyoo")
+				hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
+				;;
+		esac
+		log_message "ra hotkey enable button is $hotkey_enable"
+		case "$PLATFORM" in
+			"A30")
+				HOTKEY_LINE="input_enable_hotkey"
+				SELECT_VAL="rctrl"
+				START_VAL="enter"
+				HOME_VAL="escape"
+				;;
+			*)
+				HOTKEY_LINE="input_enable_hotkey_btn"
+				SELECT_VAL="4"
+				START_VAL="6"
+				HOME_VAL="5"
+				;;
+		esac
+		case "$hotkey_enable" in
+			"Select")
+				TMP_CFG="$(mktemp)"
+				sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+				;;
+			"Start")
+				TMP_CFG="$(mktemp)"
+				sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+				;;
+			"Menu")
+				TMP_CFG="$(mktemp)"
+				sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+				mv "$TMP_CFG" "$PLATFORM_CFG"
 			;;
-		"Miyoo")
-			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
-			;;
-	esac
-	log_message "ra hotkey enable button is $hotkey_enable" -v
-	case "$PLATFORM" in
-		"A30")
-			HOTKEY_LINE="input_enable_hotkey"
-			SELECT_VAL="rctrl"
-			START_VAL="enter"
-			HOME_VAL="escape"
-			;;
-		*)
-			HOTKEY_LINE="input_enable_hotkey_btn"
-			SELECT_VAL="4"
-			START_VAL="6"
-			HOME_VAL="5"
-			;;
-	esac
-	case "$hotkey_enable" in
-		"Select")
-			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
-			mv "$TMP_CFG" "$PLATFORM_CFG"
-			;;
-		"Start")
-			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
-			mv "$TMP_CFG" "$PLATFORM_CFG"
-			;;
-		"Menu")
-			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
-			mv "$TMP_CFG" "$PLATFORM_CFG"
-		;;
-		*) ;;
-	esac
+			*) ;;
+		esac
+	fi
 	# copy platform-specific RA config into place where RA wants it to be
 	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
+	log_message "copying $PLATFORM_CFG to $CURRENT_CFG"
+
 }
 
 backup_ra_config() {
@@ -163,6 +171,9 @@ run_retroarch() {
 				export RA_BIN="ra32.miyoo"
 			fi
 		;;
+		"MiyooMini" )
+			export RA_BIN="retroarch-miyoomini"
+		;;
 	esac
 
 	RA_DIR="/mnt/SDCARD/RetroArch"
@@ -170,6 +181,9 @@ run_retroarch() {
 
 	if [ "$PLATFORM" = "A30" ]; then
 		CORE_DIR="$RA_DIR/.retroarch/cores"
+	elif [ "$PLATFORM" = "MiyooMini" ]; then
+		#Might need to change
+		CORE_DIR="/mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/cores"
 	else # 64-bit device
 		CORE_DIR="$RA_DIR/.retroarch/cores64"
 	fi
@@ -180,7 +194,9 @@ run_retroarch() {
 		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
-	pin_to_dedicated_cores "$RA_BIN"
+	if [ "$PLATFORM" != "MiyooMini" ]; then
+		pin_to_dedicated_cores "$RA_BIN"
+	fi
 
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
