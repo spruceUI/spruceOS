@@ -429,10 +429,10 @@ else
 fi
 
 sleep 5
-vibrate
+vibrate &
 
 # Reboot device
-killall -9 runtime.sh principal.sh MainUI PyUI
+killall -9 runtime.sh principal.sh MainUI
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then

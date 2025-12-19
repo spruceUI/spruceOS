@@ -35,7 +35,7 @@ kill_current_process() {
     fi
 }
 
-vibrate
+vibrate &
 
 # Save system brightness level
 if flag_check "sleep.powerdown"; then

@@ -22,12 +22,12 @@ morse_code_sos() {
         case $symbol in
         ".")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100
+            [ "$vibrate" = "true" ] && vibrate 100 &
             sleep $dot_duration
             ;;
         "-")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100
+            [ "$vibrate" = "true" ] && vibrate 100 &
             sleep $dash_duration
             ;;
         esac

@@ -14,7 +14,7 @@ case "$process_name" in
 	    echo heartbeat > "$LED_PATH"/trigger
 		killall -q -0 MainUI
         alsactl store
-		vibrate
+		vibrate &
         sync
         poweroff
         ;;

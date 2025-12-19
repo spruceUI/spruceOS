@@ -604,7 +604,7 @@ read_only_check() {
 record_video() {
     if [ -f "/tmp/ffmpeg_recording.pid" ]; then
         # Stop recording if one is in progress
-        vibrate 200
+        vibrate 200 &
         pid=$(cat "/tmp/ffmpeg_recording.pid")
         kill "$pid" 2>/dev/null
         rm "/tmp/ffmpeg_recording.pid"
@@ -626,9 +626,9 @@ record_video() {
             output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
         fi
 
-        vibrate
+        vibrate &
         sleep 0.1
-        vibrate
+        vibrate &
         # Start ffmpeg recording
         ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
             -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \

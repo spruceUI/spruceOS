@@ -315,7 +315,7 @@ getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
                     do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
                     # Only vibrate if enabled
                     if [ "$do_vibrate" = "True" ]; then
-                        vibrate 
+                        vibrate &
                     fi
                     HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
                     log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
