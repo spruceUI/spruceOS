@@ -11,9 +11,11 @@ runifnecessary() {
 
 # Check for -buttonListenerMode in arguments
 redirect_output=0
+button_listener_mode=0
 for arg in "$@"; do
     if [ "$arg" = "-buttonListenerMode" ]; then
         redirect_output=0
+        button_listener_mode=1
         break
     fi
 done
@@ -41,7 +43,9 @@ case "$PLATFORM" in
         set -- $cmd "$@"
 
         log_message "Starting PyUI on $PLATFORM"
-        if [ "$redirect_output" -eq 1 ]; then
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
             "$@" >/dev/null 2>&1
@@ -82,7 +86,9 @@ case "$PLATFORM" in
         set -- $cmd "$@"
 
         log_message "Starting PyUI on $PLATFORM"
-        if [ "$redirect_output" -eq 1 ]; then
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
             "$@" >/dev/null 2>&1
@@ -114,7 +120,9 @@ case "$PLATFORM" in
         set -- $cmd "$@"
 
         log_message "Starting PyUI on $PLATFORM"
-        if [ "$redirect_output" -eq 1 ]; then
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
             "$@" >/dev/null 2>&1
@@ -160,7 +168,9 @@ case "$PLATFORM" in
 
         log_message "Starting PyUI on $PLATFORM"
 
-        if [ "$redirect_output" -eq 1 ]; then
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
             "$@" >/dev/null 2>&1
