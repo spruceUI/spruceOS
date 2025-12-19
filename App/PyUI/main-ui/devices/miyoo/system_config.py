@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 
 from controller.controller_inputs import ControllerInput
@@ -250,6 +251,8 @@ class SystemConfig:
             theme = PyUiConfig.get("theme")
             PyUiLogger.get_logger().info(f"Current user config does not have theme set, so loading from PyUIConfig as {theme}")
             self.set_theme(theme)
+            from devices.device import Device
+            Device.set_theme(os.path.join(PyUiConfig.get("themeDir"), theme))
         return theme
 
     def set_theme(self, theme):
