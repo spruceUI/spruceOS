@@ -171,14 +171,16 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
         /etc/bluetooth/bluetoothd start
     fi
 
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_inputd &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_thermald &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/musicserver &
-    #LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/osd/trimui_osdd &
+    cd /usr/trimui/bin
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_inputd &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_thermald &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./keymon &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_scened &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_btmanager &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./hardwareservice &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./musicserver &
+    cd /usr/trimui/osd
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
 
     tinymix set 23 1
     tinymix set 18 23

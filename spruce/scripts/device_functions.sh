@@ -250,8 +250,22 @@ vibrate() {
                 log_message "this is where I'd put my vibration... IF I HAD ONE"
             fi
             ;;
-        "Brick" | "SmartPro" | "SmartProS" | "Flip")  
-            # todo: figure out how to make lengths equal across intensity
+        "SmartProS")
+                case "$intensity" in
+                    "Weak")   echo  50 > /sys/class/motor/max_scale ;;
+                    "Medium") echo  75 > /sys/class/motor/max_scale ;;
+                    "Strong") echo 100 > /sys/class/motor/max_scale ;;
+                esac
+                timer=0
+                echo -n 65535 > /sys/class/motor/level
+                while [ $timer -lt $duration ]; do
+                    sleep 0.002
+                    timer=$(($timer + 2))
+                done &
+                wait
+                echo -n 0 > /sys/class/motor/level
+            ;;
+        "Brick" | "SmartPro" | "Flip")  
             if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
                 timer=0
                 echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
