@@ -301,9 +301,7 @@ vibrate() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    if [ "$PLATFORM" != "MiyooMini" ]; then
-        kill -9 $(pgrep display) 2> /dev/null
-    fi
+    kill -9 $(pgrep display) 2> /dev/null
 }
 
 # Call this to display text on the screen
@@ -335,7 +333,6 @@ display_kill() {
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    [ "$PLATFORM" = "MiyooMini" ] && return 64
     [ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
     if [ "$BRAND" = "TrimUI" ]; then
         LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
@@ -637,14 +634,14 @@ set_path_variable() {
     esac
 }
 
-
-
 enter_sleep() {
-    if [ "$PLATFORM" != "MiyooMini" ]; then
-        log_message "powerbutton_watchdog.sh: Entering sleep."
-        [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
-        echo -n mem >/sys/power/state
-    fi
+    case "$PLATFORM" in
+        Flip|Brick|SmartPro|A30)
+            log_message "powerbutton_watchdog.sh: Entering sleep."
+            [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
+            echo -n mem >/sys/power/state
+            ;;
+    esac
 }
 
 get_current_volume() {
