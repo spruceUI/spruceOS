@@ -76,7 +76,6 @@ kill_ppsspp() {
     
     sleep 1 # wait to ensure save process is started
     # kill PPSSPP with signal 15, it should exit after saving is done
-    killall -q -15 PPSSPPSDL
     killall -q -15 PPSSPPSDL_$PLATFORM
     killall -q -15 PPSSPPSDL_TrimUI
 }

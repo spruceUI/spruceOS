@@ -30,10 +30,8 @@ run_ppsspp() {
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 	case "$PLATFORM" in
-		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
-		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
-		"SmartProS") PPSSPPSDL="./PPSSPPSDL_SmartProS" ;;
-		"Brick"|"SmartPro"|"SmartProS") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
+		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
+		*) 					PPSSPPSDL="./PPSSPPSDL_${PLATFORM}" ;;
 	esac
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }

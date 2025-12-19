@@ -75,7 +75,7 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
         echo 0 0 0   # tell sendevent to exit
     } | $BIN_PATH/sendevent /dev/input/event4
     sleep 1
-    killall -q -15 PPSSPPSDL
+    killall -q -15 PPSSPPSDL_TrimUI
     killall -q -15 PPSSPPSDL_$PLATFORM
 else
     killall -q -15 ra64.miyoo

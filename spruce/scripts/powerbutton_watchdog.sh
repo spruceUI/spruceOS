@@ -7,7 +7,7 @@ log_message "powerbutton_watchdog.sh: Started up."
 
 
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
-EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_Brick ra64.trimui_SmartPro retroarch retroarch-flip retroarch.trimui drastic32 drastic64 PPSSPPSDL PPSSPPSDL_Flip PPSSPPSDL_Brick PPSSPPSDL_SmartPro MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch-flip retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
 TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
@@ -16,6 +16,7 @@ applicable_process_is_running() {
     pgrep -f "retroarch" >/dev/null || \
     pgrep -f "ra32.miyoo" >/dev/null || \
     pgrep -f "ra64.miyoo" >/dev/null || \
+    pgrep -f "ra64.trimui" >/dev/null || \
     pgrep -f "drastic" >/dev/null || \
     pgrep -f "PPSSPPSDL" >/dev/null || \
     pgrep -f "flycast" >/dev/null || \
