@@ -221,27 +221,7 @@ elif [ "$PLATFORM" = "Flip" ]; then
     ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
 
     killall runmiyoo.sh
-elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-    export_ld_library_path
-    
-    audioserver &
 
-    /mnt/SDCARD/spruce/miyoomini/bin/keymon &
-    insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
-    ifconfig lo up
-    /customer/app/axp_test wifion
-    sleep 2
-    ifconfig wlan0 up
-    wpa_supplicant -B -D nl80211 -i wlan0 -c /appconfigs/wpa_supplicant.conf
-    
-    touch /mnt/SDCARD/spruce/miyoomini/bin/MainUI
-    mount -o bind /mnt/SDCARD/spruce/miyoomini/bin/python /mnt/SDCARD/spruce/miyoomini/bin/MainUI
-    mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/profile /etc/profile
-    mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
-    mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
-
-    adbd &
-        
 fi
 
 # check whether to run first boot procedure
