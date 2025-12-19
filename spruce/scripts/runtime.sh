@@ -73,7 +73,9 @@ if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
 
-${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
+if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+    ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
+fi
 
 unstage_archives_$PLATFORM
 
@@ -229,11 +231,13 @@ if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
 fi
 
-${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-${SCRIPTS_DIR}/homebutton_watchdog.sh &
-${SCRIPTS_DIR}/lid_watchdog.sh &
-${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-${SCRIPTS_DIR}/low_power_warning.sh &
+if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    ${SCRIPTS_DIR}/lid_watchdog.sh &
+    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+    ${SCRIPTS_DIR}/low_power_warning.sh &
+fi
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
