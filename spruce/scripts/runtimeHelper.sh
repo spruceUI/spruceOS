@@ -473,8 +473,9 @@ runtime_mounts_SmartProS() {
 }
 
 runtime_mounts_MiyooMini() {
-    mount --bind /mnt/SDCARD/spruce/miyoomini/Emu /mnt/SDCARD/Emu
-    mount --bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
+    #mount --bind /mnt/SDCARD/spruce/miyoomini/Emu /mnt/SDCARD/Emu
+    #mount --bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
+    log_message "MiyooMini runtime mounts not yet implemented"
 }
 
 runtime_mounts_Flip() {
