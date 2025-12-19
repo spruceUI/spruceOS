@@ -233,11 +233,12 @@ fi
 
 if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/lid_watchdog.sh &
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/low_power_warning.sh &
 fi
+
+${SCRIPTS_DIR}/homebutton_watchdog.sh &
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
