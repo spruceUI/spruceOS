@@ -32,6 +32,7 @@ run_ppsspp() {
 	case "$PLATFORM" in
 		"A30") PPSSPPSDL="./PPSSPPSDL" ;;
 		"Flip") PPSSPPSDL="./PPSSPPSDL_Flip" ;;
+		"SmartProS") PPSSPPSDL="./PPSSPPSDL_SmartProS" ;;
 		"Brick"|"SmartPro"|"SmartProS") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
 	esac
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
