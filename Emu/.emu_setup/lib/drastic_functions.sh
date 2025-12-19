@@ -21,6 +21,8 @@ run_drastic() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 
+	[ -f "$EMU_DIR/resources/settings_${PLATFORM}.json" ] && cp "$EMU_DIR/resources/settings_${PLATFORM}.json" "$EMU_DIR/resources/settings.json"
+
 	if [ "$PLATFORM" = "A30" ]; then # only Steward is available.
 		run_drastic_steward_A30
 
@@ -53,6 +55,8 @@ run_drastic() {
 		fi
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"	# stash arch dependent states
 	fi
+
+	[ -f "$EMU_DIR/resources/settings.json" ] && cp "$EMU_DIR/resources/settings.json" "$EMU_DIR/resources/settings_${PLATFORM}.json"
 	sync
 }
 

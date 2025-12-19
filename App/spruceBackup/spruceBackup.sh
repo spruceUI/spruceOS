@@ -93,9 +93,11 @@ $SYSTEM_JSON
 /mnt/SDCARD/Emu/NDS/config/drastic-A30.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Brick.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-SmartPro.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-SmartProS.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Flip.cfg
 /mnt/SDCARD/Emu/NDS/savestates
-/mnt/SDCARD/Emu/NDS/resources/settings.json
+/mnt/SDCARD/Emu/NDS/resources/settings_A30.json
+/mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
 /mnt/SDCARD/Emu/SATURN/.yabasanshiro
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
@@ -105,6 +107,7 @@ $SYSTEM_JSON
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-SmartProS.cfg
 /mnt/SDCARD/Saves/spruce/backups/spruce-config.json
 /mnt/SDCARD/Saves/spruce/emu_backups
 /mnt/SDCARD/Saves/spruce/theme_backups
