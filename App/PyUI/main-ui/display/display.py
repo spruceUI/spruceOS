@@ -91,6 +91,7 @@ class Display:
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
+        "Text has zero width"
     ]
 
     @classmethod
@@ -493,7 +494,7 @@ class Display:
             return render_w, render_h
 
     @classmethod
-    def log_sdl_error_and_clear_cache(cls, image_path=None):
+    def log_sdl_error_and_clear_cache_image(cls, image_path=None):
         err = sdl2.sdlttf.TTF_GetError()
         err_msg = err.decode('utf-8') if err else "Unknown error"
         PyUiLogger.get_logger().warning(f"SDL Error received on loading {image_path} : {err_msg}")
@@ -502,10 +503,28 @@ class Display:
             if(image_path is not None):
                 cls._problematic_images.add(image_path)
                 PyUiLogger.get_logger().warning(f"Marking as image to permanently stop trying to load: {image_path}")
+            
+            return False
         else:
             PyUiLogger.get_logger().warning(f"Clearing cache : {err_msg}")
             cls._text_texture_cache.clear_cache()
             cls._image_texture_cache.clear_cache()
+            return True
+
+
+    @classmethod
+    def log_sdl_error_and_clear_cache_text(cls, text,purpose):
+        err = sdl2.sdlttf.TTF_GetError()
+        err_msg = err.decode('utf-8') if err else "Unknown error"
+        
+        if not (any(keyword in err_msg for keyword in cls._problematic_image_keywords)):
+            PyUiLogger.get_logger().warning(f"SDL Error received on loading {text} w/ purpose {purpose}")
+            PyUiLogger.get_logger().warning(f"Clearing cache : {err_msg}")
+            cls._text_texture_cache.clear_cache()
+            cls._image_texture_cache.clear_cache()
+            return True
+        
+        return False
 
 
     @classmethod
@@ -524,7 +543,8 @@ class Display:
             sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
             surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
             if not surface:
-                cls.log_sdl_error_and_clear_cache()
+                if not cls.log_sdl_error_and_clear_cache_text(text,purpose):
+                    return 0, 0
                 surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
@@ -532,7 +552,9 @@ class Display:
 
             texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
             if not texture:
-                cls.log_sdl_error_and_clear_cache()
+                if not cls.log_sdl_error_and_clear_cache_text(text,purpose):
+                    sdl2.SDL_FreeSurface(surface)
+                    return 0, 0
                 texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
                 if not texture:
                     err = sdl2.sdlttf.TTF_GetError()
@@ -598,7 +620,8 @@ class Display:
         else:
             surface = Display.image_load(image_path)
             if not surface:
-                cls.log_sdl_error_and_clear_cache(image_path)
+                if not cls.log_sdl_error_and_clear_cache_image(image_path):
+                    return 0,0
                 surface = Display.image_load(image_path)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
@@ -615,11 +638,15 @@ class Display:
                     f"Image is too large to render. Skipping {image_path}\n"
                     f"Stack trace:\n{''.join(traceback.format_stack())}"
                 ) 
+                cls._problematic_images.add(image_path)
                 return 0, 0
 
 
             if not texture:
-                cls.log_sdl_error_and_clear_cache()
+                if not cls.log_sdl_error_and_clear_cache_image(image_path):
+                    sdl2.SDL_FreeSurface(surface)
+                    return 0,0
+
                 texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
                 if not texture:
                     sdl2.SDL_FreeSurface(surface)
