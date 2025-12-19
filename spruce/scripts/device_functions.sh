@@ -9,7 +9,7 @@ get_python_path() {
     case "$PLATFORM" in
         A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
         Brick|SmartPro|SmartProS|Flip)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
-        MIYOO_MINI_FLIP)                echo "/mnt/SDCARD/spruce/miyoomini/bin/python" ;;
+        MiyooMini)                echo "/mnt/SDCARD/spruce/miyoomini/bin/python" ;;
     esac
 }
 
@@ -19,7 +19,7 @@ export_ld_library_path() {
         "Flip")            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "Brick")           export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
         "SmartPro"*)       export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
-        "MIYOO_MINI_FLIP") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib" ;;
+        "MiyooMini") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib" ;;
     esac
 }
 
@@ -38,7 +38,7 @@ get_config_path() {
         "Flip") cfgname="flip" ;;
         "Brick") cfgname="brick" ;;
         "SmartPro") cfgname="smartpro" ;;
-        "MIYOO_MINI_FLIP") cfgname="mini-flip" ;;
+        "MiyooMini") cfgname="mini-flip" ;;
         *) cfgname="unknown" ;;  # optional default
     esac
 
@@ -105,7 +105,7 @@ set_smart() {
 
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        if [ "$PLATFORM" = "MiyooMini" ]; then
             echo ondemand > $CPU_0_DIR/scaling_governor
         else #  official spruce device
             cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -140,7 +140,7 @@ set_smart() {
 set_performance() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        if [ "$PLATFORM" = "MiyooMini" ]; then
             echo performance > $CPU_0_DIR/scaling_governor        
         else #  official spruce device
             cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -167,7 +167,7 @@ set_performance() {
 set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        if [ "$PLATFORM" = "MiyooMini" ]; then
             echo performance > $CPU_0_DIR/scaling_governor
         else #  official spruce device
             cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -301,7 +301,7 @@ vibrate() {
 # Call this to kill any display processes left running
 # If you use display() at all you need to call this on all the possible exits of your script
 display_kill() {
-    if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+    if [ "$PLATFORM" != "MiyooMini" ]; then
         kill -9 $(pgrep display) 2> /dev/null
     fi
 }
@@ -335,7 +335,7 @@ display_kill() {
 # Example: display -t "Hello, World!" -s 48 -p top -a center -c ff0000 --icon "/path/to/icon.png"
 
 display() {
-    [ "$PLATFORM" = "MIYOO_MINI_FLIP" ] && return 64
+    [ "$PLATFORM" = "MiyooMini" ] && return 64
     [ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
     if [ "$BRAND" = "TrimUI" ]; then
         LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
@@ -513,7 +513,7 @@ rgb_led() {
         return 0
     ;; esac
 
-    if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+    if [ "$PLATFORM" = "MiyooMini" ]; then
         return 0
     fi
 
@@ -632,7 +632,7 @@ get_qr_bin_path() {
 set_path_variable() {
     case "$PLATFORM" in
         A30)               export PATH="/mnt/SDCARD/spruce/bin:$PATH" ;;
-        MIYOO_MINI_FLIP)   export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH" ;;
+        MiyooMini)   export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH" ;;
         *)                 export PATH="/mnt/SDCARD/spruce/bin64:$PATH" ;;
     esac
 }
@@ -640,7 +640,7 @@ set_path_variable() {
 
 
 enter_sleep() {
-    if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+    if [ "$PLATFORM" != "MiyooMini" ]; then
         log_message "powerbutton_watchdog.sh: Entering sleep."
         [ "$PLATFORM" = "Flip" ] && echo deep >/sys/power/mem_sleep
         echo -n mem >/sys/power/state
@@ -728,7 +728,7 @@ run_mixer_watchdog() {
 }
 
 new_execution_loop() {
-    if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+    if [ "$PLATFORM" = "MiyooMini" ]; then
         # Only run if not already running
         pidof audioserver >/dev/null || audioserver &
     fi

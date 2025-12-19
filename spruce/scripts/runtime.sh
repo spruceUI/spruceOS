@@ -73,7 +73,7 @@ if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
 	/mnt/SDCARD/spruce/scripts/networkservices.sh &
 fi
 
-if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+if [ "$PLATFORM" != "MiyooMini" ]; then
     ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 fi
 
@@ -231,7 +231,7 @@ if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
 fi
 
-if [ "$PLATFORM" != "MIYOO_MINI_FLIP" ]; then
+if [ "$PLATFORM" != "MiyooMini" ]; then
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
     ${SCRIPTS_DIR}/lid_watchdog.sh &
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &

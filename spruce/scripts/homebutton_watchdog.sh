@@ -254,7 +254,7 @@ send_menu_button_to_emu() {
     elif pgrep -f "retroarch" >/dev/null; then
         if [ "$PLATFORM" = "A30" ]; then
             send_virtual_key_L3R3
-        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        elif [ "$PLATFORM" = "MiyooMini" ]; then
             ra_network_command MENU_TOGGLE
         else
             echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
@@ -365,7 +365,7 @@ home_key_up () {
 
 # TODO Remove platform check and better wrap button monitoring more generically in another
 # common executable or location
-if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+if [ "$PLATFORM" = "MiyooMini" ]; then
 
     log_message "homebutton_watchdog.sh: Started miyoo mini loop."
 

@@ -472,7 +472,7 @@ runtime_mounts_SmartProS() {
    runtime_mounts_Brick
 }
 
-runtime_mounts_MIYOO_MINI_FLIP() {
+runtime_mounts_MiyooMini() {
     mount --bind /mnt/SDCARD/spruce/miyoomini/Emu /mnt/SDCARD/Emu
     mount --bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
 }

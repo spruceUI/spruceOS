@@ -84,7 +84,7 @@ while [ 1 ]; do
         elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
             rm -f /tmp/trimui_inputd/input_no_dpad
             rm -f /tmp/trimui_inputd/input_dpad_to_joystick
-        elif [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
+        elif [ "$PLATFORM" = "MiyooMini" ]; then
             set_performance
         fi
 
