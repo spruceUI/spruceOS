@@ -5,7 +5,10 @@
 
 IMAGE_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 
-display --icon "$IMAGE_PATH" -t "Generating miyoogamelist.xml files... Please be patient, as this can take a few minutes."
+start_pyui_message_writer
+
+display_image_and_text "$IMAGE_PATH" "Generating miyoogamelist.xml files...\n\nPlease be patient, as this can take a few minutes."
+sleep 2
 
 # Delete miyoogamelist.xml files first
 delete_gamelist_files "/mnt/SDCARD/Roms"
@@ -83,10 +86,9 @@ for system in "$emudir"/*; do
         tempfile="$rompath/used_names.txt"
         tempfile_original_names="$rompath/original_names.txt"
 
+        display_image_and_text "$IMAGE_PATH" "Generating miyoogamelist.xml for $system_name..."
         generate_miyoogamelist "$rompath" "$imgpath" "$extlist" "$out" "$tempfile" "$tempfile_original_names"
     fi
 done
-
-display_kill
 
 auto_regen_tmp_update
