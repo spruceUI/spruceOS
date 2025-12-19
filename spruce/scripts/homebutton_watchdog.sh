@@ -1,6 +1,9 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+set_path_variable
+export_ld_library_path
+
 log_message "homebutton_watchdog.sh: Started up."
 
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
@@ -164,9 +167,11 @@ take_screenshot(){
 
     if [ "$PLATFORM" = "A30" ]; then
         /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
-    else
+    elif [ "$PLATFORM" = "Flip" ]; then
         close_ppsspp_menu
         /mnt/SDCARD/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" 
+    else
+        screenshot.sh "$SCREENSHOT_NAME"
     fi
 
     log_message "homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
@@ -361,8 +366,6 @@ home_key_up () {
 # TODO Remove platform check and better wrap button monitoring more generically in another
 # common executable or location
 if [ "$PLATFORM" = "MIYOO_MINI_FLIP" ]; then
-    set_path_variable
-    export_ld_library_path
 
     log_message "homebutton_watchdog.sh: Started miyoo mini loop."
 
