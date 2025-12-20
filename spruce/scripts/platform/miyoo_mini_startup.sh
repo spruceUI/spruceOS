@@ -24,7 +24,7 @@ cd /mnt/SDCARD/spruce/scripts
 
 (
     sleep 5
-    send_event /dev/input/event0 114:1
     send_event /dev/input/event0 115:1
+    send_event /dev/input/event0 114:1
 ) &
 ./runtime.sh
