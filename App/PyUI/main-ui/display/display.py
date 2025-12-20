@@ -941,6 +941,18 @@ class Display:
         sdl2.SDL_FreeSurface(surface)
         return width, height
 
+
+    _cached_space_dimensions = None  # class-level cache
+    @classmethod
+    def get_space_dimensions(cls, font_purpose=FontPurpose.LIST):
+        """
+        Returns the width and height of a space character for the given font.
+        Caches the result after the first calculation.
+        """
+        if cls._cached_space_dimensions is None:
+            cls._cached_space_dimensions = cls.get_text_dimensions(font_purpose, " ")
+        return cls._cached_space_dimensions
+    
     @classmethod
     def get_text_dimensions(cls, purpose, text="A"):
         w = sdl2.Sint32()
