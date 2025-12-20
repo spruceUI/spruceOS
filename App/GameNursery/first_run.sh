@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-[ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png" || BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 display_image_and_text "$BG_IMG" 33 10 "Welcome to the spruce Game Nursery!\nThis is where we grow our curated collection of ports and free homebrew games for your enjoyment." 60 50
 sleep 7
