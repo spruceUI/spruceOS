@@ -264,9 +264,9 @@ construct_config() {
 
 ##### MAIN EXECUTION #####
 
-show_slideshow_if_first_run
 start_pyui_message_writer
-log_and_display_message "Welcome to the spruceOS Game Nursery, where you can pick the freshest homegrown games! Please wait.........."
+show_slideshow_if_first_run
+log_and_display_message "Welcome to the spruceOS Game Nursery, where you can pick the freshest homegrown games! Please wait"
 
 if ! is_wifi_connected; then sleep 3; exit 1; fi
 if ! is_json_valid; then get_latest_jsons; fi
@@ -282,7 +282,7 @@ while true; do
         content=$(cat "$RESULT_FILE" 2>/dev/null)
         
         if [ "$content" = "EXIT" ]; then
-            log_and_display_message "happy gaming.........."
+            log_and_display_message "happy gaming"
             sleep 2
             break
         else

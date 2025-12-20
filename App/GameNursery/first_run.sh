@@ -1,15 +1,15 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-[ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+[ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png" || BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
-display --okay -i "$BG_IMG" -t "Welcome to the spruce Game Nursery! This is where we grow our curated collection of ports and free homebrew games for your enjoyment."
-sleep 0.05
-display --okay -i "$BG_IMG" -t "You can browse the games at your leisure; selections will be downloaded and installed automaticially."
-sleep 0.05
-display --okay -i "$BG_IMG" -t "Games that you have previously installed can also be easily reinstalled through this same interface, if needed."
-sleep 0.05
-display --okay -i "$BG_IMG" -t "The spruce team has the utmost respect for the developers of these games, and strives to comply with the respective license terms for each game in our collection."
-sleep 0.05
-display --okay -i "$BG_IMG" -t "We are happy to share some of our favorite ports and homebrew games with you, and hope you enjoy your Game Nursery experience. Happy gaming!"
-sleep 0.05
+display_image_and_text "$BG_IMG" 33 10 "Welcome to the spruce Game Nursery!\nThis is where we grow our curated collection of ports and free homebrew games for your enjoyment." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "You can browse the games at your leisure;\nselections will be downloaded and installed automaticially." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "Games that you have previously installed can also be easily reinstalled through this same interface, if needed." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "The spruce team has the utmost respect for the developers of these games, and strives to comply with the respective license terms for each game in our collection." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "We are happy to share some of our favorite ports and homebrew games with you, and hope you enjoy your Game Nursery experience. Happy gaming!" 60 50
+sleep 15
