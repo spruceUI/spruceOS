@@ -223,37 +223,47 @@ stash_architecture_dependent_states() {
 }
 
 load_n64_controller_profile() {
-	PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
-	[ "$PROFILE" = "Classic (R2 + A, B, X, Y)" ] && PROFILE="Classic"
-	[ "$PROFILE" = "Action (A, X, Select, R1)" ] && PROFILE="Action"
+	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	case "$profile" in
+		*"Classic"*) profile_name="Classic" ;;
+		*"Action"*) profile_name="Action" ;;
+		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected
+		*) return 0 ;; # exit early if jq fails or config is broken
+	esac
 
 	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
-	LUDI="LudicrousN64 Xtreme Amped"
-	PARA="ParaLLEl N64"
-	MUPEN="Mupen64Plus GLES2"
-	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${LUDI}/${LUDI}.rmp"
-	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${PARA}/${PARA}.rmp"
-	cp -f "${SRC}/${PROFILE}.rmp" "${DST}/${MUPEN}/${MUPEN}.rmp"
+
+	for dir in "$DST"/*; do
+		[ ! -d "$dir" ] && continue
+		dirname="$(basename "$dir")"
+		case "$dirname" in
+			*"n64"*|*"N64"*)
+				cp -f "${SRC}/${profile_name}.rmp" "${dir}/${dirname}.rmp"
+			;;
+			*) ;; # if core display name doesn't have N64 in it, do nothing.
+		esac
+	done
 }
 
 save_custom_n64_controller_profile() {
-	PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
-	[ "$PROFILE" = "Classic (R2 + A, B, X, Y)" ] && PROFILE="Classic"
-	[ "$PROFILE" = "Action (A, X, Select, R1)" ] && PROFILE="Action"
-	
-	if [ "$PROFILE" = "Custom" ]; then
-		SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
-		DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
-		LUDI="LudicrousN64 Xtreme Amped"
-		PARA="ParaLLEl N64"
-		MUPEN="Mupen64Plus GLES2"
-		if [ "$CORE" = "km_ludicrousn64_2k22_xtreme_amped" ]; then
-			cp -f "${DST}/${LUDI}/${LUDI}.rmp" "${SRC}/Custom.rmp"
-		elif [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-			cp -f "${DST}/${PARA}/${PARA}.rmp" "${SRC}/Custom.rmp"
-		else # CORE is mupen64plus
-			cp -f "${DST}/${MUPEN}/${MUPEN}.rmp" "${SRC}/Custom.rmp"
-		fi
-	fi
+	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	case "$profile" in 
+		*"Custom"* ) ;; # continue to remainder of function
+		* ) return 0 ;; # exit function early; no need to back up remap
+	esac
+
+	REMAP_BACKUP="/mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp"
+	REMAP_DIR="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+
+	case "$CORE" in
+		"km_ludicrousn64_2k22_xtreme_amped") 	core_name="LudicrousN64 2K22 Xtreme Amped" ;;
+		"km_parallel_n64_xtreme_amped_turbo") 	core_name="ParaLLEl N64 Xtreme Amped" ;;
+		"mupen64plus") 							core_name="Mupen64Plus GLES2" ;;
+		"parallel_n64") 						core_name="ParaLLEl N64" ;;
+		"mupen64plus_next") 					core_name="Mupen64Plus-Next" ;;
+		*) return 0 ;; # if not a known N64 core, do nothing
+	esac
+
+	cp -f "${REMAP_DIR}/${core_name}/${core_name}.rmp" "$REMAP_BACKUP"
 }
