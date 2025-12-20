@@ -78,13 +78,6 @@ jobs:
             rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
           fi
 
-      - name: Create RetroArch core archives
-        run: |
-          7z a -t7z -mx=9 spruce/archives/staging/cores.7z RetroArch/.retroarch/cores
-          7z a -t7z -mx=9 spruce/archives/staging/cores64.7z RetroArch/.retroarch/cores64
-          rm -rf RetroArch/.retroarch/cores
-          rm -rf RetroArch/.retroarch/cores64
-
       - name: Pull selected PyUI Themes
         run: |
           echo "Cloning PyUI-Themes repo..."
@@ -221,6 +214,7 @@ jobs:
             fi
 
           done
+
 
 
 
