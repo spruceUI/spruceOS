@@ -74,7 +74,7 @@ class MiyooA30(MiyooDevice):
             super().__init__()
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-                "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=1.0)
+                "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
     @property
     def power_off_cmd(self):

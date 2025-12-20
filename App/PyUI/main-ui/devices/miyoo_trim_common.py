@@ -215,7 +215,6 @@ class MiyooTrimCommon():
 
     @staticmethod
     def set_theme(json_path, theme_path: str):
-        json_path = "/userdata/system.json"
         # Read the existing JSON
         try:
             with open(json_path, "r", encoding="utf-8") as f:
