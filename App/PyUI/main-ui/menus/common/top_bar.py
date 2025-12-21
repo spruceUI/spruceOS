@@ -1,5 +1,6 @@
 from datetime import datetime
 import time
+import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
@@ -12,7 +13,7 @@ from utils.py_ui_config import PyUiConfig
 class TopBar:
     def __init__(self):
         self.title = ""
-        self.volume_changed_time = time.time()
+        self.volume_changed_time = 0
         self.volume = 0
         self.selected_tab = "Games"
         self.top_bar_h = 0
@@ -161,7 +162,6 @@ class TopBar:
         return self.title
     
     def volume_changed(self, volume):
-        PyUiLogger().get_logger().info(f"Setting volume icon {volume}")
         #volume icon is for every 5 volume
         self.volume = volume // 5
         self.volume_changed_time = time.time()
