@@ -320,32 +320,25 @@ PERFORM_DELETION=true       ### debug variable
 if [ "$PERFORM_DELETION" = true ]; then
     log_update_message "Deleting unnecessary folders and files"
     display_image_and_text "$LOGO" 35 25 "Cleaning up your SD card..." 75
-    cd /mnt/SDCARD
-    
-    # Explicitly delete .config and .tmp_update folders
-    log_update_message "Deleting .config folder"
-    rm -rf .config
-    log_update_message "Deleting .tmp_update folder"
-    rm -rf .tmp_update
 
-    # unmount all the binds so that the deletion process can complete successfully
-    log_update_message "unmounting binds"
-    unmount_binds
-
-    for item in *; do
-        if [ "$item" != "$(basename "$UPDATE_FILE")" ] && [ "$item" != "BIOS" ] && [ "$item" != "Roms" ] && [ "$item" != "Saves" ] && [ "$item" != "Themes" ] && [ "$item" != "Persistent" ] && [ "$item" != "Collections" ]; then
-            if [ "$item" = "spruce" ]; then
-                log_update_message "Handling spruce folder"
-                find "$item" -mindepth 1 -maxdepth 1 ! -name "bin" ! -name "bin64"  ! -name "flip"  ! -name "a30" ! -name "brick" ! -name "miyoomini" -exec rm -rf {} +
-            else
-                log_update_message "Deleting: $item"
-                rm -rf "$item"
-            fi
+    DELETION_SCRIPT="/mnt/SDCARD/App/-Updater/delete_files.sh"
+    chmod a+x "$DELETION_SCRIPT"
+    if [ -x "$DELETION_SCRIPT" ]; then
+        "$DELETION_SCRIPT"
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            log_update_message "Deletion script failed with code $rc"
+            display_image_and_text "$LOGO" 35 25 "Cleanup failed!" 75
+            sleep 5
+        else
+            display_image_and_text "$LOGO" 35 25 "SD card cleaned up..." 75
+            sleep 2
         fi
-    done
-    log_update_message "Deletion process completed"
-    display_image_and_text "$LOGO" 35 25 "SD card cleaned up..." 75
-    sleep 2
+    else
+        log_update_message "Deletion script missing or not executable"
+        display_image_and_text "$LOGO" 35 25 "Cleanup skipped!" 75
+        sleep 5
+    fi
 else
     log_update_message "Skipping deletion process"
     display_image_and_text "$LOGO" 35 25 "Skipping file deletion..." 75
