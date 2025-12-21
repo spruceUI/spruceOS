@@ -102,6 +102,8 @@ while [ 1 ]; do
             done
         fi
 
+        spruce/scripts/applySetting/idlemon_mm.sh reapply &
+
         flag_remove "in_menu"
     fi
 

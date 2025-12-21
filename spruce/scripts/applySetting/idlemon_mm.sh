@@ -48,7 +48,7 @@ start_idlemon() {
     in_game)
       case "$timeout_value" in
          Off)
-		  pgrep -f 'idlemon.*miyoo' | xargs kill -9
+		      pgrep -f 'idlemon.*miyoo' | xargs kill -9
           return 0
           ;;
         2m)
@@ -72,8 +72,8 @@ start_idlemon() {
           ;;
       esac
       # Kill all processes with 'idlemon' and 'miyoo' in the name
-	  pgrep -f 'idlemon.*miyoo' | xargs kill -9
-	  # Start idlemon for in_game with multiple processes
+	    pgrep -f 'idlemon.*miyoo' | xargs kill -9
+	    # Start idlemon for in_game with multiple processes
       idlemon -p "ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
