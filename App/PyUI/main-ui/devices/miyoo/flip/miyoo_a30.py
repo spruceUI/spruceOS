@@ -273,7 +273,8 @@ class MiyooA30(MiyooDevice):
 
     def _set_volume(self, volume):
         try:
-            ProcessRunner.run(["amixer","set","headphone volume",str(volume)+"%"], print=True)            
+            scaled = round(255 * max(0, min(100, volume)) / 100)
+            ProcessRunner.run(["amixer","set","Soft Volume Master",str(scaled)], print=True)            
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
