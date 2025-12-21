@@ -108,9 +108,9 @@ restore_spruce_config() {
     [ -f "$new_config" ] || { log_message "New config not found: $new_config"; return 1; }
 
     tmpfile="$(mktemp)"
-    jq --argfile old "$old_config" '
+    jq --slurpfile old "$old_config" '
       .menuOptions as $newMenus |
-      ($old.menuOptions // {}) as $oldMenus |
+      ($old[0].menuOptions // {}) as $oldMenus |
       .menuOptions |=
         with_entries(
           # For each top-level category, like "Battery Settings"

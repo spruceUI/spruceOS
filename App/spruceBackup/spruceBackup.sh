@@ -68,11 +68,10 @@ log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
 # - Syncthing config
-# - PICO-8 config
-# - PPSSPP saves
-# - Drastic saves
+# - PICO-8 config and carts
+# - PPSSPP saves and config
+# - Drastic saves and configs
 # - RetroArch main configs
-# - RetroArch hotkeyprofile/nohotkeyprofile swap files
 # - RetroArch core configs
 # - RetroArch overlays (excluding specific folders)
 
