@@ -107,7 +107,7 @@ while [ 1 ]; do
 
     # clear the FB to get rid of residual Loading or Iconfresh screen if present
     touch /tmp/fbdisplay_exit
-    cat /dev/zero > /dev/fb0
+    cat /dev/zero > /dev/fb0 2>/dev/null
 
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
@@ -133,6 +133,11 @@ while [ 1 ]; do
     if flag_check "tmp_update_repair_attempted"; then
         flag_remove "tmp_update_repair_attempted"
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
+    fi
+
+    # Bring up network and services in case they were disabled in-game or otherwise toggled
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
+        /mnt/SDCARD/spruce/scripts/networkservices.sh &
     fi
 
 done
