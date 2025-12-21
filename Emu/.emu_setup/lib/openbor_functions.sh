@@ -16,17 +16,25 @@ run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
 	if [ "$PLATFORM" = "Brick" ]; then
+
 		./OpenBOR_Brick "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+
 	elif [ "$PLATFORM" = "Flip" ]; then
+
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
 		./OpenBOR_Flip "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+
 	else # assume A30
+
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
+		killall -q -USR2 joystickinput
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
 			./OpenBOR_mod "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 		else
 			./OpenBOR_new "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 		fi
+		killall -q -USR1 joystickinput
+
 	fi
 	sync
 }
