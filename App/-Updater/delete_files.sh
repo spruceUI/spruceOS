@@ -22,12 +22,12 @@ delete_list_from_dir() {
         esac
 
         if [ -e "$target" ]; then
-            log_update_message "Deleting $target"
+            echo "Deleting $target"
             rm -rf "$target"
         fi
     done
 
-    log_update_message "Remaining files in $base_dir:"
+    echo "Remaining files in $base_dir:"
     ls -Al "$base_dir" 2>/dev/null
 }
 
@@ -179,37 +179,37 @@ README.md
 ##### MAIN #####
 ################
 
-log_update_message "----------------------"
-log_update_message "Beginning file cleanup"
-log_update_message "----------------------"
+echo "----------------------"
+echo "Beginning file cleanup"
+echo "----------------------"
 
-log_update_message "SD card contents at beginning of cleanup:"
+echo "SD card contents at beginning of cleanup:"
 ls -Al /mnt/SDCARD
 
-log_update_message "-------------------"
-log_update_message "App folder deletion"
-log_update_message "-------------------"
+echo "-------------------"
+echo "App folder deletion"
+echo "-------------------"
 
 delete_list_from_dir "$APP_DELETE_LIST" "$APP_DIR"
 
-log_update_message "-------------------"
-log_update_message "Emu folder deletion"
-log_update_message "-------------------"
+echo "-------------------"
+echo "Emu folder deletion"
+echo "-------------------"
 
 delete_list_from_dir "$EMU_DELETE_LIST" "$EMU_DIR"
 
-log_update_message "----------------------"
-log_update_message "spruce folder deletion"
-log_update_message "----------------------"
+echo "----------------------"
+echo "spruce folder deletion"
+echo "----------------------"
 
 delete_list_from_dir "$SPRUCE_DELETE_LIST" "$SPRUCE_DIR"
 
-log_update_message "---------------------"
-log_update_message "Misc. SD card cleanup"
-log_update_message "---------------------"
+echo "---------------------"
+echo "Misc. SD card cleanup"
+echo "---------------------"
 
 delete_list_from_dir "$SDCARD_DELETE_LIST" "$SDCARD_PATH"
 
-log_update_message "---------------------"
-log_update_message "File cleanup complete"
-log_update_message "---------------------"
+echo "---------------------"
+echo "File cleanup complete"
+echo "---------------------"
