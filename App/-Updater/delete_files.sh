@@ -159,7 +159,6 @@ SDCARD_PATH="/mnt/SDCARD"
 SDCARD_DELETE_LIST="
 .github
 .tmp_update
-.config
 Icons
 miyoo
 miyoo355
