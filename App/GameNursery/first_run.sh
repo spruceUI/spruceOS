@@ -12,4 +12,4 @@ sleep 7
 display_image_and_text "$BG_IMG" 33 10 "The spruce team has the utmost respect for the developers of these games, and strives to comply with the respective license terms for each game in our collection." 60 50
 sleep 7
 display_image_and_text "$BG_IMG" 33 10 "We are happy to share some of our favorite ports and homebrew games with you, and hope you enjoy your Game Nursery experience. Happy gaming!" 60 50
-sleep 15
+sleep 10

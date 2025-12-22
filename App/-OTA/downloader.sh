@@ -80,7 +80,7 @@ verify_checksum() {
 ##### MAIN EXECUTION #####
 
 start_pyui_message_writer
-display_image_and_text "$IMAGE_PATH" 30 25 "Checking for updates..." 75
+display_image_and_text "$IMAGE_PATH" 35 25 "Checking for updates..." 75
 
 # twinkle them lights
 rgb_led lrm12 blink2 0000FF 1500 "-1" mmc0
@@ -90,7 +90,7 @@ if [ "$PLATFORM" = "A30" ]; then
     VERSION="$(cat /usr/miyoo/version)"
     if [ "$VERSION" -lt 20240713100458 ]; then
         sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
-        display_image_and_text "$IMAGE_PATH" 30 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
         sleep 5
         exit 1
     fi
@@ -111,7 +111,7 @@ if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
     if ! download_release_info "$OTA_URL_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
         log_message "OTA: First backup URL failed; trying second backup URL"
         if ! download_release_info "$OTA_URL_BACKUP_BACKUP" "$TMP_DIR/spruce" "$TMP_DIR"; then
-            display_image_and_text "$IMAGE_PATH" 30 25 "Update check failed; could not get valid update info. Please try again later." 75
+            display_image_and_text "$IMAGE_PATH" 35 25 "Update check failed; could not get valid update info. Please try again later." 75
             sleep 5
             rm -rf "$TMP_DIR"
             exit 1
@@ -152,11 +152,11 @@ TARGET_INFO="$RELEASE_INFO"
 # Handle version selection based on flags
 if flag_check "developer_mode"; then
     # Developer mode: offer nightly -> beta -> release
-    display_image_and_text "$IMAGE_PATH" 30 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
     if confirm 30 0; then
         set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     elif [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 30 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
         if confirm 30 1; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
@@ -164,7 +164,7 @@ if flag_check "developer_mode"; then
 elif flag_check "beta"; then
     # Beta mode: offer beta (if exists) -> release
     if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 30 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
         if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         fi
@@ -172,17 +172,17 @@ elif flag_check "beta"; then
 elif flag_check "tester_mode"; then
     # Tester mode: offer beta (if exists) -> nightly -> release
     if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 30 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
         if confirm 30 0; then
             set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
         else
-            display_image_and_text "$IMAGE_PATH" 30 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
+            display_image_and_text "$IMAGE_PATH" 35 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
             if confirm 30 0; then
                 set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
             fi
         fi
     else
-        display_image_and_text "$IMAGE_PATH" 30 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
         if confirm; then
             set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
         fi
@@ -217,7 +217,7 @@ log_message "Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
 if [ "$SKIP_VERSION_CHECK" = "True" ] || [ "$(echo "$TARGET_VERSION $CURRENT_VERSION" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$CURRENT_VERSION" ]; then
     log_message "Proceeding with update"
 else
-    display_image_and_text "$IMAGE_PATH" 30 25 "System is up to date. Installed version: $CURRENT_VERSION" 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: $CURRENT_VERSION" 75
     rm -rf "$TMP_DIR"
     sleep 5
     exit 0
@@ -226,7 +226,7 @@ fi
 BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
 CHARGING="$(cat $BATTERY/online)"
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
-    display_image_and_text "$IMAGE_PATH" 30 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
     sleep 5
     log_message "OTA: Battery level: $BATTERY_CAPACITY%
     Charging: $CHARGING"
@@ -250,10 +250,10 @@ FILENAME=$(echo "$TARGET_LINK" | sed 's/.*\///')
 
 # Check if update file already exists
 if [ -f "$SD_CARD/$FILENAME" ]; then
-    display_image_and_text "$IMAGE_PATH" 30 25 "Update file already exists. Verifying..." 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "Update file already exists. Verifying..." 75
     log_message "OTA: Update file already exists"
     if verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
-        display_image_and_text "$IMAGE_PATH" 30 25 "Valid update file already exists. Download again anyways? Press A to redownload, or B to use existing file for update."
+        display_image_and_text "$IMAGE_PATH" 35 25 "Valid update file already exists. Download again anyways? Press A to redownload, or B to use existing file for update."
         if ! confirm; then
             log_message "OTA: User chose to use existing file"
             rm -rf "$TMP_DIR"
@@ -262,7 +262,7 @@ if [ -f "$SD_CARD/$FILENAME" ]; then
             rm -rf "$SD_CARD/$FILENAME"
         fi
     else
-        display_image_and_text "$IMAGE_PATH" 30 25 "Existing update file isn't valid. Will download fresh copy." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Existing update file isn't valid. Will download fresh copy." 75
         sleep 3
     fi
 fi
@@ -274,20 +274,20 @@ if [ "$goto_install" != "true" ]; then  # do the downloadin'
     min_install_space=$(((TARGET_SIZE * 2) + 128))
     if [ "$free_space" -lt "$min_install_space" ]; then
         log_message "OTA: Not enough free space on SD card (at least ${min_install_space}MB should be free)"
-        display_image_and_text "$IMAGE_PATH" 30 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
+        display_image_and_text "$IMAGE_PATH" 35 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
         sleep 5
         rm -rf "$TMP_DIR"
         exit 1
     fi
 
     # Download update file
-    display_image_and_text "$IMAGE_PATH" 30 25 "Downloading update..." 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "Downloading update..." 75
     if ! download_and_display_progress "$TARGET_LINK" "$SD_CARD/$FILENAME" "spruce v${TARGET_VERSION}" "$((TARGET_SIZE * 1024 * 1024))"; then
         exit 1
     fi
 
     # Verify checksum
-    display_image_and_text "$IMAGE_PATH" 30 25 "Download complete! Verifying..." 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "Download complete! Verifying..." 75
     if ! verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
         display_image_and_text "$BAD_IMG" 35 25 "File downloaded but failed verification. Try again..." 75
         sleep 5
@@ -311,7 +311,7 @@ if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then
 fi
 
 # Update script call
-display_image_and_text "$IMAGE_PATH" 30 25 "Download successful! Press A to install now, or B to exit and install later." 75
+display_image_and_text "$IMAGE_PATH" 35 25 "Download successful! Press A to install now, or B to exit and install later." 75
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
     /mnt/SDCARD/App/-Updater/updater.sh

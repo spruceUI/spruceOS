@@ -17,7 +17,7 @@ SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 
 
-display_image_and_text "$SPRUCE_LOGO" 25 25 "Installing spruce $SPRUCE_VERSION" 75
+display_image_and_text "$SPRUCE_LOGO" 35 25 "Installing spruce $SPRUCE_VERSION" 75
 sleep 5 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
 log_message "Preparing SSH keys if necessary"
@@ -28,7 +28,7 @@ if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
   mv /mnt/SDCARD/App/PortMaster/.portmaster /mnt/SDCARD/Persistent/portmaster &
 fi
 
-display_image_and_text "$WIKI_ICON" 25 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
+display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
 
 # A30's firmware check
@@ -37,13 +37,13 @@ if [ "$PLATFORM" = "A30" ]; then
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
         sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
-        display_top_image_bottom_text "$FW_ICON" 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
+        display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
         sleep 5
     fi
 fi
 
 if flag_check "pre_menu_unpacking"; then
-    display_top_image_bottom_text "$UNPACKING_ICON" 25 "Finishing up unpacking themes and files.........."
+    display_image_and_text "$UNPACKING_ICON" 35 25 "Finishing up unpacking themes and files.........." 75
     flag_remove "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
         sleep 0.2
@@ -65,7 +65,7 @@ else
     /mnt/SDCARD/spruce/flip/bin/MainUI -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
 fi
 
-display_image_and_text "$HAPPY_ICON" 25 25 "Happy gaming.........." 75
+display_image_and_text "$HAPPY_ICON" 35 25 "Happy gaming.........." 75
 sleep 5
 
 log_message "Finished firstboot script"

@@ -838,7 +838,7 @@ display_image_and_text() {
     if [ $# -eq 2 ]; then
         img="$1"
         text="$2"
-        size="25"
+        size="35"
         img_y="25"
         text_y="75"
     else

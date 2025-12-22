@@ -14,7 +14,7 @@ DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
 
 display_logo() {
-    display -i "$DIR/$1.png" -d 1
+    display -i "$DIR/$1.png" -d 3
 }
 
 log_message "--Debug-- PATH = $PATH"
