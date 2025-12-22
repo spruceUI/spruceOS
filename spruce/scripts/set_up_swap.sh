@@ -3,8 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SWAPFILE="/mnt/SDCARD/cachefile"
-BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-[ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
 
 swap_setting="$(get_config_value '.menuOptions."System Settings".swapfileSize.selected' "Off")"
 case "$swap_setting" in
@@ -32,7 +30,6 @@ if [ -f "${SWAPFILE}" ]; then
 fi
 
 if [ ! -f "${SWAPFILE}" ]; then
-    display -i "$BG_TREE" -t "Setting up swapfile..."
     if dd if=/dev/zero of="${SWAPFILE}" bs=1M count="$MIN_MB"; then
         mkswap "${SWAPFILE}"
         sync
@@ -46,4 +43,3 @@ fi
 
 swapon -p 40 "${SWAPFILE}" || swapon "$SWAPFILE" || log_message "swapon command failed; proceeding without swap memory."
 echo 10 > /proc/sys/vm/swappiness
-display_kill
