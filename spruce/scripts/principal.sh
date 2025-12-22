@@ -55,29 +55,23 @@ while [ 1 ]; do
     enable_or_disable_rgb
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
-        # create in menu flag and remove last played game flag
-        flag_remove "lastgame"
+        
+        display_kill &          # This is to kill leftover display processes that may be running
+        flag_remove "lastgame" # create in menu flag and remove last played game flag
+        flag_add "in_menu"
 
         # Check for the low_battery flag
         if flag_check "low_battery"; then
             CAPACITY=$(cat $BATTERY/capacity)
-            display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
+            start_pyui_message_writer
+            log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
+            acknowledge
             flag_remove "low_battery"
+            stop_pyui_message_writer
         fi
 
-        # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to MainUI
-        if flag_check "pre_menu_unpacking"; then
-            display -t "Finishing up unpacking archives.........." -i "/mnt/SDCARD/spruce/imgs/bg_tree.png"
-            flag_remove "silentUnpacker"
-            while [ -f "$FLAGS_DIR/pre_menu_unpacking.lock" ]; do
-                : # null operation (no sleep needed)
-            done
-        fi
-
-        # This is to kill leftover display processes that may be running
-        display_kill &
-
-        flag_add "in_menu"
+        # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI
+        finish_unpacking "pre_menu_unpacking"
 
         if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
             killall -q -USR2 joystickinput 
@@ -93,14 +87,7 @@ while [ 1 ]; do
         [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
 
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
-        if flag_check "pre_cmd_unpacking"; then
-            [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-            display -t "Finishing up unpacking archives.........." -i "$BG_TREE"
-            flag_remove "silentUnpacker"
-            while [ -f "$FLAGS_DIR/pre_cmd_unpacking.lock" ]; do
-                : # null operation (no sleep needed)
-            done
-        fi
+        finish_unpacking "pre_cmd_unpacking"
 
         spruce/scripts/applySetting/idlemon_mm.sh reapply &
 

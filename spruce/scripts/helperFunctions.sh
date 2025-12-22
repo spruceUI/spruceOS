@@ -220,6 +220,19 @@ dim_screen() {
     done
 }
 
+finish_unpacking() {
+    flag="$1"
+    if flag_check "$flag"; then
+        start_pyui_message_writer
+        log_and_display_message "Finishing up unpacking archives.........."
+        flag_remove "silentUnpacker"
+        while [ -f "$FLAGS_DIR/$flag.lock" ]; do
+            : # null operation (no sleep needed)
+        done
+        stop_pyui_message_writer
+    fi
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
 flag_add() {
