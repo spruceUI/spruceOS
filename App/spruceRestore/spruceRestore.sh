@@ -108,32 +108,30 @@ restore_spruce_config() {
     [ -f "$new_config" ] || { log_message "New config not found: $new_config"; return 1; }
 
     tmpfile="$(mktemp)"
-    jq --slurpfile old "$old_config" '
-      .menuOptions as $newMenus |
-      ($old[0].menuOptions // {}) as $oldMenus |
-      .menuOptions |=
+jq --slurpfile old "$old_config" '
+  ($old[0].menuOptions // {}) as $oldMenus
+  |
+  .menuOptions |=
+    with_entries(
+      . as $cat
+      |
+      .value |=
         with_entries(
-          # For each top-level category, like "Battery Settings"
-          .value |= with_entries(
-            # For each sub-field, like "ledMode"
-            .value |= (
-              if has("selected") and ($oldMenus[.key] // {})[.key] != null then
-                # oldSelected = old value’s selected
-                ($oldVal := $oldMenus[.key][.key];
-                 $oldSelected := $oldVal.selected;
-                 # only set if still valid in new options
-                 if (.options | index($oldSelected)) != null then
-                   .selected = $oldSelected
-                 else
-                   .
-                 end)
-              else
-                .
-              end
-            )
+          . as $opt
+          |
+          if (
+            ($oldMenus[$cat.key] // {})[$opt.key]? != null
+            and ($oldMenus[$cat.key][$opt.key] | has("selected"))
+            and ($opt.value | has("selected"))
           )
+          then
+            .value.selected = $oldMenus[$cat.key][$opt.key].selected
+          else
+            .
+          end
         )
-    ' "$new_config" > "$tmpfile" && mv -f "$tmpfile" "$new_config"
+    )
+' "$new_config" > "$tmpfile" && mv -f "$tmpfile" "$new_config"
 
     log_message "Config restore complete."
 }
