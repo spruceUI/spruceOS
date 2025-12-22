@@ -12,27 +12,9 @@ FW_DIR="/mnt/SDCARD/spruce/FIRMWARE_UPDATE"
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
 NEEDS_UPDATE=true
-
 case "$PLATFORM" in
-	"A30" )
-		VERSION="$(cat /usr/miyoo/version)"
-		[ "$VERSION" -ge 20240713100458 ] && NEEDS_UPDATE=false
-		;;
-	"Flip" )
-		VERSION="$(cat /usr/miyoo/version)"
-		[ "$VERSION" -ge 20250627233124 ] && NEEDS_UPDATE="false"
-		;;
-	"Brick" )
-        current_fw_is="$(compare_current_version_to_version "1.1.1")"
-        [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
-		;;
-	"SmartPro" )
-        current_fw_is="$(compare_current_version_to_version "1.1.1")"
-        [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
-		;;
-	"SmartProS" )
-        current_fw_is="$(compare_current_version_to_version "1.0.1")"
-        [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
+	"A30"|"Flip"|"Brick"|"SmartPro"|"SmartProS")
+		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."

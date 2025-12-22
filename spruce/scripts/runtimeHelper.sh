@@ -7,7 +7,7 @@
 case "$PLATFORM" in
     "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
     "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
-    "Brick" | "SmartPro" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
+    "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
 esac
 
 hide_fw_app() {
@@ -57,33 +57,37 @@ compare_current_version_to_version() {
     return 1
 }
 
-# Define the function to check and hide the firmware update app
-check_and_handle_firmware_app() {
-
-    need_fw_update="true"
-
+check_if_fw_needs_update() {
     case "$PLATFORM" in
         "A30" )
             VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge 20240713100458 ] && need_fw_update="false"
+            [ "$VERSION" -ge 20240713100458 ] && echo "false" || echo "true"
             ;;
         "Flip" )
             VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge 20250627233124 ] && need_fw_update="false"
+            [ "$VERSION" -ge 20250627233124 ] && echo "false" || echo "true"
             ;;
         "Brick" )
-            current_fw_is="$(compare_current_version_to_version "1.1.0")"
-            [ "$current_fw_is" != "older" ] && need_fw_update="false"
+            current_fw_is="$(compare_current_version_to_version "1.1.1")"
+            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
             ;;
         "SmartPro" )
-            current_fw_is="$(compare_current_version_to_version "1.1.0")"
-            [ "$current_fw_is" != "older" ] && need_fw_update="false"
+            current_fw_is="$(compare_current_version_to_version "1.1.1")"
+            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
             ;;
-        * )
-            need_fw_update="false"
-        ;;
+        "SmartProS" )
+            current_fw_is="$(compare_current_version_to_version "1.0.1")"
+            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
+            ;;
+        *)
+            echo "false"
+            ;;
     esac
+}
 
+# Define the function to check and hide the firmware update app
+check_and_handle_firmware_app() {
+    need_fw_update="$(check_if_fw_needs_update)"
     if [ "$need_fw_update" = "true" ]; then
         show_fw_app
     else
