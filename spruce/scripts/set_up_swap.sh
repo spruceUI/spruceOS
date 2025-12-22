@@ -6,9 +6,19 @@ SWAPFILE="/mnt/SDCARD/cachefile"
 BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 [ "$PLATFORM" = "SmartPro" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
 
-case "$PLATFORM" in
-    "A30") MIN_MB=128 ;;
-    * ) log_message "no swap needed for $PLATFORM. Exiting."; exit 0 ;; # MIN_MB=512 ;;
+swap_setting="$(get_config_value '.menuOptions."System Settings".swapfileSize.selected' "Off")"
+case "$swap_setting" in
+    "128MB") MIN_MB=128 ;;
+    "256MB") MIN_MB=256 ;;
+    "512MB") MIN_MB=512 ;;
+    * ) log_message "No swapfile requested by user settings."
+        if [ -f "${SWAPFILE}" ]; then
+            swapoff "${SWAPFILE}"
+            rm "${SWAPFILE}"
+            log_message "Removed extraneous swap file."
+        fi
+        exit 0
+        ;;
 esac
 
 if [ -f "${SWAPFILE}" ]; then

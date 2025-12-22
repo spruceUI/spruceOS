@@ -1,4 +1,16 @@
 #!/bin/sh
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+enable_zram="$(get_config_value '.menuOptions."System Settings".useZRAM.selected' "False")"
+if [ "$enable_zram" = "True" ]; then
+  log_message "Attempting to enable ZRAM per user settings."
+else
+  log_message "No ZRAM requested per user settings."
+  /mnt/SDCARD/spruce/scripts/disable_zram.sh
+  exit 0
+fi
+
 set -eu
 
 # If zram is already active, do nothing
@@ -19,7 +31,7 @@ if [ ! -b /dev/zram0 ] && [ -e /sys/class/zram-control/hot_add ]; then
 fi
 
 if [ ! -b /dev/zram0 ] || [ ! -d /sys/block/zram0 ]; then
-  echo "zram device not found (no /dev/zram0). Kernel may lack zram support." >&2
+  log_message "zram device not found (no /dev/zram0). Kernel may lack zram support."
   exit 1
 fi
 
@@ -30,8 +42,10 @@ echo 1 > /sys/block/zram0/reset 2>/dev/null || true
 # Pick a fast compressor if available (ignore if kernel says busy)
 if [ -w /sys/block/zram0/comp_algorithm ]; then
   if grep -qw lz4 /sys/block/zram0/comp_algorithm; then
+    log_message "using lz4 compression algorithm"
     echo lz4 > /sys/block/zram0/comp_algorithm 2>/dev/null || true
   elif grep -qw lzo /sys/block/zram0/comp_algorithm; then
+    log_message "using lzo compression algorithm"
     echo lzo > /sys/block/zram0/comp_algorithm 2>/dev/null || true
   fi
 fi
@@ -45,6 +59,7 @@ MAX=$((1024 * 1024 * 1024))
 [ "$ZRAM_BYTES" -gt "$MAX" ] && ZRAM_BYTES=$MAX
 
 echo "$ZRAM_BYTES" > /sys/block/zram0/disksize
+log_message "Using disksize of $ZRAM_BYTES bytes"
 
 # mkswap
 if command -v mkswap >/dev/null 2>&1; then

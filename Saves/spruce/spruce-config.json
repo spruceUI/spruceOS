@@ -156,6 +156,27 @@
                     "False"
                 ],
                 "selected": "False"
+            },
+            "useZRAM":{
+                "devices": ["MIYOO_FLIP"],
+                "display": "Use ZRAM (experimental)",
+                "description": "reboot to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "swapfileSize":{
+                "display": "Swapfile size (experimental)",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "128MB",
+                    "256MB",
+                    "512MB"
+                ],
+                "selected": "Off"
             }
         },
         "Emulator Settings": {
