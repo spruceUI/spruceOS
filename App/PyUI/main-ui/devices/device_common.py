@@ -236,9 +236,11 @@ class DeviceCommon(AbstractDevice):
 
             time.sleep(10)
 
-    @throttle.limit_refresh(10)
+    @throttle.limit_refresh(15)
     def get_wifi_status(self):
         if(self.is_wifi_enabled()):
+            if(self.get_ip_addr_text() in ["Off","Error","Connecting"]):
+                return WifiStatus.OFF
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
