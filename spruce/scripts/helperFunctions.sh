@@ -548,6 +548,18 @@ log_precise() {
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
 }
 
+low_battery_check() {
+    if flag_check "low_battery"; then
+        CAPACITY=$(cat $BATTERY/capacity)
+        start_pyui_message_writer
+        log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
+        sleep 1
+        acknowledge
+        flag_remove "low_battery"
+        stop_pyui_message_writer
+    fi
+}
+
 # Generate a QR code
 # Usage: qr_code -t "text" -s "size" -l "level" -o "output"
 # If no output is provided, the QR code will be saved to /tmp/tmp/qr.png

@@ -57,18 +57,9 @@ while [ 1 ]; do
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         
         display_kill &          # This is to kill leftover display processes that may be running
-        flag_remove "lastgame" # create in menu flag and remove last played game flag
+        flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu"
-
-        # Check for the low_battery flag
-        if flag_check "low_battery"; then
-            CAPACITY=$(cat $BATTERY/capacity)
-            start_pyui_message_writer
-            log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
-            acknowledge
-            flag_remove "low_battery"
-            stop_pyui_message_writer
-        fi
+        low_battery_check       # Check for the low_battery flag and warn user if so
 
         # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI
         finish_unpacking "pre_menu_unpacking"
