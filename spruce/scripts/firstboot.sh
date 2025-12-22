@@ -23,17 +23,17 @@ sleep 5 # make sure installing spruce logo stays up longer; gives more time for 
 log_message "Preparing SSH keys if necessary"
 dropbear_generate_keys &
 
-mkdir -p /mnt/SDCARD/Persistent/
-display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
-
-if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-  gzip -d /mnt/SDCARD/App/PortMaster/pm.tar.gz
-  tar -xvf /mnt/SDCARD/App/PortMaster/pm.tar -C /mnt/SDCARD/Persistent
-  rm -f /mnt/SDCARD/App/PortMaster/pm.tar
-else
-  rm -f /mnt/SDCARD/App/PortMaster/pm.tar.gz
+if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
+    mkdir -p /mnt/SDCARD/Persistent/
+    display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
+    if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
+        gzip -d /mnt/SDCARD/App/PortMaster/pm.tar.gz
+        tar -xvf /mnt/SDCARD/App/PortMaster/pm.tar -C /mnt/SDCARD/Persistent
+        rm -f /mnt/SDCARD/App/PortMaster/pm.tar
+    else
+        rm -f /mnt/SDCARD/App/PortMaster/pm.tar.gz
+    fi
 fi
-
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
