@@ -23,11 +23,15 @@ case "$PLATFORM" in
 		[ "$VERSION" -ge 20250627233124 ] && NEEDS_UPDATE="false"
 		;;
 	"Brick" )
-        current_fw_is="$(compare_current_version_to_version "1.1.0")"
+        current_fw_is="$(compare_current_version_to_version "1.1.1")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
 	"SmartPro" )
-        current_fw_is="$(compare_current_version_to_version "1.1.0")"
+        current_fw_is="$(compare_current_version_to_version "1.1.1")"
+        [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
+		;;
+	"SmartProS" )
+        current_fw_is="$(compare_current_version_to_version "1.0.1")"
         [ "$current_fw_is" != "older" ] && NEEDS_UPDATE="false"
 		;;
 	*)
