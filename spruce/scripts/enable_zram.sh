@@ -58,4 +58,4 @@ swapon /dev/zram0
 
 # Swappiness tuning
 # Picked 5 as a reasonable default, as increased value may lead to excessive swapping
-[ -w /proc/sys/vm/swappiness ] && echo 5 > /proc/sys/vm/swappiness || true
+[ -w /proc/sys/vm/swappiness ] && echo 60 > /proc/sys/vm/swappiness || true
