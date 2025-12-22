@@ -191,6 +191,7 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     tinymix set 28 1
     tinymix set 29 1
 
+    echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
 
