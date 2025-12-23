@@ -137,18 +137,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
         killall -9 udhcpc    
     fi
 
-    mkdir /tmp/trimui_inputd
-    /etc/bluetooth/bluetoothd start
-    cd /usr/trimui/bin
-    LD_LIBRARY_PATH=/usr/trimui/lib ./keymon &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_btmanager &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_inputd &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_scened &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./hardwareservice &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./musicserver &
-    cd /usr/trimui/osd
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
-
+    run_trimui_blobs
     echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
 
 elif [ "$PLATFORM" = "SmartProS" ]; then
@@ -170,16 +159,8 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
         /etc/bluetooth/bluetoothd start
     fi
 
-    cd /usr/trimui/bin
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_inputd &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_thermald &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./keymon &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_scened &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_btmanager &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./hardwareservice &
-    LD_LIBRARY_PATH=/usr/trimui/lib ./musicserver &
-    cd /usr/trimui/osd
-    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
+    run_trimui_blobs
+    echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
 
     tinymix set 23 1
     tinymix set 18 23
@@ -188,7 +169,6 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
     tinymix set 28 1
     tinymix set 29 1
 
-    echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
 

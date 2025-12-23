@@ -615,10 +615,32 @@ init_gpio_SmartProS() {
     modprobe aic8800_fdrv.ko
     modprobe aic8800_btlpm.ko
 
-    mkdir /tmp/trimui_inputd
-
     #splash rumble
     echo 32768 > /sys/class/motor/level 
     sleep 0.2
     echo 0 > /sys/class/motor/level 
+}
+
+run_trimui_blobs() {
+
+    cd /usr/trimui/bin || return 1
+    mkdir -p /tmp/trimui_inputd
+
+    for blob in trimui_inputd trimui_thermald keymon trimui_scened \
+                trimui_btmanager hardwareservice musicserver; do
+        if [ -x "/usr/trimui/bin/$blob" ]; then
+            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
+            log_message "Attempted to start $blob"
+        else
+            log_message "$blob not found. Skipping."
+        fi
+    done
+
+    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
+        cd /usr/trimui/osd || return 1
+        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
+        log_message "Attempted to start trimui_osdd"
+    else
+        log_message "trimui_osdd not found. Skipping."
+    fi
 }
