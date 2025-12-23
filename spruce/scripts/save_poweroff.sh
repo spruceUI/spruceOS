@@ -2,6 +2,16 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
+
+# kill principal and runtime first so no new app / MainUI will be loaded anymore
+killall -q -15 runtime.sh
+killall -q -15 principal.sh
+
+# Ensure PyUI message writer can run
+killall -q -9 MainUI
+sleep 0.5
+
+
 if [ "$PLATFORM" = "A30" ]; then
     BIN_PATH="/mnt/SDCARD/spruce/bin"
     SET_OR_CSET="set"
@@ -16,11 +26,7 @@ fi
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
-if [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then 
-    BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
-else
-    BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-fi
+BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
@@ -37,6 +43,7 @@ kill_current_process() {
 
 vibrate &
 
+#is this a30 specific? get errors in output on flip
 # Save system brightness level
 if flag_check "sleep.powerdown"; then
     cp /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level /mnt/SDCARD/spruce/settings/sys_brightness_level
@@ -49,10 +56,6 @@ pgrep -f "lid_watchdog.sh" | xargs -r kill
 
 # notify user with led
 echo heartbeat > "$LED_PATH"/trigger
-
-# kill principal and runtime first so no new app / MainUI will be loaded anymore
-killall -q -15 runtime.sh
-killall -q -15 principal.sh
 
 # kill enforceSmartCPU first so no CPU setting is changed during shutdown
 killall -q -15 enforceSmartCPU.sh
@@ -91,10 +94,9 @@ else
     killall -q -15 yabasanshiro
     killall -q -15 yabasanshiro.trimui
     killall -q -15 mupen64plus
-    killall -q -9 MainUI
 fi
 
-# wait until emulator or MainUI exit
+# wait until emulator exit
 while killall -q -0 ra32.miyoo ||
     killall -q -0 ra64.miyoo ||
     killall -q -0 retroarch ||
@@ -107,21 +109,18 @@ while killall -q -0 ra32.miyoo ||
     killall -q -0 flycast ||
     killall -q -0 yabasanshiro ||
     killall -q -0 yabasanshiro.trimui ||
-    killall -q -0 mupen64plus||
-    killall -q -0 MainUI; do
+    killall -q -0 mupen64plus; do
     sleep 0.3
 done
 
+start_pyui_message_writer
+
 # Display appropriate image and message depending on whether it's a forced safe shutdown, or else whether user is in-game or in-menu.
 if flag_check "forced_shutdown"; then
-    display -i "$BG_TREE" -t "Battery level is below 1%. Shutting down to prevent progress loss."
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
     flag_remove "forced_shutdown"
-
-elif flag_check "in_menu"; then
-    display -i "$BG_TREE"
-
-elif ! pgrep "display_text.elf" >/dev/null && ! flag_check "sleep.powerdown"; then
-    display --icon "/mnt/SDCARD/spruce/imgs/save.png" -t "Saving and shutting down... Please wait a moment."
+else
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Saving and shutting down... Please wait a moment." 60 50
 fi
 
 dim_screen &
@@ -137,6 +136,7 @@ syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyn
 if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
     log_message "Syncthing is enabled, WiFi connection needed"
 
+    # This seems specific to one device, is it a30?
     # Restore brightness and sound if sleep->powerdown for syncthing
     if flag_check "sleep.powerdown"; then
         cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
@@ -162,6 +162,19 @@ if flag_check "sleep.powerdown"; then
 fi
 alsactl store
 
+
+#Let user read any messages
+sleep 3
+
+# kill MainUI
+killall -q -9 MainUI
+
+# wait until emulator or MainUI exit
+while killall -q -0 MainUI; do
+    sleep 0.3
+done
+
 # sync files and power off device
 sync
 poweroff
+

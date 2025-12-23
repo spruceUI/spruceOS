@@ -232,8 +232,9 @@ if flag_check "first_boot_${PLATFORM}"; then
     "${SCRIPTS_DIR}/firstboot.sh"
 fi
 
+${SCRIPTS_DIR}/set_up_swap.sh &
+
 if [ "$PLATFORM" != "MiyooMini" ]; then
-    ${SCRIPTS_DIR}/set_up_swap.sh &
     ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
     ${SCRIPTS_DIR}/lid_watchdog.sh &
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
