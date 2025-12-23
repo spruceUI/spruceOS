@@ -57,7 +57,7 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
         echo 1 311 0 # R1 up
         echo 1 314 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent /dev/input/event4
+    } | sendevent /dev/input/event4 # this is very specific im guessing to miyoo flip?
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI
     killall -q -15 PPSSPPSDL_$PLATFORM
@@ -104,6 +104,9 @@ else
     display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Saving and shutting down... Please wait a moment." 60 50
 fi
 
+#Let user read any messages
+sleep 5
+
 dim_screen &
 
 # Set flag to trigger autoresume on boot if appropriate
@@ -132,9 +135,6 @@ flag_remove "emulator_launched"
 
 alsactl store
 
-
-#Let user read any messages
-sleep 3
 
 # kill MainUI
 killall -q -9 MainUI
