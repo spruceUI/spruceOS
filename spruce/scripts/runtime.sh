@@ -35,8 +35,6 @@ enable_or_disable_wifi &
 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 # ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 
-handle_a30_quirks &
-
 # Flag cleanup
 flag_remove "log_verbose" &
 flag_remove "low_battery" &
@@ -56,18 +54,7 @@ check_and_handle_firmware_app &
 check_and_hide_update_app &
 
 if [ "$PLATFORM" = "A30" ]; then
-    alsactl nrestore &
-
-    # Restore and monitor brightness
-    if [ -f "$TMP_BACKLIGHT_PATH" ]; then
-        BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
-        # only set non zero brightness value
-        if [ "$BRIGHTNESS" -ne 0 ]; then 
-            echo "$BRIGHTNESS" > /sys/devices/virtual/disp/disp/attr/lcdbl
-        fi
-    else
-        echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
-    fi
+    handle_a30_quirks &
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
@@ -78,12 +65,6 @@ if [ "$PLATFORM" = "A30" ]; then
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
-
-    # read joystick raw data from serial input and apply calibration,
-    # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
-    # and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
-    # Please send kill signal USR1 to switch to ANALOG_MODE
-    # and send kill signal USR2 to switch to KEYBOARD_MODE
     ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
 elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then

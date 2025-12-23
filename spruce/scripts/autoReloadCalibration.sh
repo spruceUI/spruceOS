@@ -1,5 +1,11 @@
 #!/bin/sh
 
+    # read joystick raw data from serial input and apply calibration,
+    # then send analog input to /dev/input/event4 when in ANALOG_MODE (this is default)
+    # and send keyboard input to /dev/input/event3 when in KEYBOARD_MODE.
+    # Please send kill signal USR1 to switch to ANALOG_MODE
+    # and send kill signal USR2 to switch to KEYBOARD_MODE
+
 WATCHED_FILE="/config/joypad.config"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
