@@ -11,17 +11,6 @@ killall -q -15 principal.sh
 killall -q -9 MainUI
 sleep 0.5
 
-
-if [ "$PLATFORM" = "A30" ]; then
-    SET_OR_CSET="set"
-    NAME_QUALIFIER=""
-    AMIXER_CONTROL="'Soft Volume Master'"
-else
-    SET_OR_CSET="cset"
-    NAME_QUALIFIER="name="
-    AMIXER_CONTROL="'SPK Volume'"
-fi
-
 set_path_variable
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
