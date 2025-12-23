@@ -22,6 +22,8 @@ class SprigMiyooMiniCommon(MiyooMiniCommon):
     
     def startup_init(self, include_wifi=True):
         super().startup_init()
+        config_volume = self.system_config.get_volume()
+        self._set_volume(config_volume)
         self._set_screen_values_to_config()
 
     def on_sprig_config_change(self):
