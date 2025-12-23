@@ -137,21 +137,19 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
         killall -9 udhcpc    
     fi
 
-    # start all the trimui things and sleep long enough for the input devices to get
-    # registered correctly before creating the virtual joypad on /dev/input/event4
     mkdir /tmp/trimui_inputd
     /etc/bluetooth/bluetoothd start
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/keymon &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_btmanager &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_inputd &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/trimui_scened &
-    LD_LIBRARY_PATH=/usr/trimui/lib /usr/trimui/bin/hardwareservice &
-    sleep 0.3 ### wait long enough to create the virtual joypad
+    cd /usr/trimui/bin
+    LD_LIBRARY_PATH=/usr/trimui/lib ./keymon &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_btmanager &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_inputd &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_scened &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./hardwareservice &
+    LD_LIBRARY_PATH=/usr/trimui/lib ./musicserver &
+    cd /usr/trimui/osd
+    LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
 
-    # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-    # TODO: verify that we can call this via absolute path
-    cd "/mnt/SDCARD/spruce/bin"
-    ./joypad $EVENT_PATH_KEYBOARD &
+    echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
 
 elif [ "$PLATFORM" = "SmartProS" ]; then
 
@@ -163,8 +161,7 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
 
     #syslogd -S
 
-    btenable=`/usr/trimui/bin/systemval bluetooth`
-    if [ "$btenable" == "1" ] ; then
+    if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ] ; then
         /etc/bluetooth/bt_init.sh start
         hpid=`pgrep hciattach`
         if [ "$hpid" == "" ] ; then
