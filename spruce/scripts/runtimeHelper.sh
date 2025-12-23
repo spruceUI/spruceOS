@@ -383,31 +383,18 @@ unstage_archive() {
     fi
 }
 
-
-unstage_archives_A30() {
-    unstage_archive "Overlays.7z" "preCmd"
-    unstage_archive "cores32.7z" "preCmd"
-}
-
-unstage_archives_Brick() {
-    unstage_archive "autoconfig.7z" "preCmd"
-    unstage_archive "cores64.7z" "preCmd"
-}
-
-unstage_archives_SmartPro() {
-    unstage_archive "autoconfig.7z" "preCmd"
-    unstage_archive "cores64.7z" "preCmd"
-}
-
-unstage_archives_SmartProS() {
-    unstage_archive "autoconfig.7z" "preCmd"
-    unstage_archive "cores64.7z" "preCmd"
-}
-
-unstage_archives_Flip() {
-    unstage_archive "Overlays.7z" "preCmd"
-    unstage_archive "autoconfig.7z" "preCmd"
-    unstage_archive "cores64.7z" "preCmd"
+unstage_archives_wanted() {
+    if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
+        unstage_archive "Overlays.7z" "preCmd"
+    fi
+    if [ "$DEVICE_CAN_USE_EXTERNAL_CONTROLLER" = "true" ]; then
+        unstage_archive "autoconfig.7z" "preCmd"
+    fi
+    if [ "$DEVICE_USES_64_BIT_RA" = "true" ]; then
+        unstage_archive "cores64.7z" "preCmd"
+    else
+        unstage_archive "cores32.7z" "preCmd"
+    fi
 }
 
 UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"

@@ -77,7 +77,7 @@ if [ "$PLATFORM" != "MiyooMini" ]; then
     ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 fi
 
-unstage_archives_$PLATFORM
+unstage_archives_wanted
 
 # Check for first_boot flags and run Unpacker accordingly
 if flag_check "first_boot_${PLATFORM}"; then
