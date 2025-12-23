@@ -1,3 +1,4 @@
+from asyncio import sleep
 import ctypes
 import fcntl
 import json
@@ -107,8 +108,6 @@ class MiyooMiniCommon(MiyooDevice):
             return None
 
     def startup_init(self, include_wifi=True):
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
         if(self.is_wifi_enabled()):
             self.start_wifi_services()
         self.on_mainui_config_change()
@@ -346,63 +345,65 @@ class MiyooMiniCommon(MiyooDevice):
             return self.mainui_volume * 5
         except:
             return 0
-        
-    def _set_volume_raw(self, value: int, add: int = 0) -> int:
+
+    def volume_up(self):
         try:
-            fd = os.open("/dev/mi_ao", os.O_RDWR)
-        except OSError:
-            return 0
+            subprocess.run(
+                ["send_event", "/dev/input/event0", "115:1"],
+                check=False
+            )
+        except Exception as e:
+            PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
-        # Prepare buffers
-        buf2 = (ctypes.c_int * 2)(0, 0)
-        buf1 = (ctypes.c_uint64 * 2)(ctypes.sizeof(buf2), ctypes.cast(buf2, ctypes.c_void_p).value)
+    def volume_down(self):
+        try:
+            subprocess.run(
+                ["send_event", "/dev/input/event0", "114:1"],
+                check=False
+            )
+        except Exception as e:
+            PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
-        # Get previous volume
-        fcntl.ioctl(fd, MI_AO_GETVOLUME, buf1)
-        prev_value = buf2[1]
-
-        if add:
-            value = prev_value + add
+    def change_volume(self, amount):
+        from display.display import Display
+        self.system_config.reload_config()
+        volume = self.get_volume() + amount
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        if(amount > 0):
+            self.volume_up()
         else:
-            value += MIN_RAW_VALUE
-
-        # Clamp value
-        value = max(MIN_RAW_VALUE, min(MAX_RAW_VALUE, value))
-
-        if value == prev_value:
-            os.close(fd)
-            return prev_value
-
-        buf2[1] = value
-        fcntl.ioctl(fd, MI_AO_SETVOLUME, buf1)
-
-        # Handle mute
-        if prev_value <= MIN_RAW_VALUE < value:
-            buf2[1] = 0
-            fcntl.ioctl(fd, MI_AO_SETMUTE, buf1)
-        elif prev_value > MIN_RAW_VALUE >= value:
-            buf2[1] = 1
-            fcntl.ioctl(fd, MI_AO_SETMUTE, buf1)
-
-        os.close(fd)
-        return value
-
+            self.volume_down()
+        sleep(0.1)
+        self.on_mainui_config_change()
 
     def _set_volume(self, volume: int) -> int:
-        #Breaks keymon somehow
-        if(False):
-            volume = max(0, min(MAX_VOLUME, volume))
+        event_dev = "/dev/input/event0"
 
-            volume_raw = 0
-            if volume != 0:
-                volume_raw = round(48 * math.log10(1 + volume))  # volume curve
+        try:
+            # Send volume-down (114) 20 times
+            for _ in range(20):
+                subprocess.run(
+                    ["send_event", event_dev, "114:1"],
+                    check=False
+                )
+            time.sleep(0.2)
+            # Send volume-up (115) volume//5 times
+            for _ in range(volume // 5):
+                subprocess.run(
+                    ["send_event", event_dev, "115:1"],
+                    check=False
+                )
 
-            self._set_volume_raw(volume_raw, 0)
+        except Exception as e:
+            PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
+
         return volume
 
     def fix_sleep_sound_bug(self):
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
+        pass #uneeded
 
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
