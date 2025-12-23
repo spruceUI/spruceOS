@@ -59,24 +59,12 @@ compare_current_version_to_version() {
 
 check_if_fw_needs_update() {
     case "$PLATFORM" in
-        "A30" )
+        "A30"|"Flip" )
             VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge 20240713100458 ] && echo "false" || echo "true"
+            [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
             ;;
-        "Flip" )
-            VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge 20250627233124 ] && echo "false" || echo "true"
-            ;;
-        "Brick" )
-            current_fw_is="$(compare_current_version_to_version "1.1.1")"
-            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
-            ;;
-        "SmartPro" )
-            current_fw_is="$(compare_current_version_to_version "1.1.1")"
-            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
-            ;;
-        "SmartProS" )
-            current_fw_is="$(compare_current_version_to_version "1.0.1")"
+        "Brick"|"SmartPro"|"SmartProS" )
+            current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
             [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
             ;;
         *)
