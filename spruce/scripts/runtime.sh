@@ -131,6 +131,7 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
 
     syslogd -S
 
+    /etc/bluetooth/bluetoothd start
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         ifconfig wlan0 down
         killall -15 wpa_supplicant
