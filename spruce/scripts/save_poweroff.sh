@@ -43,14 +43,6 @@ kill_current_process() {
 
 vibrate &
 
-#is this a30 specific? get errors in output on flip
-# Save system brightness level
-if flag_check "sleep.powerdown"; then
-    cp /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level /mnt/SDCARD/spruce/settings/sys_brightness_level
-else
-    cat "$DEVICE_BRIGHTNESS_PATH" >/mnt/SDCARD/spruce/settings/sys_brightness_level
-fi
-
 # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
 pgrep -f "lid_watchdog.sh" | xargs -r kill
 
@@ -139,7 +131,6 @@ if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
     # This seems specific to one device, is it a30?
     # Restore brightness and sound if sleep->powerdown for syncthing
     if flag_check "sleep.powerdown"; then
-        cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
         amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
     fi
     
