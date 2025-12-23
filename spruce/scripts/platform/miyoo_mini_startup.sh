@@ -17,6 +17,8 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/bin/python /mnt/SDCARD/spruce/miyoomi
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/profile /etc/profile
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
+mount -o bind /mnt/SDCARD/spruce/miyoomini/Emu /mnt/SDCARD/Emu
+mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
 
 adbd &
  
@@ -27,4 +29,7 @@ cd /mnt/SDCARD/spruce/scripts
     send_event /dev/input/event0 115:1
     send_event /dev/input/event0 114:1
 ) &
+
+lid_watchdog.sh &
+
 ./runtime.sh
