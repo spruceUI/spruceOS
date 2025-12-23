@@ -29,37 +29,18 @@ set_performance
 runtime_mounts_$PLATFORM
 
 # Check if WiFi is enabled and bring up network services if so
-if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-    ifconfig wlan0 down         2>/dev/null
-    touch /tmp/wifioff          2>/dev/null
-    killall -9 wpa_supplicant   2>/dev/null
-    killall -9 udhcpc           2>/dev/null
-    # rfkill                      2>/dev/null
-    log_message "WiFi turned off"
-else
-    touch /tmp/wifion
-    /mnt/SDCARD/spruce/scripts/networkservices.sh &
-    log_message "WiFi turned on"
-fi
+enable_or_disable_wifi &
 
 # import multipass.cfg and start wifi_watchdog
 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
 # ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 
-if [ "$PLATFORM" = "A30" ]; then
-    echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &  # Stop NTPD
-    killall MtpDaemon 2>/dev/null
-    killall -9 main ### SUPER important in preventing .tmp_update suicide
-# elif [ "$PLATFORM" = "Flip" ]; then
-#	log_message "Checking for payload updates"
-#	"$SCRIPTS_DIR"/update_miyoo_payload.sh
-fi
+handle_a30_quirks &
 
 # Flag cleanup
-flag_remove "log_verbose"
-flag_remove "low_battery"
-flag_remove "in_menu"
+flag_remove "log_verbose" &
+flag_remove "low_battery" &
+flag_remove "in_menu" &
 
 unstage_archives_wanted
 
