@@ -484,7 +484,7 @@ runtime_mounts_Brick() {
     /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/flip/bin/python3 /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
 runtime_mounts_SmartPro() {
