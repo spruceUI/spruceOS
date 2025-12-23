@@ -13,16 +13,16 @@ sleep 0.5
 
 
 if [ "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
     SET_OR_CSET="set"
     NAME_QUALIFIER=""
     AMIXER_CONTROL="'Soft Volume Master'"
 else
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
     SET_OR_CSET="cset"
     NAME_QUALIFIER="name="
     AMIXER_CONTROL="'SPK Volume'"
 fi
+
+set_path_variable
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
@@ -68,7 +68,7 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
         echo 1 311 0 # R1 up
         echo 1 314 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
-    } | $BIN_PATH/sendevent /dev/input/event4
+    } | sendevent /dev/input/event4
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI
     killall -q -15 PPSSPPSDL_$PLATFORM
