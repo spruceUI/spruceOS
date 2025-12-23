@@ -2,8 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "Flip" ]; then
-    log_message "wifi_watchdog disabled on Miyoo Flip due to already spotty wifi"
+if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "MiyooMini" ]; then
+    log_message "wifi_watchdog disabled on $PLATFORM"
     exit 0
 fi
 

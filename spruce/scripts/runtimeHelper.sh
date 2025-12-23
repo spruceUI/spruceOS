@@ -10,6 +10,16 @@ case "$PLATFORM" in
     "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
 esac
 
+run_sd_card_fix_if_triggered() {
+    if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
+        log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."
+        mkdir -p /tmp/sdfix
+        cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
+        chmod 777 /tmp/sdfix/repairSD.sh
+        /tmp/sdfix/repairSD.sh run
+    fi
+}
+
 hide_fw_app() {
     sed -i 's|"label"|"#label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }

@@ -311,9 +311,7 @@ kill_network_services
 # Creating a backup of current install
 /mnt/SDCARD/App/spruceBackup/spruceBackup.sh
 
-if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "Flip" ]; then
-    echo heartbeat > "$LED_PATH"/trigger
-fi
+[ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 
 PERFORM_DELETION=true       ### debug variable
 # Delete all folders and files except the update zip, BIOS, Roms, Saves, Persistent, Themes, and Collections

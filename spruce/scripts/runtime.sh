@@ -11,71 +11,55 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
-rotate_logs
-log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
-log_message "---------Starting up---------"
+[ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
-if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
-    log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."
-    mkdir -p /tmp/sdfix
-    cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
-    chmod 777 /tmp/sdfix/repairSD.sh
-    /tmp/sdfix/repairSD.sh run
-fi
-
+export PATH="$SYSTEM_PATH/app:${PATH}"
 export HOME="/mnt/SDCARD"
 SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
 TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
+rotate_logs
+log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
+log_message "---------Starting up---------"
+
+run_sd_card_fix_if_triggered    # do this before anything else
 cores_online
 set_performance
-
-case "$PLATFORM" in
-    "A30"|"Flip") echo mmc0 > "$LED_PATH"/trigger ;;
-esac
-
 runtime_mounts_$PLATFORM
+
+# Check if WiFi is enabled and bring up network services if so
+if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+    ifconfig wlan0 down         2>/dev/null
+    touch /tmp/wifioff          2>/dev/null
+    killall -9 wpa_supplicant   2>/dev/null
+    killall -9 udhcpc           2>/dev/null
+    # rfkill                      2>/dev/null
+    log_message "WiFi turned off"
+else
+    touch /tmp/wifion
+    /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    log_message "WiFi turned on"
+fi
+
+# import multipass.cfg and start wifi_watchdog
+${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
+# ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 
 if [ "$PLATFORM" = "A30" ]; then
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1 &  # Stop NTPD
     killall MtpDaemon 2>/dev/null
-    
-    # Check if WiFi is enabled
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        touch /tmp/wifioff && killall -9 wpa_supplicant && killall -9 udhcpc && rfkill
-        log_message "WiFi turned off"
-    else
-        touch /tmp/wifion
-        log_message "WiFi turned on"
-    fi
-
     killall -9 main ### SUPER important in preventing .tmp_update suicide
-
 # elif [ "$PLATFORM" = "Flip" ]; then
 #	log_message "Checking for payload updates"
 #	"$SCRIPTS_DIR"/update_miyoo_payload.sh
 fi
 
-export PATH="$SYSTEM_PATH/app:${PATH}"
-
 # Flag cleanup
 flag_remove "log_verbose"
 flag_remove "low_battery"
 flag_remove "in_menu"
-
-# import multipass.cfg
-${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
-
-# Bring up network and services
-if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
-	/mnt/SDCARD/spruce/scripts/networkservices.sh &
-fi
-
-if [ "$PLATFORM" != "MiyooMini" ]; then
-    ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
-fi
 
 unstage_archives_wanted
 
@@ -94,7 +78,7 @@ if [ "$PLATFORM" = "A30" ]; then
     alsactl nrestore &
 
     # Restore and monitor brightness
-    if [ -f "$TMP_BACKLIGHT_PATH)" ]; then
+    if [ -f "$TMP_BACKLIGHT_PATH" ]; then
         BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
         # only set non zero brightness value
         if [ "$BRIGHTNESS" -ne 0 ]; then 
@@ -132,11 +116,6 @@ elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
     syslogd -S
 
     /etc/bluetooth/bluetoothd start
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        ifconfig wlan0 down
-        killall -15 wpa_supplicant
-        killall -9 udhcpc    
-    fi
 
     run_trimui_blobs
     echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow

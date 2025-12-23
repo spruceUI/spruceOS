@@ -48,7 +48,7 @@ fi
 pgrep -f "lid_watchdog.sh" | xargs -r kill
 
 # notify user with led
-echo heartbeat > "$LED_PATH"/trigger
+[ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 
 # kill principal and runtime first so no new app / MainUI will be loaded anymore
 killall -q -15 runtime.sh
