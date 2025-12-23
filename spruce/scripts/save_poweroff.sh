@@ -127,12 +127,6 @@ fi
 syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
 if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
     log_message "Syncthing is enabled, WiFi connection needed"
-
-    # This seems specific to one device, is it a30?
-    # Restore brightness and sound if sleep->powerdown for syncthing
-    if flag_check "sleep.powerdown"; then
-        amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
-    fi
     
     if check_and_connect_wifi; then
         start_syncthing_process
@@ -147,10 +141,6 @@ fi
 flag_remove "sleep.powerdown"
 flag_remove "emulator_launched"
 
-# Save current sound settings
-if flag_check "sleep.powerdown"; then
-    amixer $SET_OR_CSET $NAME_QUALIFIER"$AMIXER_CONTROL" $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
-fi
 alsactl store
 
 
