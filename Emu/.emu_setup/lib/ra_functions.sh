@@ -110,7 +110,7 @@ backup_ra_config() {
 }
 
 run_retroarch() {
-	ready_architecture_dependent_states
+	
 
 	prepare_ra_config 2>/dev/null
 
@@ -121,12 +121,14 @@ run_retroarch() {
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
-		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
-		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
 	pin_to_dedicated_cores "$RA_BIN"
+
+	ra_start_setup_saves_and_states_for_core_differences
 
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
@@ -134,7 +136,43 @@ run_retroarch() {
 
 	backup_ra_config 2>/dev/null
 	
+	ra_close_setup_saves_and_states_for_core_differences
+}
+
+ra_start_setup_saves_and_states_for_core_differences() {
+	ready_architecture_dependent_states
+	CACHED_CORE=$(get_cached_core_path)
+	cache_core_path
+
+    if [ "$CACHED_CORE" != "$CORE_PATH" ]; then
+        log_message "Core path changed for ROM '$ROM_FILE': cached='$CACHED_CORE' current='$CORE_PATH'"
+    fi
+}
+
+ra_close_setup_saves_and_states_for_core_differences(){
 	stash_architecture_dependent_states
+}
+
+cache_core_path() {
+    cache_dir="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}"
+    mkdir -p "$cache_dir"
+
+    # Get only the basename of the ROM file
+    rom_basename=$(basename "$ROM_FILE")
+
+    cache_file="${cache_dir}/${rom_basename}"
+    log_message "Caching core path for ROM '$ROM_FILE': '$CORE_PATH'"
+    echo "$CORE_PATH" > "$cache_file"
+}
+
+get_cached_core_path() {
+    cache_file="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}/${ROM_FILE}"
+
+    if [ -f "$cache_file" ]; then
+        cat "$cache_file"
+    else
+        echo "$CORE_PATH"
+    fi
 }
 
 ready_architecture_dependent_states() {
