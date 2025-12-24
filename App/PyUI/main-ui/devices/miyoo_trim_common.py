@@ -69,17 +69,15 @@ class MiyooTrimCommon():
         escaped_path = re.sub(r'([$`"\\])', r'\\\1', miyoo_app_path)        
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         device.fix_sleep_sound_bug()
-        PyUiLogger.get_logger().info(f'Launching game {rom_info.game_system.display_name} from {launch_path}"')
-        if(rom_info.game_system.display_name == "PORTS"):
-            try:
-                return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Failed to launch game {rom_info.rom_file_path}: {e}")
-                return None
-        else:
-            Device.exit_pyui()
 
+
+        Device.exit_pyui()
+        #try:
+        #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
+        #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #except Exception as e:
+        #    PyUiLogger.get_logger().error(f"Failed to launch game {rom_info.rom_file_path}: {e}")
+        #    return None
         
     @staticmethod
     def run_cmd(device, args, dir = None):
