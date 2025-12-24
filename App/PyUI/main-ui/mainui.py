@@ -198,13 +198,9 @@ def main():
     args = parse_arguments()
     PyUiLogger.init(args.logDir, "PyUI")
     PyUiLogger.get_logger().info(f"{args}")
-    #PyUiLogger.get_logger().info(f"logDir: {args.logDir}")
-    #PyUiLogger.get_logger().info(f"pyUiConfig: {args.pyUiConfig}")
-    #PyUiLogger.get_logger().info(f"device: {args.device}")
 
     #log_renderer_info()
 
-    PyUiLogger.get_logger().info(f"{args}")
     with log_timing("Entire Startup initialization", PyUiLogger.get_logger()):    
 
         with log_timing("Config initialization", PyUiLogger.get_logger()):    
@@ -242,9 +238,9 @@ def main():
         check_for_msg_display_socket_based(args)
         check_for_option_list_file(args)
 
-        main_menu = MainMenu()
+    main_menu = MainMenu()
 
-        start_background_threads()
+    start_background_threads()
     keep_running = True
     PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):

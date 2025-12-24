@@ -103,7 +103,6 @@ class KeyWatcherControllerMiyooMini(ControllerInterface):
 
     def poll_keyboard(self):
         logger = PyUiLogger.get_logger()
-        logger.debug("Starting keyboard polling on fd %d", self.fd)
 
         while True:
             now = time.time()

@@ -142,7 +142,7 @@ class BoxArtResizer():
 
     @classmethod
     def patch_boxart_list(cls, image_list):
-        cls.scan_count = 0
+        cls.scan_count = len(image_list)
         cls.patched_count = 0
         threading.Thread(target=cls.monitor_for_input, daemon=True).start()
 
@@ -163,6 +163,7 @@ class BoxArtResizer():
     @classmethod
     def process_rom_folders(cls):
         """Search through ROM directories and scale images inside Imgs folders."""
+        Display.display_message(f"Starting boxart patching", 500)
         rom_paths = ["/mnt/SDCARD/Roms/", "/media/sdcard1/Roms/"]
         target_medium_width, target_medium_height = Device.get_boxart_medium_resize_dimensions()
         target_small_width, target_small_height = Device.get_boxart_small_resize_dimensions()

@@ -1,17 +1,14 @@
+import time
 from asyncio import sleep
-import ctypes
-import fcntl
 import json
-import math
 from pathlib import Path
 import subprocess
 import threading
-import time
-from zoneinfo import reset_tzpath
+import os
+from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-import os
 from controller.key_watcher_controller_miyoo_mini import InputResult, KeyEvent, KeyWatcherControllerMiyooMini
 from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFlipSharedMemoryWriter
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
@@ -21,14 +18,12 @@ from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from display.display import Display
 from menus.games.utils.rom_info import RomInfo
-from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from utils.time_logger import log_timing
 
 MAX_VOLUME = 20
 MIN_RAW_VALUE = -60
@@ -44,47 +39,21 @@ class MiyooMiniCommon(MiyooDevice):
 
 
     def __init__(self, device_name, main_ui_mode, miyoo_mini_specific_model_variables: MiyooMiniSpecificModelVariables):
+
         self.device_name = device_name
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
-        self.unknown_axis_ranges = {}  # axis -> (min, max)
-        self.unknown_axis_stats = {}   # axis -> (sum, count)
-        self.sdl_axis_names = {
-            0: "SDL_CONTROLLER_AXIS_LEFTX",
-            1: "SDL_CONTROLLER_AXIS_LEFTY",
-            2: "SDL_CONTROLLER_AXIS_RIGHTX",
-            3: "SDL_CONTROLLER_AXIS_RIGHTY",
-            4: "SDL_CONTROLLER_AXIS_TRIGGERLEFT",
-            5: "SDL_CONTROLLER_AXIS_TRIGGERRIGHT"
-        }
-
 
         ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
         self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
+        
         if(main_ui_mode):
-            os.environ["TZPATH"] = "/mnt/SDCARD/miyoo285/zoneinfo"
-            reset_tzpath()  # reload TZPATH
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self._set_lumination_to_config()
-            self._set_contrast_to_config()
-            self._set_saturation_to_config()
-            self._set_brightness_to_config()
-            self.ensure_wpa_supplicant_conf()
-            self.init_gpio()
             self.mainui_volume = None
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
                 "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2)
             threading.Thread(target=self.startup_init, daemon=True).start()
-        
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
 
         super().__init__()
 
@@ -101,6 +70,7 @@ class MiyooMiniCommon(MiyooDevice):
             old_volume = self.mainui_volume
             self.mainui_volume = data.get("vol")
             if(old_volume != self.mainui_volume):
+                from display.display import Display
                 Display.volume_changed(self.mainui_volume * 5)
 
         except Exception as e:
@@ -111,7 +81,20 @@ class MiyooMiniCommon(MiyooDevice):
         if(self.is_wifi_enabled()):
             self.start_wifi_services()
         self.on_mainui_config_change()
-        self.apply_timezone(self.system_config.get_timezone())
+        self._set_lumination_to_config()
+        self._set_contrast_to_config()
+        self._set_saturation_to_config()
+        self._set_brightness_to_config()
+        self.ensure_wpa_supplicant_conf()
+        self.init_gpio()
+        if(PyUiConfig.enable_button_watchers()):
+            from controller.controller import Controller
+            #/dev/miyooio if we want to get rid of miyoo_inputd
+            # debug in terminal: hexdump  /dev/miyooio
+            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
 
     def build_controller_interface(self):
         key_mappings = {}  
@@ -365,7 +348,6 @@ class MiyooMiniCommon(MiyooDevice):
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
     def change_volume(self, amount):
-        from display.display import Display
         self.system_config.reload_config()
         volume = self.get_volume() + amount
         if(volume < 0):
@@ -469,14 +451,8 @@ class MiyooMiniCommon(MiyooDevice):
         return True
 
     def prompt_timezone_update(self):
-        timezone_menu = TimezoneMenu()
-        tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/mnt/SDCARD/miyoo285/zoneinfo/', verify_via_datetime=False))
-
-        if (tz is not None):
-            self.system_config.set_timezone(tz)
-            self.apply_timezone(tz)
-            Display.display_message_multiline(["Timezone changed","Reloading UI..."],2000)           
-            self.exit_pyui()
+        #No timezone update for miyoo mini
+        pass
 
     def apply_timezone(self, timezone):
         ProcessRunner.run(["rm", "-f", "/tmp/localtime"])

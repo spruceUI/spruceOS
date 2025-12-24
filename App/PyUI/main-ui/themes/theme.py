@@ -111,7 +111,8 @@ class Theme():
 
         resolution_converted = False
         if os.path.exists(config_path):
-            PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
+            #PyUiLogger.get_logger().info(f"Resolution specific config found, using {resolution_specific_config}")
+            pass #don't need to log
         elif ThemePatcher.patch_theme(path,width, height) and os.path.exists(config_path):
             resolution_converted = True
 
@@ -196,7 +197,7 @@ class Theme():
         """
         Shared resolver:
         - Checks full path
-        - If missing and ends in .qoi, tries .png then .tga fallback
+        - If missing and ends in .qoi, tries .png 
         - Caches results
         """
         key = (base_folder, parts)
@@ -216,11 +217,6 @@ class Theme():
             if os.path.exists(png_path):
                 cls._asset_cache[key] = png_path
                 return png_path
-
-            tga_path = path[:-4] + ".tga"
-            if os.path.exists(tga_path):
-                cls._asset_cache[key] = tga_path
-                return tga_path
 
         # Nothing found
         if(cache_missing):
