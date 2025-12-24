@@ -17,6 +17,13 @@
 #   pin_to_dedicated_cores
 
 set_emu_core_from_emu_json() {
+    # Try to use platform-specific emulator if it exists
+    CORE_PATH=".menuOptions.Emulator_$PLATFORM.selected"
+    if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
+        export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
+        return
+    fi
+
     case "$EMU_NAME" in
         DC|NAOMI|N64|PS)
             case "$PLATFORM" in

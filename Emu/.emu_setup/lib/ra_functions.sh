@@ -1,5 +1,6 @@
 #!/bin/sh
 
+. /mnt/SDCARD/Emu/.emu_setup/lib/core_mappings.sh
 # Requires globals:
 #   PLATFORM
 #   BRAND
@@ -142,11 +143,17 @@ run_retroarch() {
 ra_start_setup_saves_and_states_for_core_differences() {
 	ready_architecture_dependent_states
 	CACHED_CORE=$(get_cached_core_path)
-	cache_core_path
+	
+    # Get only the filename of the core
+    core_basename=$(basename "$CORE_PATH")
 
-    if [ "$CACHED_CORE" != "$CORE_PATH" ]; then
-        log_message "Core path changed for ROM '$ROM_FILE': cached='$CACHED_CORE' current='$CORE_PATH'"
-    fi
+    if [ "$CACHED_CORE" != "$core_basename" ]; then
+		log_message "Core changed : CURRENT = $core_basename, CACHED = $CACHED_CORE"
+		cache_core_path
+    else
+		log_message "Core same"
+	fi
+
 }
 
 ra_close_setup_saves_and_states_for_core_differences(){
@@ -160,17 +167,26 @@ cache_core_path() {
     # Get only the basename of the ROM file
     rom_basename=$(basename "$ROM_FILE")
 
+    # Get only the filename of the core
+    core_basename=$(basename "$CORE_PATH")
+
     cache_file="${cache_dir}/${rom_basename}"
-    log_message "Caching core path for ROM '$ROM_FILE': '$CORE_PATH'"
-    echo "$CORE_PATH" > "$cache_file"
+    log_message "Caching core filename for ROM '$ROM_FILE': '$core_basename'"
+
+    echo "$core_basename" > "$cache_file"
 }
 
+
 get_cached_core_path() {
-    cache_file="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}/${ROM_FILE}"
+	# Get only the basename of the ROM file
+    rom_basename=$(basename "$ROM_FILE")
+
+    cache_file="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}/${rom_basename}"
 
     if [ -f "$cache_file" ]; then
         cat "$cache_file"
     else
+		log_message "No cached core found for ROM '$ROM_FILE'. $cache_file does not exist."
         echo "$CORE_PATH"
     fi
 }
