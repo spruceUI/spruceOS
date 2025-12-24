@@ -15,21 +15,17 @@ kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
     if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
         rm -f /tmp/menubtn
-        scan=true
+
+        # Don't relaunch if somehow the exit fails
+        rm -f /tmp/cmd_to_run.sh
+        rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+
         take_screenshot
-        while $scan; do
 
-            # Run the ps command, filter for 'box86', and exclude the grep process itself
-            pid=$(ps -f | grep -E "box86|box64|mono|tee|gmloader|love.aarch64" | grep -v "grep" | awk 'NR==1 {print $1}')
-
-            # Check if a PID was found
-            if [ -n "$pid" ]; then
-                log_message "Killing $pid ..." -v
-                kill -9 $pid
-            else
-                scan=false
-            fi
-        done
+        SID=$(cat /tmp/last_port_sid)
+        kill -TERM -"$SID" 2>/dev/null
+        sleep 2
+        kill -9 -"$SID" 2>/dev/null
     fi
 }
 
