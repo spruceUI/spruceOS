@@ -25,7 +25,28 @@
         "fbalpha2012"
       ],
       "selected": "fbneo",
-      "overrides": {}
+      "overrides": {},
+      "devices": [
+        "MIYOO_A30",
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK"
+      ]
+    },
+    "Emulator_MiyooMini": {
+      "display": "Retroarch Core",
+      "options": [
+        "fbneo",
+        "mame2003_plus",
+        "km_mame2003_xtreme",
+        "fbalpha2012"
+      ],
+      "selected": "fbneo",
+      "overrides": {},
+      "devices": [
+        "MIYOO_MINI_FLIP"
+      ]
     }
   },
   "sortOrder": 300,
