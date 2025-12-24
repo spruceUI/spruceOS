@@ -727,6 +727,9 @@ kill_pyui_message_writer() {
 
     if [ -n "$pids" ]; then
         log_message "Real Time message listener is running. Killing it..."
+        display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
+        sleep 0.5
+
         # Kill all matching PIDs
         for pid in $pids; do
             kill "$pid" 2>/dev/null
@@ -738,8 +741,6 @@ kill_pyui_message_writer() {
 }
 
 stop_pyui_message_writer() {
-    display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
-    sleep 0.5
     kill_pyui_message_writer
     freemma &>/dev/null # I don't think we have this bin on any spruce devices
 }
