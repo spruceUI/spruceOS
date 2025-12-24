@@ -81,9 +81,7 @@ case $EMU_NAME in
 			run_mupen_standalone
 		else
 			load_n64_controller_profile
-			ready_architecture_dependent_states
 			run_retroarch
-			stash_architecture_dependent_states
 			save_custom_n64_controller_profile
 		fi
 		;;
@@ -123,9 +121,7 @@ case $EMU_NAME in
 		;;
 
 	*)
-		ready_architecture_dependent_states
 		run_retroarch
-		stash_architecture_dependent_states
 		;;
 esac
 

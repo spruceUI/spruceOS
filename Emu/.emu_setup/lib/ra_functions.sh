@@ -110,6 +110,7 @@ backup_ra_config() {
 }
 
 run_retroarch() {
+	ready_architecture_dependent_states
 
 	prepare_ra_config 2>/dev/null
 
@@ -132,6 +133,8 @@ run_retroarch() {
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 
 	backup_ra_config 2>/dev/null
+	
+	stash_architecture_dependent_states
 }
 
 ready_architecture_dependent_states() {
