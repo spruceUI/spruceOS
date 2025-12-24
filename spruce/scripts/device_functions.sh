@@ -730,3 +730,74 @@ new_execution_loop() {
         pidof audioserver >/dev/null || audioserver &
     fi
 }
+
+get_spruce_ra_cfg_location() {
+    echo "/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+}
+
+get_ra_cfg_location(){
+    if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
+		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
+	else
+		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
+	fi
+}
+
+setup_for_retroarch_and_get_bin_location(){
+	case "$PLATFORM" in
+		"Brick" | "SmartPro" | "SmartProS")
+			if [ "$use_igm" = "True" ]; then
+				export RA_BIN="ra64.trimui_$PLATFORM"
+			else
+				export RA_BIN="retroarch.trimui"
+				export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
+			fi
+			if [ "$CORE" = "uae4arm" ]; then
+				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then
+				use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
+				[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
+			fi
+			# TODO: remove this once profile is set up
+			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
+		    export CORE_DIR="$RA_DIR/.retroarch/cores64"
+		;;
+		"Flip" )
+			if [ "$CORE" = "yabasanshiro" ]; then
+				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
+				export RA_BIN="ra64.miyoo"
+			elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
+				export RA_BIN="retroarch-flip"
+			else
+				export RA_BIN="ra64.miyoo"
+			fi
+			
+			if [ "$CORE" = "easyrpg" ]; then
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+			elif [ "$CORE" = "yabasanshiro" ]; then
+				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
+			fi
+		    export CORE_DIR="$RA_DIR/.retroarch/cores64"
+
+		;;
+		"A30" )
+        	export CORE_DIR="$RA_DIR/.retroarch/cores"
+
+			if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
+				export RA_BIN="retroarch"
+			else
+				export RA_BIN="ra32.miyoo"
+			fi
+		;;
+	esac
+
+
+	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+	else
+		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+	fi
+
+    echo "$RA_BIN"
+
+}

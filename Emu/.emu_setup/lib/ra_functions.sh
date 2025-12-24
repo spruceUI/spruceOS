@@ -26,12 +26,8 @@
 
 prepare_ra_config() {
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
-		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
-	else
-		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
-	fi
+	PLATFORM_CFG=$(get_spruce_ra_cfg_location)
+	CURRENT_CFG=$(get_ra_cfg_location)
 
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
@@ -108,12 +104,8 @@ prepare_ra_config() {
 backup_ra_config() {
 	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	if [ "$PLATFORM" = "Flip" ] && [ "$use_igm" = "True" ]; then
-		CURRENT_CFG="/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
-	else
-		CURRENT_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
-	fi
+	PLATFORM_CFG=$(get_spruce_ra_cfg_location)
+	CURRENT_CFG=$(get_ra_cfg_location)
 	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
 }
 
@@ -123,56 +115,9 @@ run_retroarch() {
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
-	case "$PLATFORM" in
-		"Brick" | "SmartPro" | "SmartProS")
-			if [ "$use_igm" = "True" ]; then
-				export RA_BIN="ra64.trimui_$PLATFORM"
-			else
-				export RA_BIN="retroarch.trimui"
-				export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
-			fi
-			if [ "$CORE" = "uae4arm" ]; then
-				export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-			elif [ "$CORE" = "genesis_plus_gx" ] && [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then
-				use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
-				[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
-			fi
-			# TODO: remove this once profile is set up
-			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
-		;;
-		"Flip" )
-			if [ "$CORE" = "yabasanshiro" ]; then
-				# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
-				export RA_BIN="ra64.miyoo"
-			elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
-				export RA_BIN="retroarch-flip"
-			else
-				export RA_BIN="ra64.miyoo"
-			fi
-			
-			if [ "$CORE" = "easyrpg" ]; then
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
-			elif [ "$CORE" = "yabasanshiro" ]; then
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
-			fi
-		;;
-		"A30" )
-			if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-				export RA_BIN="retroarch"
-			else
-				export RA_BIN="ra32.miyoo"
-			fi
-		;;
-	esac
-
+	RA_BIN=$(setup_for_retroarch_and_get_bin_location)
 	RA_DIR="/mnt/SDCARD/RetroArch"
 	cd "$RA_DIR"
-
-	if [ "$PLATFORM" = "A30" ]; then
-		CORE_DIR="$RA_DIR/.retroarch/cores"
-	else # 64-bit device
-		CORE_DIR="$RA_DIR/.retroarch/cores64"
-	fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
