@@ -789,6 +789,9 @@ setup_for_retroarch_and_get_bin_location(){
 				export RA_BIN="ra32.miyoo"
 			fi
 		;;
+        "MiyooMini" )
+        	export CORE_DIR="/mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/cores"
+			export RA_BIN="retroarch"
 	esac
 
 
