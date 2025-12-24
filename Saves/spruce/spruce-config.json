@@ -208,6 +208,14 @@
                 ],
                 "selected": "True"
             },
+            "keepSavesBetweenCores": {
+                "display": "Keep saves between cores",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",

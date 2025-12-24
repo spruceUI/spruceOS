@@ -149,9 +149,8 @@ ra_start_setup_saves_and_states_for_core_differences() {
 
     if [ "$CACHED_CORE" != "$core_basename" ]; then
 		log_message "Core changed : CURRENT = $core_basename, CACHED = $CACHED_CORE"
+		handle_changed_core "$CACHED_CORE" "$core_basename" 
 		cache_core_path
-    else
-		log_message "Core same"
 	fi
 
 }
@@ -190,6 +189,58 @@ get_cached_core_path() {
         echo "$CORE_PATH"
     fi
 }
+
+handle_changed_core() {
+	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "False")"
+	if [ "$KEEP_SAVES_BETWEEN_CORES" = "True" ]; then
+		log_message "Syncing saves between cores as per user setting."
+		cached_core="$1"
+		current_core="$2"
+
+		cached_core_folder=$(get_core_folder "$cached_core")
+		current_core_folder=$(get_core_folder "$current_core")
+
+		rom_basename=$(basename "$ROM_FILE")
+		rom_name="${rom_basename%.*}" 
+
+		timestamp=$(date +%s)
+
+		saves_dir="/mnt/SDCARD/Saves/saves"
+
+		# --- Handle Saves ---
+		# Find the current save (any extension) in the current core folder
+		current_save_file=$(find "$saves_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$current_save_file" ]; then
+			mv "$current_save_file" "${current_save_file}.bak-$timestamp"
+			log_message "Moved current save to ${current_save_file}.bak-$timestamp"
+		else
+			log_message "No current save exists in $current_core_folder for $rom_name"
+		fi
+
+		# Find the cached save (any extension) in the cached core folder
+		cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$cached_save_file" ]; then
+			cp "$cached_save_file" "$saves_dir/$current_core_folder/"
+			log_message "Copied save from $cached_save_file to $current_core_folder"
+		else
+			log_message "No cached save exists in $cached_core_folder for $rom_name"
+		fi
+
+		# --- Handle States ---
+		states_dir="/mnt/SDCARD/Saves/states"
+
+		# Find the current state file (any extension, typically .auto) in current core folder
+		current_state_file=$(find "$states_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$current_state_file" ]; then
+			mv "$current_state_file" "${current_state_file}.bak-$timestamp"
+			log_message "Moved current state to ${current_state_file}.bak-$timestamp"
+		else
+			log_message "No current state exists in $current_core_folder for $rom_name"
+		fi
+		# No state copy from cached folder, since cores rarely share state files
+	fi
+}
+
 
 ready_architecture_dependent_states() {
 	STATES="/mnt/SDCARD/Saves/states"
