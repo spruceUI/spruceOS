@@ -53,11 +53,46 @@ use_default_emulator() {
 }
 
 get_core_override() {
-	local core_override="$(jq -r --arg game "$GAME" '.menuOptions.Emulator.overrides[$game]' "$EMU_JSON_PATH")"
-	if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
-		export CORE=$core_override
-	fi
+    # Determine the platform-specific key first
+    if jq -e ".menuOptions.Emulator_$PLATFORM" "$EMU_JSON_PATH" >/dev/null 2>&1; then
+        core_section=".menuOptions.Emulator_$PLATFORM"
+    else
+        # Fallback for EMU_NAME-specific keys
+        case "$EMU_NAME" in
+            DC|NAOMI|N64|PS)
+                if [ "$PLATFORM" = "A30" ]; then
+                    core_section=".menuOptions.Emulator_A30"
+                else
+                    core_section=".menuOptions.Emulator_64"
+                fi
+                ;;
+            NDS)
+                if [ "$PLATFORM" = "Flip" ]; then
+                    core_section=".menuOptions.Emulator_Flip"
+                else
+                    core_section=".menuOptions.Emulator_Brick"
+                fi
+                ;;
+            *)
+                core_section=".menuOptions.Emulator"
+                ;;
+        esac
+    fi
+
+    # 1) Check per-game override in the resolved section
+    core_override=$(jq -r --arg game "$GAME" "$core_section.overrides[\$game]" "$EMU_JSON_PATH")
+    if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
+        export CORE="$core_override"
+        return
+    fi
+
+    # 2) Fallback to the section's selected core
+    core_override=$(jq -r "$core_section.selected" "$EMU_JSON_PATH")
+    if [ -n "$core_override" ] && [ "$core_override" != "null" ]; then
+        export CORE="$core_override"
+    fi
 }
+
 
 get_mode_override() {
 	local mode_override="$(jq -r --arg game "$GAME" '.menuOptions.Governor.overrides[$game]' "$EMU_JSON_PATH")"
