@@ -250,7 +250,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
     
-        core_selection_in_config = Device.get_core_for_game(rom_info.game_system.game_system_config, rom_info.rom_file_path)
+        core_selection_in_config = Device.get_core_for_game(rom_info.game_system.game_system_config, os.path.basename(rom_info.rom_file_path))
        
         core_names = self.CORE_TO_FOLDER_LOOKUP.get(core_selection_in_config)
         if(core_names is not None):       
