@@ -509,7 +509,7 @@ get_version_complex() {
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 log_message() {
     message="$1"
-    verbose_flag="$2"
+    verbose_flag="${2:-}"
     custom_log_file="${3:-$log_file}"
 
     # Check if it's a verbose message and if verbose logging is not enabled
