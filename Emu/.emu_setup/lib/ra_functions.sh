@@ -1,5 +1,6 @@
 #!/bin/sh
 
+. /mnt/SDCARD/Emu/.emu_setup/lib/core_mappings.sh
 # Requires globals:
 #   PLATFORM
 #   BRAND
@@ -110,7 +111,7 @@ backup_ra_config() {
 }
 
 run_retroarch() {
-	ready_architecture_dependent_states
+	
 
 	prepare_ra_config 2>/dev/null
 
@@ -121,12 +122,14 @@ run_retroarch() {
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
-		CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
-		CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
 
 	pin_to_dedicated_cores "$RA_BIN"
+
+	ra_start_setup_saves_and_states_for_core_differences
 
 	#Swap below if debugging new cores
 	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
@@ -134,8 +137,110 @@ run_retroarch() {
 
 	backup_ra_config 2>/dev/null
 	
+	ra_close_setup_saves_and_states_for_core_differences
+}
+
+ra_start_setup_saves_and_states_for_core_differences() {
+	ready_architecture_dependent_states
+	CACHED_CORE=$(get_cached_core_path)
+	
+    # Get only the filename of the core
+    core_basename=$(basename "$CORE_PATH")
+
+    if [ "$CACHED_CORE" != "$core_basename" ]; then
+		log_message "Core changed : CURRENT = $core_basename, CACHED = $CACHED_CORE"
+		handle_changed_core "$CACHED_CORE" "$core_basename" 
+		cache_core_path
+	fi
+
+}
+
+ra_close_setup_saves_and_states_for_core_differences(){
 	stash_architecture_dependent_states
 }
+
+cache_core_path() {
+    cache_dir="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}"
+    mkdir -p "$cache_dir"
+
+    # Get only the basename of the ROM file
+    rom_basename=$(basename "$ROM_FILE")
+
+    # Get only the filename of the core
+    core_basename=$(basename "$CORE_PATH")
+
+    cache_file="${cache_dir}/${rom_basename}"
+    log_message "Caching core filename for ROM '$ROM_FILE': '$core_basename'"
+
+    echo "$core_basename" > "$cache_file"
+}
+
+
+get_cached_core_path() {
+	# Get only the basename of the ROM file
+    rom_basename=$(basename "$ROM_FILE")
+
+    cache_file="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}/${rom_basename}"
+
+    if [ -f "$cache_file" ]; then
+        cat "$cache_file"
+    else
+		log_message "No cached core found for ROM '$ROM_FILE'. $cache_file does not exist."
+        echo "$CORE_PATH"
+    fi
+}
+
+handle_changed_core() {
+	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "False")"
+	if [ "$KEEP_SAVES_BETWEEN_CORES" = "True" ]; then
+		log_message "Syncing saves between cores as per user setting."
+		cached_core="$1"
+		current_core="$2"
+
+		cached_core_folder=$(get_core_folder "$cached_core")
+		current_core_folder=$(get_core_folder "$current_core")
+
+		rom_basename=$(basename "$ROM_FILE")
+		rom_name="${rom_basename%.*}" 
+
+		timestamp=$(date +%s)
+
+		saves_dir="/mnt/SDCARD/Saves/saves"
+
+		# --- Handle Saves ---
+		# Find the current save (any extension) in the current core folder
+		current_save_file=$(find "$saves_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$current_save_file" ]; then
+			mv "$current_save_file" "${current_save_file}.bak-$timestamp"
+			log_message "Moved current save to ${current_save_file}.bak-$timestamp"
+		else
+			log_message "No current save exists in $current_core_folder for $rom_name"
+		fi
+
+		# Find the cached save (any extension) in the cached core folder
+		cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$cached_save_file" ]; then
+			cp "$cached_save_file" "$saves_dir/$current_core_folder/"
+			log_message "Copied save from $cached_save_file to $current_core_folder"
+		else
+			log_message "No cached save exists in $cached_core_folder for $rom_name"
+		fi
+
+		# --- Handle States ---
+		states_dir="/mnt/SDCARD/Saves/states"
+
+		# Find the current state file (any extension, typically .auto) in current core folder
+		current_state_file=$(find "$states_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+		if [ -n "$current_state_file" ]; then
+			mv "$current_state_file" "${current_state_file}.bak-$timestamp"
+			log_message "Moved current state to ${current_state_file}.bak-$timestamp"
+		else
+			log_message "No current state exists in $current_core_folder for $rom_name"
+		fi
+		# No state copy from cached folder, since cores rarely share state files
+	fi
+}
+
 
 ready_architecture_dependent_states() {
 	STATES="/mnt/SDCARD/Saves/states"
