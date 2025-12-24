@@ -206,38 +206,40 @@ handle_changed_core() {
 		timestamp=$(date +%s)
 
 		saves_dir="/mnt/SDCARD/Saves/saves"
-
-		# --- Handle Saves ---
-		# Find the current save (any extension) in the current core folder
-		current_save_file=$(find "$saves_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
-		if [ -n "$current_save_file" ]; then
-			mv "$current_save_file" "${current_save_file}.bak-$timestamp"
-			log_message "Moved current save to ${current_save_file}.bak-$timestamp"
-		else
-			log_message "No current save exists in $current_core_folder for $rom_name"
-		fi
-
-		# Find the cached save (any extension) in the cached core folder
-		cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
 		if [ -n "$cached_save_file" ]; then
+
+			# --- Handle Saves ---
+			# Find the current save (any extension) in the current core folder
+			current_save_file=$(find "$saves_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+			if [ -n "$current_save_file" ]; then
+				mv "$current_save_file" "${current_save_file}.bak-$timestamp"
+				log_message "Moved current save to ${current_save_file}.bak-$timestamp"
+			else
+				log_message "No current save exists in $current_core_folder for $rom_name"
+			fi
+
+			# Find the cached save (any extension) in the cached core folder
+			cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
 			cp "$cached_save_file" "$saves_dir/$current_core_folder/"
 			log_message "Copied save from $cached_save_file to $current_core_folder"
-		else
-			log_message "No cached save exists in $cached_core_folder for $rom_name"
-		fi
 
-		# --- Handle States ---
-		states_dir="/mnt/SDCARD/Saves/states"
+			# --- Handle States ---
+			states_dir="/mnt/SDCARD/Saves/states"
 
-		# Find the current state file (any extension, typically .auto) in current core folder
-		current_state_file=$(find "$states_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
-		if [ -n "$current_state_file" ]; then
-			mv "$current_state_file" "${current_state_file}.bak-$timestamp"
-			log_message "Moved current state to ${current_state_file}.bak-$timestamp"
+			# Find the current state file (any extension, typically .auto) in current core folder
+			current_state_file=$(find "$states_dir/$current_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
+			if [ -n "$current_state_file" ]; then
+				mv "$current_state_file" "${current_state_file}.bak-$timestamp"
+				log_message "Moved current state to ${current_state_file}.bak-$timestamp"
+			else
+				log_message "No current state exists in $current_core_folder for $rom_name"
+			fi
+
+			# No state copy from cached folder, since cores rarely share state files
+
 		else
-			log_message "No current state exists in $current_core_folder for $rom_name"
+			log_message "No cached save exists in $cached_core_folder for $rom_name so not moving any saves/states"
 		fi
-		# No state copy from cached folder, since cores rarely share state files
 	fi
 }
 
