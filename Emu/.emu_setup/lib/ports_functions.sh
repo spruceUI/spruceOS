@@ -50,20 +50,19 @@ run_port() {
         set_port_mode
 
         is_retroarch_port
+        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+        export HOME="/mnt/SDCARD/Saves/flip/home"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+        export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
         if [ $? -eq 1 ]; then
-            PORTS_DIR=/mnt/SDCARD/Roms/PORTS
             cd /mnt/SDCARD/RetroArch/
-            export HOME="/mnt/SDCARD/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
-             "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
+            "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
         else
-            PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-            cd $PORTS_DIR
-            export HOME="/mnt/SDCARD/Saves/flip/home"
-            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
-            export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
-            "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log
+            setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+            SID=$!
+            echo "$SID" > /tmp/last_port_sid
+            wait "$SID"
+            rm -f /tmp/last_port_sid
         fi
         
         /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
