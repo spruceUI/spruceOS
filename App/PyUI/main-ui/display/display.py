@@ -91,7 +91,9 @@ class Display:
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
-        "Text has zero width"
+        "Text has zero width",
+        "Texture dimensions are limited",
+        "Corrupt PNG"
     ]
 
     @classmethod
@@ -232,18 +234,15 @@ class Display:
         cls._text_texture_cache.clear_cache()
         cls._image_texture_cache.clear_cache()
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
-        PyUiLogger.get_logger().debug("Display deinitialized")    
 
     @classmethod
     def clear_text_cache(cls):
-        PyUiLogger.get_logger().debug("Clearing text cache")    
         cls._text_texture_cache.clear_cache()
         cls.deinit_fonts()
         cls.init_fonts()
 
     @classmethod
     def clear_image_cache(cls):
-        PyUiLogger.get_logger().debug("Clearing image cache")    
         cls._image_texture_cache.clear_cache()
 
     @classmethod
@@ -259,7 +258,6 @@ class Display:
 
     @classmethod
     def reinitialize(cls, bg=None):
-        PyUiLogger.get_logger().info("reinitialize display")
         cls.deinit_display()
         cls._unload_bg_texture()
         cls._init_display()
@@ -274,7 +272,6 @@ class Display:
         if cls.background_texture:
             sdl2.SDL_DestroyTexture(cls.background_texture)
             cls.background_texture = None
-            PyUiLogger.get_logger().debug("Destroying bg texture")
 
     @classmethod
     def restore_bg(cls, bg=None):
@@ -635,8 +632,7 @@ class Display:
             if(surface_width > Device.max_texture_width() or surface_height > Device.max_texture_height()):
                 sdl2.SDL_FreeSurface(surface)
                 PyUiLogger.get_logger().warning(
-                    f"Image is too large to render. Skipping {image_path}\n"
-                    f"Stack trace:\n{''.join(traceback.format_stack())}"
+                    f"Image is too large to render ({surface_width} x {surface_height} with max of {Device.max_texture_width()} x {Device.max_texture_height()}). Skipping {image_path}\n"
                 ) 
                 cls._problematic_images.add(image_path)
                 return 0, 0

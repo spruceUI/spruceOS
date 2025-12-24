@@ -373,16 +373,17 @@ class BoxArtScraper:
         downloaded_files = []
         # Run tasks concurrently
         count = 0
+        success_count = 0
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self.process_rom, *t) for t in tasks]
 
             for future in as_completed(futures):
                 count = count +1
-                if(count % 10 == 0):
-                    self.log_and_display_message(f"Scraping box art... ({count}/{len(tasks)})")
+                self.log_and_display_message(f"Scraping box art... ({count}/{len(tasks)}). Found {success_count} so far.")
                 try:
                     result = future.result()
                     if result: 
+                        success_count = success_count +1
                         downloaded_files.append(result)
                 except Exception as e:
                     self.log_message(f"BoxartScraper: Error processing a ROM - {e}")
