@@ -23,6 +23,15 @@ export_ld_library_path() {
     esac
 }
 
+export_spruce_etc_dir() {
+    case "$PLATFORM" in
+        "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
+        "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
+        "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
+    esac
+
+}
+
 get_sd_card_path() {
     if [ "$PLATFORM" = "Flip" ]; then
         echo "/mnt/sdcard"

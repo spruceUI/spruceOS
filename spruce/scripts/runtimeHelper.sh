@@ -4,11 +4,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
-case "$PLATFORM" in
-    "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
-    "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
-    "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
-esac
+export_spruce_etc_dir
 
 run_sd_card_fix_if_triggered() {
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
