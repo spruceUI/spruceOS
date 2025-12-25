@@ -193,7 +193,16 @@ init_gpio_a133p() {
 }
 
 runtime_mounts_a133p() {
-    log_message "Missing runtime_mounts_a133p method for TrimUI A133P device"
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
+    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
+    wait
+    touch /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
 
