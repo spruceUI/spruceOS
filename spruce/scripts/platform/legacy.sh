@@ -8,14 +8,13 @@
 get_python_path() {
     case "$PLATFORM" in
         A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
-        Brick|SmartProS)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
+        SmartProS)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
     esac
 }
 
 export_ld_library_path() {
     case "$PLATFORM" in
         "A30")       export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
-        "Brick")     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
         "SmartProS"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
     esac
 }
@@ -23,7 +22,7 @@ export_ld_library_path() {
 export_spruce_etc_dir() {
     case "$PLATFORM" in
         "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
-        "Brick" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
+        "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
     esac
 
 }
@@ -36,7 +35,6 @@ get_config_path() {
     local cfgname
     case "$PLATFORM" in
         "A30") cfgname="a30" ;;
-        "Brick") cfgname="brick" ;;
         *) cfgname="unknown" ;;  # optional default
     esac
 
@@ -249,35 +247,6 @@ vibrate() {
                 done &
                 wait
                 echo -n 0 > /sys/class/motor/level
-            ;;
-        "Brick")  
-            if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
-                timer=0
-                echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-                while [ $timer -lt $duration ]; do
-                    sleep 0.002
-                    timer=$(($timer + 2))
-                done
-                echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-            elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
-                timer=0
-                while [ $timer -lt $duration ]; do
-                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-                    sleep 0.005
-                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-                    sleep 0.001
-                    timer=$(($timer + 6))
-                done &
-            elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
-                timer=0
-                while [ $timer -lt $duration ]; do
-                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-                    sleep 0.003
-                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-                    sleep 0.001
-                    timer=$(($timer + 4))
-                done &
-            fi
             ;;
     esac
 }
@@ -559,7 +528,7 @@ rainbreathe() {
 # used in principal.sh
 enable_or_disable_rgb() {
     case "$PLATFORM" in
-        "Brick"|"SmartProS")
+        "SmartProS")
             enable_file="/sys/class/led_anim/enable"
         	disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
             if [ "$disable_rgb" = "True" ]; then
@@ -602,7 +571,7 @@ set_path_variable() {
 
 enter_sleep() {
     case "$PLATFORM" in
-        Brick|A30)
+        A30)
             log_message "powerbutton_watchdog.sh: Entering sleep."
             echo -n mem >/sys/power/state
             ;;
@@ -625,7 +594,7 @@ set_volume() {
 
 reset_playback_pack() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
     log_message "*** audioFunctions.sh: reset playback path" -v
 
     current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
@@ -642,7 +611,7 @@ reset_playback_pack() {
 
 set_playback_path() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
     volume_lv=$(amixer cget name='SPK Volume' | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
     log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
 
@@ -682,7 +651,7 @@ get_ra_cfg_location(){
 
 setup_for_retroarch_and_get_bin_location(){
 	case "$PLATFORM" in
-		"Brick" | "SmartProS")
+		"SmartProS")
 			if [ "$use_igm" = "True" ]; then
 				export RA_BIN="ra64.trimui_$PLATFORM"
 			else
@@ -766,11 +735,8 @@ send_menu_button_to_retroarch() {
 }
 
 prepare_for_pyui_launch(){
-     if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
+    if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
         killall -q -USR2 joystickinput 
-    elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
-        rm -f /tmp/trimui_inputd/input_no_dpad
-        rm -f /tmp/trimui_inputd/input_dpad_to_joystick
     fi
 }
 
@@ -849,7 +815,7 @@ check_if_fw_needs_update() {
             VERSION="$(cat /usr/miyoo/version)"
             [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
             ;;
-        "Brick"|"SmartProS" )
+        "SmartProS" )
             current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
             [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
             ;;
@@ -881,22 +847,6 @@ device_specific_wake_from_sleep() {
     log_message "nothing to do" -v
 }
 
-
-init_gpio_Brick() {
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
-}
 
 init_gpio_SmartProS() {
     #5V enable
@@ -951,7 +901,7 @@ runtime_mounts_A30() {
     mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
 }
 
-runtime_mounts_Brick() {
+runtime_mounts_SmartProS() {
     # Mask Roms/PORTS with non-A30 version
     mkdir -p "/mnt/SDCARD/Roms/PORTS64"
     mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
@@ -962,10 +912,6 @@ runtime_mounts_Brick() {
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
-}
-
-runtime_mounts_SmartProS() {
-   runtime_mounts_Brick
 }
 
 run_trimui_blobs() {
@@ -1010,21 +956,6 @@ device_init() {
         cd "/mnt/SDCARD/spruce/bin"
         ./joypad $EVENT_PATH_KEYBOARD &
         ${SCRIPTS_DIR}/autoReloadCalibration.sh &
-
-    elif [ $PLATFORM = "Brick" ]; then
-
-        export PATH="/usr/trimui/bin:$PATH"
-        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        chmod a+x /usr/bin/notify
-
-        init_gpio_${PLATFORM}
-
-        syslogd -S
-
-        /etc/bluetooth/bluetoothd start
-
-        run_trimui_blobs
-        echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
 
     elif [ "$PLATFORM" = "SmartProS" ]; then
 
