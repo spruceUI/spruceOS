@@ -33,7 +33,6 @@ enable_or_disable_wifi &
 
 # import multipass.cfg and start wifi_watchdog
 ${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
-# ${SCRIPTS_DIR}/network/wifi_watchdog.sh > /dev/null &
 
 # Flag cleanup
 flag_remove "log_verbose" &
