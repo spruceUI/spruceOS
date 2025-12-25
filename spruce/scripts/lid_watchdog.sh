@@ -3,11 +3,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ ! "$PLATFORM" = "Flip" ]; then
-    log_message "Lid watchdog not needed."
-    exit 0
-fi
-
 log_message "*** lid_watchdog.sh: started" 
 
 GPIO_PATH="/sys/devices/platform/hall-mh248/hallvalue"

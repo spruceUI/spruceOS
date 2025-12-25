@@ -6,11 +6,7 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 
-if [ $PLATFORM = "A30" ]; then
-	SFTP_SERVICE_NAME=sftp-server 
-else
-	SFTP_SERVICE_NAME=sftpgo
-fi
+SFTP_SERVICE_NAME=$(get_sftp_service_name)
 
 samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
 ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"

@@ -23,6 +23,15 @@ export_ld_library_path() {
     esac
 }
 
+export_spruce_etc_dir() {
+    case "$PLATFORM" in
+        "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
+        "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
+        "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
+    esac
+
+}
+
 get_sd_card_path() {
     if [ "$PLATFORM" = "Flip" ]; then
         echo "/mnt/sdcard"
@@ -803,4 +812,371 @@ setup_for_retroarch_and_get_bin_location(){
 
     echo "$RA_BIN"
 
+}
+
+
+
+# Send L3 and R3 press event, this would toggle in-game and pause in RA
+# or toggle in-game menu in PPSSPP
+send_virtual_key_L3R3() {
+    {
+        echo $B_MENU 0 # MENU up
+        echo $B_L3 1 # L3 down
+        echo $B_R3 1 # R3 down
+        sleep 0.1
+        echo $B_R3 0 # R3 up
+        echo $B_L3 0 # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | sendevent $EVENT_PATH_JOYPAD
+}
+
+send_virtual_key_L3() {
+    {
+        echo $B_MENU 0 # MENU up
+        echo $B_L3 1 # L3 down
+        sleep 0.1
+        echo $B_L3 0 # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | sendevent $EVENT_PATH_JOYPAD
+}
+
+send_menu_button_to_retroarch() {
+    if pgrep "ra32.miyoo" >/dev/null; then
+        send_virtual_key_L3
+    elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+        echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
+    elif pgrep -f "retroarch" >/dev/null; then
+        if [ "$PLATFORM" = "A30" ]; then
+            send_virtual_key_L3R3
+        elif [ "$PLATFORM" = "MiyooMini" ]; then
+            ra_network_command MENU_TOGGLE
+        else
+            echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
+        fi
+    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+        send_virtual_key_L3
+    fi
+    # PICO8 has no in-game menu and
+    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
+}
+
+prepare_for_pyui_launch(){
+     if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
+        killall -q -USR2 joystickinput 
+    elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
+        rm -f /tmp/trimui_inputd/input_no_dpad
+        rm -f /tmp/trimui_inputd/input_dpad_to_joystick
+    elif [ "$PLATFORM" = "MiyooMini" ]; then
+        set_performance
+    fi
+}
+
+post_pyui_exit(){
+    [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
+}
+
+launch_startup_watchdogs(){
+    if [ "$PLATFORM" != "MiyooMini" ]; then
+        ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
+        ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+        ${SCRIPTS_DIR}/low_power_warning.sh &
+    fi
+
+    if [ "$PLATFORM" = "Flip" ]; then
+        ${SCRIPTS_DIR}/lid_watchdog.sh &
+    fi
+
+
+    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+}
+
+perform_fw_check(){
+    FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
+
+    # A30's firmware check
+    if [ "$PLATFORM" = "A30" ]; then
+        VERSION=$(cat /usr/miyoo/version)
+        if [ "$VERSION" -lt 20240713100458 ]; then
+            log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
+            sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
+            display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
+            sleep 5
+        fi
+    fi
+
+}
+
+
+compare_current_version_to_version() {
+    target_version="$1"
+    current_version="$(cat /etc/version 2>/dev/null)"
+
+    [ -z "$target_version" ] && target_version="1.0.0"
+    [ -z "$current_version" ] && current_version="1.0.0"
+
+    # Split versions into components
+    C_1=$(echo "$current_version" | cut -d. -f1)
+    C_2=$(echo "$current_version" | cut -d. -f2)
+    C_3=$(echo "$current_version" | cut -d. -f3)
+    C_2=${C_2:-0}
+    C_3=${C_3:-0}
+
+    T_1=$(echo "$target_version" | cut -d. -f1)
+    T_2=$(echo "$target_version" | cut -d. -f2)
+    T_3=$(echo "$target_version" | cut -d. -f3)
+    T_2=${T_2:-0}
+    T_3=${T_3:-0}
+
+    i=1
+    while [ $i -le 3 ]; do
+        eval C=\$C_$i
+        eval T=\$T_$i
+
+        if [ "$C" -gt "$T" ]; then
+            echo "newer"
+            return 0
+        elif [ "$C" -lt "$T" ]; then
+            echo "older"
+            return 2
+        fi
+        i=$((i + 1))
+    done
+
+    echo "same"
+    return 1
+}
+
+
+# Should the above be merged into here?
+check_if_fw_needs_update() {
+    case "$PLATFORM" in
+        "A30"|"Flip" )
+            VERSION="$(cat /usr/miyoo/version)"
+            [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
+            ;;
+        "Brick"|"SmartPro"|"SmartProS" )
+            current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
+            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
+            ;;
+        *)
+            echo "false"
+            ;;
+    esac
+}
+
+take_screenshot() {
+    screenshot_path="$1"
+
+    if [ "$PLATFORM" = "A30" ]; then
+        /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
+    elif [ "$PLATFORM" = "Flip" ]; then
+        close_ppsspp_menu
+        /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
+    else
+        screenshot.sh "$screenshot_path"
+    fi
+}
+
+get_sftp_service_name() {
+    if [ "$PLATFORM" = "A30" ]; then
+        echo "sftp-server"
+    else
+        echo "sftpgo"
+    fi
+}
+
+device_specific_wake_from_sleep() {
+    [ "$PLATFORM" = "Flip" ] && reset_playback_pack
+}
+
+
+init_gpio_Flip() {
+    # Initialize rumble motor
+    echo 20 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio20/direction
+    echo -n 0 > /sys/class/gpio/gpio20/value
+
+    # Initialize headphone jack
+    if [ ! -d /sys/class/gpio/gpio150 ]; then
+        echo 150 > /sys/class/gpio/export
+        sleep 0.1
+    fi
+    echo in > /sys/class/gpio/gpio150/direction
+}
+
+init_gpio_Brick() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}
+
+init_gpio_SmartPro() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #Left/Right Pad PD14/PD18
+    echo 110 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio110/direction
+    echo -n 1 > /sys/class/gpio/gpio110/value
+
+    echo 114 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio114/direction
+    echo -n 1 > /sys/class/gpio/gpio114/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}
+
+init_gpio_SmartProS() {
+    #5V enable
+    # echo 335 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio335/direction
+    # echo -n 1 > /sys/class/gpio/gpio335/value
+
+    #fan off
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state 
+
+    #rumble motor PH12
+    echo 236 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio236/direction
+    echo -n 0 > /sys/class/gpio/gpio236/value
+
+    #Left/Right Pad PK12/PK16 , run in trimui_inputd
+    # echo 332 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio332/direction
+    # echo -n 1 > /sys/class/gpio/gpio332/value
+
+    # echo 336 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio336/direction
+    # echo -n 1 > /sys/class/gpio/gpio336/value
+
+    #DIP Switch PL11 , run in trimui_inputd
+    # echo 363 > /sys/class/gpio/export
+    # echo -n in > /sys/class/gpio/gpio363/direction
+
+    # load wifi and low power bluetooth modules
+    modprobe aic8800_fdrv.ko
+    modprobe aic8800_btlpm.ko
+
+    #splash rumble
+    echo 32768 > /sys/class/motor/level 
+    sleep 0.2
+    echo 0 > /sys/class/motor/level 
+}
+
+device_init() {
+    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
+
+    if [ "$PLATFORM" = "A30" ]; then
+        handle_a30_quirks &
+
+        # listen hotkeys for brightness adjustment, volume buttons and power button
+        ${SCRIPTS_DIR}/buttons_watchdog.sh &
+
+        # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
+        mv /dev/ttyS0 /dev/ttyS2
+
+        # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+        cd "/mnt/SDCARD/spruce/bin"
+        ./joypad $EVENT_PATH_KEYBOARD &
+        ${SCRIPTS_DIR}/autoReloadCalibration.sh &
+
+    elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
+
+        export PATH="/usr/trimui/bin:$PATH"
+        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+        chmod a+x /usr/bin/notify
+
+        init_gpio_${PLATFORM}
+
+        syslogd -S
+
+        /etc/bluetooth/bluetoothd start
+
+        run_trimui_blobs
+        echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
+
+    elif [ "$PLATFORM" = "SmartProS" ]; then
+
+        export PATH=/usr/trimui/bin:$PATH
+        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+        chmod a+x /usr/bin/notify
+
+        init_gpio_SmartProS
+
+        #syslogd -S
+
+        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ] ; then
+            /etc/bluetooth/bt_init.sh start
+            hpid=`pgrep hciattach`
+            if [ "$hpid" == "" ] ; then
+                hciattach -n ttyAS1 aic &
+            fi        
+            /etc/bluetooth/bluetoothd start
+        fi
+
+        run_trimui_blobs
+        echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
+
+        tinymix set 23 1
+        tinymix set 18 23
+        tinymix set 26 1
+        tinymix set 27 1
+        tinymix set 28 1
+        tinymix set 29 1
+
+        echo 1 > /sys/class/drm/card0-DSI-1/rotate
+        echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+
+    elif [ "$PLATFORM" = "Flip" ]; then
+
+        echo 3 > /proc/sys/kernel/printk
+        chmod a+x /usr/bin/notify
+
+        export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
+
+        init_gpio_Flip
+
+        insmod /lib/modules/rtk_btusb.ko
+        /usr/miyoo/bin/btmanager &
+        /usr/miyoo/bin/hardwareservice &
+        /usr/miyoo/bin/miyoo_inputd &
+        sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
+
+        #joypad
+        echo -1 > /sys/class/miyooio_chr_dev/joy_type
+        #keyboard
+        #echo 0 > /sys/class/miyooio_chr_dev/joy_type
+
+        # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
+        perform_fw_update_Flip
+
+        # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
+        ${SCRIPTS_DIR}/buttons_watchdog.sh &
+        ${SCRIPTS_DIR}/mixer_watchdog.sh &
+        ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
+        ${SCRIPTS_DIR}/enable_zram.sh &
+
+        killall runmiyoo.sh
+
+    fi
+   
 }

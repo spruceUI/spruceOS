@@ -64,18 +64,11 @@ while [ 1 ]; do
         # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI
         finish_unpacking "pre_menu_unpacking"
 
-        if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
-            killall -q -USR2 joystickinput 
-        elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
-            rm -f /tmp/trimui_inputd/input_no_dpad
-            rm -f /tmp/trimui_inputd/input_dpad_to_joystick
-        elif [ "$PLATFORM" = "MiyooMini" ]; then
-            set_performance
-        fi
+        prepare_for_pyui_launch
 
         /mnt/SDCARD/App/PyUI/launch.sh
 
-        [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
+        post_pyui_exit
 
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         finish_unpacking "pre_cmd_unpacking"

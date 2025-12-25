@@ -4,11 +4,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
-case "$PLATFORM" in
-    "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
-    "Flip") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo355/etc" ;;
-    "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
-esac
+export_spruce_etc_dir
 
 run_sd_card_fix_if_triggered() {
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
@@ -60,61 +56,6 @@ hide_fw_app() {
 
 show_fw_app() {
     sed -i 's|"#label"|"label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
-}
-
-compare_current_version_to_version() {
-    target_version="$1"
-    current_version="$(cat /etc/version 2>/dev/null)"
-
-    [ -z "$target_version" ] && target_version="1.0.0"
-    [ -z "$current_version" ] && current_version="1.0.0"
-
-    # Split versions into components
-    C_1=$(echo "$current_version" | cut -d. -f1)
-    C_2=$(echo "$current_version" | cut -d. -f2)
-    C_3=$(echo "$current_version" | cut -d. -f3)
-    C_2=${C_2:-0}
-    C_3=${C_3:-0}
-
-    T_1=$(echo "$target_version" | cut -d. -f1)
-    T_2=$(echo "$target_version" | cut -d. -f2)
-    T_3=$(echo "$target_version" | cut -d. -f3)
-    T_2=${T_2:-0}
-    T_3=${T_3:-0}
-
-    i=1
-    while [ $i -le 3 ]; do
-        eval C=\$C_$i
-        eval T=\$T_$i
-
-        if [ "$C" -gt "$T" ]; then
-            echo "newer"
-            return 0
-        elif [ "$C" -lt "$T" ]; then
-            echo "older"
-            return 2
-        fi
-        i=$((i + 1))
-    done
-
-    echo "same"
-    return 1
-}
-
-check_if_fw_needs_update() {
-    case "$PLATFORM" in
-        "A30"|"Flip" )
-            VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
-            ;;
-        "Brick"|"SmartPro"|"SmartProS" )
-            current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
-            [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
-            ;;
-        *)
-            echo "false"
-            ;;
-    esac
 }
 
 # Define the function to check and hide the firmware update app
@@ -570,98 +511,6 @@ perform_fw_update_Flip() {
         /usr/miyoo/apps/fw_update/miyoo_fw_update
         rm "${miyoo_fw_dir}/miyoo355_fw.img"
     fi
-}
-
-init_gpio_Flip() {
-    # Initialize rumble motor
-    echo 20 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio20/direction
-    echo -n 0 > /sys/class/gpio/gpio20/value
-
-    # Initialize headphone jack
-    if [ ! -d /sys/class/gpio/gpio150 ]; then
-        echo 150 > /sys/class/gpio/export
-        sleep 0.1
-    fi
-    echo in > /sys/class/gpio/gpio150/direction
-}
-
-init_gpio_Brick() {
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
-}
-
-init_gpio_SmartPro() {
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #Left/Right Pad PD14/PD18
-    echo 110 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio110/direction
-    echo -n 1 > /sys/class/gpio/gpio110/value
-
-    echo 114 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio114/direction
-    echo -n 1 > /sys/class/gpio/gpio114/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
-}
-
-init_gpio_SmartProS() {
-    #5V enable
-    # echo 335 > /sys/class/gpio/export
-    # echo -n out > /sys/class/gpio/gpio335/direction
-    # echo -n 1 > /sys/class/gpio/gpio335/value
-
-    #fan off
-    echo 0 > /sys/class/thermal/cooling_device0/cur_state 
-
-    #rumble motor PH12
-    echo 236 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio236/direction
-    echo -n 0 > /sys/class/gpio/gpio236/value
-
-    #Left/Right Pad PK12/PK16 , run in trimui_inputd
-    # echo 332 > /sys/class/gpio/export
-    # echo -n out > /sys/class/gpio/gpio332/direction
-    # echo -n 1 > /sys/class/gpio/gpio332/value
-
-    # echo 336 > /sys/class/gpio/export
-    # echo -n out > /sys/class/gpio/gpio336/direction
-    # echo -n 1 > /sys/class/gpio/gpio336/value
-
-    #DIP Switch PL11 , run in trimui_inputd
-    # echo 363 > /sys/class/gpio/export
-    # echo -n in > /sys/class/gpio/gpio363/direction
-
-    # load wifi and low power bluetooth modules
-    modprobe aic8800_fdrv.ko
-    modprobe aic8800_btlpm.ko
-
-    #splash rumble
-    echo 32768 > /sys/class/motor/level 
-    sleep 0.2
-    echo 0 > /sys/class/motor/level 
 }
 
 run_trimui_blobs() {

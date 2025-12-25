@@ -180,7 +180,7 @@ while true; do
 
             # restore volume only when we actually woke from the alarm
             set_volume "$(cat "$TMP_VOLUME_PATH")"
-            [ "$PLATFORM" = "Flip" ] && reset_playback_pack
+            device_specific_wake_from_sleep
         fi
     fi
 
