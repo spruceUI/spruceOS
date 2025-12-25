@@ -850,3 +850,14 @@ send_menu_button_to_retroarch() {
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
+
+prepare_for_pyui_launch(){
+     if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
+        killall -q -USR2 joystickinput 
+    elif [ "$PLATFORM" = "Brick" ]; then    # this ensures the d-pad can be used to control PyUI
+        rm -f /tmp/trimui_inputd/input_no_dpad
+        rm -f /tmp/trimui_inputd/input_dpad_to_joystick
+    elif [ "$PLATFORM" = "MiyooMini" ]; then
+        set_performance
+    fi
+}
