@@ -18,7 +18,13 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/profile /etc/profile
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 mount -o bind /mnt/SDCARD/spruce/miyoomini/Emu/NDS /mnt/SDCARD/Emu/NDS
-mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
+
+
+#mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch /mnt/SDCARD/RetroArch
+mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch/retroarch /mnt/SDCARD/RetroArch/retroarch
+mount -o bind  /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/cores /mnt/SDCARD/RetroArch/.retroarch/cores
+mount -o bind  /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/config /mnt/SDCARD/RetroArch/.retroarch/config
+cp /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/retroarch.cfg /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
 
 adbd &
  
