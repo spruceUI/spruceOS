@@ -7,21 +7,18 @@
 
 get_python_path() {
     case "$PLATFORM" in
-        A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
         SmartProS)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
     esac
 }
 
 export_ld_library_path() {
     case "$PLATFORM" in
-        "A30")       export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "SmartProS"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
     esac
 }
 
 export_spruce_etc_dir() {
     case "$PLATFORM" in
-        "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
         "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
     esac
 
@@ -34,7 +31,6 @@ get_sd_card_path() {
 get_config_path() {
     local cfgname
     case "$PLATFORM" in
-        "A30") cfgname="a30" ;;
         *) cfgname="unknown" ;;  # optional default
     esac
 
@@ -159,9 +155,6 @@ set_overclock() {
         unlock_governor 2>/dev/null
 
         case "$PLATFORM" in
-            "A30")    ### A30 requires special bin to overclock beyond 1344
-                /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
-                ;;
             *)
                 echo performance > "$CPU_0_DIR/scaling_governor"
                 echo "$DEVICE_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
@@ -180,7 +173,6 @@ set_overclock() {
 
 # use these in conjunction with the pin_cpu binary, e.g.:
 #   pin_cpu "$EMU_CPUS" -n drastic32
-# would set drastic's affinity to cpus 2 and 3 on the A30.
 export SYSTEM_CPU="${DEVICE_CORES_ONLINE%"${DEVICE_CORES_ONLINE#?}"}"
 EMU_CPUS="${DEVICE_CORES_ONLINE#${DEVICE_CORES_ONLINE%??}}"
 export EMU_CPUS="${EMU_CPUS%?},${EMU_CPUS#?}"
@@ -212,27 +204,6 @@ vibrate() {
     done
 
     case "$PLATFORM" in
-        "A30")
-            if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
-                echo "$duration" >/sys/devices/virtual/timed_output/vibrator/enable
-            elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
-                timer=0
-                while [ $timer -lt $duration ]; do
-                    echo 5 >/sys/devices/virtual/timed_output/vibrator/enable
-                    sleep 0.006
-                    timer=$(($timer + 6))
-                done &
-            elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
-                timer=0
-                while [ $timer -lt $duration ]; do
-                    echo 3 >/sys/devices/virtual/timed_output/vibrator/enable
-                    sleep 0.004
-                    timer=$(($timer + 4))
-                done &
-            else
-                log_message "this is where I'd put my vibration... IF I HAD ONE"
-            fi
-            ;;
         "SmartProS")
                 case "$intensity" in
                     "Weak")   echo  50 > /sys/class/motor/max_scale ;;
@@ -409,7 +380,7 @@ display() {
 
 
 # ---------------------------------------------------------------------------
-# rgb_led <zones> <effect> [color] [duration_ms] [cycles] [A30/Flip led trigger]
+# rgb_led <zones> <effect> [color] [duration_ms] [cycles] [Flip led trigger]
 #
 # Controls RGB LEDs on TrimUI Brick / Smart Pro.
 #
@@ -457,12 +428,6 @@ rgb_led() {
     # early out if disabled
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
 	[ "$disable" = "True" ] && return 0
-
-    # handle platforms with no rgb zones
-    case "$PLATFORM" in "A30") 
-        [ -n "$6" ] && echo "$6" > "$LED_PATH/trigger"
-        return 0
-    ;; esac
 
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
@@ -555,46 +520,32 @@ QRENCODE_PATH="/mnt/SDCARD/spruce/bin/qrencode"
 QRENCODE64_PATH="/mnt/SDCARD/spruce/bin64/qrencode"
 
 get_qr_bin_path() {
-    if [ "$PLATFORM" = "A30" ]; then
-        echo "$QRENCODE_PATH"
-    else
-        echo "$QRENCODE64_PATH"
-    fi
+    echo "$QRENCODE64_PATH"
 }
 
 set_path_variable() {
     case "$PLATFORM" in
-        A30)               export PATH="/mnt/SDCARD/spruce/bin:$PATH" ;;
         *)                 export PATH="/mnt/SDCARD/spruce/bin64:$PATH" ;;
     esac
 }
 
 enter_sleep() {
-    case "$PLATFORM" in
-        A30)
-            log_message "powerbutton_watchdog.sh: Entering sleep."
-            echo -n mem >/sys/power/state
-            ;;
-    esac
+    log_message "none"
 }
 
 get_current_volume() {
-    case "$PLATFORM" in
-        * ) amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%' ;;
-    esac
+    amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%' ;;
 }
 
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
-    case "$PLATFORM" in
-        * ) amixer set 'Soft Volume Master' "$new_vol" ;;
-    esac
+    amixer set 'Soft Volume Master' "$new_vol" ;;
 }
 
 
 reset_playback_pack() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "SmartProS" ]; then
     log_message "*** audioFunctions.sh: reset playback path" -v
 
     current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
@@ -611,7 +562,7 @@ reset_playback_pack() {
 
 set_playback_path() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "SmartProS" ]; then
     volume_lv=$(amixer cget name='SPK Volume' | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
     log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
 
@@ -668,15 +619,6 @@ setup_for_retroarch_and_get_bin_location(){
 			export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
 		    export CORE_DIR="$RA_DIR/.retroarch/cores64"
 		;;
-		"A30" )
-        	export CORE_DIR="$RA_DIR/.retroarch/cores"
-
-			if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-				export RA_BIN="retroarch"
-			else
-				export RA_BIN="ra32.miyoo"
-			fi
-		;;
 	esac
 
 
@@ -722,11 +664,7 @@ send_menu_button_to_retroarch() {
     elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
         echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
     elif pgrep -f "retroarch" >/dev/null; then
-        if [ "$PLATFORM" = "A30" ]; then
-            send_virtual_key_L3R3
-        else
-            echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
-        fi
+        echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
     elif pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
     fi
@@ -735,13 +673,11 @@ send_menu_button_to_retroarch() {
 }
 
 prepare_for_pyui_launch(){
-    if [ "$PLATFORM" = "A30" ]; then        # this allows joystick to be used as DPAD in MainUI
-        killall -q -USR2 joystickinput 
-    fi
+    log_message "none"
 }
 
 post_pyui_exit(){
-    [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
+    log_message "none"
 }
 
 launch_startup_watchdogs(){
@@ -752,19 +688,7 @@ launch_startup_watchdogs(){
 }
 
 perform_fw_check(){
-    FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
-
-    # A30's firmware check
-    if [ "$PLATFORM" = "A30" ]; then
-        VERSION=$(cat /usr/miyoo/version)
-        if [ "$VERSION" -lt 20240713100458 ]; then
-            log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-            sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
-            display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
-            sleep 5
-        fi
-    fi
-
+    log_message "none"
 }
 
 
@@ -811,10 +735,6 @@ compare_current_version_to_version() {
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     case "$PLATFORM" in
-        "A30")
-            VERSION="$(cat /usr/miyoo/version)"
-            [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
-            ;;
         "SmartProS" )
             current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
             [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
@@ -828,19 +748,11 @@ check_if_fw_needs_update() {
 take_screenshot() {
     screenshot_path="$1"
 
-    if [ "$PLATFORM" = "A30" ]; then
-        /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
-    else
-        screenshot.sh "$screenshot_path"
-    fi
+    screenshot.sh "$screenshot_path"
 }
 
 get_sftp_service_name() {
-    if [ "$PLATFORM" = "A30" ]; then
-        echo "sftp-server"
-    else
-        echo "sftpgo"
-    fi
+    echo "sftpgo"
 }
 
 device_specific_wake_from_sleep() {
@@ -885,22 +797,6 @@ init_gpio_SmartProS() {
     echo 0 > /sys/class/motor/level 
 }
 
-
-runtime_mounts_A30() {
-    mkdir -p /var/lib/alsa
-    mkdir -p /mnt/SDCARD/spruce/dummy
-    mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
-    mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
-    mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
-    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
-    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
-    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-    /mnt/SDCARD/spruce/a30/sdl2/bind.sh &
-    wait
-    touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
-}
-
 runtime_mounts_SmartProS() {
     # Mask Roms/PORTS with non-A30 version
     mkdir -p "/mnt/SDCARD/Roms/PORTS64"
@@ -943,21 +839,7 @@ device_init() {
 
     SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 
-    if [ "$PLATFORM" = "A30" ]; then
-        handle_a30_quirks &
-
-        # listen hotkeys for brightness adjustment, volume buttons and power button
-        ${SCRIPTS_DIR}/buttons_watchdog.sh &
-
-        # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
-        mv /dev/ttyS0 /dev/ttyS2
-
-        # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
-        cd "/mnt/SDCARD/spruce/bin"
-        ./joypad $EVENT_PATH_KEYBOARD &
-        ${SCRIPTS_DIR}/autoReloadCalibration.sh &
-
-    elif [ "$PLATFORM" = "SmartProS" ]; then
+    if [ "$PLATFORM" = "SmartProS" ]; then
 
         export PATH=/usr/trimui/bin:$PATH
         export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
@@ -998,22 +880,14 @@ set_event_arg() {
 }
 
 set_dark_httpd_dir() {
-    if [ "$PLATFORM" = "A30" ]; then
-        DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
-    else
-        DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
-    fi
+    DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
 
 }
 
 # Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
 
 set_SMB_DIR(){
-    if [ $PLATFORM = "A30" ]; then
-        SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
-    else
-        SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
-    fi
+    SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
 }
 
 set_LD_LIBRARY_PATH_FOR_SAMBA(){
@@ -1021,19 +895,11 @@ set_LD_LIBRARY_PATH_FOR_SAMBA(){
 }
 
 set_SFTPGO_DIR() {
-    if [ "$PLATFORM" = "A30" ]; then
-        SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
-    else
-        SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
-    fi
+    SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
 }
 
 set_syncthing_ST_BIN() {
-    if [ "$PLATFORM" = "A30" ]; then
-        ST_BIN=$SYNCTHING_DIR/bin/syncthing
-    else
-        ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
-    fi
+    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
 }
 
 
@@ -1061,23 +927,6 @@ set_default_ra_hotkeys() {
 
     # Update RetroArch config with default values
 
-    if [ "$PLATFORM" = "A30" ]; then
-        update_ra_config_file_with_new_setting "$RA_FILE" \
-            "input_enable_hotkey = \"rctrl\"" \
-            "input_exit_emulator = \"ctrl\"" \
-            "input_fps_toggle = \"alt\"" \
-            "input_load_state = \"tab\"" \
-            "input_menu_toggle = \"shift\"" \
-            "input_menu_toggle_btn = \"9\"" \
-            "input_quit_gamepad_combo = \"0\"" \
-            "input_save_state = \"backspace\"" \
-            "input_screenshot = \"space\"" \
-            "input_shader_toggle = \"up\"" \
-            "input_state_slot_decrease = \"left\"" \
-            "input_state_slot_increase = \"right\"" \
-            "input_toggle_slowmotion = \"e\"" \
-            "input_toggle_fast_forward = \"t\""
-    else
         update_ra_config_file_with_new_setting "$RA_FILE" \
             "input_enable_hotkey_btn = \"4\"" \
             "input_exit_emulator_btn = \"0\"" \
@@ -1093,6 +942,6 @@ set_default_ra_hotkeys() {
             "input_state_slot_increase_btn = \"14\"" \
             "input_toggle_slowmotion_axis = \"+4\"" \
             "input_toggle_fast_forward_axis = \"+5\""
-    fi
+    
 
 }

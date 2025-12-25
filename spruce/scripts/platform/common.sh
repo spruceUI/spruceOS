@@ -121,19 +121,12 @@ set_overclock() {
         cores_online "$DEVICE_CORES_ONLINE"
         unlock_governor 2>/dev/null
 
-        case "$PLATFORM" in
-            "A30")    ### A30 requires special bin to overclock beyond 1344
-                /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
-                ;;
-            *)
-                echo performance > "$CPU_0_DIR/scaling_governor"
-                echo "$DEVICE_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
-                if [ -e "$CPU_4_DIR" ]; then
-                    echo "performance" > "$CPU_4_DIR/scaling_governor"
-                    echo "$DEVICE_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
-                fi
-                ;;
-        esac
+        echo performance > "$CPU_0_DIR/scaling_governor"
+        echo "$DEVICE_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+        if [ -e "$CPU_4_DIR" ]; then
+            echo "performance" > "$CPU_4_DIR/scaling_governor"
+            echo "$DEVICE_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+        fi
 
         lock_governor 2>/dev/null
         log_message "CPU Mode now locked to OVERCLOCK" -v
