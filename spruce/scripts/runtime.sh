@@ -154,14 +154,7 @@ fi
 
 ${SCRIPTS_DIR}/set_up_swap.sh &
 
-if [ "$PLATFORM" != "MiyooMini" ]; then
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-    ${SCRIPTS_DIR}/lid_watchdog.sh &
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/low_power_warning.sh &
-fi
-
-${SCRIPTS_DIR}/homebutton_watchdog.sh &
+launch_startup_watchdogs
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
