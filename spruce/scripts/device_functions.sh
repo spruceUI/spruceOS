@@ -1082,7 +1082,149 @@ init_gpio_SmartProS() {
     echo 0 > /sys/class/motor/level 
 }
 
+
+runtime_mounts_A30() {
+    mkdir -p /var/lib/alsa
+    mkdir -p /mnt/SDCARD/spruce/dummy
+    mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
+    mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
+    mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
+    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    /mnt/SDCARD/spruce/a30/sdl2/bind.sh &
+    wait
+    touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
+}
+
+runtime_mounts_Brick() {
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
+    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
+    wait
+    touch /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
+}
+
+runtime_mounts_SmartPro() {
+   runtime_mounts_Brick
+}
+
+runtime_mounts_SmartProS() {
+   runtime_mounts_Brick
+}
+
+runtime_mounts_MiyooMini() {
+    log_message "No Miyoo Mini specific runtime mounts"
+}
+
+runtime_mounts_Flip() {
+
+    mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
+    mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
+    mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+
+    if [ ! -d /mnt/sdcard/Saves/userdata-flip ]; then
+        log_message "Saves/userdata-flip does not exist. Populating surrogate /userdata directory"
+        mkdir /mnt/sdcard/Saves/userdata-flip
+        cp -R /userdata/* /mnt/sdcard/Saves/userdata-flip
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bin
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/bluetooth
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/cfg
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/localtime
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/timezone
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib
+        mkdir -p /mnt/sdcard/Saves/userdata-flip/lib/bluetooth
+    fi
+
+	if [ ! -f /mnt/SDCARD/Saves/userdata-flip/system.json ]; then
+		cp /mnt/SDCARD/spruce/flip/miyoo_system.json /mnt/SDCARD/Saves/userdata-flip/system.json
+	fi
+
+    log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
+    mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
+    mkdir -p /run/bluetooth_fix
+    mount --bind /run/bluetooth_fix /userdata/bluetooth
+    touch /mnt/SDCARD/spruce/flip/bin/MainUI
+    mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
+
+    /mnt/sdcard/spruce/flip/recombine_large_files.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_chroot.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+    /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
+
+    # use appropriate loading images
+    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
+    
+    # Mask Roms/PORTS with non-A30 version
+    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
+    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
+
+	# PortMaster ports location
+    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+	
+	# Treat /spruce/flip/ as the 'root' for any application that needs it.
+	# (i.e. PortMaster looks here for config information which is device specific)
+    mount --bind /mnt/sdcard/spruce/flip/ /root 
+
+    # Bind the correct version of retroarch so it can be accessed by PM
+    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
+}
+
+
+perform_fw_update_Flip() {
+    miyoo_fw_update=0
+    miyoo_fw_dir=/media/sdcard0
+    if [ -f /media/sdcard0/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard0
+    elif [ -f /media/sdcard1/miyoo355_fw.img ] ; then
+        miyoo_fw_update=1
+        miyoo_fw_dir=/media/sdcard1
+    fi
+
+    if [ ${miyoo_fw_update} -eq 1 ] ; then
+        cd $miyoo_fw_dir
+        /usr/miyoo/apps/fw_update/miyoo_fw_update
+        rm "${miyoo_fw_dir}/miyoo355_fw.img"
+    fi
+}
+
+
+run_trimui_blobs() {
+
+    cd /usr/trimui/bin || return 1
+    mkdir -p /tmp/trimui_inputd
+
+    for blob in trimui_inputd trimui_thermald keymon trimui_scened \
+                trimui_btmanager hardwareservice musicserver; do
+        if [ -x "/usr/trimui/bin/$blob" ]; then
+            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
+            log_message "Attempted to start $blob"
+        else
+            log_message "$blob not found. Skipping."
+        fi
+    done
+
+    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
+        cd /usr/trimui/osd || return 1
+        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
+        log_message "Attempted to start trimui_osdd"
+    else
+        log_message "trimui_osdd not found. Skipping."
+    fi
+}
+
 device_init() {
+    runtime_mounts_$PLATFORM
+
     SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 
     if [ "$PLATFORM" = "A30" ]; then
@@ -1179,4 +1321,115 @@ device_init() {
 
     fi
    
+}
+
+# This doesn't seem right for all platforms, needs review
+set_event_arg() {
+    # Use event5 for Flip only; other devices assume event3
+    # NOTE: A30 idlemon bin has not been updated to support -e flag yet
+    [ "$PLATFORM" = "Flip" ] && EVENT_ARG="-e /dev/input/event5"
+}
+
+set_dark_httpd_dir() {
+    if [ "$PLATFORM" = "A30" ]; then
+        DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
+    else
+        DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
+    fi
+
+}
+
+# Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
+
+set_SMB_DIR(){
+    if [ $PLATFORM = "A30" ]; then
+        SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
+    else
+        SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
+    fi
+}
+
+set_LD_LIBRARY_PATH_FOR_SAMBA(){
+	#add Flip libraries
+	if [ $PLATFORM = "Flip" ]; then
+		LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
+	fi
+
+}
+
+set_SFTPGO_DIR() {
+    if [ "$PLATFORM" = "A30" ]; then
+        SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
+    else
+        SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
+    fi
+}
+
+set_syncthing_ST_BIN() {
+    if [ "$PLATFORM" = "A30" ]; then
+        ST_BIN=$SYNCTHING_DIR/bin/syncthing
+    else
+        ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
+    fi
+}
+
+
+update_ra_config_file_with_new_setting() {
+    file="$1"
+    shift
+
+    for setting in "$@"; do
+        if grep -q "${setting%%=*}" "$file"; then
+            sed -i "s|^${setting%%=*}.*|$setting|" "$file"
+        else
+            echo "$setting" >>"$file"
+        fi
+    done
+
+    log_message "Updated $file"
+}
+
+
+set_default_ra_hotkeys() {
+        
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+
+    log_message "Resetting RetroArch hotkeys to Spruce defaults."
+
+    # Update RetroArch config with default values
+
+    if [ "$PLATFORM" = "A30" ]; then
+        update_ra_config_file_with_new_setting "$RA_FILE" \
+            "input_enable_hotkey = \"rctrl\"" \
+            "input_exit_emulator = \"ctrl\"" \
+            "input_fps_toggle = \"alt\"" \
+            "input_load_state = \"tab\"" \
+            "input_menu_toggle = \"shift\"" \
+            "input_menu_toggle_btn = \"9\"" \
+            "input_quit_gamepad_combo = \"0\"" \
+            "input_save_state = \"backspace\"" \
+            "input_screenshot = \"space\"" \
+            "input_shader_toggle = \"up\"" \
+            "input_state_slot_decrease = \"left\"" \
+            "input_state_slot_increase = \"right\"" \
+            "input_toggle_slowmotion = \"e\"" \
+            "input_toggle_fast_forward = \"t\""
+    else
+        update_ra_config_file_with_new_setting "$RA_FILE" \
+            "input_enable_hotkey_btn = \"4\"" \
+            "input_exit_emulator_btn = \"0\"" \
+            "input_fps_toggle_btn = \"2\"" \
+            "input_load_state_btn = \"9\"" \
+            "input_menu_toggle = \"escape\"" \
+            "input_menu_toggle_btn = \"3\"" \
+            "input_quit_gamepad_combo = \"0\"" \
+            "input_save_state_btn = \"10\"" \
+            "input_screenshot_btn = \"1\"" \
+            "input_shader_toggle_btn = \"11\"" \
+            "input_state_slot_decrease_btn = \"13\"" \
+            "input_state_slot_increase_btn = \"14\"" \
+            "input_toggle_slowmotion_axis = \"+4\"" \
+            "input_toggle_fast_forward_axis = \"+5\""
+    fi
+
 }

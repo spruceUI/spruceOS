@@ -2,20 +2,13 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ $PLATFORM = "A30" ]; then
-	SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
-else
-	SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
-fi
+# Why not just get this off the path?
+set_SMB_DIR
 
 start_samba_process(){
     log_message "Starting Samba..."
 	
-	#add Flip libraries
-	if [ $PLATFORM = "Flip" ]; then
-		LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
-	fi
-    
+    set_LD_LIBRARY_PATH_FOR_SAMBA
 	# Set the LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH="$SMB_DIR/lib:$LD_LIBRARY_PATH"
 

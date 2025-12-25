@@ -26,8 +26,7 @@ log_message "---------Starting up---------"
 run_sd_card_fix_if_triggered    # do this before anything else
 cores_online
 set_performance
-runtime_mounts_$PLATFORM
-
+device_init
 # Check if WiFi is enabled and bring up network services if so
 enable_or_disable_wifi &
 
@@ -52,7 +51,7 @@ fi
 check_and_handle_firmware_app &
 check_and_hide_update_app &
 
-device_init
+
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
