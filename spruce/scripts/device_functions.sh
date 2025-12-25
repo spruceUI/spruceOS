@@ -988,3 +988,195 @@ get_sftp_service_name() {
 device_specific_wake_from_sleep() {
     [ "$PLATFORM" = "Flip" ] && reset_playback_pack
 }
+
+
+init_gpio_Flip() {
+    # Initialize rumble motor
+    echo 20 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio20/direction
+    echo -n 0 > /sys/class/gpio/gpio20/value
+
+    # Initialize headphone jack
+    if [ ! -d /sys/class/gpio/gpio150 ]; then
+        echo 150 > /sys/class/gpio/export
+        sleep 0.1
+    fi
+    echo in > /sys/class/gpio/gpio150/direction
+}
+
+init_gpio_Brick() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}
+
+init_gpio_SmartPro() {
+    #PD11 pull high for VCC-5v
+    echo 107 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio107/direction
+    echo -n 1 > /sys/class/gpio/gpio107/value
+
+    #rumble motor PH3
+    echo 227 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio227/direction
+    echo -n 0 > /sys/class/gpio/gpio227/value
+
+    #Left/Right Pad PD14/PD18
+    echo 110 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio110/direction
+    echo -n 1 > /sys/class/gpio/gpio110/value
+
+    echo 114 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio114/direction
+    echo -n 1 > /sys/class/gpio/gpio114/value
+
+    #DIP Switch PH19
+    echo 243 > /sys/class/gpio/export
+    echo -n in > /sys/class/gpio/gpio243/direction
+}
+
+init_gpio_SmartProS() {
+    #5V enable
+    # echo 335 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio335/direction
+    # echo -n 1 > /sys/class/gpio/gpio335/value
+
+    #fan off
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state 
+
+    #rumble motor PH12
+    echo 236 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio236/direction
+    echo -n 0 > /sys/class/gpio/gpio236/value
+
+    #Left/Right Pad PK12/PK16 , run in trimui_inputd
+    # echo 332 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio332/direction
+    # echo -n 1 > /sys/class/gpio/gpio332/value
+
+    # echo 336 > /sys/class/gpio/export
+    # echo -n out > /sys/class/gpio/gpio336/direction
+    # echo -n 1 > /sys/class/gpio/gpio336/value
+
+    #DIP Switch PL11 , run in trimui_inputd
+    # echo 363 > /sys/class/gpio/export
+    # echo -n in > /sys/class/gpio/gpio363/direction
+
+    # load wifi and low power bluetooth modules
+    modprobe aic8800_fdrv.ko
+    modprobe aic8800_btlpm.ko
+
+    #splash rumble
+    echo 32768 > /sys/class/motor/level 
+    sleep 0.2
+    echo 0 > /sys/class/motor/level 
+}
+
+device_init() {
+    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
+
+    if [ "$PLATFORM" = "A30" ]; then
+        handle_a30_quirks &
+
+        # listen hotkeys for brightness adjustment, volume buttons and power button
+        ${SCRIPTS_DIR}/buttons_watchdog.sh &
+
+        # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
+        mv /dev/ttyS0 /dev/ttyS2
+
+        # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
+        cd "/mnt/SDCARD/spruce/bin"
+        ./joypad $EVENT_PATH_KEYBOARD &
+        ${SCRIPTS_DIR}/autoReloadCalibration.sh &
+
+    elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
+
+        export PATH="/usr/trimui/bin:$PATH"
+        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+        chmod a+x /usr/bin/notify
+
+        init_gpio_${PLATFORM}
+
+        syslogd -S
+
+        /etc/bluetooth/bluetoothd start
+
+        run_trimui_blobs
+        echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
+
+    elif [ "$PLATFORM" = "SmartProS" ]; then
+
+        export PATH=/usr/trimui/bin:$PATH
+        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+        chmod a+x /usr/bin/notify
+
+        init_gpio_SmartProS
+
+        #syslogd -S
+
+        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ] ; then
+            /etc/bluetooth/bt_init.sh start
+            hpid=`pgrep hciattach`
+            if [ "$hpid" == "" ] ; then
+                hciattach -n ttyAS1 aic &
+            fi        
+            /etc/bluetooth/bluetoothd start
+        fi
+
+        run_trimui_blobs
+        echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
+
+        tinymix set 23 1
+        tinymix set 18 23
+        tinymix set 26 1
+        tinymix set 27 1
+        tinymix set 28 1
+        tinymix set 29 1
+
+        echo 1 > /sys/class/drm/card0-DSI-1/rotate
+        echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+
+    elif [ "$PLATFORM" = "Flip" ]; then
+
+        echo 3 > /proc/sys/kernel/printk
+        chmod a+x /usr/bin/notify
+
+        export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
+
+        init_gpio_Flip
+
+        insmod /lib/modules/rtk_btusb.ko
+        /usr/miyoo/bin/btmanager &
+        /usr/miyoo/bin/hardwareservice &
+        /usr/miyoo/bin/miyoo_inputd &
+        sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
+
+        #joypad
+        echo -1 > /sys/class/miyooio_chr_dev/joy_type
+        #keyboard
+        #echo 0 > /sys/class/miyooio_chr_dev/joy_type
+
+        # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
+        perform_fw_update_Flip
+
+        # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
+        ${SCRIPTS_DIR}/buttons_watchdog.sh &
+        ${SCRIPTS_DIR}/mixer_watchdog.sh &
+        ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
+        ${SCRIPTS_DIR}/enable_zram.sh &
+
+        killall runmiyoo.sh
+
+    fi
+   
+}
