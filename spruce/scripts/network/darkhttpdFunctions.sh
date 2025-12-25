@@ -2,11 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
-else
-  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
-fi
+set_dark_httpd_dir
 
 WWW_DIR=/mnt/SDCARD/spruce/www
 

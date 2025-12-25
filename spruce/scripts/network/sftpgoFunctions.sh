@@ -1,11 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
-else
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
-fi
+set_SFTPGO_DIR
 
 start_sftpgo_process() {
     log_message "Starting SFTPGO..."

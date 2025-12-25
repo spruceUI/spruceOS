@@ -1,9 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Use event5 for Flip only; other devices assume event3
-# NOTE: A30 idlemon bin has not been updated to support -e flag yet
-[ "$PLATFORM" = "Flip" ] && EVENT_ARG="-e /dev/input/event5"
+set_event_arg
 
 idle_type="$1"
 timeout_value="$2"
