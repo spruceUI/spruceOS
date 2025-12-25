@@ -9,7 +9,7 @@ get_python_path() {
     case "$PLATFORM" in
         A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
         Brick|SmartPro|SmartProS|Flip)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
-        MiyooMini)                      echo "/mnt/SDCARD/spruce/miyoomini/bin/python" ;;
+        MiyooMini)                      echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
     esac
 }
 
@@ -19,7 +19,7 @@ export_ld_library_path() {
         "Flip")      export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "Brick")     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
         "SmartPro"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
-        "MiyooMini") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib" ;;
+        "MiyooMini") export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib" ;;
     esac
 }
 
@@ -629,7 +629,7 @@ get_qr_bin_path() {
 set_path_variable() {
     case "$PLATFORM" in
         A30)               export PATH="/mnt/SDCARD/spruce/bin:$PATH" ;;
-        MiyooMini)   export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH" ;;
+        MiyooMini)   export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH" ;;
         *)                 export PATH="/mnt/SDCARD/spruce/bin64:$PATH" ;;
     esac
 }
