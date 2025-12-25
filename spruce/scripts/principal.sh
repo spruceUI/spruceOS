@@ -68,7 +68,7 @@ while [ 1 ]; do
 
         /mnt/SDCARD/App/PyUI/launch.sh
 
-        [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
+        post_pyui_exit
 
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         finish_unpacking "pre_cmd_unpacking"

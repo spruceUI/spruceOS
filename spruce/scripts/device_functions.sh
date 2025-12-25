@@ -862,6 +862,10 @@ prepare_for_pyui_launch(){
     fi
 }
 
+post_pyui_exit(){
+    [ "$PLATFORM" = "A30" ] && killall -q -USR1 joystickinput   # return the stick to being a stick
+}
+
 launch_startup_watchdogs(){
     if [ "$PLATFORM" != "MiyooMini" ]; then
         ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
