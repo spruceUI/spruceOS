@@ -5,9 +5,8 @@
 # (Not everything was cleanly broken apart since this is a refactor, in the future
 #  we can try to make the file import chain cleaner)
 
-get_python_path() {
-    echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" 
-}
+. "/mnt/SDCARD/spruce/scripts/platform/common32bit.sh"
+
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
@@ -71,10 +70,6 @@ enable_or_disable_rgb() {
 
 restart_wifi() {
     log_message "Intentionally do not let spruce modify wifi" -v
-}
-
-get_qr_bin_path() {
-    echo "/mnt/SDCARD/spruce/bin/qrencode"
 }
 
 set_path_variable() {
@@ -164,43 +159,19 @@ take_screenshot() {
     screenshot.sh "$screenshot_path"
 }
 
-get_sftp_service_name() {
-    echo "sftp-server"
-}
+update_ra_config_file_with_new_setting() {
+    file="$1"
+    shift
 
-device_specific_wake_from_sleep() {
-    log_message "MiyooMini has no specific device wake from sleep needed" -v
-}
+    for setting in "$@"; do
+        if grep -q "${setting%%=*}" "$file"; then
+            sed -i "s|^${setting%%=*}.*|$setting|" "$file"
+        else
+            echo "$setting" >>"$file"
+        fi
+    done
 
-device_init() {
-    log_message "No initialization needed for miyoo mini (handled via .tmp_update)" -v   
-}
-
-# This doesn't seem right for all platforms, needs review
-set_event_arg() {
-    log_message "TODO event arg for miyoo mini?" -v
-}
-
-set_dark_httpd_dir() {
-    DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
-}
-
-# Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
-
-set_SMB_DIR(){
-    SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
-}
-
-set_LD_LIBRARY_PATH_FOR_SAMBA(){
-    log_message "No LD Library Path manip needed for samba on miyoo mini" -v   
-}
-
-set_SFTPGO_DIR() {
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
-}
-
-set_syncthing_ST_BIN() {
-    ST_BIN=$SYNCTHING_DIR/bin/syncthing
+    log_message "Updated $file"
 }
 
 set_default_ra_hotkeys() {
@@ -225,4 +196,9 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
+}
+
+
+device_specific_wake_from_sleep() {
+    log_message "MiyooMini has no specific device wake from sleep needed" -v
 }
