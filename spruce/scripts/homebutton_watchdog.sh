@@ -204,64 +204,6 @@ prepare_game_switcher() {
 
 }
 
-# Send L3 and R3 press event, this would toggle in-game and pause in RA
-# or toggle in-game menu in PPSSPP
-send_virtual_key_L3R3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        echo $B_R3 1 # R3 down
-        sleep 0.1
-        echo $B_R3 0 # R3 up
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
-}
-
-send_virtual_key_L3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        sleep 0.1
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
-}
-
-# Send R3 press event, this would toggle pause in RA
-send_virtual_key_R3() {
-    # Only pause RA if it is running and their hotkey is not 'escape'
-    hotkey_value=$(grep '^input_enable_hotkey = ' "$RETROARCH_CFG" | cut -d '"' -f 2)
-    if [ "$hotkey_value" != "escape" ]; then
-        {
-            echo $B_R3 1 # R3 down
-            sleep 0.1
-            echo $B_R3 0 # R3 up
-            echo 0 0 0   # tell sendevent to exit
-        } | sendevent $EVENT_PATH_JOYPAD
-    fi
-}
-
-send_menu_button_to_emu() {
-    if pgrep "ra32.miyoo" >/dev/null; then
-        send_virtual_key_L3
-    elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
-        echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
-    elif pgrep -f "retroarch" >/dev/null; then
-        if [ "$PLATFORM" = "A30" ]; then
-            send_virtual_key_L3R3
-        elif [ "$PLATFORM" = "MiyooMini" ]; then
-            ra_network_command MENU_TOGGLE
-        else
-            echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
-        fi
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
-        send_virtual_key_L3
-    fi
-    # PICO8 has no in-game menu and
-    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
-}
-
 perform_action() {
     # handle short press
     case $1 in
@@ -269,7 +211,7 @@ perform_action() {
         prepare_game_switcher
         ;;
     "Emulator menu")
-        send_menu_button_to_emu
+        send_menu_button_to_retroarch
         ;;
     "Exit game")
         # resume MainUI if it is running
