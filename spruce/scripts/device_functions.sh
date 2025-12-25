@@ -888,3 +888,16 @@ perform_fw_check(){
     fi
 
 }
+
+take_screenshot() {
+    screenshot_path="$1"
+
+    if [ "$PLATFORM" = "A30" ]; then
+        /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
+    elif [ "$PLATFORM" = "Flip" ]; then
+        close_ppsspp_menu
+        /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
+    else
+        screenshot.sh "$screenshot_path"
+    fi
+}

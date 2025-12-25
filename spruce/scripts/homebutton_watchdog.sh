@@ -161,15 +161,8 @@ take_screenshot(){
     mkdir -p "/mnt/SDCARD/Saves/states/.gameswitcher"
     SCREENSHOT_NAME="/mnt/SDCARD/Saves/states/.gameswitcher/${SHORT_NAME}.state.auto.png"
 
-    if [ "$PLATFORM" = "A30" ]; then
-        /mnt/SDCARD/spruce/a30/screenshot.sh "$SCREENSHOT_NAME" 
-    elif [ "$PLATFORM" = "Flip" ]; then
-        close_ppsspp_menu
-        /mnt/SDCARD/spruce/flip/screenshot.sh "$SCREENSHOT_NAME" 
-    else
-        screenshot.sh "$SCREENSHOT_NAME"
-    fi
-
+    take_screenshot "$SCREENSHOT_NAME"
+    
     log_message "homebutton_watchdog.sh: 'SCREENSHOT_NAME': $SCREENSHOT_NAME" 
 }
 
