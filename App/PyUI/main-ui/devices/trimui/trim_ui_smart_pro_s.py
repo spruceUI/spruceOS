@@ -6,7 +6,8 @@ from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
+from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon

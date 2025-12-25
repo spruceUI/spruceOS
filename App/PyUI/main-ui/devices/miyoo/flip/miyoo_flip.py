@@ -8,7 +8,8 @@ from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
 import os
-from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
+from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller

@@ -2,7 +2,8 @@ import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import InputResult, KeyEvent, KeyWatcherController
+from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.muos.muos_device import MuosDevice

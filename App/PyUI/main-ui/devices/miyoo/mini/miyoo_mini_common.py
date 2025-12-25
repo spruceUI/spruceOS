@@ -5,11 +5,12 @@ from pathlib import Path
 import subprocess
 import threading
 import os
+from controller.key_watcher_controller import KeyWatcherController
 from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller_miyoo_mini import InputResult, KeyEvent, KeyWatcherControllerMiyooMini
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFlipSharedMemoryWriter
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -134,7 +135,7 @@ class MiyooMiniCommon(MiyooDevice):
         key_mappings[KeyEvent(1, 106, 0)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
         
-        return KeyWatcherControllerMiyooMini(event_path="/dev/input/event0", key_mappings=key_mappings)
+        return KeyWatcherController(event_path="/dev/input/event0", key_mappings=key_mappings)
 
     @property
     def power_off_cmd(self):
