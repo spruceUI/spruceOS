@@ -8,7 +8,7 @@
 get_python_path() {
     case "$PLATFORM" in
         A30)                            echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" ;;
-        Brick|SmartPro|SmartProS)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
+        Brick|SmartProS)  echo "/mnt/SDCARD/spruce/flip/bin/python3.10" ;;
     esac
 }
 
@@ -16,14 +16,14 @@ export_ld_library_path() {
     case "$PLATFORM" in
         "A30")       export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib" ;;
         "Brick")     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
-        "SmartPro"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
+        "SmartProS"*) export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib" ;;
     esac
 }
 
 export_spruce_etc_dir() {
     case "$PLATFORM" in
         "A30") export SPRUCE_ETC_DIR="/mnt/SDCARD/miyoo/etc" ;;
-        "Brick" | "SmartPro" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
+        "Brick" | "SmartProS" ) export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" ;;
     esac
 
 }
@@ -37,7 +37,6 @@ get_config_path() {
     case "$PLATFORM" in
         "A30") cfgname="a30" ;;
         "Brick") cfgname="brick" ;;
-        "SmartPro") cfgname="smartpro" ;;
         *) cfgname="unknown" ;;  # optional default
     esac
 
@@ -251,7 +250,7 @@ vibrate() {
                 wait
                 echo -n 0 > /sys/class/motor/level
             ;;
-        "Brick" | "SmartPro")  
+        "Brick")  
             if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
                 timer=0
                 echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
@@ -560,7 +559,7 @@ rainbreathe() {
 # used in principal.sh
 enable_or_disable_rgb() {
     case "$PLATFORM" in
-        "Brick"|"SmartPro"|"SmartProS")
+        "Brick"|"SmartProS")
             enable_file="/sys/class/led_anim/enable"
         	disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
             if [ "$disable_rgb" = "True" ]; then
@@ -603,7 +602,7 @@ set_path_variable() {
 
 enter_sleep() {
     case "$PLATFORM" in
-        Brick|SmartPro|A30)
+        Brick|A30)
             log_message "powerbutton_watchdog.sh: Entering sleep."
             echo -n mem >/sys/power/state
             ;;
@@ -626,7 +625,7 @@ set_volume() {
 
 reset_playback_pack() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
     log_message "*** audioFunctions.sh: reset playback path" -v
 
     current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
@@ -643,7 +642,7 @@ reset_playback_pack() {
 
 set_playback_path() {
   #TODO I think this should be Flip only
-  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+  if [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "A30" ] || [ "$PLATFORM" = "SmartProS" ]; then
     volume_lv=$(amixer cget name='SPK Volume' | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
     log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
 
@@ -683,7 +682,7 @@ get_ra_cfg_location(){
 
 setup_for_retroarch_and_get_bin_location(){
 	case "$PLATFORM" in
-		"Brick" | "SmartPro" | "SmartProS")
+		"Brick" | "SmartProS")
 			if [ "$use_igm" = "True" ]; then
 				export RA_BIN="ra64.trimui_$PLATFORM"
 			else
@@ -850,7 +849,7 @@ check_if_fw_needs_update() {
             VERSION="$(cat /usr/miyoo/version)"
             [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
             ;;
-        "Brick"|"SmartPro"|"SmartProS" )
+        "Brick"|"SmartProS" )
             current_fw_is="$(compare_current_version_to_version "$TARGET_FW_VERSION")"
             [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
             ;;
@@ -893,31 +892,6 @@ init_gpio_Brick() {
     echo 227 > /sys/class/gpio/export
     echo -n out > /sys/class/gpio/gpio227/direction
     echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
-}
-
-init_gpio_SmartPro() {
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #Left/Right Pad PD14/PD18
-    echo 110 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio110/direction
-    echo -n 1 > /sys/class/gpio/gpio110/value
-
-    echo 114 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio114/direction
-    echo -n 1 > /sys/class/gpio/gpio114/value
 
     #DIP Switch PH19
     echo 243 > /sys/class/gpio/export
@@ -990,10 +964,6 @@ runtime_mounts_Brick() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
-runtime_mounts_SmartPro() {
-   runtime_mounts_Brick
-}
-
 runtime_mounts_SmartProS() {
    runtime_mounts_Brick
 }
@@ -1041,7 +1011,7 @@ device_init() {
         ./joypad $EVENT_PATH_KEYBOARD &
         ${SCRIPTS_DIR}/autoReloadCalibration.sh &
 
-    elif [ $PLATFORM = "Brick" ] || [ $PLATFORM = "SmartPro" ]; then
+    elif [ $PLATFORM = "Brick" ]; then
 
         export PATH="/usr/trimui/bin:$PATH"
         export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"

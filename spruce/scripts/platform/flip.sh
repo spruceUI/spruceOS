@@ -204,9 +204,6 @@ take_screenshot() {
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
 }
 
-get_sftp_service_name() {
-    echo "sftpgo"
-}
 
 device_specific_wake_from_sleep() {
     reset_playback_pack
