@@ -1,6 +1,5 @@
 #!/bin/sh
 
-. "/mnt/SDCARD/spruce/scripts/platform/legacy.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/trimui_delegate.sh"
 
@@ -206,30 +205,6 @@ runtime_mounts_a133p() {
 }
 
 
-run_trimui_blobs() {
-
-    cd /usr/trimui/bin || return 1
-    mkdir -p /tmp/trimui_inputd
-
-    for blob in trimui_inputd trimui_thermald keymon trimui_scened \
-                trimui_btmanager hardwareservice musicserver; do
-        if [ -x "/usr/trimui/bin/$blob" ]; then
-            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-            log_message "Attempted to start $blob"
-        else
-            log_message "$blob not found. Skipping."
-        fi
-    done
-
-    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
-        cd /usr/trimui/osd || return 1
-        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
-        log_message "Attempted to start trimui_osdd"
-    else
-        log_message "trimui_osdd not found. Skipping."
-    fi
-}
-
 device_init() {
     runtime_mounts_a133p
 
@@ -279,4 +254,8 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
+}
+
+restart_wifi() {
+    log_message "Unecessary to restart wifi for trimui a133p" -v
 }

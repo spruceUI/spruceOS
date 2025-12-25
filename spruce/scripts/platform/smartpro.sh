@@ -13,7 +13,7 @@ export_ld_library_path() {
 
 get_config_path() {
     # Return the full path
-    echo "/mnt/SDCARD/Saves/smartpro-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json"
 }
 
 init_gpio_a133p() {
