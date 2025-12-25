@@ -865,10 +865,14 @@ prepare_for_pyui_launch(){
 launch_startup_watchdogs(){
     if [ "$PLATFORM" != "MiyooMini" ]; then
         ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-        ${SCRIPTS_DIR}/lid_watchdog.sh &
         ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
         ${SCRIPTS_DIR}/low_power_warning.sh &
     fi
+
+    if [ "$PLATFORM" = "Flip" ]; then
+        ${SCRIPTS_DIR}/lid_watchdog.sh &
+    fi
+
 
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
 }
