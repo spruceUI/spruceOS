@@ -31,6 +31,9 @@ send_menu_button_to_retroarch() {
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
+get_sftp_service_name() {
+    echo "sftpgo"
+}
 
 set_dark_httpd_dir() {
     DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd

@@ -449,3 +449,49 @@ update_ra_config_file_with_new_setting() {
     log_message "Updated $file"
 }
 
+
+restart_wifi() {
+    log_message "Overwrite if needed" -v
+}
+
+
+
+compare_current_version_to_version() {
+    target_version="$1"
+    current_version="$(cat /etc/version 2>/dev/null)"
+
+    [ -z "$target_version" ] && target_version="1.0.0"
+    [ -z "$current_version" ] && current_version="1.0.0"
+
+    # Split versions into components
+    C_1=$(echo "$current_version" | cut -d. -f1)
+    C_2=$(echo "$current_version" | cut -d. -f2)
+    C_3=$(echo "$current_version" | cut -d. -f3)
+    C_2=${C_2:-0}
+    C_3=${C_3:-0}
+
+    T_1=$(echo "$target_version" | cut -d. -f1)
+    T_2=$(echo "$target_version" | cut -d. -f2)
+    T_3=$(echo "$target_version" | cut -d. -f3)
+    T_2=${T_2:-0}
+    T_3=${T_3:-0}
+
+    i=1
+    while [ $i -le 3 ]; do
+        eval C=\$C_$i
+        eval T=\$T_$i
+
+        if [ "$C" -gt "$T" ]; then
+            echo "newer"
+            return 0
+        elif [ "$C" -lt "$T" ]; then
+            echo "older"
+            return 2
+        fi
+        i=$((i + 1))
+    done
+
+    echo "same"
+    return 1
+}
+
