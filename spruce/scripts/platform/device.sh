@@ -1,0 +1,182 @@
+#!/bin/sh
+
+# Intended to be sourced by helperFunctions.sh but NOT anywhere else
+# It relies on functions inside helperFunctions.sh to operate properly
+# (Not everything was cleanly broken apart since this is a refactor, in the future
+#  we can try to make the file import chain cleaner)
+
+get_python_path() {
+    log_message "Missing get_python_path function"
+}
+
+export_ld_library_path() {
+    log_message "Missing export_ld_library_path function"
+}
+
+export_spruce_etc_dir() {
+    log_message "Missing export_spruce_etc_dir function"
+}
+
+get_sd_card_path() {
+    log_message "Missing get_sd_card_path function"
+}
+
+get_config_path() {
+    log_message "Missing get_config_path function"
+}
+
+cores_online() {
+    log_message "Missing cores_online function"
+}
+
+set_smart() {
+    log_message "Missing set_smart function"
+}
+
+set_performance() {
+    log_message "Missing set_performance function"
+}
+
+set_overclock() {
+    log_message "Missing set_overclock function"
+}
+
+vibrate() {
+    log_message "Missing vibrate function"
+}
+
+display_kill() {
+    log_message "Missing display_kill function"
+}
+
+display() {
+    log_message "Missing display function"
+}
+
+rgb_led() {
+    log_message "Missing rgb_led function"
+}
+
+enable_or_disable_rgb() {
+    log_message "Missing enable_or_disable_rgb function"
+}
+
+restart_wifi() {
+    log_message "Missing restart_wifi function"
+}
+
+get_qr_bin_path() {
+    log_message "Missing get_qr_bin_path function"
+}
+
+set_path_variable() {
+    log_message "Missing set_path_variable function"
+}
+
+enter_sleep() {
+    log_message "Missing enter_sleep function"
+}
+
+get_current_volume() {
+    log_message "Missing get_current_volume function"
+}
+
+set_volume() {
+    log_message "Missing set_volume function"
+}
+
+reset_playback_pack() {
+    log_message "Missing reset_playback_pack function"
+}
+
+set_playback_path() {
+    log_message "Missing set_playback_path function"
+}
+
+run_mixer_watchdog() {
+    log_message "Missing run_mixer_watchdog function"
+}
+
+new_execution_loop() {
+    log_message "Missing new_execution_loop function"
+}
+
+get_spruce_ra_cfg_location() {
+    log_message "Missing get_spruce_ra_cfg_location function"
+}
+
+get_ra_cfg_location(){
+    log_message "Missing get_ra_cfg_location function"
+}
+
+setup_for_retroarch_and_get_bin_location(){
+    log_message "Missing setup_for_retroarch_and_get_bin_location function"
+}
+
+send_menu_button_to_retroarch() {
+    log_message "Missing send_menu_button_to_retroarch function"
+}
+
+prepare_for_pyui_launch(){
+    log_message "Missing prepare_for_pyui_launch function"
+}
+
+post_pyui_exit(){
+    log_message "Missing post_pyui_exit function"
+}
+
+launch_startup_watchdogs(){
+    log_message "Missing launch_startup_watchdogs function"
+}
+
+perform_fw_check(){
+    log_message "Missing perform_fw_check function"
+}
+
+check_if_fw_needs_update() {
+    log_message "Missing check_if_fw_needs_update function"
+}
+
+take_screenshot() {
+    log_message "Missing take_screenshot function"
+}
+
+get_sftp_service_name() {
+    log_message "Missing get_sftp_service_name function"
+}
+
+device_specific_wake_from_sleep() {
+    log_message "Missing device_specific_wake_from_sleep function"
+}
+
+device_init() {
+    log_message "Missing device_init function"
+}
+
+set_event_arg() {
+    log_message "Missing set_event_arg function"
+}
+
+set_dark_httpd_dir() {
+    log_message "Missing set_dark_httpd_dir function"
+}
+
+set_SMB_DIR(){
+    log_message "Missing set_SMB_DIR function"
+}
+
+set_LD_LIBRARY_PATH_FOR_SAMBA(){
+    log_message "Missing set_LD_LIBRARY_PATH_FOR_SAMBA function"
+}
+
+set_SFTPGO_DIR() {
+    log_message "Missing set_SFTPGO_DIR function"
+}
+
+set_syncthing_ST_BIN() {
+    log_message "Missing set_syncthing_ST_BIN function"
+}
+
+set_default_ra_hotkeys() {
+    log_message "Missing set_default_ra_hotkeys function"
+}
