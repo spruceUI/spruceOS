@@ -905,3 +905,11 @@ take_screenshot() {
         screenshot.sh "$screenshot_path"
     fi
 }
+
+get_sftp_service_name() {
+    if [ "$PLATFORM" = "A30" ]; then
+        echo "sftp-server"
+    else
+        echo "sftpgo"
+    fi
+}
