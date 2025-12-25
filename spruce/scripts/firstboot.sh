@@ -8,7 +8,6 @@ start_pyui_message_writer
 flag_remove "first_boot_$PLATFORM"
 log_message "Starting firstboot script on $PLATFORM"
 
-FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 UNPACKING_ICON="/mnt/SDCARD/spruce/imgs/refreshing.png"
@@ -38,16 +37,7 @@ fi
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
 
-# A30's firmware check
-if [ "$PLATFORM" = "A30" ]; then
-    VERSION=$(cat /usr/miyoo/version)
-    if [ "$VERSION" -lt 20240713100458 ]; then
-        log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-        sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
-        display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
-        sleep 5
-    fi
-fi
+perform_fw_check
 
 if flag_check "pre_menu_unpacking"; then
     display_image_and_text "$UNPACKING_ICON" 35 25 "Finishing up unpacking themes and files.........." 75
