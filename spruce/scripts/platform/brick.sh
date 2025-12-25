@@ -13,7 +13,7 @@ export_ld_library_path() {
 
 get_config_path() {
     # Return the full path
-    echo "/mnt/SDCARD/Saves/brick-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-brick-system.json"
 }
 
 init_gpio_a133p() {

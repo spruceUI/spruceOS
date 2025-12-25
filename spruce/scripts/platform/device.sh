@@ -53,6 +53,51 @@ display() {
     log_message "Missing display function"
 }
 
+
+# ---------------------------------------------------------------------------
+# rgb_led <zones> <effect> [color] [duration_ms] [cycles] [Flip led trigger]
+#
+# Controls RGB LEDs on TrimUI Brick / Smart Pro.
+#
+# PARAMETERS:
+#   <zones>        A string containing any combination of: l r m 1 2
+#                  (order does not matter)
+#                  Zones resolve to:
+#                     l  → left LED
+#                     r  → right LED
+#                     m  → middle LED
+#                     1  → front LED f1
+#                     2  → front LED f2
+#                  Example: "lrm12", "m1", "r2", "l"
+#
+#   <effect>       One of the following keywords or numeric equivalents:
+#                     0 | off | disable      → off
+#                     1 | linear | rise      → linear rise
+#                     2 | breath*            → breathing pattern
+#                     3 | sniff              → "sniff" animation
+#                     4 | static | on        → solid color
+#                     5 | blink*1            → blink pattern 1
+#                     6 | blink*2            → blink pattern 2
+#                     7 | blink*3            → blink pattern 3
+#
+#   [color]        Hex RGB color (default: "FFFFFF")
+#
+#   [duration_ms]  Animation duration in milliseconds (default: 1000)
+#
+#   [cycles]       Number of animation cycles (default: 1)
+#
+#   [led trigger]  none battery-charging-or-full battery-charging battery-full 
+#                  battery-charging-blink-full-solid usb-online ac-online 
+#                  timer heartbeat gpio default-on mmc1 mmc0
+#
+#
+# EXAMPLES:
+#   rgb_led lrm breathe FF8800 2000 3 heartbeat
+#   rgb_led m2 blink1 00FFAA
+#   rgb_led 12 static
+#   rgb_led r off
+# ---------------------------------------------------------------------------
+
 rgb_led() {
     log_message "Missing rgb_led function"
 }

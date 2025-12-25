@@ -15,5 +15,5 @@ platform_file="/mnt/SDCARD/spruce/scripts/platform/$(echo "$PLATFORM" | tr '[:up
 if [ -f "$platform_file" ]; then
     . "$platform_file"
 else
-    . "/mnt/SDCARD/spruce/scripts/platform/legacy.sh"
+    log_message "No platform functions file found for platform: $PLATFORM : $platform_file"
 fi
