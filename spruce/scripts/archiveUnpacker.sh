@@ -20,6 +20,7 @@ if flag_check "silentUnpacker"; then
     exit 0
 fi
 
+log_message "Unpacker: Script started"
 
 cleanup() {
     flag_remove "silentUnpacker"
@@ -37,10 +38,10 @@ elif [ -n "$1" ]; then
     RUN_MODE="$1"
 fi
 
-flag_check "silentUnpacker" || start_pyui_message_writer
 
 # Function to display text if not in silent mode
 display_if_not_silent() {
+    flag_check "silentUnpacker" || start_pyui_message_writer
     flag_check "silentUnpacker" || display_image_and_text "$ICON" 35 25 "$archive_name archive detected. Unpacking.........." 75
 }
 
