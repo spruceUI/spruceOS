@@ -110,7 +110,9 @@ get_spruce_ra_cfg_location() {
 }
 
 get_ra_cfg_location(){
-	echo "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
+    log_message "TODO: spruce breaks RA cfg so return fake value from get_ra_cfg_location"
+    touch /tmp/ignore.txt
+	echo "/tmp/ignore.txt"
 }
 
 setup_for_retroarch_and_get_bin_location(){
@@ -159,43 +161,8 @@ take_screenshot() {
     screenshot.sh "$screenshot_path"
 }
 
-update_ra_config_file_with_new_setting() {
-    file="$1"
-    shift
-
-    for setting in "$@"; do
-        if grep -q "${setting%%=*}" "$file"; then
-            sed -i "s|^${setting%%=*}.*|$setting|" "$file"
-        else
-            echo "$setting" >>"$file"
-        fi
-    done
-
-    log_message "Updated $file"
-}
-
 set_default_ra_hotkeys() {
-        
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-
-    log_message "Resetting RetroArch hotkeys to Spruce defaults."
-    # Are these right for miyoo mini?
-    update_ra_config_file_with_new_setting "$RA_FILE" \
-        "input_enable_hotkey_btn = \"4\"" \
-        "input_exit_emulator_btn = \"0\"" \
-        "input_fps_toggle_btn = \"2\"" \
-        "input_load_state_btn = \"9\"" \
-        "input_menu_toggle = \"escape\"" \
-        "input_menu_toggle_btn = \"3\"" \
-        "input_quit_gamepad_combo = \"0\"" \
-        "input_save_state_btn = \"10\"" \
-        "input_screenshot_btn = \"1\"" \
-        "input_shader_toggle_btn = \"11\"" \
-        "input_state_slot_decrease_btn = \"13\"" \
-        "input_state_slot_increase_btn = \"14\"" \
-        "input_toggle_slowmotion_axis = \"+4\"" \
-        "input_toggle_fast_forward_axis = \"+5\""
-
+    log_message "TODO: set_default_ra_hotkeys"
 }
 
 
