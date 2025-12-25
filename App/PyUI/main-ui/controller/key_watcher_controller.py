@@ -1,6 +1,7 @@
 
 
 from collections import deque
+import errno
 import os
 import struct
 import threading
@@ -89,15 +90,33 @@ class KeyWatcherController(ControllerInterface):
         return event
 
 
+
     def poll_keyboard(self):
         logger = PyUiLogger.get_logger()
-
+        if self.fd is None:
+            logger.error("File descriptor is None, cannot poll keyboard.")
+            return
+            
         while True:
             now = time.time()
             try:
-                # One blocking read per event — no extra loop
-                data = os.read(self.fd, EVENT_SIZE)
 
+                try:
+                    data = os.read(self.fd, EVENT_SIZE)
+                except OSError as e:
+                    if e.errno == errno.EINTR:
+                        continue
+
+                    if e.errno in (errno.EBADF, errno.ENODEV, errno.EIO):
+                        logger.error(
+                            "Keyboard device became unavailable (errno=%d)",
+                            e.errno,
+                        )
+                        return
+
+                    logger.exception("Unexpected OSError while reading input")
+                    return
+                
                 if len(data) != EVENT_SIZE:
                     logger.error("Short read: got %d bytes, expected %d", len(data), EVENT_SIZE)
                     continue
@@ -127,7 +146,7 @@ class KeyWatcherController(ControllerInterface):
                     pass
 
             except Exception as e:
-                logger.exception("Error reading input: %s", e)
+                logger.exception("Error processing input: %s", e)
 
     def key_change(self, controller_input, direction):
         if(self.print_key_changes):
