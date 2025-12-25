@@ -913,3 +913,7 @@ get_sftp_service_name() {
         echo "sftpgo"
     fi
 }
+
+device_specific_wake_from_sleep() {
+    [ "$PLATFORM" = "Flip" ] && reset_playback_pack
+}
