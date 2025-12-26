@@ -278,3 +278,23 @@ device_get_charging_status() {
 device_get_battery_percent() {
     log_message "Missing device_get_battery_percent function"
 }
+
+device_enter_pseudo_sleep() {
+    log_message "Missing device_enter_pseudo_sleep"
+}
+
+device_exit_pseudo_sleep() {
+    log_message "Missing device_exit_pseudo_sleep"
+}
+
+
+device_lid_sensor_ready() {
+    log_message "Missing device_exit_pseudo_sleep"
+    return 1  # <-- sets exit status to 1 (failure)
+}
+
+# Returns 1 to indicate open, 0 otherwise
+device_lid_open(){
+    log_message "Missing device_lid_open"
+    return 1
+}

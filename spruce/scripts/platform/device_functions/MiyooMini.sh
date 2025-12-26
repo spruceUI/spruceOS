@@ -157,6 +157,7 @@ launch_startup_watchdogs(){
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/low_power_warning.sh &
+    ${SCRIPTS_DIR}/lid_watchdog_v2.sh &
 }
 
 perform_fw_check(){
@@ -240,4 +241,46 @@ device_get_charging_status() {
 device_get_battery_percent() {
     battery=$( /customer/app/axp_test | grep -o '"battery":[0-9]*' | sed 's/"battery"://' )
     echo "$battery"
+}
+
+EMU_LIST="retroarch scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
+BRIGHTNESS_FILE="/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/pwm0/duty_cycle"
+SCREEN_BLANK_FILE="/proc/mi_modules/fb/mi_fb0"
+BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
+
+device_enter_pseudo_sleep() {
+    killall -9 keymon
+    killall -q -SIGSTOP $(echo $EMU_LIST) 2>/dev/null
+    cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
+    echo "GUI_SHOW 0 off" > "$SCREEN_BLANK_FILE" 2>/dev/null    # blank the screen
+    echo "0" > "$BRIGHTNESS_FILE" 2>/dev/null                   # set brightness to 0
+    [ -e "$BUTTON_ENABLE_FILE" ] && echo "N" > "$BUTTON_ENABLE_FILE" 2>/dev/null # disable input
+    touch /tmp/screen_blanked                                   # create flag file
+    cpuclock 100                                                # slow cpu to a crawl
+}
+
+device_exit_pseudo_sleep() {
+    cpuclock 1600                                               # wake up cpu speed
+    keymon &
+    killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
+    echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
+    if [ -f /tmp/saved_brightness ]; then
+        cat /tmp/saved_brightness > "$BRIGHTNESS_FILE" 2>/dev/null  # restore previous brightness
+    else
+        echo "50" > "$BRIGHTNESS_FILE" 2>/dev/null              # default if previous not found
+    fi
+    [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
+    rm -f /tmp/screen_blanked /tmp/saved_brightness             # clean up temp files
+
+    send_event /dev/input/event0 116:1
+
+    pgrep retroarch 2>/dev/null && set_smart # return to smart mode
+}
+
+device_lid_sensor_ready() {
+    [ -e "$LID_HALL_FILE" ]
+}
+
+device_lid_open(){
+    head -c 1 "/sys/devices/soc0/soc/soc:hall-mh248/hallvalue" 2>/dev/null
 }
