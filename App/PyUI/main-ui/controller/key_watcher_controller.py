@@ -155,8 +155,8 @@ class KeyWatcherController(ControllerInterface):
     def get_input(self, timeoutInMilliseconds):
         start_time = time.time()
         timeout = timeoutInMilliseconds / 1000.0
-
-        while (time.time() - start_time) < timeout:
+        do_get_input = True
+        while do_get_input:
             with self.lock:
                 # First, check the event queue
                 if self.input_queue:
@@ -171,6 +171,7 @@ class KeyWatcherController(ControllerInterface):
                     return value
 
             time.sleep(0.005)
+            do_get_input = (time.time() - start_time) < timeout
 
         self.last_held_input = None
         return None
