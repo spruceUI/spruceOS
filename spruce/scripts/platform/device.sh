@@ -114,10 +114,6 @@ get_qr_bin_path() {
     log_message "Missing get_qr_bin_path function"
 }
 
-set_path_variable() {
-    log_message "Missing set_path_variable function"
-}
-
 enter_sleep() {
     log_message "Missing enter_sleep function"
 }

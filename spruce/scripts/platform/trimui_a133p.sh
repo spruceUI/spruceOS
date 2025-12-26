@@ -210,7 +210,6 @@ device_init() {
 
     SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 
-    export PATH="/usr/trimui/bin:$PATH"
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 

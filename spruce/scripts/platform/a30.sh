@@ -92,11 +92,6 @@ restart_wifi() {
     log_message "Do not restart wifi from spruce on a30" -v
 }
 
-
-set_path_variable() {
-    export PATH="/mnt/SDCARD/spruce/bin:$PATH" 
-}
-
 enter_sleep() {
     log_message "Entering sleep."
     echo -n mem >/sys/power/state

@@ -34,8 +34,6 @@ esac
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
-set_path_variable
-
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {

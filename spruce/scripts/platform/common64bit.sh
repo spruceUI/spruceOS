@@ -11,12 +11,6 @@ get_qr_bin_path() {
     echo "/mnt/SDCARD/spruce/bin64/qrencode"
 }
 
-
-set_path_variable() {
-    export PATH="/mnt/SDCARD/spruce/bin64:$PATH"
-}
-
-
 send_menu_button_to_retroarch() {
     if pgrep "ra32.miyoo" >/dev/null; then
         send_virtual_key_L3

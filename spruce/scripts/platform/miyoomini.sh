@@ -72,10 +72,6 @@ restart_wifi() {
     log_message "Intentionally do not let spruce modify wifi" -v
 }
 
-set_path_variable() {
-    export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
-}
-
 enter_sleep() {
     log_message "Keymon handles sleep, not spruce" -v
 }

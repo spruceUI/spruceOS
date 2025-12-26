@@ -13,7 +13,6 @@
 
 [ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
-export PATH="$SYSTEM_PATH/app:${PATH}"
 export HOME="/mnt/SDCARD"
 SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
@@ -50,8 +49,6 @@ fi
 
 check_and_handle_firmware_app &
 check_and_hide_update_app &
-
-
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then

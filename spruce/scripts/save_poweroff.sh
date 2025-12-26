@@ -11,8 +11,6 @@ killall -q -15 principal.sh
 killall -q -9 MainUI
 sleep 0.5
 
-set_path_variable
-
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"

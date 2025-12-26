@@ -23,11 +23,5 @@ else
     elif [ "$PLATFORM" = "Flip" ]; then
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
     fi
-    case "$PLATFORM" in
-		"A30") APP_PATH="/mnt/SDCARD/miyoo/app" ;;
-		"Flip") APP_PATH="/mnt/SDCARD/miyoo355/app" ;;
-		"Brick" | "SmartPro") APP_PATH="/mnt/SDCARD/trimui/app" ;;
-    esac
-    export PATH="$APP_PATH:/usr/sbin:/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     exec /bin/sh
 fi
