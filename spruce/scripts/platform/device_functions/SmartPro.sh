@@ -5,7 +5,7 @@
 # (Not everything was cleanly broken apart since this is a refactor, in the future
 #  we can try to make the file import chain cleaner)
 
-. "/mnt/SDCARD/spruce/scripts/platform/trimui_a133p.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_a133p.sh"
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
@@ -13,7 +13,7 @@ export_ld_library_path() {
 
 get_config_path() {
     # Return the full path
-    echo "/mnt/SDCARD/Saves/trim-ui-brick-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json"
 }
 
 init_gpio_a133p() {
@@ -27,11 +27,20 @@ init_gpio_a133p() {
     echo -n out > /sys/class/gpio/gpio227/direction
     echo -n 0 > /sys/class/gpio/gpio227/value
 
+    #Left/Right Pad PD14/PD18
+    echo 110 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio110/direction
+    echo -n 1 > /sys/class/gpio/gpio110/value
+
+    echo 114 > /sys/class/gpio/export
+    echo -n out > /sys/class/gpio/gpio114/direction
+    echo -n 1 > /sys/class/gpio/gpio114/value
+
     #DIP Switch PH19
     echo 243 > /sys/class/gpio/export
     echo -n in > /sys/class/gpio/gpio243/direction
 }
 
 get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg"
+    echo "/mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg"
 }
