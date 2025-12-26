@@ -3,7 +3,10 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/trimui_delegate.sh"
-
+. "/mnt/SDCARD/spruce/scripts/platform/utils/cores_online_binary_cpu_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
@@ -80,11 +83,6 @@ enable_or_disable_rgb() {
         echo 1 > "$enable_file" 2>/dev/null
         # don't lock them back afterwards
     fi
-}
-
-
-restart_wifi() {
-    log_message "Unecessary to restart wifi for trimui smart pro s" -v
 }
 
 enter_sleep() {
@@ -195,10 +193,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/low_power_warning.sh &
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    launch_common_startup_watchdogs
 }
 
 perform_fw_check(){
@@ -378,4 +373,20 @@ set_default_ra_hotkeys() {
         "input_toggle_fast_forward_axis = \"+5\""
     
 
+}
+
+reset_playback_pack() {
+    log_message "reset_playback_pack Uneeded on this device" -v
+}
+
+set_playback_path() {
+    log_message "set_playback_path Uneeded on this device" -v
+}
+
+run_mixer_watchdog() {
+    log_message "run_mixer_watchdog Uneeded on this device" -v
+}
+
+new_execution_loop() {
+    log_message "new_execution_loop Uneeded on this device" -v
 }

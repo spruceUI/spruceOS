@@ -2,6 +2,11 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/trimui_delegate.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/rumble.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/cores_online_binary_cpu_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
 export_spruce_etc_dir() {
     export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc"
@@ -21,52 +26,8 @@ get_sd_card_path() {
 # If no duration is provided, defaults to 50ms
 # If no intensity is provided, gets value from settings
 vibrate() {
-    duration=50
-    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
-
-    # Parse arguments in any order
-    while [ $# -gt 0 ]; do
-        case "$1" in
-        --intensity)
-            shift
-            intensity="$1"
-            ;;
-        [0-9]*)
-            duration="$1"
-            ;;
-        esac
-        shift
-    done
-
-    if [ "$intensity" = "Strong" ]; then    # 100% duty cycle
-        timer=0
-        echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-        while [ $timer -lt $duration ]; do
-            sleep 0.002
-            timer=$(($timer + 2))
-        done
-        echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-    elif [ "$intensity" = "Medium" ]; then  # 83% duty cycle
-        timer=0
-        while [ $timer -lt $duration ]; do
-            echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-            sleep 0.005
-            echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-            sleep 0.001
-            timer=$(($timer + 6))
-        done &
-    elif [ "$intensity" = "Weak" ]; then    # 75% duty cycle
-        timer=0
-        while [ $timer -lt $duration ]; do
-            echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
-            sleep 0.003
-            echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
-            sleep 0.001
-            timer=$(($timer + 4))
-        done &
-    fi
+    rumble_gpio "$@"
 }
-
 
 rgb_led() {
     rgb_led_trimui "$@"
@@ -160,10 +121,7 @@ post_pyui_exit(){
 
 
 launch_startup_watchdogs(){
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/low_power_warning.sh &
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    launch_common_startup_watchdogs
 }
 
 
@@ -255,6 +213,14 @@ set_default_ra_hotkeys() {
 
 }
 
-restart_wifi() {
-    log_message "Unecessary to restart wifi for trimui a133p" -v
+reset_playback_pack() {
+    log_message "reset_playback_pack Uneeded on this device" -v
+}
+
+set_playback_path() {
+    log_message "set_playback_path Uneeded on this device" -v
+}
+
+run_mixer_watchdog() {
+    log_message "run_mixer_watchdog on this device" -v
 }
