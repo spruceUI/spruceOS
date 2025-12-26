@@ -136,6 +136,7 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    ${SCRIPTS_DIR}/buttons_watchdog.sh &
 }
 
 perform_fw_check(){
@@ -175,10 +176,30 @@ get_volume_level() {
     echo "0"
 }
 
+current_backlight() {
+    jq -r '.backlight' "$SYSTEM_JSON"
+}
+
+set_backlight() {
+    local value="$1"
+
+    # Clamp between 0–10
+    [ "$value" -lt 0 ] && value=0
+    [ "$value" -gt 10 ] && value=10
+
+    sed -i "s/\"backlight\": *[0-9][0-9]*/\"backlight\": $value/" "$SYSTEM_JSON"
+    # Should we get this from path or always from PyUI?
+    /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
+}
+
 brightness_down() {
-    jq -r '.contrast' "$SYSTEM_JSON"
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight - 1))
 }
 
 brightness_up() {
-    log_message "Missing brightness_up function"
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight + 1))
 }
