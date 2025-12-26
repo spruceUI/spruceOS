@@ -85,12 +85,7 @@ vibrate() {
 # ---------------------------------------------------------------------------
 
 rgb_led() {
-
-    # early out if disabled
-	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-	[ "$disable" = "True" ] && return 0
     [ -n "$6" ] && echo "$6" > "$LED_PATH/trigger"
-
     return 0
 }
 
