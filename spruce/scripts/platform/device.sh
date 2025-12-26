@@ -213,3 +213,23 @@ set_syncthing_ST_BIN() {
 set_default_ra_hotkeys() {
     log_message "Missing set_default_ra_hotkeys function"
 }
+
+volume_down() {
+    log_message "Missing volume_down function"
+}
+
+volume_up() {
+    log_message "Missing volume_up function"
+}
+
+get_volume_level() {
+    log_message "Missing get_volume_level function"
+}
+
+brightness_down() {
+    log_message "Missing brightness_down function"
+}
+
+brightness_up() {
+    log_message "Missing brightness_up function"
+}

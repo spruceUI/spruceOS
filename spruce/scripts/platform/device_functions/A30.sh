@@ -5,6 +5,9 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/amixer_volume_control.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
+
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib"
@@ -352,4 +355,17 @@ set_playback_path() {
 
 run_mixer_watchdog() {
     log_message "run_mixer_watchdog on this device" -v
+}
+
+
+volume_down() {
+    amixer_volume_down
+}
+
+volume_up() {
+    amixer_volume_up
+}
+
+get_volume_level() {
+    amixer_get_volume_level
 }

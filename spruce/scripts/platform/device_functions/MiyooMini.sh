@@ -161,3 +161,24 @@ set_default_ra_hotkeys() {
 device_specific_wake_from_sleep() {
     log_message "MiyooMini has no specific device wake from sleep needed" -v
 }
+
+volume_down() {
+    log_message "Volume is handled via keymon" -v
+}
+
+volume_up() {
+    log_message "Volume is handled via keymon" -v
+}
+
+get_volume_level() {
+    log_message "Volume is handled via keymon" -v
+    echo "0"
+}
+
+brightness_down() {
+    jq -r '.contrast' "$SYSTEM_JSON"
+}
+
+brightness_up() {
+    log_message "Missing brightness_up function"
+}
