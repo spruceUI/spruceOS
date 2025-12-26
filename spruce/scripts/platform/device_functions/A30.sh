@@ -357,7 +357,6 @@ run_mixer_watchdog() {
     log_message "run_mixer_watchdog on this device" -v
 }
 
-
 volume_down() {
     amixer_volume_down
 }
