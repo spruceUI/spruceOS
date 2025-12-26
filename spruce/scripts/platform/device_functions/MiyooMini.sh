@@ -5,7 +5,7 @@
 # (Not everything was cleanly broken apart since this is a refactor, in the future
 #  we can try to make the file import chain cleaner)
 
-. "/mnt/SDCARD/spruce/scripts/platform/common32bit.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
 
 
 export_ld_library_path() {
