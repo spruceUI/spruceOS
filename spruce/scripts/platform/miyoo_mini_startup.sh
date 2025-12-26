@@ -36,6 +36,4 @@ cd /mnt/SDCARD/spruce/scripts
     send_event /dev/input/event0 114:1
 ) &
 
-lid_watchdog.sh &
-
 ./runtime.sh
