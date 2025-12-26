@@ -137,6 +137,7 @@ post_pyui_exit(){
 launch_startup_watchdogs(){
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
 }
 
 perform_fw_check(){
@@ -202,4 +203,8 @@ brightness_up() {
     local backlight
     backlight=$(current_backlight)
     set_backlight $((backlight + 1))
+}
+
+set_event_arg() {
+    EVENT_ARG="-e /dev/input/event0"
 }
