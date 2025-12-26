@@ -151,7 +151,7 @@ close_ppsspp_menu() {
 }
 
 
-take_screenshot(){
+capture_screen(){
     # capture screenshot
     CMD=$(cat /tmp/cmd_to_run.sh)
     GAME_PATH=$(echo "$CMD" | grep -o '".*"' | tail -n1 | tr -d '"')
@@ -180,7 +180,7 @@ prepare_game_switcher() {
             return 0
         fi
 
-        SCREENSHOT_NAME=$(take_screenshot)
+        SCREENSHOT_NAME=$(capture_screen)
 
         update_gameswitcher_json "$CMD" "$SCREENSHOT_NAME"
         touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
@@ -191,7 +191,10 @@ prepare_game_switcher() {
     elif pgrep "MainUI" >/dev/null; then
 
         log_message "homebutton_watchdog.sh: letting PyUI handle menu button" 
-    # otherwise other program is running, exit normally
+        # otherwise other program is running, exit normally
+    else
+        log_message "homebutton_watchdog.sh: /tmp/cmd_to_run.sh not found and MainUI is not running, bypassing game switcher." 
+        return 0
     fi
 
 }
@@ -212,6 +215,9 @@ perform_action() {
         # or kill any emulator
         kill_emulator
         ;;
+        *)
+            log_message "homebutton_watchdog: $1 is an unknown action to perform"
+            ;;
     esac
     killall sendevent
 }
