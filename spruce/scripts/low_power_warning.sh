@@ -135,17 +135,14 @@ while true; do
     elif [ "$LED_MODE" = "Always on" ]; then
         echo 1 >${LED_PATH}/brightness
         flag_remove "low_battery"
-        SLEEP=10
 
     elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
         echo 1 >${LED_PATH}/brightness
         flag_remove "low_battery"
-        SLEEP=10
 
     else # if [ "$LED_MODE" = "Always Off" ]; then
         echo 0 >${LED_PATH}/brightness
         flag_remove "low_battery"
-        SLEEP=10
     fi
 
     sleep $SLEEP
