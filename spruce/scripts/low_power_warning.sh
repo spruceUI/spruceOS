@@ -16,25 +16,23 @@ LAST_LOG=0
 MAX_LINES=1000
 
 morse_code_sos() {
-    local vibrate=$1
+    local do_vibrate=$1
     shift
     for symbol in "$@"; do
         case $symbol in
         ".")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100 &
+            [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dot_duration
             ;;
         "-")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100 &
+            [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dash_duration
             ;;
         esac
         echo 0 >${LED_PATH}/brightness
-        if [ "$vibrate" = "true" ]; then
-            echo 0 >/sys/devices/virtual/timed_output/vibrator/enable
-        fi
+        # No need to set vibrate to off as we passed duration to vibrate function
         sleep $intra_char_gap
     done
     sleep $inter_word_gap
