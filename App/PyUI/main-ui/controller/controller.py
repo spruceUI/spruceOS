@@ -178,14 +178,11 @@ class Controller:
             # Reset hold delay and clear any lingering event
             Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
 
-            Controller.clear_last_input()
-
             # Blocking wait for event until timeout
+            elapsed = time.time() - start_time
+            remaining_time = timeout - elapsed
+            remaining_time = max(remaining_time, 0.001)
             while True:
-                elapsed = time.time() - start_time
-                remaining_time = timeout - elapsed
-                if remaining_time <= 0:
-                    break
 
                 ms_remaining = int(remaining_time * 1000)
                 input = Controller.controller_interface.get_input(ms_remaining)
@@ -203,6 +200,10 @@ class Controller:
                                 Controller.check_for_hotkey()
                     else:
                         break  # Valid non-hotkey input
+                elapsed = time.time() - start_time
+                remaining_time = timeout - elapsed
+                if remaining_time <= 0:
+                    break
 
 
         #TODO i think this loop is in the wrong place
