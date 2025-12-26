@@ -426,3 +426,13 @@ volume_up() {
 get_volume_level() {
     amixer_get_volume_level
 }
+
+
+# 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
+device_get_charging_status() {
+	cat "$BATTERY/status"
+}
+
+device_get_battery_percent() {
+	cat "$BATTERY/capacity"
+}

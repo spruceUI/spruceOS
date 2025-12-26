@@ -222,3 +222,13 @@ set_playback_path() {
 run_mixer_watchdog() {
     log_message "run_mixer_watchdog on this device" -v
 }
+
+
+# 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
+device_get_charging_status() {
+	cat "$BATTERY/status"
+}
+
+device_get_battery_percent() {
+	cat "$BATTERY/capacity"
+}

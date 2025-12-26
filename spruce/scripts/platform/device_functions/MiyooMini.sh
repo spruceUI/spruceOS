@@ -49,7 +49,25 @@ set_overclock() {
 }
 
 vibrate() {
-    log_message "Vibration not enabled for miyoo mini" -v
+    duration=50
+
+    # Parse arguments in any order
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
+        esac
+        shift
+    done
+
+    echo out > /sys/class/gpio/gpio48/direction
+    sleep "$duration"
+    echo 1 > /sys/class/gpio/gpio48/value
 }
 
 display_kill() {
@@ -138,6 +156,7 @@ launch_startup_watchdogs(){
     ${SCRIPTS_DIR}/homebutton_watchdog.sh &
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
+    ${SCRIPTS_DIR}/low_power_warning.sh &
 }
 
 perform_fw_check(){
@@ -207,4 +226,18 @@ brightness_up() {
 
 set_event_arg() {
     EVENT_ARG="-e /dev/input/event0"
+}
+
+device_get_charging_status() {
+    charging=$( /customer/app/axp_test | grep -o '"charging":[0-9]*' | sed 's/"charging"://' )
+    if [ "$charging" -eq 0 ]; then
+        echo "Discharging"
+    else
+        echo "Charging"
+    fi
+}
+
+device_get_battery_percent() {
+    battery=$( /customer/app/axp_test | grep -o '"battery":[0-9]*' | sed 's/"battery"://' )
+    echo "$battery"
 }
