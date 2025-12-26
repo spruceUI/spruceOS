@@ -110,10 +110,6 @@ restart_wifi() {
     log_message "Missing restart_wifi function"
 }
 
-get_qr_bin_path() {
-    log_message "Missing get_qr_bin_path function"
-}
-
 enter_sleep() {
     log_message "Missing enter_sleep function"
 }

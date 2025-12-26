@@ -39,7 +39,3 @@ set_SFTPGO_DIR() {
 set_syncthing_ST_BIN() {
     ST_BIN=$SYNCTHING_DIR/bin/syncthing
 }
-
-get_qr_bin_path() {
-    echo "/mnt/SDCARD/spruce/bin/qrencode"
-}

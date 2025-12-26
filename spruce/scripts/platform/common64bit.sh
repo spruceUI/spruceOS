@@ -7,10 +7,6 @@ get_python_path() {
     echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
 }
 
-get_qr_bin_path() {
-    echo "/mnt/SDCARD/spruce/bin64/qrencode"
-}
-
 send_menu_button_to_retroarch() {
     if pgrep "ra32.miyoo" >/dev/null; then
         send_virtual_key_L3

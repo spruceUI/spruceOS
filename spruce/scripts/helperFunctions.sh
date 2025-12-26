@@ -590,10 +590,8 @@ qr_code() {
     # Make tmp directory if it doesn't exist
     mkdir -p "/mnt/SDCARD/spruce/tmp"
 
-    qr_bin_path=$(get_qr_bin_path)
-
     # Generate QR code
-    if "$qr_bin_path" -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
+    if qrencode -o "$output" -s "$size" -l "$level" -m 2 "$text" >/dev/null 2>&1; then
         echo "$output"
         return 0
     else
