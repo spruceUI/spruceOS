@@ -269,3 +269,12 @@ brightness_down() {
 brightness_up() {
     log_message "Missing brightness_up function"
 }
+
+# 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
+device_get_charging_status() {
+    log_message "Missing device_get_charging_status function"
+}
+
+device_get_battery_percent() {
+    log_message "Missing device_get_battery_percent function"
+}
