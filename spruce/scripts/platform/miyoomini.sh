@@ -68,10 +68,6 @@ enable_or_disable_rgb() {
     log_message "rgb led not supported on miyoo mini"
 }
 
-restart_wifi() {
-    log_message "Intentionally do not let spruce modify wifi" -v
-}
-
 enter_sleep() {
     log_message "Keymon handles sleep, not spruce" -v
 }
@@ -102,7 +98,7 @@ new_execution_loop() {
 }
 
 get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    echo "/mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg"
 }
 
 get_ra_cfg_location(){

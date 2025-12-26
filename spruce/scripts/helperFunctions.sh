@@ -62,6 +62,22 @@ auto_regen_tmp_update() {
     fi
 }
 
+
+restart_wifi() {
+    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
+    log_message "Restarting Wi-Fi interface wlan0"
+
+    # Bring the interface down and kill any running services
+    ifconfig wlan0 down
+    killall wpa_supplicant 2>/dev/null
+    killall udhcpc 2>/dev/null
+
+    # Bring the interface back up and reconnect
+    ifconfig wlan0 up
+    wpa_supplicant -B -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+    udhcpc -i wlan0 &
+}
+
 check_and_connect_wifi() {
     # ########################################################################
     # WARNING: Avoid running this function in-game, it will lead to stuttters!

@@ -6,6 +6,10 @@
 #  we can try to make the file import chain cleaner)
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/rumble.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/cores_online_binary_cpu_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
+. "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/miyoo/lib:/usr/lib:/lib"
@@ -95,21 +99,6 @@ enable_or_disable_rgb() {
     log_message "rgb led not supported on miyoo flip"
 }
 
-restart_wifi() {
-    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
-    log_message "Restarting Wi-Fi interface wlan0 on Flip"
-
-    # Bring the interface down and kill any running services
-    ifconfig wlan0 down
-    killall wpa_supplicant 2>/dev/null
-    killall udhcpc 2>/dev/null
-
-    # Bring the interface back up and reconnect
-    ifconfig wlan0 up
-    wpa_supplicant -B -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-    udhcpc -i wlan0 &
-}
-
 enter_sleep() {
     echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
@@ -180,6 +169,10 @@ post_pyui_exit(){
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs
     ${SCRIPTS_DIR}/lid_watchdog.sh &
+    ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    ${SCRIPTS_DIR}/mixer_watchdog.sh &
+    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
+    ${SCRIPTS_DIR}/enable_zram.sh &
 }
 
 perform_fw_check(){
@@ -320,14 +313,7 @@ device_init() {
     # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
     perform_fw_update_Flip
 
-    # Can this be moved into launch_startup_watchdogs?
-    # listen for hotkeys for brightness adjustment, volume button, power button and bluetooth setting change
-    ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    ${SCRIPTS_DIR}/mixer_watchdog.sh &
-    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
-    ${SCRIPTS_DIR}/enable_zram.sh &
-
-     killall runmiyoo.sh   
+    killall runmiyoo.sh   
 }
 
 set_event_arg() {
@@ -357,4 +343,70 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
+}
+
+get_spruce_ra_cfg_location() {
+    echo "/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
+}
+
+reset_playback_pack() {
+    log_message "*** reset playback path" -v
+
+    current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
+    system_json_volume=$(cat $SYSTEM_JSON | grep -o '"vol":\s*[0-9]*' | grep -o [0-9]*)
+    current_vol_name="SYSTEM_VOLUME_$system_json_volume"
+    
+    eval vol_value=\$$current_vol_name
+    
+    amixer sset 'SPK' "$vol_value%" > /dev/null
+    amixer cset name='Playback Path' 0 > /dev/null
+    amixer cset name='Playback Path' "$current_path" > /dev/null
+}
+
+
+set_playback_path() {
+    volume_lv=$(amixer cget name='SPK Volume' | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
+    log_message "*** audioFunctions.sh: Volume level: $volume_lv" -v
+
+    jack_status=$(cat /sys/class/gpio/gpio150/value) # 0 connected, 1 disconnected
+    log_message "*** audioFunctions.sh: Jack status: $jack_status" -v
+
+    # 0 OFF, 2 SPK, 3 HP
+    playback_path=$([ $jack_status -eq 1 ] && echo 2 || echo 3)
+    [ "$volume_lv" = 0 ] && [ "$playback_path" = 2 ] && playback_path=0
+    log_message "*** audioFunctions.sh: Playback path: $playback_path" -v
+
+    current_path=$(amixer cget name="Playback Path" | grep  -o ": values=[0-9]*" | grep -o [0-9]*)
+
+    amixer cset name='Playback Path' "$playback_path" > /dev/null
+    # if coming off mute, ensure that there's a change so that volume doesn't spike
+    ( (( current_path == 0 )) || (( current_path != playback_path )) ) && [ ! "$playback_path" = 0 ] \
+      && amixer sset 'SPK' 1% > /dev/null && amixer sset 'SPK' "$volume_lv%" > /dev/null
+}
+
+
+run_mixer_watchdog() {
+    # TODO: will need to fix for brick and tsp
+    JACK_PATH=/sys/class/gpio/gpio150/value
+
+    while true; do
+        /mnt/SDCARD/spruce/bin64/inotifywait -e modify "$SYSTEM_JSON" >/dev/null 2>&1 &
+        PID_INOTIFY=$!
+
+        /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
+        PID_GPIO=$!
+
+        wait -n
+
+        log_message "*** mixer watchdog: change detected" -v
+
+        kill $PID_INOTIFY $PID_GPIO 2>/dev/null
+
+        set_playback_path
+    done
+}
+
+
+new_execution_loop() {
+    log_message "new_execution_loop Uneeded on this device" -v
 }

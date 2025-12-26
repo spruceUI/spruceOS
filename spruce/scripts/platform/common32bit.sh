@@ -1,5 +1,6 @@
 #!/bin/sh
 
+. "/mnt/SDCARD/spruce/scripts/platform/common.sh"
 
 get_python_path() {
     echo "/mnt/SDCARD/spruce/bin/python/bin/python3.10" 

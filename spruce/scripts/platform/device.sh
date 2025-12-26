@@ -106,10 +106,6 @@ enable_or_disable_rgb() {
     log_message "Missing enable_or_disable_rgb function"
 }
 
-restart_wifi() {
-    log_message "Missing restart_wifi function"
-}
-
 enter_sleep() {
     log_message "Missing enter_sleep function"
 }

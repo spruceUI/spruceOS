@@ -31,25 +31,6 @@ enable_or_disable_wifi() {
     fi
 }
 
-handle_a30_quirks() {
-    echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
-    nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1  # Stop NTPD
-    killall MtpDaemon 2>/dev/null
-    killall -9 main ### SUPER important in preventing .tmp_update suicide
-    alsactl nrestore &
-
-    # Restore and monitor brightness
-    if [ -f "$TMP_BACKLIGHT_PATH" ]; then
-        BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
-        # only set non zero brightness value
-        if [ "$BRIGHTNESS" -ne 0 ]; then 
-            echo "$BRIGHTNESS" > /sys/devices/virtual/disp/disp/attr/lcdbl
-        fi
-    else
-        echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
-    fi
-}
-
 hide_fw_app() {
     sed -i 's|"label"|"#label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }

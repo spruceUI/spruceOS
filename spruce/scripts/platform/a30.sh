@@ -1,9 +1,10 @@
 #!/bin/sh
 
-# common 32bit does not inherit from common as common isn't fully common for all 32bit devices currently
 . "/mnt/SDCARD/spruce/scripts/platform/common32bit.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/common.sh"
-
+. "/mnt/SDCARD/spruce/scripts/platform/utils/cores_online_binary_cpu_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
+. "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
 export_ld_library_path() {
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/a30/lib:/usr/miyoo/lib:/usr/lib:/lib"
@@ -82,10 +83,6 @@ rgb_led() {
 # used in principal.sh
 enable_or_disable_rgb() {
     log_message "No RGB on A30" -v
-}
-
-restart_wifi() {
-    log_message "Do not restart wifi from spruce on a30" -v
 }
 
 enter_sleep() {
@@ -222,10 +219,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    ${SCRIPTS_DIR}/powerbutton_watchdog.sh &
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/low_power_warning.sh &
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
+    launch_common_startup_watchdogs
 }
 
 perform_fw_check(){
@@ -276,6 +270,26 @@ runtime_mounts_A30() {
 }
 
 
+
+handle_a30_quirks() {
+    echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
+    nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1  # Stop NTPD
+    killall MtpDaemon 2>/dev/null
+    killall -9 main ### SUPER important in preventing .tmp_update suicide
+    alsactl nrestore &
+
+    # Restore and monitor brightness
+    if [ -f "$TMP_BACKLIGHT_PATH" ]; then
+        BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
+        # only set non zero brightness value
+        if [ "$BRIGHTNESS" -ne 0 ]; then 
+            echo "$BRIGHTNESS" > /sys/devices/virtual/disp/disp/attr/lcdbl
+        fi
+    else
+        echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
+    fi
+}
+
 device_init() {
     runtime_mounts_A30
 
@@ -284,6 +298,7 @@ device_init() {
     handle_a30_quirks &
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
+    # What is being changed later that prevents this from running with the other watchdogs?
     ${SCRIPTS_DIR}/buttons_watchdog.sh &
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
@@ -324,4 +339,17 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion = \"e\"" \
         "input_toggle_fast_forward = \"t\""
 
+}
+
+
+reset_playback_pack() {
+    log_message "reset_playback_pack Uneeded on this device" -v
+}
+
+set_playback_path() {
+    log_message "set_playback_path Uneeded on this device" -v
+}
+
+run_mixer_watchdog() {
+    log_message "run_mixer_watchdog on this device" -v
 }
