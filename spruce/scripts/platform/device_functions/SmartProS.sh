@@ -329,6 +329,7 @@ device_init() {
     fi
 
     run_trimui_blobs
+    run_trimui_osdd
     echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
 
     tinymix set 23 1

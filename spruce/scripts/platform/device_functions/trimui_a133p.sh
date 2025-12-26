@@ -163,7 +163,7 @@ runtime_mounts_a133p() {
 }
 
 
-device_init() {
+device_init_a133p() {
     runtime_mounts_a133p
 
     SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
@@ -179,8 +179,6 @@ device_init() {
 
     run_trimui_blobs
     echo -n MENU+SELECT > /tmp/trimui_osd/hotkeyshow
-
-   
 }
 
 set_event_arg() {
