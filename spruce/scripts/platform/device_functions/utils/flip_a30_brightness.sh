@@ -36,7 +36,7 @@ brightness_down() {
         echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
+        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
 
@@ -95,7 +95,7 @@ brightness_up() {
         echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"brightness\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
+        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"brightness\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
 
         logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
     
