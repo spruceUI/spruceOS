@@ -35,3 +35,8 @@ init_gpio_a133p() {
 get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg"
 }
+
+device_init() {
+    device_init_a133p
+    run_trimui_osdd
+}

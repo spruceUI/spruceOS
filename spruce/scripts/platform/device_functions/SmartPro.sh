@@ -44,3 +44,7 @@ init_gpio_a133p() {
 get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg"
 }
+
+device_init() {
+    device_init_a133p
+}

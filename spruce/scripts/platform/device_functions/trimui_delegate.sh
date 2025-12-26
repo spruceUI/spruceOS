@@ -195,6 +195,15 @@ check_if_fw_needs_update_trimui() {
     [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
 }
 
+run_trimui_osdd() {
+    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
+        cd /usr/trimui/osd || return 1
+        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
+        log_message "Attempted to start trimui_osdd"
+    else
+        log_message "trimui_osdd not found. Skipping."
+    fi
+}
 
 run_trimui_blobs() {
 
@@ -211,11 +220,4 @@ run_trimui_blobs() {
         fi
     done
 
-    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
-        cd /usr/trimui/osd || return 1
-        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
-        log_message "Attempted to start trimui_osdd"
-    else
-        log_message "trimui_osdd not found. Skipping."
-    fi
 }
