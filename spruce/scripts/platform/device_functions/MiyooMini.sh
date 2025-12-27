@@ -154,7 +154,6 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    log_message "Made it to MiyooMini launch_startup_watchdogs"
     launch_common_startup_watchdogs_v2 "true"
 }
 

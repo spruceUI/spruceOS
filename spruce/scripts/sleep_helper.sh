@@ -77,8 +77,6 @@ trigger_sleep() {
 
         while [ "$elapsed" -lt "$IDLE_TIMEOUT" ]; do
             current_lid_state=$(device_lid_open)
-            log_message "current_lid_state is $current_lid_state"
-
             
             # Track if lid was ever closed
             if [ "$current_lid_state" = "0" ]; then
