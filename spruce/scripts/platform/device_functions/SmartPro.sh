@@ -57,7 +57,3 @@ device_init() {
         run_trimui_osdd
     fi
 }
-
-take_screenshot() {
-    /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
-}

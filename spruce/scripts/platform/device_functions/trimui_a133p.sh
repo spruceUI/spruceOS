@@ -131,7 +131,7 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    screenshot.sh "$screenshot_path"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
 }
 
 
