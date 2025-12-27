@@ -283,3 +283,7 @@ device_lid_sensor_ready() {
 device_lid_open(){
     head -c 1 "$LID_HALL_FILE" 2>/dev/null
 }
+
+take_screenshot() { # todo: what's the rotation per each model again?'
+    /mnt/SDCARD/spruce/bin/fbscreenshot "$1"
+}
