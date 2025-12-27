@@ -18,6 +18,10 @@
 #   save_drastic_configs
 
 run_drastic() {
+	load_drastic_configs
+	#Why do we use grid on NDS but no other systems?
+	cp -f $nds_emu_dir/resources/overlay/grid-enabled.png $nds_emu_dir/resources/overlay/grid.png
+
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
 
@@ -25,6 +29,9 @@ run_drastic() {
 
 	if [ "$PLATFORM" = "A30" ]; then # only Steward is available.
 		run_drastic_steward_A30
+
+	elif [ "$PLATFORM" = "MiyooMini" ]; then # only Steward is available.
+		run_drastic_steward_MiyooMini
 
 	else # 64-bit platform
 		[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"	# ready arch dependent states
@@ -58,6 +65,7 @@ run_drastic() {
 
 	[ -f "$EMU_DIR/resources/settings.json" ] && cp "$EMU_DIR/resources/settings.json" "$EMU_DIR/resources/settings_${PLATFORM}.json"
 	sync
+	save_drastic_configs
 }
 
 run_drastic64() {
@@ -84,6 +92,38 @@ run_drastic_steward_A30() {
 	rm /dev/ttyS0
 	killall -q -CONT joystickinput
 	[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"		# stash arch dependent states
+}
+
+run_drastic_steward_MiyooMini() {
+	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
+
+
+	nds_emu_dir=/mnt/SDCARD/Emu/NDS
+	export HOME=$nds_emu_dir
+	export PATH=$nds_emu_dir:$PATH
+	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
+	export SDL_VIDEODRIVER=mmiyoo
+	export SDL_AUDIODRIVER=mmiyoo
+	export EGL_VIDEODRIVER=mmiyoo
+
+	cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
+
+	killall audioserver
+
+	sv=`cat /proc/sys/vm/swappiness`
+
+	# 60 by default
+	echo 10 > /proc/sys/vm/swappiness
+
+	cd $nds_emu_dir
+
+	set_performance
+	log_message "Running DraStic-Steward on MiyooMini"
+	./drastic32 "$ROM_FILE"
+	sync
+
+	echo $sv > /proc/sys/vm/swappiness
+
 }
 
 run_drastic_steward_Brick() {
