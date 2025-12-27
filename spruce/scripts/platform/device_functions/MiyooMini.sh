@@ -6,6 +6,7 @@
 #  we can try to make the file import chain cleaner)
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
 
 export_ld_library_path() {
@@ -153,12 +154,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
-    /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
-    /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
-    /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
+    launch_common_startup_watchdogs_v2 "true"
 }
 
 perform_fw_check(){
