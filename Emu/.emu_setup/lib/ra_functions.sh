@@ -242,6 +242,7 @@ handle_changed_core() {
 }
 
 
+CORE_LIST="PCSX-ReARMed RACE fake-08 ChimeraSNES"
 
 ready_architecture_dependent_states() {
     STATES="/mnt/SDCARD/Saves/states"
@@ -251,8 +252,8 @@ ready_architecture_dependent_states() {
     [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
 
     # List of cores to handle
-    for CORE in "PCSX-ReARMed" "RACE" "fake-08" "ChimeraSNES"; do
-        # Loop over both STATES and SAVES
+    for CORE in ${CORE_LIST}; do
+	    # Loop over both STATES and SAVES
         for BASE in "$STATES" "$SAVES"; do
             DIR_SUFFIX="$BASE/$CORE-$SUFFIX"
             DIR_BASE="$BASE/$CORE"
@@ -277,8 +278,8 @@ stash_architecture_dependent_states() {
     SAVES="/mnt/SDCARD/Saves/saves"
 
     # List of cores to handle
-    for CORE in "PCSX-ReARMed" "RACE" "fake-08" "ChimeraSNES"; do
-        mkdir -p "$BASE/$CORE-$SUFFIX"
+    for CORE in $CORE_LIST; do
+		mkdir -p "$BASE/$CORE-$SUFFIX"
         umount "$BASE/$CORE"
     done
 }
