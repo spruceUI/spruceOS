@@ -1,3 +1,8 @@
+
+arch_suffix() {
+    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && echo "32" || echo "64"
+}
+
 get_core_folder() {
     core_name="$1"
     case "$core_name" in
@@ -10,14 +15,14 @@ get_core_folder() {
         "bluemsx_libretro.so") echo "blueMSX" ;;
         "cap32_libretro.so") echo "Caprice32" ;;
         "chailove_libretro.so") echo "ChaiLove" ;;
-        "chimerasnes_libretro.so") echo "ChimeraSNES" ;;
+        "chimerasnes_libretro.so") echo "ChimeraSNES-$(arch_suffix)" ;;
         "crocods_libretro.so") echo "CrocoDS" ;;
         "daphne_libretro.so") echo "Daphne" ;;
         "dosbox_pure_libretro.so") echo "DOSBox" ;;
         "duckstation_libretro.so") echo "DuckStation" ;;
         "easyrpg_libretro.so") echo "EasyRPG Player" ;;
         "ecwolf_libretro.so") echo "ECWolf" ;;
-        "fake08_libretro.so") echo "FAKE-08" ;;
+        "fake08_libretro.so") echo "fakse-08-$(arch_suffix)" ;;
         "fbalpha2012_libretro.so") echo "FB Alpha 2012" ;;
         "fbneo_libretro.so") echo "FinalBurn Neo" ;;
         "fceumm_libretro.so") echo "FCEUmm" ;;
@@ -64,7 +69,7 @@ get_core_folder() {
         "o2em_libretro.so") echo "O2EM" ;;
         "opera_libretro.so") echo "Opera" ;;
         "parallel_n64_libretro.so") echo "ParaLLEl N64" ;;
-        "pcsx_rearmed_libretro.so") echo "PCSX-ReARMed" ;;
+        "pcsx_rearmed_libretro.so") echo "PCSX-ReARMed-$(arch_suffix)" ;;
         "picodrive_libretro.so") echo "PicoDrive" ;;
         "pokemini_libretro.so") echo "PokeMini" ;;
         "potator_libretro.so") echo "Potator" ;;
@@ -76,7 +81,7 @@ get_core_folder() {
         "px68k_libretro.so") echo "PX68k" ;;
         "quasi88_libretro.so") echo "QUASI88" ;;
         "quicknes_libretro.so") echo "QuickNES" ;;
-        "race_libretro.so") echo "RACE" ;;
+        "race_libretro.so") echo "RACE-$(arch_suffix)" ;;
         "reminiscence_libretro.so") echo "REminiscence" ;;
         "retro8_libretro.so") echo "Retro8" ;;
         "sameduck_libretro.so") echo "SameDuck" ;;

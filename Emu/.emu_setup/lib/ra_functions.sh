@@ -141,18 +141,20 @@ run_retroarch() {
 }
 
 ra_start_setup_saves_and_states_for_core_differences() {
-	ready_architecture_dependent_states
-	CACHED_CORE=$(get_cached_core_path)
+	cached_core_folder=$(get_cached_core_path)
 	
     # Get only the filename of the core
     core_basename=$(basename "$CORE_PATH")
+	current_core_folder=$(get_core_folder "$core_basename")
 
-    if [ "$CACHED_CORE" != "$core_basename" ]; then
-		log_message "Core changed : CURRENT = $core_basename, CACHED = $CACHED_CORE"
-		handle_changed_core "$CACHED_CORE" "$core_basename" 
-		cache_core_path
+    if [ "$cached_core_folder" != "$current_core_folder" ]; then
+		log_message "Core changed : CURRENT = $current_core_folder, CACHED = $cached_core_folder"
+
+		handle_changed_core "$cached_core_folder" "$current_core_folder" 
+		cache_core_path "$current_core_folder"
 	fi
 
+	ready_architecture_dependent_states
 }
 
 ra_close_setup_saves_and_states_for_core_differences(){
@@ -160,19 +162,18 @@ ra_close_setup_saves_and_states_for_core_differences(){
 }
 
 cache_core_path() {
+    core=$1
+
     cache_dir="/mnt/SDCARD/Saves/spruce/last_core_run/${EMU_NAME}"
     mkdir -p "$cache_dir"
 
     # Get only the basename of the ROM file
     rom_basename=$(basename "$ROM_FILE")
 
-    # Get only the filename of the core
-    core_basename=$(basename "$CORE_PATH")
-
     cache_file="${cache_dir}/${rom_basename}"
-    log_message "Caching core filename for ROM '$ROM_FILE': '$core_basename'"
+    log_message "Caching core filename for ROM '$ROM_FILE': '$core'"
 
-    echo "$core_basename" > "$cache_file"
+    echo "$core" > "$cache_file"
 }
 
 
@@ -194,11 +195,8 @@ handle_changed_core() {
 	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "False")"
 	if [ "$KEEP_SAVES_BETWEEN_CORES" = "True" ]; then
 		log_message "Syncing saves between cores as per user setting."
-		cached_core="$1"
-		current_core="$2"
-
-		cached_core_folder=$(get_core_folder "$cached_core")
-		current_core_folder=$(get_core_folder "$current_core")
+		cached_core_folder="$1"
+		current_core_folder="$2"
 
 		rom_basename=$(basename "$ROM_FILE")
 		rom_name="${rom_basename%.*}" 
@@ -206,6 +204,8 @@ handle_changed_core() {
 		timestamp=$(date +%s)
 
 		saves_dir="/mnt/SDCARD/Saves/saves"
+		# Find the cached save (any extension) in the cached core folder
+		cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
 		if [ -n "$cached_save_file" ]; then
 
 			# --- Handle Saves ---
@@ -218,8 +218,6 @@ handle_changed_core() {
 				log_message "No current save exists in $current_core_folder for $rom_name"
 			fi
 
-			# Find the cached save (any extension) in the cached core folder
-			cached_save_file=$(find "$saves_dir/$cached_core_folder/" -maxdepth 1 -type f -name "${rom_name}.*" | head -n 1)
 			cp "$cached_save_file" "$saves_dir/$current_core_folder/"
 			log_message "Copied save from $cached_save_file to $current_core_folder"
 
@@ -232,7 +230,7 @@ handle_changed_core() {
 				mv "$current_state_file" "${current_state_file}.bak-$timestamp"
 				log_message "Moved current state to ${current_state_file}.bak-$timestamp"
 			else
-				log_message "No current state exists in $current_core_folder for $rom_name"
+				log_message "No current state exists in $states_dir/$current_core_folder for $rom_name"
 			fi
 
 			# No state copy from cached folder, since cores rarely share state files
@@ -244,37 +242,45 @@ handle_changed_core() {
 }
 
 
-ready_architecture_dependent_states() {
-	STATES="/mnt/SDCARD/Saves/states"
-	if [ "$PLATFORM" = "A30" ]; then 
-		[ -d "$STATES/RACE-32" ] && mv "$STATES/RACE-32" "$STATES/RACE"
-		[ -d "$STATES/fake-08-32" ] && mv "$STATES/fake-08-32" "$STATES/fake-08"
-		[ -d "$STATES/PCSX-ReARMed-32" ] && mv "$STATES/PCSX-ReARMed-32" "$STATES/PCSX-ReARMed"
-		[ -d "$STATES/ChimeraSNES-32" ] && mv "$STATES/ChimeraSNES-32" "$STATES/ChimeraSNES"
 
-	else # 64-bit device
-		[ -d "$STATES/RACE-64" ] && mv "$STATES/RACE-64" "$STATES/RACE"
-		[ -d "$STATES/fake-08-64" ] && mv "$STATES/fake-08-64" "$STATES/fake-08"
-		[ -d "$STATES/PCSX-ReARMed-64" ] && mv "$STATES/PCSX-ReARMed-64" "$STATES/PCSX-ReARMed"
-		[ -d "$STATES/ChimeraSNES-64" ] && mv "$STATES/ChimeraSNES-64" "$STATES/ChimeraSNES"
-	fi
+ready_architecture_dependent_states() {
+    STATES="/mnt/SDCARD/Saves/states"
+    SAVES="/mnt/SDCARD/Saves/saves"
+
+    SUFFIX="64"
+    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+
+    # List of cores to handle
+    for CORE in "PCSX-ReARMed" "RACE" "fake-08" "ChimeraSNES"; do
+        # Loop over both STATES and SAVES
+        for BASE in "$STATES" "$SAVES"; do
+            DIR_SUFFIX="$BASE/$CORE-$SUFFIX"
+            DIR_BASE="$BASE/$CORE"
+
+            # Only for SAVES: copy existing base files into SUFFIX dir if empty
+			# This is because we used to have a common saves dir, so if it's the
+			# first time it's being made, it means the user has just upgraded
+			# Alternatively we could have users manually do this
+            [ ! -d "$DIR_SUFFIX" ] && mkdir -p "$DIR_SUFFIX"
+            if [ "$BASE" = "$SAVES" ] && [ -d "$DIR_BASE" ] && [ "$(ls -A "$DIR_SUFFIX")" = "" ]; then
+                cp -a "$DIR_BASE/." "$DIR_SUFFIX/"
+            fi
+
+            [ ! -d "$DIR_BASE" ] && mkdir -p "$DIR_BASE"
+            mount --bind "$DIR_SUFFIX" "$DIR_BASE"
+        done
+    done
 }
 
 stash_architecture_dependent_states() {
-	STATES="/mnt/SDCARD/Saves/states"
-	if [ "$PLATFORM" = "A30" ]; then 
-		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-32"
-		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-32"
-		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-32"
-		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-32"
+    STATES="/mnt/SDCARD/Saves/states"
+    SAVES="/mnt/SDCARD/Saves/saves"
 
-	else # 64-bit device
-		[ -d "$STATES/RACE" ] && mv "$STATES/RACE" "$STATES/RACE-64"
-		[ -d "$STATES/fake-08" ] && mv "$STATES/fake-08" "$STATES/fake-08-64"
-		[ -d "$STATES/PCSX-ReARMed" ] && mv "$STATES/PCSX-ReARMed" "$STATES/PCSX-ReARMed-64"
-		[ -d "$STATES/ChimeraSNES" ] && mv "$STATES/ChimeraSNES" "$STATES/ChimeraSNES-64"
-
-	fi
+    # List of cores to handle
+    for CORE in "PCSX-ReARMed" "RACE" "fake-08" "ChimeraSNES"; do
+        mkdir -p "$BASE/$CORE-$SUFFIX"
+        umount "$BASE/$CORE"
+    done
 }
 
 load_n64_controller_profile() {
