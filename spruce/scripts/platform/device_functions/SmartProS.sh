@@ -310,8 +310,6 @@ runtime_mounts_SmartProS() {
 device_init() {
     runtime_mounts_SmartProS
 
-    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
-
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 

@@ -171,11 +171,11 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs
-    ${SCRIPTS_DIR}/lid_watchdog.sh &
-    ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    ${SCRIPTS_DIR}/mixer_watchdog.sh &
-    ${SCRIPTS_DIR}/bluetooth_watchdog.sh &
-    ${SCRIPTS_DIR}/enable_zram.sh &
+    /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/mixer_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 perform_fw_check(){
@@ -291,8 +291,6 @@ perform_fw_update_Flip() {
 
 device_init() {
     runtime_mounts_Flip
-
-    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 
 
     echo 3 > /proc/sys/kernel/printk

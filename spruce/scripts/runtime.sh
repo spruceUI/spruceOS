@@ -14,7 +14,6 @@
 [ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
 export HOME="/mnt/SDCARD"
-SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
 TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
@@ -30,7 +29,7 @@ device_init
 enable_or_disable_wifi &
 
 # import multipass.cfg and start wifi_watchdog
-${SCRIPTS_DIR}/network/multipass.sh > /dev/null &
+/mnt/SDCARD/spruce/scripts/network/multipass.sh > /dev/null &
 
 # Flag cleanup
 flag_remove "log_verbose" &
@@ -41,10 +40,10 @@ unstage_archives_wanted
 
 # Check for first_boot flags and run Unpacker accordingly
 if flag_check "first_boot_${PLATFORM}"; then
-    ${SCRIPTS_DIR}/archiveUnpacker.sh --silent &
+    /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh --silent &
     log_message "Unpacker started silently in background due to first_boot flag"
 else
-    ${SCRIPTS_DIR}/archiveUnpacker.sh
+    /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 fi
 
 check_and_handle_firmware_app &
@@ -52,10 +51,10 @@ check_and_hide_update_app &
 
 # check whether to run first boot procedure
 if flag_check "first_boot_${PLATFORM}"; then
-    "${SCRIPTS_DIR}/firstboot.sh"
+    "/mnt/SDCARD/spruce/scripts/firstboot.sh"
 fi
 
-${SCRIPTS_DIR}/set_up_swap.sh &
+/mnt/SDCARD/spruce/scripts/set_up_swap.sh &
 
 launch_startup_watchdogs
 
@@ -82,7 +81,7 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-${SCRIPTS_DIR}/autoIconRefresh.sh &
+/mnt/SDCARD/spruce/scripts/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
 # update_notification
@@ -92,4 +91,4 @@ set_smart
 
 # start main loop
 log_message "Starting main loop"
-${SCRIPTS_DIR}/principal.sh
+/mnt/SDCARD/spruce/scripts/principal.sh

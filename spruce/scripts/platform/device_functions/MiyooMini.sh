@@ -153,12 +153,12 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    ${SCRIPTS_DIR}/homebutton_watchdog.sh &
-    ${SCRIPTS_DIR}/buttons_watchdog.sh &
-    ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
-    ${SCRIPTS_DIR}/low_power_warning.sh &
-    ${SCRIPTS_DIR}/lid_watchdog_v2.sh &
-    ${SCRIPTS_DIR}/power_button_watchdog_v2.sh &
+    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+    /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
+    /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+    /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
 }
 
 perform_fw_check(){

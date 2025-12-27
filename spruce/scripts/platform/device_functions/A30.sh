@@ -299,13 +299,11 @@ handle_a30_quirks() {
 device_init() {
     runtime_mounts_A30
 
-    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
-
     handle_a30_quirks &
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     # What is being changed later that prevents this from running with the other watchdogs?
-    ${SCRIPTS_DIR}/buttons_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
@@ -313,7 +311,7 @@ device_init() {
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
-    ${SCRIPTS_DIR}/autoReloadCalibration.sh &
+    /mnt/SDCARD/spruce/scripts/autoReloadCalibration.sh &
 }
 
 set_event_arg() {

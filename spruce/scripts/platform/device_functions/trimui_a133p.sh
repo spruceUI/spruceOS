@@ -166,8 +166,6 @@ runtime_mounts_a133p() {
 device_init_a133p() {
     runtime_mounts_a133p
 
-    SCRIPTS_DIR="/mnt/SDCARD/spruce/scripts"
-
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 
