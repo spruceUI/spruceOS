@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cores_online_binary_cpu_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
