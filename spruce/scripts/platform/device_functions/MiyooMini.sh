@@ -158,6 +158,7 @@ launch_startup_watchdogs(){
     ${SCRIPTS_DIR}/applySetting/idlemon_mm.sh &
     ${SCRIPTS_DIR}/low_power_warning.sh &
     ${SCRIPTS_DIR}/lid_watchdog_v2.sh &
+    ${SCRIPTS_DIR}/power_button_watchdog_v2.sh &
 }
 
 perform_fw_check(){
@@ -247,6 +248,7 @@ EMU_LIST="retroarch scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ff
 BRIGHTNESS_FILE="/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/pwm0/duty_cycle"
 SCREEN_BLANK_FILE="/proc/mi_modules/fb/mi_fb0"
 BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
+LID_HALL_FILE="/sys/devices/soc0/soc/soc:hall-mh248/hallvalue"
 
 device_enter_pseudo_sleep() {
     killall -9 keymon
@@ -272,7 +274,8 @@ device_exit_pseudo_sleep() {
     [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
     rm -f /tmp/screen_blanked /tmp/saved_brightness             # clean up temp files
 
-    send_event /dev/input/event0 116:1
+    sleep 0.5
+    send_event /dev/input/event0 116:1 
 
     pgrep retroarch 2>/dev/null && set_smart # return to smart mode
 }
@@ -282,5 +285,5 @@ device_lid_sensor_ready() {
 }
 
 device_lid_open(){
-    head -c 1 "/sys/devices/soc0/soc/soc:hall-mh248/hallvalue" 2>/dev/null
+    head -c 1 "$LID_HALL_FILE" 2>/dev/null
 }

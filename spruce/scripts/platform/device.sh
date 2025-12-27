@@ -287,9 +287,8 @@ device_exit_pseudo_sleep() {
     log_message "Missing device_exit_pseudo_sleep"
 }
 
-
 device_lid_sensor_ready() {
-    log_message "Missing device_exit_pseudo_sleep"
+    log_message "Missing device_lid_sensor_ready"
     return 1  # <-- sets exit status to 1 (failure)
 }
 
