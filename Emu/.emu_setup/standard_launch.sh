@@ -70,9 +70,7 @@ case $EMU_NAME in
 
 	"NDS")
 		. /mnt/SDCARD/Emu/.emu_setup/lib/drastic_functions.sh
-		load_drastic_configs
 		run_drastic
-		save_drastic_configs
 		;;
 
 	"N64")
