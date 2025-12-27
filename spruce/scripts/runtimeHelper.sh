@@ -4,8 +4,6 @@
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
-export_spruce_etc_dir
-
 run_sd_card_fix_if_triggered() {
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
         log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."

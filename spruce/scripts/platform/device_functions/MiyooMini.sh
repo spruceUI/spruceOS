@@ -12,10 +12,6 @@ export_ld_library_path() {
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 }
 
-export_spruce_etc_dir() {
-    export SPRUCE_ETC_DIR="/mnt/SDCARD/spruce/miyoomini/etc"
-}
-
 get_sd_card_path() {
     echo "/mnt/SDCARD"
 }

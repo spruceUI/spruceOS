@@ -13,10 +13,6 @@ export_ld_library_path() {
     log_message "Missing export_ld_library_path function"
 }
 
-export_spruce_etc_dir() {
-    log_message "Missing export_spruce_etc_dir function"
-}
-
 get_sd_card_path() {
     log_message "Missing get_sd_card_path function"
 }

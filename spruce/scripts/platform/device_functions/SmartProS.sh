@@ -12,10 +12,6 @@ export_ld_library_path() {
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
 }
 
-export_spruce_etc_dir() {
-    export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc" 
-}
-
 get_sd_card_path() {
     echo "/mnt/SDCARD"
 }

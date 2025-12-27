@@ -8,11 +8,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
-export_spruce_etc_dir() {
-    export SPRUCE_ETC_DIR="/mnt/SDCARD/trimui/etc"
-}
-
-
 get_sd_card_path() {
     echo "/mnt/SDCARD"
 }
