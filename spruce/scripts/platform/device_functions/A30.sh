@@ -246,7 +246,7 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    /mnt/SDCARD/spruce/bin/fbscreenshot -r 270 "$screenshot_path"
+    /mnt/SDCARD/spruce/bin/fbscreenshot "$1"
 }
 
 device_specific_wake_from_sleep() {
