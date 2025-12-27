@@ -6,6 +6,7 @@
 #  we can try to make the file import chain cleaner)
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
 
 export_ld_library_path() {
@@ -153,6 +154,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
+    log_message "Made it to MiyooMini launch_startup_watchdogs"
     launch_common_startup_watchdogs_v2 "true"
 }
 

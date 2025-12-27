@@ -1,6 +1,7 @@
 #!/bin/sh
 
 launch_common_startup_watchdogs(){
+    log_message "Launching common startup watchdogs v1"
     /mnt/SDCARD/spruce/scripts/powerbutton_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
     /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
@@ -8,6 +9,7 @@ launch_common_startup_watchdogs(){
 }
 
 launch_common_startup_watchdogs_v2() {
+    log_message "Launching common startup watchdogs v2"
     HAS_LID="${1:-false}" 
 
     /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
