@@ -87,7 +87,7 @@ trigger_sleep() {
             fi
 
             # If lid opened, restore screen and break
-            if ([ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]); then
+            if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                 log_message "Lid opened"
                 device_exit_pseudo_sleep
                 pseudo_sleep_exited=true 
@@ -120,7 +120,7 @@ trigger_sleep() {
 
             current_lid_state=$(device_lid_open)
             # If lid opened, restore screen and break
-            if ([ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]); then
+            if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                 log_message "Lid opened"
                 device_exit_pseudo_sleep
                 break
