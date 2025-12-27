@@ -45,6 +45,15 @@ get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg"
 }
 
+get_fw_version() {
+    tr -d ' \t\n' < /etc/version 2>/dev/null
+}
+
 device_init() {
     device_init_a133p
+
+    version="$(get_fw_version)"
+    if [ "$version" != "1.1.0" ]; then
+        run_trimui_osdd
+    fi
 }
