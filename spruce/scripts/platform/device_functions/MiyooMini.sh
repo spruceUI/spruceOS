@@ -44,8 +44,12 @@ set_overclock() {
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 }
 
+device_init() {
+    #Enable GPIO48 for vibration motor 
+    echo 48 > /sys/class/gpio/export
+}
 vibrate() {
-    duration=50
+    duration=0.5
 
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
