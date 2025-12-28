@@ -57,7 +57,8 @@ power_key_down () {
 }
 
 LAST_POWER_DOWN=0
-getevent -pid $$ $EVENT_PATH_KEYBOARD | while read line; do
+log_message "power_button_watchdog_v2.sh: Monitoring power button events on $POWER_EVENT"
+getevent -pid $$ $POWER_EVENT | while read line; do
     if [ -e /tmp/sleep_helper_started ]; then
         log_message "power_button_watchdog_v2.sh: Sleep helper active, skipping power button event."
         continue

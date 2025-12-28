@@ -12,7 +12,7 @@ rm -f /tmp/power_pressed_flag
 
 touch /tmp/sleep_helper_started
 START_TIME=$(date +%s)
-getevent | while read -r line; do
+getevent $POWER_EVENT | while read -r line; do
     CURRENT_TIME=$(date +%s)
     ELAPSED=$((CURRENT_TIME - START_TIME))
     # Ignore events for the first 2 seconds of script starting
