@@ -278,10 +278,6 @@ init_gpio_SmartProS() {
     # echo 363 > /sys/class/gpio/export
     # echo -n in > /sys/class/gpio/gpio363/direction
 
-    # load wifi and low power bluetooth modules
-    modprobe aic8800_fdrv.ko
-    modprobe aic8800_btlpm.ko
-
     #splash rumble
     echo 32768 > /sys/class/motor/level 
     sleep 0.2
@@ -301,6 +297,24 @@ runtime_mounts_SmartProS() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+# Use different thermald than the a133p ones
+run_trimui_blobs() {
+
+    cd /usr/trimui/bin || return 1
+    mkdir -p /tmp/trimui_inputd
+
+    for blob in trimui_inputd thermald keymon trimui_scened \
+                trimui_btmanager hardwareservice musicserver; do
+        if [ -x "/usr/trimui/bin/$blob" ]; then
+            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
+            log_message "Attempted to start $blob"
+        else
+            log_message "$blob not found. Skipping."
+        fi
+    done
+
+}
+
 device_init() {
     runtime_mounts_SmartProS
 
@@ -308,6 +322,10 @@ device_init() {
     chmod a+x /usr/bin/notify
 
     init_gpio_SmartProS
+
+    # load wifi and low power bluetooth modules
+    modprobe aic8800_fdrv.ko
+    modprobe aic8800_btlpm.ko
 
     #syslogd -S
 
@@ -392,4 +410,28 @@ device_get_charging_status() {
 
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
+}
+
+device_lid_open(){
+    # device has no lid so it's always open
+    return 1
+}
+
+device_enter_pseudo_sleep() {
+    log_message "device_enter_pseudo_sleep Uneeded on this device: keymon handles" -v
+}
+
+device_exit_pseudo_sleep() {
+    # keymon will bring wifi back up?
+    log_message "device_exit_pseudo_sleep Uneeded on this device keymon handles" -v
+}
+
+set_smart() {
+    log_message "Don't mess w/ stock cpu settings, causes bad behavior currently (e.g. limbo in sleep)" 
+}
+set_performance() {
+    log_message "Don't mess w/ stock cpu settings, causes bad behavior currently (e.g. limbo in sleep)" 
+}
+set_overclock() {
+    log_message "Don't mess w/ stock cpu settings, causes bad behavior currently (e.g. limbo in sleep)" 
 }
