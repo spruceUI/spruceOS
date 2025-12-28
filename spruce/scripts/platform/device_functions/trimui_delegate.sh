@@ -204,20 +204,3 @@ run_trimui_osdd() {
         log_message "trimui_osdd not found. Skipping."
     fi
 }
-
-run_trimui_blobs() {
-
-    cd /usr/trimui/bin || return 1
-    mkdir -p /tmp/trimui_inputd
-
-    for blob in trimui_inputd trimui_thermald keymon trimui_scened \
-                trimui_btmanager hardwareservice musicserver; do
-        if [ -x "/usr/trimui/bin/$blob" ]; then
-            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-            log_message "Attempted to start $blob"
-        else
-            log_message "$blob not found. Skipping."
-        fi
-    done
-
-}

@@ -56,9 +56,11 @@ SMART_UP_THRESH=75
 SMART_FREQ_STEP=3
 SMART_DOWN_FACTOR=1
 SMART_SAMPLING_RATE=100000
+SLEEP_SAMPLING_RATE=1000000
 
 set_smart() {
     scaling_min_freq="${1:-DEVICE_SMART_FREQ}"
+    log_message "set_smart called $scaling_min_freq"
 
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
@@ -92,6 +94,7 @@ set_smart() {
 }
 
 set_performance() {
+    log_message "set_performance called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -115,6 +118,7 @@ set_performance() {
 }
 
 set_overclock() {
+    log_message "set_overclock called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -134,3 +138,39 @@ set_overclock() {
     fi
 }
 
+
+set_cpu_psuedosleep() {
+    scaling_sleep_freq="${1:-DEVICE_SLEEP_FREQ}"
+    log_message "set_cpu_psuedosleep called $scaling_sleep_freq"
+
+    if ! flag_check "setting_cpu"; then
+        flag_add "setting_cpu"
+        cores_online 01234567   # bring all up before potentially offlining cpu0
+
+        unlock_governor 2>/dev/null
+
+        echo "conservative" > "$CPU_0_DIR/scaling_governor"
+        echo "$scaling_sleep_freq" > "$CPU_0_DIR/scaling_min_freq"
+        echo "$scaling_sleep_freq" > "$CPU_0_DIR/scaling_max_freq"
+
+        if [ -e "$CPU_4_DIR" ]; then
+            echo "conservative" > "$CPU_4_DIR/scaling_governor"
+            echo "$scaling_sleep_freq" > "$CPU_4_DIR/scaling_min_freq"
+            echo "$scaling_sleep_freq" > "$CPU_4_DIR/scaling_max_freq"
+        fi
+
+        CONSERVATIVE_POLICY_DIR=$(get_conservative_policy_dir)
+        echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
+        echo "$SMART_UP_THRESH" > $CONSERVATIVE_POLICY_DIR/up_threshold
+        echo "$SMART_FREQ_STEP" > $CONSERVATIVE_POLICY_DIR/freq_step
+        echo "$SMART_DOWN_FACTOR" > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
+        echo "$SLEEP_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
+
+        cores_online "0"
+
+        lock_governor 2>/dev/null
+
+        log_message "CPU Mode now locked to SMART" -v
+        flag_remove "setting_cpu"
+    fi
+}
