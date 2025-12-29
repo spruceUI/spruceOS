@@ -30,8 +30,7 @@ class TrimUISmartPro(TrimUIDevice):
 
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", source)
         if(main_ui_mode):
             trim_stock_json_file = script_dir / 'stock/brick.json'
             ConfigCopier.ensure_config(TrimUISmartPro.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)

@@ -31,8 +31,7 @@ class TrimUIBrick(TrimUIDevice):
         self.audio_player = AudioPlayerDelegateSdl2()
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/trim-ui-brick-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/trim-ui-brick-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/trim-ui-brick-system.json", source)
 
         if(main_ui_mode):
             trim_stock_json_file = script_dir / 'stock/brick.json'

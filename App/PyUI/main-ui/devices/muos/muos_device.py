@@ -37,8 +37,7 @@ class MuosDevice(DeviceCommon):
         self.parent_dir = os.path.dirname(base_dir)
         source = os.path.join(self.script_dir,"muos-system.json") 
         system_json_path = os.path.join(self.parent_dir,"muos-system.json")
-        ConfigCopier.ensure_config(system_json_path, Path(source))
-        self.system_config = SystemConfig(system_json_path)
+        self._load_system_config(system_json_path, Path(source))
 
     def sleep(self):
         ProcessRunner.run(["/opt/muos/script/system/suspend.sh"])

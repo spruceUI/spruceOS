@@ -36,8 +36,7 @@ class MiyooA30(MiyooDevice):
         self.audio_player = AudioPlayerDelegateSdl2()
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'a30-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/a30-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/a30-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/a30-system.json", source)
 
         if(main_ui_mode):
             self.miyoo_games_file_parser = MiyooGamesFileParser()        

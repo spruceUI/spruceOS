@@ -1,5 +1,6 @@
 
 
+import os
 import socket
 import subprocess
 import sys
@@ -7,11 +8,13 @@ import time
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
+from devices.miyoo.system_config import SystemConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
 from utils import throttle
+from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
 
@@ -457,4 +460,12 @@ class DeviceCommon(AbstractDevice):
     def might_require_surface_format_conversion(self):
         return False
 
-    
+    def _load_system_config(self, config_path, config_if_missing):
+        ConfigCopier.ensure_config(config_path, config_if_missing)
+        try:
+            self.system_config = SystemConfig(config_path)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to load system config, resetting config: {e}")
+            os.remove(config_path)
+            ConfigCopier.ensure_config(config_path, config_if_missing)
+            self.system_config = SystemConfig(config_path)

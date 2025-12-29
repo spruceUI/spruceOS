@@ -30,8 +30,7 @@ class TrimUISmartProS(TrimUIDevice):
 
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
         self.mainui_volume = 0
 
         if(main_ui_mode):

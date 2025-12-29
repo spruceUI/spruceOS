@@ -45,8 +45,7 @@ class MiyooMiniCommon(MiyooDevice):
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
 
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/mini-flip-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
         
         if(main_ui_mode):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
