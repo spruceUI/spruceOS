@@ -63,7 +63,7 @@ get_shutdown_timer() {
 
 trigger_sleep() {
     log_message "Entering pseudosleep"
-    device_enter_pseudo_sleep
+    device_enter_sleep
     lid_ever_closed=false
     pseudo_sleep_exited=false
     # Get the lid powerdown timeout
@@ -87,12 +87,12 @@ trigger_sleep() {
             # If lid opened, restore screen and break
             if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                 log_message "Lid opened"
-                device_exit_pseudo_sleep
+                device_exit_sleep
                 pseudo_sleep_exited=true 
                 break
             elif power_button_pressed; then
                 log_message "Power button pressed, exiting pseudosleep"
-                device_exit_pseudo_sleep
+                device_exit_sleep
                 pseudo_sleep_exited=true 
                 break
             fi
@@ -104,7 +104,7 @@ trigger_sleep() {
         # Timeout reached without exitting sleep → poweroff
         if [ "$pseudo_sleep_exited" = false ]; then
             log_message "Lid closed for ${IDLE_TIMEOUT}s, triggering poweroff"
-            device_exit_pseudo_sleep
+            device_exit_sleep
             sleep 0.1
             "$POWER_OFF_SCRIPT" &
         fi
@@ -120,11 +120,11 @@ trigger_sleep() {
             # If lid opened, restore screen and break
             if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                 log_message "Lid opened"
-                device_exit_pseudo_sleep
+                device_exit_sleep
                 break
             elif power_button_pressed; then
                 log_message "Power button pressed, exiting pseudosleep"
-                device_exit_pseudo_sleep
+                device_exit_sleep
                 break
             fi
             sleep 1

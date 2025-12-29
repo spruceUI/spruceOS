@@ -417,13 +417,13 @@ device_lid_open(){
     return 1
 }
 
-device_enter_pseudo_sleep() {
-    log_message "device_enter_pseudo_sleep Uneeded on this device: keymon handles" -v
+device_enter_sleep() {
+    log_message "device_enter_sleep Uneeded on this device: keymon handles" -v
 }
 
-device_exit_pseudo_sleep() {
+device_exit_sleep() {
     # keymon will bring wifi back up?
-    log_message "device_exit_pseudo_sleep Uneeded on this device keymon handles" -v
+    log_message "device_exit_sleep Uneeded on this device keymon handles" -v
 }
 
 # Need a conservative version

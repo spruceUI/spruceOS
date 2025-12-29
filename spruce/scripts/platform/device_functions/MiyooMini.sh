@@ -246,7 +246,7 @@ SCREEN_BLANK_FILE="/proc/mi_modules/fb/mi_fb0"
 BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
 LID_HALL_FILE="/sys/devices/soc0/soc/soc:hall-mh248/hallvalue"
 
-device_enter_pseudo_sleep() {
+device_enter_sleep() {
     killall -9 keymon
     killall -q -SIGSTOP $(echo $EMU_LIST) 2>/dev/null
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
@@ -257,7 +257,7 @@ device_enter_pseudo_sleep() {
     cpuclock 100                                                # slow cpu to a crawl
 }
 
-device_exit_pseudo_sleep() {
+device_exit_sleep() {
     cpuclock 1600                                               # wake up cpu speed
     keymon &
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
