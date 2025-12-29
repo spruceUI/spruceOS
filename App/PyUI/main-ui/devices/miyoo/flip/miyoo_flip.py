@@ -76,8 +76,7 @@ class MiyooFlip(MiyooDevice):
         
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'flip-system.json'
-        ConfigCopier.ensure_config("/mnt/SDCARD/Saves/flip-system.json", source)
-        self.system_config = SystemConfig("/mnt/SDCARD/Saves/flip-system.json")
+        self._load_system_config("/mnt/SDCARD/Saves/flip-system.json", source)
 
         if(main_ui_mode):
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
