@@ -16,6 +16,32 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "ardens"
+      ],
+      "selected": "ardens",
+      "overrides": {},
+      "devices": [
+        "MIYOO_A30",
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK"
+      ]
+    },
+    "Emulator_MiyooMini": {
+      "display": "Retroarch Core",
+      "options": [
+        "arduous"
+      ],
+      "selected": "arduous",
+      "overrides": {},
+      "devices": [
+        "MIYOO_MINI_FLIP"
+      ]
     }
   },
   "sortOrder": 400,
