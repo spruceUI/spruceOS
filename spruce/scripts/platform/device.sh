@@ -275,12 +275,12 @@ device_get_battery_percent() {
     log_message "Missing device_get_battery_percent function"
 }
 
-device_enter_pseudo_sleep() {
-    log_message "Missing device_enter_pseudo_sleep"
+device_enter_sleep() {
+    log_message "Missing device_enter_sleep"
 }
 
-device_exit_pseudo_sleep() {
-    log_message "Missing device_exit_pseudo_sleep"
+device_exit_sleep() {
+    log_message "Missing device_exit_sleep"
 }
 
 device_lid_sensor_ready() {
