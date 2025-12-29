@@ -190,3 +190,7 @@ class TrimUIBrick(TrimUIDevice):
         self.system_config.save_config()
         Display.volume_changed(user_volume)
         return user_volume
+    
+    
+    def might_require_surface_format_conversion(self):
+        return True # RA save state images don't seem to load w/o conversion?
