@@ -63,3 +63,21 @@ set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
     amixer set 'Soft Volume Master' "$new_vol"
 }
+
+
+send_virtual_key_L3R3() {
+    {
+        echo $B_L3 1 # L3 down
+        echo $B_R3 1 # R3 down
+        sleep 0.1
+        echo $B_L3 0 # R3 up
+        echo $B_R3 0 # L3 up
+        echo 0 0 0   # tell sendevent to exit
+    } | sendevent $EVENT_PATH_JOYPAD
+}
+
+send_menu_button_to_retroarch() {
+    if pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+        send_virtual_key_L3R3
+    fi
+}
