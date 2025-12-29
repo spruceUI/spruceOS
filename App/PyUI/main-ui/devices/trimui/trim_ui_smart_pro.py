@@ -184,7 +184,7 @@ class TrimUISmartPro(TrimUIDevice):
                 check=True
             )
 
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
