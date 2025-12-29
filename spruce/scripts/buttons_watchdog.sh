@@ -125,7 +125,6 @@ save_volume_to_config_file() {
 EVENTS="$EVENT_PATH_KEYBOARD"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
-    log_message "*** : $line"
     # first print event code to log file
     logger -p 15 -t "keymon[$$]" "$line"
 
