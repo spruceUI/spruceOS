@@ -489,3 +489,6 @@ class MiyooMiniCommon(MiyooDevice):
         if(core is None):
             core = game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
         return core
+    
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name+"-32"]

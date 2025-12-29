@@ -198,3 +198,11 @@ class TrimUISmartProS(TrimUIDevice):
         except Exception as e:
             PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
             return None
+
+    def _set_lumination_to_config(self):
+        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
+        try:
+            with open("/sys/class/backlight/backlight0/brightness", "w") as f:
+                f.write(str(val))
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error setting backlight: {e}")

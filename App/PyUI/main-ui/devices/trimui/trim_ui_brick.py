@@ -1,4 +1,6 @@
+import math
 from pathlib import Path
+import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
@@ -10,10 +12,14 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
+from devices.utils.file_watcher import FileWatcher
+from devices.utils.process_runner import ProcessRunner
+from display.display import Display
 from utils import throttle
 
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class TrimUIBrick(TrimUIDevice):
@@ -37,6 +43,8 @@ class TrimUIBrick(TrimUIDevice):
             self.ensure_wpa_supplicant_conf()
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
+            self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+                "/mnt/SDCARD/Saves/trim-ui-brick-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
             if(PyUiConfig.enable_button_watchers()):
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd
@@ -48,6 +56,7 @@ class TrimUIBrick(TrimUIDevice):
                 self.power_key_watcher = KeyWatcher("/dev/input/event1")
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
+                # Done to try to account for external systems editting the config file
                 
         super().__init__()
             
@@ -60,7 +69,7 @@ class TrimUIBrick(TrimUIDevice):
         self._set_hue_to_config()
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
-
+            
     #Untested
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
@@ -157,3 +166,27 @@ class TrimUIBrick(TrimUIDevice):
     
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-64"]
+            
+    def _set_volume(self, user_volume):
+        from display.display import Display
+        if(user_volume < 0):
+            user_volume = 0
+        elif(user_volume > 100):
+            user_volume = 100
+        volume = math.ceil(user_volume * 255//100)
+        
+        try:
+            
+            ProcessRunner.run(
+                ["amixer", "cset", f"numid=17", str(int(volume))],
+                check=True
+            )
+
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
+
+        self.system_config.reload_config()
+        self.system_config.set_volume(user_volume)
+        self.system_config.save_config()
+        Display.volume_changed(user_volume)
+        return user_volume
