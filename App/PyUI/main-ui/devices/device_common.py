@@ -453,3 +453,8 @@ class DeviceCommon(AbstractDevice):
     
     def startup_init(self, include_wifi):
         pass
+
+    def might_require_surface_format_conversion(self):
+        return False
+
+    

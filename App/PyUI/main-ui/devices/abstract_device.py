@@ -420,3 +420,9 @@ class AbstractDevice(ABC):
     @abstractmethod
     def startup_init(self, include_wifi):
         pass
+
+    @abstractmethod
+    def might_require_surface_format_conversion(self):
+        pass
+
+    

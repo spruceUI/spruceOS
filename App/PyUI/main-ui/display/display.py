@@ -115,6 +115,12 @@ class Display:
         cls.log_sdl_error_if_any()
         sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
         cls.log_sdl_error_if_any()
+
+        if(Device.might_require_surface_format_conversion()):
+            info = sdl2.SDL_RendererInfo()
+            sdl2.SDL_GetRendererInfo(cls.renderer.renderer, info)
+            cls.supported_formats = set(info.texture_formats[:info.num_texture_formats])
+
         cls.restore_bg()
         cls.clear("")
         cls.present()
@@ -605,7 +611,21 @@ class Display:
         return sdl2.sdlimage.IMG_Load(image_path.encode("utf-8"))
     
     @classmethod
-    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):
+    def convert_surface_to_safe_format(cls, surface):
+        if(Device.might_require_surface_format_conversion() and surface):
+            surface_format = surface.contents.format.contents.format
+            if surface_format not in cls.supported_formats:
+                # Convert to safe format
+                converted_surface = sdl2.SDL_ConvertSurfaceFormat(
+                    surface, sdl2.SDL_PIXELFORMAT_ARGB1555, 0
+                )
+                sdl2.SDL_FreeSurface(surface)
+                surface = converted_surface
+
+        return surface
+                     
+    @classmethod
+    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):        
         if(image_path is None or image_path in cls._problematic_images):
             return 0, 0
 
@@ -616,13 +636,17 @@ class Display:
             texture = cache.texture
         else:
             surface = Display.image_load(image_path)
+            surface = cls.convert_surface_to_safe_format(surface)
             if not surface:
                 if not cls.log_sdl_error_and_clear_cache_image(image_path):
                     return 0,0
                 surface = Display.image_load(image_path)
+                surface = cls.convert_surface_to_safe_format(surface)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
                     return 0, 0
+
+
 
             texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
 
