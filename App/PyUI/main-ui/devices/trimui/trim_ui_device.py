@@ -12,6 +12,7 @@ from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
@@ -25,6 +26,13 @@ class TrimUIDevice(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         self.sdl2_controller_interface = Sdl2ControllerInterface()
+
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if(old_volume != new_volume):
+            Display.volume_changed(new_volume)
 
     def get_controller_interface(self):
         return self.sdl2_controller_interface
@@ -78,30 +86,6 @@ class TrimUIDevice(DeviceCommon):
     def _set_hue_to_config(self):
         with open("/sys/devices/virtual/disp/disp/attr/color_temperature", "w") as f:
             f.write(str((self.system_config.hue * 5) - 50))
-            
-    def _set_volume(self, user_volume):
-        from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = math.ceil(user_volume * 255//100)
-        
-        try:
-            
-            ProcessRunner.run(
-                ["amixer", "cset", f"numid=17", str(int(volume))],
-                check=True
-            )
-
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
-        self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
 
     def get_volume(self):
         return self.system_config.get_volume()

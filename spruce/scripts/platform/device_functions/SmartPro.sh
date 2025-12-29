@@ -57,3 +57,9 @@ device_init() {
         run_trimui_osdd
     fi
 }
+
+
+set_volume() {
+    new_vol="${1:-0}" # default to mute if no value supplied
+    amixer set 'Soft Volume Master' "$new_vol"
+}

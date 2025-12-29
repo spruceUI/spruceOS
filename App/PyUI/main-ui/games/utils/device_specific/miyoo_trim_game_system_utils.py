@@ -29,7 +29,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "duckstation": ["DuckStation"],
         "easyrpg": ["EasyRPG Player"],
         "ecwolf": ["ECWolf"],
-        "fake08": ["FAKE-08"],
+        "fake08": ["FAKE-08","fake-08"],
         "fbalpha2012": ["FB Alpha 2012"],
         "fbneo": ["FinalBurn Neo"],
         "fceumm": ["FCEUmm"],

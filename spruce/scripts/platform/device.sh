@@ -142,14 +142,6 @@ enter_sleep() {
     log_message "Missing enter_sleep function"
 }
 
-get_current_volume() {
-    log_message "Missing get_current_volume function"
-}
-
-set_volume() {
-    log_message "Missing set_volume function"
-}
-
 reset_playback_pack() {
     log_message "Missing reset_playback_pack function"
 }
@@ -254,8 +246,18 @@ volume_up() {
     log_message "Missing volume_up function"
 }
 
+# System volume (why do we differentiate?)
+get_current_volume() {
+    log_message "Missing get_current_volume function"
+}
+
+# Config volume (We should normalize and not have 2 functions)
 get_volume_level() {
     log_message "Missing get_volume_level function"
+}
+
+set_volume() {
+    log_message "Missing set_volume function"
 }
 
 brightness_down() {

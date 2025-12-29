@@ -44,9 +44,36 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-set_volume() {
-    amixer set 'Soft Volume Master' "$new_vol"
+set_volume_delta() {
+    delta="$1"
+
+    current=$(get_volume_level)
+    [ -z "$current" ] && current=0
+
+    new=$((current + delta))
+
+    # Clamp 0–20
+    [ "$new" -lt 0 ] && new=0
+    [ "$new" -gt 20 ] && new=20
+
+    jq ".vol = $new" "$SYSTEM_JSON" > "${SYSTEM_JSON}.tmp" && mv "${SYSTEM_JSON}.tmp" "$SYSTEM_JSON"
+
+    scaled=$(( new * 255 / 20 ))
+    set_volume "$scaled"
 }
+
+volume_up() {
+    set_volume_delta 1
+}
+
+volume_down() {
+    set_volume_delta -1
+}
+
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
+}
+
 
 reset_playback_pack() {
     #TODO I think this is wrong
@@ -117,6 +144,7 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 }
 
 
