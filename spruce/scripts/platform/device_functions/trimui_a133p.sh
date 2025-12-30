@@ -39,6 +39,16 @@ enter_sleep() {
     echo -n mem >/sys/power/state
 }
 
+device_enter_sleep() {
+    log_message "Entering sleep."
+    #Is this the right wake file for a TrimUI A133P?
+    #Or is it old code that was copy pasted improperly?
+    RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
+    IDLE_TIMEOUT="$1"
+    echo "+$IDLE_TIMEOUT" >"$RTC_WAKE_FILE"
+
+    echo -n mem >/sys/power/state
+}
 
 get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
@@ -143,8 +153,7 @@ post_pyui_exit(){
 
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    launch_common_startup_watchdogs_v2 "false"
 }
 
 
