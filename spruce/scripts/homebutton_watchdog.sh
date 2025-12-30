@@ -19,7 +19,7 @@ kill_port(){
         rm -f /tmp/cmd_to_run.sh
         rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
 
-        take_screenshot
+        capture_screen
 
         SID=$(cat /tmp/last_port_sid)
         kill -TERM -"$SID" 2>/dev/null
