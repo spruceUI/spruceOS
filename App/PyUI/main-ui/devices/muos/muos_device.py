@@ -379,3 +379,6 @@ class MuosDevice(DeviceCommon):
 
     def keep_running_on_error(self):
         return False
+
+    def perform_sdcard_ro_check(self):
+        PyUiLogger.get_logger().info("MUOS Device does not check for read-only SD card status.")

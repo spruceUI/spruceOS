@@ -233,6 +233,8 @@ def main():
         Controller.init()
         Language.init()
 
+        Device.perform_sdcard_ro_check()
+
         check_for_msg_display(args)
         check_for_msg_display_realtime(args)
         check_for_msg_display_socket_based(args)

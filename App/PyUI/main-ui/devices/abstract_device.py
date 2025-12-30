@@ -425,4 +425,6 @@ class AbstractDevice(ABC):
     def might_require_surface_format_conversion(self):
         pass
 
-    
+    @abstractmethod
+    def perform_sdcard_ro_check(self):
+        pass

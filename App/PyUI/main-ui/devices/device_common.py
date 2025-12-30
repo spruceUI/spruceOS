@@ -4,6 +4,7 @@ import os
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
@@ -469,3 +470,16 @@ class DeviceCommon(AbstractDevice):
             os.remove(config_path)
             ConfigCopier.ensure_config(config_path, config_if_missing)
             self.system_config = SystemConfig(config_path)
+
+
+    def is_filesystem_read_only(self,path="/mnt/SDCARD"):
+        try:
+            with tempfile.NamedTemporaryFile(dir=path, delete=True):
+                pass
+            return False
+        except OSError:
+            return True
+
+    def perform_sdcard_ro_check(self):
+        if self.is_filesystem_read_only("/mnt/SDCARD"):
+            Display.display_message("Warning: /mnt/SDCARD is read-only. Please check your SD card.", duration_ms=10000)
