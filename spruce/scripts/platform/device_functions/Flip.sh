@@ -431,3 +431,11 @@ device_get_charging_status() {
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
+
+device_prepare_for_ports_run() {
+    /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
+}
+
+device_cleanup_after_ports_run() {
+    /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
+}

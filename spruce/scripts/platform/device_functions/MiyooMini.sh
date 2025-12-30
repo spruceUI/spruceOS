@@ -288,3 +288,12 @@ device_lid_open(){
 take_screenshot() { # todo: what's the rotation per each model again?'
     /mnt/SDCARD/spruce/bin/fbscreenshot "$1"
 }
+
+
+device_prepare_for_ports_run() {
+    log_message "device_prepare_for_ports_run uneeded on this device" -v
+}
+
+device_cleanup_after_ports_run() {
+    log_message "device_cleanup_after_ports_run uneeded on this device" -v
+}

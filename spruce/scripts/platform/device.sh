@@ -295,3 +295,11 @@ device_lid_open(){
     log_message "Missing device_lid_open"
     return 1
 }
+
+device_prepare_for_ports_run() {
+    log_message "Missing device_prepare_for_ports_run function"
+}
+
+device_cleanup_after_ports_run() {
+    log_message "Missing device_cleanup_after_ports_run function"
+}

@@ -185,6 +185,11 @@ runtime_mounts_a133p() {
     # Mask Roms/PORTS with non-A30 version
     mkdir -p "/mnt/SDCARD/Roms/PORTS64"
     mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
+
+    # PortMaster ports location
+    mkdir -p /mnt/SDCARD/Roms/PORTS64/ports/ 
+    mount --bind /mnt/SDCARD/Roms/PORTS64/ /mnt/SDCARD/Roms/PORTS64/ports/
+
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -278,4 +283,12 @@ device_get_charging_status() {
 
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
+}
+
+device_prepare_for_ports_run() {
+    log_message "device_prepare_for_ports_run uneeded on this device" -v
+}
+
+device_cleanup_after_ports_run() {
+    log_message "device_cleanup_after_ports_run uneeded on this device" -v
 }
