@@ -122,6 +122,7 @@ enable_or_disable_rgb_trimui() {
 }
 
 setup_for_retroarch_and_get_bin_location_trimui(){
+	RA_DIR="/mnt/SDCARD/RetroArch"
 	if [ "$use_igm" = "True" ]; then
 		export RA_BIN="ra64.trimui_$PLATFORM"
 	else

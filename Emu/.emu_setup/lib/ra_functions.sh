@@ -111,14 +111,11 @@ backup_ra_config() {
 }
 
 run_retroarch() {
-	
-
 	prepare_ra_config 2>/dev/null
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
-	RA_BIN=$(setup_for_retroarch_and_get_bin_location)
-	RA_DIR="/mnt/SDCARD/RetroArch"
+	setup_for_retroarch_and_get_bin_location
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then

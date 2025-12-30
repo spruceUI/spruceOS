@@ -155,6 +155,7 @@ get_ra_cfg_location(){
 }
 
 setup_for_retroarch_and_get_bin_location(){
+	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"
 
 	if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
