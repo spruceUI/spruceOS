@@ -121,6 +121,7 @@ get_ra_cfg_location(){
 }
 
 setup_for_retroarch_and_get_bin_location(){
+	RA_DIR="/mnt/SDCARD/RetroArch"
 	if [ "$CORE" = "yabasanshiro" ]; then
 		# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 		export RA_BIN="ra64.miyoo"
