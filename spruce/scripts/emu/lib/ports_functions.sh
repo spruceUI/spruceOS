@@ -45,19 +45,24 @@ set_port_mode() {
 }
 
 run_port() {
-	if [ "$PLATFORM" = "Flip" ] || [ "$PLATFORM" = "Brick" ]; then
-        /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
+    log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
+    device_prepare_for_ports_run
+	
+	
+    if [ "$PLATFORM_ARCHITECTURE" == "aarch64" ]; then
         set_port_mode
 
         is_retroarch_port
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         export HOME="/mnt/SDCARD/Saves/flip/home"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:/usr/lib:/mnt/SDCARD/spruce/flip/muOS/usr/lib/:/mnt/SDCARD/spruce/flip/muOS/lib/:/usr/lib32:/mnt/SDCARD/spruce/flip/lib32/:/mnt/SDCARD/spruce/flip/muOS/usr/lib32/:$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
         export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
         if [ $? -eq 1 ]; then
+            log_message "Launching RA port $ROM_FILE"
             cd /mnt/SDCARD/RetroArch/
             "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
         else
+            log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
             setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
             SID=$!
             echo "$SID" > /tmp/last_port_sid
@@ -65,10 +70,11 @@ run_port() {
             rm -f /tmp/last_port_sid
         fi
         
-        /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
     else
         PORTS_DIR=/mnt/SDCARD/Roms/PORTS
         cd $PORTS_DIR
         /bin/sh "$ROM_FILE" 
     fi
+
+    device_cleanup_after_ports_run
 }

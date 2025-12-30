@@ -288,6 +288,11 @@ runtime_mounts_SmartProS() {
     # Mask Roms/PORTS with non-A30 version
     mkdir -p "/mnt/SDCARD/Roms/PORTS64"
     mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
+
+    # PortMaster ports location
+    mkdir -p /mnt/SDCARD/Roms/PORTS64/ports/ 
+    mount --bind /mnt/SDCARD/Roms/PORTS64/ /mnt/SDCARD/Roms/PORTS64/ports/
+
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -457,4 +462,13 @@ set_performance() {
 }
 set_overclock() {
     set_performance
+}
+
+
+device_prepare_for_ports_run() {
+    log_message "device_prepare_for_ports_run uneeded on this device" -v
+}
+
+device_cleanup_after_ports_run() {
+    log_message "device_cleanup_after_ports_run uneeded on this device" -v
 }
