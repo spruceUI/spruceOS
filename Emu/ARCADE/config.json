@@ -3,7 +3,7 @@
   "icon": "arcade.png",
   "iconsel": "arcade_sel.png",
   "themecolor": "CD6155",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip",
   "launchlist": [],
   "menuOptions": {

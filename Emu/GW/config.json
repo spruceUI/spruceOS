@@ -3,7 +3,7 @@
   "icon": "gw.png",
   "iconsel": "gw_sel.png",
   "themecolor": "FF0000",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "mgw|zip|7z",
   "launchlist": [],
   "menuOptions": {

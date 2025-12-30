@@ -3,7 +3,7 @@
   "icon": "chai.png",
   "iconsel": "chai_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chailove",
   "launchlist": [],
   "menuOptions": {

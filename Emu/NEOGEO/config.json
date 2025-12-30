@@ -3,7 +3,7 @@
   "icon": "neogeo.png",
   "iconsel": "neogeo_sel.png",
   "themecolor": "FFD200",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z",
   "launchlist": [],
   "menuOptions": {

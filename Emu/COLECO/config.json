@@ -3,7 +3,7 @@
   "icon": "col.png",
   "iconsel": "col_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|rom|ri|mx1|mx2|col|dsk|cas|sg|sc|m3u",
   "launchlist": [],
   "menuOptions": {

@@ -3,7 +3,7 @@
   "icon": "segasgone.png",
   "iconsel": "segasgone_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|sms|gg|sg|mv|bin|rom",
   "launchlist": [],
   "menuOptions": {

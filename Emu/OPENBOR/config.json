@@ -3,7 +3,7 @@
   "icon": "openbor.png",
   "iconsel": "openbor_sel.png",
   "themecolor": "FFFF00",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "pak",
   "launchlist": [],
   "menuOptions": {

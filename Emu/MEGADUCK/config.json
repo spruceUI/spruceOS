@@ -3,7 +3,7 @@
   "icon": "megaduck.png",
   "iconsel": "megaduck_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "bin|zip|7z",
   "launchlist": [],
   "menuOptions": {

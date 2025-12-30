@@ -3,7 +3,7 @@
   "icon": "atarist.png",
   "iconsel": "atarist_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "st|msa|stx|dim|ipf|zip|7z",
   "launchlist": [],
   "menuOptions": {

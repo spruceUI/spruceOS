@@ -3,7 +3,7 @@
   "icon": "pico.png",
   "iconsel": "pico_sel.png",
   "themecolor": "00FF88",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "p8|png",
   "launchlist": [],
   "menuOptions": {

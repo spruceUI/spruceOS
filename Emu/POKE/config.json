@@ -3,7 +3,7 @@
   "icon": "poke.png",
   "iconsel": "poke_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "min|zip|7z",
   "launchlist": [],
   "menuOptions": {

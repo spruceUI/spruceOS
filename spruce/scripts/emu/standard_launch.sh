@@ -22,11 +22,11 @@ export MODE="$(get_cpu_mode_from_emu_json)"
 ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
-. /mnt/SDCARD/Emu/.emu_setup/lib/general_functions.sh
-. /mnt/SDCARD/Emu/.emu_setup/lib/led_functions.sh
-. /mnt/SDCARD/Emu/.emu_setup/lib/network_functions.sh
-. /mnt/SDCARD/Emu/.emu_setup/lib/gtt_functions.sh
-. /mnt/SDCARD/Emu/.emu_setup/lib/ra_functions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/led_functions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/network_functions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/gtt_functions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
 
  ########################
 ##### MAIN EXECUTION #####
@@ -47,7 +47,7 @@ case $EMU_NAME in
 
 	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ]; then
-			. /mnt/SDCARD/Emu/.emu_setup/lib/flycast_functions.sh
+			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
 			run_flycast_standalone
 		elif [ ! "$PLATFORM" = "A30" ]; then
 			export CORE="flycast"
@@ -64,18 +64,18 @@ case $EMU_NAME in
 		;;
 
 	"MEDIA")
-		. /mnt/SDCARD/Emu/.emu_setup/lib/media_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
 		run_ffplay
 		;;
 
 	"NDS")
-		. /mnt/SDCARD/Emu/.emu_setup/lib/drastic_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
 		run_drastic
 		;;
 
 	"N64")
 		if [ "$CORE" = "mupen64plus-standalone" ]; then
-			. /mnt/SDCARD/Emu/.emu_setup/lib/mupen_functions.sh
+			. /mnt/SDCARD/spruce/scripts/emu/lib/mupen_functions.sh
 			run_mupen_standalone
 		else
 			load_n64_controller_profile
@@ -85,23 +85,23 @@ case $EMU_NAME in
 		;;
 
 	"OPENBOR")
-		. /mnt/SDCARD/Emu/.emu_setup/lib/openbor_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/openbor_functions.sh
 		run_openbor
 		;;
 
 	"PICO8")			
-		. /mnt/SDCARD/Emu/.emu_setup/lib/pico8_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/pico8_functions.sh
 		load_pico8_control_profile
 		run_pico8
 		;;
 
 	"PORTS")
-		. /mnt/SDCARD/Emu/.emu_setup/lib/ports_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
 		run_port
 		;;
 
 	"PSP")
-		. /mnt/SDCARD/Emu/.emu_setup/lib/ppsspp_functions.sh
+		. /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
 		[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
 		load_ppsspp_configs
 		run_ppsspp
@@ -110,7 +110,7 @@ case $EMU_NAME in
 
 	"SATURN")
 		if [ "$CORE" = "yabasanshiro-standalone-bios" ] || [ "$CORE" = "yabasanshiro-standalone-hle" ]; then
-			. /mnt/SDCARD/Emu/.emu_setup/lib/yaba_functions.sh
+			. /mnt/SDCARD/spruce/scripts/emu/lib/yaba_functions.sh
 			run_yabasanshiro
 		else
 			export CORE="yabasanshiro"

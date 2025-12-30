@@ -3,7 +3,7 @@
   "icon": "cps2.png",
   "iconsel": "cps2_sel.png",
   "themecolor": "FFFF00",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|cue",
   "launchlist": [],
   "menuOptions": {

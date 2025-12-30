@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. /mnt/SDCARD/Emu/.emu_setup/lib/core_mappings.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/core_mappings.sh
 # Requires globals:
 #   PLATFORM
 #   BRAND

@@ -3,7 +3,7 @@
   "icon": "psp.png",
   "iconsel": "psp_sel.png",
   "themecolor": "64A8BD",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "iso|cso|chd",
   "launchlist": [],
   "menuOptions": {

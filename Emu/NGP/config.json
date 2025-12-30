@@ -3,7 +3,7 @@
   "icon": "ngp.png",
   "iconsel": "ngp_sel.png",
   "themecolor": "FFFFFF",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ngp|ngc|zip|7z",
   "launchlist": [],
   "menuOptions": {

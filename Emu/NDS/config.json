@@ -3,7 +3,7 @@
   "icon": "nds.png",
   "iconsel": "nds_sel.png",
   "themecolor": "FF8800",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "noaudiofix": 1,
   "extlist": "nds|zip|7z|rar",
   "launchlist": [],

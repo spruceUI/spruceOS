@@ -3,7 +3,7 @@
   "icon": "pce.png",
   "iconsel": "pce_sel.png",
   "themecolor": "EA483F",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "pce|zip|7z|ccd|iso|img|chd|cue",
   "launchlist": [],
   "menuOptions": {

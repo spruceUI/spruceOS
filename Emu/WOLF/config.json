@@ -3,7 +3,7 @@
   "icon": "wolf.png",
   "iconsel": "wolf_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ecwolf|exe",
   "launchlist": [],
   "menuOptions": {

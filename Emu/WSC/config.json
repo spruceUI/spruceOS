@@ -3,7 +3,7 @@
   "icon": "wsc.png",
   "iconsel": "wsc_sel.png",
   "themecolor": "3C4593",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [],
   "menuOptions": {
