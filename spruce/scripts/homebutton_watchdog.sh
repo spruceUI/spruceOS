@@ -15,16 +15,18 @@ kill_port(){
     if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
         rm -f /tmp/menubtn
 
+        capture_screen
+
+
         # Don't relaunch if somehow the exit fails
         rm -f /tmp/cmd_to_run.sh
         rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
-
-        capture_screen
 
         SID=$(cat /tmp/last_port_sid)
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
         kill -9 -"$SID" 2>/dev/null
+
     fi
 }
 
@@ -260,12 +262,10 @@ home_key_down () {
                 HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
                 log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
-
+                kill_port
             fi
         ) &
         menu_hold_pid=$!
-
-        kill_port
     fi
 }
 
@@ -291,6 +291,7 @@ home_key_up () {
             TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
             log_message "homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
             perform_action "$TAP_HOME"
+            kill_port
         fi
 
         resume_drastic
