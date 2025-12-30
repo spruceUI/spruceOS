@@ -135,8 +135,6 @@ setup_for_retroarch_and_get_bin_location_trimui(){
 		use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
 		[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
 	fi
-	# TODO: remove this once profile is set up
-	export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
 	export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
