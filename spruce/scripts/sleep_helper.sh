@@ -63,7 +63,7 @@ get_shutdown_timer() {
 
 trigger_sleep() {
     log_message "Entering pseudosleep"
-    device_enter_sleep
+    device_enter_sleep "$IDLE_TIMEOUT"
     lid_ever_closed=false
     pseudo_sleep_exited=false
     # Get the lid powerdown timeout
