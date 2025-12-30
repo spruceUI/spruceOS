@@ -3,7 +3,7 @@
   "icon": "cpc.png",
   "iconsel": "cpc_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|sna|dsk|kcr|bin",
   "launchlist": [],
   "menuOptions": {

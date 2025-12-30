@@ -3,7 +3,7 @@
   "icon": "lynx.png",
   "iconsel": "lynx_sel.png",
   "themecolor": "88FF88",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "lnx|zip",
   "launchlist": [],
   "menuOptions": {

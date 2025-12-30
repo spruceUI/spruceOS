@@ -3,7 +3,7 @@
   "icon": "gbc.png",
   "iconsel": "gbc_sel.png",
   "themecolor": "FFB800",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "gb|gbc|zip|7z|bin|dmg",
   "launchlist": [],
   "menuOptions": {

@@ -3,7 +3,7 @@
   "icon": "saturn.png",
   "iconsel": "saturn_sel.png",
   "themecolor": "E4007F",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chd|zip|mds|ccd|iso|cue",
   "launchlist": [
     {

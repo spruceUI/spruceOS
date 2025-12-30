@@ -3,7 +3,7 @@
   "icon": "dc.png",
   "iconsel": "dc_sel.png",
   "themecolor": "FFFFFF",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
   "launchlist": [
     {

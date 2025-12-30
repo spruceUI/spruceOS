@@ -3,7 +3,7 @@
   "icon": "supervision.png",
   "iconsel": "supervision_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|sv|bin",
   "launchlist": [],
   "menuOptions": {

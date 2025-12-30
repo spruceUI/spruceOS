@@ -3,7 +3,7 @@
   "icon": "tic.png",
   "iconsel": "tic_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [],
   "menuOptions": {

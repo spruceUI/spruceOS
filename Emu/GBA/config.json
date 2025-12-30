@@ -3,7 +3,7 @@
   "icon": "gba.png",
   "iconsel": "gba_sel.png",
   "themecolor": "FF00FF",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "gba|zip|7z|bin",
   "launchlist": [],
   "menuOptions": {

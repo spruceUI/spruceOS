@@ -3,7 +3,7 @@
   "icon": "neocd.png",
   "iconsel": "neocd_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "cue|chd|m3u",
   "launchlist": [
     {

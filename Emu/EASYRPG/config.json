@@ -3,7 +3,7 @@
   "icon": "easyrpg.png",
   "iconsel": "easyrpg_sel.png",
   "themecolor": "FFFF88",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "subfolder_launch_file": "RPG_RT.ldb",
   "extlist": "zip|ldb|easyrpg",
   "launchlist": [],

@@ -3,7 +3,7 @@
   "icon": "iconname.png",
   "iconsel": "iconname_sel.png",
   "themecolor": "FFFF00",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "file|ext|ens|ions|sep|arat|ed|by|pipes|with|no|dots",
   "launchlist": [],
   "menuOptions": {

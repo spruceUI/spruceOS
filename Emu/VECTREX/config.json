@@ -3,7 +3,7 @@
   "icon": "vectrex.png",
   "iconsel": "vectrex_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "vec|zip|7z",
   "launchlist": [],
   "menuOptions": {

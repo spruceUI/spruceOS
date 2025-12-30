@@ -3,7 +3,7 @@
   "icon": "vb.png",
   "iconsel": "vb_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "vb|vboy|zip|7z",
   "launchlist": [],
   "menuOptions": {

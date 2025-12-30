@@ -3,7 +3,7 @@
   "icon": "sufami.png",
   "iconsel": "sufami_sel.png",
   "themecolor": "",
-  "launch": "../.emu_setup/standard_launch.sh",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "smc|zip|7z",
   "launchlist": [],
   "menuOptions": {
