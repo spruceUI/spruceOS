@@ -56,6 +56,11 @@ device_init() {
     if [ "$version" != "1.1.0" ]; then
         run_trimui_osdd
     fi
+
+    if [ ! -x /bin/bash ]; then
+        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
+        chmod +x /bin/bash
+    fi
 }
 
 
