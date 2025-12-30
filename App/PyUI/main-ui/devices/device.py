@@ -469,3 +469,6 @@ class Device:
     def might_require_surface_format_conversion():
         return Device._impl.might_require_surface_format_conversion()
 
+    @staticmethod
+    def perform_sdcard_ro_check():
+        return Device._impl.perform_sdcard_ro_check()
