@@ -164,7 +164,7 @@ take_screenshot() {
 
 
 device_specific_wake_from_sleep() {
-    log_message "nothing to do" -v
+    log_message "*** nothing to do for device_specific_wake_from_sleep" -v
 }
 
 
@@ -191,7 +191,7 @@ run_trimui_blobs() {
     cd /usr/trimui/bin || return 1
     mkdir -p /tmp/trimui_inputd
 
-    for blob in trimui_inputd trimui_thermald keymon trimui_scened \
+    for blob in trimui_inputd trimui_thermald trimui_scened \
                 trimui_btmanager hardwareservice musicserver; do
         if [ -x "/usr/trimui/bin/$blob" ]; then
             LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
