@@ -292,3 +292,64 @@ device_prepare_for_ports_run() {
 device_cleanup_after_ports_run() {
     log_message "device_cleanup_after_ports_run uneeded on this device" -v
 }
+
+set_backlight() {
+    val="$1"
+
+
+    # Clamp input to 1–10
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+
+
+    # Convert 1–10 → 1–255
+    val_255=$(( (val - 1) * 254 / 9 + 1 ))
+
+
+    "$DEVICE_PYTHON3_PATH" - <<EOF
+import os, fcntl, ctypes, sys, traceback
+
+
+try:
+    DISP_LCD_SET_BRIGHTNESS = 0x102
+    val = int("$val_255")
+
+    print(f"[PY] Brightness value: {val}", file=sys.stderr)
+
+    if not os.path.exists("/dev/disp"):
+        print("[PY][ERR] /dev/disp does not exist", file=sys.stderr)
+        sys.exit(1)
+
+    fd = os.open("/dev/disp", os.O_RDWR)
+
+    param = (ctypes.c_ulong * 4)(0, val, 0, 0)
+
+    fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+
+    os.close(fd)
+
+except Exception as e:
+    print("[PY][EXCEPTION]", e, file=sys.stderr)
+    traceback.print_exc()
+EOF
+
+tmp=$(mktemp)
+jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+
+}
+
+current_backlight() {
+    jq -r '.backlight' "$SYSTEM_JSON"
+}
+
+brightness_down() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight - 1))
+}
+
+brightness_up() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight + 1))
+}
