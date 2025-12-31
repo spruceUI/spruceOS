@@ -193,6 +193,23 @@ check_if_fw_needs_update_trimui() {
     [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
 }
 
+run_trimui_blobs() {
+
+    cd /usr/trimui/bin || return 1
+    mkdir -p /tmp/trimui_inputd
+
+    for blob in trimui_inputd thermald keymon trimui_scened \
+                trimui_btmanager hardwareservice musicserver; do
+        if [ -x "/usr/trimui/bin/$blob" ]; then
+            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
+            log_message "Attempted to start $blob"
+            sleep 0.05
+        else
+            log_message "$blob not present on this device."
+        fi
+    done
+}
+
 run_trimui_osdd() {
     if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
         cd /usr/trimui/osd || return 1
@@ -201,4 +218,9 @@ run_trimui_osdd() {
     else
         log_message "trimui_osdd not found. Skipping."
     fi
+
+    {
+        sleep 2 # ensure OSDD fully initializes before setting hotkey
+        echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
+    } &
 }

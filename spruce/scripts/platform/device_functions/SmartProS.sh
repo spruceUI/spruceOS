@@ -298,24 +298,6 @@ runtime_mounts_SmartProS() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
-# Use different thermald than the a133p ones
-run_trimui_blobs() {
-
-    cd /usr/trimui/bin || return 1
-    mkdir -p /tmp/trimui_inputd
-
-    for blob in trimui_inputd thermald keymon trimui_scened \
-                trimui_btmanager hardwareservice musicserver; do
-        if [ -x "/usr/trimui/bin/$blob" ]; then
-            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-            log_message "Attempted to start $blob"
-        else
-            log_message "$blob not found. Skipping."
-        fi
-    done
-
-}
-
 device_init() {
     runtime_mounts_SmartProS
 
@@ -341,7 +323,6 @@ device_init() {
 
     run_trimui_blobs
     run_trimui_osdd
-    echo -n HOME > /tmp/trimui_osd/hotkeyshow   # allows button on top of device to pull up OSD
 
     tinymix set 23 1
     tinymix set 18 23
