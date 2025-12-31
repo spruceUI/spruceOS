@@ -8,8 +8,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
-export_ld_library_path
-
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
 

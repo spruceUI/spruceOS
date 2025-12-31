@@ -27,10 +27,6 @@ set_SMB_DIR(){
     SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
 }
 
-set_LD_LIBRARY_PATH_FOR_SAMBA(){
-    log_message "No LD Library Path manip needed for samba on miyoo mini" -v   
-}
-
 set_SFTPGO_DIR() {
     SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
 }

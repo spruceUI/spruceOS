@@ -36,9 +36,7 @@ display_kill() {
 
 display() {
     [ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayTextWidescreen.png" || DEFAULT_IMAGE="/mnt/SDCARD/spruce/imgs/displayText.png"
-    if [ "$BRAND" = "TrimUI" ]; then
-        LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
-    fi
+
     ACKNOWLEDGE_IMAGE="/mnt/SDCARD/spruce/imgs/displayAcknowledge.png"
     CONFIRM_IMAGE="/mnt/SDCARD/spruce/imgs/displayConfirm.png"
     DEFAULT_FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"

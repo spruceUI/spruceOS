@@ -2,8 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-export_ld_library_path
-
 SD_CARD=$(get_sd_card_path)
 
 IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"

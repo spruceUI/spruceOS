@@ -9,10 +9,6 @@ get_python_path() {
     log_message "Missing get_python_path function"
 }
 
-export_ld_library_path() {
-    log_message "Missing export_ld_library_path function"
-}
-
 get_sd_card_path() {
     log_message "Missing get_sd_card_path function"
 }
@@ -220,10 +216,6 @@ set_dark_httpd_dir() {
 
 set_SMB_DIR(){
     log_message "Missing set_SMB_DIR function"
-}
-
-set_LD_LIBRARY_PATH_FOR_SAMBA(){
-    log_message "Missing set_LD_LIBRARY_PATH_FOR_SAMBA function"
 }
 
 set_SFTPGO_DIR() {

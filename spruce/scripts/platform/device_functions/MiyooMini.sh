@@ -8,11 +8,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
-
-export_ld_library_path() {
-    export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
-}
-
 get_sd_card_path() {
     echo "/mnt/SDCARD"
 }

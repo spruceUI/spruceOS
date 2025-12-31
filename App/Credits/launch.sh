@@ -16,8 +16,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     /mnt/SDCARD/spruce/bin64/gptokeyb -k "credits_app" -c "./credits_app.gptk" & 
     sleep 0.5
 
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/miyoo/lib
-
     "$HERE"/credits_app \
     "$HERE"/sprucepixelbg43.png \
     "$HERE"/credits.txt \
@@ -27,8 +25,6 @@ elif [ "$PLATFORM" = "Flip" ]; then
     kill -9 "$(pidof gptokeyb)"
 
 else    # trimui devices - currently not working due to needing a newer glibc
-
-    export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/trimui/lib
 
     "$HERE"/credits_app \
     "$HERE"/sprucepixelbg43.png \

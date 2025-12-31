@@ -31,10 +31,6 @@ set_SMB_DIR(){
    SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
 }
 
-set_LD_LIBRARY_PATH_FOR_SAMBA(){
-	LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
-}
-
 set_SFTPGO_DIR() {
     SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
 }

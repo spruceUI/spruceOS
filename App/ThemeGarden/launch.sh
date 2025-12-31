@@ -8,8 +8,6 @@ DOWNLOAD="/mnt/SDCARD/App/ThemeGarden/download_theme.sh"
 CONFIG_DIR=/mnt/SDCARD/Saves/ThemeGarden
 PREVIEW_PACK_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/Resources/theme_previews.7z"
 
-export_ld_library_path
-
 ##### FUNCTIONS #####
 
 is_wifi_connected() {
