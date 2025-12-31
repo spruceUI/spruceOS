@@ -1,3 +1,4 @@
+import subprocess
 import json
 import os
 from pathlib import Path
@@ -20,6 +21,7 @@ from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from asyncio import sleep
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
@@ -205,3 +207,58 @@ class TrimUISmartProS(TrimUIDevice):
                 f.write(str(val))
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting backlight: {e}")
+
+    def volume_up(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event0"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 115 1\n")
+            proc.stdin.write("1 115 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
+
+    def volume_down(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event0"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 114 1\n")
+            proc.stdin.write("1 114 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
+
+    def change_volume(self, amount):
+        PyUiLogger.get_logger().debug(f"Changing volume by {amount}")
+        self.system_config.reload_config()
+        volume = self.get_volume() + amount
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        if(amount > 0):
+            self.volume_up()
+        else:
+            self.volume_down()
+        sleep(0.1)
+        self.on_mainui_config_change()
