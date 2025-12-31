@@ -123,7 +123,7 @@ get_ra_cfg_location(){
 
 setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
-    export CORE_DIR="/mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/cores"
+    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     export RA_BIN="retroarch"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
