@@ -281,7 +281,7 @@ device_lid_open(){
 }
 
 take_screenshot() { # todo: what's the rotation per each model again?'
-    /mnt/SDCARD/spruce/bin/fbscreenshot "$1"
+    /mnt/SDCARD/spruce/bin/fbgrab -a "$1"
 }
 
 

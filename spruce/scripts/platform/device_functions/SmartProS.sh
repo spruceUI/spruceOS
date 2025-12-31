@@ -239,7 +239,7 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
+    /mnt/SDCARD/spruce/bin64/fbgrab -a "$1"
 }
 
 device_specific_wake_from_sleep() {

@@ -242,7 +242,8 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    /mnt/SDCARD/spruce/bin/fbscreenshot "$1"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
 }
 
 device_specific_wake_from_sleep() {
