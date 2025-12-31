@@ -194,21 +194,24 @@ check_if_fw_needs_update_trimui() {
 }
 
 run_trimui_blobs() {
+    # First argument is the blob list as a space-separated string
+    # Second argument is the single argument to pass to each blob (optional)
+    blobs="$1"
 
     cd /usr/trimui/bin || return 1
     mkdir -p /tmp/trimui_inputd
 
-    for blob in trimui_inputd thermald keymon trimui_scened \
-                trimui_btmanager hardwareservice musicserver; do
-        if [ -x "/usr/trimui/bin/$blob" ]; then
-            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-            log_message "Attempted to start $blob"
+    for blob in $blobs; do
+        if [ -x "./$blob" ]; then
+            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" $arg &
+            log_message "Attempted to start $blob with arg '$arg'"
             sleep 0.05
         else
             log_message "$blob not present on this device."
         fi
     done
 }
+
 
 run_trimui_osdd() {
     if [ -x "/usr/trimui/osd/trimui_osdd" ]; then

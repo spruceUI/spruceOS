@@ -321,7 +321,8 @@ device_init() {
         /etc/bluetooth/bluetoothd start
     fi
 
-    run_trimui_blobs
+    run_trimui_blobs "trimui_inputd thermald keymon trimui_scened trimui_btmanager hardwareservice musicserver"
+
     run_trimui_osdd
 
     tinymix set 23 1
