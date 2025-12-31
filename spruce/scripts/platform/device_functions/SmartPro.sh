@@ -7,10 +7,6 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_a133p.sh"
 
-export_ld_library_path() {
-    export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
-}
-
 get_config_path() {
     # Return the full path
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json"

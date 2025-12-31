@@ -30,7 +30,6 @@ case "$PLATFORM" in
         ln -s /dev/ttyS2 /dev/ttyS0
 
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/a30/sdl2"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/miyoo/lib:/usr/miyoo/lib:/usr/lib:/lib"
 
         cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -61,11 +60,9 @@ case "$PLATFORM" in
         tinymix set 9 1
         tinymix set 1 0
 
-        export LD_LIBRARY_PATH=/usr/trimui/lib:$LD_LIBRARY_PATH
         cd /usr/trimui/bin
 
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
-        export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
 
         if [ "$PLATFORM" = "Brick" ]; then
             DEVICE="TRIMUI_BRICK"
@@ -106,7 +103,6 @@ case "$PLATFORM" in
 # Miyoo Flip
 ############################################################
     "Flip" )
-        export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
         cd /usr/miyoo/bin/
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
 
@@ -145,7 +141,6 @@ case "$PLATFORM" in
         done
 
         export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/miyoomini/lib"
 
         export SDL_VIDEODRIVER=mmiyoo

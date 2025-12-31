@@ -8,8 +8,6 @@ set_SMB_DIR
 start_samba_process(){
     log_message "Starting Samba..."
 	
-    set_LD_LIBRARY_PATH_FOR_SAMBA
-	# Set the LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH="$SMB_DIR/lib:$LD_LIBRARY_PATH"
 
 	# Create necessary directories

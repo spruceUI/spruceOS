@@ -127,7 +127,6 @@ setup_for_retroarch_and_get_bin_location_trimui(){
 		export RA_BIN="ra64.trimui_$PLATFORM"
 	else
 		export RA_BIN="retroarch.trimui"
-		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/flip/lib"
 	fi
 	if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH

@@ -18,10 +18,5 @@ if [ "$SSH_ORIGINAL_COMMAND" = "/usr/libexec/sftp-server" ]; then
 elif [ -n "$SSH_ORIGINAL_COMMAND" ]; then
     exec $SSH_ORIGINAL_COMMAND
 else
-    if [ "$BRAND" = "TrimUI" ]; then
-        export LD_LIBRARY_PATH="/usr/trimui/lib:$LD_LIBRARY_PATH"
-    elif [ "$PLATFORM" = "Flip" ]; then
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
-    fi
     exec /bin/sh
 fi

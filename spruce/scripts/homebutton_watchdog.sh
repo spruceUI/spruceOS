@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-export_ld_library_path
 
 log_message "homebutton_watchdog.sh: Started up."
 
