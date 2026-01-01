@@ -1,14 +1,14 @@
 #!/bin/sh
 
-# becomes /usr/trimui/bin/runtrimui.sh on tg5040/tg3040
+# becomes /usr/trimui/bin/runtrimui.sh on tg5040/tg3040/tg5050
 
-#wait for SDCARD mounted
-mounted=$(cat /proc/mounts | grep SDCARD)
+# wait for SDCARD to be mounted
+mounted=$(cat /proc/mounts | grep mmcblk1p1)
 cnt=0
-while [ "$mounted" == "" ] && [ $cnt -lt 6 ] ; do
+while [ "$mounted" = "" ] && [ $cnt -lt 6 ] ; do
    sleep 0.5
    cnt=$(expr $cnt + 1)
-   mounted=$(cat /proc/mounts | grep SDCARD)
+   mounted=$(cat /proc/mounts | grep mmcblk1p1)
 done
 
 UPDATER_PATH=/mnt/SDCARD/.tmp_update/updater
