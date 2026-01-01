@@ -48,7 +48,6 @@ power_key_down () {
                 log_message "power_button_watchdog_v2.sh: Powering off due to power button hold."
                 rm -f /tmp/powerbtn
                 rm -f /tmp/powerbtn_cancelled
-                vibrate &
                 "$POWER_OFF_SCRIPT"
             fi
         ) &
