@@ -1,10 +1,30 @@
 #!/bin/sh
 
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+case $INFO in
+    *"sun8i"*) export PLATFORM="A30" ;;
+    *"TG5040"*)	export PLATFORM="SmartPro" ;;
+    *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"TG5050"*)	export PLATFORM="SmartProS"	;;
+    *"0xd05"*) export PLATFORM="Flip" ;;
+    *) export PLATFORM="MiyooMini" ;;
+esac
+
 #ENV Variables
-export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
-export PATH="/mnt/SDCARD/spruce/flip/bin/:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
-export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib/:$LD_LIBRARY_PATH"
-export HOME="/mnt/SDCARD/Saves/flip/home"
+case "$PLATFORM" in
+    Flip|SmartProS)
+        export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
+        export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+        export HOME="/mnt/SDCARD/Saves/flip/home"
+        ;;
+    Brick|SmartPro)
+        export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
+        export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+        export HOME="/mnt/SDCARD/Saves/flip/home"
+        ;;
+esac
 
 # Until PM-GUI is updated we need to override where spruce stores things
 # Just replacing the entire file. This should go away soon
