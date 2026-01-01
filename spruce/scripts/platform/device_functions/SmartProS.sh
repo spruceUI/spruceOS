@@ -186,6 +186,7 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
+    /mnt/SDCARD/spruce/scripts/thermal_watchdog.sh &
 }
 
 perform_fw_check(){
@@ -335,7 +336,6 @@ device_init() {
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
 
-   /mnt/SDCARD/spruce/scripts/thermal_watchdog.sh &
 }
 
 set_event_arg() {
