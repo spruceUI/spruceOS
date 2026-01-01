@@ -211,7 +211,7 @@ device_init_a133p() {
 
     /etc/bluetooth/bluetoothd start
 
-    run_trimui_blobs "trimui_inputd thermald trimui_scened trimui_btmanager hardwareservice musicserver"
+    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
 }
 
 set_event_arg() {
