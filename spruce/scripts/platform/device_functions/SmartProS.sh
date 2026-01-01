@@ -321,7 +321,7 @@ device_init() {
         /etc/bluetooth/bluetoothd start
     fi
 
-    run_trimui_blobs "trimui_inputd thermald keymon trimui_scened trimui_btmanager hardwareservice musicserver"
+    run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
 
     run_trimui_osdd
 
@@ -335,7 +335,7 @@ device_init() {
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
 
-   
+   /mnt/SDCARD/spruce/scripts/thermal_watchdog.sh &
 }
 
 set_event_arg() {
