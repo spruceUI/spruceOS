@@ -266,9 +266,9 @@ runtime_mounts_A30() {
     mount --bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
 }
 
+device_init() {
+    runtime_mounts_A30
 
-
-handle_a30_quirks() {
     echo L,L2,R,R2,X,A,B,Y > /sys/module/gpio_keys_polled/parameters/button_config
     nice -n -18 sh -c '/etc/init.d/sysntpd stop && /etc/init.d/ntpd stop' > /dev/null 2>&1  # Stop NTPD
     killall MtpDaemon 2>/dev/null
@@ -285,12 +285,6 @@ handle_a30_quirks() {
     else
         echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
     fi
-}
-
-device_init() {
-    runtime_mounts_A30
-
-    handle_a30_quirks &
 
     # listen hotkeys for brightness adjustment, volume buttons and power button
     # What is being changed later that prevents this from running with the other watchdogs?
