@@ -9,10 +9,29 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
   export LD_PRELOAD=""
-  export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
   controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
   directory="/mnt/SDCARD/Roms/PORTS64/"
-  export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
+
+
+  INFO=$(cat /proc/cpuinfo 2> /dev/null)
+  case $INFO in
+      *"sun8i"*) export PLATFORM="A30" ;;
+      *"TG5040"*)	export PLATFORM="SmartPro" ;;
+      *"TG3040"*)	export PLATFORM="Brick"	;;
+      *"TG5050"*)	export PLATFORM="SmartProS"	;;
+      *"0xd05"*) export PLATFORM="Flip" ;;
+      *) export PLATFORM="MiyooMini" ;;
+  esac
+
+  #ENV Variables
+  case "$PLATFORM" in
+      Flip|SmartProS)
+          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
+          ;;
+      Brick|SmartPro)
+          export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
+          ;;
+  esac
 else
   export HOME="/root"
   export LD_PRELOAD=""
