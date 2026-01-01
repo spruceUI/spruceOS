@@ -409,40 +409,6 @@ device_exit_sleep() {
     log_message "device_exit_sleep Uneeded on this device keymon handles" -v
 }
 
-# Need a conservative version
-set_smart() {
-    # little Cortex-A55 CPU0
-    # 408000 672000 792000 936000 1032000 1128000 1224000 1320000 1416000 
-    echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 408000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    echo 1128000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-
-    # big Cortex-A55 CPU4
-    # 408000 672000 840000 1008000 1200000 1344000 1488000 1584000 1680000 1800000 1992000 2088000 2160000
-    echo ondemand > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 408000 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-    echo 1200000 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
-
-}
-
-set_performance() {
-    # little Cortex-A55 CPU0
-    # 408000 672000 792000 936000 1032000 1128000 1224000 1320000 1416000 
-    echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 1416000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    echo 1416000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-
-    # big Cortex-A55 CPU4
-    # 408000 672000 840000 1008000 1200000 1344000 1488000 1584000 1680000 1800000 1992000 2088000 2160000
-    echo performance > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 1992000 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-    echo 2160000 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
-}
-set_overclock() {
-    set_performance
-}
-
-
 device_prepare_for_ports_run() {
     log_message "device_prepare_for_ports_run uneeded on this device" -v
 }
