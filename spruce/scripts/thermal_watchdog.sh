@@ -108,21 +108,21 @@ while true; do
 
     high_temp=$(get_highest_temp)
     fan_level=$(convert_temp_to_fan_level "$high_temp")
+    [ "$fan_level" -gt 31 ] && fan_level=31
+    [ "$fan_level" -lt 0 ] && fan_level=0
 
     if [ "$fan_level" -gt "$last_level" ]; then
 
-        [ "$fan_level" -gt 31 ] && fan_level=31
-        [ "$fan_level" -lt 0 ] && fan_level=0
         last_level="$fan_level"
         echo "$fan_level" > "$FAN_CONTROL_PATH"
         block_10_seconds &
 
+    elif [ "$fan_level" -eq "$last_level" ]; then
+        : # do nothing
+
     else # new fan level is lower than previous fan level
 
         if [ ! -e "$BLOCK" ]; then
-
-            [ "$fan_level" -gt 31 ] && fan_level=31
-            [ "$fan_level" -lt 0 ] && fan_level=0
             last_level="$fan_level"
             echo "$fan_level" > "$FAN_CONTROL_PATH"
             block_10_seconds &
