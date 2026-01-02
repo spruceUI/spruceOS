@@ -18,6 +18,9 @@ class ThemePatcher():
     WIDTH_SCALABLE_KEYS = {"gameSystemSelectColCount","carouselSystemExternalXPad",
                            "carouselSystemFixedWidth","mainMenuColCount","gameSelectColCount"}
     HEIGHT_SCALABLE_KEYS = {"gameSystemSelectRowCount", "gameSelectRowCount"}
+    ASPECT_RATIO_RESET_KEYS = {
+        "recentsEnabled": True,
+    }
 
     @classmethod
     def convert_to_qoi(cls, path):
@@ -99,6 +102,8 @@ class ThemePatcher():
             height_multiplier = ((scale_height-scale_width) / scale_width) + 1
             width_multiplier = 1.0  
 
+        aspect_ratio_reset = abs(scale_width - scale_height) > 1e-6
+
         PyUiLogger().get_logger().info(f"Patching theme {config_path} from {theme_width}x{theme_height} to {target_width}x{target_height} w/ a scale factor of {scale}")
 
         Display.clear("Theme Patch")
@@ -132,7 +137,8 @@ class ThemePatcher():
                      os.path.join(config_path,f"config_{target_width}x{target_height}.json"),
                      scale,
                      width_multiplier,
-                     height_multiplier)
+                     height_multiplier,
+                     aspect_ratio_reset)
 
     @classmethod
     def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):
@@ -194,12 +200,12 @@ class ThemePatcher():
                     PyUiLogger().get_logger().exception(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
                         
     @classmethod
-    def scale_config_json(cls, config_path, output_config_path, scale, width_multiplier, height_multiplier):
+    def scale_config_json(cls, config_path, output_config_path, scale, width_multiplier, height_multiplier, aspect_ratio_reset):
         try:
             with open(config_path, 'r') as f:
                 config = json.load(f)
 
-            scaled_config = cls._scale_json_values(config, scale, width_multiplier, height_multiplier)
+            scaled_config = cls._scale_json_values(config, scale, width_multiplier, height_multiplier, aspect_ratio_reset)
 
             os.makedirs(os.path.dirname(output_config_path), exist_ok=True)
             with open(output_config_path, 'w') as f:
@@ -210,12 +216,14 @@ class ThemePatcher():
             PyUiLogger().get_logger().exception(f"Failed to process JSON config {config_path}: {e}")    
 
     @classmethod
-    def _scale_json_values(cls, obj, scale, width_multiplier, height_multiplier):
+    def _scale_json_values(cls, obj, scale, width_multiplier, height_multiplier, aspect_ratio_reset):
         if isinstance(obj, dict):
             new_dict = {}
             for k, v in obj.items():
 
-                if cls._should_scale_based_on_width(k):
+                if k in cls.ASPECT_RATIO_RESET_KEYS:
+                    new_dict[k] = cls.ASPECT_RATIO_RESET_KEYS[k]
+                elif cls._should_scale_based_on_width(k):
                     new_dict[k] = cls._scale_if_number(v, width_multiplier)
 
                 elif cls._should_scale_based_on_height(k):
@@ -224,12 +232,12 @@ class ThemePatcher():
                     new_dict[k] = cls._scale_if_number(v, scale)
 
                 else:
-                    new_dict[k] = cls._scale_json_values(v, scale, width_multiplier, height_multiplier)
+                    new_dict[k] = cls._scale_json_values(v, scale, width_multiplier, height_multiplier, aspect_ratio_reset)
 
             return new_dict
 
         elif isinstance(obj, list):
-            return [cls._scale_json_values(i, scale, width_multiplier, height_multiplier) for i in obj]
+            return [cls._scale_json_values(i, scale, width_multiplier, height_multiplier, aspect_ratio_reset) for i in obj]
 
         else:
             return obj
