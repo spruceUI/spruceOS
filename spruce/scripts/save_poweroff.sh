@@ -28,8 +28,6 @@ kill_current_process() {
     fi
 }
 
-vibrate &
-
 # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
 pgrep -f "lid_watchdog.sh" | xargs -r kill
 

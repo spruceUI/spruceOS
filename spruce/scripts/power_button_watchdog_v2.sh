@@ -46,8 +46,11 @@ power_key_down () {
             # Check if the powerbtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
             if [ -e /tmp/powerbtn ] && [ ! -e /tmp/powerbtn_cancelled ]; then
                 log_message "power_button_watchdog_v2.sh: Powering off due to power button hold."
+                vibrate &
                 rm -f /tmp/powerbtn
                 rm -f /tmp/powerbtn_cancelled
+                killall getevent 2>/dev/null
+                sleep 0.1
                 "$POWER_OFF_SCRIPT"
             fi
         ) &
