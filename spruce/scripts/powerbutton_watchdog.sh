@@ -5,7 +5,6 @@
 
 log_message "powerbutton_watchdog.sh: Started up."
 
-
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
 EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch-flip retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
@@ -128,6 +127,7 @@ while true; do
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         set_volume 0
+                        vibrate &
                         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                     fi
                 fi
