@@ -37,7 +37,8 @@
       "display": "Retroarch Core",
       "options": [
         "mgba",
-        "gpsp_v0.91"
+        "gpsp_v0.91",
+        "gpsp"
       ],
       "selected": "mgba",
       "devices": [
