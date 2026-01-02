@@ -128,6 +128,8 @@ while true; do
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         set_volume 0
                         vibrate &
+                        killall getevent 2>/dev/null
+                        sleep 0.1
                         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                     fi
                 fi
