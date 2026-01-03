@@ -42,7 +42,12 @@ flag_add 'emulator_launched'
 
 
 case $EMU_NAME in
-
+		
+	"A30PORTS")
+		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
+		run_A30_port
+		;;
+		
 	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
