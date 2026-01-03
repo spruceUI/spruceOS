@@ -42,6 +42,7 @@ long_press_handler() {
     flag_add "pb.longpress"
     sleep 2
     flag_remove "pb.longpress"
+    vibrate &
     /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 }
 
@@ -212,6 +213,7 @@ while true; do
             flag_add "sleep.powerdown"
 
             if applicable_process_is_running; then
+                vibrate &
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
             fi
 
