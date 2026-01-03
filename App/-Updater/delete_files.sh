@@ -59,6 +59,7 @@ USBStorageMode
 # up earlier in the update process anyhow.
 EMU_DIR="/mnt/SDCARD/Emu"
 EMU_DELETE_LIST="
+A30PORTS
 AMIGA
 ARCADE
 ARDUBOY

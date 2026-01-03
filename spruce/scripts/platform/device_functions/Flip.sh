@@ -245,14 +245,10 @@ runtime_mounts_Flip() {
 
     # use appropriate loading images
     [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
-    
-    # Mask Roms/PORTS with non-A30 version
-    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
-    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &
 
 	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS64/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS64/ /mnt/sdcard/Roms/PORTS64/ports/
+    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
 	
 	# Treat /spruce/flip/ as the 'root' for any application that needs it.
 	# (i.e. PortMaster looks here for config information which is device specific)

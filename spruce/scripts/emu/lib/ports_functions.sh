@@ -49,32 +49,31 @@ run_port() {
     device_prepare_for_ports_run
 	
 	
-    if [ "$PLATFORM_ARCHITECTURE" == "aarch64" ]; then
-        set_port_mode
+    set_port_mode
 
-        is_retroarch_port
-        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-        export HOME="/mnt/SDCARD/Saves/flip/home"
-        export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-        export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
-        if [ $? -eq 1 ]; then
-            log_message "Launching RA port $ROM_FILE"
-            cd /mnt/SDCARD/RetroArch/
-            "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
-        else
-            log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
-            setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
-            SID=$!
-            echo "$SID" > /tmp/last_port_sid
-            wait "$SID"
-            rm -f /tmp/last_port_sid
-        fi
-        
+    is_retroarch_port
+    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+    export HOME="/mnt/SDCARD/Saves/flip/home"
+    export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
+    export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+    if [ $? -eq 1 ]; then
+        log_message "Launching RA port $ROM_FILE"
+        cd /mnt/SDCARD/RetroArch/
+        "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
     else
-        PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-        cd $PORTS_DIR
-        /bin/sh "$ROM_FILE" 
+        log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
+        setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        SID=$!
+        echo "$SID" > /tmp/last_port_sid
+        wait "$SID"
+        rm -f /tmp/last_port_sid
     fi
 
     device_cleanup_after_ports_run
+}
+
+run_A30_port() {
+    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+    cd $PORTS_DIR
+    /bin/sh "$ROM_FILE" 
 }

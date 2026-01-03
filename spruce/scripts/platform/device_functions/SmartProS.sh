@@ -282,13 +282,9 @@ init_gpio_SmartProS() {
 }
 
 runtime_mounts_SmartProS() {
-    # Mask Roms/PORTS with non-A30 version
-    mkdir -p "/mnt/SDCARD/Roms/PORTS64"
-    mount --bind "/mnt/SDCARD/Roms/PORTS64" "/mnt/SDCARD/Roms/PORTS" &    
-
-    # PortMaster ports location
-    mkdir -p /mnt/SDCARD/Roms/PORTS64/ports/ 
-    mount --bind /mnt/SDCARD/Roms/PORTS64/ /mnt/SDCARD/Roms/PORTS64/ports/
+	# PortMaster ports location
+    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &

@@ -8,7 +8,7 @@ CUR_TTY=/dev/null
 
 if [ -d "/mnt/SDCARD/spruce" ]; then
   controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  directory="/mnt/SDCARD/Roms/PORTS64/"
+  directory="/mnt/SDCARD/Roms/PORTS/"
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
 else
