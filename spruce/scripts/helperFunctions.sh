@@ -791,6 +791,10 @@ display_text_with_percentage_bar(){
     fi
 }
 
+get_remote_filesize_bytes() {
+    url="$1"
+    wget --spider --server-response --no-check-certificate "$url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+}
 
 download_and_display_progress() {
 	BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -800,7 +804,7 @@ download_and_display_progress() {
     final_size_bytes="$4"
 
     if [ -z "$final_size_bytes" ]; then
-        final_size_bytes="$(wget --spider --server-response --no-check-certificate "$remote_url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n')"
+        final_size_bytes="$(get_remote_filesize_bytes "$remote_url")"
     fi
 
 	{
