@@ -36,21 +36,22 @@ class Theme():
     def set_theme_path(cls,path, width = 0, height = 0):
         #Uneeded due to moving where we convert?
         #cls.load_defaults_so_user_can_see_at_least(path)
-
+        cls._path = path
         resolution_specific_config = f"config_{width}x{height}.json"
         config_path = os.path.join(path, resolution_specific_config)
         if not os.path.exists(config_path):
             config_path = "config.json"
+            cls._skin_folder = cls._get_asset_folder(cls._path, "skin", -1, -1)
+            cls._icon_folder = cls._get_asset_folder(cls._path, "icons", -1, -1)
+        else:
+            cls._skin_folder = cls._get_asset_folder(cls._path, "skin", width, height)
+            cls._icon_folder = cls._get_asset_folder(cls._path, "icons", width, height)
 
 
         cls._data.clear()
-        cls._path = path
         cls._load_defaults()
         cls._load_from_file(os.path.join(path, config_path))
 
-        cls._path = path
-        cls._skin_folder = cls._get_asset_folder(cls._path, "skin", width, height)
-        cls._icon_folder = cls._get_asset_folder(cls._path, "icons", width, height)
         daijisho_theme_index_file = os.path.join(cls._path, cls._icon_folder,"index.json")
         if os.path.exists(daijisho_theme_index_file):
             try:
@@ -119,10 +120,7 @@ class Theme():
         #qoi_converted = ThemePatcher.convert_to_qoi(path)
 
         if(resolution_converted): # or qoi_converted):
-            from display.display import Display
-            Display.clear_image_cache()
-            Display.clear_text_cache()
-            cls.set_theme_path(path,width,height)
+            Device.exit_pyui()
 
     @classmethod
     def load_defaults_so_user_can_see_at_least(cls, path):
