@@ -283,8 +283,8 @@ init_gpio_SmartProS() {
 
 runtime_mounts_SmartProS() {
 	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
+    mkdir -p /mnt/SDCARD/Roms/PORTS/ports/ 
+    mount --bind /mnt/SDCARD/Roms/PORTS/ /mnt/SDCARD/Roms/PORTS/ports/
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
