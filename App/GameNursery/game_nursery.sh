@@ -15,6 +15,18 @@ log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH" -v
 
 ##### FUNCTIONS #####
 
+bind_over_PORTS() {
+    log_message "bind mounting A30PORTS as backing store over viewpoint PORTS"
+    mkdir -p /mnt/SDCARD/Roms/A30PORTS
+    mkdir -p /mnt/SDCARD/Roms/PORTS
+    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
+}
+
+unbind_PORTS() {
+    log_message "unmounting A30PORTS from atop PORTS"
+    umount /mnt/SDCARD/Roms/PORTS
+}
+
 is_wifi_connected() {
     if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
         log_message "Cloudflare ping successful; device is online."
@@ -174,7 +186,7 @@ get_system_icon_from_theme() {
         "Game Tank")        icon_name="gametank";   emu_name="GAMETANK" ;;
         "NES")              icon_name="fc";         emu_name="FC" ;;
         "SNES")             icon_name="sfc";        emu_name="SFC" ;;
-        "Ports")            icon_name="ports";      emu_name="PORTS" ;;
+        "Ports")            icon_name="ports";      emu_name="A30PORTS" ;;
         "ZX Spectrum")      icon_name="zxs";        emu_name="ZXS" ;;
         *) return 1 ;;
     esac
@@ -257,6 +269,8 @@ construct_config() {
 
 ##### MAIN EXECUTION #####
 
+[ "$PLATFORM" = "A30" ] && bind_over_PORTS
+
 start_pyui_message_writer
 show_slideshow_if_first_run
 log_and_display_message "Welcome to the spruceOS Game Nursery, where you can pick the freshest homegrown games! Please wait..."
@@ -292,3 +306,4 @@ done
 
 touch /mnt/SDCARD/App/PyUI/pyui_resize_boxart_trigger
 
+[ "$PLATFORM" = "A30" ] && unbind_PORTS
