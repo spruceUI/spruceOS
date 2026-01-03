@@ -2,9 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SD_CARD=$(get_sd_card_path)
-
-IMAGE_PATH="$SD_CARD/spruce/imgs/update.png"
+IMAGE_PATH="/mnt/SDCARD/spruce/imgs/update.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"

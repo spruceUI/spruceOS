@@ -8,10 +8,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
-get_sd_card_path() {
-    echo "/mnt/SDCARD"
-}
-
 get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system-system.json"
 }

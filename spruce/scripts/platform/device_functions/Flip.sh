@@ -14,17 +14,8 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/amixer_volume_control.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
-get_sd_card_path() {
-    echo "/mnt/sdcard"
-}
-
 get_config_path() {
     echo "/mnt/SDCARD/Saves/flip-system.json"
-}
-
-
-get_conservative_policy_dir() {
-    echo "$CPU_0_DIR/conservative"
 }
 
 ###############################################################################

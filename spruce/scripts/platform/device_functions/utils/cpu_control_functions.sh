@@ -4,13 +4,15 @@
 # CPU CONTROLS #
 ################
 
+# requires from $PLATFORM.cfg files:
+# DEVICE_CORES_ONLINE
+# DEVICE_SMART_FREQ
+# DEVICE_PERF_FREQ
+# DEVICE_MAX_FREQ
+# CONSERVATIVE_POLICY_DIR
+
 CPU_0_DIR=/sys/devices/system/cpu/cpu0/cpufreq
 CPU_4_DIR=/sys/devices/system/cpu/cpu4/cpufreq
-
-
-get_conservative_policy_dir() {
-    log_message "Failed to implement get_conservative_policy_dir()"
-}
 
 unlock_governor() {
     for file in scaling_governor scaling_min_freq scaling_max_freq; do
@@ -79,7 +81,6 @@ set_smart() {
             echo "$DEVICE_PERF_FREQ" > "$CPU_4_DIR/scaling_max_freq"
         fi
 
-        CONSERVATIVE_POLICY_DIR=$(get_conservative_policy_dir)
         echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
         echo "$SMART_UP_THRESH" > $CONSERVATIVE_POLICY_DIR/up_threshold
         echo "$SMART_FREQ_STEP" > $CONSERVATIVE_POLICY_DIR/freq_step

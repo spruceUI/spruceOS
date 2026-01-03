@@ -9,10 +9,6 @@ get_python_path() {
     log_message "Missing get_python_path function"
 }
 
-get_sd_card_path() {
-    log_message "Missing get_sd_card_path function"
-}
-
 get_config_path() {
     log_message "Missing get_config_path function"
 }

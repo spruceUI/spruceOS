@@ -8,10 +8,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
-get_sd_card_path() {
-    echo "/mnt/SDCARD"
-}
-
 get_config_path() {
     echo "/mnt/SDCARD/Saves/mini-flip-system.json"
 }
