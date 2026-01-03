@@ -31,8 +31,8 @@ SKIP_APPLY=false
 
 log_message "firmwareUpdate.sh: current device: $PLATFORM"
 log_message "firmwareUpdate.sh: free space: $FREE_SPACE"
-log_message "firmwareUpdate.sh: charging status: $(get_charging_status)"
-log_message "firmwareUpdate.sh: current charge percent: $(get_battery_percent)"
+log_message "firmwareUpdate.sh: charging status: $(device_get_charging_status)"
+log_message "firmwareUpdate.sh: current charge percent: $(device_get_battery_percent)"
 log_message "firmwareUpdate.sh: current FW version: $VERSION"
 
 cancel_update() {
@@ -114,7 +114,7 @@ else
 fi
 
 # Do not allow them to update if their battery level is low, to help avoid bricking
-if [ "$(get_battery_percent)" -lt 15 ]; then
+if [ "$(device_get_battery_percent)" -lt 15 ]; then
 	log_and_display_message "As a precaution, please charge your $PLATFORM to at least 15% capacity, then try again."
 	sleep 5
 	exit 1
@@ -138,14 +138,14 @@ else
 fi
 
 # Require them to be plugged into power (requisite for A30 update to even occur).
-if [ "$(get_charging_status)" = "Discharging" ]; then
+if [ "$(device_get_charging_status)" = "Discharging" ]; then
 	log_message "firmwareUpdate.sh: Device not plugged in. Prompting user to plug in their $PLATFORM."
 	while true; do
 		log_and_display_message "Please connect your device to a power source to proceed with the update process. Press A to continue, or B to cancel."
 		sleep 1
 		if confirm; then
 			# Re-evaluate charging status
-			if [ "$(get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ] && [ "$(get_battery_percent)" -ge 35 ]; then
+			if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ] && [ "$(device_get_battery_percent)" -ge 35 ]; then
 				log_message "firmwareUpdate.sh: Device is now plugged in, or at least >35% capacity. Continuing."
 				break
 			else
@@ -162,7 +162,7 @@ else
 fi
 
 # Give them one last warning, and a chance to proceed with or cancel the FW update.
-if [ "$(get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ]; then
+if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ]; then
 	log_and_display_message "WARNING: If powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software. Press A to continue, or B to cancel."
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."

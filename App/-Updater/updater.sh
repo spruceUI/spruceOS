@@ -205,8 +205,8 @@ UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{pr
 
 # Check battery level
 log_update_message "Checking battery level"
-BATTERY_CAPACITY="$(get_battery_percent)"
-CHARGING="$(get_charging_status)"
+BATTERY_CAPACITY="$(device_get_battery_percent)"
+CHARGING="$(device_get_charging_status)"
 log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" = "Discharging" ]; then
