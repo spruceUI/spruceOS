@@ -128,8 +128,11 @@ run_retroarch() {
 
 	ra_start_setup_saves_and_states_for_core_differences
 
-	#Swap below if debugging new cores
-	#HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
+	log_message "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" -v
+	log_message "export PATH=\"$PATH\"" -v
+	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\"" -v
+	#Swap below if debugging
+	#HOME="$RA_DIR/.retroarch/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 
 	backup_ra_config 2>/dev/null
