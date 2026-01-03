@@ -17,15 +17,6 @@
       ],
       "selected": "Smart",
       "overrides": {}
-    },
-    "controlMode": {
-      "display": "Controller Mode",
-      "options": [
-        "X360",
-        "Nintendo"
-      ],
-      "selected": "X360",
-      "overrides": {}
     }
   },
   "sortOrder": 5000,
@@ -34,5 +25,5 @@
   "releaseYear": 2000,
   "default_emulator": "sh",
   "scaling_min_freq": 648000,
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO","TRIMUI_SMART_PRO_S", "MIYOO_FLIP"]
+  "devices": ["MIYOO_A30"]
 }
