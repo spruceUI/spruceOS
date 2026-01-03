@@ -284,23 +284,9 @@ class CarouselView(View):
         render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
         iterable = list(enumerate(visible_options))
 
-        for visible_index, imageTextPair in iterable:
-            x_offset = x_offsets[visible_index]
-            #PyUiLogger.get_logger().info(f"Visible option {visible_index}: {imageTextPair.get_primary_text()} w/ x_offset {x_offset}")
+        self.render_images(iterable, x_offsets, widths, render_mode, render_selected_only=False)
+        self.render_images(iterable, x_offsets, widths, render_mode, render_selected_only=True)
 
-            y_image_offset = Display.get_center_of_usable_screen_height()
-            if(imageTextPair == self.options[self.selected]):
-                image = imageTextPair.get_image_path_selected_ideal(widths[visible_index],Display.get_usable_screen_height())
-            else:
-                image = imageTextPair.get_image_path_ideal(widths[visible_index],Display.get_usable_screen_height())
-
-            self._render_image(image, 
-                                    x_offset, 
-                                    y_image_offset,
-                                    render_mode,
-                                    target_width=widths[visible_index],
-                                    target_height=Display.get_usable_screen_height(),
-                                    resize_type=self.resize_type)
         self.prev_selected = self.selected
         self.prev_visible_options = visible_options
         self.prev_x_offsets = x_offsets
@@ -314,6 +300,29 @@ class CarouselView(View):
 
         Display.present()
 
+    def render_images(self, iterable, x_offsets, widths, render_mode, render_selected_only):
+        for visible_index, imageTextPair in iterable:
+            is_selected = imageTextPair == self.options[self.selected]
+            if(render_selected_only and not is_selected):
+                continue
+            elif(not render_selected_only and is_selected):
+                continue
+            x_offset = x_offsets[visible_index]
+            #PyUiLogger.get_logger().info(f"Visible option {visible_index}: {imageTextPair.get_primary_text()} w/ x_offset {x_offset}")
+
+            y_image_offset = Display.get_center_of_usable_screen_height()
+            if(is_selected):
+                image = imageTextPair.get_image_path_selected_ideal(widths[visible_index],Display.get_usable_screen_height())
+            else:
+                image = imageTextPair.get_image_path_ideal(widths[visible_index],Display.get_usable_screen_height())
+
+            self._render_image(image, 
+                                    x_offset, 
+                                    y_image_offset,
+                                    render_mode,
+                                    target_width=widths[visible_index],
+                                    target_height=Display.get_usable_screen_height(),
+                                    resize_type=self.resize_type)
 
     def get_selected_option(self):
         if 0 <= self.selected < len(self.options):
