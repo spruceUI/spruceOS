@@ -186,7 +186,7 @@ tmp_read_only_check() {
         MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
         if [ "$MNT_STATUS" = "ro" ] && [ -n "$SD_DEV" ]; then
             echo "SD card is mounted as RO. Attempting to remount."
-            mount -o remount,rw "$SD_DEV" /mnt/"$SD_or_sd"
+            mount -o remount,rw "$SD_DEV" "$SD_MOUNTPOINT"
             NEW_MNT_LINE=$(mount | grep "$SD_or_sd")
             echo "new mount line: $NEW_MNT_LINE"
         else

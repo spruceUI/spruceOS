@@ -147,7 +147,7 @@ ps
 echo "Current mounts:"
 mount
 echo "SD Card root contents:"
-ls -Al /mnt/SDCARD
+ls -Al "$SD_MOUNTPOINT"
 echo "PATH: $PATH"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
