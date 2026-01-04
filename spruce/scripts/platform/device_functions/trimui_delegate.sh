@@ -196,21 +196,25 @@ check_if_fw_needs_update_trimui() {
 }
 
 run_trimui_blobs() {
-    # First argument is the blob list as a space-separated string
-    # Second argument is the single argument to pass to each blob (optional)
     blobs="$1"
 
     cd /usr/trimui/bin || return 1
     mkdir -p /tmp/trimui_inputd
 
     for blob in $blobs; do
-        if [ -x "./$blob" ]; then
-            LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" $arg &
-            log_message "Attempted to start $blob with arg '$arg'"
-            sleep 0.05
-        else
+        if [ ! -x "./$blob" ]; then
             log_message "$blob not present on this device."
+            continue
         fi
+
+        if ps | grep "[/]$blob" >/dev/null 2>&1; then
+            log_message "$blob already running, skipping."
+            continue
+        fi
+
+        LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
+        log_message "Started $blob"
+        sleep 0.05
     done
 }
 
