@@ -130,6 +130,8 @@ setup_for_retroarch_and_get_bin_location_trimui(){
 	fi
 	if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+	elif [ "$CORE" = "easyrpg" ]; then
+		export LD_LIBRARY_PATH=$EMU_DIR/lib-trimui:$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 	elif [ "$CORE" = "genesis_plus_gx" ] && [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then
 		use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
 		[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
