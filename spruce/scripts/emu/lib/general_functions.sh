@@ -44,7 +44,8 @@ set_emu_core_from_emu_json() {
 }
 
 get_cpu_mode_from_emu_json() {
-    jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH"
+    GOV="$(jq -r '.menuOptions.Governor.selected' "$EMU_JSON_PATH")"
+    echo "$GOV"
 }
 
 use_default_emulator() {
@@ -102,15 +103,18 @@ get_mode_override() {
 }
 
 set_cpu_mode() {
+    log_message "Setting CPU mode to $MODE"
 	if [ "$MODE" = "Overclock" ]; then
 		if [ "$EMU_NAME" = "NDS" ]; then
 			( sleep 33 && set_overclock ) &
 		else
+            log_message "Applying overclock mode"
 			set_overclock
 		fi
 	fi
 
 	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
+        log_message "Calling enforceSmartCPU"
 		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &
 	fi
