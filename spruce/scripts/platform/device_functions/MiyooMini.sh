@@ -25,15 +25,23 @@ cores_online() {
 
 
 set_smart() {
+    log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 }
 
 set_performance() {
+    log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 }
 
 set_overclock() {
-    echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeed.selected' "1600")"
+
+    log_message "Setting cpu to performance"
+    log_message "Setting overclock to ${overclock_speed}MHz"
+
+    echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor    
+    cpuclock "$overclock_speed"
 }
 
 device_init() {
