@@ -15,16 +15,12 @@
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
-	if [ "$PLATFORM" = "Brick" ]; then
-
-		./OpenBOR_Brick "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
-
-	elif [ "$PLATFORM" = "Flip" ]; then
+	if [ "$PLATFORM" = "Flip" ]; then
 
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
 		./OpenBOR_Flip "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
-	else # assume A30
+	elif [ "$PLATFORM" = "A30" ]; then
 
 		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
 		killall -q -USR2 joystickinput
@@ -35,6 +31,10 @@ run_openbor() {
 		fi
 		killall -q -USR1 joystickinput
 
+	else # TrimUI Brick, SmartPro, or SmartProS
+
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
+		./OpenBOR_TrimUI "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	fi
 	sync
 }
