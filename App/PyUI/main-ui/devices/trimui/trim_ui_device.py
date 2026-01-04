@@ -5,12 +5,10 @@ import re
 import subprocess
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
-from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
-from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
@@ -25,7 +23,6 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
-        self.sdl2_controller_interface = Sdl2ControllerInterface()
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -33,9 +30,6 @@ class TrimUIDevice(DeviceCommon):
         new_volume = self.system_config.get_volume()
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
-
-    def get_controller_interface(self):
-        return self.sdl2_controller_interface
 
     def ensure_wpa_supplicant_conf(self):
         MiyooTrimCommon.ensure_wpa_supplicant_conf("/userdata/cfg/wpa_supplicant.conf")
