@@ -324,6 +324,7 @@ device_init() {
 
     run_trimui_osdd
 
+    echo 1 > /sys/class/speaker/mute
     tinymix set 23 1
     tinymix set 18 23
     tinymix set 26 1
@@ -344,8 +345,9 @@ device_init() {
             echo 1 114 0 # Vol down released
             echo 0 0 0   # tell sendevent to exit
         } | sendevent $EVENT_PATH_VOLUME 
+        sleep 1
+        echo 0 > /sys/class/speaker/mute
     ) &
-
 }
 
 set_event_arg() {
