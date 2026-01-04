@@ -113,14 +113,6 @@ volume_up_bg() {
     done
 }
 
-save_volume_to_config_file() {
-    # get current levels
-    VOLUME_LV=$(get_volume_level)
-
-    # Update MainUI Config file
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
-}
-
 # scan all button input
 EVENTS="$EVENT_PATH_KEYBOARD"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
@@ -164,7 +156,6 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLDOWN 0"*) # VOLUMEDOWN key up
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
-            save_volume_to_config_file
         ;;
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
@@ -176,7 +167,6 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 0"*) # VOLUMEUP key up
             kill $PID_UP 2&> /dev/null
             PID_UP=""
-            save_volume_to_config_file
         ;;
     esac
 done

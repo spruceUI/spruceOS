@@ -9,6 +9,13 @@ get_contrast() {
     jq -r '.contrast' "$SYSTEM_JSON"
 }
 
+save_volume_to_config_file() {
+    VOLUME_LV=$1
+
+    # Update MainUI Config file
+    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+}
+
 amixer_volume_down() {
     # get current brightness and volume levels
     BRIGHTNESS_LV=$(get_brightness_level)
@@ -44,6 +51,7 @@ amixer_volume_down() {
 
         # write both level value to shared memory for MainUI to update its UI
         $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
+        save_volume_to_config_file "$VOLUME_LV"
     fi
 }
 
@@ -80,6 +88,7 @@ amixer_volume_up() {
 
         # write both level value to shared memory for MainUI to update its UI
         $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
+        save_volume_to_config_file "$VOLUME_LV"
     fi
 }
 
