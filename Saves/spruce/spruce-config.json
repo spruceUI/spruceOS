@@ -177,6 +177,17 @@
                     "512MB"
                 ],
                 "selected": "Off"
+            },
+            "overclockSpeed": {
+                "devices": ["MIYOO_MINI_FLIP"],
+                "display": "Overclock Speed",
+                "description": "Clockspeed to use for overclocking",
+                "options": [
+                    "1600",
+                    "1700",
+                    "1800"
+                ],
+                "selected": "1600"
             }
         },
         "Emulator Settings": {
