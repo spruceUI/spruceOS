@@ -321,7 +321,6 @@ device_init() {
 
 
     run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
-
     run_trimui_osdd
 
     echo 1 > /sys/class/speaker/mute
@@ -426,5 +425,10 @@ device_prepare_for_ports_run() {
 }
 
 device_cleanup_after_ports_run() {
-    log_message "device_cleanup_after_ports_run uneeded on this device" -v
+    #Ensure TrimUI blobs are running each loop of mainui
+    (
+        # They seem to die ~5s after ports close
+        sleep 5
+        run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
+    ) &
 }
