@@ -333,6 +333,18 @@ device_init() {
 
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+    (
+        # Set volume on startup by simulating button presses
+        # Alternative is shared memory to keymon
+        sleep 3
+        {
+            echo 1 115 1 # Vol up pressed
+            echo 1 115 0 # Vol up released
+            echo 1 114 1 # Vol down pressed
+            echo 1 114 0 # Vol down released
+            echo 0 0 0   # tell sendevent to exit
+        } | sendevent $EVENT_PATH_VOLUME 
+    ) &
 
 }
 
