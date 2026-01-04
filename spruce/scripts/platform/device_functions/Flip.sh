@@ -118,7 +118,9 @@ setup_for_retroarch_and_get_bin_location(){
 		export RA_BIN="ra64.miyoo"
 	fi
 			
-	if [ "$CORE" = "easyrpg" ]; then
+    if [ "$CORE" = "uae4arm" ]; then
+		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+	elif [ "$CORE" = "easyrpg" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
 	elif [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
