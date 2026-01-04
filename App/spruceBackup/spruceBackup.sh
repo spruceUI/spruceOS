@@ -109,7 +109,7 @@ folders="
 /mnt/SDCARD/Saves/spruce/emu_backups
 /mnt/SDCARD/Saves/spruce/theme_backups
 /mnt/SDCARD/spruce/bin/Syncthing/config
-/mnt/SDCARD/spruce/etc/SSH/keys
+/mnt/SDCARD/spruce/etc/ssh/keys
 "
 
 log_message "Folders to backup: $folders"
@@ -152,11 +152,13 @@ log_message "Backing up theme config files"
 backup_theme_configs
 
 log_message "Creating 7z archive"
-7zr a -spf "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
+7zr a -spf -mmt=2 "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 
-if [ $? -eq 0 ] || [ $? -eq 1 ]; then   # exit code 1 is with warnings, but still creates a valid archive.
+if [ $? -eq 0 ]; then  
     display_image_and_text "$ICON_PATH" 25 25 "Backup completed successfully! Backups can be found in the Saves/spruce/backups/ directory." 75
-else    # exit codes 2+ are various actual failures
+elif [ $? -eq 1 ]; then # exit code 1 is with warnings, but still creates an archive.
+    display_image_and_text "$ICON_PATH" 25 25 "Backup completed but with warnings. Check Saves/spruce/spruceBackup.log for more details. Backups can be found in the Saves/spruce/backups/ directory." 75
+else                    # exit codes 2+ are various actual failures
     display_image_and_text "$BAD_IMG" 25 25 "Backup failed. Check Saves/spruce/spruceBackup.log for more details." 75
 fi
 

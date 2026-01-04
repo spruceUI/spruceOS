@@ -11,7 +11,6 @@
 # Provides:
 #   run_openbor
 
-# TODO: SET UP TSP AND TSPS FOR OPENBOR!!
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
