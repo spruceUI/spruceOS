@@ -11,16 +11,18 @@
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
 
+. /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
+
 export LOG_DIR=/mnt/SDCARD/Saves/spruce
 export EMU_NAME="$(echo "$1" | cut -d'/' -f5)"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
 export MODE="$(get_cpu_mode_from_emu_json)"
+log_message "EMU_NAME is $EMU_NAME, EMU_DIR is $EMU_DIR, GAME is $GAME, MODE is $MODE"
 ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
-. /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/led_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/network_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/gtt_functions.sh
