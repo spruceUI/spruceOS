@@ -5,13 +5,7 @@ export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer
 
 audioserver &
 /mnt/SDCARD/spruce/miyoomini/bin/keymon &
-insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
-ifconfig lo up
-/customer/app/axp_test wifion
-sleep 2
-ifconfig wlan0 up
-wpa_supplicant -B -D nl80211 -i wlan0 -c /appconfigs/wpa_supplicant.conf
-    
+
 touch /mnt/SDCARD/spruce/miyoomini/bin/MainUI
 mount -o bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/profile /etc/profile
@@ -23,8 +17,16 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch/retroarch /mnt/SDCARD/Retro
 
 cp /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/retroarch.cfg /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
 
-adbd &
- 
+(
+    insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
+    ifconfig lo up
+    /customer/app/axp_test wifion
+    sleep 2
+    ifconfig wlan0 up
+    wpa_supplicant -B -D nl80211 -i wlan0 -c /appconfigs/wpa_supplicant.conf
+    adbd &
+) &
+
 cd /mnt/SDCARD/spruce/scripts
 
 (
