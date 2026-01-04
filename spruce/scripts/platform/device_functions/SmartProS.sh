@@ -299,20 +299,26 @@ device_init() {
 
     init_gpio_SmartProS
 
-    # load wifi and low power bluetooth modules
-    modprobe aic8800_fdrv.ko
-    modprobe aic8800_btlpm.ko
 
     #syslogd -S
 
-    if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ] ; then
-        /etc/bluetooth/bt_init.sh start
-        hpid=`pgrep hciattach`
-        if [ "$hpid" == "" ] ; then
-            hciattach -n ttyAS1 aic &
-        fi        
-        /etc/bluetooth/bluetoothd start
-    fi
+    # load wifi and low power bluetooth modules
+    (
+        modprobe aic8800_fdrv.ko
+        modprobe aic8800_btlpm.ko
+
+        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+            /etc/bluetooth/bt_init.sh start
+
+            hpid="$(pgrep hciattach)"
+            if [ -z "$hpid" ]; then
+                hciattach -n ttyAS1 aic &
+            fi
+
+            /etc/bluetooth/bluetoothd start
+        fi
+    ) &
+
 
     run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
 
