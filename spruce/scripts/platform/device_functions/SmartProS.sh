@@ -182,7 +182,7 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
-    /mnt/SDCARD/spruce/scripts/thermal_watchdog.sh &
+    /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
 }
 
 perform_fw_check(){
