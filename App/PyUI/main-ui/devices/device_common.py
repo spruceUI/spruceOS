@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
@@ -463,11 +464,21 @@ class DeviceCommon(AbstractDevice):
 
     def _load_system_config(self, config_path, config_if_missing):
         ConfigCopier.ensure_config(config_path, config_if_missing)
+
         try:
             self.system_config = SystemConfig(config_path)
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to load system config, resetting config: {e}")
-            os.remove(config_path)
+            logger = PyUiLogger.get_logger()
+            logger.error(f"Failed to load system config, backing up and resetting config: {e}")
+
+            config_path = Path(config_path)
+            bak_path = config_path.with_suffix(config_path.suffix + ".bak")
+
+            try:
+                os.replace(config_path, bak_path)  # overwrites existing .bak
+            except FileNotFoundError:
+                pass  # config may not exist; ignore
+
             ConfigCopier.ensure_config(config_path, config_if_missing)
             self.system_config = SystemConfig(config_path)
 

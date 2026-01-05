@@ -359,8 +359,11 @@ class GameSystemSelectMenu:
                         carousel_shrink_further_away=Theme.get_carousel_system_select_shrink_further_away(),
                         carousel_sides_hang_off_edge=Theme.get_carousel_system_select_sides_hang_off(),
                         carousel_x_pad=Theme.get_carousel_system_x_pad(),
+                        carousel_additional_y_offset=Theme.get_carousel_system_additional_y_offset(),
+                        carousel_selected_offset=Theme.get_carousel_system_selected_offset(),
                         carousel_x_offset=Theme.get_carousel_system_external_x_offset(),
                         carousel_fixed_width=Theme.get_carousel_system_fixed_width() if not Theme.get_carousel_system_use_percentage_mode() else None,
+                        carousel_fixed_selected_width=Theme.get_carousel_system_fixed_selected_width() if not Theme.get_carousel_system_use_percentage_mode() else None,
                         grid_view_wrap_around_single_row=Theme.get_system_select_grid_wrap_around_single_row()
                      )
         else:
