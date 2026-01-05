@@ -11,7 +11,7 @@
 
 run_flycast_standalone() {
 	export HOME="/mnt/SDCARD/Emu/DC"
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64"
+	export LD_LIBRARY_PATH="$HOME/lib-TrimUI:$LD_LIBRARY_PATH:$HOME/lib64"
 
 	mkdir -p "$HOME/.local/share/flycast"
 	mkdir -p "/mnt/SDCARD/BIOS/dc"
