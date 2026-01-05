@@ -148,7 +148,17 @@ send_virtual_key_L3() {
 }
 
 prepare_for_pyui_launch(){
-    log_message "Miyoo Flip doesn't need to do anything  when launching pyui" -v
+    unlock_governor 2>/dev/null
+    echo "dmc_ondemand" > /sys/class/devfreq/dmc/governor
+    echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    echo "600000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    echo "600000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    echo "1" > /sys/devices/system/cpu/cpu0/online
+    echo "1" > /sys/devices/system/cpu/cpu1/online
+    echo "0" > /sys/devices/system/cpu/cpu2/online
+    echo "0" > /sys/devices/system/cpu/cpu3/online
+    log_message "CPU/GPU set to ondemand, cores 0,1 online, 2,3 offline, speed from 600MHz to 600MHz"
+    lock_governor 2>/dev/null
 }
 
 post_pyui_exit(){
