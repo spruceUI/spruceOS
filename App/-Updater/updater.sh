@@ -96,7 +96,7 @@ verify_7z_content() {
 }
 
 unmount_binds() {
-    PRESERVE="/mnt/sdcard /userdata /mnt/SDCARD"
+    PRESERVE="/mnt/sdcard /userdata /mnt/SDCARD /mnt/sdcard/mmcblk1p1"
     echo "[INFO] Scanning /proc/self/mountinfo for bind mounts from $SD_DEV..."
     cat /proc/self/mountinfo | while read -r line; do
     # Extract everything after the last " - ", then get the device (6th field overall)
