@@ -91,8 +91,9 @@ class RomUtils:
                                 valid_files.append(entry.path)
                         elif entry.is_dir(follow_symlinks=False) and os.path.basename(dir_to_search) != "Imgs":
                             # only consider folders that contain ROMs
-                            if self.has_roms(game_system, entry.path):
-                                valid_folders.append(entry.path)
+                            if(game_system.game_system_config.get_label() not in self.dont_scan_subfolders):
+                                if self.has_roms(game_system, entry.path):
+                                    valid_folders.append(entry.path)
             except (FileNotFoundError, PermissionError):
                 continue
 
