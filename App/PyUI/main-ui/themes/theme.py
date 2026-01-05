@@ -1562,6 +1562,8 @@ class Theme():
 
     @classmethod
     def get_bg_for_img(cls, img_path):
+        if not img_path:
+            return None
         p = Path(img_path)
 
         if not p.exists():
