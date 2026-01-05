@@ -53,6 +53,9 @@ class ViewCreator:
                     carousel_x_pad = None,
                     carousel_x_offset = None,
                     carousel_fixed_width = None,
+                    carousel_fixed_selected_width = None,
+                    carousel_additional_y_offset = None,
+                    carousel_selected_offset = None,
                     grid_view_wrap_around_single_row=None) -> object:
         
         if(len(options) == 0):
@@ -231,7 +234,10 @@ class ViewCreator:
                     missing_image_path=missing_image_path,
                     x_pad=carousel_x_pad,
                     x_offset=carousel_x_offset,
-                    fixed_width=carousel_fixed_width
+                    fixed_width=carousel_fixed_width,
+                    fixed_selected_width=carousel_fixed_selected_width,
+                    additional_y_offset=carousel_additional_y_offset,
+                    selected_offset=carousel_selected_offset
                 )
 
             case _:

@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import sys
 import traceback
 from turtle import color
@@ -896,6 +897,24 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_carousel_system_additional_y_offset(cls):
+        return cls._data.get("carouselSystemAdditionalYOffset", 0)
+
+    @classmethod
+    def set_carousel_system_additional_y_offset(cls, value):
+        cls._data["carouselSystemAdditionalYOffset"] = value
+        cls.save_changes()
+        
+    @classmethod
+    def get_carousel_system_selected_offset(cls):
+        return cls._data.get("carouselSystemSelectedOffset", 0)
+
+    @classmethod
+    def set_carousel_system_selected_offset(cls, value):
+        cls._data["carouselSystemSelectedOffset"] = value
+        cls.save_changes()
+        
+    @classmethod
     def get_carousel_system_external_x_offset(cls):
         return cls._data.get("carouselSystemExternalXPad", 0)
 
@@ -920,6 +939,15 @@ class Theme():
     @classmethod
     def set_carousel_system_fixed_width(cls, value):
         cls._data["carouselSystemFixedWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_carousel_system_fixed_selected_width(cls):
+        return cls._data.get("carouselSystemFixedSelectedWidth", cls.get_carousel_system_fixed_width())
+
+    @classmethod
+    def set_carousel_system_fixed_selected_width(cls, value):
+        cls._data["carouselSystemFixedSelectedWidth"] = value
         cls.save_changes()
 
     @classmethod
@@ -1530,3 +1558,18 @@ class Theme():
                     return png_path
 
             return None
+        
+
+    @classmethod
+    def get_bg_for_img(cls, img_path):
+        p = Path(img_path)
+
+        if not p.exists():
+            return None
+
+        bg_path = p.parent / "bg" / p.name
+
+        if not bg_path.exists():
+            return None
+
+        return str(bg_path)

@@ -25,7 +25,10 @@ class CarouselView(View):
                   missing_image_path = None,
                   x_pad = None,
                   x_offset = None,
-                  fixed_width=None):
+                  additional_y_offset = None,
+                  fixed_width=None,
+                  fixed_selected_width=None,
+                  selected_offset=None,):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -51,11 +54,19 @@ class CarouselView(View):
             x_pad = 10
         if(x_offset is None):
             x_offset = 0
+        if(additional_y_offset is None):
+            additional_y_offset = 0
+        if(selected_offset is None):
+            selected_offset = 0
+        if(fixed_selected_width is None):
+            fixed_selected_width = fixed_width
 
         self.x_pad = x_pad
         self.x_offset = x_offset
-
+        self.additional_y_offset = additional_y_offset
+        self.selected_offset = selected_offset
         self.selected = selected_index
+        self.fixed_selected_width = fixed_selected_width
         if(cols < 3):
             cols = 3
 
@@ -120,12 +131,15 @@ class CarouselView(View):
         #PyUiLogger.get_logger().info(f"Selected: {self.options[self.selected].get_primary_text()}, cols = {self.cols}")
 
         for i in range(range_amt):
-            options_offset = (start + i) % n
+            options_offset = (start + i + self.selected_offset) % n
             visible.append(self.options[options_offset])
+            if options_offset == self.selected:
+                selected_visible_index = i
+
             #PyUiLogger.get_logger().info(f"Visible option {i}: {self.options[options_offset].get_primary_text()}")
 
 
-        return visible
+        return visible, selected_visible_index
 
     def get_width_percentages(self) -> List[float]:
         if(self.shrink_further_away):
@@ -189,6 +203,15 @@ class CarouselView(View):
 
 
     def _clear(self):
+        
+        if self.selected < len(self.options):
+            selected = self.options[self.selected]
+            bg = Theme.get_bg_for_img(selected.get_image_path())
+            if(bg is None):
+                Display.restore_bg()
+            else:
+                Display.set_new_bg(bg)
+
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
         elif(self.set_bottom_bar_text_to_selection):
@@ -219,13 +242,16 @@ class CarouselView(View):
                                 target_width=target_width,
                                 target_height=target_height,
                                 resize_type=resize_type)
+            
     def _render(self):
-        self._clear()
         self.correct_selected_for_off_list()
+        self._clear()
 
         
-        #TODO Get hard coded values for padding from theme
+        #TODO Get hard coded values for padding from +
         usable_width = Device.screen_width()
+        visible_options, selected_visible_index = self.get_visible_options()
+
         if(self.fixed_width is None):
             image_width_percentages = self.get_width_percentages()
             #PyUiLogger.get_logger().debug(f"image_width_percentages  = {image_width_percentages}")
@@ -239,8 +265,7 @@ class CarouselView(View):
 
         else:
             widths = [self.fixed_width for _ in range(self.cols)]
-                
-
+            widths[selected_visible_index] = self.fixed_selected_width               
             # Step 1: cumulative offsets
             x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
@@ -274,18 +299,16 @@ class CarouselView(View):
                 for i, x in enumerate(x_offsets)
             ]
 
-        visible_options: List[GridOrListEntry] = self.get_visible_options()
 
         if(self.prev_visible_options is not None and self.selected != self.prev_selected):
             self.animate_transition()
         else:
             self.animated_count = 0
         
-        render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
         iterable = list(enumerate(visible_options))
 
-        self.render_images(iterable, x_offsets, widths, render_mode, render_selected_only=False)
-        self.render_images(iterable, x_offsets, widths, render_mode, render_selected_only=True)
+        self.render_images(iterable, x_offsets, widths, render_selected_only=False)
+        self.render_images(iterable, x_offsets, widths, render_selected_only=True)
 
         self.prev_selected = self.selected
         self.prev_visible_options = visible_options
@@ -300,7 +323,15 @@ class CarouselView(View):
 
         Display.present()
 
-    def render_images(self, iterable, x_offsets, widths, render_mode, render_selected_only):
+    def get_img_render_mode(self):
+        if(self.additional_y_offset > 0):
+            return RenderMode.BOTTOM_CENTER_ALIGNED
+
+        return RenderMode.MIDDLE_CENTER_ALIGNED
+
+    def render_images(self, iterable, x_offsets, widths, render_selected_only):
+        render_mode = self.get_img_render_mode()
+
         for visible_index, imageTextPair in iterable:
             is_selected = imageTextPair == self.options[self.selected]
             if(render_selected_only and not is_selected):
@@ -308,9 +339,8 @@ class CarouselView(View):
             elif(not render_selected_only and is_selected):
                 continue
             x_offset = x_offsets[visible_index]
-            #PyUiLogger.get_logger().info(f"Visible option {visible_index}: {imageTextPair.get_primary_text()} w/ x_offset {x_offset}")
-
-            y_image_offset = Display.get_center_of_usable_screen_height()
+           
+            y_image_offset = Display.get_center_of_usable_screen_height() + self.additional_y_offset
             if(is_selected):
                 image = imageTextPair.get_image_path_selected_ideal(widths[visible_index],Display.get_usable_screen_height())
             else:
@@ -357,8 +387,10 @@ class CarouselView(View):
                 self.skip_next_animation = True
                 self.adjust_selected(self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
             elif Controller.last_input() in select_controller_inputs:
+                Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
+                Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 
         return Selection(self.get_selected_option(),None, self.selected)
@@ -374,7 +406,7 @@ class CarouselView(View):
         if(not self.skip_next_animation):
             animation_frames = 10 - self.animated_count
             if PyUiConfig.animations_enabled() and animation_frames > 1:
-                render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
+                render_mode = self.get_img_render_mode()
                 #frame_duration = 1 / 60.0  # 60 FPS
                 #last_frame_time = 0
 
@@ -383,7 +415,7 @@ class CarouselView(View):
                 x_offsets_for_animation = list(self.prev_x_offsets)
                 widths_for_animation = list(self.prev_widths)
                 image_list = list(self.prev_visible_options)
-                new_visible_options = self.get_visible_options()
+                new_visible_options, selected_visible_index = self.get_visible_options()
         
                 if(not self.sides_hang_off_edge):
                     if rotate_left:
@@ -437,8 +469,7 @@ class CarouselView(View):
                     for visible_index, imageTextPair in enumerate(image_list):
                         x_offset = frame_x_offset[visible_index]
 
-                        y_image_offset = Display.get_center_of_usable_screen_height()
-
+                        y_image_offset = Display.get_center_of_usable_screen_height() + self.additional_y_offset
 
                         if(imageTextPair == self.options[self.selected]):
                             image = imageTextPair.get_image_path_selected_ideal(frame_widths[visible_index],Display.get_usable_screen_height())

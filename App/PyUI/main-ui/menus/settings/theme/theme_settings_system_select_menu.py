@@ -144,12 +144,33 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                             Theme.get_carousel_system_fixed_width, 
                                             Theme.set_carousel_system_fixed_width)
                 )
+                option_list.append(
+                    self.build_numeric_entry("Selected Width", 
+                                            Theme.get_carousel_system_fixed_selected_width, 
+                                            Theme.set_carousel_system_fixed_selected_width)
+                )
+                
             option_list.append(
                 self.build_numeric_entry("Internal Padding", 
                                         Theme.get_carousel_system_x_pad, 
                                         Theme.set_carousel_system_x_pad,
                                         min=0)
             )
+            option_list.append(
+                self.build_numeric_entry("Y-Offset", 
+                                        Theme.get_carousel_system_additional_y_offset, 
+                                        Theme.set_carousel_system_additional_y_offset,
+                                        min=0)
+            )
+            option_list.append(
+                self.build_numeric_entry("Selected Icon Position Offset", 
+                                        Theme.get_carousel_system_selected_offset, 
+                                        Theme.set_carousel_system_selected_offset,
+                                        min=0)
+            )
+
+
+            
             option_list.append(
                 self.build_numeric_entry("X-Offset", 
                                         Theme.get_carousel_system_external_x_offset, 
