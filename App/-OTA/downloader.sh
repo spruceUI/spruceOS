@@ -8,7 +8,7 @@ BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
 OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
-TMP_DIR="$SD_CARD/App/-OTA/tmp"
+TMP_DIR="/mnt/SDCARD/App/-OTA/tmp"
 
 ##### FUNCTIONS #####
 
@@ -245,17 +245,17 @@ fi
 FILENAME=$(echo "$TARGET_LINK" | sed 's/.*\///')
 
 # Check if update file already exists
-if [ -f "$SD_CARD/$FILENAME" ]; then
+if [ -f "/mnt/SDCARD/$FILENAME" ]; then
     display_image_and_text "$IMAGE_PATH" 35 25 "Update file already exists. Verifying..." 75
     log_message "OTA: Update file already exists"
-    if verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
+    if verify_checksum "/mnt/SDCARD/$FILENAME" "$TARGET_CHECKSUM"; then
         display_image_and_text "$IMAGE_PATH" 35 25 "Valid update file already exists. Download again anyways? Press A to redownload, or B to use existing file for update."
         if ! confirm; then
             log_message "OTA: User chose to use existing file"
             rm -rf "$TMP_DIR"
             goto_install=true
         else
-            rm -rf "$SD_CARD/$FILENAME"
+            rm -rf "/mnt/SDCARD/$FILENAME"
         fi
     else
         display_image_and_text "$IMAGE_PATH" 35 25 "Existing update file isn't valid. Will download fresh copy." 75
@@ -265,7 +265,7 @@ fi
 
 if [ "$goto_install" != "true" ]; then  # do the downloadin'
     # Check free disk space
-    sdcard_mountpoint="$(mount | grep -m 1 "$SD_CARD" | awk '{print $1}')"
+    sdcard_mountpoint="$(mount | grep -m 1 "$SD_MOUNTPOINT" | awk '{print $1}')"
     sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
     min_install_space=$(((TARGET_SIZE * 2) + 128))
     if [ "$free_space" -lt "$min_install_space" ]; then
@@ -278,13 +278,13 @@ if [ "$goto_install" != "true" ]; then  # do the downloadin'
 
     # Download update file
     display_image_and_text "$IMAGE_PATH" 35 25 "Downloading update..." 75
-    if ! download_and_display_progress "$TARGET_LINK" "$SD_CARD/$FILENAME" "spruce v${TARGET_VERSION}" "$((TARGET_SIZE * 1024 * 1024))"; then
+    if ! download_and_display_progress "$TARGET_LINK" "/mnt/SDCARD/$FILENAME" "spruce v${TARGET_VERSION}" "$((TARGET_SIZE * 1024 * 1024))"; then
         exit 1
     fi
 
     # Verify checksum
     display_image_and_text "$IMAGE_PATH" 35 25 "Download complete! Verifying..." 75
-    if ! verify_checksum "$SD_CARD/$FILENAME" "$TARGET_CHECKSUM"; then
+    if ! verify_checksum "/mnt/SDCARD/$FILENAME" "$TARGET_CHECKSUM"; then
         display_image_and_text "$BAD_IMG" 35 25 "File downloaded but failed verification. Try again..." 75
         sleep 5
         rm -rf "$TMP_DIR"
