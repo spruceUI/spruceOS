@@ -111,9 +111,11 @@ set_cpu_mode() {
             log_message "Applying overclock mode"
 			set_overclock
 		fi
-	fi
-
-	if [ "$MODE" != "Overclock" ] && [ "$MODE" != "Performance" ]; then
+	elif [ "$MODE" = "Powersave" ]; then
+        set_powersave
+	elif [ "$MODE" = "Calling" ]; then
+        set_performance
+    elif [ "$MODE" != "Performance" ]; then
         log_message "Calling enforceSmartCPU"
 		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &

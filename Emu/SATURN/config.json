@@ -17,7 +17,8 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Smart",
       "overrides": {}
@@ -39,5 +40,10 @@
   "releaseYear": 1994,
   "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000,
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO","TRIMUI_SMART_PRO_S", "MIYOO_FLIP"]
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP"
+  ]
 }
