@@ -85,9 +85,113 @@ enable_or_disable_rgb() {
     log_message "rgb led not supported on miyoo flip"
 }
 
-enter_sleep() {
+
+get_system_volume() {
+    config_file="/mnt/SDCARD/Saves/flip-system.json"
+
+    if [ ! -f "$config_file" ]; then
+        echo "0"
+        return
+    fi
+
+    vol=$(jq -r '.vol // 0' "$config_file")
+    echo $((vol * 5)) # Config is 0-20, amixer is 0-100
+}
+
+are_headphones_plugged_in() {
+    gpio_path="/sys/class/gpio/gpio150/value"
+
+    if [ ! -f "$gpio_path" ]; then
+        return 1  # false (not plugged in)
+    fi
+
+    value=$(cat "$gpio_path" 2>/dev/null | tr -d '[:space:]')
+
+    if [ "$value" = "0" ]; then
+        return 0  # true (plugged in)
+    else
+        return 1  # false
+    fi
+}
+
+_set_volume() {
+    volume="$1"
+
+    if [ "$volume" -eq 0 ]; then
+        amixer sset "Playback Path" "OFF" >/dev/null 2>&1
+        return
+    fi
+
+    echo "Setting volume to ${volume}"
+    amixer cset "name='SPK Volume'" "$volume" >/dev/null 2>&1
+
+    if are_headphones_plugged_in; then
+        amixer sset "Playback Path" "HP" >/dev/null 2>&1
+    else
+        amixer sset "Playback Path" "SPK" >/dev/null 2>&1
+    fi
+
+    # Handle the "volume 5" quirk
+    if [ "$volume" -eq 5 ]; then
+        amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
+        amixer cset "name='SPK Volume'" 0 >/dev/null 2>&1
+    fi
+}
+
+fix_sleep_sound_bug() {
+    config_volume=$(get_system_volume)
+    echo "Restoring volume to ${config_volume}"
+
+    amixer cset numid=2 0
+    amixer cset numid=5 0
+
+    if are_headphones_plugged_in; then
+        amixer cset numid=2 3
+    elif [ "$config_volume" -eq 0 ]; then
+        amixer cset numid=2 0
+    else
+        amixer cset numid=2 2
+    fi
+
+    _set_volume "$config_volume"
+    log_message "*** lid_watchdog.sh: Set volume to $config_volume"
+}
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    # RTC Wake up
+    echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH"
+    
+    # Enter sleep
     echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
+}
+
+device_exit_sleep() {
+    fix_sleep_sound_bug
+}
+
+device_lid_sensor_ready() {
+    [ -e "/sys/devices/platform/hall-mh248/hallvalue" ]
+}
+
+device_woke_via_timer() {
+    CURRENT_ALARM=$(cat "$WAKE_ALARM_PATH" 2>/dev/null)
+
+    if [ -z "$CURRENT_ALARM" ]; then
+        echo "true"
+    else
+        echo 0 >"$CURRENT_ALARM"
+        echo "false"
+    fi
+}
+
+device_lid_open(){
+    head -c 1 "/sys/devices/platform/hall-mh248/hallvalue" 2>/dev/null
 }
 
 get_current_volume() {
@@ -153,10 +257,13 @@ prepare_for_pyui_launch(){
 }
 
 set_powersave(){
+
     unlock_governor 2>/dev/null
+    #interactive conservative ondemand userspace powersave performance schedutil
+    #408000 600000 816000 1104000 1416000 1608000 1800000 1992000
     echo "conservative" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo "408000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    echo "816000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     echo "1" > /sys/devices/system/cpu/cpu0/online
     echo "0" > /sys/devices/system/cpu/cpu1/online
     echo "0" > /sys/devices/system/cpu/cpu2/online
@@ -178,11 +285,15 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs
-    /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    launch_common_startup_watchdogs_v2 "true"
+
+    # Why do we need this on flip? What exactly does it do?
+    # The name is kinda confusing. I think it monitors for headphones?
     /mnt/SDCARD/spruce/scripts/mixer_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
+
+    #BT is broken so don't bother with it
+    #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
+    
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 

@@ -29,7 +29,7 @@ kill_current_process() {
 }
 
 # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
-pgrep -f "lid_watchdog.sh" | xargs -r kill
+pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
 
 # notify user with led
 [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger

@@ -3,7 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 log_message "power_button_watchdog_v2.sh: Started up."
-POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 
 
 

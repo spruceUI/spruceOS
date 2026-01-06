@@ -296,3 +296,7 @@ device_prepare_for_ports_run() {
 device_cleanup_after_ports_run() {
     log_message "device_cleanup_after_ports_run uneeded on this device" -v
 }
+
+device_uses_pseudo_sleep() {
+    echo "true"
+}
