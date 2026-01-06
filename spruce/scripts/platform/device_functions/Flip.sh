@@ -149,6 +149,7 @@ send_virtual_key_L3() {
 
 prepare_for_pyui_launch(){
     set_powersave
+    unlock_governor 2>/dev/null
 }
 
 set_powersave(){
@@ -158,15 +159,15 @@ set_powersave(){
     echo "408000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     echo "1" > /sys/devices/system/cpu/cpu0/online
-    echo "1" > /sys/devices/system/cpu/cpu1/online
+    echo "0" > /sys/devices/system/cpu/cpu1/online
     echo "0" > /sys/devices/system/cpu/cpu2/online
     echo "0" > /sys/devices/system/cpu/cpu3/online
-    log_message "Enabling convervative mode"
+    log_message "Enabling powersave mode"
     lock_governor 2>/dev/null
 }
 
 post_pyui_exit(){
-    log_message "Miyoo Flip doesn't need to do anything  when exitting pyui" -v
+    lock_governor 2>/dev/null
 }
 
 launch_startup_watchdogs(){
