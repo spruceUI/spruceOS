@@ -262,8 +262,8 @@ set_powersave(){
     #interactive conservative ondemand userspace powersave performance schedutil
     #408000 600000 816000 1104000 1416000 1608000 1800000 1992000
     echo "conservative" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    echo "816000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    echo "408000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     echo "1" > /sys/devices/system/cpu/cpu0/online
     echo "0" > /sys/devices/system/cpu/cpu1/online
     echo "0" > /sys/devices/system/cpu/cpu2/online
@@ -272,7 +272,7 @@ set_powersave(){
     #rknpu_ondemand dmc_ondemand vdec2_ondemand venc_ondemand userspace powersave performance simple_ondemand
     #324000000 528000000 780000000 1056000000
     echo "conservative" > /sys/class/devfreq/dmc/governor
-    echo "528000000" > /sys/class/devfreq/dmc/max_freq
+    echo "324000000" > /sys/class/devfreq/dmc/max_freq
 
     log_message "Enabling powersave mode"
     lock_governor 2>/dev/null
