@@ -165,7 +165,7 @@ set_powersave(){
     #rknpu_ondemand dmc_ondemand vdec2_ondemand venc_ondemand userspace powersave performance simple_ondemand
     #324000000 528000000 780000000 1056000000
     echo "conservative" > /sys/class/devfreq/dmc/governor
-    echo "528000000" > /sys/devices/system/cpu/cpu0/cpufreq/max_freq
+    echo "528000000" > /sys/class/devfreq/dmc/max_freq
 
     log_message "Enabling powersave mode"
     lock_governor 2>/dev/null
@@ -173,7 +173,7 @@ set_powersave(){
 
 post_pyui_exit(){
     echo "dmc_ondemand" > /sys/class/devfreq/dmc/governor
-    echo "1056000000" > /sys/devices/system/cpu/cpu0/cpufreq/max_freq
+    echo "1056000000" > /sys/class/devfreq/dmc/max_freq
     lock_governor 2>/dev/null
 }
 
