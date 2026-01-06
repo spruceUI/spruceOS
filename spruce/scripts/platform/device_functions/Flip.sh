@@ -149,24 +149,32 @@ send_virtual_key_L3() {
 
 prepare_for_pyui_launch(){
     set_powersave
+    unlock_governor 2>/dev/null
 }
 
 set_powersave(){
     unlock_governor 2>/dev/null
-    echo "conservative" > /sys/class/devfreq/dmc/governor
     echo "conservative" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     echo "408000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     echo "1104000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     echo "1" > /sys/devices/system/cpu/cpu0/online
-    echo "1" > /sys/devices/system/cpu/cpu1/online
+    echo "0" > /sys/devices/system/cpu/cpu1/online
     echo "0" > /sys/devices/system/cpu/cpu2/online
     echo "0" > /sys/devices/system/cpu/cpu3/online
-    log_message "Enabling convervative mode"
+
+    #rknpu_ondemand dmc_ondemand vdec2_ondemand venc_ondemand userspace powersave performance simple_ondemand
+    #324000000 528000000 780000000 1056000000
+    echo "conservative" > /sys/class/devfreq/dmc/governor
+    echo "528000000" > /sys/devices/system/cpu/cpu0/cpufreq/max_freq
+
+    log_message "Enabling powersave mode"
     lock_governor 2>/dev/null
 }
 
 post_pyui_exit(){
-    log_message "Miyoo Flip doesn't need to do anything  when exitting pyui" -v
+    echo "dmc_ondemand" > /sys/class/devfreq/dmc/governor
+    echo "1056000000" > /sys/devices/system/cpu/cpu0/cpufreq/max_freq
+    lock_governor 2>/dev/null
 }
 
 launch_startup_watchdogs(){
