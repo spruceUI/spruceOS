@@ -295,3 +295,13 @@ device_prepare_for_ports_run() {
 device_cleanup_after_ports_run() {
     log_message "Missing device_cleanup_after_ports_run function"
 }
+
+device_uses_pseudo_sleep() {
+    log_message "Missing device_uses_pseudo_sleep function"
+    echo "false"
+}
+
+device_woke_via_timer() {
+    log_message "Missing device_woke_via_timer function"
+    echo "false"
+}

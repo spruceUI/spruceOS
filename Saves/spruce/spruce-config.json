@@ -54,10 +54,12 @@
                 "description": "off sleeps indefinitely",
                 "options": [
                     "Off",
-                    "Instant",
+                    "30s",
+                    "1m",
                     "2m",
                     "5m",
                     "10m",
+                    "15m",
                     "30m",
                     "60m"
                 ],
