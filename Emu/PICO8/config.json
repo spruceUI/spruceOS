@@ -28,7 +28,8 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Smart",
       "overrides": {}
@@ -57,7 +58,9 @@
     },
     "stewardMode": {
       "display": "Steward Mode (overrides control profile)",
-      "devices": ["MIYOO_A30"],
+      "devices": [
+        "MIYOO_A30"
+      ],
       "options": [
         "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse",
         "Off - follow control profile"

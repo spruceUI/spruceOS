@@ -16,7 +16,8 @@
       "display": "CPU Mode",
       "options": [
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Performance",
       "overrides": {}
@@ -55,5 +56,11 @@
   "releaseYear": 1998,
   "default_emulator": "flycast",
   "scaling_min_freq": 1008000,
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO","TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP"]
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_A30",
+    "MIYOO_FLIP"
+  ]
 }

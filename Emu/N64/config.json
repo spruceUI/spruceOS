@@ -12,7 +12,8 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Smart",
       "overrides": {}
@@ -64,6 +65,11 @@
   "releaseYear": 1996,
   "default_emulator": "km_ludicrousn64_2k22_xtreme_amped",
   "scaling_min_freq": 1008000,
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO","TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP"]
-
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_A30",
+    "MIYOO_FLIP"
+  ]
 }

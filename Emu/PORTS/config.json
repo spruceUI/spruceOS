@@ -13,7 +13,8 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Smart",
       "overrides": {}
@@ -34,5 +35,10 @@
   "releaseYear": 2000,
   "default_emulator": "sh",
   "scaling_min_freq": 648000,
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO","TRIMUI_SMART_PRO_S", "MIYOO_FLIP"]
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP"
+  ]
 }

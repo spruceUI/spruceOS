@@ -13,7 +13,8 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock"
+        "Overclock",
+        "Powersave"
       ],
       "selected": "Smart",
       "overrides": {}
@@ -25,5 +26,7 @@
   "releaseYear": 2000,
   "default_emulator": "sh",
   "scaling_min_freq": 648000,
-  "devices": ["MIYOO_A30"]
+  "devices": [
+    "MIYOO_A30"
+  ]
 }
