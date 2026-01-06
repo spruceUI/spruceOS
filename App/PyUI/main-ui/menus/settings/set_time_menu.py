@@ -83,7 +83,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
         elif(ControllerInput.DPAD_RIGHT == input_value):
             self.hour +=1
             if(self.hour > 23):
-                self.hour = 10           
+                self.hour = 0           
             self.update_datetime()
 
     def update_minute(self, input_value):
