@@ -29,6 +29,10 @@ set_overclock() {
     log_message "Missing set_overclock function"
 }
 
+set_powersave() {
+    log_message "Missing set_powersave function -- using smart"
+    set_smart
+}
 
 # Vibrate the device
 # Usage: vibrate [duration] [--intensity Strong|Medium|Weak]
