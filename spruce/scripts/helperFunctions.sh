@@ -880,3 +880,8 @@ get_pyui_config_value() {
 
     jq -r "${key} // \"$default\"" "$SYSTEM_JSON"
 }
+
+set_rgb_in_menu() {
+    # todo: make this user-configurable
+    rgb_led lrm12 off
+}
