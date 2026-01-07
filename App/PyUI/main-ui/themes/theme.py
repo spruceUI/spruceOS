@@ -915,6 +915,15 @@ class Theme():
         cls.save_changes()
         
     @classmethod
+    def get_carousel_use_selected_image_in_animation(cls):
+        return cls._data.get("carouselSystemUseSelectedImageInAnimation", True)
+
+    @classmethod
+    def set_carousel_use_selected_image_in_animation(cls, value):
+        cls._data["carouselSystemUseSelectedImageInAnimation"] = value
+        cls.save_changes()
+        
+    @classmethod
     def get_carousel_system_external_x_offset(cls):
         return cls._data.get("carouselSystemExternalXPad", 0)
 

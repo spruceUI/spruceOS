@@ -168,6 +168,11 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                         Theme.set_carousel_system_selected_offset,
                                         min=0)
             )
+            option_list.append(
+                self.build_enabled_disabled_entry("Use Selected Image In Animation", 
+                                        Theme.get_carousel_use_selected_image_in_animation, 
+                                        Theme.set_carousel_use_selected_image_in_animation)
+            )
 
 
             
