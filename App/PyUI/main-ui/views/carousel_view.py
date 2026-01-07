@@ -28,7 +28,8 @@ class CarouselView(View):
                   additional_y_offset = None,
                   fixed_width=None,
                   fixed_selected_width=None,
-                  selected_offset=None,):
+                  selected_offset=None,
+                  use_selected_image_in_animation=None):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -67,6 +68,7 @@ class CarouselView(View):
         self.selected_offset = selected_offset
         self.selected = selected_index
         self.fixed_selected_width = fixed_selected_width
+        self.use_selected_image_in_animation = use_selected_image_in_animation if use_selected_image_in_animation is not None else True
         if(cols < 3):
             cols = 3
 
@@ -471,7 +473,7 @@ class CarouselView(View):
 
                         y_image_offset = Display.get_center_of_usable_screen_height() + self.additional_y_offset
 
-                        if(imageTextPair == self.options[self.selected]):
+                        if(imageTextPair == self.options[self.selected] and self.use_selected_image_in_animation):
                             image = imageTextPair.get_image_path_selected_ideal(frame_widths[visible_index],Display.get_usable_screen_height())
                         else:
                             image = imageTextPair.get_image_path_ideal(frame_widths[visible_index],Display.get_usable_screen_height())
