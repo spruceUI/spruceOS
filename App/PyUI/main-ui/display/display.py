@@ -18,6 +18,8 @@ from utils.logger import PyUiLogger
 import ctypes
 import traceback
 
+from utils.time_logger import log_timing
+
 @dataclass
 class CachedImageTexture:
     def __init__(self, surface, texture):
@@ -100,30 +102,40 @@ class Display:
     def init(cls):
         cls._init_display()
         #Outside init_fonts as it should only ever be called once
-        if sdl2.sdlttf.TTF_Init() == -1:
-            raise RuntimeError("Failed to initialize SDL_ttf")
-        cls.init_fonts()
-        cls.render_canvas = sdl2.SDL_CreateTexture(
-            cls.renderer.renderer,
-            sdl2.SDL_PIXELFORMAT_ARGB1555,
-            sdl2.SDL_TEXTUREACCESS_TARGET,
-            Device.screen_width(),
-            Device.screen_height()
-        )
-        cls.log_sdl_error_if_any()
-        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
-        cls.log_sdl_error_if_any()
-        sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
-        cls.log_sdl_error_if_any()
+        with log_timing("sdl2.sdlttf.TTF_Init()", PyUiLogger.get_logger()):    
+            if sdl2.sdlttf.TTF_Init() == -1:
+                raise RuntimeError("Failed to initialize SDL_ttf")
+            cls.init_fonts()
+
+
+        with log_timing("sdl2 create render canvas", PyUiLogger.get_logger()):    
+            cls.render_canvas = sdl2.SDL_CreateTexture(
+                cls.renderer.renderer,
+                sdl2.SDL_PIXELFORMAT_ARGB1555,
+                sdl2.SDL_TEXTUREACCESS_TARGET,
+                Device.screen_width(),
+                Device.screen_height()
+            )
+            cls.log_sdl_error_if_any()
+
+        with log_timing("sdl2.SDL_SetRenderTarget", PyUiLogger.get_logger()):    
+            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls.log_sdl_error_if_any()
+        with log_timing("sdl2.SDL_SetRenderDrawBlendMode", PyUiLogger.get_logger()):    
+            sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
+            cls.log_sdl_error_if_any()
 
         if(Device.might_require_surface_format_conversion()):
             info = sdl2.SDL_RendererInfo()
             sdl2.SDL_GetRendererInfo(cls.renderer.renderer, info)
             cls.supported_formats = set(info.texture_formats[:info.num_texture_formats])
 
-        cls.restore_bg()
-        cls.clear("")
-        cls.present()
+
+        with log_timing("restore_bg", PyUiLogger.get_logger()):    
+            cls.restore_bg()
+
+        with log_timing("clear", PyUiLogger.get_logger()):    
+            cls.clear("")    
         if(Device.double_init_sdl_display()):
             Display.deinit_display()
             Display.reinitialize()
@@ -204,22 +216,26 @@ class Display:
 
     @classmethod
     def _init_display(cls):
-        sdl2.ext.init(controller=True)
-        sdl2.SDL_InitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        with log_timing("sdl2.ext.init", PyUiLogger.get_logger()):    
+            sdl2.ext.init(controller=False)
 
-        display_mode = sdl2.SDL_DisplayMode()
-        if sdl2.SDL_GetCurrentDisplayMode(0, display_mode) != 0:
-            PyUiLogger.get_logger().error("Failed to get display mode, using fallback 640x480")
-            width, height = Device.screen_width(), Device.screen_height()
-        else:
-            width, height = display_mode.w, display_mode.h
-            #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
+        with log_timing("sdl2.SDL_DisplayMode", PyUiLogger.get_logger()):    
+            display_mode = sdl2.SDL_DisplayMode()
+            if sdl2.SDL_GetCurrentDisplayMode(0, display_mode) != 0:
+                PyUiLogger.get_logger().error("Failed to get display mode, using fallback 640x480")
+                width, height = Device.screen_width(), Device.screen_height()
+            else:
+                width, height = display_mode.w, display_mode.h
+                #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
 
-        cls.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
-        cls.window.show()
+        with log_timing("sdl2.ext.Window", PyUiLogger.get_logger()):    
+            cls.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
+            cls.window.show()
 
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
-        cls.renderer = sdl2.ext.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
+
+        with log_timing("sdl2.ext.Renderer", PyUiLogger.get_logger()):    
+            sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
+            cls.renderer = sdl2.ext.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
 
     @classmethod
     def deinit_display(cls):
@@ -288,10 +304,10 @@ class Display:
 
     @classmethod
     def set_new_bg(cls, bg_path):
-        cls._unload_bg_texture()
-        cls.bg_path = bg_path
-        #PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
-        if(bg_path is not None):
+        if(bg_path is not None and bg_path != cls.bg_path):
+            PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
+            cls._unload_bg_texture()
+            cls.bg_path = bg_path
             surface = Display.image_load(cls.bg_path)
             if not surface:
                 PyUiLogger.get_logger().error(f"Failed to load image: {cls.bg_path}")
@@ -367,13 +383,15 @@ class Display:
               bottom_bar_text = None,
               render_bottom_bar_icons_and_images = True):
         cls.top_bar_text = top_bar_text
-
+        
         if cls.bg_canvas is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
         elif cls.background_texture is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
         else:
             PyUiLogger.get_logger().warning("No background texture to render")
+        #cls.render_image(cls.bg_path, Device.screen_width()//2, Device.screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
+        #cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
 
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
