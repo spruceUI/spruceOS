@@ -436,6 +436,8 @@ device_init() {
     perform_fw_update_Flip
 
     killall runmiyoo.sh   
+    /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
+
 }
 
 set_event_arg() {
@@ -557,9 +559,9 @@ device_get_battery_percent() {
 }
 
 device_prepare_for_ports_run() {
-    /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
+    log_message "device_prepare_for_ports_run uneeded" -v
 }
 
 device_cleanup_after_ports_run() {
-    /mnt/SDCARD/spruce/flip/unbind-new-libmali.sh
+    log_message "device_cleanup_after_ports_run uneeded" -v
 }
