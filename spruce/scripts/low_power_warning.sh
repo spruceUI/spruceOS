@@ -131,18 +131,19 @@ while true; do
             # disable script if turned off in spruce.cfg
             [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
         done
+    elif [ "$LED_PATH" != "not applicable" ]; then
+        if [ "$LED_MODE" = "Always on" ]; then
+            echo 1 >${LED_PATH}/brightness
+            flag_remove "low_battery"
 
-    elif [ "$LED_MODE" = "Always on" ]; then
-        echo 1 >${LED_PATH}/brightness
-        flag_remove "low_battery"
+        elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
+            echo 1 >${LED_PATH}/brightness
+            flag_remove "low_battery"
 
-    elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
-        echo 1 >${LED_PATH}/brightness
-        flag_remove "low_battery"
-
-    else # if [ "$LED_MODE" = "Always Off" ]; then
-        echo 0 >${LED_PATH}/brightness
-        flag_remove "low_battery"
+        else # if [ "$LED_MODE" = "Always Off" ]; then
+            echo 0 >${LED_PATH}/brightness
+            flag_remove "low_battery"
+        fi
     fi
 
     sleep $SLEEP
