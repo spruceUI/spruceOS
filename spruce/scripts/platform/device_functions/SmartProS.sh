@@ -182,7 +182,11 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
-    /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    if [ "$custom_thermal_watchdog" = "Custom" ]; then
+        log_message "Launching custom thermal watchdog for Trim UI Smart Pro S"
+        /mnt/SDCARD/spruce/smartpros/bin/custom-thermal-watchdog &
+    fi
 }
 
 perform_fw_check(){
@@ -321,7 +325,12 @@ device_init() {
     ) &
 
 
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
     run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
+    if [ "$custom_thermal_watchdog" != "Custom" ]; then
+        run_trimui_blobs "thermald"
+    fi
+
     run_trimui_osdd
 
     echo 1 > /sys/class/speaker/mute
