@@ -85,7 +85,7 @@ set_smart() {
     SMART_DOWN_FACTOR=1
     SMART_SAMPLING_RATE=100000
     
-    scaling_min_freq="${1:-DEVICE_SMART_FREQ}"
+    scaling_min_freq="${1:-$DEVICE_SMART_FREQ}"
     log_message "set_smart called $scaling_min_freq"
 
     if ! flag_check "setting_cpu"; then
