@@ -3,6 +3,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
 from menus.settings.set_time_menu import SetTimeMenu
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -62,6 +63,8 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                     value=self.set_timezone
                 )
             )
+        else:
+            PyUiLogger.getLogger().info("Timezone setting not supported on this device.")
 
         option_list.append(
             GridOrListEntry(

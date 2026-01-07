@@ -190,6 +190,16 @@
                     "1800"
                 ],
                 "selected": "1600"
+            },
+            "customThermals": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Custom Thermal Control",
+                "description": "Use customized thermal controls",
+                "options": [
+                    "Stock",
+                    "Custom"
+                ],
+                "selected": "Stock"
             }
         },
         "Emulator Settings": {

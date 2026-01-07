@@ -494,3 +494,13 @@ class DeviceCommon(AbstractDevice):
     def perform_sdcard_ro_check(self):
         if self.is_filesystem_read_only("/mnt/SDCARD"):
             Display.display_message("Warning: /mnt/SDCARD is read-only. Please check your SD card.", duration_ms=10000)
+
+    def sync_hw_clock(self):
+        #Is this different per device? Should be right for the tina linux handhelds at least
+        try:
+            subprocess.run(
+                ["hwclock", "-w", "-u"],
+                check=True
+            )
+        except Exception as e:
+            PyUiLogger.get_logger.error(f"Failed to run hwclock: {e}")

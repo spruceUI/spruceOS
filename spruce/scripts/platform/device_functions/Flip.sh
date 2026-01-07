@@ -252,8 +252,14 @@ send_virtual_key_L3() {
 }
 
 prepare_for_pyui_launch(){
-    set_powersave
     unlock_governor 2>/dev/null
+    set_performance
+    echo "performance" > /sys/class/devfreq/dmc/governor
+    (
+        # SDL2 takes forever, let it initialize before going to powersave
+        sleep 10
+        set_powersave
+    ) &
 }
 
 set_powersave(){

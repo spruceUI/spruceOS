@@ -3,6 +3,7 @@ import calendar
 from datetime import datetime
 import subprocess
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from menus.settings import settings_menu
 from utils.logger import PyUiLogger
@@ -38,6 +39,7 @@ class SetTimeMenu(settings_menu.SettingsMenu):
         cmd = ["hwclock", "--systohc"]
         PyUiLogger.get_logger().info(f"Running: {' '.join(cmd)}")
         ProcessRunner.run(cmd, check=False, timeout=None, print=True)
+        Device.sync_hw_clock()
 
     def update_year(self, input_value):
         if(ControllerInput.DPAD_LEFT == input_value):
