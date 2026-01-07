@@ -228,8 +228,8 @@ run_trimui_osdd() {
         log_message "trimui_osdd not found. Skipping."
     fi
 
-    {
-        sleep 2 # ensure OSDD fully initializes before setting hotkey
-        echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
-    } &
+    # {
+    #     sleep 2 # ensure OSDD fully initializes before setting hotkey
+    #     echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
+    # } &
 }

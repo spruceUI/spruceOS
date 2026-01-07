@@ -5,7 +5,11 @@
 ################
 
 # requires from $PLATFORM.cfg files:
-# DEVICE_CORES_ONLINE
+# DEVICE_MIN_CORES_ONLINE
+# DEVICE_SMART_CORES_ONLINE
+# DEVICE_MAX_CORES_ONLINE
+# DEVICE_POWERSAVE_LOW_FREQ
+# DEVICE_POWERSAVE_HIGH_FREQ
 # DEVICE_SMART_FREQ
 # DEVICE_PERF_FREQ
 # DEVICE_MAX_FREQ
@@ -53,21 +57,41 @@ cores_online() {
     done
 }
 
-SMART_DOWN_THRESH=45
-SMART_UP_THRESH=75
-SMART_FREQ_STEP=3
-SMART_DOWN_FACTOR=1
-SMART_SAMPLING_RATE=100000
-SLEEP_SAMPLING_RATE=1000000
+# overridden on Flip by its specific implementation (for now?) that also sets gpu gov and freq
+set_powersave(){
+
+    cores_online "$DEVICE_MIN_CORES_ONLINE"
+    unlock_governor 2>/dev/null
+
+    echo "conservative" > "$CPU_0_DIR/scaling_governor"
+    echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_0_DIR/scaling_min_freq"
+    echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+
+    if [ -e "$CPU_4_DIR" ]; then
+        echo "conservative" > "$CPU_4_DIR/scaling_governor"
+        echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_4_DIR/scaling_min_freq"
+        echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+    fi
+
+    log_message "Enabling powersave mode"
+    lock_governor 2>/dev/null
+}
 
 set_smart() {
+
+    SMART_DOWN_THRESH=45
+    SMART_UP_THRESH=75
+    SMART_FREQ_STEP=3
+    SMART_DOWN_FACTOR=1
+    SMART_SAMPLING_RATE=100000
+    
     scaling_min_freq="${1:-DEVICE_SMART_FREQ}"
     log_message "set_smart called $scaling_min_freq"
 
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
-        cores_online "$DEVICE_CORES_ONLINE"
+        cores_online "$DEVICE_SMART_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
 
@@ -99,7 +123,7 @@ set_performance() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
-        cores_online "$DEVICE_CORES_ONLINE"
+        cores_online "$DEVICE_MAX_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
 
@@ -123,7 +147,7 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
-        cores_online "$DEVICE_CORES_ONLINE"
+        cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
 
         echo performance > "$CPU_0_DIR/scaling_governor"

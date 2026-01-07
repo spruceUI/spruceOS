@@ -17,7 +17,7 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
-        cores_online "$DEVICE_CORES_ONLINE"
+        cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
         /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
         lock_governor 2>/dev/null

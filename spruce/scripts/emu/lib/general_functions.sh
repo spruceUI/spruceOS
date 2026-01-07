@@ -113,9 +113,9 @@ set_cpu_mode() {
 		fi
 	elif [ "$MODE" = "Powersave" ]; then
         set_powersave
-	elif [ "$MODE" = "Calling" ]; then
+	elif [ "$MODE" = "Performance" ]; then
         set_performance
-    elif [ "$MODE" != "Performance" ]; then
+    else
         log_message "Calling enforceSmartCPU"
 		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &

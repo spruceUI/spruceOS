@@ -15,9 +15,9 @@
     "Governor": {
       "display": "CPU Mode",
       "options": [
+        "Smart",
         "Performance",
-        "Overclock",
-        "Powersave"
+        "Overclock"
       ],
       "selected": "Performance",
       "overrides": {}
