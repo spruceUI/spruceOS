@@ -428,3 +428,8 @@ class AbstractDevice(ABC):
     @abstractmethod
     def perform_sdcard_ro_check(self):
         pass
+
+    @abstractmethod
+    def sync_hw_clock(self):
+        pass
+

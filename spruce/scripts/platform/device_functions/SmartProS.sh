@@ -304,6 +304,7 @@ device_init() {
 
     # load wifi and low power bluetooth modules
     (
+        hwclock -s -u
         modprobe aic8800_fdrv.ko
         modprobe aic8800_btlpm.ko
 

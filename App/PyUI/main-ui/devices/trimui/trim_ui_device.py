@@ -1,8 +1,10 @@
 import ctypes
 import fcntl
 import math
+from pathlib import Path
 import re
 import subprocess
+import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
@@ -15,6 +17,7 @@ from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGa
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
+from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 from utils.logger import PyUiLogger
 
@@ -322,3 +325,39 @@ class TrimUIDevice(DeviceCommon):
         if(core is None):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
+    
+    def supports_timezone_setting(self):
+        return True
+
+    def prompt_timezone_update(self):
+        timezone_menu = TimezoneMenu()
+        tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/usr/share/zoneinfo', verify_via_datetime=True))
+
+        if (tz is not None):
+            self.system_config.set_timezone(tz)
+            self.apply_timezone(tz)
+
+    def apply_timezone(self, timezone):
+        """
+        timezone example: "America/New_York"
+        """
+
+        zoneinfo_path = Path("/usr/share/zoneinfo") / timezone
+        localtime_path = Path("/etc/localtime")
+
+        if not zoneinfo_path.exists():
+            raise ValueError(f"Invalid timezone: {timezone}")
+
+        # Update system timezone symlink 
+        try:
+            subprocess.run(
+                ["ln", "-sf", str(zoneinfo_path), str(localtime_path)],
+                check=True
+            )
+        except Exception as e:
+            PyUiLogger.get_logger.error(f"Failed to update /etc/localtime: {e}")
+
+        # Update environment for current process
+        os.environ["TZ"] = timezone
+        time.tzset()
+        self.sync_hw_clock()

@@ -199,9 +199,13 @@ device_init_a133p() {
 
     init_gpio_a133p
 
-    syslogd -S
 
-    /etc/bluetooth/bluetoothd start
+    (
+        syslogd -S
+        hwclock -s -u
+        /etc/bluetooth/bluetoothd start
+    ) &
+
 
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
 }

@@ -472,3 +472,8 @@ class Device:
     @staticmethod
     def perform_sdcard_ro_check():
         return Device._impl.perform_sdcard_ro_check()
+
+    @staticmethod
+    def sync_hw_clock():
+        return Device._impl.sync_hw_clock()
+
