@@ -48,4 +48,7 @@ cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/m
 # Fix images to be spruce compatible
 /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
 
-
+# Hide pm_message for miyoo as it creates some issues for us (jpg and broken ports)
+FILE="/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_Miyoo.txt"
+grep -q '^pm_message()' "$FILE" 2>/dev/null || \
+echo 'pm_message() { echo "$1" > "$CUR_TTY"; }' >> "$FILE"
