@@ -1579,7 +1579,7 @@ class Theme():
         
 
     @classmethod
-    def get_bg_for_img(cls, img_path):
+    def get_relative_img(cls, img_path, folder):    
         if not img_path:
             return None
         p = Path(img_path)
@@ -1587,9 +1587,17 @@ class Theme():
         if not p.exists():
             return None
 
-        bg_path = p.parent / "bg" / p.name
+        bg_path = p.parent / folder / p.name
 
         if not bg_path.exists():
             return None
 
         return str(bg_path)
+
+    @classmethod
+    def get_bg_for_img(cls, img_path):
+        return cls.get_relative_img(img_path, "bg")
+    
+    @classmethod
+    def get_overlay_for_img(cls, img_path):
+        return cls.get_relative_img(img_path, "overlay")
