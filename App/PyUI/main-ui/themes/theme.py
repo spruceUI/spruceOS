@@ -1496,6 +1496,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def grid_bg_offset_to_image_offset(cls):
+        return cls._data.get("gridBgOffsetToImageOffset", False)
+
+    @classmethod
+    def set_grid_bg_offset_to_image_offset(cls, value):
+        cls._data["gridBgOffsetToImageOffset"] = value
+        cls.save_changes()
+
+    @classmethod
     def single_row_grid_text_y_offset(cls):
         return cls._data.get("singleRowGridTextYOffset", 0)
 
