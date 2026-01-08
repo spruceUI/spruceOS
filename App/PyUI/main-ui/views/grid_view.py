@@ -63,7 +63,7 @@ class GridView(View):
         self.x_pad = 10
         self.usable_width = Device.screen_width() - (2 * self.x_pad)
         self.icon_width = self.usable_width / self.cols  # Initial icon width
-
+        self.set_bg_offset_to_image_offset = Theme.grid_bg_offset_to_image_offset()
 
     def set_options(self, options):
         self.options = options
@@ -185,7 +185,10 @@ class GridView(View):
             bg_width += Theme.get_grid_multi_row_sel_bg_resize_pad_width()
             bg_height += Theme.get_grid_multi_row_sel_bg_resize_pad_height()
             if(YRenderOption.CENTER == render_mode.y_mode):
-                bg_offset = 0
+                if(self.set_bg_offset_to_image_offset):
+                    bg_offset = img_offset
+                else:
+                    bg_offset = 0
             elif(YRenderOption.BOTTOM == render_mode.y_mode):
                 bg_offset = Theme.get_grid_multi_row_sel_bg_resize_pad_height() //2    
 
@@ -200,7 +203,7 @@ class GridView(View):
         elif(self.unselected_bg is not None):
             Display.render_image(self.unselected_bg,
                          x_offset,
-                         cell_y,
+                         cell_y + bg_offset // offset_divisor,
                          render_mode,
                          target_width=int(bg_width*1.05),
                          target_height=int(bg_height*1.05))
