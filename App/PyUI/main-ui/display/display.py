@@ -388,13 +388,14 @@ class Display:
         if cls.is_custom_theme_background is not None:
             #cls.render_image(cls.bg_path, Device.screen_width()//2, Device.screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
             cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
-        if cls.bg_canvas is not None:
+        elif cls.bg_canvas is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
         elif cls.background_texture is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
         else:
             PyUiLogger.get_logger().warning("No background texture to render")
         
+
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
             cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
