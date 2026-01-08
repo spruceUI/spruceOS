@@ -212,7 +212,7 @@ class CarouselView(View):
             if(bg is None):
                 Display.restore_bg()
             else:
-                Display.set_new_bg(bg)
+                Display.set_new_bg(bg, is_custom_theme_background=True)
 
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
@@ -311,6 +311,15 @@ class CarouselView(View):
 
         self.render_images(iterable, x_offsets, widths, render_selected_only=False)
         self.render_images(iterable, x_offsets, widths, render_selected_only=True)
+
+        if self.selected < len(self.options):
+            selected = self.options[self.selected]
+            overlay = Theme.get_overlay_for_img(selected.get_image_path())
+            if(overlay is not None):
+                Display.render_image(overlay,
+                                     Device.screen_width()//2,
+                                     Device.screen_height()//2,
+                                     RenderMode.MIDDLE_CENTER_ALIGNED)
 
         self.prev_selected = self.selected
         self.prev_visible_options = visible_options

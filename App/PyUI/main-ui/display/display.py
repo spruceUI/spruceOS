@@ -298,15 +298,16 @@ class Display:
     @classmethod
     def restore_bg(cls, bg=None):
         if(bg is not None):
-            cls.set_new_bg(bg)
+            cls.set_new_bg(bg, is_custom_theme_background=True)
         else:
-            cls.set_new_bg(Theme.background())
+            cls.set_new_bg(Theme.background(), is_custom_theme_background=False)
 
     @classmethod
-    def set_new_bg(cls, bg_path):
+    def set_new_bg(cls, bg_path, is_custom_theme_background):
         if(bg_path is not None and bg_path != cls.bg_path):
-            PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
+            #PyUiLogger.get_logger().info(f"Using {bg_path} as the background")
             cls._unload_bg_texture()
+            cls.is_custom_theme_background = is_custom_theme_background
             cls.bg_path = bg_path
             surface = Display.image_load(cls.bg_path)
             if not surface:
@@ -325,7 +326,7 @@ class Display:
             cls.page_bg = page_bg 
             background = Theme.background(page_bg)
             if(background is not None and os.path.exists(background)):
-                cls.set_new_bg(background)
+                cls.set_new_bg(background, is_custom_theme_background=True)
 
     @classmethod
     def set_selected_tab(cls, tab):
@@ -384,14 +385,17 @@ class Display:
               render_bottom_bar_icons_and_images = True):
         cls.top_bar_text = top_bar_text
         
+        if cls.is_custom_theme_background is not None:
+            cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
         if cls.bg_canvas is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
         elif cls.background_texture is not None:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
         else:
             PyUiLogger.get_logger().warning("No background texture to render")
+        
         #cls.render_image(cls.bg_path, Device.screen_width()//2, Device.screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
-        #cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
+        cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.screen_width(), Device.screen_height(), ResizeType.ZOOM)
 
         if not Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
