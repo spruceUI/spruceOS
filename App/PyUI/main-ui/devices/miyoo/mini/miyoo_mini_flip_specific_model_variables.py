@@ -29,7 +29,7 @@ MIYOO_MINI_V1_V2_V3_VARIABLES = MiyooMiniSpecificModelVariables(
 )
 
 MIYOO_MINI_V4_VARIABLES = MiyooMiniSpecificModelVariables(
-    width=750,
+    width=752,
     height=560,
     supports_wifi=False,
     poweroff_cmd="reboot",
@@ -49,7 +49,7 @@ MIYOO_MINI_PLUS = MiyooMiniSpecificModelVariables(
 )
 
 MIYOO_MINI_FLIP_VARIABLES = MiyooMiniSpecificModelVariables(
-    width=750,
+    width=752,
     height=560,
     supports_wifi=True,
     poweroff_cmd="poweroff",
