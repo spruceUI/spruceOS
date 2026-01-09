@@ -5,6 +5,7 @@ from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.animation_settings_menu import AnimationSettingsMenu
 from menus.settings.cfw_system_settings_menu_for_category import CfwSystemSettingsMenuForCategory
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
 from menus.settings.display_settings_menu import DisplaySettingsMenu
@@ -53,6 +54,10 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             ControllerSettingsMenu().show_menu()
 
+    def launch_animation_settings(self,input):
+        if(ControllerInput.A == input):
+            AnimationSettingsMenu().show_menu()
+            
     def launch_gammeswitcher_settings(self,input):
         if(ControllerInput.A == input):
             GameSwitcherSettingsMenu().show_menu()
@@ -168,6 +173,17 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.launch_controller_settings
+                )
+        )
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.animation_settings(),
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_animation_settings
                 )
         )
 

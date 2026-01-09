@@ -113,6 +113,7 @@ _set_volume() {
     log_message "Setting volume to ${VOLUME_RAW}"
 
     if [ "$VOLUME_RAW" -eq 0 ]; then
+        amixer cset "name='SPK Volume'" 0 >/dev/null 2>&1
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
         amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
@@ -123,10 +124,10 @@ _set_volume() {
             amixer sset "Playback Path" "SPK" >/dev/null 2>&1
         fi
 
-        # Handle the "volume 5" quirk
+        # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            amixer cset "name='SPK Volume'" 0 >/dev/null 2>&1
+            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
     fi
     save_volume_to_config_file "$VOLUME_LV"

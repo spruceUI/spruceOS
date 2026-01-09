@@ -314,7 +314,7 @@ class FullScreenGridView(View):
         self.correct_selected_for_off_list()
 
     def animate_transition(self):
-        if not PyUiConfig.animations_enabled():
+        if not Device.get_system_config().animations_enabled():
             return
 
         animation_duration = 0.20 - self.animated_count *0.04  # seconds

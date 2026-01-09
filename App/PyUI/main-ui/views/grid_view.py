@@ -324,7 +324,7 @@ class GridView(View):
     def animate_transition(self):
         animation_frames = 10 - self.animated_count*2
 
-        if PyUiConfig.animations_enabled() and animation_frames > 1:
+        if Device.get_system_config().animations_enabled() and animation_frames > 1:
             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
             animation_frames = 10
             frame_duration = 1 / 60.0  # 60 FPS

@@ -170,10 +170,6 @@ class PyUiConfig:
         cls.save()
 
     @classmethod
-    def animations_enabled(cls):
-        return cls.get("animationsEnabled",True)
-
-    @classmethod
     def get_language(cls):
         return cls.get("language","English")
 
