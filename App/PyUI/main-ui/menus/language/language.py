@@ -373,6 +373,14 @@ class Language:
         return cls._data.get("languageSettings","Language Settings")
 
     @classmethod
+    def animation_settings(cls):
+        return cls._data.get("animationSettings","Animation Settings")
+
+    @classmethod
+    def animations_enabled(cls):
+        return cls._data.get("animationsEnabled","Animations Enabled")
+
+    @classmethod
     def stock_os_menu(cls):
         return cls._data.get("stockOsMenu","Stock OS Menu")
 

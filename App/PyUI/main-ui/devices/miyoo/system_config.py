@@ -335,3 +335,10 @@ class SystemConfig:
         self.config["preferredRegion"] = value
         self.save_config()
 
+    def animations_enabled(self):
+        return self.config.get("animationsEnabled", True)
+
+    def set_animations_enabled(self, value):
+        self.config["animationsEnabled"] = value
+        self.save_config()
+

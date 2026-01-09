@@ -416,7 +416,7 @@ class CarouselView(View):
     def animate_transition(self):
         if(not self.skip_next_animation):
             animation_frames = 10 - self.animated_count
-            if PyUiConfig.animations_enabled() and animation_frames > 1:
+            if Device.get_system_config().animations_enabled() and animation_frames > 1:
                 render_mode = self.get_img_render_mode()
                 #frame_duration = 1 / 60.0  # 60 FPS
                 #last_frame_time = 0
