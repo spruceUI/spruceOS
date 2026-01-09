@@ -48,6 +48,7 @@ device_init() {
     #Enable GPIO48 for vibration motor 
     echo 48 > /sys/class/gpio/export
 }
+
 vibrate() {
     duration=0.5
 
@@ -227,7 +228,11 @@ set_event_arg() {
 }
 
 device_get_charging_status() {
-    charging=$( /customer/app/axp_test | grep -o '"charging":[0-9]*' | sed 's/"charging"://' )
+    if is_mini_og; then
+        charging="$(cat /sys/devices/gpiochip0/gpio/gpio59/value)"
+    else
+        charging="$(/customer/app/axp_test 2>/dev/null | jq -r '.charging // 0' )"
+    fi
     if [ "$charging" -eq 0 ]; then
         echo "Discharging"
     else
@@ -236,8 +241,11 @@ device_get_charging_status() {
 }
 
 device_get_battery_percent() {
-    battery=$( /customer/app/axp_test | grep -o '"battery":[0-9]*' | sed 's/"battery"://' )
-    echo "$battery"
+    if is_mini_og; then
+        /mnt/SDCARD/spruce/miyoomini/bin/read_battery || echo 0
+    else
+        /customer/app/axp_test 2>/dev/null | jq -r '.battery // empty'
+    fi
 }
 
 EMU_LIST="retroarch scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
@@ -299,4 +307,34 @@ device_cleanup_after_ports_run() {
 
 device_uses_pseudo_sleep() {
     echo "true"
+}
+
+# Miyoo Mini subtype detection
+
+is_mini_og() {
+    if [ -e /customer/app/axp_test ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+has_v4_screen() {
+    grep -q "752x560p" /sys/class/graphics/fb0/modes &>/dev/null
+}
+
+get_miyoo_mini_variant() {
+    if is_mini_og; then
+        if has_v4_screen; then
+            echo "MIYOO_MINI_V4"
+        else
+            echo "MIYOO_MINI"
+        fi
+    else
+        if has_v4_screen; then
+            echo "MIYOO_MINI_FLIP"
+        else
+            echo "MIYOO_MINI_PLUS"
+        fi
+    fi
 }
