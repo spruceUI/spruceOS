@@ -1,7 +1,7 @@
 {
   "label": "DC-Naomi",
-  "icon": "dc.png",
-  "iconsel": "dc_sel.png",
+  "icon": "naomi.png",
+  "iconsel": "naomi_sel.png",
   "themecolor": "FFFFFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
