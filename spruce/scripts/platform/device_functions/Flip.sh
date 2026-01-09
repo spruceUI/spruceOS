@@ -11,7 +11,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/amixer_volume_control.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
 get_config_path() {
@@ -86,18 +85,6 @@ enable_or_disable_rgb() {
 }
 
 
-get_system_volume() {
-    config_file="/mnt/SDCARD/Saves/flip-system.json"
-
-    if [ ! -f "$config_file" ]; then
-        echo "0"
-        return
-    fi
-
-    vol=$(jq -r '.vol // 0' "$config_file")
-    echo $((vol * 5)) # Config is 0-20, amixer is 0-100
-}
-
 are_headphones_plugged_in() {
     gpio_path="/sys/class/gpio/gpio150/value"
 
@@ -114,32 +101,40 @@ are_headphones_plugged_in() {
     fi
 }
 
+
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
+}
+
 _set_volume() {
-    volume="$1"
+    VOLUME_LV="$1"
+    VOLUME_RAW=$(( VOLUME_LV * 5 ))    
 
-    if [ "$volume" -eq 0 ]; then
+    log_message "Setting volume to ${VOLUME_RAW}"
+
+    if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
-        return
-    fi
-
-    echo "Setting volume to ${volume}"
-    amixer cset "name='SPK Volume'" "$volume" >/dev/null 2>&1
-
-    if are_headphones_plugged_in; then
-        amixer sset "Playback Path" "HP" >/dev/null 2>&1
     else
-        amixer sset "Playback Path" "SPK" >/dev/null 2>&1
-    fi
+        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
 
-    # Handle the "volume 5" quirk
-    if [ "$volume" -eq 5 ]; then
-        amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-        amixer cset "name='SPK Volume'" 0 >/dev/null 2>&1
+        if are_headphones_plugged_in; then
+            amixer sset "Playback Path" "HP" >/dev/null 2>&1
+        else
+            amixer sset "Playback Path" "SPK" >/dev/null 2>&1
+        fi
+
+        # Handle the "volume 5" quirk
+        if [ "$VOLUME_RAW" -eq 5 ]; then
+            amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
+            amixer cset "name='SPK Volume'" 0 >/dev/null 2>&1
+        fi
     fi
+    save_volume_to_config_file "$VOLUME_LV"
+
 }
 
 fix_sleep_sound_bug() {
-    config_volume=$(get_system_volume)
+    config_volume=$(get_volume_level)
     echo "Restoring volume to ${config_volume}"
 
     amixer cset numid=2 0
@@ -153,8 +148,31 @@ fix_sleep_sound_bug() {
         amixer cset numid=2 2
     fi
 
-    _set_volume "$config_volume"
+    _set_volume "$(( config_volume ))"
     log_message "*** lid_watchdog.sh: Set volume to $config_volume"
+}
+
+save_volume_to_config_file() {
+    VOLUME_LV=$1
+
+    # Update MainUI Config file
+    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+}
+
+volume_down() {
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -gt 0 ] ; then
+        VOLUME_LV=$((VOLUME_LV-1))
+        _set_volume "$(( VOLUME_LV ))"
+    fi
+}
+
+volume_up() {
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -lt 20 ] ; then
+        VOLUME_LV=$((VOLUME_LV+1))
+        _set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -196,11 +214,6 @@ device_lid_open(){
 
 get_current_volume() {
     amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%'
-}
-
-set_volume() {
-    new_vol="${1:-0}" # default to mute if no value supplied
-    amixer cset name='SPK Volume' "$new_vol"
 }
 
 get_ra_cfg_location(){
@@ -534,20 +547,6 @@ run_mixer_watchdog() {
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
 }
-
-
-volume_down() {
-    amixer_volume_down
-}
-
-volume_up() {
-    amixer_volume_up
-}
-
-get_volume_level() {
-    amixer_get_volume_level
-}
-
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
