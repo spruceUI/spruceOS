@@ -5,7 +5,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/amixer_volume_control.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
 get_config_path() {
@@ -339,16 +338,41 @@ run_mixer_watchdog() {
     log_message "run_mixer_watchdog on this device" -v
 }
 
+
+save_volume_to_config_file() {
+    VOLUME_LV=$1
+    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+}
+
+_set_volume() {
+    VOLUME_LV="$1"
+    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
+    log_message "Setting volume to ${VOLUME_RAW}"
+    amixer set 'Soft Volume Master' $VOLUME_RAW > /dev/null
+    save_volume_to_config_file "$VOLUME_LV"
+
+}
+
 volume_down() {
-    amixer_volume_down
+    VOLUME_LV=$(get_volume_level)
+    # if value greater than zero
+    if [ $VOLUME_LV -gt 0 ] ; then
+        VOLUME_LV=$((VOLUME_LV-1))
+        _set_volume "$VOLUME_LV"
+    fi
 }
 
 volume_up() {
-    amixer_volume_up
+    VOLUME_LV=$(get_volume_level)
+    # if value less than 20
+    if [ $VOLUME_LV -lt 20 ] ; then
+        VOLUME_LV=$((VOLUME_LV+1))
+        _set_volume "$VOLUME_LV"
+    fi
 }
 
 get_volume_level() {
-    amixer_get_volume_level
+    jq -r '.vol' "$SYSTEM_JSON"
 }
 
 
