@@ -646,7 +646,7 @@ class Display:
         return surface
                      
     @classmethod
-    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None):        
+    def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None, crop_w=None, crop_h=None):        
         if(image_path is None or image_path in cls._problematic_images):
             return 0, 0
 
@@ -708,7 +708,8 @@ class Display:
                                            scale_width=target_width, 
                                            scale_height=target_height,
                                            resize_type=resize_type, 
-                                           texture_id=image_path)
+                                           texture_id=image_path,
+                                           crop_w=crop_w, crop_h=crop_h)
         
         if(not cached):
             sdl2.SDL_DestroyTexture(texture)

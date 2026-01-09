@@ -2,6 +2,7 @@
 
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.mini.axp_test_methods import AxpTestMehthods
+from devices.miyoo.mini.og_mini_methods import OgMiniMethods
 
 
 class MiyooMiniSpecificModelVariables():
@@ -24,8 +25,8 @@ MIYOO_MINI_V1_V2_V3_VARIABLES = MiyooMiniSpecificModelVariables(
     supports_wifi=False,
     poweroff_cmd="reboot",
     reboot_cmd=None,
-    get_charge_status=lambda: ChargeStatus.DISCONNECTED, #TODO
-    get_battery_percent=lambda: 100 #TODO
+    get_charge_status=OgMiniMethods.get_charge_status,
+    get_battery_percent=OgMiniMethods.get_battery_percent
 )
 
 MIYOO_MINI_V4_VARIABLES = MiyooMiniSpecificModelVariables(
@@ -34,8 +35,8 @@ MIYOO_MINI_V4_VARIABLES = MiyooMiniSpecificModelVariables(
     supports_wifi=False,
     poweroff_cmd="reboot",
     reboot_cmd=None,
-    get_charge_status=lambda: ChargeStatus.DISCONNECTED, #TODO
-    get_battery_percent=lambda: 100 #TODO
+    get_charge_status=OgMiniMethods.get_charge_status,
+    get_battery_percent=OgMiniMethods.get_battery_percent
 )
 
 MIYOO_MINI_PLUS = MiyooMiniSpecificModelVariables(
