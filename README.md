@@ -1,5 +1,5 @@
-![sprucetreelogo](https://github.com/tenlevels/spruce/assets/139886575/f248b441-835c-4f2e-b849-cec145b3ffcf)
-# spruce: *SD Card Overhaul for Miyoo A30 and Flip* 
+
+# spruceOS 
 
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
 
@@ -17,9 +17,6 @@
 * Native Pico-8 support with Splore.
 * Built-in boxart scraper app using libretro API.
 * OTA updates over Wi-Fi on device.
-* Advanced Settings App to customize and change the user experience!
-
-Plus many more enhancements over the original stock operating system!
 
 ## Download the latest version
 
@@ -64,30 +61,12 @@ Plus many more enhancements over the original stock operating system!
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
-## All In One Installer
-  - Download [The new SpruceBurner program](https://github.com/spruceUI/spruceSource/releases/download/SpruceBurnerV1.0/SpruceBurner.exe)
-  - Simply insert your SD card into your Windows computer and run the program, be sure to select the correct drive!
-  - It formats your card, downloads the latest official spruce release, and installs it in one click!
-  - HUGE props to spycat from the Rocknix team for developing this for us!
-
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
 See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
 ## Controls and Hotkeys
-
-Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and calibrate your joystick
-
-### Global
-
-* Brightness: START + L1/R1 (to lower/increase brightness respectively)
-
-### Main Menu
-
-* Search: SELECT
-* Shutdown: Hold POWER until *Power Off* pop-up display (press A to confirm)
-* Emulator/CPU clock/Random Game selection menu: X while over a game title
 
 ### In-game
 
@@ -123,8 +102,8 @@ Please do not adjust the RetroArch configurations unless you are already familia
 
 ## Themes
 
-  - Included are six themes located in Settings. More icons and themes are planned to be added in the future.
-  - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
+  - Included are some default themes to choose from in Settings.
+  - Download from a wide variety of themes using the Theme Garden app!
   - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
   - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
@@ -193,10 +172,6 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
   - N64/DC/Naomi/PSP/Saturn:
 
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
-
-## News
-The release of the Miyoo Flip has us excited! We are working on spruceOS 4.0 that will be multi platform! One SD card with our software will boot/play on the Miyoo A30, Flip, Trimui Brick and Smart Pro. 
-[Gogamegeek.com](https://www.gogamegeek.com/) as well as Miyoo themselves has kindly sent us a few units. Expect updates on our progress "soon"!
 
 ## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
 
