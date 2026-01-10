@@ -23,7 +23,7 @@ connect_services() {
 	done
 
 	# Samba check
-	if [ "$syncthing_enabled" = "True" ] && ! pgrep "smbd" >/dev/null; then
+	if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" >/dev/null; then
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: Samba detected not running, starting..."
 		start_samba_process

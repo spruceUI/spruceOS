@@ -17,13 +17,17 @@ run_sd_card_fix_if_triggered() {
 enable_or_disable_wifi() {
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         ifconfig wlan0 down         2>/dev/null
+        rm -f /tmp/wifion           2>/dev/null
         touch /tmp/wifioff          2>/dev/null
         killall -9 wpa_supplicant   2>/dev/null
         killall -9 udhcpc           2>/dev/null
-        # rfkill                      2>/dev/null
         log_message "WiFi turned off"
     else
-        touch /tmp/wifion
+        rm -f /tmp/wifioff          2>/dev/null
+        touch /tmp/wifion           2>/dev/null
+        ifconfig wlan0 up           2>/dev/null
+        pgrep -f "wpa_supplicant.*wlan0" >/dev/null || wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
         /mnt/SDCARD/spruce/scripts/networkservices.sh &
         log_message "WiFi turned on"
     fi
