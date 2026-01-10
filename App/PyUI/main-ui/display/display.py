@@ -305,7 +305,7 @@ class Display:
             cls.set_new_bg(Theme.background(), is_custom_theme_background=False)
 
     @classmethod
-    def set_new_bg(cls, bg_path, is_custom_theme_background):
+    def set_new_bg(cls, bg_path, is_custom_theme_background, retry=True):
         if(bg_path is not None and bg_path != cls.bg_path):
             cls._unload_bg_texture()
             cls.is_custom_theme_background = is_custom_theme_background
@@ -319,9 +319,18 @@ class Display:
             sdl2.SDL_FreeSurface(surface)
 
             if not cls.background_texture:
-                PyUiLogger.get_logger().error("Failed to create texture from surface")
+                if(retry):
+                    PyUiLogger.get_logger().info("Retrying bg texture")
+                    cls._text_texture_cache.clear_cache()
+                    cls._image_texture_cache.clear_cache()
+                    cls.bg_path = None
+                    cls.set_new_bg(bg_path, is_custom_theme_background, retry=False)
+                else:
+                    PyUiLogger.get_logger().error("Failed to create bg texture")
+
             else:
                 PyUiLogger.get_logger().info(f"{bg_path} loaded as background texture")
+
         elif(bg_path is None):
             PyUiLogger.get_logger().error(f"Background path none")
 
