@@ -20,7 +20,7 @@
         "Overclock",
         "Powersave"
       ],
-      "selected": "Smart",
+      "selected": "Powersave",
       "overrides": {}
     },
     "Emulator_A30": {
