@@ -200,11 +200,6 @@ reset_playback_pack() {
     log_message "reset_playback_pack Uneeded on this device" -v
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog on this device" -v
-}
-
-
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
 	cat "$BATTERY/status"

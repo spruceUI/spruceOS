@@ -293,11 +293,6 @@ reset_playback_pack() {
     log_message "reset_playback_pack Uneeded on this device" -v
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog on this device" -v
-}
-
-
 save_volume_to_config_file() {
     VOLUME_LV=$1
     sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"

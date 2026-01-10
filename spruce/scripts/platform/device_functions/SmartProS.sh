@@ -351,10 +351,6 @@ reset_playback_pack() {
     log_message "reset_playback_pack Uneeded on this device" -v
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog Uneeded on this device" -v
-}
-
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
 }
