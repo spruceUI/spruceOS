@@ -20,6 +20,7 @@ from menus.settings.button_remapper import ButtonRemapper
 from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 class TrimUIDevice(DeviceCommon):
     
@@ -295,7 +296,7 @@ class TrimUIDevice(DeviceCommon):
         return None
     
     def get_wpa_supplicant_conf_path(self):
-        return "/userdata/cfg/wpa_supplicant.conf"
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf")
     
     def supports_brightness_calibration():
         return True

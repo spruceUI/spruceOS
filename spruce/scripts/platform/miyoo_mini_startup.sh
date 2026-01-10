@@ -23,7 +23,7 @@ cp /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/retroarch.cfg /mnt/SDCARD/R
     /customer/app/axp_test wifion
     sleep 2
     ifconfig wlan0 up
-    wpa_supplicant -B -D nl80211 -i wlan0 -c /appconfigs/wpa_supplicant.conf
+    wpa_supplicant -B -D nl80211 -i wlan0 -c /mnt/SDCARD/Saves/spruce/wpa_supplicant.conf
     adbd &
 ) &
 

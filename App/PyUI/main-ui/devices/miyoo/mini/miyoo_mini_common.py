@@ -298,7 +298,7 @@ class MiyooMiniCommon(MiyooDevice):
                         "-B",
                         "-D", "nl80211",
                         "-i", "wlan0",
-                        "-c", "/appconfigs/wpa_supplicant.conf"
+                        "-c", self.get_wpa_supplicant_conf_path()
                     ])
                     subprocess.run(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script"])
                     time.sleep(3)
@@ -321,7 +321,7 @@ class MiyooMiniCommon(MiyooDevice):
         return self.miyoo_mini_specific_model_variables.reboot_cmd
 
     def get_wpa_supplicant_conf_path(self):
-        return "/appconfigs/wpa_supplicant.conf"
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/appconfigs/wpa_supplicant.conf")
 
     def get_volume(self):
         try:

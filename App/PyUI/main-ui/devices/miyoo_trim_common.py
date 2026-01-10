@@ -145,7 +145,7 @@ class MiyooTrimCommon():
                     f.write(conf_content)
                 PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Error creating /userdata/cfg/wpa_supplicant.conf: {e}")
+            PyUiLogger.get_logger().error(f"Error creating {wpa_supplicant_path}: {e}")
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()

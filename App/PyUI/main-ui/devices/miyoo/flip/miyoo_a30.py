@@ -265,7 +265,7 @@ class MiyooA30(MiyooDevice):
         return None
 
     def get_wpa_supplicant_conf_path(self):
-        return "/config/wpa_supplicant.conf"
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/config/wpa_supplicant.conf")
 
     def get_volume(self):
         return self.system_config.get_volume()
