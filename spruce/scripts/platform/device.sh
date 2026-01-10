@@ -202,14 +202,6 @@ set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
 }
 
-set_SFTPGO_DIR() {
-    log_message "Missing set_SFTPGO_DIR function"
-}
-
-set_syncthing_ST_BIN() {
-    log_message "Missing set_syncthing_ST_BIN function"
-}
-
 set_default_ra_hotkeys() {
     log_message "Missing set_default_ra_hotkeys function"
 }

@@ -1,7 +1,11 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-set_SFTPGO_DIR
+if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+	SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
+else # aarch64
+	SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
+fi
 
 start_sftpgo_process() {
     log_message "Starting SFTPGO..."

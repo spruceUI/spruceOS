@@ -16,13 +16,3 @@ device_init() {
 set_event_arg_for_idlemon() {
     log_message "TODO event arg for miyoo mini?" -v
 }
-
-# Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
-
-set_SFTPGO_DIR() {
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
-}
-
-set_syncthing_ST_BIN() {
-    ST_BIN=$SYNCTHING_DIR/bin/syncthing
-}

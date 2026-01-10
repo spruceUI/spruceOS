@@ -12,7 +12,7 @@
 # External binaries:
 #   ifconfig
 #   killall
-#   /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh
+#   /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh
 #   /mnt/SDCARD/spruce/scripts/networkservices.sh
 #
 # Provides:
@@ -50,7 +50,7 @@ handle_network_services() {
 	# Handle Syncthing sync if enabled
 	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
 		start_syncthing_process
-		/mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --startup
+		/mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced"
 
 	fi

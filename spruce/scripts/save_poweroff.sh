@@ -120,7 +120,7 @@ if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
         start_syncthing_process
         # Dimming screen before syncthing sync check
         dim_screen &
-        /mnt/SDCARD/spruce/bin/Syncthing/syncthing_sync_check.sh --shutdown
+        /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --shutdown
     fi
 
     flag_remove "syncthing_startup_synced"

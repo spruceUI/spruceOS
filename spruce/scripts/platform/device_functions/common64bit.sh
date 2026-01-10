@@ -22,11 +22,3 @@ send_menu_button_to_retroarch() {
 get_sftp_service_name() {
     echo "sftpgo"
 }
-
-set_SFTPGO_DIR() {
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
-}
-
-set_syncthing_ST_BIN() {
-    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
-}
