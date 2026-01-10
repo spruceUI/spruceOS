@@ -591,7 +591,7 @@ device_init() {
 
 }
 
-set_event_arg() {
+set_event_arg_for_idlemon() {
     EVENT_ARG="-e /dev/input/event5"
 }
 

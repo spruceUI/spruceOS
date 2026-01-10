@@ -257,7 +257,7 @@ device_init() {
     /mnt/SDCARD/spruce/scripts/autoReloadCalibration.sh &
 }
 
-set_event_arg() {
+set_event_arg_for_idlemon() {
     log_message "nothing to do" -v
 }
 

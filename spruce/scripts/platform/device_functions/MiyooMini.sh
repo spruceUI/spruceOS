@@ -214,7 +214,7 @@ brightness_up() {
     set_backlight $((backlight + 1))
 }
 
-set_event_arg() {
+set_event_arg_for_idlemon() {
     EVENT_ARG="-e /dev/input/event0"
 }
 

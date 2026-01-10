@@ -13,7 +13,7 @@ device_init() {
 }
 
 # This doesn't seem right for all platforms, needs review
-set_event_arg() {
+set_event_arg_for_idlemon() {
     log_message "TODO event arg for miyoo mini?" -v
 }
 

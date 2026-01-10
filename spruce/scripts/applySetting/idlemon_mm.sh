@@ -1,7 +1,7 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-set_event_arg
+set_event_arg_for_idlemon
 
 idle_type="$1"
 timeout_value="$2"

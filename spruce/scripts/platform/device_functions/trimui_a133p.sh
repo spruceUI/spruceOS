@@ -166,7 +166,7 @@ device_init_a133p() {
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
 }
 
-set_event_arg() {
+set_event_arg_for_idlemon() {
     log_message "nothing to do" -v
 }
 

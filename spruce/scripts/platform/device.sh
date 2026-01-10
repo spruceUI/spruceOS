@@ -198,8 +198,8 @@ device_init() {
     log_message "Missing device_init function"
 }
 
-set_event_arg() {
-    log_message "Missing set_event_arg function"
+set_event_arg_for_idlemon() {
+    log_message "Missing set_event_arg_for_idlemon function"
 }
 
 set_dark_httpd_dir() {
