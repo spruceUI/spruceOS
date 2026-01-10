@@ -14,8 +14,6 @@
 [ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
 export HOME="/mnt/SDCARD"
-TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
-TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
 rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location

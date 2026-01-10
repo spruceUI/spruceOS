@@ -233,6 +233,7 @@ device_init() {
     alsactl nrestore &
 
     # Restore and monitor brightness
+    TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
     if [ -f "$TMP_BACKLIGHT_PATH" ]; then
         BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
         # only set non zero brightness value
