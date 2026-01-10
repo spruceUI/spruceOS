@@ -19,10 +19,6 @@ set_event_arg_for_idlemon() {
 
 # Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
 
-set_SMB_DIR(){
-    SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
-}
-
 set_SFTPGO_DIR() {
     SFTPGO_DIR="/mnt/SDCARD/spruce/bin/SFTPGo"
 }

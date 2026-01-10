@@ -202,10 +202,6 @@ set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
 }
 
-set_SMB_DIR(){
-    log_message "Missing set_SMB_DIR function"
-}
-
 set_SFTPGO_DIR() {
     log_message "Missing set_SFTPGO_DIR function"
 }

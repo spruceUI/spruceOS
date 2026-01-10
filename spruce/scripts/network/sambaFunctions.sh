@@ -2,8 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Why not just get this off the path?
-set_SMB_DIR
+if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+	SMB_DIR=/mnt/SDCARD/spruce/bin/Samba
+else # aarch64
+	SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
+fi
 
 start_samba_process(){
     log_message "Starting Samba..."

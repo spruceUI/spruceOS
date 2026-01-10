@@ -23,10 +23,6 @@ get_sftp_service_name() {
     echo "sftpgo"
 }
 
-set_SMB_DIR(){
-   SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
-}
-
 set_SFTPGO_DIR() {
     SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
 }
