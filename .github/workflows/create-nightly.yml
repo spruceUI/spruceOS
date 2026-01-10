@@ -108,17 +108,6 @@ jobs:
           echo "Removing cloned PyUI Themes repo"
           rm -rf pyui_themes
 
-      - name: Recombine large files
-        run: |
-          rm -f spruce/flip/miyoo355_rootfs_32.img
-          cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
-          rm -f spruce/flip/miyoo355_rootfs_32.img_part*
-          rm -f spruce/flip/muOS-pixie-reduced.sqsh
-          cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
-          rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
-          cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
-          rm -f spruce/flip/scummvm_libretro.so.part*
-
       - name: Create RetroArch core archives
         run: |
           7z a -t7z -mx=9 spruce/archives/staging/cores.7z /mnt/SDCARD/RetroArch/.retroarch/cores
