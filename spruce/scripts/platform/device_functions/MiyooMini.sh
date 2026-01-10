@@ -104,10 +104,6 @@ reset_playback_pack() {
     log_message "Intentionally do not let spruce modify audio, let keymon" -v
 }
 
-set_playback_path() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
 run_mixer_watchdog() {
     log_message "Intentionally do not let spruce modify audio, let keymon" -v
 }
@@ -175,11 +171,6 @@ take_screenshot() {
 
 set_default_ra_hotkeys() {
     log_message "TODO: set_default_ra_hotkeys"
-}
-
-
-device_specific_wake_from_sleep() {
-    log_message "MiyooMini has no specific device wake from sleep needed" -v
 }
 
 volume_down() {

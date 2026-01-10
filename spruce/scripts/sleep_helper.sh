@@ -158,7 +158,7 @@ trigger_sleep() {
 }
 
 trigger_sleep
-
+device_exit_sleep
 kill "$GET_EVENT_PID" 2>/dev/null
 
 sleep 2 #don't allow resleeping for a few seconds
