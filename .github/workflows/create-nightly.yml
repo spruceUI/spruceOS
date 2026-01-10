@@ -88,8 +88,10 @@ jobs:
           echo "Copying selected themes..."
 
           cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/
+          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/
           cp "pyui_themes/PackedThemes/Avocado.7z" Themes/
-          cp "pyui_themes/PackedThemes/CONSOLED.7z" Themes/
+          cp "pyui_themes/PackedThemes/CONSOLED V2.7z" Themes/
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/
           cp "pyui_themes/PackedThemes/Grape.7z" Themes/
           cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/
