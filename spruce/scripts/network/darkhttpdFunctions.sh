@@ -2,12 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
-  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
-else # aarch64
-  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
-fi
-
 WWW_DIR=/mnt/SDCARD/spruce/www
 
 # Generic Startup
@@ -39,7 +33,7 @@ start_darkhttpd_process() {
   fi
 
   log_message "darkhttpd: Starting Darkhttpd..."
-  $DARKHTTPD_DIR/bin/darkhttpd $WWW_DIR >$DARKHTTPD_DIR/serve.log 2>&1 &
+  darkhttpd $WWW_DIR >/mnt/SDCARD/Saves/spruce/serve.log 2>&1 &
 }
 
 stop_darkhttpd_process() {
