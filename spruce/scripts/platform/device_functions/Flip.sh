@@ -106,62 +106,27 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-run_amixer() {
-    # Usage:
-    #   run_amixer cset "name='SPK Volume'" 10
-    #   run_amixer sset "Playback Path" "SPK"
-
-    local cmd=(amixer "$@")
-    local output
-    local rc
-
-    # Log command
-    log_message "AMIXER CMD: ${cmd[*]}"
-
-    # Run and capture stdout+stderr
-    output="$("${cmd[@]}" 2>&1)"
-    rc=$?
-
-    # Log output (preserve newlines)
-    if [ -n "$output" ]; then
-        while IFS= read -r line; do
-            log_message "AMIXER OUT: $line"
-        done <<EOF
-$output
-EOF
-    else
-        log_message "AMIXER OUT: <no output>"
-    fi
-
-    # Log exit code if non-zero (or always, if you prefer)
-    if [ $rc -ne 0 ]; then
-        log_message "AMIXER ERROR: exit code $rc"
-    fi
-
-    return $rc
-}
-
 _set_volume() {
     VOLUME_LV="$1"
     VOLUME_RAW=$(( VOLUME_LV * 5 ))    
 
     if are_headphones_plugged_in; then
-        run_amixer sset "Playback Path" "HP" >/dev/null 2>&1
+        amixer sset "Playback Path" "HP" >/dev/null 2>&1
     else
-        run_amixer sset "Playback Path" "SPK" >/dev/null 2>&1
+        amixer sset "Playback Path" "SPK" >/dev/null 2>&1
     fi
 
     log_message "Setting volume to ${VOLUME_RAW}"
 
-    run_amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
+    amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
 
     if [ "$VOLUME_RAW" -eq 0 ]; then
-        run_amixer sset "Playback Path" "OFF" >/dev/null 2>&1
+        amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
-            run_amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            run_amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
+            amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
+            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
     fi
     save_volume_to_config_file "$VOLUME_LV"
@@ -171,15 +136,15 @@ fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
     echo "Restoring volume to ${config_volume}"
 
-    run_amixer cset numid=2 0
-    run_amixer cset numid=5 0
+    amixer cset numid=2 0
+    amixer cset numid=5 0
 
     if are_headphones_plugged_in; then
-        run_amixer cset numid=2 3
+        amixer cset numid=2 3
     elif [ "$config_volume" -eq 0 ]; then
-        run_amixer cset numid=2 0
+        amixer cset numid=2 0
     else
-        run_amixer cset numid=2 2
+        amixer cset numid=2 2
     fi
 
     _set_volume "$(( config_volume ))"
