@@ -48,4 +48,4 @@ class RecentsMenu(RomsMenuCommon):
 
 
     def prefer_savestate_screenshot(self):
-        return Device.get_system_config().use_savestate_screenshots(RECENTS)
+        return Device.get_device().get_system_config().use_savestate_screenshots(RECENTS)

@@ -84,19 +84,19 @@ class TrimUISmartProS(TrimUIDevice):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    @property
+
     def screen_width(self):
         return 1280
 
-    @property
+
     def screen_height(self):
         return 720
     
-    @property
+
     def output_screen_width(self):
         return 1920
 
-    @property
+
     def output_screen_height(self):
         return 1080
 

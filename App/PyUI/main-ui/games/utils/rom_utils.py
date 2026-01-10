@@ -98,6 +98,6 @@ class RomUtils:
                 continue
 
         # store in cache
-        if(Device.supports_caching_rom_lists()):
+        if(Device.get_device().supports_caching_rom_lists()):
             self._get_roms_cache[cache_key] = (valid_files, valid_folders)
         return valid_files, valid_folders

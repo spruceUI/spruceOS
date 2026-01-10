@@ -8,27 +8,22 @@ from utils.image_utils import ImageUtils
 
 class AbstractDevice(ABC):
  
-    @property
     @abstractmethod
     def screen_width(self):
         pass
 
-    @property
     @abstractmethod
     def screen_height(self):
         pass
 
-    @property
     @abstractmethod
     def screen_rotation(self):
         pass
 
-    @property
     @abstractmethod
     def output_screen_width(self):
         pass
 
-    @property
     @abstractmethod
     def output_screen_height(self):
         pass
@@ -37,22 +32,18 @@ class AbstractDevice(ABC):
     def should_scale_screen(self):
         pass
     
-    @property
     @abstractmethod
     def lumination(self):
         pass
 
-    @property
     @abstractmethod
     def contrast(self):
         pass
 
-    @property
     @abstractmethod
     def saturation(self):
         pass
 
-    @property
     @abstractmethod
     def input_timeout_default(self):
         pass

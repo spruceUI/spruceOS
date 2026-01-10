@@ -51,7 +51,7 @@ class GameSelectMenuPopup:
             return
 
         selected_rom = random.choice(roms_only)
-        Device.run_game(selected_rom.get_value())
+        Device.get_device().run_game(selected_rom.get_value())
 
     def execute_game_search(self, game_system, input_value):
         from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
@@ -141,7 +141,7 @@ class GameSelectMenuPopup:
         rom_name = os.path.basename(rom_info.rom_file_path)
         
         if(PyUiConfig.get_gameswitcher_path() is not None 
-           and Device.get_system_config().use_custom_gameswitcher_path()):
+           and Device.get_device().get_system_config().use_custom_gameswitcher_path()):
             if(CustomGameSwitcherListManager.contains_game(rom_info)):
                 popup_options.append(GridOrListEntry(
                     primary_text=Language.remove_gameswitcher_game() if use_full_text else "+/- GameSwitcher",
@@ -192,7 +192,7 @@ class GameSelectMenuPopup:
         ))
 
                
-        if(not Device.get_system_config().simple_mode_enabled()):               
+        if(not Device.get_device().get_system_config().simple_mode_enabled()):               
             popup_options.append(GridOrListEntry(
                 primary_text=Language.download_boxart(),
                 image_path=None,
@@ -236,7 +236,7 @@ class GameSelectMenuPopup:
 
         popup_options.extend(self.get_game_options(rom_info, additional_popup_options, rom_list, use_full_text=False)) 
 
-        if(not Device.get_system_config().simple_mode_enabled()):
+        if(not Device.get_device().get_system_config().simple_mode_enabled()):
             popup_options.append(GridOrListEntry(
                 primary_text=f"Toggle View",
                 image_path=Theme.settings(),

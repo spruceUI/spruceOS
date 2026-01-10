@@ -48,7 +48,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
     def launch_stock_os_menu(self,input):
         if(ControllerInput.A == input):
-            Device.launch_stock_os_menu()
+            Device.get_device().launch_stock_os_menu()
 
     def launch_controller_settings(self,input):
         if(ControllerInput.A == input):
@@ -187,7 +187,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
         )
 
-        option_list.extend(Device.get_extra_settings_options())
+        option_list.extend(Device.get_device().get_extra_settings_options())
 
         option_list.append(
             GridOrListEntry(
@@ -221,7 +221,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             contains_entry_for_device = False
             for name, option in menu_options.items():
                 devices = option.get('devices')
-                supported_device = not devices or Device.get_device_name() in devices
+                supported_device = not devices or Device.get_device().get_device_name() in devices
                 if(supported_device):
                     contains_entry_for_device = True
                     break

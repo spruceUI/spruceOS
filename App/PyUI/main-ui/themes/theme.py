@@ -65,8 +65,8 @@ class Theme():
             cls._daijisho_theme_index = None
             #PyUiLogger.get_logger().info(f"Using Miyoo style theme")
 
-        scale_width = Device.screen_width() / 640
-        scale_height = Device.screen_height() / 480
+        scale_width = Device.get_device().screen_width() / 640
+        scale_height = Device.get_device().screen_height() / 480
 
         if(scale_width > scale_height):
             cls.width_multiplier = ((scale_width-scale_height) / scale_height) + 1
@@ -83,28 +83,28 @@ class Theme():
 
     @classmethod
     def bgm_setting_changed(cls):
-        Device.get_audio_system().audio_stop_loop()
-        if(Device.get_system_config().play_bgm()):
+        Device.get_device().get_audio_system().audio_stop_loop()
+        if(Device.get_device().get_system_config().play_bgm()):
             bgm_wav = os.path.join(cls._path, "sound", "bgm.wav")
             bgm_mp3 = os.path.join(cls._path, "sound", "bgm.mp3")
-            Device.get_audio_system().audio_set_volume(Device.get_system_config().bgm_volume())
+            Device.get_device().get_audio_system().audio_set_volume(Device.get_device().get_system_config().bgm_volume())
             if os.path.exists(bgm_wav) and os.path.getsize(bgm_wav) > 0:
-                Device.get_audio_system().audio_loop_wav(bgm_wav)
+                Device.get_device().get_audio_system().audio_loop_wav(bgm_wav)
             elif os.path.exists(bgm_mp3) and os.path.getsize(bgm_mp3) > 0:
-                Device.get_audio_system().audio_loop_mp3(bgm_mp3)
+                Device.get_device().get_audio_system().audio_loop_mp3(bgm_mp3)
 
     @classmethod
     def button_press_sounds_changed(cls):
-        cls._play_button_press_sounds = Device.get_system_config().play_button_press_sound()
+        cls._play_button_press_sounds = Device.get_device().get_system_config().play_button_press_sound()
         button_press_wav = os.path.join(cls._path, "sound", "change.wav")
         if(os.path.exists(button_press_wav)) and os.path.getsize(button_press_wav) > 0:
             cls._button_press_wav = button_press_wav
-            Device.get_audio_system().load_wav(button_press_wav)
+            Device.get_device().get_audio_system().load_wav(button_press_wav)
 
     @classmethod
     def controller_button_pressed(cls, input):
         if(cls._play_button_press_sounds and cls._button_press_wav is not None):
-            Device.get_audio_system().audio_play_wav(cls._button_press_wav)
+            Device.get_device().get_audio_system().audio_play_wav(cls._button_press_wav)
 
     @classmethod
     def convert_theme_if_needed(cls, path, width, height):
@@ -121,7 +121,7 @@ class Theme():
         #qoi_converted = ThemePatcher.convert_to_qoi(path)
 
         if(resolution_converted): # or qoi_converted):
-            Device.exit_pyui()
+            Device.get_device().exit_pyui()
 
     @classmethod
     def load_defaults_so_user_can_see_at_least(cls, path):
@@ -165,7 +165,7 @@ class Theme():
             PyUiLogger.get_logger().error(
                 f"Unexpected error while loading {file_path}: {e}\n{traceback.format_exc()}"
             )
-            Device.get_system_config().delete_theme_entry()
+            Device.get_device().get_system_config().delete_theme_entry()
             raise
 
     @classmethod
@@ -325,7 +325,7 @@ class Theme():
         input_image = cls._resolve_png_path(cls._skin_folder,["background.png"])
         output_image = cls._resolve_png_path(cls._skin_folder,["bg-pop-menu-4.png"])
         PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
-        Device.get_image_utils().resize_image(input_image,
+        Device.get_device().get_image_utils().resize_image(input_image,
                                               output_image,
                                               320,
                                               240,
@@ -352,7 +352,7 @@ class Theme():
         input_image = cls._resolve_png_path(cls._skin_folder,["bg-list-s.png"])
         output_image = cls._resolve_png_path(cls._skin_folder,["bg-list-s2.png"])
         PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
-        Device.get_image_utils().resize_image(input_image,
+        Device.get_device().get_image_utils().resize_image(input_image,
                                               output_image,
                                               320,
                                               60,
@@ -1526,7 +1526,7 @@ class Theme():
     def check_and_create_asset(cls, output_image, input_image, target_width, target_height, target_alpha_channel):
         if(not os.path.exists(output_image)):
             PyUiLogger.get_logger().info(f"Creating resized {output_image} from {input_image}")      
-            Device.get_image_utils().resize_image(input_image,
+            Device.get_device().get_image_utils().resize_image(input_image,
                                                   output_image,
                                                   target_width,
                                                   target_height,
@@ -1561,8 +1561,8 @@ class Theme():
             PyUiLogger.get_logger().debug(f"cfw_theme_path is '{cfw_theme_path}'")
             path = os.path.join(cfw_theme_path, 
                                 cls._get_asset_folder(cfw_theme_path, "icons", 
-                                                      Device.screen_width(), 
-                                                      Device.screen_height()), 
+                                                      Device.get_device().screen_width(), 
+                                                      Device.get_device().screen_height()), 
                                 "app",icon_name)
 
             PyUiLogger.get_logger().debug(f"icon path resolved to '{path}'")

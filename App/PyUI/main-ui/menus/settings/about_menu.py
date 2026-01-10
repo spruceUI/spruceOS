@@ -14,7 +14,7 @@ class AboutMenu(settings_menu.SettingsMenu):
     def build_options_list(self):
         option_list = []
 
-        for text, value in Device.get_about_info_entries():
+        for text, value in Device.get_device().get_about_info_entries():
             option_list.append(
                 GridOrListEntry(
                     primary_text=text,

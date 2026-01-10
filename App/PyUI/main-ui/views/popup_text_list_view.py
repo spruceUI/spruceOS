@@ -24,14 +24,14 @@ class PopupTextListView(TextListView):
         self.include_index_text = False
 
 
-        self.view_x = int(Theme.pop_menu_x_offset() * Device.screen_width())
-        self.view_y = int(Theme.pop_menu_y_offset() * Device.screen_height())
+        self.view_x = int(Theme.pop_menu_x_offset() * Device.get_device().screen_width())
+        self.view_y = int(Theme.pop_menu_y_offset() * Device.get_device().screen_height())
         if(Theme.pop_menu_add_top_bar_height_to_y_offset()):
             self.view_y += Display.get_top_bar_height()
 
         self.starting_x_offset = self.view_x + Theme.pop_menu_text_padding()
         self.base_y_offset = self.view_y
-        Device.screen_width()//4
+        Device.get_device().screen_width()//4
         Display.render_image(
             image_path=Theme.menu_popup_bg_large(),
             x=self.view_x,

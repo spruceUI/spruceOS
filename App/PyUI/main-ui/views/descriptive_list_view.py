@@ -66,7 +66,7 @@ class DescriptiveListView(ListView):
                     self.selected_bg, 
                     0, 
                     row_offset_y,
-                    target_width=Device.screen_width(),
+                    target_width=Device.get_device().screen_width(),
                     target_height=self.each_entry_height,
                     resize_type= ResizeType.ZOOM
                     )
@@ -112,7 +112,7 @@ class DescriptiveListView(ListView):
                     value_text = "< " + value_text + " >"
                 Display.render_text(
                     value_text, 
-                    Device.screen_width() - Theme.get_descriptive_list_text_from_icon_offset(), 
+                    Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset(), 
                     row_offset_y + self.each_entry_height // 2, 
                     color, 
                     FontPurpose.DESCRIPTIVE_LIST_TITLE,

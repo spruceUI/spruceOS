@@ -17,13 +17,13 @@ class BluetoothMenu:
         self.bluetooth_scanner = BluetoothScanner()
 
     def bluetooth_adjust(self):
-        if Device.is_bluetooth_enabled():
-            Device.disable_bluetooth()
+        if Device.get_device().is_bluetooth_enabled():
+            Device.get_device().disable_bluetooth()
         else:
-            Device.enable_bluetooth()
+            Device.get_device().enable_bluetooth()
 
     def toggle_pairing_device(self, device):
-        self.bluetooth_scanner.connect_to_device(device.address)
+        self.bluetooth_scanner.connect_to_device(Device.get_device().address)
         Controller.new_bt_device_paired()
 
     def show_bluetooth_menu(self):
@@ -31,7 +31,7 @@ class BluetoothMenu:
         devices = []
         self.bluetooth_scanner.start()
         while(selected is not None):
-            bluetooth_enabled = Device.is_bluetooth_enabled()
+            bluetooth_enabled = Device.get_device().is_bluetooth_enabled()
             option_list = []
             option_list.append(
                 GridOrListEntry(
@@ -51,8 +51,8 @@ class BluetoothMenu:
                 for bt_device in devices:
                     option_list.append(
                         GridOrListEntry(
-                                primary_text=bt_device.name,
-                                value_text=bt_device.address,
+                                primary_text=bt_Device.get_device().name,
+                                value_text=bt_Device.get_device().address,
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,

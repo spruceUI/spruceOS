@@ -13,40 +13,40 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
     
     def brightness_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_brightness()
+            Device.get_device().lower_brightness()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_brightness()
+            Device.get_device().raise_brightness()
 
     def contrast_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_contrast()
+            Device.get_device().lower_contrast()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_contrast()
+            Device.get_device().raise_contrast()
 
     def saturation_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_saturation()
+            Device.get_device().lower_saturation()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_saturation()
+            Device.get_device().raise_saturation()
     
     def lumination_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_lumination()
+            Device.get_device().lower_lumination()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_lumination()
+            Device.get_device().raise_lumination()
     
     def hue_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_hue()
+            Device.get_device().lower_hue()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_hue()
+            Device.get_device().raise_hue()
 
     
     def hue_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_hue()
+            Device.get_device().lower_hue()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_hue()
+            Device.get_device().raise_hue()
 
     def adjust_rgb(self, input: ControllerInput, getter, setter):
         delta = 0
@@ -73,7 +73,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.backlight(),
-                        value_text="<    " + str(Device.lumination()) + "    >",
+                        value_text="<    " + str(Device.get_device().lumination()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -82,11 +82,11 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                     )
             )
 
-        if(Device.supports_brightness_calibration()):
+        if(Device.get_device().supports_brightness_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.brightness(),
-                            value_text="<    " + str(Device.get_brightness()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_brightness()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -94,11 +94,11 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                             value=self.brightness_adjust
                         )
                 )
-        if(Device.supports_contrast_calibration()):
+        if(Device.get_device().supports_contrast_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.contrast(),
-                            value_text="<    " + str(Device.get_contrast()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_contrast()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -106,11 +106,11 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                             value=self.contrast_adjust
                         )
                 )
-        if(Device.supports_saturation_calibration()):
+        if(Device.get_device().supports_saturation_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.saturation(),
-                            value_text="<    " + str(Device.get_saturation()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_saturation()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -119,11 +119,11 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                         )
                 )          
         
-        if(Device.supports_hue_calibration()):
+        if(Device.get_device().supports_hue_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.hue(),
-                            value_text="<    " + str(Device.get_hue()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_hue()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -132,38 +132,38 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                         )
                 )          
         
-        if(Device.supports_rgb_calibration()):
+        if(Device.get_device().supports_rgb_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.red(),
-                            value_text="<    " + str(Device.get_disp_red()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_disp_red()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=lambda input_value, getter=Device.get_disp_red, setter=Device.set_disp_red: self.adjust_rgb(input_value,getter,setter)
+                            value=lambda input_value, getter=Device.get_device().get_disp_red, setter=Device.get_device().set_disp_red: self.adjust_rgb(input_value,getter,setter)
                         )
                 )          
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.blue(),
-                            value_text="<    " + str(Device.get_disp_blue()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_disp_blue()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=lambda input_value, getter=Device.get_disp_blue, setter=Device.set_disp_blue: self.adjust_rgb(input_value,getter,setter)
+                            value=lambda input_value, getter=Device.get_device().get_disp_blue, setter=Device.get_device().set_disp_blue: self.adjust_rgb(input_value,getter,setter)
                         )
                 )          
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.green(),
-                            value_text="<    " + str(Device.get_disp_green()) + "    >",
+                            value_text="<    " + str(Device.get_device().get_disp_green()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=lambda input_value, getter=Device.get_disp_green, setter=Device.set_disp_green: self.adjust_rgb(input_value,getter,setter)
+                            value=lambda input_value, getter=Device.get_device().get_disp_green, setter=Device.get_device().set_disp_green: self.adjust_rgb(input_value,getter,setter)
                         )
                 )          
         

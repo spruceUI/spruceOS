@@ -33,7 +33,7 @@ class ThemeSelectionMenu:
             option_list.append(
                 option
             )
-            if(opt == Device.get_system_config().get_theme()):
+            if(opt == Device.get_device().get_system_config().get_theme()):
                 selected = Selection(option, None, index)
 
         #convert to text and desc and show the theme desc

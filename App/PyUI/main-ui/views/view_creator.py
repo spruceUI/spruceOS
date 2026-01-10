@@ -62,7 +62,7 @@ class ViewCreator:
         if(len(options) == 0):
             return EmptyView()
 
-        if(ViewType.POPUP == view_type and not Device.supports_popup_menu()):
+        if(ViewType.POPUP == view_type and not Device.get_device().supports_popup_menu()):
             view_type = ViewType.TEXT_ONLY
 
         match view_type:
@@ -86,8 +86,8 @@ class ViewCreator:
                 img_height = Theme.get_list_game_select_img_height()
 
                 if text_and_image_list_view_mode == "TEXT_LEFT_IMAGE_RIGHT":
-                    img_offset_x = Device.screen_width() - 10 - img_width // 2
-                    img_offset_y = ((Device.screen_height() - Display.get_top_bar_height() +
+                    img_offset_x = Device.get_device().screen_width() - 10 - img_width // 2
+                    img_offset_y = ((Device.get_device().screen_height() - Display.get_top_bar_height() +
                                      Display.get_bottom_bar_height()) // 2 +
                                     Display.get_top_bar_height() - Display.get_bottom_bar_height())
                     image_render = RenderMode.MIDDLE_CENTER_ALIGNED
@@ -96,7 +96,7 @@ class ViewCreator:
 
                 elif text_and_image_list_view_mode == "TEXT_RIGHT_IMAGE_LEFT":
                     img_offset_x = 10 + img_width // 2
-                    img_offset_y = ((Device.screen_height() - Display.get_top_bar_height() +
+                    img_offset_y = ((Device.get_device().screen_height() - Display.get_top_bar_height() +
                                      Display.get_bottom_bar_height()) // 2 +
                                     Display.get_top_bar_height() - Display.get_bottom_bar_height())
                     image_render = RenderMode.MIDDLE_CENTER_ALIGNED
@@ -104,7 +104,7 @@ class ViewCreator:
                     usable_height = None
 
                 elif text_and_image_list_view_mode == "TEXT_BELOW_IMAGE":
-                    img_offset_x = Device.screen_width() // 2
+                    img_offset_x = Device.get_device().screen_width() // 2
                     y_pad = 20  # TODO: get from somewhere
                     img_offset_y = Display.get_top_bar_height() + y_pad
                     image_render = RenderMode.TOP_CENTER_ALIGNED
@@ -112,16 +112,16 @@ class ViewCreator:
                     usable_height = ViewCreator.get_usable_height_for_text_above_or_below_image(img_height, y_pad)
 
                 elif text_and_image_list_view_mode == "TEXT_ABOVE_IMAGE":
-                    img_offset_x = Device.screen_width() // 2
+                    img_offset_x = Device.get_device().screen_width() // 2
                     y_pad = 20  # TODO: get from somewhere
-                    img_offset_y = Device.screen_height() - Display.get_bottom_bar_height() - y_pad
+                    img_offset_y = Device.get_device().screen_height() - Display.get_bottom_bar_height() - y_pad
                     image_render = RenderMode.BOTTOM_CENTER_ALIGNED
                     text_to_image_relationship = TextToImageRelationship.ABOVE_IMAGE
                     usable_height = ViewCreator.get_usable_height_for_text_above_or_below_image(img_height, y_pad)
 
                 elif text_and_image_list_view_mode == "TEXT_AROUND_LEFT_IMAGE":
                     img_offset_x = 10 + img_width // 2
-                    img_offset_y = ((Device.screen_height() - Display.get_top_bar_height() +
+                    img_offset_y = ((Device.get_device().screen_height() - Display.get_top_bar_height() +
                                      Display.get_bottom_bar_height()) // 2 +
                                     Display.get_top_bar_height() - Display.get_bottom_bar_height())
                     image_render = RenderMode.MIDDLE_CENTER_ALIGNED
@@ -129,8 +129,8 @@ class ViewCreator:
                     usable_height = None
 
                 elif text_and_image_list_view_mode == "TEXT_AROUND_RIGHT_IMAGE":
-                    img_offset_x = Device.screen_width() - 10 - img_width // 2
-                    img_offset_y = ((Device.screen_height() - Display.get_top_bar_height() +
+                    img_offset_x = Device.get_device().screen_width() - 10 - img_width // 2
+                    img_offset_y = ((Device.get_device().screen_height() - Display.get_top_bar_height() +
                                      Display.get_bottom_bar_height()) // 2 +
                                     Display.get_top_bar_height() - Display.get_bottom_bar_height())
                     image_render = RenderMode.MIDDLE_CENTER_ALIGNED

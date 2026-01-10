@@ -13,16 +13,16 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
 
     def calibrate_sticks(self,input):
         if(ControllerInput.A == input):
-            Device.calibrate_sticks()
+            Device.get_device().calibrate_sticks()
 
     def remap_buttons(self,input):
         if(ControllerInput.A == input):
-            Device.remap_buttons()
+            Device.get_device().remap_buttons()
 
     def build_options_list(self):
         option_list = []
         
-        if(Device.supports_analog_calibration()):
+        if(Device.get_device().supports_analog_calibration()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.calibrate_analog_sticks(),

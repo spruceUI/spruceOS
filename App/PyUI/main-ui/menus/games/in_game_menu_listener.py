@@ -72,9 +72,9 @@ class InGameMenuListener:
                             self.send_signal(game_process, signal.SIGSTOP)
 
                         PyUiLogger.get_logger().info(f"Taking snapshot before in-game menu")
-                        snapshot = Device.take_snapshot("/tmp/screenshot.png")
+                        snapshot = Device.get_device().take_snapshot("/tmp/screenshot.png")
                         PyUiLogger.get_logger().info(f"Finished Taking snapshot before in-game menu")
-                        Device.capture_framebuffer()
+                        Device.get_device().capture_framebuffer()
                         Display.reinitialize(snapshot)
                         
                         PyUiLogger.get_logger().debug(f"In game menu opened")
@@ -85,7 +85,7 @@ class InGameMenuListener:
                         PyUiLogger.get_logger().debug(f"In game menu opened closed. Continue Running ? {continue_running}")
 
                         Display.deinit_display()
-                        Device.restore_framebuffer()
+                        Device.get_device().restore_framebuffer()
                         if(continue_running):
                             self.send_signal(game_process, signal.SIGCONT)
                         else:

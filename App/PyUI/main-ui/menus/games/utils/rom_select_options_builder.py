@@ -22,7 +22,7 @@ class RomSelectOptionsBuilder:
     _user_doesnt_want_to_resize = False
 
     def __init__(self):
-        self.roms_path = Device.get_roms_dir()
+        self.roms_path = Device.get_device().get_roms_dir()
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
         
     
@@ -47,7 +47,7 @@ class RomSelectOptionsBuilder:
 
         if(prefer_savestate_screenshot):
             # Use RA savestate image
-            save_state_image_path = Device.get_save_state_image(rom_info)
+            save_state_image_path = Device.get_device().get_save_state_image(rom_info)
             if save_state_image_path is not None and os.path.exists(save_state_image_path):
                 return save_state_image_path
 
@@ -71,15 +71,15 @@ class RomSelectOptionsBuilder:
         root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
 
         qoi_path = os.path.join(root_dir, "Imgs", base_name + ".qoi")
-        if os.path.exists(qoi_path) and Device.supports_qoi():
+        if os.path.exists(qoi_path) and Device.get_device().supports_qoi():
             return qoi_path
 
         image_path = os.path.join(root_dir, "Imgs", base_name + ".png")
 
         if os.path.exists(image_path):
-            if(Device.supports_qoi()):
+            if(Device.get_device().supports_qoi()):
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
-                    if(Device.get_system_config().never_prompt_boxart_resize()):
+                    if(Device.get_device().get_system_config().never_prompt_boxart_resize()):
                         RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     else:
                         Display.display_message_multiline([f"Would you like to optimize boxart?",
@@ -93,13 +93,13 @@ class RomSelectOptionsBuilder:
                         if(input == ControllerInput.B):
                             RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                         elif(input == ControllerInput.X or input == ControllerInput.Y):
-                            Device.get_system_config().set_never_prompt_boxart_resize(True)
+                            Device.get_device().get_system_config().set_never_prompt_boxart_resize(True)
                             RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
 
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     BoxArtResizer.process_rom_folders()
-                if os.path.exists(qoi_path) and Device.supports_qoi():
+                if os.path.exists(qoi_path) and Device.get_device().supports_qoi():
                     return qoi_path
                 else:
                     return image_path
@@ -155,14 +155,14 @@ class RomSelectOptionsBuilder:
         
         if(not prefer_savestate_screenshot):
             # Use RA savestate image
-            save_state_image_path = Device.get_save_state_image(rom_info)
+            save_state_image_path = Device.get_device().get_save_state_image(rom_info)
             if save_state_image_path is not None and os.path.exists(save_state_image_path):
                 return save_state_image_path
         
         return None
 
     def _build_favorites_dict(self):
-        favorites = Device.parse_favorites()
+        favorites = Device.get_device().parse_favorites()
         favorite_paths = []
         for favorite in favorites:
             favorite_paths.append(str(Path(favorite.rom_path).resolve()))

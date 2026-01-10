@@ -27,7 +27,7 @@ class WiFiScanner:
         result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         if "Failed to connect to" in result.stderr:
             PyUiLogger.get_logger().error("wlan0 seems broken, restarting and retrying")
-            Device.wifi_error_detected()
+            Device.get_device().wifi_error_detected()
             time.sleep(15)
             ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         

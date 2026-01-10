@@ -24,13 +24,13 @@ class WifiMenu:
         self.on_screen_keyboard = OnScreenKeyboard()
 
     def wifi_adjust(self):
-        if Device.is_wifi_enabled():
-            Device.disable_wifi()
+        if Device.get_device().is_wifi_enabled():
+            Device.get_device().disable_wifi()
         else:
-            Device.enable_wifi()
+            Device.get_device().enable_wifi()
 
     def write_wpa_supplicant_conf(self, ssid, pw_line):
-        file_path = Device.get_wpa_supplicant_conf_path()
+        file_path = Device.get_device().get_wpa_supplicant_conf_path()
         # WPA configuration header
         header = """ctrl_interface=/var/run/wpa_supplicant
     update_config=1
@@ -99,7 +99,7 @@ class WifiMenu:
         connected_freq = 0
         connected_is_5ghz = False
         while(selected is not None):
-            wifi_enabled = Device.is_wifi_enabled()
+            wifi_enabled = Device.get_device().is_wifi_enabled()
             option_list = []
             option_list.append(
                 GridOrListEntry(
@@ -118,7 +118,7 @@ class WifiMenu:
                 Display.clear("WiFi")
                 Display.render_text(
                     text = "Scanning for Networks (~10s)",
-                    x = Device.screen_width() // 2,
+                    x = Device.get_device().screen_width() // 2,
                     y = Display.get_usable_screen_height() // 2,
                     color = Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
                     purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE,

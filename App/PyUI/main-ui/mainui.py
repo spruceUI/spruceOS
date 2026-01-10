@@ -112,14 +112,14 @@ def initialize_device(device, main_ui_mode):
 
 
 def background_startup():
-    FavoritesManager.initialize(Device.get_favorites_path())
-    RecentsManager.initialize(Device.get_recents_path())
+    FavoritesManager.initialize(Device.get_device().get_favorites_path())
+    RecentsManager.initialize(Device.get_device().get_recents_path())
     CustomGameSwitcherListManager.initialize()
-    CollectionsManager.initialize(Device.get_collections_path())
-    AppsManager.initialize(Device.get_apps_config_path())
+    CollectionsManager.initialize(Device.get_device().get_collections_path())
+    AppsManager.initialize(Device.get_device().get_apps_config_path())
 
 def start_background_threads():
-    startup_thread = threading.Thread(target=Device.perform_startup_tasks)
+    startup_thread = threading.Thread(target=Device.get_device().perform_startup_tasks)
     startup_thread.start()
 
     # Background favorites/recents init thread
@@ -191,7 +191,7 @@ def check_for_button_listener_mode(args):
 def check_for_startup_init_only(args):
     if(args.startupInitOnly):
         print("Running in startup init only mode")
-        Device.startup_init(include_wifi=False)
+        Device.get_device().startup_init(include_wifi=False)
         sys.exit(0)
 
 def main():
@@ -216,24 +216,24 @@ def main():
         with log_timing("Device initialization", PyUiLogger.get_logger()):    
             initialize_device(args.device, main_ui_mode)
 
-        PyUiState.init(Device.get_state_path())
+        PyUiState.init(Device.get_device().get_state_path())
 
-        selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_system_config().get_theme())
+        selected_theme = os.path.join(PyUiConfig.get("themeDir"), Device.get_device().get_system_config().get_theme())
         check_for_button_listener_mode(args)
         check_for_startup_init_only(args)
 
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
-            Theme.init(selected_theme, Device.screen_width(), Device.screen_height())
+            Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
 
         with log_timing("Display initialization", PyUiLogger.get_logger()):    
             Display.init()
         
         #2nd init is just to allow scaling if needed
-        Theme.convert_theme_if_needed(selected_theme, Device.screen_width(), Device.screen_height())
+        Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
         Language.init()
 
-        Device.perform_sdcard_ro_check()
+        Device.get_device().perform_sdcard_ro_check()
 
         check_for_msg_display(args)
         check_for_msg_display_realtime(args)

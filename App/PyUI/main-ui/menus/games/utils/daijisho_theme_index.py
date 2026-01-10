@@ -106,7 +106,7 @@ class DaijishoThemeIndex:
 
     def _convert_if_needed(self, filename):
         # Check if filename ends with .jpg or .jpeg (case-insensitive)
-        if(Device.supports_qoi()):
+        if(Device.get_device().supports_qoi()):
             if filename.lower().endswith((".jpg", ".jpeg")):
                 jpg_path = os.path.join(self.foldername, filename)
                 qoi_filename = os.path.splitext(filename)[0] + ".qoi"
@@ -117,7 +117,7 @@ class DaijishoThemeIndex:
                 if not os.path.exists(qoi_path):
                     PyUiLogger.get_logger().info(f"Converting {jpg_path} to {qoi_path}")
                     try:
-                        Device.get_image_utils().convert_from_jpg_to_qoi(jpg_path, qoi_path)
+                        Device.get_device().get_image_utils().convert_from_jpg_to_qoi(jpg_path, qoi_path)
                     except Exception as e:
                         PyUiLogger.get_logger().warning(
                             f"Failed to convert {jpg_path} to PNG: {e}"
@@ -136,7 +136,7 @@ class DaijishoThemeIndex:
                 if not os.path.exists(png_path):
                     PyUiLogger.get_logger().info(f"Converting {jpg_path} to {png_path}")
                     try:
-                        Device.get_image_utils().convert_from_jpg_to_png(jpg_path, png_path)
+                        Device.get_device().get_image_utils().convert_from_jpg_to_png(jpg_path, png_path)
                     except Exception as e:
                         PyUiLogger.get_logger().warning(
                             f"Failed to convert {jpg_path} to PNG: {e}"

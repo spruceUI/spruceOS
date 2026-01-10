@@ -128,7 +128,7 @@ class GameConfigMenu:
             if(not os.path.isfile(app_path)):
                 app_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, launch_option)
 
-            Device.run_app(os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name), app_path + " \"" +miyoo_game_path +"\"")
+            Device.get_device().run_app(os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name), app_path + " \"" +miyoo_game_path +"\"")
             # TODO Once we remove the display_kill and popups from launch.sh we can remove this
             # For a good speedup
             Display.reinitialize()
@@ -170,7 +170,7 @@ class GameConfigMenu:
         while(selected is not None):
 
             config_list = []
-            if(not Device.get_system_config().simple_mode_enabled()):
+            if(not Device.get_device().get_system_config().simple_mode_enabled()):
                 for config_option in self.game_system.game_system_config.get_launchlist():
                     config_list.append(
                         GridOrListEntry(
@@ -188,12 +188,12 @@ class GameConfigMenu:
 
             menu_options = self.game_system.game_system_config.get_menu_options()
 
-            if(not Device.get_system_config().simple_mode_enabled()):
+            if(not Device.get_device().get_system_config().simple_mode_enabled()):
 
                 overridable_entries = []
                 for name, option in menu_options.items():
                     devices = option.get("devices")
-                    supported_device = not devices or Device.get_device_name() in devices
+                    supported_device = not devices or Device.get_device().get_device_name() in devices
                     if(supported_device):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
                         display_name = option.get('display')
@@ -231,7 +231,7 @@ class GameConfigMenu:
                             )
                         )
 
-            if(not Device.get_system_config().simple_mode_enabled()):
+            if(not Device.get_device().get_system_config().simple_mode_enabled()):
                 config_list.append(
                     GridOrListEntry(
                         primary_text=Language.delete_rom(),

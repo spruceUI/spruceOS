@@ -103,7 +103,7 @@ class MiyooFlip(MiyooDevice):
 
         super().__init__()
 
-    @property
+
     def power_off_cmd(self):
         return "poweroff"
 
@@ -248,23 +248,23 @@ class MiyooFlip(MiyooDevice):
             PyUiLogger.get_logger().error(f"An error occurred: {e}")
             return False
 
-    @property
+
     def screen_width(self):
         return 640
 
-    @property
+
     def screen_height(self):
         return 480
     
     
-    @property
+
     def output_screen_width(self):
         if(self.should_scale_screen()):
             return 1920
         else:
             return 640
         
-    @property
+
     def output_screen_height(self):
         if(self.should_scale_screen()):
             return 1080
@@ -364,7 +364,7 @@ class MiyooFlip(MiyooDevice):
     def get_bluetooth_scanner(self):
         return BluetoothScanner()
     
-    @property
+
     def reboot_cmd(self):
         return "reboot"
 
@@ -433,8 +433,8 @@ class MiyooFlip(MiyooDevice):
     
     def read_volume(self):
         try:
-            current_mixer = self.get_current_mixer_value(MiyooDevice.OUTPUT_MIXER)
-            if(MiyooDevice.SOUND_DISABLED == current_mixer):
+            current_mixer = self.get_current_mixer_value(MiyooDevice.get_device().OUTPUT_MIXER)
+            if(MiyooDevice.get_device().SOUND_DISABLED == current_mixer):
                 return 0
             else:
                 output = subprocess.check_output(

@@ -74,6 +74,6 @@ class KeyWatcher:
             if(code is not None):
                if(time.time() - last_recorded_time > 0.1):
                     from controller.controller import Controller
-                    controller_input = Device.map_key(code)
+                    controller_input = Device.get_device().map_key(code)
                     Controller.non_sdl_input_event(controller_input, is_key_down)
                     last_recorded_time = time.time()

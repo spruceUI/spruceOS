@@ -47,11 +47,11 @@ class TrimUIDevice(DeviceCommon):
     def restore_framebuffer(self):
         pass
     
-    @property
+
     def power_off_cmd(self):
         return "poweroff"
     
-    @property
+
     def reboot_cmd(self):
         return "reboot"
         

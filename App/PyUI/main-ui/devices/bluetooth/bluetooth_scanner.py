@@ -119,7 +119,7 @@ class BluetoothScanner:
         from controller.controller import Controller
         PyUiLogger.get_logger().info(f"Attempting to connect to {device_address}")
         Display.clear("Bluetooth Connection")
-        Display.render_text_centered(f"Attempting to connect to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.render_text_centered(f"Attempting to connect to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
 
         try:
@@ -173,7 +173,7 @@ class BluetoothScanner:
             if "Connection successful" in all_output:
                 PyUiLogger.get_logger().info(f"Successfully connected to {device_address}")
                 Display.clear("Bluetooth Connection")
-                Display.render_text_centered(f"Successfully connected to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_text_centered(f"Successfully connected to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
                 Display.present()
                 while(not Controller.get_input()):
                     pass
@@ -181,7 +181,7 @@ class BluetoothScanner:
             else:
                 PyUiLogger.get_logger().info(f"Failed to connect to {device_address}. Output:\n{all_output}")
                 Display.clear("Bluetooth Connection")
-                Display.render_text_centered(f"Failed to connect to {device_address}",Device.screen_width()//2, Device.screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_text_centered(f"Failed to connect to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
                 Display.present()
                 while(not Controller.get_input()):
                     pass

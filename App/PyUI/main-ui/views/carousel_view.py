@@ -251,7 +251,7 @@ class CarouselView(View):
 
         
         #TODO Get hard coded values for padding from +
-        usable_width = Device.screen_width()
+        usable_width = Device.get_device().screen_width()
         visible_options, selected_visible_index = self.get_visible_options()
 
         if(self.fixed_width is None):
@@ -272,7 +272,7 @@ class CarouselView(View):
             x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
             # Step 2: center the middle image
-            screen_center = Device.screen_width() // 2
+            screen_center = Device.get_device().screen_width() // 2
             mid = len(x_offsets) // 2
             middle_width = widths[mid]
 
@@ -317,8 +317,8 @@ class CarouselView(View):
             overlay = Theme.get_overlay_for_img(selected.get_image_path())
             if(overlay is not None):
                 Display.render_image(overlay,
-                                     Device.screen_width()//2,
-                                     Device.screen_height()//2,
+                                     Device.get_device().screen_width()//2,
+                                     Device.get_device().screen_height()//2,
                                      RenderMode.MIDDLE_CENTER_ALIGNED)
 
         self.prev_selected = self.selected
@@ -393,10 +393,10 @@ class CarouselView(View):
                     self.adjust_selected(self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L2:
                 self.skip_next_animation = True
-                self.adjust_selected(-1* self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+                self.adjust_selected(-1* self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
             elif Controller.last_input() == ControllerInput.R2:
                 self.skip_next_animation = True
-                self.adjust_selected(self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+                self.adjust_selected(self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
             elif Controller.last_input() in select_controller_inputs:
                 Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
@@ -416,7 +416,7 @@ class CarouselView(View):
     def animate_transition(self):
         if(not self.skip_next_animation):
             animation_frames = 10 - self.animated_count
-            if Device.get_system_config().animations_enabled() and animation_frames > 1:
+            if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
                 render_mode = self.get_img_render_mode()
                 #frame_duration = 1 / 60.0  # 60 FPS
                 #last_frame_time = 0

@@ -16,7 +16,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def set_timezone(self, input):
         if (ControllerInput.A == input):
-            Device.prompt_timezone_update()
+            Device.get_device().prompt_timezone_update()
 
     def change_24_hour_clock_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
@@ -51,7 +51,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             )
         )
 
-        if(Device.supports_timezone_setting()):
+        if(Device.get_device().supports_timezone_setting()):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.set_timezone(),
@@ -64,7 +64,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 )
             )
         else:
-            PyUiLogger.getLogger().info("Timezone setting not supported on this device.")
+            PyUiLogger.getLogger().info("Timezone setting not supported on this Device.get_device().")
 
         option_list.append(
             GridOrListEntry(

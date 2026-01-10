@@ -67,7 +67,7 @@ class ThemePatcher():
         if now - cls._last_display_time >= 1.0:
             Display.display_message(f"Converting {os.path.basename(png_path)}")
             cls._last_display_time = now
-        image_utils = Device.get_image_utils()
+        image_utils = Device.get_device().get_image_utils()
         image_utils.convert_from_png_to_qoi(png_path)
 
 
@@ -170,7 +170,7 @@ class ThemePatcher():
         if os.path.exists(output_file):
             PyUiLogger().get_logger().info(f"Scaled version of {output_file} already exists, skipping scaling.")
         else:
-            image_utils = Device.get_image_utils()
+            image_utils = Device.get_device().get_image_utils()
             try:
                 img_width ,img_height = image_utils.get_image_dimensions(input_file)
                 new_width = int(img_width * scale)

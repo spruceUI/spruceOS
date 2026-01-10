@@ -44,13 +44,13 @@ class TopBar:
         w, h = Display.render_text(Language.settings(),x_offset, center_of_bar,  settings_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
         x_offset += w +text_padding
 
-        battery_percent = Device.get_battery_percent()
-        charging = Device.get_charge_status()
+        battery_percent = Device.get_device().get_battery_percent()
+        charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
         img_padding = 10
 
         #Battery Text
-        x_offset = Device.screen_width() - img_padding
+        x_offset = Device.get_device().screen_width() - img_padding
         if(Theme.display_battery_percent()):
             w, h = Display.render_text(str(battery_percent)+"%",x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
             x_offset = x_offset - w - img_padding
@@ -62,14 +62,14 @@ class TopBar:
             x_offset = x_offset - w - img_padding
 
         #Wifi
-        if(Device.supports_wifi() and Device.is_wifi_enabled()):
-            wifi_status = Device.get_wifi_status()
+        if(Device.get_device().supports_wifi() and Device.get_device().is_wifi_enabled()):
+            wifi_status = Device.get_device().get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
             w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
             x_offset = x_offset - w - img_padding
  
         #Volume
-        if(time.time() - self.volume_changed_time < 3 and Device.supports_volume()):
+        if(time.time() - self.volume_changed_time < 3 and Device.get_device().supports_volume()):
             if(Theme.display_volume_numbers()):
                 w, h = Display.render_text(str(self.volume),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w  #Don't padd the number from the icon
@@ -81,8 +81,8 @@ class TopBar:
         from display.display import Display
         self.title = title
         top_bar_bg = Theme.get_title_bar_bg()
-        battery_percent = Device.get_battery_percent()
-        charging = Device.get_charge_status()
+        battery_percent = Device.get_device().get_battery_percent()
+        charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
         #TODO Improve padding to not just be 10
         self.top_bar_w, self.top_bar_h = Display.render_image(top_bar_bg,0,0)
@@ -92,8 +92,8 @@ class TopBar:
             self.top_bar_h = max(self.top_bar_h, text_h)
 
         wifi_icon = None
-        if(Device.supports_wifi() and Device.is_wifi_enabled()):
-            wifi_status = Device.get_wifi_status()
+        if(Device.get_device().supports_wifi() and Device.get_device().is_wifi_enabled()):
+            wifi_status = Device.get_device().get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
             wifi_w, wifi_h = Display.get_image_dimensions(wifi_icon)
             self.top_bar_w = max(self.top_bar_w, wifi_w)
@@ -107,7 +107,7 @@ class TopBar:
         center_of_bar = self.top_bar_h //2
 
         #TODO Allow specifying which side which icon is on    
-        x_offset = Device.screen_width() - padding*2
+        x_offset = Device.get_device().screen_width() - padding*2
         if(not hide_top_bar_icons):
             if(Theme.display_battery_percent()):
                 #Battery Text
@@ -139,7 +139,7 @@ class TopBar:
 
         if(Theme.show_top_bar_text()):
             Display.render_text(title,
-                                int(Device.screen_width()/2), 
+                                int(Device.get_device().screen_width()/2), 
                                 center_of_bar, 
                                 Theme.text_color(FontPurpose.TOP_BAR_TEXT), 
                                 FontPurpose.TOP_BAR_TEXT, 
