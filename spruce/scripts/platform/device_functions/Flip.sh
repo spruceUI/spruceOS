@@ -205,9 +205,11 @@ get_hw_epoch() {
 }
 
 
-device_enter_sleep() {
+# -----------------------------
+# Save sleep timing info
+# -----------------------------
+save_sleep_info() {
     IDLE_TIMEOUT="$1"
-    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
     START_EPOCH="$(get_hw_epoch)"
     [ -z "$START_EPOCH" ] && {
@@ -217,26 +219,62 @@ device_enter_sleep() {
 
     TARGET_EPOCH=$(( START_EPOCH + IDLE_TIMEOUT ))
 
-    # Persist transient timing data
     cat >"$SLEEP_TIMER_FILE" <<EOF
 START_EPOCH=$START_EPOCH
 TIMEOUT=$IDLE_TIMEOUT
 TARGET_EPOCH=$TARGET_EPOCH
 EOF
-    sync
 
-    # Program RTC wakealarm (still required for wakeup)
+    sync
+    return 0
+}
+
+# -----------------------------
+# Program the RTC wakealarm
+# -----------------------------
+set_wake_alarm() {
+    IDLE_TIMEOUT="$1"
+
     if [ -e "$WAKE_ALARM_PATH" ]; then
-        echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH" 2>/dev/null \
-            || log_message "WARNING: Failed to write WAKE_ALARM_PATH"
+        # Clear previous alarm first (important on some BSP kernels)
+        echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+
+        # Clamp to at least 1 second
+        [ "$IDLE_TIMEOUT" -lt 1 ] && IDLE_TIMEOUT=1
+
+        if ! echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH" 2>/dev/null; then
+            log_message "WARNING: Failed to write WAKE_ALARM_PATH"
+            return 1
+        fi
+
+        log_message "set_wake_alarm: Wakealarm set for +$IDLE_TIMEOUT seconds"
     else
         log_message "WARNING: WAKE_ALARM_PATH missing, relying on external wake"
     fi
 
-    # Enter sleep
+    return 0
+}
+
+# -----------------------------
+# Trigger the device sleep
+# -----------------------------
+trigger_device_sleep() {
     echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
 }
+
+# -----------------------------
+# Main entry point
+# -----------------------------
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" || return 1
+    trigger_device_sleep
+}
+
 
 device_exit_sleep() {
     fix_sleep_sound_bug
@@ -267,60 +305,48 @@ device_woke_via_timer() {
         echo "false"
     fi
 }
-
-# Try to account for the alarm being cleared by something in miyoo's
-# software
-device_continue_sleep() {
-    # Must have existing sleep state
-    [ ! -f "$SLEEP_TIMER_FILE" ] && {
-        log_message "device_continue_sleep: No sleep state file"
-        return 1
-    }
-
+# -----------------------------
+# Compute remaining time for sleep
+# -----------------------------
+compute_remaining_sleep_time() {
     # Load saved timing
+    [ ! -f "$SLEEP_TIMER_FILE" ] && return 1
     . "$SLEEP_TIMER_FILE"
 
     NOW_EPOCH="$(get_hw_epoch)"
-    [ -z "$NOW_EPOCH" ] && {
-        log_message "device_continue_sleep: Unable to read hwclock"
-        return 1
-    }
+    [ -z "$NOW_EPOCH" ] && return 1
 
     REMAINING=$(( TARGET_EPOCH - NOW_EPOCH ))
+    # Clamp to at least 1 second if positive
+    [ "$REMAINING" -gt 0 ] && [ "$REMAINING" -lt 1 ] && REMAINING=1
 
-    # Already expired or zero → nothing to re-arm
+    echo "$REMAINING"
+    return 0
+}
+
+# -----------------------------
+# Device continue sleep
+# -----------------------------
+device_continue_sleep() {
+    log_message "device_continue_sleep: Checking remaining sleep time"
+
+    REMAINING="$(compute_remaining_sleep_time)"
+    if [ $? -ne 0 ] || [ -z "$REMAINING" ]; then
+        log_message "device_continue_sleep: No valid sleep state or hwclock read failed"
+        return 1
+    fi
+
     if [ "$REMAINING" -le 0 ]; then
         log_message "device_continue_sleep: Timer already expired"
         return 0
     fi
 
-    # Best-effort reprogram RTC alarm
-    if [ -e "$WAKE_ALARM_PATH" ]; then
-        # Clear old alarm first (important on Miyoo/BSP kernels)
-        echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    # Re-arm the wakealarm using earlier function
+    set_wake_alarm "$REMAINING" || return 1
 
-        # Clamp to at least 1 second
-        if [ "$REMAINING" -lt 1 ]; then
-            REMAINING=1
-        fi
-
-        # Re-arm
-        if ! echo "+$REMAINING" >"$WAKE_ALARM_PATH" 2>/dev/null; then
-            log_message "device_continue_sleep: Failed to write WAKE_ALARM_PATH (value: $REMAINING)"
-            return 1
-        fi
-
-        log_message "device_continue_sleep: Re-armed wakealarm for ${REMAINING}s"
-        echo deep >/sys/power/mem_sleep
-        echo -n mem >/sys/power/state
-
-    else
-        log_message "device_continue_sleep: WAKE_ALARM_PATH missing"
-        return 1
-    fi
+    # Go back to sleep
+    trigger_device_sleep
 }
-
-
 
 device_lid_sensor_ready() {
     [ -e "/sys/devices/platform/hall-mh248/hallvalue" ]
