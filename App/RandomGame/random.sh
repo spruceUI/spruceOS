@@ -92,7 +92,7 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd="\"${EMU_DIR}/.emu_setup/standard_launch.sh\" \"${SELECTED_GAME}\""
+cmd="\"/mnt/SDCARD/spruce/scripts/emu/standard_launch.sh\" \"${SELECTED_GAME}\""
 echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"
 
