@@ -140,8 +140,9 @@ trigger_sleep() {
         fi
     else
 
-        while [ "$(device_lid_open)" = "0" ]; do
-            log_message "Lid is closed, but not in sleep -- Retrigger sleep"            
+        # TODO account for no timer set as well here
+        while [ "$(device_lid_open)" = "0" ] && [ "$(device_woke_via_timer)" != "true" ]; do
+            log_message "Lid is closed, but not in sleep -- Retrigger sleep"
             device_continue_sleep
         done
 
