@@ -138,14 +138,6 @@ enter_sleep() {
     log_message "Missing enter_sleep function"
 }
 
-reset_playback_pack() {
-    log_message "Missing reset_playback_pack function"
-}
-
-set_playback_path() {
-    log_message "Missing set_playback_path function"
-}
-
 run_mixer_watchdog() {
     log_message "Missing run_mixer_watchdog function"
 }
