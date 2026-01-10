@@ -139,12 +139,16 @@ trigger_sleep() {
             done
         fi
     else
+    
+        while [ "$(device_lid_open)" = "0" ]; do
+            if [ "$IDLE_TIMEOUT" -gt 0 ] && [ "$(device_woke_via_timer)" = "true" ]; then
+                break
+            fi
 
-        # TODO account for no timer set as well here
-        while [ "$(device_lid_open)" = "0" ] && [ "$(device_woke_via_timer)" != "true" ]; do
             log_message "Lid is closed, but not in sleep -- Retrigger sleep"
             device_continue_sleep
         done
+
 
         if [ "$(device_woke_via_timer)" = "true" ]; then
             log_message "Idle time exceeded, triggering poweroff"
