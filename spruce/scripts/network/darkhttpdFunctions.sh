@@ -9,13 +9,12 @@ WWW_DIR=/mnt/SDCARD/spruce/www
 start_darkhttpd_process() {
   if pgrep "darkhttpd" >/dev/null; then
     log_message "darkhttpd: Already running, skipping start" -v
-    return
+    return 1
   fi
 
-  wifi=$(grep '"wifi"' $SYSTEM_JSON | awk -F ':' '{print $2}' | tr -d ' ,')
-  if [ "$wifi" -eq 0 ]; then
+  if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
     log_message "darkhttpd: WiFi is off, skipping start" -v
-    return
+    return 2
   fi
 
   samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
@@ -29,11 +28,12 @@ start_darkhttpd_process() {
      [ "$ssh_enabled" = "False" ] && \
      [ "$sftpgo_enabled" = "False" ]; then
     log_message "darkhttpd: No network services enabled, skipping start" -v
-    return 1
+    return 4
   fi
 
   log_message "darkhttpd: Starting Darkhttpd..."
   darkhttpd $WWW_DIR >/mnt/SDCARD/Saves/spruce/serve.log 2>&1 &
+  return 0
 }
 
 stop_darkhttpd_process() {
