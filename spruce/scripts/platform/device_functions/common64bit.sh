@@ -23,10 +23,6 @@ get_sftp_service_name() {
     echo "sftpgo"
 }
 
-set_dark_httpd_dir() {
-    DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
-}
-
 set_SMB_DIR(){
    SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
 }

@@ -17,10 +17,6 @@ set_event_arg_for_idlemon() {
     log_message "TODO event arg for miyoo mini?" -v
 }
 
-set_dark_httpd_dir() {
-    DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
-}
-
 # Why can't these just all come off the path? / Why do they need special LD LIBRARY PATHS?
 
 set_SMB_DIR(){

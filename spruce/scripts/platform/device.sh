@@ -202,10 +202,6 @@ set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
 }
 
-set_dark_httpd_dir() {
-    log_message "Missing set_dark_httpd_dir function"
-}
-
 set_SMB_DIR(){
     log_message "Missing set_SMB_DIR function"
 }

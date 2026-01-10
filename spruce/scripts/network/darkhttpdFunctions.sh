@@ -2,7 +2,11 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-set_dark_httpd_dir
+if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin/darkhttpd
+else # aarch64
+  DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
+fi
 
 WWW_DIR=/mnt/SDCARD/spruce/www
 
@@ -27,11 +31,11 @@ start_darkhttpd_process() {
 
   # Check if at least one network service is enabled
   if [ "$syncthing_enabled" = "False" ] && \
-     [ "$sftpgo_enabled" = "False" ] && \
+     [ "$samba_enabled" = "False" ] && \
      [ "$ssh_enabled" = "False" ] && \
      [ "$sftpgo_enabled" = "False" ]; then
     log_message "darkhttpd: No network services enabled, skipping start" -v
-    return
+    return 1
   fi
 
   log_message "darkhttpd: Starting Darkhttpd..."
