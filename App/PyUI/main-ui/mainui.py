@@ -96,7 +96,7 @@ def initialize_device(device, main_ui_mode):
         from devices.trimui.trim_ui_smart_pro_s import TrimUISmartProS
         Device.init(TrimUISmartProS(device,main_ui_mode))
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
-        from devices.miyoo.flip.miyoo_a30 import MiyooA30
+        from devices.miyoo.a30.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
     elif "ANBERNIC_RG34XXSP" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
