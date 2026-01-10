@@ -26,7 +26,20 @@ enable_or_disable_wifi() {
         rm -f /tmp/wifioff          2>/dev/null
         touch /tmp/wifion           2>/dev/null
         ifconfig wlan0 up           2>/dev/null
-        pgrep -f "wpa_supplicant.*wlan0" >/dev/null || wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+
+        # check if WPA supplicant needs to be started or restarted
+        WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
+        if [ -n "$WPA_PID" ]; then
+            WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
+            if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+                log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
+                kill -9 "$WPA_PID" 2>/dev/null
+                sleep 1
+                wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            fi
+        else    # wpa_supplicant was not running at all, so start it
+            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        fi
         pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
         /mnt/SDCARD/spruce/scripts/networkservices.sh &
         log_message "WiFi turned on"
