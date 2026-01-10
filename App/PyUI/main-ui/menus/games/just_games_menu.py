@@ -17,7 +17,7 @@ class JustGamesMenu(RomsMenuCommon):
         
     def _get_rom_list(self) -> list[GridOrListEntry]:
         roms = []
-        game_utils = Device.get_game_system_utils()
+        game_utils = Device.get_device().get_game_system_utils()
 
         def _collect_roms_recursively(game_system, directory=None):
 
@@ -55,4 +55,4 @@ class JustGamesMenu(RomsMenuCommon):
         return self._run_rom_selection("Game List")
 
     def prefer_savestate_screenshot(self):
-        return Device.get_system_config().use_savestate_screenshots(GAME_SELECT)
+        return Device.get_device().get_system_config().use_savestate_screenshots(GAME_SELECT)

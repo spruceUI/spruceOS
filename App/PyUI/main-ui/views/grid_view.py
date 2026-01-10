@@ -61,7 +61,7 @@ class GridView(View):
         self.missing_image_path = missing_image_path
         # TODO Get hard coded values for padding from theme
         self.x_pad = 10
-        self.usable_width = Device.screen_width() - (2 * self.x_pad)
+        self.usable_width = Device.get_device().screen_width() - (2 * self.x_pad)
         self.icon_width = self.usable_width / self.cols  # Initial icon width
         self.set_bg_offset_to_image_offset = Theme.grid_bg_offset_to_image_offset()
 
@@ -220,7 +220,7 @@ class GridView(View):
 
         if (self.show_grid_text):
             if(self.rows == 1) : 
-                y_text = int(Device.screen_height() * 310/480) + Theme.single_row_grid_text_y_offset()
+                y_text = int(Device.get_device().screen_height() * 310/480) + Theme.single_row_grid_text_y_offset()
             else:
                 y_text = bottom_row_y - text_height + Theme.multi_row_grid_text_y_offset()
                 
@@ -285,9 +285,9 @@ class GridView(View):
             elif Controller.last_input() == ControllerInput.R1:
                 self.adjust_selected(self.cols * self.rows, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L2:
-                self.adjust_selected(-1 * self.cols * self.rows, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+                self.adjust_selected(-1 * self.cols * self.rows, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
             elif Controller.last_input() == ControllerInput.R2:
-                self.adjust_selected(self.cols * self.rows, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_system_config().get_skip_by_letter())
+                self.adjust_selected(self.cols * self.rows, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
             if Controller.last_input() == ControllerInput.DPAD_UP:
 
                 if (self.selected == 0):
@@ -324,7 +324,7 @@ class GridView(View):
     def animate_transition(self):
         animation_frames = 10 - self.animated_count*2
 
-        if Device.get_system_config().animations_enabled() and animation_frames > 1:
+        if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
             animation_frames = 10
             frame_duration = 1 / 60.0  # 60 FPS

@@ -35,8 +35,8 @@ class OnScreenKeyboard:
         self.selected_row_index = 0
         self.selected_key_index = 0
         self.entered_text = starting_text
-        key_w = Device.screen_width() // 16 #13 keys, set to 16 for spacing
-        key_w_offset = Device.screen_width() // 13
+        key_w = Device.get_device().screen_width() // 16 #13 keys, set to 16 for spacing
+        key_w_offset = Device.get_device().screen_width() // 13
         key_h = key_w
 
         while running:
@@ -46,8 +46,8 @@ class OnScreenKeyboard:
                 x = 0,
                 y = Display.get_top_bar_height(), 
                 render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                target_width=Device.screen_width(), 
-                target_height=Device.screen_height())
+                target_width=Device.get_device().screen_width(), 
+                target_height=Device.get_device().screen_height())
 
             next_y = Display.get_top_bar_height()
             entry_bar_text_x_offset = 10 #TODO get somewhere better

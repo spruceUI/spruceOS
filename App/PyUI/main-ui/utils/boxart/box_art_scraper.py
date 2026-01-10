@@ -38,12 +38,12 @@ class BoxArtScraper:
 
     def __init__(self):
         self.base_dir = "/mnt/SDCARD"
-        self.roms_dir = Device.get_roms_dir()
+        self.roms_dir = Device.get_device().get_roms_dir()
         script_dir = Path(__file__).resolve().parent.parent.parent.parent
         self.db_dir = os.path.join(script_dir,"boxartdb")
         PyUiLogger.get_logger().info(f"BoxArtScraper: Using boxart db directory at {self.db_dir}")
-        self.game_system_utils = Device.get_game_system_utils()
-        self.preferred_region = Device.get_system_config().get_preferred_region()
+        self.game_system_utils = Device.get_device().get_game_system_utils()
+        self.preferred_region = Device.get_device().get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)
     # ==========================================================
     # Helper Methods
@@ -428,7 +428,7 @@ class BoxArtScraper:
         return tasks
 
     def check_wifi(self):
-        if not Device.is_wifi_enabled():
+        if not Device.get_device().is_wifi_enabled():
             Display.display_message("Wifi must be connected", 2000)
             return False
 

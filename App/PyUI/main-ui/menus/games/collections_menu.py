@@ -24,7 +24,7 @@ class CollectionsMenu(RomsMenuCommon):
             for collection in collections:
                 rom_info = RomInfo(None, collection, is_collection=True)
                 # Get the base filename without extension
-                img_path = os.path.join(Device.get_collections_path(),"Imgs",collection+".png")
+                img_path = os.path.join(Device.get_device().get_collections_path(),"Imgs",collection+".png")
 
                 rom_list.append(
                     GridOrListEntry(
@@ -74,4 +74,4 @@ class CollectionsMenu(RomsMenuCommon):
             return None
         
     def prefer_savestate_screenshot(self):
-        return Device.get_system_config().use_savestate_screenshots(COLLECTIONS)
+        return Device.get_device().get_system_config().use_savestate_screenshots(COLLECTIONS)

@@ -29,7 +29,7 @@ class RomsMenuCommon(ABC):
         self.in_game_menu_listener = InGameMenuListener()
         self.popup_menu = GameSelectMenuPopup()
         
-        self.support_only_game_launching = Device.get_system_config().game_selection_only_mode_enabled()
+        self.support_only_game_launching = Device.get_device().get_system_config().game_selection_only_mode_enabled()
 
     def _remove_extension(self,file_name):
         return os.path.splitext(file_name)[0]
@@ -306,7 +306,7 @@ class RomsMenuCommon(ABC):
         #recents is handled one level up to account for launched_via_special_case
         Display.deinit_display()
 
-        game_thread: subprocess.Popen = Device.run_game(game_path)
+        game_thread: subprocess.Popen = Device.get_device().run_game(game_path)
         if (game_thread is not None):
             self.in_game_menu_listener.game_launched(
                 game_thread, game_path)

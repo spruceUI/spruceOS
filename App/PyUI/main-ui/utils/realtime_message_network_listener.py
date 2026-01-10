@@ -183,10 +183,10 @@ class RealtimeMessageNetworkListener:
 
                     Display.render_image(
                         image_path,
-                        Device.screen_width() // 2,
+                        Device.get_device().screen_width() // 2,
                         image_y,
                         RenderMode.TOP_CENTER_ALIGNED,
-                        Device.screen_width(),
+                        Device.get_device().screen_width(),
                         image_height
                     )
 
@@ -205,10 +205,10 @@ class RealtimeMessageNetworkListener:
                     percentage = args[1]
                     self.logger.info(f"Rendering text: {text} w/ perc(entage bar: {percentage}%")
                     Display.clear("")
-                    Display.write_message_multiline(Display.split_message(text, FontPurpose.LIST,clip_to_device_width=True), Device.screen_height()*0.35)
-                    Display.write_message_multiline([self._progress_bar(percentage)], (Device.screen_height()*0.6))                    
+                    Display.write_message_multiline(Display.split_message(text, FontPurpose.LIST,clip_to_device_width=True), Device.get_device().screen_height()*0.35)
+                    Display.write_message_multiline([self._progress_bar(percentage)], (Device.get_device().screen_height()*0.6))                    
                     if(len(args) > 2):
-                        Display.write_message_multiline(Display.split_message(args[2], FontPurpose.LIST,clip_to_device_width=True), Device.screen_height()*0.7)
+                        Display.write_message_multiline(Display.split_message(args[2], FontPurpose.LIST,clip_to_device_width=True), Device.get_device().screen_height()*0.7)
                     Display.present()
                 else:
                     self.logger.error("TEXT_WITH_PERCENTAGE_BAR missing args")

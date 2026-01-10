@@ -20,7 +20,7 @@ from views.view_creator import ViewCreator
 
 class AppMenu:
     def __init__(self):
-        self.appFinder = Device.get_app_finder()
+        self.appFinder = Device.get_device().get_app_finder()
         self.show_all_apps = False
 
     def _convert_to_theme_version_of_icon(self, icon_path):
@@ -54,12 +54,12 @@ class AppMenu:
         launch = app.get_launch()
         folder = app.get_folder()
         Display.deinit_display()
-        Device.run_app(folder,launch)
+        Device.get_device().run_app(folder,launch)
         Controller.clear_input_queue()
         Display.reinitialize()
         
     def append_pyui_apps(self, app_list):
-        system_config = Device.get_system_config()
+        system_config = Device.get_device().get_system_config()
         if(not system_config.simple_mode_enabled()):
             boxart_scraper_config = PyUiAppConfig("Boxart Scraper")
             hidden = AppsManager.is_hidden(boxart_scraper_config) and not self.show_all_apps
@@ -82,7 +82,7 @@ class AppMenu:
     def run_app_selection(self) :
         running = True
     
-        system_config = Device.get_system_config()
+        system_config = Device.get_device().get_system_config()
 
         while(running):
             last_selected_label = PyUiState.get_last_app_selection()
@@ -93,7 +93,7 @@ class AppMenu:
             for app in device_apps:
                 hidden = AppsManager.is_hidden(app) and not self.show_all_apps
                 devices = app.get_devices()
-                supported_device = not devices or Device.get_device_name() in devices
+                supported_device = not devices or Device.get_device().get_device_name() in devices
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
                 if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
                     icon = self.get_icon(app.get_folder(),app.get_icon())

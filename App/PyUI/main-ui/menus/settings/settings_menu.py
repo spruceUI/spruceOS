@@ -98,7 +98,7 @@ class SettingsMenu(ABC):
 
     def replace_dynamic_text_in_description(self, description):
         if(description):
-            description = description.format(ip_addr=Device.get_ip_addr_text())
+            description = description.format(ip_addr=Device.get_device().get_ip_addr_text())
         return description
 
 
@@ -110,7 +110,7 @@ class SettingsMenu(ABC):
             display_name = option.get('display')
             description = self.replace_dynamic_text_in_description(option.get('description'))
             devices = option.get('devices')
-            supported_device = not devices or Device.get_device_name() in devices
+            supported_device = not devices or Device.get_device().get_device_name() in devices
             if(supported_device):
                 selected_value = CfwSystemConfig.get_selected_value(category,name)
                 type = option.get('type')

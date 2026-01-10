@@ -14,7 +14,7 @@ class BottomBar:
         if(Theme.show_bottom_bar()):
             bottom_bar_bg = Theme.bottom_bar_bg()
             
-            self.bottom_bar_w, self.bottom_bar_h = Display.render_image(bottom_bar_bg,0,Device.screen_height(),render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
+            self.bottom_bar_w, self.bottom_bar_h = Display.render_image(bottom_bar_bg,0,Device.get_device().screen_height(),render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
             back_icon = Theme.back_icon()
             icon_w, icon_h =Display.get_image_dimensions(back_icon)
             if(icon_h > self.bottom_bar_h):
@@ -34,7 +34,7 @@ class BottomBar:
         from display.display import Display
         # TODO don't hard code these
         padding = 5
-        bottom_icons_y = Device.screen_height() - padding
+        bottom_icons_y = Device.get_device().screen_height() - padding
 
         confirm_icon = Theme.confirm_icon()
         x_offset = padding
@@ -69,9 +69,9 @@ class BottomBar:
     def render_bottom_bar_text(self, text):
         from display.display import Display
         y_padding = max(5, Display.get_bottom_bar_height() // 4)
-        y_value = Device.screen_height() - y_padding
+        y_value = Device.get_device().screen_height() - y_padding
         Display.render_text(text,
-                            Device.screen_width() // 2,
+                            Device.get_device().screen_width() // 2,
                             y_value,
                             Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
                             FontPurpose.DESCRIPTIVE_LIST_TITLE,

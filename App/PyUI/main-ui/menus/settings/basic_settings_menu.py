@@ -31,40 +31,40 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
     def shutdown(self, input: ControllerInput):
         if(ControllerInput.A == input):
-           Device.prompt_power_down()
+           Device.get_device().prompt_power_down()
     
     def lumination_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.lower_lumination()
+            Device.get_device().lower_lumination()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.raise_lumination()
+            Device.get_device().raise_lumination()
         
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
-            Device.change_volume(-5)
+            Device.get_device().change_volume(-5)
         elif(ControllerInput.L1 == input):
-            Device.change_volume(-5)
+            Device.get_device().change_volume(-5)
         elif(ControllerInput.DPAD_RIGHT == input):
-            Device.change_volume(+5)
+            Device.get_device().change_volume(+5)
         elif(ControllerInput.R1 == input):
-            Device.change_volume(+5)
+            Device.get_device().change_volume(+5)
 
     def show_wifi_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
-            if(Device.is_wifi_enabled()):
-                Device.disable_wifi()
+            if(Device.get_device().is_wifi_enabled()):
+                Device.get_device().disable_wifi()
             else:
-                Device.enable_wifi()
+                Device.get_device().enable_wifi()
 
         if(ControllerInput.A == input):
             self.wifi_menu.show_wifi_menu()
 
     def show_bt_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
-            if(Device.is_bluetooth_enabled()):
-                Device.disable_bluetooth()
+            if(Device.get_device().is_bluetooth_enabled()):
+                Device.get_device().disable_bluetooth()
             else:
-                Device.enable_bluetooth()
+                Device.get_device().enable_bluetooth()
         else:
             self.bt_menu.show_bluetooth_menu()
 
@@ -82,7 +82,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
     def change_theme(self, input):
         self.theme_ever_changed = True
         theme_folders = self.get_theme_folders()
-        selected_index = theme_folders.index(Device.get_system_config().get_theme())
+        selected_index = theme_folders.index(Device.get_device().get_system_config().get_theme())
         if(ControllerInput.DPAD_LEFT == input):
             selected_index-=1
             if(selected_index < 0):
@@ -91,17 +91,17 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             selected_index+=1
             if(selected_index == len(theme_folders)):
                 selected_index = 0
-        elif(ControllerInput.X == input and not Device.get_system_config().simple_mode_enabled()):
+        elif(ControllerInput.X == input and not Device.get_device().get_system_config().simple_mode_enabled()):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
             selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, "Themes")
 
 
         if(selected_index is not None):
-            Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.screen_width(), Device.screen_height())
+            Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.get_device().screen_width(), Device.get_device().screen_height())
             Display.init_fonts()   
-            Device.get_system_config().set_theme(theme_folders[selected_index])
-            Device.set_theme(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]))
+            Device.get_device().get_system_config().set_theme(theme_folders[selected_index])
+            Device.get_device().set_theme(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]))
             self.theme_changed = True
             Display.restore_bg()
 
@@ -147,7 +147,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.backlight(),
-                        value_text="<    " + str(Device.lumination()) + "    >",
+                        value_text="<    " + str(Device.get_device().lumination()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -156,11 +156,11 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                     )
             )
 
-        if(Device.supports_volume()):
+        if(Device.get_device().supports_volume()):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.volume(),
-                            value_text="<    " + str(Device.get_volume()//5) + "    >",
+                            value_text="<    " + str(Device.get_device().get_volume()//5) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -170,13 +170,13 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 )
         
 
-        if(not Device.get_system_config().simple_mode_enabled()):
+        if(not Device.get_device().get_system_config().simple_mode_enabled()):
 
-            if(Device.supports_wifi()):
+            if(Device.get_device().supports_wifi()):
                 option_list.append(
                         GridOrListEntry(
                                 primary_text=Language.wifi(),
-                                value_text="<    " + (Device.get_ip_addr_text()) + "    >",
+                                value_text="<    " + (Device.get_device().get_ip_addr_text()) + "    >",
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
@@ -185,11 +185,11 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                             )
                     )
             
-            if(Device.get_bluetooth_scanner() is not None):
+            if(Device.get_device().get_bluetooth_scanner() is not None):
                 option_list.append(
                         GridOrListEntry(
                                 primary_text=Language.bluetooth(),
-                                value_text="<    " + ("On" if Device.is_bluetooth_enabled() else "Off") + "    >",
+                                value_text="<    " + ("On" if Device.get_device().is_bluetooth_enabled() else "Off") + "    >",
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
@@ -201,7 +201,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.theme(),
-                        value_text="<    " + Device.get_system_config().get_theme() + "    >",
+                        value_text="<    " + Device.get_device().get_system_config().get_theme() + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -211,7 +211,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         )
             
 
-        if(not Device.get_system_config().simple_mode_enabled()):
+        if(not Device.get_device().get_system_config().simple_mode_enabled()):
             option_list.append(
                         GridOrListEntry(
                                 primary_text=Language.theme_settings(),

@@ -17,8 +17,8 @@ class AnimationSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             self.build_enabled_disabled_entry(
                 primary_text=Language.animations_enabled(),
-                get_value_func=Device.get_system_config().animations_enabled,
-                set_value_func=Device.get_system_config().set_animations_enabled,
+                get_value_func=Device.get_device().get_system_config().animations_enabled,
+                set_value_func=Device.get_device().get_system_config().set_animations_enabled,
             )
     )
 

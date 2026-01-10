@@ -59,8 +59,8 @@ class Controller:
 
     @staticmethod
     def init():
-        Controller.controller_interface = Device.get_controller_interface()
-        Controller._watch_for_secret_code = Device.get_system_config().game_selection_only_mode_enabled() or Device.get_system_config().simple_mode_enabled()
+        Controller.controller_interface = Device.get_device().get_controller_interface()
+        Controller._watch_for_secret_code = Device.get_device().get_system_config().game_selection_only_mode_enabled() or Device.get_device().get_system_config().simple_mode_enabled()
 
     @staticmethod
     def init_controller():
@@ -122,9 +122,9 @@ class Controller:
             # Check for match
             if Controller._input_history == Controller._SECRET_CODE:
                 PyUiLogger().get_logger().info(f"Secret code entered")
-                Device.get_system_config().set_game_selection_only_mode_enabled(False)
-                Device.get_system_config().set_simple_mode_enabled(False)
-                Device.exit_pyui()
+                Device.get_device().get_system_config().set_game_selection_only_mode_enabled(False)
+                Device.get_device().get_system_config().set_simple_mode_enabled(False)
+                Device.get_device().exit_pyui()
 
 
             if(Controller._matches_secret_prefix()):
@@ -151,7 +151,7 @@ class Controller:
             callback()
 
         if timeout == DEFAULT_TIMEOUT_FLAG:
-            timeout = Device.input_timeout_default()
+            timeout = Device.get_device().input_timeout_default()
 
         now = time.time()
         time_since_last_input = now - Controller.last_input_time
@@ -237,7 +237,7 @@ class Controller:
 
     @staticmethod
     def allow_pyui_game_switcher():
-        return PyUiConfig.allow_pyui_game_switcher() and Device.get_system_config().game_switcher_enabled()
+        return PyUiConfig.allow_pyui_game_switcher() and Device.get_device().get_system_config().game_switcher_enabled()
 
     @staticmethod
     def clear_input_queue():
@@ -285,9 +285,9 @@ class Controller:
         PyUiLogger.get_logger().info(f"Performing hotkey for {controller_input}")
         #TODO where to let these be user definable
         if(ControllerInput.VOLUME_UP == controller_input):
-            Device.raise_lumination()
+            Device.get_device().raise_lumination()
         elif(ControllerInput.VOLUME_DOWN == controller_input):
-            Device.lower_lumination()
+            Device.get_device().lower_lumination()
         
     @staticmethod
     def non_sdl_input_event(controller_input, is_down):
@@ -302,14 +302,14 @@ class Controller:
                     if(last_press_time_length > TRIGGER_TIME_FOR_HOLD_BUTTONS):
                         PyUiLogger.get_logger().info(f"Starting special non sdl event : {controller_input}")
                         Controller.special_non_sdl_event = True
-                        Controller.render_required_callback = lambda ci=controller_input, lpt=last_press_time_length: Device.special_input(ci, lpt)
+                        Controller.render_required_callback = lambda ci=controller_input, lpt=last_press_time_length: Device.get_device().special_input(ci, lpt)
                         Controller.non_sdl_input = None
                         Controller.special_non_sdl_event = False
                         PyUiLogger.get_logger().info(f"Ending special non sdl event : {controller_input}")
 
             else:
                 if(not Controller.is_check_for_hotkey):
-                    Device.special_input(controller_input, 0)
+                    Device.get_device().special_input(controller_input, 0)
                 else:
                     Controller.non_sdl_input = controller_input
         elif(not is_down):
@@ -317,7 +317,7 @@ class Controller:
             if(controller_input in Controller.hold_buttons):
                 last_press_time_length = time.time() - Controller.last_press_time_map[controller_input]
                 if(last_press_time_length < TRIGGER_TIME_FOR_HOLD_BUTTONS):
-                    Device.special_input(controller_input, 0)
+                    Device.get_device().special_input(controller_input, 0)
 
             Controller.last_press_time_map.pop(controller_input,None)
 

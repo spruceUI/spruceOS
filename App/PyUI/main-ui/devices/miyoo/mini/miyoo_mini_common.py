@@ -136,7 +136,6 @@ class MiyooMiniCommon(MiyooDevice):
         
         return KeyWatcherController(event_path="/dev/input/event0", key_mappings=key_mappings)
 
-    @property
     def power_off_cmd(self):
         return self.miyoo_mini_specific_model_variables.poweroff_cmd
 
@@ -171,31 +170,26 @@ class MiyooMiniCommon(MiyooDevice):
     def is_hdmi_connected(self):
         return False
 
-    @property
     def screen_width(self):
         return self.miyoo_mini_specific_model_variables.width
 
-    @property
     def screen_height(self):
         return self.miyoo_mini_specific_model_variables.height
         
-    @property
     def screen_rotation(self):
         return 0
     
-    @property
     def output_screen_width(self):
         if(self.should_scale_screen()):
             return 1920
         else:
-            return self.screen_height
+            return self.screen_height()
         
-    @property
     def output_screen_height(self):
         if(self.should_scale_screen()):
             return 1080
         else:
-            return self.screen_width
+            return self.screen_width()
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
@@ -316,7 +310,6 @@ class MiyooMiniCommon(MiyooDevice):
     def get_bluetooth_scanner(self):
         return None
         
-    @property
     def reboot_cmd(self):
         return self.miyoo_mini_specific_model_variables.reboot_cmd
 

@@ -56,5 +56,5 @@ class SearchGamesForSystemMenu(RomsMenuCommon):
         return self._run_rom_selection(f"{self.game_system.display_name} Search")
 
     def prefer_savestate_screenshot(self):
-        return Device.get_system_config().use_savestate_screenshots(GAME_SELECT)
+        return Device.get_device().get_system_config().use_savestate_screenshots(GAME_SELECT)
  

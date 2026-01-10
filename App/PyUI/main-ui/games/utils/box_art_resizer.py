@@ -30,9 +30,9 @@ class BoxArtResizer():
 
     @classmethod
     def process_image(cls, full_path):
-        target_medium_width, target_medium_height = Device.get_boxart_medium_resize_dimensions()
-        target_small_width, target_small_height = Device.get_boxart_small_resize_dimensions()
-        target_large_width, target_large_height = Device.get_boxart_large_resize_dimensions()
+        target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
+        target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
+        target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
 
         qoi_full_path = os.path.splitext(full_path)[0] + ".qoi"
         if os.path.exists(qoi_full_path):
@@ -55,7 +55,7 @@ class BoxArtResizer():
             if (not cls.scale_and_convert_image(full_path, large_image_path, target_large_width, target_large_height, qoi_large_path)):
                 # Convert it
                 try:
-                    Device.get_image_utils().convert_from_png_to_qoi(full_path)
+                    Device.get_device().get_image_utils().convert_from_png_to_qoi(full_path)
                     qoi_full_path = os.path.splitext(full_path)[0] + ".qoi"
                 except Exception as e:
                     PyUiLogger().get_logger().warning(
@@ -124,9 +124,9 @@ class BoxArtResizer():
             idx = parts.index("Imgs")
             folder_path = os.sep.join(parts[:idx - 1]) if idx > 1 else os.sep
 
-            target_medium_width, target_medium_height = Device.get_boxart_medium_resize_dimensions()
-            target_small_width, target_small_height = Device.get_boxart_small_resize_dimensions()
-            target_large_width, target_large_height = Device.get_boxart_large_resize_dimensions()
+            target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
+            target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
+            target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
 
             # This is always temporary
             shutil.rmtree(os.path.join(folder_path, "Imgs_large"), ignore_errors=True)
@@ -165,9 +165,9 @@ class BoxArtResizer():
         """Search through ROM directories and scale images inside Imgs folders."""
         Display.display_message(f"Starting boxart patching", 500)
         rom_paths = ["/mnt/SDCARD/Roms/", "/media/sdcard1/Roms/"]
-        target_medium_width, target_medium_height = Device.get_boxart_medium_resize_dimensions()
-        target_small_width, target_small_height = Device.get_boxart_small_resize_dimensions()
-        target_large_width, target_large_height = Device.get_boxart_large_resize_dimensions()
+        target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
+        target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
+        target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
         cls._aborted = False
         cls._monitoring = True
         cls.scan_count = 0
@@ -228,11 +228,11 @@ class BoxArtResizer():
         if os.path.exists(qoi_path):
             return True
 
-        needed_shrink = Device.get_image_utils().shrink_image_if_needed(
+        needed_shrink = Device.get_device().get_image_utils().shrink_image_if_needed(
             image_file, resize_png_path, target_width, target_height)
         if (needed_shrink):
             try:
-                Device.get_image_utils().convert_from_png_to_qoi(resize_png_path, qoi_path)
+                Device.get_device().get_image_utils().convert_from_png_to_qoi(resize_png_path, qoi_path)
                 cls._to_delete.append(resize_png_path)
                 return needed_shrink
             except Exception as e:

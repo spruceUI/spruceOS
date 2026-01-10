@@ -12,8 +12,8 @@ class GameArtDisplaySettingsMenu(settings_menu.SettingsMenu):
 
     def toggle_game_screenshot_preference(self, input, screen):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
-            Device.get_system_config().set_use_savestate_screenshots(screen,
-                not Device.get_system_config().use_savestate_screenshots(screen))
+            Device.get_device().get_system_config().set_use_savestate_screenshots(screen,
+                not Device.get_device().get_system_config().use_savestate_screenshots(screen))
 
     def build_options_list(self):
         option_list = []
@@ -22,7 +22,7 @@ class GameArtDisplaySettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=screen_type,
-                            value_text="<    " + ("Screenshot" if Device.get_system_config().use_savestate_screenshots(screen_type) else "Boxart") + "    >",
+                            value_text="<    " + ("Screenshot" if Device.get_device().get_system_config().use_savestate_screenshots(screen_type) else "Boxart") + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,

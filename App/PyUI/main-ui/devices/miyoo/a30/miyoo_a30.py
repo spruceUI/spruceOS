@@ -75,7 +75,7 @@ class MiyooA30(MiyooDevice):
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/a30-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
-    @property
+
     def power_off_cmd(self):
         return "poweroff"
 
@@ -119,26 +119,26 @@ class MiyooA30(MiyooDevice):
     def is_hdmi_connected(self):
         return False
 
-    @property
+
     def screen_width(self):
         return 640
 
-    @property
+
     def screen_height(self):
         return 480
         
-    @property
+
     def screen_rotation(self):
         return 270
     
-    @property
+
     def output_screen_width(self):
         if(self.should_scale_screen()):
             return 1920
         else:
-            return self.screen_height
+            return self.screen_height()
         
-    @property
+
     def output_screen_height(self):
         if(self.should_scale_screen()):
             return 1080
@@ -260,7 +260,7 @@ class MiyooA30(MiyooDevice):
     def get_bluetooth_scanner(self):
         return None
         
-    @property
+
     def reboot_cmd(self):
         return None
 

@@ -118,7 +118,7 @@ class GameSystemSelectMenu:
         self.collections_menu = collections_menu
         self.recents_menu = recents_menu
         self.settings_menu = settings_menu
-        self.game_utils : GameSystemUtils = Device.get_game_system_utils()
+        self.game_utils : GameSystemUtils = Device.get_device().get_game_system_utils()
         self.rom_select_menu : GameSelectMenu = GameSelectMenu()
         self.use_emu_cfg = False
         self.game_system_select_menu_popup = GameSystemSelectMenuPopup()

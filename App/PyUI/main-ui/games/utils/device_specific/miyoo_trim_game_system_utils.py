@@ -165,7 +165,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                and (self.contains_needed_files(game_system_config) 
                                                    or PyUiConfig.show_all_game_systems())):
                 devices = game_system_config.get_devices()
-                supported_device = not devices or Device.get_device_name() in devices
+                supported_device = not devices or Device.get_device().get_device_name() in devices
                 if(supported_device):
                     folder_paths = self.build_paths_array(folder)
                     if(len(folder_paths) > 0):
@@ -250,12 +250,12 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
     
-        core_selection_in_config = Device.get_core_for_game(rom_info.game_system.game_system_config, os.path.basename(rom_info.rom_file_path))
+        core_selection_in_config = Device.get_device().get_core_for_game(rom_info.game_system.game_system_config, os.path.basename(rom_info.rom_file_path))
        
         core_names = self.CORE_TO_FOLDER_LOOKUP.get(core_selection_in_config)
         if(core_names is not None):       
             for core in core_names:
-                cores_to_try = Device.get_core_name_overrides(core)
+                cores_to_try = Device.get_device().get_core_name_overrides(core)
             
                 for core_to_try in cores_to_try:
                     state_png = self.check_for_image_with_core(core_to_try, saves_root, base_name, rom_info)

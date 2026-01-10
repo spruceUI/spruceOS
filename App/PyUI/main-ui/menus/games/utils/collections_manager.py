@@ -25,7 +25,7 @@ class CollectionsManager:
 
     @classmethod
     def initialize(cls, _collections_folder: str):
-        cls._game_system_utils = Device.get_game_system_utils()
+        cls._game_system_utils = Device.get_device().get_game_system_utils()
         cls._collections_folder = _collections_folder
         cls.load_from_file()
         cls._init_event.set()  # unblock waiting methods

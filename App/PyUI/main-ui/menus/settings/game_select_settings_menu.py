@@ -13,7 +13,7 @@ class GameSelectSettingsMenu(settings_menu.SettingsMenu):
     
     def adjust_skip_by_letter(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
-            system_config = Device.get_system_config()
+            system_config = Device.get_device().get_system_config()
             system_config.set_skip_by_letter(not system_config.get_skip_by_letter())
 
     def build_options_list(self):
@@ -22,7 +22,7 @@ class GameSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.l2_r2_skip_by_letter_for_daijisho_themes(),
-                        value_text="<    " + str(Device.get_system_config().get_skip_by_letter()) + "    >",
+                        value_text="<    " + str(Device.get_device().get_system_config().get_skip_by_letter()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,

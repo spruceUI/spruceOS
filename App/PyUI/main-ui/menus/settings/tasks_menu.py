@@ -44,7 +44,7 @@ class TasksMenu(settings_menu.SettingsMenu):
                 )
          )    
 
-        if(Device.supports_image_resizing()):
+        if(Device.get_device().supports_image_resizing()):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.optimize_boxart(),

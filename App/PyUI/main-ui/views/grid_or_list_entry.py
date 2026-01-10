@@ -124,8 +124,8 @@ class GridOrListEntry:
         return self.get_properly_sized_image(self.get_image_path_selected(), target_width, target_height)
 
     def get_properly_sized_image(self, image_path, target_width, target_height):
-        small_width, small_height = Device.get_boxart_small_resize_dimensions()
-        medium_width, medium_height = Device.get_boxart_medium_resize_dimensions()
+        small_width, small_height = Device.get_device().get_boxart_small_resize_dimensions()
+        medium_width, medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
 
         if(target_width is not None and target_width <= small_width):
             #PyUiLogger.get_logger().info(f"Going with small due to width {target_width} <= {small_width}")

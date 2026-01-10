@@ -24,7 +24,7 @@ class RomsListManager:
         self._entries: List[RomsListEntry] = []
         self._entries_dict: dict[Tuple[str, str], RomsListEntry] = {}
         self.load_from_file()
-        self.game_system_utils = Device.get_game_system_utils()
+        self.game_system_utils = Device.get_device().get_game_system_utils()
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def _entry_key(self, rom_file_path: str, game_system_name: str) -> Tuple[str, str]:
