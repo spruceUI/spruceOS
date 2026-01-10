@@ -148,7 +148,6 @@ fix_sleep_sound_bug() {
     fi
 
     _set_volume "$(( config_volume ))"
-    log_message "*** lid_watchdog.sh: Set volume to $config_volume"
 }
 
 save_volume_to_config_file() {
@@ -174,15 +173,66 @@ volume_up() {
     fi
 }
 
+
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+SLEEP_TIMER_FILE="/tmp/sleep_timer_info"
+
+get_hw_epoch() {
+    # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds
+    read _ MON DAY TIME YEAR _ < <(hwclock 2>/dev/null)
+    
+    # Convert month name to number
+    case "$MON" in
+        Jan) MM=01 ;;
+        Feb) MM=02 ;;
+        Mar) MM=03 ;;
+        Apr) MM=04 ;;
+        May) MM=05 ;;
+        Jun) MM=06 ;;
+        Jul) MM=07 ;;
+        Aug) MM=08 ;;
+        Sep) MM=09 ;;
+        Oct) MM=10 ;;
+        Nov) MM=11 ;;
+        Dec) MM=12 ;;
+        *) MM=00 ;;  # fallback
+    esac
+
+    HW_STR="${YEAR}-${MM}-${DAY} ${TIME}"
+
+    # Convert to epoch seconds
+    date -d "$HW_STR" +%s 2>/dev/null
+}
+
 
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
-    # RTC Wake up
-    echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH"
-    
+    START_EPOCH="$(get_hw_epoch)"
+    [ -z "$START_EPOCH" ] && {
+        log_message "ERROR: Unable to read hwclock"
+        return 1
+    }
+
+    TARGET_EPOCH=$(( START_EPOCH + IDLE_TIMEOUT ))
+
+    # Persist transient timing data
+    cat >"$SLEEP_TIMER_FILE" <<EOF
+START_EPOCH=$START_EPOCH
+TIMEOUT=$IDLE_TIMEOUT
+TARGET_EPOCH=$TARGET_EPOCH
+EOF
+    sync
+
+    # Program RTC wakealarm (still required for wakeup)
+    if [ -e "$WAKE_ALARM_PATH" ]; then
+        echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH" 2>/dev/null \
+            || log_message "WARNING: Failed to write WAKE_ALARM_PATH"
+    else
+        log_message "WARNING: WAKE_ALARM_PATH missing, relying on external wake"
+    fi
+
     # Enter sleep
     echo deep >/sys/power/mem_sleep
     echo -n mem >/sys/power/state
@@ -190,21 +240,90 @@ device_enter_sleep() {
 
 device_exit_sleep() {
     fix_sleep_sound_bug
-}
-
-device_lid_sensor_ready() {
-    [ -e "/sys/devices/platform/hall-mh248/hallvalue" ]
+    echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
 device_woke_via_timer() {
-    CURRENT_ALARM=$(cat "$WAKE_ALARM_PATH" 2>/dev/null)
+    [ ! -f "$SLEEP_TIMER_FILE" ] && {
+        echo "false"
+        return
+    }
 
-    if [ -z "$CURRENT_ALARM" ]; then
+    . "$SLEEP_TIMER_FILE"
+
+    NOW_EPOCH="$(get_hw_epoch)"
+    [ -z "$NOW_EPOCH" ] && {
+        log_message "ERROR: Unable to read hwclock"
+        echo "false"
+        return
+    }
+
+    # Allow small drift (RTC granularity / resume latency)
+    DRIFT_TOLERANCE=10
+
+    if [ "$NOW_EPOCH" -ge $(( TARGET_EPOCH - DRIFT_TOLERANCE )) ]; then
         echo "true"
     else
-        echo 0 >"$CURRENT_ALARM"
         echo "false"
     fi
+}
+
+# Try to account for the alarm being cleared by something in miyoo's
+# software
+device_continue_sleep() {
+    # Must have existing sleep state
+    [ ! -f "$SLEEP_TIMER_FILE" ] && {
+        log_message "device_continue_sleep: No sleep state file"
+        return 1
+    }
+
+    # Load saved timing
+    . "$SLEEP_TIMER_FILE"
+
+    NOW_EPOCH="$(get_hw_epoch)"
+    [ -z "$NOW_EPOCH" ] && {
+        log_message "device_continue_sleep: Unable to read hwclock"
+        return 1
+    }
+
+    REMAINING=$(( TARGET_EPOCH - NOW_EPOCH ))
+
+    # Already expired or zero → nothing to re-arm
+    if [ "$REMAINING" -le 0 ]; then
+        log_message "device_continue_sleep: Timer already expired"
+        return 0
+    fi
+
+    # Best-effort reprogram RTC alarm
+    if [ -e "$WAKE_ALARM_PATH" ]; then
+        # Clear old alarm first (important on Miyoo/BSP kernels)
+        echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+
+        # Clamp to at least 1 second
+        if [ "$REMAINING" -lt 1 ]; then
+            REMAINING=1
+        fi
+
+        # Re-arm
+        if ! echo "+$REMAINING" >"$WAKE_ALARM_PATH" 2>/dev/null; then
+            log_message "device_continue_sleep: Failed to write WAKE_ALARM_PATH (value: $REMAINING)"
+            return 1
+        fi
+
+        log_message "device_continue_sleep: Re-armed wakealarm for ${REMAINING}s"
+        echo deep >/sys/power/mem_sleep
+        echo -n mem >/sys/power/state
+
+    else
+        log_message "device_continue_sleep: WAKE_ALARM_PATH missing"
+        return 1
+    fi
+}
+
+
+
+device_lid_sensor_ready() {
+    [ -e "/sys/devices/platform/hall-mh248/hallvalue" ]
 }
 
 device_lid_open(){

@@ -297,3 +297,7 @@ device_woke_via_timer() {
     log_message "Missing device_woke_via_timer function"
     echo "false"
 }
+
+device_continue_sleep() {
+    log_message "Missing device_continue_sleep function"
+}

@@ -71,7 +71,6 @@ trigger_sleep() {
     IDLE_TIMEOUT=$(get_shutdown_timer)
     now_ts=$(date +%s)
     device_enter_sleep "$IDLE_TIMEOUT"
-
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
         if [ "$IDLE_TIMEOUT" -gt 0 ]; then
@@ -142,9 +141,8 @@ trigger_sleep() {
     else
 
         while [ "$(device_lid_open)" = "0" ]; do
-            counter=$((counter + 1))
-            log_message "Lid is closed, but not in sleep -- Will autosleep again soon"            
-            sleep 2
+            log_message "Lid is closed, but not in sleep -- Retrigger sleep"            
+            device_continue_sleep
         done
 
         if [ "$(device_woke_via_timer)" = "true" ]; then
