@@ -146,8 +146,4 @@ flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got inte
 # sync files and power off device
 sync
 
-if is_mini_og; then
-    reboot              # OG Mini hangs if you use the poweroff command
-else
-    poweroff
-fi
+run_poweroff_cmd

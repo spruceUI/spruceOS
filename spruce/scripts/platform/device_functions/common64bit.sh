@@ -22,9 +22,3 @@ send_menu_button_to_retroarch() {
 get_sftp_service_name() {
     echo "sftpgo"
 }
-
-# Miyoo Mini subtype detection
-
-is_mini_og() {
-    return 1
-}
