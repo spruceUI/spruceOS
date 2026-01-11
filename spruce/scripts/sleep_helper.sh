@@ -153,7 +153,7 @@ trigger_sleep() {
         if [ "$IDLE_TIMEOUT" -gt 0 ] && [ "$(device_woke_via_timer)" = "true" ]; then
             log_message "Idle time exceeded, triggering poweroff -- IDLE_TIMEOUT=$IDLE_TIMEOUT"
             sleep 0.1
-            #"$POWER_OFF_SCRIPT" &
+            "$POWER_OFF_SCRIPT" &
         else
             log_message "Woke from sleep manually"
         fi
