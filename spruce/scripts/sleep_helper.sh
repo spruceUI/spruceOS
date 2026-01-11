@@ -70,6 +70,7 @@ trigger_sleep() {
     local IDLE_TIMEOUT
     IDLE_TIMEOUT=$(get_shutdown_timer)
     now_ts=$(date +%s)
+    set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
     device_enter_sleep "$IDLE_TIMEOUT"
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
@@ -161,7 +162,13 @@ trigger_sleep() {
 }
 
 trigger_sleep
+
 device_exit_sleep
+
+# Restore volume
+VOLUME_LV=$(jq -r '.vol' "$SYSTEM_JSON")
+set_volume "$VOLUME_LV"
+
 kill "$GET_EVENT_PID" 2>/dev/null
 
 sleep 2 #don't allow resleeping for a few seconds

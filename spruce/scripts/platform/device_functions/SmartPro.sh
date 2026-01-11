@@ -58,7 +58,15 @@ device_init() {
 
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
-    amixer set 'Soft Volume Master' "$new_vol"
+    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    scaled=$(( new_vol * 255 / 20 ))
+
+    amixer set 'Soft Volume Master' "$scaled"
+
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$new_vol"
+    fi
+
 }
 
 

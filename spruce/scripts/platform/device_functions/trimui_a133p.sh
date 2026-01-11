@@ -63,8 +63,7 @@ set_volume_delta() {
 
     jq ".vol = $new" "$SYSTEM_JSON" > "${SYSTEM_JSON}.tmp" && mv "${SYSTEM_JSON}.tmp" "$SYSTEM_JSON"
 
-    scaled=$(( new * 255 / 20 ))
-    set_volume "$scaled"
+    set_volume "$new"
 }
 
 volume_up() {

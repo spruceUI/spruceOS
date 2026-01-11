@@ -216,6 +216,8 @@ get_volume_level() {
     log_message "Missing get_volume_level function"
 }
 
+# Arg1: Sets the volume on a scale of 0-20
+# Arg2: (optional) 'true' to save to config, anything else to not save
 set_volume() {
     log_message "Missing set_volume function"
 }
@@ -281,4 +283,11 @@ device_continue_sleep() {
 run_poweroff_cmd() {
     log_message "Missing run_poweroff_cmd -- using default of poweroff"
     poweroff
+}
+
+save_volume_to_config_file() {
+    VOLUME_LV=$1
+
+    # Update MainUI Config file
+    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
 }
