@@ -91,13 +91,11 @@ trigger_sleep() {
                 # If lid opened, restore screen and break
                 if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                     log_message "Lid opened"
-                    device_exit_sleep
                     sleep_exited=true 
                     break
                 elif power_button_pressed; then
                     if [ "$current_lid_state" = "1" ]; then
                         log_message "Power button pressed, exiting pseudosleep"
-                        device_exit_sleep
                         sleep_exited=true 
                         break
                     else
@@ -113,7 +111,8 @@ trigger_sleep() {
             # Timeout reached without exitting sleep → poweroff
             if [ "$sleep_exited" = false ]; then
                 log_message "Lid closed for ${IDLE_TIMEOUT}s, triggering poweroff"
-                device_exit_sleep
+                # Set clocks bad to full speed
+                set_performance
                 sleep 0.1
                 "$POWER_OFF_SCRIPT" &
             fi
@@ -129,11 +128,9 @@ trigger_sleep() {
                 # If lid opened, restore screen and break
                 if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
                     log_message "Lid opened"
-                    device_exit_sleep
                     break
                 elif power_button_pressed; then
                     log_message "Power button pressed, exiting sleep"
-                    device_exit_sleep
                     break
                 fi
                 sleep 1
