@@ -1,4 +1,7 @@
 
+<img width="310" height="310" alt="spruce labeled" src="https://github.com/user-attachments/assets/703691e2-dca0-49e6-987b-48ccfd16270b" />
+
+
 # spruceOS 
 
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
