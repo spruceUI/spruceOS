@@ -61,6 +61,9 @@ run_port() {
         cd /mnt/SDCARD/RetroArch/
         "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
     else
+
+    	mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python 
+
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
         setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
         SID=$!
