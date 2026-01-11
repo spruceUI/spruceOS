@@ -142,6 +142,8 @@ case "$PLATFORM" in
 
         export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH"
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/miyoomini/lib"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/bin/python/lib:$LD_LIBRARY_PATH"
+        export PYTHONHOME="/mnt/SDCARD/spruce/bin/python"
 
         export SDL_VIDEODRIVER=mmiyoo
         export SDL_AUDIODRIVER=mmiyoo
@@ -152,7 +154,7 @@ case "$PLATFORM" in
             freemma
         fi
 
-        cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
+        cmd="/mnt/SDCARD/spruce/miyoomini/bin/MainUI \
                 /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
                 -device MIYOO_MINI_FLIP \
                 -logDir /mnt/SDCARD/Saves/spruce \
