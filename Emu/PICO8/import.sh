@@ -5,9 +5,11 @@
 BBS_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/bbs"
 ROM_PATH="/mnt/SDCARD/Roms/PICO8"
 FAVE_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/favourites.txt"
-[ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
-{
+start_pyui_message_writer
+display_image_and_text "$SPRUCE_LOGO" 35 25 "Importing carts from Splore" 75
+
 for cart in "$BBS_PATH"/*/*.p8.png ; do
 	cartname="$(basename "$cart")"
 	shortname="$(basename "$cart" .p8.png)"
@@ -28,9 +30,4 @@ for cart in "$BBS_PATH"/*/*.p8.png ; do
 		fi
 	fi
 done
-} &
-
-display -i "$BG_TREE" -t "Importing carts from Splore" -d 2
-
-rm -f "$ROM_PATH/PICO8_cache6.db" "$ROM_PATH/PICO8_cache7.db"
-log_message "Done importing. Pico-8 romlist refreshed."
+sleep 2

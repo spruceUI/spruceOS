@@ -1,7 +1,5 @@
 #!/bin/sh
 
-ICONFRESH_ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
-
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 get_theme_path() {

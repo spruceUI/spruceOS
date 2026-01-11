@@ -131,7 +131,6 @@ flag_remove "emulator_launched"
 
 alsactl store
 
-
 # kill MainUI
 killall -q -9 MainUI
 
