@@ -28,11 +28,11 @@
 
 get_ra_cfg_location(){
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
+	#Why is Flip here as a platform check?
     if [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
 		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
 	elif [ "$PLATFORM" = "MiyooMini" ]; then
-		touch /tmp/ignore.txt									# TODO: figure out why chris says spruce breaks mini cfg,
-		echo "/tmp/ignore.txt"									# then fix that and remove this elif branch
+		echo "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 	else
 		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
 	fi
@@ -78,34 +78,21 @@ prepare_ra_config() {
 			;;
 	esac
 	log_message "ra hotkey enable button is $hotkey_enable" -v
-	case "$PLATFORM" in
-		"A30")
-			HOTKEY_LINE="input_enable_hotkey"
-			SELECT_VAL="rctrl"
-			START_VAL="enter"
-			HOME_VAL="escape"
-			;;
-		*)
-			HOTKEY_LINE="input_enable_hotkey_btn"
-			SELECT_VAL="4"
-			START_VAL="6"
-			HOME_VAL="5"
-			;;
-	esac
+
 	case "$hotkey_enable" in
 		"Select")
 			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			sed "s|^$RA_HOTKEY_LINE = .*|$RA_HOTKEY_LINE = \"$RA_SELECT_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 			;;
 		"Start")
 			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			sed "s|^$RA_HOTKEY_LINE = .*|$RA_HOTKEY_LINE = \"$RA_START_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 			;;
 		"Menu")
 			TMP_CFG="$(mktemp)"
-			sed "s|^$HOTKEY_LINE = .*|$HOTKEY_LINE = \"$HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
+			sed "s|^$RA_HOTKEY_LINE = .*|$RA_HOTKEY_LINE = \"$RA_HOME_VAL\"|" "$PLATFORM_CFG" > "$TMP_CFG"
 			mv "$TMP_CFG" "$PLATFORM_CFG"
 		;;
 		*) ;;
