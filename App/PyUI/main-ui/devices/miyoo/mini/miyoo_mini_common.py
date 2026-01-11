@@ -1,3 +1,4 @@
+import tempfile
 import time
 from asyncio import sleep
 import json
@@ -197,25 +198,59 @@ class MiyooMiniCommon(MiyooDevice):
         else:
             return 1
     
+    def _update_stock_config(self, key, value):
+        path = "/appconfigs/system.json"
+
+        try:
+            # Only proceed if file exists
+            if not os.path.isfile(path):
+                return
+
+            # Load existing JSON (fail silently if invalid)
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            # Only update if it's a dict
+            if not isinstance(data, dict):
+                return
+
+            # Update saturation
+            data[key] = value
+
+            # Atomic write back to same file
+            dir_name = os.path.dirname(path) or "."
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=dir_name,
+                delete=False
+            ) as tmp:
+                json.dump(data, tmp, indent=2)
+                tmp.flush()
+                os.fsync(tmp.fileno())
+                tmp_path = tmp.name
+
+            os.replace(tmp_path, path)
+
+        except Exception:
+            # Silently ignore all failures
+            pass
+
     def _set_lumination_to_config(self):
         # Miyoo internally has lumination but it does not work
-        #self.miyoo_mini_flip_shared_memory_writer.set_lumination(self.system_config.backlight)
+        self._update_stock_config("brightness", self.system_config.backlight)
         self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.backlight)
 
     def _set_contrast_to_config(self):
-        #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_contrast(self.system_config.contrast)
-        pass
+        self._update_stock_config("contrast", self.system_config.contrast)
     
     def _set_saturation_to_config(self):
         #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_saturation(self.system_config.saturation)
-        pass
+        self._update_stock_config("saturation", self.system_config.saturation)
 
     def _set_brightness_to_config(self):
         #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.brightness)
-        pass
+        self._update_stock_config("lumination", self.system_config.brightness)
 
     def _set_hue_to_config(self):
         pass
@@ -411,13 +446,13 @@ class MiyooMiniCommon(MiyooDevice):
         return True
 
     def supports_brightness_calibration(self):
-        return False
+        return True
 
     def supports_contrast_calibration(self):
-        return False
+        return True
 
     def supports_saturation_calibration(self):
-        return False
+        return True
 
     def supports_hue_calibration(self):
         return False

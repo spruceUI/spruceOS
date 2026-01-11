@@ -148,7 +148,7 @@ class AbstractDevice(ABC):
     def raise_lumination(self):
         pass
 
-    @property
+    
     @abstractmethod
     def brightness(self):
         pass
@@ -177,7 +177,7 @@ class AbstractDevice(ABC):
     def raise_saturation(self):
         pass
     
-    @property
+    
     @abstractmethod
     def hue(self):
         pass
@@ -202,7 +202,7 @@ class AbstractDevice(ABC):
     def get_display_volume(self):
         pass
 
-    @property
+    
     @abstractmethod
     def power_off_cmd(self):
         pass
@@ -211,7 +211,7 @@ class AbstractDevice(ABC):
     def prompt_power_down(self):
         pass
     
-    @property
+    
     @abstractmethod
     def reboot_cmd(self):
         pass
