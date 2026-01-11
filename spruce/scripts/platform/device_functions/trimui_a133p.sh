@@ -7,6 +7,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 
 ###############################################################################
@@ -29,20 +30,19 @@ enable_or_disable_rgb() {
     enable_or_disable_rgb_trimui "$@"
 }
 
-enter_sleep() {
-    log_message "Entering sleep."
+trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
 
-device_enter_sleep() {
-    log_message "Entering sleep."
-    #Is this the right wake file for a TrimUI A133P?
-    #Or is it old code that was copy pasted improperly?
-    RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
-    IDLE_TIMEOUT="$1"
-    echo "+$IDLE_TIMEOUT" >"$RTC_WAKE_FILE"
 
-    echo -n mem >/sys/power/state
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
 }
 
 get_current_volume() {
