@@ -235,12 +235,15 @@ EOF
 set_wake_alarm() {
     IDLE_TIMEOUT="$1"
 
+    # If timeout is not positive, do not set an alarm
+    if [ "$IDLE_TIMEOUT" -le 0 ]; then
+        log_message "set_wake_alarm: IDLE_TIMEOUT <= 0, not setting wakealarm"
+        return 0
+    fi
+
     if [ -e "$WAKE_ALARM_PATH" ]; then
         # Clear previous alarm first (important on some BSP kernels)
         echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
-
-        # Clamp to at least 1 second
-        [ "$IDLE_TIMEOUT" -lt 1 ] && IDLE_TIMEOUT=1
 
         if ! echo "+$IDLE_TIMEOUT" >"$WAKE_ALARM_PATH" 2>/dev/null; then
             log_message "WARNING: Failed to write WAKE_ALARM_PATH"
@@ -254,6 +257,7 @@ set_wake_alarm() {
 
     return 0
 }
+
 
 # -----------------------------
 # Trigger the device sleep
