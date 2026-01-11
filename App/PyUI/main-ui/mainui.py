@@ -106,7 +106,10 @@ def initialize_device(device, main_ui_mode):
         Device.init(MuosAnbernicRGXX(device))
     elif "ANBERNIC_MUOS" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX(device))
+        Device.init(MuosAnbernicRGXX(device))        
+    elif "GKD_PIXEL2" == device:
+        from devices.gkd.gkd_pixel2 import GKDPixel2
+        Device.init(GKDPixel2(device, main_ui_mode))
     else:
         raise RuntimeError(f"{device} is not a supported device")
 

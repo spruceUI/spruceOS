@@ -64,7 +64,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 )
             )
         else:
-            PyUiLogger.getLogger().info("Timezone setting not supported on this Device.get_device().")
+            PyUiLogger.get_logger().info("Timezone setting not supported on this Device.get_device().")
 
         option_list.append(
             GridOrListEntry(
@@ -92,3 +92,4 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
         )
 
         return option_list
+

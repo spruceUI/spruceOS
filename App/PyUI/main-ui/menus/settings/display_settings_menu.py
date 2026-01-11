@@ -86,7 +86,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.brightness(),
-                            value_text="<    " + str(Device.get_device().get_brightness()) + "    >",
+                            value_text="<    " + str(Device.get_device().brightness()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -98,7 +98,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.contrast(),
-                            value_text="<    " + str(Device.get_device().get_contrast()) + "    >",
+                            value_text="<    " + str(Device.get_device().contrast()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -110,7 +110,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.saturation(),
-                            value_text="<    " + str(Device.get_device().get_saturation()) + "    >",
+                            value_text="<    " + str(Device.get_device().saturation()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -123,7 +123,7 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.hue(),
-                            value_text="<    " + str(Device.get_device().get_hue()) + "    >",
+                            value_text="<    " + str(Device.get_device().hue()) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
