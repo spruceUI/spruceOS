@@ -116,9 +116,11 @@ jobs:
 
       - name: Create ZIP archive
         run: |
-          echo "Creating regular ZIP archive..."
+          echo "Creating regular ZIP archive with BZIP2 compression..."
           ZIP_NAME="spruceV${{ steps.get_version.outputs.version }}.zip"
-          zip -r9 "$ZIP_NAME" * .tmp_update \
+          
+          # Create ZIP with max compression using BZIP2
+          zip -r9 -Z bzip2 "$ZIP_NAME" * .tmp_update \
             -x ".git/*" \
             -x ".github/*" \
             -x ".gitignore" \
@@ -126,9 +128,11 @@ jobs:
             -x "create_spruce_release.bat" \
             -x "create_spruce_release.sh" \
             -x "commits_nightly.txt"
-          # Add the commits file to the root
+          
+          # Add commits file separately to ensure it's at the root
           zip "$ZIP_NAME" commits_nightly.txt
-          # Optional integrity check
+          
+          # Test ZIP integrity
           echo "Testing ZIP integrity..."
           zip -T "$ZIP_NAME"
           echo "ZIP archive $ZIP_NAME created successfully"
@@ -140,7 +144,6 @@ jobs:
           files: |
             spruceV${{ steps.get_version.outputs.version }}.7z
             spruceV${{ steps.get_version.outputs.version }}.zip
-
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.check_commits.outputs.commits }}
           repository: spruceUI/spruceOSNightlies
@@ -204,7 +207,7 @@ jobs:
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
             jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
           
-          # Convert to array and keep only releases after the first 3
+          # Convert to array and keep only releases after the first 14
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
@@ -212,4 +215,3 @@ jobs:
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done
-
