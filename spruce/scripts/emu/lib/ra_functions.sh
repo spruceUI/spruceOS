@@ -28,11 +28,12 @@
 
 get_ra_cfg_location(){
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-	#Why is Flip here as a platform check?
-    if [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
+    if [ -n "$RA_CFG_LOCATION" ]; then
+        # Already set, use it
+        echo "$RA_CFG_LOCATION"
+    elif [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
+		#Why is Flip here as a platform check?
 		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
-	elif [ "$PLATFORM" = "MiyooMini" ]; then
-		echo "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 	else
 		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
 	fi
@@ -41,7 +42,6 @@ get_ra_cfg_location(){
 prepare_ra_config() {
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG=$(get_ra_cfg_location)
-
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
