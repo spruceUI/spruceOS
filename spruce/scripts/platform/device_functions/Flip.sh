@@ -110,27 +110,29 @@ set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     VOLUME_RAW=$(( VOLUME_LV * 5 ))    
-
-    if are_headphones_plugged_in; then
-        amixer sset "Playback Path" "HP" >/dev/null 2>&1
-    else
-        amixer sset "Playback Path" "SPK" >/dev/null 2>&1
-    fi
-
     log_message "Setting volume to ${VOLUME_RAW}"
 
-    amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
 
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
+        #TODO can we prevent peaking audio if going from 0 to non-0?
+
+        if are_headphones_plugged_in; then
+            amixer sset "Playback Path" "HP" >/dev/null 2>&1
+        else
+            amixer sset "Playback Path" "SPK" >/dev/null 2>&1
+        fi
+
+        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
+        
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
             amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
     fi
-    
+
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
     if [ "$SAVE_TO_CONFIG" = true ]; then
         save_volume_to_config_file "$VOLUME_LV"
@@ -139,27 +141,18 @@ set_volume() {
 
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
-    log_message "Restoring volume to ${config_volume}"
 
-    amixer cset numid=2 0
-    amixer cset numid=5 0
-
-    if are_headphones_plugged_in; then
-        amixer cset numid=2 3
-    elif [ "$config_volume" -eq 0 ]; then
+    if [ "$config_volume" -ne 0 ]; then
+        log_message "Restoring volume to ${config_volume}"
         amixer cset numid=2 0
-    else
-        amixer cset numid=2 2
+        amixer cset numid=5 0
+        if are_headphones_plugged_in; then
+            amixer cset numid=2 3
+        else
+            amixer cset numid=2 2
+        fi
+        set_volume "$(( config_volume ))"
     fi
-
-    set_volume "$(( config_volume ))"
-}
-
-save_volume_to_config_file() {
-    VOLUME_LV=$1
-
-    # Update MainUI Config file
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
 }
 
 volume_down() {
