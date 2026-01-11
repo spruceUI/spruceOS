@@ -211,8 +211,7 @@ log_update_message "Current battery level: $BATTERY_CAPACITY%"
 
 if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" = "Discharging" ]; then
     log_update_message "Battery level too low for update"
-    display_image_and_text "$BAD_IMG" 35 25 "Battery too low for update.
-    Please charge to at least 20% or plug in your device, then try again." 75
+    display_image_and_text "$BAD_IMG" 35 25 "Battery too low for update.\nPlease charge to at least 20% or plug in your device, then try again." 75
     sleep 5
     exit 1
 fi
