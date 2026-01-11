@@ -82,9 +82,7 @@ class MiyooMiniCommon(MiyooDevice):
             self.start_wifi_services()
         self.on_mainui_config_change()
         self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
+        self._set_screen_values_to_config()  # Apply all display settings on startup
         self.ensure_wpa_supplicant_conf()
         self.init_gpio()
         if(PyUiConfig.enable_button_watchers()):
@@ -202,23 +200,47 @@ class MiyooMiniCommon(MiyooDevice):
         #self.miyoo_mini_flip_shared_memory_writer.set_lumination(self.system_config.backlight)
         self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.backlight)
 
+    def _set_screen_values_to_config(self):
+        """Apply all display settings via direct kernel proc interface"""
+        # Config is 1-20, Device is 0-100
+        # Ensure minimum values for visibility
+        brightness = max(5, self.system_config.brightness) * 5
+        contrast = max(5, self.system_config.contrast) * 5
+        saturation = self.system_config.saturation * 5
+        hue = self.system_config.hue * 5
+        red = max(48, self.get_disp_red())
+        green = max(48, self.get_disp_green())
+        blue = max(48, self.get_disp_blue())
+        
+        try:
+            ProcessRunner.run([
+                "/mnt/SDCARD/spruce/scripts/display_control.sh",
+                str(brightness), str(saturation), str(contrast), str(hue),
+                str(red), str(green), str(blue)
+            ])
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to apply display settings: {e}")
+
     def _set_contrast_to_config(self):
-        #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_contrast(self.system_config.contrast)
-        pass
+        self._set_screen_values_to_config()
     
     def _set_saturation_to_config(self):
-        #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_saturation(self.system_config.saturation)
-        pass
+        self._set_screen_values_to_config()
 
     def _set_brightness_to_config(self):
-        #Doesn't seem to work?
-        #self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.brightness)
-        pass
+        self._set_screen_values_to_config()
 
     def _set_hue_to_config(self):
-        pass
+        self._set_screen_values_to_config()
+    
+    def _set_disp_red_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_blue_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_green_to_config(self):
+        self._set_screen_values_to_config()
     
     def take_snapshot(self, path):
         return None
@@ -411,16 +433,31 @@ class MiyooMiniCommon(MiyooDevice):
         return True
 
     def supports_brightness_calibration(self):
-        return False
+        return True
 
     def supports_contrast_calibration(self):
-        return False
+        return True
 
     def supports_saturation_calibration(self):
-        return False
+        return True
 
     def supports_hue_calibration(self):
-        return False
+        return True
+    
+    def supports_rgb_calibration(self):
+        return True
+    
+    def get_brightness(self):
+        return self.system_config.get_brightness()
+    
+    def get_contrast(self):
+        return self.system_config.get_contrast()
+    
+    def get_saturation(self):
+        return self.system_config.get_saturation()
+    
+    def get_hue(self):
+        return self.system_config.get_hue()
     
     def supports_popup_menu(self):
         return False
