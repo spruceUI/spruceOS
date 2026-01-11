@@ -142,6 +142,7 @@ case "$PLATFORM" in
 
         export PATH="/mnt/SDCARD/spruce/miyoomini/bin:$PATH"
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/miyoomini/lib"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/bin/python/lib:$LD_LIBRARY_PATH"
 
         export SDL_VIDEODRIVER=mmiyoo
         export SDL_AUDIODRIVER=mmiyoo
