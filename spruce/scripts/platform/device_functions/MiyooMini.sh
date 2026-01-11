@@ -134,6 +134,7 @@ send_menu_button_to_retroarch() {
 
 prepare_for_pyui_launch(){
     set_performance
+    has_v4_screen && fbset -g 752 560 752 560 32
 }
 
 post_pyui_exit(){
