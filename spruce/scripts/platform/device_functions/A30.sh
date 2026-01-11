@@ -86,6 +86,7 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
+# Not updated to match other devices yet, takes raw value
 set_volume() {
     amixer set 'Soft Volume Master' "$new_vol" 
 }
