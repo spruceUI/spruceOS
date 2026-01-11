@@ -98,14 +98,6 @@ new_execution_loop() {
     log_message "Not needed for A30: new_execution_loop" -v
 }
 
-get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg"
-}
-
-get_ra_cfg_location(){
-	echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
-}
-
 setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"

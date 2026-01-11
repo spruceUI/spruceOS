@@ -112,16 +112,6 @@ new_execution_loop() {
     pidof audioserver >/dev/null || audioserver &
 }
 
-get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg"
-}
-
-get_ra_cfg_location(){
-    log_message "TODO: spruce breaks RA cfg so return fake value from get_ra_cfg_location"
-    touch /tmp/ignore.txt
-	echo "/tmp/ignore.txt"
-}
-
 setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"

@@ -146,14 +146,6 @@ new_execution_loop() {
     log_message "Missing new_execution_loop function"
 }
 
-get_spruce_ra_cfg_location() {
-    log_message "Missing get_spruce_ra_cfg_location function"
-}
-
-get_ra_cfg_location(){
-    log_message "Missing get_ra_cfg_location function"
-}
-
 setup_for_retroarch_and_get_bin_location(){
     log_message "Missing setup_for_retroarch_and_get_bin_location function"
 }

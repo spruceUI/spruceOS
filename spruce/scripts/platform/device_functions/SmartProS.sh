@@ -57,7 +57,6 @@ rgb_led() {
     rgb_led_trimui "$@"
 }
 
-
 # used in principal.sh
 enable_or_disable_rgb() {
     enable_file="/sys/class/led_anim/enable"
@@ -92,23 +91,9 @@ run_mixer_watchdog() {
     log_message "run_mixer_watchdog unecessary for smart pro s?" -v
 }
 
-new_execution_loop() {
-    log_message "new_execution_loop nothing todo" -v
-}
-
-get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-SmartProS.cfg"
-}
-
-get_ra_cfg_location(){
-	echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
-}
-
 setup_for_retroarch_and_get_bin_location(){
     setup_for_retroarch_and_get_bin_location_trimui
 }
-
-
 
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
 # or toggle in-game menu in PPSSPP
@@ -354,7 +339,6 @@ reset_playback_pack() {
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
 }
-
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {

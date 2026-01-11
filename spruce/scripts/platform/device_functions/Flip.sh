@@ -364,14 +364,6 @@ get_current_volume() {
     amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-get_ra_cfg_location(){
-    if [ "$use_igm" = "True" ]; then
-		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"
-	else
-		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
-	fi
-}
-
 setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
 	if [ "$CORE" = "yabasanshiro" ]; then
@@ -622,10 +614,6 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
-}
-
-get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
 }
 
 reset_playback_pack() {

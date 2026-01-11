@@ -17,6 +17,7 @@
 #   pin_to_dedicated_cores
 #
 # Provides:
+#   get_ra_cfg_location
 #   prepare_ra_config
 #   backup_ra_config
 #   run_retroarch
@@ -25,9 +26,20 @@
 #   load_n64_controller_profile
 #   save_custom_n64_controller_profile
 
-prepare_ra_config() {
+get_ra_cfg_location(){
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-	PLATFORM_CFG=$(get_spruce_ra_cfg_location)
+    if [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
+		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
+	elif [ "$PLATFORM" = "MiyooMini" ]; then
+		touch /tmp/ignore.txt									# TODO: figure out why chris says spruce breaks mini cfg,
+		echo "/tmp/ignore.txt"									# then fix that and remove this elif branch
+	else
+		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
+	fi
+}
+
+prepare_ra_config() {
+	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG=$(get_ra_cfg_location)
 
 	# Set auto save state based on spruceUI config
@@ -104,8 +116,7 @@ prepare_ra_config() {
 
 backup_ra_config() {
 	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-	PLATFORM_CFG=$(get_spruce_ra_cfg_location)
+	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG=$(get_ra_cfg_location)
 	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
 }

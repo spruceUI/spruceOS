@@ -37,10 +37,6 @@ init_gpio_a133p() {
     echo -n in > /sys/class/gpio/gpio243/direction
 }
 
-get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg"
-}
-
 get_fw_version() {
     tr -d ' \t\n' < /etc/version 2>/dev/null
 }
