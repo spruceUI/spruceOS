@@ -6,8 +6,8 @@ export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer
 audioserver &
 /mnt/SDCARD/spruce/miyoomini/bin/keymon &
 
-touch /mnt/SDCARD/spruce/miyoomini/bin/MainUI
-mount -o bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/miyoomini/bin/MainUI
+touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
+mount -o bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/profile /etc/profile
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
