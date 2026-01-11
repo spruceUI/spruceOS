@@ -3,7 +3,12 @@ SLEEP_TIMER_FILE="/tmp/sleep_timer_info"
 
 get_hw_epoch() {
     # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds
-    read _ MON DAY TIME YEAR _ < <(hwclock 2>/dev/null)
+    hw_output=$(hwclock 2>/dev/null)
+    set -- $hw_output
+    MON=$2
+    DAY=$3
+    TIME=$4
+    YEAR=$5
     
     # Convert month name to number
     case "$MON" in
