@@ -7,7 +7,7 @@
     "theme":    "/mnt/SDCARD/Themes/SPRUCE/",
     "hostap":    0,
     "netplay":    0,
-    "wifi":    1,
+    "wifi":    0,
     "cpufreq":    0,
     "topled":    4,
     "shoulderled":    4,
