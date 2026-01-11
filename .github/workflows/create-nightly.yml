@@ -1,7 +1,11 @@
 name: Create Nightly
 
 on:
+#  schedule:
+#    - cron: '10 10 * * *'
   workflow_dispatch:
+#  push:
+#    branches: [ Development ]
 
 jobs:
   create-7z:
@@ -14,10 +18,10 @@ jobs:
           ref: Development
           fetch-depth: 0
 
-      - name: Install 7zip and zip
+      - name: Install 7zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full zip
+          sudo apt-get install -y p7zip-full
 
       - name: Get version and date
         id: get_version
@@ -114,36 +118,11 @@ jobs:
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
-      - name: Create ZIP archive
-        run: |
-          echo "Creating regular ZIP archive with BZIP2 compression..."
-          ZIP_NAME="spruceV${{ steps.get_version.outputs.version }}.zip"
-          
-          # Create ZIP with max compression using BZIP2
-          zip -r9 -Z bzip2 "$ZIP_NAME" * .tmp_update \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x ".gitignore" \
-            -x ".gitattributes" \
-            -x "create_spruce_release.bat" \
-            -x "create_spruce_release.sh" \
-            -x "commits_nightly.txt"
-          
-          # Add commits file separately to ensure it's at the root
-          zip "$ZIP_NAME" commits_nightly.txt
-          
-          # Test ZIP integrity
-          echo "Testing ZIP integrity..."
-          zip -T "$ZIP_NAME"
-          echo "ZIP archive $ZIP_NAME created successfully"
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success() && steps.check_commits.outcome == 'success'
         with:
-          files: |
-            spruceV${{ steps.get_version.outputs.version }}.7z
-            spruceV${{ steps.get_version.outputs.version }}.zip
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.check_commits.outputs.commits }}
           repository: spruceUI/spruceOSNightlies
@@ -207,11 +186,16 @@ jobs:
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
             jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
           
-          # Convert to array and keep only releases after the first 14
+          # Convert to array and keep only releases after the first 3
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
-            if [ $COUNT -gt 14 ]; then
+            if [ $COUNT -gt 3 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
+
           done
+
+
+
+
