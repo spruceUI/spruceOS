@@ -16,3 +16,9 @@ device_init() {
 set_event_arg_for_idlemon() {
     log_message "TODO event arg for miyoo mini?" -v
 }
+
+# Miyoo Mini subtype detection
+
+is_mini_og() {
+    return 1
+}

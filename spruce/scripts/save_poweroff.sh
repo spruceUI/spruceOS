@@ -143,5 +143,9 @@ done
 
 # sync files and power off device
 sync
-poweroff
 
+if is_mini_og; then
+    reboot              # OG Mini hangs if you use the poweroff command
+else
+    poweroff
+fi
