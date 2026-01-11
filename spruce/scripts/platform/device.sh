@@ -277,3 +277,8 @@ device_woke_via_timer() {
 device_continue_sleep() {
     log_message "Missing device_continue_sleep function"
 }
+
+run_poweroff_cmd() {
+    log_message "Missing run_poweroff_cmd -- using default of poweroff"
+    poweroff
+}
