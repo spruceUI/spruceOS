@@ -61,7 +61,8 @@ else
     killall -q -15 ra64.miyoo
     killall -q -15 ra32.miyoo
     killall -q -15 retroarch
-    killall -q -15 retroarch-flip
+    killall -q -15 retroarch.A30
+    killall -q -15 retroarch.Flip
     killall -q -15 ra64.trimui_$PLATFORM
     killall -q -15 drastic32
     killall -q -15 drastic64
@@ -77,7 +78,8 @@ fi
 while killall -q -0 ra32.miyoo ||
     killall -q -0 ra64.miyoo ||
     killall -q -0 retroarch ||
-    killall -q -0 retroarch-flip ||
+    killall -q -0 retroarch.A30 ||
+    killall -q -0 retroarch.Flip ||
     killall -q -0 ra64.trimui_$PLATFORM ||
     killall -q -0 PPSSPPSDL ||
     killall -q -0 PPSSPPSDL_$PLATFORM ||

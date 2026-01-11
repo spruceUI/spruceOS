@@ -322,7 +322,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-SmartProS.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

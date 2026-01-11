@@ -111,7 +111,7 @@ setup_for_retroarch_and_get_bin_location(){
     export CORE_DIR="$RA_DIR/.retroarch/cores"
 
 	if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		export RA_BIN="retroarch"
+		export RA_BIN="retroarch.A30"
 	else
 		export RA_BIN="ra32.miyoo"
 	fi

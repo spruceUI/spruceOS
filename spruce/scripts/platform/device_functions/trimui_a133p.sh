@@ -173,7 +173,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
     #TODO Are these right for TrimUI A133P?
@@ -257,9 +257,8 @@ except Exception as e:
     traceback.print_exc()
 EOF
 
-tmp=$(mktemp)
-jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
-
+    tmp=$(mktemp)
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
 }
 
 current_backlight() {

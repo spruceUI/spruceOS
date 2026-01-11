@@ -378,7 +378,7 @@ setup_for_retroarch_and_get_bin_location(){
 		# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 		export RA_BIN="ra64.miyoo"
 	elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
-		export RA_BIN="retroarch-flip"
+		export RA_BIN="retroarch.Flip"
 	else
 		export RA_BIN="ra64.miyoo"
 	fi
@@ -542,7 +542,7 @@ runtime_mounts_Flip() {
     mount --bind /mnt/sdcard/spruce/flip/ /root 
 
     # Bind the correct version of retroarch so it can be accessed by PM
-    mount --bind /mnt/sdcard/RetroArch/retroarch-flip /mnt/sdcard/RetroArch/retroarch
+    mount --bind /mnt/sdcard/RetroArch/retroarch.Flip /mnt/sdcard/RetroArch/retroarch
 }
 
 
@@ -601,7 +601,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
