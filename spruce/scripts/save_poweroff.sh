@@ -141,6 +141,8 @@ while killall -q -0 MainUI; do
     sleep 0.3
 done
 
+flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
+
 # sync files and power off device
 sync
 

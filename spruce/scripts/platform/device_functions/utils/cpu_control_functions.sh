@@ -59,35 +59,37 @@ cores_online() {
 
 # overridden on Flip by its specific implementation (for now?) that also sets gpu gov and freq
 set_powersave(){
+    log_message "set_powersave() called"
+    if ! flag_check "setting_cpu"; then
 
-    cores_online "$DEVICE_MIN_CORES_ONLINE"
-    unlock_governor 2>/dev/null
+        cores_online "$DEVICE_MIN_CORES_ONLINE"
+        unlock_governor 2>/dev/null
 
-    echo "conservative" > "$CPU_0_DIR/scaling_governor"
-    echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_0_DIR/scaling_min_freq"
-    echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+        echo "conservative" > "$CPU_0_DIR/scaling_governor"
+        echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_0_DIR/scaling_min_freq"
+        echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_0_DIR/scaling_max_freq"
 
-    if [ -e "$CPU_4_DIR" ]; then
-        echo "conservative" > "$CPU_4_DIR/scaling_governor"
-        echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_4_DIR/scaling_min_freq"
-        echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+        if [ -e "$CPU_4_DIR" ]; then
+            echo "conservative" > "$CPU_4_DIR/scaling_governor"
+            echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_4_DIR/scaling_min_freq"
+            echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+        fi
+
+        lock_governor 2>/dev/null
+        log_message "CPU locked to POWERSAVE: core(s) $DEVICE_MIN_CORES_ONLINE @ $DEVICE_POWERSAVE_LOW_FREQ to $DEVICE_POWERSAVE_HIGH_FREQ"
+        flag_remove "setting_cpu"
     fi
-
-    log_message "Enabling powersave mode"
-    lock_governor 2>/dev/null
 }
 
 set_smart() {
-
     SMART_DOWN_THRESH=45
     SMART_UP_THRESH=75
     SMART_FREQ_STEP=3
     SMART_DOWN_FACTOR=1
     SMART_SAMPLING_RATE=100000
-    
     scaling_min_freq="${1:-$DEVICE_SMART_FREQ}"
-    log_message "set_smart called $scaling_min_freq"
 
+    log_message "set_smart called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
@@ -112,8 +114,7 @@ set_smart() {
         echo "$SMART_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
 
         lock_governor 2>/dev/null
-
-        log_message "CPU Mode now locked to SMART" -v
+        log_message "CPU Mode now locked to SMART: core(s) $DEVICE_SMART_CORES_ONLINE @ $scaling_min_freq to $DEVICE_PERF_FREQ"
         flag_remove "setting_cpu"
     fi
 }
@@ -136,8 +137,7 @@ set_performance() {
         fi
 
         lock_governor 2>/dev/null
-
-        log_message "CPU Mode now locked to PERFORMANCE" -v
+        log_message "CPU Mode now locked to PERFORMANCE: $DEVICE_MAX_CORES_ONLINE @ $DEVICE_PERF_FREQ"
         flag_remove "setting_cpu"
     fi
 }
@@ -158,7 +158,7 @@ set_overclock() {
         fi
 
         lock_governor 2>/dev/null
-        log_message "CPU Mode now locked to OVERCLOCK" -v
+        log_message "CPU Mode now locked to OVERCLOCK: $DEVICE_MAX_CORES_ONLINE @ $DEVICE_MAX_FREQ"
         flag_remove "setting_cpu"
     fi
 }
