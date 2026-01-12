@@ -127,7 +127,7 @@ jobs:
           {
             echo "files<<EOF"
             echo "spruceV${{ steps.get_version.outputs.version }}.7z"
-            for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
+            for file in spruceV${{ steps.get_version.outputs.version }}.zip spruce*.z*; do
               [ -f "$file" ] && echo "$file"
             done
             echo "EOF"
