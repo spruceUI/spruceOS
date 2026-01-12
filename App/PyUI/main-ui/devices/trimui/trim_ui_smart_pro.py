@@ -194,3 +194,11 @@ class TrimUISmartPro(TrimUIDevice):
     
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?
+    
+    def enable_bluetooth(self):
+        if(not self.is_bluetooth_enabled()):
+            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
+                            cwd='/usr/bin',
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+        self.system_config.set_bluetooth(1)

@@ -272,7 +272,7 @@ class GKDDevice(DeviceCommon):
         self.button_remapper.remap_buttons()
 
     def supports_wifi(self):
-        return True
+        return False
     
     def get_game_system_utils(self):
         return self.game_utils

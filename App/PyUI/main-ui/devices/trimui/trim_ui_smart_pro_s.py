@@ -262,3 +262,11 @@ class TrimUISmartProS(TrimUIDevice):
             self.volume_down()
         sleep(0.1)
         self.on_mainui_config_change()
+
+    def enable_bluetooth(self):
+        if(not self.is_bluetooth_enabled()):
+            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
+                            cwd='/usr/libexec/bluetooth/',
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+        self.system_config.set_bluetooth(1)
