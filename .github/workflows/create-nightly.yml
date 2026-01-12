@@ -87,15 +87,31 @@ jobs:
 
       - name: Create and split ZIP archive
         run: |
-          zip -r -9 "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update commits_nightly.txt \
+          VERSION="${{ steps.get_version.outputs.version }}"
+          ZIP_FILE="spruceV${VERSION}.zip"
+
+          echo "Creating full ZIP..."
+          zip -r -9 "$ZIP_FILE" * .tmp_update commits_nightly.txt \
             -x '*.git/*' -x '.github/*' \
             -x 'create_spruce_release.bat' -x 'create_spruce_release.sh' \
-            -x "spruceV${{ steps.get_version.outputs.version }}.7z"
+            -x "spruceV${VERSION}.7z"
 
-          zipsplit -n 1610612736 "spruceV${{ steps.get_version.outputs.version }}.zip"
+          echo "Splitting ZIP into 1.5GB parts..."
+          zipsplit -n 1610612736 "$ZIP_FILE"
 
-          # IMPORTANT: delete the oversized base zip so it never uploads
-          rm "spruceV${{ steps.get_version.outputs.version }}.zip"
+          echo "Renaming split parts..."
+          COUNT=1
+          for PART in "${ZIP_FILE}".z*; do
+            NEW_PART="spruceV${VERSION}.z$(printf "%02d" $COUNT)"
+            mv "$PART" "$NEW_PART"
+            COUNT=$((COUNT+1))
+          done
+
+          # Delete original zip
+          rm "$ZIP_FILE"
+
+          echo "ZIP split parts ready:"
+          ls -lh spruceV${VERSION}.z*
 
       - name: Prepare release files list
         id: zip_files
