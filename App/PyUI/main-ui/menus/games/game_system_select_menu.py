@@ -274,7 +274,7 @@ class GameSystemSelectMenu:
                         icon=None,
                         value=lambda input_value: self.run_extra(input_value, "Collections", self.collections_menu.run_rom_selection)
                     )          )    
-            if(Theme.get_settings_enabled() or Theme.merge_main_menu_and_game_menu()):
+            if(Theme.get_settings_enabled() or (Theme.merge_main_menu_and_game_menu() and not Theme.skip_main_menu())):
                 systems_list.append(GridOrListEntry(
                         primary_text="Settings",
                         primary_text_long="Settings",

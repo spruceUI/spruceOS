@@ -183,13 +183,15 @@ class MiyooFlip(MiyooDevice):
             except Exception as e:
                 PyUiLogger.get_logger().error(f"Error running insmod {e}")
 
-            if(not self.is_btmanager_runing()):
-                try:
-                    subprocess.Popen(["/usr/miyoo/bin/btmanager"],
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
-                except Exception as e:
-                    PyUiLogger.get_logger().error(f"Error running insmod {e}")
+            #Is this needed? Temporarily disable
+            if(False):
+                if(not self.is_btmanager_runing()):
+                    try:
+                        subprocess.Popen(["/usr/miyoo/bin/btmanager"],
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL)
+                    except Exception as e:
+                        PyUiLogger.get_logger().error(f"Error running insmod {e}")
         else:
             self.disable_bluetooth()
 

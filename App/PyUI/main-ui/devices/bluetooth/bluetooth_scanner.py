@@ -1,192 +1,184 @@
-from dataclasses import dataclass
-import os
-import re
-import select
 import subprocess
 import threading
 import time
-from typing import List
+from dataclasses import dataclass
 
-from display.font_purpose import FontPurpose
+# Current import (per your note this will change later)
+from devices.utils.process_runner import ProcessRunner
 from utils.logger import PyUiLogger
+
 
 @dataclass
 class BluetoothDevice:
     address: str
-    name: int
-    def __init__(self, address: str, name: str):
+    name: str
+    paired: bool = False 
+
+    def __init__(self, address: str, name: str, paired: bool):
         self.address = address
         self.name = name
+        self.paired = paired
 
 class BluetoothScanner:
-    def __init__(self):
-        self.seen_devices = {}
+    SCAN_INTERVAL = 2.0
 
+    def __init__(self):
+        self.log = PyUiLogger.get_logger()
+
+        self._devices = {}
+        self._lock = threading.Lock()
+        self._stop_event = threading.Event()
+        self._thread = None
+
+        self._scan_proc = None
+
+    # ----------------------------
+    # Public API
+    # ----------------------------
 
     def start(self):
-        self.process = subprocess.Popen(
-            ['bluetoothctl'],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
+        self.log.info("BluetoothScanner.start() called")
+
+        if self._thread and self._thread.is_alive():
+            self.log.info("BluetoothScanner: scanner thread already running")
+            return
+
+        self._stop_event.clear()
+
+        self._ensure_bluetooth_services()
+
+        self._thread = threading.Thread(
+            target=self._scanner_thread,
+            name="BluetoothScannerThread",
+            daemon=True
         )
-
-
-        self.send('power on')
-        time.sleep(1)
-        self.send('scan on')
+        self._thread.start()
 
     def stop(self):
-        self.send('scan off')
-        time.sleep(0.25)
-        self.send('exit')
-        self.process.terminate()
+        self.log.info("BluetoothScanner.stop() called")
 
-    def remove_ansi_escape_sequences(self,text):
-        # Remove ANSI escape sequences (for coloring and formatting in terminal)
-        text = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', text)
-        # Remove non-printable characters
-        text = ''.join(c for c in text if c.isprintable())
-        return text
-    
-    def send(self, cmd):
-        self.process.stdin.write(cmd + '\n')
-        PyUiLogger.get_logger().info(f"Running cmd : {cmd}")
-        self.process.stdin.flush()
+        self._stop_event.set()
 
-    def get_device_name_from_address(self, addr: str) -> str:
-        base_path = "/var/lib/bluetooth"
-        controllers = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
-        if not controllers:
-            PyUiLogger.get_logger().error(f"No directories found in {base_path}")
-            return f"Unknown ({addr})"
-       
-        controller_dir = os.path.join(base_path, controllers[0])  # assume only one controller folder
-        cache_dir = os.path.join(controller_dir, "cache")
-        cache_file_path = os.path.join(cache_dir, addr.upper())
+        if self._scan_proc:
+            try:
+                self.log.info("BluetoothScanner: stopping scan process")
+                self._scan_proc.terminate()
+            except Exception as e:
+                self.log.info(f"BluetoothScanner: failed stopping scan process: {e}")
+            self._scan_proc = None
 
-        if not os.path.isfile(cache_file_path):
-            PyUiLogger.get_logger().error(f"Cannot find cache file : {cache_file_path}")
-            return f"Unknown ({addr})"
+        # Best effort scan off
+        self._run_cmd(["bluetoothctl", "scan", "off"])
 
-        with open(cache_file_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("Name="):
-                    name = line[len("Name="):].strip()
-                    return name
+        if self._thread:
+            self._thread.join(timeout=2.0)
+            self._thread = None
 
-        PyUiLogger.get_logger().error(f"No name line found in : {cache_file_path}")
+        self.log.info("BluetoothScanner stopped")
 
+    def scan_devices(self):
+        """Returns list of uniquely seen devices."""
+        with self._lock:
+            return list(self._devices.values())
 
-    def scan_devices(self) -> List[BluetoothDevice]:
-        rlist, _, _ = select.select([self.process.stdout], [], [], 0.1)
-        if rlist:
-            line = self.process.stdout.readline().strip()
-            PyUiLogger.get_logger().info(f"{line}")  # Debug line read
-            line = self.remove_ansi_escape_sequences(line)  # Remove escape sequences
+    # ----------------------------
+    # Internal
+    # ----------------------------
 
-            if line.startswith('[NEW] Device '):
-                parts = line.split(' ', 3)
-                if len(parts) >= 4:
-                    addr = parts[2].strip()
-                    name = parts[3].strip()
-                    if addr not in self.seen_devices:
-                        self.seen_devices[addr] = BluetoothDevice(address=addr, name=name)
-                        PyUiLogger.get_logger().error(f"Found: {self.seen_devices[addr]}")
-                    else:
-                        PyUiLogger.get_logger().error(f"Device {addr} already seen.")
-
-            elif '[CHG] Device ' in line:
-                parts = line.split()
-                if len(parts) >= 4:
-                    addr = parts[2].strip()
-                    if addr not in self.seen_devices:
-                        name = self.get_device_name_from_address(addr)
-                        self.seen_devices[addr] = BluetoothDevice(address=addr, name=name)
-                        PyUiLogger.get_logger().error(f"Found device: {self.seen_devices[addr]}")
-                    else:
-                        PyUiLogger.get_logger().error(f"Controller {addr} already seen.")
-
-        return list(self.seen_devices.values())
-    
-    def connect_to_device(self, device_address):
-        from display.display import Display
-        from devices.device import Device
-        from themes.theme import Theme
-        from controller.controller import Controller
-        PyUiLogger.get_logger().info(f"Attempting to connect to {device_address}")
-        Display.clear("Bluetooth Connection")
-        Display.render_text_centered(f"Attempting to connect to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-        Display.present()
+    def _ensure_bluetooth_services(self):
+        self.log.info("Ensuring bluetooth services are running...")
 
         try:
-            process = subprocess.Popen(
-                ['bluetoothctl'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1
+            subprocess.Popen(
+                ["/usr/libexec/bluetooth/bluetoothd", "-f", "/etc/bluetooth/main.conf"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
-
-            output_lines = []
-
-            def read_output():
-                while True:
-                    line = process.stdout.readline()
-                    if not line:
-                        break
-                    PyUiLogger.get_logger().info(f"[BTCTL] {line.strip()}")
-                    output_lines.append(line)
-                    if "Connection successful" in line or "Failed to connect" in line or "Authentication Failed" in line:
-                        break
-
-            thread = threading.Thread(target=read_output)
-            thread.start()
-
-            # Send commands
-            cmds = [
-                'power on\n',
-                'agent on\n',
-                'default-agent\n',
-                f'pair {device_address}\n',
-                f'trust {device_address}\n',
-                f'connect {device_address}\n'
-            ]
-            for cmd in cmds:
-                process.stdin.write(cmd)
-                process.stdin.flush()
-                time.sleep(2)  # allow time for each step to complete
-
-            thread.join(timeout=20)  # wait up to 20 seconds for output reading
-
-            # Stop the process
-            process.stdin.write('quit\n')
-            process.stdin.flush()
-            process.terminate()
-
-            # Check if connection succeeded
-            all_output = ''.join(output_lines)
-            if "Connection successful" in all_output:
-                PyUiLogger.get_logger().info(f"Successfully connected to {device_address}")
-                Display.clear("Bluetooth Connection")
-                Display.render_text_centered(f"Successfully connected to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-                Display.present()
-                while(not Controller.get_input()):
-                    pass
-                return True
-            else:
-                PyUiLogger.get_logger().info(f"Failed to connect to {device_address}. Output:\n{all_output}")
-                Display.clear("Bluetooth Connection")
-                Display.render_text_centered(f"Failed to connect to {device_address}",Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
-                Display.present()
-                while(not Controller.get_input()):
-                    pass
-                return False
-
+            self.log.info("bluetoothd started (or already running)")
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Error while connecting to the device: {str(e)}")
+            self.log.info(f"Failed starting bluetoothd: {e}")
+
+        try:
+            subprocess.Popen(
+                ["bluealsa", "-p", "a2dp-source"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            self.log.info("bluealsa started (or already running)")
+        except Exception as e:
+            self.log.info(f"Failed starting bluealsa: {e}")
+
+        # Give dbus a moment
+        time.sleep(1.0)
+
+    def _scanner_thread(self):
+        self.log.info("BluetoothScanner: scanner thread entering")
+
+        # Power on bluetooth (blocking is safe)
+        self._run_cmd(["bluetoothctl", "power", "on"])
+
+        # Start scan NON-BLOCKING (important)
+        try:
+            self.log.info("BluetoothScanner: starting bluetoothctl scan on (non-blocking)")
+            self._scan_proc = subprocess.Popen(
+                ["bluetoothctl", "scan", "on"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        except Exception as e:
+            self.log.info(f"BluetoothScanner: failed starting scan: {e}")
+
+        self.log.info("BluetoothScanner: bluetooth power on + scan enabled")
+
+        # Poll loop
+        while not self._stop_event.is_set():
+            try:
+                self._poll_devices()
+            except Exception as e:
+                self.log.info(f"BluetoothScanner: poll failed: {e}")
+
+            time.sleep(self.SCAN_INTERVAL)
+
+        self.log.info("BluetoothScanner: scanner thread exiting")
+
+    def _poll_devices(self):
+        """Runs `bluetoothctl devices` and parses output."""
+        #self.log.info("BluetoothScanner: polling devices")
+
+        output = self._run_cmd(["bluetoothctl", "devices"], log_stdout=False)
+        if not output:
+            return
+
+        for line in output.splitlines():
+            line = line.strip()
+            if not line.startswith("Device"):
+                continue
+
+            # Format:
+            # Device AA:BB:CC:DD:EE:FF Device Name
+            parts = line.split(" ", 2)
+            if len(parts) < 3:
+                continue
+
+            _, mac, name = parts
+
+            with self._lock:
+                if mac not in self._devices:
+                    paired = self._check_paired(mac)
+                    self.log.info(f"BluetoothScanner: discovered {mac} ({name})")
+                    self._devices[mac] = BluetoothDevice(mac, name, paired)
+
+    def _check_paired(self, mac: str) -> bool:
+        """Checks if a device is paired using `bluetoothctl info`."""
+        output = self._run_cmd(["bluetoothctl", "info", mac])
+        if not output:
             return False
+        return "Paired: yes" in output
+    
+    def refresh_devices(self):
+        """Clears the device list to force re-scan."""
+        with self._lock:
+            self._devices.clear()
+    
+    def _run_cmd(self, cmd, log_stdout=True):
+        return ProcessRunner.run_cmd("BluetoothScanner", cmd, log_stdout=log_stdout)

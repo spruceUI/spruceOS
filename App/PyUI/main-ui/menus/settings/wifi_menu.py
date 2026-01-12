@@ -1,8 +1,11 @@
 
+from asyncio import subprocess
+import time
 import os
 import re
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from display.display import Display
 from display.font_purpose import FontPurpose
@@ -20,7 +23,6 @@ from menus.language.language import Language
 
 class WifiMenu:
     def __init__(self):
-        self.wifi_scanner = WiFiScanner()
         self.on_screen_keyboard = OnScreenKeyboard()
 
     def wifi_adjust(self):
@@ -78,98 +80,153 @@ class WifiMenu:
             PyUiLogger.get_logger().error(f"Error writing to {file_path}: {e}")
 
 
+    def reload_wpa_supplicant_config(self):
+        try:
+            ProcessRunner.run(["wpa_cli", "reconfigure"])
+            PyUiLogger.get_logger().info("wpa_supplicant.conf reloaded successfully.")
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Error reloading wpa_supplicant.conf: {e}")
+
+
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
-        if(net.requires_password):
+        if(net.requires_password()):
             password = self.on_screen_keyboard.get_input("WiFi Password")
             if(password is not None and 8 <= len(password) <= 63):
                 self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
         else:   
             self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
 
-        self.wifi_scanner.reload_wpa_supplicant_config()
+        self.reload_wpa_supplicant_config()
 
+    def _build_options(
+        self,
+        wifi_enabled: bool,
+        networks: list[WiFiNetwork],
+        connected_ssid: str | None,
+        connected_is_5ghz: bool,
+    ):
+        option_list = []
 
-    def show_wifi_menu(self):
-        selected = Selection(None, None, 0)
-        should_scan_for_wifi = True
-        networks = []
-        connected_ssid = ""
-        connected_freq = 0
-        connected_is_5ghz = False
-        while(selected is not None):
-            wifi_enabled = Device.get_device().is_wifi_enabled()
-            option_list = []
-            option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.status(),
-                        value_text="<    " + ("On" if wifi_enabled else "Off") + "    >",
+        # WiFi toggle entry
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.status(),
+                value_text="<    " + ("On" if wifi_enabled else "Off") + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.wifi_adjust,
+            )
+        )
+
+        # Network entries
+        if wifi_enabled:
+            if not networks:
+                option_list.append(
+                    GridOrListEntry(
+                        primary_text="Scanning for networks...",
+                        value_text=None,
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.wifi_adjust
+                        value=lambda: None,
                     )
-            )
-            
-
-            if(wifi_enabled):
-                Display.clear("WiFi")
-                Display.render_text(
-                    text = "Scanning for Networks (~10s)",
-                    x = Device.get_device().screen_width() // 2,
-                    y = Display.get_usable_screen_height() // 2,
-                    color = Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
-                    purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                    render_mode=RenderMode.MIDDLE_CENTER_ALIGNED)
-                Display.present()
-                if(should_scan_for_wifi):
-                    should_scan_for_wifi = False
-                    networks = self.wifi_scanner.scan_networks()
-                    connected_ssid, connected_freq = self.wifi_scanner.get_connected_ssid()
-                    connected_is_5ghz = False
-                    if(connected_freq is not None and connected_freq >= 5000 and connected_freq <= 6000):
-                        connected_is_5ghz = True
-
+                )
+            else:
                 for net in networks:
-                    network_name = net.ssid
-                    network_is_5ghz = False
-                    if(net.frequency >= 5000 and net.frequency <= 6000):
-                        network_name += " (5Ghz)"
-                        network_is_5ghz = True
+                    name = net.ssid
+                    is_5ghz = 5000 <= net.frequency <= 6000
 
-                    connected = False
-                    if(connected_ssid == net.ssid and network_is_5ghz == connected_is_5ghz):
-                        connected = True
+                    if is_5ghz:
+                        name += " (5Ghz)"
+
+                    connected = (
+                        connected_ssid == net.ssid
+                        and is_5ghz == connected_is_5ghz
+                    )
 
                     option_list.append(
                         GridOrListEntry(
-                                primary_text=network_name,
-                                value_text="✓" if connected else None,
-                                image_path=None,
-                                image_path_selected=None,
-                                description=None,
-                                icon=None,
-                                value=lambda net=net: self.switch_network(net)  # Capture net at creation
-                            )
+                            primary_text=name,
+                            value_text="✓" if connected else None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=lambda net=net: self.switch_network(net),
+                        )
                     )
 
-            list_view = ViewCreator.create_view(
-                    view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="WiFi Configuration", 
-                    options=option_list,
-                    selected_index=selected.get_index())
+        return option_list
 
-            accepted_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
-                                                ControllerInput.L1, ControllerInput.R1]
-            
-            selected = Selection(None, None, 0)
-            while(selected is not None and selected.get_input() not in accepted_inputs):
+
+    def show_wifi_menu(self):
+        selected = Selection(None, None, 0)
+        self.wifi_scanner = WiFiScanner()
+
+        # Start background scanning immediately
+        self.wifi_scanner.scan_networks()
+
+        connected_ssid = None
+        connected_is_5ghz = False
+
+        accepted_inputs = [
+            ControllerInput.A,
+            ControllerInput.DPAD_LEFT,
+            ControllerInput.DPAD_RIGHT,
+            ControllerInput.L1,
+            ControllerInput.R1,
+        ]
+
+        try:
+            while selected is not None:
+                wifi_enabled = Device.get_device().is_wifi_enabled()
+
+                # Pull latest scan snapshot (non-blocking)
+                networks = (
+                    self.wifi_scanner.scan_networks()
+                    if wifi_enabled
+                    else []
+                )
+
+                ssid, freq = self.wifi_scanner.get_connected_ssid()
+                connected_ssid = ssid
+                connected_is_5ghz = bool(freq and 5000 <= freq <= 6000)
+
+                # Build options (single source of truth)
+                option_list = self._build_options(
+                    wifi_enabled=wifi_enabled,
+                    networks=networks,
+                    connected_ssid=connected_ssid,
+                    connected_is_5ghz=connected_is_5ghz,
+                )
+
+                # Render view
+                list_view = ViewCreator.create_view(
+                    view_type=ViewType.ICON_AND_DESC,
+                    top_bar_text="WiFi Configuration",
+                    options=option_list,
+                    selected_index=selected.get_index(),
+                )
+
+                # Single non-blocking poll
                 selected = list_view.get_selection(accepted_inputs)
 
-                if(selected.get_input() in accepted_inputs):
+                if selected is None:
+                    break
+
+                if selected.get_input() in accepted_inputs:
                     selected.get_selection().value()
-                    should_scan_for_wifi = True
-                elif(ControllerInput.B == selected.get_input()):
-                    selected = None
+                elif ControllerInput.B == selected.get_input():
+                    break
+
+                # Prevent CPU spin
+                time.sleep(0.05)
+
+        finally:
+            Display.display_message("Stopping WiFi scanner...")
+            self.wifi_scanner.stop()
