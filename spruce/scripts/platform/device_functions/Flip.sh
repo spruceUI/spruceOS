@@ -257,12 +257,6 @@ prepare_for_pyui_launch(){
     ) &
 }
 
-post_pyui_exit(){
-    echo "dmc_ondemand" > /sys/class/devfreq/dmc/governor
-    echo "1056000000" > /sys/class/devfreq/dmc/max_freq
-    lock_governor 2>/dev/null
-}
-
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "true"
 
