@@ -118,9 +118,9 @@ jobs:
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
-      - name: Create ZIP archive (split into 2GB parts)
+      - name: Create ZIP archive (split into 1.5GB parts)
         run: |
-          zip -r -9 -s 2g "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update \
+          zip -r -9 -s 1536m "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update \
             -x '*.git*' \
             -x '*.github*' \
             -x 'create_spruce_release.bat' \
