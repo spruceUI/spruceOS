@@ -138,14 +138,15 @@ jobs:
         with:
           files: |
             spruceV${{ steps.get_version.outputs.version }}.7z
-            spruceV${{ steps.get_version.outputs.version }}.zip
-            spruceV${{ steps.get_version.outputs.version }}.z[0-9][0-9]
+            spruceV${{ steps.get_version.outputs.version }}*.zip
+            spruceV${{ steps.get_version.outputs.version }}*.z??
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.check_commits.outputs.commits }}
           repository: spruceUI/spruceOSNightlies
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
           prerelease: false
+          fail_on_unmatched_files: false
 
       - name: Update OTA files
         if: success() && steps.check_commits.outcome == 'success'
