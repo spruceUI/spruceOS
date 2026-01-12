@@ -211,6 +211,7 @@ class MiyooDevice(DeviceCommon):
     
     
     def disable_bluetooth(self):
+        PyUiLogger.get_logger().info(f"Disabling Bluetooth")
         ProcessRunner.run(["killall","-15","bluetoothd"])
         time.sleep(0.1)  
         ProcessRunner.run(["killall","-9","bluetoothd"])
@@ -221,6 +222,7 @@ class MiyooDevice(DeviceCommon):
                             cwd='/usr/libexec/bluetooth/',
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
+        self.system_config.set_bluetooth(1)
             
     def perform_startup_tasks(self):
         pass

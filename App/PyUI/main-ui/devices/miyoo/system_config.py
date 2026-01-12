@@ -117,6 +117,11 @@ class SystemConfig:
 
     def set_wifi(self, value):
         self.config["wifi"] = value
+        self.save_config()
+
+    def set_bluetooth(self, value):
+        self.config["bluetooth"] = value
+        self.save_config()
 
     def get_language(self):
         return self.config.get("language")
