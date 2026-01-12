@@ -130,6 +130,8 @@ run_retroarch() {
 	log_message "export PATH=\"$PATH\"" -v
 	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\"" -v
 	#Swap below if debugging
+	
+	/mnt/SDCARD/spruce/scripts/bluetooth/bluetooth.sh "$RA_DIR"
 	#HOME="$RA_DIR/.retroarch/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v -L "$CORE_PATH" "$ROM_FILE"
 
