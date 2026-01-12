@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# From CarlOS launch.sh script
+# Modified From CarlOS launch.sh script
 
 # Allow HOME override via first argument
 BASE_HOME="${1:-$HOME}"
