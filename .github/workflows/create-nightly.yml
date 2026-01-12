@@ -129,6 +129,8 @@ jobs:
             -x "spruceV${{ steps.get_version.outputs.version }}.7z"
           # Add the commits file to the ZIP
           zip "spruceV${{ steps.get_version.outputs.version }}.zip" commits_nightly.txt
+          # List all ZIP parts created
+          ls -lh spruceV${{ steps.get_version.outputs.version }}.z* spruceV${{ steps.get_version.outputs.version }}.zip 2>/dev/null || true
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
