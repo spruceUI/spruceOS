@@ -15,7 +15,7 @@
         "Overclock",
         "Powersave"
       ],
-      "selected": "Powersave",
+      "selected": "Smart",
       "overrides": {}
     }
   },

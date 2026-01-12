@@ -15,7 +15,7 @@
         "Overclock",
         "Powersave"
       ],
-      "selected": "Powersave",
+      "selected": "Smart",
       "overrides": {}
     },
     "Emulator": {
@@ -24,7 +24,7 @@
         "mgba",
         "gpsp"
       ],
-      "selected": "gpsp",
+      "selected": "mgba",
       "overrides": {}
     }
   },
@@ -32,6 +32,6 @@
   "brand": "Nintendo",
   "type": "handheld",
   "releaseYear": 2001,
-  "default_emulator": "gpsp",
+  "default_emulator": "mgba",
   "scaling_min_freq": 816000
 }
