@@ -1,24 +1,27 @@
 name: Create Nightly
 
 on:
+#  schedule:
+#    - cron: '10 10 * * *'
   workflow_dispatch:
+#  push:
+#    branches: [ Development ]
 
 jobs:
   create-7z:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: Development
           fetch-depth: 0
 
-      - name: Install 7zip and zip
+      - name: Install 7zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full zip jq
+          sudo apt-get install -y p7zip-full
 
       - name: Get version and date
         id: get_version
@@ -27,10 +30,9 @@ jobs:
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
-
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-
+          # Get last commit hash and commits, save to file
           {
             echo "Last commit: $(git rev-parse HEAD)"
             echo ""
@@ -41,11 +43,13 @@ jobs:
       - name: Check for commits
         id: check_commits
         run: |
+          # Get all commits from last 24 hours
           COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
           fi
+          # Write commits to output
           {
             echo "commits<<EOF"
             echo "$COMMITS"
@@ -54,16 +58,21 @@ jobs:
 
       - name: Recombine large files
         run: |
+          # Miyoo rootfs
           if ls spruce/flip/miyoo355_rootfs_32.img_part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/miyoo355_rootfs_32.img
             cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
             rm -f spruce/flip/miyoo355_rootfs_32.img_part*
           fi
 
+          # muOS pixie
           if ls spruce/flip/muOS-pixie-reduced.sqsh-part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh
             cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
             rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
           fi
 
+          # scummvm libretro core
           if ls RetroArch/.retroarch/cores64/scummvm_libretro.so.part* 1>/dev/null 2>&1; then
             cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
             rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
@@ -71,85 +80,122 @@ jobs:
 
       - name: Pull selected PyUI Themes
         run: |
-          git clone --depth=1 https://github.com/spruceUI/PyUI-Themes.git pyui_themes
+          echo "Cloning PyUI-Themes repo..."
+          git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
+
           mkdir -p Themes
-          cp pyui_themes/PackedThemes/*.7z Themes/ || true
+
+          echo "Copying selected themes..."
+
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/RETRO TV.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
+
+          echo "Themes copied:"
+          ls -lh Themes
+
+          echo "Removing cloned PyUI Themes repo"
           rm -rf pyui_themes
 
       - name: Create 7z archive
         run: |
           7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
-            -xr!.git -xr!.github -x!.gitignore -x!.gitattributes \
-            -x!create_spruce_release.bat -x!create_spruce_release.sh \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh \
             -x!commits_nightly.txt
-
+          # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
-
-      - name: Create and split ZIP archive
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          ZIP_FILE="spruceV${VERSION}.zip"
-
-          echo "Creating full ZIP..."
-          zip -r -9 "$ZIP_FILE" * .tmp_update commits_nightly.txt \
-            -x '*.git/*' -x '.github/*' \
-            -x 'create_spruce_release.bat' -x 'create_spruce_release.sh' \
-            -x "spruceV${VERSION}.7z"
-
-          echo "Splitting ZIP into 1.5GB parts..."
-          zipsplit -n 1610612736 "$ZIP_FILE"
-
-          echo "Renaming split parts..."
-          COUNT=1
-          for PART in "${ZIP_FILE}".z*; do
-            NEW_PART="spruceV${VERSION}.z$(printf "%02d" $COUNT)"
-            mv "$PART" "$NEW_PART"
-            COUNT=$((COUNT+1))
-          done
-
-          # Delete original zip
-          rm "$ZIP_FILE"
-
-          echo "ZIP split parts ready:"
-          ls -lh spruceV${VERSION}.z*
-
-      - name: Prepare release files list
-        id: zip_files
-        run: |
-          {
-            echo "files<<EOF"
-            echo "spruceV${{ steps.get_version.outputs.version }}.7z"
-            for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
-              [ -f "$file" ] && echo "$file"
-            done
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success() && steps.check_commits.outcome == 'success'
         with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           body: ${{ steps.check_commits.outputs.commits }}
-          files: ${{ steps.zip_files.outputs.files }}
           repository: spruceUI/spruceOSNightlies
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
           prerelease: false
-          fail_on_unmatched_files: true
+
+      - name: Update OTA files
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # Clone both repositories
+          git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
+          git clone https://github.com/spruceUI/spruceSource.git source_repo
+          
+          # Calculate file info
+          CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
+          SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
+          
+          # Function to update OTA file
+          update_ota_file() {
+            local file="$1"
+            local content
+            content=$(cat "$file")
+            
+            echo "$content" | grep -v "^NIGHTLY_" > "$file"
+            echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+            echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
+            echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
+            echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+            echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+          }
+          
+          # Update both OTA files
+          update_ota_file "ota_repo/OTA/spruce"
+          update_ota_file "source_repo/OTA/spruce"
+          
+          # Update primary OTA repo
+          cd ota_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          
+          # Update backup OTA repo
+          cd ../source_repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add OTA/spruce
+          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
 
       - name: Delete old releases
         if: success() && steps.check_commits.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate |
+          # Get all releases and filter out beta releases
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
             jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
-
+          
+          # Convert to array and keep only releases after the first 3
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
             if [ $COUNT -gt 3 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
+
           done
+
+
+
+
