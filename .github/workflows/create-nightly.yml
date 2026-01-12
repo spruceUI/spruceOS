@@ -123,20 +123,19 @@ jobs:
           echo "ZIP files created:"
           ls -lh spruceV${{ steps.get_version.outputs.version }}.*
 
-          - name: Prepare ZIP files list
-  id: zip_files
-  run: |
-    {
-      echo "files<<EOF"
-      echo "spruceV${{ steps.get_version.outputs.version }}.7z"
-      [ -f "spruceV${{ steps.get_version.outputs.version }}.zip" ] && \
-        echo "spruceV${{ steps.get_version.outputs.version }}.zip"
-      for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
-        [ -f "$file" ] && echo "$file"
-      done
-      echo "EOF"
-    } >> "$GITHUB_OUTPUT"
-
+      - name: Prepare ZIP files list
+        id: zip_files
+        run: |
+          {
+            echo "files<<EOF"
+            echo "spruceV${{ steps.get_version.outputs.version }}.7z"
+            [ -f "spruceV${{ steps.get_version.outputs.version }}.zip" ] && \
+              echo "spruceV${{ steps.get_version.outputs.version }}.zip"
+            for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
+              [ -f "$file" ] && echo "$file"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -182,7 +181,7 @@ jobs:
           git config user.email "actions@github.com"
           git add OTA/spruce
           git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          git push https://x-access-token:${{ steps.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
 
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
@@ -204,5 +203,3 @@ jobs:
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done
-
-
