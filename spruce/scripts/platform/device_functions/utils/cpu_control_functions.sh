@@ -6,13 +6,13 @@
 
 # requires from $PLATFORM.cfg files:
 # DEVICE_MIN_CORES_ONLINE
-# DEVICE_SMART_CORES_ONLINE
+# CPU_SMART_CORES_ONLINE
 # DEVICE_MAX_CORES_ONLINE
 # DEVICE_POWERSAVE_LOW_FREQ
 # DEVICE_POWERSAVE_HIGH_FREQ
-# DEVICE_SMART_FREQ
-# DEVICE_PERF_FREQ
-# DEVICE_MAX_FREQ
+# CPU_SMART_MIN_FREQ
+# CPU_PERF_MAX_FREQ
+# CPU_OVERCLOCK_MAX_FREQ
 # CONSERVATIVE_POLICY_DIR
 
 CPU_0_DIR=/sys/devices/system/cpu/cpu0/cpufreq
@@ -37,6 +37,7 @@ lock_governor() {
 #   cores_online "0135"     -> online cores 0,1,3,5; offline others
 cores_online() {
     core_string="${1:-0123}"
+    log_message "Setting cores online: ${core_string}"
 
     # Silently fall back on invalid input
     case "$core_string" in (*[!0-7]*) core_string=0123 ;; esac
@@ -87,24 +88,29 @@ set_smart() {
     SMART_FREQ_STEP=3
     SMART_DOWN_FACTOR=1
     SMART_SAMPLING_RATE=100000
-    scaling_min_freq="${1:-$DEVICE_SMART_FREQ}"
+    scaling_min_freq="${1:-$CPU_SMART_MIN_FREQ}"
 
-    log_message "set_smart called"
+    if [ -n "$CPU_SMART_MAX_FREQ" ]; then
+        scaling_max_freq="$CPU_SMART_MAX_FREQ"
+    else
+        scaling_max_freq="$CPU_PERF_MAX_FREQ"
+    fi
+
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
         cores_online 01234567   # bring all up before potentially offlining cpu0
-        cores_online "$DEVICE_SMART_CORES_ONLINE"
+        cores_online "$CPU_SMART_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
 
         echo "conservative" > "$CPU_0_DIR/scaling_governor"
         echo "$scaling_min_freq" > "$CPU_0_DIR/scaling_min_freq"
-        echo "$DEVICE_PERF_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+        echo "$scaling_max_freq" > "$CPU_0_DIR/scaling_max_freq"
 
         if [ -e "$CPU_4_DIR" ]; then
             echo "conservative" > "$CPU_4_DIR/scaling_governor"
             echo "$scaling_min_freq" > "$CPU_4_DIR/scaling_min_freq"
-            echo "$DEVICE_PERF_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+            echo "$scaling_max_freq" > "$CPU_4_DIR/scaling_max_freq"
         fi
 
         echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
@@ -113,8 +119,13 @@ set_smart() {
         echo "$SMART_DOWN_FACTOR" > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
         echo "$SMART_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
 
+        if [ -d "$GPU_GOVENOR_DIR" ]; then
+            echo "$GPU_SMART_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
+            echo "$GPU_SMART_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
+        fi
+
         lock_governor 2>/dev/null
-        log_message "CPU Mode now locked to SMART: core(s) $DEVICE_SMART_CORES_ONLINE @ $scaling_min_freq to $DEVICE_PERF_FREQ"
+        log_message "CPU Mode now locked to SMART: core(s) $CPU_SMART_CORES_ONLINE @ $scaling_min_freq to $CPU_PERF_MAX_FREQ"
         flag_remove "setting_cpu"
     fi
 }
@@ -129,16 +140,22 @@ set_performance() {
         unlock_governor 2>/dev/null
 
         echo "performance" > "$CPU_0_DIR/scaling_governor"
-        echo "$DEVICE_PERF_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+        echo "$CPU_PERF_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
 
         if [ -e "$CPU_4_DIR" ]; then
             echo "performance" > "$CPU_4_DIR/scaling_governor"
-            echo "$DEVICE_PERF_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+            echo "$CPU_PERF_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+        fi
+
+        if [ -d "$GPU_GOVENOR_DIR" ]; then
+            echo "$GPU_PERFORMANCE_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
+            echo "$GPU_PERFORMANCE_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
         fi
 
         lock_governor 2>/dev/null
-        log_message "CPU Mode now locked to PERFORMANCE: $DEVICE_MAX_CORES_ONLINE @ $DEVICE_PERF_FREQ"
+        log_message "CPU Mode now locked to PERFORMANCE: $DEVICE_MAX_CORES_ONLINE @ $CPU_PERF_MAX_FREQ"
         flag_remove "setting_cpu"
+        
     fi
 }
 
@@ -151,14 +168,22 @@ set_overclock() {
         unlock_governor 2>/dev/null
 
         echo performance > "$CPU_0_DIR/scaling_governor"
-        echo "$DEVICE_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
+        # Should we specify a min frequncy?
+        echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_0_DIR/scaling_min_freq"
+        echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
         if [ -e "$CPU_4_DIR" ]; then
             echo "performance" > "$CPU_4_DIR/scaling_governor"
-            echo "$DEVICE_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+            echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_4_DIR/scaling_min_freq"
+            echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
+        fi
+
+        if [ -d "$GPU_GOVENOR_DIR" ]; then
+            echo "$GPU_OVERCLOCK_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
+            echo "$GPU_OVERCLOCK_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
         fi
 
         lock_governor 2>/dev/null
-        log_message "CPU Mode now locked to OVERCLOCK: $DEVICE_MAX_CORES_ONLINE @ $DEVICE_MAX_FREQ"
+        log_message "CPU Mode now locked to OVERCLOCK: $DEVICE_MAX_CORES_ONLINE @ $CPU_OVERCLOCK_MAX_FREQ"
         flag_remove "setting_cpu"
     fi
 }

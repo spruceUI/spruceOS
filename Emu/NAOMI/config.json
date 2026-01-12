@@ -16,8 +16,7 @@
       "display": "CPU Mode",
       "options": [
         "Performance",
-        "Overclock",
-        "Powersave"
+        "Overclock"
       ],
       "selected": "Performance",
       "overrides": {}

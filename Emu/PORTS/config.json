@@ -13,10 +13,9 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock",
-        "Powersave"
+        "Overclock"
       ],
-      "selected": "Smart",
+      "selected": "Performance",
       "overrides": {}
     },
     "controlMode": {
