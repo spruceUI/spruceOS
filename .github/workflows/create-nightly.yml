@@ -28,7 +28,8 @@ jobs:
           fi
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-          # Get last commit hash and commits, save to file
+
+          # Save last commit and commits in last 24h
           {
             echo "Last commit: $(git rev-parse HEAD)"
             echo ""
@@ -74,12 +75,9 @@ jobs:
 
       - name: Pull selected PyUI Themes
         run: |
-          echo "Cloning PyUI-Themes repo..."
           git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
-
           mkdir -p Themes
 
-          echo "Copying selected themes..."
           cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
@@ -94,8 +92,6 @@ jobs:
 
           echo "Themes copied:"
           ls -lh Themes
-
-          echo "Removing cloned PyUI Themes repo"
           rm -rf pyui_themes
 
       - name: Create 7z archive
@@ -110,35 +106,20 @@ jobs:
             -x!commits_nightly.txt
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
-      - name: Create ZIP archive (split into 1.5GB parts)
+      - name: Create and split ZIP archive
         run: |
-          echo "Creating full ZIP archive..."
-          zip -r -9 "temp_spruce.zip" * .tmp_update commits_nightly.txt \
-            -x '*.git/*' \
-            -x '.github/*' \
-            -x 'create_spruce_release.bat' \
-            -x 'create_spruce_release.sh' \
+          echo "Creating full ZIP..."
+          zip -r -9 "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update commits_nightly.txt \
+            -x '*.git/*' -x '.github/*' -x 'create_spruce_release.bat' -x 'create_spruce_release.sh' \
             -x "spruceV${{ steps.get_version.outputs.version }}.7z"
-          
-          echo "=== Temp ZIP created ==="
-          ls -lh temp_spruce.zip
-          SIZE=$(stat -c%s temp_spruce.zip 2>/dev/null || stat -f%z temp_spruce.zip 2>/dev/null || echo "0")
-          echo "Size in bytes: $SIZE"
-          echo "Size in MB: $((SIZE / 1024 / 1024))"
-          
-          echo "=== Running zip split command ==="
-          set -x
-          zip -s 1536m temp_spruce.zip --out "spruceV${{ steps.get_version.outputs.version }}.zip"
-          set +x
-          
-          echo "=== All files after split ==="
-          ls -lha | grep spruce || echo "No spruce files found"
-          
-          echo "=== Cleaning up temp ==="
-          rm -f temp_spruce.zip
-          
-          echo "=== Final files ==="
-          ls -lh spruceV${{ steps.get_version.outputs.version }}* 2>/dev/null || echo "No final files found"
+
+          echo "Splitting ZIP into 1.5GB parts..."
+          zipsplit -n 1610612736 "spruceV${{ steps.get_version.outputs.version }}.zip"
+
+          rm -f "spruceV${{ steps.get_version.outputs.version }}.zip"
+
+          echo "Files after split:"
+          ls -lh *.zip 2>/dev/null || echo "No zip files found"
 
       - name: Prepare ZIP files list
         id: zip_files
@@ -146,9 +127,7 @@ jobs:
           {
             echo "files<<EOF"
             echo "spruceV${{ steps.get_version.outputs.version }}.7z"
-            [ -f "spruceV${{ steps.get_version.outputs.version }}.zip" ] && \
-              echo "spruceV${{ steps.get_version.outputs.version }}.zip"
-            for file in spruceV${{ steps.get_version.outputs.version }}.z[0-9][0-9]; do
+            for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
               [ -f "$file" ] && echo "$file"
             done
             echo "EOF"
@@ -179,10 +158,8 @@ jobs:
 
           update_ota_file() {
             local file="$1"
-            local content
-            content=$(cat "$file")
-
-            echo "$content" | grep -v "^NIGHTLY_" > "$file"
+            content=$(grep -v "^NIGHTLY_" "$file")
+            echo "$content" > "$file"
             echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
             echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
             echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
