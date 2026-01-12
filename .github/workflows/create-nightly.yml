@@ -116,10 +116,8 @@ jobs:
           echo "Splitting ZIP into 1.5GB parts..."
           zipsplit -n 1610612736 "spruceV${{ steps.get_version.outputs.version }}.zip"
 
-          rm -f "spruceV${{ steps.get_version.outputs.version }}.zip"
-
           echo "Files after split:"
-          ls -lh *.zip 2>/dev/null || echo "No zip files found"
+          ls -lh spruceV${{ steps.get_version.outputs.version }}.zip spruceV${{ steps.get_version.outputs.version }}.z* 2>/dev/null || echo "No split zip files found"
 
       - name: Prepare ZIP files list
         id: zip_files
