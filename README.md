@@ -13,6 +13,7 @@
 
 ## Features
 
+* Custom Python based UI.
 * Game Switcher: seamlessly switch between save states during gameplay.
 * Autosave shutdown/resume: automatic save state when powering off in-game; powering on will resume play from where you left off.
 * Network services: Retroachievments, RTC sync via WiFi, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
