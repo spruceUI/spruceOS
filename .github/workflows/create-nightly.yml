@@ -27,6 +27,7 @@ jobs:
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
+
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
 
@@ -72,7 +73,6 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/spruceUI/PyUI-Themes.git pyui_themes
           mkdir -p Themes
-
           cp pyui_themes/PackedThemes/*.7z Themes/ || true
           rm -rf pyui_themes
 
@@ -94,10 +94,10 @@ jobs:
 
           zipsplit -n 1610612736 "spruceV${{ steps.get_version.outputs.version }}.zip"
 
-      # ================================
-      # OPTION A FIX — THIS IS THE KEY
-      # ================================
-      - name: Prepare ZIP files list
+          # IMPORTANT: delete the oversized base zip so it never uploads
+          rm "spruceV${{ steps.get_version.outputs.version }}.zip"
+
+      - name: Prepare release files list
         id: zip_files
         run: |
           {
