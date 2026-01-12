@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 if [ -e /tmp/sleep_helper_started ]; then
-    log_message "Sleep helper already active, skipping. /tmp/sleep_helper_started exists"
+    log_message "Sleep helper already active, skipping. /tmp/sleep_helper_started exists" -v
     exit 0 
 fi
 
