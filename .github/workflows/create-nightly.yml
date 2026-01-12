@@ -1,11 +1,7 @@
 name: Create Nightly
 
 on:
-#  schedule:
-#    - cron: '10 10 * * *'
   workflow_dispatch:
-#  push:
-#    branches: [ Development ]
 
 jobs:
   create-7z:
@@ -18,10 +14,10 @@ jobs:
           ref: Development
           fetch-depth: 0
 
-      - name: Install 7zip
+      - name: Install 7zip and zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full
+          sudo apt-get install -y p7zip-full zip
 
       - name: Get version and date
         id: get_version
@@ -43,13 +39,11 @@ jobs:
       - name: Check for commits
         id: check_commits
         run: |
-          # Get all commits from last 24 hours
           COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
           fi
-          # Write commits to output
           {
             echo "commits<<EOF"
             echo "$COMMITS"
@@ -86,7 +80,6 @@ jobs:
           mkdir -p Themes
 
           echo "Copying selected themes..."
-
           cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
@@ -115,43 +108,30 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
             -x!commits_nightly.txt
-          # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
       - name: Create ZIP archive (split into 1.5GB parts)
         run: |
-          # Create initial archive including commits file
-          zip -r -9 "temp_spruce.zip" * .tmp_update commits_nightly.txt \
+          echo "Creating split ZIP archive (1.5GB per part)..."
+          zip -r -9 -s 1536m "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update commits_nightly.txt \
             -x '*.git*' \
             -x '*.github*' \
             -x 'create_spruce_release.bat' \
             -x 'create_spruce_release.sh' \
             -x "spruceV${{ steps.get_version.outputs.version }}.7z"
-          
-          # Split the archive into 1.5GB parts
-          zip -s 1536m temp_spruce.zip --out "spruceV${{ steps.get_version.outputs.version }}.zip"
-          
-          # Remove temp file
-          rm -f temp_spruce.zip
-          
-          # List all ZIP parts created
+
           echo "ZIP files created:"
-          ls -lh spruceV${{ steps.get_version.outputs.version }}.z* spruceV${{ steps.get_version.outputs.version }}.zip 2>/dev/null || true
+          ls -lh spruceV${{ steps.get_version.outputs.version }}.*
 
       - name: Prepare ZIP files list
         id: zip_files
         run: |
-          # Find all ZIP parts
           {
             echo "files<<EOF"
             echo "spruceV${{ steps.get_version.outputs.version }}.7z"
-            if [ -f "spruceV${{ steps.get_version.outputs.version }}.zip" ]; then
-              echo "spruceV${{ steps.get_version.outputs.version }}.zip"
-            fi
-            for file in spruceV${{ steps.get_version.outputs.version }}.z[0-9][0-9]; do
-              if [ -f "$file" ]; then
-                echo "$file"
-              fi
+            # add all split zip parts
+            for file in spruceV${{ steps.get_version.outputs.version }}.*; do
+              [ -f "$file" ] && echo "$file"
             done
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
@@ -173,20 +153,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git source_repo
-          
-          # Calculate file info
+
           CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
-          
-          # Function to update OTA file
+
           update_ota_file() {
             local file="$1"
             local content
             content=$(cat "$file")
-            
+
             echo "$content" | grep -v "^NIGHTLY_" > "$file"
             echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
             echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
@@ -194,20 +171,17 @@ jobs:
             echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
             echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
           }
-          
-          # Update both OTA files
+
           update_ota_file "ota_repo/OTA/spruce"
           update_ota_file "source_repo/OTA/spruce"
-          
-          # Update primary OTA repo
+
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
           git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
-          
-          # Update backup OTA repo
+
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
@@ -220,16 +194,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases and filter out beta releases
-          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
-            jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
-          
-          # Convert to array and keep only releases after the first 3
+          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
             if [ $COUNT -gt 3 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
-
           done
