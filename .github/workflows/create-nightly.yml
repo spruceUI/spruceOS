@@ -17,7 +17,7 @@ jobs:
       - name: Install 7zip and zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full zip
+          sudo apt-get install -y p7zip-full zip jq
 
       - name: Get version and date
         id: get_version
@@ -112,14 +112,20 @@ jobs:
 
       - name: Create ZIP archive (split into 1.5GB parts)
         run: |
-          echo "Creating split ZIP archive (1.5GB per part)..."
-          zip -r -9 -s 1536m "spruceV${{ steps.get_version.outputs.version }}.zip" * .tmp_update commits_nightly.txt \
-            -x '*.git*' \
-            -x '*.github*' \
+          echo "Creating full ZIP archive..."
+          zip -r -9 "temp_spruce.zip" * .tmp_update commits_nightly.txt \
+            -x '*.git/*' \
+            -x '.github/*' \
             -x 'create_spruce_release.bat' \
             -x 'create_spruce_release.sh' \
             -x "spruceV${{ steps.get_version.outputs.version }}.7z"
-
+          
+          echo "Splitting into 1.5GB parts..."
+          zip -s 1536m temp_spruce.zip --out "spruceV${{ steps.get_version.outputs.version }}.zip"
+          
+          echo "Removing temp file..."
+          rm -f temp_spruce.zip
+          
           echo "ZIP files created:"
           ls -lh spruceV${{ steps.get_version.outputs.version }}.*
 
@@ -131,7 +137,7 @@ jobs:
             echo "spruceV${{ steps.get_version.outputs.version }}.7z"
             [ -f "spruceV${{ steps.get_version.outputs.version }}.zip" ] && \
               echo "spruceV${{ steps.get_version.outputs.version }}.zip"
-            for file in spruceV${{ steps.get_version.outputs.version }}.z*; do
+            for file in spruceV${{ steps.get_version.outputs.version }}.z[0-9][0-9]; do
               [ -f "$file" ] && echo "$file"
             done
             echo "EOF"
@@ -181,7 +187,7 @@ jobs:
           git config user.email "actions@github.com"
           git add OTA/spruce
           git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ steps.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
 
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
