@@ -39,7 +39,12 @@ pcm.!default {
         type bluealsa
         device "$mac"
         profile "a2dp"
+        delay 64
     }
+}
+ctl.!default {
+    type hw
+    card 0
 }
 EOF
 else
