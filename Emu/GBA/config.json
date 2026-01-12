@@ -24,7 +24,7 @@
         "mgba",
         "gpsp"
       ],
-      "selected": "mgba",
+      "selected": "gpsp",
       "overrides": {}
     }
   },
@@ -32,6 +32,6 @@
   "brand": "Nintendo",
   "type": "handheld",
   "releaseYear": 2001,
-  "default_emulator": "mgba",
+  "default_emulator": "gpsp",
   "scaling_min_freq": 816000
 }
