@@ -237,8 +237,11 @@ class RomsMenuCommon(ABC):
                         self.run_game(selected.get_selection().get_value())
                 elif(ControllerInput.X == selected.get_input() and not self.support_only_game_launching):
                     gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
-                    GameConfigMenu(selected.get_selection().get_value().game_system, 
-                                   selected.get_selection().get_value(), gen_additional_game_options).show_config(os.path.basename(selected.get_selection().get_value().rom_file_path))
+                    GameConfigMenu(
+                        selected.get_selection().get_value().game_system, 
+                        selected.get_selection().get_value(), 
+                        gen_additional_game_options
+                    ).show_config(os.path.basename(selected.get_selection().get_value().rom_file_path))
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input() and not self.support_only_game_launching):

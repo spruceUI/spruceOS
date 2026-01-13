@@ -293,9 +293,9 @@ class FullScreenGridView(View):
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
-            elif Controller.last_input() == ControllerInput.DPAD_LEFT:
+            elif Controller.last_input() == ControllerInput.DPAD_LEFT or Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(-1, skip_by_letter=False)
-            elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
+            elif Controller.last_input() == ControllerInput.DPAD_RIGHT or Controller.last_input() == ControllerInput.DPAD_DOWN:
                 self.adjust_selected(+1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
                 self.adjust_selected(-5, skip_by_letter=False)
@@ -317,7 +317,7 @@ class FullScreenGridView(View):
         if not Device.get_device().get_system_config().animations_enabled():
             return
 
-        animation_duration = 0.20 - self.animated_count *0.04  # seconds
+        animation_duration = 0.30 / Device.get_device().animation_divisor() - self.animated_count *0.04  # seconds
         start_time = time.time()
         total_shift = Device.get_device().screen_width()
         last_frame_time = 0
@@ -340,7 +340,7 @@ class FullScreenGridView(View):
                 new_frame_x_offset = total_shift + old_frame_x_offset
 
             if(t < 1.0):
-                self._render_image(self.last_selected, old_frame_x_offset,render_text_overlay=True, text_alpha=int(256 * (1.0-t)//1.0))
+                self._render_image(self.last_selected, old_frame_x_offset,render_text_overlay=False, text_alpha=int(256 * (1.0-t)//1.0))
             else:
                 self._render_image(self.last_selected, old_frame_x_offset,render_text_overlay=False)
 

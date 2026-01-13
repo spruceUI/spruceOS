@@ -1,3 +1,4 @@
+import math
 import time
 from typing import List
 from controller.controller_inputs import ControllerInput
@@ -322,7 +323,7 @@ class GridView(View):
 
 
     def animate_transition(self):
-        animation_frames = 10 - self.animated_count*2
+        animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count*2
 
         if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED

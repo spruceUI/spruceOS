@@ -504,3 +504,6 @@ class DeviceCommon(AbstractDevice):
             )
         except Exception as e:
             PyUiLogger.get_logger.error(f"Failed to run hwclock: {e}")
+
+    def animation_divisor(self):
+        return self.get_system_config().animation_speed(1)

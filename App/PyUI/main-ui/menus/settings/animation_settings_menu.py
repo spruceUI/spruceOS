@@ -20,6 +20,15 @@ class AnimationSettingsMenu(settings_menu.SettingsMenu):
                 get_value_func=Device.get_device().get_system_config().animations_enabled,
                 set_value_func=Device.get_device().get_system_config().set_animations_enabled,
             )
-    )
+        )
+
+        option_list.append(
+            self.build_defined_list_entry(
+                primary_text=Language.animation_speed(),
+                all_options=[0.5, 1, 1.5, 2, 2.5, 3],
+                get_value_func=Device.get_device().animation_divisor,
+                set_value_func=Device.get_device().get_system_config().set_animation_speed,
+            )
+        )
 
         return option_list

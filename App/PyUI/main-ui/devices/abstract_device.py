@@ -424,3 +424,7 @@ class AbstractDevice(ABC):
     def sync_hw_clock(self):
         pass
 
+    @abstractmethod
+    def animation_divisor(self):
+        pass
+
