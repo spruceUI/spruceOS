@@ -347,3 +347,11 @@ class SystemConfig:
         self.config["animationsEnabled"] = value
         self.save_config()
 
+    def animation_speed(self, default_value):
+        return self.config.get("animationSpeed", default_value)
+
+    def set_animation_speed(self, value):
+        self.config["animationSpeed"] = value
+        self.save_config()
+
+

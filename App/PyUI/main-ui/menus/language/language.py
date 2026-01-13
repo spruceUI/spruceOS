@@ -381,6 +381,10 @@ class Language:
         return cls._data.get("animationsEnabled","Animations Enabled")
 
     @classmethod
+    def animation_speed(cls):
+        return cls._data.get("animationSpeed","Animation Speed")
+
+    @classmethod
     def stock_os_menu(cls):
         return cls._data.get("stockOsMenu","Stock OS Menu")
 

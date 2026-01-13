@@ -103,7 +103,18 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_display_settings
                     )
             )
-        
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.animation_settings(),
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_animation_settings
+                )
+        )
+
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.time_settings(),
@@ -162,9 +173,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 )
         )
 
-
-                    
-
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.controller_settings(),
@@ -173,17 +181,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.launch_controller_settings
-                )
-        )
-
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.animation_settings(),
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_animation_settings
                 )
         )
 

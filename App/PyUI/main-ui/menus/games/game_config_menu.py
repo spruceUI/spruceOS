@@ -1,5 +1,6 @@
 
 import os
+import shutil
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -137,9 +138,13 @@ class GameConfigMenu:
     def delete_rom(self, input_value):
         if(ControllerInput.A == input_value):
             if UserPrompt.prompt_yes_no(Language.delete_rom(), [f"Would you like to permanently delete", f"{self.game.display_name}?"]):
-                os.remove(self.game.rom_file_path)
+                path = self.game.rom_file_path
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
                 self.perform_boxart_deletion()
-                Display.display_message(f"{self.game.rom_file_path} deleted.",2000)
+                Display.display_message(f"{path} deleted.",2000)
                 FavoritesManager.remove_favorite(self.game)
                 RecentsManager.remove_game(self.game)
                 CollectionsManager.remove_game_from_collections(self.game)

@@ -519,3 +519,7 @@ class MiyooMiniCommon(MiyooDevice):
     
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-32"]
+
+
+    def animation_divisor(self):
+        return self.get_system_config().animation_speed(2) 

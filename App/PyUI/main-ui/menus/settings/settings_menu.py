@@ -153,6 +153,30 @@ class SettingsMenu(ABC):
         return option_list
 
 
+
+
+    def build_defined_list_entry(self, primary_text, all_options, get_value_func,set_value_func) -> GridOrListEntry:
+
+        current_value = get_value_func()
+
+        return GridOrListEntry(
+            primary_text=primary_text,
+            value_text="<    " + str(current_value) + "    >",
+            image_path=None,
+            image_path_selected=None,
+            description=None,
+            icon=None,
+            value=lambda 
+                input_value, 
+                entry_name=primary_text, 
+                category=None,
+                all_options=all_options,
+                current_value=current_value,
+                update_value= lambda category, entry_name, selected_value : set_value_func(selected_value)
+                : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, 
+                                                                         all_options, current_value, update_value)
+        )
+
     def build_enabled_disabled_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
 
         return GridOrListEntry(
