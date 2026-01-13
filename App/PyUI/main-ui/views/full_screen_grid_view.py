@@ -8,6 +8,7 @@ from display.render_mode import RenderMode
 from display.resize_type import ResizeType
 from controller.controller import Controller
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -72,6 +73,7 @@ class FullScreenGridView(View):
 
         self.render_bottom_bar_text_enabled = image_resize_height_multiplier != 1.0
         self.image_resize_height_multiplier = image_resize_height_multiplier
+        self.y_rotate_instead = False
 
     def set_options(self, options):
         self.options = options
@@ -176,7 +178,7 @@ class FullScreenGridView(View):
         else:
             return 0
 
-    def _render_image(self, index=None, x_offset=0, render_text_overlay=True, text_alpha=None):
+    def _render_image(self, index=None, x_offset=0, y_add_offset=0, render_text_overlay=True, text_alpha=None):
         imageTextPair = self.options[index]
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()
@@ -200,6 +202,7 @@ class FullScreenGridView(View):
                 x_offset += Device.get_device().screen_width() // 2
                 y_offset = Display.get_top_bar_height(False) + (Display.get_usable_screen_height(False))//2
         
+        y_offset += y_add_offset
         self._render_primary_image( image_path,
                                     x_offset,
                                     y_offset,
@@ -293,10 +296,18 @@ class FullScreenGridView(View):
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
-            elif Controller.last_input() == ControllerInput.DPAD_LEFT or Controller.last_input() == ControllerInput.DPAD_UP:
+            elif Controller.last_input() == ControllerInput.DPAD_DOWN:
                 self.adjust_selected(-1, skip_by_letter=False)
-            elif Controller.last_input() == ControllerInput.DPAD_RIGHT or Controller.last_input() == ControllerInput.DPAD_DOWN:
+                self.y_rotate_instead = True
+            elif Controller.last_input() == ControllerInput.DPAD_LEFT:
+                self.adjust_selected(-1, skip_by_letter=False)
+                self.y_rotate_instead = False
+            elif Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(+1, skip_by_letter=False)
+                self.y_rotate_instead = True
+            elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
+                self.adjust_selected(+1, skip_by_letter=False)
+                self.y_rotate_instead = False
             elif Controller.last_input() == ControllerInput.L1:
                 self.adjust_selected(-5, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R1:
@@ -319,7 +330,12 @@ class FullScreenGridView(View):
 
         animation_duration = 0.30 / Device.get_device().animation_divisor() - self.animated_count *0.04  # seconds
         start_time = time.time()
-        total_shift = Device.get_device().screen_width()
+                
+        if(self.y_rotate_instead):
+            total_shift = Device.get_device().screen_height()
+        else:            
+            total_shift = Device.get_device().screen_width()
+
         last_frame_time = 0
         refresh_rate = 1/60
 
@@ -333,19 +349,31 @@ class FullScreenGridView(View):
             self._render_bottom_bar_text()
 
             if rotate_left:
-                old_frame_x_offset = int(total_shift * t)
-                new_frame_x_offset = -total_shift + old_frame_x_offset
+                old_frame_offset = int(total_shift * t)
+                new_frame_offset = -total_shift + old_frame_offset
             else:
-                old_frame_x_offset = int(-total_shift * t)
-                new_frame_x_offset = total_shift + old_frame_x_offset
+                old_frame_offset = int(-total_shift * t)
+                new_frame_offset = total_shift + old_frame_offset
+
+            old_x_offset = 0
+            new_x_offset = 0
+            old_y_offset = 0
+            new_y_offset = 0
+
+            if(self.y_rotate_instead):
+                old_y_offset = old_frame_offset
+                new_y_offset = new_frame_offset
+            else:
+                old_x_offset = old_frame_offset
+                new_x_offset = new_frame_offset 
 
             if(t < 1.0):
-                self._render_image(self.last_selected, old_frame_x_offset,render_text_overlay=False, text_alpha=int(256 * (1.0-t)//1.0))
+                self._render_image(self.last_selected, old_x_offset, old_y_offset,render_text_overlay=False, text_alpha=int(256 * (1.0-t)//1.0))
             else:
-                self._render_image(self.last_selected, old_frame_x_offset,render_text_overlay=False)
+                self._render_image(self.last_selected, old_x_offset, old_y_offset,render_text_overlay=False)
+    
 
-
-            self._render_image(self.selected, new_frame_x_offset,render_text_overlay=True, text_alpha=256)
+            self._render_image(self.selected, new_x_offset, new_y_offset,render_text_overlay=True, text_alpha=256)
 
             the_time = time.time()
             if the_time - last_frame_time < refresh_rate:

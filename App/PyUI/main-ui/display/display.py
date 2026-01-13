@@ -139,7 +139,7 @@ class Display:
             cls.restore_bg()
 
         with log_timing("clear", PyUiLogger.get_logger()):    
-            cls.clear("")    
+            cls.clear("", force_top_and_bottom_bar=True)    
 
         if(False):
             Display.log_sdl_render_drivers()
@@ -396,7 +396,8 @@ class Display:
               top_bar_text, 
               hide_top_bar_icons = False,
               bottom_bar_text = None,
-              render_bottom_bar_icons_and_images = True):
+              render_bottom_bar_icons_and_images = True,
+              force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
         
         if cls.is_custom_theme_background:
@@ -410,7 +411,7 @@ class Display:
             PyUiLogger.get_logger().warning("No background texture to render")
         
 
-        if not Theme.render_top_and_bottom_bar_last():
+        if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
             cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
 
