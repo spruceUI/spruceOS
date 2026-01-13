@@ -1,5 +1,6 @@
 
 from asyncio import subprocess
+import tempfile
 import time
 import os
 import re
@@ -31,53 +32,108 @@ class WifiMenu:
         else:
             Device.get_device().enable_wifi()
 
-    def write_wpa_supplicant_conf(self, ssid, pw_line):
+
+    def write_wpa_supplicant_conf(self, ssid: str, pw_line: str):
+        """
+        Writes exactly one network block for `ssid` into the wpa_supplicant config.
+        Any existing entries for the same SSID are removed.
+        The file is written atomically to avoid corruption.
+        """
+
         file_path = Device.get_device().get_wpa_supplicant_conf_path()
-        # WPA configuration header
-        header = """ctrl_interface=/var/run/wpa_supplicant
-    update_config=1
-    """
 
-        # Build the new network block
-        new_network = f"""
-    network={{
-        ssid="{ssid}"
-        {pw_line}
-    }}
-    """
+        HEADER = (
+            "ctrl_interface=/var/run/wpa_supplicant\n"
+            "update_config=1\n"
+        )
 
-        try:
-            # Read the existing file if it exists
-            existing_content = ""
-            if os.path.exists(file_path):
+        def normalize(text: str) -> str:
+            return text.replace("\r\n", "\n").strip()
+
+        # ---------------------------
+        # Load existing content
+        # ---------------------------
+        content = ""
+        if os.path.exists(file_path):
+            try:
                 with open(file_path, "r") as f:
-                    existing_content = f.read().strip()
+                    content = normalize(f.read())
+            except OSError as e:
+                PyUiLogger.get_logger().error(f"Failed reading {file_path}: {e}")
+                return
 
-            # Ensure the file starts with the required header
-            if not existing_content.startswith("ctrl_interface"):
-                existing_content = header + "\n" + existing_content
+        # ---------------------------
+        # Extract existing network blocks
+        # ---------------------------
+        # Since we own the file, a simple non-nested block matcher is safe.
+        network_blocks = re.findall(
+            r'network\s*\{[^}]*\}',
+            content,
+            flags=re.DOTALL
+        )
 
-            # Regex to locate a block for this SSID
-            ssid_pattern = re.compile(
-                r'network\s*\{\s*ssid="' + re.escape(ssid) + r'".*?\}',
-                re.DOTALL
+        preserved_blocks = []
+        removed = 0
+
+        for block in network_blocks:
+            m = re.search(r'ssid\s*=\s*"([^"]+)"', block)
+            if not m:
+                # Should not happen in our own file, but keep it just in case
+                preserved_blocks.append(block.strip())
+                continue
+
+            existing_ssid = m.group(1)
+            if existing_ssid == ssid:
+                removed += 1
+            else:
+                preserved_blocks.append(block.strip())
+
+        if removed:
+            PyUiLogger.get_logger().info(
+                f"Removed {removed} existing network block(s) for '{ssid}'"
             )
 
-            if ssid_pattern.search(existing_content):
-                # Replace the existing block for this SSID
-                updated_content = ssid_pattern.sub(new_network.strip(), existing_content)
-                PyUiLogger.get_logger().info(f"Updated existing network '{ssid}' in {file_path}")
-            else:
-                # Append the new network at the end
-                updated_content = existing_content.rstrip() + "\n" + new_network.strip() + "\n"
-                PyUiLogger.get_logger().info(f"Added new network '{ssid}' to {file_path}")
+        # ---------------------------
+        # Build the new network block
+        # ---------------------------
+        new_block = (
+            "network={\n"
+            f'    ssid="{ssid}"\n'
+            f"    {pw_line}\n"
+            "}\n"
+        ).strip()
 
-            # Write the updated content back to the file
-            with open(file_path, "w") as f:
-                f.write(updated_content)
+        # Optionally: put newest network first (often desirable)
+        preserved_blocks.insert(0, new_block)
 
-        except IOError as e:
-            PyUiLogger.get_logger().error(f"Error writing to {file_path}: {e}")
+        # ---------------------------
+        # Rebuild full file deterministically
+        # ---------------------------
+        final_content = HEADER.strip() + "\n\n"
+
+        if preserved_blocks:
+            final_content += "\n\n".join(preserved_blocks) + "\n"
+
+        # ---------------------------
+        # Atomic write
+        # ---------------------------
+        try:
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                prefix="wpa_supplicant.",
+                dir=os.path.dirname(file_path)
+            )
+            with os.fdopen(tmp_fd, "w") as f:
+                f.write(final_content)
+
+            os.replace(tmp_path, file_path)
+
+            PyUiLogger.get_logger().info(
+                f"Installed network '{ssid}' into {file_path}"
+            )
+
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"Failed writing {file_path}: {e}")
+
 
 
     def reload_wpa_supplicant_config(self):
@@ -95,6 +151,9 @@ class WifiMenu:
             password = self.on_screen_keyboard.get_input("WiFi Password")
             if(password is not None and 8 <= len(password) <= 63):
                 self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
+                Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
+            else:
+                Display.display_message("Invalid WiFi password length! Must be between 8 and 63", duration_ms=5000)
         else:   
             self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
 
@@ -137,6 +196,7 @@ class WifiMenu:
                     )
                 )
             else:
+                seen_names = set()
                 for net in networks:
                     name = net.ssid
                     is_5ghz = 5000 <= net.frequency <= 6000
@@ -144,10 +204,15 @@ class WifiMenu:
                     if is_5ghz:
                         name += " (5Ghz)"
 
+                    if name in seen_names:
+                        continue
+
+                    seen_names.add(name)
                     connected = (
                         connected_ssid == net.ssid
                         and is_5ghz == connected_is_5ghz
                     )
+
 
                     option_list.append(
                         GridOrListEntry(
