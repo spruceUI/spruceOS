@@ -102,7 +102,11 @@ set_smart() {
 
         unlock_governor 2>/dev/null
 
-        echo "conservative" > "$CPU_0_DIR/scaling_governor"
+        if [ -n "$CPU_SMART_GOVENOR" ]; then
+            echo "$CPU_SMART_GOVENOR" > "$CPU_0_DIR/scaling_governor"
+        else
+            echo "conservative" > "$CPU_0_DIR/scaling_governor"
+        fi
         echo "$scaling_min_freq" > "$CPU_0_DIR/scaling_min_freq"
         echo "$scaling_max_freq" > "$CPU_0_DIR/scaling_max_freq"
 
