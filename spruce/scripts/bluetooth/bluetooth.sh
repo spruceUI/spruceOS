@@ -6,7 +6,15 @@
 BASE_HOME="${1:-$HOME}"
 ASOUND_CONF="$BASE_HOME/.asoundrc"
 
+is_bluetoothd_running() {
+    ps | grep "[b]luetoothd"
+}
+
+
 get_connected_audio_bt_mac() {
+    if ! is_bluetoothd_running; then
+        return 1
+    fi
     for mac in $(bluetoothctl devices | awk '{print $2}'); do
         if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
             name=$(bluetoothctl info "$mac" | grep "Name" | cut -d ' ' -f2-)
