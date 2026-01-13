@@ -85,9 +85,9 @@ set_powersave(){
 set_smart() {
     SMART_DOWN_THRESH=50
     SMART_UP_THRESH=80
-    SMART_FREQ_STEP=3
+    SMART_FREQ_STEP=10
     SMART_DOWN_FACTOR=1
-    SMART_SAMPLING_RATE=100000
+    SMART_SAMPLING_RATE=10000
     scaling_min_freq="${1:-$CPU_SMART_MIN_FREQ}"
 
     if [ -n "$CPU_SMART_MAX_FREQ" ]; then
@@ -98,7 +98,6 @@ set_smart() {
 
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        cores_online 01234567   # bring all up before potentially offlining cpu0
         cores_online "$CPU_SMART_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
@@ -134,12 +133,13 @@ set_performance() {
     log_message "set_performance called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu"
-        cores_online 01234567   # bring all up before potentially offlining cpu0
         cores_online "$DEVICE_MAX_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
 
         echo "performance" > "$CPU_0_DIR/scaling_governor"
+        # Should we specify min freq?
+        echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_0_DIR/scaling_min_freq"
         echo "$CPU_PERF_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
 
         if [ -e "$CPU_4_DIR" ]; then
