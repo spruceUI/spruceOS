@@ -5,7 +5,7 @@
 ## Note: This startup is different from the rest
 ## of the platforms, as MiyooMini does not support
 ## ADB over USB. Thus to make debugging easier we
-## ensure we can at least ge tto ADB in case anything
+## ensure we can at least get to ADB in case anything
 ## else goes wrong that would crash the startup
 ## sequence
 ####################################################
