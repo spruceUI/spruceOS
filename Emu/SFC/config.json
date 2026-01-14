@@ -24,7 +24,7 @@
         "mednafen_supafaust",
         "snes9x"
       ],
-      "selected": "chimerasnes",
+      "selected": "mednafen_supafaust",
       "overrides": {},
       "devices": [
         "MIYOO_A30",
@@ -41,9 +41,12 @@
         "snes9x",
         "snes9x2010"
       ],
-      "selected": "mednafen_supafaust",
+      "selected": "snes9x2010",
       "overrides": {},
       "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP"
       ]
     }
