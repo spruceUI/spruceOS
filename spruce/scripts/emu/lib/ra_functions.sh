@@ -126,9 +126,9 @@ run_retroarch() {
 
 	ra_start_setup_saves_and_states_for_core_differences
 
-	log_message "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" -v
-	log_message "export PATH=\"$PATH\"" -v
-	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\"" -v
+	log_message "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
+	log_message "export PATH=\"$PATH\""
+	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 	#Swap below if debugging
 	
 	/mnt/SDCARD/spruce/scripts/bluetooth/bluetooth.sh "$RA_DIR"
