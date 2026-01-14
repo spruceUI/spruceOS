@@ -248,7 +248,8 @@ class TrimUIDevice(DeviceCommon):
         ProcessRunner.run(["killall","-15","bluetoothd"])
         time.sleep(0.1)  
         ProcessRunner.run(["killall","-9","bluetoothd"])
-        
+        self.system_config.set_bluetooth(0)
+
     def perform_startup_tasks(self):
         pass
 

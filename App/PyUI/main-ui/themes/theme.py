@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import sys
 import traceback
-from turtle import color
 
 from devices.charge.charge_status import ChargeStatus
 from devices.device import Device
