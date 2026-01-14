@@ -65,18 +65,48 @@ class RomSelectOptionsBuilder:
             roms_index = next(i for i, part in enumerate(parts) if part.lower() == "roms")
         except (ValueError, IndexError):
             PyUiLogger.get_logger().info(f"Roms not found in {rom_info.rom_file_path}")
-            return None  # "Roms" not in path or nothing after "Roms"
+            return None
 
-        # Build path to the image using the extracted directory
-        root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
+        # Expected layout: ... /Roms/<system>/...
+        if roms_index + 2 >= len(parts):
+            return None  # No system or filename
 
-        qoi_path = os.path.join(root_dir, "Imgs", base_name + ".qoi")
-        if os.path.exists(qoi_path) and Device.get_device().supports_qoi():
-            return qoi_path
+        system_index = roms_index + 1  # MD
+        system_dir = parts[system_index]
 
-        image_path = os.path.join(root_dir, "Imgs", base_name + ".png")
+        # Path pieces after the system folder (subfolders + filename)
+        relative_parts = parts[system_index + 1 : -1]
 
-        if os.path.exists(image_path):
+        # Build mirrored Imgs path
+        mirrored_path_base = os.path.join(
+            os.sep.join(parts[:system_index + 1]),  # Folder/Roms/MD
+            "Imgs",
+            *relative_parts,
+            base_name
+        )
+
+        mirrored_qoi_path = mirrored_path_base + ".qoi"
+
+        if os.path.exists(mirrored_qoi_path) and Device.get_device().supports_qoi():
+            return mirrored_qoi_path
+
+        # ---- Fallback to old behavior (top-level image) ----
+        flat_root = os.path.join(os.sep.join(parts[:system_index + 1]), "Imgs", base_name)
+        flat_qoi_path = flat_root+ ".qoi"
+
+        if os.path.exists(flat_qoi_path) and Device.get_device().supports_qoi():
+            return flat_qoi_path
+        
+        mirrored_png_path = mirrored_path_base + ".png"
+        flat_png_path = flat_root+ ".png"
+
+        image_png_path = mirrored_png_path
+        image_qoi_path = mirrored_qoi_path
+        if(not os.path.exists(image_png_path)):
+            image_png_path = flat_png_path
+            image_qoi_path = flat_qoi_path
+
+        if os.path.exists(image_png_path):
             if(Device.get_device().supports_qoi()):
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     if(Device.get_device().get_system_config().never_prompt_boxart_resize()):
@@ -99,18 +129,20 @@ class RomSelectOptionsBuilder:
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     BoxArtResizer.process_rom_folders()
-                if os.path.exists(qoi_path) and Device.get_device().supports_qoi():
-                    return qoi_path
+                if os.path.exists(image_qoi_path) and Device.get_device().supports_qoi():
+                    return image_qoi_path
                 else:
-                    return image_path
+                    return image_png_path
             else:
-                return image_path
+                return image_png_path
 
         
         # Attempt to construct alternate path by replacing "Roms" with "Imgs"
         imgs_older_equal_to_roms_parts = parts.copy()
         imgs_older_equal_to_roms_parts[roms_index] = "Imgs"
         imgs_folder_equal_to_roms_path = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + ".png")
+
+        root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
 
         if os.path.exists(imgs_folder_equal_to_roms_path):
             return imgs_folder_equal_to_roms_path

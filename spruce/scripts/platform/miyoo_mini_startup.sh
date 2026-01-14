@@ -1,5 +1,15 @@
 #!/bin/sh
 
+
+####################################################
+## Note: This startup is different from the rest
+## of the platforms, as MiyooMini does not support
+## ADB over USB. Thus to make debugging easier we
+## ensure we can at least get to ADB in case anything
+## else goes wrong that would crash the startup
+## sequence
+####################################################
+
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
@@ -13,9 +23,7 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 
 
-mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch/retroarch /mnt/SDCARD/RetroArch/retroarch
-
-cp /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/retroarch.cfg /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
+mount -o bind /mnt/SDCARD/RetroArch/retroarch.MiyooMini /mnt/SDCARD/RetroArch/retroarch
 
 (
     insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko

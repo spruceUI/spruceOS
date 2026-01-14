@@ -14,9 +14,11 @@ class ThemePatcher():
                      "gridMultiRowSelBgResizePadHeight","gridMultiRowExtraYPad", "topBarInitialXOffset","gridMultiRowImageYOffset",
                      "singleRowGridTextYOffset","multiRowGridTextYOffset","carouselSystemXPad",
                      "gridSystemImageYOffset","gridSystemSelectImgWidth","listSystemSelectImgWidth","carouselSystemSelectPrimaryImgWidth",
-                     "gridSystemSelectImgHeight","listSystemSelectImgHeight"}
+                     "gridSystemSelectImgHeight","listSystemSelectImgHeight","carouselSystemAdditionalYOffset"}
     WIDTH_SCALABLE_KEYS = {"gameSystemSelectColCount","carouselSystemExternalXPad",
-                           "carouselSystemFixedWidth","mainMenuColCount","gameSelectColCount"}
+                           "carouselSystemFixedWidth","mainMenuColCount","gameSelectColCount", 
+                           "gameSystemSelectCarouselColCount","carouselSystemSelectedOffset",
+                            "carouselSystemFixedWidth", "carouselSystemFixedSelectedWidth"}
     HEIGHT_SCALABLE_KEYS = {"gameSystemSelectRowCount", "gameSelectRowCount"}
     ASPECT_RATIO_RESET_KEYS = {
         "recentsEnabled": True,
@@ -176,12 +178,13 @@ class ThemePatcher():
                 new_width = int(img_width * scale)
                 new_height = int(img_height * scale)
                 preserve_aspect_ratio = True
+                is_icon = "icons" in input_file.lower()
 
-                if(img_width == theme_width and img_height != theme_height):
+                if(img_width == theme_width and img_height != theme_height and not is_icon):
                     new_width = target_width
                     preserve_aspect_ratio = False
 
-                if(img_height == theme_height and img_width != theme_width):
+                if(img_height == theme_height and img_width != theme_width and not is_icon):
                     new_height = target_height
                     preserve_aspect_ratio = False
 

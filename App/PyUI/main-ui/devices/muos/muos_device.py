@@ -48,11 +48,11 @@ class MuosDevice(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    @property
+    
     def power_off_cmd(self):
         return "poweroff"
     
-    @property
+    
     def reboot_cmd(self):
         return "reboot"
 
@@ -257,26 +257,26 @@ class MuosDevice(DeviceCommon):
     def get_roms_dir(self):
         return "/mnt/union/ROMS/"
     
-    @property
+    
     def screen_width(self):
         return  int(self.read_based_on_muos_config("/opt/muos/device/config/screen/internal/width"))
 
-    @property
+    
     def screen_height(self):
         return int(self.read_based_on_muos_config("/opt/muos/device/config/screen/internal/height"))
     
-    @property
+    
     def screen_rotation(self):
         return int(self.read_based_on_muos_config("/opt/muos/device/config/screen/rotate"))
 
-    @property
+    
     def output_screen_width(self):
         if(self.should_scale_screen()):
             return 1920
         else:
             return self.screen_width()
         
-    @property
+    
     def output_screen_height(self):
         if(self.should_scale_screen()):
             return 1080
