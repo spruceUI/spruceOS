@@ -23,9 +23,7 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/passwd /etc/passwd
 mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 
 
-mount -o bind /mnt/SDCARD/spruce/miyoomini/RetroArch/retroarch /mnt/SDCARD/RetroArch/retroarch
-
-cp /mnt/SDCARD/spruce/miyoomini/RetroArch/.retroarch/retroarch.cfg /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
+mount -o bind /mnt/SDCARD/RetroArch/retroarch.MiyooMini /mnt/SDCARD/RetroArch/retroarch
 
 (
     insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
