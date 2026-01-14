@@ -32,6 +32,7 @@ mount -o bind /mnt/SDCARD/RetroArch/retroarch.MiyooMini /mnt/SDCARD/RetroArch/re
     sleep 2
     ifconfig wlan0 up
     wpa_supplicant -B -D nl80211 -i wlan0 -c /mnt/SDCARD/Saves/spruce/wpa_supplicant.conf
+    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
     adbd &
 ) &
 
