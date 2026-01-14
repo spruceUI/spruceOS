@@ -1,5 +1,15 @@
 #!/bin/sh
 
+
+####################################################
+## Note: This startup is different from the rest
+## of the platforms, as MiyooMini does not support
+## ADB over USB. Thus to make debugging easier we
+## ensure we can at least ge tto ADB in case anything
+## else goes wrong that would crash the startup
+## sequence
+####################################################
+
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
