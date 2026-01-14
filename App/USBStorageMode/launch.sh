@@ -163,7 +163,7 @@ while [ "$(device_get_charging_status)" = "Discharging" ]; do
 done
 
 # 2. Confirm entry into USB mode
-log_and_display_message "Enter USB Mass Storage Mode? Press A to confirm, or B to cancel."
+log_and_display_message "Enter USB Mass Storage Mode?\nPress A to confirm, or B to cancel."
 if confirm; then
     # User pressed A, continue
     :
@@ -196,7 +196,7 @@ while true; do
         exit 0
     fi
 
-    log_and_display_message "USB Mode Active. Press A to exit and reboot your device."
+    log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device."
     if confirm; then
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
