@@ -181,7 +181,10 @@
                 "selected": "Off"
             },
             "overclockSpeed": {
-                "devices": ["MIYOO_MINI_FLIP"],
+                "devices": ["MIYOO_MINI",
+                            "MIYOO_MINI_V4",
+                            "MIYOO_MINI_PLUS",
+                            "MIYOO_MINI_FLIP"],
                 "display": "Overclock Speed",
                 "description": "Clockspeed to use for overclocking",
                 "options": [

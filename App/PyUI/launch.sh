@@ -153,9 +153,11 @@ case "$PLATFORM" in
             freemma
         fi
 
+        miyoo_device=$(get_miyoo_mini_variant)
+
         cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
                 /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-                -device MIYOO_MINI_FLIP \
+                -device $miyoo_device \
                 -logDir /mnt/SDCARD/Saves/spruce \
                 -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
                 -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
