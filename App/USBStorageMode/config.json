@@ -2,7 +2,7 @@
   "label": "USB Storage Mode",
   "icon": "usb.png",
   "launch": "launch.sh",
-  "description": "WARNING: In Testing",
+  "description": "Transfer files over USB",
   "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "MIYOO_A30", "MIYOO_FLIP"],
   "hideInSimpleMode": true
 }

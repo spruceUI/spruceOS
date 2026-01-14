@@ -1,14 +1,14 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
 # --- Platform-specific configuration ---
 case "$PLATFORM" in
     "A30")
         STORAGE_DEVICE="/dev/mmcblk0p1"
         MOUNT_POINT="/mnt/SDCARD"
-        USB_POWER_PATH="/sys/class/power_supply/usb"
-        GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
+        USB_GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
         LUN_PATH="$GADGET_PATH/lun0"
         LUN_FILE="$LUN_PATH/file"
         ;;
@@ -16,7 +16,6 @@ case "$PLATFORM" in
         STORAGE_DEVICE="/dev/mmcblk1p1"
         MOUNT_POINT="/mnt/SDCARD"
         USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
-        USB_POWER_PATH="/sys/class/power_supply/axp2202-usb"
         ;;
     "Flip")
         STORAGE_DEVICE="/dev/mmcblk1p1"
@@ -24,76 +23,16 @@ case "$PLATFORM" in
         USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
         USB_UDC_CONTROLLER="fcc00000.dwc3"
         USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
-        UDC_STATE_FILE="/sys/class/udc/fcc00000.dwc3/state"
         ;;
     *)
-        log_and_display_message "USB Storage Mode is not supported on this device."
+        # This will run if PyUI isn't ready yet, providing a basic message.
+        /mnt/SDCARD/App/PyUI/main-ui/devices/utils/display_text "USB Storage Mode is not supported on this device." &
         sleep 3
         exit 1
         ;;
 esac
 
 # --- Unified Functions ---
-
-# Displays a prompt and waits for A (OK) or B/START (Cancel).
-# Returns 0 for OK, 1 for Cancel.
-display_blocking_prompt() {
-    local message="$1"
-    local ok_text="$2"
-    local cancel_text="$3"
-    local full_message
-    
-    # Construct a single-line message
-    if [ -n "$cancel_text" ]; then
-        full_message=$(printf "%s (A: %s / B: %s)" "$message" "$ok_text" "$cancel_text")
-    else
-        full_message=$(printf "%s (A: %s)" "$message" "$ok_text")
-    fi
-    log_and_display_message "$full_message"
-
-    # Wait for A, B, or START button press
-    while true; do
-        button=$(get_button_press 300) # 5-minute timeout
-        # Always exit on A
-        if [ "$button" = "A" ]; then
-            log_and_display_message "" # Clear prompt
-            return 0
-        fi
-        # Only exit on B/START if a cancel option was provided
-        if [ -n "$cancel_text" ]; then
-            if [ "$button" = "B" ] || [ "$button" = "START" ]; then
-                log_and_display_message "" # Clear prompt
-                return 1
-            fi
-        fi
-        # For all other buttons, or for B/START on single-option
-        # prompts, the loop continues and waits for a valid button press.
-    done
-}
-
-check_usb_connection() {
-    case "$PLATFORM" in
-        "A30" | "Brick" | "SmartPro")
-            for status_file in "$USB_POWER_PATH/present" "$USB_POWER_PATH/online"; do
-                if [ -f "$status_file" ] && [ "$(cat "$status_file" 2>/dev/null)" = "1" ]; then
-                    return 0
-                fi
-            done
-            ;;
-        "Flip")
-            [ "$(cat "$UDC_STATE_FILE" 2>/dev/null)" = "configured" ] && return 0
-            ;;
-    esac
-    return 1
-}
-
-check_sd_activity() {
-    local device_name=$(basename "$STORAGE_DEVICE")
-    local prev_ios=$(awk -v dev="$device_name" '$3 == dev {print $10}' /proc/diskstats 2>/dev/null || echo "0")
-    sleep 1
-    local curr_ios=$(awk -v dev="$device_name" '$3 == dev {print $10}' /proc/diskstats 2>/dev/null || echo "0")
-    [ "$curr_ios" = "$prev_ios" ]
-}
 
 safe_unmount_all() {
     for mpoint in $(mount | grep "$STORAGE_DEVICE" | awk '{print $3}' | sort -r); do
@@ -205,26 +144,38 @@ configure_usb_gadget() {
 
 start_pyui_message_writer "1" # Wait for listener
 
-# 1. Wait for USB cable
-while ! check_usb_connection; do
-    display_blocking_prompt "USB Connection: Please connect the USB cable to your computer." "OK" "Cancel"
-    if [ $? -ne 0 ]; then
+# Warm up the display driver, mimicking other known-good apps
+log_and_display_message "Loading..."
+sleep 0.5 
+
+# 1. Wait for USB cable connection, using the reliable charging status check
+while [ "$(device_get_charging_status)" = "Discharging" ]; do
+    log_and_display_message "Please connect the USB cable to your computer. Press A to check again, or B to cancel."
+    if confirm; then
+        # Loop will re-check charging status
+        :
+    else
+        # User pressed B
         log_and_display_message "Cancelled by user."
         sleep 1
         exit 0
     fi
 done
 
-# 2. Confirm entry
-display_blocking_prompt "USB Storage Mode: Do you want to enter USB Mass Storage Mode?" "Enter" "Cancel"
-if [ $? -ne 0 ]; then
+# 2. Confirm entry into USB mode
+log_and_display_message "Enter USB Mass Storage Mode? Press A to confirm, or B to cancel."
+if confirm; then
+    # User pressed A, continue
+    :
+else
+    # User pressed B
     log_and_display_message "Cancelled by user."
     sleep 1
     exit 0
 fi
 
 # 3. Double-check connection and start
-if ! check_usb_connection; then
+if [ "$(device_get_charging_status)" = "Discharging" ]; then
     log_and_display_message "USB Cable Disconnected."
     sleep 2
     exit 0
@@ -236,7 +187,7 @@ log_and_display_message "" # Clear the "Connecting" message
 
 # 4. Main loop
 while true; do
-    if ! check_usb_connection; then
+    if [ "$(device_get_charging_status)" = "Discharging" ]; then
         log_and_display_message "USB Cable Disconnected."
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
@@ -245,15 +196,15 @@ while true; do
         exit 0
     fi
 
-    display_blocking_prompt "USB Mass Storage Mode: The device is in USB mode. Do not unplug without exiting first." "Exit & Reboot"
-    
-    if [ $? -eq 0 ]; then # "Exit & Reboot" was pressed
+    log_and_display_message "USB Mode Active. Press A to exit and reboot your device."
+    if confirm; then
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
         reboot
         exit 0
     fi
+    # Add a small sleep to prevent the loop from overwhelming the CPU
     sleep 1
 done
 
