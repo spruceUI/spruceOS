@@ -68,18 +68,19 @@ log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
 # - Syncthing config
+# - SSH keys
+# - spruce emulator and system configs
+# - modified theme configs
 # - PICO-8 config and carts
-# - PPSSPP saves and config
 # - Drastic saves and configs
+# - Flycast standalone configs
 # - RetroArch main configs
 # - RetroArch core configs
 # - RetroArch overlays (excluding specific folders)
+# - Yabasanshiro standalone configs
 
 # Define the folders to backup
 folders="
-/mnt/SDCARD/.config/ppsspp/PSP/SAVEDATA
-/mnt/SDCARD/.config/ppsspp/PSP/PPSSPP_STATE
-/mnt/SDCARD/.config/ppsspp/PSP/SYSTEM
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp

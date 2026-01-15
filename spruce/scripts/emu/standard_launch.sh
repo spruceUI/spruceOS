@@ -107,7 +107,7 @@ case $EMU_NAME in
 
 	"PSP")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
-		[ ! -d "/mnt/SDCARD/.config" ] && move_dotconfig_into_place
+		[ ! -d "/mnt/SDCARD/Saves/.config" ] && move_dotconfig_into_place
 		load_ppsspp_configs
 		run_ppsspp
 		save_ppsspp_configs
