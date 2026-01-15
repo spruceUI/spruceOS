@@ -176,7 +176,6 @@ cache_core_path() {
     rom_basename=$(basename "$ROM_FILE")
 
     cache_file="${cache_dir}/${rom_basename}"
-    log_message "Caching core filename for ROM '$ROM_FILE': '$core'"
 
     echo "$core" > "$cache_file"
 }
@@ -191,12 +190,18 @@ get_cached_core_path() {
     if [ -f "$cache_file" ]; then
         cat "$cache_file"
     else
-		log_message "No cached core found for ROM '$ROM_FILE'. $cache_file does not exist."
-        echo "$CORE_PATH"
+		core_basename=$(basename "$CORE_PATH")
+		current_core_folder=$(get_core_folder "$core_basename")
+		cache_core_path "$current_core_folder"
+
+        echo "$current_core_folder"
     fi
 }
 
 transfer_save(){
+	cached_core_folder="$1"
+	current_core_folder="$2"
+
 	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "Prompt")"
 	if [ "$KEEP_SAVES_BETWEEN_CORES" = "Always" ]; then
 		return 0
@@ -204,7 +209,7 @@ transfer_save(){
 		return 1
 	else
 		start_pyui_message_writer
-		log_and_display_message "RetroArch core changed!\nWould you like to transfer your old save?\n(This will remove save-states).\n\nPress A to transfer, or B to continue"
+		log_and_display_message "RetroArch core changed!\n$cached_core_folder to $current_core_folder\nWould you like to transfer your old save?\n(This will remove save-states).\n\nPress A to transfer, or B to continue"
 		if event_joypad_confirm; then
 			stop_pyui_message_writer
 			return 0
@@ -218,11 +223,11 @@ transfer_save(){
 
 handle_changed_core() {
 
+	cached_core_folder="$1"
+	current_core_folder="$2"
 
-	if transfer_save; then
+	if transfer_save "$1" "$2"; then
 		log_message "Syncing saves between cores as per user setting."
-		cached_core_folder="$1"
-		current_core_folder="$2"
 
 		rom_basename=$(basename "$ROM_FILE")
 		rom_name="${rom_basename%.*}" 
