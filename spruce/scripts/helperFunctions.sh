@@ -150,6 +150,44 @@ Press START to continue anyway."
     return 0
 }
 
+event_joypad_confirm() {
+    timeout=${1:-0}         # Default to 0 (no timeout)
+    timeout_return=${2:-1}  # Default to 1 (usually 'No' or 'Cancel')
+    start_time=$(date +%s)
+
+    rm -f /tmp/ge_out 2>/dev/null
+    
+    # Start getevent in the background
+    getevent "$EVENT_PATH_JOYPAD" > /tmp/ge_out &
+    GE_PID=$!
+
+    RET_VAL=2
+    while [ "$RET_VAL" -eq 2 ]; do
+        # 1. Check for User Input
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_A"*) RET_VAL=0 ;;
+                *"key $B_B"*) RET_VAL=1 ;;
+            esac
+        fi
+
+        # 2. Check for Timeout (only if timeout > 0)
+        if [ "$timeout" -gt 0 ]; then
+            current_time=$(date +%s)
+            elapsed=$((current_time - start_time))
+            if [ "$elapsed" -ge "$timeout" ]; then
+                RET_VAL=$timeout_return
+            fi
+        fi
+        
+        # 3. Prevent CPU pegging
+        [ "$RET_VAL" -eq 2 ] && sleep 0.1
+    done
+
+    kill "$GE_PID" 2>/dev/null
+    return "$RET_VAL"
+}
+
 # Call this to wait for the user to confirm an action
 # Use this with display --confirm to show an image with a confirm/cancel prompt
 # The combined usage would be like

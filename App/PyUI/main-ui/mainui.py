@@ -230,6 +230,8 @@ def main():
 
         with log_timing("Display initialization", PyUiLogger.get_logger()):    
             Display.init()
+        with log_timing("Display Present", PyUiLogger.get_logger()):    
+            Display.present()
         
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
