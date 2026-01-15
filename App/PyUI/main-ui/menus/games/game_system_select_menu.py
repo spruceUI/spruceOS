@@ -360,6 +360,7 @@ class GameSystemSelectMenu:
                         carousel_sides_hang_off_edge=Theme.get_carousel_system_select_sides_hang_off(),
                         carousel_x_pad=Theme.get_carousel_system_x_pad(),
                         carousel_additional_y_offset=Theme.get_carousel_system_additional_y_offset(),
+                        carousel_resize_type=Theme.get_carousel_system_resize_type(),
                         carousel_selected_offset=Theme.get_carousel_system_selected_offset(),
                         carousel_use_selected_image_in_animation=Theme.get_carousel_use_selected_image_in_animation(),
                         carousel_x_offset=Theme.get_carousel_system_external_x_offset(),

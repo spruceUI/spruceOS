@@ -19,6 +19,7 @@ class Theme():
     _data = {}
     _path = ""
     _skin_folder = ""
+    _bg_folder = ""
     _icon_folder = ""
     _loaded_file_path = ""
     _daijisho_theme_index = None
@@ -43,9 +44,11 @@ class Theme():
             config_path = "config.json"
             cls._skin_folder = cls._get_asset_folder(cls._path, "skin", -1, -1)
             cls._icon_folder = cls._get_asset_folder(cls._path, "icons", -1, -1)
+            cls._bg_folder = cls._get_asset_folder(cls._path, "bg", -1, -1)
         else:
             cls._skin_folder = cls._get_asset_folder(cls._path, "skin", width, height)
             cls._icon_folder = cls._get_asset_folder(cls._path, "icons", width, height)
+            cls._bg_folder = cls._get_asset_folder(cls._path, "bg", width, height)
 
 
         cls._data.clear()
@@ -226,16 +229,23 @@ class Theme():
         return cls._resolve_file(cls._skin_folder, parts, cache_missing)
 
     @classmethod
+    def _bg(cls, *parts, cache_missing=True):
+        return cls._resolve_file(cls._bg_folder, parts, cache_missing)
+
+    @classmethod
     def _icon(cls, *parts):
         return cls._resolve_file(cls._icon_folder, parts)
     
     @classmethod
     def background(cls, page = None):
         if(page is None):
+            PyUiLogger.get_logger().info("page is None")
             return cls._asset("background.qoi")
         else:
-            return cls._asset(f"{page.lower()}-background.qoi")
-    
+            background_img = cls._bg(f"{page.lower()}.qoi")
+            PyUiLogger.get_logger().info(f"Found background for page {page}: {background_img}")
+            return background_img
+
     @classmethod
     def favorite(cls): return cls._asset("ic-favorite-n.qoi")
     
@@ -904,6 +914,16 @@ class Theme():
         cls._data["carouselSystemAdditionalYOffset"] = value
         cls.save_changes()
         
+    @classmethod
+    def get_carousel_system_resize_type(cls):
+        view_type_str = cls._data.get("carouselSystemResizeType", "FIT")
+        return getattr(ResizeType, view_type_str, ResizeType.FIT)
+
+    @classmethod
+    def set_carousel_system_resize_type(cls, view_type):
+        cls._data["carouselSystemResizeType"] = view_type.name
+        cls.save_changes()
+
     @classmethod
     def get_carousel_system_selected_offset(cls):
         return cls._data.get("carouselSystemSelectedOffset", 0)

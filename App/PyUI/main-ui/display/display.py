@@ -82,7 +82,6 @@ class Display:
     bg_canvas = None
     render_canvas = None
     bg_path = ""
-    page_bg = ""
     top_bar = TopBar()
     bottom_bar = BottomBar()
     window = None
@@ -336,11 +335,9 @@ class Display:
 
     @classmethod
     def set_page_bg(cls, page_bg):
-        if(page_bg != cls.page_bg):
-            cls.page_bg = page_bg 
-            background = Theme.background(page_bg)
-            if(background is not None and os.path.exists(background)):
-                cls.set_new_bg(background, is_custom_theme_background=True)
+        background = Theme.background(page_bg)
+        if(background is not None and os.path.exists(background)):
+            cls.set_new_bg(background, is_custom_theme_background=True)
 
     @classmethod
     def set_selected_tab(cls, tab):

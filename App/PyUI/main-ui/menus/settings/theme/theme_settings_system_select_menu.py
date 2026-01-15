@@ -149,7 +149,17 @@ class ThemeSettingsSystemSelectMenu(ThemeSettingsMenuCommon):
                                             Theme.get_carousel_system_fixed_selected_width, 
                                             Theme.set_carousel_system_fixed_selected_width)
                 )
-                
+            # Should restrict NONE if in use percentage mode but oh well                
+            option_list.append(
+                self.build_enum_entry(
+                                    primary_text="Image Resize Type",
+                                    get_value_func=Theme.get_carousel_system_resize_type,
+                                    set_value_func=Theme.set_carousel_system_resize_type,
+                                    get_next_enum_type=get_next_resize_type
+                                )               
+            )
+
+
             option_list.append(
                 self.build_numeric_entry("Internal Padding", 
                                         Theme.get_carousel_system_x_pad, 

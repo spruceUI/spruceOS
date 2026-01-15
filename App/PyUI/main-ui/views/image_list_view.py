@@ -31,7 +31,6 @@ class ImageListView(NonDescriptiveListView):
         self.img_offset_x = img_offset_x
         self.img_offset_y = img_offset_y
         self.img_width = img_width
-        PyUiLogger.get_logger().info(f"ImageListView: img_width={img_width}, img_height={img_height}")
         self.img_height = img_height
         self.text_to_image_relationship = text_to_image_relationship
         self.prev_index = -1
