@@ -18,7 +18,7 @@
 
 move_dotconfig_into_place() {
 	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]; then
-		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/Saves/.config" && log_message "Copied .config folder to root of SD card."
+		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/Saves/.config" && log_message "Copied .config folder into Saves folder."
 	else
 		log_message "WARNING!!! No .config folder found!"
 	fi
