@@ -7,6 +7,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system-system.json"
@@ -72,26 +73,46 @@ enable_or_disable_rgb() {
     fi
 }
 
-enter_sleep() {
-    log_message "Need to fix sleep on trimui smart pro s"
-}
-
-get_current_volume() {
-    log_message "TODO: verify get_current_volume for SmartProS"
-    amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
-}
-
 set_volume() {
-    log_message "TODO: verify set_volume for SmartProS"
-    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     new_vol="${1:-0}" # default to mute if no value supplied
-    scaled=$(( new_vol * 255 / 20 ))
-    amixer set 'Soft Volume Master' "$scaled"
+    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    # Volume on smart pro s is weird
+    # 1/2 volume is basically one step above mute
+    if [ "$new_vol" -eq 0 ]; then
+        scaled=0
+    else
+        scaled=$(( 32 + ( (new_vol - 1) * 31 / 19 ) ))
+    fi
+
+
+    amixer set DAC "$scaled"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         save_volume_to_config_file "$new_vol"
+        sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
     fi
 
+}
+
+
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
+}
+
+volume_down() {
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -gt 0 ] ; then
+        VOLUME_LV=$((VOLUME_LV-1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
+}
+
+volume_up() {
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -lt 20 ] ; then
+        VOLUME_LV=$((VOLUME_LV+1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 run_mixer_watchdog() {
@@ -275,10 +296,7 @@ device_init() {
 
 
     custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
-    if [ "$custom_thermal_watchdog" != "Custom" ]; then
-        run_trimui_blobs "thermald"
-    fi
+    device_run_tsps_blobs
 
     run_trimui_osdd
 
@@ -361,24 +379,64 @@ device_lid_open(){
     return 1
 }
 
-device_enter_sleep() {
-    log_message "device_enter_sleep Uneeded on this device: keymon handles" -v
-}
-
-device_exit_sleep() {
-    # keymon will bring wifi back up?
-    log_message "device_exit_sleep Uneeded on this device keymon handles" -v
-}
-
 device_prepare_for_ports_run() {
     log_message "device_prepare_for_ports_run uneeded on this device" -v
 }
 
 device_cleanup_after_ports_run() {
-    #Ensure TrimUI blobs are running each loop of mainui
+    device_delay_then_check_trimui_blobs
+}
+
+
+device_exit_sleep(){
+    if [ -f /tmp/wifi_on ]; then
+        # wait for wlan0 to appear (up to ~5s)
+        for _ in 1 2 3 4 5; do
+            ip link show wlan0 >/dev/null 2>&1 && break
+            sleep 1
+        done
+
+        if ! pidof wpa_supplicant >/dev/null 2>&1; then
+            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        fi
+    fi
+    device_run_tsps_blobs
+}
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+
+
+trigger_device_sleep() {
+    echo -n mem >/sys/power/state
+}
+
+device_enter_sleep() {    
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    rm -f /tmp/wifi_on
+    if pidof wpa_supplicant >/dev/null 2>&1; then
+        : > /tmp/wifi_on
+        killall wpa_supplicant
+    fi
+
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
+device_delay_then_check_trimui_blobs() {
     (
         # They seem to die ~5s after ports close
         sleep 5
-        run_trimui_blobs "trimui_inputd keymon trimui_scened trimui_btmanager hardwareservice musicserver"
+        device_run_tsps_blobs
     ) &
+
+}
+
+device_run_tsps_blobs() {
+    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
+    if [ "$custom_thermal_watchdog" != "Custom" ]; then
+        run_trimui_blobs "thermald"
+    fi
 }
