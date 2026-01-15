@@ -235,12 +235,13 @@
                 "selected": "True"
             },
             "keepSavesBetweenCores": {
-                "display": "Keep saves between cores",
+                "display": "Transfer saves between cores",
                 "options": [
-                    "True",
-                    "False"
+                    "Prompt",
+                    "Always",
+                    "Never"
                 ],
-                "selected": "False"
+                "selected": "Prompt"
             },
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",

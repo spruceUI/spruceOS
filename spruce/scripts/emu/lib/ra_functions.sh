@@ -196,9 +196,30 @@ get_cached_core_path() {
     fi
 }
 
+transfer_save(){
+	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "Prompt")"
+	if [ "$KEEP_SAVES_BETWEEN_CORES" = "Always" ]; then
+		return 0
+	elif [ "$KEEP_SAVES_BETWEEN_CORES" = "Never" ]; then
+		return 1
+	else
+		start_pyui_message_writer
+		log_and_display_message "RetroArch core changed!\nWould you like to transfer your old save?\n(This will remove save-states).\n\nPress A to transfer, or B to continue"
+		if event_joypad_confirm; then
+			stop_pyui_message_writer
+			return 0
+		else
+			stop_pyui_message_writer
+			return 1
+		fi
+
+	fi
+}
+
 handle_changed_core() {
-	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "False")"
-	if [ "$KEEP_SAVES_BETWEEN_CORES" = "True" ]; then
+
+
+	if transfer_save; then
 		log_message "Syncing saves between cores as per user setting."
 		cached_core_folder="$1"
 		current_core_folder="$2"
