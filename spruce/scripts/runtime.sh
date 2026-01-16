@@ -87,6 +87,35 @@ update_checker &
 # Initialize CPU settings
 set_smart
 
+# Set up the boot_to action prior to getting into the principal loop
+BOOT_ACTION="$(get_config_value '.menuOptions."System Settings".bootTo.selected' "spruceUI")"
+if ! flag_check "save_active"; then
+    log_message "Selected boot action is $BOOT_ACTION."
+    case "$BOOT_ACTION" in
+        "Random Game")
+            echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
+            ;;
+        "Game Switcher")
+            touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+            ;;
+        "Splore")
+            log_message "Attempting to boot into Pico-8. Checking for binaries"
+            if [ "$ARCH" = "aarch64" ]; then
+                PICO8_EXE="pico8_64"
+            else
+                PICO8_EXE="pico8_dyn"
+            fi
+            if [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ]; then
+                echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+            else
+                log_message "Pico-8 binaries not found; booting to spruceUI instead."
+            fi
+            ;;
+    esac
+fi
+
+flag_remove "save_active"
+
 # start main loop
 log_message "Starting main loop"
 /mnt/SDCARD/spruce/scripts/principal.sh
