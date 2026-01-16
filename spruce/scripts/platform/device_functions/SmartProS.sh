@@ -92,6 +92,7 @@ set_volume() {
         sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
     fi
 
+    /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
 }
 
 
