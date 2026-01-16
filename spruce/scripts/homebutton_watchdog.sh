@@ -110,6 +110,17 @@ update_gameswitcher_json() {
 
     # Create file if missing
     [ ! -f "$gameswitcher_json" ] && echo "[]" > "$gameswitcher_json"
+    if ! head -c 1 "$gameswitcher_json" | grep -q '[\[{]'; then
+        ts="$(date +%Y%m%d-%H%M%S)"
+        bak="${gameswitcher_json}.bak.$ts"
+
+        log_message "homebutton_watchdog.sh: JSON invalid/empty, backing up to $bak"
+
+        # Only move if file exists
+        [ -f "$gameswitcher_json" ] && mv "$gameswitcher_json" "$bak"
+
+        echo "[]" > "$gameswitcher_json"    
+    fi
 
     tmpfile="$(mktemp)"
 
