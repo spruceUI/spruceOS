@@ -7,6 +7,8 @@
 killall -q -15 runtime.sh
 killall -q -15 principal.sh
 
+device_prepare_for_poweroff
+
 # Ensure PyUI message writer can run
 killall -q -9 MainUI
 sleep 0.5

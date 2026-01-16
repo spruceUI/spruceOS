@@ -383,12 +383,14 @@ class CarouselView(View):
                 self.adjust_selected(1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
                 if(Theme.skip_main_menu()):
+                    Display.restore_bg()
                     return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 else:
                     self.skip_next_animation = True
                     self.adjust_selected(-1* self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R1:
                 if(Theme.skip_main_menu()):
+                    Display.restore_bg()
                     return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 else:
                     self.skip_next_animation = True
