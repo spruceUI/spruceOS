@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import threading
+import time
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
@@ -270,3 +271,23 @@ class TrimUISmartProS(TrimUIDevice):
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
         self.system_config.set_bluetooth(1)
+
+    def _signal_osd_quit(self):
+        os.makedirs("/tmp/trimui_osd", exist_ok=True)
+        open("/tmp/trimui_osd/osdd_quit", "a").close()
+        time.sleep(1)
+
+    def power_off(self):
+        Display.display_message("Powering off...")
+        self._signal_osd_quit()
+        self.run_cmd([self.power_off_cmd()])
+        # So we dont update the display while shutting down
+        time.sleep(10)
+
+
+    def reboot(self):
+        Display.display_message("Rebooting...")
+        self._signal_osd_quit()
+        self.run_cmd([self.reboot_cmd()])
+        # So we dont update the display while rebooting
+        time.sleep(10)

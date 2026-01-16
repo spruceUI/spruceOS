@@ -88,11 +88,17 @@ set_volume() {
     amixer set DAC "$scaled"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
-        save_volume_to_config_file "$new_vol"
-        sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+        current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
+
+        if [ "$current_volume" -ne "$new_vol" ]; then
+            save_volume_to_config_file "$new_vol"
+            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            if ! pgrep MainUI >/dev/null; then
+                /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
+            fi
+        fi
     fi
 
-    /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
 }
 
 
@@ -440,4 +446,8 @@ device_run_tsps_blobs() {
     if [ "$custom_thermal_watchdog" != "Custom" ]; then
         run_trimui_blobs "thermald"
     fi
+}
+
+device_prepare_for_poweroff() {
+    touch /tmp/trimui_osd/osdd_quit
 }
