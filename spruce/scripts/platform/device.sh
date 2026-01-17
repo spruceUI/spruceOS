@@ -295,3 +295,7 @@ save_volume_to_config_file() {
 device_prepare_for_poweroff() {
     log_message "Missing device_prepare_for_poweroff function" -v
 }
+
+device_home_button_pressed() {
+    log_message "Missing device_home_button_pressed function" -v
+}
