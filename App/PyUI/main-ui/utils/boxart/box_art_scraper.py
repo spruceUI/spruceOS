@@ -11,6 +11,7 @@ from typing import List, Optional
 from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 import re
 from typing import Optional
@@ -313,6 +314,7 @@ class BoxArtScraper:
         return self.download_remote_image(ra_name, remote_image_name, image_path)
 
     def download_remote_image(self, ra_name, remote_image_name, image_path):
+        CachedExists.clear()
 
         boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
         fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")

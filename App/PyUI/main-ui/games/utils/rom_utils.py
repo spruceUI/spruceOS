@@ -72,7 +72,6 @@ class RomUtils:
         cache_key = (game_system, directory)
         if cache_key in self._get_roms_cache:
             return self._get_roms_cache[cache_key]
-
         directories_to_search = directory and [directory] or game_system.folder_paths
         valid_files = []
         valid_folders = []

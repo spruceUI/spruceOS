@@ -1,6 +1,7 @@
 import json
 import os
 from devices.device import Device
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 
 class DaijishoThemeIndex:
@@ -111,10 +112,10 @@ class DaijishoThemeIndex:
                 jpg_path = os.path.join(self.foldername, filename)
                 qoi_filename = os.path.splitext(filename)[0] + ".qoi"
                 qoi_path = os.path.join(self.foldername, qoi_filename)
-                if os.path.exists(qoi_path):
+                if CachedExists.exists(qoi_path):
                     return qoi_path
 
-                if not os.path.exists(qoi_path):
+                if not CachedExists.exists(qoi_path):
                     PyUiLogger.get_logger().info(f"Converting {jpg_path} to {qoi_path}")
                     try:
                         Device.get_device().get_image_utils().convert_from_jpg_to_qoi(jpg_path, qoi_path)
@@ -130,10 +131,10 @@ class DaijishoThemeIndex:
                 jpg_path = os.path.join(self.foldername, filename)
                 png_filename = os.path.splitext(filename)[0] + ".png"
                 png_path = os.path.join(self.foldername, png_filename)
-                if os.path.exists(png_path):
+                if CachedExists.exists(png_path):
                     return png_path
 
-                if not os.path.exists(png_path):
+                if not CachedExists.exists(png_path):
                     PyUiLogger.get_logger().info(f"Converting {jpg_path} to {png_path}")
                     try:
                         Device.get_device().get_image_utils().convert_from_jpg_to_png(jpg_path, png_path)

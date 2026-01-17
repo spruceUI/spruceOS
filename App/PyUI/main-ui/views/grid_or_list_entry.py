@@ -4,6 +4,7 @@ import threading
 from typing import Callable, TypeVar
 
 from devices.device import Device
+from utils.cached_exists import CachedExists
 
 T = TypeVar('T')  # Generic input type
 
@@ -103,7 +104,7 @@ class GridOrListEntry:
                 marker, os.path.sep + f"Imgs_{variant_name}" + os.path.sep
             )
 
-            if os.path.exists(variant_path):
+            if CachedExists.exists(variant_path):
                 return variant_path
 
         if("small" == variant_name):

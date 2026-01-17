@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from devices.device import Device
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 
 
@@ -93,6 +94,7 @@ class ThemePatcher():
     @classmethod
     def scale_theme(cls, config_path, theme_width, theme_height, target_width, target_height):
         from display.display import Display
+        CachedExists.clear()
         scale_width = target_width / theme_width
         scale_height = target_height / theme_height
         scale = min(scale_width, scale_height)

@@ -239,11 +239,9 @@ class Theme():
     @classmethod
     def background(cls, page = None):
         if(page is None):
-            PyUiLogger.get_logger().info("page is None")
             return cls._asset("background.qoi")
         else:
             background_img = cls._bg(f"{page.lower()}.qoi")
-            PyUiLogger.get_logger().info(f"Found background for page {page}: {background_img}")
             return background_img
 
     @classmethod
