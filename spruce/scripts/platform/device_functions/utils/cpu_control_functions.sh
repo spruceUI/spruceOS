@@ -143,11 +143,12 @@ set_performance() {
 
         echo "performance" > "$CPU_0_DIR/scaling_governor"
         # Should we specify min freq?
-        echo "$CPU_OVERCLOCK_MAX_FREQ" > "$CPU_0_DIR/scaling_min_freq"
+        echo "$CPU_PERF_MAX_FREQ" > "$CPU_0_DIR/scaling_min_freq"
         echo "$CPU_PERF_MAX_FREQ" > "$CPU_0_DIR/scaling_max_freq"
 
         if [ -e "$CPU_4_DIR" ]; then
             echo "performance" > "$CPU_4_DIR/scaling_governor"
+            echo "$CPU_PERF_MAX_FREQ" > "$CPU_4_DIR/scaling_min_freq"
             echo "$CPU_PERF_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
         fi
 
