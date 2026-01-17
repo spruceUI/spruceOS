@@ -8,6 +8,7 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 
 
@@ -30,6 +31,7 @@ class BoxArtResizer():
 
     @classmethod
     def process_image(cls, full_path):
+        CachedExists.clear()
         target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
         target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
         target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()

@@ -2,12 +2,13 @@
 import os
 
 from apps.miyoo.miyoo_app_config import MiyooAppConfig
+from utils.cached_exists import CachedExists
 
 class MiyooAppFinder:
 
     def __init__(self):
         self.app_dir = "/mnt/SDCARD/App/"
-        if(not os.path.exists(self.app_dir)):
+        if(not CachedExists.exists(self.app_dir)):
             self.app_dir = "/mnt/SDCARD/Apps/"
 
     def get_apps(self):

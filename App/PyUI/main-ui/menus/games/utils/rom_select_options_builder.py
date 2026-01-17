@@ -14,6 +14,7 @@ from menus.games.utils.miyoo_game_list import MiyooGameList
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -48,12 +49,12 @@ class RomSelectOptionsBuilder:
         if(prefer_savestate_screenshot):
             # Use RA savestate image
             save_state_image_path = Device.get_device().get_save_state_image(rom_info)
-            if save_state_image_path is not None and os.path.exists(save_state_image_path):
+            if save_state_image_path is not None and CachedExists.exists(save_state_image_path):
                 return save_state_image_path
 
 
         if(game_entry is not None):
-            if(os.path.exists(game_entry.image)):
+            if(CachedExists.exists(game_entry.image)):
                 return game_entry.image
         # Get the base filename without extension
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
@@ -87,14 +88,14 @@ class RomSelectOptionsBuilder:
 
         mirrored_qoi_path = mirrored_path_base + ".qoi"
 
-        if os.path.exists(mirrored_qoi_path) and Device.get_device().supports_qoi():
+        if CachedExists.exists(mirrored_qoi_path) and Device.get_device().supports_qoi():
             return mirrored_qoi_path
 
         # ---- Fallback to old behavior (top-level image) ----
         flat_root = os.path.join(os.sep.join(parts[:system_index + 1]), "Imgs", base_name)
         flat_qoi_path = flat_root+ ".qoi"
 
-        if os.path.exists(flat_qoi_path) and Device.get_device().supports_qoi():
+        if CachedExists.exists(flat_qoi_path) and Device.get_device().supports_qoi():
             return flat_qoi_path
         
         mirrored_png_path = mirrored_path_base + ".png"
@@ -102,11 +103,11 @@ class RomSelectOptionsBuilder:
 
         image_png_path = mirrored_png_path
         image_qoi_path = mirrored_qoi_path
-        if(not os.path.exists(image_png_path)):
+        if(not CachedExists.exists(image_png_path)):
             image_png_path = flat_png_path
             image_qoi_path = flat_qoi_path
 
-        if os.path.exists(image_png_path):
+        if CachedExists.exists(image_png_path):
             if(Device.get_device().supports_qoi()):
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     if(Device.get_device().get_system_config().never_prompt_boxart_resize()):
@@ -129,7 +130,7 @@ class RomSelectOptionsBuilder:
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     BoxArtResizer.process_rom_folders()
-                if os.path.exists(image_qoi_path) and Device.get_device().supports_qoi():
+                if CachedExists.exists(image_qoi_path) and Device.get_device().supports_qoi():
                     return image_qoi_path
                 else:
                     return image_png_path
@@ -144,41 +145,41 @@ class RomSelectOptionsBuilder:
 
         root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
 
-        if os.path.exists(imgs_folder_equal_to_roms_path):
+        if CachedExists.exists(imgs_folder_equal_to_roms_path):
             return imgs_folder_equal_to_roms_path
         else:
             #Check for png in same dir
             same_dir_png = os.path.join(root_dir, base_name + ".png")
-            if os.path.exists(same_dir_png):
+            if CachedExists.exists(same_dir_png):
                 return same_dir_png
                 
         # Else try the muOS location
         muos_image_path_sd2 = os.path.join("/mnt/sdcard/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
-        if os.path.exists(muos_image_path_sd2):
+        if CachedExists.exists(muos_image_path_sd2):
             return muos_image_path_sd2
 
         muos_image_path_sd1 = os.path.join("/mnt/mmc/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
-        if os.path.exists(muos_image_path_sd1):
+        if CachedExists.exists(muos_image_path_sd1):
             return muos_image_path_sd1
         
         #ES format
         imgs_folder_with_image_suffix = os.path.join(root_dir, "Imgs", base_name + "-image.png")
-        if os.path.exists(imgs_folder_with_image_suffix):
+        if CachedExists.exists(imgs_folder_with_image_suffix):
             return imgs_folder_with_image_suffix
 
         #ES format2
         imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(root_dir, "Imgs", base_name + "-thumb.png")
-        if os.path.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
+        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
             return imgs_folder_equal_to_roms_path_with_thumb_suffix
 
         #ES format same folder
         imgs_folder_equal_to_roms_path_with_image_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-image.png")
-        if os.path.exists(imgs_folder_equal_to_roms_path_with_image_suffix):
+        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_image_suffix):
             return imgs_folder_equal_to_roms_path_with_image_suffix
         
         #ES format2 same folder
         imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-thumb.png")
-        if os.path.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
+        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
             return imgs_folder_equal_to_roms_path_with_thumb_suffix
 
         #File itself is a png
@@ -188,7 +189,7 @@ class RomSelectOptionsBuilder:
         if(not prefer_savestate_screenshot):
             # Use RA savestate image
             save_state_image_path = Device.get_device().get_save_state_image(rom_info)
-            if save_state_image_path is not None and os.path.exists(save_state_image_path):
+            if save_state_image_path is not None and CachedExists.exists(save_state_image_path):
                 return save_state_image_path
         
         return None

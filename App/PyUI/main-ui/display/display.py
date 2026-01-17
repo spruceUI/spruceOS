@@ -294,7 +294,6 @@ class Display:
         if cls.background_texture:
             sdl2.SDL_DestroyTexture(cls.background_texture)
             cls.background_texture = None
-            PyUiLogger.get_logger().info("Unloaded background texture")
 
     @classmethod
     def restore_bg(cls, bg=None):
@@ -326,9 +325,6 @@ class Display:
                     cls.set_new_bg(bg_path, is_custom_theme_background, retry=False)
                 else:
                     PyUiLogger.get_logger().error("Failed to create bg texture")
-
-            else:
-                PyUiLogger.get_logger().info(f"{bg_path} loaded as background texture")
 
         elif(bg_path is None):
             PyUiLogger.get_logger().error(f"Background path none")
