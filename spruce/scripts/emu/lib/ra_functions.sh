@@ -131,7 +131,7 @@ run_retroarch() {
 	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 	#Swap below if debugging
 	
-	/mnt/SDCARD/spruce/scripts/bluetooth/bluetooth.sh "$RA_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 	
 	if flag_check "developer_mode"; then
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"

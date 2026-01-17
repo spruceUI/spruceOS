@@ -33,6 +33,7 @@ run_ppsspp() {
 		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
 		*) 					PPSSPPSDL="./PPSSPPSDL_${PLATFORM}" ;;
 	esac
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 

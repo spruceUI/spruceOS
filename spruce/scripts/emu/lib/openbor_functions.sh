@@ -14,6 +14,7 @@
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	if [ "$PLATFORM" = "Flip" ]; then
 
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
