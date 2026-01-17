@@ -408,6 +408,7 @@ device_exit_sleep(){
         fi
     fi
     device_run_tsps_blobs
+    [ "$custom_thermal_watchdog" = "Custom" ] && /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -428,7 +429,9 @@ device_enter_sleep() {
 
 
     save_sleep_info "$IDLE_TIMEOUT" || return 1
-    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    set_wake_alarm "$IDaLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    pidof thermal-watchdog >/dev/null 2>&1 && killall thermal-watchdog
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state
     trigger_device_sleep
 }
 
