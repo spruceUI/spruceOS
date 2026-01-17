@@ -76,7 +76,12 @@ run_port() {
 }
 
 run_A30_port() {
-    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-    cd $PORTS_DIR
+
+    touch /mnt/SDCARD/RetroArch/retroarch
+    mount --bind /mnt/SDCARD/RetroArch/retroarch.A30 /mnt/SDCARD/RetroArch/retroarch
+
+    cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$ROM_FILE" 
+
+    umount /mnt/SDCARD/RetroArch/retroarch
 }
