@@ -12,7 +12,7 @@
       "options": [
         "Smart",
         "Performance",
-        "Overclock",
+        "Overclock"
       ],
       "selected": "Performance",
       "overrides": {}
