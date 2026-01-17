@@ -251,7 +251,7 @@ device_init() {
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
-    /mnt/SDCARD/spruce/scripts/device_functions/utils/a30/autoReloadCalibration.sh &
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/a30/autoReloadCalibration.sh &
 }
 
 set_event_arg_for_idlemon() {
