@@ -148,6 +148,7 @@ set_performance() {
 
         if [ -e "$CPU_4_DIR" ]; then
             echo "performance" > "$CPU_4_DIR/scaling_governor"
+            echo "$CPU_PERF_MAX_FREQ" > "$CPU_4_DIR/scaling_min_freq"
             echo "$CPU_PERF_MAX_FREQ" > "$CPU_4_DIR/scaling_max_freq"
         fi
 
