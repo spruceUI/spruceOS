@@ -98,16 +98,28 @@ class RomSelectOptionsBuilder:
         if CachedExists.exists(flat_qoi_path) and Device.get_device().supports_qoi():
             return flat_qoi_path
         
-        mirrored_png_path = mirrored_path_base + ".png"
-        flat_png_path = flat_root+ ".png"
+        NON_QOI_EXTS = (".png", ".jpg", ".jpeg") 
 
-        image_png_path = mirrored_png_path
-        image_qoi_path = mirrored_qoi_path
-        if(not CachedExists.exists(image_png_path)):
-            image_png_path = flat_png_path
-            image_qoi_path = flat_qoi_path
+        # Each entry is: (non_qoi_base, qoi_base)
+        PATH_VARIANTS = (
+            (mirrored_path_base, mirrored_qoi_path),
+            (flat_root,          flat_qoi_path),
+        )
 
-        if CachedExists.exists(image_png_path):
+        image_non_qoi_path = None
+        image_qoi_path = None
+
+        for base_path, qoi_path in PATH_VARIANTS:
+            for ext in NON_QOI_EXTS:
+                candidate = base_path + ext
+                if CachedExists.exists(candidate):
+                    image_non_qoi_path = candidate
+                    image_qoi_path = qoi_path
+                    break
+            if image_non_qoi_path:
+                break
+
+        if image_non_qoi_path is not None:
             if(Device.get_device().supports_qoi()):
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     if(Device.get_device().get_system_config().never_prompt_boxart_resize()):
@@ -133,9 +145,9 @@ class RomSelectOptionsBuilder:
                 if CachedExists.exists(image_qoi_path) and Device.get_device().supports_qoi():
                     return image_qoi_path
                 else:
-                    return image_png_path
+                    return image_non_qoi_path
             else:
-                return image_png_path
+                return image_non_qoi_path
 
         
         # Attempt to construct alternate path by replacing "Roms" with "Imgs"
