@@ -210,7 +210,7 @@ transfer_save(){
 	else
 		start_pyui_message_writer
 		log_and_display_message "RetroArch core changed!\n$cached_core_folder to $current_core_folder\nWould you like to transfer your old save?\n(This will remove save-states).\n\nPress A to transfer, or B to continue"
-		if event_joypad_confirm; then
+		if event_confirm; then
 			stop_pyui_message_writer
 			return 0
 		else

@@ -243,7 +243,7 @@ send_virtual_key_L3() {
         sleep 0.1
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
+    } | sendevent $EVENT_PATH_READ_INPUTS_SPRUCE
 }
 
 prepare_for_pyui_launch(){
@@ -279,6 +279,29 @@ perform_fw_check(){
 check_if_fw_needs_update() {
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
+}
+
+
+close_ppsspp_menu() {
+
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
+        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
+        {
+            echo $B_RIGHT 1  
+            echo $B_RIGHT 0  
+            echo $B_A 1  
+            echo $B_A 0  
+        } > /tmp/ppsspp_events.txt
+
+
+        # run sendevent in a fully detached subshell
+        (
+            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
+        ) < /dev/null > /dev/null 2>&1 &
+
+        sleep 0.5
+    fi
 }
 
 take_screenshot() {

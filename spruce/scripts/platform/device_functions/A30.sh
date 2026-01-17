@@ -1,5 +1,8 @@
 #!/bin/sh
 
+export EVENT_PATH_JOYPAD="/dev/input/event4"
+export EVENT_PATH_KEYBOARD="/dev/input/event3"
+
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
@@ -121,7 +124,8 @@ setup_for_retroarch_and_get_bin_location(){
 }
 
 
-
+# TODO this is actually dependent on which emulator is being used
+# and cannot be generically done
 # Send L3 and R3 press event, this would toggle in-game and pause in RA
 # or toggle in-game menu in PPSSPP
 send_virtual_key_L3R3() {
@@ -133,7 +137,7 @@ send_virtual_key_L3R3() {
         echo $B_R3 0 # R3 up
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
+    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
 send_virtual_key_L3() {
@@ -143,7 +147,7 @@ send_virtual_key_L3() {
         sleep 0.1
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
+    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
 send_menu_button_to_retroarch() {
@@ -247,7 +251,7 @@ device_init() {
     # create virtual joypad from keyboard input, it should create /dev/input/event4 system file
     cd "/mnt/SDCARD/spruce/bin"
     ./joypad $EVENT_PATH_KEYBOARD &
-    /mnt/SDCARD/spruce/scripts/autoReloadCalibration.sh &
+    /mnt/SDCARD/spruce/scripts/device_functions/utils/a30/autoReloadCalibration.sh &
 }
 
 set_event_arg_for_idlemon() {

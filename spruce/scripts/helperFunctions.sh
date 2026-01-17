@@ -150,7 +150,7 @@ Press START to continue anyway."
     return 0
 }
 
-event_joypad_confirm() {
+event_confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
     timeout_return=${2:-1}  # Default to 1 (usually 'No' or 'Cancel')
     start_time=$(date +%s)
@@ -158,7 +158,7 @@ event_joypad_confirm() {
     rm -f /tmp/ge_out 2>/dev/null
     
     # Start getevent in the background
-    getevent "$EVENT_PATH_JOYPAD" > /tmp/ge_out &
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
     GE_PID=$!
 
     RET_VAL=2
@@ -484,7 +484,7 @@ get_current_theme() {
 
 
 get_event() {
-    "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_KEYBOARD
+    "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_READ_INPUTS_SPRUCE
 }
 
 get_version() {
