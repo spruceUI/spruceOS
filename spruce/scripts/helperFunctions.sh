@@ -923,3 +923,40 @@ set_rgb_in_menu() {
     # todo: make this user-configurable
     rgb_led lrm12 off
 }
+
+set_network_proxy() {
+    enable_proxy="$(get_config_value '.menuOptions."Proxy Settings".enableProxy.selected' "False")"
+    proxy_protocol="$(get_config_value '.menuOptions."Proxy Settings".proxyProtocol.selected' "http")"
+    proxy_address="$(get_config_value '.menuOptions."Proxy Settings".proxyAddress.selected' "")"
+    proxy_port="$(get_config_value '.menuOptions."Proxy Settings".proxyPort.selected' "")"
+
+    proxy=""
+
+    if [ "$enable_proxy" = "True" ]; then
+        if [ -n "$proxy_address" ] && [ -n "$proxy_port" ]; then
+            case "$proxy_port" in
+                *[!0-9]*)
+                    log_message "Invalid proxy port (not a number): $proxy_port"
+                    unset http_proxy https_proxy
+                    return 1
+                    ;;
+            esac
+
+            if [ "$proxy_port" -lt 1 ] || [ "$proxy_port" -gt 65535 ]; then
+                log_message "Invalid proxy port (out of range 1-65535): $proxy_port"
+                unset http_proxy https_proxy
+                return 1
+            fi
+
+            proxy="${proxy_protocol}://${proxy_address}:${proxy_port}"
+        fi
+    fi
+
+    if [ -n "$proxy" ]; then
+        log_message "Set network proxy as $proxy"
+        export http_proxy="$proxy"
+        export https_proxy="$proxy"
+    else
+        unset http_proxy https_proxy
+    fi
+}
