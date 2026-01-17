@@ -193,7 +193,7 @@ class BoxArtResizer():
                 cls.create_interim_folders(imgs_path)
                 for root, _, files in os.walk(imgs_path):
                     for file in files:
-                        if file.lower().endswith((".png", ".jpg", ".jpeg")):
+                        if file.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".webp")):
                             cls.scan_count = cls.scan_count + 1
                             cls._to_delete = []
                             if (cls._aborted):

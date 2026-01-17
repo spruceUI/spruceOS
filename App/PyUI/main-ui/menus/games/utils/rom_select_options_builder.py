@@ -98,7 +98,7 @@ class RomSelectOptionsBuilder:
         if CachedExists.exists(flat_qoi_path) and Device.get_device().supports_qoi():
             return flat_qoi_path
         
-        NON_QOI_EXTS = (".png", ".jpg", ".jpeg") 
+        NON_QOI_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".bmp") 
 
         # Each entry is: (non_qoi_base, qoi_base)
         PATH_VARIANTS = (
