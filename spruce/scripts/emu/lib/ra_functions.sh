@@ -209,11 +209,13 @@ transfer_save(){
 		return 1
 	else
 		start_pyui_message_writer
-		log_and_display_message "RetroArch core changed!\n$cached_core_folder to $current_core_folder\nWould you like to transfer your old save?\n(This will remove save-states).\n\nPress A to transfer, or B to continue"
+		log_and_display_message "RetroArch core changed!\n$cached_core_folder to $current_core_folder\nWould you like to transfer your old save?\n(This will remove the auto save-state).\n\nPress A to transfer, or B to continue"
 		if event_confirm; then
+			log_and_display_message "Transferring saves from\n$cached_core_folder to $current_core_folder"
 			stop_pyui_message_writer
 			return 0
 		else
+			log_and_display_message "Not transferring saves. Launching with new core."
 			stop_pyui_message_writer
 			return 1
 		fi
