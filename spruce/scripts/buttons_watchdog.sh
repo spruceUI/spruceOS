@@ -114,7 +114,7 @@ volume_up_bg() {
 }
 
 # scan all button input
-EVENTS="$EVENT_PATH_KEYBOARD"
+EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
     # first print event code to log file

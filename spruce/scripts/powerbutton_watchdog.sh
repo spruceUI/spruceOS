@@ -67,7 +67,7 @@ while true; do
     }
 
     # start getevent writing to the fifo in background, and capture its PID
-    getevent -exclusive "$POWER_EVENT" > "$FIFO" 2>/dev/null &
+    getevent -exclusive "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
     GETEVENT_PID=$!
 
     while IFS= read -r line < "$FIFO"; do

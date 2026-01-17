@@ -141,7 +141,7 @@ send_virtual_key_L3R3() {
         echo $B_R3 0 # R3 up
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
+    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
 send_virtual_key_L3() {
@@ -151,7 +151,7 @@ send_virtual_key_L3() {
         sleep 0.1
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_JOYPAD
+    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
 prepare_for_pyui_launch(){
