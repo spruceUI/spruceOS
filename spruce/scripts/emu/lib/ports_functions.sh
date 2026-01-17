@@ -12,7 +12,7 @@
 #   is_retroarch_port
 #   set_port_mode
 #   run_port
-
+/mnt/SDCARD/spruce/scripts/asound-setup.sh /mnt/SDCARD/Saves/flip/home
 extract_game_dir(){
     # long-term come up with better method.
     # this is short term for testing
