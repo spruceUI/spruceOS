@@ -119,7 +119,6 @@ EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 getevent $EVENTS | while read line; do
     # first print event code to log file
     logger -p 15 -t "keymon[$$]" "$line"
-
     # handle hotkeys and volume buttons
     case $line in
         *"key $B_START 1"*) # START key down
@@ -167,6 +166,9 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 0"*) # VOLUMEUP key up
             kill $PID_UP 2&> /dev/null
             PID_UP=""
+        ;;
+        *"key $B_HOME 1"*) # Home Button Pressed
+            device_home_button_pressed
         ;;
     esac
 done

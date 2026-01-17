@@ -456,3 +456,8 @@ device_run_tsps_blobs() {
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
 }
+
+
+device_home_button_pressed() {
+    touch /tmp/show_osdd
+}
