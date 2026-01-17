@@ -431,7 +431,7 @@ device_enter_sleep() {
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     pidof thermal-watchdog >/dev/null 2>&1 && killall thermal-watchdog
-    echo 0 > /sys/class/thermal/cooling_device0/cur_state
+    [ "$custom_thermal_watchdog" = "Custom" ] && echo 0 > /sys/class/thermal/cooling_device0/cur_state
     trigger_device_sleep
 }
 
