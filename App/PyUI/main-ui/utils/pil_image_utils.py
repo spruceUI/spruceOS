@@ -74,10 +74,11 @@ class PilImageUtils(ImageUtils):
         Converts a PNG file to a 32-bit RGBA QOI using ffmpeg.
         The QOI will be in the same directory with the same basename.
         """
-        if not png_path.lower().endswith(".png"):
-            PyUiLogger().get_logger().info(f"{png_path} is not a png")
+        if png_path.lower().endswith(".qoi"):
+            PyUiLogger().get_logger().info(f"{png_path} is already a qoi")
             return
-        PyUiLogger().get_logger().info(f"Converting {png_path} to qoi")
+        if not png_path.lower().endswith(".png"):
+            PyUiLogger().get_logger().warning(f"{png_path} is not a png")
 
         if(qoi_path is None):
             qoi_path = os.path.splitext(png_path)[0] + ".qoi"
