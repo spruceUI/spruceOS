@@ -15,6 +15,7 @@ run_yabasanshiro() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	export HOME="$EMU_DIR"
 	cd "$HOME"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
 	KEYMAP_FILE="/mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json"
 	case "$PLATFORM" in

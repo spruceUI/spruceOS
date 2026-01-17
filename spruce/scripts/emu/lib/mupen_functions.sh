@@ -15,10 +15,10 @@
 run_mupen_standalone() {
 
 	export HOME="$EMU_DIR/mupen64plus"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	export XDG_CONFIG_HOME="$HOME"
 	export XDG_DATA_HOME="$HOME"
 	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
-
 	cd "$HOME"
 
 	sed -i "s|^ScreenWidth *=.*|ScreenWidth = $DISPLAY_WIDTH|" "$HOME/.config/mupen64plus/mupen64plus.cfg"

@@ -36,6 +36,7 @@ run_flycast_standalone() {
 	mount --bind /mnt/SDCARD/BIOS/dc $HOME/data
 
 	cd "$HOME"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 	./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
 	umount $HOME/bios

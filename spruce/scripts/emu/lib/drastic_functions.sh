@@ -24,7 +24,7 @@ run_drastic() {
 
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
-
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	[ -f "$EMU_DIR/resources/settings_${PLATFORM}.json" ] && cp "$EMU_DIR/resources/settings_${PLATFORM}.json" "$EMU_DIR/resources/settings.json"
 
 	if [ "$PLATFORM" = "A30" ]; then # only Steward is available.
