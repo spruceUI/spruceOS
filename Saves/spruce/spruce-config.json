@@ -354,6 +354,35 @@
                 "selected":"False"
             }
         },
+        "Proxy Settings": {
+            "enableProxy": {
+                "display": "Enable Network Proxy",
+                "description": "Route HTTP(S) requests to proxy server",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "proxyAddress": {
+                "display": "Proxy Address",
+                "type": "freeText",
+                "selected": ""
+            },
+            "proxyPort": {
+                "display": "Proxy Port",
+                "type": "freeText",
+                "selected": ""
+            },
+            "proxyProtocol": {
+                "display": "Proxy Protocol",
+                "options": [
+                    "http",
+                    "socks5"
+                ],
+                "selected": "http"
+            }
+        },
         "RGB LED Settings": {
             "emulatorLEDeffect": {
                 "display": "Trigger LEDs on emulator launch",
