@@ -39,7 +39,7 @@ run_pico8() {
 	fi
 
 	cd "$HOME"
-
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 	if [ "$PLATFORM" = "A30" ]; then
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
