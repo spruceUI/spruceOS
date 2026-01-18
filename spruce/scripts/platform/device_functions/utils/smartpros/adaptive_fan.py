@@ -112,7 +112,7 @@ def main(lower_bound, upper_bound, debug):
                         new_fan = current_fan - 1
             # else: within margin, keep fan steady
 
-            current_fan = clamp(current_fan, FAN_MIN, FAN_MAX)
+            new_fan = clamp(new_fan, FAN_MIN, FAN_MAX)
             # If fan changed, reset trend history
             if new_fan != current_fan:
                 current_fan = set_fan_speed(new_fan)

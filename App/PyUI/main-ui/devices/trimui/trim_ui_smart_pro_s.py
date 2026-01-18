@@ -66,10 +66,6 @@ class TrimUISmartProS(TrimUIDevice):
 
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self._set_hue_to_config()
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
 
