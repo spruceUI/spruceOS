@@ -194,6 +194,16 @@
                 ],
                 "selected": "1600"
             },
+            "trimuiOSD": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Run TrimUI OSD",
+                "description": "Early Alpha",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "customThermals": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
                 "display": "Custom Thermal Control",
