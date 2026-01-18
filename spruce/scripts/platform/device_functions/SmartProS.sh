@@ -302,10 +302,10 @@ device_init() {
     ) &
 
 
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
     device_run_tsps_blobs
 
-    run_trimui_osdd
+    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
+    [ "$run_osd" = "True" ] && run_trimui_osdd
 
     echo 1 > /sys/class/speaker/mute
     tinymix set 23 1
