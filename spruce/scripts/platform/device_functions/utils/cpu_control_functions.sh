@@ -38,7 +38,6 @@ lock_governor() {
 cores_online() {
     [ -z "$1" ] && return  # skip empty call
     core_string="${1:-0123}"
-    log_message "Setting cores online: ${core_string}"
 
     # TODO why silent?
     # Silently fall back on invalid input
@@ -58,9 +57,7 @@ cores_online() {
         echo "$val" >"$cpu_path/online" 2>/dev/null
         chmod a-w "$cpu_path/online" 2>/dev/null
     done
-
-    log_message "Setting cores online: $cores"
-
+    log_message "Setting cores online: ${core_string}"
 }
 
 # Save the current online cores to /tmp/cores_online
