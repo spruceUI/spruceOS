@@ -206,11 +206,12 @@
             },
             "customThermals": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
-                "display": "Custom Thermal Control",
-                "description": "Use customized thermal controls",
+                "display": "Thermal Control",
+                "description": "Customize fan profiles",
                 "options": [
                     "Stock",
-                    "Custom"
+                    "Adaptive",
+                    "Balanced"
                 ],
                 "selected": "Stock"
             }

@@ -164,11 +164,6 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    if [ "$custom_thermal_watchdog" = "Custom" ]; then
-        log_message "Launching custom thermal watchdog for Trim UI Smart Pro S"
-        /mnt/SDCARD/spruce/smartpros/bin/custom-thermal-watchdog &
-    fi
 }
 
 perform_fw_check(){
@@ -303,6 +298,7 @@ device_init() {
 
 
     device_run_tsps_blobs
+    device_run_thermal_process
 
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
@@ -408,8 +404,7 @@ device_exit_sleep(){
         fi
     fi
     device_run_tsps_blobs
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    [ "$custom_thermal_watchdog" = "Custom" ] && /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog
+    device_run_thermal_process
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -431,9 +426,7 @@ device_enter_sleep() {
 
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
-    pidof thermal-watchdog >/dev/null 2>&1 && killall thermal-watchdog
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    [ "$custom_thermal_watchdog" = "Custom" ] && echo 0 > /sys/class/thermal/cooling_device0/cur_state
+    device_stop_thermal_process
     trigger_device_sleep
 }
 
@@ -448,16 +441,39 @@ device_delay_then_check_trimui_blobs() {
 
 device_run_tsps_blobs() {
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
-    if [ "$custom_thermal_watchdog" != "Custom" ]; then
-        run_trimui_blobs "thermald"
-    fi
 }
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
 }
 
-
 device_home_button_pressed() {
     touch /tmp/show_osdd
+}
+
+device_stop_thermal_process(){
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    if [ "$custom_thermal_watchdog" = "Custom" ]; then
+        killall thermal-watchdog
+    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
+        pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
+        if [ -n "$pid" ]; then
+            kill "$pid"
+        fi
+    else
+        killall thermald
+    fi
+}
+
+device_run_thermal_process(){
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    if [ "$custom_thermal_watchdog" = "Balanced" ]; then
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
+        #TODO: Add ability to adjust lower/upper values
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+    else
+        run_trimui_blobs "thermald"
+    fi
+
 }
