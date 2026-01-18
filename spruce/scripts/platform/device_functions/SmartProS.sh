@@ -392,6 +392,7 @@ device_cleanup_after_ports_run() {
 
 
 device_exit_sleep(){
+    restore_cores_online
     if [ -f /tmp/wifi_on ]; then
         # wait for wlan0 to appear (up to ~5s)
         for _ in 1 2 3 4 5; do
@@ -405,6 +406,11 @@ device_exit_sleep(){
     fi
     device_run_tsps_blobs
     device_run_thermal_process
+    (
+        # Core 0 won't offline immediately, wait a bit to get rid of it
+        sleep 10
+        restore_cores_online
+    ) &
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -423,7 +429,8 @@ device_enter_sleep() {
         killall wpa_supplicant
     fi
 
-
+    save_cores_online
+    cores_online 0
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     device_stop_thermal_process
