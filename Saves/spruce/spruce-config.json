@@ -210,8 +210,12 @@
                 "description": "Customize fan profiles",
                 "options": [
                     "Stock",
-                    "Adaptive",
-                    "Balanced"
+                    "Adaptive Performance",
+                    "Adaptive Balanced",
+                    "Adaptive Quiet",
+                    "Quiet",
+                    "Balanced",
+                    "Performance"
                 ],
                 "selected": "Stock"
             }

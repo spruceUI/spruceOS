@@ -453,25 +453,44 @@ device_home_button_pressed() {
 
 device_stop_thermal_process(){
     custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    if [ "$custom_thermal_watchdog" = "Custom" ]; then
-        killall thermal-watchdog
-    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
-        pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
-        if [ -n "$pid" ]; then
-            kill "$pid"
-        fi
-    else
-        killall thermald
-    fi
+    case "$custom_thermal_watchdog" in
+        Balanced|Performance|Quiet)
+            killall thermal-watchdog
+            ;;
+        "Adaptive Balanced"|"Adaptive Performance"|"Adaptive Quiet")
+            pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
+            if [ -n "$pid" ]; then
+                kill "$pid"
+            fi
+            ;;
+        
+        *)
+            killall thermald
+            ;;
+    esac
 }
 
 device_run_thermal_process(){
+    # Initial trip point = 60C (Likely to turn on fan)
+    # Second trip point = 70C (Potential first throttle point)
+    # Third trip point = 105C (Likely Critical shutdown) 
+
     custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
     if [ "$custom_thermal_watchdog" = "Balanced" ]; then
+        echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
         /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
-        #TODO: Add ability to adjust lower/upper values
+    elif [ "$custom_thermal_watchdog" = "Quiet" ]; then
+        echo "quiet" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Performance" ]; then
+        echo "sport" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Performance" ]; then
         python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Balanced" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 70 --upper 80 &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Quiet" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 80 --upper 90 &
     else
         run_trimui_blobs "thermald"
     fi

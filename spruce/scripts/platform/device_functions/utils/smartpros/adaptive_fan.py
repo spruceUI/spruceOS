@@ -58,55 +58,18 @@ def main(lower_bound, upper_bound, debug):
     DEBUG = debug
 
     target_temp = (lower_bound + upper_bound) / 2
-    temp_history = deque(maxlen=TREND_WINDOW)
-    fan_history = deque(maxlen=TREND_WINDOW)
     
     current_fan = read_fan_speed()
     
     if DEBUG:
         print(f"Target {target_temp:.2f}°C between {lower_bound}-{upper_bound}°C")
 
-    # -----------------------------
-    # Phase 1: catch-up (fast)
-    # -----------------------------
-    while False:
-        temp = get_max_temperature()
-        if temp is None:
-            time.sleep(SAMPLE_INTERVAL)
-            continue
-
-        temp_history.append(temp)
-        fan_history.append(current_fan)
-
-        # If we're far from target, go max fan
-        if temp > target_temp + 2 * TARGET_MARGIN:
-            current_fan = set_fan_speed(FAN_MAX)
-            if DEBUG:
-                print(f"Catch-up: Temp={temp:.1f}°C → FAN MAX ({current_fan})")
-            time.sleep(SAMPLE_INTERVAL)
-            continue
-        elif temp < target_temp - 2 * TARGET_MARGIN:
-            current_fan = set_fan_speed(FAN_MIN)
-            if DEBUG:
-                print(f"Catch-up: Temp={temp:.1f}°C → FAN MIN ({current_fan})")
-            time.sleep(SAMPLE_INTERVAL)
-            continue
-        else:
-            # Reached near target → switch to tracking phase
-            if DEBUG:
-                print("Entering tracking phase")
-            break
-
-    # -----------------------------
-    # Phase 2: tracking / fine-tuning
-    # -----------------------------
     # Start at fan speed roughly proportional to target
     current_fan = int(FAN_MAX * (target_temp - lower_bound) / (upper_bound - lower_bound))
     current_fan = set_fan_speed(current_fan)
 
     temp_read_count = 0
     initial_temp = get_max_temperature()    
-    fan_history.clear()
 
     while True:
         temp = get_max_temperature()
@@ -114,8 +77,6 @@ def main(lower_bound, upper_bound, debug):
         if temp is None:
             time.sleep(SAMPLE_INTERVAL)
             continue
-
-        fan_history.append(current_fan)
 
         # Compute short-term trend only since last fan change
         if temp_read_count >= 2:
@@ -157,7 +118,6 @@ def main(lower_bound, upper_bound, debug):
                 current_fan = set_fan_speed(new_fan)
                 temp_read_count = 0
                 initial_temp = temp
-                fan_history.clear()
 
             # Reset the initial temp every 10s after a fan change
             if temp_read_count > 15:
