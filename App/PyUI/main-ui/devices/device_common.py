@@ -30,7 +30,7 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().info("Prompting for shutdown")
             Display.clear("Power")
             Display.render_text_centered(f"Would you like to power down?",self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            if(self.reboot_cmd is not None):
+            if(self.reboot_cmd() is not None):
                 Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             else:
                 Display.render_text_centered(f"A = Power Down, B = Cancel",self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
