@@ -11,9 +11,6 @@ fi
 
 cd $(dirname "$0")
 
-RESOLUTION=$("/mnt/SDCARD/App/PortMaster/.portmaster/PortMaster/sdl_resolution.aarch64" 2>/dev/null | grep -a 'Current' | awk -F ': ' '{print $2}')
-DISPLAY_WIDTH=$(echo "$RESOLUTION" | cut -d'x' -f 1)
-DISPLAY_HEIGHT=$(echo "$RESOLUTION" | cut -d'x' -f 2)
 export SCREEN_WIDTH=$DISPLAY_WIDTH
 export SCREEN_HEIGHT=$DISPLAY_HEIGHT
 
