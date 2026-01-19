@@ -215,16 +215,19 @@ class MiyooTrimCommon():
 
     @staticmethod
     def set_theme(json_path, theme_path: str):
-        # Read the existing JSON
         try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}  # start with empty if file doesn't exist
+            # Read the existing JSON
+            try:
+                with open(json_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except FileNotFoundError:
+                data = {}  # start with empty if file doesn't exist
 
-        # Update the "Theme" entry
-        data["theme"] = theme_path
+            # Update the "Theme" entry
+            data["theme"] = theme_path
 
-        # Write back to the file
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4)
+            # Write back to the file
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not set theme in {json_path} : {e}")
