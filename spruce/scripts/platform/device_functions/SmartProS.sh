@@ -466,10 +466,10 @@ device_home_button_pressed() {
 device_stop_thermal_process(){
     custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
     case "$custom_thermal_watchdog" in
-        Balanced|Performance|Quiet)
+        "Cool")
             killall thermal-watchdog
             ;;
-        "Adaptive Balanced"|"Adaptive Performance"|"Adaptive Quiet")
+        "Adaptive")
             pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
             if [ -n "$pid" ]; then
                 kill "$pid"
@@ -483,27 +483,20 @@ device_stop_thermal_process(){
 }
 
 device_run_thermal_process(){
-    # Initial trip point = 60C (Likely to turn on fan)
-    # Second trip point = 70C (Potential first throttle point)
-    # Third trip point = 105C (Likely Critical shutdown) 
+    # Initial trip point = 60C (Fan should kick on -- No throttling noticed)
+    # Second trip point = 70C (CPU/GPU Start getting throttled)
+    # Third trip point = 105C (Likely Critical shutdown -- Untested) 
 
     custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    if [ "$custom_thermal_watchdog" = "Balanced" ]; then
+    if [ "$custom_thermal_watchdog" = "Cool" ]; then
+        # Fan is always on
         echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
         /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    elif [ "$custom_thermal_watchdog" = "Quiet" ]; then
-        echo "quiet" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    elif [ "$custom_thermal_watchdog" = "Performance" ]; then
-        echo "sport" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    elif [ "$custom_thermal_watchdog" = "Adaptive Performance" ]; then
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    elif [ "$custom_thermal_watchdog" = "Adaptive Balanced" ]; then
+    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
+        # Fan adjusts only to prevent throttling
         python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 70 --upper 80 &
-    elif [ "$custom_thermal_watchdog" = "Adaptive Quiet" ]; then
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 80 --upper 90 &
     else
+        # Stock from TrimUI
         run_trimui_blobs "thermald"
     fi
 
