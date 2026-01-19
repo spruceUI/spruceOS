@@ -416,6 +416,14 @@ device_exit_sleep(){
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 
+kill_wifi(){
+    rm -f /tmp/wifi_on
+    if pidof wpa_supplicant >/dev/null 2>&1; then
+        : > /tmp/wifi_on
+        killall wpa_supplicant
+    fi
+}
+
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
@@ -423,11 +431,7 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    rm -f /tmp/wifi_on
-    if pidof wpa_supplicant >/dev/null 2>&1; then
-        : > /tmp/wifi_on
-        killall wpa_supplicant
-    fi
+    kill_wifi
 
     save_cores_online
     cores_online 0
@@ -452,6 +456,7 @@ device_run_tsps_blobs() {
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
+    kill_wifi
 }
 
 device_home_button_pressed() {
