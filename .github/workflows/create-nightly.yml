@@ -114,23 +114,35 @@ jobs:
         run: |
           ARCHIVE="spruceV${{ steps.get_version.outputs.version }}.7z"
 
-          # Step 1: Compress all files normally (non-binaries)
-          find . -type f ! -name '*.7z' \
+          # Step 0: Detect binaries/uncompressible files first
+          BIN_FILES=$(find . -type f ! -name '*.7z' \
             ! -path './.git/*' ! -path './.github/*' \
             ! -name '*.gitignore' ! -name '*.gitattributes' \
             ! -name 'create_spruce_release.bat' ! -name 'create_spruce_release.sh' \
             ! -name 'commits_nightly.txt' \
-            -print0 | xargs -0 file | grep -Ev 'ELF|executable|shared object|PE32' | cut -d: -f1 | \
-            tr '\n' '\0' | xargs -0 7z a -t7z -mx=7 -m0=lzma2:d=16m -ms=off "$ARCHIVE" --
+            -print0 | xargs -0 file | grep -E 'ELF|executable|shared object|PE32' | cut -d: -f1)
 
-          # Step 2: Store binaries/uncompressible files safely
+          # Convert newline list to array for safe quoting
+          IFS=$'\n' read -r -d '' -a BIN_ARRAY <<< "$BIN_FILES"$'\0'
+
+          # Step 1: Compress all non-binaries normally
           find . -type f ! -name '*.7z' \
             ! -path './.git/*' ! -path './.github/*' \
             ! -name '*.gitignore' ! -name '*.gitattributes' \
             ! -name 'create_spruce_release.bat' ! -name 'create_spruce_release.sh' \
             ! -name 'commits_nightly.txt' \
-            -print0 | xargs -0 file | grep -E 'ELF|executable|shared object|PE32' | cut -d: -f1 | \
-            tr '\n' '\0' | xargs -0 7z u -t7z -mx=0 -ms=off "$ARCHIVE" --
+            -print0 | xargs -0 -I{} bash -c '
+              skip=false
+              for f in "${BIN_ARRAY[@]}"; do
+                [[ "$f" == "{}" ]] && skip=true
+              done
+              $skip || 7z a -t7z -mx=7 -m0=lzma2:d=16m -ms=off "'"$ARCHIVE"'" "{}"
+            '
+
+          # Step 2: Add binaries uncompressed
+          for f in "${BIN_ARRAY[@]}"; do
+            7z u -t7z -mx=0 -ms=off "$ARCHIVE" -- "$f"
+          done
 
           # Step 3: Add commits_nightly.txt at root
           7z u -t7z -mx=0 -ms=off "$ARCHIVE" commits_nightly.txt
