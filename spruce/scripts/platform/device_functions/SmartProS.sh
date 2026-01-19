@@ -494,7 +494,7 @@ device_run_thermal_process(){
         /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
     elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
         # Fan adjusts only to prevent throttling
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 70 --upper 80 &
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
     else
         # Stock from TrimUI
         run_trimui_blobs "thermald"
