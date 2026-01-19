@@ -110,33 +110,18 @@ jobs:
           echo "Removing cloned PyUI Themes repo"
           rm -rf pyui_themes
 
-      - name: Create 7z archive safely
+      - name: Create 7z archive
         run: |
-          ARCHIVE="spruceV${{ steps.get_version.outputs.version }}.7z"
-
-          # Step 0: Detect binaries/uncompressible files
-          BIN_FILES=$(find . -type f ! -name '*.7z' \
-            ! -path './.git/*' ! -path './.github/*' \
-            ! -name '*.gitignore' ! -name '*.gitattributes' \
-            ! -name 'create_spruce_release.bat' ! -name 'create_spruce_release.sh' \
-            ! -name 'commits_nightly.txt' \
-            -print0 | xargs -0 file | grep -E 'ELF|executable|shared object|PE32' | cut -d: -f1)
-
-          # Step 1: Compress everything in **one call** preserving relative paths
-          # Exclude binaries
-          find . -type f ! -name '*.7z' \
-            ! -path './.git/*' ! -path './.github/*' \
-            ! -name '*.gitignore' ! -name '*.gitattributes' \
-            ! -name 'create_spruce_release.bat' ! -name 'create_spruce_release.sh' \
-            ! -name 'commits_nightly.txt' \
-            | grep -Fv -f <(echo "$BIN_FILES") \
-            | 7z a -t7z -mx=7 -m0=lzma2:d=16m -ms=off "$ARCHIVE" -spf@
-
-          # Step 2: Add binaries **in one call**, uncompressed, preserving relative paths
-          echo "$BIN_FILES" | 7z u -t7z -mx=0 -ms=off "$ARCHIVE" -spf@
-
-          # Step 3: Add commits_nightly.txt at root
-          7z u -t7z -mx=0 -ms=off "$ARCHIVE" commits_nightly.txt
+          7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh \
+            -x!commits_nightly.txt
+          # Add the commits file separately to place it at the root
+          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
