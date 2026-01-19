@@ -1,0 +1,26 @@
+Summary of Changes to USBStorageMode App (Final Version):
+
+This refactor aimed to restore functionality to the USBStorageMode app across all supported devices, particularly the Brick, SmartPro, and Flip, which were failing due to changes in the PyUI display system.
+
+The final, working solution was achieved through an iterative debugging process. The key changes are:
+
+1.  **Unified Launch Script:** The separate, platform-specific launch scripts (e.g., `launch_A30.sh`, `launch_Brick.sh`, `launch_Flip.sh`) were removed. Their logic was merged into a single, unified `launch.sh` that uses a `case` statement to handle platform differences.
+
+2.  **Modernized UI Interaction:**
+    *   All calls to old `show_message` binaries were removed.
+    *   A robust, two-step pattern was implemented for prompts, based on the known-good `-FirmwareUpdate-` app:
+        1.  `log_and_display_message` is used to show prompt text.
+        2.  The `confirm` function (from `helperFunctions.sh`) is then used to wait for a blocking A/B button press.
+    *   This replaces all previous custom `display_blocking_prompt` workarounds.
+
+3.  **Fix for Flip "Black Screen" Bug:**
+    *   **Reliable Connection Check:** The `check_usb_connection` function for the Flip was faulty. It has been replaced with a call to the more reliable `device_get_charging_status` function, which correctly detects if a USB cable is providing power.
+    *   **Display "Warm-Up":** A `sleep` and a "Loading..." message were added immediately after starting the PyUI listener. This mimics the behavior of other working apps and gives the Flip's specific display driver a moment to initialize, preventing the initial display command from failing.
+
+4.  **Fix for Exit Loop ("Data Transfer" Bug):**
+    *   The unreliable `check_sd_activity` function, which was creating a loop and preventing clean exits, has been removed from the exit path.
+    *   The app now trusts the user's input and proceeds directly to the `cleanup_usb_gadget` function and reboot when "Exit" is selected. This ensures a clean shutdown and prevents USB errors on the host PC.
+
+5.  **Platform Name Correction:** The script was updated to use the correct platform name `"SmartPro"` instead of the incorrect `"TRIMUI_SMART_PRO"`.
+
+6.  **File Cleanup:** All obsolete files (`launch_A30.sh`, `launch_Brick.sh`, `launch_Flip.sh`, `show_message`, `show_message_A30`) were deleted from the `USBStorageMode` folder.

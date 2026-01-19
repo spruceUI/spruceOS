@@ -1,9 +1,9 @@
-![sprucetreelogo](https://github.com/tenlevels/spruce/assets/139886575/f248b441-835c-4f2e-b849-cec145b3ffcf)
 
-# spruce: *SD Card Overhaul for Miyoo A30* 
+<img width="310" height="310" alt="spruce labeled" src="https://github.com/user-attachments/assets/703691e2-dca0-49e6-987b-48ccfd16270b" />
 
-  - Spruce is not an operating system (OS) on its own.
-  - Spruce is best described as being a beautification and optimization of the stock Miyoo OS that cleans up bloat, optimizes performance and focuses on aesthetics.
+
+# spruceOS 
+
   - Spruce is intended to be sleek, intuitive, efficient and user friendly, we hope that you enjoy it.
 
     _We are not responsible for damage to your device. You must use spruce and its features at your own risk._
@@ -13,6 +13,7 @@
 
 ## Features
 
+* Custom Python based UI.
 * Game Switcher: seamlessly switch between save states during gameplay.
 * Autosave shutdown/resume: automatic save state when powering off in-game; powering on will resume play from where you left off.
 * Network services: Retroachievments, RTC sync via WiFi, SSH/SFTP, Syncthing, Samba and HTTP file transfer.
@@ -20,9 +21,6 @@
 * Native Pico-8 support with Splore.
 * Built-in boxart scraper app using libretro API.
 * OTA updates over Wi-Fi on device.
-* Advanced Settings App to customize and change the user experience!
-
-Plus many more enhancements over the original stock operating system!
 
 ## Download the latest version
 
@@ -33,36 +31,34 @@ Plus many more enhancements over the original stock operating system!
   - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
 
 ## What was done:
-
+ - Featuring an all new highly customizable Python based front end UI.
  - All emulators and cores are pre-configured with performance considered.
  - Emulator systems are automatically detected games and show in the Games menu.
- - Advanced Settings App added.
- - Auto Save/Quick Shutdown + Resume feature added.
+ - Advanced Settings App.
+ - Auto Save/Quick Shutdown + Resume feature.
  - GameSwitcher App added.
  - Multiple WiFi networks can be remembered.
- - Automatic Firmware Updater App added.
- - Syncthing App added.
- - Random Game Apps added.
- - Bootlogo App added.
- - Miyoo Gamelist App added.
- - Boxart Scraper App added.
- - WiFi File Transfer App added.
- - SSH App added.
- - Samba App added.
+ - Automatic Firmware Updater App.
+ - Syncthing function added.
+ - Random Game App.
+ - Bootlogo App.
+ - Gamelist.xml App.
+ - Boxart Scraper App.
+ - WiFi File Transfer function.
+ - SSH.
+ - Samba.
  - Backup/Restore Apps added.
  - Auto-updater App added.
- - Battery% shown in Main Menu.
- - Auto Shutdown when idle function added.
- - Recents tab is optional via Advanced Settings toggle.
+ - Battery % shown in Main Menu.
+ - Auto Shutdown when idle function.
+ - Recents tab is optional.
  - Performance and overclock adjustments are preset and adjustable.
- - Removed RApp (RetroArch/Expert) from Main Menu.
  - In-game menu matches that of the theme loaded.
- - Imgs folders for box art are now located inside each Rom folder.
+ - Imgs folders for box art are located inside each Rom folder.
  - BIOS folder has been created on the root of SD card.
  - Auto save state/load states enabled.
- - Joystick function enabled on all systems and Main Menu.
- - Configuration of RetroArch with almost no notifications or hotkeys.
- - LED Control App added.
+ - LED Control functionality.
+ - Over The Air updates.
 
 ## Installation
   - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
@@ -80,19 +76,6 @@ To update:
 See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
 
 ## Controls and Hotkeys
-
-Having issues with joystick drift? Go to *Settings > Calibrate Joystick* and calibrate your joystick
-
-### Global
-
-* Brightness: START + L1/R1 (to lower/increase brightness respectively)
-
-### Main Menu
-
-* Refresh ROMs/Search: HOME
-* Search: SELECT
-* Shutdown: Hold POWER until *Power Off* pop-up display (press A to confirm)
-* Emulator/CPU clock/Random Game selection menu: X while over a game title
 
 ### In-game
 
@@ -128,16 +111,20 @@ Please do not adjust the RetroArch configurations unless you are already familia
 
 ## Themes
 
-  - Included are six themes located in Settings. More icons and themes are planned to be added in the future.
-  - You can add themes from your Miyoo Mini or MMP. NOTE: There will be some missing assets because the A30 has additional ones.
+  - Included are some default themes to choose from in Settings.
+  - Download from a wide variety of themes using the Theme Garden app!
   - We are seeking out new themes and hoping to get some soon! If you are interested in contributing a theme please reach out!
   - Initial work has began creating a [Theme Guide](https://github.com/spruceUI/spruceOS/wiki/Theme-design-guide)
 
 ## Credits and Thanks
   - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
+  - Chrisj951: Creating the Python based UI that enabled us to get rid of MainUI. You turned a pipedream into reality.
   - All past and present Team Members!
   - Decojon: Auto Save/Quick Shutdown + Resume feature, MainUI patches, Keymon tweaks, Random Game Selector (X-menu).
   - Shauninman: Help, support and Bootlogo function (and so much more!).
+  - MustardOS and team, we borrowed kind of a lot from you guys thank you (looking at you AntiKK, SCUMMVM)!
+  - christianhaitian for update graphics driver for Miyoo Flip
+  - Knulli and the rest of the Open Handheld Collective for amazing collaboration and sharing. It takes a village! 
   - Rayon and Cinethezs: Boxart Scraper App and tweaks.
   - Cinethezs, Oscarkcau and tenlevels: Random Game App
   - Ndguardian, XanXic, and XK9274: Syncthing App.
@@ -162,48 +149,44 @@ Please do not adjust the RetroArch configurations unless you are already familia
   - Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
   - Hoo: Testing and encouragement.
   - All of out Beta testers!
-  - SundownerSport: Team Lead, Wiki and testing.
+  - SundownerSport: Team Lead, Wiki and testing and most of the GitHub related mistakes and blunders.
   - Metallic77: Shaders and core adjustments.
   - Supermodi064: Photos, testing and support.
   - Aemiii91, tGecko and QuackWalks: Being awesome!
   - Russ from RGC: His YouTube channel is an inspiration.
   - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
+  - [Miyoo](https://lomiyoo.com/) for sending us development units.
 
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
 
 ## The Current Team (Alphabetical order):
    - 369px
-   - Basecase - Stefan Ayala
-   - Cinethezs
+   - Chrisj951 - Discord @chrisbastion
+   - Chris Cromer
+   - Cilantro
    - Cobaltdsc4102
    - Dandon
-   - Decojon
-   - Fragbait79
+   - German Tacos
+   - Kitfox
    - Lonko
-   - Metallic77
-   - Mike C
-   - Oscarkcau
    - Ry - Ryan Sartor
-   - SamuraiCowboy
+   - Spiken
    - SundownerSport
-   - Veckia9x
-   - XanXic
 
 ## SUPPORTED GAME SYSTEMS
 
-*Amiga / Amstrad CPC / Arcade / Arduboy / (FBNEO & Mame 2003+) / Atari 800 / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
+*Amiga / Amstrad CPC / Arcade / Arduboy / (FBNEO & Mame 2003+) / Atari 800 / Atari 2600 / Atari 5200 / Atari 7800 / Atari Lynx / Bandai Sufami Turbo / Bandai WonderSwan & Color WS / Capcom Play System 1 / Capcom Play System 2 / Capcom Play System 3 / ColecoVision / Commodore 64 / Commodore VIC-20 / DOOM (PrBoom) / Fairchild Channel F / Famicom Disk System / FFPlay, Video & Music Player / Game Tank / Game & Watch / GCE Vectrex / Magnavox Odyssey 2 / Mattel Intellivision / Mega Duck / MS-DOS / MSX - MSX2 / NEC SuperGrafx / NE / TurboGrafx CD / NEC TurboGrafx-16 / Nintendo DS / Nintendo Entertainment System / Nintendo Game Boy / Nintendo Game Boy Advance / Nintendo Game Boy Color / Nintendo Pokemini / Nintendo Satellaview / Nintendo Super Game Boy / Nintendo Super Nintendo / Nintendo Virtual Boy / Nintendo64 / PICO-8 / Quake (Tyrquake) / ScummVM / Sega 32X / Sega CD / Sega Dreamcast / Sega Game Gear / Sega Genesis / Sega Genesis MSU / Sega Master System / Sega Saturn / Sega SG-1000 / Sharp X68000 / Sinclair ZX Spectrum / SNES MSU1 / SNK Neo Geo / SNK Neo Geo CD / SNK NeoGeo Pocket & Color NGP / Sony Playstation / Sony  PSP / TIC-80 / VideoPac / Watara Supervision / Wolfenstein3D (ECWolf)*
 
-  - N64/DC/PSP:
+  - N64/DC/Naomi/PSP/Saturn:
 
     -Consider these "BONUS". If any games play and you enjoy it, GREAT! Do not expect these systems to run smooth. Again... Bonus!
-
-## News
-The release of the Miyoo Flip has us excited! We are working on spruceOS 4.0 that will be multi platform! One SD card with our software will boot/play on the Miyoo A30, Flip, Trimui Brick and Smart Pro. 
-[Gogamegeek.com](https://www.gogamegeek.com/) as well as Miyoo themselves has kindly sent us a few units. Expect updates on our progress "soon"!
 
 ## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
 
 [![spruce logo](https://github.com/user-attachments/assets/ee3ce8fa-87f2-455a-adf6-c071f7ce4e7a)
 ](https://discord.gg/KjR5uMQQt9)
+
+
+
 

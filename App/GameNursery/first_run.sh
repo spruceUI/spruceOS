@@ -1,17 +1,15 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-BG_IMG="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+BG_IMG="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
-
-display --okay -i "$BG_IMG" -t "Welcome to the spruce Game Nursery! This is where we grow our curated collection of ports and free homebrew games for your enjoyment." -p 180
-
-display --okay -i "$BG_IMG" -t "You can browse the games at your leisure, adding them to and removing them from your 'cart' as you go. Once you exit the app, your selections will be downloaded and installed in sequence." -p 150
-
-display --okay -i "$BG_IMG" -t "Press L1 and R1 to tab through the different groups of games. The A button toggles a game in or out of your 'cart'. When you are ready to 'check out', press the B button." -p 150
-
-display --okay -i "$BG_IMG" -t "Games that you have previously installed can also be easily reinstalled through this same interface, if needed." -p 180
-
-display --okay -i "$BG_IMG" -t "The spruce team has the utmost respect for the developers of these games, and strives to comply with the respective license terms for each game in our collection." -p 150
-
-display --okay -i "$BG_IMG" -t "We are happy to share some of our favorite ports and homebrew games with you, and hope you enjoy your Game Nursery experience. Happy gaming!" -p 150
+display_image_and_text "$BG_IMG" 33 10 "Welcome to the spruce Game Nursery!\nThis is where we grow our curated collection of ports and free homebrew games for your enjoyment." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "You can browse the games at your leisure;\nselections will be downloaded and installed automaticially." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "Games that you have previously installed can also be easily reinstalled through this same interface, if needed." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "The spruce team has the utmost respect for the developers of these games, and strives to comply with the respective license terms for each game in our collection." 60 50
+sleep 7
+display_image_and_text "$BG_IMG" 33 10 "We are happy to share some of our favorite ports and homebrew games with you, and hope you enjoy your Game Nursery experience. Happy gaming!" 60 50
+sleep 10

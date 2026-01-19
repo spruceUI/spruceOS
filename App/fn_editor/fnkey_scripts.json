@@ -1,0 +1,14 @@
+[  
+    {
+        "name":"CPU clock swither",
+        "launch":"com.trimui.switch.cpufreq.sh"
+    },    
+    {
+        "name":"LCD brigheness switcher",
+        "launch":"com.trimui.switch.backlight.sh"
+    },
+    {
+        "name":"LED ON/OFF toggle",
+        "launch":"com.trimui.toggle.ledc.sh"
+    }    
+]

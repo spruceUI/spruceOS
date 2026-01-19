@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="vice_x64"
-export MODE="smart"
-
-export scaling_min_freq=480000

@@ -1,0 +1,8 @@
+ The GameTank is an 8-bit game console based on the W65C02S, a 6502-family CPU from Western Design Center. It has a 128×100 pixel display with 200 unique colors, two controller ports on the front, a general purpose IO header on the back, and a 36-pin cartridge port on top.
+
+The GameTank is open source and can be built from entirely new stock parts* in 2023. The emulator and development toolchains, along with all schematics and board files are freely available on GitHub.
+
+For more info about the project and to get more games please visit:
+
+https://gametank.zone/
+

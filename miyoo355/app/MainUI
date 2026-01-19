@@ -1,0 +1,16 @@
+#!/bin/sh
+
+cd $(dirname "$0")
+
+# install .tmp_update/updater if user misplaced theirs
+tmp_dir="/mnt/SDCARD/.tmp_update"
+updater="/mnt/SDCARD/spruce/scripts/.tmp_update/updater"
+[ ! -d "$tmp_dir" ] && mkdir "$tmp_dir"
+[ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater" && reboot
+
+# install .tmp_update hook if needed
+if [ ! -f /usr/miyoo/bin/runmiyoo-original.sh ]; then
+	my355/init.sh
+fi
+
+poweroff

@@ -1,35 +1,27 @@
 {
   "label": "VIC-20",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/c64.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/c64.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/VIC20",
-  "imgpath": "../../Roms/VIC20/Imgs",
-  "gamelist": "../../Roms/VIC20/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "c64.png",
+  "iconsel": "c64_sel.png",
+  "themecolor": "",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|m3u|d64|d6z|d71|d7z|d80|d81|d82|d8z|g64|g6z|g41|g4z|x64|x6z|nib|nbz|d2m|d4m|t64|tap|tcrt|prg|p00|crt|bin|cmd|vfl|vsf|gz|20|40|60|a0|b0|rom",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random VIC-20 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 7000,
+  "brand": "Commodore",
+  "type": "homeconsole",
+  "releaseYear": 1980,
+  "default_emulator": "vice_xvic",
+  "scaling_min_freq": 480000
 }

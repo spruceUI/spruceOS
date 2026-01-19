@@ -1,35 +1,27 @@
 {
   "label": "Atari 2600",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/atari.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/atari.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/ATARI",
-  "imgpath": "../../Roms/ATARI/Imgs",
-  "gamelist": "../../Roms/ATARI/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "atari.png",
+  "iconsel": "atari_sel.png",
+  "themecolor": "AF7AC5",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "a26|zip|7z|bin",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Atari 2600 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 500,
+  "brand": "Atari",
+  "type": "homeconsole",
+  "releaseYear": 1977,
+  "default_emulator": "stella2014",
+  "scaling_min_freq": 408000
 }

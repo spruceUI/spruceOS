@@ -1,5 +1,0 @@
-#!/bin/sh
-
-export MODE="smart"
-
-export scaling_min_freq=648000

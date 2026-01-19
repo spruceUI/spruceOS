@@ -1,27 +1,32 @@
 #!/bin/sh
-export HOME=`dirname "$0"`
-export LD_LIBRARY_PATH=lib:$LD_LIBRARY_PATH
 
-#THEME_JSON_FILE="/config/system.json"
-#if [ ! -f "$THEME_JSON_FILE" ]; then
-#    exit 1
-#fi
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-#THEME_PATH=$(awk -F'"' '/"theme":/ {print $4}' "$THEME_JSON_FILE")
-#THEME_PATH="${THEME_PATH%/}/"
+export HOME="$(dirname "$0")"
+cd "$HOME"
 
-#if [ "${THEME_PATH: -1}" != "/" ]; then
-#    THEME_PATH="${THEME_PATH}/"
-#fi
+case "$PLATFORM" in
+    "SmartPro"* ) export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
+    * )          export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
+esac
 
-# set stick to d-pad mode
-killall -q -USR2 joystickinput
+if [ "$PLATFORM" = "A30" ]; then
+	killall -q -USR2 joystickinput   # set stick to d-pad mode
+	./DinguxCommanderA30
+	sync
+	killall -q -USR2 joystickinput   # set stick to d-pad mode
 
-cd $HOME
-./DinguxCommander #--res-dir ${THEME_PATH} || ./DinguxCommander --res-dir /mnt/SDCARD/Themes/SPRUCE
-sync
-
-# set stick to d-pad mode
-killall -q -USR2 joystickinput
-
-auto_regen_tmp_update
+elif [ "$PLATFORM" = "SmartProS" ]; then
+    /mnt/SDCARD/spruce/bin64/gptokeyb -c "./DinguxCommander.gptk" &
+    sleep 0.3
+	./"DinguxCommanderSmartPro"
+    sync
+    kill -9 "$(pidof gptokeyb)"
+    
+else
+    /mnt/SDCARD/spruce/bin64/gptokeyb -c "./DinguxCommander.gptk" &
+    sleep 0.3
+	./"DinguxCommander$PLATFORM"
+    sync
+    kill -9 "$(pidof gptokeyb)" 
+fi

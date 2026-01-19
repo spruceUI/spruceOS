@@ -9,8 +9,7 @@ killall wpa_supplicant
 killall udhcpc
 
 # Remove all networks
-echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > /config/wpa_supplicant_temp.conf
-echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > /config/wpa_supplicant.conf
+echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" | tee "$WPA_SUPPLICANT_FILE" "${WPA_SUPPLICANT_FILE}.tmp"
 
 # Bring up interface to avoid issues with MainUI
 ifconfig wlan0 up

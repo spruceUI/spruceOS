@@ -1,39 +1,36 @@
 {
   "label": "FDS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fds.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fds.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/FDS",
-  "imgpath": "../../Roms/FDS/Imgs",
-  "gamelist": "../../Roms/FDS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "fds.png",
+  "iconsel": "fds_sel.png",
+  "themecolor": "",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|fds|nes|unif|unf",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random FDS game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓FCEUMM)-nestopia",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "fceumm",
+        "nestopia"
+      ],
+      "selected": "fceumm",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 2400,
+  "brand": "Nintendo",
+  "type": "homeconsole",
+  "releaseYear": 1986,
+  "default_emulator": "fceumm",
+  "scaling_min_freq": 408000
 }

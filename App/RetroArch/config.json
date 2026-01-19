@@ -1,6 +1,8 @@
 {
   "label": "RetroArch",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/retroarch.png",
+  "icon": "retroarch.png",
   "launch": "launch.sh",
-  "description": "Core and game configuration"
+  "description": "Core and game configuration",
+  "hide": false,
+  "hideInSimpleMode": true
 }

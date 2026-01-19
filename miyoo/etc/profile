@@ -6,8 +6,8 @@ fgrep -sq '/ overlay ro,' /proc/mounts && {
 	echo 'Please try to remove files from /overlay/upper/... and reboot!'
 }
 
-export PATH="/mnt/SDCARD/miyoo/app:/usr/sbin:/usr/bin:/sbin:/bin:${PATH}"
-export LD_LIBRARY_PATH="/mnt/SDCARD/miyoo/lib:${LD_LIBRARY_PATH}"
+export PATH="/mnt/SDCARD/spruce/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+export LD_LIBRARY_PATH="/mnt/SDCARD/miyoo/lib:/usr/miyoo/lib:/usr/lib:/lib:$LD_LIBRARY_PATH"
 export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
 export HOME=${HOME:-/root}
 export PS1='\u@\h:\w\$ '
