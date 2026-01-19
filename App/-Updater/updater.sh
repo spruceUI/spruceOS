@@ -8,6 +8,8 @@ LOG_LOCATION="/mnt/SDCARD/Saves/spruce/updater.log"
 FLAG_DIR="/mnt/SDCARD/spruce/flags"
 LOGO="$APP_DIR/updater.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
+PERFORM_DELETION=true       ### debug variable
+DELETE_UPDATE=true      ### debug variable
 
 
 ##### FUNCTIONS #####
@@ -312,7 +314,6 @@ kill_network_services
 
 [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 
-PERFORM_DELETION=true       ### debug variable
 # Delete all folders and files except the update zip, BIOS, Roms, Saves, Persistent, Themes, and Collections
 if [ "$PERFORM_DELETION" = true ]; then
     log_update_message "Deleting unnecessary folders and files"
@@ -352,13 +353,58 @@ read_only_check
 
 display_image_and_text "$LOGO" 35 25 "Applying update. This should take around 10 minutes..." 75
 
-if ! 7zr x -y -scsUTF-8 "$UPDATE_FILE" >>"$LOG_LOCATION" 2>&1; then
+# -----------------------------
+# 1️⃣ Count total files in archive
+# -----------------------------
+TOTAL_FILES=$(7zr l -scsUTF-8 "$UPDATE_FILE" |
+awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
+[ "$TOTAL_FILES" -eq 0 ] && TOTAL_FILES=1
+
+# -----------------------------
+# 2️⃣ Initialize counters
+# -----------------------------
+FILE_COUNT=0
+PERCENT_COMPLETE=0
+THROTTLE=10  # update display every 10 files
+
+# -----------------------------
+# 3️⃣ Extract and update UI
+# -----------------------------
+7zr x -y -scsUTF-8 -bb1 "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
+while read -r line || [ -n "$line" ]; do
+    # Remove leading dash/spaces
+    FILE=$(echo "$line" | sed 's/^[-[:space:]]*//')
+    [ -z "$FILE" ] && continue
+
+    FILE_COUNT=$((FILE_COUNT + 1))
+    PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
+
+    # Throttle UI updates for performance
+    if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
+        display_text_with_percentage_bar \
+            "$FILE" \
+            "$PERCENT_COMPLETE" \
+            "$FILE_COUNT / $TOTAL_FILES files"
+    fi
+done
+
+# -----------------------------
+# 4️⃣ Capture exit code
+# -----------------------------
+RET=${PIPESTATUS[0]:-$?}  # fallback for sh
+
+
+# Success / warning logic
+if [ "$RET" -ne 0 ]; then
     log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
-    display_image_and_text "$LOGO" 35 25 "Update completed with warnings. Check the update log for details." 75
+    display_image_and_text "$LOGO" 35 25 \
+        "Update completed with warnings. Check the update log for details." 75
 else
     log_update_message "Extraction process completed successfully"
-    display_image_and_text "$LOGO" 35 25  "Update completed!" 75
+    display_image_and_text "$LOGO" 35 25 "Update completed!" 75
 fi
+
+
 sleep 5
 
 # Verify extraction success
@@ -382,7 +428,6 @@ log_update_message "Update file extracted successfully"
 display_image_and_text "$LOGO" 35 25 "Now using spruce $UPDATE_VERSION" 75
 sleep 5
 
-DELETE_UPDATE=true      ### debug variable
 if [ "$DELETE_UPDATE" = true ]; then
     log_update_message "Deleting all update files"
     # Remove all spruce update files matching the pattern
