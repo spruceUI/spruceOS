@@ -156,6 +156,7 @@ www
 spruce
 "
 
+# exclude RetroArch folder in order to keep user-added assets from getting nuked.
 SDCARD_PATH="/mnt/SDCARD"
 SDCARD_DELETE_LIST="
 .github
@@ -163,7 +164,6 @@ SDCARD_DELETE_LIST="
 Icons
 miyoo
 miyoo355
-RetroArch
 trimui
 .gitattributes
 .gitignore
