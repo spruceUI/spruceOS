@@ -33,12 +33,13 @@ lock_governor() {
 }
 
 # Usage:
-#   cores_online            -> defaults to cores 0-3
+#   cores_online "0123"           -> cores 0-3
 #   cores_online "0135"     -> online cores 0,1,3,5; offline others
 cores_online() {
+    [ -z "$1" ] && return  # skip empty call
     core_string="${1:-0123}"
-    log_message "Setting cores online: ${core_string}"
 
+    # TODO why silent?
     # Silently fall back on invalid input
     case "$core_string" in (*[!0-7]*) core_string=0123 ;; esac
 
@@ -56,7 +57,38 @@ cores_online() {
         echo "$val" >"$cpu_path/online" 2>/dev/null
         chmod a-w "$cpu_path/online" 2>/dev/null
     done
+    log_message "Setting cores online: ${core_string}"
 }
+
+# Save the current online cores to /tmp/cores_online
+save_cores_online() {
+    local core_list=""
+    for cpu_path in /sys/devices/system/cpu/cpu[0-7]*; do
+        [ -e "$cpu_path/online" ] || continue
+        cpu="${cpu_path##*cpu}"
+        val=$(<"$cpu_path/online")
+        if [ "$val" -eq 1 ]; then
+            core_list+="$cpu"
+        fi
+    done
+
+    # Default to "0" if somehow no cores are online
+    [ -z "$core_list" ] && core_list="0"
+
+    echo "$core_list" > /tmp/cores_online
+    log_message "Saved online cores: $core_list"
+}
+
+# Restore online cores from /tmp/cores_online
+restore_cores_online() {
+    if [ -f /tmp/cores_online ]; then
+        cores=$(< /tmp/cores_online)
+        cores_online "$cores"
+    else
+        log_message "No saved cores found in /tmp/cores_online"
+    fi
+}
+
 
 # overridden on Flip by its specific implementation (for now?) that also sets gpu gov and freq
 set_powersave(){

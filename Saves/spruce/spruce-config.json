@@ -194,13 +194,28 @@
                 ],
                 "selected": "1600"
             },
+            "trimuiOSD": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Run TrimUI OSD",
+                "description": "Early Alpha",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "customThermals": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
-                "display": "Custom Thermal Control",
-                "description": "Use customized thermal controls",
+                "display": "Thermal Control",
+                "description": "Customize fan profiles",
                 "options": [
                     "Stock",
-                    "Custom"
+                    "Adaptive Performance",
+                    "Adaptive Balanced",
+                    "Adaptive Quiet",
+                    "Quiet",
+                    "Balanced",
+                    "Performance"
                 ],
                 "selected": "Stock"
             }

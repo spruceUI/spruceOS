@@ -6,8 +6,8 @@
         <path>./005.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>1941: Counter Attack (World 900227)</name>
+        <image>./Imgs/1941.png</image>
+        <name>1941: Counter Attack</name>
         <path>./1941.zip</path>
         </game>
     <game>
@@ -31,8 +31,8 @@
         <path>./1943mii.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>1944 : The Loop Master (USA 000620)</name>
+        <image>./Imgs/1944.png</image>
+        <name>1944 : The Loop Master</name>
         <path>./1944.zip</path>
         </game>
     <game>
@@ -41,8 +41,8 @@
         <path>./1945kiii.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>19XX : The War Against Destiny (USA 951207)</name>
+        <image>./Imgs/19xx.png</image>
+        <name>19XX : The War Against Destiny</name>
         <path>./19xx.zip</path>
         </game>
     <game>
@@ -56,9 +56,14 @@
         <path>./280zzzap.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>3 Count Bout (NGM-043 ~ NGH-043)</name>
+        <image>./Imgs/3countb.png</image>
+        <name>3 Count Bout</name>
         <path>./3countb.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/3on3dunk.png</image>
+        <name>3 On 3 Dunk Madness</name>
+        <path>./3on3dunk.zip</path>
         </game>
     <game>
         <image>./Imgs/3stooges.png</image>
@@ -66,8 +71,8 @@
         <path>./3stooges.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Three Wonders (World 910520)</name>
+        <image>./Imgs/3wonders.png</image>
+        <name>Three Wonders</name>
         <path>./3wonders.zip</path>
         </game>
     <game>
@@ -114,6 +119,11 @@
         <image>./Imgs/abcop.png</image>
         <name>A.B. Cop</name>
         <path>./abcop.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/aburner.png</image>
+        <name>Afterburner</name>
+        <path>./aburner.zip</path>
         </game>
     <game>
         <image>./Imgs/aburner2.png</image>
@@ -186,13 +196,13 @@
         <path>./ajax.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/akatana.png</image>
         <name>Akai Katana</name>
         <path>./akatana.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Alcon (US)</name>
+        <image>./Imgs/alcon.png</image>
+        <name>Alcon</name>
         <path>./alcon.zip</path>
         </game>
     <game>
@@ -226,8 +236,8 @@
         <path>./aliensyn.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Alligator Hunt (World, protected)</name>
+        <image>./Imgs/aligator.png</image>
+        <name>Alligator Hunt</name>
         <path>./aligator.zip</path>
         </game>
     <game>
@@ -401,8 +411,8 @@
         <path>./armorcar.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Powered Gear: Strategic Variant Armor Equipment (Euro 941024)</name>
+        <image>./Imgs/armwar.png</image>
+        <name>Powered Gear: Strategic Variant Armor Equipment</name>
         <path>./armwar.zip</path>
         </game>
     <game>
@@ -441,8 +451,8 @@
         <path>./astinvad.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Alien Storm (World, 2 Players, FD1094 317-0154)</name>
+        <image>./Imgs/astorm.png</image>
+        <name>Alien Storm</name>
         <path>./astorm.zip</path>
         </game>
     <game>
@@ -531,8 +541,8 @@
         <path>./avengrgs.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Alien vs. Predator (Euro 940520)</name>
+        <image>./Imgs/avsp.png</image>
+        <name>Alien vs. Predator</name>
         <path>./avsp.zip</path>
         </game>
     <game>
@@ -661,8 +671,8 @@
         <path>./basebal2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Battle Circuit (Euro 970319)</name>
+        <image>./Imgs/batcir.png</image>
+        <name>Battle Circuit</name>
         <path>./batcir.zip</path>
         </game>
     <game>
@@ -801,8 +811,8 @@
         <path>./bestri.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Battle Garegga (Europe / USA / Japan / Asia, Sat Feb 3 1996)</name>
+        <image>./Imgs/bgaregga.png</image>
+        <name>Battle Garegga</name>
         <path>./bgaregga.zip</path>
         </game>
     <game>
@@ -836,8 +846,8 @@
         <path>./biomtoy.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Top Secret (Euro)</name>
+        <image>./Imgs/bionicc.png</image>
+        <name>Top Secret</name>
         <path>./bionicc.zip</path>
         </game>
     <game>
@@ -1041,7 +1051,7 @@
         <path>./bombkick.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/bongo.png</image>
         <name>Bongo</name>
         <path>./bongo.zip</path>
         </game>
@@ -1206,7 +1216,7 @@
         <path>./bubblem.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/bubbles.png</image>
         <name>Bubbles</name>
         <path>./bubbles.zip</path>
         </game>
@@ -1271,7 +1281,7 @@
         <path>./butasan.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/bwidow.png</image>
         <name>Black Widow</name>
         <path>./bwidow.zip</path>
         </game>
@@ -1281,13 +1291,13 @@
         <path>./bwings.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Battlezone (rev 2)</name>
+        <image>./Imgs/bzone.png</image>
+        <name>Battlezone</name>
         <path>./bzone.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Cabal (World, Joystick)</name>
+        <image>./Imgs/cabal.png</image>
+        <name>Cabal</name>
         <path>./cabal.zip</path>
         </game>
     <game>
@@ -1341,8 +1351,8 @@
         <path>./captaven.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Captain Commando (World 911202)</name>
+        <image>./Imgs/captcomm.png</image>
+        <name>Captain Commando</name>
         <path>./captcomm.zip</path>
         </game>
     <game>
@@ -1371,8 +1381,8 @@
         <path>./cavenger.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Carrier Air Wing (World 901012)</name>
+        <image>./Imgs/cawing.png</image>
+        <name>Carrier Air Wing</name>
         <path>./cawing.zip</path>
         </game>
     <game>
@@ -1492,7 +1502,7 @@
         </game>
     <game>
         <image>./Imgs/chimerab.png</image>
-        <name>Chimera Beast (Proto.)</name>
+        <name>Chimera Beast</name>
         <path>./chimerab.zip</path>
         </game>
     <game>
@@ -1521,8 +1531,8 @@
         <path>./choko.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Choplifter (8751 315-5151)</name>
+        <image>./Imgs/choplift.png</image>
+        <name>Choplifter</name>
         <path>./choplift.zip</path>
         </game>
     <game>
@@ -1551,8 +1561,8 @@
         <path>./circus.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Circus Charlie (level select, set 1)</name>
+        <image>./Imgs/circusc.png</image>
+        <name>Circus Charlie</name>
         <path>./circusc.zip</path>
         </game>
     <game>
@@ -1581,8 +1591,8 @@
         <path>./ckong.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Crazy Kong Part II (set 1)</name>
+        <image>./Imgs/ckongpt2.png</image>
+        <name>Crazy Kong Part II</name>
         <path>./ckongpt2.zip</path>
         </game>
     <game>
@@ -1711,6 +1721,16 @@
         <path>./cotton.zip</path>
         </game>
     <game>
+        <image>./Imgs/cppicf.png</image>
+        <name>Peter Pepper's Ice Cream Factory</name>
+        <path>./cppicf.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/cprobowl.png</image>
+        <name>Pro Bowling</name>
+        <path>./cprobowl.zip</path>
+        </game>
+    <game>
         <image>./Imgs/cracksht.png</image>
         <name>Crackshot</name>
         <path>./cracksht.zip</path>
@@ -1746,7 +1766,7 @@
         <path>./crshrace.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/crswd2bl.png</image>
         <name>Crossed Swords II</name>
         <path>./crswd2bl.zip</path>
         </game>
@@ -1766,8 +1786,8 @@
         <path>./crzrally.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Capcom Sports Club (Euro 971017)</name>
+        <image>./Imgs/csclub.png</image>
+        <name>Capcom Sports Club</name>
         <path>./csclub.zip</path>
         </game>
     <game>
@@ -1836,8 +1856,8 @@
         <path>./cyberlip.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Cyberbots : Fullmetal Madness (Euro 950424)</name>
+        <image>./Imgs/cybots.png</image>
+        <name>Cyberbots : Fullmetal Madness</name>
         <path>./cybots.zip</path>
         </game>
     <game>
@@ -1976,8 +1996,8 @@
         <path>./ddcrew.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>D. D. Crew (World, 2 Players, FD1094 317-0184)</name>
+        <image>./Imgs/ddcrew2.png</image>
+        <name>D. D. Crew</name>
         <path>./ddcrew2.zip</path>
         </game>
     <game>
@@ -1991,13 +2011,13 @@
         <path>./ddp2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/ddp3.png</image>
         <name>DoDonPachi DaiOuJou</name>
         <path>./ddp3.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>DoDonPachi Resurrection (2008/06/23 MASTER VER 1.5)</name>
+        <image>./Imgs/ddpdfk.png</image>
+        <name>DoDonPachi Resurrection</name>
         <path>./ddpdfk.zip</path>
         </game>
     <game>
@@ -2006,7 +2026,7 @@
         <path>./ddpdoj.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/ddpsdoj.png</image>
         <name>DoDonPachi SaiDaiOuJou</name>
         <path>./ddpsdoj.zip</path>
         </game>
@@ -2026,18 +2046,23 @@
         <path>./ddragon3.zip</path>
         </game>
     <game>
+        <image>./Imgs/ddragonu.png</image>
+        <name>Double Dragon</name>
+        <path>./ddragonu.zip</path>
+        </game>
+    <game>
         <image>./Imgs/ddribble.png</image>
         <name>Double Dribble</name>
         <path>./ddribble.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Dungeons &amp; Dragons: Shadow over Mystara (Euro 960619)</name>
+        <image>./Imgs/ddsom.png</image>
+        <name>Dungeons &amp; Dragons: Shadow over Mystara</name>
         <path>./ddsom.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Dungeons &amp; Dragons: Tower of Doom (Euro 940412)</name>
+        <image>./Imgs/ddtod.png</image>
+        <name>Dungeons &amp; Dragons: Tower of Doom</name>
         <path>./ddtod.zip</path>
         </game>
     <game>
@@ -2046,8 +2071,8 @@
         <path>./ddungeon.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Dynamite Düx (set 3, World, FD1094 317-0096)</name>
+        <image>./Imgs/ddux.png</image>
+        <name>Dynamite Düx</name>
         <path>./ddux.zip</path>
         </game>
     <game>
@@ -2066,8 +2091,8 @@
         <path>./deadconx.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Deathsmiles (2007/10/09 MASTER VER)</name>
+        <image>./Imgs/deathsml.png</image>
+        <name>Deathsmiles</name>
         <path>./deathsml.zip</path>
         </game>
     <game>
@@ -2141,8 +2166,8 @@
         <path>./dfeveron.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>DoDonPachi Dai-Fukkatsu Black Label (2010/1/18 BLACK LABEL)</name>
+        <image>./Imgs/dfkbl.png</image>
+        <name>DoDonPachi Dai-Fukkatsu Black Label</name>
         <path>./dfkbl.zip</path>
         </game>
     <game>
@@ -2171,8 +2196,8 @@
         <path>./digger.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Great Mahou Daisakusen (Euro 000121)</name>
+        <image>./Imgs/dimahoo.png</image>
+        <name>Great Mahou Daisakusen</name>
         <path>./dimahoo.zip</path>
         </game>
     <game>
@@ -2181,8 +2206,8 @@
         <path>./dingo.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Cadillacs and Dinosaurs (World 930201)</name>
+        <image>./Imgs/dino.png</image>
+        <name>Cadillacs and Dinosaurs</name>
         <path>./dino.zip</path>
         </game>
     <game>
@@ -2221,8 +2246,13 @@
         <path>./dkongjr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Demon Front (68k label V105, ROM M105XX 08/05/02, ARM label V10)</name>
+        <image>./Imgs/dkongx.png</image>
+        <name>Donkey Kong II: Jumpman Returns</name>
+        <path>./dkongx.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/dmnfrnt.png</image>
+        <name>Demon Front</name>
         <path>./dmnfrnt.zip</path>
         </game>
     <game>
@@ -2366,8 +2396,8 @@
         <path>./dsaber.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Deathsmiles MegaBlack Label (2008/10/06 MEGABLACK LABEL VER)</name>
+        <image>./Imgs/dsmbl.png</image>
+        <name>Deathsmiles MegaBlack Label</name>
         <path>./dsmbl.zip</path>
         </game>
     <game>
@@ -2381,8 +2411,8 @@
         <path>./dspirit.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Vampire: The Night Warriors (Euro 940705)</name>
+        <image>./Imgs/dstlk.png</image>
+        <name>Vampire: The Night Warriors</name>
         <path>./dstlk.zip</path>
         </game>
     <game>
@@ -2416,8 +2446,8 @@
         <path>./dynduke.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Tenchi wo Kurau (USA, B-Board 89624B-?)</name>
+        <image>./Imgs/dynwar.png</image>
+        <name>Tenchi wo Kurau</name>
         <path>./dynwar.zip</path>
         </game>
     <game>
@@ -2431,8 +2461,8 @@
         <path>./earthjkr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Eco Fighters (World 931203)</name>
+        <image>./Imgs/ecofghtr.png</image>
+        <name>Eco Fighters</name>
         <path>./ecofghtr.zip</path>
         </game>
     <game>
@@ -2481,8 +2511,8 @@
         <path>./empcity.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Enduro Racer (YM2151, FD1089B 317-0013A)</name>
+        <image>./Imgs/enduror.png</image>
+        <name>Enduro Racer</name>
         <path>./enduror.zip</path>
         </game>
     <game>
@@ -2521,8 +2551,8 @@
         <path>./espgal.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Espgaluda II (2005/11/14 MASTER VER)</name>
+        <image>./Imgs/espgal2.png</image>
+        <name>Espgaluda II</name>
         <path>./espgal2.zip</path>
         </game>
     <game>
@@ -2536,8 +2566,8 @@
         <path>./esprade.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Cyber Police ESWAT (set 4, World, FD1094 317-0130)</name>
+        <image>./Imgs/eswat.png</image>
+        <name>Cyber Police ESWAT</name>
         <path>./eswat.zip</path>
         </game>
     <game>
@@ -2554,6 +2584,11 @@
         <image>./Imgs/evilston.png</image>
         <name>Evil Stone</name>
         <path>./evilston.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/excitebk.png</image>
+        <name>Vs. Excitebike</name>
+        <path>./excitebk.zip</path>
         </game>
     <game>
         <image>./Imgs/exctsccr.png</image>
@@ -2671,13 +2706,13 @@
         <path>./fbfrenzy.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Fever SOS (International, Ver. 98/09/25)</name>
+        <image>./Imgs/feversos.png</image>
+        <name>Fever SOS</name>
         <path>./feversos.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Final Fight (World, set 1)</name>
+        <image>./Imgs/ffight.png</image>
+        <name>Final Fight</name>
         <path>./ffight.zip</path>
         </game>
     <game>
@@ -2766,6 +2801,11 @@
         <path>./flicky.zip</path>
         </game>
     <game>
+        <image>./Imgs/flipjack.png</image>
+        <name>Flipper Jack</name>
+        <path>./flipjack.zip</path>
+        </game>
+    <game>
         <image>./Imgs/flipshot.png</image>
         <name>Battle Flip Shot</name>
         <path>./flipshot.zip</path>
@@ -2806,8 +2846,8 @@
         <path>./footchmp.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Forgotten Worlds (World, newer)</name>
+        <image>./Imgs/forgottn.png</image>
+        <name>Forgotten Worlds</name>
         <path>./forgottn.zip</path>
         </game>
     <game>
@@ -2856,8 +2896,8 @@
         <path>./fround.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Sky Shark (World)</name>
+        <image>./Imgs/fshark.png</image>
+        <name>Sky Shark</name>
         <path>./fshark.zip</path>
         </game>
     <game>
@@ -2886,13 +2926,13 @@
         <path>./funnymou.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mushihime-Sama Futari (2006/12/8.MASTER VER. 1.54.)</name>
+        <image>./Imgs/futari15.png</image>
+        <name>Mushihime-Sama Futari</name>
         <path>./futari15.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mushihime-Sama Futari Black Label (2009/11/27 INTERNATIONAL BL)</name>
+        <image>./Imgs/futaribl.png</image>
+        <name>Mushihime-Sama Futari Black Label</name>
         <path>./futaribl.zip</path>
         </game>
     <game>
@@ -2921,8 +2961,8 @@
         <path>./gaiapols.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Ninja Gaiden (US)</name>
+        <image>./Imgs/gaiden.png</image>
+        <name>Ninja Gaiden</name>
         <path>./gaiden.zip</path>
         </game>
     <game>
@@ -3026,8 +3066,8 @@
         <path>./gberet.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Global Champion (Ver 2.1A 1994/07/29)</name>
+        <image>./Imgs/gblchmp.png</image>
+        <name>Global Champion</name>
         <path>./gblchmp.zip</path>
         </game>
     <game>
@@ -3051,8 +3091,8 @@
         <path>./geebee.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Gee Bee (US)</name>
+        <image>./Imgs/geebeeg.png</image>
+        <name>Gee Bee</name>
         <path>./geebeeg.zip</path>
         </game>
     <game>
@@ -3076,13 +3116,18 @@
         <path>./genpeitd.zip</path>
         </game>
     <game>
+        <image>./Imgs/gforce2.png</image>
+        <name>Galaxy Force 2</name>
+        <path>./gforce2.zip</path>
+        </game>
+    <game>
         <image>./Imgs/gghost.png</image>
         <name>Goalie Ghost</name>
         <path>./gghost.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Gain Ground (World, 3 Players, Floppy Based, FD1094 317-0058-03)</name>
+        <image>./Imgs/gground.png</image>
+        <name>Gain Ground</name>
         <path>./gground.zip</path>
         </game>
     <game>
@@ -3096,8 +3141,8 @@
         <path>./ghostlop.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Ghouls'n Ghosts (World)</name>
+        <image>./Imgs/ghouls.png</image>
+        <name>Ghouls'n Ghosts</name>
         <path>./ghouls.zip</path>
         </game>
     <game>
@@ -3121,8 +3166,8 @@
         <path>./gigasm2b.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Giga Wing (USA 990222)</name>
+        <image>./Imgs/gigawing.png</image>
+        <name>Giga Wing</name>
         <path>./gigawing.zip</path>
         </game>
     <game>
@@ -3171,8 +3216,8 @@
         <path>./goalx3.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Godzilla (Japan)</name>
+        <image>./Imgs/godzilla.png</image>
+        <name>Godzilla</name>
         <path>./godzilla.zip</path>
         </game>
     <game>
@@ -3219,6 +3264,16 @@
         <image>./Imgs/gpilots.png</image>
         <name>Ghost Pilots</name>
         <path>./gpilots.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/gradius.png</image>
+        <name>Gradius</name>
+        <path>./gradius.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/gradius2.png</image>
+        <name>Gradius II: GOFER no Yabou</name>
+        <path>./gradius2.zip</path>
         </game>
     <game>
         <image>./Imgs/gradius3.png</image>
@@ -3281,7 +3336,7 @@
         <path>./gseeker.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/gstream.png</image>
         <name>G-Stream G2020</name>
         <path>./gstream.zip</path>
         </game>
@@ -3461,6 +3516,11 @@
         <path>./hangzo.zip</path>
         </game>
     <game>
+        <image>./Imgs/harddriv.png</image>
+        <name>Hard Drivin'</name>
+        <path>./harddriv.zip</path>
+        </game>
+    <game>
         <image>./Imgs/harddunk.png</image>
         <name>Hard Dunk</name>
         <path>./harddunk.zip</path>
@@ -3516,8 +3576,8 @@
         <path>./headon2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Heated Barrel (World version 3)</name>
+        <image>./Imgs/heatbrl.png</image>
+        <name>Heated Barrel</name>
         <path>./heatbrl.zip</path>
         </game>
     <game>
@@ -3586,6 +3646,11 @@
         <path>./holeland.zip</path>
         </game>
     <game>
+        <image>./Imgs/holo.png</image>
+        <name>Holosseum</name>
+        <path>./holo.zip</path>
+        </game>
+    <game>
         <image>./Imgs/hook.png</image>
         <name>Hook</name>
         <path>./hook.zip</path>
@@ -3631,8 +3696,8 @@
         <path>./hotshock.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Hyper Street Fighter II: The Anniversary Edition (USA 040202)</name>
+        <image>./Imgs/hsf2.png</image>
+        <name>Hyper Street Fighter II: The Anniversary Edition</name>
         <path>./hsf2.zip</path>
         </game>
     <game>
@@ -3676,6 +3741,11 @@
         <path>./hwrace.zip</path>
         </game>
     <game>
+        <image>./Imgs/hydra.png</image>
+        <name>Hydra</name>
+        <path>./hydra.zip</path>
+        </game>
+    <game>
         <image>./Imgs/hyperpac.png</image>
         <name>Hyper Pacman</name>
         <path>./hyperpac.zip</path>
@@ -3691,13 +3761,13 @@
         <path>./hyprduel.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Ibara (2005/03/22 MASTER VER..)</name>
+        <image>./Imgs/ibara.png</image>
+        <name>Ibara</name>
         <path>./ibara.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Ibara Kuro Black Label (2006/02/06. MASTER VER.)</name>
+        <image>./Imgs/ibarablk.png</image>
+        <name>Ibara Kuro Black Label</name>
         <path>./ibarablk.zip</path>
         </game>
     <game>
@@ -3846,13 +3916,23 @@
         <path>./jailbrek.zip</path>
         </game>
     <game>
+        <image>./Imgs/jchan.png</image>
+        <name>Jackie Chan - The Kung-Fu Master</name>
+        <path>./jchan.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/jchan2.png</image>
+        <name>Jackie Chan in Fists of Fire</name>
+        <path>./jchan2.zip</path>
+        </game>
+    <game>
         <image>./Imgs/jcross.png</image>
         <name>Jumping Cross</name>
         <path>./jcross.zip</path>
         </game>
     <game>
         <image>./Imgs/jdreddp.png</image>
-        <name>Judge Dredd (Proto.)</name>
+        <name>Judge Dredd</name>
         <path>./jdreddp.zip</path>
         </game>
     <game>
@@ -3871,6 +3951,11 @@
         <path>./jjsquawk.zip</path>
         </game>
     <game>
+        <image>./Imgs/jmpbreak.png</image>
+        <name>Jumping Break</name>
+        <path>./jmpbreak.zip</path>
+        </game>
+    <game>
         <image>./Imgs/jockeygp.png</image>
         <name>Jockey Grand Prix</name>
         <path>./jockeygp.zip</path>
@@ -3881,14 +3966,19 @@
         <path>./joemacr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>JoJo no Kimyou na Bouken (USA 990128)</name>
+        <image>./Imgs/jojo.png</image>
+        <name>JoJo no Kimyou na Bouken</name>
         <path>./jojo.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>JoJo no Kimyou na Bouken: Mirai e no Isan (Japan 990927)</name>
+        <image>./Imgs/jojoba.png</image>
+        <name>JoJo no Kimyou na Bouken: Mirai e no Isan</name>
         <path>./jojoba.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/jojon.png</image>
+        <name>JoJo's Venture</name>
+        <path>./jojon.zip</path>
         </game>
     <game>
         <image>./Imgs/jollyjgr.png</image>
@@ -3926,6 +4016,11 @@
         <path>./joyjoy.zip</path>
         </game>
     <game>
+        <image>./Imgs/jpark.png</image>
+        <name>Jurassic Park</name>
+        <path>./jpark.zip</path>
+        </game>
+    <game>
         <image>./Imgs/jrpacman.png</image>
         <name>Jr. Pac-Man</name>
         <path>./jrpacman.zip</path>
@@ -3954,6 +4049,11 @@
         <image>./Imgs/jumpshot.png</image>
         <name>Jump Shot</name>
         <path>./jumpshot.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/jungleh.png</image>
+        <name>Jungle Hunt</name>
+        <path>./jungleh.zip</path>
         </game>
     <game>
         <image>./Imgs/junglek.png</image>
@@ -4126,6 +4226,11 @@
         <path>./kingdmgp.zip</path>
         </game>
     <game>
+        <image>./Imgs/kingofb.png</image>
+        <name>King of Boxer</name>
+        <path>./kingofb.zip</path>
+        </game>
+    <game>
         <image>./Imgs/kittenk.png</image>
         <name>Kitten Kaboodle</name>
         <path>./kittenk.zip</path>
@@ -4151,13 +4256,13 @@
         <path>./kncljoe.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Knights of the Round (World 911127)</name>
+        <image>./Imgs/knights.png</image>
+        <name>Knights of the Round</name>
         <path>./knights.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>The King of Dragons (World 910805)</name>
+        <image>./Imgs/kod.png</image>
+        <name>The King of Dragons</name>
         <path>./kod.zip</path>
         </game>
     <game>
@@ -4291,8 +4396,8 @@
         <path>./ladyfrog.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Land Maker (Ver 2.01J 1998/06/01)</name>
+        <image>./Imgs/landmakr.png</image>
+        <name>Land Maker</name>
         <path>./landmakr.zip</path>
         </game>
     <game>
@@ -4324,6 +4429,11 @@
         <image>./Imgs/lasthope.png</image>
         <name>Last Hope</name>
         <path>./lasthope.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/lastkm.png</image>
+        <name>Last KM</name>
+        <path>./lastkm.zip</path>
         </game>
     <game>
         <image>./Imgs/lastmisn.png</image>
@@ -4381,6 +4491,11 @@
         <path>./legion.zip</path>
         </game>
     <game>
+        <image>./Imgs/legionna.png</image>
+        <name>Legionnaire</name>
+        <path>./legionna.zip</path>
+        </game>
+    <game>
         <image>./Imgs/leprechn.png</image>
         <name>Leprechaun</name>
         <path>./leprechn.zip</path>
@@ -4406,13 +4521,13 @@
         <path>./liberatr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/liblrabl.png</image>
         <name>Libble Rabble</name>
         <path>./liblrabl.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Dungeon Magic (Ver 2.2O 1994/04/08)</name>
+        <image>./Imgs/lightbr.png</image>
+        <name>Dungeon Magic</name>
         <path>./lightbr.zip</path>
         </game>
     <game>
@@ -4431,8 +4546,8 @@
         <path>./lkage.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Lunar Lander (rev 2)</name>
+        <image>./Imgs/llander.png</image>
+        <name>Lunar Lander</name>
         <path>./llander.zip</path>
         </game>
     <game>
@@ -4601,8 +4716,8 @@
         <path>./mainevt.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>The Main Event (2 Players ver. X)</name>
+        <image>./Imgs/mainevt2p.png</image>
+        <name>The Main Event</name>
         <path>./mainevt2p.zip</path>
         </game>
     <game>
@@ -4721,8 +4836,8 @@
         <path>./mazinger.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Muscle Bomber Duo : Ultimate Team Battle (World 931206)</name>
+        <image>./Imgs/mbombrd.png</image>
+        <name>Muscle Bomber Duo : Ultimate Team Battle</name>
         <path>./mbombrd.zip</path>
         </game>
     <game>
@@ -4746,13 +4861,13 @@
         <path>./megadon.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Rockman: The Power Battle (CPS1, USA 951006)</name>
+        <image>./Imgs/megaman.png</image>
+        <name>Rockman: The Power Battle</name>
         <path>./megaman.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Rockman 2: The Power Fighters (USA 960708)</name>
+        <image>./Imgs/megaman2.png</image>
+        <name>Rockman 2: The Power Fighters</name>
         <path>./megaman2.zip</path>
         </game>
     <game>
@@ -4766,8 +4881,13 @@
         <path>./megazone.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mercs (World 900302)</name>
+        <image>./Imgs/megrescu.png</image>
+        <name>Megumi Rescue</name>
+        <path>./megrescu.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/mercs.png</image>
+        <name>Mercs</name>
         <path>./mercs.zip</path>
         </game>
     <game>
@@ -4886,8 +5006,8 @@
         <path>./mk3.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mars Matrix: Hyper Solid Shooting (USA 000412)</name>
+        <image>./Imgs/mmatrix.png</image>
+        <name>Mars Matrix: Hyper Solid Shooting</name>
         <path>./mmatrix.zip</path>
         </game>
     <game>
@@ -4901,8 +5021,8 @@
         <path>./mmonkey.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Muchi Muchi Pork! (2007/ 4/17 MASTER VER.)</name>
+        <image>./Imgs/mmpork.png</image>
+        <name>Muchi Muchi Pork!</name>
         <path>./mmpork.zip</path>
         </game>
     <game>
@@ -4936,8 +5056,8 @@
         <path>./moo.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Wild West C.O.W.-Boys of Moo Mesa (ver EAB)</name>
+        <image>./Imgs/moomesa.png</image>
+        <name>Wild West C.O.W.-Boys of Moo Mesa</name>
         <path>./moomesa.zip</path>
         </game>
     <game>
@@ -4976,8 +5096,8 @@
         <path>./mouser.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mighty! Pang (Euro 001010)</name>
+        <image>./Imgs/mpang.png</image>
+        <name>Mighty! Pang</name>
         <path>./mpang.zip</path>
         </game>
     <game>
@@ -5026,8 +5146,8 @@
         <path>./msgundam.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Marvel Super Heroes (Euro 951024)</name>
+        <image>./Imgs/msh.png</image>
+        <name>Marvel Super Heroes</name>
         <path>./msh.zip</path>
         </game>
     <game>
@@ -5036,8 +5156,8 @@
         <path>./mshuttle.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Marvel Super Heroes vs. Street Fighter (Euro 970625)</name>
+        <image>./Imgs/mshvsf.png</image>
+        <name>Marvel Super Heroes vs. Street Fighter</name>
         <path>./mshvsf.zip</path>
         </game>
     <game>
@@ -5081,8 +5201,8 @@
         <path>./mspacman.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Magic Sword: Heroic Fantasy (World 900725)</name>
+        <image>./Imgs/msword.png</image>
+        <name>Magic Sword: Heroic Fantasy</name>
         <path>./msword.zip</path>
         </game>
     <game>
@@ -5096,8 +5216,8 @@
         <path>./mtrap.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mega Twins (World 900619)</name>
+        <image>./Imgs/mtwins.png</image>
+        <name>Mega Twins</name>
         <path>./mtwins.zip</path>
         </game>
     <game>
@@ -5106,9 +5226,14 @@
         <path>./mugsmash.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Mushihime-Sama (2004/10/12.MASTER VER.)</name>
+        <image>./Imgs/mushisam.png</image>
+        <name>Mushihime-Sama</name>
         <path>./mushisam.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/musicbal.png</image>
+        <name>Music Ball</name>
+        <path>./musicbal.zip</path>
         </game>
     <game>
         <image>./Imgs/mustache.png</image>
@@ -5136,13 +5261,18 @@
         <path>./mvp.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Marvel vs. Capcom : Clash of Super Heroes (Euro 980123)</name>
+        <image>./Imgs/mvsc.png</image>
+        <name>Marvel vs. Capcom : Clash of Super Heroes</name>
         <path>./mvsc.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Michael Jackson's Moonwalker (World, FD1094/8751 317-0159)</name>
+        <image>./Imgs/mvscu.png</image>
+        <name>Marvel Vs. Capcom: Clash of Super Heroes</name>
+        <path>./mvscu.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/mwalk.png</image>
+        <name>Michael Jackson's Moonwalker</name>
         <path>./mwalk.zip</path>
         </game>
     <game>
@@ -5179,6 +5309,11 @@
         <image>./Imgs/nam1975.png</image>
         <name>NAM-1975</name>
         <path>./nam1975.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/nametune.png</image>
+        <name>Name That Tune</name>
+        <path>./nametune.zip</path>
         </game>
     <game>
         <image>./Imgs/naname.png</image>
@@ -5231,6 +5366,11 @@
         <path>./nbajamte.zip</path>
         </game>
     <game>
+        <image>./Imgs/nbamht.png</image>
+        <name>NBA Maximum Hangtime</name>
+        <path>./nbamht.zip</path>
+        </game>
+    <game>
         <image>./Imgs/nbbatman.png</image>
         <name>Ninja Baseball Bat Man</name>
         <path>./nbbatman.zip</path>
@@ -5261,8 +5401,8 @@
         <path>./nemesis.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Nemo (World 901130)</name>
+        <image>./Imgs/nemo.png</image>
+        <name>Nemo</name>
         <path>./nemo.zip</path>
         </game>
     <game>
@@ -5284,11 +5424,6 @@
         <image>./Imgs/neodrift.png</image>
         <name>Neo Drift Out - New Technology</name>
         <path>./neodrift.zip</path>
-        </game>
-    <game>
-        <image>no-img.png</image>
-        <name>ZZZ(notgame):#bios</name>
-        <path>./neogeo.zip</path>
         </game>
     <game>
         <image>./Imgs/neomrdo.png</image>
@@ -5371,8 +5506,8 @@
         <path>./nitrobal.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Noboranka (Japan)</name>
+        <image>./Imgs/nob.png</image>
+        <name>Noboranka</name>
         <path>./nob.zip</path>
         </game>
     <game>
@@ -5406,8 +5541,8 @@
         <path>./nslasher.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Night Slashers (Over Sea Rev 1.2, DE-0397-0 PCB)</name>
+        <image>./Imgs/nslashers.png</image>
+        <name>Night Slashers</name>
         <path>./nslashers.zip</path>
         </game>
     <game>
@@ -5426,8 +5561,8 @@
         <path>./numanath.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Vampire Hunter: Darkstalkers' Revenge (Euro 950316)</name>
+        <image>./Imgs/nwarr.png</image>
+        <name>Vampire Hunter: Darkstalkers' Revenge</name>
         <path>./nwarr.zip</path>
         </game>
     <game>
@@ -5514,6 +5649,11 @@
         <image>./Imgs/orlegend.png</image>
         <name>Oriental Legend</name>
         <path>./orlegend.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/orunners.png</image>
+        <name>OutRunners</name>
+        <path>./orunners.zip</path>
         </game>
     <game>
         <image>./Imgs/oscar.png</image>
@@ -5616,8 +5756,8 @@
         <path>./pandoras.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Pang! 3 (Euro 950601)</name>
+        <image>./Imgs/pang3.png</image>
+        <name>Pang! 3</name>
         <path>./pang3.zip</path>
         </game>
     <game>
@@ -5694,6 +5834,11 @@
         <image>./Imgs/pbobblen.png</image>
         <name>Bust-A-Move</name>
         <path>./pbobblen.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/pdrift.png</image>
+        <name>Power Drift</name>
+        <path>./pdrift.zip</path>
         </game>
     <game>
         <image>./Imgs/peggle.png</image>
@@ -5781,8 +5926,8 @@
         <path>./pingpong.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Pink Sweets: Ibara Sorekara (2006/04/06 MASTER VER....)</name>
+        <image>./Imgs/pinkswts.png</image>
+        <name>Pink Sweets: Ibara Sorekara</name>
         <path>./pinkswts.zip</path>
         </game>
     <game>
@@ -5856,8 +6001,8 @@
         <path>./plusalph.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Pnickies (Japan 940608)</name>
+        <image>./Imgs/pnickj.png</image>
+        <name>Pnickies</name>
         <path>./pnickj.zip</path>
         </game>
     <game>
@@ -5986,8 +6131,8 @@
         <path>./prmrsocr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Progear No Arashi (USA 010117)</name>
+        <image>./Imgs/progear.png</image>
+        <name>Progear No Arashi</name>
         <path>./progear.zip</path>
         </game>
     <game>
@@ -6019,6 +6164,11 @@
         <image>./Imgs/psychos.png</image>
         <name>Psycho Soldier</name>
         <path>./psychos.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/pubball.png</image>
+        <name>Power Up Baseball</name>
+        <path>./pubball.zip</path>
         </game>
     <game>
         <image>./Imgs/puchicar.png</image>
@@ -6056,8 +6206,8 @@
         <path>./punchout.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>The Punisher (World 930422)</name>
+        <image>./Imgs/punisher.png</image>
+        <name>The Punisher</name>
         <path>./punisher.zip</path>
         </game>
     <game>
@@ -6066,8 +6216,8 @@
         <path>./punkshot.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Punk Shot (US 2 Players)</name>
+        <image>./Imgs/punkshot2.png</image>
+        <name>Punk Shot</name>
         <path>./punkshot2.zip</path>
         </game>
     <game>
@@ -6081,8 +6231,8 @@
         <path>./pushman.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Puyo Puyo (World)</name>
+        <image>./Imgs/puyo.png</image>
+        <name>Puyo Puyo</name>
         <path>./puyo.zip</path>
         </game>
     <game>
@@ -6136,8 +6286,8 @@
         <path>./pzlbreak.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Puzz Loop 2 (Euro 010302)</name>
+        <image>./Imgs/pzloop2.png</image>
+        <name>Puzz Loop 2</name>
         <path>./pzloop2.zip</path>
         </game>
     <game>
@@ -6181,8 +6331,8 @@
         <path>./quartet.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Quartet (8751 317-0010)</name>
+        <image>./Imgs/quartet2.png</image>
+        <name>Quartet</name>
         <path>./quartet2.zip</path>
         </game>
     <game>
@@ -6204,6 +6354,11 @@
         <image>./Imgs/r2dx_v33.png</image>
         <name>Raiden II DX</name>
         <path>./r2dx_v33.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/racedriv.png</image>
+        <name>Race Drivin'</name>
+        <path>./racedriv.zip</path>
         </game>
     <game>
         <image>./Imgs/racingb.png</image>
@@ -6234,6 +6389,11 @@
         <image>./Imgs/radm.png</image>
         <name>Rad Mobile</name>
         <path>./radm.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/radr.png</image>
+        <name>Rad Rally</name>
+        <path>./radr.zip</path>
         </game>
     <game>
         <image>./Imgs/radrad.png</image>
@@ -6301,8 +6461,8 @@
         <path>./rampart.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Rampart (Joystick)</name>
+        <image>./Imgs/rampart2p.png</image>
+        <name>Rampart</name>
         <path>./rampart2p.zip</path>
         </game>
     <game>
@@ -6331,9 +6491,19 @@
         <path>./rbffspec.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Rainbow Islands (New version)</name>
+        <image>./Imgs/rbisland.png</image>
+        <name>Rainbow Islands</name>
         <path>./rbisland.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/rdft.png</image>
+        <name>Raiden Fighters</name>
+        <path>./rdft.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/rdft2.png</image>
+        <name>Raiden Fighters 2 - Operation Hell Dive</name>
+        <path>./rdft2.zip</path>
         </game>
     <game>
         <image>./Imgs/reactor.png</image>
@@ -6351,8 +6521,8 @@
         <path>./redclash.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Warzard (Euro 961121)</name>
+        <image>./Imgs/redearth.png</image>
+        <name>Warzard</name>
         <path>./redearth.zip</path>
         </game>
     <game>
@@ -6436,8 +6606,8 @@
         <path>./rimrockn.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Super Muscle Bomber: The International Blowout (Euro 940902)</name>
+        <image>./Imgs/ringdest.png</image>
+        <name>Super Muscle Bomber: The International Blowout</name>
         <path>./ringdest.zip</path>
         </game>
     <game>
@@ -6631,8 +6801,8 @@
         <path>./rungun.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Rush'n Attack (US)</name>
+        <image>./Imgs/rushatck.png</image>
+        <name>Rush'n Attack</name>
         <path>./rushatck.zip</path>
         </game>
     <game>
@@ -6691,7 +6861,7 @@
         <path>./salmndr2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/samsh5fe.png</image>
         <name>Samurai Shodown V Special</name>
         <path>./samsh5fe.zip</path>
         </game>
@@ -6876,7 +7046,7 @@
         <path>./searchar.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/seawolft.png</image>
         <name>Sea Wolf</name>
         <path>./seawolft.zip</path>
         </game>
@@ -6926,8 +7096,8 @@
         <path>./sexyparo.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter (US, set 1)</name>
+        <image>./Imgs/sf.png</image>
+        <name>Street Fighter</name>
         <path>./sf.zip</path>
         </game>
     <game>
@@ -6936,48 +7106,48 @@
         <path>./sf1.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter II : The World Warrior (World 910522)</name>
+        <image>./Imgs/sf2.png</image>
+        <name>Street Fighter II : The World Warrior</name>
         <path>./sf2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter II' : Champion Edition (World 920513)</name>
+        <image>./Imgs/sf2ce.png</image>
+        <name>Street Fighter II' : Champion Edition</name>
         <path>./sf2ce.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter II' : Hyper Fighting (World 921209)</name>
+        <image>./Imgs/sf2hf.png</image>
+        <name>Street Fighter II' : Hyper Fighting</name>
         <path>./sf2hf.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter Zero (Euro 950727)</name>
+        <image>./Imgs/sfa.png</image>
+        <name>Street Fighter Zero</name>
         <path>./sfa.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter Zero 2 (Euro 960229)</name>
+        <image>./Imgs/sfa2.png</image>
+        <name>Street Fighter Zero 2</name>
         <path>./sfa2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter Zero 3 (Euro 980904)</name>
+        <image>./Imgs/sfa3.png</image>
+        <name>Street Fighter Zero 3</name>
         <path>./sfa3.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter III : New Generation (Euro 970204)</name>
+        <image>./Imgs/sfiii.png</image>
+        <name>Street Fighter III : New Generation</name>
         <path>./sfiii.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter III : 2nd Impact - Giant Attack (USA 970930)</name>
+        <image>./Imgs/sfiii2.png</image>
+        <name>Street Fighter III : 2nd Impact - Giant Attack</name>
         <path>./sfiii2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter III : 3rd Strike - Fight for the Future (Euro 990608)</name>
+        <image>./Imgs/sfiii3.png</image>
+        <name>Street Fighter III : 3rd Strike - Fight for the Future</name>
         <path>./sfiii3.zip</path>
         </game>
     <game>
@@ -7006,13 +7176,13 @@
         <path>./sfx.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Street Fighter Zero 2 Alpha (Asia 960826)</name>
+        <image>./Imgs/sfz2al.png</image>
+        <name>Street Fighter Zero 2 Alpha</name>
         <path>./sfz2al.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Pocket Fighter (USA 970904)</name>
+        <image>./Imgs/sgemf.png</image>
+        <name>Pocket Fighter</name>
         <path>./sgemf.zip</path>
         </game>
     <game>
@@ -7231,8 +7401,8 @@
         <path>./skyfox.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Sky Kid (New version)</name>
+        <image>./Imgs/skykid.png</image>
+        <name>Sky Kid</name>
         <path>./skykid.zip</path>
         </game>
     <game>
@@ -7266,8 +7436,8 @@
         <path>./skysoldr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Saturday Night Slam Masters (World 930713)</name>
+        <image>./Imgs/slammast.png</image>
+        <name>Saturday Night Slam Masters</name>
         <path>./slammast.zip</path>
         </game>
     <game>
@@ -7381,13 +7551,13 @@
         <path>./solomon.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Solar Warrior (US)</name>
+        <image>./Imgs/solrwarr.png</image>
+        <name>Solar Warrior</name>
         <path>./solrwarr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Segasonic The Hedgehog (Japan, rev. C)</name>
+        <image>./Imgs/sonic.png</image>
+        <name>Segasonic The Hedgehog</name>
         <path>./sonic.zip</path>
         </game>
     <game>
@@ -7396,7 +7566,7 @@
         <path>./sonicbom.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/sonicfgt.png</image>
         <name>Sega Sonic Cosmo Fighter</name>
         <path>./sonicfgt.zip</path>
         </game>
@@ -7561,8 +7731,8 @@
         <path>./spelunkr.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Super Puzzle Fighter II X (Euro 960529)</name>
+        <image>./Imgs/spf2t.png</image>
+        <name>Super Puzzle Fighter II X</name>
         <path>./spf2t.zip</path>
         </game>
     <game>
@@ -7576,8 +7746,8 @@
         <path>./spidey.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Spider-Man: The Videogame (World)</name>
+        <image>./Imgs/spidman.png</image>
+        <name>Spider-Man: The Videogame</name>
         <path>./spidman.zip</path>
         </game>
     <game>
@@ -7686,19 +7856,19 @@
         <path>./srumbler.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Super Street Fighter II: The New Challengers (World 931005)</name>
+        <image>./Imgs/ssf2.png</image>
+        <name>Super Street Fighter II: The New Challengers</name>
         <path>./ssf2.zip</path>
         </game>
     <game>
-        <image>./Imgs/ssf2nl.png</image>
-        <name>Super Street Fighter II New Legacy</name>
-        <path>./ssf2nl.zip</path>
+        <image>./Imgs/ssf2t.png</image>
+        <name>Super Street Fighter II Turbo</name>
+        <path>./ssf2t.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Super Street Fighter II Turbo (World 940223)</name>
-        <path>./ssf2t.zip</path>
+        <image>./Imgs/ssf2tnl.png</image>
+        <name>Super Street Fighter II New Legacy</name>
+        <path>./ssf2tnl.zip</path>
         </game>
     <game>
         <image>./Imgs/ssf2t.png</image>
@@ -7761,8 +7931,8 @@
         <path>./ssriders.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Sunset Riders (2 Players ver UBC)</name>
+        <image>./Imgs/ssridersubc.png</image>
+        <name>Sunset Riders</name>
         <path>./ssridersubc.zip</path>
         </game>
     <game>
@@ -7814,6 +7984,11 @@
         <image>./Imgs/starforc.png</image>
         <name>Star Force</name>
         <path>./starforc.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/stargate.png</image>
+        <name>Stargate</name>
+        <path>./stargate.zip</path>
         </game>
     <game>
         <image>./Imgs/starhawk.png</image>
@@ -7906,8 +8081,8 @@
         <path>./strhoop.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Strider Hiryu (USA, B-Board 89624B-2)</name>
+        <image>./Imgs/strider.png</image>
+        <name>Strider Hiryu</name>
         <path>./strider.zip</path>
         </game>
     <game>
@@ -7996,6 +8171,11 @@
         <path>./suprloco.zip</path>
         </game>
     <game>
+        <image>./Imgs/suprmrio.png</image>
+        <name>Vs. Super Mario Bros.</name>
+        <path>./suprmrio.zip</path>
+        </game>
+    <game>
         <image>./Imgs/suprridr.png</image>
         <name>Super Rider</name>
         <path>./suprridr.zip</path>
@@ -8061,7 +8241,7 @@
         <path>./swimmer.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/sxevious.png</image>
         <name>Xevious</name>
         <path>./sxevious.zip</path>
         </game>
@@ -8127,7 +8307,7 @@
         </game>
     <game>
         <image>./Imgs/tattass.png</image>
-        <name>Tattoo Assassins (Proto.)</name>
+        <name>Tattoo Assassins</name>
         <path>./tattass.zip</path>
         </game>
     <game>
@@ -8181,6 +8361,11 @@
         <path>./tempest.zip</path>
         </game>
     <game>
+        <image>./Imgs/temptube.png</image>
+        <name>Tempest Tubes</name>
+        <path>./temptube.zip</path>
+        </game>
+    <game>
         <image>./Imgs/tempest.png</image>
         <name>Tempest Tubes</name>
         <path>./temptubes.zip</path>
@@ -8226,7 +8411,7 @@
         <path>./tgm2.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
+        <image>./Imgs/tgm2p.png</image>
         <name>Tetris The Absolute The Grand Master 2</name>
         <path>./tgm2p.zip</path>
         </game>
@@ -8266,8 +8451,8 @@
         <path>./thief.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Thunder Blade (upright, FD1094 317-0056)</name>
+        <image>./Imgs/thndrbld.png</image>
+        <name>Thunder Blade</name>
         <path>./thndrbld.zip</path>
         </game>
     <game>
@@ -8371,8 +8556,8 @@
         <path>./tmnt22pu.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Teenage Mutant Ninja Turtles (Japan 2 Players, version 1)</name>
+        <image>./Imgs/tmnt2pj.png</image>
+        <name>Teenage Mutant Ninja Turtles</name>
         <path>./tmnt2pj.zip</path>
         </game>
     <game>
@@ -8436,6 +8621,11 @@
         <path>./toobin.zip</path>
         </game>
     <game>
+        <image>./Imgs/topdrive.png</image>
+        <name>Top Driving</name>
+        <path>./topdrive.zip</path>
+        </game>
+    <game>
         <image>./Imgs/tophuntr.png</image>
         <name>Top Hunter - Roddy &amp; Cathy</name>
         <path>./tophuntr.zip</path>
@@ -8461,8 +8651,8 @@
         <path>./totc.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Total Carnage (rev LA1 03/10/92)</name>
+        <image>./Imgs/totcarn.png</image>
+        <name>Total Carnage</name>
         <path>./totcarn.zip</path>
         </game>
     <game>
@@ -8596,6 +8786,11 @@
         <path>./tumblep.zip</path>
         </game>
     <game>
+        <image>./Imgs/turbo.png</image>
+        <name>Turbo</name>
+        <path>./turbo.zip</path>
+        </game>
+    <game>
         <image>./Imgs/turbofrc.png</image>
         <name>Turbo Force</name>
         <path>./turbofrc.zip</path>
@@ -8726,8 +8921,8 @@
         <path>./uniwars.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Area 88 (USA)</name>
+        <image>./Imgs/unsquad.png</image>
+        <name>Area 88</name>
         <path>./unsquad.zip</path>
         </game>
     <game>
@@ -8781,8 +8976,8 @@
         <path>./vaportra.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Varth: Operation Thunderstorm (World 920714)</name>
+        <image>./Imgs/varth.png</image>
+        <name>Varth: Operation Thunderstorm</name>
         <path>./varth.zip</path>
         </game>
     <game>
@@ -8816,8 +9011,8 @@
         <path>./vendetta.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Crime Fighters 2 (Asia, 2 Players, ver. U)</name>
+        <image>./Imgs/vendetta2pu.png</image>
+        <name>Crime Fighters 2</name>
         <path>./vendetta2pu.zip</path>
         </game>
     <game>
@@ -8826,8 +9021,8 @@
         <path>./vf.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Vampire Hunter 2: Darkstalkers' Revenge (Japan 970929)</name>
+        <image>./Imgs/vhunt2.png</image>
+        <name>Vampire Hunter 2: Darkstalkers' Revenge</name>
         <path>./vhunt2.zip</path>
         </game>
     <game>
@@ -8891,14 +9086,19 @@
         <path>./volfied.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Vampire Savior : World of Darkness (Euro 970519)</name>
+        <image>./Imgs/vsav.png</image>
+        <name>Vampire Savior : World of Darkness</name>
         <path>./vsav.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Vampire Savior 2 : The Lord of Vampire (Japan 970913)</name>
+        <image>./Imgs/vsav2.png</image>
+        <name>Vampire Savior 2 : The Lord of Vampire</name>
         <path>./vsav2.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/vspinbal.png</image>
+        <name>Vs. Pinball</name>
+        <path>./vspinbal.zip</path>
         </game>
     <game>
         <image>./Imgs/vulcan.png</image>
@@ -8956,8 +9156,8 @@
         <path>./wb3.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Wonder Boy In Monster Land (Japan New Ver., MC-8123, 317-0043)</name>
+        <image>./Imgs/wbml.png</image>
+        <name>Wonder Boy In Monster Land</name>
         <path>./wbml.zip</path>
         </game>
     <game>
@@ -9026,8 +9226,8 @@
         <path>./wildfang.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Willow (World)</name>
+        <image>./Imgs/willow.png</image>
+        <name>Willow</name>
         <path>./willow.zip</path>
         </game>
     <game>
@@ -9076,8 +9276,8 @@
         <path>./wndrplnt.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Warriors of Fate (World 921031)</name>
+        <image>./Imgs/wof.png</image>
+        <name>Warriors of Fate</name>
         <path>./wof.zip</path>
         </game>
     <game>
@@ -9146,14 +9346,24 @@
         <path>./xevios.zip</path>
         </game>
     <game>
+        <image>./Imgs/xevious.png</image>
+        <name>Xevious</name>
+        <path>./xevious.zip</path>
+        </game>
+    <game>
         <image>./Imgs/xexex.png</image>
         <name>Xexex</name>
         <path>./xexex.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>X-Men : Children of the Atom (Euro 950331)</name>
+        <image>./Imgs/xmcota.png</image>
+        <name>X-Men: Children of the Atom</name>
         <path>./xmcota.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/xmcotau.png</image>
+        <name>X-Men: Children of the Atom</name>
+        <path>./xmcotau.zip</path>
         </game>
     <game>
         <image>./Imgs/xmen.png</image>
@@ -9161,8 +9371,8 @@
         <path>./xmen.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>X-Men (2 Players ver AAA)</name>
+        <image>./Imgs/xmen2pa.png</image>
+        <name>X-Men</name>
         <path>./xmen2pa.zip</path>
         </game>
     <game>
@@ -9171,8 +9381,8 @@
         <path>./xmultipl.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>X-Men vs. Street Fighter (Euro 961004)</name>
+        <image>./Imgs/xmvsf.png</image>
+        <name>X-Men vs. Street Fighter</name>
         <path>./xmvsf.zip</path>
         </game>
     <game>
@@ -9186,8 +9396,8 @@
         <path>./xxmissio.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Xybots (rev 2)</name>
+        <image>./Imgs/xybots.png</image>
+        <name>Xybots</name>
         <path>./xybots.zip</path>
         </game>
     <game>
@@ -9201,8 +9411,8 @@
         <path>./yard.zip</path>
         </game>
     <game>
-        <image>no-img.png</image>
-        <name>Yie Ar Kung-Fu (program code I)</name>
+        <image>./Imgs/yiear.png</image>
+        <name>Yie Ar Kung-Fu</name>
         <path>./yiear.zip</path>
         </game>
     <game>
@@ -9214,6 +9424,11 @@
         <image>./Imgs/zaviga.png</image>
         <name>Zaviga</name>
         <path>./zaviga.zip</path>
+        </game>
+    <game>
+        <image>./Imgs/zaxxon.png</image>
+        <name>Zaxxon</name>
+        <path>./zaxxon.zip</path>
         </game>
     <game>
         <image>./Imgs/zaxxon2.png</image>

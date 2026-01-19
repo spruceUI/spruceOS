@@ -164,11 +164,6 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    if [ "$custom_thermal_watchdog" = "Custom" ]; then
-        log_message "Launching custom thermal watchdog for Trim UI Smart Pro S"
-        /mnt/SDCARD/spruce/smartpros/bin/custom-thermal-watchdog &
-    fi
 }
 
 perform_fw_check(){
@@ -302,10 +297,11 @@ device_init() {
     ) &
 
 
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
     device_run_tsps_blobs
+    device_run_thermal_process
 
-    run_trimui_osdd
+    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
+    [ "$run_osd" = "True" ] && run_trimui_osdd
 
     echo 1 > /sys/class/speaker/mute
     tinymix set 23 1
@@ -396,6 +392,7 @@ device_cleanup_after_ports_run() {
 
 
 device_exit_sleep(){
+    restore_cores_online
     if [ -f /tmp/wifi_on ]; then
         # wait for wlan0 to appear (up to ~5s)
         for _ in 1 2 3 4 5; do
@@ -408,12 +405,24 @@ device_exit_sleep(){
         fi
     fi
     device_run_tsps_blobs
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    [ "$custom_thermal_watchdog" = "Custom" ] && /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog
+    device_run_thermal_process
+    (
+        # Core 0 won't offline immediately, wait a bit to get rid of it
+        sleep 10
+        restore_cores_online
+    ) &
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
+
+kill_wifi(){
+    rm -f /tmp/wifi_on
+    if pidof wpa_supplicant >/dev/null 2>&1; then
+        : > /tmp/wifi_on
+        killall wpa_supplicant
+    fi
+}
 
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
@@ -422,18 +431,13 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    rm -f /tmp/wifi_on
-    if pidof wpa_supplicant >/dev/null 2>&1; then
-        : > /tmp/wifi_on
-        killall wpa_supplicant
-    fi
+    kill_wifi
 
-
+    save_cores_online
+    cores_online 0
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
-    pidof thermal-watchdog >/dev/null 2>&1 && killall thermal-watchdog
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    [ "$custom_thermal_watchdog" = "Custom" ] && echo 0 > /sys/class/thermal/cooling_device0/cur_state
+    device_stop_thermal_process
     trigger_device_sleep
 }
 
@@ -448,16 +452,59 @@ device_delay_then_check_trimui_blobs() {
 
 device_run_tsps_blobs() {
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
-    if [ "$custom_thermal_watchdog" != "Custom" ]; then
-        run_trimui_blobs "thermald"
-    fi
 }
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
+    kill_wifi
 }
-
 
 device_home_button_pressed() {
     touch /tmp/show_osdd
+}
+
+device_stop_thermal_process(){
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    case "$custom_thermal_watchdog" in
+        Balanced|Performance|Quiet)
+            killall thermal-watchdog
+            ;;
+        "Adaptive Balanced"|"Adaptive Performance"|"Adaptive Quiet")
+            pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
+            if [ -n "$pid" ]; then
+                kill "$pid"
+            fi
+            ;;
+        
+        *)
+            killall thermald
+            ;;
+    esac
+}
+
+device_run_thermal_process(){
+    # Initial trip point = 60C (Likely to turn on fan)
+    # Second trip point = 70C (Potential first throttle point)
+    # Third trip point = 105C (Likely Critical shutdown) 
+
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    if [ "$custom_thermal_watchdog" = "Balanced" ]; then
+        echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Quiet" ]; then
+        echo "quiet" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Performance" ]; then
+        echo "sport" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Performance" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Balanced" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 70 --upper 80 &
+    elif [ "$custom_thermal_watchdog" = "Adaptive Quiet" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 80 --upper 90 &
+    else
+        run_trimui_blobs "thermald"
+    fi
+
 }
