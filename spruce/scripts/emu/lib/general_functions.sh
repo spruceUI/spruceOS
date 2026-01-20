@@ -125,6 +125,9 @@ set_cpu_mode() {
 pin_to_dedicated_cores() {
 	comm="$1"
 	delay="$2:-1"
+
+    # get the last two cores that are online
+    EMU_CPUS=${DEVICE_MAX_CORES_ONLINE#${DEVICE_MAX_CORES_ONLINE%??}}
     {
         sleep "$delay"
         pgrep "$comm" | while read -r pid; do
