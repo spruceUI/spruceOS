@@ -2,7 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-APP_DIR=/mnt/SDCARD/App/spruceBackup
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 ICON_PATH="/mnt/SDCARD/spruce/imgs/backup.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -63,7 +62,6 @@ log_message "Starting backup process with timestamp: $timestamp"
 
 # Replace zip_file with 7z_file
 seven_z_file="$BACKUP_DIR/backups/spruceBackup_${timestamp}.7z"
-seven_z_filename=$(basename "$seven_z_file")
 log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
@@ -93,9 +91,11 @@ folders="
 /mnt/SDCARD/Emu/NDS/config/drastic-SmartPro.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-SmartProS.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Flip.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-Pixel2.cfg
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings_A30.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
+/mnt/SDCARD/Emu/NDS/resources/settings_Pixel2.json
 /mnt/SDCARD/Emu/SATURN/.yabasanshiro
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
@@ -106,6 +106,7 @@ folders="
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartProS.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg
 /mnt/SDCARD/Saves/spruce/backups/spruce-config.json
 /mnt/SDCARD/Saves/spruce/emu_backups
 /mnt/SDCARD/Saves/spruce/theme_backups
