@@ -49,6 +49,26 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
+
+set_volume() {
+    new_vol="${1:-0}" # default to mute if no value supplied
+    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    scaled=$(( new_vol * 255 / 20 ))
+    amixer set 'Soft Volume Master' "$scaled"
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
+
+        if [ "$current_volume" -ne "$new_vol" ]; then
+            save_volume_to_config_file "$new_vol"
+            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            if ! pgrep MainUI >/dev/null; then
+                /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
+            fi
+        fi
+    fi
+
+}
+
 set_volume_delta() {
     delta="$1"
 
@@ -60,8 +80,6 @@ set_volume_delta() {
     # Clamp 0–20
     [ "$new" -lt 0 ] && new=0
     [ "$new" -gt 20 ] && new=20
-
-    jq ".vol = $new" "$SYSTEM_JSON" > "${SYSTEM_JSON}.tmp" && mv "${SYSTEM_JSON}.tmp" "$SYSTEM_JSON"
 
     set_volume "$new"
 }
