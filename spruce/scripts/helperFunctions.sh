@@ -958,10 +958,7 @@ extract_7z_with_progress() {
         fi
     done
 
-    # -----------------------------
-    # 4️⃣ Capture exit code
-    # -----------------------------
-    RET=${PIPESTATUS[0]:-$?}  # bash-safe, sh fallback
+    RET=$?
 
     if [ "$RET" -ne 0 ]; then
         log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."

@@ -391,7 +391,7 @@ done
 # -----------------------------
 # 4️⃣ Capture exit code
 # -----------------------------
-RET=${PIPESTATUS[0]:-$?}  # fallback for sh
+RET=$?
 
 
 # Success / warning logic
