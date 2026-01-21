@@ -103,6 +103,15 @@ class Controller:
        
     @staticmethod
     def set_last_input(last_input):
+        if(last_input == ControllerInput.LEFT_STICK_UP):
+            last_input = ControllerInput.DPAD_UP
+        elif(last_input == ControllerInput.LEFT_STICK_DOWN):
+            last_input = ControllerInput.DPAD_DOWN
+        elif(last_input == ControllerInput.LEFT_STICK_LEFT):
+            last_input = ControllerInput.DPAD_LEFT
+        elif(last_input == ControllerInput.LEFT_STICK_RIGHT):
+            last_input = ControllerInput.DPAD_RIGHT
+
         Controller.last_controller_input = last_input
 
         if(Controller._watch_for_secret_code and last_input is not None):

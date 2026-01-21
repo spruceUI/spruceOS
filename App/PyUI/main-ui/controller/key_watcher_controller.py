@@ -14,24 +14,39 @@ from controller.key_watcher_controller_dataclasses import KeyEvent
 from utils.logger import PyUiLogger
 
 # Constants for Linux input
-EVENT_FORMAT = 'llHHI'
-EVENT_SIZE = struct.calcsize(EVENT_FORMAT)
 KEY_PRESS = 1
 KEY_RELEASE = 0
 KEY_REPEAT = 2
 
+class KeyMappingProvider:
+    def get_mapped_events(self, key_event):
+        """
+        Return a list of mapped events for a KeyEvent,
+        or None / empty list if unmapped.
+        """
+        raise NotImplementedError
+
+class DictKeyMappingProvider:
+    def __init__(self, key_mappings):
+        self.key_mappings = key_mappings
+
+    def get_mapped_events(self, key_event):
+        return self.key_mappings.get(key_event)
+        
 class KeyWatcherController(ControllerInterface):
 
-    def __init__(self, event_path, key_mappings):
+    def __init__(self, event_path, mapping_provider, event_format='llHHI'):
         """
         :param event_path: Path to /dev/input/eventX
         :param repeat_interval: Time between repeats (seconds)
         """
         self.event_path = event_path
-        self.key_mappings = key_mappings
+        self.mapping_provider = mapping_provider
         self.held_controller_inputs = OrderedDict()
         self.input_queue = deque()
-        
+        self.event_format = event_format
+        self.event_size = struct.calcsize(self.event_format)
+
         try:
             self.fd = os.open(self.event_path, os.O_RDONLY)
         except OSError as e:
@@ -76,9 +91,9 @@ class KeyWatcherController(ControllerInterface):
     def read_event(self, fd):
         """Read exactly one input_event from fd (blocking)."""
         buf = b''
-        while len(buf) < EVENT_SIZE:
+        while len(buf) < self.event_size:
             try:
-                chunk = os.read(fd, EVENT_SIZE - len(buf))
+                chunk = os.read(fd, self.event_size - len(buf))
             except BlockingIOError:
                 continue
             if not chunk:
@@ -86,7 +101,7 @@ class KeyWatcherController(ControllerInterface):
                 return None
             buf += chunk
 
-        event = struct.unpack(EVENT_FORMAT, buf)
+        event = struct.unpack(self.event_format, buf)
         return event
 
 
@@ -102,7 +117,7 @@ class KeyWatcherController(ControllerInterface):
             try:
 
                 try:
-                    data = os.read(self.fd, EVENT_SIZE)
+                    data = os.read(self.fd, self.event_size)
                 except OSError as e:
                     if e.errno == errno.EINTR:
                         continue
@@ -117,39 +132,41 @@ class KeyWatcherController(ControllerInterface):
                     logger.exception("Unexpected OSError while reading input")
                     return
                 
-                if len(data) != EVENT_SIZE:
-                    logger.error("Short read: got %d bytes, expected %d", len(data), EVENT_SIZE)
+                if len(data) != self.event_size:
+                    logger.error("Short read: got %d bytes, expected %d", len(data), self.event_size)
                     continue
 
-                tv_sec, tv_usec, event_type, code, value = struct.unpack(EVENT_FORMAT, data)
+                tv_sec, tv_usec, event_type, code, value = struct.unpack(self.event_format, data)
 
                 key_event = KeyEvent(event_type, code, value)
 
-                if key_event in self.key_mappings:
-                    mapped_events = self.key_mappings[key_event]
-                    if mapped_events:
-                        for mapped_event in mapped_events:
-                            if mapped_event.key_state == KeyState.PRESS:
-                                with self.lock:
-                                    self.held_controller_inputs[mapped_event.controller_input] = now
-                                    if mapped_event.controller_input not in self.input_queue:
-                                        self.input_queue.append(mapped_event.controller_input)
+                mapped_events = self.mapping_provider.get_mapped_events(key_event)
+                if mapped_events:
+                    for mapped_event in mapped_events:
+                        if mapped_event.key_state == KeyState.PRESS:
+                            with self.lock:
                                 self.key_change(mapped_event.controller_input,"PRESS")
-                            elif mapped_event.key_state == KeyState.RELEASE:
-                                with self.lock:
-                                    self.key_change(mapped_event.controller_input,"RELEASE")
-                                self.held_controller_inputs.pop(mapped_event.controller_input, None)
-                    else:
-                        logger.error("No mapping for event: %s", key_event)
-                elif(key_event.event_type != 0 or key_event.code !=0 or key_event.value != 0):
-                    #logger.debug("Unmapped key event: %s", key_event)
+                                if mapped_event.controller_input not in self.held_controller_inputs:
+                                    self.input_queue.append(mapped_event.controller_input)
+                                self.held_controller_inputs[mapped_event.controller_input] = now
+                        elif mapped_event.key_state == KeyState.RELEASE:
+                            with self.lock:
+                                self.key_change(mapped_event.controller_input,"RELEASE")
+                            self.held_controller_inputs.pop(mapped_event.controller_input, None)
+                else:
+                    #logger.error("No mapping for event: %s", key_event)
                     pass
 
             except Exception as e:
                 logger.exception("Error processing input: %s", e)
 
     def key_change(self, controller_input, direction):
-        if(self.print_key_changes):
+        if not self.print_key_changes:
+            return
+        # Check if the event matches the current held state
+        if direction == "PRESS" and controller_input not in self.held_controller_inputs:
+            print(f"KEY,{controller_input},{direction}")
+        elif direction == "RELEASE" and controller_input in self.held_controller_inputs:
             print(f"KEY,{controller_input},{direction}")
 
     def get_input(self, timeoutInMilliseconds):

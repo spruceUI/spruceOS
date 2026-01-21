@@ -15,8 +15,8 @@ from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
@@ -108,42 +108,7 @@ class MiyooFlip(MiyooDevice):
         return "poweroff"
 
     def get_controller_interface(self):
-        key_mappings = {}  
-        key_mappings[KeyEvent(1, 304, 0)] = [InputResult(ControllerInput.B, KeyState.RELEASE)]
-        key_mappings[KeyEvent(1, 304, 1)] = [InputResult(ControllerInput.B, KeyState.PRESS)]
-        key_mappings[KeyEvent(1, 305, 0)] = [InputResult(ControllerInput.A, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 305, 1)] = [InputResult(ControllerInput.A, KeyState.PRESS)]   
-        key_mappings[KeyEvent(1, 308, 0)] = [InputResult(ControllerInput.X, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 308, 1)] = [InputResult(ControllerInput.X, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 307, 0)] = [InputResult(ControllerInput.Y, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 307, 1)] = [InputResult(ControllerInput.Y, KeyState.PRESS)]  
-
-
-        key_mappings[KeyEvent(3, 17, 4294967295)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
-        key_mappings[KeyEvent(3, 17, 1)] = [InputResult(ControllerInput.DPAD_DOWN, KeyState.PRESS)]
-        key_mappings[KeyEvent(3, 17, 0)] = [InputResult(ControllerInput.DPAD_UP, KeyState.RELEASE), InputResult(ControllerInput.DPAD_DOWN, KeyState.RELEASE)]
-        key_mappings[KeyEvent(3, 16, 4294967295)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
-        key_mappings[KeyEvent(3, 16, 1)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.PRESS)]
-        key_mappings[KeyEvent(3, 16, 0)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.RELEASE), InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
-
-
-        key_mappings[KeyEvent(1, 311, 0)] = [InputResult(ControllerInput.R1, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 311, 1)] = [InputResult(ControllerInput.R1, KeyState.PRESS)]  
-        key_mappings[KeyEvent(3, 5, 0)] = [InputResult(ControllerInput.R2, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(3, 5, 255)] = [InputResult(ControllerInput.R2, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 310, 0)] = [InputResult(ControllerInput.L1, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 310, 1)] = [InputResult(ControllerInput.L1, KeyState.PRESS)]  
-        key_mappings[KeyEvent(3, 2, 0)] = [InputResult(ControllerInput.L2, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(3, 2, 255)] = [InputResult(ControllerInput.L2, KeyState.PRESS)]  
-
-        key_mappings[KeyEvent(1, 316, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]  
-        key_mappings[KeyEvent(1, 316, 1)] = [InputResult(ControllerInput.MENU, KeyState.PRESS)]
-        key_mappings[KeyEvent(1, 315, 0)] = [InputResult(ControllerInput.START, KeyState.RELEASE)]
-        key_mappings[KeyEvent(1, 315, 1)] = [InputResult(ControllerInput.START, KeyState.PRESS)]  
-        key_mappings[KeyEvent(1, 314, 0)] = [InputResult(ControllerInput.SELECT, KeyState.RELEASE)]   
-        key_mappings[KeyEvent(1, 314, 1)] = [InputResult(ControllerInput.SELECT, KeyState.PRESS)]   
-
-        return KeyWatcherController(event_path="/dev/input/event5", key_mappings=key_mappings)
+        return KeyWatcherController(event_path="/dev/input/event5", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
         
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
