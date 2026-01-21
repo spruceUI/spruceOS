@@ -154,7 +154,7 @@ case "$PLATFORM" in
         fi
 
         miyoo_device=$(get_miyoo_mini_variant)
-
+        
         cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
                 /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
                 -device $miyoo_device \
@@ -175,5 +175,31 @@ case "$PLATFORM" in
         fi
 
 
+    ;;
+############################################################
+# GKD Pixel 2
+############################################################
+    "Pixel2" )
+        redirect_output=0
+        cd /usr/bin/
+        export PYSDL2_DLL_PATH="/usr/lib"
+
+        cmd="/mnt/SDCARD/spruce/pixel2/bin/python \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device GKD_PIXEL2 \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        set -- $cmd "$@"
+
+        log_message "Starting PyUI on $PLATFORM"
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
+            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
+        else
+            "$@" >/dev/null 2>&1
+        fi
     ;;
 esac

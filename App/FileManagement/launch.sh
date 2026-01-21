@@ -6,7 +6,7 @@ export HOME="$(dirname "$0")"
 cd "$HOME"
 
 case "$PLATFORM" in
-    "SmartPro"* ) export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
+    "SmartPro"* | "Pixel2" ) export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
     * )          export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
 esac
 
@@ -22,7 +22,14 @@ elif [ "$PLATFORM" = "SmartProS" ]; then
 	./"DinguxCommanderSmartPro"
     sync
     kill -9 "$(pidof gptokeyb)"
-    
+
+elif [ "$PLATFORM" = "Pixel2" ]; then
+    /mnt/SDCARD/spruce/bin64/gptokeyb -c "./DinguxCommanderPixel2.gptk" &
+    sleep 0.3
+	./"DinguxCommanderFlip"
+    sync
+    kill -9 "$(pidof gptokeyb)"
+
 else
     /mnt/SDCARD/spruce/bin64/gptokeyb -c "./DinguxCommander.gptk" &
     sleep 0.3
