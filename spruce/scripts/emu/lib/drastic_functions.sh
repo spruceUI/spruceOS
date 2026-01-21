@@ -59,7 +59,11 @@ run_drastic() {
 			else
 				run_drastic64 		# if overlay mount of /usr fails, fall back to original DraStic instead of Steward's
 			fi
+
+		elif [ "$PLATFORM" = "Pixel2" ]; then
+			run_drastic_Pixel2
 		fi
+
 		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"	# stash arch dependent states
 	fi
 
@@ -153,6 +157,12 @@ run_drastic_trngaje_Flip() {
 	mv ./drastic64 ./drastic
 	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	mv ./drastic ./drastic64
+}
+
+run_drastic_Pixel2() {
+	pin_to_dedicated_cores drastic64 2
+	# Disable loging for now, it's writting a lot to it
+	./drastic64 "$ROM_FILE" # > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 
 kill_runner() {

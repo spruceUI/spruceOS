@@ -82,6 +82,9 @@ load_pico8_control_profile() {
 		"Brick" | "SmartPro" | "SmartProS")
 			export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
 			;;
+		"Pixel2")
+			export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+			;;
 	esac
 
 	case "$CONTROL_PROFILE" in

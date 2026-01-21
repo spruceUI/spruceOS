@@ -27,6 +27,10 @@ run_yabasanshiro() {
 			YABASANSHIRO="./yabasanshiro.trimui" 
 			GUID=0300a3845e0400008e02000014010000
 			;;
+		"Pixel2")
+			YABASANSHIRO="./yabasanshiro" 
+			GUID=19008d96010000000221000000010000
+			;;
 	esac
 
 	[ -n "$GUID" ] && \

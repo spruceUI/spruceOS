@@ -29,6 +29,7 @@ case $INFO in
     *"TG3040"*)	export PLATFORM="Brick"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
+    *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
 

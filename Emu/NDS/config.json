@@ -42,6 +42,17 @@
       ],
       "selected": "DraStic-original",
       "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "DraStic-stock"
+      ],
+      "selected": "DraStic-stock",
+      "overrides": {}
     }
   },
   "sortOrder": 4000,

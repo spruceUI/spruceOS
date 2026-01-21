@@ -51,7 +51,7 @@ case $EMU_NAME in
 		;;
 		
 	"DC"|"NAOMI")
-		if [ "$CORE" = "Flycast-standalone" ]; then
+		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast-stock" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
 			run_flycast_standalone
 		elif [ ! "$PLATFORM" = "A30" ]; then

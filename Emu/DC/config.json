@@ -48,6 +48,19 @@
       ],
       "selected": "Flycast-libretro",
       "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone",
+        "Flycast-stock"
+      ],
+      "selected": "Flycast-stock",
+      "overrides": {}
     }
   },
   "sortOrder": 1800,
@@ -61,6 +74,7 @@
     "TRIMUI_SMART_PRO",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
-    "MIYOO_FLIP"
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
   ]
 }

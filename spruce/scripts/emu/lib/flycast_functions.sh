@@ -3,6 +3,7 @@
 # Requires globals:
 #   ROM_FILE
 #   PLATFORM
+#   CORE
 #   LD_LIBRARY_PATH
 #   LOG_DIR
 #
@@ -13,11 +14,15 @@ set_ui_scale() {
 
 	CFG=/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg
 
-	case "$PLATFORM" in
-		"Flip") SCALING=70 ;;
-		"Brick") SCALING=120 ;;
-		*) SCALING=100 ;;
-	esac
+	if [ "$CORE" = "Flycast-stock" ]; then
+		SCALING=100
+	else
+		case "$PLATFORM" in
+			"Flip"|"Pixel2") SCALING=70 ;;
+			"Brick") SCALING=120 ;;
+			*) SCALING=100 ;;
+		esac
+	fi
 
 	sed -i "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG"
 }
@@ -37,7 +42,12 @@ run_flycast_standalone() {
 
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
-	./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+
+	if [ "$CORE" = "Flycast-stock" ]; then
+		./flycast-stock "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	else
+		./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	fi
 
 	umount $HOME/bios
 	umount $HOME/data
