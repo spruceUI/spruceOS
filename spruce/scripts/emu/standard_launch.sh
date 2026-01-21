@@ -133,6 +133,10 @@ record_session_end_time
 calculate_current_session_duration
 update_gtt
 
+
+enable_or_disable_wifi &
+
+
 log_message "-----Closing Emulator-----"
 
 auto_regen_tmp_update
