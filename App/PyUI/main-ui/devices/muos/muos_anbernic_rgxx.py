@@ -2,7 +2,7 @@ import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -91,7 +91,7 @@ class MuosAnbernicRGXX(MuosDevice):
         key_mappings[KeyEvent(3, 16, 0)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.RELEASE), InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
         
-        return KeyWatcherController(event_path="/dev/input/event1", key_mappings=key_mappings)
+        return KeyWatcherController(event_path="/dev/input/event1", mapping_provider=DictKeyMappingProvider(key_mappings))
 
 
     def are_headphones_plugged_in(self):

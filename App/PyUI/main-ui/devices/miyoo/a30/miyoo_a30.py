@@ -9,7 +9,7 @@ from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
 import os
-from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -350,7 +350,7 @@ class MiyooA30(MiyooDevice):
         key_mappings[KeyEvent(1, 1, 1)] = [InputResult(ControllerInput.MENU, KeyState.PRESS)]
         key_mappings[KeyEvent(1, 1, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]  
 
-        return KeyWatcherController(event_path="/dev/input/event3", key_mappings=key_mappings)
+        return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=DictKeyMappingProvider(key_mappings))
 
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, theme_path)

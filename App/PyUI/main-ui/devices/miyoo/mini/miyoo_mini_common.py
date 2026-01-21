@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import threading
 import os
-from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
@@ -135,7 +135,7 @@ class MiyooMiniCommon(MiyooDevice):
         key_mappings[KeyEvent(1, 106, 0)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
         
-        return KeyWatcherController(event_path="/dev/input/event0", key_mappings=key_mappings)
+        return KeyWatcherController(event_path="/dev/input/event0", mapping_provider=DictKeyMappingProvider(key_mappings))
 
     def power_off_cmd(self):
         return self.miyoo_mini_specific_model_variables.poweroff_cmd
