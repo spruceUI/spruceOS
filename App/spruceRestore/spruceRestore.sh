@@ -7,8 +7,11 @@ UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 ICON_PATH="/mnt/SDCARD/spruce/imgs/restore.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
-
+python_path="$(get_python_path)"
 ##### FUNCTIONS #####
+# Set up logging
+log_file="$BACKUP_DIR/spruceRestore.log"
+>"$log_file" # Empty out or create the log file
 
 compare_versions() {
     echo "$1 $2" | awk '{
@@ -51,87 +54,26 @@ restore_emu_settings() {
 
         [ -f "$new_json" ] || continue  # Skip if emulator no longer exists
 
-        jq_expr="."
-        # clear positional params for accumulating jq args
-        set --
-
-        for field in $menu_fields; do
-            # test whether the field exists in the target JSON
-            if jq -e ".menuOptions.\"$field\"" "$new_json" >/dev/null 2>&1; then
-                selected_val="$(jq -r ".menuOptions.\"$field\".selected // empty" "$configjson")"
-                if [ -z "$selected_val" ] || [ "$selected_val" = "null" ]; then
-                    log_message "$emu_name: $field missing in backup — leaving current default"
-                    continue
-                fi
-
-                overrides_val="$(jq ".menuOptions.\"$field\".overrides // {}" "$configjson" 2>/dev/null || echo '{}')"
-
-                log_message "$emu_name: restoring $field → $selected_val"
-
-                # extend jq expression (note: use double quotes to allow variable expansion)
-                jq_expr="$jq_expr
-                    | if .menuOptions.\"${field}\" then
-                        .menuOptions.\"${field}\".selected = \$${field}_selected |
-                        .menuOptions.\"${field}\".overrides = \$${field}_overrides
-                      else . end"
-
-                # append --arg and --argjson into positional params safely
-                set -- "$@" --arg "${field}_selected" "$selected_val"
-                # pass the overrides JSON as literal for --argjson; ensure it's valid JSON
-                set -- "$@" --argjson "${field}_overrides" "$(printf '%s' "$overrides_val")"
-            fi
-        done
-
-        # if no positional args were added, skip
-        if [ $# -eq 0 ]; then
-            continue
-        fi
-
-        tmpfile="$(mktemp)"
-        # run jq with accumulated args
-        if jq "$@" "$jq_expr" "$new_json" > "$tmpfile" 2>>"$log_file"; then
-            mv -f "$tmpfile" "$new_json"
-        else
-            log_message "Failed to apply settings for $emu_name (jq exit $?). See $log_file"
-            rm -f "$tmpfile"
-        fi
-        # clear positional params for next iteration
-        set --
+        log_message "Merging $configjson → $new_json"
+        "$python_path" /mnt/SDCARD/App/spruceRestore/merge_configs.py \
+                "$configjson" \
+                "$new_json" \
+                >> "$log_file" 2>&1
     done
 }
 
 restore_spruce_config() {
     local old_config="/mnt/SDCARD/Saves/spruce/backups/spruce-config.json"
     local new_config="/mnt/SDCARD/Saves/spruce/spruce-config.json"
-
+    
     [ -f "$old_config" ] || { log_message "Old config not found: $old_config"; return 1; }
     [ -f "$new_config" ] || { log_message "New config not found: $new_config"; return 1; }
 
-    tmpfile="$(mktemp)"
-jq --slurpfile old "$old_config" '
-  ($old[0].menuOptions // {}) as $oldMenus
-  |
-  .menuOptions |=
-    with_entries(
-      . as $cat
-      |
-      .value |=
-        with_entries(
-          . as $opt
-          |
-          if (
-            ($oldMenus[$cat.key] // {})[$opt.key]? != null
-            and ($oldMenus[$cat.key][$opt.key] | has("selected"))
-            and ($opt.value | has("selected"))
-          )
-          then
-            .value.selected = $oldMenus[$cat.key][$opt.key].selected
-          else
-            .
-          end
-        )
-    )
-' "$new_config" > "$tmpfile" && mv -f "$tmpfile" "$new_config"
+    log_message "Merging $old_config → $new_config"
+    "$python_path" /mnt/SDCARD/App/spruceRestore/merge_configs.py \
+                "$old_config" \
+                "$new_config" \
+                >> "$log_file" 2>&1
 
     log_message "Config restore complete."
 }
@@ -165,9 +107,6 @@ display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backu
 # twinkle them lights
 rgb_led lrm12 breathe 00FF00 1900 "-1" mmc0
 
-# Set up logging
-log_file="$BACKUP_DIR/spruceRestore.log"
->"$log_file" # Empty out or create the log file
 log_message "Looking for backup files..."
 
 # Check if backups folder exists
