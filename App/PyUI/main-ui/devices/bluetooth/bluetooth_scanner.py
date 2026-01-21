@@ -150,8 +150,9 @@ class BluetoothScanner:
             return
 
         for line in output.splitlines():
+            PyUiLogger.get_logger().debug(f"BluetoothScanner: scan line: {line}")
             line = line.strip()
-            if not line.startswith("Device"):
+            if not line.startswith("Device") and not line.startswith("Controller"):
                 continue
 
             # Format:

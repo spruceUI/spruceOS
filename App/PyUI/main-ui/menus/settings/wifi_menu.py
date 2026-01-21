@@ -231,7 +231,7 @@ class WifiMenu:
 
     def show_wifi_menu(self):
         selected = Selection(None, None, 0)
-        self.wifi_scanner = WiFiScanner()
+        self.wifi_scanner = Device.get_device().get_new_wifi_scanner()
 
         # Start background scanning immediately
         self.wifi_scanner.scan_networks()
