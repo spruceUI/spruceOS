@@ -25,7 +25,7 @@ from views.view_type import ViewType
 class BasicSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
-        self.wifi_menu = WifiMenu()
+        self.wifi_menu = Device.get_device().get_wifi_menu()
         self.bt_menu = BluetoothMenu()
         self.theme_ever_changed = False
 
@@ -172,7 +172,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
         if(not Device.get_device().get_system_config().simple_mode_enabled()):
 
-            if(Device.get_device().supports_wifi()):
+            if(Device.get_device().supports_wifi() and self.wifi_menu is not None):
                 option_list.append(
                         GridOrListEntry(
                                 primary_text=Language.wifi(),

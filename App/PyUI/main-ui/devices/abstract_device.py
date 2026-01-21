@@ -428,3 +428,11 @@ class AbstractDevice(ABC):
     def animation_divisor(self):
         pass
 
+    # TODO potentially combine these two wifi methods
+    @abstractmethod
+    def get_wifi_menu(self):
+        pass
+
+    @abstractmethod
+    def get_new_wifi_scanner(self):
+        pass

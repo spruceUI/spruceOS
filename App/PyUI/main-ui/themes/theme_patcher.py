@@ -18,8 +18,9 @@ class ThemePatcher():
                      "gridSystemSelectImgHeight","listSystemSelectImgHeight","carouselSystemAdditionalYOffset"}
     WIDTH_SCALABLE_KEYS = {"gameSystemSelectColCount","carouselSystemExternalXPad",
                            "carouselSystemFixedWidth","mainMenuColCount","gameSelectColCount", 
-                           "gameSystemSelectCarouselColCount","carouselSystemSelectedOffset",
-                            "carouselSystemFixedWidth", "carouselSystemFixedSelectedWidth"}
+                           "gameSystemSelectCarouselColCount",
+                           "carouselSystemSelectedOffset","carouselSystemFixedWidth", "carouselSystemFixedSelectedWidth" # These might not belong here
+                           }
     HEIGHT_SCALABLE_KEYS = {"gameSystemSelectRowCount", "gameSelectRowCount"}
     ASPECT_RATIO_RESET_KEYS = {
         "recentsEnabled": True,
@@ -99,6 +100,7 @@ class ThemePatcher():
         scale_height = target_height / theme_height
         scale = min(scale_width, scale_height)
         # TODO care about height multiplier at some point
+        PyUiLogger.get_logger().info(f"Scale Width: {scale_width}, Scale Height: {scale_height}")
         if(scale_width > scale_height):
             width_multiplier = ((scale_width-scale_height) / scale_height) + 1
             height_multiplier = 1.0
@@ -228,10 +230,11 @@ class ThemePatcher():
 
                 if k in cls.ASPECT_RATIO_RESET_KEYS:
                     new_dict[k] = cls.ASPECT_RATIO_RESET_KEYS[k]
-                elif cls._should_scale_based_on_width(k):
+                elif cls._should_scale_based_on_width(k) and abs(width_multiplier - 1.0) > 1e-6:
+                    PyUiLogger.get_logger().info(f"Scaled {k} based on width_multiplier of {width_multiplier}")
                     new_dict[k] = cls._scale_if_number(v, width_multiplier)
-
-                elif cls._should_scale_based_on_height(k):
+                elif cls._should_scale_based_on_height(k) and abs(height_multiplier - 1.0) > 1e-6:
+                    PyUiLogger.get_logger().info(f"Scaled {k} based on height_multiplier of {height_multiplier}")
                     new_dict[k] = cls._scale_if_number(v, height_multiplier)  
                 elif cls._should_scale_key(k):
                     new_dict[k] = cls._scale_if_number(v, scale)
