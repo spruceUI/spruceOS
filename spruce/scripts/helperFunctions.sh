@@ -914,3 +914,63 @@ set_network_proxy() {
         unset http_proxy https_proxy
     fi
 }
+
+extract_7z_with_progress() {
+    UPDATE_FILE="$1"
+    DEST_DIR="$2"
+    LOG_LOCATION="$3" # Only logs errors
+
+    if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
+        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> <logo_image>"
+        return 1
+    fi
+
+    LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+
+    TOTAL_FILES=$(7zr l -scsUTF-8 "$UPDATE_FILE" |
+        awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
+
+    [ "$TOTAL_FILES" -eq 0 ] && TOTAL_FILES=1
+
+    FILE_COUNT=0
+    PERCENT_COMPLETE=0
+    THROTTLE=10  # update UI every N files
+
+    # Ensure destination exists
+    if ! mkdir -p "$DEST_DIR"; then
+        echo "Failed to create destination directory: $DEST_DIR" >>"$LOG_LOCATION"
+        return 1
+    fi
+
+    7zr x -y -scsUTF-8 -bb1 -o"$DEST_DIR" "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
+    while read -r line || [ -n "$line" ]; do
+        FILE=$(echo "$line" | sed 's/^[-[:space:]]*//')
+        [ -z "$FILE" ] && continue
+
+        FILE_COUNT=$((FILE_COUNT + 1))
+        PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
+
+        if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
+            display_text_with_percentage_bar \
+                "$FILE" \
+                "$PERCENT_COMPLETE" \
+                "$FILE_COUNT / $TOTAL_FILES files"
+        fi
+    done
+
+    # -----------------------------
+    # 4️⃣ Capture exit code
+    # -----------------------------
+    RET=${PIPESTATUS[0]:-$?}  # bash-safe, sh fallback
+
+    if [ "$RET" -ne 0 ]; then
+        log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
+        display_image_and_text "$LOGO" 35 25 \
+            "Extraction completed with warnings. Check the log for details." 75
+    else
+        log_update_message "Extraction process completed successfully"
+        display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
+    fi
+
+    return "$RET"
+}

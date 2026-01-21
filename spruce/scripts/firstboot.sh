@@ -24,14 +24,14 @@ dropbear_generate_keys &
 
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/
-    display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
     if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-        gzip -d /mnt/SDCARD/App/PortMaster/pm.tar.gz
-        tar -xvf /mnt/SDCARD/App/PortMaster/pm.tar -C /mnt/SDCARD/Persistent
-        rm -f /mnt/SDCARD/App/PortMaster/pm.tar
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
+        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log
     else
-        rm -f /mnt/SDCARD/App/PortMaster/pm.tar.gz
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "PortMaster already exists, removing install archive" 75
     fi
+
+    rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
 fi
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
