@@ -299,3 +299,11 @@ device_prepare_for_poweroff() {
 device_home_button_pressed() {
     log_message "Missing device_home_button_pressed function" -v
 }
+
+device_wifi_power_on() { 
+    log_message "Missing device_wifi_power_on function" -v
+}
+
+device_wifi_power_off() { 
+    log_message "Missing device_wifi_power_off function" -v
+}

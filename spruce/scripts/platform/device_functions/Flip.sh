@@ -497,3 +497,13 @@ device_prepare_for_ports_run() {
 device_cleanup_after_ports_run() {
     log_message "device_cleanup_after_ports_run uneeded" -v
 }
+
+
+device_wifi_power_on() { 
+    echo 1 > /sys/class/rkwifi/wifi_power
+    sleep 1
+}
+
+device_wifi_power_off() { 
+    echo 0 > /sys/class/rkwifi/wifi_power
+}
