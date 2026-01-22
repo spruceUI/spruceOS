@@ -7,6 +7,10 @@ if [ -e /tmp/sleep_helper_started ]; then
     exit 0 
 fi
 
+current_app="$(get_current_app)"
+log_activity_event "$current_app" "STOP"
+
+
 log_message "Sleep helper starting up..."
 rm -f /tmp/power_pressed_flag
 
@@ -161,6 +165,8 @@ trigger_sleep() {
 trigger_sleep
 
 device_exit_sleep
+
+log_activity_event "$current_app" "START"
 
 # Restore volume
 VOLUME_LV=$(jq -r '.vol' "$SYSTEM_JSON")

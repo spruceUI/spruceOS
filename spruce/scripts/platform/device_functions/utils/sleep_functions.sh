@@ -87,6 +87,15 @@ set_wake_alarm() {
     return 0
 }
 
+clear_wake_alarm() {
+    WAKE_ALARM_PATH="$1"
+
+    if [ -e "$WAKE_ALARM_PATH" ]; then
+        echo 0 > "$WAKE_ALARM_PATH"
+        log_message "clear_wake_alarm: Wakealarm cleared"
+    fi
+}
+
 device_woke_via_timer() {
     [ ! -f "$SLEEP_TIMER_FILE" ] && {
         echo "false"

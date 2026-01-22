@@ -1011,3 +1011,76 @@ enable_or_disable_wifi() {
         log_message "WiFi turned on"
     fi
 }
+
+get_current_app() {
+    if [ -f /tmp/cmd_to_run.sh ]; then
+        sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh
+    else
+        printf 'PyUI\n'
+    fi
+}
+
+extract_entry_name() {
+    cmd="$1"
+
+    case "$cmd" in
+        *emu/standard_launch.sh*)
+            # Get last quoted argument
+            last_arg=$(printf '%s\n' "$cmd" \
+                | sed -n 's/.*"\([^"]*\)"/\1/p' \
+                | tail -n 1)
+            # Extract everything after the last "Roms/"
+            if echo "$last_arg" | grep -q "Roms/"; then
+                rom_path=$(printf '%s\n' "$last_arg" | sed 's/.*\(Roms\/.*\)/\1/')
+                # Remove any trailing quote
+                rom_path="${rom_path%\"}"
+                printf '%s\n' "$rom_path"
+            else
+                printf '%s\n' "${last_arg##*/}"
+            fi
+            ;;
+        *App/*)
+            # Extract everything after the LAST "App/" including subfolders and file
+            app_path=$(printf '%s\n' "$cmd" \
+                | sed -n 's/.*\(App\/.*\)/\1/p' \
+                | tail -n 1)
+            # Remove any trailing quote
+            app_path="${app_path%\"}"
+            printf '%s\n' "$app_path"
+            ;;
+        *)
+            printf '%s\n' "$cmd"
+            ;;
+    esac
+}
+
+
+log_activity_event() {
+    app="$1"
+    event="$2"
+
+    [ -z "$app" ] && return 1
+    [ -z "$event" ] && return 1
+
+    ts="$(date +%s)"
+    pid="$$"
+
+    LOG_DIR="/mnt/SDCARD/Saves/spruce"
+    LOG_FILE="$LOG_DIR/activity.jsonl"
+
+    mkdir -p "$LOG_DIR" || return 1
+
+    name=$(extract_entry_name "$app")
+
+    safe_app=$(printf '%s' "$name" | sed '
+        s/\\/\\\\/g
+        s/"/\\"/g
+        s/\t/\\t/g
+        s/\r/\\r/g
+        s/\n/\\n/g
+    ')
+
+    printf '{"ts":%s,"event":"%s","app":"%s","pid":%s}\n' \
+        "$ts" "$event" "$safe_app" "$pid" >> "$LOG_FILE"
+}
+

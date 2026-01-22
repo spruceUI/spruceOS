@@ -45,6 +45,11 @@ device_enter_sleep() {
     trigger_device_sleep
 }
 
+
+device_exit_sleep(){
+    clear_wake_alarm $WAKE_ALARM_PATH
+}
+
 get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
