@@ -97,7 +97,7 @@ while killall -q -0 ra32.miyoo ||
     killall -q -0 yabasanshiro ||
     killall -q -0 yabasanshiro.trimui ||
     killall -q -0 mupen64plus; do
-    sleep 0.3
+    sleep 0.1
 done
 
 start_pyui_message_writer
@@ -111,9 +111,7 @@ else
 fi
 
 #Let user read any messages
-sleep 5
-
-dim_screen &
+sleep 1
 
 # Set flag to trigger autoresume on boot if appropriate
 if flag_check "in_menu"; then
@@ -134,6 +132,8 @@ if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
     fi
 
     flag_remove "syncthing_startup_synced"
+else
+    dim_screen &
 fi
 
 flag_remove "sleep.powerdown"
@@ -146,7 +146,7 @@ killall -q -9 MainUI
 
 # wait until emulator or MainUI exit
 while killall -q -0 MainUI; do
-    sleep 0.3
+    sleep 0.1
 done
 
 flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
