@@ -5,8 +5,16 @@
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
 run_sd_card_fix_if_triggered() {
+    needs_fix=false
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
-        log_message "/mnt/SDCARD/FIX_MY_SDCARD detected. Running repairSD.sh..."
+        needs_fix=true
+        log_message "/mnt/SDCARD/FIX_MY_SDCARD detected."
+    elif read_only_check; then
+        needs_fix=true
+    fi
+
+    if [ "$needs_fix" = "true" ]; then
+        log_message "Running repairSD.sh..."
         mkdir -p /tmp/sdfix
         cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
         chmod 777 /tmp/sdfix/repairSD.sh

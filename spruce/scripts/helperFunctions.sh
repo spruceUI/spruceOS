@@ -605,7 +605,6 @@ qr_code() {
 read_only_check() {
     log_message "Performing read-only check"
     SD_or_sd=$(mount | grep -q sdcard && echo "sdcard" || echo "SDCARD")
-    log_message "Device uses /mnt/$SD_or_sd for its SD card path"
     MNT_LINE=$(mount | grep "$SD_or_sd")
     if [ -n "$MNT_LINE" ]; then
         log_message "mount line for SD card: $MNT_LINE"
@@ -613,8 +612,10 @@ read_only_check() {
         if [ "$MNT_STATUS" = "ro" ] && [ -n "$SD_DEV" ]; then
             log_message "SD card is mounted as RO. Attempting to remount."
             mount -o remount,rw "$SD_DEV" "$SD_MOUNTPOINT"
+            return 0
         else
             log_message "SD card is not read-only."
+            return 1
         fi
     fi
 }

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# TODO: miyoo mini support
+# TODO: pixel2
+# TODO: opt out with a tmp_confirm() ?
+
 EXPERT_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/expertappswitch.png"
 TMP_LOG_PATH=/tmp/SDCARD_REPAIR.log
 FINAL_LOG_PATH="/mnt/SDCARD/SDCARD_REPAIR.log"
@@ -154,7 +158,7 @@ tmp_display() {
 
     command="LD_LIBRARY_PATH=$LD_LIBRARY_PATH /tmp/sdfix/display_text.elf"
     command="$command $DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION"
-    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0" # /tmp/sdfix/expertappswitch.png 0.25 top middle"
+    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0"
 
     echo "displaying: $command"
     eval "$command" &
@@ -179,7 +183,6 @@ tmp_kill_boot_scripts() {
 tmp_read_only_check() {
     echo "Performing read-only check"
     SD_or_sd=$(mount | grep -q sdcard && echo "sdcard" || echo "SDCARD")
-    echo "Device uses /mnt/$SD_or_sd for its SD card path"
     MNT_LINE=$(mount | grep "$SD_or_sd")
     if [ -n "$MNT_LINE" ]; then
         echo "mount line for SD card: $MNT_LINE" -v
