@@ -4,7 +4,7 @@ directory="/mnt/SDCARD/Roms/PORTS"
 mkdir -p "$directory/Imgs"
 
 # Define the list of image base names
-image_names=("cover" "screenshot" "splash")
+image_names="cover screenshot splash"
 
 # Ensure pillow is installed 
 if [ ! -d "/mnt/SDCARD/Persistent/portmaster/site-packages/PIL/" ] ; then
@@ -36,7 +36,7 @@ for file in "$directory"/*; do
       if [ ! -f "$directory/Imgs/$file_name.png" ]; then				  
 
 		# Loop through the list to convert jpg to png
-		for name in "${image_names[@]}"; do
+		for name in $image_names ; do
 			jpg_path="$directory/$dir_name/${name}.jpg"
 			if [ -f "$jpg_path" ]; then
 				echo "Converting $jpg_path to png"
@@ -48,7 +48,7 @@ for file in "$directory"/*; do
 		found=false
 		
 		# Loop through the list again to copy the first existing png to the target location
-		for name in "${image_names[@]}"; do
+		for name in $image_names ; do
 			png_path="$directory/$dir_name/${name}.png"
 			if [ -f "$png_path" ]; then
 				cp "$png_path" "$directory/Imgs/$file_name.png"
@@ -56,7 +56,7 @@ for file in "$directory"/*; do
 			fi
 		done
 		
-		if [ ! found ]; then
+		if [ ! $found ]; then
 			echo Unable to find image for $file_name in $dir_name
 		else 
 			echo Updated image for $file_name
