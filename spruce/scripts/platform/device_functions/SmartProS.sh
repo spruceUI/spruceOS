@@ -412,7 +412,7 @@ device_exit_sleep(){
         sleep 10
         restore_cores_online
     ) &
-    echo 0 > $WAKE_ALARM_PATH
+    clear_wake_alarm $WAKE_ALARM_PATH
 }
 
 
