@@ -390,6 +390,7 @@ device_cleanup_after_ports_run() {
     device_delay_then_check_trimui_blobs
 }
 
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_exit_sleep(){
     restore_cores_online
@@ -411,9 +412,8 @@ device_exit_sleep(){
         sleep 10
         restore_cores_online
     ) &
+    echo 0 > $WAKE_ALARM_PATH
 }
-
-WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 
 kill_wifi(){
