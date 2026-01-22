@@ -38,7 +38,9 @@ while [ 1 ]; do
 
         prepare_for_pyui_launch
 
+        log_activity_event "PyUI" "START"
         /mnt/SDCARD/App/PyUI/launch.sh
+        log_activity_event "PyUI" "STOP"
 
         post_pyui_exit
 
@@ -58,6 +60,8 @@ while [ 1 ]; do
     # This section handles what becomes of that temp file.
     if [ -f /tmp/cmd_to_run.sh ]; then
 
+        cmd="$(sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh)"
+        log_activity_event "$cmd" "START"
         set_performance # lead with this to speed up launching
 
         udpbcast -f /tmp/host_msg 2>/dev/null &
@@ -73,6 +77,7 @@ while [ 1 ]; do
         killall -9 udpbcast 2>/dev/null
 
         set_smart
+        log_activity_event "$cmd" "STOP"
     fi
 
     if flag_check "tmp_update_repair_attempted"; then

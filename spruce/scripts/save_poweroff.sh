@@ -2,6 +2,8 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
+current_app="$(get_current_app)"
+log_activity_event "$current_app" "STOP"
 
 # kill principal and runtime first so no new app / MainUI will be loaded anymore
 killall -q -15 runtime.sh
