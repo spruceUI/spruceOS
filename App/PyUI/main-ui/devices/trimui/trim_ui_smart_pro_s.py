@@ -16,6 +16,7 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
+from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from utils import throttle
 from utils.config_copier import ConfigCopier
@@ -237,11 +238,19 @@ class TrimUISmartProS(TrimUIDevice):
     def _signal_osd_quit(self):
         os.makedirs("/tmp/trimui_osd", exist_ok=True)
         open("/tmp/trimui_osd/osdd_quit", "a").close()
+
+    def _wpa_supplicant_quit(self):
+        ProcessRunner.run(["killall", "wpa_supplicant"])  
+
+    def _prepare_for_power_action(self):
+        self._signal_osd_quit()
+        self._wpa_supplicant_quit()
         time.sleep(1)
 
     def power_off(self):
         Display.display_message("Powering off...")
-        self._signal_osd_quit()
+        self._prepare_for_power_action()
+        time.sleep(1)
         self.run_cmd([self.power_off_cmd()])
         # So we dont update the display while shutting down
         time.sleep(10)
@@ -249,7 +258,8 @@ class TrimUISmartProS(TrimUIDevice):
 
     def reboot(self):
         Display.display_message("Rebooting...")
-        self._signal_osd_quit()
+        self._prepare_for_power_action()
+        time.sleep(1)
         self.run_cmd([self.reboot_cmd()])
         # So we dont update the display while rebooting
         time.sleep(10)
