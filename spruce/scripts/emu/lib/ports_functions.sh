@@ -77,11 +77,21 @@ run_port() {
 
 run_A30_port() {
 
+    # ensure correct RA bin and config are available
+    . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
     touch /mnt/SDCARD/RetroArch/retroarch
     mount --bind /mnt/SDCARD/RetroArch/retroarch.A30 /mnt/SDCARD/RetroArch/retroarch
+    prepare_ra_config 2>/dev/null
 
+    # make A30PORTS accessible from PORTS for backwards compatibility
+    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
+
+    # launch the actual game
     cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$ROM_FILE" 
 
+    # clean up and back up any RA config modifications
+    umount /mnt/SDCARD/Roms/PORTS
     umount /mnt/SDCARD/RetroArch/retroarch
+    backup_ra_config 2>/dev/null
 }
