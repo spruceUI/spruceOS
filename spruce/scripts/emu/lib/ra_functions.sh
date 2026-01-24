@@ -135,13 +135,13 @@ run_retroarch() {
 
 	RA_PARAMS="-v"
 	if [ "$PLATFORM" = "Pixel2" ]; then
-		RA_PARAMS="${RA_PARAMS} --config $CURRENT_CFG"
+		RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
 	fi
 
 	if flag_check "developer_mode"; then
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" "$RA_PARAMS" --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" "$RA_PARAMS" -L "$CORE_PATH" "$ROM_FILE"
+		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
 	
 
