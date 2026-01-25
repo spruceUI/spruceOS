@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # TODO: miyoo mini support
-# TODO: pixel2
 # TODO: opt out with a tmp_confirm() ?
 
 EXPERT_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/expertappswitch.png"
@@ -65,6 +64,18 @@ case $INFO in
         SD_DEV="/dev/mmcblk1p1"
         BIN_DIR="/mnt/SDCARD/spruce/bin64"
         MAX_FREQ=1800000
+        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+        TEXT_WIDTH=600
+        DISPLAY_WIDTH=640
+        DISPLAY_HEIGHT=480
+        DISPLAY_ROTATION=0
+        ;;
+    *"0xd04"*)
+        PLATFORM="Pixel2"
+        LD_LIBRARY_PATH="/usr/lib:/lib:/usr/lib/compat"
+        SD_DEV="/dev/mmcblk0p3"
+        BIN_DIR="/mnt/SDCARD/spruce/bin64"
+        MAX_FREQ=1416000
         BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
         TEXT_WIDTH=600
         DISPLAY_WIDTH=640
