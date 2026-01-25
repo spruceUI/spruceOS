@@ -20,7 +20,6 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
 
 run_sd_card_fix_if_triggered    # do this before anything else
-cores_online "0123"
 set_performance
 device_init
 # Check if WiFi is enabled and bring up network services if so
