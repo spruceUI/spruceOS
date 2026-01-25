@@ -19,8 +19,10 @@ SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 display_image_and_text "$SPRUCE_LOGO" 35 25 "Installing spruce $SPRUCE_VERSION" 75
 sleep 5 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
-log_message "Preparing SSH keys if necessary"
-dropbear_generate_keys &
+if [ "$PLATFORM" != "Pixel2" ]; then
+    log_message "Preparing SSH keys if necessary"
+    dropbear_generate_keys &
+fi
 
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/

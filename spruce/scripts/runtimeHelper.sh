@@ -4,6 +4,10 @@
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
 
+if [ "$PLATFORM" = "Pixel2" ]; then
+	. /mnt/SDCARD/spruce/scripts/network/sshdFunctions.sh
+fi
+
 run_sd_card_fix_if_triggered() {
     needs_fix=false
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
@@ -262,15 +266,22 @@ developer_mode_task() {
             while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
                 sleep 0.2
             done
-            
+
             if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
                 log_message "Dev Mode: Samba starting..."
                 start_samba_process
             fi
 
-            if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" > /dev/null; then
-                log_message "Dev Mode: Dropbear starting..."
-                start_dropbear_process
+            if [ "$PLATFORM" = "Pixel2" ]; then
+                if [ "$ssh_enabled" = "True" ] && ! pgrep "sshd" > /dev/null; then
+                    log_message "Dev Mode: sshd starting..."
+                    start_sshd_process
+                fi
+            else
+                if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" > /dev/null; then
+                    log_message "Dev Mode: Dropbear starting..."
+                    start_dropbear_process
+                fi
             fi
         fi
     fi
