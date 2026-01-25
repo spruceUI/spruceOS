@@ -876,8 +876,26 @@ get_pyui_config_value() {
 }
 
 set_rgb_in_menu() {
-    # todo: make this user-configurable
-    rgb_led lrm12 off
+    # get relevant variables from spruce-config.json
+    color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
+    effect="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDeffect.selected' "static")"
+    duration="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDduration.selected' "1000")"
+
+    # map color names to hex values
+    case "$color_name" in
+        "Red")    color_hex=FF0000 ;;
+        "Pink")   color_hex=FF3333 ;;
+        "Purple") color_hex=FF00FF ;;
+        "Blue")   color_hex=0000FF ;;
+        "Cyan")   color_hex=00FFFF ;;
+        "Green")  color_hex=00FF00 ;;
+        "Yellow") color_hex=FFFF00 ;;
+        "Orange") color_hex=FF55FF ;;
+        *)        color_hex=FFFFFF ;;
+    esac
+
+    rgb_led "lrm12" "$effect" "$color_hex" "$duration" "-1"
+
 }
 
 set_network_proxy() {

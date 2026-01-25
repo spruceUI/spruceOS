@@ -395,20 +395,72 @@
             }
         },
         "RGB LED Settings": {
-            "emulatorLEDeffect": {
-                "display": "Trigger LEDs on emulator launch",
+            "disableLEDs": {
+                "display": "Disable RGB LEDs in all contexts",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "different color per emulated system",
+                "description": "reload UI to apply",
                 "options": [
                     "True",
                     "False"
                 ],
                 "selected": "True"
             },
-            "disableLEDs": {
-                "display": "Disable RGB LEDs in all contexts",
+            "defaultLEDcolor": {
+                "display": "Default LED color",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "reload UI to apply",
+                "description": "in menu, etc.",
+                "options": [
+                    "Red",
+                    "Pink",
+                    "Purple",
+                    "Blue",
+                    "Cyan",
+                    "Green",
+                    "Yellow",
+                    "Orange",
+                    "White"
+                ],
+                "selected": "Green"
+            },
+            "defaultLEDeffect": {
+                "display": "Default LED behavior",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "in menu, etc.",
+                "options": [
+                    "off",
+                    "rise",
+                    "breathe",
+                    "sniff",
+                    "static",
+                    "blink 1",
+                    "blink 2",
+                    "blink 3"
+                ],
+                "selected": "static"
+            },
+            "defaultLEDduration": {
+                "display": "Default LED cycle duration (ms)",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "in menu, etc.",
+                "options": [
+                    "500",
+                    "750",
+                    "1000",
+                    "1250",
+                    "1500",
+                    "1750",
+                    "2000",
+                    "2250",
+                    "2500",
+                    "2750",
+                    "3000"
+                ],
+                "selected": "1000"
+            },
+            "emulatorLEDeffect": {
+                "display": "Trigger LEDs on emulator launch",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "different color per emulated system",
                 "options": [
                     "True",
                     "False"
