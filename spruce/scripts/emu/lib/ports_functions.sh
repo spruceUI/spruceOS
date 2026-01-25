@@ -84,6 +84,7 @@ run_A30_port() {
     prepare_ra_config 2>/dev/null
 
     # make A30PORTS accessible from PORTS for backwards compatibility
+    mkdir -p /mnt/SDCARD/Roms/PORTS
     mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
 
     # launch the actual game
