@@ -890,7 +890,7 @@ set_rgb_in_menu() {
         "Cyan")   color_hex=00FFFF ;;
         "Green")  color_hex=00FF00 ;;
         "Yellow") color_hex=FFFF00 ;;
-        "Orange") color_hex=FF55FF ;;
+        "Orange") color_hex=FF5500 ;;
         *)        color_hex=FFFFFF ;;
     esac
 
