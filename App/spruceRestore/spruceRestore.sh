@@ -31,7 +31,9 @@ compare_versions() {
 }
 
 kill_network_services() {
-    killall -9 dropbear
+    ssh_service=$(get_ssh_service_name)
+
+    killall -9 $ssh_service
     #killall -9 smbd
     #killall -9 sftpgo
     killall -9 syncthing

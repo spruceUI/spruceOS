@@ -2,11 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
-. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
-
-if [ "$PLATFORM" = "Pixel2" ]; then
-	. /mnt/SDCARD/spruce/scripts/network/sshdFunctions.sh
-fi
+. /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 
 run_sd_card_fix_if_triggered() {
     needs_fix=false
@@ -260,6 +256,7 @@ developer_mode_task() {
     if flag_check "developer_mode"; then
         samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
         ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+        ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
             # Loop until WiFi is connected
@@ -272,16 +269,9 @@ developer_mode_task() {
                 start_samba_process
             fi
 
-            if [ "$PLATFORM" = "Pixel2" ]; then
-                if [ "$ssh_enabled" = "True" ] && ! pgrep "sshd" > /dev/null; then
-                    log_message "Dev Mode: sshd starting..."
-                    start_sshd_process
-                fi
-            else
-                if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" > /dev/null; then
-                    log_message "Dev Mode: Dropbear starting..."
-                    start_dropbear_process
-                fi
+            if [ "$ssh_enabled" = "True" ] && ! pgrep "$ssh_service" > /dev/null; then
+                log_message "Dev Mode: $ssh_service starting..."
+                start_ssh_process
             fi
         fi
     fi

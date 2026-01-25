@@ -1,16 +1,13 @@
 #!/bin/sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 
-if [ "$PLATFORM" = "Pixel2" ]; then
-	. /mnt/SDCARD/spruce/scripts/network/sshdFunctions.sh
-fi
-
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
+SSH_SERVICE_NAME=$(get_ssh_service_name)
 
 samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
 ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
@@ -34,18 +31,10 @@ connect_services() {
 	fi
 
 	# SSH check
-	if [ "$PLATFORM" = "Pixel2" ]; then
-		if [ "$ssh_enabled" = "True" ] && ! pgrep "sshd" >/dev/null; then
-			# Flag exists but service is not running, so start it...
-			log_message "Network services: sshd detected not running, starting..."
-			start_sshd_process
-		fi
-	else
-		if [ "$ssh_enabled" = "True" ] && ! pgrep "dropbearmulti" >/dev/null; then
-			# Flag exists but service is not running, so start it...
-			log_message "Network services: Dropbear detected not running, starting..."
-			start_dropbear_process
-		fi
+	if [ "$ssh_enabled" = "True" ] && ! pgrep "$SSH_SERVICE_NAME" >/dev/null; then
+		# Flag exists but service is not running, so start it...
+		log_message "Network services: $SSH_SERVICE_NAME detected not running, starting..."
+		start_ssh_process
 	fi
 
 	# SFTPGo check
@@ -70,12 +59,11 @@ connect_services() {
 disconnect_services() {
 
 	log_message "Network services: Stopping all network services..."
-	for service in "$SFTP_SERVICE_NAME" "dropbearmulti" "sshd" "smbd" "syncthing" "darkhttpd"; do
+	for service in "$SFTP_SERVICE_NAME" "$SSH_SERVICE_NAME" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in
 			"$SFTP_SERVICE_NAME") stop_sftpgo_process ;;
-			"dropbearmulti") stop_dropbear_process ;;
-			"sshd") stop_sshd_process ;;
+			"$SSH_SERVICE_NAME") stop_ssh_process ;;
 			"smbd") stop_samba_process ;;
 			"syncthing") stop_syncthing_process ;;
 			"darkhttpd") stop_darkhttpd_process ;;

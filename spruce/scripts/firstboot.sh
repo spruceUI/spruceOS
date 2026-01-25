@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/scripts/network/dropbearFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 
 start_pyui_message_writer
 
@@ -19,7 +19,8 @@ SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 display_image_and_text "$SPRUCE_LOGO" 35 25 "Installing spruce $SPRUCE_VERSION" 75
 sleep 5 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
-if [ "$PLATFORM" != "Pixel2" ]; then
+SSH_SERVICE_NAME=$(get_ssh_service_name)
+if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
     log_message "Preparing SSH keys if necessary"
     dropbear_generate_keys &
 fi

@@ -22,3 +22,7 @@ send_menu_button_to_retroarch() {
 get_sftp_service_name() {
     echo "sftpgo"
 }
+
+get_ssh_service_name() {
+    echo "dropbearmulti"
+}
