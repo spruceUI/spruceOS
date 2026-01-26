@@ -20,7 +20,7 @@ led_effect() {
 
 	# get system-specific color from emu config.json
 	THEME_COLOR="$(jq -r '.themecolor' "$EMU_JSON_PATH")"
-	if [ -z "$COLOR" ] || [ "$COLOR" = "null" ]; then
+	if [ -z "$THEME_COLOR" ] || [ "$THEME_COLOR" = "null" ]; then
 		THEME_COLOR="FFFFFF"
 	fi
 
