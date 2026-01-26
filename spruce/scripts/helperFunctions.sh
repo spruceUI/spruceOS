@@ -875,6 +875,22 @@ get_pyui_config_value() {
     jq -r "${key} // \"$default\"" "$SYSTEM_JSON"
 }
 
+map_color_name_to_hex() {
+    name="$1"
+    case "$name" in
+        "Red")    hex=FF0000 ;;
+        "Pink")   hex=FF3333 ;;
+        "Purple") hex=FF00FF ;;
+        "Blue")   hex=0000FF ;;
+        "Cyan")   hex=00FFFF ;;
+        "Green")  hex=00FF00 ;;
+        "Yellow") hex=FFFF00 ;;
+        "Orange") hex=FF5500 ;;
+        *)        hex=FFFFFF ;;
+    esac
+    echo "$hex"
+}
+
 set_rgb_in_menu() {
     # get relevant variables from spruce-config.json
     color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
@@ -882,17 +898,7 @@ set_rgb_in_menu() {
     duration="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDduration.selected' "1000")"
 
     # map color names to hex values
-    case "$color_name" in
-        "Red")    color_hex=FF0000 ;;
-        "Pink")   color_hex=FF3333 ;;
-        "Purple") color_hex=FF00FF ;;
-        "Blue")   color_hex=0000FF ;;
-        "Cyan")   color_hex=00FFFF ;;
-        "Green")  color_hex=00FF00 ;;
-        "Yellow") color_hex=FFFF00 ;;
-        "Orange") color_hex=FF5500 ;;
-        *)        color_hex=FFFFFF ;;
-    esac
+    color_hex="$(map_color_name_to_hex "$color_name")"
 
     rgb_led "lrm12" "$effect" "$color_hex" "$duration" "-1"
 

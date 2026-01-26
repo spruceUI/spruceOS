@@ -443,8 +443,6 @@
                 "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "description": "in menu, etc.",
                 "options": [
-                    "500",
-                    "750",
                     "1000",
                     "1250",
                     "1500",
@@ -453,20 +451,79 @@
                     "2250",
                     "2500",
                     "2750",
-                    "3000"
+                    "3000",
+                    "3500",
+                    "4000",
+                    "4500",
+                    "5000"
                 ],
-                "selected": "1000"
+                "selected": "2000"
             },
-            "emulatorLEDeffect": {
-                "display": "Trigger LEDs on emulator launch",
+            "enableEmuSpecificLEDbehavior": {
+                "display": "Use separate LED control during emulation",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "different color per emulated system",
+                "description": "follows defaults if set to False",
                 "options": [
                     "True",
                     "False"
                 ],
                 "selected": "True"
-            }
+            },
+            "emuLEDcolor": {
+                "display": "In-game LED color",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "System-specific",
+                    "Red",
+                    "Pink",
+                    "Purple",
+                    "Blue",
+                    "Cyan",
+                    "Green",
+                    "Yellow",
+                    "Orange",
+                    "White"
+                ],
+                "selected": "Green"
+            },
+            "emuLEDeffect": {
+                "display": "In-game LED behavior",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "off",
+                    "rise",
+                    "breathe",
+                    "sniff",
+                    "static",
+                    "blink 1",
+                    "blink 2",
+                    "blink 3"
+                ],
+                "selected": "breathe"
+            },
+            "emuLEDduration": {
+                "display": "In-game LED cycle duration (ms)",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "1000",
+                    "1250",
+                    "1500",
+                    "1750",
+                    "2000",
+                    "2250",
+                    "2500",
+                    "2750",
+                    "3000",
+                    "3500",
+                    "4000",
+                    "4500",
+                    "5000"
+                ],
+                "selected": "4000"
+            },
         }
     }
 }
