@@ -16,6 +16,7 @@
 run_ffplay() {
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	if [ "$PLATFORM" = "A30" ]; then
 		export PATH="$EMU_DIR"/bin32:"$PATH"
 		export LD_LIBRARY_PATH="$EMU_DIR"/lib32:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
