@@ -134,7 +134,7 @@ run_retroarch() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
 	RA_PARAMS="-v"
-	if [ "$PLATFORM" = "Pixel2" ]; then
+	if [ "$PLATFORM" = "Pixel2" ] || [ "$PLATFORM" = "Flip" ]; then
 		RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
 	fi
 
