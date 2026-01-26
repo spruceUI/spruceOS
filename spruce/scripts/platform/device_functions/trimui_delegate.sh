@@ -54,7 +54,11 @@ rgb_led_trimui() {
     # early out if disabled
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
 	[ "$disable" = "True" ] && return 0
-    
+
+    # get and set peak rgb brightness
+    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "False")"
+    echo "$max_scale" > "/sys/class/led_anim/max_scale"
+
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
         zones=""

@@ -34,7 +34,5 @@ led_effect() {
 		color_hex="$(map_color_name_to_hex "$color_name")"
 	fi
 
-	rgb_led lrm12 breathe "$color_hex" 1200 3
-	sleep 5
 	rgb_led lrm12 "$effect" "$color_hex" "$duration" "-1"
 }

@@ -405,6 +405,28 @@
                 ],
                 "selected": "True"
             },
+            "LEDmaxScale": {
+                "display": "RGB LED brightness",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "if enabled; non-linear",
+                "options": [
+                    "5",
+                    "10",
+                    "15",
+                    "20",
+                    "25",
+                    "30",
+                    "35",
+                    "40",
+                    "45",
+                    "50",
+                    "55",
+                    "60",
+                    "70",
+                    "80"
+                ],
+                "selected": "15"
+            },
             "defaultLEDcolor": {
                 "display": "Default LED color",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
