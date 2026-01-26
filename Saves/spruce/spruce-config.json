@@ -485,7 +485,7 @@
                     "Orange",
                     "White"
                 ],
-                "selected": "Green"
+                "selected": "System-specific"
             },
             "emuLEDeffect": {
                 "display": "In-game LED behavior",
