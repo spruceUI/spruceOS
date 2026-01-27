@@ -31,4 +31,9 @@ init_gpio_a133p() {
 device_init() {
     device_init_a133p
     run_trimui_osdd
+
+    if [ ! -x /bin/bash ]; then
+        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
+        chmod +x /bin/bash
+    fi
 }
