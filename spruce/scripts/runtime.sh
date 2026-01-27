@@ -26,7 +26,7 @@ device_init
 enable_or_disable_wifi &
 
 # import multipass.cfg and start wifi_watchdog
-run_multipass
+/mnt/SDCARD/spruce/scripts/network/multipass.sh > /dev/null &
 
 # Flag cleanup
 flag_remove "log_verbose" &

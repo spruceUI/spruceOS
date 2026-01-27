@@ -28,10 +28,6 @@ get_python_path() {
     echo "/mnt/SDCARD/spruce/pixel2/bin/python"
 }
 
-run_multipass() {
-    /mnt/SDCARD/spruce/scripts/network/multipassConnMan.sh > /dev/null &
-}
-
 setup_for_retroarch_and_get_bin_location(){
     RA_DIR="/mnt/SDCARD/RetroArch"
     export RA_BIN="retroarch.Pixel2"
