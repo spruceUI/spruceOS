@@ -56,6 +56,13 @@ class RomSelectOptionsBuilder:
         if(game_entry is not None):
             if(CachedExists.exists(game_entry.image)):
                 return game_entry.image
+
+        # [Added] If the original ext files are not available, change it to .qoi and check again.
+            if Device.get_device().supports_qoi() and game_entry.image:
+                qoi_path = os.path.splitext(game_entry.image)[0] + ".qoi"
+                if CachedExists.exists(qoi_path):
+                    return qoi_path
+
         # Get the base filename without extension
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
@@ -268,8 +275,8 @@ class RomSelectOptionsBuilder:
                         primary_text=display_name,
                         description=game_system.folder_name, 
                         value=rom_info,
-                        image_path_searcher=lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
-                        image_path_selected_searcher=lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
+                        image_path_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
+                        image_path_selected_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
                         icon_searcher=lambda rom_info=rom_info: self._get_favorite_icon(rom_info)
                     )
                 )
