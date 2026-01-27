@@ -171,7 +171,6 @@ autorun.inf
 create_spruce_release.bat
 create_spruce_release.sh
 LICENSE
-multipass.cfg
 Pico8.Native.INFO.txt
 README.md
 "

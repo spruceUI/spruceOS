@@ -25,9 +25,6 @@ device_init
 # Check if WiFi is enabled and bring up network services if so
 enable_or_disable_wifi &
 
-# import multipass.cfg and start wifi_watchdog
-/mnt/SDCARD/spruce/scripts/network/multipass.sh > /dev/null &
-
 # Flag cleanup
 flag_remove "log_verbose" &
 flag_remove "low_battery" &
