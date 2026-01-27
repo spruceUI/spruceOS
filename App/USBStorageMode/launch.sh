@@ -24,6 +24,13 @@ case "$PLATFORM" in
         USB_UDC_CONTROLLER="fcc00000.dwc3"
         USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
         ;;
+    "Pixel2")
+        STORAGE_DEVICE="/dev/mmcblk0p3"
+        MOUNT_POINT="/storage/games-external"
+        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
+        USB_UDC_CONTROLLER="ff300000.usb"
+        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
+        ;;
     *)
         # This will run if PyUI isn't ready yet, providing a basic message.
         /mnt/SDCARD/App/PyUI/main-ui/devices/utils/display_text "USB Storage Mode is not supported on this device." &
@@ -78,7 +85,7 @@ cleanup_usb_gadget() {
             [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
             [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
             ;;
-        "Flip")
+        "Flip" | "Pixel2")
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
@@ -136,6 +143,25 @@ configure_usb_gadget() {
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            ;;
+        "Pixel2")
+            mkdir $USB_GADGET_PATH -m 0770
+            echo "0x2207" > $USB_GADGET_PATH/rockchip/idVendor
+            echo "0x0000" > $USB_GADGET_PATH/rockchip/idProduct
+            echo "0x0200" > $USB_GADGET_PATH/rockchip/bcdUSB
+            mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
+            echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
+            echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
+            echo “Pixel2” > $USB_GADGET_PATH/strings/0x409/product
+            mkdir $USB_CONFIG_PATH -m 0770
+            mkdir $USB_CONFIG_PATH/strings/0x409 -m 0770
+            echo "mass_storage" > $USB_CONFIG_PATH/strings/0x409/configuration
+            mkdir $USB_GADGET_PATH/functions/mass_storage.0
+            echo $STORAGE_DEVICE > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/file
+		    echo 1 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable
+		    echo 0 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/nofua
+            ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
+            echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
             ;;
     esac
 }
