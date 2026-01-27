@@ -26,3 +26,7 @@ get_sftp_service_name() {
 get_ssh_service_name() {
     echo "dropbearmulti"
 }
+
+run_multipass() {
+    /mnt/SDCARD/spruce/scripts/network/multipass.sh > /dev/null &
+}

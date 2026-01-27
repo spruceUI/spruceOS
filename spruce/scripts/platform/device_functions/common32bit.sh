@@ -12,6 +12,10 @@ get_ssh_service_name() {
     echo "dropbearmulti"
 }
 
+run_multipass() {
+    /mnt/SDCARD/spruce/scripts/network/multipass.sh > /dev/null &
+}
+
 device_init() {
     log_message "No initialization needed for miyoo mini (handled via .tmp_update)" -v   
 }
