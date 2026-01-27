@@ -329,7 +329,9 @@ unstage_archive() {
 
 unstage_archives_wanted() {
     if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
-        unstage_archive "Overlays.7z" "preCmd"
+        unstage_archive "overlays_640x480.7z" "preCmd"
+    elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
+        unstage_archive "overlays_1024x768.7z" "preCmd"
     fi
     if [ "$DEVICE_CAN_USE_EXTERNAL_CONTROLLER" = "true" ]; then
         unstage_archive "autoconfig.7z" "preCmd"
