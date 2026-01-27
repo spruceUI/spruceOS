@@ -51,8 +51,10 @@ check_installation_validity() {
 }
 
 kill_network_services() {
+    ssh_service=$(get_ssh_service_name)
+
     log_update_message "Killing network services."
-    killall -9 dropbear
+    killall -9 $ssh_service
     killall -9 smbd
     killall -9 sftpgo
     killall -9 syncthing

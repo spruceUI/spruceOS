@@ -15,20 +15,8 @@ get_sftp_service_name() {
     echo "sftpgo"
 }
 
-set_dark_httpd_dir() {
-    DARKHTTPD_DIR=/mnt/SDCARD/spruce/bin64/darkhttpd
-}
-
-set_SMB_DIR(){
-   SMB_DIR=/mnt/SDCARD/spruce/bin64/Samba
-}
-
-set_SFTPGO_DIR() {
-    SFTPGO_DIR="/mnt/SDCARD/spruce/bin64/SFTPGo"
-}
-
-set_syncthing_ST_BIN() {
-    ST_BIN=/mnt/SDCARD/spruce/bin64/Syncthing/bin/syncthing
+get_ssh_service_name() {
+    echo "sshd"
 }
 
 get_config_path() {
