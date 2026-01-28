@@ -2,7 +2,7 @@
   "label": "SuperGfx",
   "icon": "sgfx.png",
   "iconsel": "sgfx_sel.png",
-  "themecolor": "",
+  "themecolor": "EA483F",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|pce|sgx|cue|ccd|chd",
   "launchlist": [],

@@ -2,7 +2,7 @@
   "label": "VideoPac",
   "icon": "vdp.png",
   "iconsel": "vdp_sel.png",
-  "themecolor": "",
+  "themecolor": "ff1f1f",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "bin|zip|7z",
   "launchlist": [],

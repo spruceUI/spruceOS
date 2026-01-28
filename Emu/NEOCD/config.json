@@ -2,7 +2,7 @@
   "label": "Neo CD",
   "icon": "neocd.png",
   "iconsel": "neocd_sel.png",
-  "themecolor": "",
+  "themecolor": "FFD200",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "cue|chd|m3u",
   "launchlist": [

@@ -2,7 +2,7 @@
   "label": "NGPC",
   "icon": "ngpc.png",
   "iconsel": "ngpc_sel.png",
-  "themecolor": "",
+  "themecolor": "FFFFFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ngp|ngc|zip|7z",
   "launchlist": [],

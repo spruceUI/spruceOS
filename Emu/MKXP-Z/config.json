@@ -2,7 +2,7 @@
   "label": "MKXP",
   "icon": "mkxp-z.png",
   "iconsel": "mkxp-z_sel.png",
-  "themecolor": "",
+  "themecolor": "0066cc",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ini|json|rxproj|rvproj|rvproj2|mkxp|mkxpz|zip|7z",
   "launchlist": [],

@@ -2,7 +2,7 @@
   "label": "Atari 5200",
   "icon": "5200.png",
   "iconsel": "5200_sel.png",
-  "themecolor": "",
+  "themecolor": "6187e5",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "a52|zip|7z|atr|bin",
   "launchlist": [],

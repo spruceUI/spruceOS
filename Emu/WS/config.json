@@ -2,7 +2,7 @@
   "label": "WndrSwan",
   "icon": "ws.png",
   "iconsel": "ws_sel.png",
-  "themecolor": "",
+  "themecolor": "ff0000",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ws|wsc|zip|7z|pc2",
   "launchlist": [],

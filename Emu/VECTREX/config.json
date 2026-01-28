@@ -2,7 +2,7 @@
   "label": "Vectrex",
   "icon": "vectrex.png",
   "iconsel": "vectrex_sel.png",
-  "themecolor": "",
+  "themecolor": "c8dce0",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "vec|zip|7z",
   "launchlist": [],

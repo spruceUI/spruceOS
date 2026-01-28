@@ -2,7 +2,7 @@
   "label": "Sega 32X",
   "icon": "32X.png",
   "iconsel": "32X_sel.png",
-  "themecolor": "",
+  "themecolor": "002f82",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|gen|smd|md|32x|bin|iso|sms|68k|chd",
   "launchlist": [],

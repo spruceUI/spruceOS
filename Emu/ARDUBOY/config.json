@@ -2,7 +2,7 @@
   "label": "Arduboy",
   "icon": "arduboy.png",
   "iconsel": "arduboy_sel.png",
-  "themecolor": "",
+  "themecolor": "8b2db4",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "hex",
   "launchlist": [],

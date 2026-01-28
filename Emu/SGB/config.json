@@ -2,7 +2,7 @@
   "label": "SGB",
   "icon": "sgb.png",
   "iconsel": "sgb_sel.png",
-  "themecolor": "",
+  "themecolor": "FF0000",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "gb|gbc|gba|zip|7z|bin",
   "launchlist": [],

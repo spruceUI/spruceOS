@@ -2,7 +2,7 @@
   "label": "Supervision",
   "icon": "supervision.png",
   "iconsel": "supervision_sel.png",
-  "themecolor": "",
+  "themecolor": "00fffe",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|sv|bin",
   "launchlist": [],

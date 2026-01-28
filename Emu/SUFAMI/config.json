@@ -2,7 +2,7 @@
   "label": "Sufami",
   "icon": "sufami.png",
   "iconsel": "sufami_sel.png",
-  "themecolor": "",
+  "themecolor": "f26140",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "smc|zip|7z",
   "launchlist": [],

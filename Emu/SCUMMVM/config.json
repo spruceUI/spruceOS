@@ -2,7 +2,7 @@
   "label": "ScummVM",
   "icon": "scummvm.png",
   "iconsel": "scummvm_sel.png",
-  "themecolor": "",
+  "themecolor": "90db09",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "scummvm",
   "launchlist": [],

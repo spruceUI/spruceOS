@@ -2,7 +2,7 @@
   "label": "Mega Duck",
   "icon": "megaduck.png",
   "iconsel": "megaduck_sel.png",
-  "themecolor": "",
+  "themecolor": "3cc7c7",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "bin|zip|7z",
   "launchlist": [],

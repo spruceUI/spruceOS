@@ -2,7 +2,7 @@
   "label": "TIC-80",
   "icon": "tic.png",
   "iconsel": "tic_sel.png",
-  "themecolor": "",
+  "themecolor": "5fa5f0",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
   "launchlist": [],

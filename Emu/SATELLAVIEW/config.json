@@ -2,7 +2,7 @@
   "label": "Satella",
   "icon": "satella.png",
   "iconsel": "satella_sel.png",
-  "themecolor": "",
+  "themecolor": "FF0000",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|bs|sfc|smc|swc|fig|st",
   "launchlist": [],

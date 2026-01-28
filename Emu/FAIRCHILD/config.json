@@ -2,7 +2,7 @@
   "label": "ChannelF",
   "icon": "fairchild.png",
   "iconsel": "fairchild_sel.png",
-  "themecolor": "",
+  "themecolor": "ffe000",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|bin|rom|chf",
   "launchlist": [],

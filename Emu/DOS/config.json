@@ -2,7 +2,7 @@
   "label": "MS-DOS",
   "icon": "dos.png",
   "iconsel": "dos_sel.png",
-  "themecolor": "",
+  "themecolor": "b100b1",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|dosz|exe|com|bat|iso|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf",
   "launchlist": [],

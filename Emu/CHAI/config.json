@@ -2,7 +2,7 @@
   "label": "ChaiLove",
   "icon": "chai.png",
   "iconsel": "chai_sel.png",
-  "themecolor": "",
+  "themecolor": "e74999",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chailove",
   "launchlist": [],

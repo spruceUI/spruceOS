@@ -2,7 +2,7 @@
   "label": "DOOM",
   "icon": "doom.png",
   "iconsel": "doom_sel.png",
-  "themecolor": "",
+  "themecolor": "ecaf50",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|wad|exe",
   "launchlist": [],

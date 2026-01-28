@@ -2,7 +2,7 @@
   "label": "Pokemini",
   "icon": "poke.png",
   "iconsel": "poke_sel.png",
-  "themecolor": "",
+  "themecolor": "ffe900",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "min|zip|7z",
   "launchlist": [],

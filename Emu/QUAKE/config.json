@@ -2,7 +2,7 @@
   "label": "Quake",
   "icon": "quake.png",
   "iconsel": "quake_sel.png",
-  "themecolor": "",
+  "themecolor": "d7660f",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "fbl|pak",
   "launchlist": [],

@@ -2,7 +2,7 @@
   "label": "Amst CPC",
   "icon": "cpc.png",
   "iconsel": "cpc_sel.png",
-  "themecolor": "",
+  "themecolor": "c0214e",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|sna|dsk|kcr|bin",
   "launchlist": [],

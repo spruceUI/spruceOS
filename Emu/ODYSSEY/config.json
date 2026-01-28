@@ -2,7 +2,7 @@
   "label": "Odyssey2",
   "icon": "ody.png",
   "iconsel": "ody_sel.png",
-  "themecolor": "",
+  "themecolor": "c5b9a4",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "bin|zip|7z",
   "launchlist": [],

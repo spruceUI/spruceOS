@@ -2,7 +2,7 @@
   "label": "MSX",
   "icon": "msx.png",
   "iconsel": "msx_sel.png",
-  "themecolor": "",
+  "themecolor": "0080ff",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|rom|mx1|mx2|dsk|cas|m3u",
   "launchlist": [],

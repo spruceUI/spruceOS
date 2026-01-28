@@ -2,7 +2,7 @@
   "label": "Game Tank",
   "icon": "gametank.png",
   "iconsel": "gametank_sel.png",
-  "themecolor": "",
+  "themecolor": "29489f",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "gtr|zip|7z",
   "launchlist": [],

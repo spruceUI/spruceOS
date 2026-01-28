@@ -2,7 +2,7 @@
   "label": "Atari 800",
   "icon": "atari800.png",
   "iconsel": "atari800_sel.png",
-  "themecolor": "",
+  "themecolor": "9f3a35",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|xfd|atr|cdm|cas|bin|a52|atx|car|com|xex",
   "launchlist": [],

@@ -2,7 +2,7 @@
   "label": "Intellivis.",
   "icon": "itv.png",
   "iconsel": "itv_sel.png",
-  "themecolor": "",
+  "themecolor": "0035a0",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|bin|int",
   "launchlist": [

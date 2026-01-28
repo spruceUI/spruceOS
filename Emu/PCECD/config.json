@@ -2,7 +2,7 @@
   "label": "TG-CD",
   "icon": "pcecd.png",
   "iconsel": "pcecd_sel.png",
-  "themecolor": "",
+  "themecolor": "EA483F",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "iso|img|chd|pce|ccd|cue|zip|7z",
   "launchlist": [
