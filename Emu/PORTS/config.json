@@ -28,6 +28,7 @@
       "overrides": {}
     }
   },
+  "scanSubfolders": false,
   "sortOrder": 5000,
   "brand": "Other",
   "type": "other",

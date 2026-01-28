@@ -92,7 +92,7 @@ class TrimUIJoystick:
             }
 
 
-    def sample_axes_stats(self, duration=5.0):
+    def sample_axes_stats(self, duration=2.0):
         samples = {
             "axisYL": [],
             "axisXL": [],
@@ -110,7 +110,7 @@ class TrimUIJoystick:
             axes = self.get_axes()
             for axis, value in axes.items():
                 samples[axis].append(value)
-            PyUiLogger.get_logger().info(axes)
+            #PyUiLogger.get_logger().info(axes)
             time.sleep(0.01)  # Sample every 10ms to avoid busy looping
 
         stats = {}

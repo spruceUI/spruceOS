@@ -385,6 +385,10 @@ class Language:
         return cls._data.get("animationSpeed","Animation Speed")
 
     @classmethod
+    def input_rate_limit_ms(cls):
+        return cls._data.get("inputRateLimitMs","Input Rate Limiting (ms)")
+
+    @classmethod
     def stock_os_menu(cls):
         return cls._data.get("stockOsMenu","Stock OS Menu")
 

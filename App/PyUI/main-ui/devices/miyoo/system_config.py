@@ -354,4 +354,9 @@ class SystemConfig:
         self.config["animationSpeed"] = value
         self.save_config()
 
+    def get_input_rate_limit_ms(self):
+        return self.config.get("inputRateLimitMs", 16)
 
+    def set_input_rate_limit_ms(self, value):
+        self.config["inputRateLimitMs"] = value
+        self.save_config()

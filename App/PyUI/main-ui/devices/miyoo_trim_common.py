@@ -173,22 +173,27 @@ class MiyooTrimCommon():
     @staticmethod
     def run_analog_stick_calibration(device, stick_name, joystick, file_path, leftOrRight):
         from display.display import Display
-        from themes.theme import Theme
         
         Display.clear("Stick Calibration")
-        Display.render_text_centered(f"Rotate {stick_name}",Device.get_device().screen_width//2, Device.get_device().screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.display_message(f"Rotate {stick_name}")
         Display.present()
        
         rotate_stats = joystick.sample_axes_stats()
         
         Display.clear("Stick Calibration")
-        Display.render_text_centered(f"Leave {stick_name} Still",Device.get_device().screen_width//2, Device.get_device().screen_height//2,Theme.text_color_selected(FontPurpose.LIST), purpose=FontPurpose.LIST)
+        Display.display_message(f"Leave {stick_name} Still")
         Display.present()
 
         centered_stats = joystick.sample_axes_stats()
-        PyUiLogger.get_logger().info("rotate_stats keys:", rotate_stats.keys())
-        PyUiLogger.get_logger().info("centered_stats keys:", rotate_stats.keys())
-        
+        PyUiLogger.get_logger().info(
+            "rotate_stats keys: %s",
+            list(rotate_stats.keys())
+        )
+
+        PyUiLogger.get_logger().info(
+            "centered_stats keys: %s",
+            list(centered_stats.keys())
+        )        
         x_min = f"x_min={round(rotate_stats['axisX'+leftOrRight]['min'])}"
         x_max = f"x_max={round(rotate_stats['axisX'+leftOrRight]['max'])}"
         x_zero = f"x_zero={round(centered_stats['axisX'+leftOrRight]['avg'])}"
@@ -212,6 +217,8 @@ class MiyooTrimCommon():
             f.write(y_max + "\n")
             f.write(x_zero + "\n")
             f.write(y_zero + "\n")
+        PyUiLogger.get_logger().info("Calibration Complete")
+
 
     @staticmethod
     def set_theme(json_path, theme_path: str):

@@ -16,7 +16,6 @@ class RomUtils:
             "WSC":"WS"
         }
 
-        self.dont_scan_subfolders = ["PORTS","PORTS32","PORTS64","PM"]
         self._get_roms_cache: dict[tuple, tuple[list[str], list[str]]] = {}
 
     def get_roms_dir_for_emu_dir(self, emu_dir):
@@ -50,7 +49,7 @@ class RomUtils:
             try:
                 for entry in os.scandir(dir_to_search):
                     if not entry.is_file(follow_symlinks=False):
-                        if (entry.is_dir(follow_symlinks=False) and game_system.game_system_config.get_label() not in self.dont_scan_subfolders):
+                        if (entry.is_dir(follow_symlinks=False) and game_system.game_system_config.scan_subfolders()):
                             if(self.has_roms(game_system, directory=entry)):
                                 return True
                         continue
@@ -90,7 +89,7 @@ class RomUtils:
                                 valid_files.append(entry.path)
                         elif entry.is_dir(follow_symlinks=False) and os.path.basename(dir_to_search) != "Imgs":
                             # only consider folders that contain ROMs
-                            if(game_system.game_system_config.get_label() not in self.dont_scan_subfolders):
+                            if(game_system.game_system_config.scan_subfolders()):
                                 if self.has_roms(game_system, entry.path):
                                     valid_folders.append(entry.path)
             except (FileNotFoundError, PermissionError):
