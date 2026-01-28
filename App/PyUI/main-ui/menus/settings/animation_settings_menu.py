@@ -30,5 +30,6 @@ class AnimationSettingsMenu(settings_menu.SettingsMenu):
                 set_value_func=Device.get_device().get_system_config().set_animation_speed,
             )
         )
+       
 
         return option_list

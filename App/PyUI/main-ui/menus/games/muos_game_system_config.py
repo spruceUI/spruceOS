@@ -59,3 +59,7 @@ class MuosGameSystemConfig():
     
     def get_selected_core(self):
         return None
+            
+    def scan_subfolders(self):
+        return True
+        

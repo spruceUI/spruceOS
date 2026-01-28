@@ -236,7 +236,7 @@ class Controller:
             elif(started_held_down):
                 #if(Controller.last_controller_input is not None):
                 #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
-                Controller.hold_delay = 0.0  # No input was released yet
+                Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
         Controller.last_input_time = time.time()
         #if(Controller.last_controller_input is not None):

@@ -124,14 +124,20 @@ class KeyWatcherController(ControllerInterface):
 
                     if e.errno in (errno.EBADF, errno.ENODEV, errno.EIO):
                         logger.error(
-                            "Keyboard device became unavailable (errno=%d)",
+                            "Keyboard device became unavailable (errno=%d), retrying in 1s",
                             e.errno,
                         )
+                        time.sleep(1.0)  
+                        try:
+                            fd_tmp = os.open(self.event_path, os.O_RDONLY)
+                            if fd_tmp is not None and fd_tmp > 0:
+                                self.fd = fd_tmp
+                        except OSError as e:
+                            pass
+                    else:
+                        logger.exception("Unexpected OSError while reading input")
                         return
 
-                    logger.exception("Unexpected OSError while reading input")
-                    return
-                
                 if len(data) != self.event_size:
                     logger.error("Short read: got %d bytes, expected %d", len(data), self.event_size)
                     continue

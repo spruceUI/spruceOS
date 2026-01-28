@@ -1077,6 +1077,10 @@ class Display:
         if not message:
             return [""]
 
+        # Convert anything that's not a string to string
+        if not isinstance(message, str):
+            message = str(message)
+            
         # First split on explicit newlines
         raw_lines = message.split("\n")
         final_lines = []

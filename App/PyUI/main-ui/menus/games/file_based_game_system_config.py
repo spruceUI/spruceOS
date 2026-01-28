@@ -169,3 +169,8 @@ class FileBasedGameSystemConfig():
 
         overrides = option.get('overrides', {})
         return override_key in overrides
+
+            
+    def scan_subfolders(self):
+        return self._data.get('scanSubfolders', True)
+        

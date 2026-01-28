@@ -3,6 +3,8 @@ from logging.handlers import RotatingFileHandler
 import os
 import sys
 
+from utils.etension_preserving_rotating_file_handler import ExtensionPreservingRotatingFileHandler
+
 class StreamToLogger:
     """Redirect writes to a logger."""
     def __init__(self, logger, level, stream=None):
@@ -45,7 +47,7 @@ class PyUiLogger:
                 console_handler.setFormatter(formatter)
 
                 # File handler
-                file_handler = RotatingFileHandler(
+                file_handler = ExtensionPreservingRotatingFileHandler(
                     os.path.join(log_dir, "pyui.log"),
                     maxBytes=1024 * 1024,
                     backupCount=5
@@ -90,28 +92,34 @@ class PyUiLogger:
             cls._logger = fallback
             return fallback
 
-    
     @staticmethod
     def rotate_logs(log_dir):
         try:
-            # Perform log rotation before initializing the logger
-            log_path = os.path.join(log_dir,"pyui.log")
-            backup_path = os.path.join(log_dir,"pyui.log.5")
+            base = os.path.join(log_dir, "pyui")
+            ext = ".log"
+            max_backups = 5
 
-            # Rotate logs manually before starting
-            if os.path.exists(backup_path):
-                os.remove(backup_path)
-            for i in range(4, 0, -1):
-                src = f"{log_path}.{i}" if i > 1 else log_path
-                dest = f"{log_path}.{i + 1}"
+            # Remove oldest
+            oldest = "%s.%d%s" % (base, max_backups, ext)
+            if os.path.exists(oldest):
+                os.remove(oldest)
+
+            # Shift backups up
+            for i in range(max_backups - 1, 0, -1):
+                src = "%s.%d%s" % (base, i, ext)
+                dst = "%s.%d%s" % (base, i + 1, ext)
                 if os.path.exists(src):
-                    os.rename(src, dest)
+                    os.rename(src, dst)
 
-            # Optionally, delete the pyui-5.log if it exists
-            if os.path.exists(f"{log_path}.5"):
-                os.remove(f"{log_path}.5")
+            # Rotate current log
+            current = "%s%s" % (base, ext)
+            first = "%s.1%s" % (base, ext)
+            if os.path.exists(current):
+                os.rename(current, first)
+
         except Exception as e:
-            print(f"Error rotating logs (likely means RO file system): {e}")
+            print("Error rotating logs (likely RO filesystem): %s" % e)
+
 
     @classmethod
     def get_logger(cls):
