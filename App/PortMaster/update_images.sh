@@ -7,8 +7,16 @@ mkdir -p "$directory/Imgs"
 image_names="cover screenshot splash"
 
 # Ensure pillow is installed 
-if [ ! -d "/mnt/SDCARD/Persistent/portmaster/site-packages/PIL/" ] ; then
-    /mnt/SDCARD/Persistent/portmaster/bin/python3 -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
+if [ -f /mnt/SDCARD/Persistent/portmaster/bin/python3 ] ; then
+	PM_PYTHON_PATH="/mnt/SDCARD/Persistent/portmaster/bin/python3"
+	if [ ! -d "/mnt/SDCARD/Persistent/portmaster/site-packages/PIL/" ] ; then
+		$PM_PYTHON_PATH -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
+	fi
+else # Pixel2 stock portmaster
+	PM_PYTHON_PATH="/mnt/SDCARD/spruce/pixel2/bin/python"
+	if [ ! -d "/mnt/SDCARD/spruce/pixel2/lib/python3.10/site-packages/PIL/" ] ; then
+		$PM_PYTHON_PATH -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
+	fi
 fi
 
 
@@ -40,7 +48,7 @@ for file in "$directory"/*; do
 			jpg_path="$directory/$dir_name/${name}.jpg"
 			if [ -f "$jpg_path" ]; then
 				echo "Converting $jpg_path to png"
-				/mnt/SDCARD/Persistent/portmaster/bin/python3 /mnt/SDCARD/App/PortMaster/jpg_to_png.py "$jpg_path"
+				$PM_PYTHON_PATH /mnt/SDCARD/App/PortMaster/jpg_to_png.py "$jpg_path"
 				break
 			fi
 		done
