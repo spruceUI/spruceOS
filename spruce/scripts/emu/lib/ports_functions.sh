@@ -35,34 +35,43 @@ is_retroarch_port() {
 }
 
 set_port_mode() {
-    rm "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+    rm "$PM_DIR/gamecontrollerdb.txt"
 	PORT_CONTROL="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
     if [ "$PORT_CONTROL" = "X360" ]; then
-        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "$PM_DIR/gamecontrollerdb.txt"
     else
-        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "/mnt/SDCARD/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
+        cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "$PM_DIR/gamecontrollerdb.txt"
     fi
 }
 
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
     device_prepare_for_ports_run
-	
-	
-    set_port_mode
 
-    is_retroarch_port
+    # Setup variables
     PORTS_DIR=/mnt/SDCARD/Roms/PORTS
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-    export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+
+    if [ "$PLATFORM" = "Pixel2" ]; then
+        PM_DIR="/mnt/SDCARD/Roms/PORTS/PortMaster"
+        MOUNT_BIND=false
+    else
+        PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+        MOUNT_BIND=true
+        export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
+    fi
+
+    set_port_mode
+    is_retroarch_port
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
         "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
     else
-
-    	mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python 
+        if [ "$MOUNT_BIND" = true ]; then
+            mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python
+        fi
 
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
         setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &

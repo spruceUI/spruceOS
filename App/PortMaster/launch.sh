@@ -7,6 +7,7 @@ case $INFO in
     *"TG3040"*)	export PLATFORM="Brick"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
+    *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
 
@@ -23,6 +24,13 @@ case "$PLATFORM" in
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
         export HOME="/mnt/SDCARD/Saves/flip/home"
+        ;;
+    Pixel2)
+        export HOME="/mnt/SDCARD/Saves/flip/home"
+        /usr/bin/start_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
+        /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+        rm /mnt/SDCARD/Roms/PORTS/gamelist.*
+        exit 0
         ;;
 esac
 
