@@ -209,11 +209,10 @@
                 "display": "Thermal Control",
                 "description": "Customize fan profiles",
                 "options": [
-                    "Stock",
                     "Adaptive",
                     "Cool"
                 ],
-                "selected": "Stock"
+                "selected": "Adaptive"
             }
         },
         "Emulator Settings": {

@@ -469,15 +469,11 @@ device_stop_thermal_process(){
         "Cool")
             killall thermal-watchdog
             ;;
-        "Adaptive")
+        *)
             pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
             if [ -n "$pid" ]; then
                 kill "$pid"
             fi
-            ;;
-        
-        *)
-            killall thermald
             ;;
     esac
 }
@@ -487,17 +483,14 @@ device_run_thermal_process(){
     # Second trip point = 70C (CPU/GPU Start getting throttled)
     # Third trip point = 105C (Likely Critical shutdown -- Untested) 
 
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
+    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
     if [ "$custom_thermal_watchdog" = "Cool" ]; then
         # Fan is always on
         echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
         /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    elif [ "$custom_thermal_watchdog" = "Adaptive" ]; then
+    else
         # Fan adjusts only to prevent throttling
         python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    else
-        # Stock from TrimUI
-        run_trimui_blobs "thermald"
     fi
 
 }
