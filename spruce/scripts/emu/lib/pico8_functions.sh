@@ -40,11 +40,23 @@ run_pico8() {
 
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
+
 	if [ "$PLATFORM" = "A30" ]; then
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		PICO8_BINARY="pico8_dyn"
 		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+
+	elif [ "$PLATFORM" = "MiyooMini" ]; then
+		export SDL_VIDEODRIVER=mmiyoo
+		export SDL_AUDIODRIVER=mmiyoo
+		export EGL_VIDEODRIVER=mmiyoo
+		export SDL_MMIYOO_DOUBLE_BUFFER=1
+		PICO8_BINARY="pico8_dyn"
+		killall audioserver
+		cpuclock 1600
+		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
+
 	else
 		PICO8_BINARY="pico8_64"
 		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
@@ -79,8 +91,14 @@ load_pico8_control_profile() {
 		"Flip")
 			export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
 			;;
-		"Brick" | "SmartPro" | "SmartProS")
+		"MiyooMini")
+			export LD_LIBRARY_PATH="$HOME"/lib-MiyooMini:$LD_LIBRARY_PATH
+			;;
+		"Brick" | "SmartPro")
 			export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
+			;;
+		"SmartProS")
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME"/lib-trimui
 			;;
 		"Pixel2")
 			export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
