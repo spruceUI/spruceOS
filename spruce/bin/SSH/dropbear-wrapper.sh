@@ -5,7 +5,7 @@ cd /mnt/SDCARD
 
 # TODO: this probably doesn't work outside the a30?
 if [ "$SSH_ORIGINAL_COMMAND" = "/usr/libexec/sftp-server" ]; then
-    if [ "$PLATFORM" = "A30" ]; then
+    if [ "$PLATFORM" = "A30" -o "$PLATFORM" = "MiyooMini" ]; then
         GESFTPSERVER="/mnt/SDCARD/spruce/bin/gesftpserver"
     else
         GESFTPSERVER="/mnt/SDCARD/spruce/bin64/gesftpserver"
