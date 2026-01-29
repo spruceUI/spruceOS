@@ -13,6 +13,7 @@ dropbear_generate_keys() {
 }
 
 start_ssh_process() {
+    killall -9 sshd 2>/dev/null
     log_message "Starting $SSH_SERVICE_NAME..."
     if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
         $SSH_DIR/bin/dropbearmulti dropbear -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" -c "$SSH_DIR/dropbear-wrapper.sh" &
