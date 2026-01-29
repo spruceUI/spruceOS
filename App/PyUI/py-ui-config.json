@@ -1,0 +1,14 @@
+{
+    "theme": "SPRUCE",
+    "themeDir": "/mnt/SDCARD/Themes/",
+    "turboDelayMs": 250,
+    "enableButtonWatchers": false,
+    "enableWifiMonitor": true,
+    "mainMenuTitle": "spruceOS",
+    "gameSystemSortMode": "SortOrderKey",
+    "includeStockOsLaunchOption": false,
+    "allowPyUiGameSwitcher": true,
+    "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
+    "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
+    "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+}

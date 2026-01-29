@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# enable .tmp_update/updater backdoor for smart pro/brick
+if [ -f /usr/trimui/bin/runtrimui.sh ] && [ ! -f /usr/trimui/bin/runtrimui-original.sh ]; then
+	mv /usr/trimui/bin/runtrimui.sh /usr/trimui/bin/runtrimui-original.sh
+	cp ./runtrimui.sh /usr/trimui/bin/
+	reboot
+fi
+
+poweroff

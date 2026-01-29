@@ -1,0 +1,7 @@
+{
+    "#label": "spruceUI Credits",
+    "icon": "led.png",
+    "launch": "launch.sh",
+    "description": "Jam out with Jim",
+    "hideInSimpleMode": false
+}

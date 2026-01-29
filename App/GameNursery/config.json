@@ -1,6 +1,7 @@
 {
   "label": "Game Nursery",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/iconfresh.png",
+  "icon": "iconfresh.png",
   "launch": "launch.sh",
-  "description": "Download free games directly to your A30"
+  "description": "Download free games directly to your device",
+  "hideInSimpleMode": false
 }

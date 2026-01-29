@@ -1,35 +1,27 @@
 {
   "label": "X68000",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/x68000.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/x68000.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/X68000",
-  "imgpath": "../../Roms/X68000/Imgs",
-  "gamelist": "../../Roms/X68000/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "x68000.png",
+  "iconsel": "x68000_sel.png",
+  "themecolor": "d02026",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random X68000 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 7600,
+  "brand": "Sharp",
+  "type": "pc",
+  "releaseYear": 1987,
+  "default_emulator": "px68k",
+  "scaling_min_freq": 816000
 }

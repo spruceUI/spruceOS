@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="mame2003_plus"
-export MODE="smart"
-
-export scaling_min_freq=816000

@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="genesis_plus_gx"
-export MODE="smart"
-
-export scaling_min_freq=408000

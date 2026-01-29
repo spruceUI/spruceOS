@@ -1,0 +1,44 @@
+#!/bin/sh
+
+SIGNAL="-TERM"
+FULL_MATCH=0
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f)
+            FULL_MATCH=1
+            shift
+            ;;
+        -[0-9]*)
+            SIGNAL="$1"
+            shift
+            ;;
+        -*)
+            echo "pkill: unsupported option $1" >&2
+            exit 1
+            ;;
+        *)
+            PATTERN="$1"
+            shift
+            ;;
+    esac
+done
+
+[ -z "$PATTERN" ] && exit 1
+
+SELF_PID=$$
+
+if [ "$FULL_MATCH" -eq 1 ]; then
+    PIDS=$(ps -o pid,args \
+        | grep "$PATTERN" \
+        | grep -v grep \
+        | awk -v self="$SELF_PID" '$1 != self {print $1}')
+else
+    PIDS=$(ps -o pid,comm \
+        | grep " $PATTERN\$" \
+        | awk -v self="$SELF_PID" '$1 != self {print $1}')
+fi
+
+[ -z "$PIDS" ] && exit 0
+
+kill $SIGNAL $PIDS

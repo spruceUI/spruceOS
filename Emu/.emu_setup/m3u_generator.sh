@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/Icons/App/gamelist.png"
+ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 ROMS_DIR="/mnt/SDCARD/Roms"
 DISC_EXTS="cue|gdi|chd|pbp|iso|dsk"
 SYSTEM="$(echo "$1" | cut -d'/' -f5)"
@@ -24,7 +24,7 @@ generate_cues() {
     INDEX 01 00:00:00" > "$cuepath"
     done
 
-    find $SYSTEM -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} +
+    find $SYSTEM -maxdepth 1 -type f -iname "*_cache[6-7].db" -exec rm -f {} +
 }
 
 display --icon "$ICON_PATH" -t "Generating M3Us... this shouldn't take longer than a few seconds"
@@ -78,7 +78,7 @@ else
 fi
 
 cd "$ROMS_DIR"
-find $SYSTEM -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} +
+find $SYSTEM -maxdepth 1 -type f -iname "*_cache[6-7].db" -exec rm -f {} +
 sync
 
 display_kill

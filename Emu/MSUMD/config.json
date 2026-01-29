@@ -1,35 +1,27 @@
 {
   "label": "MSUMD",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/msumd.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/msumd.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/MSUMD",
-  "imgpath": "../../Roms/MSUMD/Imgs",
-  "gamelist": "../../Roms/MSUMD/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "msumd.png",
+  "iconsel": "msumd_sel.png",
+  "themecolor": "",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|gen|smd|md|32x|bin|iso|sms|68k|chd",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random MSUMD game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 3700,
+  "brand": "Sega",
+  "type": "homeconsole",
+  "releaseYear": 1991,
+  "default_emulator": "genesis_plus_gx",
+  "scaling_min_freq": 816000
 }

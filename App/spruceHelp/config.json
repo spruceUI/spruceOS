@@ -1,6 +1,0 @@
-{
-	"label":        "Sapling Guide",
-	"icon":	        "/mnt/SDCARD/Themes/SPRUCE/icons/App/expertappswitch.png",
-	"launch":       "launch.sh",
-	"description":  "Information about spruce basics"
-}

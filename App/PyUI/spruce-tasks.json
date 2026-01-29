@@ -1,0 +1,18 @@
+{
+  "Forget all WiFi networks": "/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh",
+  "Reset RetroArch hotkeys": "/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh",
+  "Reset RetroArch config":  "/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh",
+  "Reset DraStic config": "/mnt/SDCARD/spruce/scripts/tasks/resetNDS.sh",
+  "Reset PPSSPP config": "/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh",
+  "Clean up macOS dotfiles": "/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh",
+  "Repair SD Card": "/mnt/SDCARD/spruce/scripts/tasks/repairSD.sh",
+  "descriptions": {
+    "Forget all WiFi networks": "disconnect and clear all saved networks",
+    "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
+    "Reset RetroArch config": "restore spruce default RA config for current device",
+    "Reset DraStic config": "restore spruce default NDS config for current device",
+    "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
+    "Clean up macOS dotfiles": "delete any junk files created by macOS",
+    "Repair SD Card": "reboot and attempt an fsck.fat on your card"
+  }
+}

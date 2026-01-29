@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="fuse"
-export MODE="smart"
-
-export scaling_min_freq=408000

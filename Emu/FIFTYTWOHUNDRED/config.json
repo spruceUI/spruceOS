@@ -1,35 +1,27 @@
 {
   "label": "Atari 5200",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/5200.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/5200.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/FIFTYTWOHUNDRED",
-  "imgpath": "../../Roms/FIFTYTWOHUNDRED/Imgs",
-  "gamelist": "../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "5200.png",
+  "iconsel": "5200_sel.png",
+  "themecolor": "6187e5",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "a52|zip|7z|atr|bin",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Atari 5200 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 600,
+  "brand": "Atari",
+  "type": "homeconsole",
+  "releaseYear": 1982,
+  "default_emulator": "a5200",
+  "scaling_min_freq": 312000
 }

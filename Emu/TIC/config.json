@@ -1,35 +1,27 @@
 {
   "label": "TIC-80",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/tic.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/tic.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/TIC",
-  "imgpath": "../../Roms/TIC/Imgs",
-  "gamelist": "../../Roms/TIC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "tic.png",
+  "iconsel": "tic_sel.png",
+  "themecolor": "5fa5f0",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "tic|zip|7z|fd|sap|k7|m7|rom",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Tic-80 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 6800,
+  "brand": "modernengine",
+  "type": "fantasy",
+  "releaseYear": 2010,
+  "default_emulator": "tic80",
+  "scaling_min_freq": 816000
 }

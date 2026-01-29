@@ -1,35 +1,27 @@
 {
   "label": "MAME 03+",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/mame.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/mame.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/MAME2003PLUS",
-  "imgpath": "../../Roms/MAME2003PLUS/Imgs",
-  "gamelist": "../../Roms/MAME2003PLUS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 1,
-  "hidebios": 1,
+  "icon": "mame.png",
+  "iconsel": "mame_sel.png",
+  "themecolor": "00CCFF",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random MAME game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 3200,
+  "brand": "modernengine",
+  "type": "arcade",
+  "releaseYear": 2003,
+  "default_emulator": "mame2003_plus",
+  "scaling_min_freq": 816000
 }

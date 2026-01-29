@@ -1,50 +1,102 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-log_message "*** powerbutton_watchdog.sh: helperFunctions imported." -v
+. /mnt/SDCARD/spruce/scripts/audioFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-SETTINGS_PATH="/mnt/SDCARD/spruce/settings"
-FLAG_PATH="/mnt/SDCARD/spruce/flags"
-WAKE_ALARM_SEC=300 # Fallback time in seconds until the wake alarm triggers
+log_message "powerbutton_watchdog.sh: Started up."
+
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.A30 retroarch.Flip retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
+TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
+TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
+
+applicable_process_is_running() {
+    pgrep -f "MainUI" >/dev/null || \
+    pgrep -f "retroarch" >/dev/null || \
+    pgrep -f "ra32.miyoo" >/dev/null || \
+    pgrep -f "ra64.miyoo" >/dev/null || \
+    pgrep -f "ra64.trimui" >/dev/null || \
+    pgrep -f "drastic" >/dev/null || \
+    pgrep -f "PPSSPPSDL" >/dev/null || \
+    pgrep -f "flycast" >/dev/null || \
+    pgrep -f "yabasanshiro" >/dev/null || \
+    pgrep -f "mupen64plus" >/dev/null
+}
+
+get_wake_alarm() {
+    sleep_setting=$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "5m")
+    # Map to corresponding seconds
+    case "$sleep_setting" in
+        Instant) echo "-1" ;;
+        Off)     echo 0 ;;
+        2m)      echo 120 ;;
+        5m)      echo 300 ;;
+        10m)     echo 600 ;;
+        30m)     echo 1800 ;;
+        60m)     echo 3600 ;;
+        *)       echo 300 ;; # Default to 5m if no match
+    esac
+}
 
 long_press_handler() {
-    # setup flag for long pressed event
     flag_add "pb.longpress"
     sleep 2
     flag_remove "pb.longpress"
-
-    # now here long press is detected
-    # trigger auto save and then power down the device
-
+    vibrate &
     /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 }
 
-# ensure no flag files before main loop started
+
+##### MAIN EXECUTION #####
+
+# Initialize flags and tmpfiles
 flag_remove "pb.longpress"
 flag_remove "pb.sleep"
+touch "$TMP_BACKLIGHT_PATH"
+touch "$TMP_VOLUME_PATH"
 
 while true; do
 
-    # listen to event0 and handle key press events
-    $BIN_PATH/getevent /dev/input/event0 -exclusive | while read line; do
+    # create a temporary FIFO so we can run getevent in background and read in this shell
+    FIFO="/tmp/power_event_fifo.$$"
+    rm -f "$FIFO"
+    mkfifo "$FIFO" || {
+        log_message "Failed to create FIFO $FIFO" -v
+        sleep 1
+        continue
+    }
+
+    # start getevent writing to the fifo in background, and capture its PID
+    getevent -exclusive "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
+    GETEVENT_PID=$!
+
+    while IFS= read -r line < "$FIFO"; do
         case $line in
-        *"key 1 116 1"*) # Power key down
-            # not in previous sleep event
+
+        # Power key down
+        *"key $B_POWER 1"*)
             if ! flag_check "pb.sleep" && ! flag_check "pb.longpress"; then
-                # start long press handler
-                kill $PID
+                # start long press handler (kill existing handler safely if present)
+                if [ -n "$PID" ]; then
+                    kill "$PID" 2>/dev/null || true
+                    wait "$PID" 2>/dev/null || true
+                    PID=""
+                fi
                 long_press_handler &
                 PID=$!
             fi
             ;;
-        *"key 1 116 0"*) # Power key up
+
+        # Power key up
+        *"key $B_POWER 0"*)
             # if NOT long press
             if flag_check "pb.longpress"; then
                 # kill long press handler and remove flag
-                kill $PID
-                PID=""
+                if [ -n "$PID" ]; then
+                    kill "$PID" 2>/dev/null || true
+                    wait "$PID" 2>/dev/null || true
+                    PID=""
+                fi
                 flag_remove "pb.longpress"
 
                 # add sleep flag
@@ -52,55 +104,57 @@ while true; do
 
                 # Check settings to determine how long to set RTC wake timer
 
-                sleep_setting=$(setting_get "sleep_powerdown")
-                # Map to corresponding seconds
-                case "$sleep_setting" in
-                Instant) WAKE_ALARM_SEC=-1 ;;
-                Off) WAKE_ALARM_SEC=0 ;;
-                2m) WAKE_ALARM_SEC=120 ;;
-                5m) WAKE_ALARM_SEC=300 ;;
-                10m) WAKE_ALARM_SEC=600 ;;
-                30m) WAKE_ALARM_SEC=1800 ;;
-                60m) WAKE_ALARM_SEC=3600 ;;
-                *) WAKE_ALARM_SEC=300 ;; # Default to 5m if no match
-                esac
+                WAKE_ALARM_SEC="$(get_wake_alarm)"
 
+                # shutdown from sleep is neither Instant nor Off
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
-                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+                    if applicable_process_is_running; then
                         echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
-                        cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
-                        CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
-                        echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
-                        echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
-                        amixer set 'Soft Volume Master' 0
+                        cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
+                        CURRENT_VOLUME="$(get_current_volume)"
+                        echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
+                        echo 0 > $DEVICE_BRIGHTNESS_PATH
+                        set_volume 0
                         flag_add "wake.alarm"
                     fi
                 fi
 
+                # shutdown from sleep is Instant
                 if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
-                    if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+                    if applicable_process_is_running; then
                         flag_add "sleep.powerdown"
-                        cat /sys/devices/virtual/disp/disp/attr/lcdbl >/mnt/SDCARD/spruce/settings/tmp_sys_brightness_level
-                        CURRENT_VOLUME=$(amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%')
-                        echo $CURRENT_VOLUME >/mnt/SDCARD/spruce/settings/tmp_sys_volume_level
-                        echo 0 >/sys/devices/virtual/disp/disp/attr/lcdbl
-                        amixer set 'Soft Volume Master' 0
+                        cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
+                        CURRENT_VOLUME="$(get_current_volume)"
+                        echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
+                        echo 0 > $DEVICE_BRIGHTNESS_PATH
+                        set_volume 0
+                        vibrate &
+                        killall getevent 2>/dev/null
+                        sleep 0.1
                         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
                     fi
                 fi
 
-                # PAUSE pany process that may crash the system during wakeup
+                # PAUSE any process that may crash the system during wakeup
                 killall -q -19 enforceSmartCPU.sh
 
-                # PAUSE any other running emulator or MainUI
-                killall -q -19 ra32.miyoo ||
-                    killall -q -19 retroarch ||
-                    killall -q -19 PPSSPPSDL ||
-                    killall -q -19 drastic ||
-                    killall -q -19 MainUI
+                # PAUSE any other running emulator or MainUI (use exact matches)
+                for EMU in $EMULATORS; do
+                    pids=$(pgrep -x "$EMU" 2>/dev/null)
+                    if [ -n "$pids" ]; then
+                        kill -19 $pids 2>/dev/null || true
+                        break
+                    fi
+                done
 
                 # kill getevent program, prepare to break inner while loop
-                kill $(pgrep -f "getevent /dev/input/event0 -exclusive")
+                if [ -n "$GETEVENT_PID" ]; then
+                    kill "$GETEVENT_PID" 2>/dev/null || true
+                    wait "$GETEVENT_PID" 2>/dev/null || true
+                    GETEVENT_PID=""
+                fi
+
+                # small pause to let things settle
                 sleep 0.5
 
                 # now break inner while loop
@@ -110,17 +164,11 @@ while true; do
         esac
     done
 
-    # notify MainUI (if it is running) the system is going to sleep
-    touch /tmp/ui_sleeped_notification
+    # cleanup FIFO
+    rm -f "$FIFO"
 
-    # ensure all cache is written to SD card
     sync
-
-    # suspend to memory
-    echo -n mem >/sys/power/state
-
-    # wait long enough to ensure device enter sleep mode
-    # sleep 1
+    enter_sleep
 
     if flag_check "wake.alarm"; then
 
@@ -128,24 +176,25 @@ while true; do
         CURRENT_ALARM=$(cat "$RTC_WAKE_FILE" 2>/dev/null)
 
         if ! [ -z "$CURRENT_ALARM" ]; then
-            # update display and volume setting after wakeup
-            cat /mnt/SDCARD/spruce/settings/tmp_sys_brightness_level >/sys/devices/virtual/disp/disp/attr/lcdbl
+            # restore display and volume setting after wakeup
+            cat "$TMP_BACKLIGHT_PATH" > $DEVICE_BRIGHTNESS_PATH
             ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
             echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-            amixer set 'Soft Volume Master' $(cat /mnt/SDCARD/spruce/settings/tmp_sys_volume_level)
-        fi
 
+            # restore volume only when we actually woke from the alarm
+            set_volume "$(cat "$TMP_VOLUME_PATH")"
+            device_specific_wake_from_sleep
+        fi
     fi
 
-    # wait long enough to ensure wakeup task is finished
-    # sleep 2
-
-    # RESUME any running emulator or MainUI
-    killall -q -18 ra32.miyoo ||
-        killall -q -18 retroarch ||
-        killall -q -18 PPSSPPSDL ||
-        killall -q -18 drastic ||
-        killall -q -18 MainUI
+    # RESUME any running emulator or MainUI (use exact matches)
+    for EMU in $EMULATORS; do
+        pids=$(pgrep -x "$EMU" 2>/dev/null)
+        if [ -n "$pids" ]; then
+            kill -18 $pids 2>/dev/null || true
+            break
+        fi
+    done
 
     # RESUME any process that may crash the system during wakeup
     killall -q -18 enforceSmartCPU.sh
@@ -163,7 +212,8 @@ while true; do
             flag_remove "wake.alarm"
             flag_add "sleep.powerdown"
 
-            if pgrep "MainUI" >/dev/null || pgrep "ra32.miyoo" >/dev/null || pgrep "drastic" >/dev/null || pgrep "PPSSPP" >/dev/null; then
+            if applicable_process_is_running; then
+                vibrate &
                 /mnt/SDCARD/spruce/scripts/save_poweroff.sh
             fi
 

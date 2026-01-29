@@ -1,0 +1,31 @@
+{
+  "label": "PORTS",
+  "icon": "ports.png",
+  "iconsel": "ports_sel.png",
+  "themecolor": "FF0000",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "ingamemenu": 1,
+  "extlist": "sh",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 5000,
+  "brand": "Other",
+  "type": "other",
+  "releaseYear": 2000,
+  "default_emulator": "sh",
+  "scaling_min_freq": 648000,
+  "devices": [
+    "MIYOO_A30"
+  ]
+}

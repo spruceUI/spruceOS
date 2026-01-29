@@ -1,0 +1,286 @@
+{
+"name":"trngaje",
+"number":14,
+"layout":[
+{
+    "index":0,
+    "name":"vh_t0",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":160,
+    "screen0_h":120,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":720
+},
+{
+    "index":1,
+    "name":"vh_t1",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":256,
+    "screen0_h":192,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":720
+},
+{
+    "index":2,
+    "name":"s0",
+    "bg":"bg_s0.png",
+    "type":4,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":0,
+    "screen0_h":0,
+
+    "screen1_x":104,
+    "screen1_y":168,
+    "screen1_w":512,
+    "screen1_h":384
+},
+
+{
+    "index":3,
+    "name":"s1",
+    "bg":"",
+    "type":4,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":0,
+    "screen0_h":0,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":720
+},
+
+{
+    "index":4,
+    "name":"v0",
+    "bg":"bg_v0.png",
+
+    "screen0_x":232,
+    "screen0_y":168,
+    "screen0_w":256,
+    "screen0_h":192,
+
+    "screen1_x":232,
+    "screen1_y":360,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":5,
+    "name":"v1",
+    "bg":"bg_vertical.png",
+
+    "screen0_x":120,
+    "screen0_y":0,
+    "screen0_w":480,
+    "screen0_h":360,
+
+    "screen1_x":120,
+    "screen1_y":360,
+    "screen1_w":480,
+    "screen1_h":360
+},
+
+{
+    "index":5,
+    "name":"thraeg_v1",
+    "bg":"bg_v1.png",
+
+    "screen0_x":136,
+    "screen0_y":0,
+    "screen0_w":448,
+    "screen0_h":336,
+
+    "screen1_x":136,
+    "screen1_y":384,
+    "screen1_w":448,
+    "screen1_h":336
+},
+
+{
+    "index":6,
+    "name":"h0",
+    "bg":"bg_h0.png",
+
+    "screen0_x":104,
+    "screen0_y":264,
+    "screen0_w":256,
+    "screen0_h":192,
+
+    "screen1_x":360,
+    "screen1_y":264,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":7,
+    "name":"h1",
+    "bg":"bg_h1.png",
+
+    "screen0_x":0,
+    "screen0_y":225,
+    "screen0_w":360,
+    "screen0_h":270,
+
+    "screen1_x":360,
+    "screen1_y":225,
+    "screen1_w":360,
+    "screen1_h":270
+},
+
+{
+    "index":8,
+    "name":"vh_c1",
+    "bg":"bg_vh_s2.png",
+
+    "screen0_x":104,
+    "screen0_y":72,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":232,
+    "screen1_y":456,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":9,
+    "name":"vh_c1",
+    "bg":"bg_vh_c1.png",
+
+    "screen0_x":104,
+    "screen0_y":0,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":136,
+    "screen1_y":384,
+    "screen1_w":448,
+    "screen1_h":336
+},
+
+{
+    "index":10,
+    "name":"vh_s2",
+    "bg":"bg_vertical_full.png",
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":720,
+    "screen0_h":540,
+
+    "screen1_x":240,
+    "screen1_y":540,
+    "screen1_w":240,
+    "screen1_h":180
+},
+
+{
+    "index":10,
+    "name":"thraeg_vh_s2",
+    "bg":"bg_vertical_full.png",
+
+    "screen0_x":0,
+    "screen0_y":-6,
+    "screen0_w":720,
+    "screen0_h":540,
+
+    "screen1_x":232,
+    "screen1_y":534,
+    "screen1_w":256,
+    "screen1_h":192
+},
+
+{
+    "index":11,
+    "name":"hh0",
+    "bg":"bg_hh0.png",
+    "type":2,
+    "rotate":90,
+
+    "screen0_x":0,
+    "screen0_y":120,
+    "screen0_w":480,
+    "screen0_h":360,
+
+    "screen1_x":360,
+    "screen1_y":120,
+    "screen1_w":480,
+    "screen1_h":360
+},
+
+{
+    "index":12,
+    "name":"hh1",
+    "bg":"",
+    "type":2,
+    "rotate":270,
+
+    "screen1_x":0,
+    "screen1_y":120,
+    "screen1_w":480,
+    "screen1_h":360,
+    
+    "screen0_x":360,
+    "screen0_y":120,
+    "screen0_w":480,
+    "screen0_h":360
+},
+
+{
+    "index":13,
+    "name":"hres0",
+    "bg":"bg_hres0.png",
+    "type":3,
+
+    "screen0_x":104,
+    "screen0_y":168,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":104,
+    "screen1_y":168,
+    "screen1_w":512,
+    "screen1_h":384
+},
+
+{
+    "index":14,
+    "name":"hres1",
+    "type":3,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":720,
+    "screen0_h":720,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":720
+},
+]
+
+}
+

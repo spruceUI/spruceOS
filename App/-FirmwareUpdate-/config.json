@@ -1,6 +1,7 @@
 {
-  "#label": "A Firmware Update Is Available",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png",
+  "label": "A Firmware Update Is Available",
+  "icon": "firmwareupdate.png",
   "launch": "launch.sh",
-  "description": "Run this to get the latest fixes"
+  "description": "Run this to get the latest fixes",
+  "hideInSimpleMode": true
 }

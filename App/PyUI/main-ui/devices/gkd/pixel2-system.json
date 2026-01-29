@@ -1,0 +1,11 @@
+{
+        "vol": 10,
+        "backlight": 4,
+        "brightness": 0,
+        "contrast": 0,
+        "saturation": 0,
+        "hue":0,
+        "audiofix": 0,
+        "wifi": 0,
+        "bluetooth": 0
+}

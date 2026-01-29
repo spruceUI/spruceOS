@@ -67,6 +67,7 @@ fi
 NOTOK=1
 while [ "$NOTOK" -eq 1 ]; do
     NOTOK=0
+    # TODO: this _will_ select an empty folder, probably shouldn't
     SELECTED_FOLDER=$(get_rand_folder "$ROM_DIR")
     SELECTED_GAME=$(get_rand_file "$SELECTED_FOLDER")
     echo "${SELECTED_FOLDER} ${SELECTED_GAME}"
@@ -91,7 +92,7 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd="\"${EMU_DIR}/.emu_setup/standard_launch.sh\" \"${SELECTED_GAME}\""
+cmd="\"/mnt/SDCARD/spruce/scripts/emu/standard_launch.sh\" \"${SELECTED_GAME}\""
 echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"
 

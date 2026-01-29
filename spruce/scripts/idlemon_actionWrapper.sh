@@ -11,14 +11,14 @@ process_name=$1
 # Handle different process names....
 case "$process_name" in
     MainUI)
-	    echo heartbeat > /sys/devices/platform/sunxi-led/leds/led1/trigger
+	    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 		killall -q -0 MainUI
         alsactl store
-		vibrate
+		vibrate &
         sync
         poweroff
         ;;
-    ra32.miyoo|drastic|PPSSPP|switcher)
+    ra32.miyoo|ra64.miyoo|ra64.trimui|retroarch*|drastic*|PPSSPP*)
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         ;;
     *)

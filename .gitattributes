@@ -2,3 +2,4 @@
 *text eol=lf
 *.sh text eol=lf
 *.bat text eol=crlf
+RetroArch/.retroarch/cores64/scummvm_libretro.so filter=lfs diff=lfs merge=lfs -text

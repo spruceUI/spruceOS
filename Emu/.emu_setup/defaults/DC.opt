@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="km_flycast_xtreme"
-export MODE="performance"
-
-export scaling_min_freq=1008000

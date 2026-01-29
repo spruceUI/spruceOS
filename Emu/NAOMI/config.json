@@ -1,0 +1,58 @@
+{
+  "label": "Naomi",
+  "icon": "naomi.png",
+  "iconsel": "naomi_sel.png",
+  "themecolor": "FFFFFF",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    }
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "flycast",
+        "km_flycast_xtreme"
+      ],
+      "selected": "flycast",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone"
+      ],
+      "selected": "Flycast-libretro",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 1800,
+  "brand": "Sega",
+  "type": "homeconsole",
+  "releaseYear": 1998,
+  "default_emulator": "flycast",
+  "scaling_min_freq": 1008000
+}

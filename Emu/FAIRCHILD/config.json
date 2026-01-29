@@ -1,35 +1,27 @@
 {
   "label": "ChannelF",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/fairchild.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/fairchild.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/FAIRCHILD",
-  "imgpath": "../../Roms/FAIRCHILD/Imgs",
-  "gamelist": "../../Roms/FAIRCHILD/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "fairchild.png",
+  "iconsel": "fairchild_sel.png",
+  "themecolor": "ffe000",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|bin|rom|chf",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Channel F game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 1300,
+  "brand": "Fairchild",
+  "type": "homeconsole",
+  "releaseYear": 1976,
+  "default_emulator": "freechaf",
+  "scaling_min_freq": 480000
 }

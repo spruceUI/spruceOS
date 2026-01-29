@@ -1,0 +1,10 @@
+.DS_Store
+._*
+.vscode
+*.pyc
+.idea
+current.txt
+sync.bat
+tsp
+tsps
+flip

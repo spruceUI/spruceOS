@@ -1,35 +1,27 @@
 {
   "label": "Wolf3D",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/wolf.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/wolf.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/WOLF",
-  "imgpath": "../../Roms/WOLF/Imgs",
-  "gamelist": "../../Roms/WOLF/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "wolf.png",
+  "iconsel": "wolf_sel.png",
+  "themecolor": "eb0706",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ecwolf|exe",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Wolfenstein game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 7500,
+  "brand": "Other",
+  "type": "pc",
+  "releaseYear": 1992,
+  "default_emulator": "ecwolf",
+  "scaling_min_freq": 480000
 }

@@ -1,0 +1,27 @@
+{
+  "label": "MKXP",
+  "icon": "mkxp-z.png",
+  "iconsel": "mkxp-z_sel.png",
+  "themecolor": "0066cc",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "ini|json|rxproj|rvproj|rvproj2|mkxp|mkxpz|zip|7z",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 3450,
+  "brand": "modernengine",
+  "type": "fantasy",
+  "releaseYear": 2020,
+  "default_emulator": "mkxp-z",
+  "scaling_min_freq": 648000
+}

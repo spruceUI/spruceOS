@@ -1,39 +1,77 @@
 {
   "label": "Pico-8",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/pico.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/pico.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/PICO8",
-  "imgpath": "../../Roms/PICO8",
-  "gamelist": "../../Roms/PICO8/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "pico.png",
+  "iconsel": "pico_sel.png",
+  "themecolor": "00FF88",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "requiredfiles": [
+    [
+      "/mnt/SDCARD/BIOS/pico8.dat"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/pico8_64"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/pico8_dyn"
+    ]
+  ],
   "extlist": "p8|png|splore",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Pico-8 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
       "name": "Import carts from Splore to MainUI",
       "launch": "import.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
-  ]
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    },
+    "Stretch": {
+      "display": "Stretch to Full Screen",
+      "options": [
+        "True",
+        "False"
+      ],
+      "selected": "False",
+      "overrides": {}
+    },
+    "controlMode": {
+      "display": "Control Profile",
+      "options": [
+        "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+        "Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ",
+        "One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ",
+        "One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ",
+        "Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ",
+        "Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ"
+      ],
+      "selected": "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+      "overrides": {}
+    },
+    "stewardMode": {
+      "display": "Steward Mode (overrides control profile)",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse",
+        "Off - follow control profile"
+      ],
+      "selected": "Off - follow control profile",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 4800,
+  "brand": "modernengine",
+  "type": "fantasy",
+  "releaseYear": 2015,
+  "default_emulator": "pico8",
+  "scaling_min_freq": 816000
 }

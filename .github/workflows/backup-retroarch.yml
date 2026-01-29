@@ -18,7 +18,7 @@ jobs:
       - name: Copy retroarch.cfg to target location
         run: |
           FILE_TO_COPY="RetroArch/retroarch.cfg"
-          TARGET_PATH="spruce/bin/res/retroarch.cfg"
+          TARGET_PATH="spruce/settings/platform/retroarch-A30.cfg"
 
           # Copy the file to the target location
           cp "$FILE_TO_COPY" "$TARGET_PATH"

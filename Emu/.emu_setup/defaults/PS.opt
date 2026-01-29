@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="pcsx_rearmed"
-export MODE="smart"
-
-export scaling_min_freq=1008000

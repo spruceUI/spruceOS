@@ -1,0 +1,7 @@
+{
+  "poll_interval_ms": 2000,
+  "block_duration_secs": 20,
+  "fan_curve": [
+    { "temp": 25000, "fan_level": 0 }
+  ]
+}

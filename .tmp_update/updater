@@ -1,27 +1,20 @@
 #!/bin/sh
 
-# Get the current mount mode of the SDCARD
-MOUNT_MODE=$(mount | grep SDCARD | cut -d'(' -f 2 | cut -d',' -f 1)
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+case $INFO in
+    *"sun8i"*) export PLATFORM="A30" ;;
+    *"TG5040"*)	export PLATFORM="SmartPro" ;;
+    *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"TG5050"*)	export PLATFORM="SmartProS"	;;
+    *"0xd05"*) export PLATFORM="Flip" ;;
+    *"0xd04"*) export PLATFORM="Pixel2" ;;
+    *) export PLATFORM="MiyooMini" ;;
+esac
 
-# Check if the mount mode is 'ro'
-if [ "$MOUNT_MODE" = "ro" ]; then #set to rw for testing
-    
-	cp /mnt/SDCARD/spruce/scripts/sdfix.sh /tmp
-	cp /mnt/SDCARD/miyoo/app/fsck.fat /tmp
-	cp /mnt/SDCARD/spruce/bin/showOutput /tmp
-	mkdir -p /tmp/res
-	cp /mnt/SDCARD/spruce/bin/res/SourceCodePro-Regular.ttf /tmp/res
-	
-	cd /tmp
-    /tmp/sdfix.sh | /tmp/showOutput	-k __EXIT__ -f 25 -w -d -t "SDCARD Error"
 
-    # Cleanup
-	rm /tmp/sdfix.sh
-	rm /tmp/fsck.fat
-	rm /tmp/showOutput
-	rm -rf /tmp/res
-	rm -f /mnt/SDCARD/FSCK*.REC
+if [ "$PLATFORM" = "MiyooMini" ]; then
+    /mnt/SDCARD/spruce/scripts/platform/miyoo_mini_startup.sh
+else
+    cd /mnt/SDCARD/spruce/scripts
+    ./runtime.sh
 fi
-
-cd /mnt/SDCARD/spruce/scripts
-./runtime.sh

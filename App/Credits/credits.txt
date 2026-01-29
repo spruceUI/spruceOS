@@ -1,20 +1,17 @@
-The Current Team (Alphabetical order):
+The Team (Alphabetical order):
    - 369px
-   - Basecase - Stefan Ayala
-   - Cinethezs
+   - Chrisbastion
+   - Chris Cromer
    - Cobaltdsc4102
    - Dandon
-   - Decojon
-   - Fragbait79
+   - Dubious
+   - KitFox618
+   - KMFDManic
    - Lonko
-   - Metallic77
-   - Mike C
-   - Oscarkcau
    - Ry - Ryan Sartor
-   - SamuraiCowboy
    - SundownerSport
-   - Veckia9x
-   - XanXic
+   
+
 
 Credits and Thanks:
 
@@ -29,91 +26,19 @@ Thanks buddy!
 
 All past and present Team Members!
 
-Decojon: Auto Save/Quick Shutdown + Resume feature,
-MainUI patches, Keymon tweaks,
-Random Game Selector (X-menu).
-
 Shauninman: Help, support and Bootlogo function
 (and so much more!).
-
-Rayon and Cinethezs: Boxart Scraper App and tweaks.
-
-Cinethezs, Oscarkcau and tenlevels: Random Game App.
-
-Ndguardian, XanXic, and XK9274: Syncthing App.
-
-Basecase - Stefan Ayala: Syncthing sync check on Shutdown/Startup/Resume
-
-Veckia9x and Fragbait79: WiFi File Transfer App.
-
-XanXic: spruceBackup and spruceRestore Apps,
-AutoUpdater App, organizational wizardry
-and so much more!
-
-Fragbait79: SSH App, RTC-Sync, network services
-tweaks and many other optimizations.
-
-Ry: Overhauled Emu folder, LibRetro ports
-and so much more.
-
-Oscarkcau: GameSwitcher, Advanced Settings App
-and general debugging, clean up 
-and optimizations to SO MANY things.
-
-Cinethezs: LED App, show-battery-percentage,
-Credits App and so much more. 
-
-Ry: Game Nursery: Aka our simpler version of PortMaster
-
-Ry, XanXic: Simple Mode: Kiosk mode/Kid mode.
-
-XanXic: Sapling Guide.
-
-Cobalt: M3U Generator.
-
-Gerard Szulc: Added support for hidden networks to multipass.cfg. 
 
 Jim Gray: Retroarch removal from MainUI,
 the sick jams your dancing to now 
 and general inspiration.
 
-Onion Team: Finding the best cores
-to use and inspiration.
-
-Steward: Drastic.
-
-XK, Cinethezs, Ninoh-FOX and Steward: Pico-8 wrapper.
-
-Sky_Walker: Avocado theme.
-
-KyleBing: Cozy theme.
-
-369px: Theme Guide.
-
-Cobaltdsc4102: Building and enabling the chimerasnes
-core for SFC and additional cores for other systems.
-
-KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
-
-Onion and Darkhorse: Overlays.
-
-Axcelon: Cleaned up and organized Overlay and Filter directories (and bug finding).
-
-Hoo: Testing and encouragement.
+Hoo for early testing and encouragement.
 
 All of out Beta testers!
-
-SundownerSport: Team Lead, Wiki and testing.
-
-Metallic77: Shaders and core adjustments.
-
-Supermodi064: Photos, testing and support.
 
 Aemiii91, tGecko and QuackWalks: Being awesome!
 
 Russ from RGC: His YouTube channel is an inspiration.
-
-Icons8.com for the logo, icons and their genrosityin giving
-us expanded access to high resolution icons for this project.
 
 THANK YOU TO THE AMAZING MIYOO COMMUNITY!!

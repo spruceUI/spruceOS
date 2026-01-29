@@ -1,43 +1,80 @@
 {
   "label": "DC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/dc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/dc.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/DC",
-  "imgpath": "../../Roms/DC/Imgs",
-  "gamelist": "../../Roms/DC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "dc.png",
+  "iconsel": "dc_sel.png",
+  "themecolor": "FFFFFF",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chd|cdi|gdi|cue|iso|m3u",
   "launchlist": [
     {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Dreamcast game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓FCXTREME)-flycast",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
       "name": "Generate M3U playlists for multi-disc games",
       "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
     }
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "flycast",
+        "km_flycast_xtreme"
+      ],
+      "selected": "flycast",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone"
+      ],
+      "selected": "Flycast-libretro",
+      "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone",
+        "Flycast-stock"
+      ],
+      "selected": "Flycast-stock",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 1800,
+  "brand": "Sega",
+  "type": "homeconsole",
+  "releaseYear": 1998,
+  "default_emulator": "flycast",
+  "scaling_min_freq": 1008000,
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_A30",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
   ]
 }
