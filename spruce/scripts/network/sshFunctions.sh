@@ -13,9 +13,11 @@ dropbear_generate_keys() {
 }
 
 start_ssh_process() {
-    killall -9 sshd 2>/dev/null
     log_message "Starting $SSH_SERVICE_NAME..."
     if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
+        # sshd on some devices runs on startup. When using dropbearmulti
+        # we need to swap to using it (they both occupy port 22)
+        killall -9 sshd 2>/dev/null # should we swap to systemctl stop sshd?
         $SSH_DIR/bin/dropbearmulti dropbear -r "$SSH_KEYS/dropbear_rsa_host_key" -r "$SSH_KEYS/dropbear_dss_host_key" -c "$SSH_DIR/dropbear-wrapper.sh" &
     else # sshd
         systemctl start sshd
