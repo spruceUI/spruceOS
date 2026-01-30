@@ -96,10 +96,10 @@ if ! flag_check "save_active"; then
             ;;
         "Splore")
             log_message "Attempting to boot into Pico-8. Checking for binaries"
-            if [ "$ARCH" = "aarch64" ]; then
-                PICO8_EXE="pico8_64"
-            else
+            if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
                 PICO8_EXE="pico8_dyn"
+            else
+                PICO8_EXE="pico8_64"
             fi
             if [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ]; then
                 echo "\"/mnt/SDCARD/Emu/.emu_setup/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
