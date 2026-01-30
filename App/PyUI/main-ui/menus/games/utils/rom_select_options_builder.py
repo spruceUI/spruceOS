@@ -43,6 +43,13 @@ class RomSelectOptionsBuilder:
 
         return os.path.join(root_dir, "Imgs", base_name + ".png")
 
+    def first_existing(self, base_path_without_ext):
+        IMAGE_EXTS = (".qoi", ".png")
+        for ext in IMAGE_EXTS:
+            path = base_path_without_ext + ext
+            if CachedExists.exists(path):
+                return path
+        return None
 
     def get_image_path(self, rom_info: RomInfo, game_entry = None, prefer_savestate_screenshot = False) -> str:
 
@@ -160,46 +167,73 @@ class RomSelectOptionsBuilder:
         # Attempt to construct alternate path by replacing "Roms" with "Imgs"
         imgs_older_equal_to_roms_parts = parts.copy()
         imgs_older_equal_to_roms_parts[roms_index] = "Imgs"
-        imgs_folder_equal_to_roms_path = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + ".png")
 
-        root_dir = os.sep.join(parts[:roms_index+2])  # base path before Roms
+        # Imgs folder equal to roms path
+        path = self.first_existing(
+            os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name)
+        )
+        if path:
+            return path
 
-        if CachedExists.exists(imgs_folder_equal_to_roms_path):
-            return imgs_folder_equal_to_roms_path
-        else:
-            #Check for png in same dir
-            same_dir_png = os.path.join(root_dir, base_name + ".png")
-            if CachedExists.exists(same_dir_png):
-                return same_dir_png
-                
-        # Else try the muOS location
-        muos_image_path_sd2 = os.path.join("/mnt/sdcard/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
-        if CachedExists.exists(muos_image_path_sd2):
-            return muos_image_path_sd2
+        root_dir = os.sep.join(parts[:roms_index + 2])  # base path before Roms
 
-        muos_image_path_sd1 = os.path.join("/mnt/mmc/MUOS/info/catalogue/", rom_info.game_system.game_system_config.system_name, "box", base_name + ".png")
-        if CachedExists.exists(muos_image_path_sd1):
-            return muos_image_path_sd1
-        
-        #ES format
-        imgs_folder_with_image_suffix = os.path.join(root_dir, "Imgs", base_name + "-image.png")
-        if CachedExists.exists(imgs_folder_with_image_suffix):
-            return imgs_folder_with_image_suffix
+        # Same dir as rom
+        path = self.first_existing(os.path.join(root_dir, base_name))
+        if path:
+            return path
 
-        #ES format2
-        imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(root_dir, "Imgs", base_name + "-thumb.png")
-        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
-            return imgs_folder_equal_to_roms_path_with_thumb_suffix
+        # muOS SD2
+        path = self.first_existing(
+            os.path.join(
+                "/mnt/sdcard/MUOS/info/catalogue/",
+                rom_info.game_system.game_system_config.system_name,
+                "box",
+                base_name
+            )
+        )
+        if path:
+            return path
 
-        #ES format same folder
-        imgs_folder_equal_to_roms_path_with_image_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-image.png")
-        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_image_suffix):
-            return imgs_folder_equal_to_roms_path_with_image_suffix
-        
-        #ES format2 same folder
-        imgs_folder_equal_to_roms_path_with_thumb_suffix = os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-thumb.png")
-        if CachedExists.exists(imgs_folder_equal_to_roms_path_with_thumb_suffix):
-            return imgs_folder_equal_to_roms_path_with_thumb_suffix
+        # muOS SD1
+        path = self.first_existing(
+            os.path.join(
+                "/mnt/mmc/MUOS/info/catalogue/",
+                rom_info.game_system.game_system_config.system_name,
+                "box",
+                base_name
+            )
+        )
+        if path:
+            return path
+
+        # ES format
+        path = self.first_existing(
+            os.path.join(root_dir, "Imgs", base_name + "-image")
+        )
+        if path:
+            return path
+
+        # ES format 2
+        path = self.first_existing(
+            os.path.join(root_dir, "Imgs", base_name + "-thumb")
+        )
+        if path:
+            return path
+
+        # ES format same folder
+        path = self.first_existing(
+            os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-image")
+        )
+        if path:
+            return path
+
+        # ES format 2 same folder
+        path = self.first_existing(
+            os.path.join(os.sep.join(imgs_older_equal_to_roms_parts[:-1]), base_name + "-thumb")
+        )
+        if path:
+            return path
+
 
         #File itself is a png
         if rom_info.rom_file_path.lower().endswith(".png"):
