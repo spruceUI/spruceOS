@@ -14,7 +14,7 @@ if [ -n "$WPA_SUPPLICANT_FILE" ] ; then
 
     # Bring up interface to avoid issues with MainUI
     ifconfig wlan0 up
-else # Connman
+elif [ -d /storage/.cache/connman/ ] ; then # Connman
     rm -r /storage/.cache/connman/[!settings]*
     systemctl restart connman
     connmanctl enable wifi
