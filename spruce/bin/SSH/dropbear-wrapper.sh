@@ -1,14 +1,15 @@
 #!/bin/sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 # Set the working directory to /mnt/SDCARD for all commands
 cd /mnt/SDCARD
 
 # TODO: this probably doesn't work outside the a30?
 if [ "$SSH_ORIGINAL_COMMAND" = "/usr/libexec/sftp-server" ]; then
-    if [ "$ARCH" = "aarch64" ]; then
-        GESFTPSERVER="/mnt/SDCARD/spruce/bin64/gesftpserver"
-    else
+    if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
         GESFTPSERVER="/mnt/SDCARD/spruce/bin/gesftpserver"
+    else
+        GESFTPSERVER="/mnt/SDCARD/spruce/bin64/gesftpserver"
     fi
     if [ -x "$GESFTPSERVER" ]; then
         exec $GESFTPSERVER
