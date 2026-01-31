@@ -68,7 +68,9 @@ jobs:
           mkdir -p Themes
 
           echo "Copying selected themes..."
-          cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_OUTLINE.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
