@@ -9,12 +9,13 @@ from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcher
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.gkd.gkd_device import GKDDevice
+from devices.gkd.connman_wifi_scanner import ConnmanWiFiScanner
+from devices.gkd.connman_wifi_menu import ConnmanWifiMenu
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 
-from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -29,7 +30,6 @@ class GKDPixel2(GKDDevice):
 
         if(main_ui_mode):
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self.ensure_wpa_supplicant_conf()
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
@@ -193,6 +193,11 @@ class GKDPixel2(GKDDevice):
         Display.volume_changed(user_volume)
         return user_volume
     
-    
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?
+
+    def get_wifi_menu(self):
+        return ConnmanWifiMenu()
+
+    def get_new_wifi_scanner(self):
+        return ConnmanWiFiScanner()

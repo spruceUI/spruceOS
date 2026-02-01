@@ -1,13 +1,10 @@
-import ctypes
-import fcntl
-import math
 import re
+import socket
 import subprocess
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.charge.charge_status import ChargeStatus
-import os
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
@@ -37,10 +34,7 @@ class GKDDevice(DeviceCommon):
     def get_controller_interface(self):
         return self.sdl2_controller_interface
 
-    def ensure_wpa_supplicant_conf(self):
-        # TODO:
-        pass
-        
+
     def clear_framebuffer(self):
         pass
 
@@ -143,61 +137,83 @@ class GKDDevice(DeviceCommon):
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         try:
-            result = subprocess.run(
-                ["iw", "dev", "wlan0", "link"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            output = result.stdout.strip()
+            with open("/proc/net/wireless", "r") as f:
+                output = f.read().strip().splitlines()
 
-            if "Not connected." in output or result.returncode != 0:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            if len(output) >= 3:
+                # The 3rd line contains the actual wireless stats
+                data_line = output[2]
+                parts = data_line.split()
 
-            signal_level = 0
-            link_quality = 0  # This won't be available directly via iw, unless you derive it
+                # According to the standard format:
+                # parts[2] = link quality (float ending in '.')
+                # parts[3] = signal level
+                # parts[4] = noise level
+                link_quality = int(float(parts[2].strip('.')))
+                signal_level = int(float(parts[3].strip('.')))
+                noise_level = int(float(parts[4].strip('.')))
 
-            # Extract signal level (in dBm)
-            signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
-            if signal_match:
-                signal_level = int(signal_match.group(1))
-
-            # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
-            # Example rough mapping:
-            if signal_level <= -100:
-                link_quality = 0
-            elif signal_level >= -50:
-                link_quality = 70
+                return WiFiConnectionQualityInfo(
+                    noise_level=noise_level,
+                    signal_level=signal_level,
+                    link_quality=link_quality
+                )
             else:
-                link_quality = int((signal_level + 100) * 1.4)  # Maps -100..-50 dBm to 0..70
-
-            return WiFiConnectionQualityInfo(
-                noise_level=0,  # Not available via `iw`
-                signal_level=signal_level,
-                link_quality=link_quality
-            )
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
-             
-    def set_wifi_power(self, value):
+
+    def get_wpa_supplicant_conf_path(self):
+        return None
+
+    def start_wifi_services(self):
         pass
 
     def stop_wifi_services(self):
-        MiyooTrimCommon.stop_wifi_services(self)
-
-    def start_wpa_supplicant(self):
-        MiyooTrimCommon.start_wpa_supplicant(self)
+        pass
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
+    @throttle.limit_refresh(10)
+    def get_ip_addr_text(self):
+        import psutil
+        if self.is_wifi_enabled():
+            if not self.get_wifi_menu().adapter_is_connected():
+                return "No USB adapter"
+
+            try:
+                addrs = psutil.net_if_addrs().get("wlan0")
+                if addrs:
+                    for addr in addrs:
+                        if addr.family == socket.AF_INET:
+                            return addr.address
+                    return "Connecting"
+                else:
+                    return "Connecting"
+            except Exception:
+                return "Error"
+
+        return "Off"
+
     def disable_wifi(self):
-        MiyooTrimCommon.disable_wifi(self)
+        self.system_config.reload_config()
+        self.system_config.set_wifi(0)
+        self.system_config.save_config()
+        ProcessRunner.run(["connmanctl", "disable", "wifi"])
+        self.get_wifi_status.force_refresh()
+        self.get_ip_addr_text.force_refresh()
 
     def enable_wifi(self):
-        MiyooTrimCommon.enable_wifi(self)
+        self.system_config.reload_config()
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
+        ProcessRunner.run(["systemctl", "restart", "connman"])
+        ProcessRunner.run(["connmanctl", "enable", "wifi"])
+        self.get_wifi_status.force_refresh()
+        self.get_ip_addr_text.force_refresh()
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
@@ -272,7 +288,7 @@ class GKDDevice(DeviceCommon):
         self.button_remapper.remap_buttons()
 
     def supports_wifi(self):
-        return False
+        return True
     
     def get_game_system_utils(self):
         return self.game_utils
@@ -281,10 +297,6 @@ class GKDDevice(DeviceCommon):
         return "/mnt/SDCARD/Roms/"
 
     def take_snapshot(self, path):
-        return None
-    
-    def get_wpa_supplicant_conf_path(self):
-        # TODO:
         return None
     
     def supports_brightness_calibration():
