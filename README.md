@@ -73,7 +73,7 @@
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
-See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
+See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/02.-Updating-to-the-Latest-Release)
 
 ## Controls and Hotkeys
 
