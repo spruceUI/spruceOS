@@ -66,7 +66,7 @@
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
 ## All In One Installer
-  - Download [The new Beta spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases)
+  - Download [The new Beta spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
   - Simply insert your SD card into your computer and run the program, be sure to select the correct drive!
   - It formats your card, downloads the latest official spruce release, and installs it in one click!
 
