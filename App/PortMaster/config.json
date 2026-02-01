@@ -1,0 +1,8 @@
+{
+  "label": "PortMaster",
+  "icon": "portmaster.png",
+  "launch": "launch.sh",
+  "description": "PortMaster Menu",
+  "devices": ["MIYOO_FLIP", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2"],
+  "hideInSimpleMode": false
+}

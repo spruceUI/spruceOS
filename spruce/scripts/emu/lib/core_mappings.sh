@@ -1,0 +1,113 @@
+
+arch_suffix() {
+    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && echo "32" || echo "64"
+}
+
+get_core_folder() {
+    core_name="$1"
+    case "$core_name" in
+        "2048_libretro.so") echo "2048" ;;
+        "81_libretro.so") echo "81" ;;
+        "a5200_libretro.so") echo "a5200" ;;
+        "ardens_libretro.so") echo "Ardens" ;;
+        "atari800_libretro.so") echo "Atari800" ;;
+        "bk_libretro.so") echo "bk" ;;
+        "bluemsx_libretro.so") echo "blueMSX" ;;
+        "cap32_libretro.so") echo "Caprice32" ;;
+        "chailove_libretro.so") echo "ChaiLove" ;;
+        "chimerasnes_libretro.so") echo "ChimeraSNES-$(arch_suffix)" ;;
+        "crocods_libretro.so") echo "CrocoDS" ;;
+        "daphne_libretro.so") echo "Daphne" ;;
+        "dosbox_pure_libretro.so") echo "DOSBox" ;;
+        "duckstation_libretro.so") echo "DuckStation" ;;
+        "easyrpg_libretro.so") echo "EasyRPG Player" ;;
+        "ecwolf_libretro.so") echo "ECWolf" ;;
+        "fake08_libretro.so") echo "fakse-08-$(arch_suffix)" ;;
+        "fbalpha2012_libretro.so") echo "FB Alpha 2012" ;;
+        "fbneo_libretro.so") echo "FinalBurn Neo" ;;
+        "fceumm_libretro.so") echo "FCEUmm" ;;
+        "flycast_libretro.so") echo "Flycast" ;;
+        "fmsx_libretro.so") echo "fMSX" ;;
+        "freechaf_libretro.so") echo "FreeChaF" ;;
+        "freeintv_libretro.so") echo "FreeIntv" ;;
+        "frodo_libretro.so") echo "Frodo" ;;
+        "fuse_libretro.so") echo "Fuse" ;;
+        "gambatte_libretro.so") echo "Gambatte" ;;
+        "gearboy_libretro.so") echo "Gearboy" ;;
+        "gearcoleco_libretro.so") echo "Gearcoleco" ;;
+        "gearsystem_libretro.so") echo "Gearsystem" ;;
+        "genesis_plus_gx_libretro.so") echo "Genesis Plus GX" ;;
+        "gme_libretro.so") echo "Game Music Emu" ;;
+        "gpsp_libretro.so") echo "gpSP" ;;
+        "gw_libretro.so") echo "GW" ;;
+        "handy_libretro.so") echo "Handy" ;;
+        "hatari_libretro.so") echo "Hatari" ;;
+        "km_duckswanstation_xtreme_amped_libretro.so") echo "DuckSwanStation Xtreme Amped" ;;
+        "km_flycast_xtreme_libretro.so") echo "Flycast Xtreme" ;;
+        "km_ludicrousn64_2k22_xtreme_amped_libretro.so") echo "LudicrousN64 2K22 Xtreme Amped" ;;
+        "km_parallel_n64_xtreme_amped_turbo_libretro.so") echo "ParaLLEl N64 Xtreme Amped Turbo" ;;
+        "libgametank_libretro.so") echo "GameTank (Rust)" ;;
+        "lowresnx_libretro.so") echo "lowresnx" ;;
+        "lutro_libretro.so") echo "Lutro" ;;
+        "mame2003_plus_libretro.so") echo "MAME 2003-Plus" ;;
+        "mame2003_xtreme_libretro.so") echo "mame2003_xtreme" ;;
+        "mednafen_lynx_libretro.so") echo "Beetle Lynx" ;;
+        "mednafen_ngp_libretro.so") echo "Beetle NeoPop" ;;
+        "mednafen_pce_fast_libretro.so") echo "Beetle PCE Fast" ;;
+        "mednafen_pce_libretro.so") echo "Beetle PCE" ;;
+        "mednafen_pcfx_libretro.so") echo "Beetle PC-FX" ;;
+        "mednafen_supafaust_libretro.so") echo "Supafaust" ;;
+        "mednafen_supergrafx_libretro.so") echo "Beetle SuperGrafx" ;;
+        "mednafen_vb_libretro.so") echo "Beetle VB" ;;
+        "mednafen_wswan_libretro.so") echo "Beetle WonderSwan" ;;
+        "mgba_libretro.so") echo "mGBA" ;;
+        "mkxp-z_libretro") echo "mkxp-z" ;;
+        "mu_libretro.so") echo "Mu" ;;
+        "neocd_libretro.so") echo "NeoCD" ;;
+        "nestopia_libretro.so") echo "Nestopia" ;;
+        "np2kai_libretro.so") echo "Neko Project II" ;;
+        "numero_libretro.so") echo "Numero" ;;
+        "o2em_libretro.so") echo "O2EM" ;;
+        "opera_libretro.so") echo "Opera" ;;
+        "parallel_n64_libretro.so") echo "ParaLLEl N64" ;;
+        "pcsx_rearmed_libretro.so") echo "PCSX-ReARMed-$(arch_suffix)" ;;
+        "picodrive_libretro.so") echo "PicoDrive" ;;
+        "pokemini_libretro.so") echo "PokeMini" ;;
+        "potator_libretro.so") echo "Potator" ;;
+        "ppsspp_libretro.so") echo "PPSSPP" ;;
+        "prboom_libretro.so") echo "PrBoom" ;;
+        "prosystem_libretro.so") echo "ProSystem" ;;
+        "puae2021_libretro.so") echo "PUAE 2021" ;;
+        "puzzlescript_libretro.so") echo "puzzlescript" ;;
+        "px68k_libretro.so") echo "PX68k" ;;
+        "quasi88_libretro.so") echo "QUASI88" ;;
+        "quicknes_libretro.so") echo "QuickNES" ;;
+        "race_libretro.so") echo "RACE-$(arch_suffix)" ;;
+        "reminiscence_libretro.so") echo "REminiscence" ;;
+        "retro8_libretro.so") echo "Retro8" ;;
+        "sameduck_libretro.so") echo "SameDuck" ;;
+        "scummvm_libretro.so") echo "ScummVM" ;;
+        "snes9x2002_libretro.so") echo "Snes9x 2002" ;;
+        "snes9x2005_libretro.so") echo "Snes9x 2005" ;;
+        "snes9x2005_plus_libretro.so") echo "Snes9x 2005 Plus" ;;
+        "snes9x2010_libretro.so") echo "Snes9x 2010" ;;
+        "snes9x_libretro.so") echo "Snes9x" ;;
+        "squirreljme_libretro.so") echo "SquirrelJME" ;;
+        "stella2014_libretro.so") echo "Stella 2014" ;;
+        "swanstation_libretro.so") echo "SwanStation" ;;
+        "tgbdual_libretro.so") echo "TGB Dual" ;;
+        "theodore_libretro.so") echo "theodore" ;;
+        "tic80_libretro.so") echo "TIC-80" ;;
+        "tyrquake_libretro.so") echo "TyrQuake" ;;
+        "uae4arm_libretro.so") echo "UAE4ARM" ;;
+        "uw8_libretro.so") echo "MicroW8" ;;
+        "uzem_libretro.so") echo "uzem" ;;
+        "vecx_libretro.so") echo "vecx" ;;
+        "vemulator_libretro.so") echo "VeMUlator" ;;
+        "vice_x64_libretro.so") echo "VICE x64" ;;
+        "vice_xvic_libretro.so") echo "VICE xvic" ;;
+        "x1_libretro.so") echo "x1" ;;
+        "yabasanshiro_libretro.so") echo "YabaSanshiro" ;;
+        *) echo "UNKNOWN" ;;
+    esac
+}

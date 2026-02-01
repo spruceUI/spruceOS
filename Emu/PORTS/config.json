@@ -1,35 +1,45 @@
 {
   "label": "PORTS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ports.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ports.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "/mnt/SDCARD/Roms/PORTS",
-  "imgpath": "/mnt/SDCARD/Roms/PORTS/Imgs",
-  "gamelist": "/mnt/SDCARD/Roms/PORTS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "ports.png",
+  "iconsel": "ports_sel.png",
+  "themecolor": "FF0000",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "ingamemenu": 1,
   "extlist": "sh",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random Port",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "controlMode": {
+      "display": "Controller Mode",
+      "options": [
+        "X360",
+        "Nintendo"
+      ],
+      "selected": "X360",
+      "overrides": {}
     }
+  },
+  "scanSubfolders": false,
+  "sortOrder": 5000,
+  "brand": "Other",
+  "type": "other",
+  "releaseYear": 2000,
+  "default_emulator": "sh",
+  "scaling_min_freq": 648000,
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
   ]
 }

@@ -1,0 +1,13 @@
+To gain access to native Pico-8 on a spruce-enabled device, please place your pico8.dat,
+pico8_64, and pico8_dyn files directly in the BIOS folder at the root of the SD card.
+These files need to come from the Rasberry Pi version of an official Pico-8 release.
+These can be purchased here: https://www.lexaloffle.com/pico-8.php?#getpico8
+
+Adding these files to your BIOS folder will populate the Pico-8 system in the spruceUI
+games menu, with an option to launch Splore, a wonderful repository stuffed with hundreds
+if not thousands of free games. You can also add your own Pico-8 carts to play offline
+by simply dropping them in your Roms/PICO8 folder.
+
+If you do not have access to these commercial files, you can still emulate Pico-8 games using the
+fake08 libretro core. In that case, simply drop your Pico-8 cart files in the Roms/FAKE08 folder
+instead. However, for the best experience, we strongly encourage you to pick up the real deal! :)

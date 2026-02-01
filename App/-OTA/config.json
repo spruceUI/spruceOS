@@ -1,6 +1,7 @@
 {
   "label": "Check for Updates",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/updater.png",
+  "icon": "updater.png",
   "launch": "launch.sh",
-  "description": "Download and install updates over Wi-Fi"
+  "description": "Download and install updates over Wi-Fi",
+  "hideInSimpleMode": true
 }

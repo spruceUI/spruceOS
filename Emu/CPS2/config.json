@@ -1,39 +1,36 @@
 {
   "label": "CPS2",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/cps2.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/cps2.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/CPS2",
-  "imgpath": "../../Roms/CPS2/Imgs",
-  "gamelist": "../../Roms/CPS2/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 1,
-  "hidebios": 1,
+  "icon": "cps2.png",
+  "iconsel": "cps2_sel.png",
+  "themecolor": "FFFF00",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|cue",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random CPS2 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓FBALPHA2012)-fbneo",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "fbalpha2012",
+        "fbneo"
+      ],
+      "selected": "fbalpha2012",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 1600,
+  "brand": "Capcom",
+  "type": "arcade",
+  "releaseYear": 1993,
+  "default_emulator": "fbalpha2012",
+  "scaling_min_freq": 816000
 }

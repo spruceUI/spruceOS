@@ -1,0 +1,225 @@
+{
+"name":"steward",
+"number":14,
+"layout":[
+{
+    "index":0,
+    "name":"vh_t0",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":160,
+    "screen0_h":120,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1280,
+    "screen1_h":720
+},
+{
+    "index":1,
+    "name":"vh_t1",
+    "bg":"",
+    "type":1,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":256,
+    "screen0_h":192,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1280,
+    "screen1_h":720
+},
+{
+    "index":2,
+    "name":"s0",
+    "bg":"bg_s0.png",
+    "type":4,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":0,
+    "screen0_h":0,
+
+    "screen1_x":160,
+    "screen1_y":0,
+    "screen1_w":960,
+    "screen1_h":720
+},
+
+{
+    "index":3,
+    "name":"s1",
+    "bg":"",
+    "type":4,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":0,
+    "screen0_h":0,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1280,
+    "screen1_h":720
+},
+
+ {
+     "index":4,
+    "name":"v1",
+    "bg":"",
+
+    "screen0_x":400,
+    "screen0_y":0,
+    "screen0_w":480,
+    "screen0_h":360,
+
+    "screen1_x":400,
+    "screen1_y":360,
+    "screen1_w":480,
+    "screen1_h":360
+},
+
+ {
+    "index":5,
+    "name":"h1",
+    "bg":"",
+
+    "screen0_x":0,
+    "screen0_y":120,
+    "screen0_w":640,
+    "screen0_h":480,
+
+    "screen1_x":640,
+    "screen1_y":120,
+    "screen1_w":640,
+    "screen1_h":480
+},
+
+{
+    "index":6,
+    "name":"vertical0",
+    "bg":"bg_vertical.png",
+
+    "screen1_x":0,
+    "screen1_y":72,
+    "screen1_w":768,
+    "screen1_h":576,
+
+    "screen0_x":768,
+    "screen0_y":168,
+    "screen0_w":512,
+    "screen0_h":384
+},
+
+{
+    "index":7,
+    "name":"vertical1",
+    "bg":"bg_vertical_ext.png",
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":960,
+    "screen1_h":720,
+
+    "screen0_x":960,
+    "screen0_y":240,
+    "screen0_w":320,
+    "screen0_h":240
+
+
+},
+
+{
+    "index":8,
+    "name":"hh0",
+    "bg":"",
+    "type":2,
+    "rotate":90,
+
+    "screen0_x":100,
+    "screen0_y":0,
+    "screen0_w":720,
+    "screen0_h":540,
+
+    "screen1_x":640,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":540
+},
+
+{
+    "index":9,
+    "name":"hh1",
+    "bg":"",
+    "type":2,
+    "rotate":270,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":720,
+    "screen1_h":540,
+    
+    "screen0_x":740,
+    "screen0_y":0,
+    "screen0_w":720,
+    "screen0_h":540
+},
+
+{
+    "index":10,
+    "name":"hres0",
+    "bg":"",
+    "type":3,
+
+    "screen0_x":384,
+    "screen0_y":168,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":384,
+    "screen1_y":168,
+    "screen1_w":512,
+    "screen1_h":384
+},
+
+{
+    "index":11,
+    "name":"hres1",
+    "bg":"",
+    "type":3,
+
+    "screen0_x":160,
+    "screen0_y":0,
+    "screen0_w":960,
+    "screen0_h":720,
+
+    "screen1_x":160,
+    "screen1_y":0,
+    "screen1_w":960,
+    "screen1_h":720
+},
+
+{
+    "index":12,
+    "name":"hres2",
+    "type":3,
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":1280,
+    "screen0_h":720,
+
+    "screen1_x":0,
+    "screen1_y":0,
+    "screen1_w":1280,
+    "screen1_h":720
+},
+]
+
+}
+

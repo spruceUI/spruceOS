@@ -1,39 +1,36 @@
 {
   "label": "ColecoVis",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/col.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/col.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/COLECO",
-  "imgpath": "../../Roms/COLECO/Imgs",
-  "gamelist": "../../Roms/COLECO/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "col.png",
+  "iconsel": "col_sel.png",
+  "themecolor": "70b038",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|rom|ri|mx1|mx2|col|dsk|cas|sg|sc|m3u",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random Colecovision game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓BLUEMSX)-gearcoleco",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "bluemsx",
+        "gearcoleco"
+      ],
+      "selected": "bluemsx",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 1400,
+  "brand": "Coleco",
+  "type": "homeconsole",
+  "releaseYear": 1982,
+  "default_emulator": "bluemsx",
+  "scaling_min_freq": 480000
 }

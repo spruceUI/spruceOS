@@ -1,0 +1,27 @@
+{
+  "label": "PC 98",
+  "icon": "pc98.png",
+  "iconsel": "pc98_sel.png",
+  "themecolor": "",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "d98|zip|98d|fdi|fdd|2hd|tfd|d88|88d|hdm|xdf|dup|cmd|hdi|thd|nhd|hdd|hdn",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 6800,
+  "brand": "NEC",
+  "type": "computer",
+  "releaseYear": 1982,
+  "default_emulator": "np2kai",
+  "scaling_min_freq": 816000
+}

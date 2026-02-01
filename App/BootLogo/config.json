@@ -1,6 +1,8 @@
 {
-  "#label": "Boot Logo",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/App/bootlogo.png",
+  "label": "Boot Logo",
+  "icon": "bootlogo.png",
   "launch": "launch.sh",
-  "description": "Swap the boot logo at start up"
+  "description": "Swap the boot logo at start up",
+  "devices": ["MIYOO_A30", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO","MIYOO_FLIP"],
+  "hideInSimpleMode": true
 }

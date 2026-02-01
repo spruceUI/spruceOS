@@ -1,0 +1,27 @@
+{
+  "label": "Game Tank",
+  "icon": "gametank.png",
+  "iconsel": "gametank_sel.png",
+  "themecolor": "29489f",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "gtr|zip|7z",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 2650,
+  "brand": "other",
+  "type": "fantasy",
+  "releaseYear": 2023,
+  "default_emulator": "libgametank",
+  "scaling_min_freq": 1008000
+}

@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="fceumm"
-export MODE="smart"
-
-export scaling_min_freq=312000

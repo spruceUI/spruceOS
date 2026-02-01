@@ -1,35 +1,35 @@
 {
   "label": "PSP",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/psp.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/psp.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/PSP",
-  "imgpath": "../../Roms/PSP/Imgs",
-  "gamelist": "../../Roms/PSP/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "psp.png",
+  "iconsel": "psp_sel.png",
+  "themecolor": "64A8BD",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "iso|cso|chd",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random PlayStation Portable game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
     }
+  },
+  "sortOrder": 5100,
+  "brand": "Sony",
+  "type": "handheld",
+  "releaseYear": 2004,
+  "default_emulator": "standalone",
+  "scaling_min_freq": 1008000,  
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_A30",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
   ]
 }

@@ -1,0 +1,550 @@
+{
+    "menuOptions": {
+        "Game Switcher Settings": {
+            "menuHoldTime": {
+                "display": "Menu Hold Time",
+                "description": "seconds before GS launch from menu",
+                "options": [
+                    "0",
+                    "0.5",
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "selected": "1"
+            },
+            "menuShouldVibrate": {
+                "display": "Vibrate on Menu Hold",
+                "description": "when launching GS from menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            }
+        },
+        "Battery Settings": {
+            "ledMode": {
+                "display": "Power indicator LED mode",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "description": "for non-red status LED",
+                "options": [
+                    "Always off",
+                    "On in menu only",
+                    "Always on"
+                ],
+                "selected": "Always off"
+            },
+            "lowPowerWarningPercent": {
+                "display": "Low power warning percent",
+                "description": "flash LED below threshold",
+                "options": [
+                    "Off",
+                    "4",
+                    "8",
+                    "12",
+                    "16",
+                    "20"
+                ],
+                "selected": "4"
+            },
+            "shutdownFromSleep": {
+                "display": "Shutdown after sleeping",
+                "description": "off sleeps indefinitely",
+                "options": [
+                    "Off",
+                    "30s",
+                    "1m",
+                    "2m",
+                    "5m",
+                    "10m",
+                    "15m",
+                    "30m",
+                    "60m"
+                ],
+                "selected": "5m"
+            },
+            "idlemonInMenu": {
+                "display": "Shutdown while idle in menu",
+                "description": "only applies in main UI",
+                "options": [
+                    "Off",
+                    "2m",
+                    "5m",
+                    "10m"
+                ],
+                "selected": "Off"
+            },
+            "idlemonInGame": {
+                "display": "Shutdown while idle in game",
+                "description": "in RA, PPSSPP, or DraStic",
+                "options": [
+                    "Off",
+                    "2m",
+                    "5m",
+                    "10m",
+                    "30m"
+                ],
+                "selected": "Off"
+            },
+            "disableNetworkServicesInGame": {
+                "display": "Disable network services in game",
+                "description": "including samba, ssh, etc.",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "disableWifiInGame": {
+                "display": "Disable wifi in game",
+                "description": "reduces battery consumption",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            }
+        },
+        "System Settings": {
+            "checkForUpdates": {
+                "display": "Check for spruce updates on startup",
+                "description": "if connected to Wi-Fi",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "bootTo": {
+                "display": "Launch application on startup",
+                "description": "if not autoresuming last game",
+                "options": [
+                    "spruceUI",
+                    "Random Game",
+                    "Game Switcher",
+                    "Splore"
+                ],
+                "selected": "spruceUI"
+            },
+            "rumbleIntensity": {
+                "display": "Rumble intensity",
+                "description": "for system notifications",
+                "options": [
+                    "Strong",
+                    "Medium",
+                    "Weak",
+                    "Off"
+                ],
+                "selected": "Medium"
+            },
+            "extendedBrightness": {
+                "devices": ["MIYOO_FLIP"],
+                "display": "Extended brightness controls",
+                "description": "Start + L/R change contrast at minimum brightness",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "disableJoystick": {
+                "devices": ["MIYOO_A30"],
+                "display": "Disable joystick",
+                "description": "can help with stick delete mod bugs",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "useZRAM":{
+                "devices": ["MIYOO_FLIP"],
+                "display": "Use ZRAM (experimental)",
+                "description": "reboot to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "swapfileSize":{
+                "display": "Swapfile size (experimental)",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "128MB",
+                    "256MB",
+                    "512MB"
+                ],
+                "selected": "Off"
+            },
+            "overclockSpeed": {
+                "devices": ["MIYOO_MINI",
+                            "MIYOO_MINI_V4",
+                            "MIYOO_MINI_PLUS",
+                            "MIYOO_MINI_FLIP"],
+                "display": "Overclock Speed",
+                "description": "Clockspeed to use for overclocking",
+                "options": [
+                    "1600",
+                    "1700",
+                    "1800"
+                ],
+                "selected": "1600"
+            },
+            "trimuiOSD": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Run TrimUI OSD",
+                "description": "Early Alpha",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "customThermals": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Thermal Control",
+                "description": "Customize fan profiles",
+                "options": [
+                    "Adaptive",
+                    "Cool"
+                ],
+                "selected": "Adaptive"
+            }
+        },
+        "Emulator Settings": {
+            "tapHomeAction": {
+                "display": "Tap home key action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Emulator menu"
+            },
+            "holdHomeAction": {
+                "display": "Hold home key action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Game Switcher"
+            },
+            "raInGameMenu": {
+                "display": "RA: use in-game menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "keepSavesBetweenCores": {
+                "display": "Transfer saves between cores",
+                "options": [
+                    "Prompt",
+                    "Always",
+                    "Never"
+                ],
+                "selected": "Prompt"
+            },
+            "raHotkeyMiyoo": {
+                "display": "RA: hotkey enable button",
+                "description": "custom allows to set in RA itself",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "options": [
+                    "Select",
+                    "Start",
+                    "Menu",
+                    "Custom"
+                ],
+                "selected": "Select"
+            },
+            "raHotkeyTrimUI": {
+                "display": "RA: hotkey enable button",
+                "description": "custom allows to set in RA itself",
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S"],
+                "options": [
+                    "Select",
+                    "Start",
+                    "Menu",
+                    "Custom"
+                ],
+                "selected": "Menu"
+            },
+            "raAutoSave": {
+                "display": "RA: auto save state on close",
+                "description": "custom allows to set in RA itself",
+                "options": [
+                    "True",
+                    "False",
+                    "Custom"
+                ],
+                "selected": "Custom"
+            },
+            "raAutoLoad": {
+                "display": "RA: auto load state on launch",
+                "description": "custom allows to set in RA itself",
+                "options": [
+                    "True",
+                    "False",
+                    "Custom"
+                ],
+                "selected": "Custom"
+            },
+            "perfectOverlays": {
+                "display": "GB[C/A]: use Perfect Overlays",
+                "description": "provided by 1PlayerInsertCoin and Mugwomp93",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "genesisPlusGXWide": {
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "display": "Genesis Plus GX: enable widescreen",
+                "description": "use widescreen hacked core when available",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            }
+        },
+        "Network Settings": {
+            "enableSamba": {
+                "display": "Enable Samba",
+                "description": "smb://{ip_addr}/SDCARD (user/pass=spruce/happygaming)",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSSH": {
+                "display": "Enable SSH",
+                "description": "ssh spruce@{ip_addr} (password=happygaming)",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSyncthing": {
+                "display": "Enable Syncthing",
+                "description": "http://{ip_addr}:8384",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "enableSFTPGo": {
+                "display": "Enable WiFi File Transfer",
+                "description": "http://{ip_addr}:8080",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            },
+            "otaSkipVersionCheck": {
+                "display": "OTA: skip version check",
+                "description": "allows reinstall of same spruce version",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False"
+            }
+        },
+        "Proxy Settings": {
+            "enableProxy": {
+                "display": "Enable Network Proxy",
+                "description": "Route HTTP(S) requests to proxy server",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "proxyAddress": {
+                "display": "Proxy Address",
+                "type": "freeText",
+                "selected": ""
+            },
+            "proxyPort": {
+                "display": "Proxy Port",
+                "type": "freeText",
+                "selected": ""
+            },
+            "proxyProtocol": {
+                "display": "Proxy Protocol",
+                "options": [
+                    "http",
+                    "socks5"
+                ],
+                "selected": "http"
+            }
+        },
+        "RGB LED Settings": {
+            "disableLEDs": {
+                "display": "Disable RGB LEDs in all contexts",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "reload UI to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "LEDmaxScale": {
+                "display": "RGB LED brightness",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "if enabled; non-linear",
+                "options": [
+                    "5",
+                    "10",
+                    "15",
+                    "20",
+                    "25",
+                    "30",
+                    "35",
+                    "40",
+                    "45",
+                    "50",
+                    "55",
+                    "60",
+                    "70",
+                    "80"
+                ],
+                "selected": "15"
+            },
+            "defaultLEDcolor": {
+                "display": "Default LED color",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "in menu, etc.",
+                "options": [
+                    "Red",
+                    "Pink",
+                    "Purple",
+                    "Blue",
+                    "Cyan",
+                    "Green",
+                    "Yellow",
+                    "Orange",
+                    "White"
+                ],
+                "selected": "Green"
+            },
+            "defaultLEDeffect": {
+                "display": "Default LED behavior",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "in menu, etc.",
+                "options": [
+                    "off",
+                    "rise",
+                    "breathe",
+                    "sniff",
+                    "static",
+                    "blink 1",
+                    "blink 2",
+                    "blink 3"
+                ],
+                "selected": "static"
+            },
+            "defaultLEDduration": {
+                "display": "Default LED cycle duration (ms)",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "in menu, etc.",
+                "options": [
+                    "1000",
+                    "1250",
+                    "1500",
+                    "1750",
+                    "2000",
+                    "2250",
+                    "2500",
+                    "2750",
+                    "3000",
+                    "3500",
+                    "4000",
+                    "4500",
+                    "5000"
+                ],
+                "selected": "2000"
+            },
+            "enableEmuSpecificLEDbehavior": {
+                "display": "Use separate LED control during emulation",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "follows defaults if set to False",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "emuLEDcolor": {
+                "display": "In-game LED color",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "System-specific",
+                    "Red",
+                    "Pink",
+                    "Purple",
+                    "Blue",
+                    "Cyan",
+                    "Green",
+                    "Yellow",
+                    "Orange",
+                    "White"
+                ],
+                "selected": "System-specific"
+            },
+            "emuLEDeffect": {
+                "display": "In-game LED behavior",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "off",
+                    "rise",
+                    "breathe",
+                    "sniff",
+                    "static",
+                    "blink 1",
+                    "blink 2",
+                    "blink 3"
+                ],
+                "selected": "breathe"
+            },
+            "emuLEDduration": {
+                "display": "In-game LED cycle duration (ms)",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "description": "during emulation",
+                "options": [
+                    "1000",
+                    "1250",
+                    "1500",
+                    "1750",
+                    "2000",
+                    "2250",
+                    "2500",
+                    "2750",
+                    "3000",
+                    "3500",
+                    "4000",
+                    "4500",
+                    "5000"
+                ],
+                "selected": "4000"
+            }
+        }
+    }
+}

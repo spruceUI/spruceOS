@@ -1,0 +1,16 @@
+{
+  "poll_interval_ms": 500,
+  "block_duration_secs": 10,
+  "fan_curve": [
+    { "temp": 70000, "fan_level": 31 },
+    { "temp": 68000, "fan_level": 28 },
+    { "temp": 66000, "fan_level": 25 },
+    { "temp": 64000, "fan_level": 22 },
+    { "temp": 62000, "fan_level": 20 },
+    { "temp": 60000, "fan_level": 18 },
+    { "temp": 57500, "fan_level": 16 },
+    { "temp": 55000, "fan_level": 14 },
+    { "temp": 52500, "fan_level": 12 },
+    { "temp": 50000, "fan_level": 10 }
+  ]
+}

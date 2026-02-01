@@ -27,6 +27,8 @@ jobs:
       - name: Update language files
         run: |
           find miyoo/res/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
+          find miyoo355/app/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
+          find trimui/res/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
           
       - name: Commit changes
         run: |

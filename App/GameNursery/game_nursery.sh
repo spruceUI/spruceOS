@@ -1,44 +1,40 @@
 #!/bin/sh
 
-##### CONSTANTS #####
-
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BIN_PATH="/mnt/SDCARD/spruce/bin"
-CONFIG_DIR="/tmp/nursery-config"
+##### CONSTANTS #####
+
+DOWNLOAD="/mnt/SDCARD/App/GameNursery/download_game.sh"
+CONFIG_DIR="/mnt/SDCARD/Saves/GameNursery"
 JSON_DIR="/tmp/nursery-json"
 JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_info.7z"
-DEV_JSON_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Singles/_test.7z"
 JSON_CACHE_VALID_MINUTES=20
+
+log_message "--DEBUG-- PATH: $PATH" -v
+log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH" -v
 
 ##### FUNCTIONS #####
 
-check_battery() {
-    CHARGING="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/online)"
-    CAPACITY="$(cat /sys/devices/platform/axp22_board/axp22-supplyer.20/power_supply/battery/capacity)"
-
-    if [ "$CAPACITY" -lt 10 ] && [ "$CHARGING" -eq 0 ]; then
-        log_message "Game Nursery: Device is below 10% battery and is not plugged in. Aborting."
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Cannot use Game Nursery while device battery is below 10%. Please plug in your A30, then try again."
-        exit 1
-    else
-        log_message "Game Nursery: Device has at least 10% battery or is currently plugged in. Proceeding."
-    fi
+bind_over_PORTS() {
+    log_message "bind mounting A30PORTS as backing store over viewpoint PORTS"
+    mkdir -p /mnt/SDCARD/Roms/A30PORTS
+    mkdir -p /mnt/SDCARD/Roms/PORTS
+    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
 }
 
-check_for_connection() {
+unbind_PORTS() {
+    log_message "unmounting A30PORTS from atop PORTS"
+    umount /mnt/SDCARD/Roms/PORTS
+}
 
-    wifi_enabled="$(jq -r '.wifi' "/config/system.json")"
-    if [ $wifi_enabled -eq 0 ]; then
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Wi-Fi not enabled. You must enable Wi-Fi to download free games."
-        exit 1
+is_wifi_connected() {
+    if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
+        log_message "Cloudflare ping successful; device is online."
+        return 0
+    else
+        log_and_display_message "Cloudflare ping failed; device is offline. Aborting."
+        return 1
     fi
-
-    if ! ping -c 3 github.com > /dev/null 2>&1; then
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to connect to GitHub repository. Please check your connection and try again."
-        exit 1
-    fi
-    log_message "Game Nursery: Device is online. Proceeding."
 }
 
 show_slideshow_if_first_run() {
@@ -48,19 +44,10 @@ show_slideshow_if_first_run() {
     fi
 }
 
-get_latest_jsons() {
+is_json_valid() {
     mkdir "$JSON_DIR" 2>/dev/null
     cd "$JSON_DIR"
-    
-    NEEDS_CONFIG_REBUILD=0
-
-    # Dev mode always gets fresh files
-    if [ -f "/mnt/SDCARD/spruce/flags/developer_mode" ]; then
-        log_message "Game Nursery: Developer mode detected, skipping cache check"
-        rm -r ./* 2>/dev/null
-        NEEDS_CONFIG_REBUILD=1
-    # Check if files already exist and are within cache timeout
-    elif [ -f "$JSON_DIR/INFO.7z" ]; then
+    if [ -f "$JSON_DIR/INFO.7z" ]; then
         file_age_minutes=$(( ($(date +%s) - $(date -r "$JSON_DIR/INFO.7z" +%s)) / 60 ))
         
         if [ "$file_age_minutes" -lt "$JSON_CACHE_VALID_MINUTES" ]; then
@@ -73,101 +60,185 @@ get_latest_jsons() {
             log_message "Game Nursery: Cache exists but needs extraction"
             if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
                 rm -f "$JSON_DIR/INFO.7z" >/dev/null 2>&1
-                NEEDS_CONFIG_REBUILD=1
+                log_message "Game Nursery: Existing cache could not be extracted."
+                return 1
             else
-                NEEDS_CONFIG_REBUILD=1
+                log_message "Game Nursery: Existing cache extracted successfully."
                 return 0
             fi
         fi
-    fi
-
-    # Clear directory only if we need to download new files
-    rm -r ./* 2>/dev/null
-    NEEDS_CONFIG_REBUILD=1
-
-    download_json() {
-        local url="$1"
-        if curl -s -k -L -o "$JSON_DIR/INFO.7z" "$url"; then
-            return 0
-        fi
+    else        # no INFO.7z exists, so not valid.
         return 1
-    }
-
-    if [ -f "/mnt/SDCARD/spruce/flags/developer_mode" ]; then
-        # Check if dev JSONs exist and try to download them
-        if curl -s -k -L -I "$DEV_JSON_URL" 2>/dev/null | grep -q "200 OK" && download_json "$DEV_JSON_URL"; then
-            log_message "Game Nursery: Dev-exclusive info cache downloaded"
-        else
-            log_message "Game Nursery: Dev JSONs not found, falling back to release JSONs"
-            display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Dev JSON pack not found, falling back to release JSONs"
-            
-            if ! download_json "$JSON_URL"; then
-                log_message "Game Nursery: Failed to download release info from $JSON_URL"
-                display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
-                exit 1
-            fi
-        fi
-    else
-        if ! download_json "$JSON_URL"; then
-            log_message "Game Nursery: Failed to download release info from $JSON_URL"
-            display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to download latest info files from repository. Please try again later."
-            exit 1
-        fi
-        log_message "Game Nursery: Info cache downloaded successfully"
     fi
+}
+
+get_latest_jsons() {
+    # Clear directory only if we need to download new files
+    mkdir "$JSON_DIR" 2>/dev/null
+    cd "$JSON_DIR"
+    rm -r ./* 2>/dev/null
+
+    if ! wget --quiet --no-check-certificate --max-redirect=20 -O "$JSON_DIR/INFO.7z" "$JSON_URL"; then
+        log_and_display_message "Unable to download latest info files from repository. Please try again later."
+        sleep 3
+        exit 1
+    fi
+
+    log_message "Game Nursery: Info cache downloaded successfully"
 
     if ! 7zr x -y -scsUTF-8 "$JSON_DIR/INFO.7z" >/dev/null 2>&1; then
-        display -d 3 --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -t "Unable to extract latest game info files. Please try again later."
+        log_and_display_message "Unable to extract latest game info files. Please try again later."
+        sleep 3
         rm -f "$JSON_DIR/INFO.7z" >/dev/null 2>&1
-        log_message "Game Nursery: Failed to extract release info from INFO.7z file"
         exit 1
     fi
     log_message "Game Nursery: JSON extraction process completed successfully"
+
+    # remove existing nursery_config so we can rebuild it with updated info
+    rm -f "$CONFIG_DIR/nursery_config" 2>/dev/null
 }
 
 interpret_json() {
-
     json_file="$1"
     display_name="$(jq -r '.display' "$json_file")"
-    file="$(jq -r '.file' "$json_file")"
-    system="$(jq -r '.system' "$json_file")"
-    description="$(jq -r '.description' "$json_file")"
-    requires_files="$(jq -r '.requires_files' "$json_file")"
-    # version="$(jq -r '.version' "$json_file")"
-
-    # add notice that additional files are needed
-    if [ "$requires_files" = "true" ]; then
-        description="$description Requires additional files."
-    fi
+    group_name="$(basename "$(dirname "$json_file")")"    # file="$(jq -r '.file' "$json_file")"
 
     # add line for specific game
-    echo "\"\" \"$display_name\" \"|\" \"run|off\" \"echo -n off\" \"\$DOWNLOAD\$ '$json_file'|\" \"\$TOGGLE\$ '_VALUE_' '$json_file'\""
+    echo "\"$group_name/$display_name\": \"$DOWNLOAD '$json_file'\","
+}
 
-    # check whether game already installed
-    if [ -f "/mnt/SDCARD/Roms/$system/$file" ]; then
-        echo "@\"Already installed!\""
-    else
-        echo "@\"$description\""
+download_boxart() {
+    local json_file="$1"
+    local display_name system group_name img_url img_path
+
+    display_name="$(jq -r '.display' "$json_file" | tr -d '\r\n')"
+    system="$(jq -r '.system' "$json_file")"
+    group_name="$(basename "$(dirname "$json_file")")"
+
+    # Construct local destination
+    img_path="$CONFIG_DIR/Imgs/${display_name}.png"
+
+    log_message "Checking for cached boxart at: $img_path" -v
+    if [ -e "$img_path" ]; then
+        log_message "Game Nursery: Box art for '$display_name' already cached. Skipping download."
+        return 0
     fi
 
+    # Construct GitHub raw URL for the boxart
+    img_url="https://raw.githubusercontent.com/spruceUI/Ports-and-Free-Games/main/${group_name}/${display_name}/Roms/${system}/Imgs/${display_name}.png"
+
+    # Ensure directory exists
+    mkdir -p "$(dirname "$img_path")"
+
+    if wget --quiet --no-check-certificate -O "$img_path" "$img_url"; then
+        log_message "Game Nursery: Successfully downloaded boxart for '$display_name'"
+        resize_image "$img_path"
+    else
+        log_message "Game Nursery: Failed to download boxart for '$display_name'"
+        rm -f "$img_path"
+    fi
+}
+
+resize_image() {
+    local image_path="$1"
+    local full_width=450
+    local full_height=450
+
+    # Ensure image exists
+    [ -f "$image_path" ] || { echo "File not found: $image_path"; return 1; }
+
+    local dir base tmp_path
+    dir=$(dirname "$image_path")
+    base=$(basename "$image_path")
+    tmp_path="$dir/tmp_$base"
+    
+    log_message "Resizing $image_path to $full_width x $full_height max."
+    # Resize while preserving aspect ratio
+    ffmpeg -y -i "$image_path" \
+        -vf "scale='min($full_width,iw)':'min($full_height,ih)':force_original_aspect_ratio=decrease" \
+        "$tmp_path"
+
+    if [ -f "$tmp_path" ]; then
+        mv "$tmp_path" "$image_path"
+    else
+        log_message "Resize failed — ffmpeg did not produce $tmp_path"
+        return 1
+    fi
+
+    return 0
+}
+
+get_system_icon_from_theme() {
+    local category="$1"
+    local current_theme icon_name emu_name selected_icon ext
+    local theme_dir fallback_dir dest_path
+    local config
+    config=$(get_config_path)
+
+    current_theme="$(jq -r '.theme // "spruce"' "$config")"
+
+    case "$category" in
+        "Arduboy")          icon_name="arduboy";    emu_name="ARDUBOY" ;;
+        "Commodore 64")     icon_name="c64";        emu_name="COMMODORE" ;;
+        "Doom")             icon_name="doom";       emu_name="DOOM" ;;
+        "EasyRPG")          icon_name="easyrpg";    emu_name="EASYRPG" ;;
+        "Game Boy family")  icon_name="gba";        emu_name="GBA" ;;
+        "Game Tank")        icon_name="gametank";   emu_name="GAMETANK" ;;
+        "NES")              icon_name="fc";         emu_name="FC" ;;
+        "SNES")             icon_name="sfc";        emu_name="SFC" ;;
+        "Ports")            icon_name="ports";      emu_name="A30PORTS" ;;
+        "ZX Spectrum")      icon_name="zxs";        emu_name="ZXS" ;;
+        *) return 1 ;;
+    esac
+    theme_dir="/mnt/SDCARD/Themes/${current_theme}/icons"
+    fallback_dir="/mnt/SDCARD/Emu/${emu_name}"
+
+    if   [ -e "${theme_dir}/sel/${icon_name}.qoi" ]; then selected_icon="${theme_dir}/sel/${icon_name}.qoi"
+    elif [ -e "${theme_dir}/sel/${icon_name}.png" ]; then selected_icon="${theme_dir}/sel/${icon_name}.png"
+    elif [ -e "${theme_dir}/${icon_name}.qoi" ];     then selected_icon="${theme_dir}/${icon_name}.qoi"
+    elif [ -e "${theme_dir}/${icon_name}.png" ];     then selected_icon="${theme_dir}/${icon_name}.png"
+    elif [ -e "${fallback_dir}/${icon_name}_sel.qoi" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.qoi"
+    elif [ -e "${fallback_dir}/${icon_name}_sel.png" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.png"
+    elif [ -e "${fallback_dir}/${icon_name}.qoi" ];  then selected_icon="${fallback_dir}/${icon_name}.qoi"
+    elif [ -e "${fallback_dir}/${icon_name}.png" ];  then selected_icon="${fallback_dir}/${icon_name}.png"
+    else return 1
+    fi
+
+    ext="${selected_icon##*.}"
+    dest_path="/mnt/SDCARD/Saves/GameNursery/Imgs/${category}.${ext}"
+    mkdir -p "/mnt/SDCARD/Saves/GameNursery/Imgs"
+    cp -f "$selected_icon" "$dest_path"
+    log_message "Game Nursery: Copied system icon for '$category' from '$selected_icon' → '$dest_path'"
+}
+
+is_config_valid() {
+    local config_file="$CONFIG_DIR/nursery_config"
+
+    # Check that the config file exists and isn't empty
+    if [ ! -f "$config_file" ] || [ ! -s "$config_file" ]; then
+        log_message "Game Nursery: nursery_config missing or empty. Rebuilding."
+        return 1
+    fi
+
+    # Validate JSON structure
+    if ! jq empty "$config_file" >/dev/null 2>&1; then
+        log_message "Game Nursery: nursery_config is invalid JSON. Rebuilding."
+        return 1
+    fi
+
+    log_message "Game Nursery: Existing nursery_config is valid."
+    return 0
 }
 
 construct_config() {
     mkdir "$CONFIG_DIR" 2>/dev/null
     cd "$CONFIG_DIR"
     
-    # Only keep existing config if we haven't downloaded new JSONs
-    if [ "$NEEDS_CONFIG_REBUILD" -eq 0 ] && [ -f "$CONFIG_DIR/nursery_config" ] && [ -s "$CONFIG_DIR/nursery_config" ]; then
-        log_message "Game Nursery: Using existing nursery_config"
-        return 0
-    fi
-
     # Clear and rebuild if we get here
-    rm -r ./* 2>/dev/null
+    rm -f "$CONFIG_DIR/nursery_config" 2>/dev/null
 
-    # initialize nursery_config with constant definitions
-    echo "\$TOGGLE=\/mnt\/SDCARD\/App\/GameNursery\/toggle_descriptions.sh\$" > "$CONFIG_DIR"/nursery_config
-    echo "\$DOWNLOAD=\/mnt\/SDCARD\/App\/GameNursery\/download_game.sh\$" >> "$CONFIG_DIR"/nursery_config
+    # Initialize config json with open bracket
+    echo "{" > "$CONFIG_DIR"/nursery_config
 
     # loop through each folder of game jsons
     for group_dir in "$JSON_DIR"/*; do
@@ -175,30 +246,64 @@ construct_config() {
         # make sure it's a non-empty directory before trying to do stuff
         if [ -d "$group_dir" ] && [ -n "$(ls "$group_dir")" ]; then
 
-            # create tab for a given group of games
             tab_name="$(basename "$group_dir")"
-            echo "[$tab_name]" >> "$CONFIG_DIR"/nursery_config
+
+            # Exclude Ports if PLATFORM is NOT A30
+            if [ "$PLATFORM" != "A30" ] && [ "$tab_name" = "Ports" ]; then
+                continue
+            fi
 
             # iterate through each json for the current group
+            get_system_icon_from_theme "$tab_name"
             for filename in "$group_dir"/*.json; do
                 interpret_json "$filename" >> "$CONFIG_DIR"/nursery_config
+                download_boxart "$filename"
             done
         fi
     done
-    log_message "Game Nursery: nursery_config constructed from game info JSONs."
+
+    sed -i '$ s/,$//' "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
+    echo "}" >> "$CONFIG_DIR"/nursery_config            # Finish config json with a closing bracket
 }
 
 
 ##### MAIN EXECUTION #####
 
-display -i "/mnt/SDCARD/spruce/imgs/bg_tree.png" -t "Connecting to the spruce Game Nursery. Please wait.........."
+[ "$PLATFORM" = "A30" ] && bind_over_PORTS
 
-check_battery
-check_for_connection
+start_pyui_message_writer
 show_slideshow_if_first_run
-get_latest_jsons
-construct_config
+log_and_display_message "Welcome to the spruceOS Game Nursery, where you can pick the freshest homegrown games! Please wait..."
 
-killall -q -USR2 joystickinput # kbd mode
-cd $BIN_PATH && ./easyConfig "$CONFIG_DIR"/nursery_config
-killall -q -USR1 joystickinput # analog mode
+if ! is_wifi_connected; then sleep 3; exit 1; fi
+if ! is_json_valid; then get_latest_jsons; fi
+if ! is_config_valid; then construct_config; fi
+
+RESULT_FILE="/mnt/SDCARD/App/PyUI/selection.txt"
+rm -f "$RESULT_FILE"
+
+display_option_list "$CONFIG_DIR/nursery_config"
+
+while true; do
+    if [ -f "$RESULT_FILE" ]; then
+        content=$(cat "$RESULT_FILE" 2>/dev/null)
+        
+        if [ "$content" = "EXIT" ]; then
+            log_and_display_message "happy gaming.........."
+            sleep 2
+            break
+        else
+            log_message "$content"
+            # Execute the content of the file as a command
+            eval "$content"
+            # Remove the file after running
+            rm -f "$RESULT_FILE"
+            display_option_list "$CONFIG_DIR/nursery_config"
+        fi
+    fi
+
+done
+
+touch /mnt/SDCARD/App/PyUI/pyui_resize_boxart_trigger
+
+[ "$PLATFORM" = "A30" ] && unbind_PORTS

@@ -1,0 +1,49 @@
+{
+  "label": "Saturn",
+  "icon": "saturn.png",
+  "iconsel": "saturn_sel.png",
+  "themecolor": "E4007F",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "chd|zip|mds|ccd|iso|cue",
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    }
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    },
+    "Emulator": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro-libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "selected": "yabasanshiro-libretro",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 5500,
+  "brand": "Sega",
+  "type": "homeconsole",
+  "releaseYear": 1994,
+  "default_emulator": "yabasanshiro-libretro",
+  "scaling_min_freq": 1008000,
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
+  ]
+}

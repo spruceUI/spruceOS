@@ -2,7 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LED_PATH="/sys/devices/platform/sunxi-led/leds/led1"
 SLEEP=30
 
 dot_duration=0.2
@@ -17,25 +16,23 @@ LAST_LOG=0
 MAX_LINES=1000
 
 morse_code_sos() {
-    local vibrate=$1
+    local do_vibrate=$1
     shift
     for symbol in "$@"; do
         case $symbol in
         ".")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100
+            [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dot_duration
             ;;
         "-")
             echo 1 >${LED_PATH}/brightness
-            [ "$vibrate" = "true" ] && vibrate 100
+            [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dash_duration
             ;;
         esac
         echo 0 >${LED_PATH}/brightness
-        if [ "$vibrate" = "true" ]; then
-            echo 0 >/sys/devices/virtual/timed_output/vibrator/enable
-        fi
+        # No need to set vibrate to off as we passed duration to vibrate function
         sleep $intra_char_gap
     done
     sleep $inter_word_gap
@@ -49,7 +46,7 @@ log_battery() {
     CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 
     # Check charging status
-    CHARGING=$(cat /sys/class/power_supply/battery/status)
+    CHARGING=$(device_get_charging_status)
 
     # Append new log entry with appropriate status
     if [ "$CHARGING" = "Charging" ]; then
@@ -74,7 +71,7 @@ hard_shutdown() {
 }
 
 # Log boot entry
-CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
+CAPACITY=$(cat $BATTERY/capacity)
 CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
 echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
@@ -84,9 +81,10 @@ fi
 LAST_LOG=$(date +%s)
 
 while true; do
-    CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-    PERCENT="$(setting_get "low_power_warning_percent")"
-
+    CAPACITY=$(device_get_battery_percent)
+    PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
+    LED_MODE="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
+    
     # Add battery logging
     CURRENT_TIME=$(date +%s)
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
@@ -125,26 +123,27 @@ while true; do
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
             fi
 
-            CAPACITY=$(cat /sys/class/power_supply/battery/capacity)
-            PERCENT="$(setting_get "low_power_warning_percent")"
+            CAPACITY=$(device_get_battery_percent)
+            PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
 
             hard_shutdown $CAPACITY
 
             # disable script if turned off in spruce.cfg
             [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
         done
+    elif [ "$LED_PATH" != "not applicable" ]; then
+        if [ "$LED_MODE" = "Always on" ]; then
+            echo 1 >${LED_PATH}/brightness
+            flag_remove "low_battery"
 
-    elif flag_check "ledon"; then
-        echo 1 >${LED_PATH}/brightness
-        flag_remove "low_battery"
+        elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
+            echo 1 >${LED_PATH}/brightness
+            flag_remove "low_battery"
 
-    elif flag_check "tlon" && flag_check "in_menu"; then
-        echo 1 >${LED_PATH}/brightness
-        flag_remove "low_battery"
-
-    else
-        echo 0 >${LED_PATH}/brightness
-        flag_remove "low_battery"
+        else # if [ "$LED_MODE" = "Always Off" ]; then
+            echo 0 >${LED_PATH}/brightness
+            flag_remove "low_battery"
+        fi
     fi
 
     sleep $SLEEP

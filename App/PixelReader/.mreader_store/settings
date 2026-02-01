@@ -1,0 +1,6 @@
+progress_reporting=global
+show_title_bar=false
+color_theme=light_sepia
+font_name=resources/fonts/nunwen.ttf
+font_size=32
+shoulder_keymap=LR

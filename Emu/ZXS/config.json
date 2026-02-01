@@ -1,35 +1,27 @@
 {
   "label": "ZXS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/zxs.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/zxs.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/ZXS",
-  "imgpath": "../../Roms/ZXS/Imgs",
-  "gamelist": "../../Roms/ZXS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "zxs.png",
+  "iconsel": "zxs_sel.png",
+  "themecolor": "00a7e1",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|tzx|tap|z80|rzx|scl|trd",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random ZX Spectrum game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 7700,
+  "brand": "Sinclair",
+  "type": "homeconsole",
+  "releaseYear": 1982,
+  "default_emulator": "fuse",
+  "scaling_min_freq": 408000
 }

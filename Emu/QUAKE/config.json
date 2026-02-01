@@ -1,35 +1,27 @@
 {
   "label": "Quake",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/quake.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/quake.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/QUAKE",
-  "imgpath": "../../Roms/QUAKE/Imgs",
-  "gamelist": "../../Roms/QUAKE/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "quake.png",
+  "iconsel": "quake_sel.png",
+  "themecolor": "d7660f",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "fbl|pak",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random Quake pak",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 5300,
+  "brand": "modernengine",
+  "type": "fantasy",
+  "releaseYear": 1996,
+  "default_emulator": "tyrquake",
+  "scaling_min_freq": 816000
 }

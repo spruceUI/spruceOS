@@ -1,6 +1,7 @@
 {
   "label": "EZ Updater",
-  "icon": "/mnt/SDCARD/Updater/imgs/recents.png",
-  "launch": "../../Updater/updater.sh",
-  "description": "Update file found, install to update to spruce"
+  "icon": "updater.png",
+  "launch": "launch.sh",
+  "description": "Update file found, install to update to spruce",
+  "hideInSimpleMode": true
 }

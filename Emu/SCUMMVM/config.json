@@ -1,35 +1,27 @@
 {
   "label": "ScummVM",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/scummvm.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/scummvm.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/SCUMMVM",
-  "imgpath": "../../Roms/SCUMMVM/Imgs",
-  "gamelist": "../../Roms/SCUMMVM/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "scummvm.png",
+  "iconsel": "scummvm_sel.png",
+  "themecolor": "90db09",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "scummvm",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
-    },
-    {
-      "name": "Jump to random ScummVM game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 5600,
+  "brand": "modernengine",
+  "type": "pc",
+  "releaseYear": 2001,
+  "default_emulator": "scummvm",
+  "scaling_min_freq": 816000
 }

@@ -1,39 +1,76 @@
 {
   "label": "N64",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/n64.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/n64.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/N64",
-  "imgpath": "../../Roms/N64/Imgs",
-  "gamelist": "../../Roms/N64/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 1,
+  "icon": "n64.png",
+  "iconsel": "n64_sel.png",
+  "themecolor": "FFFF88",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random Nintendo 64 game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "km_ludicrousn64_2k22_xtreme_amped",
+        "km_parallel_n64_xtreme_amped_turbo",
+        "mupen64plus"
+      ],
+      "selected": "km_ludicrousn64_2k22_xtreme_amped",
+      "overrides": {}
     },
-    {
-      "name": "Emu Core: (✓LUDICROUSN64)-parallel-mupen64plus",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "km_ludicrousn64_2k22_xtreme_amped",
+        "parallel_n64",
+        "mupen64plus_next",
+        "mupen64plus-standalone"
+      ],
+      "selected": "km_ludicrousn64_2k22_xtreme_amped",
+      "overrides": {}
     },
-    {
-      "name": "CPU Mode: (✓PERFORMANCE)-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "controlMode": {
+      "display": "RA: C-button Mode",
+      "options": [
+        "Custom",
+        "Classic (R2 + A, B, X, Y)",
+        "Action (A, X, Select, R1)"
+      ],
+      "selected": "Custom",
+      "overrides": {}
     }
+  },
+  "sortOrder": 3900,
+  "brand": "Nintendo",
+  "type": "homeconsole",
+  "releaseYear": 1996,
+  "default_emulator": "km_ludicrousn64_2k22_xtreme_amped",
+  "scaling_min_freq": 1008000,
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_A30",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2"
   ]
 }

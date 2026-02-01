@@ -1,96 +1,65 @@
 #!/bin/sh
 
-. "$HELPER_FUNCTIONS"
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 
-SETTINGS_FILE="/config/system.json"
-SWAPFILE="/mnt/SDCARD/cachefile"
-SDCARD_PATH="/mnt/SDCARD"
+start_pyui_message_writer
 
-SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/bg_tree_sm.png"
-FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/App/firmwareupdate.png"
+flag_remove "first_boot_$PLATFORM"
+log_message "Starting firstboot script on $PLATFORM"
+
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
-USER_THEME=$(get_theme_path_to_restore)
-
+UNPACKING_ICON="/mnt/SDCARD/spruce/imgs/refreshing.png"
+SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
+SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 
-log_message "Starting firstboot script"
 
-# initialize the settings... users can restore their own backup later.
-cp "${SDCARD_PATH}/spruce/settings/system.json" "$SETTINGS_FILE"
+display_image_and_text "$SPRUCE_LOGO" 35 25 "Installing spruce $SPRUCE_VERSION" 75
+sleep 5 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
 
-# restore the user's theme in the "theme" field of the config.JSON
-jq --arg new_theme "$USER_THEME" '.theme = $new_theme' "$SETTINGS_FILE" > tmp.json && mv tmp.json "$SETTINGS_FILE"
+SSH_SERVICE_NAME=$(get_ssh_service_name)
+if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
+    log_message "Preparing SSH keys if necessary"
+    dropbear_generate_keys &
+fi
 
-sync # Use sync just once to flush all changes of system.json to disk
-
-# Copy spruce.cfg to www folder so the landing page can read it.
-cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"
-
-display -i "$SPRUCE_LOGO" -t "Installing spruce $SPRUCE_VERSION" -p 400
-log_message "First boot flag detected"
-
-log_message "Running developer mode check" -v
-/mnt/SDCARD/spruce/scripts/devconf.sh > /dev/null &
-
-if [ -f "${SWAPFILE}" ]; then
-    SWAPSIZE=$(du -k "${SWAPFILE}" | cut -f1)
-    MINSIZE=$((128 * 1024))
-    if [ "$SWAPSIZE" -lt "$MINSIZE" ]; then
-        swapoff "${SWAPFILE}"
-        rm "${SWAPFILE}"
-        log_message "Removed undersized swap file"
+if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
+    mkdir -p /mnt/SDCARD/Persistent/
+    if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
+        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log
+    else
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "PortMaster already exists, removing install archive" 75
     fi
+
+    rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
 fi
 
-if [ ! -f "${SWAPFILE}" ]; then
-    dd if=/dev/zero of="${SWAPFILE}" bs=1M count=128
-    mkswap "${SWAPFILE}"
-    sync
-    log_message "Created new swap file"
-fi
+display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
+sleep 5
 
-log_message "Running emu_setup.sh"
-/mnt/SDCARD/Emu/.emu_setup/emu_setup.sh
-
-log_message "Running emufresh.sh"
-/mnt/SDCARD/spruce/scripts/emufresh_md5_multi.sh
-
-log_message "Running iconfresh.sh"
-/mnt/SDCARD/spruce/scripts/iconfresh.sh
-
-log_message "Checking for DONTTOUCH theme"
-if [ -d "/mnt/SDCARD/Themes/DONTTOUCH" ]; then
-    log_message "DONTTOUCH theme found. Removing theme."
-    rm -rf /mnt/SDCARD/Themes/DONTTOUCH
-fi
-
-log_message "Sorting themes"
-sh /mnt/SDCARD/spruce/scripts/tasks/sortThemes.sh
-
-sleep 3 # make sure installing spruce logo stays up longer; gives more time for XMB to unpack too
-
-log_message "Displaying wiki image"
-display -d 5 --icon "$WIKI_ICON" -t "Check out the spruce wiki on our GitHub page for tips and FAQs!"
-
-VERSION=$(cat /usr/miyoo/version)
-if [ "$VERSION" -lt 20240713100458 ]; then
-    log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-    sed -i 's|"wifi":	1|"wifi":	0|g' "$SETTINGS_FILE"
-    display -i "$BG_IMAGE" --icon "$FW_ICON" -d 5 -t "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!"
-fi
+perform_fw_check
 
 if flag_check "pre_menu_unpacking"; then
-    display --icon "/mnt/SDCARD/spruce/imgs/iconfresh.png" -t "Finishing up unpacking themes and files.........."
+    display_image_and_text "$UNPACKING_ICON" 35 25 "Finishing up unpacking themes and files.........." 75
     flag_remove "silentUnpacker"
     while flag_check "pre_menu_unpacking"; do
-        sleep 0.3
+        sleep 0.2
     done
 fi
 
-log_message "Displaying enjoy image"
-display -d 5 --icon "$HAPPY_ICON" -t "Happy gaming.........."
+# create splore launcher if it doesn't already exist
+if [ ! -f "$SPLORE_CART" ]; then
+	touch "$SPLORE_CART" && log_message "firstboot.sh: created $SPLORE_CART"
+else
+	log_message "firstboot.sh: $SPLORE_CART already found."
+fi
 
-flag_remove "first_boot"
-log_message "Removed first boot flag"
+"$(get_python_path)" -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
+
+display_image_and_text "$HAPPY_ICON" 35 25 "Happy gaming.........." 75
+sleep 5
+
 log_message "Finished firstboot script"

@@ -1,39 +1,60 @@
 {
   "label": "SNES",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/sfc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/sfc.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/SFC",
-  "imgpath": "../../Roms/SFC/Imgs",
-  "gamelist": "../../Roms/SFC/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "sfc.png",
+  "iconsel": "sfc_sel.png",
+  "themecolor": "FF0000",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|smc|sfc|fig|gd3|gd7|dx2|bsx|bs|swc|st",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random SNES/SFC game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "chimerasnes",
+        "mednafen_supafaust",
+        "snes9x"
+      ],
+      "selected": "mednafen_supafaust",
+      "overrides": {},
+      "devices": [
+        "MIYOO_A30",
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK"
+      ]
     },
-    {
-      "name": "Emu Core: (✓CHIMERASNES)-supafaust-snes9x",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator_MiyooMini": {
+      "display": "Retroarch Core",
+      "options": [
+        "mednafen_supafaust",
+        "snes9x",
+        "snes9x2010"
+      ],
+      "selected": "snes9x2010",
+      "overrides": {},
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
     }
-  ]
+  },
+  "sortOrder": 6200,
+  "brand": "Nintendo",
+  "type": "homeconsole",
+  "releaseYear": 1990,
+  "default_emulator": "chimerasnes",
+  "scaling_min_freq": 816000
 }

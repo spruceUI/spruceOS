@@ -1,36 +1,64 @@
 {
   "label": "NDS",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/nds.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/nds.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/NDS",
-  "imgpath": "../../Roms/NDS/Imgs",
-  "gamelist": "../../Roms/NDS/miyoogamelist.xml",
-  "useswap": 1,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "nds.png",
+  "iconsel": "nds_sel.png",
+  "themecolor": "FF8800",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "noaudiofix": 1,
   "extlist": "nds|zip|7z|rar",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random Nintendo DS game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
+    "Emulator_Flip": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-Steward",
+        "DraStic-trngaje"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
     },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
+    "Emulator_Brick": {
+      "display": "Emulator",
+      "devices": [
+        "TRIMUI_BRICK"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-Steward"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
     },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "DraStic-stock"
+      ],
+      "selected": "DraStic-stock",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 4000,
+  "brand": "Nintendo",
+  "type": "handheld",
+  "releaseYear": 2004,
+  "default_emulator": "DraStic-original",
+  "scaling_min_freq": 816000
 }

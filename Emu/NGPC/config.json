@@ -1,39 +1,36 @@
 {
   "label": "NGPC",
-  "icon": "/mnt/SDCARD/Themes/SPRUCE/icons/ngpc.png",
-  "iconsel": "/mnt/SDCARD/Themes/SPRUCE/icons/sel/ngpc.png",
-  "launch": "../.emu_setup/standard_launch.sh",
-  "rompath": "../../Roms/NGPC",
-  "imgpath": "../../Roms/NGPC/Imgs",
-  "gamelist": "../../Roms/NGPC/miyoogamelist.xml",
-  "useswap": 0,
-  "shortname": 0,
-  "hidebios": 0,
+  "icon": "ngpc.png",
+  "iconsel": "ngpc_sel.png",
+  "themecolor": "FFFFFF",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "ngp|ngc|zip|7z",
-  "launchlist": [
-    {
-      "name": "Add/Remove Favorite",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/toggle_favourite.sh"
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
     },
-    {
-      "name": "Jump to random NeoGeo Pocket Color game",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/aleatorio.sh"
-    },
-    {
-      "name": "Emu Core: (✓MEDNAFEN)-race",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/core_switch.sh"
-    },
-    {
-      "name": "CPU Mode: (✓SMART)-Performance-Overclock",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/cpu_switch.sh"
-    },
-    {
-      "name": "Save current launch settings as per-game override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/set_override.sh"
-    },
-    {
-      "name": "Remove per-game launch setting override",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/remove_override.sh"
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "mednafen_ngp",
+        "race"
+      ],
+      "selected": "mednafen_ngp",
+      "overrides": {}
     }
-  ]
+  },
+  "sortOrder": 4500,
+  "brand": "SNK",
+  "type": "handheld",
+  "releaseYear": 1999,
+  "default_emulator": "mednafen_ngp",
+  "scaling_min_freq": 408000
 }

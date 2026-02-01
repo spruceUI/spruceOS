@@ -1,13 +1,4 @@
 #!/bin/sh
-if [ "$1" == "0" ]; then
-    echo -n "macOS ._* files will be deleted on save and exit."
-    return 0
-fi
-
-if [ "$1" == "1" ]; then
-    echo -n "Use this to delete any junk files created by macOS."
-    return 0
-fi
 
 check_and_delete() {
     BASENAME="$(basename "$1")"

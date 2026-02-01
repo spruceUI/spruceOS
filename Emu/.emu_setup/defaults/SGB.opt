@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CORE="mgba"
-export MODE="smart"
-
-export scaling_min_freq=480000

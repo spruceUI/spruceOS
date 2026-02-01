@@ -1,0 +1,18 @@
+{
+  "vol": 10,
+  "keymap": "L,L2,R,R2,X,A,B,Y",
+  "mute": 0,
+  "bgmvol": 0,
+  "brightness": 7,
+  "language": "en.lang",
+  "hibernate": 0,
+  "lumination": 6,
+  "hue": 10,
+  "saturation": 10,
+  "contrast": 10,
+  "theme": "/mnt/SDCARD/Themes/SPRUCE/",
+  "fontsize": 24,
+  "audiofix": 1,
+  "wifi": 1,
+  "cpufreq": 0
+}

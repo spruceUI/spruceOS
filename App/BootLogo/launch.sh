@@ -1,114 +1,67 @@
 #!/bin/sh
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LOGO_NAME="bootlogo"
-PROCESSED_NAME="bootlogo_processed.bmp"
-TEMP_BMP="temp_logo.bmp"
-MAX_SIZE=62234
-DIR="$(dirname "$0")"
-cd "$DIR" || exit 1
+APP_DIR=/mnt/SDCARD/App/BootLogo
+IMG_DIR="$APP_DIR/Imgs"
+INSTALL="/mnt/SDCARD/App/BootLogo/install_logo.sh"
 
-# Function for user messages
-display_message() {
-    display -i "$DIR/res/$1.png" -d 1
+construct_config() {
+    cd "$IMG_DIR" || return 1
+    echo "{" > "$APP_DIR/bootlogo.json"
+
+    for logo in /mnt/SDCARD/App/BootLogo/Imgs/* ; do
+        file_ext=""
+        case "$logo" in
+            *"Yes, flash"*) continue ;; # ignore confirmation images
+            *".bmp") file_ext=".bmp" ;;
+            *".png") file_ext=".png" ;;
+            *)       continue        ;; # ignore non-bmp/png files
+        esac
+        logo_name="$(basename "$logo" "$file_ext")" 
+        cp -f "$logo" "$IMG_DIR/Yes, flash ${logo_name}${file_ext}"
+        echo "\"$logo_name/Yes, flash $logo_name\": \"cp -f '$logo' '$APP_DIR/bootlogo${file_ext}'\"," >> "$APP_DIR/bootlogo.json"
+    done
+
+    sed -i '$ s/,$//' "$APP_DIR/bootlogo.json"      # strip away final trailing comma
+    echo "}" >> "$APP_DIR/bootlogo.json"
+    return 0
 }
 
-display_logo() {
-    display -i "$DIR/$1.png" -d 1
-}
+##### MAIN EXECUTION #####
 
-# Check for input image in BMP or PNG format
-LOGO_PATH="/mnt/SDCARD/App/BootLogo/$LOGO_NAME"
-if [ -f "${LOGO_PATH}.bmp" ]; then
-    LOGO_PATH="${LOGO_PATH}.bmp"
-elif [ -f "${LOGO_PATH}.png" ]; then
-    LOGO_PATH="${LOGO_PATH}.png"
-else
-    echo "Error: Neither $LOGO_NAME.bmp nor $LOGO_NAME.png exist in the directory: $DIR"
-    display_message "missing"
+mv -f /mnt/SDCARD/App/BootLogo/bootlogo.png /mnt/SDCARD/App/BootLogo/bootlogo.png.bak 2>/dev/null
+
+start_pyui_message_writer
+log_and_display_message "Preparing boot logo selection menu. Please wait.........."
+
+
+if ! construct_config; then
+    log_and_display_message "Could not find App/BootLogo/Imgs folder. Exiting."
+    sleep 3
     exit 1
 fi
 
-# Convert image to BMP if not already
-EXTENSION="${LOGO_PATH##*.}"
-if [ "$EXTENSION" != "bmp" ]; then
-    echo "Converting image to BMP format..."
-    ffmpeg -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,640/480),640,-1)':'if(gt(iw/ih,640/480),-1,480)',pad=640:480:(640-iw)/2:(480-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
-        display_message "error"
-        exit 1
+RESULT_FILE="/mnt/SDCARD/App/PyUI/selection.txt"
+rm -f "$RESULT_FILE"
+
+display_option_list "$APP_DIR/bootlogo.json"
+while true; do
+    if [ -f "$RESULT_FILE" ]; then
+        content=$(cat "$RESULT_FILE" 2>/dev/null)
+        if [ "$content" = "EXIT" ]; then
+            log_and_display_message "No bootlogo selected. Exiting."
+            sleep 2
+            break
+        else
+            log_message "$content"
+            # Execute the content of the file as a command
+            eval "$content"
+            rm -f "$RESULT_FILE"
+            "$INSTALL"
+            break
+        fi
     fi
-    LOGO_PATH="$TEMP_BMP"
-fi
+done
 
-# Image conversion: rotation, resizing, compression
-echo "Processing image..."
-ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to process image with FFmpeg."
-    display_message "error"
-    exit 1
-fi
-
-# Compress image
-gzip -k "$PROCESSED_NAME"
-PROCESSED_PATH="$PROCESSED_NAME.gz"
-LOGO_SIZE=$(wc -c < "$PROCESSED_PATH")
-
-# Check dimensions of compressed image
-if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
-    echo "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
-    display_message "simplify"
-    rm "$PROCESSED_PATH" boot0 boot0-suffix
-    rm -f "$TEMP_BMP" "$PROCESSED_NAME"
-    exit 1
-fi
-
-# Backup partition
-echo "Creating backup of original partition..."
-cp /dev/mtdblock0 boot0
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to create a backup of the partition."
-    exit 1
-fi
-
-# Recover offset from firmware version
-VERSION=$(cat /usr/miyoo/version)
-OFFSET_PATH="res/offset-$VERSION"
-if [ ! -f "$OFFSET_PATH" ]; then
-    echo "Error: Offset not found for firmware version ($VERSION)."
-    display_message "abort"
-    rm "$PROCESSED_PATH" boot0
-    exit 1
-fi
-OFFSET=$(cat "$OFFSET_PATH")
-
-# Display update image
-echo "Displaying update image..."
-display_message "updating"
-
-# Update bootlogo in memory
-echo "Updating BootLogo..."
-OFFSET_PART=$((OFFSET + LOGO_SIZE))
-dd if=boot0 of=boot0-suffix bs=1 skip=$OFFSET_PART > /dev/null 2>&1
-dd if="$PROCESSED_PATH" of=boot0 bs=1 seek=$OFFSET > /dev/null 2>&1
-dd if=boot0-suffix of=boot0 bs=1 seek=$OFFSET_PART > /dev/null 2>&1
-
-echo "Writing updated partition..."
-mtd write "$DIR/boot0" boot > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "Error: Unable to write updated partition."
-    display_message "error"
-    rm "$PROCESSED_PATH" boot0 boot0-suffix
-    exit 1
-fi
-
-# Clean up temporary files
-rm "$PROCESSED_PATH" boot0 boot0-suffix
-rm -f "$TEMP_BMP" "$PROCESSED_NAME"
-echo "Bootlogo updated successfully!"
-display_message "done"
-
-# Visualizza immagine finale
-display_logo "$LOGO_NAME"
+mv -f /mnt/SDCARD/App/BootLogo/bootlogo.png.bak /mnt/SDCARD/App/BootLogo/bootlogo.png 2>/dev/null
