@@ -17,6 +17,13 @@
 #   load_drastic_configs
 #   save_drastic_configs
 
+core_unrecognized_for_platform_message() {
+	start_pyui_message_writer
+	log_and_display_message "NDS $CORE is not recognized for $PLATFORM.\nPlease check your configuration."
+	sleep 5
+	stop_pyui_message_writer
+}
+
 run_drastic() {
 	load_drastic_configs
 	#Why do we use grid on NDS but no other systems?
@@ -38,28 +45,11 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			if [ "$CORE" = "DraStic-Steward" ]; then
-				run_drastic_steward_Brick
-			else 
-				run_drastic64
-			fi
-
+			run_drastic_brick
 		elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
-			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
-			export SDL_AUDIODRIVER=dsp
-			run_drastic64
-
+			run_drastic_smartpro
 		elif [ "$PLATFORM" = "Flip" ]; then
-			if [ -d /usr/l32 ] && [ "$CORE" = "DraStic-Steward" ]; then
-				run_drastic_steward_Flip
-
-			elif [ "$CORE" = "DraStic-trngaje" ]; then
-				run_drastic_trngaje_Flip
-
-			else
-				run_drastic64 		# if overlay mount of /usr fails, fall back to original DraStic instead of Steward's
-			fi
-
+			run_drastic_flip
 		elif [ "$PLATFORM" = "Pixel2" ]; then
 			run_drastic_Pixel2
 		fi
@@ -72,62 +62,109 @@ run_drastic() {
 	save_drastic_configs
 }
 
+run_drastic_brick(){
+	if [ "$CORE" = "DraStic-Steward" ]; then
+		run_drastic_steward_Brick
+	elif [ "$CORE" = "DraStic-original" ]; then 
+		run_drastic64
+	else
+		core_unrecognized_for_platform_message
+	fi
+}
+
+run_drastic_smartpro(){			
+	if [ "$CORE" = "DraStic-original" ]; then 
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
+		export SDL_AUDIODRIVER=dsp
+		run_drastic64
+	else
+		core_unrecognized_for_platform_message
+	fi
+}
+
+run_drastic_flip(){
+	if [ "$CORE" = "DraStic-Steward" ]; then
+		if [ -d /usr/l32 ]; then
+			run_drastic_steward_Flip
+		else
+			start_pyui_message_writer
+			log_and_display_message "There appears to be an issue with your setup.\nPlease ensure you're on the latest miyoo flip firmware."
+			sleep 5
+			stop_pyui_message_writer
+		fi
+
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_Flip
+	elif [ "$CORE" = "DraStic-original" ]; then 
+		run_drastic64
+	else
+		core_unrecognized_for_platform_message
+	fi
+
+}
 run_drastic64() {
 	pin_to_dedicated_cores drastic64 2
 	./drastic64 "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 
 run_drastic_steward_A30() {
-	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
-	# the SDL library is hard coded to open ttyS0 for joystick raw input 
-	# so we pause joystickinput and create soft link to serial port
-	killall -q -STOP joystickinput
-	ln -s /dev/ttyS2 /dev/ttyS0
-	
-	export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
-	export SDL_VIDEODRIVER=mmiyoo
-	export SDL_AUDIODRIVER=mmiyoo
-	export EGL_VIDEODRIVER=mmiyoo
+	if [ "$CORE" = "DraStic-original" ]; then 
+		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
+		# the SDL library is hard coded to open ttyS0 for joystick raw input 
+		# so we pause joystickinput and create soft link to serial port
+		killall -q -STOP joystickinput
+		ln -s /dev/ttyS2 /dev/ttyS0
+		
+		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
+		export SDL_VIDEODRIVER=mmiyoo
+		export SDL_AUDIODRIVER=mmiyoo
+		export EGL_VIDEODRIVER=mmiyoo
 
-	pin_to_dedicated_cores drastic32 2
-	./drastic32 "$ROM_FILE"  > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		pin_to_dedicated_cores drastic32 2
+		./drastic32 "$ROM_FILE"  > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
-	# remove soft link and resume joystickinput
-	rm /dev/ttyS0
-	killall -q -CONT joystickinput
-	[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"		# stash arch dependent states
+		# remove soft link and resume joystickinput
+		rm /dev/ttyS0
+		killall -q -CONT joystickinput
+		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"		# stash arch dependent states
+	else
+		core_unrecognized_for_platform_message
+	fi
 }
 
 run_drastic_steward_MiyooMini() {
-	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
+	if [ "$CORE" = "DraStic-original" ]; then 
+		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
 
 
-	nds_emu_dir=/mnt/SDCARD/Emu/NDS
-	export HOME=$nds_emu_dir
-	export PATH=$nds_emu_dir:$PATH
-	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
-	export SDL_VIDEODRIVER=mmiyoo
-	export SDL_AUDIODRIVER=mmiyoo
-	export EGL_VIDEODRIVER=mmiyoo
+		nds_emu_dir=/mnt/SDCARD/Emu/NDS
+		export HOME=$nds_emu_dir
+		export PATH=$nds_emu_dir:$PATH
+		export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
+		export SDL_VIDEODRIVER=mmiyoo
+		export SDL_AUDIODRIVER=mmiyoo
+		export EGL_VIDEODRIVER=mmiyoo
 
-	cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
+		cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
 
-	killall audioserver
+		killall audioserver
 
-	sv=`cat /proc/sys/vm/swappiness`
+		sv=`cat /proc/sys/vm/swappiness`
 
-	# 60 by default
-	echo 10 > /proc/sys/vm/swappiness
+		# 60 by default
+		echo 10 > /proc/sys/vm/swappiness
 
-	cd $nds_emu_dir
+		cd $nds_emu_dir
 
-	set_performance
-	log_message "Running DraStic-Steward on MiyooMini"
-	./drastic32 "$ROM_FILE"
-	sync
+		set_performance
+		log_message "Running DraStic-Steward on MiyooMini"
+		./drastic32 "$ROM_FILE"
+		sync
 
-	echo $sv > /proc/sys/vm/swappiness
-
+		echo $sv > /proc/sys/vm/swappiness
+	else
+		core_unrecognized_for_platform_message
+	fi
 }
 
 run_drastic_steward_Brick() {
