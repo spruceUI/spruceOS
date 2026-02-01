@@ -61,12 +61,12 @@
  - Over The Air updates.
 
 ## Installation
-  - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
+  - The short version is: format your SD card to FAT32 and extract the 7z (using the 7zip app) file to your PC, then copy the files onto your SD card.
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
 ## All In One Installer
-  - Download [The new Beta spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
+  - Download [The spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
   - Simply insert your SD card into your computer and run the program, be sure to select the correct drive!
   - It formats your card, downloads the latest official spruce release, and installs it in one click!
 
@@ -167,11 +167,10 @@ THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
    - Cilantro
    - Cobaltdsc4102
    - Dandon
-   - German Tacos
+   - Hario
    - Kitfox
    - Lonko
    - Ry - Ryan Sartor
-   - Spiken
    - SundownerSport
 
 ## SUPPORTED GAME SYSTEMS
