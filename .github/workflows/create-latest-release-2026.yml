@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Development branch
         uses: actions/checkout@v4
         with:
-          ref: Development
+          ref: v4.0-staging
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
