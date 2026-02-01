@@ -24,23 +24,16 @@ set_emu_core_from_emu_json() {
         return
     fi
 
-    case "$EMU_NAME" in
-        DC|NAOMI|N64|PS)
-            case "$PLATFORM" in
-                "A30")    export CORE="$(jq -r '.menuOptions.Emulator_A30.selected' "$EMU_JSON_PATH")" ;;
-                *)        export CORE="$(jq -r '.menuOptions.Emulator_64.selected' "$EMU_JSON_PATH")" ;;
-            esac
-            ;;
-        NDS)
-            case "$PLATFORM" in
-                "Flip")	  export CORE="$(jq -r '.menuOptions.Emulator_Flip.selected' "$EMU_JSON_PATH")"  ;;
-                "Brick")  export CORE="$(jq -r '.menuOptions.Emulator_Brick.selected' "$EMU_JSON_PATH")" ;;
-            esac
-            ;;
-        *)
-            export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
-            ;;
-    esac
+    # Try the architecture suffix
+    ARCH_SUFFIX="64"
+    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && ARCH_SUFFIX="32"
+    CORE_PATH=".menuOptions.Emulator_$ARCH_SUFFIX.selected"
+    if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
+        export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
+        return
+    fi
+
+    export CORE="$(jq -r '.menuOptions.Emulator.selected' "$EMU_JSON_PATH")"
 }
 
 get_cpu_mode_from_emu_json() {
