@@ -52,7 +52,7 @@ run_port() {
     PORTS_DIR=/mnt/SDCARD/Roms/PORTS
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-
+	export LC_ALL=C
     # TODO: Remove this when portmaster updates spruce detection
     if [ "$PLATFORM" = "Pixel2" ]; then
         PM_DIR="/mnt/SDCARD/Roms/PORTS/PortMaster"
