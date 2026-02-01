@@ -38,7 +38,7 @@ class TrimUIDevice(DeviceCommon):
             Display.volume_changed(new_volume)
 
     def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf("/userdata/cfg/wpa_supplicant.conf")
+        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
         
     def clear_framebuffer(self):
         pass
