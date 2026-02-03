@@ -17,17 +17,40 @@ import re
 from typing import Optional
 
 class BoxArtScraper:
-    # optional abbreviation mapping
+    """
+    Box art scraper with fuzzy matching algorithm.
+
+    Improvements from Rust implementation:
+    - Levenshtein edit distance for better fuzzy matching
+    - Enhanced token matching (exact, substring with min length, fuzzy)
+    - Expanded abbreviation support (13 entries)
+    - Bracket and parenthesis removal in normalization
+    - Improved weighted similarity algorithm with better penalties
+    - Exact match fast path for performance
+    - Higher threshold (0.4) to reduce false matches
+    - Roman numeral conversion includes "1" → "i"
+    """
+
+    # Abbreviation mapping (expanded from Rust implementation)
     ABBREVIATIONS = {
         "ff": "final fantasy",
         "zelda": "legend of zelda",
         "mario": "super mario",
-        # add more as needed
+        "smb": "super mario bros",
+        "smw": "super mario world",
+        "sf": "street fighter",
+        "mk": "mortal kombat",
+        "dkc": "donkey kong country",
+        "cv": "castlevania",
+        "mm": "mega man",
+        "dr": "doctor",
+        "st": "saint",
+        "mr": "mister",
     }
 
-    # numbers → roman numerals
+    # Numbers → roman numerals (expanded to include 1)
     NUM_TO_ROMAN = {
-        "2": "ii", "3": "iii", "4": "iv", "5": "v",
+        "1": "i", "2": "ii", "3": "iii", "4": "iv", "5": "v",
         "6": "vi", "7": "vii", "8": "viii", "9": "ix", "10": "x"
     }
 
@@ -192,6 +215,56 @@ class BoxArtScraper:
             return self.NUM_TO_ROMAN[token]
         return token
 
+    @staticmethod
+    def edit_distance(a: str, b: str) -> int:
+        """
+        Calculate Levenshtein edit distance between two strings.
+        Imported from Rust implementation for better fuzzy matching.
+        """
+        a_len = len(a)
+        b_len = len(b)
+
+        # Initialize previous row
+        prev = list(range(b_len + 1))
+        curr = [0] * (b_len + 1)
+
+        for i in range(1, a_len + 1):
+            curr[0] = i
+            for j in range(1, b_len + 1):
+                cost = 0 if a[i - 1] == b[j - 1] else 1
+                curr[j] = min(
+                    prev[j] + 1,      # deletion
+                    curr[j - 1] + 1,  # insertion
+                    prev[j - 1] + cost  # substitution
+                )
+            prev, curr = curr, prev
+
+        return prev[b_len]
+
+    @staticmethod
+    def tokens_match(a: str, b: str) -> bool:
+        """
+        Check if two tokens match using exact, substring, or fuzzy matching.
+        Imported from Rust implementation for better accuracy.
+        """
+        # Exact match
+        if a == b:
+            return True
+
+        # Substring match (only if shorter token is >= 3 chars)
+        if a in b or b in a:
+            shorter = min(len(a), len(b))
+            if shorter >= 3:
+                return True
+
+        # Levenshtein fuzzy match for tokens >= 4 chars
+        if len(a) >= 4 and len(b) >= 4:
+            max_dist = 2 if min(len(a), len(b)) >= 6 else 1
+            if BoxArtScraper.edit_distance(a, b) <= max_dist:
+                return True
+
+        return False
+
     def split_long_token(self, token: str) -> Set[str]:
         """
         For long concatenated words with no spaces, generate simple split.
@@ -205,11 +278,21 @@ class BoxArtScraper:
         mid = len(token) // 2
         return {token, token[:mid], token[mid:]}
 
-    def strip_parentheses(self, s: str) -> str:
-        """Remove all (...) and normalize spaces/symbols"""
-        s = re.sub(r"\(.*?\)", "", s)
+    def normalize_name(self, s: str) -> str:
+        """
+        Remove all (...) and [...] and normalize spaces/symbols.
+        Renamed from strip_parentheses and expanded to match Rust implementation.
+        """
+        # Remove parentheses and brackets
+        s = re.sub(r"\([^)]*\)", "", s)
+        s = re.sub(r"\[[^\]]*\]", "", s)
+        # Normalize spaces, dashes, underscores, commas
         s = re.sub(r"[\s\-_,]+", " ", s)
         return s.strip()
+
+    def strip_parentheses(self, s: str) -> str:
+        """Alias for normalize_name for backward compatibility"""
+        return self.normalize_name(s)
 
     def tokenize(self, s: str) -> Set[str]:
         """Convert string to set of tokens, preprocess abbreviations/numbers, remove stopwords"""
@@ -224,21 +307,37 @@ class BoxArtScraper:
         return tokens
         
     def weighted_similarity(self, target_tokens: Set[str], candidate_tokens: Set[str]) -> float:
-        matched_tokens = set()
+        """
+        Calculate weighted similarity between ROM tokens (target) and candidate tokens.
+        Improved algorithm from Rust implementation with better matching and penalties.
+        """
+        if not target_tokens or not candidate_tokens:
+            return 0.0
+
+        matched_target = set()
+
+        # Use improved token matching logic
         for t in target_tokens:
             for c in candidate_tokens:
-                if t in c or c in t:  # substring-aware match
-                    matched_tokens.add(t)
+                if self.tokens_match(t, c):
+                    matched_target.add(t)
                     break
 
-        # missing tokens are target tokens that didn't match any candidate token
-        missing_tokens = target_tokens - matched_tokens
-        penalty = sum(0 if t in {"1", "i"} else 0.3 for t in missing_tokens)
+        target_len = len(target_tokens)
+        candidate_len = len(candidate_tokens)
 
-        # union for score denominator can remain the original union
-        score = len(matched_tokens) / len(target_tokens | candidate_tokens)
+        # Base score: fraction of ROM tokens that matched
+        target_coverage = len(matched_target) / target_len
 
-        return max(score - penalty, 0.0)    
+        # Penalty for missing ROM tokens (important - these are what the user expects)
+        missing_tokens = target_tokens - matched_target
+        missing_penalty = sum(0.0 if t == "i" else 0.25 for t in missing_tokens)
+
+        # Small penalty for extra candidate tokens (less important)
+        extra_candidate = max(candidate_len - target_len, 0)
+        extra_penalty = extra_candidate * 0.05
+
+        return max(target_coverage - missing_penalty - extra_penalty, 0.0)    
     
     def find_image_from_list(
         self,
@@ -246,27 +345,42 @@ class BoxArtScraper:
         rom_without_ext: str,
         image_list: List[str],
     ) -> Optional[str]:
-
+        """
+        Find the best matching image from the cached list.
+        Improved algorithm from Rust implementation with exact match fast path.
+        """
         # Precompute token sets for this system if not already cached
         if sys_name not in self._cache:
             self._cache[sys_name] = [
-                (name, self.tokenize(self.strip_parentheses(name.replace(".png", ""))))
+                (name, self.tokenize(self.normalize_name(name.replace(".png", ""))))
                 for name in image_list
             ]
 
-        target_tokens = self.tokenize(self.strip_parentheses(rom_without_ext))
+        normalized_rom = self.normalize_name(rom_without_ext)
+        rom_lower = normalized_rom.lower()
+
+        # Fast path: exact match after normalization
+        for name, _ in self._cache[sys_name]:
+            normalized_candidate = self.normalize_name(name.replace(".png", "")).lower()
+            if rom_lower == normalized_candidate:
+                return name
+
+        # Fuzzy matching
+        target_tokens = self.tokenize(normalized_rom)
         best_score = 0.0
         best_candidates = []
 
         for name, candidate_tokens in self._cache[sys_name]:
             score = self.weighted_similarity(target_tokens, candidate_tokens)
-            if score > best_score:
+            # Use small epsilon for floating point comparison
+            if score > best_score + 0.001:
                 best_score = score
                 best_candidates = [name]
-            elif score == best_score:
+            elif abs(score - best_score) <= 0.001:
                 best_candidates.append(name)
 
-        if not best_candidates or best_score < 0.3:
+        # Raised threshold from 0.3 to 0.4 (matches Rust implementation)
+        if not best_candidates or best_score < 0.4:
             return None
 
         # Preferred region tie-breaker
