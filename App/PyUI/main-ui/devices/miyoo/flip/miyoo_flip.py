@@ -19,6 +19,7 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
+from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.timezone_menu import TimezoneMenu
@@ -468,3 +469,34 @@ class MiyooFlip(MiyooDevice):
         if(core is None):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
+    
+    @throttle.limit_refresh(15)
+    def get_wifi_status(self):
+        if(self.is_wifi_enabled()):
+            if(self.get_ip_addr_text() in ["Off","Error","Connecting"]):
+                return WifiStatus.OFF
+            wifi_connection_quality_info = self.get_wifi_connection_quality_info()
+            # Composite score out of 100 based on weighted contribution
+            # Adjust weights as needed based on empirical testing
+            if(wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0):
+                return WifiStatus.OFF
+            else:
+                score = (
+                    (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
+                    (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
+                    ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
+                ) * 100
+
+            # Ensure signal and settings stay in sync
+            self.get_ip_addr_text()
+            
+            if score >= 80:
+                return WifiStatus.GREAT
+            elif score >= 60:
+                return WifiStatus.GOOD
+            elif score >= 40:
+                return WifiStatus.OKAY
+            else:
+                return WifiStatus.BAD
+        else:            
+            return WifiStatus.OFF
