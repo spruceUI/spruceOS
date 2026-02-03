@@ -105,7 +105,9 @@ update_gameswitcher_json() {
     rom_file_path="$(printf '%s' "$CMD" | sed 's:.*"\([^"]*\)" *$:\1:')"
     rom_file_path=$(readlink -f "$rom_file_path")
     # Keep consistent between devices
+    # TODO move to device so we don't make this a giant list of regexs
     rom_file_path="${rom_file_path//\/sdcard\//\/SDCARD\/}"
+    rom_file_path="$(echo "$rom_file_path" | sed -E 's|^/mnt/SDCARD/mmc[[:alnum:]]+/|/mnt/SDCARD/|')"
     gameswitcher_json="/mnt/SDCARD/Saves/gameswitcher.json"
 
     # Create file if missing
