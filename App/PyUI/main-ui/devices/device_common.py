@@ -243,19 +243,6 @@ class DeviceCommon(AbstractDevice):
 
             time.sleep(10)
 
-    def rssi_to_quality(self, rssi_dbm):
-        """
-        Convert RSSI in dBm (negative values) to a 0–100 quality score.
-        """
-        if rssi_dbm is None:
-            return 0
-
-        # Clamp to realistic Wi-Fi range
-        rssi_dbm = max(-90, min(-30, rssi_dbm))
-
-        # Map -90..-30 → 0..100
-        return int((rssi_dbm + 90) * (100.0 / 60.0))
-
     @throttle.limit_refresh(15)
     def get_wifi_status(self):
         if not self.is_wifi_enabled():
@@ -528,3 +515,7 @@ class DeviceCommon(AbstractDevice):
 
     def get_new_wifi_scanner(self):
         return WiFiScanner()
+
+    def post_present_operations(self):
+        # Uneeded for most devices
+        pass

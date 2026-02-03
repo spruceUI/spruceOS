@@ -961,6 +961,7 @@ class Display:
 
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
+        Device.get_device().post_present_operations()
 
     #TODO make default false and fix everywhere
     @classmethod
