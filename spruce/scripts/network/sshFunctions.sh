@@ -26,10 +26,8 @@ start_ssh_process() {
 }
 
 stop_ssh_process() {
-    log_message "Shutting down $SSH_SERVICE_NAME..."
-    if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
-        killall -9 dropbearmulti
-    else # sshd
-        systemctl stop sshd
-    fi
+    log_message "Shutting down ssh..."
+    # Stop all forms of ssh
+    systemctl stop sshd
+    killall -9 dropbearmulti 2>/dev/null || true
 }

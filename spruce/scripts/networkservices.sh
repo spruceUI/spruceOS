@@ -35,6 +35,8 @@ connect_services() {
 		# Flag exists but service is not running, so start it...
 		log_message "Network services: $SSH_SERVICE_NAME detected not running, starting..."
 		start_ssh_process
+	else
+		stop_ssh_process
 	fi
 
 	# SFTPGo check
