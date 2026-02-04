@@ -8,6 +8,7 @@ from games.utils.rom_utils import RomUtils
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
+from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -144,7 +145,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         for base_path in self.roms_paths:
             for folder in folder_names:
                 full_path = os.path.join(base_path, folder)
-                if os.path.isdir(full_path):
+                if CachedExists.exists(full_path):
                     paths.append(full_path)
 
         return paths
