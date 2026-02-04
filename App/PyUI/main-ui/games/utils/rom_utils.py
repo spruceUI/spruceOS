@@ -92,7 +92,7 @@ class RomUtils:
                             if(game_system.game_system_config.scan_subfolders()):
                                 if self.has_roms(game_system, entry.path):
                                     valid_folders.append(entry.path)
-            except (FileNotFoundError, PermissionError):
+            except (Exception):
                 continue
 
         # store in cache
