@@ -55,7 +55,7 @@ class RomUtils:
                         continue
 
                     if len(valid_suffix_set) == 0:
-                        if not entry.name.startswith('.') and not entry.name.endswith(('.xml', '.txt', '.db')):
+                        if not entry.name.startswith('.') and not entry.name.endswith(('.xml', '.txt', '.db')) and not entry.name in game_system.game_system_config.get_ignore_list():
                             return True
                     else:
                         if Path(entry.name).suffix.lower() in valid_suffix_set:
@@ -86,7 +86,8 @@ class RomUtils:
                         if entry.is_file(follow_symlinks=False):
                             suffix = Path(name).suffix.lower()
                             if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
-                                valid_files.append(entry.path)
+                                if name not in game_system.game_system_config.get_ignore_list():
+                                    valid_files.append(entry.path)
                         elif entry.is_dir(follow_symlinks=False) and os.path.basename(dir_to_search) != "Imgs":
                             # only consider folders that contain ROMs
                             if(game_system.game_system_config.scan_subfolders()):
