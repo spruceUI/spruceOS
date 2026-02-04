@@ -174,3 +174,6 @@ class FileBasedGameSystemConfig():
     def scan_subfolders(self):
         return self._data.get('scanSubfolders', True)
         
+    def get_alternative_folder_names(self):
+        return self._data.get('alternativeFolderNames', [])
+

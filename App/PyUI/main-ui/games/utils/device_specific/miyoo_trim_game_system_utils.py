@@ -131,17 +131,24 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()
-            return GameSystem(self.build_paths_array(system_name),display_name, game_system_config)
+            return GameSystem(self.build_paths_array(system_name, game_system_config),display_name, game_system_config)
 
         PyUiLogger.get_logger().error(f"Unable to load game system for {system_name}")
         return None
 
-    def build_paths_array(self, system_name):
-        # Build a copy of self.roms_paths with the system_name appended to each path
-        return [
-            full_path for full_path in (os.path.join(path, system_name) for path in self.roms_paths)
-            if os.path.isdir(full_path)
-        ]
+    def build_paths_array(self, system_name, game_system_config):
+        alternative_folder_names = game_system_config.get_alternative_folder_names() or []
+        folder_names = [system_name] + list(alternative_folder_names)
+
+        paths = []
+        for base_path in self.roms_paths:
+            for folder in folder_names:
+                full_path = os.path.join(base_path, folder)
+                if os.path.isdir(full_path):
+                    paths.append(full_path)
+
+        return paths
+    
     def get_active_systems(self) -> list[GameSystem]:
         active_systems : list[GameSystem]= []
         
@@ -167,7 +174,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                 devices = game_system_config.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
                 if(supported_device):
-                    folder_paths = self.build_paths_array(folder)
+                    folder_paths = self.build_paths_array(folder, game_system_config)
                     if(len(folder_paths) > 0):
                         display_name = game_system_config.get_label()
                         game_system = GameSystem(folder_paths,display_name, game_system_config)
