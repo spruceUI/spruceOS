@@ -77,11 +77,12 @@ class CollectionsManager:
             with open(file_path, 'r') as f:
                 data = json.load(f)
                 for coll in data:
-                    game_list = [
-                        RomsListEntry(game["rom_file_path"], game["game_system_name"])
-                        for game in coll["game_list"]
-                    ]
-                    cls._collections.append(CollectionEntry(coll["collection_name"], game_list))
+                    if(coll["collection_name"] is not None):
+                        game_list = [
+                            RomsListEntry(game["rom_file_path"], game["game_system_name"])
+                            for game in coll["game_list"]
+                        ]
+                        cls._collections.append(CollectionEntry(coll["collection_name"], game_list))
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to load collections file: {e}")
             cls._collections = []
