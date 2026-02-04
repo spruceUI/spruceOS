@@ -263,28 +263,3 @@ class TrimUISmartProS(TrimUIDevice):
         self.run_cmd([self.reboot_cmd()])
         # So we dont update the display while rebooting
         time.sleep(10)
-
-    def get_free_mem_mb(self):
-        with open("/proc/meminfo", "r") as f:
-            meminfo = f.read()
-
-        for line in meminfo.splitlines():
-            if line.startswith("MemAvailable:"):
-                # value is in kB
-                return int(line.split()[1]) // 1024
-
-        return None
-
-
-    def post_present_operations(self):
-
-        # last cache clear is done to account for the time it takes
-        # the memory to truly become free after we've marked it for deletion
-        # in SDL
-        self.last_cache_clear += 1
-        free_mb = self.get_free_mem_mb()
-
-        if free_mb is not None and free_mb < 100 and self.last_cache_clear > 10:
-            PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
-            Display.clear_cache()
-            self.last_cache_clear = 0
