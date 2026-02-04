@@ -56,5 +56,6 @@
   "type": "pc",
   "releaseYear": 1985,
   "default_emulator": "uae4arm",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": []
 }

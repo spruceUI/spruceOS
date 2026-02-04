@@ -23,5 +23,6 @@
   "type": "handheld",
   "releaseYear": 2001,
   "default_emulator": "pokemini",
-  "scaling_min_freq": 408000
+  "scaling_min_freq": 408000,
+  "alternativeFolderNames": []
 }

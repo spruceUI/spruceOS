@@ -23,5 +23,6 @@
   "type": "pc",
   "releaseYear": 1982,
   "default_emulator": "vice_x64",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": []
 }

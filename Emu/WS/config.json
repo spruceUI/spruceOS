@@ -23,5 +23,6 @@
   "type": "handheld",
   "releaseYear": 1999,
   "default_emulator": "mednafen_wswan",
-  "scaling_min_freq": 648000
+  "scaling_min_freq": 648000,
+  "alternativeFolderNames": []
 }

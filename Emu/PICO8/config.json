@@ -73,5 +73,6 @@
   "type": "fantasy",
   "releaseYear": 2015,
   "default_emulator": "pico8",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": []
 }
