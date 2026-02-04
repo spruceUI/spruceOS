@@ -68,6 +68,7 @@ class FfmpegImageUtils(ImageUtils):
                     "-y",
                     "-i", input_path,
                     "-vf", scale_filter,
+                    "-pix_fmt", "rgba",
                     "-frames:v", "1",
                     "-update", "1",
                     temp_path
