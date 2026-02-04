@@ -4,7 +4,7 @@
   "iconsel": "naomi_sel.png",
   "themecolor": "FFFFFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip|dat",
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
