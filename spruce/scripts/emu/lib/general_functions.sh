@@ -20,13 +20,10 @@ translate_rom_dir_to_emu_name() {
     rom_dir_name="$(echo "$1" | cut -d'/' -f5)"
 
     # 1) Direct match: ROM dir == emulator dir
-    for emu in /mnt/SDCARD/Emu/*; do
-        emu_name="$(basename "$emu")"
-        if [ "$emu_name" = "$rom_dir_name" ]; then
-            echo "$emu_name"
-            return 0
-        fi
-    done
+    if [ -d "/mnt/SDCARD/Emu/$rom_dir_name" ]; then
+        echo "$rom_dir_name"
+        return 0
+    fi
 
     # 2) Match against alternativeFolderNames in config.json
     for cfg in /mnt/SDCARD/Emu/*/config.json; do
