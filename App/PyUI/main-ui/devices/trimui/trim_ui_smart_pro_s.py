@@ -37,7 +37,6 @@ class TrimUISmartProS(TrimUIDevice):
         source = script_dir / 'brick-system.json'
         self._load_system_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
         self.mainui_volume = 0
-        self.last_cache_clear = 0
         if(main_ui_mode):
             self.on_mainui_config_change()
             trim_stock_json_file = script_dir / 'stock/brick.json'
