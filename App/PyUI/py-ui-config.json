@@ -10,5 +10,6 @@
     "allowPyUiGameSwitcher": true,
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
-    "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+    "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
+    "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl"
 }
