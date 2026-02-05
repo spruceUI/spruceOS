@@ -14,7 +14,9 @@ log_message "trying: $0 $@"
 . /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
 
 export LOG_DIR=/mnt/SDCARD/Saves/spruce
-export EMU_NAME="$(translate_rom_dir_to_emu_name "$1")"
+emu_name=${0#*/Emu/}   # remove prefix up to /Emu/
+emu_name=${emu_name%%/*}  # keep only up to next /
+export EMU_NAME="$emu_name"
 export EMU_DIR="/mnt/SDCARD/Emu/${EMU_NAME}"
 export EMU_JSON_PATH="${EMU_DIR}/config.json"
 export GAME="$(basename "$1")"
