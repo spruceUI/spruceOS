@@ -197,3 +197,9 @@ class PyUiConfig:
     @classmethod
     def get_wpa_supplicant_conf_file_location(cls, default_path):
         return cls.get("wpaSupplicantConfigFileLocation",default_path)
+
+    @classmethod
+    def get_activity_log_path(cls):
+        return cls.get("activityLogPath",None)
+    
+    
