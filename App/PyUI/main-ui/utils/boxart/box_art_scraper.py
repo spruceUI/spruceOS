@@ -398,13 +398,13 @@ class BoxArtScraper:
     # ==========================================================
     
     # Function to process a single ROM file
-    def process_rom(self,sys_name, ra_name, root, file):
-                
-        if not os.path.exists(os.path.join(root, "Imgs")):
-            os.makedirs(os.path.join(root, "Imgs"), exist_ok=True)
+    def process_rom(self,sys_name, ra_name, sys_imgs_dir, file):
+
+        if not os.path.exists(sys_imgs_dir):
+            os.makedirs(sys_imgs_dir, exist_ok=True)
 
         rom_name = os.path.splitext(file)[0]
-        image_path = os.path.join(root, "Imgs", f"{rom_name}.png")
+        image_path = os.path.join(sys_imgs_dir, f"{rom_name}.png")
 
         if self.download_boxart(sys_name, rom_name, image_path):
             return image_path
@@ -515,6 +515,9 @@ class BoxArtScraper:
         sys_path = os.path.join(self.roms_dir, sys_dir)
         sys_name = os.path.basename(sys_path)
 
+        # Central Imgs folder at system level
+        sys_imgs_dir = os.path.join(sys_path, "Imgs")
+
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
             self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
@@ -534,13 +537,12 @@ class BoxArtScraper:
                     continue
 
                 rom_name = os.path.splitext(file)[0]
-                image_dir = os.path.join(root, "Imgs")
 
-                # Skip if image already exists
-                if os.path.exists(image_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(image_dir)):
+                # Skip if image already exists in central Imgs folder
+                if os.path.exists(sys_imgs_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(sys_imgs_dir)):
                     continue
 
-                tasks.append((sys_name, ra_name, root, file))
+                tasks.append((sys_name, ra_name, sys_imgs_dir, file))
         return tasks
 
     def check_wifi(self):
