@@ -398,13 +398,15 @@ class BoxArtScraper:
     # ==========================================================
     
     # Function to process a single ROM file
-    def process_rom(self,sys_name, ra_name, sys_imgs_dir, file):
+    def process_rom(self, sys_name, ra_name, sys_imgs_dir, relative_path, file):
 
-        if not os.path.exists(sys_imgs_dir):
-            os.makedirs(sys_imgs_dir, exist_ok=True)
+        # Create subfolder structure inside Imgs to mirror ROM folder structure
+        target_img_dir = os.path.join(sys_imgs_dir, relative_path)
+        if not os.path.exists(target_img_dir):
+            os.makedirs(target_img_dir, exist_ok=True)
 
         rom_name = os.path.splitext(file)[0]
-        image_path = os.path.join(sys_imgs_dir, f"{rom_name}.png")
+        image_path = os.path.join(target_img_dir, f"{rom_name}.png")
 
         if self.download_boxart(sys_name, rom_name, image_path):
             return image_path
@@ -532,17 +534,23 @@ class BoxArtScraper:
             if "Imgs" in root:
                 continue
 
+            # Calculate relative path from system root to preserve folder structure
+            relative_path = os.path.relpath(root, sys_path)
+            if relative_path == ".":
+                relative_path = ""
+
             for file in files:
                 if not any(file.lower().endswith(ext.lower()) for ext in extensions):
                     continue
 
                 rom_name = os.path.splitext(file)[0]
 
-                # Skip if image already exists in central Imgs folder
-                if os.path.exists(sys_imgs_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(sys_imgs_dir)):
+                # Check if image already exists in mirrored Imgs subfolder
+                target_img_dir = os.path.join(sys_imgs_dir, relative_path)
+                if os.path.exists(target_img_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(target_img_dir)):
                     continue
 
-                tasks.append((sys_name, ra_name, sys_imgs_dir, file))
+                tasks.append((sys_name, ra_name, sys_imgs_dir, relative_path, file))
         return tasks
 
     def check_wifi(self):
