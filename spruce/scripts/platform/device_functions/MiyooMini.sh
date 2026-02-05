@@ -45,8 +45,16 @@ set_overclock() {
 }
 
 device_init() {
-    #Enable GPIO48 for vibration motor 
+    # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
+
+    # Detect variant
+    variant="$(get_miyoo_mini_variant)"
+
+    if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
+        # Screen is off by like ~8px unless you do this, not sure why
+        cat /proc/ls
+    fi
 }
 
 vibrate() {
