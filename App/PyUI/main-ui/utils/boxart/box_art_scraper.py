@@ -245,21 +245,24 @@ class BoxArtScraper:
     def tokens_match(a: str, b: str) -> bool:
         """
         Check if two tokens match using exact, substring, or fuzzy matching.
-        Imported from Rust implementation for better accuracy.
+        Optimized to use Levenshtein sparingly for performance on low-power devices.
         """
-        # Exact match
+        # Exact match (fastest)
         if a == b:
             return True
 
-        # Substring match (only if shorter token is >= 3 chars)
+        # Substring match (very fast, only if shorter token is >= 3 chars)
         if a in b or b in a:
             shorter = min(len(a), len(b))
             if shorter >= 3:
                 return True
 
-        # Levenshtein fuzzy match for tokens >= 4 chars
-        if len(a) >= 4 and len(b) >= 4:
-            max_dist = 2 if min(len(a), len(b)) >= 6 else 1
+        # Levenshtein fuzzy match - ONLY for short-medium tokens (4-8 chars)
+        # where typos are most common, and only if lengths are similar
+        min_len = min(len(a), len(b))
+        max_len = max(len(a), len(b))
+        if 4 <= min_len <= 8 and max_len - min_len <= 2:
+            max_dist = 1  # Only allow 1 character difference for speed
             if BoxArtScraper.edit_distance(a, b) <= max_dist:
                 return True
 
@@ -365,12 +368,28 @@ class BoxArtScraper:
             if rom_lower == normalized_candidate:
                 return name
 
-        # Fuzzy matching
+        # Fuzzy matching - check same starting letter first for speed
         target_tokens = self.tokenize(normalized_rom)
+
+        # Get first letter of ROM (after normalization)
+        rom_first_letter = rom_lower[0] if rom_lower else ""
+
+        # Separate candidates by starting letter
+        same_letter_candidates = []
+        other_candidates = []
+
+        for name, candidate_tokens in self._cache[sys_name]:
+            candidate_lower = name.lower()
+            if candidate_lower and candidate_lower[0] == rom_first_letter:
+                same_letter_candidates.append((name, candidate_tokens))
+            else:
+                other_candidates.append((name, candidate_tokens))
+
+        # Check same-letter candidates first
         best_score = 0.0
         best_candidates = []
 
-        for name, candidate_tokens in self._cache[sys_name]:
+        for name, candidate_tokens in same_letter_candidates:
             score = self.weighted_similarity(target_tokens, candidate_tokens)
             # Use small epsilon for floating point comparison
             if score > best_score + 0.001:
@@ -379,6 +398,11 @@ class BoxArtScraper:
             elif abs(score - best_score) <= 0.001:
                 best_candidates.append(name)
 
+            # Early exit: if we found an excellent match (85%+), stop searching
+            if best_score >= 0.85:
+                break
+
+        # If no good match in same-letter section, bail out (don't check other letters)
         # Raised threshold from 0.3 to 0.4 (matches Rust implementation)
         if not best_candidates or best_score < 0.4:
             return None
