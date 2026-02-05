@@ -257,7 +257,7 @@ device_enter_sleep() {
 
 device_exit_sleep() {
     cpuclock 1600                                               # wake up cpu speed
-    keymon &
+    /customer/app/keymon &
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
     if [ -f /tmp/saved_brightness ]; then

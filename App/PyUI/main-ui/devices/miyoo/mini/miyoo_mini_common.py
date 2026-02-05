@@ -1,3 +1,4 @@
+import re
 import tempfile
 import time
 from asyncio import sleep
@@ -58,25 +59,50 @@ class MiyooMiniCommon(MiyooDevice):
 
         super().__init__()
 
+
     def on_mainui_config_change(self):
         path = "/appconfigs/system.json"
         if not os.path.exists(path):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
             return
 
+        volume = None
+
         try:
+            # First try normal JSON parsing
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-
-            old_volume = self.mainui_volume
-            self.mainui_volume = data.get("vol")
-            if(old_volume != self.mainui_volume):
-                from display.display import Display
-                Display.volume_changed(self.mainui_volume * 5)
+                volume = data.get("vol")
 
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
-            return None
+            PyUiLogger.get_logger().warning(
+                f"JSON parse failed for {path}, attempting fallback parse: {e}"
+            )
+
+            # Fallback: scan file text for `"vol" : number`
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        # Match: "vol" : 23   (allow spaces)
+                        m = re.search(r'"vol"\s*:\s*(\d+)', line)
+                        if m:
+                            volume = int(m.group(1))
+                            break
+            except Exception as e2:
+                PyUiLogger.get_logger().warning(
+                    f"Fallback parse failed for {path}: {e2}"
+                )
+                return
+
+        if volume is None:
+            return
+
+        old_volume = self.mainui_volume
+        self.mainui_volume = volume
+
+        if old_volume != self.mainui_volume:
+            from display.display import Display
+            Display.volume_changed(self.mainui_volume * 5)
 
     def startup_init(self, include_wifi=True):
         if(self.is_wifi_enabled()):
