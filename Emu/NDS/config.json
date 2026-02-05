@@ -61,5 +61,5 @@
   "releaseYear": 2004,
   "default_emulator": "DraStic-original",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["nds","DS","ds","nintendods","NINTENDODS"]
 }

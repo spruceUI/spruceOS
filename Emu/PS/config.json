@@ -56,5 +56,5 @@
   "releaseYear": 1994,
   "default_emulator": "pcsx_rearmed",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["PSX","PSONE","PLAYSTATION","psx","ps","psone","playstation"]
 }

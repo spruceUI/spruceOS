@@ -24,5 +24,5 @@
   "releaseYear": 1995,
   "default_emulator": "prboom",
   "scaling_min_freq": 480000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["doom","prboom","PRBOOM"]
 }

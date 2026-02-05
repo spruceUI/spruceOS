@@ -24,5 +24,5 @@
   "releaseYear": 1987,
   "default_emulator": "px68k",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["x68000","x68k","X68K","sharpx6800","SHARPX6800","sharpx68k","SHARPX68K"]
 }

@@ -12,5 +12,5 @@
   "releaseYear": 9999,
   "default_emulator": "ffplay",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["media","videos","VIDEOS","MUSIC","music"]
 }

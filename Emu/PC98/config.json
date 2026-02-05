@@ -24,5 +24,5 @@
   "releaseYear": 1982,
   "default_emulator": "np2kai",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["pc98","necpc98","NECPC98"]
 }

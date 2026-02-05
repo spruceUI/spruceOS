@@ -33,5 +33,5 @@
   "releaseYear": 1989,
   "default_emulator": "handy",
   "scaling_min_freq": 480000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["ATARILYNX","atarilynx","lynx"]
 }

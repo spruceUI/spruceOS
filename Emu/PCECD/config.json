@@ -29,5 +29,5 @@
   "releaseYear": 1988,
   "default_emulator": "mednafen_pce_fast",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["pcecd","pcenginecd","PCENGINECD","tgcd","TGCD","turbografxcd","TURBOGRAFXCD","turbocd","TURBOCD"]
 }

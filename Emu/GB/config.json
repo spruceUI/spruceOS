@@ -34,5 +34,5 @@
   "releaseYear": 1989,
   "default_emulator": "gambatte",
   "scaling_min_freq": 240000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["GAMEBOY","gb","gameboy","dmg","DMG"]
 }

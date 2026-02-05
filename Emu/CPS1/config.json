@@ -33,5 +33,5 @@
   "releaseYear": 1988,
   "default_emulator": "fbalpha2012",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["cps1","capcomcps1"]
 }

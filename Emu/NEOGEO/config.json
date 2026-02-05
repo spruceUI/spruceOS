@@ -54,5 +54,5 @@
   "releaseYear": 1990,
   "default_emulator": "fbalpha2012",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["NG","ng","neogeo"]
 }

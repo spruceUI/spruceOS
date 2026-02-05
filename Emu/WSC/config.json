@@ -24,5 +24,5 @@
   "releaseYear": 2000,
   "default_emulator": "mednafen_wswan",
   "scaling_min_freq": 648000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["wonderswancolor","wsc","wonderswanc","WONDERSWANCOLOR","WONDERSWANC"]
 }

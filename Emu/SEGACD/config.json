@@ -38,5 +38,5 @@
   "releaseYear": 1991,
   "default_emulator": "picodrive",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["segacd","mdcd","MDCD","megacd","MEGACD"]
 }

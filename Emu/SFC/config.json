@@ -57,5 +57,5 @@
   "releaseYear": 1990,
   "default_emulator": "chimerasnes",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["sfc","SNES","snes","supernes","SUPERNES","SUPERFAMICOM","superfamicom"]
 }
