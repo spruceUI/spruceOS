@@ -1,4 +1,4 @@
-snes9x_2010_aspect = "auto"
+snes9x_2010_aspect = "4:3"
 snes9x_2010_blargg = "disabled"
 snes9x_2010_block_invalid_vram_access = "disabled"
 snes9x_2010_overclock = "10 MHz (Default)"
