@@ -34,5 +34,5 @@
   "releaseYear": 1990,
   "default_emulator": "genesis_plus_gx",
   "scaling_min_freq": 408000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["GAMEGEAR","gamegear","gg"]
 }

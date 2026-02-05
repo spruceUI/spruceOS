@@ -33,5 +33,5 @@
   "releaseYear": 2001,
   "default_emulator": "gpsp",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["GAMEBOYADVANCE","gameboyadvance","gba","agb","AGB"]
 }

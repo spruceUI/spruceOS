@@ -33,5 +33,5 @@
   "releaseYear": 1986,
   "default_emulator": "fceumm",
   "scaling_min_freq": 408000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["fds","disksystem","famicomdisk","DISKSYSTEM"]
 }

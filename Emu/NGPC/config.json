@@ -33,5 +33,5 @@
   "releaseYear": 1999,
   "default_emulator": "mednafen_ngp",
   "scaling_min_freq": 408000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["ngpc","neogeopocketcolor","NEOGEOPOCKETCOLOR"]
 }

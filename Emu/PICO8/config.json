@@ -74,5 +74,5 @@
   "releaseYear": 2015,
   "default_emulator": "pico8",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["pico8","pico-8","PICO-8"]
 }

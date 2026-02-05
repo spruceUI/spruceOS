@@ -53,5 +53,5 @@
   "releaseYear": 2014,
   "default_emulator": "ardens",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["arduboy"]
 }

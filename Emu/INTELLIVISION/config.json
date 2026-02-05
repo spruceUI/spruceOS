@@ -25,5 +25,5 @@
   "releaseYear": 1979,
   "default_emulator": "freeintv",
   "scaling_min_freq": 480000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["intellivision","ITV","itv"]
 }

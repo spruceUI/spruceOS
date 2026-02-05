@@ -55,5 +55,5 @@
   "releaseYear": 1998,
   "default_emulator": "flycast",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["naomi"]
 }

@@ -34,5 +34,5 @@
   "releaseYear": 1983,
   "default_emulator": "fceumm",
   "scaling_min_freq": 312000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["NES","FAMICOM","nes","famicom","fc"]
 }

@@ -25,5 +25,5 @@
   "releaseYear": 2008,
   "default_emulator": "easyrpg",
   "scaling_min_freq": 480000,
-  "alternativeFolderNames": []
+  "alternativeFolderNames": ["easyrpg"]
 }
