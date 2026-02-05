@@ -51,7 +51,7 @@ get_shutdown_timer() {
     local IDLE_TIMEOUT=0
 
     case "$LID_TIMER" in
-        "Off")  IDLE_TIMEOUT=0 ;;
+        "Off")  IDLE_TIMEOUT=31536000 ;; # 1 year
         "5s")   IDLE_TIMEOUT=5 ;;
         "30s")  IDLE_TIMEOUT=30 ;;
         "1m")   IDLE_TIMEOUT=60 ;;
@@ -73,77 +73,56 @@ trigger_sleep() {
     # Get the lid powerdown timeout
     local IDLE_TIMEOUT
     IDLE_TIMEOUT=$(get_shutdown_timer)
-    now_ts=$(date +%s)
+    start_ts=$(date +%s)
     set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
     device_enter_sleep "$IDLE_TIMEOUT"
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
-        if [ "$IDLE_TIMEOUT" -gt 0 ]; then
-            log_message "Starting idle timeout countdown: ${IDLE_TIMEOUT}s until poweroff if lid remains closed"
-            local elapsed=0
-            local current_lid_state
+        log_message "Starting idle timeout countdown: ${IDLE_TIMEOUT}s until poweroff if lid remains closed"
+        local elapsed=0
+        local current_lid_state
 
-            while [ "$elapsed" -lt "$IDLE_TIMEOUT" ]; do
-                current_lid_state=$(device_lid_open)
+        while [ "$elapsed" -lt "$IDLE_TIMEOUT" ]; do
+            current_lid_state=$(device_lid_open)
                 
-                # Track if lid was ever closed
-                if [ "$current_lid_state" = "0" ]; then
-                    log_message "Detected lid closed, will now wait for it to open"
-                    lid_ever_closed=true
-                fi
+            # Track if lid was ever closed
+            if [ "$current_lid_state" = "0" ]; then
+                log_message "Detected lid closed, will now wait for it to open"
+                lid_ever_closed=true
+            fi
 
-                # If lid opened, restore screen and break
-                if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
-                    log_message "Lid opened"
+            # If lid opened, restore screen and break
+            if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
+                log_message "Lid opened"
+                sleep_exited=true 
+                break
+            elif power_button_pressed; then
+                if [ "$current_lid_state" = "1" ]; then
+                    log_message "Power button pressed, exiting pseudosleep"
                     sleep_exited=true 
                     break
-                elif power_button_pressed; then
-                    if [ "$current_lid_state" = "1" ]; then
-                        log_message "Power button pressed, exiting pseudosleep"
-                        sleep_exited=true 
-                        break
-                    else
-                        log_message "Power button pressed but lid is closed, continuing pseudosleep"
-                    fi
+                else
+                    log_message "Power button pressed but lid is closed, continuing pseudosleep"
                 fi
-
-                sleep 1
-                start_ts=$(date +%s)
-                elapsed=$((now_ts - start_ts))
-            done
-
-            # Timeout reached without exitting sleep → poweroff
-            if [ "$sleep_exited" = false ]; then
-                log_message "Lid closed for ${IDLE_TIMEOUT}s, triggering poweroff"
-                # Set clocks bad to full speed
-                set_performance
-                sleep 0.1
-                "$POWER_OFF_SCRIPT" &
             fi
-        else
-            # Lid closed but no poweroff timer — just stay in pseudosleep
-            while true; do
-                # Track if lid was ever closed
-                if [ "$current_lid_state" = "0" ]; then
-                    lid_ever_closed=true
-                fi
 
-                current_lid_state=$(device_lid_open)
-                # If lid opened, restore screen and break
-                if [ "$current_lid_state" = "1" ] && [ "$lid_ever_closed" = true ]; then
-                    log_message "Lid opened"
-                    break
-                elif power_button_pressed; then
-                    log_message "Power button pressed, exiting sleep"
-                    break
-                fi
-                sleep 1
-            done
+            sleep 1
+            now_ts=$(date +%s)
+            elapsed=$((now_ts - start_ts))
+        done
+
+        # Timeout reached without exitting sleep → poweroff
+        if [ "$sleep_exited" = false ]; then
+            log_message "Lid closed for ${IDLE_TIMEOUT}s, triggering poweroff"
+            # Set clocks bad to full speed
+            set_performance
+            sleep 0.1
+            "$POWER_OFF_SCRIPT" &
         fi
     else
         
         while [ "$(device_lid_open)" = "0" ]; do
-            if [ "$IDLE_TIMEOUT" -gt 0 ] && [ "$(device_woke_via_timer)" = "true" ]; then
+            if [ "$(device_woke_via_timer)" = "true" ]; then
                 break
             fi
 
@@ -152,7 +131,7 @@ trigger_sleep() {
         done
 
 
-        if [ "$IDLE_TIMEOUT" -gt 0 ] && [ "$(device_woke_via_timer)" = "true" ]; then
+        if [ "$(device_woke_via_timer)" = "true" ]; then
             log_message "Idle time exceeded, triggering poweroff -- IDLE_TIMEOUT=$IDLE_TIMEOUT"
             sleep 0.1
             "$POWER_OFF_SCRIPT" &
