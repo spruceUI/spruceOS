@@ -10,8 +10,10 @@ from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.hidden_apps_manager import AppsManager
 from menus.language.language import Language
 from themes.theme import Theme
+from utils.activity.activity_tracker import ActivityTracker
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -78,6 +80,25 @@ class AppMenu:
                             value=BoxArtScraper().scrape_boxart
                         )
                 )
+
+            activity_tracker_config = PyUiAppConfig("Activity Tracker")
+            hidden = AppsManager.is_hidden(activity_tracker_config) and not self.show_all_apps
+            if(not hidden and PyUiConfig.get_activity_log_path() is not None):
+                icon = self.get_icon(None,"activity_tracker.png")
+                if(icon is None):
+                    icon = Theme.get_cfw_default_icon("activity_tracker.png")
+                app_list.append(
+                        GridOrListEntry(
+                            primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
+                            image_path=None,
+                            image_path_selected=None,
+                            description="Track app usage",
+                            icon=icon,
+                            extra_data=activity_tracker_config,
+                            value=ActivityTracker().run_activity_tracking_app
+                        )
+                )
+
                 
     def run_app_selection(self) :
         running = True
