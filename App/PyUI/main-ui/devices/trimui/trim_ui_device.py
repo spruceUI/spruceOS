@@ -34,6 +34,7 @@ class TrimUIDevice(DeviceCommon):
         old_volume = self.system_config.get_volume()
         self.system_config.reload_config()
         new_volume = self.system_config.get_volume()
+        self.last_cache_clear = 0
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
 
