@@ -185,7 +185,7 @@ elif flag_check "tester_mode"; then
     fi
 fi
 
-SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaskipVersionCheck.selected' "True")"
+SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 # Set SKIP_VERSION_CHECK to True if developer mode or tester mode is enabled
 if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
     SKIP_VERSION_CHECK="True"

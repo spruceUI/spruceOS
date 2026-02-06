@@ -59,7 +59,10 @@ get_shutdown_timer() {
         "5m")   IDLE_TIMEOUT=300 ;;
         "15m")  IDLE_TIMEOUT=900 ;;
         "30m")  IDLE_TIMEOUT=1800 ;;
-        "60m")   IDLE_TIMEOUT=3600 ;;
+        "60m")  IDLE_TIMEOUT=3600 ;;
+        "2h")   IDLE_TIMEOUT=7200 ;;
+        "3h")   IDLE_TIMEOUT=10800 ;;
+        "4h")   IDLE_TIMEOUT=14400 ;;
     esac
 
     echo "$IDLE_TIMEOUT"
