@@ -94,7 +94,6 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
    - Chris Cromer
    - CilantroLimewire
    - Cobaltdsc4102
-   - German Tacos
    - Hario
    - Kitfox
    - Lazydog
