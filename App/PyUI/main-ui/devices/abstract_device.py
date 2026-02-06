@@ -440,3 +440,9 @@ class AbstractDevice(ABC):
     @abstractmethod
     def post_present_operations(self):
         pass
+    
+    @abstractmethod
+    def get_button_remapper(self):
+        pass
+
+    

@@ -112,11 +112,11 @@ class MuosAnbernicRGXX(MuosDevice):
 
     def map_key(self, key_code):
         if(114 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_DOWN)
+            return ControllerInput.VOLUME_DOWN
         elif(115 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_UP)
+            return ControllerInput.VOLUME_UP
         elif(116 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.POWER_BUTTON)
+            return ControllerInput.POWER_BUTTON
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None

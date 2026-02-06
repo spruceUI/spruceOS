@@ -29,12 +29,12 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.last_cache_clear = 0
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
         self.system_config.reload_config()
         new_volume = self.system_config.get_volume()
-        self.last_cache_clear = 0
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
 
@@ -128,15 +128,15 @@ class TrimUIDevice(DeviceCommon):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
-        return self.button_remapper.get_mappping(mapping)
+        return mapping
     
     def map_key(self, key_code):
         if(116 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.POWER_BUTTON)
+            return ControllerInput.POWER_BUTTON
         if(115 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_UP)
+            return ControllerInput.VOLUME_UP
         elif(114 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_DOWN)
+            return ControllerInput.VOLUME_DOWN
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
@@ -393,3 +393,9 @@ class TrimUIDevice(DeviceCommon):
             PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
             Display.clear_cache()
             self.last_cache_clear = 0
+
+    def get_button_remapper(self):
+        return self.button_remapper
+    
+    def get_button_remapper(self):
+        return self.button_remapper
