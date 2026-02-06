@@ -442,7 +442,7 @@ class AbstractDevice(ABC):
         pass
     
     @abstractmethod
-    def get_button_remapper(self):
+    def check_for_button_remap(self, input):
         pass
 
     

@@ -328,5 +328,5 @@ class GKDDevice(DeviceCommon):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
 
-    def get_button_remapper(self):
-        return self.button_remapper
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)

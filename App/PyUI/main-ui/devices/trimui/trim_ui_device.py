@@ -394,8 +394,6 @@ class TrimUIDevice(DeviceCommon):
             Display.clear_cache()
             self.last_cache_clear = 0
 
-    def get_button_remapper(self):
-        return self.button_remapper
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)
     
-    def get_button_remapper(self):
-        return self.button_remapper
