@@ -134,9 +134,11 @@ run_retroarch() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
 	RA_PARAMS="-v"
-	if [ "$PLATFORM" = "Pixel2" ] || [ "$PLATFORM" = "Flip" ]; then
-		RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
-	fi
+	case "$PLATFORM" in
+		"Pixel2"|"Flip"|"SmartProS")
+			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
+			;;
+	esac
 
 	if flag_check "developer_mode"; then
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
