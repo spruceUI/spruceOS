@@ -27,11 +27,13 @@ cores_online() {
 set_smart() {
     log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    cpuclock 1400
 }
 
 set_performance() {
     log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    cpuclock 1600
 }
 
 set_overclock() {

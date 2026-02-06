@@ -15,32 +15,7 @@
 #   get_mode_override
 #   set_cpu_mode
 #   pin_to_dedicated_cores
-
-translate_rom_dir_to_emu_name() {
-    rom_dir_name="$(echo "$1" | cut -d'/' -f5)"
-
-    # 1) Direct match: ROM dir == emulator dir
-    if [ -d "/mnt/SDCARD/Emu/$rom_dir_name" ]; then
-        echo "$rom_dir_name"
-        return 0
-    fi
-
-    # 2) Match against alternativeFolderNames in config.json
-    for cfg in /mnt/SDCARD/Emu/*/config.json; do
-        if jq -e --arg name "$rom_dir_name" \
-            '.alternativeFolderNames? // [] | index($name)' \
-            "$cfg" >/dev/null 2>&1; then
-
-            echo "$(basename "$(dirname "$cfg")")"
-            return 0
-        fi
-    done
-
-    # 3) No match found
-    echo "ERROR"
-    return 1
-}
-  
+ 
 
 set_emu_core_from_emu_json() {
     # Try to use platform-specific emulator if it exists
