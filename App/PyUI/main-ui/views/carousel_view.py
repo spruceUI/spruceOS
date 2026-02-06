@@ -4,7 +4,7 @@ from typing import List
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.display import Display
+from display import Display
 from display.render_mode import RenderMode
 from controller.controller import Controller
 from display.resize_type import ResizeType

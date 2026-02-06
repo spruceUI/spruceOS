@@ -20,7 +20,7 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
-from display.display import Display
+from display import Display
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.timezone_menu import TimezoneMenu
 import sdl2

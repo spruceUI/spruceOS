@@ -1,6 +1,6 @@
 
 
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 
 

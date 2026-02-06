@@ -1,6 +1,6 @@
 import time
 from typing import List
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme

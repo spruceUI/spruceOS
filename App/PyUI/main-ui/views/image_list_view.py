@@ -1,7 +1,7 @@
 import time
 from typing import List
 from devices.device import Device
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from display.x_render_option import XRenderOption

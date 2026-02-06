@@ -4,7 +4,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.utils.process_runner import ProcessRunner
-from display.display import Display
+from display import Display
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection

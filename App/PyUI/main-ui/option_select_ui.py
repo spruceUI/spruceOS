@@ -8,7 +8,7 @@ from typing import List
 
 from controller.controller_inputs import ControllerInput
 
-from display.display import Display
+from display import Display
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection

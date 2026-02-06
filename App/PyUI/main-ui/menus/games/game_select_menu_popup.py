@@ -4,7 +4,7 @@ import os
 import random
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu

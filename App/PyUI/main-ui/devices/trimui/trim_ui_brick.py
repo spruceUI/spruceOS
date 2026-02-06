@@ -15,7 +15,7 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from display.display import Display
+from display import Display
 from utils import throttle
 
 from utils.config_copier import ConfigCopier

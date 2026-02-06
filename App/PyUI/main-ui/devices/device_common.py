@@ -14,7 +14,7 @@ from devices.miyoo.system_config import SystemConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 from menus.settings.wifi_menu import WifiMenu
 from utils import throttle

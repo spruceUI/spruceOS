@@ -7,7 +7,7 @@ import time
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 

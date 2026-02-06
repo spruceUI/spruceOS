@@ -3,7 +3,7 @@ import os
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.about_menu import AboutMenu

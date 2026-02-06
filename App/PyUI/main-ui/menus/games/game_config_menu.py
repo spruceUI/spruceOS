@@ -4,7 +4,7 @@ import shutil
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from games.utils.game_system import GameSystem
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.favorites_manager import FavoritesManager

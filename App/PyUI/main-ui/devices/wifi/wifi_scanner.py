@@ -6,7 +6,7 @@ from typing import List, Set
 
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
-from display.display import Display
+from display import Display
 from utils.logger import PyUiLogger
 
 

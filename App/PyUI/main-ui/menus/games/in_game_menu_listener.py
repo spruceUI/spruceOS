@@ -6,7 +6,7 @@ import time
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from menus.games.in_game_menu_popup import InGameMenuPopup
 from menus.games.retroarch_in_game_menu_popup import RetroarchInGameMenuPopup
 from menus.games.utils.rom_info import RomInfo

@@ -2,7 +2,7 @@
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
-from display.display import Display
+from display import Display
 
 
 class UserPrompt():

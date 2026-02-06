@@ -18,7 +18,7 @@ from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from display.display import Display
+from display import Display
 from menus.games.utils.rom_info import RomInfo
 from utils import throttle
 from utils.config_copier import ConfigCopier

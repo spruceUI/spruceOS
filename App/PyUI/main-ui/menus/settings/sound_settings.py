@@ -1,7 +1,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from menus.settings.settings_menu import SettingsMenu
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry

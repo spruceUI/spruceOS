@@ -4,7 +4,7 @@ import subprocess
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from menus.games.game_config_menu import GameConfigMenu
 from menus.games.game_select_menu_popup import GameSelectMenuPopup
 from menus.games.in_game_menu_listener import InGameMenuListener

@@ -6,7 +6,7 @@ from typing import Callable
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from games.utils.rom_utils import RomUtils
 from menus.games.utils.favorites_manager import FavoritesManager

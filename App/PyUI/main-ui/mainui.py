@@ -13,12 +13,18 @@ from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
 from option_select_ui import OptionSelectUI
-import sdl2
-import sdl2.ext
+
+# Conditional SDL2 imports - only for non-Miyoo Mini devices
+try:
+    import sdl2
+    import sdl2.ext
+except ImportError:
+    # Pygame-only devices don't need SDL2
+    sdl2 = None
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
-from display.display import Display
+from display import Display  # Conditional import (SDL2 or Pygame based on device)
 from themes.theme import Theme
 from utils.button_listener import ButtonListener
 from utils.cfw_system_config import CfwSystemConfig
@@ -48,6 +54,10 @@ def parse_arguments():
     return parser.parse_args()
 
 def log_renderer_info():
+    if sdl2 is None:
+        PyUiLogger.get_logger().info("SDL2 not available (using Pygame backend)")
+        return
+
     num = sdl2.SDL_GetNumRenderDrivers()
     for i in range(num):
         info = sdl2.SDL_RendererInfo()

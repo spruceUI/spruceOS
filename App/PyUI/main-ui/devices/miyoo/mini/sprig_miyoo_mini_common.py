@@ -5,7 +5,7 @@ from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.utils.file_watcher import FileWatcher
 from utils.logger import PyUiLogger
-from display.display import Display
+from display import Display
 import subprocess
 
 

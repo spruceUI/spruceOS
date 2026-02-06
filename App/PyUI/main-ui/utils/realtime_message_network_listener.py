@@ -5,7 +5,7 @@ import queue
 import json
 from pathlib import Path
 from devices.device import Device
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from menus.common.top_bar import TopBar

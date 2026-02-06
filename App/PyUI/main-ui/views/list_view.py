@@ -3,7 +3,7 @@ from abc import abstractmethod
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from display.display import Display
+from display import Display
 from themes.theme import Theme
 from views.selection import Selection
 from views.text_utils import TextUtils

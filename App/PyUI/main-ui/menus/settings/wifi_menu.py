@@ -8,7 +8,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
-from display.display import Display
+from display import Display
 from display.font_purpose import FontPurpose
 from display.on_screen_keyboard import OnScreenKeyboard
 from display.render_mode import RenderMode

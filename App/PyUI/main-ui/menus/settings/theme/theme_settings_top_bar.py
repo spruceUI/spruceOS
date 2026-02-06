@@ -1,5 +1,5 @@
 
-from display.display import Display
+from display import Display
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
