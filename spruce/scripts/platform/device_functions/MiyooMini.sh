@@ -175,17 +175,41 @@ set_default_ra_hotkeys() {
 }
 
 volume_down() {
-    log_message "Volume is handled via keymon" -v
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -gt 0 ] ; then
+        VOLUME_LV=$((VOLUME_LV-1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 volume_up() {
-    log_message "Volume is handled via keymon" -v
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -lt 20 ] ; then
+        VOLUME_LV=$((VOLUME_LV+1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 get_volume_level() {
-    log_message "Volume is handled via keymon" -v
-    echo "0"
+    jq -r '.vol' "$SYSTEM_JSON"
 }
+
+set_volume() {
+    # NOTE: This won't always work. They will often just error.
+    # But sometimes they do work. It's based on if something else is already controlling the volume.
+    # The main purpose of this is for NDS volume since drastic does some weird stuff
+    # Might be worth considering adding an if block of if <x> is running then do this
+    
+    VOLUME_LV="$1"
+    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/mm_set_volume.py "$VOLUME_LV" &
+
+    # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
+}
+
 
 current_backlight() {
     jq -r '.backlight' "$SYSTEM_JSON"
