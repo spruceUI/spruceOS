@@ -29,12 +29,12 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.last_cache_clear = 0
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
         self.system_config.reload_config()
         new_volume = self.system_config.get_volume()
-        self.last_cache_clear = 0
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
 
@@ -393,3 +393,4 @@ class TrimUIDevice(DeviceCommon):
             PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
             Display.clear_cache()
             self.last_cache_clear = 0
+
