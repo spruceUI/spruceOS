@@ -195,6 +195,7 @@ class Controller:
 
                 ms_remaining = int(remaining_time * 1000)
                 input = Controller.controller_interface.get_input(ms_remaining)
+                input = Device.get_device().get_button_remapper().get_mappping(input)
                 Controller.set_last_input(input)
 
                 if Controller.last_controller_input is not None:
