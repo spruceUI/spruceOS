@@ -308,10 +308,6 @@ device_lid_open(){
     head -c 1 "$LID_HALL_FILE" 2>/dev/null
 }
 
-take_screenshot() { # todo: what's the rotation per each model again?'
-    /mnt/SDCARD/spruce/bin/fbgrab -a "$1"
-}
-
 
 device_prepare_for_ports_run() {
     log_message "device_prepare_for_ports_run uneeded on this device" -v
