@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SYNCTHING_CONFIG_DIR="${SYNCTHING_CONFIG_DIR:-/mnt/SDCARD/spruce/bin/Syncthing/config}"
+SYNCTHING_CONFIG_DIR="${ST_DIR/config:-/mnt/SDCARD/spruce/bin/Syncthing/config}"
 API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
 API_KEY=""

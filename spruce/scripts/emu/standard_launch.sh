@@ -6,7 +6,6 @@
 ##### DEFINE BASE VARIABLES #####
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-. /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
 log_message "-----Launching Emulator-----"
 log_message "trying: $0 $@"
