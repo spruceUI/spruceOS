@@ -7,6 +7,8 @@ import re
 import time
 import urllib.request
 from typing import List, Optional
+import xml.etree.ElementTree as ET
+import glob
 
 from devices.device import Device
 from display.display import Display
@@ -69,6 +71,7 @@ class BoxArtScraper:
         self.game_system_utils = Device.get_device().get_game_system_utils()
         self.preferred_region = Device.get_device().get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)
+        self._arcade_xml_cache = {}  # sys_name -> dict of rom_name -> display_name
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -180,23 +183,122 @@ class BoxArtScraper:
         else:
             return game_system.game_system_config.get_extlist()
 
+    def _find_game_list_file(self, sys_name: str) -> Optional[str]:
+        """
+        Find the game list file for a system.
+        If the system's file doesn't exist, look for another system with the same LibRetro alias.
+        """
+        # First try the direct file
+        image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
+        if os.path.exists(image_list_file):
+            return image_list_file
+
+        # Explicit fallback mappings for systems that should share lists
+        fallback_mapping = {
+            "CPS1": "ARCADE",         # CPS1 uses ARCADE list (shared MAME repo)
+            "CPS2": "ARCADE",         # CPS2 uses ARCADE list (shared MAME repo)
+            "CPS3": "ARCADE",         # CPS3 uses ARCADE list (shared MAME repo)
+            "MSU1": "SFC",            # MSU1 uses SFC list (shared SNES repo)
+            "EIGHTHUNDRED": "ATARI",  # Atari 800 uses main Atari list
+        }
+
+        if sys_name in fallback_mapping:
+            fallback_sys = fallback_mapping[sys_name]
+            fallback_file = os.path.join(self.db_dir, f"{fallback_sys}_games.txt")
+            if os.path.exists(fallback_file):
+                PyUiLogger.get_logger().info(f"BoxartScraper: Using {fallback_sys}_games.txt for {sys_name}")
+                return fallback_file
+
+        return None
+
+    def _is_arcade_system(self, sys_name: str) -> bool:
+        """Check if system is an arcade-type system that uses XML for name mapping."""
+        arcade_systems = {"ARCADE", "CPS1", "CPS2", "CPS3", "FBNEO", "MAME2003PLUS"}
+        return sys_name.upper() in arcade_systems
+
+    def _find_system_xml(self, sys_name: str) -> Optional[str]:
+        """Find any .xml file in the system's Roms folder."""
+        system_path = os.path.join(self.roms_dir, sys_name)
+        if not os.path.exists(system_path):
+            return None
+
+        xml_files = glob.glob(os.path.join(system_path, "*.xml"))
+        if xml_files:
+            return xml_files[0]  # Return first XML file found
+        return None
+
+    def _parse_arcade_xml(self, sys_name: str) -> dict:
+        """
+        Parse arcade system XML to get ROM name -> Display name mapping.
+        Returns empty dict if XML not found or parsing fails.
+        """
+        # Check cache first
+        if sys_name in self._arcade_xml_cache:
+            return self._arcade_xml_cache[sys_name]
+
+        # Find XML file
+        xml_path = self._find_system_xml(sys_name)
+        if not xml_path:
+            PyUiLogger.get_logger().warning(f"BoxartScraper: No XML file found for {sys_name}, falling back to ROM filename matching")
+            self._arcade_xml_cache[sys_name] = {}
+            return {}
+
+        # Parse XML
+        try:
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+
+            mapping = {}
+            for game in root.findall('game'):
+                path_elem = game.find('path')
+                name_elem = game.find('name')
+
+                if path_elem is not None and name_elem is not None:
+                    path_text = path_elem.text
+                    name_text = name_elem.text
+
+                    if path_text and name_text:
+                        # Strip ./ prefix and .zip extension
+                        rom_name = path_text.replace('./', '').replace('.zip', '')
+                        mapping[rom_name] = name_text
+
+            PyUiLogger.get_logger().info(f"BoxartScraper: Loaded {len(mapping)} games from {sys_name} XML")
+            self._arcade_xml_cache[sys_name] = mapping
+            return mapping
+
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"BoxartScraper: Failed to parse XML for {sys_name}: {e}")
+            self._arcade_xml_cache[sys_name] = {}
+            return {}
+
     def find_image_name(self, sys_name: str, rom_file_name: str) -> Optional[str]:
         """Match ROM to image name based on db/<system>_games.txt."""
-        image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
-        if not os.path.exists(image_list_file):
+        image_list_file = self._find_game_list_file(sys_name)
+        if not image_list_file:
             PyUiLogger.get_logger().warning(f"BoxartScraper: Image list file not found for {sys_name}.")
             return None
 
         rom_without_ext = os.path.splitext(rom_file_name)[0]
+
+        # For arcade systems, use XML to get display name
+        search_name = rom_without_ext
+        if self._is_arcade_system(sys_name):
+            xml_mapping = self._parse_arcade_xml(sys_name)
+            if rom_without_ext in xml_mapping:
+                search_name = xml_mapping[rom_without_ext]
+                PyUiLogger.get_logger().debug(f"BoxartScraper: Mapped {rom_without_ext} -> {search_name}")
+            else:
+                PyUiLogger.get_logger().debug(f"BoxartScraper: No XML mapping for {rom_without_ext}, using ROM name")
+
         with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
             image_list = f.read().splitlines()
 
-        return self.find_image_from_list(sys_name, rom_without_ext, image_list)
+        return self.find_image_from_list(sys_name, search_name, image_list)
 
     def get_image_list_for_system(self, sys_name: str) -> List[str]:
         """Match ROM to image name based on db/<system>_games.txt."""
-        image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
-        if not os.path.exists(image_list_file):
+        image_list_file = self._find_game_list_file(sys_name)
+        if not image_list_file:
             self.log_and_display_message(f"Image list file not found for {sys_name}.")
             time.sleep(2)
             return None
