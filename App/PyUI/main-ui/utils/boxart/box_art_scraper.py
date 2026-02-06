@@ -213,7 +213,7 @@ class BoxArtScraper:
 
     def _is_arcade_system(self, sys_name: str) -> bool:
         """Check if system is an arcade-type system that uses XML for name mapping."""
-        arcade_systems = {"ARCADE", "CPS1", "CPS2", "CPS3", "FBNEO", "MAME2003PLUS"}
+        arcade_systems = {"ARCADE", "CPS1", "CPS2", "CPS3", "FBNEO", "MAME2003PLUS", "NEOGEO"}
         return sys_name.upper() in arcade_systems
 
     def _find_system_xml(self, sys_name: str) -> Optional[str]:
