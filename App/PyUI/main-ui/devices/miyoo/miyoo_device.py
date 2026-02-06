@@ -279,5 +279,5 @@ class MiyooDevice(DeviceCommon):
     def get_device_specific_about_info_entries(self):
         return []
 
-    def get_button_remapper(self):
-        return self.button_remapper
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)
