@@ -1,135 +1,160 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 import subprocess
+from typing import Any, Optional
 
+from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.system_config import SystemConfig
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from utils.image_utils import ImageUtils
 
 class AbstractDevice(ABC):
+    system_config: SystemConfig
  
     @abstractmethod
-    def screen_width(self):
+    def screen_width(self) -> int:
         pass
 
     @abstractmethod
-    def screen_height(self):
+    def screen_height(self) -> int:
         pass
 
     @abstractmethod
-    def screen_rotation(self):
+    def screen_rotation(self) -> int:
         pass
 
     @abstractmethod
-    def output_screen_width(self):
+    def output_screen_width(self) -> int:
         pass
 
     @abstractmethod
-    def output_screen_height(self):
+    def output_screen_height(self) -> int:
         pass
 
     @abstractmethod
-    def should_scale_screen(self):
+    def should_scale_screen(self) -> bool:
         pass
     
     @abstractmethod
-    def lumination(self):
+    def lumination(self) -> int:
         pass
 
     @abstractmethod
-    def contrast(self):
+    def contrast(self) -> int:
         pass
 
     @abstractmethod
-    def saturation(self):
+    def saturation(self) -> int:
         pass
 
     @abstractmethod
-    def input_timeout_default(self):
+    def input_timeout_default(self) -> float:
         pass
 
     @abstractmethod
-    def get_app_finder(self):
+    def get_app_finder(self) -> Any:
+        pass
+
+    @abstractmethod
+    def get_controller_interface(self) -> Any:
         pass
     
     @abstractmethod
-    def get_wifi_status(self):
-        pass
-    
-    @abstractmethod
-    def get_wifi_status(self):
+    def get_wifi_status(self) -> Any:
         pass
 
     @abstractmethod
-    def is_wifi_enabled(self):
+    def is_wifi_enabled(self) -> bool:
         pass
 
     @abstractmethod
-    def is_bluetooth_enabled(self):
+    def is_bluetooth_enabled(self) -> bool:
         pass
 
     @abstractmethod
-    def disable_bluetooth(self):
+    def disable_bluetooth(self) -> None:
         pass
 
     @abstractmethod
-    def enable_bluetooth(self):
+    def enable_bluetooth(self) -> None:
         pass
 
     @abstractmethod
-    def disable_wifi(self):
+    def disable_wifi(self) -> None:
         pass
 
     @abstractmethod
-    def enable_wifi(self):
+    def enable_wifi(self) -> None:
         pass
 
     @abstractmethod
-    def get_battery_percent(self):
+    def get_battery_percent(self) -> int:
         pass
 
     @abstractmethod
-    def run_game(self, rom_info) -> subprocess.Popen:
+    def get_charge_status(self) -> ChargeStatus:
         pass
 
     @abstractmethod
-    def run_cmd(self, args, dir = None):
+    def run_game(self, rom_info) -> subprocess.Popen | None:
         pass
 
     @abstractmethod
-    def run_app(self, folder,launch):
+    def run_cmd(self, args, dir = None) -> Any:
         pass
 
     @abstractmethod
-    def map_digital_input(self, sdl_input):
+    def run_app(self, folder,launch) -> Any:
         pass
 
     @abstractmethod
-    def map_analog_input(self, sdl_axis, sdl_value):
+    def map_digital_input(self, sdl_input) -> Any:
         pass
 
     @abstractmethod
-    def special_input(self, key_code, length_in_seconds):   
+    def map_analog_input(self, sdl_axis, sdl_value) -> Any:
         pass
 
     @abstractmethod
-    def map_key(self, key_code):   
+    def special_input(self, key_code, length_in_seconds) -> None:
         pass
 
     @abstractmethod
-    def get_favorites_path(self):
+    def map_key(self, key_code) -> Any:   
         pass
 
     @abstractmethod
-    def get_recents_path(self):
+    def get_favorites_path(self) -> str:
         pass
 
     @abstractmethod
-    def get_collections_path(self):
+    def capture_framebuffer(self) -> None:
         pass
 
     @abstractmethod
-    def get_apps_config_path(self):
+    def restore_framebuffer(self) -> None:
+        pass
+
+    @abstractmethod
+    def get_recents_path(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_collections_path(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_roms_dir(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_game_system_utils(self) -> Any:
+        pass
+
+    @abstractmethod
+    def get_apps_config_path(self) -> str:
         pass
 
     @abstractmethod
@@ -141,147 +166,171 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def lower_lumination(self):
+    def lower_lumination(self) -> None:
         pass
 
     @abstractmethod
-    def raise_lumination(self):
-        pass
-
-    
-    @abstractmethod
-    def brightness(self):
-        pass
-
-    @abstractmethod
-    def lower_brightness(self):
-        pass
-
-    @abstractmethod
-    def raise_brightness(self):
-        pass
-
-    @abstractmethod
-    def lower_contrast(self):
-        pass
-
-    @abstractmethod
-    def raise_contrast(self):
-        pass
-
-    @abstractmethod
-    def lower_saturation(self):
-        pass
-
-    @abstractmethod
-    def raise_saturation(self):
-        pass
-    
-    
-    @abstractmethod
-    def hue(self):
-        pass
-
-    @abstractmethod
-    def lower_hue(self):
-        pass
-
-    @abstractmethod
-    def raise_hue(self):
-        pass
-
-    @abstractmethod
-    def change_volume(self, amount):
-        pass
-
-    @abstractmethod
-    def get_volume(self):
-        pass
-
-    @abstractmethod
-    def get_display_volume(self):
+    def raise_lumination(self) -> None:
         pass
 
     
     @abstractmethod
-    def power_off_cmd(self):
-        pass
-    
-    @abstractmethod
-    def prompt_power_down(self):
-        pass
-    
-    
-    @abstractmethod
-    def reboot_cmd(self):
+    def brightness(self) -> int:
         pass
 
     @abstractmethod
-    def perform_startup_tasks(self):
+    def lower_brightness(self) -> None:
         pass
 
     @abstractmethod
-    def get_bluetooth_scanner(self):
+    def raise_brightness(self) -> None:
         pass
 
     @abstractmethod
-    def get_ip_addr_text(self):
+    def lower_contrast(self) -> None:
+        pass
+
+    @abstractmethod
+    def raise_contrast(self) -> None:
+        pass
+
+    @abstractmethod
+    def lower_saturation(self) -> None:
+        pass
+
+    @abstractmethod
+    def raise_saturation(self) -> None:
         pass
     
-    @staticmethod  
-    def launch_stock_os_menu(self):
+    
+    @abstractmethod
+    def hue(self) -> int:
+        pass
+
+    @abstractmethod
+    def lower_hue(self) -> None:
+        pass
+
+    @abstractmethod
+    def raise_hue(self) -> None:
+        pass
+
+    @abstractmethod
+    def change_volume(self, amount) -> None:
+        pass
+
+    @abstractmethod
+    def get_volume(self) -> int:
+        pass
+
+    @abstractmethod
+    def get_display_volume(self) -> int:
+        pass
+
+    
+    @abstractmethod
+    def power_off_cmd(self) -> str:
         pass
     
-    @staticmethod  
-    def supports_analog_calibration(self):
+    @abstractmethod
+    def prompt_power_down(self) -> None:
+        pass
+    
+    
+    @abstractmethod
+    def reboot_cmd(self) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def perform_startup_tasks(self) -> None:
+        pass
+
+    @abstractmethod
+    def get_bluetooth_scanner(self) -> Any:
+        pass
+
+    @abstractmethod
+    def supports_wifi(self) -> bool:
+        pass
+
+    @abstractmethod
+    def supports_volume(self) -> bool:
+        pass
+
+    def fix_sleep_sound_bug(self) -> None:
+        pass
+
+    @abstractmethod
+    def get_ip_addr_text(self) -> str:
+        pass
+
+    def get_running_processes(self) -> subprocess.CompletedProcess[str] | None:
+        pass
+
+    def set_wifi_power(self, value):
+        pass
+
+    def start_wpa_supplicant(self):
+        pass
+
+    def start_wifi_services(self):
+        pass
+
+    def stop_wifi_services(self):
+        pass
+    
+    def launch_stock_os_menu(self) -> None:
+        pass
+    
+    @abstractmethod
+    def supports_analog_calibration(self) -> bool:
         pass
         
-    @staticmethod  
-    def supports_image_resizing(self):
+    @abstractmethod
+    def supports_image_resizing(self) -> bool:
         pass
 
-    @staticmethod  
-    def calibrate_sticks(self):
+    def calibrate_sticks(self) -> None:
         pass
     
-    @staticmethod  
-    def get_state_path(self):
+    @abstractmethod
+    def get_state_path(self) -> str:
         pass
 
     @abstractmethod
-    def remap_buttons(self):
+    def remap_buttons(self) -> None:
         pass
 
     @abstractmethod
-    def get_extra_settings_options(self):
+    def get_extra_settings_options(self) -> list[Any]:
         pass
 
     @abstractmethod
-    def take_snapshot(self, path):
+    def take_snapshot(self, path) -> None:
         pass
 
     @abstractmethod
-    def exit_pyui(self):
+    def exit_pyui(self) -> None:
         pass
 
     @abstractmethod
-    def double_init_sdl_display(self):
+    def double_init_sdl_display(self) -> bool:
         pass
 
     @abstractmethod
-    def get_text_width_measurement_multiplier(self):
+    def get_text_width_measurement_multiplier(self) -> float:
         pass
 
     @abstractmethod
-    def max_texture_width(self):
+    def max_texture_width(self) -> int:
         pass
 
     @abstractmethod
-    def max_texture_height(self):
+    def max_texture_height(self) -> int:
         pass
 
     @abstractmethod
-    def get_guaranteed_safe_max_text_char_count(self):
+    def get_guaranteed_safe_max_text_char_count(self) -> int:
         pass
 
     @abstractmethod
@@ -289,87 +338,87 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def get_wpa_supplicant_conf_path(self):
+    def get_wpa_supplicant_conf_path(self) -> str:
         pass
 
     @abstractmethod
-    def supports_brightness_calibration(self):
+    def supports_brightness_calibration(self) -> bool:
         pass
 
     @abstractmethod
-    def supports_contrast_calibration(self):
+    def supports_contrast_calibration(self) -> bool:
         pass
 
     @abstractmethod
-    def supports_saturation_calibration(self):
+    def supports_saturation_calibration(self) -> bool:
         pass
 
     @abstractmethod
-    def supports_rgb_calibration(self):
+    def supports_rgb_calibration(self) -> bool:
         pass
 
     @abstractmethod
-    def set_disp_red(self,value):
+    def set_disp_red(self,value) -> None:
         pass
 
     @abstractmethod
-    def set_disp_blue(self,value):
+    def set_disp_blue(self,value) -> None:
         pass
 
     @abstractmethod
-    def set_disp_green(self,value):
+    def set_disp_green(self,value) -> None:
         pass
 
     @abstractmethod
-    def get_disp_red(self):
+    def get_disp_red(self) -> int:
         pass
 
     @abstractmethod
-    def get_disp_blue(self):
+    def get_disp_blue(self) -> int:
         pass
 
     @abstractmethod
-    def get_disp_green(self):
+    def get_disp_green(self) -> int:
         pass
 
     @abstractmethod
-    def supports_hue_calibration(self):
+    def supports_hue_calibration(self) -> bool:
         pass
 
     @abstractmethod
-    def supports_popup_menu(self):
+    def supports_popup_menu(self) -> bool:
         pass
 
     @abstractmethod
-    def supports_timezone_setting(self):
+    def supports_timezone_setting(self) -> bool:
         pass
 
     @abstractmethod
-    def apply_timezone(self, timezone):
+    def apply_timezone(self, timezone) -> None:
         pass
 
     @abstractmethod
-    def set_theme(self, theme_path):
+    def set_theme(self, theme_path) -> None:
         pass
 
     @abstractmethod
-    def get_core_name_overrides(self, core_name):
+    def get_core_name_overrides(self, core_name) -> list[str]:
         pass
 
     @abstractmethod
-    def get_core_for_game(self, game_system_config, rom_file_path):
+    def get_core_for_game(self, game_system_config, rom_file_path) -> Optional[str]:
         pass
     
     @abstractmethod
-    def prompt_timezone_update(self):
+    def prompt_timezone_update(self) -> None:
         pass
 
     @abstractmethod
-    def supports_caching_rom_lists(self):
+    def supports_caching_rom_lists(self) -> bool:
         pass
 
     @abstractmethod
-    def keep_running_on_error(self):
+    def keep_running_on_error(self) -> bool:
         pass
 
     @abstractmethod
@@ -377,27 +426,27 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def get_boxart_medium_resize_dimensions(self):
+    def get_boxart_medium_resize_dimensions(self) -> tuple[int, int]:
         pass
 
     @abstractmethod
-    def get_boxart_small_resize_dimensions(self):
+    def get_boxart_small_resize_dimensions(self) -> tuple[int, int]:
         pass
 
     @abstractmethod
-    def get_boxart_large_resize_dimensions(self):
+    def get_boxart_large_resize_dimensions(self) -> tuple[int, int]:
         pass
 
     @abstractmethod
-    def get_device_name(self):
+    def get_device_name(self) -> str:
         pass
 
     @abstractmethod
-    def supports_qoi(self):
+    def supports_qoi(self) -> bool:
         pass
 
     @abstractmethod
-    def get_save_state_image(self, rom_info: RomInfo):
+    def get_save_state_image(self, rom_info: RomInfo) -> Optional[str]:
         pass
 
     @abstractmethod
@@ -405,38 +454,38 @@ class AbstractDevice(ABC):
         pass
     
     @abstractmethod
-    def get_about_info_entries(self):
+    def get_about_info_entries(self) -> list[tuple[str, str]]:
         pass
 
     @abstractmethod
-    def startup_init(self, include_wifi):
+    def startup_init(self, include_wifi) -> None:
         pass
 
     @abstractmethod
-    def might_require_surface_format_conversion(self):
+    def might_require_surface_format_conversion(self) -> bool:
         pass
 
     @abstractmethod
-    def perform_sdcard_ro_check(self):
+    def perform_sdcard_ro_check(self) -> None:
         pass
 
     @abstractmethod
-    def sync_hw_clock(self):
+    def sync_hw_clock(self) -> None:
         pass
 
     @abstractmethod
-    def animation_divisor(self):
+    def animation_divisor(self) -> float:
         pass
 
     # TODO potentially combine these two wifi methods
     @abstractmethod
-    def get_wifi_menu(self):
+    def get_wifi_menu(self) -> Any:
         pass
 
     @abstractmethod
-    def get_new_wifi_scanner(self):
+    def get_new_wifi_scanner(self) -> Any:
         pass
 
     @abstractmethod
-    def post_present_operations(self):
+    def post_present_operations(self) -> None:
         pass

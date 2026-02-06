@@ -15,7 +15,7 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
@@ -120,9 +120,6 @@ class TrimUISmartPro(TrimUIDevice):
 
     def get_controller_interface(self):
         return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
-    
-    def get_device_name(self):
-        return self.device_name
         
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(TrimUISmartPro.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)
@@ -134,13 +131,13 @@ class TrimUISmartPro(TrimUIDevice):
         return [core_name, core_name+"-64"]
 
             
-    def _set_volume(self, user_volume):
+    def _set_volume(self, volume):
         from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = math.ceil(user_volume * 255//100)
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        volume = math.ceil(volume * 255//100)
         
         try:
             
@@ -153,10 +150,10 @@ class TrimUISmartPro(TrimUIDevice):
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
+        self.system_config.set_volume(volume)
         self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
+        Display.volume_changed(volume)
+        return volume
     
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?

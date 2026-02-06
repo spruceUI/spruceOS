@@ -6,7 +6,7 @@ from menus.games.utils.roms_list_manager import RomsListManager
 from utils.py_ui_config import PyUiConfig
 
 class CustomGameSwitcherListManager:
-    _recentsManager = Optional[RomsListManager]
+    _recentsManager: Optional[RomsListManager] = None
     _exists = False
     _init_event = threading.Event()  # signals when initialize() has been called
 
@@ -24,33 +24,38 @@ class CustomGameSwitcherListManager:
     @classmethod
     def add_game(cls, rom_info: RomInfo):
         cls._wait_for_init()
-        if(cls._exists):
-            cls._recentsManager.add_game(rom_info)
-            games = cls._recentsManager.get_games()
+        manager = cls._recentsManager
+        if cls._exists and manager is not None:
+            manager.add_game(rom_info)
+            games = manager.get_games()
             if len(games) > 20:
                 for game in games[20:]:
-                    cls._recentsManager.remove_game(game)
+                    manager.remove_game(game)
                 
     @classmethod
     def get_recents(cls) -> List[RomInfo]:
         cls._wait_for_init()
-        if(cls._exists):
-            return cls._recentsManager.get_games()
+        manager = cls._recentsManager
+        if cls._exists and manager is not None:
+            return manager.get_games()
         else:
             return []
         
     @classmethod
     def contains_game(cls, rom_info: RomInfo) -> bool:
         cls._wait_for_init()
-        if(cls._exists):
-            return cls._recentsManager.is_on_list(rom_info)
+        manager = cls._recentsManager
+        if cls._exists and manager is not None:
+            return bool(manager.is_on_list(rom_info))
         else:
             return False  
               
     @classmethod
     def remove_game(cls, rom_info: RomInfo) -> bool:
         cls._wait_for_init()
-        if(cls._exists):
-            return cls._recentsManager.remove_game(rom_info)
+        manager = cls._recentsManager
+        if cls._exists and manager is not None:
+            manager.remove_game(rom_info)
+            return True
         else:
             return False

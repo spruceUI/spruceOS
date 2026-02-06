@@ -5,7 +5,7 @@ from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.roms_list_manager import RomsListManager
 
 class FavoritesManager:
-    _favoritesManager = Optional[RomsListManager]
+    _favoritesManager: Optional[RomsListManager] = None
     _init_event = threading.Event()  # signals when initialize() has been called
 
     @classmethod
@@ -21,24 +21,39 @@ class FavoritesManager:
     @classmethod
     def add_favorite(cls, rom_info: RomInfo):
         cls._wait_for_init()
-        cls._favoritesManager.add_game(rom_info)
+        manager = cls._favoritesManager
+        if manager is None:
+            return
+        manager.add_game(rom_info)
 
     @classmethod
     def remove_favorite(cls, rom_info: RomInfo):
         cls._wait_for_init()
-        cls._favoritesManager.remove_game(rom_info)
+        manager = cls._favoritesManager
+        if manager is None:
+            return
+        manager.remove_game(rom_info)
 
     @classmethod
     def is_favorite(cls, rom_info: RomInfo) -> bool:
         cls._wait_for_init()
-        return cls._favoritesManager.is_on_list(rom_info)
+        manager = cls._favoritesManager
+        if manager is None:
+            return False
+        return manager.is_on_list(rom_info)
 
     @classmethod
     def get_favorites(cls) -> List[RomInfo]:
         cls._wait_for_init()
-        return cls._favoritesManager.get_games()
+        manager = cls._favoritesManager
+        if manager is None:
+            return []
+        return manager.get_games()
 
     @classmethod
     def sort_favorites_alphabetically(cls):
         cls._wait_for_init()
-        return cls._favoritesManager.sort_alphabetically()
+        manager = cls._favoritesManager
+        if manager is None:
+            return None
+        return manager.sort_alphabetically()

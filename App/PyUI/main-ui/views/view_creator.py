@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import Any, List, cast
 from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
@@ -14,6 +14,7 @@ from views.image_list_view import ImageListView
 from views.popup_text_list_view import PopupTextListView
 from views.text_list_view import TextListView
 from views.text_to_image_relationship import TextToImageRelationship
+from views.view import View
 from views.view_type import ViewType
 from utils.logger import PyUiLogger
 
@@ -21,13 +22,15 @@ class ViewCreator:
 
     @staticmethod
     def get_usable_height_for_text_above_or_below_image(img_height, y_pad):
+        if img_height is None:
+            return Display.get_usable_screen_height() - y_pad
         return Display.get_usable_screen_height() - y_pad - img_height
 
     @staticmethod
     def create_view(view_type: ViewType,
                     options: List[GridOrListEntry],
                     top_bar_text,
-                    selected_index: int = None,
+                    selected_index: int | None = None,
                     carousel_cols=None,
                     cols=None,
                     rows=None,
@@ -58,7 +61,7 @@ class ViewCreator:
                     carousel_selected_offset = None,
                     carousel_use_selected_image_in_animation=None,
                     carousel_resize_type=None,
-                    grid_view_wrap_around_single_row=None) -> object:
+                    grid_view_wrap_around_single_row=None) -> View:
         
         if(len(options) == 0):
             return EmptyView()
@@ -77,7 +80,7 @@ class ViewCreator:
                 return DescriptiveListView(
                     top_bar_text=top_bar_text,
                     options=options,
-                    selected=selected_index,
+                    selected=cast(int, selected_index),
                     selected_bg=selected_bg
                 )
 
@@ -85,6 +88,11 @@ class ViewCreator:
                 text_and_image_list_view_mode = Theme.text_and_image_list_view_mode()
                 img_width = Theme.get_list_game_select_img_width()
                 img_height = Theme.get_list_game_select_img_height()
+                img_offset_x = 0
+                img_offset_y = 0
+                image_render = RenderMode.MIDDLE_CENTER_ALIGNED
+                text_to_image_relationship = TextToImageRelationship.LEFT_OF_IMAGE
+                usable_height = None
 
                 if text_and_image_list_view_mode == "TEXT_LEFT_IMAGE_RIGHT":
                     img_offset_x = Device.get_device().screen_width() - 10 - img_width // 2
@@ -145,7 +153,7 @@ class ViewCreator:
                     img_offset_y=img_offset_y,
                     img_width=img_width,
                     img_height=img_height,
-                    selected_index=selected_index,
+                    selected_index=cast(int, selected_index),
                     show_icons=ImageListView.SHOW_ICONS,
                     image_render_mode=image_render,
                     text_to_image_relationship=text_to_image_relationship,
@@ -157,7 +165,7 @@ class ViewCreator:
                 return TextListView(
                     top_bar_text=top_bar_text,
                     options=options,
-                    selected_index=selected_index,
+                    selected_index=cast(int, selected_index),
                     show_icons=ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
                     selected_bg=Theme.get_list_small_selected_bg(),
@@ -167,7 +175,7 @@ class ViewCreator:
             case ViewType.POPUP:
                 return PopupTextListView(
                     options=options,
-                    selected_index=selected_index,
+                    selected_index=cast(int, selected_index),
                     show_icons=ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
                     selected_bg=Theme.get_popup_menu_selected_bg()
@@ -184,11 +192,11 @@ class ViewCreator:
                 return GridView(
                     top_bar_text=top_bar_text,
                     options=options,
-                    cols=cols,
-                    rows=rows,
+                    cols=cast(int, cols),
+                    rows=cast(int, rows),
                     selected_bg=grid_selected_bg,
                     unselected_bg=grid_unselected_bg,
-                    selected_index=selected_index,
+                    selected_index=cast(int, selected_index),
                     show_grid_text=show_grid_text,
                     resized_width=grid_resized_width,
                     resized_height=grid_resized_height,
@@ -213,20 +221,20 @@ class ViewCreator:
                     options=options,
                     selected_bg=grid_selected_bg,
                     unselected_bg=grid_unselected_bg,
-                    selected_index=selected_index,
+                    selected_index=cast(int, selected_index),
                     show_grid_text=show_grid_text,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
                     missing_image_path=missing_image_path,
-                    resize_type=full_screen_grid_resize_type,
-                    render_text_overlay=full_screen_grid_render_text_overlay,
+                    resize_type=cast(Any, full_screen_grid_resize_type),
+                    render_text_overlay=cast(Any, full_screen_grid_render_text_overlay),
                     image_resize_height_multiplier=image_resize_height_multiplier
                 )
             case ViewType.CAROUSEL:
                 return CarouselView(
                     top_bar_text=top_bar_text,
                     options=options,
-                    cols=carousel_cols,
-                    selected_index=selected_index,
+                    cols=cast(int, carousel_cols),
+                    selected_index=cast(int, selected_index),
                     show_grid_text=show_grid_text,
                     set_top_bar_text_to_selection=set_top_bar_text_to_selection,
                     set_bottom_bar_text_to_selection=set_bottom_bar_text_to_selection,

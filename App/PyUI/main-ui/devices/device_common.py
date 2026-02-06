@@ -7,6 +7,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from typing import Any
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
@@ -17,7 +18,7 @@ from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
 from menus.settings.wifi_menu import WifiMenu
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
@@ -52,11 +53,11 @@ class DeviceCommon(AbstractDevice):
         self.run_cmd([self.reboot_cmd()])
 
 
-    def input_timeout_default(self):
+    def input_timeout_default(self) -> float:
         return 1/12 # 12 fps
     
 
-    def screen_rotation(self):
+    def screen_rotation(self) -> int:
         return 0
 
     def map_backlight_from_10_to_full_255(self,lumination_level, min_level=1):
@@ -97,6 +98,9 @@ class DeviceCommon(AbstractDevice):
             self.system_config.save_config()
             self._set_lumination_to_config()
 
+    def _set_lumination_to_config(self):
+        pass
+
     def lower_contrast(self):
         self.system_config.reload_config()
         if(self.system_config.contrast > 1): # don't allow 0 contrast
@@ -110,6 +114,9 @@ class DeviceCommon(AbstractDevice):
             self.system_config.set_contrast(self.system_config.contrast + 1)
             self.system_config.save_config()
             self._set_contrast_to_config()
+
+    def _set_contrast_to_config(self):
+        pass
 
     def lower_brightness(self):
         self.system_config.reload_config()
@@ -125,6 +132,9 @@ class DeviceCommon(AbstractDevice):
             self.system_config.save_config()
             self._set_brightness_to_config()
 
+    def _set_brightness_to_config(self):
+        pass
+
     def lower_saturation(self):
         self.system_config.reload_config()
         if(self.system_config.saturation > 0):
@@ -139,6 +149,9 @@ class DeviceCommon(AbstractDevice):
             self.system_config.save_config()
             self._set_saturation_to_config()
 
+    def _set_saturation_to_config(self):
+        pass
+
     def lower_hue(self):
         self.system_config.reload_config()
         if(self.system_config.hue > 0):
@@ -152,6 +165,9 @@ class DeviceCommon(AbstractDevice):
             self.system_config.set_hue(self.system_config.hue + 1)
             self.system_config.save_config()
             self._set_hue_to_config()
+
+    def _set_hue_to_config(self):
+        pass
 
 
     def hue(self):
@@ -185,6 +201,9 @@ class DeviceCommon(AbstractDevice):
         self.system_config.set_volume(volume)
         self.system_config.save_config()
         Display.volume_changed(self.get_volume())
+
+    def _set_volume(self, volume) -> int:
+        return volume
 
     def get_display_volume(self):
         return self.get_volume()
@@ -243,6 +262,9 @@ class DeviceCommon(AbstractDevice):
 
             time.sleep(10)
 
+    def stop_wifi_services(self):
+        pass
+
     @throttle.limit_refresh(15)
     def get_wifi_status(self):
         if not self.is_wifi_enabled():
@@ -273,8 +295,11 @@ class DeviceCommon(AbstractDevice):
         else:
             return WifiStatus.BAD        # Weak / unreliable
 
+    def get_wifi_connection_quality_info(self):
+        raise NotImplementedError
+
         
-    def get_running_processes(self):
+    def get_running_processes(self) -> subprocess.CompletedProcess[str]:
         #bypass ProcessRunner.run_and_print() as it makes the log too big
         return subprocess.run(['ps', '-f'], capture_output=True, text=True)
 
@@ -304,12 +329,23 @@ class DeviceCommon(AbstractDevice):
             self.start_wpa_supplicant()
             self.start_udhcpc()
 
+    def set_wifi_power(self, value):
+        pass
+
+    def start_wpa_supplicant(self):
+        pass
+
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
-        import psutil
+        try:
+            import psutil  # type: ignore[reportMissingImports]
+        except Exception:
+            psutil = None
         if self.is_wifi_enabled():
             try:
+                if psutil is None:
+                    return "Error"
                 addrs = psutil.net_if_addrs().get("wlan0")
                 if addrs:
                     for addr in addrs:
@@ -328,33 +364,36 @@ class DeviceCommon(AbstractDevice):
         Display.deinit_display()
         sys.exit()
 
-    def double_init_sdl_display(self):
+    def double_init_sdl_display(self) -> bool:
         return False
 
-    def supports_volume(self):
+    def supports_volume(self) -> bool:
         return True
+
+    def supports_wifi(self) -> bool:
+        return False
         
-    def get_text_width_measurement_multiplier(self):
+    def get_text_width_measurement_multiplier(self) -> float:
         return 1
         
-    def max_texture_width(self):
+    def max_texture_width(self) -> int:
         #No known limit?
         return sys.maxsize
         
-    def max_texture_height(self):
+    def max_texture_height(self) -> int:
         #No known limit?
         return sys.maxsize
         
-    def get_guaranteed_safe_max_text_char_count(self):
+    def get_guaranteed_safe_max_text_char_count(self) -> int:
         return 35
 
     def get_system_config(self):
         return self.system_config
     
-    def supports_popup_menu(self):
+    def supports_popup_menu(self) -> bool:
         return True
     
-    def supports_timezone_setting(self):
+    def supports_timezone_setting(self) -> bool:
         return False
 
     def apply_timezone(self, timezone):
@@ -373,23 +412,26 @@ class DeviceCommon(AbstractDevice):
         #Unsupported by default
         pass
 
-    def supports_caching_rom_lists(self):
+    def supports_caching_rom_lists(self) -> bool:
         return True
 
-    def keep_running_on_error(self):
+    def keep_running_on_error(self) -> bool:
         return True
 
-    def get_boxart_small_resize_dimensions(self):
+    def get_boxart_small_resize_dimensions(self) -> tuple[int, int]:
         return 640, 480
 
-    def get_boxart_medium_resize_dimensions(self):
+    def get_boxart_medium_resize_dimensions(self) -> tuple[int, int]:
         return 640, 480
 
-    def get_boxart_large_resize_dimensions(self):
+    def get_boxart_large_resize_dimensions(self) -> tuple[int, int]:
         return 640, 480
 
-    def supports_qoi(self):
+    def supports_qoi(self) -> bool:
         return True
+
+    def is_hdmi_connected(self) -> bool:
+        return False
 
     def set_disp_red(self,value):
         self.system_config.reload_config()
@@ -409,7 +451,7 @@ class DeviceCommon(AbstractDevice):
         self.system_config.save_config()
         self._set_disp_green_to_config()
 
-    def supports_rgb_calibration(self):
+    def supports_rgb_calibration(self) -> bool:
         return False
     
     def _set_disp_red_to_config(self):
@@ -430,7 +472,7 @@ class DeviceCommon(AbstractDevice):
     def get_disp_green(self):
         return self.system_config.get_disp_green()
 
-    def get_audio_system(self):
+    def get_audio_system(self) -> Any:
         return AudioPlayerNone()
 
     def get_extra_settings_options(self):
@@ -447,7 +489,7 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().error(f"Could not read MAC address for interface {iface} : {e}")
             return "Unknown"
 
-    def get_fw_version(self):
+    def get_fw_version(self) -> str:
         return "Unknown"
 
     def get_about_info_entries(self):
@@ -461,7 +503,7 @@ class DeviceCommon(AbstractDevice):
     def startup_init(self, include_wifi):
         pass
 
-    def might_require_surface_format_conversion(self):
+    def might_require_surface_format_conversion(self) -> bool:
         return False
 
     def _load_system_config(self, config_path, config_if_missing):
@@ -505,15 +547,15 @@ class DeviceCommon(AbstractDevice):
                 check=True
             )
         except Exception as e:
-            PyUiLogger.get_logger.error(f"Failed to run hwclock: {e}")
+            PyUiLogger.get_logger().error(f"Failed to run hwclock: {e}")
 
     def animation_divisor(self):
         return self.get_system_config().animation_speed(1)
 
-    def get_wifi_menu(self):
+    def get_wifi_menu(self) -> Any:
         return WifiMenu()
 
-    def get_new_wifi_scanner(self):
+    def get_new_wifi_scanner(self) -> Any:
         return WiFiScanner()
 
     def post_present_operations(self):

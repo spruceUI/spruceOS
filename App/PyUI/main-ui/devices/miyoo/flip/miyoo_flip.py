@@ -1,5 +1,6 @@
 import inspect
 from pathlib import Path
+import re
 import subprocess
 import threading
 import time
@@ -24,7 +25,7 @@ from display.display import Display
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.timezone_menu import TimezoneMenu
 import sdl2
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
@@ -308,7 +309,7 @@ class MiyooFlip(MiyooDevice):
         return "reboot"
 
     def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf")
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf") or ""
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -372,8 +373,8 @@ class MiyooFlip(MiyooDevice):
     
     def read_volume(self):
         try:
-            current_mixer = self.get_current_mixer_value(MiyooDevice.get_device().OUTPUT_MIXER)
-            if(MiyooDevice.get_device().SOUND_DISABLED == current_mixer):
+            current_mixer = self.get_current_mixer_value(self.OUTPUT_MIXER)
+            if(self.SOUND_DISABLED == current_mixer):
                 return 0
             else:
                 output = subprocess.check_output(
@@ -403,7 +404,7 @@ class MiyooFlip(MiyooDevice):
             ProcessRunner.run(["amixer", "cset","numid=2", "2"])
         self._set_volume(config_volume)
 
-    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen | None:
         return MiyooTrimCommon.run_game(self,rom_info)
 
     def supports_analog_calibration(self):
@@ -443,7 +444,9 @@ class MiyooFlip(MiyooDevice):
 
     def apply_timezone(self, timezone):
         os.environ['TZ'] = timezone
-        time.tzset()  
+        tzset = getattr(time, "tzset", None)
+        if callable(tzset):
+            tzset()
         #If we set the time be sure to
         #export TZ='{timezone}'
 

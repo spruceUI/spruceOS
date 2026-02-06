@@ -16,10 +16,10 @@ from views.view import View
 
 
 class FullScreenGridView(View):
-    def __init__(self, top_bar_text, options: List[GridOrListEntry], selected_bg: str = None,
+    def __init__(self, top_bar_text, options: List[GridOrListEntry], selected_bg: str | None = None,
                  selected_index=0, show_grid_text=True,
                  set_top_bar_text_to_selection=False, 
-                 unselected_bg = None, missing_image_path=None,
+                 unselected_bg: str | None = None, missing_image_path: str | None = None,
                  resize_type = ResizeType.ZOOM,
                  render_text_overlay = True,
                  image_resize_height_multiplier = None):
@@ -145,14 +145,17 @@ class FullScreenGridView(View):
                                         alpha=alpha)
 
     def _render_primary_image(self,
-                              image_path: str,
+                              image_path: str | None,
                               x: int, 
                               y: int, 
                               render_mode=RenderMode.TOP_LEFT_ALIGNED, 
                               target_width=None, 
                               target_height=None, 
                               resize_type=None):
-        
+        if not image_path:
+            image_path = self.missing_image_path
+        if not image_path:
+            return 0, 0
         w,h = Display.render_image(image_path=image_path,
                                    x=x,
                                    y=y,
@@ -162,13 +165,14 @@ class FullScreenGridView(View):
                                    resize_type=resize_type,)
         
         if(w == 0):
-            w,h = Display.render_image(image_path=self.missing_image_path,
-                                   x=x,
-                                   y=y,
-                                   render_mode=render_mode,
-                                   target_width=target_width,
-                                   target_height=target_height,
-                                   resize_type=resize_type)
+            if self.missing_image_path:
+                w,h = Display.render_image(image_path=self.missing_image_path,
+                                       x=x,
+                                       y=y,
+                                       render_mode=render_mode,
+                                       target_width=target_width,
+                                       target_height=target_height,
+                                       resize_type=resize_type)
 
         return w,h
 
@@ -178,7 +182,9 @@ class FullScreenGridView(View):
         else:
             return 0
 
-    def _render_image(self, index=None, x_offset=0, y_add_offset=0, render_text_overlay=True, text_alpha=None):
+    def _render_image(self, index=0, x_offset=0, y_add_offset=0, render_text_overlay=True, text_alpha=None):
+        if index is None:
+            return
         imageTextPair = self.options[index]
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) 
         primary_text = imageTextPair.get_primary_text_long()

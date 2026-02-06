@@ -22,7 +22,7 @@ class CollectionsMenu(RomsMenuCommon):
             rom_list = []
             collections = CollectionsManager.get_collection_names()
             for collection in collections:
-                rom_info = RomInfo(None, collection, is_collection=True)
+                rom_info = RomInfo(None, collection, display_name=collection, is_collection=True)
                 # Get the base filename without extension
                 img_path = os.path.join(Device.get_device().get_collections_path(),"Imgs",collection+".png")
 
@@ -65,7 +65,7 @@ class CollectionsMenu(RomsMenuCommon):
             for collection in collections:
                 PyUiLogger.get_logger().info(f"collection: {collection}")
                 if collection == last_subfolder:
-                    self._load_collection_menu(RomInfo(None, collection, is_collection=True))
+                    self._load_collection_menu(RomInfo(None, collection, display_name=collection, is_collection=True))
                     PyUiState.set_last_game_selection(
                         "Collections",
                         '',

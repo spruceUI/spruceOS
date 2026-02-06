@@ -35,7 +35,7 @@ class TimezoneMenu():
                         potential_timezone_entries.append(f"{subfolder}/{filename}")
 
         for filename in os.listdir(timezone_dir):
-            file_path = os.path.join(subfolder_path, filename)
+            file_path = os.path.join(timezone_dir, filename)
             if os.path.isfile(file_path):
                 potential_timezone_entries.append(f"{filename}")
 

@@ -63,10 +63,16 @@ class CollectionsManagementMenu():
                     options=option_list,
                     selected_index=selected.get_index())
                 refresh = False
+                if list_view is None:
+                    break
             else:
+                if list_view is None:
+                    break
                 list_view.set_options(option_list)
     
             control_options = [ControllerInput.A]
+            if list_view is None:
+                break
             selected = list_view.get_selection(control_options)
 
             if(selected.get_input() in control_options):

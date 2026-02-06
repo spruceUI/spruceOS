@@ -2,7 +2,7 @@
 import json
 import subprocess
 from devices.charge.charge_status import ChargeStatus
-from utils import throttle
+import utils.throttle as throttle
 
 
 class AxpTestMehthods():

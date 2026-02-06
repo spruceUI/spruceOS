@@ -27,6 +27,18 @@ class MuosGameSystemConfig():
     def get_icon_selected(self):
         return self.iconsel
 
+    def get_sort_order(self):
+        return 0
+
+    def get_brand(self):
+        return ""
+
+    def get_type(self):
+        return ""
+
+    def get_release_year(self):
+        return ""
+
     def get_launch(self):
         base_dir = os.path.abspath(sys.path[0])
         return os.path.join(base_dir, "devices","muos", "muos_launch.sh")
@@ -62,4 +74,26 @@ class MuosGameSystemConfig():
             
     def scan_subfolders(self):
         return True
+
+    def get_ignore_list(self):
+        return []
+
+    # Menu override stubs for compatibility with GameConfigMenu
+    def get_menu_options(self):
+        return {}
+
+    def get_effective_menu_selection(self, entry_name, rom_file_path):
+        return ""
+
+    def contains_menu_override(self, entry_name, rom_file_path):
+        return False
+
+    def set_menu_override(self, entry_name, rom_file_path, value):
+        pass
+
+    def delete_menu_override(self, entry_name, rom_file_path):
+        pass
+
+    def set_menu_option(self, entry_name, value):
+        pass
         

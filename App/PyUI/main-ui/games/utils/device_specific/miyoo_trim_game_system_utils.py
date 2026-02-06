@@ -127,7 +127,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
             self.roms_paths.append("/media/sdcard1/Roms/")
         self.rom_utils = RomUtils(self.roms_paths[0])
 
-    def get_game_system_by_name(self, system_name) -> GameSystem:
+    def get_game_system_by_name(self, system_name) -> GameSystem | None:
         game_system_config = FileBasedGameSystemConfig(system_name)
 
         if(game_system_config is not None):
@@ -254,13 +254,22 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
             PyUiLogger.get_logger().info(f"Roms not found in {rom_info.rom_file_path}")
             return None  # "Roms" not in path or nothing after "Roms"
 
+        if rom_info.game_system is None:
+            return None
         saves_root = os.sep.join(parts[:roms_index]) + os.sep + "Saves" + os.sep + "states"
         base_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
 
     
-        core_selection_in_config = Device.get_device().get_core_for_game(rom_info.game_system.game_system_config, os.path.basename(rom_info.rom_file_path))
-       
-        core_names = self.CORE_TO_FOLDER_LOOKUP.get(core_selection_in_config)
+        core_selection_in_config = Device.get_device().get_core_for_game(
+            rom_info.game_system.game_system_config,
+            os.path.basename(rom_info.rom_file_path),
+        )
+
+        core_names = (
+            self.CORE_TO_FOLDER_LOOKUP.get(core_selection_in_config)
+            if core_selection_in_config is not None
+            else None
+        )
         if(core_names is not None):       
             for core in core_names:
                 cores_to_try = Device.get_device().get_core_name_overrides(core)

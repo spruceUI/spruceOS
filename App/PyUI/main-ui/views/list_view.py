@@ -17,6 +17,9 @@ class ListView(View):
         self.current_bottom = 0
         self.clear_display_each_render_cycle = True
         self.include_index_text = True
+        self.top_bar_text: str = ""
+        self.max_rows: int = 0
+        self.options: list = []
 
     def center_selection(self):
         if(self.selected != 0):
@@ -89,7 +92,7 @@ class ListView(View):
 
         return Selection(self.get_selected_option(), None, self.selected)
     
-    def options_are_alphabetized(self):
+    def options_are_alphabetized(self) -> bool:
         return False
     
     def _render_common(self):

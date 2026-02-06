@@ -3,6 +3,10 @@
 import signal
 import subprocess
 import time
+try:
+    import psutil  # type: ignore[reportMissingImports]
+except Exception:  # pragma: no cover - optional dependency
+    psutil = None
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -11,8 +15,6 @@ from menus.games.in_game_menu_popup import InGameMenuPopup
 from menus.games.retroarch_in_game_menu_popup import RetroarchInGameMenuPopup
 from menus.games.utils.rom_info import RomInfo
 from utils.logger import PyUiLogger
-import signal
-
 class InGameMenuListener:
     def __init__(self):
         self.popup_menu = InGameMenuPopup()
@@ -20,7 +22,9 @@ class InGameMenuListener:
             
     def send_signal(self, proc: subprocess.Popen, sig, timeout: float = 3.0):
         try:
-            import psutil
+            if psutil is None:
+                PyUiLogger.get_logger().warning("psutil is unavailable; cannot signal child processes")
+                return
             ps_proc = psutil.Process(proc.pid)
 
             # Send SIGTERM to all children
@@ -45,13 +49,15 @@ class InGameMenuListener:
                         PyUiLogger.get_logger().debug(f"For exitting child PID {child.pid}")
                         child.kill()
                 if ps_proc.is_running():
-                    PyUiLogger.get_logger().debug(f"For exitting PID {child.pid}")
+                    PyUiLogger.get_logger().debug(f"For exitting PID {ps_proc.pid}")
                     ps_proc.kill()
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error in send_signal: {e}")
     
     def game_launched(self, game_process: subprocess.Popen, game: RomInfo):
+        if game.game_system is None:
+            return
         support_menu_button_in_game = game.game_system.game_system_config.run_in_game_menu()
         uses_retroarch = game.game_system.game_system_config.uses_retroarch()
         while(game_process.poll() is None):
@@ -69,7 +75,9 @@ class InGameMenuListener:
                         if(uses_retroarch):
                             self.ra_popup_menu.send_cmd_to_ra(b'PAUSE_TOGGLE')
                         else:
-                            self.send_signal(game_process, signal.SIGSTOP)
+                            sigstop = getattr(signal, "SIGSTOP", None)
+                            if sigstop is not None:
+                                self.send_signal(game_process, sigstop)
 
                         PyUiLogger.get_logger().info(f"Taking snapshot before in-game menu")
                         snapshot = Device.get_device().take_snapshot("/tmp/screenshot.png")
@@ -87,9 +95,13 @@ class InGameMenuListener:
                         Display.deinit_display()
                         Device.get_device().restore_framebuffer()
                         if(continue_running):
-                            self.send_signal(game_process, signal.SIGCONT)
+                            sigcont = getattr(signal, "SIGCONT", None)
+                            if sigcont is not None:
+                                self.send_signal(game_process, sigcont)
                         else:
-                            self.send_signal(game_process, signal.SIGCONT)
+                            sigcont = getattr(signal, "SIGCONT", None)
+                            if sigcont is not None:
+                                self.send_signal(game_process, sigcont)
                             time.sleep(0.1)
                             self.send_signal(game_process, signal.SIGTERM)
 

@@ -76,7 +76,6 @@ class SprigMiyooMiniCommon(MiyooMiniCommon):
         """Get volume from system config, always reload to catch external changes"""
         return self.system_config.get_volume()
     
-    @property
     def lumination(self):
         """Get backlight from system config, always reload to catch external changes"""
         return self.system_config.get_backlight()

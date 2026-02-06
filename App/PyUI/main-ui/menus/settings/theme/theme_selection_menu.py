@@ -18,6 +18,9 @@ class ThemeSelectionMenu:
         selected = Selection(None, None, 0)
         option_list = []
         theme_dir = PyUiConfig.get("themeDir")
+        if not theme_dir:
+            PyUiLogger.get_logger().warning("themeDir not set; cannot list themes")
+            return None
         for index, opt in enumerate(options):
             png_path = os.path.join(theme_dir,opt,"preview.png")
             image_path = png_path

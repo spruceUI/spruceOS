@@ -1,11 +1,13 @@
 
 
 from abc import ABC
+from typing import Any
 
 
 class View(ABC):
     def __init__(self):
-        pass
+        self.options = []
+        self.selected = 0
 
     def is_alphabetized(self,options: list):
         texts = [opt.get_primary_text() for opt in options]
@@ -14,6 +16,12 @@ class View(ABC):
     def view_finished(self):
         #Callers should always call this one the view
         #is done with so it can be cleaned up as needed
+        pass
+
+    def get_selection(self, *args, **kwargs) -> Any:
+        pass
+
+    def set_options(self, options) -> None:
         pass
 
     def calculate_amount_to_move_by(self, amount, skip_by_letter):

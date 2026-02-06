@@ -46,10 +46,15 @@ class Sdl2AudioPlayer:
     @staticmethod
     def _send_cmd(cmd_name, *args, expect_reply=False, **kwargs):
         Sdl2AudioPlayer._ensure_worker()
+        cmd_q = Sdl2AudioPlayer._cmd_q
+        if cmd_q is None:
+            return None
         resp_q = queue.Queue(maxsize=1) if expect_reply else None
         cmd = _Cmd(cmd_name, args=args, kwargs=kwargs, resp_q=resp_q)
-        Sdl2AudioPlayer._cmd_q.put(cmd)
+        cmd_q.put(cmd)
         if expect_reply:
+            if resp_q is None:
+                return None
             try:
                 return resp_q.get(timeout=2.0)
             except queue.Empty:
@@ -278,7 +283,10 @@ class Sdl2AudioPlayer:
         # main worker loop
         while Sdl2AudioPlayer._running:
             try:
-                cmd: _Cmd = Sdl2AudioPlayer._cmd_q.get(timeout=0.2)
+                cmd_q = Sdl2AudioPlayer._cmd_q
+                if cmd_q is None:
+                    continue
+                cmd: _Cmd = cmd_q.get(timeout=0.2)
             except queue.Empty:
                 # nothing to do; allow loop to continue and react to running state
                 continue

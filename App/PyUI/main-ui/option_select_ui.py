@@ -109,7 +109,7 @@ class OptionSelectUI:
         return option_list
 
     @staticmethod
-    def navigate_menu(menu_dict, title, folder, exit_after_running, view_type, execute_immediately=False, is_root=False, descriptions=None):
+    def navigate_menu(menu_dict, title, folder, exit_after_running, view_type, execute_immediately=False, is_root=False, descriptions=None) -> list[GridOrListEntry] | str | None:
         """
         Core navigation function.
         - If is_root is True: returns a list of GridOrListEntry with .value as callable.
@@ -205,7 +205,7 @@ class OptionSelectUI:
         root_dict = OptionSelectUI._build_tree_from_flat_map(data)
         folder = str(json_path.parent)
 
-        return OptionSelectUI.navigate_menu(
+        result = OptionSelectUI.navigate_menu(
             root_dict,
             title="",
             folder=folder,
@@ -215,6 +215,9 @@ class OptionSelectUI:
             is_root=True,
             descriptions=descriptions
         )
+        if isinstance(result, list):
+            return result
+        return []
 
     @staticmethod
     def display_menu_ui(title, menu_dict, folder, exit_after_running, view_type):

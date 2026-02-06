@@ -45,9 +45,12 @@ class MiyooGameList:
                 game_id = game.get('id')
                 source = game.get('source')
 
-                path = game.findtext('path')
-                image = game.findtext('image')
-                name = game.findtext('name')
+                path = game.findtext('path') or ""
+                image = game.findtext('image') or ""
+                name = game.findtext('name') or ""
+
+                if not path:
+                    continue
 
                 if path.startswith('./'):
                     file_name = path[2:]
@@ -55,7 +58,7 @@ class MiyooGameList:
                     file_name = path
 
                 # Make image path relative to the XML file's directory
-                image_path = os.path.join(base_dir, image[2:] if image.startswith('./') else image)
+                image_path = os.path.join(base_dir, image[2:] if image.startswith('./') else image) if image else ""
                 entry = GameEntry(game_id, source, path, image_path, name)
                 self.games_by_file_name[file_name] = entry
 

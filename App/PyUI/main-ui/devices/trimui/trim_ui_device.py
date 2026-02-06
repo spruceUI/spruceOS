@@ -20,7 +20,7 @@ from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from menus.settings.timezone_menu import TimezoneMenu
-from utils import throttle
+import utils.throttle as throttle
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -29,6 +29,8 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.sdl_button_to_input: dict[int, ControllerInput] = {}
+        self.miyoo_games_file_parser = None
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -67,7 +69,9 @@ class TrimUIDevice(DeviceCommon):
                 # Create a ctypes array equivalent to: unsigned long param[4] = {0, val, 0, 0};
                 param = (ctypes.c_ulong * 4)(0, val, 0, 0)
                 # Perform ioctl with pointer to param
-                fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+                ioctl = getattr(fcntl, "ioctl", None)
+                if ioctl is not None:
+                    ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
                 os.close(fd)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting brightness: {e}")
@@ -142,15 +146,15 @@ class TrimUIDevice(DeviceCommon):
             return None
 
     
-    def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
+    def special_input(self, key_code, length_in_seconds):
+        if(ControllerInput.POWER_BUTTON == key_code):
             if(length_in_seconds < 1):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
+        elif(ControllerInput.VOLUME_UP == key_code):
             self.change_volume(+5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
+        elif(ControllerInput.VOLUME_DOWN == key_code):
             self.change_volume(-5)
 
     def map_analog_input(self, sdl_axis, sdl_value):
@@ -235,9 +239,13 @@ class TrimUIDevice(DeviceCommon):
         return MiyooAppFinder()
     
     def parse_favorites(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_favorites()
     
     def parse_recents(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_recents()
 
     def is_bluetooth_enabled(self):
@@ -278,16 +286,16 @@ class TrimUIDevice(DeviceCommon):
     def calibrate_sticks(self):
         pass
 
-    def supports_analog_calibration(self):
+    def supports_analog_calibration(self) -> bool:
         return False
 
-    def supports_image_resizing(self):
+    def supports_image_resizing(self) -> bool:
         return True
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
 
-    def supports_wifi(self):
+    def supports_wifi(self) -> bool:
         return True
     
     def get_game_system_utils(self):
@@ -300,18 +308,18 @@ class TrimUIDevice(DeviceCommon):
         return None
     
     def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf")
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf") or ""
     
-    def supports_brightness_calibration():
+    def supports_brightness_calibration(self) -> bool:
         return True
 
-    def supports_contrast_calibration():
+    def supports_contrast_calibration(self) -> bool:
         return True
 
-    def supports_saturation_calibration():
+    def supports_saturation_calibration(self) -> bool:
         return True
 
-    def supports_hue_calibration():
+    def supports_hue_calibration(self) -> bool:
         return True
 
     def get_save_state_image(self, rom_info: RomInfo):
@@ -331,7 +339,7 @@ class TrimUIDevice(DeviceCommon):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
     
-    def supports_timezone_setting(self):
+    def supports_timezone_setting(self) -> bool:
         return True
 
     def prompt_timezone_update(self):
@@ -360,11 +368,13 @@ class TrimUIDevice(DeviceCommon):
                 check=True
             )
         except Exception as e:
-            PyUiLogger.get_logger.error(f"Failed to update /etc/localtime: {e}")
+            PyUiLogger.get_logger().error(f"Failed to update /etc/localtime: {e}")
 
         # Update environment for current process
         os.environ["TZ"] = timezone
-        time.tzset()
+        tzset = getattr(time, "tzset", None)
+        if tzset is not None:
+            tzset()
         self.sync_hw_clock()
 
 

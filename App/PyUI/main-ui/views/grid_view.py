@@ -16,12 +16,19 @@ from views.view import View
 
 
 class GridView(View):
-    def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str = None,
+    def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str | None = None,
                  selected_index=0, show_grid_text=True, resized_width=None, resized_height=None,
                  set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None, 
-                 unselected_bg = None, grid_img_y_offset=None, missing_image_path=None,
+                 unselected_bg: str | None = None, grid_img_y_offset=None, missing_image_path: str | None = None,
                  wrap_around_single_row=None):
         super().__init__()
+        self.prev_widths: list[int] = []
+        self.prev_x_offsets: list[int] = []
+        self.prev_visible_options: list[GridOrListEntry] = []
+        self.options_length: int = 0
+        self.include_index_text: bool = True
+        self.prev_selected: int = 0
+        self.animated_count: int = 0
         self.resized_width = resized_width
         self.resized_height = resized_height
         self.resize_type = resize_type
@@ -34,8 +41,11 @@ class GridView(View):
         if (self.max_img_height is None):
             self.max_img_height = 0
             for option in options:
+                image_path = option.get_image_path()
+                if image_path is None:
+                    continue
                 self.max_img_height = max(
-                    self.max_img_height, Display.get_image_dimensions(option.get_image_path())[1])
+                    self.max_img_height, Display.get_image_dimensions(image_path)[1])
 
         self.selected = selected_index
         self.toggles = [False] * len(options)
@@ -69,6 +79,18 @@ class GridView(View):
     def set_options(self, options):
         self.options = options
         self.options_are_sorted = self.is_alphabetized(options)
+        self.options_length = len(options)
+
+    def _render_image(self, image_path, x, y, render_mode, target_width=None, target_height=None, resize_type=None):
+        return Display.render_image(
+            image_path=image_path,
+            x=int(x),
+            y=int(y),
+            render_mode=render_mode,
+            target_width=target_width,
+            target_height=target_height,
+            resize_type=resize_type,
+        )
 
     def single_row_in_window(self):
         """Return True if index i is inside the circular window."""
@@ -122,7 +144,7 @@ class GridView(View):
                 self.current_right += 1
 
     def _render_primary_image(self,
-                              image_path: str,
+                              image_path: str | None,
                               x: int, 
                               y: int, 
                               render_mode=RenderMode.TOP_LEFT_ALIGNED, 
@@ -130,7 +152,7 @@ class GridView(View):
                               target_height=None, 
                               resize_type=None):
         
-        w,h = Display.render_image(image_path=image_path,
+        w,h = Display.render_image(image_path=image_path or "",
                                    x=x,
                                    y=y,
                                    render_mode=render_mode,
@@ -139,13 +161,14 @@ class GridView(View):
                                    resize_type=resize_type)
         
         if(w == 0):
-            w,h = Display.render_image(image_path=self.missing_image_path,
-                                   x=x,
-                                   y=y,
-                                   render_mode=render_mode,
-                                   target_width=target_width,
-                                   target_height=target_height,
-                                   resize_type=resize_type)
+            if self.missing_image_path:
+                w,h = Display.render_image(image_path=self.missing_image_path,
+                                       x=x,
+                                       y=y,
+                                       render_mode=render_mode,
+                                       target_width=target_width,
+                                       target_height=target_height,
+                                       resize_type=resize_type)
         return w,h
 
     def _render_cell(self, visible_index, imageTextPair):
@@ -153,13 +176,15 @@ class GridView(View):
         image_path = imageTextPair.get_image_path_selected_ideal(self.resized_width, self.resized_height) if actual_index == self.selected else imageTextPair.get_image_path_ideal(self.resized_width, self.resized_height)
 
         x_index = visible_index % self.cols
-        x_offset = int(self.x_pad + (x_index) * (self.icon_width)) + self.icon_width//2
+        x_offset = int(self.x_pad + (x_index) * (self.icon_width)) + int(self.icon_width)//2
 
         y_index = int(visible_index / self.cols)
         row_spacing = Display.get_usable_screen_height() / self.rows
         row_start_y = y_index * row_spacing
         bottom_row_y = row_start_y + row_spacing + Display.get_top_bar_height(False)
         render_mode = RenderMode.MIDDLE_CENTER_ALIGNED
+        cell_y = bottom_row_y
+        offset_divisor = 1
         if(YRenderOption.CENTER == render_mode.y_mode):
             cell_y = bottom_row_y - row_spacing //2
             offset_divisor = 2
@@ -168,12 +193,9 @@ class GridView(View):
             offset_divisor = 1
         
 
-        bg_width = self.resized_width
-        bg_height = self.resized_height
-        if(self.show_grid_text):
-            text_height = Display.get_line_height(self.font_purpose)
-        else:
-            text_height = 0
+        bg_width = self.resized_width or 0
+        bg_height = self.resized_height or 0
+        text_height = Display.get_line_height(self.font_purpose) if self.show_grid_text else 0
         
         if(self.rows == 1):
             img_offset = self.img_offset if self.img_offset is not None else 0
@@ -196,22 +218,22 @@ class GridView(View):
         if (actual_index == self.selected):
             if (self.selected_bg is not None):
                 Display.render_image(self.selected_bg,
-                         x_offset,
-                         cell_y + bg_offset // offset_divisor,
-                         render_mode,
-                         target_width=int(bg_width*1.05),
-                         target_height=int(bg_height*1.05))
+                             int(x_offset),
+                             int(cell_y + bg_offset // offset_divisor),
+                             render_mode,
+                             target_width=int(bg_width*1.05),
+                             target_height=int(bg_height*1.05))
         elif(self.unselected_bg is not None):
             Display.render_image(self.unselected_bg,
-                         x_offset,
-                         cell_y + bg_offset // offset_divisor,
+                         int(x_offset),
+                         int(cell_y + bg_offset // offset_divisor),
                          render_mode,
                          target_width=int(bg_width*1.05),
                          target_height=int(bg_height*1.05))
 
         self._render_primary_image(image_path,
-                         x_offset,
-                         cell_y + img_offset // offset_divisor,
+                         int(x_offset),
+                         int(cell_y + img_offset // offset_divisor),
                          render_mode,
                          target_width=self.resized_width,
                          target_height=self.resized_height,
@@ -321,6 +343,15 @@ class GridView(View):
         self.selected += amount
         self.correct_selected_for_off_list()
 
+    def _clear(self):
+        if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
+            Display.clear(
+                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+        elif(self.set_bottom_bar_text_to_selection and len(self.options) > 0):
+            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
+        else:
+            Display.clear(self.top_bar_text)
+
 
     def animate_transition(self):
         animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count*2
@@ -383,14 +414,14 @@ class GridView(View):
                 delta_time = time.time() - last_frame_time
                 if delta_time < frame_duration:
                     time.sleep(frame_duration - (delta_time))
-                if(self.include_index_text):
-                    letter = ''
-                    if(self.options_are_sorted):
-                        letter = self.options[self.selected].get_primary_text()[0]
-
-                    Display.add_index_text(self.selected%self.options_length +1, self.options_length,
-                                           letter)
-                Display.present()
                 last_frame_time = time.time()
+        if(self.include_index_text):
+            letter = ''
+            if(self.options_are_sorted):
+                letter = self.options[self.selected].get_primary_text()[0]
+
+            Display.add_index_text(self.selected%self.options_length +1, self.options_length,
+                                   letter=letter)
+        Display.present()
         
         self.animated_count += 1

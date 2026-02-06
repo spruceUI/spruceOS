@@ -1,6 +1,7 @@
 import re
 import socket
 import subprocess
+from typing import Any
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
@@ -14,7 +15,7 @@ from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGa
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
-from utils import throttle
+import utils.throttle as throttle
 from utils.logger import PyUiLogger
 
 class GKDDevice(DeviceCommon):
@@ -23,6 +24,8 @@ class GKDDevice(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         self.sdl2_controller_interface = Sdl2ControllerInterface()
+        self.sdl_button_to_input: dict[int, ControllerInput] = {}
+        self.miyoo_games_file_parser: Any = None
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -31,7 +34,7 @@ class GKDDevice(DeviceCommon):
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
 
-    def get_controller_interface(self):
+    def get_controller_interface(self) -> Any:
         return self.sdl2_controller_interface
 
 
@@ -121,15 +124,15 @@ class GKDDevice(DeviceCommon):
             return None
 
     
-    def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
+    def special_input(self, key_code, length_in_seconds):
+        if(ControllerInput.POWER_BUTTON == key_code):
             if(length_in_seconds < 1):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
+        elif(ControllerInput.VOLUME_UP == key_code):
             self.change_volume(+5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
+        elif(ControllerInput.VOLUME_DOWN == key_code):
             self.change_volume(-5)
 
     def map_analog_input(self, sdl_axis, sdl_value):
@@ -166,7 +169,7 @@ class GKDDevice(DeviceCommon):
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
     def get_wpa_supplicant_conf_path(self):
-        return None
+        return ""
 
     def start_wifi_services(self):
         pass
@@ -179,12 +182,18 @@ class GKDDevice(DeviceCommon):
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
-        import psutil
+        try:
+            import psutil  # type: ignore[reportMissingImports]
+        except Exception:
+            psutil = None
         if self.is_wifi_enabled():
-            if not self.get_wifi_menu().adapter_is_connected():
+            wifi_menu = self.get_wifi_menu()
+            if hasattr(wifi_menu, "adapter_is_connected") and not wifi_menu.adapter_is_connected():
                 return "No USB adapter"
 
             try:
+                if psutil is None:
+                    return "Error"
                 addrs = psutil.net_if_addrs().get("wlan0")
                 if addrs:
                     for addr in addrs:
@@ -203,8 +212,12 @@ class GKDDevice(DeviceCommon):
         self.system_config.set_wifi(0)
         self.system_config.save_config()
         ProcessRunner.run(["connmanctl", "disable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
+        wifi_status_refresh = getattr(self.get_wifi_status, "force_refresh", None)
+        if callable(wifi_status_refresh):
+            wifi_status_refresh()
+        ip_refresh = getattr(self.get_ip_addr_text, "force_refresh", None)
+        if callable(ip_refresh):
+            ip_refresh()
 
     def enable_wifi(self):
         self.system_config.reload_config()
@@ -212,8 +225,12 @@ class GKDDevice(DeviceCommon):
         self.system_config.save_config()
         ProcessRunner.run(["systemctl", "restart", "connman"])
         ProcessRunner.run(["connmanctl", "enable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
+        wifi_status_refresh = getattr(self.get_wifi_status, "force_refresh", None)
+        if callable(wifi_status_refresh):
+            wifi_status_refresh()
+        ip_refresh = getattr(self.get_ip_addr_text, "force_refresh", None)
+        if callable(ip_refresh):
+            ip_refresh()
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
@@ -278,16 +295,16 @@ class GKDDevice(DeviceCommon):
     def calibrate_sticks(self):
         pass
 
-    def supports_analog_calibration(self):
+    def supports_analog_calibration(self) -> bool:
         return False
 
-    def supports_image_resizing(self):
+    def supports_image_resizing(self) -> bool:
         return True
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
 
-    def supports_wifi(self):
+    def supports_wifi(self) -> bool:
         return True
     
     def get_game_system_utils(self):
@@ -299,16 +316,16 @@ class GKDDevice(DeviceCommon):
     def take_snapshot(self, path):
         return None
     
-    def supports_brightness_calibration():
+    def supports_brightness_calibration(self) -> bool:
         return True
 
-    def supports_contrast_calibration():
+    def supports_contrast_calibration(self) -> bool:
         return True
 
-    def supports_saturation_calibration():
+    def supports_saturation_calibration(self) -> bool:
         return True
 
-    def supports_hue_calibration():
+    def supports_hue_calibration(self) -> bool:
         return True
 
     def get_save_state_image(self, rom_info: RomInfo):

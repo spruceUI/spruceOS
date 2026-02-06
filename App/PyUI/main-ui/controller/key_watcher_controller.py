@@ -115,7 +115,7 @@ class KeyWatcherController(ControllerInterface):
         while True:
             now = time.time()
             try:
-
+                data = None
                 try:
                     data = os.read(self.fd, self.event_size)
                 except OSError as e:
@@ -137,6 +137,9 @@ class KeyWatcherController(ControllerInterface):
                     else:
                         logger.exception("Unexpected OSError while reading input")
                         return
+
+                if data is None:
+                    continue
 
                 if len(data) != self.event_size:
                     logger.error("Short read: got %d bytes, expected %d", len(data), self.event_size)

@@ -57,7 +57,8 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 Device.get_device().enable_wifi()
 
         if(ControllerInput.A == input):
-            self.wifi_menu.show_wifi_menu()
+            if self.wifi_menu is not None:
+                self.wifi_menu.show_wifi_menu()
 
     def show_bt_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):
@@ -69,7 +70,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             self.bt_menu.show_bluetooth_menu()
 
     def get_theme_folders(self):
-        theme_dir = PyUiConfig.get("themeDir")
+        theme_dir = PyUiConfig.get("themeDir") or ""
         return sorted(
             [
                 name for name in os.listdir(theme_dir)
@@ -82,7 +83,8 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
     def change_theme(self, input):
         self.theme_ever_changed = True
         theme_folders = self.get_theme_folders()
-        selected_index = theme_folders.index(Device.get_device().get_system_config().get_theme())
+        current_theme = Device.get_device().get_system_config().get_theme()
+        selected_index = theme_folders.index(current_theme) if current_theme in theme_folders else 0
         if(ControllerInput.DPAD_LEFT == input):
             selected_index-=1
             if(selected_index < 0):
@@ -98,10 +100,11 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
 
 
         if(selected_index is not None):
-            Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.get_device().screen_width(), Device.get_device().screen_height())
+            theme_dir = PyUiConfig.get("themeDir") or ""
+            Theme.set_theme_path(os.path.join(theme_dir, theme_folders[selected_index]), Device.get_device().screen_width(), Device.get_device().screen_height())
             Display.init_fonts()   
             Device.get_device().get_system_config().set_theme(theme_folders[selected_index])
-            Device.get_device().set_theme(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]))
+            Device.get_device().set_theme(os.path.join(theme_dir, theme_folders[selected_index]))
             self.theme_changed = True
             Display.restore_bg()
 
@@ -201,7 +204,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.theme(),
-                        value_text="<    " + Device.get_device().get_system_config().get_theme() + "    >",
+                        value_text="<    " + (Device.get_device().get_system_config().get_theme() or "") + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -288,9 +291,9 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         return option_list
 
 
-    def show_menu(self) :
+    def show_menu(self) -> bool:
         selected = Selection(None, None, 0)
-        list_view = None
+        list_view: object | None = None
         self.theme_changed = False
         while(selected is not None):
             option_list = self.build_options_list()
@@ -308,20 +311,21 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                     
                 self.theme_changed = False
             else:
-                list_view.set_options(option_list)
+                if hasattr(list_view, "set_options"):
+                    list_view.set_options(option_list)
 
             control_options = [ControllerInput.A,ControllerInput.X, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
-            selected = list_view.get_selection(control_options)
+            selected = list_view.get_selection(control_options) if hasattr(list_view, "get_selection") else Selection(None, None, 0)
 
             if(Theme.skip_main_menu() and (ControllerInput.L1 == selected.get_input() or ControllerInput.B == selected.get_input())):
                 if(self.theme_ever_changed):
                     os._exit(0)
-                return selected.get_input()
+                return True
             if(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
                 if(self.theme_ever_changed):
                     os._exit(0)
-                return ControllerInput.R1
+                return True
             elif(selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
             elif(ControllerInput.B == selected.get_input()):

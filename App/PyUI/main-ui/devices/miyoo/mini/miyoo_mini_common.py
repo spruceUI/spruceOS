@@ -1,7 +1,6 @@
 import re
 import tempfile
 import time
-from asyncio import sleep
 import json
 from pathlib import Path
 import subprocess
@@ -22,7 +21,7 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.games.utils.rom_info import RomInfo
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.py_ui_config import PyUiConfig
@@ -102,7 +101,8 @@ class MiyooMiniCommon(MiyooDevice):
 
         if old_volume != self.mainui_volume:
             from display.display import Display
-            Display.volume_changed(self.mainui_volume * 5)
+            if self.mainui_volume is not None:
+                Display.volume_changed(self.mainui_volume * 5)
 
     def startup_init(self, include_wifi=True):
         if(self.is_wifi_enabled()):
@@ -375,11 +375,11 @@ class MiyooMiniCommon(MiyooDevice):
         return self.miyoo_mini_specific_model_variables.reboot_cmd
 
     def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/appconfigs/wpa_supplicant.conf")
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/appconfigs/wpa_supplicant.conf") or ""
 
     def get_volume(self):
         try:
-            return self.mainui_volume * 5
+            return (self.mainui_volume or 0) * 5
         except:
             return 0
 
@@ -412,7 +412,7 @@ class MiyooMiniCommon(MiyooDevice):
             self.volume_up()
         else:
             self.volume_down()
-        sleep(0.1)
+        time.sleep(0.1)
         self.on_mainui_config_change()
 
     def _set_volume(self, volume: int) -> int:
@@ -442,7 +442,7 @@ class MiyooMiniCommon(MiyooDevice):
         pass #uneeded
 
 
-    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen | None:
         preload_path = "/mnt/SDCARD/miyoo/app/../lib/libpadsp.so"
         if os.path.exists(preload_path):
             run_prefix = f"LD_PRELOAD={preload_path} "
@@ -462,28 +462,28 @@ class MiyooMiniCommon(MiyooDevice):
     def get_guaranteed_safe_max_text_char_count(self):
         return 35
 
-    def supports_volume(self):
+    def supports_volume(self) -> bool:
         return True #can read but not write
 
-    def supports_analog_calibration(self):
+    def supports_analog_calibration(self) -> bool:
         return False
 
-    def supports_image_resizing(self):
+    def supports_image_resizing(self) -> bool:
         return True
 
-    def supports_brightness_calibration(self):
+    def supports_brightness_calibration(self) -> bool:
         return True
 
-    def supports_contrast_calibration(self):
+    def supports_contrast_calibration(self) -> bool:
         return True
 
-    def supports_saturation_calibration(self):
+    def supports_saturation_calibration(self) -> bool:
         return True
 
-    def supports_hue_calibration(self):
+    def supports_hue_calibration(self) -> bool:
         return False
     
-    def supports_popup_menu(self):
+    def supports_popup_menu(self) -> bool:
         return False
     
     def get_image_utils(self):
@@ -501,7 +501,7 @@ class MiyooMiniCommon(MiyooDevice):
     def get_device_name(self):
         return self.device_name
     
-    def supports_timezone_setting(self):
+    def supports_timezone_setting(self) -> bool:
         return True
 
     def prompt_timezone_update(self):
@@ -512,7 +512,7 @@ class MiyooMiniCommon(MiyooDevice):
         ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
         ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
 
-    def supports_caching_rom_lists(self):
+    def supports_caching_rom_lists(self) -> bool:
         return True #Is there enough RAM
 
     

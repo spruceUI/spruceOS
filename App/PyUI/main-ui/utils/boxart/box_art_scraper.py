@@ -297,11 +297,11 @@ class BoxArtScraper:
 
     def get_image_list_for_system(self, sys_name: str) -> List[str]:
         """Match ROM to image name based on db/<system>_games.txt."""
-        image_list_file = self._find_game_list_file(sys_name)
-        if not image_list_file:
+        image_list_file = os.path.join(self.db_dir, f"{sys_name}_games.txt")
+        if not os.path.exists(image_list_file):
             self.log_and_display_message(f"Image list file not found for {sys_name}.")
             time.sleep(2)
-            return None
+            return []
 
         with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
             image_list = f.read().splitlines()

@@ -51,13 +51,19 @@ class RomsMenuCommon(ABC):
     @abstractmethod
     def _get_rom_list(self) -> list[GridOrListEntry]:
         pass
+
+    @abstractmethod
+    def prefer_savestate_screenshot(self) -> bool:
+        pass
     
     def _run_subfolder_menu(self, rom_info : RomInfo) -> list[GridOrListEntry]:
         from menus.games.game_select_menu import GameSelectMenu
+        if rom_info.game_system is None:
+            return []
         return GameSelectMenu().run_rom_selection(rom_info.game_system, rom_info.rom_file_path)
 
 
-    def _load_collection_menu(self, rom_info : RomInfo) -> list[GridOrListEntry]:
+    def _load_collection_menu(self, rom_info : RomInfo) -> None:
         self.current_collection = rom_info.rom_file_path
         PyUiState.set_in_game_selection_screen(True)
         rom_list = self.build_rom_selection_for_collection(self.current_collection)
@@ -104,7 +110,7 @@ class RomsMenuCommon(ABC):
     def get_game_select_carousel_col_count(self):
         return Theme.get_game_select_carousel_col_count()
     
-    def get_image_resize_height_multiplier(self):
+    def get_image_resize_height_multiplier(self) -> float | None:
         return None
     
     def create_view(self, page_name, rom_list, selected):
@@ -172,7 +178,7 @@ class RomsMenuCommon(ABC):
             if(return_value is not None and return_value != ControllerInput.B):
                 return return_value
 
-    def default_to_last_game_selection(self):
+    def default_to_last_game_selection(self) -> bool:
         return True
    
     def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
@@ -321,7 +327,7 @@ class RomsMenuCommon(ABC):
         #recents is handled one level up to account for launched_via_special_case
         Display.deinit_display()
 
-        game_thread: subprocess.Popen = Device.get_device().run_game(game_path)
+        game_thread: subprocess.Popen | None = Device.get_device().run_game(game_path)
         if (game_thread is not None):
             self.in_game_menu_listener.game_launched(
                 game_thread, game_path)
@@ -332,6 +338,8 @@ class RomsMenuCommon(ABC):
 
 
     def launched_via_special_case(self, rom_info : RomInfo):
+        if rom_info.game_system is None:
+            return False
         subfolder_launch_file = rom_info.game_system.game_system_config.subfolder_launch_file()
 
         if(subfolder_launch_file is not None and subfolder_launch_file != ""):

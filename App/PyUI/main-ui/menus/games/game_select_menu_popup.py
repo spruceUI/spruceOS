@@ -70,10 +70,14 @@ class GameSelectMenuPopup:
 
     def download_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
+            if rom_info.game_system is None:
+                return
             rom_select_options_builder = get_rom_select_options_builder()
 
             rom_image_list = []
             img_path = rom_select_options_builder.get_default_image_path(rom_info.game_system, rom_info.rom_file_path)
+            if img_path is None:
+                return
             name_without_ext = RomFileNameUtils.get_rom_name_without_extensions(
                 rom_info.game_system,
                 rom_info.rom_file_path
@@ -108,6 +112,8 @@ class GameSelectMenuPopup:
 
     def select_specific_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
+            if rom_info.game_system is None:
+                return
             Display.display_message("Loading boxart list...")
             scraper = BoxArtScraper()
             if(not scraper.check_wifi()):
@@ -126,6 +132,8 @@ class GameSelectMenuPopup:
                 if(boxart_download is not None):
                     box_art = image_list[boxart_download]
                     img_path = get_rom_select_options_builder().get_default_image_path(rom_info.game_system, rom_info.rom_file_path)
+                    if img_path is None:
+                        return
                     existing_image = get_rom_select_options_builder().get_image_path(rom_info)
                     if(existing_image is not None and os.path.exists(existing_image)):
                         os.remove(existing_image)
@@ -223,14 +231,17 @@ class GameSelectMenuPopup:
 
 
     def run_game_select_popup_menu(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
+        if rom_info.game_system is None:
+            return None
+        game_system = rom_info.game_system
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text=f"{rom_info.game_system.display_name} Game Search",
+            primary_text=f"{game_system.display_name} Game Search",
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description=None,
             icon=None,
-            value=lambda input_value, game_system=rom_info.game_system: self.execute_game_search(game_system, input_value)
+            value=lambda input_value, game_system=game_system: self.execute_game_search(game_system, input_value)
         ))
 
 
@@ -249,7 +260,7 @@ class GameSelectMenuPopup:
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
-            top_bar_text=f"{rom_info.game_system.display_name} Menu Sub Options",
+            top_bar_text=f"{game_system.display_name} Menu Sub Options",
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())

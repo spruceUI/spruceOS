@@ -1,6 +1,7 @@
 
 
 import os
+from typing import cast
 from controller.controller_inputs import ControllerInput
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
@@ -11,6 +12,7 @@ from menus.games.recents_menu import RecentsMenu
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
+from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
 from menus.settings.basic_settings_menu import BasicSettingsMenu
@@ -63,12 +65,14 @@ class GameSystemSelectMenuPopup:
             roms = rom_select_options_builder.build_rom_list(game_system, subfolder=None)
             rom_image_list = []
             for rom in roms:
-                if(rom.get_image_path() is not None and os.path.exists(rom.get_image_path())):
+                image_path = rom.get_image_path()
+                if image_path is not None and os.path.exists(image_path):
                     continue
-                img_path = rom_select_options_builder.get_default_image_path(game_system, rom.get_value().rom_file_path)
+                rom_value = cast(RomInfo, rom.get_value())
+                img_path = rom_select_options_builder.get_default_image_path(game_system, rom_value.rom_file_path)
                 name_without_ext = RomFileNameUtils.get_rom_name_without_extensions(
-                    rom.get_value().game_system,
-                    rom.get_value().rom_file_path
+                    rom_value.game_system,
+                    rom_value.rom_file_path
                 )
                 rom_image_list.append((name_without_ext, img_path))
             

@@ -16,7 +16,7 @@ from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
-from utils import throttle
+import utils.throttle as throttle
 
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
@@ -132,18 +132,18 @@ class TrimUIBrick(TrimUIDevice):
     def get_core_name_overrides(self, core_name):
         return [core_name, core_name+"-64"]
             
-    def _set_volume(self, user_volume):
+    def _set_volume(self, volume):
         from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = math.ceil(user_volume * 255//100)
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        scaled_volume = math.ceil(volume * 255//100)
         
         try:
             
             ProcessRunner.run(
-                ["amixer", "cset", f"numid=17", str(int(volume))],
+                ["amixer", "cset", f"numid=17", str(int(scaled_volume))],
                 check=True
             )
 
@@ -151,10 +151,10 @@ class TrimUIBrick(TrimUIDevice):
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
+        self.system_config.set_volume(volume)
         self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
+        Display.volume_changed(volume)
+        return volume
     
     
     def might_require_surface_format_conversion(self):

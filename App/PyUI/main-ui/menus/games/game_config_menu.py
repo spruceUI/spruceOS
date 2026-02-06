@@ -210,7 +210,7 @@ class GameConfigMenu:
                         config_list.append(
                                         GridOrListEntry(
                                         primary_text=display_name,
-                                        value_text="<    " + effective_value + "    >",
+                                        value_text="<    " + str(effective_value) + "    >",
                                         image_path=None,
                                         image_path_selected=None,
                                         description=None,

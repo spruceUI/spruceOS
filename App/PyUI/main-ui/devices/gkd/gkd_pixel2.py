@@ -14,7 +14,7 @@ from devices.gkd.connman_wifi_menu import ConnmanWifiMenu
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.settings.timezone_menu import TimezoneMenu
-from utils import throttle
+import utils.throttle as throttle
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
@@ -170,13 +170,12 @@ class GKDPixel2(GKDDevice):
 
         os.system("systemctl restart tz-data.service")
 
-    def _set_volume(self, user_volume):
+    def _set_volume(self, volume):
         from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = user_volume
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
         
         try:
             ProcessRunner.run(
@@ -188,10 +187,10 @@ class GKDPixel2(GKDDevice):
             PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
 
         self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
+        self.system_config.set_volume(volume)
         self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
+        Display.volume_changed(volume)
+        return volume
     
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?

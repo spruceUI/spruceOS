@@ -1,34 +1,34 @@
 
 import os
 from utils.image_utils import ImageUtils
-from PIL import Image
+from PIL import Image  # type: ignore[import-not-found]
 from utils.logger import PyUiLogger
 
 
 class PilImageUtils(ImageUtils):
-    def convert_from_jpg_to_qoi(self, jpg_path, png_path):
+    def convert_from_jpg_to_qoi(self, jpg_path, qoi_path):
         with Image.open(jpg_path) as img:
-            img.save(png_path, "QOI")
+            img.save(qoi_path, "QOI")
 
     def convert_from_jpg_to_png(self, jpg_path, png_path):
         with Image.open(jpg_path) as img:
             img.save(png_path, "PNG")
 
-    def shrink_image_if_needed(self, input_path, output_path, width, height):
+    def shrink_image_if_needed(self, input_path, output_path, max_width, max_height):
         img = Image.open(input_path)
         actual_width, actual_height = img.size
 
         # Only shrink if necessary
-        if actual_width > width or actual_height > height:
+        if actual_width > max_width or actual_height > max_height:
             aspect_ratio = actual_width / actual_height
-            if actual_width / width > actual_height / height:
+            if actual_width / max_width > actual_height / max_height:
                 # Width is the limiting factor
-                new_width = width
-                new_height = int(width / aspect_ratio)
+                new_width = max_width
+                new_height = int(max_width / aspect_ratio)
             else:
                 # Height is the limiting factor
-                new_height = height
-                new_width = int(height * aspect_ratio)
+                new_height = max_height
+                new_width = int(max_height * aspect_ratio)
 
             img = img.resize((new_width, new_height), Image.LANCZOS)
             img.save(output_path)
@@ -42,19 +42,19 @@ class PilImageUtils(ImageUtils):
             )
             return False
             
-    def resize_image(self, input_path, output_path, width, height):
+    def resize_image(self, input_path, output_path, max_width, max_height, preserve_aspect_ratio=True, target_alpha_channel=None):
         img = Image.open(input_path)
         actual_width, actual_height = img.size
 
         aspect_ratio = actual_width / actual_height
-        if actual_width / width > actual_height / height:
+        if actual_width / max_width > actual_height / max_height:
             # Width is the limiting factor
-            new_width = width
-            new_height = int(width / aspect_ratio)
+            new_width = max_width
+            new_height = int(max_width / aspect_ratio)
         else:
             # Height is the limiting factor
-            new_height = height
-            new_width = int(height * aspect_ratio)
+            new_height = max_height
+            new_width = int(max_height * aspect_ratio)
 
         img = img.resize((new_width, new_height), Image.LANCZOS)
         img.save(output_path)

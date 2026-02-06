@@ -41,13 +41,15 @@ class OnScreenKeyboard:
 
         while running:
             Display.clear("Keyboard")
-            Display.render_image(
-                image_path = Theme.keyboard_bg(),
-                x = 0,
-                y = Display.get_top_bar_height(), 
-                render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                target_width=Device.get_device().screen_width(), 
-                target_height=Device.get_device().screen_height())
+            keyboard_bg = Theme.keyboard_bg()
+            if keyboard_bg:
+                Display.render_image(
+                    image_path = keyboard_bg,
+                    x = 0,
+                    y = Display.get_top_bar_height(), 
+                    render_mode = RenderMode.TOP_LEFT_ALIGNED, 
+                    target_width=Device.get_device().screen_width(), 
+                    target_height=Device.get_device().screen_height())
 
             next_y = Display.get_top_bar_height()
             entry_bar_text_x_offset = 10 #TODO get somewhere better
@@ -60,13 +62,17 @@ class OnScreenKeyboard:
                     render_mode = RenderMode.TOP_LEFT_ALIGNED)
                 next_y += title_h
 
-            entry_bar_w, entry_bar_h = Display.render_image(
-                image_path = Theme.keyboard_entry_bg(),
-                x = 0,
-                y = next_y, 
-                render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                target_width=None, 
-                target_height=key_h)
+            entry_bg = Theme.keyboard_entry_bg()
+            entry_bar_w = 0
+            entry_bar_h = key_h
+            if entry_bg:
+                entry_bar_w, entry_bar_h = Display.render_image(
+                    image_path = entry_bg,
+                    x = 0,
+                    y = next_y, 
+                    render_mode = RenderMode.TOP_LEFT_ALIGNED, 
+                    target_width=None, 
+                    target_height=key_h)
 
             if(self.entered_text):
                 Display.render_text(text=self.entered_text,
@@ -92,13 +98,15 @@ class OnScreenKeyboard:
                         ):
                         color = Theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD)
                         selected = True
-                        Display.render_image(
-                            image_path = Theme.key_selected_bg() if selected else Theme.key_bg(),
-                            x = x,
-                            y = y, 
-                            render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                            target_width=key_w, 
-                            target_height=key_h)
+                        key_bg = Theme.key_selected_bg() if selected else Theme.key_bg()
+                        if key_bg:
+                            Display.render_image(
+                                image_path = key_bg,
+                                x = x,
+                                y = y, 
+                                render_mode = RenderMode.TOP_LEFT_ALIGNED, 
+                                target_width=key_w, 
+                                target_height=key_h)
 
                     else:
                         color = Theme.text_color(FontPurpose.ON_SCREEN_KEYBOARD)

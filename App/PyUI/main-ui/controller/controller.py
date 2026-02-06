@@ -1,5 +1,6 @@
 import time
 from controller.controller_inputs import ControllerInput
+from controller.controller_interface import ControllerInterface
 from devices.device import Device
 
 from themes.theme import Theme
@@ -25,7 +26,7 @@ class Controller:
     _input_history = []
     gs_triggered = False
     first_check_after_gs_triggered = False
-    controller_interface = None
+    controller_interface: ControllerInterface | None = None
     _watch_for_secret_code = False
 
     # The sequence we want to detect
@@ -64,12 +65,14 @@ class Controller:
 
     @staticmethod
     def init_controller():
-        Controller.controller_interface.init_controller()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.init_controller()
 
 
     @staticmethod
     def re_init_controller():
-        Controller.controller_interface.re_init_controller()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.re_init_controller()
 
     @staticmethod
     def new_bt_device_paired():
@@ -77,10 +80,13 @@ class Controller:
 
     @staticmethod
     def close():
-        Controller.controller_interface.close()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.close()
 
     @staticmethod
     def still_held_down():
+        if Controller.controller_interface is None:
+            return False
         return Controller.controller_interface.still_held_down()
 
     @staticmethod
@@ -88,7 +94,8 @@ class Controller:
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"Clearing last input")
         Controller.last_controller_input = None
-        Controller.controller_interface.clear_input()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.clear_input()
 
     @staticmethod
     def _matches_secret_prefix():
@@ -142,7 +149,7 @@ class Controller:
 
 
     @staticmethod
-    def get_input(timeout=-2, called_from_check_for_hotkey=False):
+    def get_input(timeout: float = -2, called_from_check_for_hotkey: bool = False):
         if(Controller.first_check_after_gs_triggered):
             #Let user stop holding menu
             Controller.first_check_after_gs_triggered = False
@@ -167,16 +174,19 @@ class Controller:
 
         # Clear stale events if enough time has passed
         if time_since_last_input > INPUT_DEBOUNCE_SECONDS:
-            Controller.controller_interface.force_refresh()
+            if Controller.controller_interface is not None:
+                Controller.controller_interface.force_refresh()
             if not Controller.still_held_down():
                 Controller.clear_input_queue()
 
-        Controller.controller_interface.force_refresh()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.force_refresh()
         start_time = time.time()
 
         # Wait if the input is being held down (anti-repeat logic)
         while Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
-            Controller.controller_interface.force_refresh()
+            if Controller.controller_interface is not None:
+                Controller.controller_interface.force_refresh()
             time.sleep(POLL_INTERVAL_SECONDS)
 
         was_hotkey = False
@@ -194,7 +204,7 @@ class Controller:
             while True:
 
                 ms_remaining = int(remaining_time * 1000)
-                input = Controller.controller_interface.get_input(ms_remaining)
+                input = Controller.controller_interface.get_input(float(ms_remaining)) if Controller.controller_interface is not None else None
                 Controller.set_last_input(input)
 
                 if Controller.last_controller_input is not None:
@@ -218,7 +228,8 @@ class Controller:
         #TODO i think this loop is in the wrong place
         # Wait if the input is being held down (anti-repeat logic)
         while started_held_down and Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
-            Controller.controller_interface.force_refresh()
+            if Controller.controller_interface is not None:
+                Controller.controller_interface.force_refresh()
             time.sleep(POLL_INTERVAL_SECONDS)
 
         if Controller.still_held_down():
@@ -250,7 +261,8 @@ class Controller:
 
     @staticmethod
     def clear_input_queue():
-        Controller.controller_interface.clear_input_queue()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.clear_input_queue()
 
     @staticmethod
     def last_input():
@@ -267,7 +279,8 @@ class Controller:
     def check_for_hotkey():
         Controller.is_check_for_hotkey = True
         cached_event = Controller.last_controller_input
-        Controller.controller_interface.cache_last_event()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.cache_last_event()
         Controller.clear_last_input()
 
         was_hotkey = False
@@ -285,7 +298,8 @@ class Controller:
 
         Controller.non_sdl_input = None
         Controller.set_last_input(cached_event)
-        Controller.controller_interface.restore_cached_event()
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.restore_cached_event()
         Controller.is_check_for_hotkey = False
         return was_hotkey
     

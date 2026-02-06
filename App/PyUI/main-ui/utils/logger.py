@@ -23,10 +23,10 @@ class StreamToLogger:
         pass  # Not needed
 
 class PyUiLogger:
-    _logger = None  # Class-level cache for the logger
+    _logger: logging.Logger | None = None  # Class-level cache for the logger
 
     @classmethod
-    def init(cls, log_dir, logger_name):
+    def init(cls, log_dir, logger_name) -> logging.Logger:
         if cls._logger is not None:
             return cls._logger
 
@@ -122,6 +122,11 @@ class PyUiLogger:
 
 
     @classmethod
-    def get_logger(cls):
+    def get_logger(cls) -> logging.Logger:
+        if cls._logger is None:
+            logger = logging.getLogger("pyui")
+            if not logger.handlers:
+                logger.addHandler(logging.NullHandler())
+            cls._logger = logger
         return cls._logger
     

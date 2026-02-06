@@ -24,6 +24,11 @@ class MiyooDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.sdl_button_to_input: dict[int, ControllerInput] = {}
+        self.unknown_axis_ranges: dict[int, tuple[int, int]] = {}
+        self.unknown_axis_stats: dict[int, tuple[int, int]] = {}
+        self.sdl_axis_names: dict[int, str] = {}
+        self.miyoo_games_file_parser = None
 
     def clear_framebuffer(self):
         pass
@@ -120,15 +125,15 @@ class MiyooDevice(DeviceCommon):
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
 
-    def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
+    def special_input(self, key_code, length_in_seconds):
+        if(ControllerInput.POWER_BUTTON == key_code):
             if(length_in_seconds < 1):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
+        elif(ControllerInput.VOLUME_UP == key_code):
             self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
+        elif(ControllerInput.VOLUME_DOWN == key_code):
             self.change_volume(-5)
 
     def map_key(self, key_code):
@@ -194,9 +199,13 @@ class MiyooDevice(DeviceCommon):
         return MiyooAppFinder()
     
     def parse_favorites(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_favorites()
     
     def parse_recents(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_recents()
 
     def is_bluetooth_enabled(self):

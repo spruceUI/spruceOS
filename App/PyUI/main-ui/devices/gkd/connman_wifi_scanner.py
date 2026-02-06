@@ -62,7 +62,10 @@ class ConnmanWiFiScanner:
         result = ProcessRunner.run(["connmanctl", "scan", "wifi"])
         if "Scan completed" not in result.stdout:
             log.error("wlan0 seems broken, restarting and retrying")
-            Device.get_device().wifi_error_detected()
+            device = Device.get_device()
+            wifi_error = getattr(device, "wifi_error_detected", None)
+            if callable(wifi_error):
+                wifi_error()
             time.sleep(15)
             ProcessRunner.run(["connmanctl", "scan", "wifi"])
 

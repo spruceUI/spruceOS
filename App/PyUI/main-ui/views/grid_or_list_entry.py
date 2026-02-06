@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import os
 import threading
-from typing import Callable, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from devices.device import Device
 from utils.cached_exists import CachedExists
@@ -22,9 +22,9 @@ class GridOrListEntry:
         description=None,
         icon=None,
         value: T = None,
-        image_path_searcher: Callable[[T], str] = None,
-        image_path_selected_searcher: Callable[[T], str] = None,
-        icon_searcher: Callable[[T], str] = None,
+        image_path_searcher: Optional[Callable[[T], str | None]] = None,
+        image_path_selected_searcher: Optional[Callable[[T], str | None]] = None,
+        icon_searcher: Optional[Callable[[T], str | None]] = None,
         primary_text_long=None,
         extra_data=None
     ):        
@@ -37,7 +37,7 @@ class GridOrListEntry:
         self.icon_searcher = icon_searcher
 
         self.image_path_selected = image_path_selected or image_path
-        self.value = value if value is not None else primary_text
+        self.value: Any = value if value is not None else primary_text
         self.icon = icon
 
         self._description = None
@@ -55,6 +55,9 @@ class GridOrListEntry:
 
     def _load_description_func(self):
         try:
+            if self._description_func is None:
+                self._description_event.set()
+                return None
             desc = self._description_func()
         except Exception as e:
             desc = f"[Error loading description: {e}]"
@@ -150,10 +153,10 @@ class GridOrListEntry:
     def get_primary_text_long(self):
         return self.primary_text_long or self.primary_text
     
-    def get_value_text(self):
+    def get_value_text(self) -> str | None:
         return self.value_text
     
-    def get_value(self):
+    def get_value(self) -> Any:
         return self.value
     
     def get_icon(self):

@@ -8,11 +8,11 @@ class PyUiAppConfig(AppConfig):
         self.icontop = None
         self.icon = None
         self.launch = label
-        self.folder = None
+        self.folder = ""
         self.description = None
         self.hide = False
         self.devices = []
-        self.hide_in_simple_mode = None
+        self.hide_in_simple_mode = False
 
     def get_label(self):
         return self.label

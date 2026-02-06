@@ -108,7 +108,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.game_system_sorting(),
-                value_text="<    " + PyUiConfig.game_system_sort_mode()+ "    >",
+                value_text="<    " + (PyUiConfig.game_system_sort_mode() or "") + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,

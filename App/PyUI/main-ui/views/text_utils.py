@@ -5,6 +5,7 @@ from display.font_purpose import FontPurpose
 
 
 class TextUtils():
+    @staticmethod
     def scroll_string(text, amt, text_available_width):
         if not text:
             return text

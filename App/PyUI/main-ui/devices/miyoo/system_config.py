@@ -129,9 +129,6 @@ class SystemConfig:
     def get_hibernate(self):
         return self.config.get("hibernate")
 
-    def get_hue(self):
-        return self.config.get("hue")
-
     @property
     def saturation(self):
         return self.config.get("saturation", 10)
@@ -257,7 +254,9 @@ class SystemConfig:
             PyUiLogger.get_logger().info(f"Current user config does not have theme set, so loading from PyUIConfig as {theme}")
             self.set_theme(theme)
             from devices.device import Device
-            Device.get_device().set_theme(os.path.join(PyUiConfig.get("themeDir"), theme))
+            theme_dir = PyUiConfig.get("themeDir")
+            if theme_dir and theme:
+                Device.get_device().set_theme(os.path.join(theme_dir, theme))
         return theme
 
     def set_theme(self, theme):

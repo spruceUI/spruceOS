@@ -59,7 +59,9 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     @staticmethod
-    def run_game(device, rom_info: RomInfo, remap_sdcard_path = True, run_prefix ="") -> subprocess.Popen:
+    def run_game(device, rom_info: RomInfo, remap_sdcard_path = False, run_prefix ="") -> subprocess.Popen | None:
+        if rom_info.game_system is None:
+            return None
         Theme.check_and_create_ra_assets()
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
@@ -74,6 +76,7 @@ class MiyooTrimCommon():
 
 
         Device.get_device().exit_pyui()
+        return None
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
         #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -116,7 +119,7 @@ class MiyooTrimCommon():
         try:
             # Check if wpa_supplicant is running using ps -f
             result = Device.get_device().get_running_processes()
-            if 'wpa_supplicant' in result.stdout:
+            if result is not None and hasattr(result, "stdout") and 'wpa_supplicant' in result.stdout:
                 return
 
             # If not running, start it in the background
@@ -151,6 +154,9 @@ class MiyooTrimCommon():
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
+
+    def is_hdmi_connected(self) -> bool:
+        return False
     
     @staticmethod
     def disable_wifi(device):
@@ -159,8 +165,12 @@ class MiyooTrimCommon():
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","down"])
         Device.get_device().stop_wifi_services()
-        Device.get_device().get_wifi_status.force_refresh()
-        Device.get_device().get_ip_addr_text.force_refresh()
+        wifi_status_refresh = getattr(Device.get_device().get_wifi_status, "force_refresh", None)
+        if callable(wifi_status_refresh):
+            wifi_status_refresh()
+        ip_refresh = getattr(Device.get_device().get_ip_addr_text, "force_refresh", None)
+        if callable(ip_refresh):
+            ip_refresh()
 
     @staticmethod
     def enable_wifi(device):
@@ -169,8 +179,12 @@ class MiyooTrimCommon():
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","up"])
         Device.get_device().start_wifi_services()
-        Device.get_device().get_wifi_status.force_refresh()
-        Device.get_device().get_ip_addr_text.force_refresh()
+        wifi_status_refresh = getattr(Device.get_device().get_wifi_status, "force_refresh", None)
+        if callable(wifi_status_refresh):
+            wifi_status_refresh()
+        ip_refresh = getattr(Device.get_device().get_ip_addr_text, "force_refresh", None)
+        if callable(ip_refresh):
+            ip_refresh()
 
     @staticmethod
     def run_analog_stick_calibration(device, stick_name, joystick, file_path, leftOrRight):

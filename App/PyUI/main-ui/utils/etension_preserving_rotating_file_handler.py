@@ -5,7 +5,7 @@ class ExtensionPreservingRotatingFileHandler(RotatingFileHandler):
     def doRollover(self):
         if self.stream:
             self.stream.close()
-            self.stream = None
+            self.stream = None  # type: ignore[assignment]
 
         base, ext = os.path.splitext(self.baseFilename)
         # base = ".../pyui"

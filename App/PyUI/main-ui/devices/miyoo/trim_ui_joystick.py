@@ -1,5 +1,6 @@
 import time
 import threading
+from typing import Any
 
 from utils.logger import PyUiLogger
 
@@ -12,7 +13,7 @@ class TrimUIJoystick:
     def __init__(self, port="/dev/ttyS1", baudrate=9600):
         self.port = port
         self.baudrate = baudrate
-        self.serial = None
+        self.serial: Any = None
         self.running = False
         self.lock = threading.Lock()
         
@@ -25,7 +26,7 @@ class TrimUIJoystick:
         self.thread = threading.Thread(target=self._poll_thread, daemon=True)
     
     def open(self):
-        import serial
+        import serial  # type: ignore[import-not-found]
         self.serial = serial.Serial(
             self.port,
             self.baudrate,
@@ -47,6 +48,9 @@ class TrimUIJoystick:
     def _poll_thread(self):
         while self.running:
             # read exactly TRIMUI_PAD_FRAME_LEN bytes
+            if self.serial is None:
+                time.sleep(0.01)
+                continue
             frame = self.serial.read(self.TRIMUI_PAD_FRAME_LEN)
             
             if len(frame) != self.TRIMUI_PAD_FRAME_LEN:

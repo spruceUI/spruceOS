@@ -32,11 +32,15 @@ class SoundSettings(SettingsMenu):
         if (input == ControllerInput.DPAD_LEFT):
             curr_volume = max(curr_volume-1, 1)
             Device.get_device().get_system_config().set_bgm_volume(curr_volume)
-            Device.get_device().get_audio_system().audio_set_volume(curr_volume)
+            audio_system = Device.get_device().get_audio_system()
+            if audio_system is not None:
+                audio_system.audio_set_volume(curr_volume)
         elif(input == ControllerInput.DPAD_RIGHT):
             curr_volume = min(curr_volume+1, 10)
             Device.get_device().get_system_config().set_bgm_volume(curr_volume)
-            Device.get_device().get_audio_system().audio_set_volume(curr_volume)
+            audio_system = Device.get_device().get_audio_system()
+            if audio_system is not None:
+                audio_system.audio_set_volume(curr_volume)
 
 
     def build_options_list(self) -> list[GridOrListEntry]:

@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Included imports
 
-from loguru import logger
+from loguru import logger  # type: ignore[import-not-found]
 
 
 ################################################################################

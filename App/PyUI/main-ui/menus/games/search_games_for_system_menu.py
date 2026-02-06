@@ -3,6 +3,7 @@ import os
 from devices.device import Device
 from games.utils.game_system import GameSystem
 from menus.games.roms_menu_common import RomsMenuCommon
+from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.consts import GAME_SELECT
 from views.grid_or_list_entry import GridOrListEntry
@@ -33,7 +34,10 @@ class SearchGamesForSystemMenu(RomsMenuCommon):
 
             # Iterate through entries to find directories
             for entry in rom_list:
-                rom_path = entry.get_value().rom_file_path
+                rom_info = entry.get_value()
+                if not isinstance(rom_info, RomInfo):
+                    continue
+                rom_path = rom_info.rom_file_path
                 rom_name = os.path.basename(rom_path)
                 if os.path.isdir(rom_path):
                     # Recurse into subdirectory

@@ -167,13 +167,16 @@ class GameSystemSelectMenu:
                     icon_system_name_priority.append(icon)
                     selected_icon_system_name_priority.append(icon)
 
-        if(game_system.game_system_config.get_icon() is not None):
-            icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon()))
+        emu_folder = game_system.game_system_config.get_emu_folder()
+        icon_path = game_system.game_system_config.get_icon()
+        if emu_folder and icon_path:
+            icon_system_name_priority.append(os.path.join(emu_folder, icon_path))
 
-            if(game_system.game_system_config.get_icon_selected() is not None):
-                selected_icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon_selected()))
+            selected_icon_path = game_system.game_system_config.get_icon_selected()
+            if selected_icon_path:
+                selected_icon_system_name_priority.append(os.path.join(emu_folder, selected_icon_path))
             else:
-                selected_icon_system_name_priority.append(os.path.join(game_system.game_system_config.get_emu_folder(),game_system.game_system_config.get_icon()))
+                selected_icon_system_name_priority.append(os.path.join(emu_folder, icon_path))
         
         if(Theme.get_default_system_icon() is not None):
             icon_system_name_priority.append(Theme.get_default_system_icon())
@@ -288,7 +291,7 @@ class GameSystemSelectMenu:
 
     def build_system_list(self):
         systems_list = []
-        active_systems = self.game_utils.get_active_systems()
+        active_systems = self.game_utils.get_active_systems() or []
 
         index = 0
         total_count = len(active_systems)

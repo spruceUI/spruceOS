@@ -38,10 +38,13 @@ class ThemeSettingsMenuCommon(SettingsMenu):
                     selected_index=selected.get_index())
                 self.theme_changed = False
             else:
-                list_view.set_options(option_list)
+                if list_view is not None:
+                    list_view.set_options(option_list)
 
             control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
+            if list_view is None:
+                break
             selected = list_view.get_selection(control_options)
 
             if(selected.get_input() in control_options):

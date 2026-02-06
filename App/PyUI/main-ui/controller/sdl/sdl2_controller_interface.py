@@ -66,8 +66,8 @@ class Sdl2ControllerInterface(ControllerInterface):
     def force_refresh(self):
         sdl2.SDL_PumpEvents()
 
-    def get_input(self, timeout):
-        event_available = sdl2.SDL_WaitEventTimeout(byref(self.event), timeout)
+    def get_input(self, timeoutInMilliseconds):
+        event_available = sdl2.SDL_WaitEventTimeout(byref(self.event), timeoutInMilliseconds)
         
         if event_available:
             self.print_last_event()

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import os
 import time
+from typing import Optional, cast, Any
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.loaded_font import LoadedFont
@@ -13,6 +14,7 @@ from menus.common.top_bar import TopBar
 import sdl2
 import sdl2.ext
 import sdl2.sdlttf
+import sdl2.sdlimage
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
@@ -30,7 +32,7 @@ class ImageTextureCache:
     def __init__(self):
         self.cache = {} 
 
-    def get_texture(self, texture_id) -> CachedImageTexture:
+    def get_texture(self, texture_id) -> Optional[CachedImageTexture]:
         return self.cache.get(texture_id)
 
     def add_texture(self, texture_id, surface, texture):
@@ -62,7 +64,7 @@ class TextTextureCache:
     def __init__(self):
         self.cache = {} 
 
-    def get_texture(self, texture_id, font, color) -> CachedTextTexture:
+    def get_texture(self, texture_id, font, color) -> Optional[CachedTextTexture]:
         return self.cache.get(TextTextureKey(texture_id, font, color))
 
     def add_texture(self, texture_id, font, color, surface, texture):
@@ -77,16 +79,17 @@ class TextTextureCache:
         
 class Display:
     debug = False
-    renderer = None
+    renderer: Any = None
     fonts = {}
-    bg_canvas = None
-    render_canvas = None
+    bg_canvas: Any = None
+    render_canvas: Any = None
     bg_path = ""
     top_bar = TopBar()
     bottom_bar = BottomBar()
-    window = None
-    background_texture = None
-    top_bar_text = None
+    window: Any = None
+    background_texture: Any = None
+    top_bar_text: str | None = None
+    is_custom_theme_background: bool = False
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
     _problematic_images = set()  # Class-level set to track images that won't load properly
@@ -393,7 +396,7 @@ class Display:
               force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
         
-        if cls.is_custom_theme_background:
+        if cls.is_custom_theme_background and cls.bg_path:
             #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
             cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
         elif cls.bg_canvas is not None:
@@ -566,7 +569,7 @@ class Display:
         if(text is None or len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
-        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, purpose, color)
+        cache: Optional[CachedTextTexture] = cls._text_texture_cache.get_texture(text, purpose, color)
         cached = True
         if cache and alpha is None:
             surface = cache.surface
@@ -658,7 +661,7 @@ class Display:
         if(image_path is None or image_path in cls._problematic_images):
             return 0, 0
 
-        cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
+        cache: Optional[CachedImageTexture] = cls._image_texture_cache.get_texture(image_path)
         cached = True
         if cache:
             surface = cache.surface
@@ -715,7 +718,7 @@ class Display:
                                            render_mode=render_mode, 
                                            scale_width=target_width, 
                                            scale_height=target_height,
-                                           resize_type=resize_type, 
+                                           resize_type=resize_type or ResizeType.FIT, 
                                            texture_id=image_path,
                                            crop_w=crop_w, crop_h=crop_h)
         
@@ -850,7 +853,7 @@ class Display:
 
 
     @classmethod
-    def rotate_canvas(cls) -> sdl2.SDL_Texture:
+    def rotate_canvas(cls) -> Optional[sdl2.SDL_Texture]:
         """
         Rotates a texture by a given angle (supports 90, 180, 270) without scaling.
         Returns a new texture with dimensions swapped if needed.
@@ -945,9 +948,10 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
 
         if Device.get_device().should_scale_screen():
-            scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
-            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
-            sdl2.SDL_DestroyTexture(scaled_canvas)
+            if cls.render_canvas is not None:
+                scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
+                sdl2.SDL_DestroyTexture(scaled_canvas)
         elif(0 == Device.get_device().screen_rotation()):
             if(fade):
                 cls.fade_transition(cls.bg_canvas, cls.render_canvas)

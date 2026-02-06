@@ -8,7 +8,7 @@ from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.muos.muos_device import MuosDevice
 from devices.utils.process_runner import ProcessRunner
-from utils import throttle
+import utils.throttle as throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig

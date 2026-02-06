@@ -15,7 +15,7 @@ from games.utils.device_specific.muos_game_system_utils import MuosGameSystemUti
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
@@ -29,6 +29,7 @@ class MuosDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.muos_systems = self.load_assign_json()
+        self.miyoo_games_file_parser = None
 
     def setup_system_config(self):
         base_dir = os.path.abspath(sys.path[0])
@@ -94,7 +95,9 @@ class MuosDevice(DeviceCommon):
     def read_volume(self):
         return self.system_config.get_volume()
 
-    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen | None:
+        if rom_info.game_system is None:
+            return None
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         PyUiLogger.get_logger().info(f"About to launch {launch_path} with rom {rom_info.rom_file_path}")
         return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
@@ -119,15 +122,15 @@ class MuosDevice(DeviceCommon):
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
 
-    def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
+    def special_input(self, key_code, length_in_seconds):
+        if(ControllerInput.POWER_BUTTON == key_code):
             if(length_in_seconds < 1):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
+        elif(ControllerInput.VOLUME_UP == key_code):
             self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
+        elif(ControllerInput.VOLUME_DOWN == key_code):
             self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
@@ -201,9 +204,13 @@ class MuosDevice(DeviceCommon):
         return MuosAppFinder()
     
     def parse_favorites(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_favorites()
     
     def parse_recents(self) -> list[GameEntry]:
+        if self.miyoo_games_file_parser is None:
+            return []
         return self.miyoo_games_file_parser.parse_recents()
 
     def is_bluetooth_enabled(self):
@@ -360,7 +367,7 @@ class MuosDevice(DeviceCommon):
         return None
 
     def get_wpa_supplicant_conf_path(self):
-        return None
+        return ""
 
     def supports_brightness_calibration(self):
         return False

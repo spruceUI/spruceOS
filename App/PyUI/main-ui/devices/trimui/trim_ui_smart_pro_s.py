@@ -18,13 +18,13 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
-from asyncio import sleep
+import time
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
@@ -70,9 +70,9 @@ class TrimUISmartProS(TrimUIDevice):
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
 
-    def _set_volume(self, user_volume):
+    def _set_volume(self, volume) -> int:
         # Investigate sending volume key
-        pass
+        return volume
 
     #Untested
     @throttle.limit_refresh(5)
@@ -104,8 +104,6 @@ class TrimUISmartProS(TrimUIDevice):
         else:
             return 1
 
-    def get_device_name(self):
-        return self.device_name
     
     
     def supports_brightness_calibration(self):
@@ -179,11 +177,12 @@ class TrimUISmartProS(TrimUIDevice):
                 text=True
             )
 
-            proc.stdin.write("1 115 1\n")
-            proc.stdin.write("1 115 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
+            if proc.stdin is not None:
+                proc.stdin.write("1 115 1\n")
+                proc.stdin.write("1 115 0\n")
+                proc.stdin.write("0 0 0\n")
+                proc.stdin.flush()
+                proc.stdin.close()
 
             proc.wait()
         except Exception as e:
@@ -199,11 +198,12 @@ class TrimUISmartProS(TrimUIDevice):
                 text=True
             )
 
-            proc.stdin.write("1 114 1\n")
-            proc.stdin.write("1 114 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
+            if proc.stdin is not None:
+                proc.stdin.write("1 114 1\n")
+                proc.stdin.write("1 114 0\n")
+                proc.stdin.write("0 0 0\n")
+                proc.stdin.flush()
+                proc.stdin.close()
 
             proc.wait()
         except Exception as e:
@@ -223,7 +223,7 @@ class TrimUISmartProS(TrimUIDevice):
             self.volume_up()
         else:
             self.volume_down()
-        sleep(0.1)
+        time.sleep(0.1)
         self.on_mainui_config_change()
 
     def enable_bluetooth(self):

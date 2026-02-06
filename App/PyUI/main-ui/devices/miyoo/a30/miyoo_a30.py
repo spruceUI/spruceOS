@@ -20,7 +20,7 @@ from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from menus.games.utils.rom_info import RomInfo
-from utils import throttle
+import utils.throttle as throttle
 from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
@@ -143,7 +143,7 @@ class MiyooA30(MiyooDevice):
         if(self.should_scale_screen()):
             return 1080
         else:
-            return self.screen_widths
+            return self.screen_width()
 
     def get_scale_factor(self):
         if(self.is_hdmi_connected()):
@@ -161,10 +161,15 @@ class MiyooA30(MiyooDevice):
 
         param = struct.pack('LLLL', 0, self.map_backlight_from_10_to_full_255(self.system_config.backlight, min_level=10), 0, 0)
 
+        ioctl = getattr(fcntl, "ioctl", None)
         try:
-            fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
-        except OSError as e:
-            PyUiLogger.get_logger().warning(f"ioctl failed: {e}")
+            if ioctl is None:
+                PyUiLogger.get_logger().warning("fcntl.ioctl not available, skipping brightness update")
+            else:
+                try:
+                    ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+                except OSError as e:
+                    PyUiLogger.get_logger().warning(f"ioctl failed: {e}")
         finally:
             os.close(fd)
 
@@ -265,7 +270,7 @@ class MiyooA30(MiyooDevice):
         return None
 
     def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/config/wpa_supplicant.conf")
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/config/wpa_supplicant.conf") or ""
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -283,7 +288,7 @@ class MiyooA30(MiyooDevice):
         config_volume = self.system_config.get_volume()
         self._set_volume(config_volume)
 
-    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen | None:
         def delayed_fix():
             total_time = 2.0
             interval = 0.1

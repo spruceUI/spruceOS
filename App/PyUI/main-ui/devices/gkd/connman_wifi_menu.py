@@ -1,4 +1,4 @@
-from asyncio import subprocess
+import subprocess
 from pathlib import Path
 import configparser
 import time
@@ -32,7 +32,10 @@ class ConnmanWifiMenu:
 
         # Build config options
         config = configparser.RawConfigParser()
-        config.optionxform = lambda option: option
+        def _preserve_case(optionstr: str) -> str:
+            return optionstr
+
+        config.optionxform = _preserve_case
 
         config.add_section("Settings")
         config["Settings"]["AutoConnect"] = "true"

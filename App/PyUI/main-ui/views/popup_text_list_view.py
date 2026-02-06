@@ -11,13 +11,16 @@ from views.text_list_view import TextListView
 class PopupTextListView(TextListView):
     def __init__(self, options: List[GridOrListEntry], 
                  selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None):
+        popup_bg = Theme.menu_popup_bg_large()
+        popup_bg_height = Display.get_image_dimensions(popup_bg)[1] if popup_bg else 0
+
         super().__init__(top_bar_text=Display.get_current_top_bar_title(),
                          options=options,
                          selected_index=selected_index,
                          show_icons=show_icons,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
-                         usable_height=int(Display.get_image_dimensions(Theme.menu_popup_bg_large())[1]),
+                         usable_height=int(popup_bg_height),
                          allow_scrolling=False)
 
         self.clear_display_each_render_cycle = False
@@ -31,13 +34,13 @@ class PopupTextListView(TextListView):
 
         self.starting_x_offset = self.view_x + Theme.pop_menu_text_padding()
         self.base_y_offset = self.view_y
-        Device.get_device().screen_width()//4
-        Display.render_image(
-            image_path=Theme.menu_popup_bg_large(),
-            x=self.view_x,
-            y=self.view_y,
-            render_mode=RenderMode.TOP_LEFT_ALIGNED
-        )
+        if popup_bg:
+            Display.render_image(
+                image_path=popup_bg,
+                x=self.view_x,
+                y=self.view_y,
+                render_mode=RenderMode.TOP_LEFT_ALIGNED
+            )
         Display.present()
         Display.lock_current_image()
 

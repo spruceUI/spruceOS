@@ -16,12 +16,12 @@ class SettingsMenu(ABC):
         self.on_screen_keyboard = OnScreenKeyboard()
 
     @abstractmethod
-    def build_options_list(self):
+    def build_options_list(self) -> list[GridOrListEntry]:
         pass
 
     def show_menu(self) :
         selected = Selection(None, None, 0)
-        list_view = None
+        list_view: object | None = None
         self.theme_changed = False
         self.theme_ever_changed = False
         while(selected is not None):
@@ -38,11 +38,12 @@ class SettingsMenu(ABC):
                     selected_index=selected.get_index())
                 self.theme_changed = False
             else:
-                list_view.set_options(option_list)
+                if hasattr(list_view, "set_options"):
+                    list_view.set_options(option_list)
     
             control_options = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                   ControllerInput.L1, ControllerInput.R1]
-            selected = list_view.get_selection(control_options)
+            selected = list_view.get_selection(control_options) if hasattr(list_view, "get_selection") else Selection(None, None, 0)
 
             if(selected.get_input() in control_options):
                 selected.get_selection().get_value()(selected.get_input())
@@ -136,7 +137,7 @@ class SettingsMenu(ABC):
                     option_list.append(
                                     GridOrListEntry(
                                     primary_text=display_name,
-                                    value_text="<    " + selected_value + "    >",
+                                    value_text="<    " + str(selected_value) + "    >",
                                     image_path=None,
                                     image_path_selected=None,
                                     description=description,

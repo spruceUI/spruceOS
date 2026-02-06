@@ -25,7 +25,8 @@ class KeyWatcher:
         self.held_keys = {}  # Maps keycode -> last seen time
         self.repeat_interval = 0.2  # seconds
         try:
-            self.fd = os.open(self.event_path, os.O_RDONLY | os.O_NONBLOCK)
+            flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0)
+            self.fd = os.open(self.event_path, flags)
         except OSError as e:
             PyUiLogger.get_logger().warning(f"Unable to open {self.event_path}: {e}")
             return (None, None)

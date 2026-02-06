@@ -96,8 +96,8 @@ class DescriptiveListView(ListView):
                 FontPurpose.DESCRIPTIVE_LIST_TITLE,
                 render_mode=title_render_mode)
 
-            if(gridOrListEntry.get_value_text() is not None):
-                value_text = gridOrListEntry.get_value_text()
+            value_text = gridOrListEntry.get_value_text()
+            if value_text is not None:
                 max_value_text_length = 25
                 
                 if(len(value_text) > max_value_text_length):

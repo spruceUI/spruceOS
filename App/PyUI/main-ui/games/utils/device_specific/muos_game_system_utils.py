@@ -16,7 +16,7 @@ class MuosGameSystemUtils(GameSystemUtils):
         self.rom_utils = RomUtils(self.roms_path)
         self.muos_systems = muos_systems 
 
-    def get_game_system_by_name(self, system_name) -> GameSystem:
+    def get_game_system_by_name(self, system_name) -> GameSystem | None:
         game_system_config = MuosGameSystemConfig(system_name,system_name)
 
         if(game_system_config is not None):

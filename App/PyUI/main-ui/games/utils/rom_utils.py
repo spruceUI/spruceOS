@@ -7,8 +7,8 @@ from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from utils.logger import PyUiLogger
 
 class RomUtils:
-    def __init__(self, roms_path):
-        self.roms_path = roms_path
+    def __init__(self, roms_path: str | None):
+        self.roms_path: str = roms_path or ""
         self.emu_dir_to_rom_dir_non_matching = {
             "PPSSPP": "PSP",
             "FFPLAY":"FFMPEG",
@@ -18,10 +18,12 @@ class RomUtils:
 
         self._get_roms_cache: dict[tuple, tuple[list[str], list[str]]] = {}
 
-    def get_roms_dir_for_emu_dir(self, emu_dir):
+    def get_roms_dir_for_emu_dir(self, emu_dir: str | None) -> str:
         # Could read config.json but don't want to waste time
         # It's only a fixed list we can add to as needed
-        return self.emu_dir_to_rom_dir_non_matching.get(emu_dir,emu_dir)
+        if emu_dir is None:
+            return ""
+        return self.emu_dir_to_rom_dir_non_matching.get(emu_dir, emu_dir)
 
     def _get_valid_suffix(self, system):
         game_system_config = FileBasedGameSystemConfig(system)
@@ -29,8 +31,9 @@ class RomUtils:
 
     #TODO do a git system device file so we can geneically
     #support other formats/systems
-    def get_miyoo_games_file(self,system):
-        return os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system),"miyoogamelist.xml")
+    def get_miyoo_games_file(self, system):
+        roms_dir = self.get_roms_dir_for_emu_dir(system)
+        return os.path.join(self.roms_path, roms_dir, "miyoogamelist.xml")
 
     def has_roms(self, game_system, directory = None):
         directories_to_search = []

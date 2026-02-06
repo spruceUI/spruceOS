@@ -96,6 +96,7 @@ class FfmpegImageUtils(ImageUtils):
         This WILL enlarge the image if it is smaller than the requested bounds.
         Uses ffmpeg and writes to a temporary file before moving to output_path.
         """
+        tmp_output = None
         try:
             actual_width, actual_height = self.get_image_dimensions(input_path)
             if actual_width == 0 or actual_height == 0:
@@ -156,14 +157,14 @@ class FfmpegImageUtils(ImageUtils):
             PyUiLogger().get_logger().error(f"Error resizing {input_path}: {e}")
             # cleanup temp file if present
             try:
-                if os.path.exists(tmp_output):
+                if tmp_output and os.path.exists(tmp_output):
                     os.remove(tmp_output)
             except Exception:
                 pass
         except Exception as e:
             PyUiLogger().get_logger().error(f"Unexpected error resizing {input_path}: {e}")
             try:
-                if os.path.exists(tmp_output):
+                if tmp_output and os.path.exists(tmp_output):
                     os.remove(tmp_output)
             except Exception:
                 pass

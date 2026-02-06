@@ -1,0 +1,13 @@
+{
+  "include": [
+    "App"
+  ],
+  "exclude": [
+    "spruce/flip/lib/python3.10",
+    "spruce/bin/python/lib/python3.10",
+    "**/site-packages",
+    "**/dist-packages",
+    "**/.venv",
+    "**/venv"
+  ]
+}

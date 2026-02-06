@@ -27,7 +27,9 @@ class RomSelectOptionsBuilder:
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
         
     
-    def get_default_image_path(self, game_system, rom_file_path):
+    def get_default_image_path(self, game_system, rom_file_path) -> str | None:
+        if game_system is None:
+            return None
         parts = os.path.normpath(rom_file_path).split(os.sep)
         try:
             roms_index = next(i for i, part in enumerate(parts) if part.lower() == "roms")
@@ -43,7 +45,7 @@ class RomSelectOptionsBuilder:
 
         return os.path.join(root_dir, "Imgs", base_name + ".png")
 
-    def first_existing(self, base_path_without_ext):
+    def first_existing(self, base_path_without_ext) -> str | None:
         IMAGE_EXTS = (".qoi", ".png")
         for ext in IMAGE_EXTS:
             path = base_path_without_ext + ext
@@ -51,7 +53,9 @@ class RomSelectOptionsBuilder:
                 return path
         return None
 
-    def get_image_path(self, rom_info: RomInfo, game_entry = None, prefer_savestate_screenshot = False) -> str:
+    def get_image_path(self, rom_info: RomInfo, game_entry = None, prefer_savestate_screenshot = False) -> str | None:
+        if rom_info.game_system is None:
+            return None
 
         if(prefer_savestate_screenshot):
             # Use RA savestate image
@@ -156,10 +160,9 @@ class RomSelectOptionsBuilder:
                 if(not RomSelectOptionsBuilder._user_doesnt_want_to_resize):
                     RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     BoxArtResizer.process_rom_folders()
-                if CachedExists.exists(image_qoi_path) and Device.get_device().supports_qoi():
+                if image_qoi_path and CachedExists.exists(image_qoi_path) and Device.get_device().supports_qoi():
                     return image_qoi_path
-                else:
-                    return image_non_qoi_path
+                return image_non_qoi_path
             else:
                 return image_non_qoi_path
 
@@ -255,7 +258,7 @@ class RomSelectOptionsBuilder:
 
         return favorite_paths
 
-    def _get_favorite_icon(self, rom_info: RomInfo) -> str:
+    def _get_favorite_icon(self, rom_info: RomInfo) -> str | None:
         if FavoritesManager.is_favorite(rom_info):
             return Theme.favorite_icon()
         else:

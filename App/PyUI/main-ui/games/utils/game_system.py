@@ -1,11 +1,12 @@
 import os
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
+from menus.games.muos_game_system_config import MuosGameSystemConfig
 
 class GameSystem:
-    def __init__(self, folder_paths, display_name, game_system_config : FileBasedGameSystemConfig):
+    def __init__(self, folder_paths, display_name, game_system_config : FileBasedGameSystemConfig | MuosGameSystemConfig):
         self._folder_paths = tuple(folder_paths)
         self._display_name = display_name
-        self._game_system_config : FileBasedGameSystemConfig = game_system_config
+        self._game_system_config : FileBasedGameSystemConfig | MuosGameSystemConfig = game_system_config
 
     @property
     def folder_name(self):
@@ -36,7 +37,7 @@ class GameSystem:
         return self._game_system_config.get_release_year()
         
     @property
-    def game_system_config(self) -> FileBasedGameSystemConfig:
+    def game_system_config(self) -> FileBasedGameSystemConfig | MuosGameSystemConfig:
         return self._game_system_config
     
     # Equality: two systems are equal if their folder_paths are the same

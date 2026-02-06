@@ -41,13 +41,6 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
             Device.get_device().raise_hue()
 
-    
-    def hue_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_hue()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_hue()
-
     def adjust_rgb(self, input: ControllerInput, getter, setter):
         delta = 0
         if(ControllerInput.DPAD_LEFT == input):

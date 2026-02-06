@@ -40,17 +40,15 @@ class CarouselView(View):
         self.options_are_sorted = self.is_alphabetized(options)
         self.font_purpose = FontPurpose.GRID_ONE_ROW
         self.show_grid_text = show_grid_text
-        self.selected_entry_width_percent = selected_entry_width_percent
-        self.shrink_further_away = shrink_further_away
-        self.sides_hang_off_edge = sides_hang_off_edge
+        self.selected_entry_width_percent: int = selected_entry_width_percent if selected_entry_width_percent is not None else 40
+        self.shrink_further_away = shrink_further_away if shrink_further_away is not None else False
+        self.sides_hang_off_edge = sides_hang_off_edge if sides_hang_off_edge is not None else False
         if(set_bottom_bar_text_to_selection is None):
             set_bottom_bar_text_to_selection = not self.set_top_bar_text_to_selection
 
         self.set_bottom_bar_text_to_selection = set_bottom_bar_text_to_selection
 
         self.options_length = len(options)
-        if(self.selected_entry_width_percent is None):
-            self.selected_entry_width_percent = 40
         self.fixed_width = fixed_width        
 
         if(x_pad is None):
@@ -128,6 +126,7 @@ class CarouselView(View):
             start = (self.selected - half) % n
 
         visible = []
+        selected_visible_index = 0
         range_amt = self.cols
         if(self.sides_hang_off_edge and not self.shrink_further_away):
             range_amt += 2
@@ -141,7 +140,6 @@ class CarouselView(View):
                 selected_visible_index = i
 
             #PyUiLogger.get_logger().info(f"Visible option {i}: {self.options[options_offset].get_primary_text()}")
-
 
         return visible, selected_visible_index
 
@@ -224,13 +222,17 @@ class CarouselView(View):
             Display.clear("", bottom_bar_text="")
 
     def _render_image(self,
-                      image_path: str, 
+                      image_path: str | None, 
                       x: int, 
                       y: int, 
                       render_mode, 
                       target_width, 
                       target_height,
                       resize_type):
+        if not image_path:
+            image_path = self.missing_image_path
+        if not image_path:
+            return
         width, height = Display.render_image(image_path=image_path, 
                             x=x, 
                             y=y,
@@ -239,13 +241,14 @@ class CarouselView(View):
                             target_height=target_height,
                             resize_type=resize_type)
         if(0 == width and 0 == height):
-            Display.render_image(image_path=self.missing_image_path, 
-                                x=x, 
-                                y=y,
-                                render_mode=render_mode,
-                                target_width=target_width,
-                                target_height=target_height,
-                                resize_type=resize_type)
+            if self.missing_image_path:
+                Display.render_image(image_path=self.missing_image_path, 
+                                    x=x, 
+                                    y=y,
+                                    render_mode=render_mode,
+                                    target_width=target_width,
+                                    target_height=target_height,
+                                    resize_type=resize_type)
             
     def _render(self):
         self.correct_selected_for_off_list()
@@ -359,6 +362,8 @@ class CarouselView(View):
             else:
                 image = imageTextPair.get_image_path_ideal(widths[visible_index],Display.get_usable_screen_height())
 
+            if image is None and self.missing_image_path is None:
+                continue
             self._render_image(image, 
                                     x_offset, 
                                     y_image_offset,
@@ -418,6 +423,8 @@ class CarouselView(View):
         self.correct_selected_for_off_list()
 
     def animate_transition(self):
+        if self.prev_visible_options is None:
+            return
         if(not self.skip_next_animation):
             animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
             if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:

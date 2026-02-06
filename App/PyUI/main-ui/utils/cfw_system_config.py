@@ -21,6 +21,8 @@ class CfwSystemConfig():
     @classmethod
     def save_config(cls):
         """Save the current _data back to the JSON file."""
+        if cls._config_path is None:
+            return
         with open(cls._config_path, 'w', encoding='utf-8') as f:
             json.dump(cls._data, f, indent=4)
 

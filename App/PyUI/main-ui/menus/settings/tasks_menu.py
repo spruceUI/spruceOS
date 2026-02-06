@@ -77,4 +77,7 @@ class TasksMenu(settings_menu.SettingsMenu):
         return option_list
 
     def get_cfw_tasks(self):
-        return OptionSelectUI.get_top_level_options_from_json(PyUiConfig.cfw_tasks_json(),ViewType.ICON_AND_DESC, execute_immediately=True)
+        cfw_tasks_json = PyUiConfig.cfw_tasks_json()
+        if cfw_tasks_json is None:
+            return []
+        return OptionSelectUI.get_top_level_options_from_json(cfw_tasks_json, ViewType.ICON_AND_DESC, execute_immediately=True)
