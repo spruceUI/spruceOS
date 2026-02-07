@@ -173,6 +173,15 @@
                 "selected": "False"
             },
             "swapfileSize":{
+                "devices":["MIYOO_FLIP",
+                           "MIYOO_MINI",
+                           "MIYOO_MINI_V4",
+                           "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP",
+                           "TRIMUI_BRICK",
+                           "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S",
+                           "MIYOO_A30"],
                 "display": "Swapfile size (experimental)",
                 "description": "reboot to apply",
                 "options": [
