@@ -61,7 +61,7 @@ get_core_folder() {
         "mednafen_vb_libretro.so") echo "Beetle VB" ;;
         "mednafen_wswan_libretro.so") echo "Beetle WonderSwan" ;;
         "mgba_libretro.so") echo "mGBA" ;;
-        "mkxp-z_libretro") echo "mkxp-z" ;;
+        "mkxp-z_libretro.so") echo "mkxp-z" ;;
         "mu_libretro.so") echo "Mu" ;;
         "neocd_libretro.so") echo "NeoCD" ;;
         "nestopia_libretro.so") echo "Nestopia" ;;
