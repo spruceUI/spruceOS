@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 import glob
 
 from devices.device import Device
-from display.display import Display
+from display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
@@ -71,7 +71,7 @@ class BoxArtScraper:
         self.game_system_utils = Device.get_device().get_game_system_utils()
         self.preferred_region = Device.get_device().get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)
-        self._arcade_xml_cache = {}  # sys_name -> dict of rom_name -> display_name
+        self._arcade_xml_cache = None  # Single global dict: rom_name -> display_name for all arcade systems
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -216,31 +216,22 @@ class BoxArtScraper:
         arcade_systems = {"ARCADE", "CPS1", "CPS2", "CPS3", "FBNEO", "MAME2003PLUS", "NEOGEO"}
         return sys_name.upper() in arcade_systems
 
-    def _find_system_xml(self, sys_name: str) -> Optional[str]:
-        """Find any .xml file in the system's Roms folder."""
-        system_path = os.path.join(self.roms_dir, sys_name)
-        if not os.path.exists(system_path):
-            return None
-
-        xml_files = glob.glob(os.path.join(system_path, "*.xml"))
-        if xml_files:
-            return xml_files[0]  # Return first XML file found
-        return None
-
-    def _parse_arcade_xml(self, sys_name: str) -> dict:
+    def _parse_arcade_xml(self) -> dict:
         """
-        Parse arcade system XML to get ROM name -> Display name mapping.
+        Parse central MAME XML to get ROM name -> Display name mapping.
+        Loads once and caches for all arcade systems.
         Returns empty dict if XML not found or parsing fails.
         """
-        # Check cache first
-        if sys_name in self._arcade_xml_cache:
-            return self._arcade_xml_cache[sys_name]
+        # Check if already loaded
+        if self._arcade_xml_cache is not None:
+            return self._arcade_xml_cache
 
-        # Find XML file
-        xml_path = self._find_system_xml(sys_name)
-        if not xml_path:
-            PyUiLogger.get_logger().warning(f"BoxartScraper: No XML file found for {sys_name}, falling back to ROM filename matching")
-            self._arcade_xml_cache[sys_name] = {}
+        # Path to central MAME XML
+        xml_path = os.path.join(self.db_dir, "mame_names.xml")
+
+        if not os.path.exists(xml_path):
+            PyUiLogger.get_logger().warning(f"BoxartScraper: MAME XML not found at {xml_path}, falling back to ROM filename matching")
+            self._arcade_xml_cache = {}
             return {}
 
         # Parse XML
@@ -262,13 +253,13 @@ class BoxArtScraper:
                         rom_name = path_text.replace('./', '').replace('.zip', '')
                         mapping[rom_name] = name_text
 
-            PyUiLogger.get_logger().info(f"BoxartScraper: Loaded {len(mapping)} games from {sys_name} XML")
-            self._arcade_xml_cache[sys_name] = mapping
+            PyUiLogger.get_logger().info(f"BoxartScraper: Loaded {len(mapping)} MAME ROM mappings from central XML")
+            self._arcade_xml_cache = mapping
             return mapping
 
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"BoxartScraper: Failed to parse XML for {sys_name}: {e}")
-            self._arcade_xml_cache[sys_name] = {}
+            PyUiLogger.get_logger().warning(f"BoxartScraper: Failed to parse MAME XML: {e}")
+            self._arcade_xml_cache = {}
             return {}
 
     def find_image_name(self, sys_name: str, rom_file_name: str) -> Optional[str]:
@@ -280,15 +271,15 @@ class BoxArtScraper:
 
         rom_without_ext = os.path.splitext(rom_file_name)[0]
 
-        # For arcade systems, use XML to get display name
+        # For arcade systems, use central MAME XML to get display name
         search_name = rom_without_ext
         if self._is_arcade_system(sys_name):
-            xml_mapping = self._parse_arcade_xml(sys_name)
+            xml_mapping = self._parse_arcade_xml()
             if rom_without_ext in xml_mapping:
                 search_name = xml_mapping[rom_without_ext]
-                PyUiLogger.get_logger().debug(f"BoxartScraper: Mapped {rom_without_ext} -> {search_name}")
+                PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} -> {search_name}")
             else:
-                PyUiLogger.get_logger().debug(f"BoxartScraper: No XML mapping for {rom_without_ext}, using ROM name")
+                PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} not found in database, using ROM code")
 
         with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
             image_list = f.read().splitlines()
