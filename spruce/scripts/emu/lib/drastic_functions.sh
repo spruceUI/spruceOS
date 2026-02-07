@@ -67,6 +67,8 @@ run_drastic_brick(){
 		run_drastic_steward_Brick
 	elif [ "$CORE" = "DraStic-original" ]; then 
 		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
 	else
 		core_unrecognized_for_platform_message
 	fi
@@ -74,9 +76,11 @@ run_drastic_brick(){
 
 run_drastic_smartpro(){			
 	if [ "$CORE" = "DraStic-original" ]; then 
-		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_SmartPro_original"
 		export SDL_AUDIODRIVER=dsp
 		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
 	else
 		core_unrecognized_for_platform_message
 	fi
@@ -196,12 +200,11 @@ run_drastic_trngaje_Flip() {
 	mv ./drastic ./drastic64
 }
 
-run_drastic_trngaje_SmartPro() {
-:
-}
-
-run_drastic_trngaje_Brick() {
-:
+run_drastic_trngaje_a133p() {
+	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH"
+	mv ./drastic64 ./drastic
+	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	mv ./drastic ./drastic64
 }
 
 run_drastic_Pixel2() {
