@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 import glob
 
 from devices.device import Device
-from display import Display
+from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
