@@ -272,6 +272,7 @@ class BoxArtScraper:
         rom_without_ext = os.path.splitext(rom_file_name)[0]
 
         # For arcade systems, use central MAME XML to get display name
+        # If not found, skip this ROM entirely (don't attempt fallback matching)
         search_name = rom_without_ext
         if self._is_arcade_system(sys_name):
             xml_mapping = self._parse_arcade_xml()
@@ -279,7 +280,8 @@ class BoxArtScraper:
                 search_name = xml_mapping[rom_without_ext]
                 PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} -> {search_name}")
             else:
-                PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} not found in database, using ROM code")
+                PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} not found in database, skipping")
+                return None  # Skip ROMs not in MAME database
 
         with open(image_list_file, "r", encoding="utf-8", errors="ignore") as f:
             image_list = f.read().splitlines()
