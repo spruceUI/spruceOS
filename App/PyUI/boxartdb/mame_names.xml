@@ -458,19 +458,19 @@
   </game>
   <game>
     <path>./avsp.zip</path>
-    <name>Aliens Versus Predator</name>
+    <name>Alien vs. Predator</name>
   </game>
   <game>
     <path>./avspa.zip</path>
-    <name>Aliens Versus Predator</name>
+    <name>Alien vs. Predator</name>
   </game>
   <game>
     <path>./avspj.zip</path>
-    <name>Aliens Versus Predator</name>
+    <name>Alien vs. Predator</name>
   </game>
   <game>
     <path>./avspu.zip</path>
-    <name>Aliens Versus Predator</name>
+    <name>Alien vs. Predator</name>
   </game>
   <game>
     <path>./aliens.zip</path>
@@ -19659,5 +19659,45 @@
   <game>
     <path>./zzyzzyxx.zip</path>
     <name>Zzyzzyxx</name>
+  </game>
+  <game>
+    <path>./sf2hf.zip</path>
+    <name>Street Fighter II - Hyper Fighting</name>
+  </game>
+  <game>
+    <path>./hsf2.zip</path>
+    <name>Hyper Street Fighter II - The Anniversary Edition [Bonus]</name>
+  </game>
+  <game>
+    <path>./hsf2j.zip</path>
+    <name>Hyper Street Fighter II - The Anniversary Edition</name>
+  </game>
+  <game>
+    <path>./sfa2u.zip</path>
+    <name>Street Fighter Alpha 2</name>
+  </game>
+  <game>
+    <path>./sfa3ud.zip</path>
+    <name>Street Fighter Alpha 3 [Bonus]</name>
+  </game>
+  <game>
+    <path>./sfz2al.zip</path>
+    <name>Street Fighter Zero 2 Alpha</name>
+  </game>
+  <game>
+    <path>./jojo.zip</path>
+    <name>JoJo's Venture</name>
+  </game>
+  <game>
+    <path>./sfiii.zip</path>
+    <name>Street Fighter III - New Generation</name>
+  </game>
+  <game>
+    <path>./sfiii2.zip</path>
+    <name>Street Fighter III 2nd Impact - Giant Attack</name>
+  </game>
+  <game>
+    <path>./sfiii3.zip</path>
+    <name>Street Fighter III 3rd Strike - Fight for the Future</name>
   </game>
 </gameList>
