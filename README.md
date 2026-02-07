@@ -118,6 +118,7 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
   - KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
   - Hoo: Testing and encouragement.
   - Metallic77: Custom lightweight shaders for the A30, and Flycast tweaks.
+  - g3nesis331: Fixing port control layout switching.
   - Russ from RGC: His YouTube channel is an inspiration.
   - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
   - [Miyoo](https://lomiyoo.com/) for sending us development units.

@@ -18,7 +18,7 @@
   "extlist": "p8|png|splore",
   "launchlist": [
     {
-      "name": "Import carts from Splore to MainUI",
+      "name": "Import carts from Splore",
       "launch": "import.sh"
     }
   ],
