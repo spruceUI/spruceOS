@@ -196,6 +196,14 @@ run_drastic_trngaje_Flip() {
 	mv ./drastic ./drastic64
 }
 
+run_drastic_trngaje_SmartPro() {
+:
+}
+
+run_drastic_trngaje_Brick() {
+:
+}
+
 run_drastic_Pixel2() {
 	pin_to_dedicated_cores drastic64 2
 	# Disable loging for now, it's writting a lot to it
