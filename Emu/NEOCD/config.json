@@ -29,5 +29,6 @@
   "releaseYear": 1994,
   "default_emulator": "neocd",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["NEOGEOCD","neocd","neogeocd"]
+  "alternativeFolderNames": ["NEOGEOCD","neocd","neogeocd"],
+  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
 }

@@ -24,5 +24,6 @@
   "releaseYear": 2003,
   "default_emulator": "fbneo",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["fbneo","finalburnneo","FINALBURNNEO"]
+  "alternativeFolderNames": ["fbneo","finalburnneo","FINALBURNNEO"],
+  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
 }
