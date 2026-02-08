@@ -24,5 +24,5 @@
   "releaseYear": 1982,
   "default_emulator": "vice_x64",
   "scaling_min_freq": 480000,
-  "alternativeFolderNames": ["C64", "COMMODORE64", "commodore", "commodore64", "c64"]
+  "alternativeFolderNames": ["C64", "COMMODORE64", "commodore", "Commodore64", "commodore64", "c64"]
 }
