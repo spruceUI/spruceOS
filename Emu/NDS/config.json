@@ -38,7 +38,20 @@
       ],
       "options": [
         "DraStic-original",
-        "DraStic-Steward"
+        "DraStic-Steward",
+        "DraStic-trngaje"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
+    },
+    "Emulator_SmartPro": {
+      "display": "Emulator",
+      "devices": [
+        "TRIMUI_SMART_PRO"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-trngaje"
       ],
       "selected": "DraStic-original",
       "overrides": {}
