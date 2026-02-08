@@ -500,3 +500,7 @@ class MiyooFlip(MiyooDevice):
                 return WifiStatus.BAD
         else:            
             return WifiStatus.OFF
+
+    @throttle.limit_refresh(1)
+    def post_present_operations(self):
+        self.clear_display_cache_if_memory_full("MemAvailable", 100)

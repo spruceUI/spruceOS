@@ -375,3 +375,8 @@ class MiyooA30(MiyooDevice):
         if(core is None):
             core = game_system_config.get_effective_menu_selection("Emulator_A30", rom_file_path)
         return core
+
+    @throttle.limit_refresh(1)
+    def post_present_operations(self):
+        # Since we don't have available but free, should we lower it to 50?
+        self.clear_display_cache_if_memory_full("MemFree", 100)        
