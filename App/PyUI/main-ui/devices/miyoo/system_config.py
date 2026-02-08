@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+import time
 
 from controller.controller_inputs import ControllerInput
 from utils.consts import GAME_SWITCHER, RECENTS
@@ -14,13 +15,28 @@ class SystemConfig:
         self.reload_config()
         
 
-    def reload_config(self):
+    def reload_config(self, max_retries=3, retry_delay=0.05):
         with self._lock:
-            try:
-                with open(self.filepath, 'r') as f:
-                    self.config = json.load(f)
-            except (json.JSONDecodeError) as e:
-                raise RuntimeError(f"Failed to load config: {e}")
+            last_err = None
+            for attempt in range(1, max_retries + 1):
+                try:
+                    with open(self.filepath, 'r') as f:
+                        data = f.read()
+                    if not data.strip():
+                        raise json.JSONDecodeError("empty config", data, 0)
+                    self.config = json.loads(data)
+                    return
+                except (json.JSONDecodeError, OSError) as e:
+                    last_err = e
+                    if attempt == max_retries:
+                        PyUiLogger.get_logger().warning(
+                            f"reload_config failed (attempt {attempt}/{max_retries}): {e}"
+                        )
+                    time.sleep(retry_delay)
+
+            PyUiLogger.get_logger().error(
+                f"reload_config giving up after {max_retries} attempts: {last_err}"
+            )
 
     def save_config(self):
         with self._lock:
