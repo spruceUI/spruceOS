@@ -5,7 +5,6 @@
   "themecolor": "FFD200",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z",
-  "ignoreList": "neogeo.zip",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
