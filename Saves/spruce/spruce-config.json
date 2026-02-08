@@ -164,7 +164,7 @@
                 "selected": "False"
             },
             "enableLidSensor": {
-                "devices": ["MIYOO_FLIP"],
+                "devices": ["MIYOO_FLIP", "MIYOO_MINI_FLIP"],
                 "display": "Enable Lid Sensor",
                 "description":"shut device to enter sleep",
                 "options":[
