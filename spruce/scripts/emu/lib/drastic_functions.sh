@@ -195,16 +195,14 @@ run_drastic_steward_Flip() {
 
 run_drastic_trngaje_Flip() {
 	export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
-	mv ./drastic64 ./drastic
+	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
 	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
-	mv ./drastic ./drastic64
 }
 
 run_drastic_trngaje_a133p() {
 	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH"
-	mv ./drastic64 ./drastic
+	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
 	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
-	mv ./drastic ./drastic64
 }
 
 run_drastic_Pixel2() {
