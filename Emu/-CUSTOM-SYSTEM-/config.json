@@ -24,5 +24,6 @@
   "releaseYear": 9999,
   "default_emulator": "libgametank",
   "scaling_min_freq": 1008000,
+  "ignoreList": ["filename.ext"]
   "alternativeFolderNames": []
 }

@@ -58,5 +58,5 @@
   "releaseYear": 1985,
   "default_emulator": "uae4arm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["amiga", "amiga500", "amiga1200"]
+  "alternativeFolderNames": ["amiga", "amiga500", "Amiga", "amiga1200"]
 }
