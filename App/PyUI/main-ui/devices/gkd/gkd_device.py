@@ -23,6 +23,7 @@ class GKDDevice(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         self.sdl2_controller_interface = Sdl2ControllerInterface()
+        super().__init__()
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
