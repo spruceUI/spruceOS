@@ -62,9 +62,10 @@
         "GKD_PIXEL2"
       ],
       "options": [
-        "DraStic-stock"
+        "DraStic-stock",
+        "DraStic-trngaje"
       ],
-      "selected": "DraStic-stock",
+      "selected": "DraStic-trngaje",
       "overrides": {}
     }
   },
