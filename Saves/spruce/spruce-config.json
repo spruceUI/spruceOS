@@ -111,6 +111,7 @@
             }
         },
         "System Settings": {
+
             "checkForUpdates": {
                 "display": "Check for spruce updates on startup",
                 "description": "if connected to Wi-Fi",
@@ -161,6 +162,17 @@
                     "False"
                 ],
                 "selected": "False"
+            },
+            "enableLidSensor": {
+                "devices": ["MIYOO_FLIP"],
+                "display": "Enable Lid Sensor",
+                "description":"shut device to enter sleep",
+                "options":[
+                    "True",
+                    "Only when unplugged",
+                    "False"
+                ],
+                "selected": "True"
             },
             "useZRAM":{
                 "devices": ["MIYOO_FLIP"],
