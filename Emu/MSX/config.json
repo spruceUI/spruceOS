@@ -33,5 +33,5 @@
   "releaseYear": 1983,
   "default_emulator": "bluemsx",
   "scaling_min_freq": 408000,
-  "alternativeFolderNames": ["MSX2","msx","msx2"]
+  "alternativeFolderNames": ["MSX2","msx","msx2","MSX1","msx1"]
 }
