@@ -252,7 +252,9 @@ prepare_for_pyui_launch(){
     (
         # SDL2 takes forever, let it initialize before going to powersave
         sleep 5
-        set_smart
+        if flag_check "in_menu"; then
+            set_smart
+        fi
         unlock_governor 2>/dev/null
     ) &
 }
