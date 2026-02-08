@@ -29,7 +29,7 @@ class TrimUIDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
-        self.last_cache_clear = 0
+        super().__init__()
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -367,33 +367,9 @@ class TrimUIDevice(DeviceCommon):
         time.tzset()
         self.sync_hw_clock()
 
-
-    def get_free_mem_mb(self):
-        with open("/proc/meminfo", "r") as f:
-            meminfo = f.read()
-
-        for line in meminfo.splitlines():
-            if line.startswith("MemAvailable:"):
-                # value is in kB
-                return int(line.split()[1]) // 1024
-
-        return None
-
-
     @throttle.limit_refresh(1)
     def post_present_operations(self):
-
-        # last cache clear is done to account for the time it takes
-        # the memory to truly become free after we've marked it for deletion
-        # in SDL
-        self.last_cache_clear += 1
-        free_mb = self.get_free_mem_mb()
-
-        if free_mb is not None and free_mb < 100 and self.last_cache_clear > 10:
-            PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
-            Display.clear_cache()
-            self.last_cache_clear = 0
+        self.clear_display_cache_if_memory_full("MemAvailable", 100)        
 
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
-    

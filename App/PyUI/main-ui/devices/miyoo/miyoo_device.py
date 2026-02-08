@@ -24,6 +24,7 @@ class MiyooDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        super().__init__()
 
     def clear_framebuffer(self):
         pass

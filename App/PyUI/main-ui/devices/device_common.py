@@ -24,6 +24,9 @@ from utils.logger import PyUiLogger
 
 class DeviceCommon(AbstractDevice):
 
+    def __init__(self):
+        self.last_cache_clear = 0
+
     def prompt_power_down(self):
         from display.display import Display
         from themes.theme import Theme
@@ -519,3 +522,29 @@ class DeviceCommon(AbstractDevice):
     def post_present_operations(self):
         # Uneeded for most devices
         pass
+
+    def get_free_mem_mb(self,free_mem_variable):
+        with open("/proc/meminfo", "r") as f:
+            meminfo = f.read()
+
+        for line in meminfo.splitlines():
+            if line.startswith(free_mem_variable+":"):
+                # value is in kB
+                return int(line.split()[1]) // 1024
+
+        
+        return None
+
+    def clear_display_cache_if_memory_full(self, free_mem_variable, threshold_mb):
+        # last cache clear is done to account for the time it takes
+        # the memory to truly become free after we've marked it for deletion
+        # in SDL
+        self.last_cache_clear += 1
+        free_mb = self.get_free_mem_mb(free_mem_variable)
+
+        if free_mb is not None and free_mb < threshold_mb and self.last_cache_clear > 10:
+            PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
+            Display.clear_cache()
+            self.last_cache_clear = 0
+
+
