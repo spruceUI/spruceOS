@@ -180,9 +180,11 @@ done
 
 flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 
-# sync files and power off device
-sync
 
 unmount_all
+unmount_all # twice can't hurt right?
+
+# sync files and power off device
+sync
 
 run_poweroff_cmd
