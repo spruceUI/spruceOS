@@ -132,6 +132,7 @@ class BoxArtScraper:
             "GW": "Handheld Electronic Game",
             "INTELLIVISION": "Mattel - Intellivision",
             "LYNX": "Atari - Lynx",
+            "MAME2003PLUS": "MAME",
             "MD": "Sega - Mega Drive - Genesis",
             "MS": "Sega - Master System - Mark III",
             "MSU1": "Nintendo - Super Nintendo Entertainment System",
@@ -198,6 +199,7 @@ class BoxArtScraper:
             "CPS1": "ARCADE",         # CPS1 uses ARCADE list (shared MAME repo)
             "CPS2": "ARCADE",         # CPS2 uses ARCADE list (shared MAME repo)
             "CPS3": "ARCADE",         # CPS3 uses ARCADE list (shared MAME repo)
+            "MAME2003PLUS": "ARCADE", # MAME2003PLUS uses ARCADE list (shared MAME repo)
             "MSU1": "SFC",            # MSU1 uses SFC list (shared SNES repo)
             "EIGHTHUNDRED": "ATARI",  # Atari 800 uses main Atari list
         }
