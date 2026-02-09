@@ -132,7 +132,9 @@ done
 start_pyui_message_writer
 
 # Display appropriate image and message depending on whether it's a forced safe shutdown, or else whether user is in-game or in-menu.
-if flag_check "forced_shutdown"; then
+if flag_check "in_menu"; then
+    display_image_and_text "$BG_TREE" 33 10 "" 60 50
+elif flag_check "forced_shutdown"; then
     display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
     flag_remove "forced_shutdown"
 else
