@@ -84,9 +84,9 @@ class AppMenu:
             activity_tracker_config = PyUiAppConfig("Activity Tracker")
             hidden = AppsManager.is_hidden(activity_tracker_config) and not self.show_all_apps
             if(not hidden and PyUiConfig.get_activity_log_path() is not None):
-                icon = self.get_icon(None,"activity_tracker.png")
+                icon = self.get_icon(None,"rtc.png")
                 if(icon is None):
-                    icon = Theme.get_cfw_default_icon("activity_tracker.png")
+                    icon = Theme.get_cfw_default_icon("rtc.png")
                 app_list.append(
                         GridOrListEntry(
                             primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
