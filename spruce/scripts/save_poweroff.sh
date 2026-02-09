@@ -93,7 +93,8 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
         echo 1 311 0 # R1 up
         echo 1 314 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP # this works across all devices
+    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP || \
+    log_message "Warning: sendevent failed during PPSSPP autosave"
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
     killall -q -15 PPSSPPSDL_$PLATFORM 2>/dev/null
@@ -103,17 +104,27 @@ else
     done
 fi
 
-# wait until emulator exits
+# give emulator some time to finish shutting down
+MAX_LOOPS=200   # ~10 seconds at 0.05s
+COUNT=0
 while :; do
     for process in $EMU_PROCESSES; do
         if killall -q -0 "$process" 2>/dev/null; then
             sleep 0.05
+            COUNT=$((COUNT + 1))
+            [ "$COUNT" -ge "$MAX_LOOPS" ] && break 2
             continue 2
         fi
     done
     break
 done
 
+sync
+
+# forcefully close any remaining emulator that refused to close gracefully.
+for process in $EMU_PROCESSES; do
+    killall -q -0 "$process" 2>/dev/null && killall -q -9 "$process" 2>/dev/null
+done
 
 start_pyui_message_writer
 
@@ -168,8 +179,8 @@ done
 
 flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 
-
 unmount_all
+sleep 0.1
 unmount_all # twice can't hurt right?
 
 # sync files and power off device
