@@ -32,6 +32,35 @@ kill_current_process() {
     fi
 }
 
+unmount_all() {
+    sync
+    log_message "save_poweroff.sh: Scanning mountinfo for SD card mounts..."
+
+    MOUNTS=$(awk '
+        {
+            target = $5
+            split($0, parts, " - ")
+            device = parts[2]
+            sub(/^[^ ]+ /, "", device)
+            sub(/ .*/, "", device)
+
+            if (device == "'"$SD_DEV"'" || target ~ "^/mnt/SDCARD(/|$)") {
+                print target
+            }
+        }
+    ' /proc/self/mountinfo)
+
+    # Unmount deepest paths first
+    echo "$MOUNTS" | sort -r | while read -r TARGET; do
+        [ -z "$TARGET" ] && continue
+        log_message "save_poweroff.sh: Attempting to unmount $TARGET"
+        umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
+    done
+
+    mount | grep "$SD_DEV" && log_message "Warning: SD mounts remain after shutdown"
+}
+
+
 # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
 pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
 
@@ -153,5 +182,7 @@ flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got inte
 
 # sync files and power off device
 sync
+
+unmount_all
 
 run_poweroff_cmd
