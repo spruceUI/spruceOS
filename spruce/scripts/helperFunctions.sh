@@ -602,11 +602,31 @@ qr_code() {
     fi
 }
 
+
+# returns 0 if SD is read-only or write test fails
+# returns 1 if SD is writable
 read_only_check() {
     log_message "Performing read-only check"
     MNT_LINE=$(mount | grep -m1 $SD_DEV)
+    log_message "mount line for SD card: $MNT_LINE"
+
+    mkdir -p /mnt/SDCARD/spruce/flags 2>/dev/null
+    TEST_FILE="/mnt/SDCARD/spruce/flags/test-$(date +%s)"
+    touch "$TEST_FILE"
+    echo "testing!" > "$TEST_FILE"
+    if [ ! -e "$TEST_FILE" ]; then
+        # this log will most likely fail to write lol
+        log_message "Unable to create write test file. SD card is likely mounted read-only."
+        return 0
+    elif ! grep -q "testing!" "$TEST_FILE"; then
+        log_message "Test file created successfully but did not contain test message. SD card likely remounted as read-only."
+        return 0
+    else
+        # clean up test file and continue to next stage of RO check just cuz.
+        rm -f "$TEST_FILE"
+    fi
+
     if [ -n "$MNT_LINE" ]; then
-        log_message "mount line for SD card: $MNT_LINE"
         MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
         if [ "$MNT_STATUS" = "ro" ]; then
             log_message "SD card is mounted as RO. Attempting to remount."
