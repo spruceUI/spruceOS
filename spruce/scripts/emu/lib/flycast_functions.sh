@@ -14,15 +14,11 @@ set_ui_scale() {
 
 	CFG=/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg
 
-	if [ "$CORE" = "Flycast-stock" ]; then
-		SCALING=100
-	else
-		case "$PLATFORM" in
-			"Flip"|"Pixel2") SCALING=70 ;;
-			"Brick") SCALING=120 ;;
-			*) SCALING=100 ;;
-		esac
-	fi
+	case "$PLATFORM" in
+		"Flip") SCALING=70 ;;
+		"Brick") SCALING=120 ;;
+		*) SCALING=100 ;;
+	esac
 
 	sed -i "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG"
 }
@@ -32,6 +28,8 @@ run_flycast_standalone() {
 	set_ui_scale
 
 	export HOME="/mnt/SDCARD/Emu/DC"
+	export XDG_DATA_HOME="/mnt/SDCARD/Emu/DC/data"
+	export XDG_CONFIG_HOME="/mnt/SDCARD/Emu/DC/config"
 	export LD_LIBRARY_PATH="$HOME/lib-TrimUI:$LD_LIBRARY_PATH:$HOME/lib64"
 
 	mkdir -p "$HOME/bios"
