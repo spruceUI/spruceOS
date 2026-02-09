@@ -98,6 +98,7 @@ else
     killall -q -15 retroarch.Flip
     killall -q -15 retroarch.Pixel2
     killall -q -15 ra64.trimui_$PLATFORM
+    killall -q -15 drastic
     killall -q -15 drastic32
     killall -q -15 drastic64
     killall -q -15 pico8_dyn
@@ -119,6 +120,7 @@ while killall -q -0 ra32.miyoo ||
     killall -q -0 ra64.trimui_$PLATFORM ||
     killall -q -0 PPSSPPSDL ||
     killall -q -0 PPSSPPSDL_$PLATFORM ||
+    killall -q -0 drastic ||
     killall -q -0 drastic32 ||
     killall -q -0 drastic64 ||
     killall -q -0 flycast ||
