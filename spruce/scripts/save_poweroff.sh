@@ -77,6 +77,13 @@ if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/E
     rm "${FLAGS_DIR}/lastgame.lock"
 fi
 
+# define emulator processes to kill in following sections
+EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch retroarch.A30 \
+retroarch.Flip retroarch.Pixel2 ra64.trimui_$PLATFORM \
+drastic drastic32 drastic64 pico8_dyn pico8_64 \
+flycast flycast-stock yabasanshiro yabasanshiro.trimui \
+mupen64plus PPSSPPSDL PPSSPPSDL_$PLATFORM"
+
 # trigger auto save and send kill signal
 if pgrep -f "PPSSPPSDL" >/dev/null; then
     {
@@ -88,48 +95,25 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
         echo 0 0 0   # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP # this works across all devices
     sleep 1
-    killall -q -15 PPSSPPSDL_TrimUI
-    killall -q -15 PPSSPPSDL_$PLATFORM
+    killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
+    killall -q -15 PPSSPPSDL_$PLATFORM 2>/dev/null
 else
-    killall -q -15 ra64.miyoo
-    killall -q -15 ra32.miyoo
-    killall -q -15 retroarch
-    killall -q -15 retroarch.A30
-    killall -q -15 retroarch.Flip
-    killall -q -15 retroarch.Pixel2
-    killall -q -15 ra64.trimui_$PLATFORM
-    killall -q -15 drastic
-    killall -q -15 drastic32
-    killall -q -15 drastic64
-    killall -q -15 pico8_dyn
-    killall -q -15 pico8_64
-    killall -q -15 flycast
-    killall -q -15 flycast-stock
-    killall -q -15 yabasanshiro
-    killall -q -15 yabasanshiro.trimui
-    killall -q -15 mupen64plus
+    for process in $EMU_PROCESSES; do
+        killall -q -15 "$process" 2>/dev/null
+    done
 fi
 
-# wait until emulator exit
-while killall -q -0 ra32.miyoo ||
-    killall -q -0 ra64.miyoo ||
-    killall -q -0 retroarch ||
-    killall -q -0 retroarch.A30 ||
-    killall -q -0 retroarch.Flip ||
-    killall -q -0 retroarch.Pixel2 ||
-    killall -q -0 ra64.trimui_$PLATFORM ||
-    killall -q -0 PPSSPPSDL ||
-    killall -q -0 PPSSPPSDL_$PLATFORM ||
-    killall -q -0 drastic ||
-    killall -q -0 drastic32 ||
-    killall -q -0 drastic64 ||
-    killall -q -0 flycast ||
-    killall -q -0 flycast-stock ||
-    killall -q -0 yabasanshiro ||
-    killall -q -0 yabasanshiro.trimui ||
-    killall -q -0 mupen64plus; do
-    sleep 0.1
+# wait until emulator exits
+while :; do
+    for process in $EMU_PROCESSES; do
+        if killall -q -0 "$process" 2>/dev/null; then
+            sleep 0.05
+            continue 2
+        fi
+    done
+    break
 done
+
 
 start_pyui_message_writer
 
