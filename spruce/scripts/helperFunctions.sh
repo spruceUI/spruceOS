@@ -622,6 +622,7 @@ read_only_check() {
         log_message "Test file created successfully but did not contain test message. SD card likely remounted as read-only."
         return 0
     else
+        log_message "SD card does not appear to be read only"
         # clean up test file and continue to next stage of RO check just cuz.
         rm -f "$TEST_FILE"
     fi
