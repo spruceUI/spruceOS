@@ -18,6 +18,7 @@ sleep 0.5
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
@@ -130,12 +131,12 @@ start_pyui_message_writer
 
 # Display appropriate image and message depending on whether it's a forced safe shutdown, or else whether user is in-game or in-menu.
 if flag_check "in_menu"; then
-    display_image_and_text "$BG_TREE" 33 10 "" 60 50
+    display_image_and_text "$BG_TREE" 50 25 "" 75
 elif flag_check "forced_shutdown"; then
-    display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
+    display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
     flag_remove "forced_shutdown"
 else
-    display_image_and_text "/mnt/SDCARD/spruce/imgs/save.png" 33 10 "Saving and shutting down... Please wait a moment." 60 50
+    display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
 fi
 
 #Let user read any messages
