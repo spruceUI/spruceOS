@@ -37,7 +37,7 @@ set_performance() {
 }
 
 set_overclock() {
-    overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeed.selected' "1600")"
+    overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600")"
 
     log_message "Setting cpu to performance"
     log_message "Setting overclock to ${overclock_speed}MHz"

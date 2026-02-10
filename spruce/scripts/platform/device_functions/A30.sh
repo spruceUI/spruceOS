@@ -17,11 +17,12 @@ get_config_path() {
 
 set_overclock() {
     if ! flag_check "setting_cpu"; then
+        oc_freq="$(get_config_value '.menuOptions."System Settings".overclockSpeedA30.selected' "1344")"
+
         flag_add "setting_cpu"
-        cores_online 01234567   # bring all up before potentially offlining cpu0
         cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
-        /mnt/SDCARD/spruce/bin/setcpu/utils "performance" 4 1512 384 1080 1
+        /mnt/SDCARD/spruce/a30/setcpu/utils "performance" 4 $oc_freq 384 1080 1
         lock_governor 2>/dev/null
         log_message "CPU Mode now locked to OVERCLOCK" -v
         flag_remove "setting_cpu"

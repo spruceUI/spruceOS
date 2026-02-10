@@ -204,7 +204,7 @@
                 ],
                 "selected": "Off"
             },
-            "overclockSpeed": {
+            "overclockSpeedMiyooMini": {
                 "devices": ["MIYOO_MINI",
                             "MIYOO_MINI_V4",
                             "MIYOO_MINI_PLUS",
@@ -217,6 +217,17 @@
                     "1800"
                 ],
                 "selected": "1600"
+            },
+            "overclockSpeedA30": {
+                "devices": ["MIYOO_A30"],
+                "display": "Overclock Speed",
+                "description": "caution: high values may freeze device",
+                "options": [
+                    "1344",
+                    "1440",
+                    "1512"
+                ],
+                "selected": "1512"
             },
             "trimuiOSD": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
