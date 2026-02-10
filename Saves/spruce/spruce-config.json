@@ -223,11 +223,12 @@
                 "display": "Overclock Speed",
                 "description": "caution: high values may freeze device",
                 "options": [
-                    "1344",
+                    "1392",
                     "1440",
+                    "1488",
                     "1512"
                 ],
-                "selected": "1512"
+                "selected": "1392"
             },
             "trimuiOSD": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
