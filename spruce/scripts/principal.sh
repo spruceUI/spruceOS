@@ -59,7 +59,7 @@ while [ 1 ]; do
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
     if [ -f /tmp/cmd_to_run.sh ]; then
-
+        sync
         cmd="$(sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh)"
         log_activity_event "$cmd" "START"
         set_performance # lead with this to speed up launching
@@ -78,6 +78,7 @@ while [ 1 ]; do
 
         set_smart
         log_activity_event "$cmd" "STOP"
+        sync
     fi
 
     if flag_check "tmp_update_repair_attempted"; then
