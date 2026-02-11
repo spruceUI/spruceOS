@@ -57,6 +57,17 @@ class BoxArtScraper:
     }
 
     STOPWORDS = {"and", "the", "of", "in", "is", "a", "an"}
+
+    # Cross-system fallbacks: try the other system's game list AND Libretro repo
+    CROSS_SYSTEM_FALLBACKS = {
+        "GB": ["GBC"],
+        "GBC": ["GB"],
+        "PCE": ["PCECD"],
+        "PCECD": ["PCE"],
+        "MD": ["SEGACD", "THIRTYTWOX"],
+        "SEGACD": ["MD"],
+        "THIRTYTWOX": ["MD"],
+    }
     """
     Python version of the box art scraper script, converted into a class.
     Matches original shell behavior but without watchdog logic.
@@ -541,10 +552,21 @@ class BoxArtScraper:
             return False
 
         remote_image_name = self.find_image_name(sys_name, rom_file_name)
-        if not remote_image_name:
-            self.log_message(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
-            return False
-        return self.download_remote_image(ra_name, remote_image_name, image_path)
+        if remote_image_name:
+            return self.download_remote_image(ra_name, remote_image_name, image_path)
+
+        # Try cross-system fallbacks (e.g. GB <-> GBC)
+        for fallback_sys in self.CROSS_SYSTEM_FALLBACKS.get(sys_name, []):
+            fallback_ra = self.get_ra_alias(fallback_sys)
+            if not fallback_ra:
+                continue
+            remote_image_name = self.find_image_name(fallback_sys, rom_file_name)
+            if remote_image_name:
+                self.log_message(f"BoxartScraper: Matched {rom_file_name} via {fallback_sys} fallback")
+                return self.download_remote_image(fallback_ra, remote_image_name, image_path)
+
+        self.log_message(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
+        return False
 
     def download_remote_image_for_system(self, sys_name: str, remote_image_name: str, image_path: str):
         ra_name = self.get_ra_alias(sys_name)
