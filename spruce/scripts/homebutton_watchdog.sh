@@ -107,7 +107,11 @@ update_gameswitcher_json() {
     # Keep consistent between devices
     # TODO move to device so we don't make this a giant list of regexs
     rom_file_path="${rom_file_path//\/sdcard\//\/SDCARD\/}"
-    rom_file_path="$(echo "$rom_file_path" | sed -E 's|^/mnt/SDCARD/mmc[[:alnum:]]+/|/mnt/SDCARD/|')"
+    case "$rom_file_path" in
+        /mnt/SDCARD/mmc*/?*)
+            rom_file_path="/mnt/SDCARD/${rom_file_path#*/mnt/SDCARD/mmc*/}"
+            ;;
+    esac
     gameswitcher_json="/mnt/SDCARD/Saves/gameswitcher.json"
 
     # Create file if missing
@@ -138,6 +142,7 @@ update_gameswitcher_json() {
         }] + .)
        ' "$gameswitcher_json" > "$tmpfile"
 
+    log_message "Added $rom_file_path to $gameswitcher_json"
     mv "$tmpfile" "$gameswitcher_json"
 }
 
