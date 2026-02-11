@@ -138,6 +138,7 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
+    close_ppsspp_menu
     /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
 }
 
