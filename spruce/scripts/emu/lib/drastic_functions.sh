@@ -123,63 +123,56 @@ run_drastic64() {
 }
 
 run_drastic_steward_A30() {
-	if [ "$CORE" = "DraStic-original" ]; then 
-		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
-		# the SDL library is hard coded to open ttyS0 for joystick raw input 
-		# so we pause joystickinput and create soft link to serial port
-		killall -q -STOP joystickinput
-		ln -s /dev/ttyS2 /dev/ttyS0
-		
-		export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
-		export SDL_VIDEODRIVER=mmiyoo
-		export SDL_AUDIODRIVER=mmiyoo
-		export EGL_VIDEODRIVER=mmiyoo
+	export CORE="DraStic-Steward"
+	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
+	# the SDL library is hard coded to open ttyS0 for joystick raw input 
+	# so we pause joystickinput and create soft link to serial port
+	killall -q -STOP joystickinput
+	ln -s /dev/ttyS2 /dev/ttyS0
+	
+	export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
+	export SDL_VIDEODRIVER=mmiyoo
+	export SDL_AUDIODRIVER=mmiyoo
+	export EGL_VIDEODRIVER=mmiyoo
 
-		pin_to_dedicated_cores drastic32 2
-		./drastic32 "$ROM_FILE"  > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	pin_to_dedicated_cores drastic32 2
+	./drastic32 "$ROM_FILE"  > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
-		# remove soft link and resume joystickinput
-		rm /dev/ttyS0
-		killall -q -CONT joystickinput
-		[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"		# stash arch dependent states
-	else
-		core_unrecognized_for_platform_message
-	fi
+	# remove soft link and resume joystickinput
+	rm /dev/ttyS0
+	killall -q -CONT joystickinput
+	[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"		# stash arch dependent states
 }
 
 run_drastic_steward_MiyooMini() {
-	if [ "$CORE" = "DraStic-original" ]; then 
-		[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
+	export CORE="DraStic-Steward"
+	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
 
+	nds_emu_dir=/mnt/SDCARD/Emu/NDS
+	export HOME=$nds_emu_dir
+	export PATH=$nds_emu_dir:$PATH
+	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
+	export SDL_VIDEODRIVER=mmiyoo
+	export SDL_AUDIODRIVER=mmiyoo
+	export EGL_VIDEODRIVER=mmiyoo
 
-		nds_emu_dir=/mnt/SDCARD/Emu/NDS
-		export HOME=$nds_emu_dir
-		export PATH=$nds_emu_dir:$PATH
-		export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
-		export SDL_VIDEODRIVER=mmiyoo
-		export SDL_AUDIODRIVER=mmiyoo
-		export EGL_VIDEODRIVER=mmiyoo
+	cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
 
-		cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
+	killall audioserver
 
-		killall audioserver
+	sv=`cat /proc/sys/vm/swappiness`
 
-		sv=`cat /proc/sys/vm/swappiness`
+	# 60 by default
+	echo 10 > /proc/sys/vm/swappiness
 
-		# 60 by default
-		echo 10 > /proc/sys/vm/swappiness
+	cd $nds_emu_dir
 
-		cd $nds_emu_dir
+	set_performance
+	log_message "Running DraStic-Steward on MiyooMini"
+	./drastic32 "$ROM_FILE"
+	sync
 
-		set_performance
-		log_message "Running DraStic-Steward on MiyooMini"
-		./drastic32 "$ROM_FILE"
-		sync
-
-		echo $sv > /proc/sys/vm/swappiness
-	else
-		core_unrecognized_for_platform_message
-	fi
+	echo $sv > /proc/sys/vm/swappiness
 }
 
 run_drastic_steward_Brick() {
