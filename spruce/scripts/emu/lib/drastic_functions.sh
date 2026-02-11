@@ -184,10 +184,10 @@ run_drastic_steward_MiyooMini() {
 
 run_drastic_steward_Brick() {
 	#Drastic steward depends on something MainUI setups
-    #/usr/trimui/bin/MainUI &
-    #pid=$!
-    #sleep 2
-    #kill "$pid"
+    /usr/trimui/bin/MainUI &
+    pid=$!
+    sleep 2
+    kill "$pid"
 
 	kill_runner
 	LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
