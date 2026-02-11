@@ -26,3 +26,26 @@ get_sftp_service_name() {
 get_ssh_service_name() {
     echo "dropbearmulti"
 }
+
+
+close_ppsspp_menu() {
+
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
+        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
+        {
+            echo $B_RIGHT 1  
+            echo $B_RIGHT 0  
+            echo $B_A 1  
+            echo $B_A 0  
+        } > /tmp/ppsspp_events.txt
+
+
+        # run sendevent in a fully detached subshell
+        (
+            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
+        ) < /dev/null > /dev/null 2>&1 &
+
+        sleep 0.5
+    fi
+}
