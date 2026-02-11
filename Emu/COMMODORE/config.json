@@ -4,7 +4,7 @@
   "iconsel": "c64_sel.png",
   "themecolor": "002684",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
+  "extlist": "d64|zip|7z|t64|crt|prg|nib|m3u|tap",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
