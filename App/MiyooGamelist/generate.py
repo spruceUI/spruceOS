@@ -124,9 +124,9 @@ class GamelistXmlWriter:
         lines = ['<?xml version="1.0"?>', "<gameList>"]
         for path, name, image in self._entries:
             lines.append("    <game>")
-            lines.append(f"        <path>{html_escape(path)}</path>")
-            lines.append(f"        <name>{html_escape(name)}</name>")
-            lines.append(f"        <image>{html_escape(image)}</image>")
+            lines.append(f"        <path>{html_escape(path, quote=False)}</path>")
+            lines.append(f"        <name>{html_escape(name, quote=False)}</name>")
+            lines.append(f"        <image>{html_escape(image, quote=False)}</image>")
             lines.append("    </game>")
         lines.append("</gameList>")
         with open(output_path, "w", encoding="utf-8") as f:
