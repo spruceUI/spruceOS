@@ -74,12 +74,14 @@ jobs:
           cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/GREEN.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/OTB.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/RETRO TV.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/SLABS.7z" Themes/ || true
           cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
 
           echo "Themes copied:"
