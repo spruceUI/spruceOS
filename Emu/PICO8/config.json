@@ -18,7 +18,7 @@
   "extlist": "p8|png|splore",
   "launchlist": [
     {
-      "name": "Import carts from Splore to MainUI",
+      "name": "Import carts from Splore",
       "launch": "import.sh"
     }
   ],
@@ -73,5 +73,6 @@
   "type": "fantasy",
   "releaseYear": 2015,
   "default_emulator": "pico8",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["pico8","pico-8","PICO-8"]
 }

@@ -30,7 +30,8 @@
         "MIYOO_FLIP",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK"
+        "TRIMUI_BRICK",
+        "GKD_PIXEL2"
       ]
     },
     "Emulator_MiyooMini": {
@@ -53,5 +54,7 @@
   "type": "homeconsole",
   "releaseYear": 1990,
   "default_emulator": "fbalpha2012",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["NG","ng","NeoGeo", "neogeo"],
+  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
 }

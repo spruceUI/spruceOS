@@ -436,3 +436,13 @@ class AbstractDevice(ABC):
     @abstractmethod
     def get_new_wifi_scanner(self):
         pass
+
+    @abstractmethod
+    def post_present_operations(self):
+        pass
+    
+    @abstractmethod
+    def check_for_button_remap(self, input):
+        pass
+
+    

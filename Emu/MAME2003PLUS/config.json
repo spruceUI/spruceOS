@@ -23,5 +23,7 @@
   "type": "arcade",
   "releaseYear": 2003,
   "default_emulator": "mame2003_plus",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["mame2003plus","MAME","mame"],
+  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
 }

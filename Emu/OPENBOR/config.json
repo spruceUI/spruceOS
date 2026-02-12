@@ -23,5 +23,6 @@
   "type": "fantasy",
   "releaseYear": 2005,
   "default_emulator": "OpenBOR",
-  "scaling_min_freq": 1008000
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": ["openbor","OpenBOR"]
 }

@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1989,
   "default_emulator": "mednafen_supergrafx",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["sgfx","SUPERGRAFX","supergrafx","necsgfx","NECSGFX", "sgx", "SGX"]
 }

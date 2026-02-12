@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1991,
   "default_emulator": "genesis_plus_gx",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["msumd"]
 }

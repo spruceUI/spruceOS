@@ -32,5 +32,6 @@
   "type": "homeconsole",
   "releaseYear": 1982,
   "default_emulator": "bluemsx",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["coleco", "colecovision", "Coleco Vision", "COLECOVISION", "CV", "cv"]
 }

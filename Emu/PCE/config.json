@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1987,
   "default_emulator": "mednafen_pce_fast",
-  "scaling_min_freq": 408000
+  "scaling_min_freq": 408000,
+  "alternativeFolderNames": ["pce","PCENGINE","pcengine","TURBOGRAFX","TURBOGRAFX16","turbografx","turbografx16"]
 }

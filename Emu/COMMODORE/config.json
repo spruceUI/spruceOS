@@ -4,7 +4,7 @@
   "iconsel": "c64_sel.png",
   "themecolor": "002684",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "d64|zip|7z|t64|crt|prg|nib|tap",
+  "extlist": "d64|zip|7z|t64|crt|prg|nib|m3u|tap",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
@@ -23,5 +23,6 @@
   "type": "pc",
   "releaseYear": 1982,
   "default_emulator": "vice_x64",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["C64", "COMMODORE64", "commodore", "Commodore64", "commodore64", "c64"]
 }

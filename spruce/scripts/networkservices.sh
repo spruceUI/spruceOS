@@ -24,31 +24,43 @@ connect_services() {
 	done
 
 	# Samba check
-	if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" >/dev/null; then
-		# Flag exists but service is not running, so start it...
-		log_message "Network services: Samba detected not running, starting..."
-		start_samba_process
+	if [ "$samba_enabled" = "True" ]; then
+		if ! pgrep "smbd" >/dev/null; then
+			log_message "Network services: Samba detected not running, starting..."
+			start_samba_process
+		fi
+	else
+		stop_samba_process
 	fi
 
 	# SSH check
-	if [ "$ssh_enabled" = "True" ] && ! pgrep "$SSH_SERVICE_NAME" >/dev/null; then
-		# Flag exists but service is not running, so start it...
-		log_message "Network services: $SSH_SERVICE_NAME detected not running, starting..."
-		start_ssh_process
+	if [ "$ssh_enabled" = "True" ]; then
+		if ! pgrep "$SSH_SERVICE_NAME" >/dev/null; then
+			log_message "Network services: $SSH_SERVICE_NAME detected not running, starting..."
+			start_ssh_process
+		fi
+	else
+		stop_ssh_process
 	fi
 
 	# SFTPGo check
-	if [ "$sftpgo_enabled" = "True" ] && ! pgrep "$SFTP_SERVICE_NAME" >/dev/null; then
-		# Flag exists but service is not running, so start it...
-		log_message "Network services: SFTPGo detected not running, starting..."
-		start_sftpgo_process
+	if [ "$sftpgo_enabled" = "True" ]; then
+		if ! pgrep "$SFTP_SERVICE_NAME" >/dev/null; then
+			log_message "Network services: SFTPGo detected not running, starting..."
+			start_sftpgo_process
+		fi
+	else
+		stop_sftpgo_process
 	fi
 
 	# Syncthing check
-	if [ "$syncthing_enabled" = "True" ] && ! pgrep "syncthing" >/dev/null; then
-		# Flag exists but service is not running, so start it...
-		log_message "Network services: Syncthing detected not running, starting..."
-		start_syncthing_process
+	if [ "$syncthing_enabled" = "True" ]; then
+		if ! pgrep "syncthing" >/dev/null; then
+			log_message "Network services: Syncthing detected not running, starting..."
+			start_syncthing_process
+		fi
+	else
+		stop_syncthing_process
 	fi
 
 	# Start Network Services Landing page

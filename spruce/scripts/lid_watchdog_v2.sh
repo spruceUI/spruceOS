@@ -19,10 +19,27 @@ while true; do
     # Read current lid state (1 = open, 0 = closed)
     current_state=$(device_lid_open)
     
-    # Detect lid close 
-    if [ "$current_state" = "0" ]; then
-        /mnt/SDCARD/spruce/scripts/sleep_helper.sh
-    fi
+    # check lid sleep spruce setting
+    lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
+    
+    case "$lid_sleep_enabled" in
+        "True") 
+            # Detect lid close only
+            if [ "$current_state" = "0" ]; then
+                /mnt/SDCARD/spruce/scripts/sleep_helper.sh
+            fi
+            ;;
+        "Only when unplugged")
+            # Detect lid close and charging state
+            if [ "$current_state" = "0" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+                /mnt/SDCARD/spruce/scripts/sleep_helper.sh
+            fi
+            ;;
+        "False")
+            # li'l extra sleep
+            sleep 1
+            ;;
+    esac
     
     sleep 0.5
 done

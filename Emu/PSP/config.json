@@ -23,7 +23,7 @@
   "type": "handheld",
   "releaseYear": 2004,
   "default_emulator": "standalone",
-  "scaling_min_freq": 1008000,  
+  "scaling_min_freq": 1008000,
   "devices": [
     "TRIMUI_BRICK",
     "TRIMUI_SMART_PRO",
@@ -31,5 +31,6 @@
     "MIYOO_A30",
     "MIYOO_FLIP",
     "GKD_PIXEL2"
-  ]
+  ],
+  "alternativeFolderNames": ["psp","ppsspp","PPSSPP","playstationportable","PLAYSTATIONPORTABLE"]
 }

@@ -17,6 +17,13 @@
 #   load_drastic_configs
 #   save_drastic_configs
 
+core_unrecognized_for_platform_message() {
+	start_pyui_message_writer
+	log_and_display_message "NDS $CORE is not recognized for $PLATFORM.\nPlease check your configuration."
+	sleep 5
+	stop_pyui_message_writer
+}
+
 run_drastic() {
 	load_drastic_configs
 	#Why do we use grid on NDS but no other systems?
@@ -38,28 +45,11 @@ run_drastic() {
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		
 		if [ "$PLATFORM" = "Brick" ]; then
-			if [ "$CORE" = "DraStic-Steward" ]; then
-				run_drastic_steward_Brick
-			else 
-				run_drastic64
-			fi
-
+			run_drastic_brick
 		elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
-			export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_a133p"
-			export SDL_AUDIODRIVER=dsp
-			run_drastic64
-
+			run_drastic_smartpro
 		elif [ "$PLATFORM" = "Flip" ]; then
-			if [ -d /usr/l32 ] && [ "$CORE" = "DraStic-Steward" ]; then
-				run_drastic_steward_Flip
-
-			elif [ "$CORE" = "DraStic-trngaje" ]; then
-				run_drastic_trngaje_Flip
-
-			else
-				run_drastic64 		# if overlay mount of /usr fails, fall back to original DraStic instead of Steward's
-			fi
-
+			run_drastic_flip
 		elif [ "$PLATFORM" = "Pixel2" ]; then
 			run_drastic_Pixel2
 		fi
@@ -72,12 +62,68 @@ run_drastic() {
 	save_drastic_configs
 }
 
+run_drastic_brick(){
+	if [ "$CORE" = "DraStic-Steward" ]; then
+		run_drastic_steward_Brick
+	elif [ "$CORE" = "DraStic-original" ]; then 
+		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
+	else
+		core_unrecognized_for_platform_message
+	fi
+}
+
+run_drastic_smartpro(){			
+	if [ "$CORE" = "DraStic-original" ]; then 
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_SmartPro_original"
+		export SDL_AUDIODRIVER=dsp
+		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
+	else
+		core_unrecognized_for_platform_message
+	fi
+}
+
+run_drastic_flip(){
+	if [ "$CORE" = "DraStic-Steward" ]; then
+		if [ -d /usr/l32 ]; then
+			run_drastic_steward_Flip
+		else
+			start_pyui_message_writer
+			log_and_display_message "There appears to be an issue with your setup.\nPlease ensure you're on the latest miyoo flip firmware."
+			sleep 5
+			stop_pyui_message_writer
+		fi
+
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_Flip
+	elif [ "$CORE" = "DraStic-original" ]; then 
+		run_drastic64
+	else
+		core_unrecognized_for_platform_message
+	fi
+
+}
+
+run_drastic_Pixel2() {
+	if [ "$CORE" = "DraStic-stock" ]; then
+		run_drastic_stock_Pixel2
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_Pixel2
+	else
+		core_unrecognized_for_platform_message
+	fi
+}
+
 run_drastic64() {
 	pin_to_dedicated_cores drastic64 2
 	./drastic64 "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 
 run_drastic_steward_A30() {
+	export CORE="DraStic-Steward"
 	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
 	# the SDL library is hard coded to open ttyS0 for joystick raw input 
 	# so we pause joystickinput and create soft link to serial port
@@ -99,8 +145,8 @@ run_drastic_steward_A30() {
 }
 
 run_drastic_steward_MiyooMini() {
+	export CORE="DraStic-Steward"
 	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"	# ready arch dependent states
-
 
 	nds_emu_dir=/mnt/SDCARD/Emu/NDS
 	export HOME=$nds_emu_dir
@@ -127,15 +173,14 @@ run_drastic_steward_MiyooMini() {
 	sync
 
 	echo $sv > /proc/sys/vm/swappiness
-
 }
 
 run_drastic_steward_Brick() {
 	#Drastic steward depends on something MainUI setups
-    #/usr/trimui/bin/MainUI &
-    #pid=$!
-    #sleep 2
-    #kill "$pid"
+    /usr/trimui/bin/MainUI &
+    pid=$!
+    sleep 2
+    kill "$pid"
 
 	kill_runner
 	LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
@@ -154,15 +199,25 @@ run_drastic_steward_Flip() {
 
 run_drastic_trngaje_Flip() {
 	export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
-	mv ./drastic64 ./drastic
+	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
 	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
-	mv ./drastic ./drastic64
 }
 
-run_drastic_Pixel2() {
+run_drastic_trngaje_a133p() {
+	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH"
+	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
+	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+}
+
+run_drastic_stock_Pixel2() {
 	pin_to_dedicated_cores drastic64 2
 	# Disable loging for now, it's writting a lot to it
 	./drastic64 "$ROM_FILE" # > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+}
+
+run_drastic_trngaje_Pixel2() {
+	export LD_LIBRARY_PATH="$HOME/lib64_Pixel2_trngaje:$LD_LIBRARY_PATH"
+	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 }
 
 kill_runner() {

@@ -23,5 +23,6 @@
   "type": "pc",
   "releaseYear": 1981,
   "default_emulator": "dosbox_pure",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["dos","pc"]
 }

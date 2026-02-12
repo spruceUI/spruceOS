@@ -22,7 +22,8 @@ class CollectionsAddMenu():
 
     def create_new_collection_and_add_to(self):
         collection_name = OnScreenKeyboard().get_input("Collection Name:")
-        self.add_to_collection(collection_name)
+        if(collection_name is not None and collection_name != ""):
+            self.add_to_collection(collection_name)
 
     def build_options_list(self):
         option_list = []

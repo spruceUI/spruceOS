@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1976,
   "default_emulator": "freechaf",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["CHANNELF","fairchild","channelf","fairchildchannelf", "chf", "CHF"]
 }

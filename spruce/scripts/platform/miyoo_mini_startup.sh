@@ -14,7 +14,7 @@ export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
 audioserver &
-/mnt/SDCARD/spruce/miyoomini/bin/keymon &
+/customer/app/keymon &
 
 touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
 mount -o bind /mnt/SDCARD/spruce/bin/python/bin/python3.10 /mnt/SDCARD/spruce/bin/python/bin/MainUI

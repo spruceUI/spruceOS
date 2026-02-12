@@ -59,13 +59,15 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Failed to delete file: {e}")
 
     @staticmethod
-    def run_game(device, rom_info: RomInfo, remap_sdcard_path = False, run_prefix ="") -> subprocess.Popen:
+    def run_game(device, rom_info: RomInfo, remap_sdcard_path = True, run_prefix ="") -> subprocess.Popen:
         Theme.check_and_create_ra_assets()
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         
         #file_path = /mnt/SDCARD/Roms/FAKE08/Alpine Alpaca.p8
         #miyoo maps it to /media/sdcard0/Emu/FAKE08/../../Roms/FAKE08/Alpine Alpaca.p8
-        miyoo_app_path = MiyooTrimCommon.convert_game_path_to_miyoo_path(rom_info.rom_file_path, remap_sdcard_path)
+        # Disable path mapping for now -- probably never re-enable
+        #miyoo_app_path = MiyooTrimCommon.convert_game_path_to_miyoo_path(rom_info.rom_file_path, remap_sdcard_path)
+        miyoo_app_path = rom_info.rom_file_path
         escaped_path = re.sub(r'([$`"\\])', r'\\\1', miyoo_app_path)        
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         Device.get_device().fix_sleep_sound_bug()

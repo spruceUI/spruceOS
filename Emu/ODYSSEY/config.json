@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1972,
   "default_emulator": "o2em",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["odyssey2","odyssey","ODYSSEY2"]
 }

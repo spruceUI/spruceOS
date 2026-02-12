@@ -32,5 +32,6 @@
   "type": "homeconsole",
   "releaseYear": 1988,
   "default_emulator": "picodrive",
-  "scaling_min_freq": 648000
+  "scaling_min_freq": 648000,
+  "alternativeFolderNames": ["GENESIS","md","megadrive","MEGADRIVE"]
 }

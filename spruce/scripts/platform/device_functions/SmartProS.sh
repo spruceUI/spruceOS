@@ -217,7 +217,8 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
+    close_ppsspp_menu
+    /mnt/SDCARD/spruce/bin64/kmsgrab "$1"
 }
 
 init_gpio_SmartProS() {

@@ -33,5 +33,6 @@
   "type": "homeconsole",
   "releaseYear": 1983,
   "default_emulator": "genesis_plus_gx",
-  "scaling_min_freq": 408000
+  "scaling_min_freq": 408000,
+  "alternativeFolderNames": ["SGONETHOUSAND","sgonethousand","segasgone","sg1000","SG1000","segasg1000","SEGASG1000", "sg1k","SG1K"]
 }

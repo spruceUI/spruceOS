@@ -4,7 +4,7 @@
   "iconsel": "naomi_sel.png",
   "themecolor": "FFFFFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip|dat",
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
@@ -47,6 +47,19 @@
       ],
       "selected": "Flycast-libretro",
       "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone",
+        "Flycast-stock"
+      ],
+      "selected": "Flycast-stock",
+      "overrides": {}
     }
   },
   "sortOrder": 1800,
@@ -54,5 +67,6 @@
   "type": "homeconsole",
   "releaseYear": 1998,
   "default_emulator": "flycast",
-  "scaling_min_freq": 1008000
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": ["naomi"]
 }

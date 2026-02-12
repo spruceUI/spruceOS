@@ -27,15 +27,17 @@ cores_online() {
 set_smart() {
     log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    cpuclock 1400
 }
 
 set_performance() {
     log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    cpuclock 1600
 }
 
 set_overclock() {
-    overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeed.selected' "1600")"
+    overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600")"
 
     log_message "Setting cpu to performance"
     log_message "Setting overclock to ${overclock_speed}MHz"
@@ -45,8 +47,16 @@ set_overclock() {
 }
 
 device_init() {
-    #Enable GPIO48 for vibration motor 
+    # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
+
+    # Detect variant
+    variant="$(get_miyoo_mini_variant)"
+
+    if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
+        # Screen is off by like ~8px unless you do this, not sure why
+        cat /proc/ls
+    fi
 }
 
 vibrate() {
@@ -165,17 +175,41 @@ set_default_ra_hotkeys() {
 }
 
 volume_down() {
-    log_message "Volume is handled via keymon" -v
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -gt 0 ] ; then
+        VOLUME_LV=$((VOLUME_LV-1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 volume_up() {
-    log_message "Volume is handled via keymon" -v
+    VOLUME_LV=$(get_volume_level)
+    if [ $VOLUME_LV -lt 20 ] ; then
+        VOLUME_LV=$((VOLUME_LV+1))
+        set_volume "$(( VOLUME_LV ))"
+    fi
 }
 
 get_volume_level() {
-    log_message "Volume is handled via keymon" -v
-    echo "0"
+    jq -r '.vol' "$SYSTEM_JSON"
 }
+
+set_volume() {
+    # NOTE: This won't always work. They will often just error.
+    # But sometimes they do work. It's based on if something else is already controlling the volume.
+    # The main purpose of this is for NDS volume since drastic does some weird stuff
+    # Might be worth considering adding an if block of if <x> is running then do this
+    
+    VOLUME_LV="$1"
+    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/mm_set_volume.py "$VOLUME_LV" &
+
+    # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
+}
+
 
 current_backlight() {
     jq -r '.backlight' "$SYSTEM_JSON"
@@ -249,7 +283,7 @@ device_enter_sleep() {
 
 device_exit_sleep() {
     cpuclock 1600                                               # wake up cpu speed
-    keymon &
+    /customer/app/keymon &
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
     if [ -f /tmp/saved_brightness ]; then
@@ -272,10 +306,6 @@ device_lid_sensor_ready() {
 
 device_lid_open(){
     head -c 1 "$LID_HALL_FILE" 2>/dev/null
-}
-
-take_screenshot() { # todo: what's the rotation per each model again?'
-    /mnt/SDCARD/spruce/bin/fbgrab -a "$1"
 }
 
 

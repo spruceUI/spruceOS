@@ -389,13 +389,13 @@ class Theme():
             else:
                 return cls._asset("ic-power-charge-0%.qoi")
         else:
-            if battery_percent >= 97:
+            if battery_percent >= 81:
                 return cls._asset("power-full-icon.qoi")
-            elif battery_percent >= 80:
+            elif battery_percent >= 51:
                 return cls._asset("power-80%-icon.qoi")
-            elif battery_percent >= 50:
+            elif battery_percent >= 21:
                 return cls._asset("power-50%-icon.qoi")
-            elif battery_percent >= 20:
+            elif battery_percent >= 10:
                 return cls._asset("power-20%-icon.qoi")
             else:
                 return cls._asset("power-0%-icon.qoi")

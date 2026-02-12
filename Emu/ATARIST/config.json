@@ -23,5 +23,6 @@
   "type": "homeconsole",
   "releaseYear": 1985,
   "default_emulator": "hatari",
-  "scaling_min_freq": 480000
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["atarist", "Atari ST", "st"]
 }

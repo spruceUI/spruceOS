@@ -38,7 +38,20 @@
       ],
       "options": [
         "DraStic-original",
-        "DraStic-Steward"
+        "DraStic-Steward",
+        "DraStic-trngaje"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
+    },
+    "Emulator_SmartPro": {
+      "display": "Emulator",
+      "devices": [
+        "TRIMUI_SMART_PRO"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-trngaje"
       ],
       "selected": "DraStic-original",
       "overrides": {}
@@ -49,9 +62,10 @@
         "GKD_PIXEL2"
       ],
       "options": [
-        "DraStic-stock"
+        "DraStic-stock",
+        "DraStic-trngaje"
       ],
-      "selected": "DraStic-stock",
+      "selected": "DraStic-trngaje",
       "overrides": {}
     }
   },
@@ -60,5 +74,6 @@
   "type": "handheld",
   "releaseYear": 2004,
   "default_emulator": "DraStic-original",
-  "scaling_min_freq": 816000
+  "scaling_min_freq": 816000,
+  "alternativeFolderNames": ["nds","DS","ds","nintendods","NINTENDODS"]
 }

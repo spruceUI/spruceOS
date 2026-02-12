@@ -108,6 +108,9 @@ class RomsMenuCommon(ABC):
         return None
     
     def create_view(self, page_name, rom_list, selected):
+        if(ViewType.ICON_AND_DESC == self.get_view_type()):
+            for rom in rom_list:
+                rom.icon_searcher = rom.image_path_searcher
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
@@ -134,8 +137,20 @@ class RomsMenuCommon(ABC):
                         full_screen_grid_resize_type=self.full_screen_grid_resize_type(),
                         image_resize_height_multiplier=self.get_image_resize_height_multiplier())
 
-    def _run_rom_selection(self, page_name) :
+    def _run_rom_selection(self, page_name):
         rom_list = self._get_rom_list()
+
+        current_device = Device.get_device().get_device_name()
+
+        filtered_roms = []
+        for rom_info_ui_entry in rom_list:
+            devices = rom_info_ui_entry.value.game_system.game_system_config.get_devices()
+            supported_device = not devices or current_device in devices
+            if supported_device:
+                filtered_roms.append(rom_info_ui_entry)
+
+        rom_list = filtered_roms
+
         return self._run_rom_selection_for_rom_list(page_name,rom_list)
 
     def get_additional_menu_options(self):

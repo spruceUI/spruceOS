@@ -23,6 +23,7 @@ class GKDDevice(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         self.sdl2_controller_interface = Sdl2ControllerInterface()
+        super().__init__()
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -107,15 +108,15 @@ class GKDDevice(DeviceCommon):
         mapping = self.sdl_button_to_input.get(sdl_input, ControllerInput.UNKNOWN)
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
-        return self.button_remapper.get_mappping(mapping)
+        return mapping
     
     def map_key(self, key_code):
         if(116 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.POWER_BUTTON)
+            return ControllerInput.POWER_BUTTON
         elif(115 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_UP)
+            return ControllerInput.VOLUME_UP
         elif(114 == key_code):
-            return self.button_remapper.get_mappping(ControllerInput.VOLUME_DOWN)
+            return ControllerInput.VOLUME_DOWN
         else:
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
@@ -327,3 +328,10 @@ class GKDDevice(DeviceCommon):
         if(core is None):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
+
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)
+
+    @throttle.limit_refresh(1)
+    def post_present_operations(self):
+        self.clear_display_cache_if_memory_full("MemAvailable", 100)        

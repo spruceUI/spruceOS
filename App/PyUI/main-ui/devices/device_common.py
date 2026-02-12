@@ -24,6 +24,9 @@ from utils.logger import PyUiLogger
 
 class DeviceCommon(AbstractDevice):
 
+    def __init__(self):
+        self.last_cache_clear = 0
+
     def prompt_power_down(self):
         from display.display import Display
         from themes.theme import Theme
@@ -245,34 +248,34 @@ class DeviceCommon(AbstractDevice):
 
     @throttle.limit_refresh(15)
     def get_wifi_status(self):
-        if(self.is_wifi_enabled()):
-            if(self.get_ip_addr_text() in ["Off","Error","Connecting"]):
-                return WifiStatus.OFF
-            wifi_connection_quality_info = self.get_wifi_connection_quality_info()
-            # Composite score out of 100 based on weighted contribution
-            # Adjust weights as needed based on empirical testing
-            if(wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0):
-                return WifiStatus.OFF
-            else:
-                score = (
-                    (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
-                    (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
-                    ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
-                ) * 100
-
-            # Ensure signal and settings stay in sync
-            self.get_ip_addr_text()
-            
-            if score >= 80:
-                return WifiStatus.GREAT
-            elif score >= 60:
-                return WifiStatus.GOOD
-            elif score >= 40:
-                return WifiStatus.OKAY
-            else:
-                return WifiStatus.BAD
-        else:            
+        if not self.is_wifi_enabled():
             return WifiStatus.OFF
+
+        if self.get_ip_addr_text() in ["Off", "Error", "Connecting"]:
+            return WifiStatus.OFF
+
+        info = self.get_wifi_connection_quality_info()
+
+        # RSSI in dBm (negative values)
+        rssi = info.signal_level
+
+        # Missing / invalid RSSI
+        if rssi is None or rssi <= -200:
+            return WifiStatus.OFF
+
+        # Keep network state synced
+        self.get_ip_addr_text()
+
+        # RSSI-based classification
+        if rssi >= -50:
+            return WifiStatus.GREAT      # Excellent
+        elif rssi >= -67:
+            return WifiStatus.GOOD       # Strong / stable
+        elif rssi >= -75:
+            return WifiStatus.OKAY       # Usable
+        else:
+            return WifiStatus.BAD        # Weak / unreliable
+
         
     def get_running_processes(self):
         #bypass ProcessRunner.run_and_print() as it makes the log too big
@@ -515,3 +518,33 @@ class DeviceCommon(AbstractDevice):
 
     def get_new_wifi_scanner(self):
         return WiFiScanner()
+
+    def post_present_operations(self):
+        # Uneeded for most devices
+        pass
+
+    def get_free_mem_mb(self,free_mem_variable):
+        with open("/proc/meminfo", "r") as f:
+            meminfo = f.read()
+
+        for line in meminfo.splitlines():
+            if line.startswith(free_mem_variable+":"):
+                # value is in kB
+                return int(line.split()[1]) // 1024
+
+        
+        return None
+
+    def clear_display_cache_if_memory_full(self, free_mem_variable, threshold_mb):
+        # last cache clear is done to account for the time it takes
+        # the memory to truly become free after we've marked it for deletion
+        # in SDL
+        self.last_cache_clear += 1
+        free_mb = self.get_free_mem_mb(free_mem_variable)
+
+        if free_mb is not None and free_mb < threshold_mb and self.last_cache_clear > 10:
+            PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
+            Display.clear_cache()
+            self.last_cache_clear = 0
+
+
