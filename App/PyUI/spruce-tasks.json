@@ -14,6 +14,7 @@
     "Reset DraStic config": "restore spruce default NDS config for current device",
     "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
+    "Repair SD Card": "reboot and attempt an fsck.fat on your card",
     "Bug report": "collect logs and other info for bug reports"
   }
 }
