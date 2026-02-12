@@ -78,14 +78,15 @@ set_volume() {
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     # Volume on smart pro s is weird
     # 1/2 volume is basically one step above mute
-    if [ "$new_vol" -eq 0 ]; then
-        scaled=0
-    else
-        scaled=$(( 32 + ( (new_vol - 1) * 31 / 19 ) ))
-    fi
+    #if [ "$new_vol" -eq 0 ]; then
+    #    scaled=0
+    #else
+    #    scaled=$(( 32 + ( (new_vol - 1) * 31 / 19 ) ))
+    #fi
+    #amixer set DAC "$scaled"
 
-
-    amixer set DAC "$scaled"
+    mkdir -p /tmp/system/set_volume &>/dev/null
+    echo "$new_vol" > /tmp/system/set_volume &>/dev/null
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -98,7 +99,6 @@ set_volume() {
             fi
         fi
     fi
-
 }
 
 
