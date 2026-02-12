@@ -310,19 +310,13 @@ class GamelistGenerator:
             # Clean name
             cleaned = RomNameCleaner.clean_name(item_name, extlist)
 
-            # Prefix with subdirectory for namespacing
-            if rel_path:
-                cleaned = f"{rel_path}/{cleaned}"
-
-            # Duplicate detection
-            if cleaned in used_names:
-                if not rel_path:
-                    display_name = filename_no_ext
-                else:
-                    display_name = f"{rel_path}/{filename_no_ext}"
+            # Duplicate detection (keyed by subfolder to avoid cross-folder collisions)
+            dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
+            if dedup_key in used_names:
+                display_name = filename_no_ext
             else:
                 display_name = cleaned
-                used_names.add(cleaned)
+                used_names.add(dedup_key)
 
             writer.add_entry(file_rel_path, display_name, img_rel_path)
 
