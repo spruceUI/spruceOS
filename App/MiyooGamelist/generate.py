@@ -322,6 +322,8 @@ class GamelistGenerator:
 
             # Clean name and track duplicates (keyed by subfolder)
             cleaned = RomNameCleaner.clean_name(item_name, extlist)
+            if not cleaned:
+                cleaned = filename_no_ext
             dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
             name_count[dedup_key] = name_count.get(dedup_key, 0) + 1
 
