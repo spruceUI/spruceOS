@@ -194,12 +194,6 @@ class GamelistGenerator:
             if not os.path.isdir(rom_path):
                 continue
 
-            if self._has_invalid_subfolders(rom_path):
-                xml_path = os.path.join(rom_path, "miyoogamelist.xml")
-                if os.path.isfile(xml_path):
-                    os.remove(xml_path)
-                continue
-
             self.messenger.display_image_and_text(
                 self.image_path,
                 f"Generating miyoogamelist.xml for {system_name}...",
@@ -248,20 +242,6 @@ class GamelistGenerator:
             return {ext for ext in raw.split("|") if ext}
         except (FileNotFoundError, json.JSONDecodeError, KeyError):
             return None
-
-    @staticmethod
-    def _has_invalid_subfolders(rom_path: str) -> bool:
-        """Return True if rom_path has subdirs other than Imgs or hidden."""
-        try:
-            for entry in os.scandir(rom_path):
-                if entry.is_dir(follow_symlinks=False):
-                    name = entry.name
-                    if name == "Imgs" or name.startswith("."):
-                        continue
-                    return True
-        except FileNotFoundError:
-            pass
-        return False
 
     # ---- per-system generation ---------------------------------------------
 
