@@ -249,21 +249,33 @@ class GamelistGenerator:
         self, system_name: str, rom_path: str, extlist: set
     ) -> None:
         output_path = os.path.join(rom_path, "miyoogamelist.xml")
-        writer = GamelistXmlWriter()
-        used_names: set[str] = set()
-        self._process_roms_recursive(
-            rom_path, rom_path, "./Imgs", extlist, writer, used_names
+
+        # Pass 1: collect all ROM entries and detect duplicate cleaned names
+        rom_entries: list[tuple[str, str, str, str]] = []
+        name_count: dict[str, int] = {}
+        self._collect_roms_recursive(
+            rom_path, rom_path, "./Imgs", extlist, rom_entries, name_count
         )
+
+        # Pass 2: write entries, using raw filename for ALL duplicates
+        writer = GamelistXmlWriter()
+        for file_rel_path, img_rel_path, cleaned, filename_no_ext in rom_entries:
+            if name_count.get(cleaned, 0) > 1:
+                display_name = filename_no_ext
+            else:
+                display_name = cleaned
+            writer.add_entry(file_rel_path, display_name, img_rel_path)
+
         writer.write(output_path)
 
-    def _process_roms_recursive(
+    def _collect_roms_recursive(
         self,
         current_dir: str,
         base_path: str,
         img_path: str,
         extlist: set,
-        writer: GamelistXmlWriter,
-        used_names: set,
+        rom_entries: list,
+        name_count: dict,
     ) -> None:
         try:
             entries = sorted(os.listdir(current_dir))
@@ -281,8 +293,9 @@ class GamelistGenerator:
             if os.path.isdir(item_full):
                 if item_name == "Imgs" or item_name.startswith("."):
                     continue
-                self._process_roms_recursive(
-                    item_full, base_path, img_path, extlist, writer, used_names
+                self._collect_roms_recursive(
+                    item_full, base_path, img_path, extlist,
+                    rom_entries, name_count,
                 )
                 continue
 
@@ -307,18 +320,12 @@ class GamelistGenerator:
                 file_rel_path = f"./{rel_path}/{item_name}"
                 img_rel_path = f"{img_path}/{rel_path}/{filename_no_ext}.png"
 
-            # Clean name
+            # Clean name and track duplicates (keyed by subfolder)
             cleaned = RomNameCleaner.clean_name(item_name, extlist)
-
-            # Duplicate detection (keyed by subfolder to avoid cross-folder collisions)
             dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
-            if dedup_key in used_names:
-                display_name = filename_no_ext
-            else:
-                display_name = cleaned
-                used_names.add(dedup_key)
+            name_count[dedup_key] = name_count.get(dedup_key, 0) + 1
 
-            writer.add_entry(file_rel_path, display_name, img_rel_path)
+            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext))
 
 
 # ---------------------------------------------------------------------------
