@@ -35,19 +35,20 @@
   - [CLICK HERE TO SEE THE WIKI](https://github.com/spruceUI/spruceOS/wiki)
 
 ## Installation
-  - The short version is: format your SD card to FAT32 and extract the zip file directly onto your SD card.
+  - The short version is: format your SD card to FAT32 and extract the 7z (using the 7zip app) file to your PC, then copy the files onto your SD card.
   - For more information, see the new [Wiki installation page](https://github.com/spruceUI/spruceOS/wiki/Installation-Instructions)
   - Place your BIOS files in the `BIOS` folder on the root of SD card.
 
 ## All In One Installer
-  - Download [The new Beta spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases)
+  - Download [The spruceOS Installer program](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
   - Simply insert your SD card into your computer and run the program, be sure to select the correct drive!
   - It formats your card, downloads the latest official spruce release, and installs it in one click!
+  - Now V1.1 has a boxart scraper!
 
 ## UPDATING TO THE LATEST RELEASE
 To update:
 
-See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/Updating-to-the-Latest-Release)
+See our updating spruce [Wiki page for more info](https://github.com/spruceUI/spruceOS/wiki/01.-Installation-Instructions)
 
 ## Controls and Hotkeys
 
@@ -118,7 +119,6 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
   - KMFDManic: Building and testing new cores (N64 F^%$ Yeah!).
   - Hoo: Testing and encouragement.
   - Metallic77: Custom lightweight shaders for the A30, and Flycast tweaks.
-  - g3nesis331: Fixing port control layout switching.
   - Russ from RGC: His YouTube channel is an inspiration.
   - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
   - [Miyoo](https://lomiyoo.com/) for sending us development units.

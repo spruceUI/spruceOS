@@ -1,0 +1,136 @@
+name: Create NEW Latest Release (2026rev.)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-latest-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Development branch
+        uses: actions/checkout@v4
+        with:
+          ref: v4.0-staging
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Install 7zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Read version from spruce/spruce
+        id: get_version
+        run: |
+          if [ ! -f "spruce/spruce" ]; then
+            echo "Error: spruce/spruce file not found"
+            exit 1
+          fi
+          VERSION="$(< spruce/spruce)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${VERSION}"
+
+      - name: Recombine split files
+        run: |
+          # Miyoo rootfs
+          if ls spruce/flip/miyoo355_rootfs_32.img_part* 1>/dev/null 2>&1; then
+            echo "Recombining miyoo355_rootfs_32.img..."
+            rm -f spruce/flip/miyoo355_rootfs_32.img
+            cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
+            rm -f spruce/flip/miyoo355_rootfs_32.img_part*
+            echo "✓ miyoo355_rootfs_32.img recombined"
+          fi
+
+          # muOS pixie
+          if ls spruce/flip/muOS-pixie-reduced.sqsh-part* 1>/dev/null 2>&1; then
+            echo "Recombining muOS-pixie-reduced.sqsh..."
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh
+            cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
+            echo "✓ muOS-pixie-reduced.sqsh recombined"
+          fi
+
+          # ScummVM libretro core
+          if ls RetroArch/.retroarch/cores64/scummvm_libretro.so.part* 1>/dev/null 2>&1; then
+            echo "Recombining scummvm_libretro.so..."
+            cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
+            rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
+            echo "✓ scummvm_libretro.so recombined"
+          fi
+
+      - name: Pull PyUI Themes
+        run: |
+          echo "Cloning PyUI-Themes repo..."
+          git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
+
+          mkdir -p Themes
+
+          echo "Copying selected themes..."
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_OUTLINE.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/RETRO TV.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
+
+          echo "Themes copied:"
+          ls -lh Themes
+
+          echo "Removing cloned PyUI Themes repo"
+          rm -rf pyui_themes
+
+      - name: Create 7z archive
+        run: |
+          7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh \
+            -x!spruce/flags/developer_mode
+
+          echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
+          ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: spruceOS v${{ steps.get_version.outputs.version }}
+          body: |
+            ## What's New
+            [Describe changes here]
+
+            ## Installation
+            Download spruceV${{ steps.get_version.outputs.version }}.7z and copy the contents to a blank FAT32 formatted SD card.
+          repository: spruceUI/spruceOS
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: true
+          prerelease: false
+
+      - name: Summary
+        run: |
+          echo "=========================================="
+          echo "✓ Draft release created successfully!"
+          echo "=========================================="
+          echo "Version: ${{ steps.get_version.outputs.version }}"
+          echo "Tag: v${{ steps.get_version.outputs.version }}"
+          echo "File: spruceV${{ steps.get_version.outputs.version }}.7z"
+          echo ""
+          echo "Next steps:"
+          echo "1. Review the draft release in GitHub UI"
+          echo "2. Edit the release notes"
+          echo "3. Publish the release"
+          echo "4. OTA files will auto-update via update-ota-on-publish.yml"
+          echo "=========================================="
