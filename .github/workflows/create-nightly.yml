@@ -87,22 +87,21 @@ jobs:
 
           echo "Copying selected themes..."
 
-          cp "pyui_themes/PackedThemes/ALEKFULL_NX.7z" Themes/
-          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/
-          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/
-          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/
-          cp "pyui_themes/PackedThemes/CONSOLED V2.7z" Themes/
-          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/
-          cp "pyui_themes/PackedThemes/Grape.7z" Themes/
-          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/
-          cp "pyui_themes/PackedThemes/M.7z" Themes/
-          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/
-          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/
-          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/
-          cp "pyui_themes/PackedThemes/RETRO TV.7z" Themes/
-          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/
-          cp "pyui_themes/PackedThemes/STRIPS.7z" Themes/
-          cp "pyui_themes/PackedThemes/SLANTED.7z" Themes/
+          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_OUTLINE.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/GREEN.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/OTB.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/SLABS.7z" Themes/ || true
+          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
 
           echo "Themes copied:"
           ls -lh Themes
