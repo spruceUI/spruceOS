@@ -108,6 +108,9 @@ class RomsMenuCommon(ABC):
         return None
     
     def create_view(self, page_name, rom_list, selected):
+        if(ViewType.ICON_AND_DESC == self.get_view_type()):
+            for rom in rom_list:
+                rom.icon_searcher = rom.image_path_searcher
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
