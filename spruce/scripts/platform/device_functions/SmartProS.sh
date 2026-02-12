@@ -85,8 +85,8 @@ set_volume() {
     #fi
     #amixer set DAC "$scaled"
 
-    mkdir -p /tmp/system/set_volume 2>/dev/null
-    echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
+    mkdir -p /tmp/system/set_volume &>/dev/null
+    echo "$new_vol" > /tmp/system/set_volume &>/dev/null
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")

@@ -60,8 +60,8 @@ set_volume() {
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     # scaled=$(( new_vol * 255 / 20 ))
     # amixer set 'Soft Volume Master' "$scaled"
-    mkdir -p /tmp/system/set_volume 2>/dev/null
-    echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
+    mkdir -p /tmp/system/set_volume &>/dev/null
+    echo "$new_vol" > /tmp/system/set_volume &>/dev/null
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
 
