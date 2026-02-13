@@ -23,10 +23,23 @@ class SystemConfig:
                 raise RuntimeError(f"Failed to load config: {e}")
 
     def save_config(self):
+        import tempfile
         with self._lock:
             try:
-                with open(self.filepath, 'w') as f:
-                    json.dump(self.config, f, indent=8)
+                dirpath = os.path.dirname(self.filepath)
+
+                with tempfile.NamedTemporaryFile(
+                    'w',
+                    dir=dirpath,
+                    delete=False
+                ) as tmp:
+                    json.dump(self.config, tmp, indent=8)
+                    tmp.flush()
+                    os.fsync(tmp.fileno())
+                    tempname = tmp.name
+
+                os.replace(tempname, self.filepath) 
+
             except Exception as e:
                 raise RuntimeError(f"Failed to save config: {e}")
         
