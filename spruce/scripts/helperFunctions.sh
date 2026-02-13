@@ -880,14 +880,6 @@ display_image_and_text() {
     )"
 }
 
-get_config_value() {
-    local key="$1"
-    local default="$2"
-    local file="/mnt/SDCARD/Saves/spruce/spruce-config.json"
-
-    jq -r "${key} // \"$default\"" "$file"
-}
-
 get_pyui_config_value() {
     local key="$1"
     local default="$2"
