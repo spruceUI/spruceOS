@@ -202,4 +202,8 @@ class PyUiConfig:
     def get_activity_log_path(cls):
         return cls.get("activityLogPath",None)
     
+    @classmethod
+    def get_about_entries(cls):
+        return cls.get("aboutEntries",[])
+    
     
