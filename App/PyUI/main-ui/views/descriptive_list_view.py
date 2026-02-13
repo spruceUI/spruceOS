@@ -34,6 +34,11 @@ class DescriptiveListView(ListView):
         self.scroll_value_text_amount = 0
         self.last_selected = -1
         self.selected_same_entry_time = time.time()
+        self.contains_any_icons = False
+        for entry in options:
+            if entry.contains_potential_icon():
+                self.contains_any_icons = True
+
 
     def set_options(self, options):
         self.options = options
@@ -73,13 +78,18 @@ class DescriptiveListView(ListView):
                 
             icon_w = 0
             icon_h = 0
+            target_icon_w = int(self.each_entry_width*0.125)
+            if(not self.contains_any_icons):
+                target_icon_w = 0
             if(iconPath is not None):
                 icon_w, icon_h = Display.render_image(iconPath, 
-                                    row_offset_x, 
-                                    row_offset_y + Theme.get_descriptive_list_icon_offset_y(),
-                                    render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                                    target_width=int(self.each_entry_width*0.8), 
-                                    target_height=int(self.each_entry_height*0.8))
+                                    row_offset_x + target_icon_w//2, 
+                                    row_offset_y + self.each_entry_height//2,
+                                    render_mode = RenderMode.MIDDLE_CENTER_ALIGNED, 
+                                    target_width=target_icon_w, 
+                                    target_height=int(self.each_entry_height*0.90))
+                
+            icon_w = target_icon_w
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_TITLE) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE)
             title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y()

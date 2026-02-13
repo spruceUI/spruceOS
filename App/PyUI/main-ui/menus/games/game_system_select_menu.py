@@ -241,7 +241,7 @@ class GameSystemSelectMenu:
                         image_path=self.get_main_menu_icon("apps",Theme.app()),
                         image_path_selected=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
                         description = "Launch Applications",
-                        icon=None,
+                        icon=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
              ))        
             if(Theme.get_favorites_enabled()):
@@ -251,7 +251,7 @@ class GameSystemSelectMenu:
                         image_path=self.get_main_menu_icon("favorites",Theme.favorite()),
                         image_path_selected=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
                         description = "Launch Favorites",
-                        icon=None,
+                        icon=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Favorites", self.favorites_menu.run_rom_selection)
                     ) )         
             if(Theme.get_recents_enabled()):
@@ -261,7 +261,7 @@ class GameSystemSelectMenu:
                         image_path=self.get_main_menu_icon("recents",Theme.recent()),
                         image_path_selected=self.get_main_menu_icon_selected("recents",Theme.recent_selected()),
                         description = "Launch Recents",
-                        icon=None,
+                        icon=self.get_main_menu_icon_selected("recents",Theme.recent_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Recents", self.recents_menu.run_rom_selection)
                     )  )
             if(Theme.get_collections_enabled()):
@@ -271,7 +271,7 @@ class GameSystemSelectMenu:
                         image_path=self.get_main_menu_icon("collections",Theme.collection()),
                         image_path_selected=self.get_main_menu_icon_selected("collections",Theme.collection_selected()),
                         description = "Launch Collections",
-                        icon=None,
+                        icon=self.get_main_menu_icon_selected("collections",Theme.collection_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Collections", self.collections_menu.run_rom_selection)
                     )          )    
             if(Theme.get_settings_enabled() or (Theme.merge_main_menu_and_game_menu() and not Theme.skip_main_menu())):
@@ -281,7 +281,7 @@ class GameSystemSelectMenu:
                         image_path=self.get_main_menu_icon("settings",Theme.settings()),
                         image_path_selected=self.get_main_menu_icon_selected("settings",Theme.settings_selected()),
                         description = "Launch Settings",
-                        icon=None,
+                        icon=self.get_main_menu_icon_selected("settings",Theme.settings_selected()),
                         value=lambda input_value: self.settings_menu.show_menu() if ControllerInput.A == input_value else None
                     )  )
 
