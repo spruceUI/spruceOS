@@ -111,7 +111,7 @@ set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     VOLUME_RAW=$(( VOLUME_LV * 5 ))
-    HP_VOLUME_MAX=30  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
+    HP_VOLUME_MAX=15  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
     HP_VOLUME=$(( VOLUME_RAW * HP_VOLUME_MAX / 100 ))
     log_message "Setting volume to ${VOLUME_RAW}"
 
@@ -121,14 +121,14 @@ set_volume() {
     else
         #TODO can we prevent peaking audio if going from 0 to non-0?
 
+        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
+
         if are_headphones_plugged_in; then
-            amixer sset "Playback Path" "HP" >/dev/null 2>&1
             amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
+            amixer sset "Playback Path" "HP" >/dev/null 2>&1
         else
             amixer sset "Playback Path" "SPK" >/dev/null 2>&1
         fi
-
-        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
 
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
@@ -145,7 +145,7 @@ set_volume() {
 
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
-    HP_VOLUME_MAX=30
+    HP_VOLUME_MAX=15
     HP_VOLUME=$(( config_volume * 5 * HP_VOLUME_MAX / 100 ))
 
     if [ "$config_volume" -ne 0 ]; then
