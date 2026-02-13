@@ -232,28 +232,8 @@ class GameSystemSelectMenu:
             return backup
         return preferred_path
 
-    def add_extras_to_systems_list(self, systems_list):
+    def add_start_of_list_extras_to_systems_list(self, systems_list):
         if(Theme.skip_main_menu() and Theme.show_extras_in_system_select_menu()) or Theme.merge_main_menu_and_game_menu():
-            if(Theme.get_apps_enabled()):
-                systems_list.append(GridOrListEntry(
-                        primary_text="Apps",
-                        primary_text_long="Applications",
-                        image_path=self.get_main_menu_icon("apps",Theme.app()),
-                        image_path_selected=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
-                        description = "Launch Applications",
-                        icon=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
-                        value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
-             ))        
-            if(Theme.get_favorites_enabled()):
-                systems_list.append(GridOrListEntry(
-                        primary_text="Favorites",
-                        primary_text_long="Favorites",
-                        image_path=self.get_main_menu_icon("favorites",Theme.favorite()),
-                        image_path_selected=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
-                        description = "Launch Favorites",
-                        icon=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
-                        value=lambda input_value: self.run_extra(input_value, "Favorites", self.favorites_menu.run_rom_selection)
-                    ) )         
             if(Theme.get_recents_enabled()):
                 systems_list.append(GridOrListEntry(
                         primary_text="Recents",
@@ -264,6 +244,16 @@ class GameSystemSelectMenu:
                         icon=self.get_main_menu_icon_selected("recents",Theme.recent_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Recents", self.recents_menu.run_rom_selection)
                     )  )
+            if(Theme.get_favorites_enabled()):
+                systems_list.append(GridOrListEntry(
+                        primary_text="Favorites",
+                        primary_text_long="Favorites",
+                        image_path=self.get_main_menu_icon("favorites",Theme.favorite()),
+                        image_path_selected=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
+                        description = "Launch Favorites",
+                        icon=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
+                        value=lambda input_value: self.run_extra(input_value, "Favorites", self.favorites_menu.run_rom_selection)
+                    ) )         
             if(Theme.get_collections_enabled()):
                 systems_list.append(GridOrListEntry(
                         primary_text="Collections",
@@ -274,6 +264,22 @@ class GameSystemSelectMenu:
                         icon=self.get_main_menu_icon_selected("collections",Theme.collection_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Collections", self.collections_menu.run_rom_selection)
                     )          )    
+
+
+
+    def add_end_of_list_extras_to_systems_list(self, systems_list):
+        if(Theme.skip_main_menu() and Theme.show_extras_in_system_select_menu()) or Theme.merge_main_menu_and_game_menu():
+
+            if(Theme.get_apps_enabled()):
+                systems_list.append(GridOrListEntry(
+                        primary_text="Apps",
+                        primary_text_long="Applications",
+                        image_path=self.get_main_menu_icon("apps",Theme.app()),
+                        image_path_selected=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
+                        description = "Launch Applications",
+                        icon=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
+                        value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
+             ))        
             if(Theme.get_settings_enabled() or (Theme.merge_main_menu_and_game_menu() and not Theme.skip_main_menu())):
                 systems_list.append(GridOrListEntry(
                         primary_text="Settings",
@@ -288,6 +294,8 @@ class GameSystemSelectMenu:
 
     def build_system_list(self):
         systems_list = []
+        self.add_start_of_list_extras_to_systems_list(systems_list)        
+
         active_systems = self.game_utils.get_active_systems()
 
         index = 0
@@ -308,7 +316,8 @@ class GameSystemSelectMenu:
                 )          
             systems_list.append(option)
 
-        self.add_extras_to_systems_list(systems_list)        
+        self.add_end_of_list_extras_to_systems_list(systems_list)        
+
 
         for entry in systems_list:
             if(entry.get_primary_text() == PyUiState.get_last_system_selection()):
