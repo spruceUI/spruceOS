@@ -145,9 +145,13 @@ class RomsMenuCommon(ABC):
 
         filtered_roms = []
         for rom_info_ui_entry in rom_list:
-            devices = rom_info_ui_entry.value.game_system.game_system_config.get_devices()
-            supported_device = not devices or current_device in devices
-            if supported_device:
+            if(rom_info_ui_entry.value.game_system.game_system_config):
+                devices = rom_info_ui_entry.value.game_system.game_system_config.get_devices()
+                supported_device = not devices or current_device in devices
+                if supported_device:
+                    filtered_roms.append(rom_info_ui_entry)
+            else:
+                # Collections are fake without a system
                 filtered_roms.append(rom_info_ui_entry)
 
         rom_list = filtered_roms
