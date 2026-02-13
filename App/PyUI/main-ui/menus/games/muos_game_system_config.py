@@ -63,3 +63,5 @@ class MuosGameSystemConfig():
     def scan_subfolders(self):
         return True
         
+    def get_devices(self):
+        return []
