@@ -31,6 +31,13 @@ case "$PLATFORM" in
         USB_UDC_CONTROLLER="ff300000.usb"
         USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
         ;;
+    "SmartProS")
+        STORAGE_DEVICE="/dev/mmcblk1p1"
+        MOUNT_POINT="/mnt/sdcard/mmcblk1p1"
+        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
+        USB_UDC_CONTROLLER="4100000.udc-controller"
+        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
+        ;;
     *)
         # This will run if PyUI isn't ready yet, providing a basic message.
         /mnt/SDCARD/App/PyUI/main-ui/devices/utils/display_text "USB Storage Mode is not supported on this device." &
@@ -85,7 +92,7 @@ cleanup_usb_gadget() {
             [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
             [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
             ;;
-        "Flip" | "Pixel2")
+        "Flip" | "Pixel2" | "SmartProS")
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
@@ -163,6 +170,18 @@ configure_usb_gadget() {
             ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
             echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
             ;;
+            "SmartProS")
+            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0"
+            echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
+            echo 0 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/ro"
+            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file"
+            mkdir -p "$USB_CONFIG_PATH/strings/0x409"
+            echo "Mass Storage" > "$USB_CONFIG_PATH/strings/0x409/configuration"
+            [ -L "$USB_CONFIG_PATH/mass_storage.0" ] || ln -s "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/"
+            sleep 1
+            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
+            ;;
     esac
 }
 
@@ -172,7 +191,7 @@ start_pyui_message_writer "1" # Wait for listener
 
 # Warm up the display driver, mimicking other known-good apps
 log_and_display_message "Loading..."
-sleep 0.5 
+sleep 0.5
 
 # 1. Wait for USB cable connection, using the reliable charging status check
 while [ "$(device_get_charging_status)" = "Discharging" ]; do
