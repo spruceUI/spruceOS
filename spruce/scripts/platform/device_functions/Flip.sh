@@ -110,7 +110,8 @@ get_volume_level() {
 set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-    VOLUME_RAW=$(( VOLUME_LV * 5 ))    
+    VOLUME_RAW=$(( VOLUME_LV * 5 ))
+    HP_VOLUME=30  # Headphone amp gain (0-63, ~-33dB). Stock is 58 (~-5dB) which is way too loud.
     log_message "Setting volume to ${VOLUME_RAW}"
 
 
@@ -121,12 +122,13 @@ set_volume() {
 
         if are_headphones_plugged_in; then
             amixer sset "Playback Path" "HP" >/dev/null 2>&1
+            amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
         else
             amixer sset "Playback Path" "SPK" >/dev/null 2>&1
         fi
 
         amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
-        
+
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
@@ -142,6 +144,7 @@ set_volume() {
 
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
+    HP_VOLUME=30
 
     if [ "$config_volume" -ne 0 ]; then
         log_message "Restoring volume to ${config_volume}"
@@ -149,6 +152,7 @@ fix_sleep_sound_bug() {
         amixer cset numid=5 0
         if are_headphones_plugged_in; then
             amixer cset numid=2 3
+            amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
         else
             amixer cset numid=2 2
         fi

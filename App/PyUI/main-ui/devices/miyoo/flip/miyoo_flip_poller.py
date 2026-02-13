@@ -10,13 +10,15 @@ class MiyooFlipPoller:
         self.device = device
 
     def check_audio(self):
-        
+
         try:
             new_headphone_status = self.device.get_device().are_headphones_plugged_in()
             if(new_headphone_status != self.headphone_status):
                 self.headphone_status = new_headphone_status
                 if(self.headphone_status):
                     ProcessRunner.run(["amixer","sset","Playback Path","HP"])
+                    from devices.miyoo.flip.miyoo_flip import MiyooFlip
+                    ProcessRunner.run(["amixer", "cset", "name='headphone volume'", str(MiyooFlip.HP_VOLUME)])
                 else:
                     ProcessRunner.run(["amixer","sset","Playback Path","SPK"])
         except:
