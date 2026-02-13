@@ -29,8 +29,8 @@ class FavoritesMenu(RomsMenuCommon):
                     image_path=img_path,
                     image_path_selected=img_path,
                     description=None, 
-                    icon=img_path,
-                    value=None)
+                    icon=None,
+                    value=rom_info)
             )
         return rom_list
 

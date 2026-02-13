@@ -111,6 +111,7 @@ class RomsMenuCommon(ABC):
         if(ViewType.ICON_AND_DESC == self.get_view_type()):
             for rom in rom_list:
                 rom.icon_searcher = rom.image_path_searcher
+                rom.icon = rom.image_path
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
