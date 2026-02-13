@@ -168,3 +168,6 @@ class GridOrListEntry:
 
     def get_extra_data(self):
         return self.extra_data
+    
+    def contains_potential_icon(self):
+        return self.icon is not None or self.icon_searcher is not None
