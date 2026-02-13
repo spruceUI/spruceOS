@@ -111,7 +111,8 @@ set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     VOLUME_RAW=$(( VOLUME_LV * 5 ))
-    HP_VOLUME=30  # Headphone amp gain (0-63, ~-33dB). Stock is 58 (~-5dB) which is way too loud.
+    HP_VOLUME_MAX=30  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
+    HP_VOLUME=$(( VOLUME_RAW * HP_VOLUME_MAX / 100 ))
     log_message "Setting volume to ${VOLUME_RAW}"
 
 
@@ -144,7 +145,8 @@ set_volume() {
 
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
-    HP_VOLUME=30
+    HP_VOLUME_MAX=30
+    HP_VOLUME=$(( config_volume * 5 * HP_VOLUME_MAX / 100 ))
 
     if [ "$config_volume" -ne 0 ]; then
         log_message "Restoring volume to ${config_volume}"

@@ -18,7 +18,9 @@ class MiyooFlipPoller:
                 if(self.headphone_status):
                     ProcessRunner.run(["amixer","sset","Playback Path","HP"])
                     from devices.miyoo.flip.miyoo_flip import MiyooFlip
-                    ProcessRunner.run(["amixer", "cset", "name='headphone volume'", str(MiyooFlip.HP_VOLUME)])
+                    volume = self.device.get_device().system_config.get_volume()
+                    hp_vol = volume * MiyooFlip.HP_VOLUME_MAX // 100
+                    ProcessRunner.run(["amixer", "cset", "name='headphone volume'", str(hp_vol)])
                 else:
                     ProcessRunner.run(["amixer","sset","Playback Path","SPK"])
         except:
