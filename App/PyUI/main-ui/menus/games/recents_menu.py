@@ -38,7 +38,7 @@ class RecentsMenu(RomsMenuCommon):
                     image_path=img_path,
                     image_path_selected=img_path,
                     description=self.get_description(rom_info), 
-                    icon=img_path,
+                    icon=None,
                     value=rom_info)
             )
         return rom_list
