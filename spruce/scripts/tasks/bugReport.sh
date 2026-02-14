@@ -12,6 +12,7 @@ fi
             -i'!/mnt/SDCARD/Saves/*.json' \
             -i'!/mnt/SDCARD/Saves/spruce/*.log' \
             -i'!/mnt/SDCARD/Saves/spruce/*.json' \
-            -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*'
+            -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*' \
+            -i'!/mnt/SDCARD/spruce/spruce'
 
 log_message "Debug: Logs and configs saved to ${output7z}"
