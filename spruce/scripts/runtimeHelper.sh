@@ -360,3 +360,9 @@ Go to Apps and look for 'Update Available'" --okay
         flag_remove "update_available"
     fi
 }
+
+
+set_volume_to_config() {
+    vol=$(jq -r '.vol // empty' "$SYSTEM_JSON")
+    [ -n "$vol" ] && set_volume "$vol"
+}
