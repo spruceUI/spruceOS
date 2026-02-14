@@ -305,10 +305,12 @@ device_init() {
     tinymix set 27 1
     tinymix set 28 1
     tinymix set 29 1
+    amixer set DAC 255 # reset this to max so we're not double attenuating vol with two different mixer controls
+
 
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
-    
+
     echo 0 > /sys/class/speaker/mute
 
 }

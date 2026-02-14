@@ -174,7 +174,7 @@ device_init_a133p() {
         hwclock -s -u
         /etc/bluetooth/bluetoothd start
     ) &
-
+    amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
 }
 
