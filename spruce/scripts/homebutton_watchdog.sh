@@ -33,14 +33,14 @@ kill_port(){
 pause_drastic(){
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         log_message "homebutton_watchdog.sh: Pausing DraStic." 
-        killall -q -STOP drastic drastic64 drastic32
+        killall -q -STOP drastic drastic64
     fi
 }
 
 resume_drastic(){
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         log_message "homebutton_watchdog.sh: Resuming DraStic." 
-        killall -q -CONT drastic drastic64 drastic32
+        killall -q -CONT drastic drastic64
     fi
 }
 
@@ -48,8 +48,16 @@ kill_drastic() {
 
     resume_drastic 
 	log_message "homebutton_watchdog.sh: Killing DraStic!" 
-    # use sendevent to send MENU + L1 combo buttons to drastic
+    # use sendevent to send MENU + L1 combo buttons to drastic. Brick needs it twice
     {
+        echo $B_L3 1    # Fn1 press
+        echo $B_L3 0    # Fn1 release
+        sleep 0.1
+        echo $B_MENU 1  # MENU press
+        echo $B_L1 1    # L1 press
+        echo $B_L1 0    # L1 release
+        echo $B_MENU 0  # MENU release
+        sleep 0.1
         echo $B_MENU 1  # MENU press
         echo $B_L1 1    # L1 press
         echo $B_L1 0    # L1 release
@@ -57,7 +65,7 @@ kill_drastic() {
         echo 0 0 0      # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_DRASTIC &
 
-    killall -q -15 drastic drastic64 drastic32
+    killall -q -15 drastic drastic64
 }
 
 kill_ppsspp() {

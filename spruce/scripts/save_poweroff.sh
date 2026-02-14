@@ -99,6 +99,23 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
     killall -q -15 PPSSPPSDL_$PLATFORM 2>/dev/null
+elif pgrep -f "drastic32" >/dev/null; then
+    {
+        echo $B_L3 1    # Fn1 press
+        echo $B_L3 0    # Fn1 release
+        sleep 0.1
+        echo $B_MENU 1  # MENU press
+        echo $B_L1 1    # L1 press
+        echo $B_L1 0    # L1 release
+        echo $B_MENU 0  # MENU release
+        sleep 0.1
+        echo $B_MENU 1  # MENU press
+        echo $B_L1 1    # L1 press
+        echo $B_L1 0    # L1 release
+        echo $B_MENU 0  # MENU release
+        echo 0 0 0      # tell sendevent to exit
+    } | sendevent $EVENT_PATH_SEND_TO_DRASTIC || \
+    log_message "Warning: sendevent failed during DraStic-Steward autosave"
 else
     for process in $EMU_PROCESSES; do
         killall -q -15 "$process" 2>/dev/null
