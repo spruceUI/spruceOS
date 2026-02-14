@@ -191,7 +191,11 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def change_volume(self, amount):
+    def volume_up(self):
+        pass
+
+    @abstractmethod
+    def volume_down(self):
         pass
 
     @abstractmethod

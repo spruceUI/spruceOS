@@ -90,19 +90,6 @@ class TrimUIDevice(DeviceCommon):
 
     def get_volume(self):
         return self.system_config.get_volume()
-
-    def get_real_volume(self):
-        # Run the command and capture output
-        result = subprocess.run(['amixer', 'cget', 'numid=17'], capture_output=True, text=True)
-        # Search for 'values=' line and extract the first value
-        match = re.search(r'values=(\d+),\d+', result.stdout)
-        if match:
-            volume = int(match.group(1))
-            PyUiLogger().get_logger().info(f"Volume is {volume}")
-            return math.ceil(volume * 100/255)
-        else:
-            PyUiLogger().get_logger().error("Unable to find volume from amixer command")
-            return 0
         
     def fix_sleep_sound_bug(self):
         pass
@@ -148,10 +135,6 @@ class TrimUIDevice(DeviceCommon):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(+5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
 
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")

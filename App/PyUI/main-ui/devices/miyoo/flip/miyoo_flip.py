@@ -1,5 +1,6 @@
 import inspect
 from pathlib import Path
+import re
 import subprocess
 import threading
 import time
@@ -33,7 +34,6 @@ from utils.py_ui_config import PyUiConfig
 class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
-    HP_VOLUME_MAX = 15  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
     MIYOO_STOCK_CONFIG_LOCATION = "/userdata/system.json"
 
     def __init__(self, device_name, main_ui_mode):
@@ -137,8 +137,6 @@ class MiyooFlip(MiyooDevice):
                 self.start_wifi_services()
 
         self.init_bluetooth()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
         self.apply_timezone(self.system_config.get_timezone())
 
     def init_bluetooth(self):
@@ -314,102 +312,14 @@ class MiyooFlip(MiyooDevice):
     def get_volume(self):
         return self.system_config.get_volume()
 
-
-    def _set_volume(self, volume):
-        try:
-            
-            if(0 == volume):
-                ProcessRunner.run(["amixer","sset","Playback Path","OFF"], print=False)
-            else:
-                PyUiLogger.get_logger().info(f"Setting volume to {volume}")
-                ProcessRunner.run(
-                    ["amixer", "cset", f"name='SPK Volume'", str(volume)],
-                    check=True,
-                    print=False
-                )
-
-                if(self.are_headphones_plugged_in()):
-                    hp_vol = volume * MiyooFlip.HP_VOLUME_MAX // 100
-                    ProcessRunner.run(
-                        ["amixer", "cset", "name='headphone volume'", str(hp_vol)],
-                        print=False
-                    )
-                    ProcessRunner.run(["amixer","sset","Playback Path","HP"], print=False)
-                else:
-                    ProcessRunner.run(["amixer","sset","Playback Path","SPK"], print=False)
-
-                # Why is the volume at 5 sometimes broken, but going 10 -> 5 fixes it?
-                if(volume == 5):
-                    ProcessRunner.run(
-                        ["amixer", "cset", f"name='SPK Volume'", str(10)],
-                        check=True,
-                        print=False
-                    )
-                    ProcessRunner.run(
-                        ["amixer", "cset", f"name='SPK Volume'", str(0)],
-                        check=True,
-                        print=False
-                    )
-
-
-            
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        return volume 
-
-
-    def get_current_mixer_value(self, numid):
-        # Run the amixer command and capture output
-        result = subprocess.run(
-            ['amixer', 'cget', f'numid={numid}'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        output = result.stdout
-        
-        # Find the line containing ': values=' and extract the number
-        for line in reversed(output.splitlines()):
-            match = re.search(r': values=(\d+)', line)
-            if match:
-                return int(match.group(1))
-        return None
-    
-    def read_volume(self):
-        try:
-            current_mixer = self.get_current_mixer_value(MiyooDevice.get_device().OUTPUT_MIXER)
-            if(MiyooDevice.get_device().SOUND_DISABLED == current_mixer):
-                return 0
-            else:
-                output = subprocess.check_output(
-                    ["amixer", "cget", "name='SPK Volume'"],
-                    text=True
-                )
-                match = re.search(r": values=(\d+)", output)
-                if match:
-                    return int(match.group(1))
-                else:
-                    PyUiLogger.get_logger().info("Volume value not found in amixer output.")
-                    return 0 # ???
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Command failed: {e}")
-            return 0 # ???
-
     def fix_sleep_sound_bug(self):
         config_volume = self.system_config.get_volume()
-        PyUiLogger.get_logger().info(f"Restoring volume to {config_volume}")
-        ProcessRunner.run(["amixer", "cset","numid=2", "0"])
-        ProcessRunner.run(["amixer", "cset","numid=5", "0"])
-        if(self.are_headphones_plugged_in()):
-            ProcessRunner.run(["amixer", "cset","numid=2", "3"])
-            hp_vol = config_volume * MiyooFlip.HP_VOLUME_MAX // 100
-            ProcessRunner.run(["amixer", "cset", "name='headphone volume'", str(hp_vol)])
-        elif(0 == config_volume):
-            ProcessRunner.run(["amixer", "cset","numid=2", "0"])
+        if(config_volume == 20):
+            self.volume_down()
+            self.volume_up()
         else:
-            ProcessRunner.run(["amixer", "cset","numid=2", "2"])
-        self._set_volume(config_volume)
+            self.volume_up()
+            self.volume_down()
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         return MiyooTrimCommon.run_game(self,rom_info)
@@ -512,3 +422,43 @@ class MiyooFlip(MiyooDevice):
     @throttle.limit_refresh(1)
     def post_present_operations(self):
         self.clear_display_cache_if_memory_full("MemAvailable", 100)
+
+    def volume_up(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event0"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 115 1\n")
+            proc.stdin.write("1 115 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
+
+    def volume_down(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event0"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 114 1\n")
+            proc.stdin.write("1 114 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )

@@ -63,13 +63,6 @@ class MuosDevice(DeviceCommon):
     #def reboot(self):
     #    ProcessRunner.run(["/opt/muos/script/system/halt.sh", "reboot"])
 
-
-
-    def _set_volume(self, volume):
-        ProcessRunner.run(["/opt/muos/script/device/audio.sh", str(volume)])
-        return volume 
-
-
     def _set_brightness_to_config(self):
         pass
 
@@ -89,9 +82,6 @@ class MuosDevice(DeviceCommon):
         pass
 
     def get_volume(self):
-        return self.system_config.get_volume()
-
-    def read_volume(self):
         return self.system_config.get_volume()
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
@@ -126,9 +116,9 @@ class MuosDevice(DeviceCommon):
             else:
                 self.prompt_power_down()
         elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
+            self.volume_up()
         elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+            self.volume_down()
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
