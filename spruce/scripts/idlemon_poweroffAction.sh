@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script is a wrapper to take action on an idle event sourced from:
-# ./idlemon -p MainUI -t 30 -c 5 -s "/mnt/SDCARD/spruce/scripts/idlemon_actionWrapper.sh" -i
+# ./idlemon -p MainUI -t 30 -c 5 -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i
 
 [ -z "$1" ] && exit 1
 

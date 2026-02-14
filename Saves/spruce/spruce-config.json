@@ -91,6 +91,29 @@
                 ],
                 "selected": "Off"
             },
+            "idlemonChargingInMenu": {
+                "display": "Turn screen off when charging in menu",
+                "description": "only applies in main UI",
+                "options": [
+                    "Off",
+                    "10s",
+                    "30s",
+                    "1m"
+                ],
+                "selected": "10s"
+            },
+            "idlemonChargingInGame": {
+                "display": "Turn screen off when charging in game",
+                "description": "in RA, PPSSPP, or DraStic",
+                "options": [
+                    "Off",
+                    "30s",
+                    "1m",
+                    "5m",
+                    "10m"
+                ],
+                "selected": "Off"
+            },
             "disableNetworkServicesInGame": {
                 "display": "Disable network services in game",
                 "description": "including samba, ssh, etc.",

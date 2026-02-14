@@ -27,7 +27,6 @@ while [ 1 ]; do
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
-        
         display_kill &          # This is to kill leftover display processes that may be running
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu"
@@ -47,7 +46,7 @@ while [ 1 ]; do
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         finish_unpacking "pre_cmd_unpacking"
 
-        spruce/scripts/applySetting/idlemon_mm.sh reapply &
+        spruce/scripts/applySetting/idlemon_mm.sh &
 
         flag_remove "in_menu"
     fi
