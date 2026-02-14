@@ -230,6 +230,14 @@ brightness_up() {
     log_message "Missing brightness_up function"
 }
 
+turn_off_screen() {
+    log_message "Missing turn_off_screen function"
+}
+
+turn_on_screen() {
+    log_message "Missing turn_on_screen function"
+}
+
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
     log_message "Missing device_get_charging_status function"

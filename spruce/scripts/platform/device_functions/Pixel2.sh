@@ -293,6 +293,14 @@ brightness_up() {
     set_backlight $((backlight + 1))
 }
 
+turn_off_screen() {
+    echo 1 > /sys/class/backlight/backlight/bl_power
+}
+
+turn_on_screen() {
+    echo 0 > /sys/class/backlight/backlight/bl_power
+}
+
 set_event_arg() {
     EVENT_ARG="-e /dev/input/event2"
 }
