@@ -41,13 +41,13 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
-            Device.get_device().change_volume(-5)
+            Device.get_device().volume_down()
         elif(ControllerInput.L1 == input):
-            Device.get_device().change_volume(-5)
+            Device.get_device().volume_down()
         elif(ControllerInput.DPAD_RIGHT == input):
-            Device.get_device().change_volume(+5)
+            Device.get_device().volume_up()
         elif(ControllerInput.R1 == input):
-            Device.get_device().change_volume(+5)
+            Device.get_device().volume_up()
 
     def show_wifi_menu(self, input):
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input):

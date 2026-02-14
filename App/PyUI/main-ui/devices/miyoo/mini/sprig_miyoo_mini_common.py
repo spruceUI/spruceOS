@@ -22,8 +22,6 @@ class SprigMiyooMiniCommon(MiyooMiniCommon):
     
     def startup_init(self, include_wifi=True):
         super().startup_init()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
         self._set_screen_values_to_config()
 
     def on_sprig_config_change(self):
@@ -80,24 +78,6 @@ class SprigMiyooMiniCommon(MiyooMiniCommon):
     def lumination(self):
         """Get backlight from system config, always reload to catch external changes"""
         return self.system_config.get_backlight()
-
-    def change_volume(self, amount):
-        """Override to handle Sprig's 0-50 volume range (displays as 0-10)"""
-        from display.display import Display
-        
-        # Get current volume (0-50 range for display as 0-10)
-        volume = self.get_volume() + amount
-        
-        # Clamp to 0-50 for Sprig
-        if volume < 0:
-            volume = 0
-        elif volume > 50:
-            volume = 50
-        
-        self._set_volume(volume)
-        
-        Display.volume_changed(self.get_volume())
-        PyUiLogger.get_logger().info(f"Volume changed by {amount} to {volume}")
 
     def _set_volume(self, volume: int) -> int:
         """Set volume using direct hardware control for instant feedback"""

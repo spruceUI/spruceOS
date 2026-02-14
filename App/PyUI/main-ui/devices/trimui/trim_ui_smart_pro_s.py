@@ -24,7 +24,6 @@ from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
-from asyncio import sleep
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
@@ -61,18 +60,10 @@ class TrimUISmartProS(TrimUIDevice):
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
                 
-            config_volume = self.system_config.get_volume()
-            self._set_volume(config_volume)
         super().__init__()
 
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
-
-    def _set_volume(self, user_volume):
-        # Investigate sending volume key
-        pass
 
     #Untested
     @throttle.limit_refresh(5)
@@ -171,6 +162,43 @@ class TrimUISmartProS(TrimUIDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting backlight: {e}")
 
+    def enable_bluetooth(self):
+        if(not self.is_bluetooth_enabled()):
+            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
+                            cwd='/usr/libexec/bluetooth/',
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+        self.system_config.set_bluetooth(1)
+
+    def _signal_osd_quit(self):
+        os.makedirs("/tmp/trimui_osd", exist_ok=True)
+        open("/tmp/trimui_osd/osdd_quit", "a").close()
+
+    def _wpa_supplicant_quit(self):
+        ProcessRunner.run(["killall", "wpa_supplicant"])  
+
+    def _prepare_for_power_action(self):
+        self._signal_osd_quit()
+        self._wpa_supplicant_quit()
+        time.sleep(1)
+
+    def power_off(self):
+        Display.display_message("Powering off...")
+        self._prepare_for_power_action()
+        time.sleep(1)
+        self.run_cmd([self.power_off_cmd()])
+        # So we dont update the display while shutting down
+        time.sleep(10)
+
+
+    def reboot(self):
+        Display.display_message("Rebooting...")
+        self._prepare_for_power_action()
+        time.sleep(1)
+        self.run_cmd([self.reboot_cmd()])
+        # So we dont update the display while rebooting
+        time.sleep(10)
+
     def volume_up(self):
         try:
             proc = subprocess.Popen(
@@ -210,55 +238,3 @@ class TrimUISmartProS(TrimUIDevice):
             PyUiLogger.get_logger().exception(
                 f"Failed to set volume via input events: {e}"
             )
-
-    def change_volume(self, amount):
-        PyUiLogger.get_logger().debug(f"Changing volume by {amount}")
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        if(amount > 0):
-            self.volume_up()
-        else:
-            self.volume_down()
-        sleep(0.1)
-        self.on_mainui_config_change()
-
-    def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/libexec/bluetooth/',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
-
-    def _signal_osd_quit(self):
-        os.makedirs("/tmp/trimui_osd", exist_ok=True)
-        open("/tmp/trimui_osd/osdd_quit", "a").close()
-
-    def _wpa_supplicant_quit(self):
-        ProcessRunner.run(["killall", "wpa_supplicant"])  
-
-    def _prepare_for_power_action(self):
-        self._signal_osd_quit()
-        self._wpa_supplicant_quit()
-        time.sleep(1)
-
-    def power_off(self):
-        Display.display_message("Powering off...")
-        self._prepare_for_power_action()
-        time.sleep(1)
-        self.run_cmd([self.power_off_cmd()])
-        # So we dont update the display while shutting down
-        time.sleep(10)
-
-
-    def reboot(self):
-        Display.display_message("Rebooting...")
-        self._prepare_for_power_action()
-        time.sleep(1)
-        self.run_cmd([self.reboot_cmd()])
-        # So we dont update the display while rebooting
-        time.sleep(10)
