@@ -92,6 +92,7 @@
                 "selected": "Off"
             },
             "idlemonChargingInMenu": {
+                "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in menu",
                 "description": "only applies in main UI",
                 "options": [
@@ -100,9 +101,10 @@
                     "30s",
                     "1m"
                 ],
-                "selected": "10s"
+                "selected": "Off"
             },
             "idlemonChargingInGame": {
+                "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in game",
                 "description": "in RA, PPSSPP, or DraStic",
                 "options": [

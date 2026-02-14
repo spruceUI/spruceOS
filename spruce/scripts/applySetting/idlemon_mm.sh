@@ -168,7 +168,7 @@ IDLE_GAME_POWEROFF_VALUE="$(get_config_value '.menuOptions."Battery Settings".id
 start_idlemon_poweroff "in_game" "$IDLE_GAME_POWEROFF_VALUE"
 
 # Handle in_menu charging setting
-IDLE_MENU_CHARGING_VALUE="$(get_config_value '.menuOptions."Battery Settings".idlemonChargingInMenu.selected' "10s")"
+IDLE_MENU_CHARGING_VALUE="$(get_config_value '.menuOptions."Battery Settings".idlemonChargingInMenu.selected' "Off")"
 start_idlemon_charging "in_menu" "$IDLE_MENU_CHARGING_VALUE"
 
 # Handle in_game charging setting
