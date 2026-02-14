@@ -259,7 +259,7 @@ log_message "Restoring theme customizations"
 restore_theme_configs
 
 log_message "Applying idlemon setting"
-sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
+sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
 
 log_message "----------Restore and Upgrade completed----------"
 
