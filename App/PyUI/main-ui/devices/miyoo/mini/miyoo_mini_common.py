@@ -401,43 +401,6 @@ class MiyooMiniCommon(MiyooDevice):
         except Exception as e:
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
-    def change_volume(self, amount):
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        if(amount > 0):
-            self.volume_up()
-        else:
-            self.volume_down()
-        sleep(0.1)
-        self.on_mainui_config_change()
-
-    def _set_volume(self, volume: int) -> int:
-        event_dev = "/dev/input/event0"
-
-        try:
-            # Send volume-down (114) 20 times
-            for _ in range(20):
-                subprocess.run(
-                    ["send_event", event_dev, "114:1"],
-                    check=False
-                )
-            time.sleep(0.2)
-            # Send volume-up (115) volume//5 times
-            for _ in range(volume // 5):
-                subprocess.run(
-                    ["send_event", event_dev, "115:1"],
-                    check=False
-                )
-
-        except Exception as e:
-            PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
-
-        return volume
-
     def fix_sleep_sound_bug(self):
         pass #uneeded
 

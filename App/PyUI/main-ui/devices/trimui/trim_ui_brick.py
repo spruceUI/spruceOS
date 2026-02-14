@@ -67,8 +67,6 @@ class TrimUIBrick(TrimUIDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
             
     #Untested
     @throttle.limit_refresh(5)
@@ -130,32 +128,7 @@ class TrimUIBrick(TrimUIDevice):
         return self.audio_player
     
     def get_core_name_overrides(self, core_name):
-        return [core_name, core_name+"-64"]
-            
-    def _set_volume(self, user_volume):
-        from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = math.ceil(user_volume * 255//100)
-        
-        try:
-            
-            ProcessRunner.run(
-                ["amixer", "cset", f"numid=17", str(int(volume))],
-                check=True
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
-        self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
-    
+        return [core_name, core_name+"-64"]    
     
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?
@@ -168,3 +141,43 @@ class TrimUIBrick(TrimUIDevice):
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
         self.system_config.set_bluetooth(1)
+
+    def volume_up(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event3"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 115 1\n")
+            proc.stdin.write("1 115 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
+
+    def volume_down(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event3"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 114 1\n")
+            proc.stdin.write("1 114 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )

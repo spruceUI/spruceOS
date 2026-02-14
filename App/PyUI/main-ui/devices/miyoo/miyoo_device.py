@@ -127,10 +127,6 @@ class MiyooDevice(DeviceCommon):
                 self.sleep()
             else:
                 self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
 
     def map_key(self, key_code):
         if(116 == key_code):
