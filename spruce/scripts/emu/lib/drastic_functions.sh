@@ -46,8 +46,10 @@ run_drastic() {
 		
 		if [ "$PLATFORM" = "Brick" ]; then
 			run_drastic_brick
-		elif [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "SmartProS" ]; then
+		elif [ "$PLATFORM" = "SmartPro" ]; then
 			run_drastic_smartpro
+		elif [ "$PLATFORM" = "SmartProS" ]; then
+			run_drastic_smartpros
 		elif [ "$PLATFORM" = "Flip" ]; then
 			run_drastic_flip
 		elif [ "$PLATFORM" = "Pixel2" ]; then
@@ -84,6 +86,11 @@ run_drastic_smartpro(){
 	else
 		core_unrecognized_for_platform_message
 	fi
+}
+
+run_drastic_smartpros() {
+	export CORE="DraStic-original"
+	run_drastic64
 }
 
 run_drastic_flip(){
