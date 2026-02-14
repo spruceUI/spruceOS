@@ -22,6 +22,7 @@ log_message "---------Starting up---------"
 run_sd_card_fix_if_triggered    # do this before anything else
 set_performance
 device_init
+set_volume_to_config &
 # Check if WiFi is enabled and bring up network services if so
 enable_or_disable_wifi &
 
