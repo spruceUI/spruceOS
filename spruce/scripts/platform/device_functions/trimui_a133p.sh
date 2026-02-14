@@ -176,21 +176,6 @@ device_init_a133p() {
     ) &
 
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
-
-    (
-        # Set volume on startup by simulating button presses
-        # Alternative is shared memory to keymon
-        sleep 3
-        {
-            echo 1 115 1 # Vol up pressed
-            echo 1 115 0 # Vol up released
-            echo 1 114 1 # Vol down pressed
-            echo 1 114 0 # Vol down released
-            echo 0 0 0   # tell sendevent to exit
-        } | sendevent $EVENT_PATH_VOLUME 
-        sleep 1
-        echo 0 > /sys/class/speaker/mute
-    ) &
 }
 
 set_event_arg_for_idlemon() {
