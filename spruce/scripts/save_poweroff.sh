@@ -48,10 +48,7 @@ unmount_all() {
             sub(/^[^ ]+ /, "", device)
             sub(/ .*/, "", device)
 
-            if (
-                device == "'"$SD_DEV"'" &&
-                target ~ "^'"$SD_MOUNTPOINT"'/.+"
-            ) {
+            if (device == "'"$SD_DEV"'" || target ~ "^/mnt/SDCARD(/|$)") {
                 print target
             }
         }
@@ -61,7 +58,9 @@ unmount_all() {
     echo "$MOUNTS" | sort -r | while read -r TARGET; do
         [ -z "$TARGET" ] && continue
         log_message "save_poweroff.sh: Attempting to unmount $TARGET"
-        umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
+        if [ "$TARGET" != "$SD_MOUNTPOINT" ]; then
+            umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
+        fi
     done
 }
 
