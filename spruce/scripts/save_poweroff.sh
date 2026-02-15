@@ -9,11 +9,11 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
-EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch retroarch.A30 \
-retroarch.Flip retroarch.Pixel2 ra64.trimui_$PLATFORM \
+EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch 
+retroarch.$PLATFORM retroarch.trimui ra64.trimui_$PLATFORM \
 drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
-mupen64plus PPSSPPSDL PPSSPPSDL_$PLATFORM"
+mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 
 ##### FUNCTION DEFINITIONS ####################
 
@@ -22,7 +22,7 @@ blink_led_if_applicable() {
 }
 
 kill_current_process() {
-    pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
+    pid="$(pgrep -f '/tmp/cmd_to_run.sh' | head -n1)"
     ppid=$pid
     while [ "" != "$pid" ]; do
         ppid=$pid
@@ -137,6 +137,7 @@ close_forcefully_all_emus() {
 }
 
 close_non_emu_cmd_to_run() {
+    [ -f /tmp/cmd_to_run.sh ] || return 1
     if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
         kill_current_process
         # remove lastgame flag to prevent loading any App after next boot
