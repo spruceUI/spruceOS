@@ -300,7 +300,7 @@ class GKDDevice(DeviceCommon):
 
     def get_fw_version(self):
         try:
-            with open(f"/etc/version") as f:
+            with open(f"/etc/release") as f:
                 return f.read().strip()
         except Exception as e:
             PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
