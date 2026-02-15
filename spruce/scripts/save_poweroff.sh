@@ -15,6 +15,9 @@ drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
 mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 
+STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
+STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
+
 ##### FUNCTION DEFINITIONS ####################
 
 blink_led_if_applicable() {
@@ -204,6 +207,20 @@ clean_up_flags() {
     flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 }
 
+exec_shutdown_stage_2() {
+    log_message "Running stage 2 of save_poweroff from /tmp."
+    sync
+    if [ -e "$STAGE_2_SD_PATH" ]; then
+        cp $STAGE_2_SD_PATH $STAGE_2_TMP_PATH
+        chmod +x $STAGE_2_TMP_PATH
+        exec $STAGE_2_TMP_PATH
+    else
+        log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
+        sync
+        run_poweroff_cmd
+    fi
+}
+
     #######################################
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################
@@ -244,6 +261,5 @@ alsactl store
 unmount_all
 sleep 0.1
 unmount_all # twice can't hurt right?
-sync
 
-run_poweroff_cmd
+exec_shutdown_stage_2
