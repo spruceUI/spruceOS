@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
@@ -176,4 +177,43 @@ class GKDPixel2(GKDDevice):
 
     def get_new_wifi_scanner(self):
         return ConnmanWiFiScanner()
-    
+
+    def volume_up(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event1"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 115 1\n")
+            proc.stdin.write("1 115 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
+
+    def volume_down(self):
+        try:
+            proc = subprocess.Popen(
+                ["sendevent", "/dev/input/event1"],
+                stdin=subprocess.PIPE,
+                text=True
+            )
+
+            proc.stdin.write("1 114 1\n")
+            proc.stdin.write("1 114 0\n")
+            proc.stdin.write("0 0 0\n")
+            proc.stdin.flush()
+            proc.stdin.close()
+
+            proc.wait()
+        except Exception as e:
+            PyUiLogger.get_logger().exception(
+                f"Failed to set volume via input events: {e}"
+            )
