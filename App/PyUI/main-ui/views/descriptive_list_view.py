@@ -15,8 +15,10 @@ from views.text_utils import TextUtils
 class DescriptiveListView(ListView):
 
     def __init__(self, top_bar_text,
-                 options: List[GridOrListEntry], selected_bg, selected : int = 0):
+                 options: List[GridOrListEntry], selected_bg, selected : int = 0,
+                 icon_and_desc_use_image_in_place_of_icon=None):
         super().__init__()
+        self.icon_and_desc_use_image_in_place_of_icon = icon_and_desc_use_image_in_place_of_icon
         self.top_bar_text = top_bar_text
         self.set_options(options)
         self.selected : int = selected
@@ -64,7 +66,10 @@ class DescriptiveListView(ListView):
 
         for visible_index, (gridOrListEntry) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
-            iconPath = gridOrListEntry.get_icon()
+            if(self.icon_and_desc_use_image_in_place_of_icon):
+                iconPath = gridOrListEntry.get_image_path()
+            else:
+                iconPath = gridOrListEntry.get_icon()
 
             if actual_index == self.selected:
                 Display.render_image(

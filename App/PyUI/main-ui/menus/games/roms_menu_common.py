@@ -108,10 +108,6 @@ class RomsMenuCommon(ABC):
         return None
     
     def create_view(self, page_name, rom_list, selected):
-        if(ViewType.ICON_AND_DESC == self.get_view_type()):
-            for rom in rom_list:
-                rom.icon_searcher = rom.image_path_searcher
-                rom.icon = rom.image_path
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
@@ -136,7 +132,8 @@ class RomsMenuCommon(ABC):
                         missing_image_path=Theme.get_missing_image_path(),
                         allow_scrolling_text=True, # roms select is allowed to scroll
                         full_screen_grid_resize_type=self.full_screen_grid_resize_type(),
-                        image_resize_height_multiplier=self.get_image_resize_height_multiplier())
+                        image_resize_height_multiplier=self.get_image_resize_height_multiplier(),
+                        icon_and_desc_use_image_in_place_of_icon=True)
 
     def _run_rom_selection(self, page_name):
         rom_list = self._get_rom_list()
@@ -292,21 +289,8 @@ class RomsMenuCommon(ABC):
                         
                     return ControllerInput.B
                 elif(ControllerInput.SELECT == selected.get_input() and not self.support_only_game_launching):
-                    if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
-                        Theme.set_game_selection_view_type(ViewType.GRID)
-                        view = self.create_view(page_name,rom_list,selected)
-                    elif(ViewType.GRID == Theme.get_game_selection_view_type()):
-                        Theme.set_game_selection_view_type(ViewType.CAROUSEL)
-                        view = self.create_view(page_name,rom_list,selected)
-                    elif(ViewType.CAROUSEL == Theme.get_game_selection_view_type()):
-                        Theme.set_game_selection_view_type(ViewType.FULLSCREEN_GRID)
-                        view = self.create_view(page_name,rom_list,selected)
-                    elif(ViewType.FULLSCREEN_GRID == Theme.get_game_selection_view_type()):
-                        Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
-                        view = self.create_view(page_name,rom_list,selected)
-                    else: # how did we hit this else?
-                        Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
-                        view = self.create_view(page_name,rom_list,selected)
+                    self.popup_menu.toggle_view()
+                    view = self.create_view(page_name,rom_list,selected)
                 elif(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):
                     PyUiState.set_last_game_selection(
                         page_name,
