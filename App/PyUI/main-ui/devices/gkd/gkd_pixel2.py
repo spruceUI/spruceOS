@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
@@ -11,6 +12,7 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.gkd.gkd_device import GKDDevice
 from devices.gkd.connman_wifi_scanner import ConnmanWiFiScanner
 from devices.gkd.connman_wifi_menu import ConnmanWifiMenu
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.settings.timezone_menu import TimezoneMenu
@@ -176,4 +178,9 @@ class GKDPixel2(GKDDevice):
 
     def get_new_wifi_scanner(self):
         return ConnmanWiFiScanner()
-    
+
+    def volume_up(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",115)
+
+    def volume_down(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",114)

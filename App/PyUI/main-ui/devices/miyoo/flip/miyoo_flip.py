@@ -18,6 +18,7 @@ from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
@@ -424,41 +425,7 @@ class MiyooFlip(MiyooDevice):
         self.clear_display_cache_if_memory_full("MemAvailable", 100)
 
     def volume_up(self):
-        try:
-            proc = subprocess.Popen(
-                ["sendevent", "/dev/input/event0"],
-                stdin=subprocess.PIPE,
-                text=True
-            )
-
-            proc.stdin.write("1 115 1\n")
-            proc.stdin.write("1 115 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
-
-            proc.wait()
-        except Exception as e:
-            PyUiLogger.get_logger().exception(
-                f"Failed to set volume via input events: {e}"
-            )
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)
 
     def volume_down(self):
-        try:
-            proc = subprocess.Popen(
-                ["sendevent", "/dev/input/event0"],
-                stdin=subprocess.PIPE,
-                text=True
-            )
-
-            proc.stdin.write("1 114 1\n")
-            proc.stdin.write("1 114 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
-
-            proc.wait()
-        except Exception as e:
-            PyUiLogger.get_logger().exception(
-                f"Failed to set volume via input events: {e}"
-            )
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",114)
