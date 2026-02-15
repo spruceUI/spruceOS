@@ -37,9 +37,12 @@ class DescriptiveListView(ListView):
         self.last_selected = -1
         self.selected_same_entry_time = time.time()
         self.contains_any_icons = False
-        for entry in options:
-            if entry.contains_potential_icon():
-                self.contains_any_icons = True
+        if(icon_and_desc_use_image_in_place_of_icon):
+            self.contains_any_icons = True # assume icons if we're using the images for icons
+        else:
+            for entry in options:
+                if entry.contains_potential_icon():
+                    self.contains_any_icons = True
 
 
     def set_options(self, options):
