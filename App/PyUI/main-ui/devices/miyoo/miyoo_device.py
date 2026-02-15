@@ -278,3 +278,6 @@ class MiyooDevice(DeviceCommon):
 
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
+
+    def get_image_for_activity(self, activity):
+        return MiyooTrimCommon.get_image_for_activity(activity)

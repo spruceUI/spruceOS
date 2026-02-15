@@ -534,4 +534,6 @@ class DeviceCommon(AbstractDevice):
             Display.clear_cache()
             self.last_cache_clear = 0
 
-
+    def get_image_for_activity(self, activity):
+        # Implement in child classes where possible
+        return None

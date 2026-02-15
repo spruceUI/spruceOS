@@ -109,6 +109,29 @@ class MuosDevice(DeviceCommon):
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
 
+    def _set_volume(self, volume):
+        ProcessRunner.run(["/opt/muos/script/device/audio.sh", str(volume)])
+        return volume 
+    
+    def change_volume(self, amount):
+        from display.display import Display
+        self.system_config.reload_config()
+        volume = self.get_volume() + amount
+        if(volume < 0):
+            volume = 0
+        elif(volume > 100):
+            volume = 100
+        self._set_volume(volume)
+        self.system_config.set_volume(volume)
+        self.system_config.save_config()
+        Display.volume_changed(self.get_volume())
+
+    def volume_up(self):
+        self.change_volume(+5)
+    
+    def volume_down(self):
+        self.change_volume(-5)
+
     def special_input(self, controller_input, length_in_seconds):
         if(ControllerInput.POWER_BUTTON == controller_input):
             if(length_in_seconds < 1):
@@ -116,9 +139,9 @@ class MuosDevice(DeviceCommon):
             else:
                 self.prompt_power_down()
         elif(ControllerInput.VOLUME_UP == controller_input):
-            self.volume_up()
+            self.change_volume(5)
         elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.volume_down()
+            self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)

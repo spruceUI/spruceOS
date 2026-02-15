@@ -449,4 +449,6 @@ class AbstractDevice(ABC):
     def check_for_button_remap(self, input):
         pass
 
-    
+    @abstractmethod
+    def get_image_for_activity(self, activity):
+        pass

@@ -125,13 +125,15 @@ class GameSystemSelectMenu:
         
         self.systems_list, self.selected = self.build_system_list()
 
-    def get_system_name_for_icon(self, sys_config):        
+    @staticmethod
+    def get_system_name_for_icon(sys_config):        
         if(sys_config.get_icon()):
             return os.path.splitext(os.path.basename(sys_config.get_icon()))[0]
         else:
             return sys_config.get_label().lower()
     
-    def get_first_existing_path(self,icon_system_name_priority):
+    @staticmethod
+    def get_first_existing_path(icon_system_name_priority):
         for index, path in enumerate(icon_system_name_priority):
             try:
                 if path and os.path.isfile(path):
@@ -140,8 +142,9 @@ class GameSystemSelectMenu:
                 pass
         return None 
 
-    def get_images(self, game_system : GameSystem):
-        icon_system_name = self.get_system_name_for_icon(game_system.game_system_config)
+    @staticmethod
+    def get_images(game_system : GameSystem):
+        icon_system_name = GameSystemSelectMenu.get_system_name_for_icon(game_system.game_system_config)
         icon_system_name_priority = []
         selected_icon_system_name_priority = []
 
@@ -179,7 +182,7 @@ class GameSystemSelectMenu:
             icon_system_name_priority.append(Theme.get_default_system_icon())
             selected_icon_system_name_priority.append(Theme.get_default_system_icon())
 
-        index = self.get_first_existing_path(icon_system_name_priority)
+        index = GameSystemSelectMenu.get_first_existing_path(icon_system_name_priority)
         if(index is not None):
             icon = icon_system_name_priority[index]
             selected_icon = selected_icon_system_name_priority[index]
@@ -303,7 +306,7 @@ class GameSystemSelectMenu:
         selected = None
         for game_system in active_systems:
             index+=1
-            image_path, image_path_selected = self.get_images(game_system)
+            image_path, image_path_selected = GameSystemSelectMenu.get_images(game_system)
             icon = image_path_selected
             option = GridOrListEntry(
                     primary_text=game_system.display_name,
