@@ -65,3 +65,6 @@ class MuosGameSystemConfig():
         
     def get_devices(self):
         return []
+    
+    def get_effective_menu_selection(self, option_name, override_key=None):
+        return option_name
