@@ -120,8 +120,8 @@ unmount_binds() {
         done
 
         if [ "$SKIP" -eq 0 ]; then
-        echo "[UMOUNT] Attempting to unmount $TARGET"
-        umount "$TARGET" || echo "[ERROR] Failed to unmount $TARGET"
+            echo "[UMOUNT] Attempting to unmount $TARGET"
+            umount "$TARGET" || echo "[ERROR] Failed to unmount $TARGET"
         fi
     fi
     done

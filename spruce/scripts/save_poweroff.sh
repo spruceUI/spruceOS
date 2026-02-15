@@ -1,24 +1,21 @@
 #!/bin/sh
+
+##### IMPORTS AND CONSTANTS ###################
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 
-current_app="$(get_current_app)"
-log_activity_event "$current_app" "STOP"
-
-# kill principal and runtime first so no new app / MainUI will be loaded anymore
-killall -q -15 runtime.sh
-killall -q -15 principal.sh
-
-device_prepare_for_poweroff
-
-# Ensure PyUI message writer can run
-killall -q -9 MainUI
-sleep 0.5
-
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
+
+EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch retroarch.A30 \
+retroarch.Flip retroarch.Pixel2 ra64.trimui_$PLATFORM \
+drastic drastic32 drastic64 pico8_dyn pico8_64 \
+flycast flycast-stock yabasanshiro yabasanshiro.trimui \
+mupen64plus PPSSPPSDL PPSSPPSDL_$PLATFORM"
+
+##### FUNCTION DEFINITIONS ####################
 
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
@@ -35,8 +32,7 @@ kill_current_process() {
 
 unmount_all() {
     sync
-    log_message "save_poweroff.sh: Scanning mountinfo for SD card mounts..."
-
+    log_message "save_poweroff.sh: Scanning mountinfo for SD card submounts..."
     MOUNTS=$(awk '
         {
             target = $5
@@ -45,7 +41,10 @@ unmount_all() {
             sub(/^[^ ]+ /, "", device)
             sub(/ .*/, "", device)
 
-            if (device == "'"$SD_DEV"'" || target ~ "^/mnt/SDCARD(/|$)") {
+            if (
+                device == "'"$SD_DEV"'" &&
+                target ~ "^'"$SD_MOUNTPOINT"'/.+"
+            ) {
                 print target
             }
         }
@@ -57,36 +56,9 @@ unmount_all() {
         log_message "save_poweroff.sh: Attempting to unmount $TARGET"
         umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
     done
-
-    mount | grep "$SD_DEV" && log_message "Warning: SD mounts remain after shutdown"
 }
 
-
-# kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
-pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
-
-# notify user with led
-[ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
-
-# kill enforceSmartCPU first so no CPU setting is changed during shutdown
-killall -q -15 enforceSmartCPU.sh
-
-# kill app if not emulator is running
-if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
-    kill_current_process
-    # remove lastgame flag to prevent loading any App after next boot
-    rm "${FLAGS_DIR}/lastgame.lock"
-fi
-
-# define emulator processes to kill in following sections
-EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch retroarch.A30 \
-retroarch.Flip retroarch.Pixel2 ra64.trimui_$PLATFORM \
-drastic drastic32 drastic64 pico8_dyn pico8_64 \
-flycast flycast-stock yabasanshiro yabasanshiro.trimui \
-mupen64plus PPSSPPSDL PPSSPPSDL_$PLATFORM"
-
-# trigger auto save and send kill signal
-if pgrep -f "PPSSPPSDL" >/dev/null; then
+close_gracefully_ppsspp() {
     {
         # send autosave hot key
         echo 1 314 1 # SELECT down
@@ -99,7 +71,9 @@ if pgrep -f "PPSSPPSDL" >/dev/null; then
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
     killall -q -15 PPSSPPSDL_$PLATFORM 2>/dev/null
-elif pgrep -f "drastic32" >/dev/null; then
+}
+
+close_gracefully_drastic_steward() {
     {
         echo $B_L3 1    # Fn1 press
         echo $B_L3 0    # Fn1 release
@@ -116,33 +90,108 @@ elif pgrep -f "drastic32" >/dev/null; then
         echo 0 0 0      # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_DRASTIC || \
     log_message "Warning: sendevent failed during DraStic-Steward autosave"
-else
+    sleep 1
+    killall -q -15 drastic32 2>/dev/null
+}
+
+close_gracefully_all_emus() {
     for process in $EMU_PROCESSES; do
         killall -q -15 "$process" 2>/dev/null
     done
+}
+
+wait_for_graceful_emu_exit() {
+    MAX_LOOPS=200   # ~10 seconds at 0.05s
+    COUNT=0
+    while :; do
+        for process in $EMU_PROCESSES; do
+            if killall -q -0 "$process" 2>/dev/null; then
+                sleep 0.05
+                COUNT=$((COUNT + 1))
+                [ "$COUNT" -ge "$MAX_LOOPS" ] && break 2
+                continue 2
+            fi
+        done
+        break
+    done
+}
+
+close_forcefully_all_emus() {
+    for process in $EMU_PROCESSES; do
+        killall -q -0 "$process" 2>/dev/null && killall -q -9 "$process" 2>/dev/null
+    done
+}
+
+stop_problematic_scripts() {
+    # kill principal and runtime first so no new app / MainUI will be loaded anymore
+    killall -q -15 runtime.sh
+    killall -q -15 principal.sh
+
+    # Ensure PyUI message writer can run
+    killall -q -9 MainUI
+    sleep 0.5
+
+    # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
+    pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
+
+    # kill enforceSmartCPU first so no CPU setting is changed during shutdown
+    killall -q -15 enforceSmartCPU.sh
+}
+
+##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
+
+PIDFILE="/tmp/save_poweroff.pid"
+if [ -f "$PIDFILE" ]; then
+    oldpid="$(cat "$PIDFILE")"
+    if [ -n "$oldpid" ] && kill -0 "$oldpid" 2>/dev/null; then
+    log_message "save_poweroff.sh called in duplicate. Ignoring second call."
+        exit 0
+    fi
+fi
+echo $$ > "$PIDFILE"
+trap 'rm -f "$PIDFILE"' EXIT INT TERM
+
+
+
+    ######## 
+##### MAIN ####################################
+    ######## 
+
+# notify user with led
+[ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
+
+device_prepare_for_poweroff
+
+# Activity tracking
+current_app="$(get_current_app)"
+log_activity_event "$current_app" "STOP"
+
+stop_problematic_scripts
+
+# kill app if not emulator is running
+if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
+    kill_current_process
+    # remove lastgame flag to prevent loading any App after next boot
+    rm "${FLAGS_DIR}/lastgame.lock"
+fi
+
+
+# trigger auto save and send kill signal
+if pgrep -f "PPSSPPSDL" >/dev/null; then
+    close_gracefully_ppsspp
+elif pgrep -f "drastic32" >/dev/null; then
+    close_gracefully_drastic_steward
+else
+    close_gracefully_all_emus
 fi
 
 # give emulator some time to finish shutting down
-MAX_LOOPS=200   # ~10 seconds at 0.05s
-COUNT=0
-while :; do
-    for process in $EMU_PROCESSES; do
-        if killall -q -0 "$process" 2>/dev/null; then
-            sleep 0.05
-            COUNT=$((COUNT + 1))
-            [ "$COUNT" -ge "$MAX_LOOPS" ] && break 2
-            continue 2
-        fi
-    done
-    break
-done
+wait_for_graceful_emu_exit
 
 sync
 
 # forcefully close any remaining emulator that refused to close gracefully.
-for process in $EMU_PROCESSES; do
-    killall -q -0 "$process" 2>/dev/null && killall -q -9 "$process" 2>/dev/null
-done
+close_forcefully_all_emus
 
 start_pyui_message_writer
 
@@ -184,18 +233,10 @@ fi
 
 flag_remove "sleep.powerdown"
 flag_remove "emulator_launched"
+flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 
 alsactl store
 
-# kill MainUI
-killall -q -9 MainUI
-
-# wait until emulator or MainUI exit
-while killall -q -0 MainUI; do
-    sleep 0.1
-done
-
-flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 
 unmount_all
 sleep 0.1
