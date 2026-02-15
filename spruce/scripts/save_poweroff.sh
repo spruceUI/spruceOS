@@ -17,6 +17,10 @@ mupen64plus PPSSPPSDL PPSSPPSDL_$PLATFORM"
 
 ##### FUNCTION DEFINITIONS ####################
 
+blink_led_if_applicable() {
+    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
+}
+
 kill_current_process() {
     pid=$(ps | grep cmd_to_run | grep -v grep | sed 's/[ ]\+/ /g' | cut -d' ' -f2)
     ppid=$pid
@@ -56,6 +60,16 @@ unmount_all() {
         log_message "save_poweroff.sh: Attempting to unmount $TARGET"
         umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
     done
+}
+
+attempt_to_close_emu_gracefully() {
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        close_gracefully_ppsspp
+    elif pgrep -f "drastic32" >/dev/null; then
+        close_gracefully_drastic_steward
+    else
+        close_gracefully_all_emus
+    fi
 }
 
 close_gracefully_ppsspp() {
@@ -122,6 +136,14 @@ close_forcefully_all_emus() {
     done
 }
 
+close_non_emu_cmd_to_run() {
+    if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
+        kill_current_process
+        # remove lastgame flag to prevent loading any App after next boot
+        rm "${FLAGS_DIR}/lastgame.lock"
+    fi
+}
+
 stop_problematic_scripts() {
     # kill principal and runtime first so no new app / MainUI will be loaded anymore
     killall -q -15 runtime.sh
@@ -138,7 +160,52 @@ stop_problematic_scripts() {
     killall -q -15 enforceSmartCPU.sh
 }
 
+display_appropriate_icon_and_message() {
+    start_pyui_message_writer
+    if flag_check "in_menu"; then
+        display_image_and_text "$BG_TREE" 50 25 "" 75
+    elif flag_check "forced_shutdown"; then
+        display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
+        flag_remove "forced_shutdown"
+    else
+        display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
+    fi
+    sleep 1 # Let user read any messages
+}
+
+dim_screen_and_do_syncthing_check() {
+    syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
+    if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
+        log_message "Syncthing is enabled, WiFi connection needed"
+        
+        if check_and_connect_wifi; then
+            start_syncthing_process
+            # Dimming screen before syncthing sync check
+            dim_screen &
+            /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --shutdown
+        fi
+
+        flag_remove "syncthing_startup_synced"
+    else
+        dim_screen &
+    fi
+}
+
+clean_up_flags() {
+    # Set flag to trigger autoresume on boot if appropriate
+    if flag_check "in_menu"; then
+        flag_remove "save_active"
+    else
+        flag_add "save_active"
+    fi
+    flag_remove "sleep.powerdown"
+    flag_remove "emulator_launched"
+    flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
+}
+
+    #######################################
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
+    #######################################
 
 PIDFILE="/tmp/save_poweroff.pid"
 if [ -f "$PIDFILE" ]; then
@@ -153,96 +220,29 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 
 
 
-    ######## 
-##### MAIN ####################################
-    ######## 
+                  ######## 
+################### MAIN ######################
+                  ######## 
 
-# notify user with led
-[ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
-
+blink_led_if_applicable
 device_prepare_for_poweroff
-
-# Activity tracking
-current_app="$(get_current_app)"
-log_activity_event "$current_app" "STOP"
-
+log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 
-# kill app if not emulator is running
-if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
-    kill_current_process
-    # remove lastgame flag to prevent loading any App after next boot
-    rm "${FLAGS_DIR}/lastgame.lock"
-fi
-
-
-# trigger auto save and send kill signal
-if pgrep -f "PPSSPPSDL" >/dev/null; then
-    close_gracefully_ppsspp
-elif pgrep -f "drastic32" >/dev/null; then
-    close_gracefully_drastic_steward
-else
-    close_gracefully_all_emus
-fi
-
-# give emulator some time to finish shutting down
+attempt_to_close_emu_gracefully
 wait_for_graceful_emu_exit
-
 sync
-
-# forcefully close any remaining emulator that refused to close gracefully.
 close_forcefully_all_emus
+close_non_emu_cmd_to_run
 
-start_pyui_message_writer
-
-# Display appropriate image and message depending on whether it's a forced safe shutdown, or else whether user is in-game or in-menu.
-if flag_check "in_menu"; then
-    display_image_and_text "$BG_TREE" 50 25 "" 75
-elif flag_check "forced_shutdown"; then
-    display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
-    flag_remove "forced_shutdown"
-else
-    display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
-fi
-
-#Let user read any messages
-sleep 1
-
-# Set flag to trigger autoresume on boot if appropriate
-if flag_check "in_menu"; then
-    flag_remove "save_active"
-else
-    flag_add "save_active"
-fi
-
-syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
-if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
-    log_message "Syncthing is enabled, WiFi connection needed"
-    
-    if check_and_connect_wifi; then
-        start_syncthing_process
-        # Dimming screen before syncthing sync check
-        dim_screen &
-        /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --shutdown
-    fi
-
-    flag_remove "syncthing_startup_synced"
-else
-    dim_screen &
-fi
-
-flag_remove "sleep.powerdown"
-flag_remove "emulator_launched"
-flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
-
+display_appropriate_icon_and_message
+dim_screen_and_do_syncthing_check
+clean_up_flags
 alsactl store
-
 
 unmount_all
 sleep 0.1
 unmount_all # twice can't hurt right?
-
-# sync files and power off device
 sync
 
 run_poweroff_cmd
