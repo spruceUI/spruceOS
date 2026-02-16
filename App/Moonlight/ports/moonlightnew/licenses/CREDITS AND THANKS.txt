@@ -1,0 +1,32 @@
+I'll keep it short and sweet :)
+
+Special thanks to Kloptops and Cebion for testing the alpha builds and giving me advice <3
+
+Video assets and tools:
+- Pixel Planet Creator by Deep-Fold: https://github.com/Deep-Fold/PixelPlanets
+- Pixel Space by Deep-Fold: https://github.com/Deep-Fold/PixelSpace
+- Sunshine and Moonlight background by Jantrueno, inspired by Campo Santo: https://www.camposanto.com/
+- Aseprite: https://www.aseprite.org/
+- PortMaster logo by Tekkenfede: https://github.com/Tekkenfede
+- Animated splash tool: https://github.com/love2d-community/splashes
+- Animated Star by Salvaje: https://pixel-salvaje.itch.io/free-falling-star-animation
+
+Audio assets and tools
+- Svanefossen by Beik Poel: https://open.spotify.com/track/2VnfOMNfeaBLEW7CA6yE9q
+- Effects pack by Nathan Gibson: https://nathangibson.myportfolio.com 
+- Portmaster theme by Tekkenfede: https://github.com/Tekkenfede
+- Multiple background songs by Kevin Macleod: https://incompetech.com/wordpress/
+
+Font:
+- Handy Andy font by Andrzej Gdula: https://online-fonts.com/fonts/handy-andy
+
+Framework and programs:
+- LOVE2D framework: https://github.com/love2d/love
+- Moonlight Embedded: https://github.com/moonlight-stream/moonlight-embedded
+- Launcher by JanTrueno: https://github.com/JanTrueno
+
+If you want to donate to the creator of this project: https://ko-fi.com/jantrueno
+
+Thanks to all the testers as well :)
+
+JanTrueno
