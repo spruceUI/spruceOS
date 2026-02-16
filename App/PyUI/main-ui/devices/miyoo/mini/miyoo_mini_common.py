@@ -426,7 +426,7 @@ class MiyooMiniCommon(MiyooDevice):
         return 35
 
     def supports_volume(self):
-        return True #can read but not write
+        return self.miyoo_mini_specific_model_variables.supports_volume
 
     def supports_analog_calibration(self):
         return False
