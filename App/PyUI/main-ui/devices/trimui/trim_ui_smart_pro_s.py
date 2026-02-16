@@ -187,7 +187,7 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Powering off...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.power_off_cmd()])
+        super().power_off()
         # So we dont update the display while shutting down
         time.sleep(10)
 
@@ -196,7 +196,7 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Rebooting...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.reboot_cmd()])
+        super().reboot()
         # So we dont update the display while rebooting
         time.sleep(10)
 
