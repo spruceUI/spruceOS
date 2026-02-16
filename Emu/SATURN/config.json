@@ -64,6 +64,7 @@
     "Emulator_64": {
       "display": "Emulator",
       "options": [
+        "yabasanshiro_a133p_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
@@ -71,7 +72,7 @@
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO"
       ],
-      "selected": "yabasanshiro-standalone-bios",
+      "selected": "yabasanshiro_a133p_libretro",
       "overrides": {}
     }
   },
