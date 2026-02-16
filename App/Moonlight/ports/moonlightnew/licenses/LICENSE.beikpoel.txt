@@ -1,0 +1,29 @@
+JanTrueno — 05/31/2024 5:10 PM
+Hi there,
+
+My name is Jan. I'm part of a group called PortMaster. Is it correct that you (among others) made "en aften ved svanefossen"? 
+
+Its a bit of a bold question, but would you be willing to grant us permission to use this beautiful song in one of our apps?
+
+Our project is completely open source and non commercial. I look forward to hearing back from you 🙂 
+
+Martin — 05/31/2024 5:12 PM
+Hello! Could I ask what kind of app this is?
+
+JanTrueno — 05/31/2024 5:13 PM
+Its a front end launcher for a program called "Moonlight". We port games and programs to small linux retro handhelds. Moonlight allows users to stream games from their pc to their handheld.
+
+Martin — 05/31/2024 5:14 PM
+Oh, so in what context would the song be played exactly?
+
+JanTrueno — 05/31/2024 5:14 PM
+It would be background music 🙂
+In the frontend, the user can set their resolution, games, etc. 
+And ofcourse we would give credits on screen for the song playing.
+https://portmaster.games/
+
+Martin — 05/31/2024 5:17 PM
+I was just about to ask that😅  Sounds good to me honestly, good luck with your app:)
+
+JanTrueno — 05/31/2024 5:17 PM
+Awesome! Thank you very much. Fell in love with this song a year ago, and thought it would be a perfect fit 😄
