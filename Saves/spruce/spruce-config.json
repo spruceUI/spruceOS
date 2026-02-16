@@ -237,6 +237,7 @@
                 "display": "Overclock Speed",
                 "description": "Clockspeed to use for overclocking",
                 "options": [
+                    "1500",
                     "1600",
                     "1700",
                     "1800"

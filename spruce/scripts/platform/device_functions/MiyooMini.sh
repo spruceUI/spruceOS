@@ -27,13 +27,13 @@ cores_online() {
 set_smart() {
     log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1400
+    cpuclock 1300
 }
 
 set_performance() {
     log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1600
+    cpuclock 1400
 }
 
 set_overclock() {
@@ -104,11 +104,6 @@ enter_sleep() {
 get_current_volume() {
     log_message "Intentionally do not let spruce modify volume" -v
 }
-
-set_volume() {
-    log_message "Intentionally do not let spruce modify volume" -v
-}
-
 
 reset_playback_pack() {
     log_message "Intentionally do not let spruce modify audio, let keymon" -v
