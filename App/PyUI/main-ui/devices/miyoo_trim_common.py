@@ -228,25 +228,38 @@ class MiyooTrimCommon():
             f.write(y_zero + "\n")
         PyUiLogger.get_logger().info("Calibration Complete")
 
-
     @staticmethod
     def set_theme(json_path, theme_path: str):
         try:
-            # Read the existing JSON
             try:
                 with open(json_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+                    content = f.read()
             except FileNotFoundError:
-                data = {}  # start with empty if file doesn't exist
+                content = ""
 
-            # Update the "Theme" entry
-            data["theme"] = theme_path
+            # Regex to match: "theme": "anything"
+            theme_pattern = r'("theme"\s*:\s*")[^"]*(")'
 
-            # Write back to the file
+            if re.search(theme_pattern, content):
+                # Replace existing theme value
+                content = re.sub(
+                    theme_pattern,
+                    rf'\1{theme_path}\2',
+                    content
+                )
+            else:
+                # Insert theme before the first closing brace
+                insert_pattern = r'\}'
+                replacement = f'    "theme": "{theme_path}",\n}}'
+                content = re.sub(insert_pattern, replacement, content, count=1)
+
             with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+                f.write(content)
+
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Could not set theme in {json_path} : {e}")
+            PyUiLogger.get_logger().error(
+                f"Could not set theme in {json_path} : {e}"
+            )
 
 
     @staticmethod
