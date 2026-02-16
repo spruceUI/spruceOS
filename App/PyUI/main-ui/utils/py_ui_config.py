@@ -207,6 +207,10 @@ class PyUiConfig:
         return cls.get("activityLogPath",None)
     
     @classmethod
+    def get_about_entries(cls):
+        return cls.get("aboutEntries",[])
+    
+    @classmethod
     def get_poweroff_cmd(cls):
         return cls.get("poweroffCmd",None)
     
