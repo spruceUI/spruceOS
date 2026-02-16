@@ -22,14 +22,43 @@
       "selected": "Performance",
       "overrides": {}
     },
-    "Emulator": {
+    "Emulator_Flip": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro-libretro",
+        "yabasanshiro_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
-      "selected": "yabasanshiro-libretro",
+      "devices": [
+        "MIYOO_FLIP"
+      ],
+      "selected": "yabasanshiro_libretro",
+      "overrides": {}
+    },
+    "Emulator_SmartProS": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro_smartpros_libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "devices": [
+        "TRIMUI_SMART_PRO_S"
+      ],
+      "selected": "yabasanshiro_smartpros_libretro",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO"
+      ],
+      "selected": "yabasanshiro-standalone-bios",
       "overrides": {}
     }
   },
