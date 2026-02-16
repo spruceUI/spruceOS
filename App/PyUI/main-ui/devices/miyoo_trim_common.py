@@ -231,11 +231,8 @@ class MiyooTrimCommon():
     @staticmethod
     def set_theme(json_path, theme_path: str):
         try:
-            try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-            except FileNotFoundError:
-                content = ""
+            with open(json_path, "r", encoding="utf-8") as f:
+                content = f.read()
 
             # Regex to match: "theme": "anything"
             theme_pattern = r'("theme"\s*:\s*")[^"]*(")'
