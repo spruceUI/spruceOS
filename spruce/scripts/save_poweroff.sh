@@ -9,7 +9,7 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
-EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch 
+EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch
 retroarch.$PLATFORM retroarch.trimui ra64.trimui_$PLATFORM \
 drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
@@ -48,7 +48,7 @@ unmount_all() {
             sub(/^[^ ]+ /, "", device)
             sub(/ .*/, "", device)
 
-            if (device == "'"$SD_DEV"'" || target ~ "^/mnt/SDCARD(/|$)") {
+            if (device == "'"$SD_DEV"'" || target ~ "^'"$SD_MOUNTPOINT"'(/|$)") {
                 print target
             }
         }
@@ -180,7 +180,7 @@ dim_screen_and_do_syncthing_check() {
     syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
     if [ "$syncthing_enabled" = "True" ] && flag_check "emulator_launched"; then
         log_message "Syncthing is enabled, WiFi connection needed"
-        
+
         if check_and_connect_wifi; then
             start_syncthing_process
             # Dimming screen before syncthing sync check
@@ -237,9 +237,9 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 
 
 
-                  ######## 
+                  ########
 ################### MAIN ######################
-                  ######## 
+                  ########
 
 blink_led_if_applicable
 device_prepare_for_poweroff
