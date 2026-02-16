@@ -1,0 +1,17 @@
+[controls]
+
+up = up
+down = down
+left = left
+right = right
+
+a = enter
+b = backspace
+x = f1
+y = f2
+
+r1 = pagedown
+l1 = pageup
+
+start = delete
+guide = esc
