@@ -4,6 +4,18 @@
 # save_poweroff.sh, and handle the final unmounting of the SD card before
 # finally shutting down.
 
+cd /tmp
+
+# Flip and TSPS have nonstandard mount points.
+INFO=$(cat /proc/cpuinfo 2> /dev/null)
+case $INFO in
+    *"TG5050"*)	 SD_MOUNTPOINT="/mnt/sdcard/mmcblk1p1"	;;
+    *"0xd05"*)   SD_MOUNTPOINT="/mnt/sdcard" ;;
+    *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
+esac
+
+
+
 # Kill all remaining userspace processes except init and ourselves
 for pidpath in /proc/[0-9]*; do
     pid="${pidpath#/proc/}"
@@ -24,8 +36,8 @@ sleep 0.2
 sync
 
 # Final SD unmount (lazy fallback allowed)
-mount -o remount,ro /mnt/SDCARD 2>/dev/null
-umount /mnt/SDCARD 2>/dev/null || umount -l /mnt/SDCARD
+mount -o remount,ro "$SD_MOUNTPOINT" 2>/dev/null
+umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
 
 sync
 

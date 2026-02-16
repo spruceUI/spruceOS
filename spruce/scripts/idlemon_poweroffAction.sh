@@ -11,7 +11,7 @@ process_name=$1
 # Handle different process names....
 case "$process_name" in
 
-    MainUI|ra32.miyoo|ra64.miyoo|ra64.trimui|retroarch*|drastic*|PPSSPP*)
+    MainUI|ra32.*|ra64.*|retroarch*|drastic*|PPSSPP*)
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         ;;
     *)
