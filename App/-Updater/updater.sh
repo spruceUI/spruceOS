@@ -473,7 +473,7 @@ killall -9 runtime.sh principal.sh MainUI
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then
-    poweroff
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 else
     reboot
 fi
