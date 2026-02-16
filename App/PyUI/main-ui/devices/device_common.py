@@ -20,6 +20,7 @@ from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class DeviceCommon(AbstractDevice):
@@ -49,10 +50,16 @@ class DeviceCommon(AbstractDevice):
                     return
 
     def power_off(self):
-        self.run_cmd([self.power_off_cmd()])
+        if PyUiConfig.get_poweroff_cmd():
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()])
+        else:
+            self.run_cmd([self.power_off_cmd()])
 
     def reboot(self):
-        self.run_cmd([self.reboot_cmd()])
+        if PyUiConfig.get_reboot_cmd():
+            self.run_cmd([PyUiConfig.get_reboot_cmd()])
+        else:
+            self.run_cmd([self.reboot_cmd()])
 
 
     def input_timeout_default(self):

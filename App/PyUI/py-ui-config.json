@@ -12,6 +12,8 @@
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
+    "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
+    "rebootCmd":null,
     "aboutEntries" : [
         {
            "display":"spruce version",
