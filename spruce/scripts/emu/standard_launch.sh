@@ -119,7 +119,7 @@ case $EMU_NAME in
 			. /mnt/SDCARD/spruce/scripts/emu/lib/yaba_functions.sh
 			run_yabasanshiro
 		else
-			export CORE="yabasanshiro"
+			CORE="${CORE%_libretro}"
 			run_retroarch
 		fi
 		;;
