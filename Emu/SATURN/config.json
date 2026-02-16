@@ -35,6 +35,19 @@
       "selected": "yabasanshiro_libretro",
       "overrides": {}
     },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro_libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "selected": "yabasanshiro_libretro",
+      "overrides": {}
+    },
     "Emulator_SmartProS": {
       "display": "Emulator",
       "options": [
