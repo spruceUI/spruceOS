@@ -480,3 +480,20 @@ device_run_thermal_process(){
     fi
 
 }
+
+set_backlight() {
+    val="$1"
+
+    # Clamp input to 1–10
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+
+    # Convert 1–10 → 1–255
+    val_255=$(( (val - 1) * 254 / 9 + 1 ))
+
+    # actually change the backlight
+    echo "$val_255" > /sys/class/backlight/backlight0/brightness
+
+    # update device system json
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+}
