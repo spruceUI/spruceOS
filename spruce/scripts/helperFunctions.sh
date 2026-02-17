@@ -200,9 +200,15 @@ confirm() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    start_brightness="$SYSTEM_BRIGHTNESS_4"
+    # Get current brightness
+    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
     end_brightness="$SYSTEM_BRIGHTNESS_0"
     delay=0.01 # 50ms delay between each step
+    
+    # Start at 4 if higher (so it's faster)
+    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
+        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    fi
 
     # Check if another dim_screen is running
     if pgrep -f "dim_screen" | grep -v $$ >/dev/null; then
@@ -210,11 +216,8 @@ dim_screen() {
         return 1
     fi
 
-    # Get current brightness
-    current_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-
     # Check if we're already at target brightness
-    if [ "$current_brightness" -le "$end_brightness" ]; then
+    if [ "$start_brightness" -le "$end_brightness" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
