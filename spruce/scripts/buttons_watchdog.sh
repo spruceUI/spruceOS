@@ -2,26 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
-    SET_OR_CSET="set"
-    NAME_QUALIFIER=""
-    AMIXER_CONTROL="'Soft Volume Master'"
-elif [ "$PLATFORM" = "Flip" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
-    SET_OR_CSET="cset"
-    NAME_QUALIFIER="name="
-    AMIXER_CONTROL="'SPK Volume'"
-else    # trimui
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"     # this doesn't work yet. setsharedmem-flip is too high glibc
-    SET_OR_CSET="set"                                   # need to double check this 
-    NAME_QUALIFIER=""                                   # also need to check if this is necessary
-    AMIXER_CONTROL="'Soft Volume Master'"
-fi
-
 START_DOWN=false
 
 nearest_system_brightness() {
