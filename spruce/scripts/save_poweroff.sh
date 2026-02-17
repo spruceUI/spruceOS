@@ -255,6 +255,12 @@ close_non_emu_cmd_to_run
 display_appropriate_icon_and_message
 dim_screen_and_do_syncthing_check
 clean_up_flags
+
+# Systemd handles graceful shutdown on the pixel2
+if [ "$PLATFORM" = "Pixel2" ]; then
+    run_poweroff_cmd
+fi
+
 alsactl store
 
 unmount_all
