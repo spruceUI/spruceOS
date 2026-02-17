@@ -272,20 +272,3 @@ EOF
     tmp=$(mktemp)
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
 }
-
-current_backlight() {
-    jq -r '.backlight' "$SYSTEM_JSON"
-}
-
-brightness_down() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight - 1))
-}
-
-brightness_up() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight + 1))
-}
-
