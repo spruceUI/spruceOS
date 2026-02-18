@@ -88,7 +88,7 @@ while true; do
     # Add battery logging
     CURRENT_TIME=$(date +%s)
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
-        log_battery
+        # log_battery
         LAST_LOG=$(date +%s) # Keep this as Unix timestamp
     fi
 
