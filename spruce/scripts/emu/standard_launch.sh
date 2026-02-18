@@ -133,7 +133,7 @@ kill -9 $(pgrep -f enforceSmartCPU.sh) || true
 record_session_end_time
 calculate_current_session_duration
 update_gtt
-
+sync
 
 enable_or_disable_wifi_per_system_json &
 

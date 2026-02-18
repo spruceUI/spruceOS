@@ -99,6 +99,7 @@ prepare_ra_config() {
 	esac
 	# copy platform-specific RA config into place where RA wants it to be
 	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
+	sync
 }
 
 backup_ra_config() {
@@ -106,6 +107,7 @@ backup_ra_config() {
 	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 	CURRENT_CFG=$(get_ra_cfg_location)
 	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
+	sync
 }
 
 run_retroarch() {
