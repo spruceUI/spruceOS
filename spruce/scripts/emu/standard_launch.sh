@@ -135,7 +135,7 @@ calculate_current_session_duration
 update_gtt
 
 
-enable_or_disable_wifi &
+enable_or_disable_wifi_per_system_json &
 
 
 log_message "-----Closing Emulator-----"

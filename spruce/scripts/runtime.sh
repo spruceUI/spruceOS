@@ -24,7 +24,7 @@ set_performance
 device_init
 set_volume_to_config &
 # Check if WiFi is enabled and bring up network services if so
-enable_or_disable_wifi &
+enable_or_disable_wifi_per_system_json &
 
 # Flag cleanup
 flag_remove "log_verbose" &
