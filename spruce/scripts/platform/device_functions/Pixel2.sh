@@ -154,7 +154,7 @@ set_volume() {
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         # Update Config file
-        sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOL_VAL/" "$SYSTEM_JSON"
+        jq ".vol = $VOL_VAL" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
 
@@ -280,7 +280,7 @@ set_backlight() {
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
     if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
-        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"backlight\": $new_bl/" "$SYSTEM_JSON"
+        jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
 

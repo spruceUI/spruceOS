@@ -297,7 +297,7 @@ save_volume_to_config_file() {
     VOLUME_LV=$1
 
     # Update MainUI Config file
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+    jq ".vol = $VOLUME_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 }
 
 device_prepare_for_poweroff() {

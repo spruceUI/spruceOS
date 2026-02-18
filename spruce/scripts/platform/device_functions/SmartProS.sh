@@ -85,7 +85,7 @@ set_volume() {
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
-            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            jq ".vol = $new_vol" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
             if ! pgrep MainUI >/dev/null; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi

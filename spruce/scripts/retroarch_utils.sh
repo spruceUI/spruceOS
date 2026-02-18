@@ -5,7 +5,7 @@ update_ra_config_file_with_new_setting() {
 
     for setting in "$@"; do
         if grep -q "${setting%%=*}" "$file"; then
-            sed -i "s|^${setting%%=*}.*|$setting|" "$file"
+            sed "s|^${setting%%=*}.*|$setting|" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
         else
             echo "$setting" >>"$file"
         fi

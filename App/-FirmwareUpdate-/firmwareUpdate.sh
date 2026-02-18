@@ -94,7 +94,7 @@ check_for_connection() {
 if [ "$SKIP_VERSION_CHECK" = false ] && [ "$NEEDS_UPDATE" = false ]; then
 	log_and_display_message "Firmware is up to date - happy gaming!!!!!!!!!!"
 	sleep 5
-	sed -i 's|"label":|"#label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+	jq 'if .label then ."#label" = .label | del(.label) else . end' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json" > "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" && mv "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 	exit 0
 else
 	log_message "firmwareUpdate.sh: Firmware requires update. Continuing."

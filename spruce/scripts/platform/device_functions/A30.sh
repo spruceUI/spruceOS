@@ -182,7 +182,7 @@ perform_fw_check(){
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-        sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
+        jq '.wifi = 0' "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
         display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
         sleep 5
     fi
@@ -293,7 +293,7 @@ reset_playback_pack() {
 
 save_volume_to_config_file() {
     VOLUME_LV=$1
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+    jq ".vol = $VOLUME_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 }
 
 _set_volume() {

@@ -20,7 +20,7 @@ set_ui_scale() {
 		*) SCALING=100 ;;
 	esac
 
-	sed -i "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG"
+	sed "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
 }
 
 run_flycast_standalone() {

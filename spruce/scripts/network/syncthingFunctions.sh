@@ -27,11 +27,11 @@ repair_config() (
     if grep -q "<listenAddress>dynamic+https://relays.syncthing.net/endpoint</listenAddress>" "$config"; then
         log_message "Syncthing: Config not generated correctly, manually repairing..."
 
-        sed -i '/<listenAddress>dynamic+https:\/\/relays.syncthing.net\/endpoint<\/listenAddress>/d' "$config"
-        sed -i '/<listenAddress>quic:\/\/0.0.0.0:41383<\/listenAddress>/d' "$config"
-
-        sed -i 's|<listenAddress>tcp://0.0.0.0:41383</listenAddress>|<listenAddress>default</listenAddress>|' "$config"
-        sed -i "s|<address>127.0.0.1:8384</address>|<address>0.0.0.0:8384</address>|g" "$config"
+        sed -e '/<listenAddress>dynamic+https:\/\/relays.syncthing.net\/endpoint<\/listenAddress>/d' \
+            -e '/<listenAddress>quic:\/\/0.0.0.0:41383<\/listenAddress>/d' \
+            -e 's|<listenAddress>tcp://0.0.0.0:41383</listenAddress>|<listenAddress>default</listenAddress>|' \
+            -e 's|<address>127.0.0.1:8384</address>|<address>0.0.0.0:8384</address>|g' \
+            "$config" > "$config.tmp" && mv "$config.tmp" "$config"
 
         if grep -q "<address>0.0.0.0:8384</address>" "$config" && grep -q "<listenAddress>default</listenAddress>" "$config"; then
             log_message "Syncthing: Repair complete. GUI IP forced to 0.0.0.0"

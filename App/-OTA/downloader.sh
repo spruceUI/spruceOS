@@ -85,7 +85,7 @@ rgb_led lrm12 blink2 0000FF 1500 "-1" mmc0
 if [ "$PLATFORM" = "A30" ]; then
     VERSION="$(cat /usr/miyoo/version)"
     if [ "$VERSION" -lt 20240713100458 ]; then
-        sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+        jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json" > "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" && mv "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
         display_image_and_text "$IMAGE_PATH" 35 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
         sleep 5
         exit 1
@@ -297,7 +297,7 @@ fi
 
 rm -rf "$TMP_DIR"
 # Show updater app
-sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
 
 # Check battery level before asking to update
 BATTERY_CAPACITY="$(cat $BATTERY/capacity)"

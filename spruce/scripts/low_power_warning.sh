@@ -57,7 +57,7 @@ log_battery() {
 
     # Keep only last 1000 lines
     if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
-        sed -i '1d' "$LOG_FILE"
+        sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
     fi
 }
 
@@ -76,7 +76,7 @@ CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
 [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
 echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
 if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
-    sed -i '1d' "$LOG_FILE"
+    sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
 fi
 LAST_LOG=$(date +%s)
 

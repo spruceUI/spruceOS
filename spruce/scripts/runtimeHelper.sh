@@ -23,11 +23,11 @@ run_sd_card_fix_if_triggered() {
 }
 
 hide_fw_app() {
-    sed -i 's|"label"|"#label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+    jq 'if .label then ."#label" = .label | del(.label) else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
 
 show_fw_app() {
-    sed -i 's|"#label"|"label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+    jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
 
 # Define the function to check and hide the firmware update app
@@ -177,9 +177,11 @@ check_for_update() {
     if [ $update_available -eq 1 ]; then
         log_message "Update Check: Update available"
         # Update is available - show app and set label and description
-        sed -i 's|"#label"|"label"|; 
-                s|"label": "[^"]*"|"label": "Update Available"|;
-                s|"description": "[^"]*"|"description": "Version '"$TARGET_VERSION"' is available"|' "$CONFIG_FILE"
+        jq --arg ver "$TARGET_VERSION" '
+          (if ."#label" then del(."#label") else . end)
+          | .label = "Update Available"
+          | .description = "Version \($ver) is available"
+        ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
 
         # Check if update was previously prompted
@@ -216,8 +218,8 @@ check_for_update() {
         log_message "Update Check: Current version is up to date"
         # No update - if app is visible, set label and description back to default
         if grep -q '"label"' "$CONFIG_FILE"; then
-            sed -i 's|"label": "[^"]*"|"label": "Check for Updates"|;
-                    s|"description": "[^"]*"|"description": "Download and install updates over Wi-Fi"|' "$CONFIG_FILE"
+            jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
+              "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         fi
         rm -rf "$TMP_DIR"
         return 1
@@ -244,10 +246,10 @@ check_for_update_file() {
 # Function to check and hide the Update App if necessary
 check_and_hide_update_app() {
     if ! check_for_update_file; then
-        sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        jq 'if .label then ."#label" = .label | del(.label) else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
         log_message "No update file found; hiding Updater app"
     else
-        sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
     fi
 }

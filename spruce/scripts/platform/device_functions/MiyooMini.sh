@@ -217,7 +217,7 @@ set_backlight() {
     [ "$value" -lt 0 ] && value=0
     [ "$value" -gt 10 ] && value=10
 
-    sed -i "s/\"backlight\": *[0-9][0-9]*/\"backlight\": $value/" "$SYSTEM_JSON"
+    jq ".backlight = $value" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     # Should we get this from path or always from PyUI?
     /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
 }

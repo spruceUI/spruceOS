@@ -8,16 +8,14 @@ cd "$HOME"
 if [ "$PLATFORM" = "MiyooMini" ]; then
     cp config_mini.conf config.conf
 
-    sed -i "s/SCREEN_W/${DISPLAY_WIDTH}/" config.conf
-    sed -i "s/SCREEN_H/${DISPLAY_HEIGHT}/" config.conf
+    sed -e "s/SCREEN_W/${DISPLAY_WIDTH}/" -e "s/SCREEN_H/${DISPLAY_HEIGHT}/" config.conf > config.conf.tmp && mv config.conf.tmp config.conf
 
     export LD_LIBRARY_PATH="$HOME/lib32:$LD_LIBRARY_PATH"
     ./gallery32 > gallery.log
 else
     cp config_all.conf config.conf
     
-    sed -i "s/SCREEN_W/${DISPLAY_WIDTH}/" config.conf
-    sed -i "s/SCREEN_H/${DISPLAY_HEIGHT}/" config.conf
+    sed -e "s/SCREEN_W/${DISPLAY_WIDTH}/" -e "s/SCREEN_H/${DISPLAY_HEIGHT}/" config.conf > config.conf.tmp && mv config.conf.tmp config.conf
 
     export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
 
