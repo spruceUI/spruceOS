@@ -39,7 +39,7 @@ kill_current_process() {
 
 unmount_all() {
     sync
-    log_message "save_poweroff.sh: Scanning mountinfo for SD card submounts..."
+    log_message "save_poweroff.sh: Scanning for SD card related mounts..."
     MOUNTS=$(awk '
         {
             target = $5
@@ -48,18 +48,25 @@ unmount_all() {
             sub(/^[^ ]+ /, "", device)
             sub(/ .*/, "", device)
 
-            if (device == "'"$SD_DEV"'" || target ~ "^'"$SD_MOUNTPOINT"'(/|$)") {
+            # Match by block device, mount point under SD, source file on SD,
+            # or overlay options referencing SD paths
+            if (device == "'"$SD_DEV"'" ||
+                target ~ "^'"$SD_MOUNTPOINT"'(/|$)" ||
+                device ~ "^'"$SD_MOUNTPOINT"'/" ||
+                device ~ "^/mnt/SDCARD/" ||
+                ($0 ~ "/mnt/SDCARD" && device == "overlay")) {
                 print target
             }
         }
     ' /proc/self/mountinfo)
 
-    # Unmount deepest paths first
+    # Unmount deepest paths first, but skip the main SD mount (stage2 handles that)
     echo "$MOUNTS" | sort -r | while read -r TARGET; do
         [ -z "$TARGET" ] && continue
-        log_message "save_poweroff.sh: Attempting to unmount $TARGET"
         if [ "$TARGET" != "$SD_MOUNTPOINT" ]; then
-            umount "$TARGET" || log_message "save_poweroff.sh: Failed to unmount $TARGET"
+            log_message "save_poweroff.sh: Attempting to unmount $TARGET"
+            umount "$TARGET" 2>/dev/null || umount -l "$TARGET" 2>/dev/null || \
+                log_message "save_poweroff.sh: Failed to unmount $TARGET"
         fi
     done
 }
@@ -185,13 +192,32 @@ dim_screen_and_do_syncthing_check() {
             start_syncthing_process
             # Dimming screen before syncthing sync check
             dim_screen &
+            DIM_SCREEN_PID=$!
             /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --shutdown
         fi
 
         flag_remove "syncthing_startup_synced"
     else
         dim_screen &
+        DIM_SCREEN_PID=$!
     fi
+}
+
+kill_remaining_background_processes() {
+    # Stop the PyUI message writer — it has file handles open on the SD card
+    stop_pyui_message_writer
+
+    # Kill dim_screen if it's still running (writes to sysfs, but inherits SD fds)
+    if [ -n "$DIM_SCREEN_PID" ]; then
+        kill "$DIM_SCREEN_PID" 2>/dev/null
+        wait "$DIM_SCREEN_PID" 2>/dev/null
+    fi
+
+    # Kill syncthing if still alive — it actively writes to SD card
+    killall -q -9 syncthing 2>/dev/null
+
+    # Brief pause for file descriptor cleanup
+    sleep 0.2
 }
 
 clean_up_flags() {
@@ -212,6 +238,10 @@ exec_shutdown_stage_2() {
     if [ -e "$STAGE_2_SD_PATH" ]; then
         cp $STAGE_2_SD_PATH $STAGE_2_TMP_PATH
         chmod +x $STAGE_2_TMP_PATH
+        # Reset environment BEFORE exec so the new shell interpreter
+        # doesn't load shared libraries from the SD card
+        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+        unset LD_LIBRARY_PATH
         exec $STAGE_2_TMP_PATH
     else
         log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
@@ -263,8 +293,10 @@ fi
 
 alsactl store
 
+kill_remaining_background_processes
+
 unmount_all
-sleep 0.1
-unmount_all # twice can't hurt right?
+sync
+unmount_all
 
 exec_shutdown_stage_2
