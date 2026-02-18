@@ -763,8 +763,10 @@ download_and_display_progress() {
 		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null
+        sync
 		return 1
     else
+        sync
         return 0
 	fi
 }

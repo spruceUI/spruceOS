@@ -263,12 +263,14 @@ if [ -f "/mnt/SDCARD/$FILENAME" ]; then
     fi
 fi
 
+sync
+
 if [ "$goto_install" != "true" ]; then  # do the downloadin'
     # Check free disk space
     sdcard_mountpoint="$(mount | grep -m 1 "$SD_MOUNTPOINT" | awk '{print $1}')"
     sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
     min_install_space=$(((TARGET_SIZE * 2) + 128))
-    if [ "$free_space" -lt "$min_install_space" ]; then
+    if [ "$sdcard_freespace" -lt "$min_install_space" ]; then
         log_message "OTA: Not enough free space on SD card (at least ${min_install_space}MB should be free)"
         display_image_and_text "$IMAGE_PATH" 35 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
         sleep 5

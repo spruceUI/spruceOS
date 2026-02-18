@@ -130,6 +130,7 @@ unmount_binds() {
 
 ##### MAIN EXECUTION #####
 
+sync
 start_pyui_message_writer
 
 # twinkle them lights
@@ -345,6 +346,8 @@ else
     sleep 5
 fi
 
+sync
+
 # Extract update file
 log_update_message "Extracting update file."
 cd /mnt/SDCARD
@@ -406,7 +409,7 @@ else
     display_image_and_text "$LOGO" 35 25 "Update completed!" 75
 fi
 
-
+sync
 sleep 5
 
 # Verify extraction success
@@ -436,6 +439,8 @@ if [ "$DELETE_UPDATE" = true ]; then
     find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
     log_update_message "All update files deleted"
 fi
+
+sync
 
 # Restore backup
 /mnt/SDCARD/App/spruceRestore/spruceRestore.sh
@@ -475,5 +480,6 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then
     /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 else
+    sync
     reboot
 fi

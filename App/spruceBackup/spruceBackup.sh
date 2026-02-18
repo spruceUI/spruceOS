@@ -178,3 +178,4 @@ done
 log_message "Backup process finished running"
 
 auto_regen_tmp_update
+sync
