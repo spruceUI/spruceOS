@@ -201,6 +201,8 @@ map_mainui_volume_to_system_value() {
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
+    turn_off_screen
+
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -210,6 +212,7 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    turn_on_screen
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
