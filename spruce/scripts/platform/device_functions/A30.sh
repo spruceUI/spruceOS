@@ -19,7 +19,7 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         oc_freq="$(get_config_value '.menuOptions."System Settings".overclockSpeedA30.selected' "1344")"
 
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
         /mnt/SDCARD/spruce/a30/setcpu/utils "performance" 4 $oc_freq 384 1080 1

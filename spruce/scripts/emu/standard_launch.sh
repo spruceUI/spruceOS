@@ -41,7 +41,7 @@ set_cpu_mode
 record_session_start_time
 handle_network_services
 led_effect &
-flag_add 'emulator_launched'
+flag_add 'emulator_launched' --tmp
 
 
 case $EMU_NAME in

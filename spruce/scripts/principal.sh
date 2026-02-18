@@ -29,7 +29,7 @@ while [ 1 ]; do
     if [ ! -f /tmp/cmd_to_run.sh ]; then
         display_kill &          # This is to kill leftover display processes that may be running
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
-        flag_add "in_menu"
+        flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
 
         # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI

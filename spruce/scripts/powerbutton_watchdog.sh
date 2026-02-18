@@ -39,7 +39,7 @@ get_wake_alarm() {
 }
 
 long_press_handler() {
-    flag_add "pb.longpress"
+    flag_add "pb.longpress" --tmp
     sleep 2
     flag_remove "pb.longpress"
     vibrate &
@@ -100,7 +100,7 @@ while true; do
                 flag_remove "pb.longpress"
 
                 # add sleep flag
-                flag_add "pb.sleep"
+                flag_add "pb.sleep" --tmp
 
                 # Check settings to determine how long to set RTC wake timer
 
@@ -115,14 +115,14 @@ while true; do
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         set_volume 0
-                        flag_add "wake.alarm"
+                        flag_add "wake.alarm" --tmp
                     fi
                 fi
 
                 # shutdown from sleep is Instant
                 if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
                     if applicable_process_is_running; then
-                        flag_add "sleep.powerdown"
+                        flag_add "sleep.powerdown" --tmp
                         cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
                         CURRENT_VOLUME="$(get_current_volume)"
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
@@ -210,7 +210,7 @@ while true; do
 
         if [ -z "$CURRENT_ALARM" ]; then
             flag_remove "wake.alarm"
-            flag_add "sleep.powerdown"
+            flag_add "sleep.powerdown" --tmp
 
             if applicable_process_is_running; then
                 vibrate &

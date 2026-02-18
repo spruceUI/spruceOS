@@ -160,9 +160,14 @@ finish_unpacking() {
 
 # Add a flag
 # Usage: flag_add "flag_name"
+# Usage 2: flag_add "flag_name" --tmp   --> creates flag in /tmp/ instead, to avoid unnecessary SD writes and stuck states
 flag_add() {
     local flag_name="$1"
-    touch "$FLAGS_DIR/${flag_name}.lock"
+    local dest="$FLAGS_DIR"
+    if [ "$2" = "--tmp" ]; then
+        dest="/tmp"
+    fi
+    touch "$dest/${flag_name}.lock"
 }
 
 # Check if a flag exists
@@ -170,7 +175,7 @@ flag_add() {
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then
         return 0
     else
         return 1
@@ -190,6 +195,7 @@ flag_path() {
 flag_remove() {
     local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
+    rm -f "/tmp/${flag_name}.lock"
 }
 
 # Call this to get the last button pressed
@@ -579,7 +585,7 @@ record_video() {
         date_str=$(date +%Y-%m-%d_%H-%M-%S)
         set_performance
         # Prevent the CPU from being clocked down while recording
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
 
         # If no output file specified, create one with timestamp
         if [ -z "$output_file" ]; then
@@ -982,9 +988,6 @@ restart_wifi() {
 }
 
 check_and_connect_wifi() {
-    # ########################################################################
-    # WARNING: Avoid running this function in-game, it will lead to stuttters!
-    # ########################################################################
 
     timeout=60  # Think about making this configurable
     start_time=$(date +%s)

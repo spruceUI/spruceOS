@@ -64,7 +64,7 @@ log_battery() {
 hard_shutdown() {
     CAPACITY=$1
     if [ "$CAPACITY" -le 1 ]; then
-        flag_add "forced_shutdown"
+        flag_add "forced_shutdown" --tmp
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         exit
     fi
@@ -116,7 +116,7 @@ while true; do
                     if flag_check "in_menu"; then
                         display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
                     else
-                        flag_add "low_battery"
+                        flag_add "low_battery" --tmp
                     fi
                     flag_added=true
                 fi

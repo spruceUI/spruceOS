@@ -32,7 +32,7 @@ trap cleanup EXIT
 # Process command line arguments
 RUN_MODE="all"
 if [ "$1" = "--silent" ]; then
-    flag_add "silentUnpacker"
+    flag_add "silentUnpacker" --tmp
     [ -n "$2" ] && RUN_MODE="$2"
 elif [ -n "$1" ]; then
     RUN_MODE="$1"
@@ -50,7 +50,7 @@ unpack_archives() {
     local dir="$1"
     local flag_name="$2"
 
-    [ -n "$flag_name" ] && flag_add "$flag_name"
+    [ -n "$flag_name" ] && flag_add "$flag_name" --tmp
 
     for archive in "$dir"/*.7z; do
         if [ -f "$archive" ]; then
@@ -93,7 +93,7 @@ case "$RUN_MODE" in
     if flag_check "save_active"; then
         unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
     else
-        flag_add "silentUnpacker"
+        flag_add "silentUnpacker" --tmp
         unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" &
     fi
     ;;
