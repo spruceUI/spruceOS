@@ -13,7 +13,7 @@
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
-    "rebootCmd":null,
+    "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "aboutEntries" : [
         {
            "display":"spruce version",
