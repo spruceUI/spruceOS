@@ -22,13 +22,13 @@ jobs:
           
       - name: Update autorun.inf
         run: |
-          sed 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' autorun.inf > autorun.inf.tmp && mv autorun.inf.tmp autorun.inf
-
+          sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' autorun.inf
+          
       - name: Update language files
         run: |
-          find miyoo/res/lang -type f -name "*.lang" -exec sh -c 'for f; do sed "s/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g" "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done' _ {} +
-          find miyoo355/app/lang -type f -name "*.lang" -exec sh -c 'for f; do sed "s/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g" "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done' _ {} +
-          find trimui/res/lang -type f -name "*.lang" -exec sh -c 'for f; do sed "s/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g" "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done' _ {} +
+          find miyoo/res/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
+          find miyoo355/app/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
+          find trimui/res/lang -type f -name "*.lang" -exec sed -i 's/spruce v[0-9]\+\.[0-9]\+\.[0-9]\+/spruce v${{ steps.get-version.outputs.version }}/g' {} +
           
       - name: Commit changes
         run: |
