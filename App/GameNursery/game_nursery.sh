@@ -262,7 +262,7 @@ construct_config() {
         fi
     done
 
-    sed -i '$ s/,$//' "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
+    sed '$ s/,$//' "$CONFIG_DIR"/nursery_config > "$CONFIG_DIR"/nursery_config.tmp && mv "$CONFIG_DIR"/nursery_config.tmp "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
     echo "}" >> "$CONFIG_DIR"/nursery_config            # Finish config json with a closing bracket
 }
 

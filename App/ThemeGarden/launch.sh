@@ -78,7 +78,7 @@ construct_config() {
         echo "\"$theme_name\": \"$DOWNLOAD '$encoded_name'\"," >> "$CONFIG_DIR/garden.json"
     done
 
-    sed -i '$ s/,$//' "$CONFIG_DIR"/garden.json      # strip away final trailing comma
+    sed '$ s/,$//' "$CONFIG_DIR"/garden.json > "$CONFIG_DIR"/garden.json.tmp && mv "$CONFIG_DIR"/garden.json.tmp "$CONFIG_DIR"/garden.json      # strip away final trailing comma
     echo "}" >> "$CONFIG_DIR/garden.json"
 }
 

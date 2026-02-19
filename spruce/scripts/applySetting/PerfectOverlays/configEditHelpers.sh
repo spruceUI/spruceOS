@@ -17,8 +17,8 @@ update_config_file() {
         key="$(echo "$key" | sed 's/[[:space:]]*$//')"  # Trim whitespace
         
         # Remove existing line with this key if it exists
-        sed -i "/${key}[[:space:]]*=/d" "$config_file"
-        
+        sed "/${key}[[:space:]]*=/d" "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
+
         # Append new line
         echo "$line" >> "$config_file"
     done
@@ -36,7 +36,7 @@ remove_config_entries() {
     
     echo "$keys" | while IFS= read -r key; do
         key="$(echo "$key" | sed 's/[[:space:]]*$//')"  # Trim whitespace
-        sed -i "/${key}[[:space:]]*=/d" "$config_file"
+        sed "/${key}[[:space:]]*=/d" "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
     done
     
     # Remove file if empty

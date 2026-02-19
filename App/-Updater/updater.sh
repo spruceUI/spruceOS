@@ -202,7 +202,7 @@ fi
 # Find update 7z file; exit and hide updater app if none exists
 if ! check_for_update_file; then
     display_image_and_text "$BAD_IMG" 35 25 "No update file found" 75
-    sed -i 's|"label"|"#label"|' "$APP_DIR/config.json"
+    jq 'if .label then ."#label" = .label | del(.label) else . end' "$APP_DIR/config.json" > "$APP_DIR/config.json.tmp" && mv "$APP_DIR/config.json.tmp" "$APP_DIR/config.json"
     sleep 5
     exit 1
 fi

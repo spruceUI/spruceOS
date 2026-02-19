@@ -23,7 +23,7 @@ construct_config() {
         echo "\"$logo_name/Yes, flash $logo_name\": \"cp -f '$logo' '$APP_DIR/bootlogo${file_ext}'\"," >> "$APP_DIR/bootlogo.json"
     done
 
-    sed -i '$ s/,$//' "$APP_DIR/bootlogo.json"      # strip away final trailing comma
+    sed '$ s/,$//' "$APP_DIR/bootlogo.json" > "$APP_DIR/bootlogo.json.tmp" && mv "$APP_DIR/bootlogo.json.tmp" "$APP_DIR/bootlogo.json"      # strip away final trailing comma
     echo "}" >> "$APP_DIR/bootlogo.json"
     return 0
 }
