@@ -18,6 +18,12 @@ mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 
+if [ "$1" = "--reboot"]; then
+    s2_arg="--reboot";
+else
+    s2_arg=""
+fi
+
 ##### FUNCTION DEFINITIONS ####################
 
 blink_led_if_applicable() {
@@ -288,7 +294,11 @@ clean_up_flags
 
 # Systemd handles graceful shutdown on the pixel2
 if [ "$PLATFORM" = "Pixel2" ]; then
-    run_poweroff_cmd
+    if [ "$s2_arg" = "--reboot" ]; then
+        reboot
+    else
+        run_poweroff_cmd
+    fi
 fi
 
 alsactl store
@@ -299,4 +309,4 @@ unmount_all
 sync
 unmount_all
 
-exec_shutdown_stage_2
+exec_shutdown_stage_2 $s2_arg

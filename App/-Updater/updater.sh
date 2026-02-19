@@ -480,6 +480,5 @@ log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then
     /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 else
-    sync
-    reboot
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
 fi

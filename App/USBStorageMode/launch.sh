@@ -237,7 +237,7 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
         exit 0
     fi
 
@@ -246,7 +246,7 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
         exit 0
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU

@@ -68,7 +68,7 @@ confirm_update() {
 	acknowledge
 	flag_add "first_boot_$PLATFORM"
 	sync
-	reboot
+	/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
 }
 
 check_for_connection() {

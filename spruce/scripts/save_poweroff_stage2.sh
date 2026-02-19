@@ -93,6 +93,8 @@ sync
 # MM v1-4 require reboot command to power off properly.
 if [ -d /customer/app ] && [ ! -e /customer/app/axp_test ]; then
     reboot
+elif [ "$1" = "--reboot" ]; then
+    reboot
 else
     poweroff
 fi
