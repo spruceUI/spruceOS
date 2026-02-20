@@ -20,6 +20,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 while [ 1 ]; do
+    set_smart
 
     stop_pyui_message_writer
     enable_or_disable_rgb
@@ -75,7 +76,6 @@ while [ 1 ]; do
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
         killall -9 udpbcast 2>/dev/null
 
-        set_smart
         log_activity_event "$cmd" "STOP"
         sync
     fi
