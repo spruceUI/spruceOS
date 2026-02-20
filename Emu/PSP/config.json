@@ -4,7 +4,8 @@
   "iconsel": "psp_sel.png",
   "themecolor": "64A8BD",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "iso|cso|chd",
+  "subfolder_launch_file": "EBOOT.PBP",
+  "extlist": "iso|cso|chd|pbp",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
