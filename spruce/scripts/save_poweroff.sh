@@ -18,7 +18,7 @@ mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 
-if [ "$1" = "--reboot"]; then
+if [ "$1" = "--reboot" ]; then
     s2_arg="--reboot";
 else
     s2_arg=""
