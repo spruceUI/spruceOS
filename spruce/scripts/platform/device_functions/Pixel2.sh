@@ -58,9 +58,16 @@ get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
 }
 
+set_loading_screen() {
+    /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
+}
+
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
+
+    # Loading screen daemon
+    /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
 }
 
 set_event_arg_for_idlemon() {
