@@ -57,6 +57,7 @@ device_init() {
         # Screen is off by like ~8px unless you do this, not sure why
         cat /proc/ls
     fi
+    killall -9 main ### SUPER important in preventing .tmp_update suicide
 }
 
 vibrate() {
