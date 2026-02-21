@@ -174,6 +174,19 @@ stop_problematic_scripts() {
 
     # kill enforceSmartCPU first so no CPU setting is changed during shutdown
     killall -q -15 enforceSmartCPU.sh
+
+    # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
+    killall -q -9 homebutton_watchdog.sh
+    killall -q -9 power_button_watchdog_v2.sh
+    killall -q -9 buttons_watchdog.sh
+    killall -q -9 powerbutton_watchdog.sh
+    killall -q -9 idlemon_mm.sh
+    killall -q -9 low_power_warning.sh
+    killall -q -9 autoIconRefresh.sh
+    killall -q -9 inotifywait
+    killall -q -9 inotifywatch
+    killall -q -9 getevent
+    killall -q -9 sendevent
 }
 
 display_appropriate_icon_and_message() {
@@ -221,6 +234,7 @@ kill_remaining_background_processes() {
 
     # Kill syncthing if still alive — it actively writes to SD card
     killall -q -9 syncthing 2>/dev/null
+    killall -q -9 wpa_supplicant 2>/dev/null
 
     # Brief pause for file descriptor cleanup
     sleep 0.2
