@@ -248,7 +248,7 @@ exec_shutdown_stage_2() {
         # doesn't load shared libraries from the SD card
         export PATH=/usr/bin:/usr/sbin:/bin:/sbin
         unset LD_LIBRARY_PATH
-        exec $STAGE_2_TMP_PATH
+        exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
         sync
@@ -309,4 +309,4 @@ unmount_all
 sync
 unmount_all
 
-exec_shutdown_stage_2 $s2_arg
+exec_shutdown_stage_2
