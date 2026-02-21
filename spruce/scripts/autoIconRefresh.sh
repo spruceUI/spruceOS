@@ -18,6 +18,7 @@ while true; do
 
     if [ "$NEW_THEME_PATH" != "$THEME_PATH" ]; then
 		/mnt/SDCARD/spruce/scripts/iconfresh.sh
+		THEME_PATH="$NEW_THEME_PATH"
     fi
 
     # avoid potential busy looping
