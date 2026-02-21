@@ -14,7 +14,7 @@ get_rand_folder() {
     SIZE=$(find "$folder" -mindepth 2 -maxdepth 2 -type f ! -name "*.xml" | wc -l)
 
     # generate random index (0 - SIZE)
-    SEED=$(date +%s%N)
+    SEED=$(date +%N)
     RINDEX=$(awk -v max=$SIZE -v seed=$SEED 'BEGIN{srand(seed); print int(rand()*(max))}')
 
     # find the selected sub-folder
@@ -44,7 +44,7 @@ get_rand_file() {
     ALL_FILES=$(ls -d -1 "$folder"* | grep -E "\.($(echo "$extensions" | sed -e "s/ /\|/g"))$" | grep -Fxvf "$PREV5_FILE")
     SIZE=$(echo "$ALL_FILES" | wc -l)
     if [ $SIZE -gt 0 ]; then
-        SEED=$(date +%s%N)
+        SEED=$(date +%N)
         RINDEX=$(awk -v max=$SIZE -v seed=$SEED 'BEGIN{srand(seed); print int(rand()*(max))}')
         for file in $ALL_FILES; do
             if [ $RINDEX -eq 0 ]; then
@@ -92,7 +92,7 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd="\"/mnt/SDCARD/spruce/scripts/emu/standard_launch.sh\" \"${SELECTED_GAME}\""
+cmd="\"/mnt/SDCARD/Emu/${FOLDER_NAME}/../../spruce/scripts/emu/standard_launch.sh\" \"${SELECTED_GAME}\""
 echo "$cmd" > /tmp/cmd_to_run.sh
 eval "$cmd"
 
