@@ -327,3 +327,9 @@ device_system_handles_sdcard_unmount() {
     log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
     return 0
 }
+
+device_write_default_asound_rc() {
+    # Do these need to be unique per device? Don't have a way 
+    # to test currently
+    log_message "Missing device_write_default_asound_rc function" -v
+}

@@ -521,3 +521,17 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # Flip leaves dirty bit set?
 }
+
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.!default {
+    type plug
+    slave.pcm "dmix"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
+}
