@@ -165,7 +165,7 @@ stop_problematic_scripts() {
     killall -q -15 runtime.sh
     killall -q -15 principal.sh
 
-    # Ensure PyUI message writer can run
+    # Ensure legacy display can run
     killall -q -9 MainUI
     sleep 0.5
 
@@ -188,14 +188,13 @@ stop_problematic_scripts() {
 }
 
 display_appropriate_icon_and_message() {
-    start_pyui_message_writer
     if flag_check "in_menu"; then
-        display_image_and_text "$BG_TREE" 50 25 "" 75
+        display --icon "$BG_TREE" -t "Shutting down..."
     elif flag_check "forced_shutdown"; then
-        display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
+        display --icon "$SAVE_IMG" -t "Battery level is below 1%. Shutting down to prevent progress loss."
         flag_remove "forced_shutdown"
     else
-        display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
+        display --icon "$SAVE_IMG" -t "Saving and shutting down... Please wait a moment."
     fi
     sleep 1 # Let user read any messages
 }
@@ -221,8 +220,8 @@ dim_screen_and_do_syncthing_check() {
 }
 
 kill_remaining_background_processes() {
-    # Stop the PyUI message writer — it has file handles open on the SD card
-    stop_pyui_message_writer
+    # Stop legacy display — it has file handles open on the SD card
+    display_kill
 
     # Kill dim_screen if it's still running (writes to sysfs, but inherits SD fds)
     if [ -n "$DIM_SCREEN_PID" ]; then
@@ -293,11 +292,13 @@ device_prepare_for_poweroff
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 
-attempt_to_close_emu_gracefully
-wait_for_graceful_emu_exit
-sync
-close_forcefully_all_emus
-close_non_emu_cmd_to_run
+if ! flag_check "in_menu"; then
+    attempt_to_close_emu_gracefully
+    wait_for_graceful_emu_exit
+    sync
+    close_forcefully_all_emus
+    close_non_emu_cmd_to_run
+fi
 
 display_appropriate_icon_and_message
 dim_screen_and_do_syncthing_check
@@ -311,6 +312,8 @@ if device_system_handles_sdcard_unmount; then
     else
         run_poweroff_cmd
     fi
+
+    exit 0
 fi
 
 alsactl store
