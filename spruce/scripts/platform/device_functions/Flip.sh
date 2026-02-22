@@ -515,3 +515,9 @@ device_wifi_power_on() {
 device_wifi_power_off() { 
     echo 0 > /sys/class/rkwifi/wifi_power
 }
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # Flip leaves dirty bit set?
+}
