@@ -263,7 +263,6 @@ exec_shutdown_stage_2() {
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
-        sync
         run_poweroff_cmd
     fi
 }
@@ -318,7 +317,7 @@ alsactl store
 kill_remaining_background_processes
 
 unmount_all
-sync
+sleep 0.1
 unmount_all
 
 exec_shutdown_stage_2

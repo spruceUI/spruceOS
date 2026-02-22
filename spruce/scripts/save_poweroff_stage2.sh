@@ -43,14 +43,11 @@ for pidpath in /proc/[0-9]*; do
     done
 done
 
-
-
 echo 6
 # Give the kernel time to close file descriptors from killed processes
-sleep 1
+sleep 0.1
 echo 7
 # Flush all pending writes
-sync
 sync
 echo 8
 # Discover the SD card's block device from its mount entry
@@ -84,15 +81,12 @@ if [ -n "$SD_DEV" ]; then
     done
 fi
 echo 12
-sync
-echo 13
 # 4. Now remount the SD card read-only (clears the filesystem dirty flag)
 #    and perform the final unmount.
 mount -o remount,ro "$SD_MOUNTPOINT" 2>/dev/null
 sync
 umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
-echo 14
-sync
+echo 13
 
 # MM v1-4 require reboot command to power off properly.
 if [ -d /customer/app ] && [ ! -e /customer/app/axp_test ]; then
@@ -102,4 +96,4 @@ elif [ "$1" = "--reboot" ]; then
 else
     poweroff
 fi
-echo 15
+echo 14
