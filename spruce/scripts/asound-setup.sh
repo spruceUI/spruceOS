@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 # Modified From CarlOS launch.sh script
 
 # Allow HOME override via first argument
@@ -58,4 +60,5 @@ ctl.!default {
 EOF
 else
     [ -f "$ASOUND_CONF" ] && rm "$ASOUND_CONF"
+    device_write_default_asound_rc
 fi

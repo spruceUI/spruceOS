@@ -315,3 +315,9 @@ device_wifi_power_on() {
 device_wifi_power_off() { 
     log_message "Missing device_wifi_power_off function" -v
 }
+
+device_write_default_asound_rc() {
+    # Do these need to be unique per device? Don't have a way 
+    # to test currently
+    log_message "Missing device_write_default_asound_rc function" -v
+}
