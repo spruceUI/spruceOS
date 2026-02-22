@@ -188,13 +188,12 @@ stop_problematic_scripts() {
 }
 
 display_appropriate_icon_and_message() {
-    start_pyui_message_writer
-    if flag_check "in_menu"; then
-        display_image_and_text "$BG_TREE" 50 25 "" 75
-    elif flag_check "forced_shutdown"; then
+    if flag_check "forced_shutdown"; then
+        start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
         flag_remove "forced_shutdown"
     else
+        start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
     fi
     sleep 1 # Let user read any messages
