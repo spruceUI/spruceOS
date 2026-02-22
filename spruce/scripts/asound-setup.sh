@@ -60,5 +60,15 @@ ctl.!default {
 EOF
 else
     [ -f "$ASOUND_CONF" ] && rm "$ASOUND_CONF"
-    device_write_default_asound_rc
+    cat > "$ASOUND_CONF" <<EOF
+pcm.!default {
+    type plug
+    slave.pcm "dmix"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
 fi
