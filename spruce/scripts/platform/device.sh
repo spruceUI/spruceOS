@@ -293,6 +293,11 @@ run_poweroff_cmd() {
     poweroff
 }
 
+device_run_reboot_cmd() {
+    log_message "Missing device_run_reboot_cmd -- using default of reboot"
+    reboot
+}
+
 save_volume_to_config_file() {
     VOLUME_LV=$1
 
@@ -314,4 +319,11 @@ device_wifi_power_on() {
 
 device_wifi_power_off() { 
     log_message "Missing device_wifi_power_off function" -v
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
+    return 0
 }

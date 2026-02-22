@@ -358,3 +358,9 @@ set_default_ra_hotkeys() {
         "input_toggle_fast_forward_axis = \"+5\""
 
 }
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
+}

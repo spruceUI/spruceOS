@@ -336,3 +336,9 @@ device_get_charging_status() {
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # A30 leaves dirty bit set?
+}
