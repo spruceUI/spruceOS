@@ -305,6 +305,7 @@ clean_up_flags
 
 # Systemd handles graceful shutdown on the pixel2
 if device_system_handles_sdcard_unmount; then
+    kill_remaining_background_processes
     if [ "$s2_arg" = "--reboot" ]; then
         device_run_reboot_cmd
     else
