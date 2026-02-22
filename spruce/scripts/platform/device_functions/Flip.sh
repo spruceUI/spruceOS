@@ -515,17 +515,3 @@ device_wifi_power_on() {
 device_wifi_power_off() { 
     echo 0 > /sys/class/rkwifi/wifi_power
 }
-
-device_write_default_asound_rc() {
-    cat > "$ASOUND_CONF" <<EOF
-pcm.!default {
-    type plug
-    slave.pcm "dmix"
-}
-
-ctl.!default {
-    type hw
-    card 0
-}
-EOF
-}
