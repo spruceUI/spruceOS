@@ -10,7 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 get_config_path() {
-    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
 }
 
 ###############################################################################
