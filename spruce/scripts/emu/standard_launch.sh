@@ -70,8 +70,12 @@ case $EMU_NAME in
 		;;
 
 	"MEDIA")
-		. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
-		run_ffplay
+		if [ "$CORE" = "ffplay" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
+			run_ffplay
+		else
+			run_retroarch
+		fi
 		;;
 
 	"NDS")

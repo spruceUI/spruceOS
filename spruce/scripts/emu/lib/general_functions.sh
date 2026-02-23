@@ -54,7 +54,7 @@ get_core_override() {
     else
         # Fallback for EMU_NAME-specific keys
         case "$EMU_NAME" in
-            DC|NAOMI|N64|PS)
+            DC|NAOMI|N64|PS|MEDIA)
                 if [ "$PLATFORM" = "A30" ]; then
                     core_section=".menuOptions.Emulator_A30"
                 else
