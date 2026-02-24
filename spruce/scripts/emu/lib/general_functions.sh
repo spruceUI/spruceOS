@@ -54,12 +54,17 @@ get_core_override() {
     else
         # Fallback for EMU_NAME-specific keys
         case "$EMU_NAME" in
-            DC|NAOMI|N64|PS|MEDIA)
+            DC|NAOMI|N64|PS)
                 if [ "$PLATFORM" = "A30" ]; then
                     core_section=".menuOptions.Emulator_A30"
                 else
                     core_section=".menuOptions.Emulator_64"
                 fi
+                ;;
+            MEDIA)
+                ARCH_SUFFIX="64"
+                [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && ARCH_SUFFIX="32"
+                core_section=".menuOptions.Emulator_$ARCH_SUFFIX"
                 ;;
             NDS)
                 if [ "$PLATFORM" = "Flip" ]; then
