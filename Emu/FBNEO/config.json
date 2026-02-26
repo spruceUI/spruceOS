@@ -5,7 +5,12 @@
   "themecolor": "EC7063",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Generate namelist",
+      "launch": "/mnt/SDCARD/Emu/FBNEO/gamelist.sh"
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
