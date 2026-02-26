@@ -16,7 +16,43 @@
       ],
       "selected": "Smart",
       "overrides": {}
-    }
+    },
+      "Emulator_Flip": {
+          "display": "Retroarch Core",
+          "options": [
+              "scummvm"
+          ],
+          "devices": [
+              "MIYOO_FLIP"
+          ],
+          "selected": "scummvm",
+          "overrides": {}
+      },
+      "Emulator_Pixel2": {
+          "display": "Retroarch Core",
+          "options": [
+              "scummvm"
+          ],
+          "devices": [
+              "GKD_PIXEL2"
+          ],
+          "selected": "scummvm",
+          "overrides": {}
+      },
+      "Emulator_64": {
+          "display": "Emulator",
+          "options": [
+              "scummvm_libretro",
+              "scummvm-standalone"
+          ],
+          "devices": [
+              "TRIMUI_BRICK",
+              "TRIMUI_SMART_PRO",
+              "TRIMUI_SMART_PRO_S"
+          ],
+          "selected": "scummvm-standalone",
+          "overrides": {}
+      }
   },
   "sortOrder": 5600,
   "brand": "modernengine",
@@ -24,5 +60,7 @@
   "releaseYear": 2001,
   "default_emulator": "scummvm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["scummvm"]
+  "alternativeFolderNames": [
+      "scummvm"
+  ]
 }
