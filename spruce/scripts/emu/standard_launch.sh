@@ -128,6 +128,16 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"SCUMMVM")
+		if [ "$CORE" = "scummvm-standalone" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
+			run_scummvm
+		else
+			CORE="${CORE%_libretro}"
+			run_retroarch
+		fi
+		;;
+
 	*)
 		run_retroarch
 		;;
