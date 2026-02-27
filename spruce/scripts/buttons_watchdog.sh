@@ -76,20 +76,20 @@ map_brightness_to_system_value() {
 
 
 volume_down_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_down in background
-        # it makes sure to run whole volume_up function even volume_down_bg is killed
-        volume_down &
+        CURR_VOLUME=$((${CURR_VOLUME} - 1))
+        set_volume "$CURR_VOLUME" false &
     done
 }
 
 volume_up_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_up in background
-        # it makes sure to run whole volume_up function even volume_up_bg is killed
-        volume_up &
+        CURR_VOLUME=$((${CURR_VOLUME} + 1))
+        set_volume "$CURR_VOLUME" false &
     done
 }
 
@@ -128,7 +128,10 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
+
             volume_down # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_down_bg &
             PID_DOWN=$!
         ;;
@@ -139,7 +142,10 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
             PID_UP=""
+
             volume_up # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_up_bg &
             PID_UP=$!
         ;;
