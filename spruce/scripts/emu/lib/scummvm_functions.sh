@@ -1,17 +1,34 @@
 #!/bin/sh
 
 # Requires globals: EMU_DIR, ROM_FILE, PLATFORM, CORE, LOG_DIR
-# Provides: run_scummvm, run_scummvm_menu
+# Provides: run_scummvm, run_scummvm_menu, prepare_scummvm_bin
+
+prepare_scummvm_bin() {
+    case "$PLATFORM" in
+        "SmartProS")        SCUMMVM_BIN="$EMU_DIR/scummvm_a523" ;;
+        "SmartPro"|"Brick") SCUMMVM_BIN="$EMU_DIR/scummvm_a133p" ;;
+        *)                  SCUMMVM_BIN="$EMU_DIR/scummvm" ;;
+    esac
+
+    if [ -f "${SCUMMVM_BIN}.7z" ]; then
+        /mnt/SDCARD/spruce/bin64/7zr x "${SCUMMVM_BIN}.7z" -o"$EMU_DIR" -y > /dev/null 2>&1
+        
+        if [ $? -eq 0 ]; then
+            rm -f "${SCUMMVM_BIN}.7z"
+            echo "[BIN] New binary extracted and updated." >> "${LOG_DIR}/scummvm-standalone-${PLATFORM}.log"
+        fi
+    fi
+}
 
 run_scummvm_menu() {
-	export HOME="$EMU_DIR"
+	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
 
-	SCUMMVM_LOG="${LOG_DIR}/scummvm-sa-menu-${PLATFORM}.log"
+	SCUMMVM_LOG="${LOG_DIR}/scummvm-standalone-${PLATFORM}.log"
 
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="$EMU_DIR/.config/scummvm/scummvm-${PLATFORM}.ini"
+	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm-${PLATFORM}.ini"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
 	if [ ! -d "$SAVE_DIR" ]; then
@@ -19,8 +36,12 @@ run_scummvm_menu() {
 	fi
 
 	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
 		if [ -f "$DEFAULT_CONFIG" ]; then
+				DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
+			if [ ! -d "$DEST_DIR" ]; then
+				mkdir -p "$DEST_DIR"
+			fi
 			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
 		fi
 	fi
@@ -55,24 +76,9 @@ run_scummvm() {
 
 	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
 
-# ===== [Asset Auto-Install] =====
-SEVENZ="/mnt/SDCARD/spruce/bin64/7zr"
-
-if [ -f "scummvm_assets.7z" ]; then
-    {
-        echo "[$(date)] --- 7z Asset Installation Start ---"
-        if "$SEVENZ" x scummvm_assets.7z -y; then
-            echo "SUCCESS: Assets extracted. Deleting 7z file."
-            rm "scummvm_assets.7z"
-        else
-            echo "ERROR: 7zr failed to extract assets."
-        fi
-    } >> "$SCUMMVM_LOG" 2>&1
-fi
-
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="$EMU_DIR/.config/scummvm/scummvm-${PLATFORM}.ini"
+	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm-${PLATFORM}.ini"
 	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
@@ -82,8 +88,12 @@ fi
 
 	# Check and copy default config if platform-specific config doesn't exist
 	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
 		if [ -f "$DEFAULT_CONFIG" ]; then
+				DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
+			if [ ! -d "$DEST_DIR" ]; then
+				mkdir -p "$DEST_DIR"
+			fi
 			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
 		fi
 	fi
