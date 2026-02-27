@@ -229,6 +229,7 @@ device_lid_open(){
 }
 
 take_screenshot() {
+    close_ppsspp_menu
     screenshot_path="$1"
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
@@ -333,6 +334,25 @@ send_menu_button_to_retroarch() {
     fi
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
+}
+
+close_ppsspp_menu() {
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        log_message "Closing PPSSPP menu."
+        {
+            echo $B_RIGHT 1
+            echo $B_RIGHT 0
+            echo $B_A 1
+            echo $B_A 0
+        } > /tmp/ppsspp_events.txt
+
+        # run sendevent in a fully detached subshell
+        (
+            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
+        ) < /dev/null > /dev/null 2>&1 &
+
+        sleep 0.3
+    fi
 }
 
 set_default_ra_hotkeys() {
