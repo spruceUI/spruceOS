@@ -62,8 +62,8 @@ run_scummvm_menu() {
 	esac
 
 	if [ -f "$SCUMMVM_BIN" ]; then
-		export CURL_CA_BUNDLE="$HOME/cacert.pem"
-		export SSL_CERT_FILE="$HOME/cacert.pem"
+		export CURL_CA_BUNDLE=""$EMU_DIR/cacert.pem"
+		export SSL_CERT_FILE=""$EMU_DIR/cacert.pem"
 		"$SCUMMVM_BIN" -d10 \
 			-c "$SCUMMVM_CONFIG" \
 			>> "$SCUMMVM_LOG" 2>&1
@@ -135,8 +135,8 @@ run_scummvm() {
 		[ -z "$game_id" ] && game_id="$romNameNoExt"
 
 		# Execute ScummVM
-		export CURL_CA_BUNDLE="$HOME/cacert.pem"
-		export SSL_CERT_FILE="$HOME/cacert.pem"
+		export CURL_CA_BUNDLE=""$EMU_DIR/cacert.pem"
+		export SSL_CERT_FILE=""$EMU_DIR/cacert.pem"
 		"$SCUMMVM_BIN" -d10 \
 			-c "$SCUMMVM_CONFIG" \
 			--path="$DATA_PATH" \
