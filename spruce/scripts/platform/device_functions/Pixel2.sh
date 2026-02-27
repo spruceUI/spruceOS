@@ -161,7 +161,7 @@ set_volume() {
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         # Update Config file
-        jq ".vol = $VOL_VAL" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+        save_volume_to_config_file "$VOL_VAL"
     fi
 }
 
