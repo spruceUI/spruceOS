@@ -70,7 +70,7 @@
             },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
-                "description": "only applies in main UI",
+                "description": "only applies in main UI (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
@@ -81,7 +81,7 @@
             },
             "idlemonInGame": {
                 "display": "Shutdown while idle in game",
-                "description": "in RA, PPSSPP, or DraStic",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
@@ -94,7 +94,7 @@
             "idlemonChargingInMenu": {
                 "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in menu",
-                "description": "only applies in main UI",
+                "description": "only applies in main UI (reboot to apply)",
                 "options": [
                     "Off",
                     "10s",
@@ -106,7 +106,7 @@
             "idlemonChargingInGame": {
                 "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in game",
-                "description": "in RA, PPSSPP, or DraStic",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
                 "options": [
                     "Off",
                     "30s",
