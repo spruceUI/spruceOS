@@ -129,6 +129,8 @@ case $EMU_NAME in
 		;;
 
 	"SCUMMVM")
+		. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
+			prepare_scummvm_bin
 		OPEN_SCUMMVM_MENU="$(jq -r '.menuOptions.openScummVMMenu.selected' "$EMU_JSON_PATH")"
 		if [ "$OPEN_SCUMMVM_MENU" = "True" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh

@@ -1,0 +1,51 @@
+// Copyright 2006-2010 (C) - Frictional Games
+//
+// This file is part of HPL1 Engine
+//
+// For conditions of distribution and use, see copyright notice in LICENSE-shaders
+//
+
+///////////////////////////////////////////////////////
+/// DIFFUSE SPECULAR LIGHTING VERTEX PROGRAM //////////
+///////////////////////////////////////////////////////
+
+vec4 position = gl_Vertex;
+vec3 normal = gl_Normal;
+vec2 uv = gl_MultiTexCoord0.xy;
+vec4 tangent = gl_MultiTexCoord1;
+
+out vec4 vLightColor;
+out vec2 vUv;
+out vec3 vLightDir;
+out vec3 vHalfVec;
+
+uniform mat4 worldViewProj;
+uniform vec3 EyePos;
+uniform vec3 LightPos;
+uniform vec4 LightColor;
+uniform vec3 LightDirMul;
+
+void main()
+{
+	gl_Position = (worldViewProj * position);
+
+	vUv = uv;
+
+	vec3 lightDir = LightPos - position.xyz;
+	vLightDir = lightDir * LightDirMul;
+
+	//Calculate rotation for light to get it to tangent space.
+	vec3 binormal = cross(normal,tangent.xyz)*tangent.w;
+	mat3 rotation = transpose(mat3(tangent.xyz, binormal, normal));
+
+	//Transform the lightdir
+	vLightDir = (rotation * vLightDir);
+
+	//Get the halfvector for the specular term
+	vHalfVec = normalize(EyePos - position.xyz);
+	//transform to tangent space
+	vHalfVec = (rotation * vHalfVec);
+	vHalfVec = normalize(vLightDir)+vHalfVec;
+
+	vLightColor = clamp(LightColor, vec4(0.0), vec4(1.0));
+}
