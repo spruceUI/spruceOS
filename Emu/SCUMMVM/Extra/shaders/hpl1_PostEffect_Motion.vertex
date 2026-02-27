@@ -1,0 +1,48 @@
+// Copyright 2006-2010 (C) - Frictional Games
+//
+// This file is part of HPL1 Engine
+//
+// For conditions of distribution and use, see copyright notice in LICENSE-shaders
+//
+
+///////////////////////////////////////////////////////
+/// SIMPLE DIFFUSE COLOR VERTEX PROGRAM ////////////
+///////////////////////////////////////////////////////
+
+vec4 position = gl_Vertex;
+vec3 normal = gl_Normal;
+vec3 color = gl_Color.xyz;
+
+out vec4 vVtxPos;
+out vec4 vPrevVtxPos;
+
+uniform mat4 modelView;
+uniform mat4 prevModelView;
+uniform mat4 worldViewProj;
+uniform mat4 prevWorldViewProj;
+uniform float blurScale;
+
+void main()
+{
+	//Get the positions in eye space
+	vec4 pos = (modelView * position);
+	vec4 prevPos = (prevModelView * position);
+
+	//Transform normal to eye space
+	vec3 eyeNormal = mat3(modelView) * normal;
+
+	// calculate eye space motion vector
+	vec3 motionVector = pos.xyz - prevPos.xyz;
+
+	//Get the positions in window space.
+	pos = (worldViewProj * position);
+	prevPos = (prevWorldViewProj * position);
+
+	//Interpolate the previous according to blurscale
+	prevPos = mix(pos, prevPos, blurScale);
+
+	gl_Position = pos;
+
+	vVtxPos = pos;
+	vPrevVtxPos = prevPos;
+}
