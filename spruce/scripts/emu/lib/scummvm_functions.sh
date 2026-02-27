@@ -1,7 +1,53 @@
 #!/bin/sh
 
 # Requires globals: EMU_DIR, ROM_FILE, PLATFORM, CORE, LOG_DIR
-# Provides: run_scummvm
+# Provides: run_scummvm, run_scummvm_menu
+
+run_scummvm_menu() {
+	export HOME="$EMU_DIR"
+	cd "$EMU_DIR"
+
+	SCUMMVM_LOG="${LOG_DIR}/scummvm-sa-menu-${PLATFORM}.log"
+
+	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
+
+	SCUMMVM_CONFIG="$EMU_DIR/.config/scummvm/scummvm-${PLATFORM}.ini"
+	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
+
+	if [ ! -d "$SAVE_DIR" ]; then
+		mkdir -p "$SAVE_DIR"
+	fi
+
+	if [ ! -f "$SCUMMVM_CONFIG" ]; then
+		DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+		if [ -f "$DEFAULT_CONFIG" ]; then
+			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
+		fi
+	fi
+
+	case "$PLATFORM" in
+		"SmartProS")
+			SCUMMVM_BIN="./scummvm_a523"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib_a523:$LD_LIBRARY_PATH"
+			;;
+		"SmartPro"|"Brick")
+			SCUMMVM_BIN="./scummvm_a133p"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib_a133p:$LD_LIBRARY_PATH"
+			;;
+		*)
+			SCUMMVM_BIN="./scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+	esac
+
+	if [ -f "$SCUMMVM_BIN" ]; then
+		export CURL_CA_BUNDLE="$HOME/cacert.pem"
+		export SSL_CERT_FILE="$HOME/cacert.pem"
+		"$SCUMMVM_BIN" -d10 \
+			-c "$SCUMMVM_CONFIG" \
+			>> "$SCUMMVM_LOG" 2>&1
+	fi
+}
 
 run_scummvm() {
 	export HOME="$EMU_DIR"

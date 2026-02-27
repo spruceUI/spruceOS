@@ -129,7 +129,11 @@ case $EMU_NAME in
 		;;
 
 	"SCUMMVM")
-		if [ "$CORE" = "scummvm-standalone" ]; then
+		OPEN_SCUMMVM_MENU="$(jq -r '.menuOptions.openScummVMMenu.selected' "$EMU_JSON_PATH")"
+		if [ "$OPEN_SCUMMVM_MENU" = "True" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
+			run_scummvm_menu
+		elif [ "$CORE" = "scummvm-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
 			run_scummvm
 		else

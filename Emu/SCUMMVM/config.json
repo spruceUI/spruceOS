@@ -52,6 +52,20 @@
           ],
           "selected": "scummvm-standalone",
           "overrides": {}
+      },
+      "openScummVMMenu": {
+          "display": "Open ScummVM Menu",
+          "options": [
+              "False",
+              "True"
+          ],
+          "devices": [
+              "TRIMUI_BRICK",
+              "TRIMUI_SMART_PRO",
+              "TRIMUI_SMART_PRO_S"
+          ],
+          "selected": "False",
+          "overrides": {}
       }
   },
   "sortOrder": 5600,
