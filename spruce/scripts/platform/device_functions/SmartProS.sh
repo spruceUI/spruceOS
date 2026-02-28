@@ -388,7 +388,7 @@ device_exit_sleep(){
         done
 
         if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            enable_or_disable_wifi_per_system_json
         fi
     fi
     device_run_tsps_blobs
@@ -417,7 +417,7 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    kill_wifi
+    disable_wifi
 
     save_cores_online
     cores_online 0
