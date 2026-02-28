@@ -472,7 +472,7 @@ log_precise() {
 
 low_battery_check() {
     if flag_check "low_battery"; then
-        CAPACITY=$(cat $BATTERY/capacity)
+        CAPACITY=$(device_get_battery_percent)
         start_pyui_message_writer
         log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
         sleep 1

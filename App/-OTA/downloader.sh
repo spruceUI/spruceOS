@@ -219,9 +219,9 @@ else
     exit 0
 fi
 
-BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
-CHARGING="$(cat $BATTERY/online)"
-if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
+BATTERY_CAPACITY="$(device_get_battery_percent)"
+CHARGING="$(device_get_charging_status)"
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" = "Discharging" ]; then
     display_image_and_text "$IMAGE_PATH" 35 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
     sleep 5
     log_message "OTA: Battery level: $BATTERY_CAPACITY%
@@ -300,9 +300,9 @@ rm -rf "$TMP_DIR"
 jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
 
 # Check battery level before asking to update
-BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
-CHARGING="$(cat $BATTERY/online)"
-if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then
+BATTERY_CAPACITY="$(device_get_battery_percent)"
+CHARGING="$(device_get_charging_status)"
+if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING = "Discharging" ]; then
     display_image_and_text "$BAD_IMG" 35 25 "Battery too low to safely update. Please charge to at least 20% or plug in your device. You can run the EZ Updater app to install the already downloaded update." 75
     sleep 5
     exit 0
