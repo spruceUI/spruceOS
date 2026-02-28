@@ -71,7 +71,7 @@ run_scummvm_menu() {
 }
 
 run_scummvm() {
-	export HOME="$EMU_DIR"
+	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
 
 	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
