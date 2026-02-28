@@ -335,7 +335,10 @@ _set_volume() {
     amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
-        save_volume_to_config_file "$VOLUME_LV"
+        current_volume=$(jq -r '.vol // empty' "$SYSTEM_JSON" 2>/dev/null)
+        if [ "$current_volume" != "$VOLUME_LV" ]; then
+            save_volume_to_config_file "$VOLUME_LV"
+        fi
     fi
 }
 
