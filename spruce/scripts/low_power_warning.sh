@@ -61,6 +61,16 @@ log_battery() {
     fi
 }
 
+init_battery_log() {
+    CAPACITY=$(device_get_battery_percent)
+    CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+    [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
+    echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
+    if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
+        sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
+    fi
+}
+
 hard_shutdown() {
     CAPACITY=$1
     if [ "$CAPACITY" -le 1 ]; then
@@ -71,13 +81,7 @@ hard_shutdown() {
 }
 
 # Log boot entry
-CAPACITY=$(cat $BATTERY/capacity)
-CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-[ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
-echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
-if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
-    sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
-fi
+# init_battery_log
 LAST_LOG=$(date +%s)
 
 while true; do
