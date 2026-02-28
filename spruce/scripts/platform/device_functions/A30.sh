@@ -95,9 +95,20 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-# Not updated to match other devices yet, takes raw value
 set_volume() {
-    amixer set 'Soft Volume Master' "$new_vol" 
+    VOLUME_LV="${1:-0}"
+    SAVE_TO_CONFIG="${2:-true}"
+
+    [ "$VOLUME_LV" -lt 0 ] && VOLUME_LV=0
+    [ "$VOLUME_LV" -gt 20 ] && VOLUME_LV=20
+
+    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
+    log_message "Setting volume to ${VOLUME_RAW}"
+    amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
+
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
 }
 
 run_mixer_watchdog() {
@@ -323,12 +334,7 @@ save_volume_to_config_file() {
 }
 
 _set_volume() {
-    VOLUME_LV="$1"
-    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
-    log_message "Setting volume to ${VOLUME_RAW}"
-    amixer set 'Soft Volume Master' $VOLUME_RAW > /dev/null
-    save_volume_to_config_file "$VOLUME_LV"
-
+    set_volume "$1"
 }
 
 volume_down() {
