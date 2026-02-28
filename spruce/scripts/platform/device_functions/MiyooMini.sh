@@ -148,7 +148,11 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "true"
+    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_FLIP" ]; then
+        launch_common_startup_watchdogs_v2 "true"
+    else
+        launch_common_startup_watchdogs_v2 "false"
+    fi
 }
 
 perform_fw_check(){

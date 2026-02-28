@@ -163,7 +163,8 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    log_message "Missing launch_startup_watchdogs function"
+    log_message "No device-specific launch_startup_watchdogs function. Launching non-lid common watchdogs."
+    launch_common_startup_watchdogs_v2
 }
 
 perform_fw_check(){

@@ -171,10 +171,6 @@ post_pyui_exit(){
     killall -q -USR1 joystickinput   # return the stick to being a stick
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs
-}
-
 perform_fw_check(){
     FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
@@ -199,6 +195,18 @@ check_if_fw_needs_update() {
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
+}
+
+device_enter_sleep() {
+    :
+}
+
+device_exit_sleep() {
+    :
+}
+
+device_woke_via_timer() {
+    :
 }
 
 device_specific_wake_from_sleep() {
@@ -241,10 +249,6 @@ device_init() {
     else
         echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
     fi
-
-    # listen hotkeys for brightness adjustment, volume buttons and power button
-    # What is being changed later that prevents this from running with the other watchdogs?
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
