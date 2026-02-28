@@ -102,13 +102,7 @@ set_volume() {
     [ "$VOLUME_LV" -lt 0 ] && VOLUME_LV=0
     [ "$VOLUME_LV" -gt 20 ] && VOLUME_LV=20
 
-    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
-    log_message "Setting volume to ${VOLUME_RAW}"
-    amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
-
-    if [ "$SAVE_TO_CONFIG" = true ]; then
-        save_volume_to_config_file "$VOLUME_LV"
-    fi
+    _set_volume "$VOLUME_LV" "$SAVE_TO_CONFIG"
 }
 
 run_mixer_watchdog() {
@@ -334,7 +328,15 @@ save_volume_to_config_file() {
 }
 
 _set_volume() {
-    set_volume "$1"
+    VOLUME_LV="$1"
+    SAVE_TO_CONFIG="${2:-true}"
+    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
+    log_message "Setting volume to ${VOLUME_RAW}"
+    amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
+
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
 }
 
 volume_down() {
@@ -342,7 +344,7 @@ volume_down() {
     # if value greater than zero
     if [ $VOLUME_LV -gt 0 ] ; then
         VOLUME_LV=$((VOLUME_LV-1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
@@ -351,7 +353,7 @@ volume_up() {
     # if value less than 20
     if [ $VOLUME_LV -lt 20 ] ; then
         VOLUME_LV=$((VOLUME_LV+1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
