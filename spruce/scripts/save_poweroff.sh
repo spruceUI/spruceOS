@@ -303,7 +303,7 @@ fi
 display_appropriate_icon_and_message
 dim_screen_and_do_syncthing_check
 clean_up_flags
-alsactl store
+alsactl store 2>/dev/null
 kill_remaining_background_processes
 
 # Systemd handles graceful shutdown on the pixel2
