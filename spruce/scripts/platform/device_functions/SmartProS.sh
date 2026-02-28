@@ -401,15 +401,6 @@ device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
 }
 
-
-kill_wifi(){
-    rm -f /tmp/wifi_on
-    if pidof wpa_supplicant >/dev/null 2>&1; then
-        : > /tmp/wifi_on
-        killall wpa_supplicant
-    fi
-}
-
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
@@ -442,7 +433,7 @@ device_run_tsps_blobs() {
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
-    kill_wifi
+    disable_wifi
 }
 
 device_home_button_pressed() {
