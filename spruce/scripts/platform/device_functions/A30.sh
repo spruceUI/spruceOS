@@ -8,6 +8,7 @@ export EVENT_PATH_KEYBOARD="/dev/input/event3"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
 get_config_path() {
@@ -84,6 +85,10 @@ enable_or_disable_rgb() {
 enter_sleep() {
     log_message "Entering sleep."
     echo -n mem >/sys/power/state
+}
+
+trigger_device_sleep() {
+    enter_sleep
 }
 
 get_current_volume() {
@@ -197,16 +202,33 @@ take_screenshot() {
     /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
 }
 
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+
 device_enter_sleep() {
-    :
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
 }
 
 device_exit_sleep() {
-    :
+    if [ "$(device_woke_via_timer)" != "true" ] && [ -e "$DISPLAY_ENHANCE_PATH" ]; then
+        ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
+        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
+    fi
+
+    clear_wake_alarm "$WAKE_ALARM_PATH"
 }
 
-device_woke_via_timer() {
-    :
+device_lid_open() {
+    return 1
+}
+
+device_uses_pseudo_sleep() {
+    echo "false"
 }
 
 device_specific_wake_from_sleep() {
