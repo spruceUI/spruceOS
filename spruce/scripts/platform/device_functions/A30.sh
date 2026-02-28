@@ -95,6 +95,61 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
+nearest_system_volume() {
+    input=$1
+    levels="$SYSTEM_VOLUME_0 $SYSTEM_VOLUME_1 $SYSTEM_VOLUME_2 $SYSTEM_VOLUME_3 $SYSTEM_VOLUME_4 $SYSTEM_VOLUME_5 $SYSTEM_VOLUME_6 $SYSTEM_VOLUME_7 $SYSTEM_VOLUME_8 $SYSTEM_VOLUME_9 $SYSTEM_VOLUME_10 $SYSTEM_VOLUME_11 $SYSTEM_VOLUME_12 $SYSTEM_VOLUME_13 $SYSTEM_VOLUME_14 $SYSTEM_VOLUME_15 $SYSTEM_VOLUME_16 $SYSTEM_VOLUME_17 $SYSTEM_VOLUME_18 $SYSTEM_VOLUME_19 $SYSTEM_VOLUME_20"
+
+    case "$input" in
+        ''|*[!0-9]*)
+            return 1
+            ;;
+    esac
+
+    nearest=""
+    min_diff=""
+
+    for level in $levels; do
+        diff=$((input - level))
+        if [ "$diff" -lt 0 ]; then
+            diff=$((-diff))
+        fi
+
+        if [ -z "$min_diff" ] || [ "$diff" -lt "$min_diff" ]; then
+            min_diff=$diff
+            nearest=$level
+        fi
+    done
+
+    echo "$nearest"
+}
+
+map_mainui_volume_to_system_value() {
+    case $1 in
+        0) echo $SYSTEM_VOLUME_0 ;;
+        1) echo $SYSTEM_VOLUME_1 ;;
+        2) echo $SYSTEM_VOLUME_2 ;;
+        3) echo $SYSTEM_VOLUME_3 ;;
+        4) echo $SYSTEM_VOLUME_4 ;;
+        5) echo $SYSTEM_VOLUME_5 ;;
+        6) echo $SYSTEM_VOLUME_6 ;;
+        7) echo $SYSTEM_VOLUME_7 ;;
+        8) echo $SYSTEM_VOLUME_8 ;;
+        9) echo $SYSTEM_VOLUME_9 ;;
+        10) echo $SYSTEM_VOLUME_10 ;;
+        11) echo $SYSTEM_VOLUME_11 ;;
+        12) echo $SYSTEM_VOLUME_12 ;;
+        13) echo $SYSTEM_VOLUME_13 ;;
+        14) echo $SYSTEM_VOLUME_14 ;;
+        15) echo $SYSTEM_VOLUME_15 ;;
+        16) echo $SYSTEM_VOLUME_16 ;;
+        17) echo $SYSTEM_VOLUME_17 ;;
+        18) echo $SYSTEM_VOLUME_18 ;;
+        19) echo $SYSTEM_VOLUME_19 ;;
+        20) echo $SYSTEM_VOLUME_20 ;;
+        *) echo $SYSTEM_VOLUME_10 ;;
+    esac
+}
+
 set_volume() {
     VOLUME_LV="${1:-0}"
     SAVE_TO_CONFIG="${2:-true}"
@@ -330,7 +385,7 @@ save_volume_to_config_file() {
 _set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"
-    VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
+    VOLUME_RAW=$(map_mainui_volume_to_system_value "$VOLUME_LV")
     log_message "Setting volume to ${VOLUME_RAW}"
     amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
 
@@ -361,7 +416,37 @@ volume_up() {
 }
 
 get_volume_level() {
-    jq -r '.vol' "$SYSTEM_JSON"
+    VALUE=$(get_current_volume)
+    if [ -z "$VALUE" ]; then
+        jq -r '.vol' "$SYSTEM_JSON"
+        return
+    fi
+
+    nearest=$(nearest_system_volume "$VALUE")
+    case $nearest in
+        $SYSTEM_VOLUME_0) echo 0 ;;
+        $SYSTEM_VOLUME_1) echo 1 ;;
+        $SYSTEM_VOLUME_2) echo 2 ;;
+        $SYSTEM_VOLUME_3) echo 3 ;;
+        $SYSTEM_VOLUME_4) echo 4 ;;
+        $SYSTEM_VOLUME_5) echo 5 ;;
+        $SYSTEM_VOLUME_6) echo 6 ;;
+        $SYSTEM_VOLUME_7) echo 7 ;;
+        $SYSTEM_VOLUME_8) echo 8 ;;
+        $SYSTEM_VOLUME_9) echo 9 ;;
+        $SYSTEM_VOLUME_10) echo 10 ;;
+        $SYSTEM_VOLUME_11) echo 11 ;;
+        $SYSTEM_VOLUME_12) echo 12 ;;
+        $SYSTEM_VOLUME_13) echo 13 ;;
+        $SYSTEM_VOLUME_14) echo 14 ;;
+        $SYSTEM_VOLUME_15) echo 15 ;;
+        $SYSTEM_VOLUME_16) echo 16 ;;
+        $SYSTEM_VOLUME_17) echo 17 ;;
+        $SYSTEM_VOLUME_18) echo 18 ;;
+        $SYSTEM_VOLUME_19) echo 19 ;;
+        $SYSTEM_VOLUME_20) echo 20 ;;
+        *) jq -r '.vol' "$SYSTEM_JSON" ;;
+    esac
 }
 
 
