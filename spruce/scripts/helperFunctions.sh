@@ -64,6 +64,27 @@ auto_regen_tmp_update() {
     fi
 }
 
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.A30 retroarch.Flip retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
+pause_emulators() {
+    for EMU in $EMULATORS; do
+        pids=$(pgrep -x "$EMU" 2>/dev/null)
+        if [ -n "$pids" ]; then
+            kill -19 $pids 2>/dev/null || true
+            break
+        fi
+    done
+}
+
+unpause_emulators() {
+    for EMU in $EMULATORS; do
+        pids=$(pgrep -x "$EMU" 2>/dev/null)
+        if [ -n "$pids" ]; then
+            kill -18 $pids 2>/dev/null || true
+            break
+        fi
+    done
+}
+
 
 confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
