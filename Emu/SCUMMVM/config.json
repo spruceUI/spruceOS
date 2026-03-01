@@ -5,7 +5,17 @@
   "themecolor": "90db09",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "scummvm",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Open ScummVM Menu",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/open_scummvm_menu.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S"
+      ]
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -51,20 +61,6 @@
               "TRIMUI_SMART_PRO_S"
           ],
           "selected": "scummvm-standalone",
-          "overrides": {}
-      },
-      "openScummVMMenu": {
-          "display": "Open ScummVM Menu",
-          "options": [
-              "False",
-              "True"
-          ],
-          "devices": [
-              "TRIMUI_BRICK",
-              "TRIMUI_SMART_PRO",
-              "TRIMUI_SMART_PRO_S"
-          ],
-          "selected": "False",
           "overrides": {}
       }
   },
