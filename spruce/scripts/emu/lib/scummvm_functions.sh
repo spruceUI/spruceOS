@@ -9,15 +9,6 @@ prepare_scummvm_bin() {
         "SmartPro"|"Brick") SCUMMVM_BIN="$EMU_DIR/scummvm_a133p" ;;
         *)                  SCUMMVM_BIN="$EMU_DIR/scummvm" ;;
     esac
-
-    if [ -f "${SCUMMVM_BIN}.7z" ]; then
-        /mnt/SDCARD/spruce/bin64/7zr x "${SCUMMVM_BIN}.7z" -o"$EMU_DIR" -y > /dev/null 2>&1
-        
-        if [ $? -eq 0 ]; then
-            rm -f "${SCUMMVM_BIN}.7z"
-            echo "[BIN] New binary extracted and updated." >> "${LOG_DIR}/scummvm-standalone-${PLATFORM}.log"
-        fi
-    fi
 }
 
 run_scummvm_menu() {

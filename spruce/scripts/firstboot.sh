@@ -37,6 +37,20 @@ if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
 fi
 
+# Extract ScummVM standalone binary
+SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
+case "$PLATFORM" in
+    "SmartProS")        SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a523.7z" ;;
+    "SmartPro"|"Brick") SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a133p.7z" ;;
+    *)                  SCUMMVM_7Z="" ;;
+esac
+
+if [ -n "$SCUMMVM_7Z" ] && [ -f "$SCUMMVM_7Z" ]; then
+    display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting ScummVM!" 75
+    extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log
+    rm -f "$SCUMMVM_7Z"
+fi
+
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
 
