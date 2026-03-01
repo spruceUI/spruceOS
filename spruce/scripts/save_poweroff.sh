@@ -192,11 +192,11 @@ display_appropriate_icon_and_message() {
         start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
         flag_remove "forced_shutdown"
-    else
+    elif ! flag_check "in_menu"; then
         start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
     fi
-    sleep 1 # Let user read any messages
+    sleep 1.5 # Let user read any messages
 }
 
 dim_screen_and_do_syncthing_check() {

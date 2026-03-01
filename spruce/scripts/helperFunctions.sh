@@ -117,7 +117,7 @@ dim_screen() {
     # Get current brightness
     start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
     end_brightness="$SYSTEM_BRIGHTNESS_0"
-    delay=0.01 # 50ms delay between each step
+    delay=0.05 # 50ms delay between each step
     
     # Start at 4 if higher (so it's faster)
     if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
