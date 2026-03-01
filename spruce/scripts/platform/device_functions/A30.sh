@@ -300,7 +300,11 @@ DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
 PYUI_AUDIO_RESUME_FLAG="/tmp/pyui_audio_resume_fix"
 
 queue_pyui_audio_resume_fix() {
-    pgrep -x MainUI >/dev/null 2>&1 || return 0
+    # Unconditionally touch the flag: pgrep -x MainUI races against the kernel
+    # process-table update immediately after mem-sleep resume and can miss the
+    # running MainUI, leaving audio silently broken.  The flag is harmless if
+    # PyUI is not running (it sits in /tmp until reboot); PyUI consumes it in
+    # post_present_operations() only when it is itself running.
     touch "$PYUI_AUDIO_RESUME_FLAG"
 }
 

@@ -32,6 +32,9 @@ class MiyooA30(MiyooDevice):
     SOUND_DISABLED = 0
     MIYOO_STOCK_CONFIG_LOCATION = "/config/system.json"
     PYUI_AUDIO_RESUME_FLAG = "/tmp/pyui_audio_resume_fix"
+    # Seconds to wait after the flag is created before re-opening audio.
+    # The sunxi i2s / codec drivers need ~2 s to fully resume after mem-sleep.
+    PYUI_AUDIO_RESUME_SETTLE_SECS = 2.0
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
@@ -271,6 +274,10 @@ class MiyooA30(MiyooDevice):
         return self.system_config.get_volume()
 
     def fix_sleep_sound_bug(self):
+        # Retained for game-launch use via miyoo_trim_common.py.
+        # Not called during resume: alsactl nrestore + set_volume in
+        # sleep_helper.sh already restore ALSA state before the flag is set,
+        # and the input-event approach fires a volume OSD on the render thread.
         config_volume = self.system_config.get_volume()
         if(config_volume == 20):
             self.volume_down()
@@ -283,23 +290,37 @@ class MiyooA30(MiyooDevice):
         if not os.path.exists(self.PYUI_AUDIO_RESUME_FLAG):
             return
 
-        PyUiLogger.get_logger().info("Repairing PyUI audio after resume")
-
+        # Defer until the sunxi i2s / codec drivers have finished resuming.
+        # Calling Mix_OpenAudio too early produces a PREPARE→STANDBY flicker
+        # with no BIAS_ON, leaving audio dead.
         try:
-            self.fix_sleep_sound_bug()
+            elapsed = time.time() - os.path.getmtime(self.PYUI_AUDIO_RESUME_FLAG)
+        except OSError:
+            elapsed = self.PYUI_AUDIO_RESUME_SETTLE_SECS  # flag gone; proceed
+
+        if elapsed < self.PYUI_AUDIO_RESUME_SETTLE_SECS:
+            return  # not yet; post_present_operations() will retry on next poll
+
+        # Consume the flag before spawning so subsequent polls are instant no-ops.
+        try:
+            os.remove(self.PYUI_AUDIO_RESUME_FLAG)
+        except OSError:
+            pass
+
+        # audio_cleanup() joins the worker thread (≤3 s) and the reinit
+        # sequence sleeps briefly — both would stall the render loop here.
+        threading.Thread(target=self._do_audio_resume_repair, daemon=True).start()
+
+    def _do_audio_resume_repair(self):
+        PyUiLogger.get_logger().info("Repairing PyUI audio after resume")
+        try:
             self.get_audio_system().audio_cleanup()
-            time.sleep(0.1)
+            time.sleep(0.5)
             from themes.theme import Theme
             Theme.button_press_sounds_changed()
             Theme.bgm_setting_changed()
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"repair_pyui_audio_after_resume: {e}")
-            return
-
-        try:
-            os.remove(self.PYUI_AUDIO_RESUME_FLAG)
-        except Exception as e:
-            PyUiLogger.get_logger().warning(f"repair_pyui_audio_after_resume cleanup: {e}")
+            PyUiLogger.get_logger().warning(f"_do_audio_resume_repair: {e}")
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         return MiyooTrimCommon.run_game(self,rom_info)
