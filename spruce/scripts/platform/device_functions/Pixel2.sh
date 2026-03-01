@@ -101,10 +101,6 @@ post_pyui_exit(){
     log_message "This doesn't need to do anything when exitting pyui" -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
 	cat "$BATTERY/status"

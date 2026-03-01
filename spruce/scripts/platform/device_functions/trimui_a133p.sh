@@ -124,10 +124,6 @@ post_pyui_exit(){
     log_message "*** nothing to do for post_pyui_exit" -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
 perform_fw_check(){
     log_message "*** nothing to do for perform_fw_check" -v
 }

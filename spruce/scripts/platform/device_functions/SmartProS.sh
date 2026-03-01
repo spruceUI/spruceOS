@@ -155,10 +155,6 @@ post_pyui_exit(){
     log_message "post_pyui_exit not needed for Trim UI Smart Pro S " -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
 perform_fw_check(){
     log_message "perform_fw_check not needed for Trim UI Smart Pro S " -v
 }
