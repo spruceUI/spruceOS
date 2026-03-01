@@ -21,5 +21,8 @@ class AudioPlayerNone:
     def audio_stop_loop(self):
         pass
 
+    def audio_cleanup(self):
+        pass
+
     def load_wav(self,file_path: str):
         pass

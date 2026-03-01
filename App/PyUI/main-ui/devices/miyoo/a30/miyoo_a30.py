@@ -31,6 +31,7 @@ class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
     MIYOO_STOCK_CONFIG_LOCATION = "/config/system.json"
+    PYUI_AUDIO_RESUME_FLAG = "/tmp/pyui_audio_resume_fix"
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
@@ -278,6 +279,28 @@ class MiyooA30(MiyooDevice):
             self.volume_up()
             self.volume_down()
 
+    def repair_pyui_audio_after_resume(self):
+        if not os.path.exists(self.PYUI_AUDIO_RESUME_FLAG):
+            return
+
+        PyUiLogger.get_logger().info("Repairing PyUI audio after resume")
+
+        try:
+            self.fix_sleep_sound_bug()
+            self.get_audio_system().audio_cleanup()
+            time.sleep(0.1)
+            from themes.theme import Theme
+            Theme.button_press_sounds_changed()
+            Theme.bgm_setting_changed()
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"repair_pyui_audio_after_resume: {e}")
+            return
+
+        try:
+            os.remove(self.PYUI_AUDIO_RESUME_FLAG)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"repair_pyui_audio_after_resume cleanup: {e}")
+
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         return MiyooTrimCommon.run_game(self,rom_info)
 
@@ -361,8 +384,9 @@ class MiyooA30(MiyooDevice):
 
     @throttle.limit_refresh(1)
     def post_present_operations(self):
+        self.repair_pyui_audio_after_resume()
         # Since we don't have available but free, should we lower it to 50?
-        self.clear_display_cache_if_memory_full("MemFree", 100)        
+        self.clear_display_cache_if_memory_full("MemFree", 100)
 
         
 

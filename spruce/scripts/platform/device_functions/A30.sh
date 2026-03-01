@@ -95,6 +95,10 @@ get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
+get_configured_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
+}
+
 nearest_system_volume() {
     input=$1
     levels="$SYSTEM_VOLUME_0 $SYSTEM_VOLUME_1 $SYSTEM_VOLUME_2 $SYSTEM_VOLUME_3 $SYSTEM_VOLUME_4 $SYSTEM_VOLUME_5 $SYSTEM_VOLUME_6 $SYSTEM_VOLUME_7 $SYSTEM_VOLUME_8 $SYSTEM_VOLUME_9 $SYSTEM_VOLUME_10 $SYSTEM_VOLUME_11 $SYSTEM_VOLUME_12 $SYSTEM_VOLUME_13 $SYSTEM_VOLUME_14 $SYSTEM_VOLUME_15 $SYSTEM_VOLUME_16 $SYSTEM_VOLUME_17 $SYSTEM_VOLUME_18 $SYSTEM_VOLUME_19 $SYSTEM_VOLUME_20"
@@ -147,6 +151,35 @@ map_mainui_volume_to_system_value() {
         19) echo $SYSTEM_VOLUME_19 ;;
         20) echo $SYSTEM_VOLUME_20 ;;
         *) echo $SYSTEM_VOLUME_10 ;;
+    esac
+}
+
+map_system_volume_to_mainui_value() {
+    SYSTEM_VOLUME=$(nearest_system_volume "$1") || return 1
+
+    case $SYSTEM_VOLUME in
+        $SYSTEM_VOLUME_0) echo 0 ;;
+        $SYSTEM_VOLUME_1) echo 1 ;;
+        $SYSTEM_VOLUME_2) echo 2 ;;
+        $SYSTEM_VOLUME_3) echo 3 ;;
+        $SYSTEM_VOLUME_4) echo 4 ;;
+        $SYSTEM_VOLUME_5) echo 5 ;;
+        $SYSTEM_VOLUME_6) echo 6 ;;
+        $SYSTEM_VOLUME_7) echo 7 ;;
+        $SYSTEM_VOLUME_8) echo 8 ;;
+        $SYSTEM_VOLUME_9) echo 9 ;;
+        $SYSTEM_VOLUME_10) echo 10 ;;
+        $SYSTEM_VOLUME_11) echo 11 ;;
+        $SYSTEM_VOLUME_12) echo 12 ;;
+        $SYSTEM_VOLUME_13) echo 13 ;;
+        $SYSTEM_VOLUME_14) echo 14 ;;
+        $SYSTEM_VOLUME_15) echo 15 ;;
+        $SYSTEM_VOLUME_16) echo 16 ;;
+        $SYSTEM_VOLUME_17) echo 17 ;;
+        $SYSTEM_VOLUME_18) echo 18 ;;
+        $SYSTEM_VOLUME_19) echo 19 ;;
+        $SYSTEM_VOLUME_20) echo 20 ;;
+        *) return 1 ;;
     esac
 }
 
@@ -264,6 +297,12 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+PYUI_AUDIO_RESUME_FLAG="/tmp/pyui_audio_resume_fix"
+
+queue_pyui_audio_resume_fix() {
+    pgrep -x MainUI >/dev/null 2>&1 || return 0
+    touch "$PYUI_AUDIO_RESUME_FLAG"
+}
 
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
@@ -275,9 +314,17 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
-    if [ "$(device_woke_via_timer)" != "true" ] && [ -e "$DISPLAY_ENHANCE_PATH" ]; then
-        ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
-        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
+    woke_via_timer="$(device_woke_via_timer)"
+
+    if [ "$woke_via_timer" != "true" ]; then
+        alsactl nrestore >/dev/null 2>&1
+
+        if [ -e "$DISPLAY_ENHANCE_PATH" ]; then
+            ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
+            [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
+        fi
+
+        queue_pyui_audio_resume_fix
     fi
 
     clear_wake_alarm "$WAKE_ALARM_PATH"
@@ -397,56 +444,39 @@ _set_volume() {
     fi
 }
 
-volume_down() {
+set_volume_delta() {
+    DELTA="$1"
     VOLUME_LV=$(get_volume_level)
-    # if value greater than zero
-    if [ $VOLUME_LV -gt 0 ] ; then
-        VOLUME_LV=$((VOLUME_LV-1))
-        set_volume "$VOLUME_LV"
+
+    [ -z "$VOLUME_LV" ] && VOLUME_LV=0
+
+    NEW_VOLUME=$((VOLUME_LV + DELTA))
+    [ "$NEW_VOLUME" -lt 0 ] && NEW_VOLUME=0
+    [ "$NEW_VOLUME" -gt 20 ] && NEW_VOLUME=20
+
+    if [ "$NEW_VOLUME" -ne "$VOLUME_LV" ]; then
+        set_volume "$NEW_VOLUME"
     fi
 }
 
+volume_down() {
+    set_volume_delta -1
+}
+
 volume_up() {
-    VOLUME_LV=$(get_volume_level)
-    # if value less than 20
-    if [ $VOLUME_LV -lt 20 ] ; then
-        VOLUME_LV=$((VOLUME_LV+1))
-        set_volume "$VOLUME_LV"
-    fi
+    set_volume_delta 1
 }
 
 get_volume_level() {
     VALUE=$(get_current_volume)
     if [ -z "$VALUE" ]; then
-        jq -r '.vol' "$SYSTEM_JSON"
+        get_configured_volume_level
         return
     fi
 
-    nearest=$(nearest_system_volume "$VALUE")
-    case $nearest in
-        $SYSTEM_VOLUME_0) echo 0 ;;
-        $SYSTEM_VOLUME_1) echo 1 ;;
-        $SYSTEM_VOLUME_2) echo 2 ;;
-        $SYSTEM_VOLUME_3) echo 3 ;;
-        $SYSTEM_VOLUME_4) echo 4 ;;
-        $SYSTEM_VOLUME_5) echo 5 ;;
-        $SYSTEM_VOLUME_6) echo 6 ;;
-        $SYSTEM_VOLUME_7) echo 7 ;;
-        $SYSTEM_VOLUME_8) echo 8 ;;
-        $SYSTEM_VOLUME_9) echo 9 ;;
-        $SYSTEM_VOLUME_10) echo 10 ;;
-        $SYSTEM_VOLUME_11) echo 11 ;;
-        $SYSTEM_VOLUME_12) echo 12 ;;
-        $SYSTEM_VOLUME_13) echo 13 ;;
-        $SYSTEM_VOLUME_14) echo 14 ;;
-        $SYSTEM_VOLUME_15) echo 15 ;;
-        $SYSTEM_VOLUME_16) echo 16 ;;
-        $SYSTEM_VOLUME_17) echo 17 ;;
-        $SYSTEM_VOLUME_18) echo 18 ;;
-        $SYSTEM_VOLUME_19) echo 19 ;;
-        $SYSTEM_VOLUME_20) echo 20 ;;
-        *) jq -r '.vol' "$SYSTEM_JSON" ;;
-    esac
+    if ! map_system_volume_to_mainui_value "$VALUE"; then
+        get_configured_volume_level
+    fi
 }
 
 

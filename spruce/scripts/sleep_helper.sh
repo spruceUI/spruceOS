@@ -146,13 +146,16 @@ trigger_sleep() {
 
 trigger_sleep
 
+woke_via_timer="$(device_woke_via_timer)"
 device_exit_sleep
 
-log_activity_event "$current_app" "START"
+if [ "$woke_via_timer" != "true" ]; then
+    log_activity_event "$current_app" "START"
 
-# Restore volume
-VOLUME_LV=$(jq -r '.vol' "$SYSTEM_JSON")
-set_volume "$VOLUME_LV"
+    # Restore volume after a manual wake. Timer wakes continue into shutdown.
+    VOLUME_LV=$(jq -r '.vol' "$SYSTEM_JSON")
+    set_volume "$VOLUME_LV"
+fi
 
 kill "$GET_EVENT_PID" 2>/dev/null
 
