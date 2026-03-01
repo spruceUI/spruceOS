@@ -276,7 +276,6 @@ device_enter_sleep() {
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
     echo "GUI_SHOW 0 off" > "$SCREEN_BLANK_FILE" 2>/dev/null    # blank the screen
     echo "0" > "$BRIGHTNESS_FILE" 2>/dev/null                   # set brightness to 0
-    [ -e "$BUTTON_ENABLE_FILE" ] && echo "N" > "$BUTTON_ENABLE_FILE" 2>/dev/null # disable input
     touch /tmp/screen_blanked                                   # create flag file
     cpuclock 100                                                # slow cpu to a crawl
 }
@@ -305,7 +304,11 @@ device_lid_sensor_ready() {
 }
 
 device_lid_open(){
-    head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    if [ -e "$LID_HALL_FILE" ]; then
+        head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    else
+        echo "1"
+    fi
 }
 
 
