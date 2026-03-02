@@ -130,6 +130,7 @@ case $EMU_NAME in
 
 	"SCUMMVM")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
+			prepare_scummvm_bin
 		if [ "$OPEN_SCUMMVM_MENU" = "true" ]; then
 			run_scummvm_menu
 		elif [ "$CORE" = "scummvm-standalone" ]; then
