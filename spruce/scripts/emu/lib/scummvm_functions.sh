@@ -19,7 +19,7 @@ run_scummvm_menu() {
 
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm-${PLATFORM}.ini"
+	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
 	if [ ! -d "$SAVE_DIR" ]; then
@@ -53,11 +53,9 @@ run_scummvm_menu() {
 	esac
 
 	if [ -f "$SCUMMVM_BIN" ]; then
-		export CURL_CA_BUNDLE=""$EMU_DIR/cacert.pem"
-		export SSL_CERT_FILE=""$EMU_DIR/cacert.pem"
-		"$SCUMMVM_BIN" -d10 \
-			-c "$SCUMMVM_CONFIG" \
-			>> "$SCUMMVM_LOG" 2>&1
+		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
+		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
 	fi
 }
 
@@ -69,7 +67,7 @@ run_scummvm() {
 
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm-${PLATFORM}.ini"
+	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
@@ -126,11 +124,8 @@ run_scummvm() {
 		[ -z "$game_id" ] && game_id="$romNameNoExt"
 
 		# Execute ScummVM
-		export CURL_CA_BUNDLE=""$EMU_DIR/cacert.pem"
-		export SSL_CERT_FILE=""$EMU_DIR/cacert.pem"
-		"$SCUMMVM_BIN" -d10 \
-			-c "$SCUMMVM_CONFIG" \
-			--path="$DATA_PATH" \
-			"$game_id" >> "$SCUMMVM_LOG" 2>&1
+		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
+		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
 	fi
 }
