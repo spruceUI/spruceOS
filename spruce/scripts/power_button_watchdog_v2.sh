@@ -25,7 +25,7 @@ power_key_up () {
         fi
 
         if [ "$was_cancelled" = false ]; then
-            /mnt/SDCARD/spruce/scripts/sleep_helper.sh &
+            /mnt/SDCARD/spruce/scripts/sleep_helper.sh
         fi
     fi
 
@@ -57,32 +57,34 @@ power_key_down () {
     fi
 }
 
-LAST_POWER_DOWN=0
-log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
-getevent -exclusive -pid $$ $EVENT_PATH_POWER | while read line; do
-    if [ -e /tmp/sleep_helper_started ]; then
-        log_message "power_button_watchdog_v2.sh: Sleep helper active, skipping power button event."
-        continue
-    fi
+while true; do
+    LAST_POWER_DOWN=0
+    log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
+    getevent -exclusive -pid $$ $EVENT_PATH_POWER | while read line; do
+        if [ -e /tmp/sleep_helper_started ]; then
+            log_message "power_button_watchdog_v2.sh: Sleep helper active, skipping power button event."
+            continue
+        fi
 
-    now=$(date +%s)
-    case $line in
-        # Power key down
-        *"key $B_POWER 1"*)
-            pause_emulators
-            if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
-                log_message "power_button_watchdog_v2.sh: power_key_down"
-                power_key_down
-                LAST_POWER_DOWN=$now
-            fi
-            ;;
+        now=$(date +%s)
+        case $line in
+            # Power key down
+            *"key $B_POWER 1"*)
+                if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
+                    log_message "power_button_watchdog_v2.sh: power_key_down"
+                    power_key_down
+                    LAST_POWER_DOWN=$now
+                fi
+                ;;
 
-        # Power key up
-        *"key $B_POWER 0"*)
-                unpause_emulators
-                log_message "power_button_watchdog_v2.sh: power_key_up"
-                power_key_up
-            ;;
-        esac
+            # Power key up
+            *"key $B_POWER 0"*)
+                    log_message "power_button_watchdog_v2.sh: power_key_up"
+                    power_key_up
+                ;;
+            esac
+    done
+    log_message "power_button_watchdog_v2.sh: getevent pipe exited, restarting..."
+    sleep 1
 done
 

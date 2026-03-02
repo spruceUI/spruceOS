@@ -216,6 +216,9 @@ device_enter_sleep() {
 
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+    sleep 0.3
+    sync
     trigger_device_sleep
 }
 
@@ -224,8 +227,6 @@ device_exit_sleep() {
         ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
         [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
     fi
-
-    alsactl nrestore 2>/dev/null
 
     clear_wake_alarm "$WAKE_ALARM_PATH"
 }
