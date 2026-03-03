@@ -14,6 +14,15 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S"
       ]
+    },
+    {
+      "name": "Scan ScummVM Games",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/scan_scummvm_game.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S"
+      ]
     }
   ],
   "menuOptions": {

@@ -132,6 +132,8 @@ case $EMU_NAME in
 		. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
 		if [ "$OPEN_SCUMMVM_MENU" = "true" ]; then
 			run_scummvm_menu
+		elif [ "$RUN_SCUMMVM_SCAN" = "true" ]; then
+			run_scummvm_scan
 		elif [ "$CORE" = "scummvm-standalone" ]; then
 			run_scummvm
 		else
