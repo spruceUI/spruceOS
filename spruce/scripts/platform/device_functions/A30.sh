@@ -226,6 +226,7 @@ device_exit_sleep() {
         [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
     fi
 
+    touch /tmp/audio_reinit_needed
     clear_wake_alarm "$WAKE_ALARM_PATH"
 }
 
