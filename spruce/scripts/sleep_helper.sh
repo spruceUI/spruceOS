@@ -79,6 +79,13 @@ trigger_sleep() {
     set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
     pause_emulators
     sleep 0.5
+    # Kill exclusive getevent to prevent buffered wake button events
+    # from causing a re-sleep loop. The power watchdog's outer loop
+    # will restart getevent fresh after sleep_helper exits.
+    if [ "$(device_uses_pseudo_sleep)" != "true" ]; then
+        kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+        sleep 0.3
+    fi
     device_enter_sleep "$IDLE_TIMEOUT"
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"

@@ -216,8 +216,6 @@ device_enter_sleep() {
 
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
-    kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
-    sleep 0.3
     sync
     trigger_device_sleep
 }
