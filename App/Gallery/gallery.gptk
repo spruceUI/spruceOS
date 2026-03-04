@@ -15,3 +15,4 @@ l1 = pageup
 
 start = delete
 guide = esc
+back = h
