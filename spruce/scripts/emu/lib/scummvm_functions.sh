@@ -30,13 +30,9 @@ run_scummvm_menu() {
 	fi
 
 	case "$PLATFORM" in
-		"SmartProS")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a523"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a523:$LD_LIBRARY_PATH"
-			;;
-		"SmartPro"|"Brick")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a133p"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a133p:$LD_LIBRARY_PATH"
+		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
@@ -79,13 +75,9 @@ run_scummvm() {
 	fi
 
 	case "$PLATFORM" in
-		"SmartProS")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a523"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a523:$LD_LIBRARY_PATH"
-			;;
-		"SmartPro"|"Brick")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a133p"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a133p:$LD_LIBRARY_PATH"
+		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
@@ -135,13 +127,9 @@ run_scummvm_scan() {
 	fi
 
 	case "$PLATFORM" in
-		"SmartProS")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a523"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a523:$LD_LIBRARY_PATH"
-			;;
-		"SmartPro"|"Brick")
-			SCUMMVM_BIN="$EMU_DIR/scummvm_a133p"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib_a133p:$LD_LIBRARY_PATH"
+		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
