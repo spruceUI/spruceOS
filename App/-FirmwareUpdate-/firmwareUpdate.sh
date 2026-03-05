@@ -3,6 +3,10 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+# Disable idle/shutdown timer during firmware update
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 start_pyui_message_writer
 
 SD_ROOT="/mnt/SDCARD"

@@ -102,6 +102,11 @@ restore_theme_configs() {
 ##### MAIN EXECUTION #####
 
 log_message "----------Starting Restore script----------"
+
+# Disable idle/shutdown timer during restore
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75

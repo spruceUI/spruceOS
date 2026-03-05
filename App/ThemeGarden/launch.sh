@@ -2,6 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Disable idle/shutdown timer during theme downloads
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 ##### CONSTANTS #####
 
 DOWNLOAD="/mnt/SDCARD/App/ThemeGarden/download_theme.sh"

@@ -2,6 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Disable idle/shutdown timer during update
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 APP_DIR="/mnt/SDCARD/App/-Updater"
 UPDATE_FILE=""
 LOG_LOCATION="/mnt/SDCARD/Saves/spruce/updater.log"
