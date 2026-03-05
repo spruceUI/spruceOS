@@ -41,6 +41,11 @@ backup_theme_configs() {
 ##### MAIN EXECUTION #####
 
 log_message "----------Running Backup script----------"
+
+# Disable idle/shutdown timer during backup
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Backing up your spruce configs and files! Please wait.........." 75
@@ -178,4 +183,8 @@ done
 log_message "Backup process finished running"
 
 auto_regen_tmp_update
+
+# Restart idle/shutdown timer
+sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+
 sync

@@ -9,7 +9,7 @@ case "$PLATFORM" in
         STORAGE_DEVICE="/dev/mmcblk0p1"
         MOUNT_POINT="/mnt/SDCARD"
         USB_GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
-        LUN_PATH="$GADGET_PATH/lun0"
+        LUN_PATH="$USB_GADGET_PATH/lun0"
         LUN_FILE="$LUN_PATH/file"
         ;;
     "Brick" | "SmartPro")
