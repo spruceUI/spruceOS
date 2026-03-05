@@ -226,6 +226,10 @@ if [ "$(device_get_charging_status)" = "Discharging" ]; then
     exit 0
 fi
 
+# Disable idle/shutdown timer while in USB mode (device reboots on exit, so no need to restart)
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 log_and_display_message "Connecting USB Mass Storage Mode..."
 configure_usb_gadget
 log_and_display_message "" # Clear the "Connecting" message
