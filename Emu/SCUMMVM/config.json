@@ -12,7 +12,8 @@
       "devices": [
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO",
-        "TRIMUI_SMART_PRO_S"
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP"
       ]
     },
     {
@@ -21,7 +22,8 @@
       "devices": [
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO",
-        "TRIMUI_SMART_PRO_S"
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP"
       ]
     }
   ],
@@ -36,6 +38,21 @@
       "selected": "Smart",
       "overrides": {}
     },
+<<<<<<< Updated upstream
+=======
+      "Emulator_Flip": {
+          "display": "Emulator",
+          "options": [
+              "scummvm",
+              "scummvm-standalone"
+          ],
+          "devices": [
+              "MIYOO_FLIP"
+          ],
+          "selected": "scummvm-standalone",
+          "overrides": {}
+      },
+>>>>>>> Stashed changes
       "Emulator_Pixel2": {
           "display": "Retroarch Core",
           "options": [
