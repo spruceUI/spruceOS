@@ -38,8 +38,6 @@
       "selected": "Smart",
       "overrides": {}
     },
-<<<<<<< Updated upstream
-=======
       "Emulator_Flip": {
           "display": "Emulator",
           "options": [
@@ -52,7 +50,6 @@
           "selected": "scummvm-standalone",
           "overrides": {}
       },
->>>>>>> Stashed changes
       "Emulator_Pixel2": {
           "display": "Retroarch Core",
           "options": [
@@ -74,7 +71,7 @@
               "TRIMUI_BRICK",
               "TRIMUI_SMART_PRO",
               "TRIMUI_SMART_PRO_S",
-			  "MIYOO_FLIP"
+              "MIYOO_FLIP"
           ],
           "selected": "scummvm-standalone",
           "overrides": {}
