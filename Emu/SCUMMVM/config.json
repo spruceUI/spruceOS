@@ -38,18 +38,6 @@
       "selected": "Smart",
       "overrides": {}
     },
-      "Emulator_Flip": {
-          "display": "Emulator",
-          "options": [
-              "scummvm",
-              "scummvm-standalone"
-          ],
-          "devices": [
-              "MIYOO_FLIP"
-          ],
-          "selected": "scummvm-standalone",
-          "overrides": {}
-      },
       "Emulator_Pixel2": {
           "display": "Retroarch Core",
           "options": [
