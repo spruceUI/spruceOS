@@ -153,9 +153,9 @@ configure_usb_gadget() {
             ;;
         "Pixel2")
             mkdir $USB_GADGET_PATH -m 0770
-            echo "0x2207" > $USB_GADGET_PATH/rockchip/idVendor
-            echo "0x0000" > $USB_GADGET_PATH/rockchip/idProduct
-            echo "0x0200" > $USB_GADGET_PATH/rockchip/bcdUSB
+            echo "0x2207" > $USB_GADGET_PATH/idVendor
+            echo "0x0000" > $USB_GADGET_PATH/idProduct
+            echo "0x0200" > $USB_GADGET_PATH/bcdUSB
             mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
             echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
             echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
