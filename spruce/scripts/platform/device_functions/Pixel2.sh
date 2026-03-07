@@ -65,6 +65,7 @@ set_loading_screen() {
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
+    sync_volume_level
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
@@ -110,50 +111,22 @@ device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
 
-get_volume_level() {
-    VALUE=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '(?<=\s)(\d*)(?=\%)' | head -n1)
+sync_volume_level() {
+    VALUE=$(get_volume_level)
+    set_volume "$VALUE" false
+}
 
-    logger "Volume value: $VALUE"
-    case $VALUE in
-        $SYSTEM_VOLUME_0) echo 0 ;;
-        $SYSTEM_VOLUME_1) echo 1 ;;
-        $SYSTEM_VOLUME_2) echo 2 ;;
-        $SYSTEM_VOLUME_3) echo 3 ;;
-        $SYSTEM_VOLUME_4) echo 4 ;;
-        $SYSTEM_VOLUME_5) echo 5 ;;
-        $SYSTEM_VOLUME_6) echo 6 ;;
-        $SYSTEM_VOLUME_7) echo 7 ;;
-        $SYSTEM_VOLUME_8) echo 8 ;;
-        $SYSTEM_VOLUME_9) echo 9 ;;
-        $SYSTEM_VOLUME_10) echo 10 ;;
-        $SYSTEM_VOLUME_11) echo 11 ;;
-        $SYSTEM_VOLUME_12) echo 12 ;;
-        $SYSTEM_VOLUME_13) echo 13 ;;
-        $SYSTEM_VOLUME_14) echo 14 ;;
-        $SYSTEM_VOLUME_15) echo 15 ;;
-        $SYSTEM_VOLUME_16) echo 16 ;;
-        $SYSTEM_VOLUME_17) echo 17 ;;
-        $SYSTEM_VOLUME_18) echo 18 ;;
-        $SYSTEM_VOLUME_19) echo 19 ;;
-        $SYSTEM_VOLUME_20) echo 20 ;;
-        *) echo 10 ;;
-    esac
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
 }
 
 set_volume() {
     VOL_VAL="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}" # Optional 2nd arg, defaults to true
 
-    logger "Setting volume to $VOL_VAL"
-    if [ $VOL_VAL -lt 0 ]; then
-        VOL_VAL=0
-    elif [ $VOL_VAL -gt 20 ]; then
-        VOL_VAL=20
-    fi
-
     # Set volume
     SYSTEM_VOL=$(map_mainui_volume_to_system_value "$VOL_VAL")
-    pactl -- set-sink-volume @DEFAULT_SINK@ ${SYSTEM_VOL}%
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ $SYSTEM_VOL
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         # Update Config file
@@ -163,14 +136,18 @@ set_volume() {
 
 volume_down() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} - 1))
-    set_volume "$VALUE"
+    if [ $VALUE -gt 0 ] ; then
+        VALUE=$((${VALUE} - 1))
+        set_volume "$VALUE"
+    fi
 }
 
 volume_up() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} + 1))
-    set_volume "$VALUE"
+    if [ $VALUE -lt 20 ] ; then
+        VALUE=$((${VALUE} + 1))
+        set_volume "$VALUE"
+    fi
 }
 
 # Map the MainUI Volume level to System Value
