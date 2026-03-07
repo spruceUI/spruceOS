@@ -7,6 +7,7 @@
   "Clean up macOS dotfiles": "/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh",
   "Repair SD Card": "/mnt/SDCARD/spruce/scripts/tasks/repairSD.sh",
   "Bug report": "/mnt/SDCARD/spruce/scripts/tasks/bugReport.sh",
+  "Scan ScummVM games": "/mnt/SDCARD/spruce/scripts/tasks/scanScummVM.sh",
   "descriptions": {
     "Forget all WiFi networks": "disconnect and clear all saved networks",
     "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
@@ -15,6 +16,7 @@
     "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
     "Repair SD Card": "reboot and attempt an fsck.fat on your card",
-    "Bug report": "collect logs and other info for bug reports"
+    "Bug report": "collect logs and other info for bug reports",
+    "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM"
   }
 }
