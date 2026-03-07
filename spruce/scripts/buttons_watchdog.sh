@@ -79,8 +79,10 @@ volume_down_bg() {
     trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
     while true; do
         sleep 0.3
-        CURR_VOLUME=$((${CURR_VOLUME} - 1))
-        set_volume "$CURR_VOLUME" false &
+        if [ $CURR_VOLUME -gt 0 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} - 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
 
@@ -88,8 +90,10 @@ volume_up_bg() {
     trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
     while true; do
         sleep 0.3
-        CURR_VOLUME=$((${CURR_VOLUME} + 1))
-        set_volume "$CURR_VOLUME" false &
+        if [ $CURR_VOLUME -lt 20 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} + 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
 
