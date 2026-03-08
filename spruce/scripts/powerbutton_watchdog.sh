@@ -67,10 +67,17 @@ while true; do
     }
 
     # start getevent writing to the fifo in background, and capture its PID
-    getevent -exclusive "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
+    # Note: do NOT use -exclusive on devices with a single event device (e.g. MiyooMini)
+    # as it blocks all other input handlers
+    getevent "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
     GETEVENT_PID=$!
 
-    while IFS= read -r line < "$FIFO"; do
+    # Open FIFO once on fd 3 so it stays open between reads.
+    # Opening per-read (read < "$FIFO") causes the FIFO to close/reopen
+    # between iterations, killing getevent with SIGPIPE.
+    exec 3< "$FIFO"
+
+    while IFS= read -r line <&3; do
         case $line in
 
         # Power key down
@@ -109,13 +116,19 @@ while true; do
                 # shutdown from sleep is neither Instant nor Off
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
                     if applicable_process_is_running; then
-                        echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
+                        # Only set wake alarm if the RTC device exists
+                        if [ -e "$RTC_WAKE_FILE" ]; then
+                            echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
+                            # Verify it was actually written
+                            if [ -n "$(cat "$RTC_WAKE_FILE" 2>/dev/null)" ]; then
+                                flag_add "wake.alarm" --tmp
+                            fi
+                        fi
                         cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
                         CURRENT_VOLUME="$(get_current_volume)"
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         set_volume 0
-                        flag_add "wake.alarm" --tmp
                     fi
                 fi
 
@@ -154,6 +167,9 @@ while true; do
                     GETEVENT_PID=""
                 fi
 
+                # close fd 3
+                exec 3<&-
+
                 # small pause to let things settle
                 sleep 0.5
 
@@ -164,28 +180,24 @@ while true; do
         esac
     done
 
-    # cleanup FIFO
+    # cleanup fd 3 and FIFO
+    exec 3<&- 2>/dev/null
     rm -f "$FIFO"
 
     sync
+
     enter_sleep
 
-    if flag_check "wake.alarm"; then
-
-        # If RTC alarm is cleared, we woke from from the alarm
-        CURRENT_ALARM=$(cat "$RTC_WAKE_FILE" 2>/dev/null)
-
-        if ! [ -z "$CURRENT_ALARM" ]; then
-            # restore display and volume setting after wakeup
-            cat "$TMP_BACKLIGHT_PATH" > $DEVICE_BRIGHTNESS_PATH
-            ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
-            echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-
-            # restore volume only when we actually woke from the alarm
-            set_volume "$(cat "$TMP_VOLUME_PATH")"
-            device_specific_wake_from_sleep
-        fi
+    # Restore brightness and volume after waking (regardless of alarm status)
+    if [ -s "$TMP_BACKLIGHT_PATH" ]; then
+        cat "$TMP_BACKLIGHT_PATH" > $DEVICE_BRIGHTNESS_PATH 2>/dev/null
+        ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance 2>/dev/null)
+        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance 2>/dev/null
     fi
+    if [ -s "$TMP_VOLUME_PATH" ]; then
+        set_volume "$(cat "$TMP_VOLUME_PATH")"
+    fi
+    device_specific_wake_from_sleep
 
     # RESUME any running emulator or MainUI (use exact matches)
     for EMU in $EMULATORS; do
