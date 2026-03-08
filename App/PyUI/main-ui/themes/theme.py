@@ -1569,20 +1569,17 @@ class Theme():
     @classmethod
     def get_cfw_default_icon(cls, icon_name):
         cfw_theme = PyUiConfig.get("theme")
-        PyUiLogger.get_logger().debug(f"Getting CFW default icon '{icon_name}' for theme '{cfw_theme}'")
         if(cfw_theme is None):
             PyUiLogger.get_logger().debug(f"CFW theme is None, cannot get icon")
             return None
         else:
             cfw_theme_path = os.path.join(PyUiConfig.get("themeDir"),cfw_theme)
-            PyUiLogger.get_logger().debug(f"cfw_theme_path is '{cfw_theme_path}'")
             path = os.path.join(cfw_theme_path, 
                                 cls._get_asset_folder(cfw_theme_path, "icons", 
                                                       Device.get_device().screen_width(), 
                                                       Device.get_device().screen_height()), 
                                 "app",icon_name)
 
-            PyUiLogger.get_logger().debug(f"icon path resolved to '{path}'")
             if os.path.exists(path):
                 return path
 

@@ -70,7 +70,7 @@
             },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
-                "description": "only applies in main UI",
+                "description": "only applies in main UI (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
@@ -81,13 +81,38 @@
             },
             "idlemonInGame": {
                 "display": "Shutdown while idle in game",
-                "description": "in RA, PPSSPP, or DraStic",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
                     "5m",
                     "10m",
                     "30m"
+                ],
+                "selected": "Off"
+            },
+            "idlemonChargingInMenu": {
+                "devices":["GKD_PIXEL2"],
+                "display": "Turn screen off when charging in menu",
+                "description": "only applies in main UI (reboot to apply)",
+                "options": [
+                    "Off",
+                    "10s",
+                    "30s",
+                    "1m"
+                ],
+                "selected": "Off"
+            },
+            "idlemonChargingInGame": {
+                "devices":["GKD_PIXEL2"],
+                "display": "Turn screen off when charging in game",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
+                "options": [
+                    "Off",
+                    "30s",
+                    "1m",
+                    "5m",
+                    "10m"
                 ],
                 "selected": "Off"
             },
@@ -113,6 +138,15 @@
         "System Settings": {
 
             "checkForUpdates": {
+                "devices":["MIYOO_FLIP",
+                           "MIYOO_MINI",
+                           "MIYOO_MINI_V4",
+                           "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP",
+                           "TRIMUI_BRICK",
+                           "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S",
+                           "MIYOO_A30"],
                 "display": "Check for spruce updates on startup",
                 "description": "if connected to Wi-Fi",
                 "options": [
@@ -128,7 +162,8 @@
                     "spruceUI",
                     "Random Game",
                     "Game Switcher",
-                    "Splore"
+                    "Splore",
+                    "Apotris (GBA)"
                 ],
                 "selected": "spruceUI"
             },
@@ -212,6 +247,7 @@
                 "display": "Overclock Speed",
                 "description": "Clockspeed to use for overclocking",
                 "options": [
+                    "1500",
                     "1600",
                     "1700",
                     "1800"

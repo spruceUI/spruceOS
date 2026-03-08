@@ -10,7 +10,6 @@ fi
 current_app="$(get_current_app)"
 log_activity_event "$current_app" "STOP"
 
-
 log_message "Sleep helper starting up..."
 rm -f /tmp/power_pressed_flag
 
@@ -78,6 +77,15 @@ trigger_sleep() {
     IDLE_TIMEOUT=$(get_shutdown_timer)
     start_ts=$(date +%s)
     set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
+    pause_emulators
+    sleep 0.5
+    # Kill exclusive getevent to prevent buffered wake button events
+    # from causing a re-sleep loop. The power watchdog's outer loop
+    # will restart getevent fresh after sleep_helper exits.
+    if [ "$(device_uses_pseudo_sleep)" != "true" ]; then
+        kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+        sleep 0.3
+    fi
     device_enter_sleep "$IDLE_TIMEOUT"
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
@@ -150,9 +158,11 @@ device_exit_sleep
 
 log_activity_event "$current_app" "START"
 
-# Restore volume
+# Restore volume before unpausing so audio is ready
 VOLUME_LV=$(jq -r '.vol' "$SYSTEM_JSON")
 set_volume "$VOLUME_LV"
+
+unpause_emulators
 
 kill "$GET_EVENT_PID" 2>/dev/null
 

@@ -61,6 +61,11 @@ get_core_override() {
                     core_section=".menuOptions.Emulator_64"
                 fi
                 ;;
+            MEDIA)
+                ARCH_SUFFIX="64"
+                [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && ARCH_SUFFIX="32"
+                core_section=".menuOptions.Emulator_$ARCH_SUFFIX"
+                ;;
             NDS)
                 if [ "$PLATFORM" = "Flip" ]; then
                     core_section=".menuOptions.Emulator_Flip"

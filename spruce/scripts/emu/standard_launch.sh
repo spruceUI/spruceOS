@@ -41,7 +41,7 @@ set_cpu_mode
 record_session_start_time
 handle_network_services
 led_effect &
-flag_add 'emulator_launched'
+flag_add 'emulator_launched' --tmp
 
 
 case $EMU_NAME in
@@ -70,8 +70,12 @@ case $EMU_NAME in
 		;;
 
 	"MEDIA")
-		. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
-		run_ffplay
+		if [ "$CORE" = "ffplay" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
+			run_ffplay
+		else
+			run_retroarch
+		fi
 		;;
 
 	"NDS")
@@ -119,7 +123,21 @@ case $EMU_NAME in
 			. /mnt/SDCARD/spruce/scripts/emu/lib/yaba_functions.sh
 			run_yabasanshiro
 		else
-			export CORE="yabasanshiro"
+			CORE="${CORE%_libretro}"
+			run_retroarch
+		fi
+		;;
+
+	"SCUMMVM")
+		. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
+		if [ "$OPEN_SCUMMVM_MENU" = "true" ]; then
+			run_scummvm_menu
+		elif [ "$RUN_SCUMMVM_SCAN" = "true" ]; then
+			run_scummvm_scan
+		elif [ "$CORE" = "scummvm-standalone" ]; then
+			run_scummvm
+		else
+			CORE="${CORE%_libretro}"
 			run_retroarch
 		fi
 		;;
@@ -133,9 +151,9 @@ kill -9 $(pgrep -f enforceSmartCPU.sh) || true
 record_session_end_time
 calculate_current_session_duration
 update_gtt
+sync
 
-
-enable_or_disable_wifi &
+enable_or_disable_wifi_per_system_json &
 
 
 log_message "-----Closing Emulator-----"

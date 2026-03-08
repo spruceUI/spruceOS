@@ -155,15 +155,34 @@ class GamelistGenerator:
         emu_dir: str,
         messenger: PyUiMessenger,
         image_path: str = "",
+        log_path: str = "",
     ) -> None:
         self.roms_dir = roms_dir
         self.emu_dir = emu_dir
         self.messenger = messenger
         self.image_path = image_path
+        self.log_path = log_path
+        self._log_lines: list[str] = []
 
     # ---- public entry point ------------------------------------------------
 
+    def _log(self, message: str) -> None:
+        self._log_lines.append(message)
+
+    def _write_log(self) -> None:
+        if not self.log_path:
+            return
+        try:
+            with open(self.log_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(self._log_lines) + "\n")
+        except Exception:
+            pass
+
     def generate_all(self) -> None:
+        self._log_lines.clear()
+        self._log("MiyooGamelist Generator")
+        self._log("=" * 40)
+
         self.messenger.display_image_and_text(
             self.image_path,
             "Generating miyoogamelist.xml files...\n\n"
@@ -177,28 +196,45 @@ class GamelistGenerator:
             emu_entries = sorted(os.listdir(self.emu_dir))
         except FileNotFoundError:
             self.messenger.display_text("Error: Emu directory not found")
+            self._log("ERROR: Emu directory not found")
+            self._write_log()
             return
 
+        generated = 0
         for system_name in emu_entries:
             system_path = os.path.join(self.emu_dir, system_name)
             if not os.path.isdir(system_path):
                 continue
             if system_name in self.EXCLUDED_SYSTEMS:
+                self._log(f"SKIP {system_name}: excluded system")
                 continue
 
             extlist = self._get_extlist(system_name)
             if not extlist:
+                self._log(f"SKIP {system_name}: no extlist found")
                 continue
 
             rom_path = os.path.join(self.roms_dir, system_name)
             if not os.path.isdir(rom_path):
+                self._log(f"SKIP {system_name}: no ROM directory")
                 continue
 
             self.messenger.display_image_and_text(
                 self.image_path,
                 f"Generating miyoogamelist.xml for {system_name}...",
             )
-            self._generate_for_system(system_name, rom_path, extlist)
+            rom_count = self._generate_for_system(system_name, rom_path, extlist)
+            self._log(f"OK   {system_name}: {rom_count} ROMs")
+            generated += 1
+
+        self._log("=" * 40)
+        self._log(f"Done. Generated gamelists for {generated} systems.")
+        self._write_log()
+
+        self.messenger.display_image_and_text(
+            self.image_path,
+            f"Done! Generated gamelists for {generated} systems.",
+        )
 
     # ---- cleanup -----------------------------------------------------------
 
@@ -247,23 +283,36 @@ class GamelistGenerator:
 
     def _generate_for_system(
         self, system_name: str, rom_path: str, extlist: set
-    ) -> None:
+    ) -> int:
         output_path = os.path.join(rom_path, "miyoogamelist.xml")
-        writer = GamelistXmlWriter()
-        used_names: set[str] = set()
-        self._process_roms_recursive(
-            rom_path, rom_path, "./Imgs", extlist, writer, used_names
-        )
-        writer.write(output_path)
 
-    def _process_roms_recursive(
+        # Pass 1: collect all ROM entries and detect duplicate cleaned names
+        rom_entries: list[tuple[str, str, str, str]] = []
+        name_count: dict[str, int] = {}
+        self._collect_roms_recursive(
+            rom_path, rom_path, "./Imgs", extlist, rom_entries, name_count
+        )
+
+        # Pass 2: write entries, using raw filename for ALL duplicates
+        writer = GamelistXmlWriter()
+        for file_rel_path, img_rel_path, cleaned, filename_no_ext in rom_entries:
+            if name_count.get(cleaned, 0) > 1:
+                display_name = filename_no_ext
+            else:
+                display_name = cleaned
+            writer.add_entry(file_rel_path, display_name, img_rel_path)
+
+        writer.write(output_path)
+        return len(rom_entries)
+
+    def _collect_roms_recursive(
         self,
         current_dir: str,
         base_path: str,
         img_path: str,
         extlist: set,
-        writer: GamelistXmlWriter,
-        used_names: set,
+        rom_entries: list,
+        name_count: dict,
     ) -> None:
         try:
             entries = sorted(os.listdir(current_dir))
@@ -281,8 +330,9 @@ class GamelistGenerator:
             if os.path.isdir(item_full):
                 if item_name == "Imgs" or item_name.startswith("."):
                     continue
-                self._process_roms_recursive(
-                    item_full, base_path, img_path, extlist, writer, used_names
+                self._collect_roms_recursive(
+                    item_full, base_path, img_path, extlist,
+                    rom_entries, name_count,
                 )
                 continue
 
@@ -307,18 +357,14 @@ class GamelistGenerator:
                 file_rel_path = f"./{rel_path}/{item_name}"
                 img_rel_path = f"{img_path}/{rel_path}/{filename_no_ext}.png"
 
-            # Clean name
+            # Clean name and track duplicates (keyed by subfolder)
             cleaned = RomNameCleaner.clean_name(item_name, extlist)
-
-            # Duplicate detection (keyed by subfolder to avoid cross-folder collisions)
+            if not cleaned:
+                cleaned = filename_no_ext
             dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
-            if dedup_key in used_names:
-                display_name = filename_no_ext
-            else:
-                display_name = cleaned
-                used_names.add(dedup_key)
+            name_count[dedup_key] = name_count.get(dedup_key, 0) + 1
 
-            writer.add_entry(file_rel_path, display_name, img_rel_path)
+            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext))
 
 
 # ---------------------------------------------------------------------------
@@ -330,8 +376,9 @@ def main() -> None:
     roms_dir = "/mnt/SDCARD/Roms"
     emu_dir = "/mnt/SDCARD/Emu"
 
+    log_path = "/mnt/SDCARD/App/MiyooGamelist/generate.log"
     messenger = PyUiMessenger()
-    generator = GamelistGenerator(roms_dir, emu_dir, messenger, image_path)
+    generator = GamelistGenerator(roms_dir, emu_dir, messenger, image_path, log_path)
     generator.generate_all()
 
 

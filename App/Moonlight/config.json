@@ -1,0 +1,8 @@
+{
+  "label": "Moonlight",
+  "icon": "retroarch.png",
+  "launch": "launch.sh",
+  "description": "Game Streaming (L+R to exit)",
+  "devices": ["MIYOO_FLIP", "GKD_PIXEL2"],
+  "hideInSimpleMode": false
+}

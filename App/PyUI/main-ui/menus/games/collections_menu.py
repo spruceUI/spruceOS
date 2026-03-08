@@ -1,9 +1,13 @@
 
 import os
 from devices.device import Device
+from games.utils.game_system import GameSystem
+from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
+from menus.games.muos_game_system_config import MuosGameSystemConfig
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.rom_info import RomInfo
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.consts import COLLECTIONS
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -22,7 +26,8 @@ class CollectionsMenu(RomsMenuCommon):
             rom_list = []
             collections = CollectionsManager.get_collection_names()
             for collection in collections:
-                rom_info = RomInfo(None, collection, is_collection=True)
+                # Should not use muos game system config to get around this but it works for now
+                rom_info = get_rom_select_options_builder().build_fake_game_system(collection, collection, is_collection=True)
                 # Get the base filename without extension
                 img_path = os.path.join(Device.get_device().get_collections_path(),"Imgs",collection+".png")
 

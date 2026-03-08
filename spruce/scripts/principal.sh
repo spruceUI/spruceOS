@@ -20,6 +20,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 while [ 1 ]; do
+    set_smart
 
     stop_pyui_message_writer
     enable_or_disable_rgb
@@ -27,10 +28,9 @@ while [ 1 ]; do
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
-        
         display_kill &          # This is to kill leftover display processes that may be running
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
-        flag_add "in_menu"
+        flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
 
         # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI
@@ -47,7 +47,7 @@ while [ 1 ]; do
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         finish_unpacking "pre_cmd_unpacking"
 
-        spruce/scripts/applySetting/idlemon_mm.sh reapply &
+        spruce/scripts/applySetting/idlemon_mm.sh &
 
         flag_remove "in_menu"
     fi
@@ -76,7 +76,6 @@ while [ 1 ]; do
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
         killall -9 udpbcast 2>/dev/null
 
-        set_smart
         log_activity_event "$cmd" "STOP"
         sync
     fi

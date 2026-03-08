@@ -2,6 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Disable idle/shutdown timer during game downloads
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 ##### CONSTANTS #####
 
 DOWNLOAD="/mnt/SDCARD/App/GameNursery/download_game.sh"
@@ -28,11 +32,11 @@ unbind_PORTS() {
 }
 
 is_wifi_connected() {
-    if ping -c 3 -W 2 1.1.1.1 > /dev/null 2>&1; then
-        log_message "Cloudflare ping successful; device is online."
+    if ping -c 3 github.com > /dev/null 2>&1; then
+        log_message "Github ping successful; device is online."
         return 0
     else
-        log_and_display_message "Cloudflare ping failed; device is offline. Aborting."
+        log_and_display_message "Github ping failed; device is offline. Aborting."
         return 1
     fi
 }
@@ -262,7 +266,7 @@ construct_config() {
         fi
     done
 
-    sed -i '$ s/,$//' "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
+    sed '$ s/,$//' "$CONFIG_DIR"/nursery_config > "$CONFIG_DIR"/nursery_config.tmp && mv "$CONFIG_DIR"/nursery_config.tmp "$CONFIG_DIR"/nursery_config      # strip away final trailing comma
     echo "}" >> "$CONFIG_DIR"/nursery_config            # Finish config json with a closing bracket
 }
 

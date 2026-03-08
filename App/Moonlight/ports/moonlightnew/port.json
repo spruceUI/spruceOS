@@ -1,0 +1,30 @@
+{
+    "version": 3,
+    "name": "moonlightnew.zip",
+    "items": [
+        "Moonlight New.sh",
+        "moonlightnew"
+    ],
+    "items_opt": null,
+    "attr": {
+        "title": "Moonlight New",
+        "porter": [
+            "JanTrueno"
+        ],
+        "desc": "\"Moonlight Embedded is an open source client for Sunshine and NVIDIA GameStream for embedded Linux systems. Moonlight allows you to stream your full collection of games and applications from your PC to other devices to play them remotely\". Now with a brand new custom-made launcher!\"",
+        "desc_md": "*\"Moonlight Embedded is an open source client for [Sunshine](https://github.com/LizardByte/Sunshine) and NVIDIA GameStream for embedded Linux systems. Moonlight allows you to stream your full collection of games and applications from your PC to other devices to play them remotely\"* Now with a brand new custom-made launcher!\"",
+        "inst": "Install the latest version of Sunshine on your PC and use the launcher to pair to your pc. Full instructions are on the PortMaster site!",
+        "inst_md": "- Install the latest version of [Sunshine](https://github.com/LizardByte/Sunshine/releases) on your PC *(GFE is not updated anymore but may give good results for NVIDIA users)*\n- This guide will use the windows installer version. \n- Run the installer, agree with the terms. Wait for it to finish.\n- Open Sunshine for the first time. It will open up a window in your default browser.\n- It may give a warning about your connection not being private. Click on advanced and continue to localhost.\n- Here you will set the username and password for Sunshine, set it to something simple and memorable. It will ask for it every time.\n- The page will reload and then you will log into Sunshine. \n- Now its time to open Moonlight on your handheld. \n- First head to the *\"Settings Menu\"* and set them how you would like. Preferably start off with a low bitrate and your devices native resolution and framerate. \n- Lets move to the *\"Connect Menu\"*. Here you will first set your host device IP-address. \n- You will be able to find this by going to your network settings, properties and under *\"IPv4 address\"*.\n- Now its time to pair. Head to the *\"Pin\"* section on your host PC. \n- Click *\"Pair\"* in the Moonlight port. This will now show a pin. Fill this pin into Sunshine. Also fill in the device name, this can be named after your device such a *\"RG35XX\"*. \n- After sending the signal on you host PC, you will receive a message *\"Succesfully paired\"* in the moonlight app on your handheld. \n- Head over to the *\"Reload Apps\"* function on your handheld. Click on it and you will see the currently configured apps from Sunshine. Every time you update the Apps in Sunshine, use this function.\n- Head to the *\"Play Menu\"* and select the app you want to stream, Steam for example. \n- The Moonlight app will close on your handheld and it will start streaming. Wait 5 seconds for the controls.\n- Have fun!\n\n## Recommendations: ##\n- Moonlight requires a very good internet connection to get a decent experience. There are many factors at play such a the detail of the game your running. Simpler 2d games are easier to stream and require less power to decode on your handheld. You will have to try and find a balance of bitrate and framerate for your setup. \n- Experiencing input and/or audio delay? Lower the bitrate, resolution, or framerate. Reconnecting may help random desyncing issues.\n- Moonlight will maintain aspect ratio of your host PC monitor. You can get a better picture by manually changing the resolution to your devices native resolution, such as 640x480. There are ways to automate this process, such as  [ResolutionAutomation](https://github.com/Nonary/ResolutionAutomation). Use these programs on your own risk.\n- Inputs may be reversed. Mouse mode does not work on Moonlight-Embedded. Both can be resolved by using SteamInput.\n- Its recommended to check your connection before streaming, use the pair function for this. Does it say *\"Already paired\"*, then youre good to go. It may also say something like *\"App already opened\"*, you need to use *\"Force Close\"* under the troubleshooting options in Sunshine.\n- Most important of all, dont expect an amazing experience going in. These handhelds are not ideal for Streaming, even though they may seem like it.\n",
+        "genres": [
+            "other"
+        ],
+        "image": {},
+        "rtr": true,
+        "exp": false,
+        "runtime": null,
+        "reqs": [],
+        "arch": [
+            "aarch64"
+        ]
+    }
+}

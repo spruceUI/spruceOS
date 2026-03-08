@@ -1,0 +1,8 @@
+JanTrueno — 06/23/2024 6:13 PM
+Also forgot to ask you @tekkenfede. 
+I used the portmaster logo and theme music in the moonlight launcher. 
+Im assuming its fine, but can i use them? 
+And do i need to add a  license or something for when i host it on github?
+
+tekkenfede — Yesterday at 5:08 AM
+Sure no problem, more than a little "thanks to" or something like this somewhere is not necessary.

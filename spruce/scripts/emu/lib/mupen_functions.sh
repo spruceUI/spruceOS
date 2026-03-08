@@ -21,8 +21,14 @@ run_mupen_standalone() {
 	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
 	cd "$HOME"
 
-	sed -i "s|^ScreenWidth *=.*|ScreenWidth = $DISPLAY_WIDTH|" "$HOME/.config/mupen64plus/mupen64plus.cfg"
-	sed -i "s|^ScreenHeight *=.*|ScreenHeight = $DISPLAY_HEIGHT|" "$HOME/.config/mupen64plus/mupen64plus.cfg"
+	# Calculate 4:3 canvas for the hacked rice patch
+	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
+	G_HEIGHT=$DISPLAY_HEIGHT
+
+	# Define arguments for Hacked Rice:
+	# --resolution: 4:3 Render Canvas (960x720)
+	# --set: Physical Viewport (1280x720)
+	ARGS="--gfx mupen64plus-video-rice.so --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
 
 	case "$ROM_FILE" in
 	*.n64 | *.v64 | *.z64)
@@ -38,7 +44,7 @@ run_mupen_standalone() {
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 	sleep 0.3
-	./mupen64plus "$ROM_PATH" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./mupen64plus $ARGS "$ROM_PATH" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	kill -9 $(pidof gptokeyb2)
 
 	rm -f "$TEMP_ROM"

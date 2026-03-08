@@ -64,92 +64,23 @@ auto_regen_tmp_update() {
     fi
 }
 
-
-restart_wifi() {
-    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
-    log_message "Restarting Wi-Fi interface wlan0"
-
-    # Bring the interface down and kill any running services
-    ifconfig wlan0 down
-    killall wpa_supplicant 2>/dev/null
-    killall udhcpc 2>/dev/null
-
-    # Bring the interface back up and reconnect
-    ifconfig wlan0 up
-    wpa_supplicant -B -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-    udhcpc -i wlan0 &
-}
-
-check_and_connect_wifi() {
-    # ########################################################################
-    # WARNING: Avoid running this function in-game, it will lead to stuttters!
-    # ########################################################################
-
-    timeout=60  # Think about making this configurable
-    start_time=$(date +%s)
-
-    # More thorough connection check
-    connection_active=0
-    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-        # Additional validation - try to ping a reliable host
-        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-            connection_active=1
-            log_message "Active WiFi connection verified"
-        else
-            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
-            ifconfig wlan0 down  # Force a reconnection attempt
-            connection_active=0
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+pause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -19 "$EMU" 2>/dev/null; then
+            break
         fi
-    fi
-
-    if [ $connection_active -eq 0 ]; then
-        log_message "Attempting to connect to WiFi"
-
-        restart_wifi
-		
-        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
-Press START to continue anyway."
-        {
-            while true; do
-                # Check for timeout
-                current_time=$(date +%s)
-                if [ $((current_time - start_time)) -ge $timeout ]; then
-                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
-                    break
-                fi
-
-                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
-                    break
-                fi
-                sleep 0.5
-            done
-        } &
-        while true; do
-            inotifywait "$MESSAGES_FILE"
-            last_line=$(tail -n 1 "$MESSAGES_FILE")
-            case $last_line in
-                *"$B_START"* | *"$B_START_2"*)
-                    log_message "WiFi connection cancelled by user"
-                    display  --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -d 2 -t "Proceeding before connected to wifi."
-                    return 1
-                    ;;
-                *"Successfully connected to WiFi"*)
-                    log_message "Successfully connected to WiFi"
-                    display_kill
-                    return 0
-                    ;;
-                *"WiFi connection timed out"*)
-                    log_message "WiFi connection timed out after $timeout seconds"
-                    display_kill
-                    return 1
-                    ;;
-            esac
-        done
-    fi
-
-    return 0
+    done
 }
+
+unpause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -18 "$EMU" 2>/dev/null; then
+            break
+        fi
+    done
+}
+
 
 confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
@@ -200,9 +131,15 @@ confirm() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    start_brightness="$SYSTEM_BRIGHTNESS_4"
+    # Get current brightness
+    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
     end_brightness="$SYSTEM_BRIGHTNESS_0"
-    delay=0.01 # 50ms delay between each step
+    delay=0.05 # 50ms delay between each step
+    
+    # Start at 4 if higher (so it's faster)
+    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
+        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    fi
 
     # Check if another dim_screen is running
     if pgrep -f "dim_screen" | grep -v $$ >/dev/null; then
@@ -210,11 +147,8 @@ dim_screen() {
         return 1
     fi
 
-    # Get current brightness
-    current_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-
     # Check if we're already at target brightness
-    if [ "$current_brightness" -le "$end_brightness" ]; then
+    if [ "$start_brightness" -le "$end_brightness" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
@@ -243,9 +177,14 @@ finish_unpacking() {
 
 # Add a flag
 # Usage: flag_add "flag_name"
+# Usage 2: flag_add "flag_name" --tmp   --> creates flag in /tmp/ instead, to avoid unnecessary SD writes and stuck states
 flag_add() {
     local flag_name="$1"
-    touch "$FLAGS_DIR/${flag_name}.lock"
+    local dest="$FLAGS_DIR"
+    if [ "$2" = "--tmp" ]; then
+        dest="/tmp"
+    fi
+    touch "$dest/${flag_name}.lock"
 }
 
 # Check if a flag exists
@@ -253,7 +192,7 @@ flag_add() {
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then
         return 0
     else
         return 1
@@ -273,6 +212,7 @@ flag_path() {
 flag_remove() {
     local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
+    rm -f "/tmp/${flag_name}.lock"
 }
 
 # Call this to get the last button pressed
@@ -549,7 +489,7 @@ log_precise() {
 
 low_battery_check() {
     if flag_check "low_battery"; then
-        CAPACITY=$(cat $BATTERY/capacity)
+        CAPACITY=$(device_get_battery_percent)
         start_pyui_message_writer
         log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
         sleep 1
@@ -662,7 +602,7 @@ record_video() {
         date_str=$(date +%Y-%m-%d_%H-%M-%S)
         set_performance
         # Prevent the CPU from being clocked down while recording
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
 
         # If no output file specified, create one with timestamp
         if [ -z "$output_file" ]; then
@@ -840,8 +780,10 @@ download_and_display_progress() {
 		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null
+        sync
 		return 1
     else
+        sync
         return 0
 	fi
 }
@@ -878,14 +820,6 @@ display_image_and_text() {
         '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' \
         "$img" "$text" "$size" "$img_y" "$text_y"
     )"
-}
-
-get_config_value() {
-    local key="$1"
-    local default="$2"
-    local file="/mnt/SDCARD/Saves/spruce/spruce-config.json"
-
-    jq -r "${key} // \"$default\"" "$file"
 }
 
 get_pyui_config_value() {
@@ -1018,43 +952,125 @@ extract_7z_with_progress() {
     return "$RET"
 }
 
-enable_or_disable_wifi() {
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        ifconfig wlan0 down         2>/dev/null
-        rm -f /tmp/wifion           2>/dev/null
-        touch /tmp/wifioff          2>/dev/null
-        killall -9 wpa_supplicant   2>/dev/null
-        killall -9 udhcpc           2>/dev/null
-        log_message "WiFi turned off"
 
-        device_wifi_power_off
+##### WIFI HANDLING #####
 
-    else
-    
-        device_wifi_power_on
+disable_wifi() {
+    ifconfig wlan0 down         2>/dev/null
+    rm -f /tmp/wifion           2>/dev/null
+    touch /tmp/wifioff          2>/dev/null
+    killall -9 wpa_supplicant   2>/dev/null
+    killall -9 udhcpc           2>/dev/null
+    log_message "WiFi turned off"
+    device_wifi_power_off
+}
 
-        rm -f /tmp/wifioff          2>/dev/null
-        touch /tmp/wifion           2>/dev/null
-        ifconfig wlan0 up           2>/dev/null
+enable_wifi() {
+    device_wifi_power_on
 
-        # check if WPA supplicant needs to be started or restarted
-        WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
-        if [ -n "$WPA_PID" ]; then
-            WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-            if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-                log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
-                kill -9 "$WPA_PID" 2>/dev/null
-                sleep 1
-                wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-            fi
-        else    # wpa_supplicant was not running at all, so start it
+    rm -f /tmp/wifioff          2>/dev/null
+    touch /tmp/wifion           2>/dev/null
+    ifconfig wlan0 up           2>/dev/null
+
+    # check if WPA supplicant needs to be started or restarted
+    WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
+    if [ -n "$WPA_PID" ]; then
+        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
+        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+            log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
+            kill -9 "$WPA_PID" 2>/dev/null
+            sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
         fi
-        pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
-        log_message "WiFi turned on"
+    else    # wpa_supplicant was not running at all, so start it
+        wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+    fi
+    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+    /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    log_message "WiFi turned on"
+}
+
+enable_or_disable_wifi_per_system_json() {
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+        disable_wifi
+    else
+        enable_wifi
     fi
 }
+
+restart_wifi() {
+    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
+    log_message "Restarting Wi-Fi interface wlan0"
+    disable_wifi
+    sleep 1
+    enable_wifi
+}
+
+check_and_connect_wifi() {
+
+    timeout=60  # Think about making this configurable
+    start_time=$(date +%s)
+
+    # More thorough connection check
+    connection_active=0
+    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
+        # Additional validation - try to ping a reliable host
+        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+            connection_active=1
+            log_message "Active WiFi connection verified"
+        else
+            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
+        fi
+    fi
+
+    if [ $connection_active -eq 0 ]; then
+        log_message "Attempting to connect to WiFi"
+        start_pyui_message_writer 1
+        restart_wifi
+		
+        display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "Waiting to connect....\nPress START to continue anyway." 75
+        {
+            while true; do
+                # Check for timeout
+                current_time=$(date +%s)
+                if [ $((current_time - start_time)) -ge $timeout ]; then
+                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
+                    break
+                fi
+
+                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
+                    break
+                fi
+                sleep 0.5
+            done
+        } &
+        while true; do
+            inotifywait "$MESSAGES_FILE"
+            last_line=$(tail -n 1 "$MESSAGES_FILE")
+            case $last_line in
+                *"$B_START"* | *"$B_START_2"*)
+                    log_message "WiFi connection cancelled by user"
+                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 "Proceeding before connected to wifi." 75
+                    sleep 2
+                    return 1
+                    ;;
+                *"Successfully connected to WiFi"*)
+                    log_message "Successfully connected to WiFi"
+                    return 0
+                    ;;
+                *"WiFi connection timed out"*)
+                    log_message "WiFi connection timed out after $timeout seconds"
+                    return 1
+                    ;;
+            esac
+        done
+    fi
+    stop_pyui_message_writer
+    return 0
+}
+
+##### ACTIVITY TRACKER STUFF #####
 
 get_current_app() {
     if [ -f /tmp/cmd_to_run.sh ]; then

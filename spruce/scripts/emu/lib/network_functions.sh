@@ -51,7 +51,7 @@ handle_network_services() {
 	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
 		start_syncthing_process
 		/mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --startup
-		flag_add "syncthing_startup_synced"
+		flag_add "syncthing_startup_synced" --tmp
 
 	fi
 

@@ -163,7 +163,8 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    log_message "Missing launch_startup_watchdogs function"
+    log_message "No device-specific launch_startup_watchdogs function. Launching non-lid common watchdogs."
+    launch_common_startup_watchdogs_v2
 }
 
 perform_fw_check(){
@@ -230,6 +231,14 @@ brightness_up() {
     log_message "Missing brightness_up function"
 }
 
+turn_off_screen() {
+    log_message "Missing turn_off_screen function"
+}
+
+turn_on_screen() {
+    log_message "Missing turn_on_screen function"
+}
+
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
     log_message "Missing device_get_charging_status function"
@@ -285,6 +294,11 @@ run_poweroff_cmd() {
     poweroff
 }
 
+device_run_reboot_cmd() {
+    log_message "Missing device_run_reboot_cmd -- using default of reboot"
+    reboot
+}
+
 save_volume_to_config_file() {
     VOLUME_LV=$1
 
@@ -306,4 +320,17 @@ device_wifi_power_on() {
 
 device_wifi_power_off() { 
     log_message "Missing device_wifi_power_off function" -v
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
+    return 0
+}
+
+device_write_default_asound_rc() {
+    # Do these need to be unique per device? Don't have a way 
+    # to test currently
+    log_message "Missing device_write_default_asound_rc function" -v
 }

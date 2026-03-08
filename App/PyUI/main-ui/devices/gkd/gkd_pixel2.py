@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
@@ -11,6 +12,7 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.gkd.gkd_device import GKDDevice
 from devices.gkd.connman_wifi_scanner import ConnmanWiFiScanner
 from devices.gkd.connman_wifi_menu import ConnmanWifiMenu
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.settings.timezone_menu import TimezoneMenu
@@ -56,8 +58,6 @@ class GKDPixel2(GKDDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
             
     #Untested
     @throttle.limit_refresh(5)
@@ -170,29 +170,6 @@ class GKDPixel2(GKDDevice):
 
         os.system("systemctl restart tz-data.service")
 
-    def _set_volume(self, user_volume):
-        from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = user_volume
-        
-        try:
-            ProcessRunner.run(
-                ["pactl", "--", "set-sink-volume", "@DEFAULT_SINK@", f"{volume}%"],
-                check=True
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
-        self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
-    
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?
 
@@ -201,3 +178,9 @@ class GKDPixel2(GKDDevice):
 
     def get_new_wifi_scanner(self):
         return ConnmanWiFiScanner()
+
+    def volume_up(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",115)
+
+    def volume_down(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",114)

@@ -6,7 +6,7 @@
 log_message "powerbutton_watchdog.sh: Started up."
 
 RTC_WAKE_FILE="/sys/class/rtc/rtc0/wakealarm"
-EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.A30 retroarch.Flip retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast yabasanshiro yabasanshiro.trimui mupen64plus"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
 TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
 TMP_VOLUME_PATH=/mnt/SDCARD/Saves/spruce/tmp_volume
 
@@ -39,7 +39,7 @@ get_wake_alarm() {
 }
 
 long_press_handler() {
-    flag_add "pb.longpress"
+    flag_add "pb.longpress" --tmp
     sleep 2
     flag_remove "pb.longpress"
     vibrate &
@@ -67,10 +67,17 @@ while true; do
     }
 
     # start getevent writing to the fifo in background, and capture its PID
-    getevent -exclusive "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
+    # Note: do NOT use -exclusive on devices with a single event device (e.g. MiyooMini)
+    # as it blocks all other input handlers
+    getevent "$EVENT_PATH_POWER" > "$FIFO" 2>/dev/null &
     GETEVENT_PID=$!
 
-    while IFS= read -r line < "$FIFO"; do
+    # Open FIFO once on fd 3 so it stays open between reads.
+    # Opening per-read (read < "$FIFO") causes the FIFO to close/reopen
+    # between iterations, killing getevent with SIGPIPE.
+    exec 3< "$FIFO"
+
+    while IFS= read -r line <&3; do
         case $line in
 
         # Power key down
@@ -100,7 +107,7 @@ while true; do
                 flag_remove "pb.longpress"
 
                 # add sleep flag
-                flag_add "pb.sleep"
+                flag_add "pb.sleep" --tmp
 
                 # Check settings to determine how long to set RTC wake timer
 
@@ -109,20 +116,26 @@ while true; do
                 # shutdown from sleep is neither Instant nor Off
                 if [ "$WAKE_ALARM_SEC" -gt 0 ]; then
                     if applicable_process_is_running; then
-                        echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
+                        # Only set wake alarm if the RTC device exists
+                        if [ -e "$RTC_WAKE_FILE" ]; then
+                            echo "+$WAKE_ALARM_SEC" >"$RTC_WAKE_FILE"
+                            # Verify it was actually written
+                            if [ -n "$(cat "$RTC_WAKE_FILE" 2>/dev/null)" ]; then
+                                flag_add "wake.alarm" --tmp
+                            fi
+                        fi
                         cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
                         CURRENT_VOLUME="$(get_current_volume)"
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
                         echo 0 > $DEVICE_BRIGHTNESS_PATH
                         set_volume 0
-                        flag_add "wake.alarm"
                     fi
                 fi
 
                 # shutdown from sleep is Instant
                 if [ "$WAKE_ALARM_SEC" -eq -1 ]; then
                     if applicable_process_is_running; then
-                        flag_add "sleep.powerdown"
+                        flag_add "sleep.powerdown" --tmp
                         cat "$DEVICE_BRIGHTNESS_PATH" > "$TMP_BACKLIGHT_PATH"
                         CURRENT_VOLUME="$(get_current_volume)"
                         echo $CURRENT_VOLUME > "$TMP_VOLUME_PATH"
@@ -154,6 +167,9 @@ while true; do
                     GETEVENT_PID=""
                 fi
 
+                # close fd 3
+                exec 3<&-
+
                 # small pause to let things settle
                 sleep 0.5
 
@@ -164,28 +180,24 @@ while true; do
         esac
     done
 
-    # cleanup FIFO
+    # cleanup fd 3 and FIFO
+    exec 3<&- 2>/dev/null
     rm -f "$FIFO"
 
     sync
+
     enter_sleep
 
-    if flag_check "wake.alarm"; then
-
-        # If RTC alarm is cleared, we woke from from the alarm
-        CURRENT_ALARM=$(cat "$RTC_WAKE_FILE" 2>/dev/null)
-
-        if ! [ -z "$CURRENT_ALARM" ]; then
-            # restore display and volume setting after wakeup
-            cat "$TMP_BACKLIGHT_PATH" > $DEVICE_BRIGHTNESS_PATH
-            ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance)
-            echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance
-
-            # restore volume only when we actually woke from the alarm
-            set_volume "$(cat "$TMP_VOLUME_PATH")"
-            device_specific_wake_from_sleep
-        fi
+    # Restore brightness and volume after waking (regardless of alarm status)
+    if [ -s "$TMP_BACKLIGHT_PATH" ]; then
+        cat "$TMP_BACKLIGHT_PATH" > $DEVICE_BRIGHTNESS_PATH 2>/dev/null
+        ENHANCE_SETTINGS=$(cat /sys/devices/virtual/disp/disp/attr/enhance 2>/dev/null)
+        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" >/sys/devices/virtual/disp/disp/attr/enhance 2>/dev/null
     fi
+    if [ -s "$TMP_VOLUME_PATH" ]; then
+        set_volume "$(cat "$TMP_VOLUME_PATH")"
+    fi
+    device_specific_wake_from_sleep
 
     # RESUME any running emulator or MainUI (use exact matches)
     for EMU in $EMULATORS; do
@@ -210,7 +222,7 @@ while true; do
 
         if [ -z "$CURRENT_ALARM" ]; then
             flag_remove "wake.alarm"
-            flag_add "sleep.powerdown"
+            flag_add "sleep.powerdown" --tmp
 
             if applicable_process_is_running; then
                 vibrate &

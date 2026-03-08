@@ -1,0 +1,4 @@
+Connecting to 192.168.xx.xx...
+1. Load apps first
+2. Load apps first
+3. Load apps first

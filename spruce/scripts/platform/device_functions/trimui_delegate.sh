@@ -237,3 +237,19 @@ run_trimui_osdd() {
         echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
     } &
 }
+
+current_backlight() {
+    jq -r '.backlight' "$SYSTEM_JSON"
+}
+
+brightness_down() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight - 1))
+}
+
+brightness_up() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight + 1))
+}

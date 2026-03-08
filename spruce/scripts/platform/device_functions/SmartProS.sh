@@ -10,7 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 get_config_path() {
-    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
 }
 
 ###############################################################################
@@ -76,23 +76,16 @@ enable_or_disable_rgb() {
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-    # Volume on smart pro s is weird
-    # 1/2 volume is basically one step above mute
-    if [ "$new_vol" -eq 0 ]; then
-        scaled=0
-    else
-        scaled=$(( 32 + ( (new_vol - 1) * 31 / 19 ) ))
-    fi
 
-
-    amixer set DAC "$scaled"
+    mkdir -p /tmp/system 2>/dev/null
+    echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
-            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
             if ! pgrep MainUI >/dev/null; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi
@@ -160,10 +153,6 @@ prepare_for_pyui_launch(){
 
 post_pyui_exit(){
     log_message "post_pyui_exit not needed for Trim UI Smart Pro S " -v
-}
-
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
 }
 
 perform_fw_check(){
@@ -305,29 +294,21 @@ device_init() {
     [ "$run_osd" = "True" ] && run_trimui_osdd
 
     echo 1 > /sys/class/speaker/mute
+
     tinymix set 23 1
     tinymix set 18 23
     tinymix set 26 1
     tinymix set 27 1
     tinymix set 28 1
     tinymix set 29 1
+    amixer set DAC 255 # reset this to max so we're not double attenuating vol with two different mixer controls
+
 
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
-    (
-        # Set volume on startup by simulating button presses
-        # Alternative is shared memory to keymon
-        sleep 3
-        {
-            echo 1 115 1 # Vol up pressed
-            echo 1 115 0 # Vol up released
-            echo 1 114 1 # Vol down pressed
-            echo 1 114 0 # Vol down released
-            echo 0 0 0   # tell sendevent to exit
-        } | sendevent $EVENT_PATH_VOLUME 
-        sleep 1
-        echo 0 > /sys/class/speaker/mute
-    ) &
+
+    echo 0 > /sys/class/speaker/mute
+
 }
 
 set_event_arg_for_idlemon() {
@@ -403,7 +384,7 @@ device_exit_sleep(){
         done
 
         if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            enable_or_disable_wifi_per_system_json
         fi
     fi
     device_run_tsps_blobs
@@ -416,15 +397,6 @@ device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
 }
 
-
-kill_wifi(){
-    rm -f /tmp/wifi_on
-    if pidof wpa_supplicant >/dev/null 2>&1; then
-        : > /tmp/wifi_on
-        killall wpa_supplicant
-    fi
-}
-
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
@@ -432,7 +404,7 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    kill_wifi
+    disable_wifi
 
     save_cores_online
     cores_online 0
@@ -457,7 +429,7 @@ device_run_tsps_blobs() {
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
-    kill_wifi
+    disable_wifi
 }
 
 device_home_button_pressed() {
@@ -494,4 +466,29 @@ device_run_thermal_process(){
         python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
     fi
 
+}
+
+set_backlight() {
+    val="$1"
+
+    # Clamp input to 1–10
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+
+    # Convert 1–10 → 1–255
+    val_255=$(( (val - 1) * 254 / 9 + 1 ))
+
+    # actually change the backlight
+    echo "$val_255" > /sys/class/backlight/backlight0/brightness
+
+    # update device system json
+    tmp=$(mktemp)
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+}
+
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # SmartProS leaves dirty bit set?
 }

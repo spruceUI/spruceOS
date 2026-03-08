@@ -5,10 +5,17 @@ from pathlib import Path
 import re
 import subprocess
 import time
+from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
 from display.font_purpose import FontPurpose
+from games.utils.game_system import GameSystem
+from menus.app.app_utils import AppUtils
+from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
+from menus.games.game_system_select_menu import GameSystemSelectMenu
+from menus.games.muos_game_system_config import MuosGameSystemConfig
 from menus.games.utils.rom_info import RomInfo
+from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 
@@ -221,22 +228,69 @@ class MiyooTrimCommon():
             f.write(y_zero + "\n")
         PyUiLogger.get_logger().info("Calibration Complete")
 
-
     @staticmethod
     def set_theme(json_path, theme_path: str):
         try:
-            # Read the existing JSON
-            try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-            except FileNotFoundError:
-                data = {}  # start with empty if file doesn't exist
+            with open(json_path, "r", encoding="utf-8") as f:
+                content = f.read()
 
-            # Update the "Theme" entry
-            data["theme"] = theme_path
+            # Regex to match: "theme": "anything"
+            theme_pattern = r'("theme"\s*:\s*")[^"]*(")'
 
-            # Write back to the file
+            if re.search(theme_pattern, content):
+                # Replace existing theme value
+                content = re.sub(
+                    theme_pattern,
+                    rf'\1{theme_path}\2',
+                    content
+                )
+            else:
+                # Insert theme before the first closing brace
+                insert_pattern = r'\}'
+                replacement = f'    "theme": "{theme_path}",\n}}'
+                content = re.sub(insert_pattern, replacement, content, count=1)
+
             with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+                f.write(content)
+
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Could not set theme in {json_path} : {e}")
+            PyUiLogger.get_logger().error(
+                f"Could not set theme in {json_path} : {e}"
+            )
+
+
+    @staticmethod
+    def get_image_for_activity(activity):
+        # TODO this is assuming all defaults
+        # We can create a mapping the first time this is called from config files
+        # to account for this in the future
+        if(activity.startswith("App")):
+            config_path = "/mnt/SDCARD/" + activity.replace("launch.sh", "config.json")
+            app = MiyooAppConfig(config_path)
+            return AppUtils.get_icon(app.get_folder(),app.get_icon())
+        elif(activity.startswith("Rom")):
+            # TODO handle multiple sdcard
+            img = get_rom_select_options_builder().get_image_path(get_rom_select_options_builder().build_fake_game_system("/mnt/SDCARD/"+activity))
+            if(img is None):
+                # Should only do miyoo flip but can handle later
+                return get_rom_select_options_builder().get_image_path(get_rom_select_options_builder().build_fake_game_system("/mnt/sdcard1/"+activity))
+            else:
+                return img
+        else: # it's a console ?
+            try:
+                game_system_config = FileBasedGameSystemConfig(activity)
+                game_system = None
+                if(game_system_config is not None):
+                    display_name = game_system_config.get_label()
+                    game_system = GameSystem([activity],display_name, game_system_config)
+
+                if(game_system is not None):
+                    _, image_path_selected = GameSystemSelectMenu.get_images(game_system)
+                    PyUiLogger.get_logger().info(f"activity is {activity}, display name is {game_system.display_name.lower()}, icon is {image_path_selected}")
+                    return image_path_selected
+                else:
+                    PyUiLogger.get_logger().warning(f"Unrecognized activity : {activity}")
+                    return None
+            except Exception as e:
+                PyUiLogger.get_logger().warning("Error getting game system config (likely mapped name, TODO): ", exc_info=True)
+                return None

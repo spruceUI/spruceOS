@@ -9,7 +9,7 @@ case "$PLATFORM" in
         STORAGE_DEVICE="/dev/mmcblk0p1"
         MOUNT_POINT="/mnt/SDCARD"
         USB_GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
-        LUN_PATH="$GADGET_PATH/lun0"
+        LUN_PATH="$USB_GADGET_PATH/lun0"
         LUN_FILE="$LUN_PATH/file"
         ;;
     "Brick" | "SmartPro")
@@ -30,6 +30,13 @@ case "$PLATFORM" in
         USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
         USB_UDC_CONTROLLER="ff300000.usb"
         USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
+        ;;
+    "SmartProS")
+        STORAGE_DEVICE="/dev/mmcblk1p1"
+        MOUNT_POINT="/mnt/sdcard/mmcblk1p1"
+        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
+        USB_UDC_CONTROLLER="4100000.udc-controller"
+        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
         ;;
     *)
         # This will run if PyUI isn't ready yet, providing a basic message.
@@ -85,7 +92,7 @@ cleanup_usb_gadget() {
             [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
             [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
             ;;
-        "Flip" | "Pixel2")
+        "Flip" | "Pixel2" | "SmartProS")
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
@@ -146,9 +153,9 @@ configure_usb_gadget() {
             ;;
         "Pixel2")
             mkdir $USB_GADGET_PATH -m 0770
-            echo "0x2207" > $USB_GADGET_PATH/rockchip/idVendor
-            echo "0x0000" > $USB_GADGET_PATH/rockchip/idProduct
-            echo "0x0200" > $USB_GADGET_PATH/rockchip/bcdUSB
+            echo "0x2207" > $USB_GADGET_PATH/idVendor
+            echo "0x0000" > $USB_GADGET_PATH/idProduct
+            echo "0x0200" > $USB_GADGET_PATH/bcdUSB
             mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
             echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
             echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
@@ -163,6 +170,18 @@ configure_usb_gadget() {
             ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
             echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
             ;;
+            "SmartProS")
+            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0"
+            echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
+            echo 0 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/ro"
+            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file"
+            mkdir -p "$USB_CONFIG_PATH/strings/0x409"
+            echo "Mass Storage" > "$USB_CONFIG_PATH/strings/0x409/configuration"
+            [ -L "$USB_CONFIG_PATH/mass_storage.0" ] || ln -s "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/"
+            sleep 1
+            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
+            ;;
     esac
 }
 
@@ -172,7 +191,7 @@ start_pyui_message_writer "1" # Wait for listener
 
 # Warm up the display driver, mimicking other known-good apps
 log_and_display_message "Loading..."
-sleep 0.5 
+sleep 0.5
 
 # 1. Wait for USB cable connection, using the reliable charging status check
 while [ "$(device_get_charging_status)" = "Discharging" ]; do
@@ -207,6 +226,10 @@ if [ "$(device_get_charging_status)" = "Discharging" ]; then
     exit 0
 fi
 
+# Disable idle/shutdown timer while in USB mode (device reboots on exit, so no need to restart)
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 log_and_display_message "Connecting USB Mass Storage Mode..."
 configure_usb_gadget
 log_and_display_message "" # Clear the "Connecting" message
@@ -218,7 +241,7 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
         exit 0
     fi
 
@@ -227,7 +250,7 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
+        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
         exit 0
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU

@@ -110,7 +110,9 @@ get_volume_level() {
 set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-    VOLUME_RAW=$(( VOLUME_LV * 5 ))    
+    VOLUME_RAW=$(( VOLUME_LV * 5 ))
+    HP_VOLUME_MAX=15  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
+    HP_VOLUME=$(( VOLUME_RAW * HP_VOLUME_MAX / 100 ))
     log_message "Setting volume to ${VOLUME_RAW}"
 
 
@@ -119,14 +121,15 @@ set_volume() {
     else
         #TODO can we prevent peaking audio if going from 0 to non-0?
 
+        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
+
         if are_headphones_plugged_in; then
+            amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
             amixer sset "Playback Path" "HP" >/dev/null 2>&1
         else
             amixer sset "Playback Path" "SPK" >/dev/null 2>&1
         fi
 
-        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
-        
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
@@ -142,6 +145,8 @@ set_volume() {
 
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
+    HP_VOLUME_MAX=15
+    HP_VOLUME=$(( config_volume * 5 * HP_VOLUME_MAX / 100 ))
 
     if [ "$config_volume" -ne 0 ]; then
         log_message "Restoring volume to ${config_volume}"
@@ -149,6 +154,7 @@ fix_sleep_sound_bug() {
         amixer cset numid=5 0
         if are_headphones_plugged_in; then
             amixer cset numid=2 3
+            amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
         else
             amixer cset numid=2 2
         fi
@@ -508,4 +514,24 @@ device_wifi_power_on() {
 
 device_wifi_power_off() { 
     echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # Flip leaves dirty bit set?
+}
+
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.!default {
+    type plug
+    slave.pcm "dmix"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
 }

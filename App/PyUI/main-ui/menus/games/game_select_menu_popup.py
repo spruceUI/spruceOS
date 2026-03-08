@@ -60,13 +60,16 @@ class GameSelectMenuPopup:
             return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 
     def toggle_view(self):
-        if(ViewType.TEXT_AND_IMAGE == Theme.get_game_selection_view_type()):
-            Theme.set_game_selection_view_type(ViewType.GRID)
-        elif(ViewType.GRID == Theme.get_game_selection_view_type()):
-            Theme.set_game_selection_view_type(ViewType.CAROUSEL)
-        else:
-            Theme.set_game_selection_view_type(ViewType.TEXT_AND_IMAGE)
-
+        CYCLE_VIEWS = [
+            ViewType.TEXT_AND_IMAGE,
+            ViewType.GRID,
+            ViewType.ICON_AND_DESC,
+            ViewType.CAROUSEL,
+        ]
+        current = Theme.get_game_selection_view_type()
+        idx = CYCLE_VIEWS.index(current) if current in CYCLE_VIEWS else -1
+        next_view = CYCLE_VIEWS[(idx + 1) % len(CYCLE_VIEWS)]
+        Theme.set_game_selection_view_type(next_view)
 
     def download_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):

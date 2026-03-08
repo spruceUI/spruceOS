@@ -16,6 +16,7 @@ from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
@@ -84,8 +85,6 @@ class MiyooA30(MiyooDevice):
         self._set_lumination_to_config()
         self._set_screen_settings_to_config()
         self.init_gpio()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
 
 
     def on_system_config_changed(self):
@@ -270,32 +269,16 @@ class MiyooA30(MiyooDevice):
     def get_volume(self):
         return self.system_config.get_volume()
 
-    def _set_volume(self, volume):
-        try:
-            scaled = round(255 * max(0, min(100, volume)) / 100)
-            ProcessRunner.run(["amixer","set","Soft Volume Master",str(scaled)], print=True)            
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        return volume 
-
     def fix_sleep_sound_bug(self):
         config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
+        if(config_volume == 20):
+            self.volume_down()
+            self.volume_up()
+        else:
+            self.volume_up()
+            self.volume_down()
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
-        def delayed_fix():
-            total_time = 2.0
-            interval = 0.1
-            elapsed = 0.0
-            config_volume = self.system_config.get_volume()
-            while elapsed < total_time:
-                time.sleep(interval)
-                elapsed += interval 
-                self._set_volume(config_volume)
-
-        # Start the thread
-        threading.Thread(target=delayed_fix, daemon=True).start()
         return MiyooTrimCommon.run_game(self,rom_info)
 
     def supports_analog_calibration(self):
@@ -380,3 +363,11 @@ class MiyooA30(MiyooDevice):
     def post_present_operations(self):
         # Since we don't have available but free, should we lower it to 50?
         self.clear_display_cache_if_memory_full("MemFree", 100)        
+
+        
+
+    def volume_up(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event3",115)
+
+    def volume_down(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event3",114)

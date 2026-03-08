@@ -1,0 +1,31 @@
+// Copyright 2006-2010 (C) - Frictional Games
+//
+// This file is part of HPL1 Engine
+//
+// For conditions of distribution and use, see copyright notice in LICENSE-shaders
+//
+
+///////////////////////////////////////////////////////
+/// SIMPLE DIFFUSE COLOR VERTEX PROGRAM ////////////
+///////////////////////////////////////////////////////
+
+vec4 position = gl_Vertex;
+vec3 color = gl_Color.xyz;
+
+
+out vec4 vColor;
+out float vUv;
+
+uniform mat4 worldViewProj;
+uniform vec3 fogColor;
+uniform float fogStart;
+uniform float fogEnd;
+
+void main()
+{
+	gl_Position = (worldViewProj * position);
+
+	vUv = (fogEnd - gl_Position.z)/(fogEnd - fogStart);
+	vColor.xyz = clamp(fogColor, vec3(0.0), vec3(1.0));
+	vColor.w = 1;
+}

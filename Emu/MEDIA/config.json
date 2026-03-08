@@ -4,8 +4,42 @@
   "iconsel": "ffplay_sel.png",
   "themecolor": "DDEEFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
+  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka|ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz",
   "launchlist": [],
+  "menuOptions": {
+    "Emulator_32": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_A30",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ],
+      "options": [
+        "ffplay",
+        "gme"
+      ],
+      "selected": "ffplay",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "ffplay",
+        "gme"
+      ],
+      "selected": "ffplay",
+      "overrides": {}
+    }
+  },
   "sortOrder": 3300,
   "brand": "Misc",
   "type": "mediaplayer",

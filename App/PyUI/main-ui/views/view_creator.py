@@ -58,7 +58,8 @@ class ViewCreator:
                     carousel_selected_offset = None,
                     carousel_use_selected_image_in_animation=None,
                     carousel_resize_type=None,
-                    grid_view_wrap_around_single_row=None) -> object:
+                    grid_view_wrap_around_single_row=None,
+                    icon_and_desc_use_image_in_place_of_icon=None) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -78,7 +79,8 @@ class ViewCreator:
                     top_bar_text=top_bar_text,
                     options=options,
                     selected=selected_index,
-                    selected_bg=selected_bg
+                    selected_bg=selected_bg,
+                    icon_and_desc_use_image_in_place_of_icon=icon_and_desc_use_image_in_place_of_icon
                 )
 
             case ViewType.TEXT_AND_IMAGE:

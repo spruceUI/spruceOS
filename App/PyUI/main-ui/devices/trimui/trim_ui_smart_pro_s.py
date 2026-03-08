@@ -13,6 +13,7 @@ from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
@@ -24,7 +25,6 @@ from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
-from asyncio import sleep
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
@@ -61,18 +61,10 @@ class TrimUISmartProS(TrimUIDevice):
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
                 
-            config_volume = self.system_config.get_volume()
-            self._set_volume(config_volume)
         super().__init__()
 
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
-
-    def _set_volume(self, user_volume):
-        # Investigate sending volume key
-        pass
 
     #Untested
     @throttle.limit_refresh(5)
@@ -171,61 +163,6 @@ class TrimUISmartProS(TrimUIDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting backlight: {e}")
 
-    def volume_up(self):
-        try:
-            proc = subprocess.Popen(
-                ["sendevent", "/dev/input/event0"],
-                stdin=subprocess.PIPE,
-                text=True
-            )
-
-            proc.stdin.write("1 115 1\n")
-            proc.stdin.write("1 115 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
-
-            proc.wait()
-        except Exception as e:
-            PyUiLogger.get_logger().exception(
-                f"Failed to set volume via input events: {e}"
-            )
-
-    def volume_down(self):
-        try:
-            proc = subprocess.Popen(
-                ["sendevent", "/dev/input/event0"],
-                stdin=subprocess.PIPE,
-                text=True
-            )
-
-            proc.stdin.write("1 114 1\n")
-            proc.stdin.write("1 114 0\n")
-            proc.stdin.write("0 0 0\n")
-            proc.stdin.flush()
-            proc.stdin.close()
-
-            proc.wait()
-        except Exception as e:
-            PyUiLogger.get_logger().exception(
-                f"Failed to set volume via input events: {e}"
-            )
-
-    def change_volume(self, amount):
-        PyUiLogger.get_logger().debug(f"Changing volume by {amount}")
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        if(amount > 0):
-            self.volume_up()
-        else:
-            self.volume_down()
-        sleep(0.1)
-        self.on_mainui_config_change()
-
     def enable_bluetooth(self):
         if(not self.is_bluetooth_enabled()):
             subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
@@ -250,7 +187,7 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Powering off...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.power_off_cmd()])
+        super().power_off()
         # So we dont update the display while shutting down
         time.sleep(10)
 
@@ -259,6 +196,13 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Rebooting...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.reboot_cmd()])
+        super().reboot()
         # So we dont update the display while rebooting
         time.sleep(10)
+
+
+    def volume_up(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)
+
+    def volume_down(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",114)

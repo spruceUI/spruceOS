@@ -58,14 +58,14 @@ get_current_volume() {
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-    scaled=$(( new_vol * 255 / 20 ))
-    amixer set 'Soft Volume Master' "$scaled"
+    mkdir -p /tmp/system 2>/dev/null
+    echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
-            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
             if ! pgrep MainUI >/dev/null; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi
@@ -124,10 +124,6 @@ post_pyui_exit(){
     log_message "*** nothing to do for post_pyui_exit" -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
 perform_fw_check(){
     log_message "*** nothing to do for perform_fw_check" -v
 }
@@ -174,23 +170,8 @@ device_init_a133p() {
         hwclock -s -u
         /etc/bluetooth/bluetoothd start
     ) &
-
+    amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
-
-    (
-        # Set volume on startup by simulating button presses
-        # Alternative is shared memory to keymon
-        sleep 3
-        {
-            echo 1 115 1 # Vol up pressed
-            echo 1 115 0 # Vol up released
-            echo 1 114 1 # Vol down pressed
-            echo 1 114 0 # Vol down released
-            echo 0 0 0   # tell sendevent to exit
-        } | sendevent $EVENT_PATH_VOLUME 
-        sleep 1
-        echo 0 > /sys/class/speaker/mute
-    ) &
 }
 
 set_event_arg_for_idlemon() {
@@ -288,19 +269,9 @@ EOF
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
 }
 
-current_backlight() {
-    jq -r '.backlight' "$SYSTEM_JSON"
-}
 
-brightness_down() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight - 1))
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # Brick/SmartPro leaves dirty bit set?
 }
-
-brightness_up() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight + 1))
-}
-

@@ -102,6 +102,11 @@ restore_theme_configs() {
 ##### MAIN EXECUTION #####
 
 log_message "----------Starting Restore script----------"
+
+# Disable idle/shutdown timer during restore
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75
@@ -259,11 +264,12 @@ log_message "Restoring theme customizations"
 restore_theme_configs
 
 log_message "Applying idlemon setting"
-sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh reapply
+sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
 
 log_message "----------Restore and Upgrade completed----------"
 
 auto_regen_tmp_update
+sync
 
 # Copy spruce.cfg to www folder so the landing page can read it.
 # cp "/mnt/SDCARD/spruce/settings/spruce.cfg" "/mnt/SDCARD/spruce/www/sprucecfg.bak"

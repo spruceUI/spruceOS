@@ -20,6 +20,7 @@ from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class DeviceCommon(AbstractDevice):
@@ -49,10 +50,16 @@ class DeviceCommon(AbstractDevice):
                     return
 
     def power_off(self):
-        self.run_cmd([self.power_off_cmd()])
+        if PyUiConfig.get_poweroff_cmd():
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()])
+        else:
+            self.run_cmd([self.power_off_cmd()])
 
     def reboot(self):
-        self.run_cmd([self.reboot_cmd()])
+        if PyUiConfig.get_reboot_cmd():
+            self.run_cmd([PyUiConfig.get_reboot_cmd()])
+        else:
+            self.run_cmd([self.reboot_cmd()])
 
 
     def input_timeout_default(self):
@@ -175,19 +182,6 @@ class DeviceCommon(AbstractDevice):
 
     def saturation(self):
         return self.system_config.get_saturation()
-
-    def change_volume(self, amount):
-        from display.display import Display
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        self._set_volume(volume)
-        self.system_config.set_volume(volume)
-        self.system_config.save_config()
-        Display.volume_changed(self.get_volume())
 
     def get_display_volume(self):
         return self.get_volume()
@@ -547,4 +541,6 @@ class DeviceCommon(AbstractDevice):
             Display.clear_cache()
             self.last_cache_clear = 0
 
-
+    def get_image_for_activity(self, activity):
+        # Implement in child classes where possible
+        return None

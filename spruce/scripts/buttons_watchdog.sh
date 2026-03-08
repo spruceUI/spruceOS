@@ -2,26 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
-    SET_OR_CSET="set"
-    NAME_QUALIFIER=""
-    AMIXER_CONTROL="'Soft Volume Master'"
-elif [ "$PLATFORM" = "Flip" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
-    SET_OR_CSET="cset"
-    NAME_QUALIFIER="name="
-    AMIXER_CONTROL="'SPK Volume'"
-else    # trimui
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"     # this doesn't work yet. setsharedmem-flip is too high glibc
-    SET_OR_CSET="set"                                   # need to double check this 
-    NAME_QUALIFIER=""                                   # also need to check if this is necessary
-    AMIXER_CONTROL="'Soft Volume Master'"
-fi
-
 START_DOWN=false
 
 nearest_system_brightness() {
@@ -96,20 +76,24 @@ map_brightness_to_system_value() {
 
 
 volume_down_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_down in background
-        # it makes sure to run whole volume_up function even volume_down_bg is killed
-        volume_down &
+        if [ $CURR_VOLUME -gt 0 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} - 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
 
 volume_up_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_up in background
-        # it makes sure to run whole volume_up function even volume_up_bg is killed
-        volume_up &
+        if [ $CURR_VOLUME -lt 20 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} + 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
 
@@ -148,7 +132,10 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
+
             volume_down # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_down_bg &
             PID_DOWN=$!
         ;;
@@ -159,7 +146,10 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
             PID_UP=""
+
             volume_up # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_up_bg &
             PID_UP=$!
         ;;

@@ -27,13 +27,13 @@ cores_online() {
 set_smart() {
     log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1400
+    cpuclock 1300
 }
 
 set_performance() {
     log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1600
+    cpuclock 1400
 }
 
 set_overclock() {
@@ -57,6 +57,7 @@ device_init() {
         # Screen is off by like ~8px unless you do this, not sure why
         cat /proc/ls
     fi
+    killall -9 main ### SUPER important in preventing .tmp_update suicide
 }
 
 vibrate() {
@@ -98,17 +99,38 @@ enable_or_disable_rgb() {
 }
 
 enter_sleep() {
-    log_message "Keymon handles sleep, not spruce" -v
+    log_message "Entering pseudo-sleep (wait for power)"
+
+    # Block until power button is pressed to wake
+    local wake_fifo="/tmp/sleep_wake_fifo.$$"
+    rm -f "$wake_fifo"
+    mkfifo "$wake_fifo"
+    getevent "$EVENT_PATH_POWER" > "$wake_fifo" 2>/dev/null &
+    local gev_pid=$!
+    exec 4< "$wake_fifo"
+    while IFS= read -r line <&4; do
+        case "$line" in
+            *"key $B_POWER 1"*)
+                break
+                ;;
+        esac
+    done
+    exec 4<&-
+    kill "$gev_pid" 2>/dev/null
+    wait "$gev_pid" 2>/dev/null
+    rm -f "$wake_fifo"
+
+    log_message "Exiting pseudo-sleep"
 }
 
 get_current_volume() {
-    log_message "Intentionally do not let spruce modify volume" -v
+    # Return config-level volume (0-20) to match what set_volume expects
+    jq -r '.vol' "$SYSTEM_JSON"
 }
 
-set_volume() {
-    log_message "Intentionally do not let spruce modify volume" -v
+device_specific_wake_from_sleep() {
+    log_message "MiyooMini wake - nothing extra needed" -v
 }
-
 
 reset_playback_pack() {
     log_message "Intentionally do not let spruce modify audio, let keymon" -v
@@ -152,7 +174,25 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "true"
+    log_message "Launching MiyooMini startup watchdogs (using proven sleep watchdog)"
+
+    # Kill keymon — spruce watchdogs fully replace its functionality.
+    # keymon conflicts with the power button watchdog on the Mini since
+    # there is only a single input device (/dev/input/event0).
+    killall -9 keymon 2>/dev/null
+
+    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+    /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
+    /mnt/SDCARD/spruce/scripts/powerbutton_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n idlemon_mm.sh &
+    pin_cpu "$SYSTEM_CPU" -n low_power_warning.sh &
+    pin_cpu "$SYSTEM_CPU" -n powerbutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
 }
 
 perform_fw_check(){
@@ -222,7 +262,7 @@ set_backlight() {
     [ "$value" -lt 0 ] && value=0
     [ "$value" -gt 10 ] && value=10
 
-    sed -i "s/\"backlight\": *[0-9][0-9]*/\"backlight\": $value/" "$SYSTEM_JSON"
+    jq ".backlight = $value" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     # Should we get this from path or always from PyUI?
     /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
 }
@@ -276,7 +316,6 @@ device_enter_sleep() {
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
     echo "GUI_SHOW 0 off" > "$SCREEN_BLANK_FILE" 2>/dev/null    # blank the screen
     echo "0" > "$BRIGHTNESS_FILE" 2>/dev/null                   # set brightness to 0
-    [ -e "$BUTTON_ENABLE_FILE" ] && echo "N" > "$BUTTON_ENABLE_FILE" 2>/dev/null # disable input
     touch /tmp/screen_blanked                                   # create flag file
     cpuclock 100                                                # slow cpu to a crawl
 }
@@ -305,7 +344,11 @@ device_lid_sensor_ready() {
 }
 
 device_lid_open(){
-    head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    if [ -e "$LID_HALL_FILE" ]; then
+        head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    else
+        echo "1"
+    fi
 }
 
 
@@ -357,4 +400,10 @@ run_poweroff_cmd() {
     else
         poweroff
     fi
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
 }

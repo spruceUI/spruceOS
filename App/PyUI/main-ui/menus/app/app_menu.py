@@ -7,6 +7,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
+from menus.app.app_utils import AppUtils
 from menus.app.hidden_apps_manager import AppsManager
 from menus.language.language import Language
 from themes.theme import Theme
@@ -24,29 +25,6 @@ class AppMenu:
     def __init__(self):
         self.appFinder = Device.get_device().get_app_finder()
         self.show_all_apps = False
-
-    def _convert_to_theme_version_of_icon(self, icon_path):
-        return Theme.get_app_icon(os.path.basename(icon_path))
-
-    def get_first_existing_path(self,file_priority_list):
-        for path in file_priority_list:
-            try:
-                if path and os.path.isfile(path):
-                    return path
-            except Exception:
-                pass
-        return None 
-
-    def get_icon(self, app_folder, icon_path_from_config):
-        icon_priority = []
-        if(icon_path_from_config is not None):
-            icon_priority.append(self._convert_to_theme_version_of_icon(icon_path_from_config))
-            icon_priority.append(icon_path_from_config)
-            if(app_folder is not None):
-                icon_priority.append(os.path.join(app_folder,icon_path_from_config))
-        if(app_folder is not None):
-            icon_priority.append(os.path.join(app_folder,"icon.png"))
-        return self.get_first_existing_path(icon_priority)
     
     def save_app_selection(self, selected):
         if(selected.get_selection() is not None):
@@ -66,9 +44,7 @@ class AppMenu:
             boxart_scraper_config = PyUiAppConfig("Boxart Scraper")
             hidden = AppsManager.is_hidden(boxart_scraper_config) and not self.show_all_apps
             if(not hidden):
-                icon = self.get_icon(None,"scraper.png")
-                if(icon is None):
-                    icon = Theme.get_cfw_default_icon("scraper.png")
+                icon = AppUtils.get_icon(None,"scraper.png")
                 app_list.append(
                         GridOrListEntry(
                             primary_text=boxart_scraper_config.get_label() + "(Hidden)" if AppsManager.is_hidden(boxart_scraper_config) else boxart_scraper_config.get_label(),
@@ -84,9 +60,7 @@ class AppMenu:
             activity_tracker_config = PyUiAppConfig("Activity Tracker")
             hidden = AppsManager.is_hidden(activity_tracker_config) and not self.show_all_apps
             if(not hidden and PyUiConfig.get_activity_log_path() is not None):
-                icon = self.get_icon(None,"rtc.png")
-                if(icon is None):
-                    icon = Theme.get_cfw_default_icon("rtc.png")
+                icon = AppUtils.get_icon(None,"rtc.png")
                 app_list.append(
                         GridOrListEntry(
                             primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
@@ -117,7 +91,7 @@ class AppMenu:
                 supported_device = not devices or Device.get_device().get_device_name() in devices
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
                 if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
-                    icon = self.get_icon(app.get_folder(),app.get_icon())
+                    icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(
                             primary_text=app.get_label() + "(Hidden)" if AppsManager.is_hidden(app) else app.get_label(),

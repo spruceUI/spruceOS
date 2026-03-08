@@ -12,6 +12,7 @@ from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.system_config import SystemConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
@@ -55,9 +56,6 @@ class TrimUISmartPro(TrimUIDevice):
                 power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
                 power_key_polling_thread.start()
                 
-            config_volume = self.system_config.get_volume()
-            self._set_volume(config_volume)
-
         super().__init__()
 
     def startup_init(self, include_wifi=True):
@@ -66,8 +64,6 @@ class TrimUISmartPro(TrimUIDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
-        config_volume = self.system_config.get_volume()
-        self._set_volume(config_volume)
 
     #Untested
     @throttle.limit_refresh(5)
@@ -134,30 +130,6 @@ class TrimUISmartPro(TrimUIDevice):
         return [core_name, core_name+"-64"]
 
             
-    def _set_volume(self, user_volume):
-        from display.display import Display
-        if(user_volume < 0):
-            user_volume = 0
-        elif(user_volume > 100):
-            user_volume = 100
-        volume = math.ceil(user_volume * 255//100)
-        
-        try:
-            
-            ProcessRunner.run(
-                ["amixer", "set", f"'Soft Volume Master'", str(int(volume))],
-                check=True
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to set volume: {e}")
-
-        self.system_config.reload_config()
-        self.system_config.set_volume(user_volume)
-        self.system_config.save_config()
-        Display.volume_changed(user_volume)
-        return user_volume
-    
     def might_require_surface_format_conversion(self):
         return True # RA save state images don't seem to load w/o conversion?
     
@@ -168,3 +140,9 @@ class TrimUISmartPro(TrimUIDevice):
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
         self.system_config.set_bluetooth(1)
+
+    def volume_up(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)
+
+    def volume_down(self):
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",114)

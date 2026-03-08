@@ -8,7 +8,9 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
+from games.utils.game_system import GameSystem
 from games.utils.rom_utils import RomUtils
+from menus.games.muos_game_system_config import MuosGameSystemConfig
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.miyoo_game_list import MiyooGameList
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
@@ -26,6 +28,10 @@ class RomSelectOptionsBuilder:
         self.roms_path = Device.get_device().get_roms_dir()
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
         
+
+    def build_fake_game_system(self, item, display_name=None, is_collection=None):
+        # Should not use muos game system config to get around this but it works for now
+        return RomInfo(GameSystem([],item,MuosGameSystemConfig(item,item)), item, display_name, is_collection)
     
     def get_default_image_path(self, game_system, rom_file_path):
         parts = os.path.normpath(rom_file_path).split(os.sep)

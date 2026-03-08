@@ -23,11 +23,11 @@ run_sd_card_fix_if_triggered() {
 }
 
 hide_fw_app() {
-    sed -i 's|"label"|"#label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+    jq 'if .label then ."#label" = .label | del(.label) else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
 
 show_fw_app() {
-    sed -i 's|"#label"|"label"|' /mnt/SDCARD/App/-FirmwareUpdate-/config.json
+    jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
 
 # Define the function to check and hide the firmware update app
@@ -177,9 +177,11 @@ check_for_update() {
     if [ $update_available -eq 1 ]; then
         log_message "Update Check: Update available"
         # Update is available - show app and set label and description
-        sed -i 's|"#label"|"label"|; 
-                s|"label": "[^"]*"|"label": "Update Available"|;
-                s|"description": "[^"]*"|"description": "Version '"$TARGET_VERSION"' is available"|' "$CONFIG_FILE"
+        jq --arg ver "$TARGET_VERSION" '
+          (if ."#label" then del(."#label") else . end)
+          | .label = "Update Available"
+          | .description = "Version \($ver) is available"
+        ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
 
         # Check if update was previously prompted
@@ -216,8 +218,8 @@ check_for_update() {
         log_message "Update Check: Current version is up to date"
         # No update - if app is visible, set label and description back to default
         if grep -q '"label"' "$CONFIG_FILE"; then
-            sed -i 's|"label": "[^"]*"|"label": "Check for Updates"|;
-                    s|"description": "[^"]*"|"description": "Download and install updates over Wi-Fi"|' "$CONFIG_FILE"
+            jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
+              "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         fi
         rm -rf "$TMP_DIR"
         return 1
@@ -244,10 +246,10 @@ check_for_update_file() {
 # Function to check and hide the Update App if necessary
 check_and_hide_update_app() {
     if ! check_for_update_file; then
-        sed -i 's|"label"|"#label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        jq 'if .label then ."#label" = .label | del(.label) else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
         log_message "No update file found; hiding Updater app"
     else
-        sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+        jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
     fi
 }
@@ -358,5 +360,68 @@ update_notification(){
 Version ${available_version} is ready to install
 Go to Apps and look for 'Update Available'" --okay
         flag_remove "update_available"
+    fi
+}
+
+
+set_volume_to_config() {
+    vol=$(jq -r '.vol // empty' "$SYSTEM_JSON")
+    [ -n "$vol" ] && set_volume "$vol"
+}
+
+auto_resume_game() {
+    log_message "save_active flag detected. Autoresuming game."
+
+    # Ensure device is properly initialized (volume, wifi, etc) before launching auto-resume
+    /mnt/SDCARD/App/PyUI/launch.sh -startupInitOnly True
+
+    # moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
+    # copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
+    MOVE_OR_COPY=cp
+    if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
+
+    # move command to cmd_to_run.sh so game switcher can work correctly
+    $MOVE_OR_COPY "/mnt/SDCARD/spruce/flags/lastgame.lock" /tmp/cmd_to_run.sh && sync
+
+    sleep 4
+    nice -n -20 /tmp/cmd_to_run.sh &> /dev/null
+    rm -f /tmp/cmd_to_run.sh # remove tmp command file after game exit; otherwise the game will load again in principal.sh later
+    log_message "Auto Resume executed"
+}
+
+set_up_boot_action() {
+    BOOT_ACTION="$(get_config_value '.menuOptions."System Settings".bootTo.selected' "spruceUI")"
+    if ! flag_check "save_active"; then
+        log_message "Selected boot action is $BOOT_ACTION."
+        case "$BOOT_ACTION" in
+            "Random Game")
+                echo "\"/mnt/SDCARD/App/RandomGame/random.sh\"" > /tmp/cmd_to_run.sh
+                ;;
+            "Game Switcher")
+                touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+                ;;
+            "Splore")
+                log_message "Attempting to boot into Pico-8. Checking for binaries"
+                if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+                    PICO8_EXE="pico8_dyn"
+                else
+                    PICO8_EXE="pico8_64"
+                fi
+                if [ -f "/mnt/SDCARD/BIOS/pico8.dat" ] && [ -f "/mnt/SDCARD/BIOS/$PICO8_EXE" ]; then
+                    echo "\"/mnt/SDCARD/Emu/PICO8/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore\"" > /tmp/cmd_to_run.sh
+                else
+                    log_message "Pico-8 binaries not found; booting to spruceUI instead."
+                fi
+                ;;
+            "Apotris"*)
+                log_message "Sun mode engaged."
+                GAME_PATH=/mnt/SDCARD/Roms/GBA/Apotris.gba
+                if [ -f "$GAME_PATH" ]; then
+                    echo "\"/mnt/SDCARD/Emu/GBA/../../spruce/scripts/emu/standard_launch.sh\" \"$GAME_PATH\"" > /tmp/cmd_to_run.sh
+                else
+                    log_message "Sun's literal entire romset not found; booting to spruceUI instead."
+                fi
+                ;;
+        esac
     fi
 }

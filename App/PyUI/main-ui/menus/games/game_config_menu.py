@@ -177,7 +177,10 @@ class GameConfigMenu:
             config_list = []
             if(not Device.get_device().get_system_config().simple_mode_enabled()):
                 for config_option in self.game_system.game_system_config.get_launchlist():
-                    config_list.append(
+                    devices = config_option.get("devices")
+                    supported_device = not devices or Device.get_device().get_device_name() in devices
+                    if(supported_device):
+                        config_list.append(
                         GridOrListEntry(
                             primary_text=config_option.get('name'),
                             image_path=None,
@@ -187,7 +190,7 @@ class GameConfigMenu:
                             value=lambda input_value, launch_option=config_option.get('launch')
                                         : self.run_launch_option(input_value,launch_option)
 
-                            
+
                         )
                     )
 

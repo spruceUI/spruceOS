@@ -31,7 +31,6 @@ class MuosAnbernicRGXX(MuosDevice):
         #self._set_saturation_to_config()
         #self._set_brightness_to_config()
         #self._set_hue_to_config()
-        #self._set_volume(self.system_config.get_volume())
 
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller

@@ -3,6 +3,7 @@
 
 from typing import Dict
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from utils.activity.activity_log import ActivityLog
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -51,7 +52,7 @@ class ActivityTracker:
                 elif(ControllerInput.A == selected.get_input()):
                     selected.get_selection().get_value()(selected.get_input())
 
-    def all_apps_list(self, activity_log):
+    def all_apps_list(self, activity_log : ActivityLog):
         
         option_list = []
         option_list.append(
@@ -105,7 +106,7 @@ class ActivityTracker:
                 elif(ControllerInput.A == selected.get_input()):
                     selected.get_selection().get_value()(selected.get_input())
 
-    def by_system_list(self, activity_log):
+    def by_system_list(self, activity_log : ActivityLog):
         option_list = []       
         option_list.append(
             GridOrListEntry(
@@ -163,16 +164,22 @@ class ActivityTracker:
     def display_activity_details(self, activity_list: Dict[str, int]):
         option_list = []
         for app, total_seconds in activity_list.items():
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
-
-            option_list.append(
-                GridOrListEntry(
-                    primary_text=app.rsplit("/", 1)[-1].rsplit(".", 1)[0],
-                    value_text=time_str,
+            if(app != "PyUI"):
+                img = Device.get_device().get_image_for_activity(app)
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+                if app.endswith("launch.sh"):
+                    primary = app.rsplit("/", 2)[-2]   # directory before launch.sh
+                else:
+                    primary = app.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+                option_list.append(
+                    GridOrListEntry(
+                        primary_text=primary,
+                        value_text=time_str,
+                        icon=img
+                    )
                 )
-            )
 
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,

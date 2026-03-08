@@ -58,9 +58,17 @@ get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
 }
 
+set_loading_screen() {
+    /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
+}
+
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
+    sync_volume_level
+
+    # Loading screen daemon
+    /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
 }
 
 set_event_arg_for_idlemon() {
@@ -94,10 +102,6 @@ post_pyui_exit(){
     log_message "This doesn't need to do anything when exitting pyui" -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
 	cat "$BATTERY/status"
@@ -107,67 +111,43 @@ device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
 
-get_volume_level() {
-    VALUE=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '(?<=\s)(\d*)(?=\%)' | head -n1)
+sync_volume_level() {
+    VALUE=$(get_volume_level)
+    set_volume "$VALUE" false
+}
 
-    logger "Volume value: $VALUE"
-    case $VALUE in
-        $SYSTEM_VOLUME_0) echo 0 ;;
-        $SYSTEM_VOLUME_1) echo 1 ;;
-        $SYSTEM_VOLUME_2) echo 2 ;;
-        $SYSTEM_VOLUME_3) echo 3 ;;
-        $SYSTEM_VOLUME_4) echo 4 ;;
-        $SYSTEM_VOLUME_5) echo 5 ;;
-        $SYSTEM_VOLUME_6) echo 6 ;;
-        $SYSTEM_VOLUME_7) echo 7 ;;
-        $SYSTEM_VOLUME_8) echo 8 ;;
-        $SYSTEM_VOLUME_9) echo 9 ;;
-        $SYSTEM_VOLUME_10) echo 10 ;;
-        $SYSTEM_VOLUME_11) echo 11 ;;
-        $SYSTEM_VOLUME_12) echo 12 ;;
-        $SYSTEM_VOLUME_13) echo 13 ;;
-        $SYSTEM_VOLUME_14) echo 14 ;;
-        $SYSTEM_VOLUME_15) echo 15 ;;
-        $SYSTEM_VOLUME_16) echo 16 ;;
-        $SYSTEM_VOLUME_17) echo 17 ;;
-        $SYSTEM_VOLUME_18) echo 18 ;;
-        $SYSTEM_VOLUME_19) echo 19 ;;
-        $SYSTEM_VOLUME_20) echo 20 ;;
-        *) echo 10 ;;
-    esac
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
 }
 
 set_volume() {
     VOL_VAL="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}" # Optional 2nd arg, defaults to true
 
-    logger "Setting volume to $VOL_VAL"
-    if [ $VOL_VAL -lt 0 ]; then
-        VOL_VAL=0
-    elif [ $VOL_VAL -gt 20 ]; then
-        VOL_VAL=20
-    fi
-
     # Set volume
     SYSTEM_VOL=$(map_mainui_volume_to_system_value "$VOL_VAL")
-    pactl -- set-sink-volume @DEFAULT_SINK@ ${SYSTEM_VOL}%
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ $SYSTEM_VOL
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         # Update Config file
-        sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOL_VAL/" "$SYSTEM_JSON"
+        save_volume_to_config_file "$VOL_VAL"
     fi
 }
 
 volume_down() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} - 1))
-    set_volume "$VALUE"
+    if [ $VALUE -gt 0 ] ; then
+        VALUE=$((${VALUE} - 1))
+        set_volume "$VALUE"
+    fi
 }
 
 volume_up() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} + 1))
-    set_volume "$VALUE"
+    if [ $VALUE -lt 20 ] ; then
+        VALUE=$((${VALUE} + 1))
+        set_volume "$VALUE"
+    fi
 }
 
 # Map the MainUI Volume level to System Value
@@ -201,6 +181,8 @@ map_mainui_volume_to_system_value() {
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
+    turn_off_screen
+
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -210,6 +192,7 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    turn_on_screen
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
@@ -219,6 +202,7 @@ device_lid_open(){
 }
 
 take_screenshot() {
+    close_ppsspp_menu
     screenshot_path="$1"
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
@@ -277,7 +261,7 @@ set_backlight() {
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
     if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
-        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"backlight\": $new_bl/" "$SYSTEM_JSON"
+        jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
 
@@ -291,6 +275,14 @@ brightness_up() {
     local backlight
     backlight=$(current_backlight)
     set_backlight $((backlight + 1))
+}
+
+turn_off_screen() {
+    echo 1 > /sys/class/backlight/backlight/bl_power
+}
+
+turn_on_screen() {
+    echo 0 > /sys/class/backlight/backlight/bl_power
 }
 
 set_event_arg() {
@@ -317,6 +309,25 @@ send_menu_button_to_retroarch() {
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
+close_ppsspp_menu() {
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
+        log_message "Closing PPSSPP menu."
+        {
+            echo $B_RIGHT 1
+            echo $B_RIGHT 0
+            echo $B_A 1
+            echo $B_A 0
+        } > /tmp/ppsspp_events.txt
+
+        # run sendevent in a fully detached subshell
+        (
+            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
+        ) < /dev/null > /dev/null 2>&1 &
+
+        sleep 0.3
+    fi
+}
+
 set_default_ra_hotkeys() {
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
 
@@ -339,4 +350,10 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
 }

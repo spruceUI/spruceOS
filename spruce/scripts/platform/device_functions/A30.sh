@@ -8,6 +8,7 @@ export EVENT_PATH_KEYBOARD="/dev/input/event3"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
 get_config_path() {
@@ -19,7 +20,7 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         oc_freq="$(get_config_value '.menuOptions."System Settings".overclockSpeedA30.selected' "1344")"
 
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
         /mnt/SDCARD/spruce/a30/setcpu/utils "performance" 4 $oc_freq 384 1080 1
@@ -86,13 +87,22 @@ enter_sleep() {
     echo -n mem >/sys/power/state
 }
 
+trigger_device_sleep() {
+    enter_sleep
+}
+
 get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-# Not updated to match other devices yet, takes raw value
 set_volume() {
-    amixer set 'Soft Volume Master' "$new_vol" 
+    VOLUME_LV="${1:-0}"
+    SAVE_TO_CONFIG="${2:-true}"
+
+    [ "$VOLUME_LV" -lt 0 ] && VOLUME_LV=0
+    [ "$VOLUME_LV" -gt 20 ] && VOLUME_LV=20
+
+    _set_volume "$VOLUME_LV" "$SAVE_TO_CONFIG"
 }
 
 run_mixer_watchdog() {
@@ -171,10 +181,6 @@ post_pyui_exit(){
     killall -q -USR1 joystickinput   # return the stick to being a stick
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs
-}
-
 perform_fw_check(){
     FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
@@ -182,7 +188,7 @@ perform_fw_check(){
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-        sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
+        jq '.wifi = 0' "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
         display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
         sleep 5
     fi
@@ -199,6 +205,37 @@ check_if_fw_needs_update() {
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
+}
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    sync
+    trigger_device_sleep
+}
+
+device_exit_sleep() {
+    if [ "$(device_woke_via_timer)" != "true" ] && [ -e "$DISPLAY_ENHANCE_PATH" ]; then
+        ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
+        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
+    fi
+
+    touch /tmp/audio_reinit_needed
+    clear_wake_alarm "$WAKE_ALARM_PATH"
+}
+
+device_lid_open() {
+    return 1
+}
+
+device_uses_pseudo_sleep() {
+    echo "false"
 }
 
 device_specific_wake_from_sleep() {
@@ -241,10 +278,6 @@ device_init() {
     else
         echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
     fi
-
-    # listen hotkeys for brightness adjustment, volume buttons and power button
-    # What is being changed later that prevents this from running with the other watchdogs?
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
@@ -293,16 +326,19 @@ reset_playback_pack() {
 
 save_volume_to_config_file() {
     VOLUME_LV=$1
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+    jq ".vol = $VOLUME_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 }
 
 _set_volume() {
     VOLUME_LV="$1"
+    SAVE_TO_CONFIG="${2:-true}"
     VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
     log_message "Setting volume to ${VOLUME_RAW}"
-    amixer set 'Soft Volume Master' $VOLUME_RAW > /dev/null
-    save_volume_to_config_file "$VOLUME_LV"
+    amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
 
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
 }
 
 volume_down() {
@@ -310,7 +346,7 @@ volume_down() {
     # if value greater than zero
     if [ $VOLUME_LV -gt 0 ] ; then
         VOLUME_LV=$((VOLUME_LV-1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
@@ -319,7 +355,7 @@ volume_up() {
     # if value less than 20
     if [ $VOLUME_LV -lt 20 ] ; then
         VOLUME_LV=$((VOLUME_LV+1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
@@ -335,4 +371,10 @@ device_get_charging_status() {
 
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # A30 leaves dirty bit set?
 }
