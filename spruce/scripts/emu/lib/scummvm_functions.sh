@@ -34,6 +34,11 @@ run_scummvm_menu() {
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
+		"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			enable_digital_to_analog
+			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
@@ -78,6 +83,11 @@ run_scummvm() {
 		"SmartProS"|"SmartPro"|"Brick"|"Flip")
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			enable_digital_to_analog
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
@@ -127,7 +137,7 @@ run_scummvm_scan() {
 	fi
 
 	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+		"SmartProS"|"SmartPro"|"Brick"|"Flip"|"Pixel2")
 			SCUMMVM_BIN="$EMU_DIR/scummvm"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;

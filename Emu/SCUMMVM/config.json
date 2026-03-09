@@ -13,7 +13,8 @@
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
-        "MIYOO_FLIP"
+        "MIYOO_FLIP",
+        "GKD_PIXEL2"
       ]
     },
     {
@@ -23,7 +24,8 @@
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
-        "MIYOO_FLIP"
+        "MIYOO_FLIP",
+        "GKD_PIXEL2"
       ]
     }
   ],
@@ -38,17 +40,6 @@
       "selected": "Smart",
       "overrides": {}
     },
-      "Emulator_Pixel2": {
-          "display": "Retroarch Core",
-          "options": [
-              "scummvm"
-          ],
-          "devices": [
-              "GKD_PIXEL2"
-          ],
-          "selected": "scummvm",
-          "overrides": {}
-      },
       "Emulator_64": {
           "display": "Emulator",
           "options": [
@@ -59,7 +50,8 @@
               "TRIMUI_BRICK",
               "TRIMUI_SMART_PRO",
               "TRIMUI_SMART_PRO_S",
-              "MIYOO_FLIP"
+              "MIYOO_FLIP",
+              "GKD_PIXEL2"
           ],
           "selected": "scummvm-standalone",
           "overrides": {}

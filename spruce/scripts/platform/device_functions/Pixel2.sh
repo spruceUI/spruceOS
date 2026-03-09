@@ -88,6 +88,7 @@ enable_or_disable_rgb() {
 }
 
 prepare_for_pyui_launch(){
+    disable_digital_to_analog
     set_performance
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
@@ -309,14 +310,36 @@ send_menu_button_to_retroarch() {
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
+enable_digital_to_analog() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @digital @analog \
+            --map yield btn:east btn:south \
+            --map yield btn:south btn:east \
+            --map yield btn:dpad_left:0@analog abs:x:0 \
+            --map yield btn:dpad_left:1@analog abs:x:-900 \
+            --map yield btn:dpad_right:0@analog abs:x:0 \
+            --map yield btn:dpad_right:1@analog abs:x:899 \
+            --map yield btn:dpad_up:0@analog abs:y:0 \
+            --map yield btn:dpad_up:1@analog abs:y:-900 \
+            --map yield btn:dpad_down:0@analog abs:y:0 \
+            --map yield btn:dpad_down:1@analog abs:y:899 \
+            --output name="pixel2_joypad_alt" &
+}
+
+disable_digital_to_analog() {
+    pkill "evsieve"
+}
+
 close_ppsspp_menu() {
     if pgrep -f "PPSSPPSDL" >/dev/null; then
         log_message "Closing PPSSPP menu."
         {
             echo $B_RIGHT 1
             echo $B_RIGHT 0
-            echo $B_A 1
-            echo $B_A 0
+            echo $B_B 1
+            echo $B_B 0
         } > /tmp/ppsspp_events.txt
 
         # run sendevent in a fully detached subshell
