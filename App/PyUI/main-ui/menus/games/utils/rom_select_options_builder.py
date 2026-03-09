@@ -268,7 +268,7 @@ class RomSelectOptionsBuilder:
             return None
         
 
-    def build_rom_list(self, game_system,filter: Callable[[str, str], bool] = lambda a,b: True, subfolder = None,
+    def build_rom_list(self, game_system,filter: Callable[[str, str, str], bool] = lambda a,b,c: True, subfolder = None,
                        prefer_savestate_screenshot: bool = False) -> list[GridOrListEntry]:
         file_rom_list = []
         folder_rom_list = []
@@ -280,11 +280,11 @@ class RomSelectOptionsBuilder:
         for rom_file_path in valid_files:
             rom_file_name = os.path.basename(rom_file_path)
             game_entry = miyoo_game_list.get_by_file_path(rom_file_path)
-            if(filter(rom_file_name, rom_file_path)):
-                if(game_entry is not None):
-                    display_name = game_entry.name
-                else:
-                    display_name = RomFileNameUtils.get_rom_name_without_extensions(game_system,rom_file_path)
+            if(game_entry is not None):
+                display_name = game_entry.name
+            else:
+                display_name = RomFileNameUtils.get_rom_name_without_extensions(game_system,rom_file_path)
+            if(filter(rom_file_name, rom_file_path, display_name)):
 
                 rom_info = RomInfo(game_system,rom_file_path, display_name)
 
@@ -302,11 +302,11 @@ class RomSelectOptionsBuilder:
         for rom_file_path in valid_folders:
             rom_file_name = os.path.basename(rom_file_path)
             game_entry = miyoo_game_list.get_by_file_path(rom_file_path)
-            if(filter(rom_file_name, rom_file_path)):
-                if(game_entry is not None):
-                    display_name = game_entry.name
-                else:
-                    display_name = rom_file_name
+            if(game_entry is not None):
+                display_name = game_entry.name
+            else:
+                display_name = rom_file_name
+            if(filter(rom_file_name, rom_file_path, display_name)):
 
                 rom_info = RomInfo(game_system, rom_file_path, display_name)
 
