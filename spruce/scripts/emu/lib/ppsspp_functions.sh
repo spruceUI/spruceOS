@@ -30,8 +30,16 @@ run_ppsspp() {
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 	case "$PLATFORM" in
-		"Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
-		*) 					PPSSPPSDL="./PPSSPPSDL_${PLATFORM}" ;;
+		"Brick"|"SmartPro")
+			PPSSPPSDL="./PPSSPPSDL_TrimUI"
+			;;
+		"Pixel2")
+			enable_digital_to_analog
+			PPSSPPSDL="./PPSSPPSDL_Pixel2"
+			;;
+		*)
+			PPSSPPSDL="./PPSSPPSDL_${PLATFORM}"
+			;;
 	esac
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1

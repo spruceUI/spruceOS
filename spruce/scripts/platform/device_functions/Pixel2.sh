@@ -312,8 +312,8 @@ send_menu_button_to_retroarch() {
 
 enable_digital_to_analog() {
     evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
-            --hook btn:trigger_happy1 btn:select toggle \
-            --withhold btn:trigger_happy1 btn:select \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
             --toggle "" @digital @analog \
             --map yield btn:east btn:south \
             --map yield btn:south btn:east \
@@ -335,7 +335,6 @@ disable_digital_to_analog() {
 close_ppsspp_menu() {
     if pgrep -f "PPSSPPSDL" >/dev/null; then
         log_message "Closing PPSSPP menu."
-        disable_digital_to_analog
         {
             echo $B_RIGHT 1
             echo $B_RIGHT 0
