@@ -31,12 +31,10 @@ class RomUtils:
     #support other formats/systems
     def get_miyoo_games_file(self,system):
         system_dir = os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system))
-        try:
-            for entry in os.scandir(system_dir):
-                if entry.is_file() and entry.name.endswith('.xml'):
-                    return entry.path
-        except OSError:
-            pass
+        for name in ("miyoogamelist.xml", "gamelist.xml"):
+            path = os.path.join(system_dir, name)
+            if os.path.isfile(path):
+                return path
         return ""
 
     def has_roms(self, game_system, directory = None):
