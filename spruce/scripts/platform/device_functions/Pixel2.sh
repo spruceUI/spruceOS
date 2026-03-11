@@ -33,11 +33,7 @@ setup_for_retroarch_and_get_bin_location(){
     export RA_BIN="retroarch.Pixel2"
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
-    if [ "$CORE" = "uae4arm" ]; then
-		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-	elif [ "$CORE" = "easyrpg" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
-	elif [ "$CORE" = "yabasanshiro" ]; then
+	if [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
 
