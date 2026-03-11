@@ -22,7 +22,7 @@ send_menu_button_to_retroarch() {
         send_virtual_key_L3
     elif pgrep "retroarch.trimui" >/dev/null; then
         send_virtual_key_L3R3
-    elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null; then
+    elif pgrep "ra64.trimui_$PLATFORM" >/dev/null || pgrep "ra64.miyoo" >/dev/null || pgrep "ra64.universal" >/dev/null; then
         echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355
     elif pgrep -f "retroarch" >/dev/null; then
         echo "MENU_TOGGLE" | netcat -u -w0.1 127.0.0.1 55355

@@ -218,7 +218,7 @@ setup_for_retroarch_and_get_bin_location(){
 		# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
 		export RA_BIN="ra64.miyoo"
 	elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
-		export RA_BIN="retroarch.Flip"
+		export RA_BIN="ra64.universal"
 	else
 		export RA_BIN="ra64.miyoo"
 	fi

@@ -67,7 +67,7 @@ send_virtual_key_L3R3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+    if pgrep "ra64.trimui_$PLATFORM|ra64.universal" >/dev/null; then
         send_virtual_key_L3R3
     fi
 }

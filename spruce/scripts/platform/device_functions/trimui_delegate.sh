@@ -130,7 +130,7 @@ setup_for_retroarch_and_get_bin_location_trimui(){
 	if [ "$use_igm" = "True" ]; then
 		export RA_BIN="ra64.trimui_$PLATFORM"
 	else
-		export RA_BIN="retroarch.trimui"
+		export RA_BIN="ra64.universal"
 	fi
 	if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
