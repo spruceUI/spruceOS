@@ -2,6 +2,8 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+export PLATFORM="RG34XXSP"
+
 runifnecessary() {
     a=$(pgrep "$1")
     if [ "$a" = "" ] ; then
@@ -10,7 +12,7 @@ runifnecessary() {
 }
 
 # Check for -buttonListenerMode in arguments
-redirect_output=0
+redirect_output=1
 button_listener_mode=0
 for arg in "$@"; do
     if [ "$arg" = "-buttonListenerMode" ]; then
@@ -124,6 +126,24 @@ case "$PLATFORM" in
             "$@" >/dev/null 2>&1
         fi
     ;;
+
+############################################################
+# Anbernic RG34XXSP
+############################################################
+    "RG34XXSP" )
+        export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
+        export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
+    
+
+        python3 \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device ANBERNIC_RG34XXSP \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
+
+    ;;
+
 ############################################################
 # Miyoo Mini Flip
 ############################################################
@@ -154,7 +174,7 @@ case "$PLATFORM" in
         fi
 
         miyoo_device=$(get_miyoo_mini_variant)
-        
+
         cmd="/mnt/SDCARD/spruce/bin/python/bin/MainUI \
                 /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
                 -device $miyoo_device \
@@ -175,31 +195,5 @@ case "$PLATFORM" in
         fi
 
 
-    ;;
-############################################################
-# GKD Pixel 2
-############################################################
-    "Pixel2" )
-        redirect_output=0
-        cd /usr/bin/
-        export PYSDL2_DLL_PATH="/usr/lib"
-
-        cmd="/mnt/SDCARD/spruce/pixel2/bin/MainUI \
-            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-            -device GKD_PIXEL2 \
-            -logDir /mnt/SDCARD/Saves/spruce \
-            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
-            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
-
-        set -- $cmd "$@"
-
-        log_message "Starting PyUI on $PLATFORM"
-        if [ $button_listener_mode -eq 1 ]; then
-            "$@"
-        elif [ "$redirect_output" -eq 1 ]; then
-            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
-        else
-            "$@" >/dev/null 2>&1
-        fi
     ;;
 esac

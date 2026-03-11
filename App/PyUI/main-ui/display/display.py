@@ -12,7 +12,6 @@ from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
 import sdl2
 import sdl2.ext
-import sdl2.sdlttf
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
@@ -100,6 +99,7 @@ class Display:
     @classmethod
     def init(cls):
         cls._init_display()
+        import sdl2.sdlttf
         #Outside init_fonts as it should only ever be called once
         with log_timing("sdl2.sdlttf.TTF_Init()", PyUiLogger.get_logger()):    
             if sdl2.sdlttf.TTF_Init() == -1:
@@ -274,6 +274,7 @@ class Display:
 
     @classmethod
     def deinit_fonts(cls):
+        import sdl2.sdlttf
         for loaded_font in cls.fonts.values():
             sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
         cls.fonts.clear()
@@ -341,6 +342,7 @@ class Display:
 
     @classmethod
     def _load_font(cls, font_purpose):
+        import sdl2.sdlttf
         font_path = Theme.get_font(font_purpose)
         font_size = Theme.get_font_size(font_purpose)
 
@@ -527,6 +529,7 @@ class Display:
 
     @classmethod
     def log_sdl_error_and_clear_cache_image(cls, image_path=None):
+        import sdl2.sdlttf
         err = sdl2.sdlttf.TTF_GetError()
         err_msg = err.decode('utf-8') if err else "Unknown error"
         PyUiLogger.get_logger().warning(f"SDL Error received on loading {image_path} : {err_msg}")
@@ -546,6 +549,7 @@ class Display:
 
     @classmethod
     def log_sdl_error_and_clear_cache_text(cls, text,purpose):
+        import sdl2.sdlttf
         err = sdl2.sdlttf.TTF_GetError()
         err_msg = err.decode('utf-8') if err else "Unknown error"
         
@@ -562,6 +566,7 @@ class Display:
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None):
+        import sdl2.sdlttf
         text = Display.split_message(text, purpose, clip_to_device_width=False)[0]
         if(text is None or len(text) == 0):
             return 0, 0
@@ -1006,6 +1011,7 @@ class Display:
     
     @classmethod
     def get_text_dimensions(cls, purpose, text="A"):
+        import sdl2.sdlttf
         w = sdl2.Sint32()
         h = sdl2.Sint32()
         sdl2.sdlttf.TTF_SizeUTF8(cls.fonts[purpose].font, text.encode('utf-8'), w, h)
