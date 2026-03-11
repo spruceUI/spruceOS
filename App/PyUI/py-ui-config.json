@@ -8,6 +8,7 @@
     "gameSystemSortMode": "SortOrderKey",
     "includeStockOsLaunchOption": false,
     "allowPyUiGameSwitcher": true,
+    "mimicMiyooMainUiMode": true,
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",

@@ -209,8 +209,36 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+pause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -19 "$EMU" 2>/dev/null; then
+            log_message "$EMU was paused"
+            break
+        fi
+    done
+}
+
+unpause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -18 "$EMU" 2>/dev/null; then
+            log_message "$EMU was unpaused"
+            break
+        fi
+    done
+}
 
 device_enter_sleep() {
+    pause_emulators
+    sleep 0.5
+    # Kill exclusive getevent to prevent buffered wake button events
+    # from causing a re-sleep loop. The power watchdog's outer loop
+    # will restart getevent fresh after sleep_helper exits.
+    if [ "$(device_uses_pseudo_sleep)" != "true" ]; then
+        kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+        sleep 0.3
+    fi
+
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -228,6 +256,7 @@ device_exit_sleep() {
 
     touch /tmp/audio_reinit_needed
     clear_wake_alarm "$WAKE_ALARM_PATH"
+    unpause_emulators
 }
 
 device_lid_open() {
@@ -378,3 +407,5 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # A30 leaves dirty bit set?
 }
+
+

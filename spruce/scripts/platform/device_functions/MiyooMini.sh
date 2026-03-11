@@ -99,37 +99,11 @@ enable_or_disable_rgb() {
 }
 
 enter_sleep() {
-    log_message "Entering pseudo-sleep (wait for power)"
-
-    # Block until power button is pressed to wake
-    local wake_fifo="/tmp/sleep_wake_fifo.$$"
-    rm -f "$wake_fifo"
-    mkfifo "$wake_fifo"
-    getevent "$EVENT_PATH_POWER" > "$wake_fifo" 2>/dev/null &
-    local gev_pid=$!
-    exec 4< "$wake_fifo"
-    while IFS= read -r line <&4; do
-        case "$line" in
-            *"key $B_POWER 1"*)
-                break
-                ;;
-        esac
-    done
-    exec 4<&-
-    kill "$gev_pid" 2>/dev/null
-    wait "$gev_pid" 2>/dev/null
-    rm -f "$wake_fifo"
-
-    log_message "Exiting pseudo-sleep"
+    log_message "Keymon handles sleep, not spruce" -v
 }
 
 get_current_volume() {
-    # Return config-level volume (0-20) to match what set_volume expects
-    jq -r '.vol' "$SYSTEM_JSON"
-}
-
-device_specific_wake_from_sleep() {
-    log_message "MiyooMini wake - nothing extra needed" -v
+    log_message "Intentionally do not let spruce modify volume" -v
 }
 
 reset_playback_pack() {
@@ -174,25 +148,11 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    log_message "Launching MiyooMini startup watchdogs (using proven sleep watchdog)"
-
-    # Kill keymon — spruce watchdogs fully replace its functionality.
-    # keymon conflicts with the power button watchdog on the Mini since
-    # there is only a single input device (/dev/input/event0).
-    killall -9 keymon 2>/dev/null
-
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
-    /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
-    /mnt/SDCARD/spruce/scripts/powerbutton_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
-
-    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
-    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
-    pin_cpu "$SYSTEM_CPU" -n idlemon_mm.sh &
-    pin_cpu "$SYSTEM_CPU" -n low_power_warning.sh &
-    pin_cpu "$SYSTEM_CPU" -n powerbutton_watchdog.sh &
-    pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
+    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_FLIP" ]; then
+        launch_common_startup_watchdogs_v2 "true"
+    else
+        launch_common_startup_watchdogs_v2 "false"
+    fi
 }
 
 perform_fw_check(){
