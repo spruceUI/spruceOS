@@ -7,8 +7,8 @@ log_message "power_button_watchdog_v2.sh: Started up."
 
 
 power_key_up () {
-    log_message "Power button released at $(date +%s)"  
     if [ -e /tmp/powerbtn ]; then
+        log_message "Power button released at $(date +%s)"  
         rm -f /tmp/powerbtn
 
         was_cancelled=false
@@ -27,6 +27,8 @@ power_key_up () {
         if [ "$was_cancelled" = false ]; then
             /mnt/SDCARD/spruce/scripts/sleep_helper.sh
         fi
+    else
+        log_message "Power button released during cooldown at $(date +%s)"  
     fi
 
 }
@@ -54,26 +56,29 @@ power_key_down () {
             fi
         ) &
         power_hold_pid=$!
+    else
+        log_message "Power button pressed during cooldown at $power_btn_press_time"  
     fi
 }
 
+LAST_POWER_DOWN=0
+PREV_WAS_POWER=0
 while true; do
-    LAST_POWER_DOWN=0
     log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
     getevent -exclusive -pid $$ $EVENT_PATH_POWER | while read line; do
-        if [ -e /tmp/sleep_helper_started ]; then
-            log_message "power_button_watchdog_v2.sh: Sleep helper active, skipping power button event."
-            continue
-        fi
-
         now=$(date +%s)
+        # If last loop contained B_POWER, update LAST_POWER_DOWN now
+        if [ "$PREV_WAS_POWER" -eq 1 ]; then
+            LAST_POWER_DOWN=$now
+            PREV_WAS_POWER=0
+        fi
         case $line in
             # Power key down
             *"key $B_POWER 1"*)
                 if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
                     log_message "power_button_watchdog_v2.sh: power_key_down"
                     power_key_down
-                    LAST_POWER_DOWN=$now
+                    PREV_WAS_POWER=1
                 fi
                 ;;
 
@@ -81,6 +86,7 @@ while true; do
             *"key $B_POWER 0"*)
                     log_message "power_button_watchdog_v2.sh: power_key_up"
                     power_key_up
+                    PREV_WAS_POWER=1
                 ;;
             esac
     done
