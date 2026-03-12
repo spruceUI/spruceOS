@@ -111,6 +111,14 @@ run_retroarch() {
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
+	# Sync IGM flag file with config setting
+	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
+	if [ "$use_igm" = "True" ]; then
+		touch "$IGM_FLAG"
+	else
+		rm -f "$IGM_FLAG"
+	fi
+
 	setup_for_retroarch_and_get_bin_location
 	cd "$RA_DIR"
 
