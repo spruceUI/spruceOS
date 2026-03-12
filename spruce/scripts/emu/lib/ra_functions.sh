@@ -27,15 +27,11 @@
 #   save_custom_n64_controller_profile
 
 get_ra_cfg_location(){
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
     if [ -n "$RA_CFG_LOCATION" ]; then
         # Already set, use it
         echo "$RA_CFG_LOCATION"
-    elif [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
-		#Why is Flip here as a platform check?
-		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
 	else
-		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
+		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
 	fi
 }
 
