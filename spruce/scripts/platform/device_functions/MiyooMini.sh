@@ -291,6 +291,9 @@ device_exit_sleep() {
         {
              sleep 1
              echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+             sleep 1
+             echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+             rm /tmp/volume_zero
         } &
     fi
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
