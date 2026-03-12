@@ -283,6 +283,15 @@ device_enter_sleep() {
 device_exit_sleep() {
     cpuclock 1600                                               # wake up cpu speed
     /customer/app/keymon &
+    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
+        #TODO don't have a mini to test on but this should potentially be
+        #MMP only
+        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+        {
+             sleep 1
+             echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+        } &
+    fi
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
     if [ -f /tmp/saved_brightness ]; then
