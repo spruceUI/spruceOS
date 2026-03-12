@@ -284,18 +284,6 @@ device_enter_sleep() {
 device_exit_sleep() {
     cpuclock 1600                                               # wake up cpu speed
     /customer/app/keymon &
-    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
-        #TODO don't have a mini to test on but this should potentially be
-        #MMP only
-        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
-        {
-             sleep 1
-             echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
-             sleep 1
-             echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
-             rm /tmp/volume_zero
-        } &
-    fi
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
     if [ -f /tmp/saved_brightness ]; then
@@ -303,11 +291,20 @@ device_exit_sleep() {
     else
         echo "50" > "$BRIGHTNESS_FILE" 2>/dev/null              # default if previous not found
     fi
-    [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
     rm -f /tmp/screen_blanked /tmp/saved_brightness             # clean up temp files
 
     sleep 0.5
     send_event /dev/input/event0 116:1 
+
+
+    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
+        #TODO don't have a mini to test on but this should potentially be
+        #MMP only
+        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+    else
+        [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
+
+    fi
 
     pgrep retroarch 2>/dev/null && set_smart # return to smart mode
 }
