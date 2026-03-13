@@ -61,24 +61,19 @@ power_key_down () {
     fi
 }
 
-LAST_POWER_DOWN=0
-PREV_WAS_POWER=0
 while true; do
     log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
     getevent -exclusive -pid $$ $EVENT_PATH_POWER | while read line; do
         now=$(date +%s)
-        # If last loop contained B_POWER, update LAST_POWER_DOWN now
-        if [ "$PREV_WAS_POWER" -eq 1 ]; then
-            LAST_POWER_DOWN=$now
-            PREV_WAS_POWER=0
-        fi
         case $line in
             # Power key down
             *"key $B_POWER 1"*)
-                if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
-                    log_message "power_button_watchdog_v2.sh: power_key_down"
+                log_message "power_button_watchdog_v2.sh: power_key_down"
+                if [ $((now - LAST_POWER_DOWN)) -ge 2 ]; then
                     power_key_down
-                    PREV_WAS_POWER=1
+                    LAST_POWER_DOWN=$(date +%s)
+                else
+                    log_message "Power button pressed during cooldown at $now, LAST_POWER_DOWN=$LAST_POWER_DOWN"  
                 fi
                 ;;
 
@@ -86,7 +81,7 @@ while true; do
             *"key $B_POWER 0"*)
                     log_message "power_button_watchdog_v2.sh: power_key_up"
                     power_key_up
-                    PREV_WAS_POWER=1
+                    LAST_POWER_DOWN=$(date +%s)
                 ;;
             esac
     done
