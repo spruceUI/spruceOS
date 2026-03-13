@@ -58,10 +58,21 @@ set_loading_screen() {
     /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
 }
 
+disable_swap() {
+    swap_list=$(swapon -s)
+
+    if [ -n "$swap_list" ]; then
+        swapoff -a
+    fi
+}
+
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
     sync_volume_level
+
+    disable_swap
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
