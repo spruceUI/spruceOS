@@ -129,16 +129,20 @@ class AnbernicRG34xxSP(DeviceCommon):
             Display.display_message("No core found", 2_000)
             return
 
-        selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-        
-        cmds = ["/mnt/SDCARD/RetroArch/ra64.universal",
+        #selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
+        selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+
+        cmds = [
+                #"/mnt/SDCARD/RetroArch/ra64.universal",
+                "/mnt/vendor/deep/retro/retroarch",
                 "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
                 "-v",
                 "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
                 "-L",selected_core,
                 rom_info.rom_file_path]
 
-        directory = "/mnt/SDCARD/RetroArch/"
+        #directory = "/mnt/SDCARD/RetroArch/"
+        directory = "/mnt/vendor/deep/retro/"
         PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
         Display.deinit_display()
         subprocess.run(cmds, cwd = directory)
@@ -325,8 +329,7 @@ class AnbernicRG34xxSP(DeviceCommon):
         return None
     
     def get_save_state_image(self, rom_info: RomInfo):
-        #TODO, where does it store this?
-        return None
+        return self.get_game_system_utils().get_save_state_image(rom_info)
 
     def get_wpa_supplicant_conf_path(self):
         return None
@@ -344,7 +347,7 @@ class AnbernicRG34xxSP(DeviceCommon):
         return False
 
     def supports_qoi(self):
-        return False
+        return True
 
     def keep_running_on_error(self):
         return False
