@@ -73,6 +73,9 @@ case $EMU_NAME in
 		if [ "$CORE" = "ffplay" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
 			run_ffplay
+		elif [ "$CORE" = "mpv" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
+			run_mpv
 		else
 			run_retroarch
 		fi
