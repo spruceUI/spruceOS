@@ -146,15 +146,24 @@ run_retroarch() {
 			;;
 	esac
 
+	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
+	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
+	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
+	case "$PLATFORM" in
+		"A30")
+			export SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
+			;;
+	esac
+
 	if flag_check "developer_mode"; then
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
-	
+
 
 	backup_ra_config 2>/dev/null
-	
+
 	ra_close_setup_saves_and_states_for_core_differences
 }
 

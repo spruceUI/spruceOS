@@ -334,7 +334,7 @@ set_default_ra_hotkeys() {
         "input_fps_toggle = \"alt\"" \
         "input_load_state = \"tab\"" \
         "input_menu_toggle = \"shift\"" \
-        "input_menu_toggle_btn = \"9\"" \
+        "input_menu_toggle_btn = \"nul\"" \
         "input_quit_gamepad_combo = \"0\"" \
         "input_save_state = \"backspace\"" \
         "input_screenshot = \"space\"" \
