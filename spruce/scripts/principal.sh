@@ -20,6 +20,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 while [ 1 ]; do
+    log_message "Starting new loop of principal.sh"
     set_smart
 
     stop_pyui_message_writer
@@ -68,7 +69,7 @@ while [ 1 ]; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
-
+        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
         /tmp/cmd_to_run.sh &>/dev/null
         
         rm /tmp/cmd_to_run.sh

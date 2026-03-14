@@ -30,6 +30,7 @@ case $INFO in
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
+    *"0xd03"*) export PLATFORM="AnbernicRG34XXSP" ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
 
@@ -963,9 +964,13 @@ enable_wifi() {
             kill -9 "$WPA_PID" 2>/dev/null
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            log_message "wpa_supplicant was running with the wrong conf so restarted"
+        else
+            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        log_message "Launching wpa_supplicant"
     fi
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
     /mnt/SDCARD/spruce/scripts/networkservices.sh &

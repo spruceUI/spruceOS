@@ -99,8 +99,8 @@ def initialize_device(device, main_ui_mode):
         from devices.miyoo.a30.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
     elif "ANBERNIC_RG34XXSP" == device:
-        from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX(device))
+        from devices.anbernic.anbernic_rg34xxsp import AnbernicRG34xxSP
+        Device.init(AnbernicRG34xxSP())
     elif "ANBERNIC_RG28XX" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX(device))
