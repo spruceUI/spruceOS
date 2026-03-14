@@ -117,11 +117,7 @@ setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"
 
-	if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		export RA_BIN="retroarch.A30"
-	else
-		export RA_BIN="ra32.miyoo"
-	fi
+	export RA_BIN="RA32.A30"
 
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
@@ -162,7 +158,9 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra32.miyoo" >/dev/null; then
+    if pgrep "RA32.A30" >/dev/null; then
+        : # no-op: RA's input system handles menu toggle directly
+    elif pgrep "ra32.miyoo" >/dev/null; then
         send_virtual_key_L3
     elif pgrep -f "retroarch" >/dev/null; then
         send_virtual_key_L3R3
@@ -209,7 +207,7 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
-EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+EMULATORS="RA32.A30 ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
 pause_emulators() {
     for EMU in $EMULATORS; do
         if killall -q -19 "$EMU" 2>/dev/null; then
@@ -336,7 +334,7 @@ set_default_ra_hotkeys() {
         "input_fps_toggle = \"alt\"" \
         "input_load_state = \"tab\"" \
         "input_menu_toggle = \"shift\"" \
-        "input_menu_toggle_btn = \"9\"" \
+        "input_menu_toggle_btn = \"nul\"" \
         "input_quit_gamepad_combo = \"0\"" \
         "input_save_state = \"backspace\"" \
         "input_screenshot = \"space\"" \

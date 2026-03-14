@@ -1,7 +1,4 @@
 import json
-import os
-
-IGM_FLAG_PATH = "/mnt/SDCARD/RetroArch/IGM.txt"
 
 class CfwSystemConfig():
     _data = {}
@@ -55,26 +52,9 @@ class CfwSystemConfig():
             menu_options[name]['selected'] = selected_value
             cls.save_config()
             cls.reload_config()
-            if category == "Emulator Settings" and name == "raInGameMenu":
-                cls._sync_igm_flag(selected_value)
         else:
             # Optional: log or raise if not found
             pass
-
-    @classmethod
-    def _sync_igm_flag(cls, value):
-        """Create or delete IGM.txt flag file based on raInGameMenu setting."""
-        if value == "True":
-            try:
-                with open(IGM_FLAG_PATH, 'w') as f:
-                    pass
-            except Exception:
-                pass
-        else:
-            try:
-                os.remove(IGM_FLAG_PATH)
-            except FileNotFoundError:
-                pass
 
     @classmethod
     def get_selected_value(cls, category, name):

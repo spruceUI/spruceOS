@@ -66,7 +66,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI")
+		"TrimUI" | "GKD")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"Miyoo")
@@ -111,6 +111,14 @@ run_retroarch() {
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
+	# Sync IGM flag file with config setting
+	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
+	if [ "$use_igm" = "True" ]; then
+		touch "$IGM_FLAG"
+	else
+		rm -f "$IGM_FLAG"
+	fi
+
 	setup_for_retroarch_and_get_bin_location
 	cd "$RA_DIR"
 
@@ -133,8 +141,17 @@ run_retroarch() {
 
 	RA_PARAMS="-v"
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick")
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30")
 			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
+			;;
+	esac
+
+	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
+	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
+	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
+	case "$PLATFORM" in
+		"A30")
+			export SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
 			;;
 	esac
 
@@ -143,10 +160,10 @@ run_retroarch() {
 	else
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
-	
+
 
 	backup_ra_config 2>/dev/null
-	
+
 	ra_close_setup_saves_and_states_for_core_differences
 }
 

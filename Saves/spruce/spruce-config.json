@@ -210,7 +210,10 @@
                 "selected": "True"
             },
             "useZRAM":{
-                "devices": ["MIYOO_FLIP"],
+                "devices": [
+                    "MIYOO_FLIP",
+                    "GKD_PIXEL2"
+                ],
                 "display": "Use ZRAM (experimental)",
                 "description": "reboot to apply",
                 "options": [
@@ -220,15 +223,6 @@
                 "selected": "False"
             },
             "swapfileSize":{
-                "devices":["MIYOO_FLIP",
-                           "MIYOO_MINI",
-                           "MIYOO_MINI_V4",
-                           "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP",
-                           "TRIMUI_BRICK",
-                           "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S",
-                           "MIYOO_A30"],
                 "display": "Swapfile size (experimental)",
                 "description": "reboot to apply",
                 "options": [
@@ -340,7 +334,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2"],
                 "options": [
                     "Select",
                     "Start",
