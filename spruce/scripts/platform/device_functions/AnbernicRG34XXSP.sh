@@ -51,19 +51,10 @@ device_lid_open() {
 
 # Will miyoo ones work?
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
+	RA_DIR="/mnt/vendor/deep/retro"
 	export RA_BIN="retroarch"
-
-			
-    if [ "$CORE" = "uae4arm" ]; then
-		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-	elif [ "$CORE" = "easyrpg" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
-	elif [ "$CORE" = "yabasanshiro" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
-	fi
-	export CORE_DIR="$RA_DIR/.retroarch/cores64"
-
+    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+    
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
