@@ -12,6 +12,7 @@
 #
 # Provides:
 #   run_ffplay
+#   run_mpv
 
 run_ffplay() {
 	export HOME=$EMU_DIR
@@ -28,6 +29,24 @@ run_ffplay() {
 		sleep 1
 		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -loglevel 24 -i "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	fi
+
+	kill -9 "$(pidof gptokeyb)"
+}
+
+run_mpv() {
+	# pixel 2 only
+	export HOME=$EMU_DIR
+	cd $EMU_DIR
+
+	INPUT_CONF="/tmp/mpv_input.conf"
+	printf 'VOLUME_UP ignore\nVOLUME_DOWN ignore' > $INPUT_CONF
+
+	/mnt/SDCARD/spruce/bin64/gptokeyb -k "mpv" -c "./bin64/mpv.gptk" &
+	sleep 0.5
+
+	/usr/bin/mpv --fs --geometry="640x480" --hwdec=drm --vo=sdl \
+				 --input-conf=$INPUT_CONF --msg-level=all=warn \
+				"$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 
 	kill -9 "$(pidof gptokeyb)"
 }
