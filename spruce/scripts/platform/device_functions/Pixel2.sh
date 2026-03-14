@@ -376,7 +376,7 @@ set_default_ra_hotkeys() {
         "input_screenshot_btn = \"0\"" \
         "input_shader_toggle_btn = \"11\"" \
         "input_state_slot_decrease_btn = \"13\"" \
-        "input_state_slot_increase_btn = \"14\"" \
+        "input_state_slot_increase_btn = \"14\""
 }
 
 device_system_handles_sdcard_unmount() {
