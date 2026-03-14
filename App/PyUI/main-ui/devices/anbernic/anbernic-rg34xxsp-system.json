@@ -6,7 +6,7 @@
         "saturation": 10,
         "hue":10,
         "audiofix": 0,
-        "wifi": 0,
+        "wifi": 1,
         "bluetooth": 0
 }
 

@@ -13,6 +13,9 @@ from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
 from option_select_ui import OptionSelectUI
+import sdl2
+import sdl2.ext
+
 from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
@@ -45,9 +48,6 @@ def parse_arguments():
     return parser.parse_args()
 
 def log_renderer_info():
-    import sdl2
-    import sdl2.ext
-
     num = sdl2.SDL_GetNumRenderDrivers()
     for i in range(num):
         info = sdl2.SDL_RendererInfo()
@@ -59,13 +59,6 @@ def log_renderer_info():
         PyUiLogger.get_logger().info(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
 
 def initialize_device(device, main_ui_mode):
-    import sdl2
-    import sdl2.ext
-    sdl2.ext.init(controller=False) 
-    window = sdl2.ext.Window("PyUI", size=(720, 480))
-    renderer = sdl2.ext.Renderer(window, flags=sdl2.SDL_RENDERER_ACCELERATED)
-
-
     if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
         from devices.miyoo.flip.miyoo_flip import MiyooFlip
         Device.init(MiyooFlip(device, main_ui_mode))
@@ -273,4 +266,3 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
     main()
     os._exit(0)
-

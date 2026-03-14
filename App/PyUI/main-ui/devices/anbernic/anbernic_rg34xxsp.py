@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import subprocess
 import threading
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -7,8 +8,11 @@ from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from devices.wifi.wifi_status import WifiStatus
+from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
@@ -30,15 +34,15 @@ from utils.py_ui_config import PyUiConfig
 
 from devices.device_common import DeviceCommon
 
+#/mnt/vendor/ctrl/dmenu_ln
 class AnbernicRG34xxSP(DeviceCommon):
     def __init__(self):
-        self.device_name = "MIYOO_FLIP"
+        self.device_name = "MIYOO_A30"
  
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'anbernic-rg34xxsp-system.json'
         self._load_system_config("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json", source)
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
         self.game_utils = MiyooTrimGameSystemUtils()
@@ -86,11 +90,23 @@ class AnbernicRG34xxSP(DeviceCommon):
 
     def _set_brightness_to_config(self):
         pass
-
+                   
     def _set_lumination_to_config(self):
-        luminosity = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
-        #TODO
-    
+        import fcntl
+        import struct
+        DEV = "/dev/disp"
+        IOCTL_SET_BRIGHTNESS = 0x102
+        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
+
+        # 4 unsigned long values (ARM64 = 8 bytes each)
+        args = struct.pack("QQQQ", 0, val, 0, 0)
+
+        fd = os.open(DEV, os.O_RDWR)
+        try:
+            fcntl.ioctl(fd, IOCTL_SET_BRIGHTNESS, args)
+        finally:
+            os.close(fd)     
+
     def _set_contrast_to_config(self):
         pass
     
@@ -104,22 +120,43 @@ class AnbernicRG34xxSP(DeviceCommon):
 
     def get_volume(self):
         return self.system_config.get_volume()
+    
+    def run_game(self, rom_info: RomInfo):
+        from controller.controller import Controller
+        menu_options = rom_info.game_system.game_system_config.get_menu_options()
+        selected_core = self.get_selected_emulator(menu_options, self.device_name)
+        if(selected_core is None):
+            Display.display_message("No core found", 2_000)
+            return
 
-    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
-        launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
-        PyUiLogger.get_logger().info(f"About to launch {launch_path} with rom {rom_info.rom_file_path}")
-        return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
+        
+        cmds = ["/mnt/SDCARD/RetroArch/ra64.universal",
+                "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
+                "-v",
+                "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
+                "-L",selected_core,
+                rom_info.rom_file_path]
+
+        directory = "/mnt/SDCARD/RetroArch/"
+        PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
+        Display.deinit_display()
+        subprocess.run(cmds, cwd = directory)
+        Display.init()
+
+        Controller.clear_input_queue()
 
     def run_cmd(self, args, dir = None):
-        PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
-        subprocess.run(args, cwd = dir)
-    
+        MiyooTrimCommon.run_cmd(self, args, dir)
+            
     def run_app(self, folder,launch):
+        from controller.controller import Controller
         directory = os.path.dirname(launch)
+        Display.deinit_display()
         PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
         subprocess.run([launch], cwd = directory)
-
+        Display.init()
+        Controller.clear_input_queue()
     
     def map_digital_input(self, sdl_input):
         return None
@@ -167,35 +204,27 @@ class AnbernicRG34xxSP(DeviceCommon):
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
-
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
-
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    def disable_wifi(self):
-        pass
-
-    def enable_wifi(self):
-        pass
-
-
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        #TODO
-        return ChargeStatus.DISCONNECTED
-    
+        status_file = Path("/sys/class/power_supply/axp2202-battery/status")
+        try:
+            status = status_file.read_text().strip().lower()
+            if status == "charging":
+                return ChargeStatus.CHARGING
+            else:
+                return ChargeStatus.DISCONNECTED
+        except:
+            # battery info not available
+            return ChargeStatus.DISCONNECTED    
+        
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
-        # TODO
-        return 100
+        with open("/sys/class/power_supply/axp2202-battery/capacity", "r") as f:
+            return int(f.read().strip()) 
+        return 0
 
     def get_app_finder(self):
         return MiyooAppFinder()
@@ -252,7 +281,7 @@ class AnbernicRG34xxSP(DeviceCommon):
         self.button_remapper.remap_buttons()
 
     def supports_wifi(self):
-        return False #TODO
+        return True
     
     def get_roms_dir(self):
         return "/mnt/union/ROMS/"
@@ -376,6 +405,9 @@ class AnbernicRG34xxSP(DeviceCommon):
 
     @throttle.limit_refresh(5)
     def is_hdmi_connected(self):
+        # /sys/class/switch/hdmi/state
+        # HDMI=0
+        # HDMI=1
         return False
     
 
@@ -408,3 +440,93 @@ class AnbernicRG34xxSP(DeviceCommon):
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
+
+    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
+        try:
+            result = subprocess.run(
+                ["iw", "dev", "wlan0", "link"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            output = result.stdout.strip()
+
+            if "Not connected." in output or result.returncode != 0:
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+
+            signal_level = 0
+            link_quality = 0  # This won't be available directly via iw, unless you derive it
+
+            # Extract signal level (in dBm)
+            signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
+            if signal_match:
+                signal_level = int(signal_match.group(1))
+
+            # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
+            # Example rough mapping:
+            if signal_level <= -100:
+                link_quality = 0
+            elif signal_level >= -50:
+                link_quality = 70
+            else:
+                link_quality = int((signal_level + 100) * 1.4)  # Maps -100..-50 dBm to 0..70
+
+            return WiFiConnectionQualityInfo(
+                noise_level=0,  # Not available via `iw`
+                signal_level=signal_level,
+                link_quality=link_quality
+            )
+
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"An error occurred {e}")
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+
+    @throttle.limit_refresh(10)
+    def get_ip_addr_text(self):
+        import socket
+        import fcntl
+        import struct
+        if not self.is_wifi_enabled():
+            return "Off"
+
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            iface = b"wlan0"  # interface name must be bytes
+            ip = fcntl.ioctl(
+                sock.fileno(),
+                0x8915,  # SIOCGIFADDR
+                struct.pack('256s', iface[:15])
+            )[20:24]
+            return socket.inet_ntoa(ip)
+        except OSError:
+            return "Connecting"
+        except Exception:
+            return "Error"
+        
+             
+    def set_wifi_power(self, value):
+        pass
+
+    def stop_wifi_services(self):
+        pass
+
+    def start_wpa_supplicant(self):
+        pass
+
+    def start_udhcpc(self):
+        pass
+
+    def start_wifi_services(self):
+        pass
+
+    def is_wifi_enabled(self):
+        return self.system_config.is_wifi_enabled()
+
+    def disable_wifi(self):
+        pass
+
+    def enable_wifi(self):
+        pass
+
+    def uses_deinit_v2(self):
+        return True
