@@ -128,7 +128,7 @@ case "$PLATFORM" in
 ############################################################
 # Anbernic RG34XXSP
 ############################################################
-    "RG34XXSP" )
+    "AnbernicRG34XXSP" )
         export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
         export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
     
