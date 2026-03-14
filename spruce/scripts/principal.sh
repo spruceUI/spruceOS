@@ -70,8 +70,8 @@ while [ 1 ]; do
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
         log_message "Running: $(cat /tmp/cmd_to_run.sh)"
-        /tmp/cmd_to_run.sh &>/dev/null
-        
+        /tmp/cmd_to_run.sh >/dev/null 2>&1
+
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip

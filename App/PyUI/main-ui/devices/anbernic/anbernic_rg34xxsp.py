@@ -47,7 +47,7 @@ class AnbernicRG34xxSP(DeviceCommon):
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
         self.game_utils = MiyooTrimGameSystemUtils()
 
-        #self._set_lumination_to_config()
+        self._set_lumination_to_config()
         #self._set_contrast_to_config()
         #self._set_saturation_to_config()
         #self._set_brightness_to_config()
@@ -96,7 +96,8 @@ class AnbernicRG34xxSP(DeviceCommon):
         import struct
         DEV = "/dev/disp"
         IOCTL_SET_BRIGHTNESS = 0x102
-        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
+        #Is actually 128
+        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight //2)
 
         # 4 unsigned long values (ARM64 = 8 bytes each)
         args = struct.pack("QQQQ", 0, val, 0, 0)
@@ -122,33 +123,36 @@ class AnbernicRG34xxSP(DeviceCommon):
         return self.system_config.get_volume()
     
     def run_game(self, rom_info: RomInfo):
-        from controller.controller import Controller
-        menu_options = rom_info.game_system.game_system_config.get_menu_options()
-        selected_core = self.get_selected_emulator(menu_options, self.device_name)
-        if(selected_core is None):
-            Display.display_message("No core found", 2_000)
-            return
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            MiyooTrimCommon.run_game(self, rom_info)
+        else:
+            from controller.controller import Controller
+            menu_options = rom_info.game_system.game_system_config.get_menu_options()
+            selected_core = self.get_selected_emulator(menu_options, self.device_name)
+            if(selected_core is None):
+                Display.display_message("No core found", 2_000)
+                return
 
-        #selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-        selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+            #selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
+            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
 
-        cmds = [
-                #"/mnt/SDCARD/RetroArch/ra64.universal",
-                "/mnt/vendor/deep/retro/retroarch",
-                "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
-                "-v",
-                "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
-                "-L",selected_core,
-                rom_info.rom_file_path]
+            cmds = [
+                    #"/mnt/SDCARD/RetroArch/ra64.universal",
+                    "/mnt/vendor/deep/retro/retroarch",
+                    "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
+                    "-v",
+                    "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
+                    "-L",selected_core,
+                    rom_info.rom_file_path]
 
-        #directory = "/mnt/SDCARD/RetroArch/"
-        directory = "/mnt/vendor/deep/retro/"
-        PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
-        Display.deinit_display()
-        subprocess.run(cmds, cwd = directory)
-        Display.init()
+            #directory = "/mnt/SDCARD/RetroArch/"
+            directory = "/mnt/vendor/deep/retro/"
+            PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
+            Display.deinit_display()
+            subprocess.run(cmds, cwd = directory)
+            Display.init()
 
-        Controller.clear_input_queue()
+            Controller.clear_input_queue()
 
     def run_cmd(self, args, dir = None):
         MiyooTrimCommon.run_cmd(self, args, dir)
