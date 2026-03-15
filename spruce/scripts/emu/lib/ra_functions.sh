@@ -161,6 +161,7 @@ run_retroarch() {
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
 
+	display_kill
 
 	backup_ra_config 2>/dev/null
 
