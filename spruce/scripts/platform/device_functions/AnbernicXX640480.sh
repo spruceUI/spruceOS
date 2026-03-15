@@ -26,3 +26,8 @@ setup_for_retroarch_and_get_bin_location(){
     
     echo "$RA_BIN"
 }
+
+prepare_for_pyui_launch(){
+	# Where else to put this?
+    dhclient wlan0
+}
