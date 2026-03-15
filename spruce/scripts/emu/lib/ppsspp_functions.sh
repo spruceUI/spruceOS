@@ -15,6 +15,10 @@
 #   run_ppsspp
 #   load_ppsspp_configs
 #   save_ppsspp_configs
+#   move_screenshots_if_present
+
+SS_DIR="/mnt/SDCARD/Saves/screenshots/PPSSPP"
+PSP_SS_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SCREENSHOT"
 
 move_dotconfig_into_place() {
 	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]; then
@@ -24,9 +28,21 @@ move_dotconfig_into_place() {
 	fi
 }
 
+move_screenshots_if_present() {
+	if [ -n "$(ls -A $PSP_SS_DIR/*.png 2>/dev/null)" ]; then
+		mv $PSP_SS_DIR/*.png "$SS_DIR" 2>/dev/null
+	fi
+}
+
 run_ppsspp() {
 	export HOME=/mnt/SDCARD/Saves
 	cd $EMU_DIR
+
+	mkdir -p "$PSP_SS_DIR"
+	mkdir -p "$SS_DIR"
+
+	move_screenshots_if_present
+	mount --bind "$SS_DIR" "$PSP_SS_DIR"
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 	case "$PLATFORM" in
@@ -43,6 +59,8 @@ run_ppsspp() {
 	esac
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+
+	umount "$PSP_SS_DIR"
 }
 
 load_ppsspp_configs() {
