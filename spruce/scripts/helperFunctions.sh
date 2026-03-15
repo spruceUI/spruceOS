@@ -33,14 +33,27 @@ case $INFO in
     *0xd04*) export PLATFORM="Pixel2" ;;
     *0xd03*)
         CMDLINE=$(cat /proc/cmdline)
+
         case $CMDLINE in
-            *lcd_type=boe*) export PLATFORM="AnbernicRG34XXSP" ;;
-            *lcd_type=old*) export PLATFORM="AnbernicXX640480" ;;
-            # TODO xxCUBE?
-            *) export PLATFORM="AnbernicXX640480" ;;
+            *lcd_type=boe*)
+                export PLATFORM="AnbernicRG34XXSP"
+                ;;
+            *lcd_type=old*)
+                #TODO handle cube?
+                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
+                    export PLATFORM="AnbernicRG28XX"
+                else
+                    export PLATFORM="AnbernicXX640480"
+                fi
+                ;;
+            *)
+                export PLATFORM="AnbernicXX640480"
+                ;;
         esac
         ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *)
+        export PLATFORM="MiyooMini"
+        ;;
 esac
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
