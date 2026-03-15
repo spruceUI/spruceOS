@@ -28,10 +28,9 @@ fi
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/
     if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
-        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log
+        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "Sprucing up your device"
     else
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "PortMaster already exists, removing install archive" 75
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
     fi
 
     rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
