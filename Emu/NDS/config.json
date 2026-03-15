@@ -21,7 +21,9 @@
     "Emulator_Flip": {
       "display": "Emulator",
       "devices": [
-        "MIYOO_FLIP"
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "DraStic-original",
@@ -75,5 +77,11 @@
   "releaseYear": 2004,
   "default_emulator": "DraStic-original",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["nds","DS","ds","nintendods","NINTENDODS"]
+  "alternativeFolderNames": [
+    "nds",
+    "DS",
+    "ds",
+    "nintendods",
+    "NINTENDODS"
+  ]
 }

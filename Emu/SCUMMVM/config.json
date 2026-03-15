@@ -14,7 +14,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ]
     },
     {
@@ -25,7 +27,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ]
     }
   ],
@@ -40,22 +44,24 @@
       "selected": "Smart",
       "overrides": {}
     },
-      "Emulator_64": {
-          "display": "Emulator",
-          "options": [
-              "scummvm_libretro",
-              "scummvm-standalone"
-          ],
-          "devices": [
-              "TRIMUI_BRICK",
-              "TRIMUI_SMART_PRO",
-              "TRIMUI_SMART_PRO_S",
-              "MIYOO_FLIP",
-              "GKD_PIXEL2"
-          ],
-          "selected": "scummvm-standalone",
-          "overrides": {}
-      }
+    "Emulator_64": {
+      "display": "Emulator",
+      "options": [
+        "scummvm_libretro",
+        "scummvm-standalone"
+      ],
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
+      ],
+      "selected": "scummvm-standalone",
+      "overrides": {}
+    }
   },
   "sortOrder": 5600,
   "brand": "modernengine",
@@ -64,6 +70,6 @@
   "default_emulator": "scummvm",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": [
-      "scummvm"
+    "scummvm"
   ]
 }

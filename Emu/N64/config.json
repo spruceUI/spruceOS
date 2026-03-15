@@ -37,7 +37,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
@@ -71,7 +73,13 @@
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
     "MIYOO_FLIP",
-    "GKD_PIXEL2"
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RGXX640480"
   ],
-  "alternativeFolderNames": ["NINTENDO64","nintendo64","n64"]
+  "alternativeFolderNames": [
+    "NINTENDO64",
+    "nintendo64",
+    "n64"
+  ]
 }

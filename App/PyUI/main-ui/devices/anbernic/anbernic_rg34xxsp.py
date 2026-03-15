@@ -5,6 +5,7 @@ import os
 #/mnt/vendor/ctrl/dmenu_ln
 class AnbernicRG34xxSP(AnbernicXXCommon):
     def __init__(self):
+        self.device_name = "ANBERNIC_RG34XXSP"
         super().__init__()
                    
     def _set_lumination_to_config(self):
