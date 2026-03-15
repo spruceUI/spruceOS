@@ -81,8 +81,8 @@ send_virtual_key_L3() {
 }
 
 launch_startup_watchdogs(){
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
 }
 
 perform_fw_check(){
