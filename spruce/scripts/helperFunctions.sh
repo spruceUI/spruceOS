@@ -882,9 +882,10 @@ extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
     LOG_LOCATION="$3" # Only logs errors
+    DISPLAY_LABEL="$4" # Optional: static label to show instead of filenames
 
     if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
-        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> <logo_image>"
+        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [display_label]"
         return 1
     fi
 
@@ -915,7 +916,7 @@ extract_7z_with_progress() {
 
         if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
             display_text_with_percentage_bar \
-                "$FILE" \
+                "${DISPLAY_LABEL:-$FILE}" \
                 "$PERCENT_COMPLETE" \
                 "$FILE_COUNT / $TOTAL_FILES files"
         fi
