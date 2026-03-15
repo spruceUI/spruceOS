@@ -104,6 +104,7 @@ take_screenshot_bg() {
     timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
 
+    vibrate &
     take_screenshot "$ss_name" false
 }
 
