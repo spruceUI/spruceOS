@@ -18,10 +18,6 @@ get_config_path() {
 }
 
 ###############################################################################
-get_volume_level() {
-    jq -r '.vol' "$SYSTEM_JSON"
-}
-
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 trigger_device_sleep() {
@@ -51,16 +47,24 @@ device_lid_open() {
 
 # Will miyoo ones work?
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/vendor/deep/retro"
-	export RA_BIN="retroarch"
-    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-    
+	#RA_DIR="/mnt/vendor/deep/retro"
+    #export RA_BIN="retroarch"
+    #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+
+
+    #/mnt/SDCARD/RetroArch/.config/retroarch/autoconfig/sdl2
+	RA_DIR="/mnt/SDCARD/RetroArch"
+	export RA_BIN="ra64.universal"
+    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+
+
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-
+   
+   
     echo "$RA_BIN"
 }
 
@@ -68,7 +72,7 @@ setup_for_retroarch_and_get_bin_location(){
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
+        echo $B_L3 1 # L3 down 
         sleep 0.1
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
@@ -172,4 +176,56 @@ device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
     return 0
+}
+
+set_volume() {
+    new_vol="${1:-0}"        # default to mute
+    SAVE_TO_CONFIG="${2:-true}"
+
+    # Clamp 0–20
+    [ "$new_vol" -lt 0 ] && new_vol=0
+    [ "$new_vol" -gt 20 ] && new_vol=20
+
+    # Map 0–20 -> 0–31 (rounded)
+    system_volume=$(( (new_vol * 31 + 10) / 20 ))
+
+    amixer -q set 'lineout volume' "$system_volume"
+
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
+
+        if [ "$current_volume" -ne "$new_vol" ]; then
+            save_volume_to_config_file "$new_vol"
+
+            sed 's/"vol":[[:space:]]*[0-9]\+/"vol": '"$new_vol"'/' \
+                "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+        fi
+    fi
+}
+
+set_volume_delta() {
+    delta="$1"
+
+    current=$(get_volume_level)
+    [ -z "$current" ] && current=0
+
+    new=$((current + delta))
+
+    # Clamp 0–20
+    [ "$new" -lt 0 ] && new=0
+    [ "$new" -gt 20 ] && new=20
+
+    set_volume "$new"
+}
+
+volume_up() {
+    set_volume_delta 1
+}
+
+volume_down() {
+    set_volume_delta -1
+}
+
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
 }
