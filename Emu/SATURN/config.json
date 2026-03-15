@@ -30,7 +30,9 @@
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "MIYOO_FLIP"
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ],
       "selected": "yabasanshiro_libretro",
       "overrides": {}
@@ -87,7 +89,15 @@
     "TRIMUI_SMART_PRO",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
-    "GKD_PIXEL2"
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RGXX640480"
   ],
-  "alternativeFolderNames": ["saturn","segasaturn","SEGASATURN","ss","SS"]
+  "alternativeFolderNames": [
+    "saturn",
+    "segasaturn",
+    "SEGASATURN",
+    "ss",
+    "SS"
+  ]
 }

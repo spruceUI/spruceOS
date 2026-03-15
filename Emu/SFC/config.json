@@ -32,7 +32,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ]
     },
     "Emulator_MiyooMini": {
@@ -58,5 +60,13 @@
   "releaseYear": 1990,
   "default_emulator": "chimerasnes",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["sfc","SNES","snes","supernes","SUPERNES","SUPERFAMICOM","superfamicom"]
+  "alternativeFolderNames": [
+    "sfc",
+    "SNES",
+    "snes",
+    "supernes",
+    "SUPERNES",
+    "SUPERFAMICOM",
+    "superfamicom"
+  ]
 }

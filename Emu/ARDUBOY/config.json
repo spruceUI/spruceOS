@@ -30,7 +30,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ]
     },
     "Emulator_MiyooMini": {
@@ -54,5 +56,8 @@
   "releaseYear": 2014,
   "default_emulator": "ardens",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["arduboy", "Arduboy"]
+  "alternativeFolderNames": [
+    "arduboy",
+    "Arduboy"
+  ]
 }
