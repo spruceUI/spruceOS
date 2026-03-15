@@ -1,4 +1,5 @@
 #!/bin/sh
 
-[ -e /mnt/SDCARD ] || ln -s /mnt/sdcard /mnt/SDCARD
+systemctl enable wpa_supplicant
+systemctl start wpa_supplicant
 /mnt/SDCARD/spruce/scripts/runtime.sh
