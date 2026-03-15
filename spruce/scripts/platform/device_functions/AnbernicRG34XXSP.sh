@@ -81,7 +81,7 @@ send_virtual_key_L3() {
 }
 
 launch_startup_watchdogs(){
-    log_message "No watchdogs tested on 34xxsp yet"
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 }
 
 perform_fw_check(){
