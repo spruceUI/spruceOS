@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Intended to be sourced by helperFunctions.sh but NOT anywhere else
 # It relies on functions inside helperFunctions.sh to operate properly
@@ -82,6 +82,7 @@ send_virtual_key_L3() {
 
 launch_startup_watchdogs(){
     /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
 }
 
 perform_fw_check(){
@@ -233,4 +234,11 @@ volume_down() {
 
 get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
+}
+
+
+send_menu_button_to_retroarch() {
+    if pgrep "ra64.universal" >/dev/null; then
+        echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
+    fi
 }
