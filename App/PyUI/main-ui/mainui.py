@@ -104,7 +104,7 @@ def initialize_device(device, main_ui_mode):
     elif "ANBERNIC_RG28XX" == device:
         from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
         Device.init(AnbernicRG28xx())
-    elif "AnbernicXX640480" == device:
+    elif "ANBERNIC_RGXX640480" == device:
         from devices.anbernic.anbernic_xx_640_x_480 import Anbernic640x480
         Device.init(Anbernic640x480())
     elif "ANBERNIC_MUOS" == device:

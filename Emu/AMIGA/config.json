@@ -36,7 +36,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RGXX640480"
       ]
     },
     "Emulator_MiyooMini": {
@@ -63,5 +65,10 @@
   "releaseYear": 1985,
   "default_emulator": "uae4arm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["amiga", "amiga500", "Amiga", "amiga1200"]
+  "alternativeFolderNames": [
+    "amiga",
+    "amiga500",
+    "Amiga",
+    "amiga1200"
+  ]
 }

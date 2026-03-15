@@ -36,9 +36,8 @@ from devices.device_common import DeviceCommon
 
 #/mnt/vendor/ctrl/dmenu_ln
 class AnbernicXXCommon(DeviceCommon):
-    def __init__(self):
-        self.device_name = "MIYOO_A30"
- 
+    def __init__(self): 
+        self.device_name = "ANBERNIC_RG34XXSP"
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'anbernic-rg34xxsp-system.json'
         self._load_system_config("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json", source)

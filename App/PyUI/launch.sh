@@ -137,9 +137,9 @@ case "$PLATFORM" in
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then
-            DEVICE="AnbernicXX640480"
+            DEVICE="ANBERNIC_RGXX640480"
         else
-            DEVICE="AnbernicXX640480"
+            DEVICE="ANBERNIC_RGXX640480"
         fi
 
         python3 \

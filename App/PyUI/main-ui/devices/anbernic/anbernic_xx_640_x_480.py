@@ -8,6 +8,7 @@ import os
 #scp loadapp.sh root@10.0.0.156:/mnt/vendor/ctrl/loadapp.sh
 class Anbernic640x480(AnbernicXXCommon):
     def __init__(self):
+        self.device_name = "ANBERNIC_RGXX640480"
         super().__init__()
                    
     def _set_lumination_to_config(self):
