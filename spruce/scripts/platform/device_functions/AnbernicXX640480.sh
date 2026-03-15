@@ -22,7 +22,7 @@ setup_for_retroarch_and_get_bin_location(){
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
     
-    cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP-universal.cfg /mnt/SDCARD/RetroArch/.config/retroarch/retroarch.cfg
+    cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRXX640480-universal.cfg /mnt/SDCARD/RetroArch/.config/retroarch/retroarch.cfg
     
     echo "$RA_BIN"
 }

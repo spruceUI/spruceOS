@@ -2,8 +2,11 @@ from devices.anbernic.anbernic_xx_common import AnbernicXXCommon
 import os
 
 
+#ln -s sdcard SDCARD
+#/mnt/vendor/ctrl/loadapp.sh
 #/mnt/vendor/ctrl/dmenu_ln
-class AnbernicRG34xxSP(AnbernicXXCommon):
+#scp loadapp.sh root@10.0.0.156:/mnt/vendor/ctrl/loadapp.sh
+class Anbernic640x480(AnbernicXXCommon):
     def __init__(self):
         super().__init__()
                    
@@ -25,7 +28,7 @@ class AnbernicRG34xxSP(AnbernicXXCommon):
             os.close(fd)     
     
     def screen_width(self):
-        return 720
+        return 640
     
     def screen_height(self):
         return 480
