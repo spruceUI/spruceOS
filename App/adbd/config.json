@@ -1,0 +1,7 @@
+{
+    "label": "adbd",
+    "icon": "adbd.png",
+    "launch": "launch.sh",
+    "description": "adbd",
+    "hideInSimpleMode": false
+}
