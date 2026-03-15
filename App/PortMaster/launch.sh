@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 start_pyui_message_writer
-log_and_display_message "SpruceOS is not an officially supported CFW for PortMaster. Our port compatibility is hit and miss. Please do not bother the PortMaster Team with questions or concerns if a port is not running properly on spruceOS.\n\nPress A to continue, or B to cancel."
+log_and_display_message "SpruceOS is NOT an officially supported CFW for PortMaster. Our port compatibility is hit and miss.\n\nPress A to continue, or B to cancel."
 if ! confirm 10 0; then
     exit 0
 fi
