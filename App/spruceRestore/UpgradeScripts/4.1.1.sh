@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# Fix A30 RetroArch input mapping after restore
+# Fix A30 RetroArch config after restore
+# - Set input_driver to sdl2 (old value "sdl" broke input on A30)
+# - Set video_rotation to 1 (A30 portrait panel needs rotation for landscape)
 # - Set input_menu_toggle_btn to nul so the Guide button path works
 #   (old value "9" broke standalone menu button toggle)
 # - Add joypad _btn fallback values for hotkeys
@@ -24,7 +26,15 @@ if [ ! -f "$RA_A30_CFG" ]; then
 fi
 
 log_message "Starting upgrade to version $TARGET_VERSION"
-log_message "Patching A30 RetroArch hotkey config"
+log_message "Patching A30 RetroArch config"
+
+# Fix input driver: must be sdl2 for A30
+sed 's|^input_driver = "sdl"|input_driver = "sdl2"|' \
+    "$RA_A30_CFG" > "$RA_A30_CFG.tmp" && mv "$RA_A30_CFG.tmp" "$RA_A30_CFG"
+
+# Fix video rotation: A30 portrait panel requires rotation 1 for landscape
+sed 's|^video_rotation = "0"|video_rotation = "1"|' \
+    "$RA_A30_CFG" > "$RA_A30_CFG.tmp" && mv "$RA_A30_CFG.tmp" "$RA_A30_CFG"
 
 # Fix menu toggle btn: must be nul for Guide button autoconfig path
 sed 's|^input_menu_toggle_btn = .*|input_menu_toggle_btn = "nul"|' \
