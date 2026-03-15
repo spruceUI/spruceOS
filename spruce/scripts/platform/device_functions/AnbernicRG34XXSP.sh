@@ -63,8 +63,9 @@ setup_for_retroarch_and_get_bin_location(){
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-   
-   
+    
+    cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP-universal.cfg /mnt/SDCARD/RetroArch/.config/retroarch/retroarch.cfg
+    
     echo "$RA_BIN"
 }
 
@@ -80,7 +81,7 @@ send_virtual_key_L3() {
 }
 
 launch_startup_watchdogs(){
-    log_message "No watchdogs tested on 34xxsp yet"
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 }
 
 perform_fw_check(){
@@ -127,7 +128,11 @@ runtime_mounts_anbernic_34xxsp() {
 device_init() {
     runtime_mounts_anbernic_34xxsp
 
-    /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
+    {
+        sleep 10
+        /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
+    } &
+    /mnt/SDCARD/spruce/rg34xxsp/bin/joypad_shim &
 }
 
 set_event_arg_for_idlemon() {
