@@ -69,7 +69,7 @@ while true; do
             # Power key down
             *"key $B_POWER 1"*)
                 log_message "power_button_watchdog_v2.sh: power_key_down"
-                if [ $((now - LAST_POWER_DOWN)) -ge 0.5 ]; then
+                if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
                     power_key_down
                     LAST_POWER_DOWN=$(date +%s)
                 else
