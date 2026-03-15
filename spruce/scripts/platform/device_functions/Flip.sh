@@ -307,6 +307,7 @@ close_ppsspp_menu() {
 
 take_screenshot() {
     close_ppsspp_menu
+    screenshot_path="$1"
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
 }
 
