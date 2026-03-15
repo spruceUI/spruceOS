@@ -1,5 +1,7 @@
 #!/bin/sh
 
+[ -n "$BASH_VERSION" ] || exec /bin/bash "$0" "$@"
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 log_message "homebutton_watchdog.sh: Started up."
