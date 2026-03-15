@@ -128,14 +128,19 @@ case "$PLATFORM" in
 ############################################################
 # Anbernic RG34XXSP
 ############################################################
-    "AnbernicRG34XXSP" )
+    "AnbernicRG34XXSP" | "AnbernicXX640480" )
         export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
         export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
     
+        if [ "$PLATFORM" = "AnbernicRG34XXSP" ]; then
+            DEVICE="ANBERNIC_RG34XXSP"
+        elif [ "$PLATFORM" = "AnbernicXX640480" ]; then
+            DEVICE="AnbernicXX640480"
+        fi
 
         python3 \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-            -device ANBERNIC_RG34XXSP \
+            -device "$DEVICE" \
             -logDir /mnt/SDCARD/Saves/spruce \
             -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"

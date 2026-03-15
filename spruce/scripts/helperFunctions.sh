@@ -23,14 +23,23 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
+
 case $INFO in
-    *"sun8i"*) export PLATFORM="A30" ;;
-    *"TG5040"*)	export PLATFORM="SmartPro" ;;
-    *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
-    *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *"0xd03"*) export PLATFORM="AnbernicRG34XXSP" ;;
+    *sun8i*) export PLATFORM="A30" ;;
+    *TG5040*) export PLATFORM="SmartPro" ;;
+    *TG3040*) export PLATFORM="Brick" ;;
+    *TG5050*) export PLATFORM="SmartProS" ;;
+    *0xd05*) export PLATFORM="Flip" ;;
+    *0xd04*) export PLATFORM="Pixel2" ;;
+    *0xd03*)
+        CMDLINE=$(cat /proc/cmdline)
+        case $CMDLINE in
+            *lcd_type=boe*) export PLATFORM="AnbernicRG34XXSP" ;;
+            *lcd_type=old*) export PLATFORM="AnbernicXX640480" ;;
+            # TODO xxCUBE?
+            *) export PLATFORM="AnbernicXX640480" ;;
+        esac
+        ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
 
