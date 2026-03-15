@@ -3,6 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 START_DOWN=false
+Y_DOWN=false
+R2_DOWN=false
+L2_DOWN=false
 
 nearest_system_brightness() {
     input=$1
@@ -97,6 +100,13 @@ volume_up_bg() {
     done
 }
 
+take_screenshot_bg() {
+    timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
+    ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
+
+    take_screenshot "$ss_name" false
+}
+
 # scan all button input
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
@@ -128,6 +138,33 @@ getevent $EVENTS | while read line; do
             if [ "$START_DOWN" = true ] ; then
                 brightness_up
             fi
+        ;;
+        *"key $B_Y 1"*) # Y key down
+            Y_DOWN=true
+            if [ "$L2_DOWN" = true ] && [ "$R2_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $B_Y 0"*) # Y key up
+            Y_DOWN=false
+        ;;
+        *"key $B_L2 1"*) # L2 key down
+            L2_DOWN=true
+            if [ "$Y_DOWN" = true ] && [ "$R2_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $B_L2 0"*) # L2 key up
+            L2_DOWN=false
+        ;;
+        *"key $B_R2 1"*) # R2 key down
+            R2_DOWN=true
+            if [ "$Y_DOWN" = true ] && [ "$L2_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $B_R2 0"*) # R2 key up
+            R2_DOWN=false
         ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null

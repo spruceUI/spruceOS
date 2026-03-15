@@ -210,8 +210,13 @@ device_lid_open(){
 }
 
 take_screenshot() {
-    close_ppsspp_menu
     screenshot_path="$1"
+    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
+
+    if [ "$ppsspp_mode" = true ]; then
+        close_ppsspp_menu
+    fi
+
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
 
