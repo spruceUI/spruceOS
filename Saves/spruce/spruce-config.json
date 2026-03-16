@@ -233,6 +233,17 @@
                 ],
                 "selected": "Off"
             },
+            "globalScreenshotShortcut": {
+                "display": "Global sceenshot shortcut",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "L2+R2+Y",
+                    "L2+R2+X",
+                    "L2+R2+DOWN"
+                ],
+                "selected": "L2+R2+Y"
+            },
             "overclockSpeedMiyooMini": {
                 "devices": ["MIYOO_MINI",
                             "MIYOO_MINI_V4",
