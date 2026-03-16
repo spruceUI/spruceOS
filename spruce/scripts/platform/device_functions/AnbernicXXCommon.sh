@@ -58,11 +58,28 @@ send_virtual_key_L3() {
 launch_startup_watchdogs(){
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
 }
 
 perform_fw_check(){
     log_message "Miyoo Flip can't perform firmware check?" -v
 }
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+
+trigger_device_sleep() {
+    echo -n mem >/sys/power/state
+}
+
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
 
 close_ppsspp_menu() {
 
@@ -215,4 +232,16 @@ send_menu_button_to_retroarch() {
     if pgrep "ra64.universal" >/dev/null; then
         echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
     fi
+}
+
+device_get_hw_epoch() {
+    # Capture the raw output
+    hw_output=$(hwclock 2>/dev/null)
+    
+    # If hw_output is empty, the command failed
+    [ -z "$hw_output" ] && return 1
+
+    # 'date' is smart enough to handle the ISO-8601 format 
+    # and even the sub-seconds automatically.
+    date -d "$hw_output" +%s 2>/dev/null
 }
