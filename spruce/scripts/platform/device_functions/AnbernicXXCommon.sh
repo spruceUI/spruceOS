@@ -37,14 +37,6 @@ device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
-device_lid_sensor_ready() {
-    [ -e "/sys/class/power_supply/axp2202-battery/hallkey" ]
-}
-
-device_lid_open() {
-    head -c 1 "/sys/class/power_supply/axp2202-battery/hallkey" 2>/dev/null || echo "1"
-}
-
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up
@@ -59,6 +51,9 @@ launch_startup_watchdogs(){
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
+    # lid_watchdog shouldn't cause any issues on devices without lids
+    /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+
 }
 
 perform_fw_check(){
@@ -244,4 +239,12 @@ device_get_hw_epoch() {
     # 'date' is smart enough to handle the ISO-8601 format 
     # and even the sub-seconds automatically.
     date -d "$hw_output" +%s 2>/dev/null
+}
+
+device_lid_sensor_ready() {
+    [ -e "/sys/class/power_supply/axp2202-battery/hallkey" ]
+}
+
+device_lid_open() {
+    head -c 1 "/sys/class/power_supply/axp2202-battery/hallkey" 2>/dev/null || echo "1"
 }
