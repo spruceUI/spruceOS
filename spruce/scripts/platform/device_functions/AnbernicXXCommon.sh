@@ -108,7 +108,6 @@ device_init() {
         sleep 10
         /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
     } &
-    /mnt/SDCARD/spruce/rg34xxsp/bin/joypad_shim &
 }
 
 set_event_arg_for_idlemon() {

@@ -22,7 +22,7 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
         "ANBERNIC_RGXX640480"
       ],
       "options": [
