@@ -38,7 +38,7 @@
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
         "GKD_PIXEL2",
-        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG34XXSP","AnbernicRG28XX",
         "ANBERNIC_RGXX640480"
       ],
       "options": [
@@ -74,7 +74,7 @@
     "MIYOO_A30",
     "MIYOO_FLIP",
     "GKD_PIXEL2",
-    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RG34XXSP","AnbernicRG28XX",
     "ANBERNIC_RGXX640480"
   ],
   "alternativeFolderNames": [
