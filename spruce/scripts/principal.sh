@@ -23,6 +23,7 @@ while [ 1 ]; do
     log_message "Starting new loop of principal.sh"
     set_smart
 
+    rm -f /tmp/spruce_loading_done
     stop_pyui_message_writer
     enable_or_disable_rgb
     set_rgb_in_menu
@@ -40,7 +41,14 @@ while [ 1 ]; do
         prepare_for_pyui_launch
 
         log_activity_event "PyUI" "START"
-        /mnt/SDCARD/App/PyUI/launch.sh
+        /mnt/SDCARD/App/PyUI/launch.sh &
+        PYUI_PID=$!
+
+        # Wait for PyUI to exit or for a game to be selected
+        while kill -0 $PYUI_PID 2>/dev/null && [ ! -f /tmp/cmd_to_run.sh ]; do
+            sleep 0.1
+        done
+
         log_activity_event "PyUI" "STOP"
 
         post_pyui_exit
@@ -52,8 +60,13 @@ while [ 1 ]; do
     fi
 
     # clear the FB to get rid of residual Loading or Iconfresh screen if present
-    touch /tmp/fbdisplay_exit
-    cat /dev/zero > /dev/fb0 2>/dev/null
+    # Skip for RA launches — PyUI loading animation is still showing
+    if [ -f /tmp/cmd_to_run.sh ] && grep -q "RA32\.\|ra64\.\|retroarch" /tmp/cmd_to_run.sh 2>/dev/null; then
+        : # PyUI animation covers the screen
+    else
+        touch /tmp/fbdisplay_exit
+        cat /dev/zero > /dev/fb0 2>/dev/null
+    fi
 
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
@@ -67,8 +80,19 @@ while [ 1 ]; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
-        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
-        /tmp/cmd_to_run.sh >/dev/null 2>&1
+        rm -f /tmp/spruce_loading_done
+
+        # Check if this is an RA launch — if so, PyUI may still be running
+        # with the loading animation. Keep it alive until RA signals ready.
+        if grep -q "RA32\.\|ra64\.\|retroarch" /tmp/cmd_to_run.sh 2>/dev/null; then
+            log_message "Running (RA): $(cat /tmp/cmd_to_run.sh)"
+            /tmp/cmd_to_run.sh >/dev/null 2>&1
+            killall MainUI 2>/dev/null
+            rm -f /tmp/spruce_loading_done
+        else
+            log_message "Running: $(cat /tmp/cmd_to_run.sh)"
+            /tmp/cmd_to_run.sh >/dev/null 2>&1
+        fi
 
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null

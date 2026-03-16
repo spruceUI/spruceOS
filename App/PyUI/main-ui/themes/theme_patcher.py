@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import subprocess
 import time
 from devices.device import Device
 from utils.cached_exists import CachedExists
@@ -120,11 +121,14 @@ class ThemePatcher():
         ])
         Display.present()
 
+        skin_output = os.path.join(config_path,f"skin_{target_width}x{target_height}")
         cls.patch_folder(os.path.join(config_path,"skin"),
-                     os.path.join(config_path,f"skin_{target_width}x{target_height}"),
+                     skin_output,
                      scale,
                      theme_width, theme_height, target_width, target_height)
-        
+
+        cls.composite_loading_images(skin_output)
+
         Display.clear("Theme Patch")
         Display.display_message_multiline([
             f"Theme is missing correctly sized assets so patching",
@@ -145,6 +149,30 @@ class ThemePatcher():
                      width_multiplier,
                      height_multiplier,
                      aspect_ratio_reset)
+
+    @classmethod
+    def composite_loading_images(cls, skin_folder):
+        """Composite app_loading_bg + each app_loading_XX frame into
+        ready-to-display app_loading_composited_XX images."""
+        bg = os.path.join(skin_folder, "app_loading_bg.png")
+        if not os.path.exists(bg):
+            return
+        for i in range(1, 6):
+            frame = os.path.join(skin_folder, f"app_loading_{i:02d}.png")
+            output = os.path.join(skin_folder, f"app_loading_composited_{i:02d}.png")
+            if not os.path.exists(frame) or os.path.exists(output):
+                continue
+            try:
+                subprocess.run([
+                    "ffmpeg", "-y",
+                    "-i", bg, "-i", frame,
+                    "-filter_complex", "overlay=(W-w)/2:(H-h)/2",
+                    "-frames:v", "1",
+                    output
+                ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                PyUiLogger.get_logger().info(f"Composited loading frame: {output}")
+            except Exception as e:
+                PyUiLogger.get_logger().warning(f"Failed to composite {frame}: {e}")
 
     @classmethod
     def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):

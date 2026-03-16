@@ -141,7 +141,7 @@ run_retroarch() {
 
 	RA_PARAMS="-v"
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30")
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"MiyooMini")
 			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
 			;;
 	esac
@@ -161,6 +161,7 @@ run_retroarch() {
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
 
+	display_kill
 
 	backup_ra_config 2>/dev/null
 
