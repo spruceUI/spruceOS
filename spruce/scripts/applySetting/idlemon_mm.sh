@@ -69,7 +69,7 @@ start_idlemon_poweroff() {
       # Kill all processes with 'idlemon' and 'miyoo' in the name
 	    pgrep -f 'idlemon.*miyoo.*poweroffAction.sh' | xargs kill -9
 	    # Start idlemon for in_game with multiple processes
-      idlemon -p "RA32.A30,RA32.mini,ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32.a30,ra32.mini,ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)
@@ -148,7 +148,7 @@ start_idlemon_charging() {
       # Kill all processes with 'idlemon' and 'miyoo' in the name
       pgrep -f 'idlemon.*miyoo.*chargingAction.sh' | xargs kill -9
       # Start idlemon for in_game with multiple processes
-      idlemon -p "RA32.A30,RA32.mini,ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32.a30,ra32.mini,ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)

@@ -9,7 +9,7 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
-EMU_PROCESSES="RA32.A30 RA32.mini ra64.miyoo ra32.miyoo retroarch
+EMU_PROCESSES="ra32.a30 ra32.mini ra64.miyoo ra32.miyoo retroarch
 retroarch.$PLATFORM retroarch.trimui ra64.trimui_$PLATFORM ra64.universal \
 drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
