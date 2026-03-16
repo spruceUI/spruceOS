@@ -50,27 +50,6 @@ class MiyooTrimCommon():
 
 
                 
-    LOADING_FLAG = "/tmp/spruce_loading_done"
-
-    @staticmethod
-    def show_loading_animation():
-        try:
-            skin_dir = os.path.join(Theme.get_theme_path(), Theme._skin_folder)
-            frames = []
-            for i in range(1, 6):
-                img = os.path.join(skin_dir, f"app_loading_composited_{i:02d}.png")
-                if os.path.exists(img):
-                    frames.append(img)
-            if not frames:
-                return
-            while not os.path.exists(MiyooTrimCommon.LOADING_FLAG):
-                for img in frames:
-                    if os.path.exists(MiyooTrimCommon.LOADING_FLAG):
-                        return
-                    Display.display_image(img, 80)
-        except Exception as e:
-            PyUiLogger.get_logger().warning(f"Loading animation failed: {e}")
-
     @staticmethod
     def write_cmd_to_run(command):
         with open('/tmp/cmd_to_run.sh', 'w') as file:
@@ -101,10 +80,8 @@ class MiyooTrimCommon():
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         Device.get_device().fix_sleep_sound_bug()
 
-        # Show themed loading animation then exit without clearing the
-        # framebuffer so the last frame stays visible while RA initializes
-        MiyooTrimCommon.show_loading_animation()
-        sys.exit()
+        Display.deinit_display()
+        Device.get_device().exit_pyui()
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
         #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

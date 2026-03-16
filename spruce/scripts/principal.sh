@@ -40,14 +40,7 @@ while [ 1 ]; do
         prepare_for_pyui_launch
 
         log_activity_event "PyUI" "START"
-        /mnt/SDCARD/App/PyUI/launch.sh &
-        PYUI_PID=$!
-
-        # Wait for PyUI to exit or for a game/app to be selected
-        while kill -0 $PYUI_PID 2>/dev/null && [ ! -f /tmp/cmd_to_run.sh ]; do
-            sleep 0.1
-        done
-
+        /mnt/SDCARD/App/PyUI/launch.sh
         log_activity_event "PyUI" "STOP"
 
         post_pyui_exit
@@ -57,6 +50,10 @@ while [ 1 ]; do
 
         flag_remove "in_menu"
     fi
+
+    # clear the FB to get rid of residual Loading or Iconfresh screen if present
+    touch /tmp/fbdisplay_exit
+    cat /dev/zero > /dev/fb0 2>/dev/null
 
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
@@ -70,19 +67,8 @@ while [ 1 ]; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
-        rm -f /tmp/spruce_loading_done
         log_message "Running: $(cat /tmp/cmd_to_run.sh)"
         /tmp/cmd_to_run.sh >/dev/null 2>&1
-
-        # Kill PyUI if still running (animation loop) and clean up
-        killall MainUI 2>/dev/null
-        kill $PYUI_PID 2>/dev/null
-        wait $PYUI_PID 2>/dev/null
-        rm -f /tmp/spruce_loading_done
-
-        # Clear FB after game exits
-        touch /tmp/fbdisplay_exit
-        cat /dev/zero > /dev/fb0 2>/dev/null
 
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
