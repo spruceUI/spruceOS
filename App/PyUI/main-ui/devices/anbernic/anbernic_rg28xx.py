@@ -9,6 +9,7 @@ import os
 class AnbernicRG28xx(AnbernicXXCommon):
     def __init__(self):
         # For now
+        self.device_name = "ANBERNIC_RG28XX"
         super().__init__()
                    
     def _set_lumination_to_config(self):
