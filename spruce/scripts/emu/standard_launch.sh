@@ -43,6 +43,9 @@ handle_network_services
 led_effect &
 flag_add 'emulator_launched' --tmp
 
+# Signal loading animation to stop for non-RA emulators.
+# RA removes this and re-creates it later when its video driver is ready.
+touch /tmp/spruce_loading_done
 
 case $EMU_NAME in
 		

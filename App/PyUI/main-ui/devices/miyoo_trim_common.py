@@ -101,10 +101,12 @@ class MiyooTrimCommon():
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         Device.get_device().fix_sleep_sound_bug()
 
-        # Show themed loading animation — loops until RA signals
-        # it's ready via /tmp/spruce_loading_done, then exits
+        # Show themed loading animation — loops until RA signals ready
+        # via /tmp/spruce_loading_done, or stops after timeout for non-RA launches
         MiyooTrimCommon.show_loading_animation()
-        sys.exit()
+
+        Display.deinit_display()
+        Device.get_device().exit_pyui()
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
         #         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

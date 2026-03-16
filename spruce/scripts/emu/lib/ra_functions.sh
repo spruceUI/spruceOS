@@ -107,6 +107,9 @@ backup_ra_config() {
 }
 
 run_retroarch() {
+	# Remove early flag so RA can re-create it when video driver is ready
+	rm -f /tmp/spruce_loading_done
+
 	prepare_ra_config 2>/dev/null
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
@@ -161,7 +164,7 @@ run_retroarch() {
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
 
-	display_kill
+	display_kill  # kill any leftover display_text.elf from loading screen
 
 	backup_ra_config 2>/dev/null
 

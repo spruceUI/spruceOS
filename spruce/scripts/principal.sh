@@ -60,13 +60,8 @@ while [ 1 ]; do
     fi
 
     # clear the FB to get rid of residual Loading or Iconfresh screen if present
-    # Skip for RA launches — PyUI loading animation is still showing
-    if [ -f /tmp/cmd_to_run.sh ] && grep -q "RA32\.\|ra64\.\|retroarch" /tmp/cmd_to_run.sh 2>/dev/null; then
-        : # PyUI animation covers the screen
-    else
-        touch /tmp/fbdisplay_exit
-        cat /dev/zero > /dev/fb0 2>/dev/null
-    fi
+    touch /tmp/fbdisplay_exit
+    cat /dev/zero > /dev/fb0 2>/dev/null
 
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
@@ -80,19 +75,12 @@ while [ 1 ]; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
-        rm -f /tmp/spruce_loading_done
+        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
+        /tmp/cmd_to_run.sh >/dev/null 2>&1
 
-        # Check if this is an RA launch — if so, PyUI may still be running
-        # with the loading animation. Keep it alive until RA signals ready.
-        if grep -q "RA32\.\|ra64\.\|retroarch" /tmp/cmd_to_run.sh 2>/dev/null; then
-            log_message "Running (RA): $(cat /tmp/cmd_to_run.sh)"
-            /tmp/cmd_to_run.sh >/dev/null 2>&1
-            killall MainUI 2>/dev/null
-            rm -f /tmp/spruce_loading_done
-        else
-            log_message "Running: $(cat /tmp/cmd_to_run.sh)"
-            /tmp/cmd_to_run.sh >/dev/null 2>&1
-        fi
+        # Kill PyUI if still running (loading animation) and clean up
+        killall MainUI 2>/dev/null
+        rm -f /tmp/spruce_loading_done
 
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
