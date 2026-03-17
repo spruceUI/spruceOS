@@ -169,7 +169,7 @@ run_retroarch() {
 
 	RA_PARAMS="-v"
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30")
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
 			;;
 	esac
