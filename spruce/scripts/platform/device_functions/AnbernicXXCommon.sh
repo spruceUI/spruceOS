@@ -47,13 +47,33 @@ send_virtual_key_L3() {
     } | sendevent $EVENT_PATH_READ_INPUTS_SPRUCE
 }
 
+
+has_lid() {
+    CMDLINE=$(cat /proc/cmdline)
+
+    case "$CMDLINE" in
+        *lcd_type=boe*)
+            # RG34xxSP
+            return 0
+            ;;
+        *lcd_type=old*)
+            if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG35xxSP'; then
+                return 0
+            fi
+            ;;
+    esac
+
+    return 1
+}
+
 launch_startup_watchdogs(){
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
-    # lid_watchdog shouldn't cause any issues on devices without lids
-    /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
 
+    if has_lid >/dev/null; then
+        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+    fi
 }
 
 perform_fw_check(){
