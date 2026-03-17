@@ -36,7 +36,11 @@ case $INFO in
 
         case $CMDLINE in
             *lcd_type=boe*)
-                export PLATFORM="AnbernicRG34XXSP"
+                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
+                    export PLATFORM="AnbernicRGCubeXX"
+                else
+                    export PLATFORM="AnbernicRG34XXSP"
+                fi
                 ;;
             *lcd_type=old*)
                 #TODO handle cube?

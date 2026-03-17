@@ -30,7 +30,7 @@ get_python_path() {
 
 setup_for_retroarch_and_get_bin_location(){
     RA_DIR="/mnt/SDCARD/RetroArch"
-    export RA_BIN="retroarch.Pixel2"
+    export RA_BIN="ra64.pixel2"
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
 	if [ "$CORE" = "yabasanshiro" ]; then
@@ -313,7 +313,7 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "retroarch.Pixel2" >/dev/null; then
+    if pgrep "ra64.pixel2" >/dev/null; then
         echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
     elif pgrep -f "PPSSPPSDL_Pixel2" >/dev/null; then
         send_virtual_key_L3

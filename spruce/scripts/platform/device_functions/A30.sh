@@ -117,7 +117,7 @@ setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"
 
-	export RA_BIN="RA32.A30"
+	export RA_BIN="ra32.a30"
 
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
@@ -158,15 +158,10 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "RA32.A30" >/dev/null; then
-        : # no-op: RA's input system handles menu toggle directly
-    elif pgrep "ra32.miyoo" >/dev/null; then
-        send_virtual_key_L3
-    elif pgrep -f "retroarch" >/dev/null; then
-        send_virtual_key_L3R3
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
     fi
+    # ra32.a30 handles menu toggle via its own input system
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
@@ -207,7 +202,7 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
-EMULATORS="RA32.A30 ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+EMULATORS="ra32.a30 ra32.mini retroarch drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
 pause_emulators() {
     for EMU in $EMULATORS; do
         if killall -q -19 "$EMU" 2>/dev/null; then

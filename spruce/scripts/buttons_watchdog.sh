@@ -3,9 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 START_DOWN=false
-Y_DOWN=false
-R2_DOWN=false
-L2_DOWN=false
 
 nearest_system_brightness() {
     input=$1
@@ -108,6 +105,32 @@ take_screenshot_bg() {
     take_screenshot "$ss_name" false
 }
 
+# Setup global screenshot shortcut
+SS_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
+SS_B1=$B_L2
+SS_B2=$B_R2
+
+case "$SS_SHORTCUT" in
+    "L2+R2+Y")
+        SS_B3=$B_Y
+        ;;
+    "L2+R2+X")
+        SS_B3=$B_X
+        ;;
+    "L2+R2+DOWN")
+        SS_B3=$B_DOWN
+        ;;
+    "Off")
+        SS_B1="NULL"
+        SS_B2="NULL"
+        SS_B3="NULL"
+        ;;
+esac
+
+SS_B1_DOWN=false
+SS_B2_DOWN=false
+SS_B3_DOWN=false
+
 # scan all button input
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
@@ -140,32 +163,32 @@ getevent $EVENTS | while read line; do
                 brightness_up
             fi
         ;;
-        *"key $B_Y 1"*) # Y key down
-            Y_DOWN=true
-            if [ "$L2_DOWN" = true ] && [ "$R2_DOWN" = true ] ; then
+        *"key $SS_B1 1"*) # Screenshot key 1 down
+            SS_B1_DOWN=true
+            if [ "$SS_B2_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $B_Y 0"*) # Y key up
-            Y_DOWN=false
+        *"key $SS_B1 0"*) # Screenshot key 1 up
+            SS_B1_DOWN=false
         ;;
-        *"key $B_L2 1"*) # L2 key down
-            L2_DOWN=true
-            if [ "$Y_DOWN" = true ] && [ "$R2_DOWN" = true ] ; then
+        *"key $SS_B2 1"*) # Screenshot key 2 down
+            SS_B2_DOWN=true
+            if [ "$SS_B1_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $B_L2 0"*) # L2 key up
-            L2_DOWN=false
+        *"key $SS_B2 0"*) # Screenshot key 2 up
+            SS_B2_DOWN=false
         ;;
-        *"key $B_R2 1"*) # R2 key down
-            R2_DOWN=true
-            if [ "$Y_DOWN" = true ] && [ "$L2_DOWN" = true ] ; then
+        *"key $SS_B3 1"*) # Screenshot key 3 down
+            SS_B3_DOWN=true
+            if [ "$SS_B1_DOWN" = true ] && [ "$SS_B2_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $B_R2 0"*) # R2 key up
-            R2_DOWN=false
+        *"key $SS_B3 0"*) # Screenshot key 3 up
+            SS_B3_DOWN=false
         ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
