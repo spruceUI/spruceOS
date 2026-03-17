@@ -36,7 +36,10 @@ get_ra_cfg_location(){
 }
 
 prepare_ra_config() {
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+	case "$PLATFORM" in
+    	"Anbernic"*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
+		*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
+	esac
 	CURRENT_CFG=$(get_ra_cfg_location)
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
@@ -66,7 +69,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI" | "GKD")
+		"TrimUI" | "GKD" | "Anbernic")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"Miyoo")
@@ -93,6 +96,31 @@ prepare_ra_config() {
 		;;
 		*) ;;
 	esac
+
+	# Handle resolution and rotation for Anbernic H700 devices
+	case "$PLATFORM" in
+		*"Anbernic"*)
+			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
+				rot="1"
+			else
+				rot="0"
+			fi
+			if sed \
+				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
+				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$DISPLAY_WIDTH\"|" \
+				-e "s|^video_fullscreen_y.*|video_fullscreen_y = \"$DISPLAY_HEIGHT\"|" \
+				-e "s|^video_windowed_position_width.*|video_windowed_position_width = \"$DISPLAY_WIDTH\"|" \
+				-e "s|^video_windowed_position_height.*|video_windowed_position_height = \"$DISPLAY_HEIGHT\"|" \
+				"$PLATFORM_CFG" > "$TMP_CFG"
+			then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		*) ;;
+	esac
+
 	# copy platform-specific RA config into place where RA wants it to be
 	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
 	sync
