@@ -4,15 +4,15 @@
 
 
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/vendor/deep/retro"
-    export RA_BIN="retroarch"
-    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-    cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
+	#RA_DIR="/mnt/vendor/deep/retro"
+    #export RA_BIN="retroarch"
+    #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+    #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-	#RA_DIR="/mnt/SDCARD/RetroArch"
-	#export RA_BIN="ra64.universal"
-    #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
-    #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX-universal.cfg /mnt/SDCARD/RetroArch/.config/retroarch/retroarch.cfg
+	RA_DIR="/mnt/SDCARD/RetroArch"
+	export RA_BIN="ra64.universal"
+    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+    cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX-universal.cfg /mnt/SDCARD/RetroArch/.config/retroarch/retroarch.cfg
 
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
