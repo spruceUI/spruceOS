@@ -538,7 +538,7 @@ class DeviceCommon(AbstractDevice):
 
         if free_mb is not None and free_mb < threshold_mb and self.last_cache_clear > 10:
             PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
-            Display.clear_cache()
+            Display.clear_cache(include_fonts=False)
             self.last_cache_clear = 0
 
     def get_image_for_activity(self, activity):
