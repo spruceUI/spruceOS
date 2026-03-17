@@ -128,7 +128,7 @@ case "$PLATFORM" in
 ############################################################
 # Anbernic RG34XXSP
 ############################################################
-    "AnbernicRG34XXSP" | "AnbernicXX640480" | "AnbernicRG28XX")
+    "AnbernicRG34XXSP" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
         export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
         export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
     
@@ -138,6 +138,8 @@ case "$PLATFORM" in
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then
             DEVICE="ANBERNIC_RGXX640480"
+        elif [ "$PLATFORM" = "AnbernicRGCubeXX" ]; then
+            DEVICE="ANBERNIC_RGCUBEXX"
         else
             DEVICE="ANBERNIC_RGXX640480"
         fi
