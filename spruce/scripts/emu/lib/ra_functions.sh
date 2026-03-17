@@ -69,10 +69,10 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI" | "GKD" | "Anbernic")
+		"TrimUI" | "GKD")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
-		"Miyoo")
+		"Miyoo" | "Anbernic")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
 			;;
 	esac
