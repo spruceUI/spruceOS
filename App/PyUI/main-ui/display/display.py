@@ -302,19 +302,20 @@ class Display:
         cls.bg_path = None
 
     @classmethod
-    def clear_text_cache(cls):
+    def clear_text_cache(cls, include_fonts=True):
         cls._text_texture_cache.clear_cache()
-        cls.deinit_fonts()
-        cls.init_fonts()
+        if include_fonts:
+            cls.deinit_fonts()
+            cls.init_fonts()
 
     @classmethod
     def clear_image_cache(cls):
         cls._image_texture_cache.clear_cache()
 
     @classmethod
-    def clear_cache(cls):
+    def clear_cache(cls, include_fonts=True):
         cls.clear_image_cache()
-        cls.clear_text_cache()
+        cls.clear_text_cache(include_fonts)
 
     @classmethod
     def deinit_fonts(cls):
