@@ -69,7 +69,7 @@ start_idlemon_poweroff() {
       # Kill existing in_game poweroff idlemon
 	    pgrep -f 'idlemon.*ra32.*poweroffAction.sh' | xargs kill -9
 	    # Start idlemon for in_game with multiple processes
-      idlemon -p "ra32.a30,ra32.mini,ra64.universal,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32,ra64,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)
@@ -148,7 +148,7 @@ start_idlemon_charging() {
       # Kill existing in_game charging idlemon
       pgrep -f 'idlemon.*ra32.*chargingAction.sh' | xargs kill -9
       # Start idlemon for in_game with multiple processes
-      idlemon -p "ra32.a30,ra32.mini,ra64.universal,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32,ra64,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)
