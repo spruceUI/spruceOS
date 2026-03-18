@@ -70,6 +70,14 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     )
                 )
                 option_list.append(
+                    self.build_numeric_entry(
+                        primary_text=Language.main_menu_rows(),
+                        get_value_func=Theme.get_main_menu_row_count,
+                        set_value_func=Theme.set_main_menu_row_count
+                    )
+                )
+                
+                option_list.append(
                     self.build_enabled_disabled_entry(
                         primary_text=Language.show_text(),
                         get_value_func=Theme.get_main_menu_show_text_grid_mode,
