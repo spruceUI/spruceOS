@@ -10,8 +10,8 @@ export HOME="$(dirname "$0")"
 cd "$HOME"
 
 case "$PLATFORM" in
-    "SmartPro"* | "Pixel2" ) export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
-    * )                      export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
+    "SmartPro"* ) export LD_LIBRARY_PATH="$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
+    * )           export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
 esac
 
 case "$PLATFORM" in
