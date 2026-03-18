@@ -51,16 +51,18 @@ def setup_logging():
 log = setup_logging()
 
 
-# --- PyUI display (direct socket, no subprocess per message) ---
+# --- PyUI display (abstract Unix domain socket, no subprocess per message) ---
 
 class PyUiMessenger:
-    HOST = "127.0.0.1"
-    PORT = 50980
+    SOCKET_ADDR = b"\x0050980"  # abstract Unix socket matching PyUI listener
 
     def send(self, msg):
         try:
-            with socket.create_connection((self.HOST, self.PORT), timeout=1) as s:
-                s.sendall((msg + "\n").encode())
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            s.connect(self.SOCKET_ADDR)
+            s.sendall((msg + "\n").encode("utf-8"))
+            s.close()
         except Exception:
             pass
 
