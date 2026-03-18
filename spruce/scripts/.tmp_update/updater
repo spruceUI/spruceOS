@@ -8,6 +8,28 @@ case $INFO in
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
+    *"0xd03"*)
+        CMDLINE=$(cat /proc/cmdline)
+        case $CMDLINE in
+            *lcd_type=boe*)
+                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
+                    export PLATFORM="AnbernicRGCubeXX"
+                else
+                    export PLATFORM="AnbernicRG34XXSP"
+                fi
+                ;;
+            *lcd_type=old*)
+                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
+                    export PLATFORM="AnbernicRG28XX"
+                else
+                    export PLATFORM="AnbernicXX640480"
+                fi
+                ;;
+            *)
+                export PLATFORM="AnbernicXX640480"
+                ;;
+        esac
+        ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
 
