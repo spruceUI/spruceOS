@@ -10,6 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 get_sftp_service_name() {
     echo "sftpgo"
@@ -275,6 +276,7 @@ set_backlight() {
     if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+        "$SYSTEM_EMIT" brightness-level "$new_bl" "Pixel2.sh/set_backlight" 2>/dev/null || true
     fi
 }
 

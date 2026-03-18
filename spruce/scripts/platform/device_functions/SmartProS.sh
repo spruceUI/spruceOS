@@ -8,6 +8,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
@@ -490,6 +491,7 @@ set_backlight() {
     # update device system json
     tmp=$(mktemp)
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    "$SYSTEM_EMIT" brightness-level "$val" "SmartProS.sh/set_backlight" 2>/dev/null || true
 }
 
 

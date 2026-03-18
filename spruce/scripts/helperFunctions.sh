@@ -17,6 +17,7 @@
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export MESSAGES_FILE="/var/log/messages"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
+export SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
@@ -174,12 +175,21 @@ dim_screen() {
 finish_unpacking() {
     flag="$1"
     if flag_check "$flag"; then
+        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_ENTER" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
         start_pyui_message_writer
         log_and_display_message "Finishing up unpacking archives.........."
-        flag_remove "silentUnpacker"
+        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_WAIT_PRESERVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        wait_loops=0
         while [ -f "$FLAGS_DIR/$flag.lock" ]; do
+            wait_loops=$((wait_loops + 1))
+            if [ $((wait_loops % 50)) -eq 0 ]; then
+                "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_WAIT_LOOP" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
+            fi
             : # null operation (no sleep needed)
         done
+        flag_remove "silentUnpacker"
+        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_REMOVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_COMPLETE" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
         stop_pyui_message_writer
     fi
 }
@@ -662,6 +672,7 @@ get_config_value() {
 start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_START_REQUEST" "helperFunctions.sh/start_pyui_message_writer" "wait_for_listener=${wait_for_listener:-unset}" || true
 
     ifconfig lo up
     ifconfig lo 127.0.0.1
@@ -669,12 +680,14 @@ start_pyui_message_writer() {
     # Check if PyUI is already running with the realtime port argument
     if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
         log_message "Real Time message listener already running."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_REUSE_LISTENER" "helperFunctions.sh/start_pyui_message_writer" "listener already running" || true
         return
     fi
     
     rm -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_LAUNCHED" "helperFunctions.sh/start_pyui_message_writer" "pid=$!" || true
 
     # Optional wait for the listener file
     if [ "$wait_for_listener" != "0" ]; then
@@ -683,6 +696,7 @@ start_pyui_message_writer() {
             sleep 0.1
         done
         log_message "Realtime message network listener detected."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_HANDSHAKE_COMPLETE" "helperFunctions.sh/start_pyui_message_writer" "listener file detected" || true
     fi
 }
 
@@ -691,9 +705,11 @@ kill_pyui_message_writer() {
 
     # Check if PyUI is already running with the realtime port argument
     pids=$(pgrep -f "sgDisplayRealtimePort" | awk '{print $1}')
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_TARGETS" "helperFunctions.sh/kill_pyui_message_writer" "target_pids=${pids:-none}" || true
 
     if [ -n "$pids" ]; then
         log_message "Real Time message listener is running. Killing it..."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_SIGNAL" "helperFunctions.sh/kill_pyui_message_writer" "sending EXIT_APP before kill" || true
         display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
         sleep 0.5
 
@@ -703,6 +719,7 @@ kill_pyui_message_writer() {
         done
         # Optionally wait for processes to exit
         sleep 1
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_COMPLETE" "helperFunctions.sh/kill_pyui_message_writer" "kill sequence complete" || true
     fi    
 
 }
@@ -1157,4 +1174,3 @@ log_activity_event() {
     printf '{"ts":%s,"event":"%s","app":"%s","pid":%s}\n' \
         "$ts" "$event" "$safe_app" "$pid" >> "$LOG_FILE"
 }
-
