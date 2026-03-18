@@ -374,7 +374,7 @@ awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
 # -----------------------------
 FILE_COUNT=0
 PERCENT_COMPLETE=0
-THROTTLE=10  # update display every 10 files
+LAST_SENT_PERCENT=-1  # Added to track state
 
 # -----------------------------
 # 3️⃣ Extract and update UI
@@ -388,12 +388,14 @@ while read -r line || [ -n "$line" ]; do
     FILE_COUNT=$((FILE_COUNT + 1))
     PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
 
-    # Throttle UI updates for performance
-    if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
+    # Update UI only when percentage integer changes
+    if [ "$PERCENT_COMPLETE" -ne "$LAST_SENT_PERCENT" ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
         display_text_with_percentage_bar \
             "$FILE" \
             "$PERCENT_COMPLETE" \
             "$FILE_COUNT / $TOTAL_FILES files"
+        
+        LAST_SENT_PERCENT="$PERCENT_COMPLETE"
     fi
 done
 
@@ -476,9 +478,7 @@ fi
 
 sleep 5
 vibrate &
-
-# Reboot device
-killall -9 runtime.sh principal.sh MainUI
+stop_pyui_message_writer
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then

@@ -8,6 +8,8 @@
   "Repair SD Card": "/mnt/SDCARD/spruce/scripts/tasks/repairSD.sh",
   "Bug report": "/mnt/SDCARD/spruce/scripts/tasks/bugReport.sh",
   "Scan ScummVM games": "/mnt/SDCARD/spruce/scripts/tasks/scanScummVM.sh",
+  "Clear all Recents": "/mnt/SDCARD/spruce/scripts/tasks/clearRecents.sh",
+  "Clear all Favorites": "/mnt/SDCARD/spruce/scripts/tasks/clearFavorites.sh",
   "descriptions": {
     "Forget all WiFi networks": "disconnect and clear all saved networks",
     "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
@@ -17,6 +19,8 @@
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
     "Repair SD Card": "reboot and attempt an fsck.fat on your card",
     "Bug report": "collect logs and other info for bug reports",
-    "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM"
+    "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM",
+    "Clear all Recents": "delete your recently played games list",
+    "Clear all Favorites": "delete your favorited games list"
   }
 }

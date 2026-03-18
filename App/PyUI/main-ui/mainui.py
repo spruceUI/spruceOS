@@ -100,16 +100,16 @@ def initialize_device(device, main_ui_mode):
         Device.init(MiyooA30(device, main_ui_mode))
     elif "ANBERNIC_RG34XXSP" == device:
         from devices.anbernic.anbernic_rg34xxsp import AnbernicRG34xxSP
-        Device.init(AnbernicRG34xxSP())
+        Device.init(AnbernicRG34xxSP(main_ui_mode))
     elif "ANBERNIC_RG28XX" == device:
         from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
-        Device.init(AnbernicRG28xx())
+        Device.init(AnbernicRG28xx(main_ui_mode))
     elif "ANBERNIC_RGCUBEXX" == device:
         from devices.anbernic.anbernic_rgcubexx import AnbernicRGCubeXX
-        Device.init(AnbernicRGCubeXX())
+        Device.init(AnbernicRGCubeXX(main_ui_mode))
     elif "ANBERNIC_RGXX640480" == device:
         from devices.anbernic.anbernic_xx_640_x_480 import Anbernic640x480
-        Device.init(Anbernic640x480())
+        Device.init(Anbernic640x480(main_ui_mode))
     elif "ANBERNIC_MUOS" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX(device))        

@@ -53,6 +53,9 @@ run_ppsspp() {
 			enable_digital_to_analog
 			PPSSPPSDL="./PPSSPPSDL_Pixel2"
 			;;
+		*"Anbernic"*)
+			PPSSPPSDL="/mnt/vendor/deep/ppsspp/PPSSPPSDL"
+			;;
 		*)
 			PPSSPPSDL="./PPSSPPSDL_${PLATFORM}"
 			;;

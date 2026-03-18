@@ -9,6 +9,8 @@ import os
 from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
+from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
@@ -36,11 +38,12 @@ from devices.device_common import DeviceCommon
 
 #/mnt/vendor/ctrl/dmenu_ln
 class AnbernicXXCommon(DeviceCommon):
-    def __init__(self): 
+    def __init__(self, main_ui_mode): 
         self.device_name = "ANBERNIC_RG34XXSP"
         script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'anbernic-rg34xxsp-system.json'
-        self._load_system_config("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json", source)
+        default_cfg_path = script_dir / 'anbernic-rg34xxsp-system.json'
+        system_cfg_path = "/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json"
+        self._load_system_config(system_cfg_path, default_cfg_path)
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
@@ -70,6 +73,18 @@ class AnbernicXXCommon(DeviceCommon):
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
+        if(main_ui_mode):
+            # Done to try to account for external systems editting the config file
+            self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+                system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if(old_volume != new_volume):
+            Display.volume_changed(new_volume)
+
     def sleep(self):
         pass #TODO
 
@@ -89,9 +104,23 @@ class AnbernicXXCommon(DeviceCommon):
 
     def _set_brightness_to_config(self):
         pass
-                   
+                              
     def _set_lumination_to_config(self):
-        pass
+        import fcntl
+        import struct
+        DEV = "/dev/disp"
+        IOCTL_SET_BRIGHTNESS = 0x102
+        #Is actually 128
+        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight //2)
+
+        # 4 unsigned long values (ARM64 = 8 bytes each)
+        args = struct.pack("QQQQ", 0, val, 0, 0)
+
+        fd = os.open(DEV, os.O_RDWR)
+        try:
+            fcntl.ioctl(fd, IOCTL_SET_BRIGHTNESS, args)
+        finally:
+            os.close(fd)     
 
     def _set_contrast_to_config(self):
         pass
@@ -159,29 +188,12 @@ class AnbernicXXCommon(DeviceCommon):
 
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
-
-    def _set_volume(self, volume):
-        #TODO
-        return volume 
-    
-    def change_volume(self, amount):
-        from display.display import Display
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        self._set_volume(volume)
-        self.system_config.set_volume(volume)
-        self.system_config.save_config()
-        Display.volume_changed(self.get_volume())
-
+        
     def volume_up(self):
-        self.change_volume(+5)
-    
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",115)
+
     def volume_down(self):
-        self.change_volume(-5)
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",114)
 
     def special_input(self, controller_input, length_in_seconds):
         if(ControllerInput.POWER_BUTTON == controller_input):
@@ -190,9 +202,9 @@ class AnbernicXXCommon(DeviceCommon):
             else:
                 self.prompt_power_down()
         elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
+            self.volume_up(5)
         elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+            self.volume_up(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
