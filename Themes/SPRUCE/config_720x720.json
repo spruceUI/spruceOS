@@ -1,51 +1,52 @@
 {
+    "showBottomBar": true,
     "name": "Spruce",
     "author": "tenlevels",
     "description": "spruce theme for a30",
     "batteryPercentage": {
         "color": "#EBDBB2",
         "font": "nunwen.ttf",
-        "size": 27
+        "size": 20
     },
     "title": {
         "font": "nunwen.ttf",
-        "size": 37,
+        "size": 28,
         "color": "#EBDBB2"
     },
     "hint": {
         "font": "nunwen.ttf",
-        "size": 37,
+        "size": 28,
         "color": "#EBDBB2"
     },
     "currentpage": {
         "font": "nunwen.ttf",
-        "size": 33,
+        "size": 24,
         "color": "#EBDBB2"
     },
     "total": {
         "font": "nunwen.ttf",
-        "size": 33,
+        "size": 24,
         "color": "#D65D0E"
     },
     "grid": {
         "font": "nunwen.ttf",
-        "grid1x4": 37,
-        "grid3x4": 27,
+        "grid1x4": 28,
+        "grid3x4": 20,
         "color": "#7C6F64",
         "selectedcolor": "#FBF1C7"
     },
     "list": {
         "font": "nunwen.ttf",
-        "size": 36,
+        "size": 27,
         "color": "#FBF1C7",
         "selectedcolor": "#FBF1C7"
     },
     "bindOverMiyooTheme": true,
-    "recentsEnabled": true,
-    "topBarInitialXOffset": 90,
+    "recentsEnabled": false,
+    "topBarInitialXOffset": 67,
     "setTopBarTextToGameSelection": true,
     "fullScreenGridGameMenuResizeType": "FIT",
     "mainMenuTitle": "",
-    "mainMenuColCount": 5,
-    "displayVolumeNumbers": true
+    "displayVolumeNumbers": true,
+    "gameSystemSelectRowCount": 3
 }
