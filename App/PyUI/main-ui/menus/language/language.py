@@ -597,6 +597,10 @@ class Language:
         return cls._data.get("mainMenuColumns","Main Menu Columns")
 
     @classmethod
+    def main_menu_rows(cls):
+        return cls._data.get("mainMenuRows","Main Menu Rows")
+
+    @classmethod
     def show_text(cls):
         return cls._data.get("showText","Show Text")
 
