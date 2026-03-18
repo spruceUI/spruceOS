@@ -3,6 +3,6 @@
   "icon": "ereader.png",
   "launch": "launch.sh",
   "description": "Read Ebooks on your device",
-  "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MIYOO_FLIP", "GKD_PIXEL2"],
+  "devices": ["MIYOO_A30", "TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MIYOO_FLIP", "GKD_PIXEL2"],
   "hideInSimpleMode": false
 }
