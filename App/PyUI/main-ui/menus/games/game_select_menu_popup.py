@@ -10,6 +10,7 @@ from games.utils.box_art_resizer import BoxArtResizer
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
 from menus.games.utils.favorites_manager import FavoritesManager
+from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
@@ -193,6 +194,22 @@ class GameSelectMenuPopup:
             icon=None,
             value=lambda input_value, rom_info=rom_info: self.collections_management_view(rom_info, input_value)
         ))
+
+        recents_primary_text = Language.add_recents()
+        recents_lambda = lambda input_value, rom_info=rom_info: RecentsManager.remove_game(rom_info)
+        if(not RecentsManager.is_recent(rom_info)):
+            recents_primary_text = Language.remove_recents()
+            recents_lambda = lambda input_value, rom_info=rom_info: RecentsManager.add_game(rom_info)
+
+        if(RecentsManager.is_recent(rom_info)):        
+            popup_options.append(GridOrListEntry(
+                primary_text=recents_primary_text if use_full_text else "+/- Recents",
+                image_path=Theme.settings(),
+                image_path_selected=Theme.settings_selected(),
+                description=None,
+                icon=None,
+                value=recents_lambda
+            ))
 
                
         if(not Device.get_device().get_system_config().simple_mode_enabled()):               
