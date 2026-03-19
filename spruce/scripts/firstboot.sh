@@ -25,6 +25,27 @@ if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
     dropbear_generate_keys &
 fi
 
+# Extract ScummVM standalone binaries in the background (64-bit only)
+SCUMMVM_BG_PID=""
+if [ "$PLATFORM_ARCHITECTURE" != "armhf" ]; then
+    SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
+    SCUMMVM_HAS_ARCHIVES=""
+    for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
+        [ -f "$SCUMMVM_7Z" ] && SCUMMVM_HAS_ARCHIVES=1 && break
+    done
+    if [ -n "$SCUMMVM_HAS_ARCHIVES" ]; then
+        (
+            for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
+                [ -f "$SCUMMVM_7Z" ] || continue
+                7zr x -y -scsUTF-8 -o"$SCUMMVM_DIR" "$SCUMMVM_7Z" \
+                    >>/mnt/SDCARD/Saves/spruce/scummvm_extract.log 2>&1
+                rm -f "$SCUMMVM_7Z"
+            done
+        ) &
+        SCUMMVM_BG_PID=$!
+    fi
+fi
+
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/
     if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
@@ -34,17 +55,13 @@ if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     fi
 
     rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
+else
+    display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
 fi
 
-# Extract ScummVM standalone binaries (64-bit only)
-if [ "$PLATFORM_ARCHITECTURE" != "armhf" ]; then
-    SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
-    for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
-        [ -f "$SCUMMVM_7Z" ] || continue
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting ScummVM!" 75
-        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log
-        rm -f "$SCUMMVM_7Z"
-    done
+# Wait for ScummVM extraction to finish
+if [ -n "$SCUMMVM_BG_PID" ]; then
+    wait "$SCUMMVM_BG_PID"
 fi
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
