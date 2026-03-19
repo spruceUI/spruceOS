@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import threading
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -147,20 +148,18 @@ class AnbernicXXCommon(DeviceCommon):
                 Display.display_message("No core found", 2_000)
                 return
 
-            #selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
 
+            shutil.copyfile("/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg", "/mnt/SDCARD/RetroArch/retroarch.cfg")
             cmds = [
-                    #"/mnt/SDCARD/RetroArch/ra64.universal",
-                    "/mnt/vendor/deep/retro/retroarch",
-                    "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
+                    "/mnt/SDCARD/RetroArch/ra64.universal",
                     "-v",
+                    "--config", "/mnt/SDCARD/RetroArch/retroarch.cfg",
                     "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
                     "-L",selected_core,
                     rom_info.rom_file_path]
 
-            #directory = "/mnt/SDCARD/RetroArch/"
-            directory = "/mnt/vendor/deep/retro/"
+            directory = "/mnt/SDCARD/RetroArch/"
             PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
             Display.deinit_display()
             subprocess.run(cmds, cwd = directory)
@@ -172,13 +171,16 @@ class AnbernicXXCommon(DeviceCommon):
         MiyooTrimCommon.run_cmd(self, args, dir)
             
     def run_app(self, folder,launch):
-        from controller.controller import Controller
-        directory = os.path.dirname(launch)
-        Display.deinit_display()
-        PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-        subprocess.run([launch], cwd = directory)
-        Display.init()
-        Controller.clear_input_queue()
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            MiyooTrimCommon.run_app(self, folder,launch)
+        else:
+            from controller.controller import Controller
+            directory = os.path.dirname(launch)
+            Display.deinit_display()
+            PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
+            subprocess.run([launch], cwd = directory)
+            Display.init()
+            Controller.clear_input_queue()
     
     def map_digital_input(self, sdl_input):
         return None
@@ -320,7 +322,7 @@ class AnbernicXXCommon(DeviceCommon):
         return self.get_game_system_utils().get_save_state_image(rom_info)
 
     def get_wpa_supplicant_conf_path(self):
-        return None
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf")
 
     def supports_brightness_calibration(self):
         return False
