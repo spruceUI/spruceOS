@@ -6,6 +6,7 @@ ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
 PRECMD_PID_FILE="/mnt/SDCARD/spruce/flags/unpacker_precmd.pid"
 HANDOFF_FLAG="unpacker_handoff_pre_cmd"
+FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
 SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -90,6 +91,11 @@ queue_has_archive() {
 }
 
 queue_empty_for_mode() {
+    if [ "$RUN_MODE" = "themes_only" ]; then
+        ! queue_has_archive "$THEME_DIR"
+        return
+    fi
+
     if [ "$RUN_MODE" = "pre_cmd" ]; then
         ! queue_has_archive "$ARCHIVE_DIR/preCmd"
         return
@@ -142,6 +148,21 @@ consume_handoff_token_if_present() {
     fi
 }
 
+wait_for_firstboot_package_phase() {
+    wait_loops=0
+    if flag_check "$FIRSTBOOT_PACKAGE_PHASE_FLAG"; then
+        "$SYSTEM_EMIT" process archiveUnpacker "WAIT_FIRSTBOOT_PACKAGE_PHASE_BEGIN" "archiveUnpacker.sh/startup" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
+        while flag_check "$FIRSTBOOT_PACKAGE_PHASE_FLAG"; do
+            wait_loops=$((wait_loops + 1))
+            if [ $((wait_loops % 50)) -eq 0 ]; then
+                "$SYSTEM_EMIT" process archiveUnpacker "WAIT_FIRSTBOOT_PACKAGE_PHASE_LOOP" "archiveUnpacker.sh/startup" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG loops=$wait_loops" || true
+            fi
+            sleep 0.1
+        done
+        "$SYSTEM_EMIT" process archiveUnpacker "WAIT_FIRSTBOOT_PACKAGE_PHASE_END" "archiveUnpacker.sh/startup" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG loops=$wait_loops" || true
+    fi
+}
+
 "$SYSTEM_EMIT" process-init archiveUnpacker "archiveUnpacker.sh" "argv1=${1:-} argv2=${2:-}" || true
 
 # Guard against overlapping unpack workers.
@@ -168,6 +189,7 @@ trap archive_exit_handler EXIT
 # Process command line arguments
 parse_startup_args "${1:-}" "${2:-}"
 consume_handoff_token_if_present "${1:-}" "${2:-}"
+wait_for_firstboot_package_phase
 
 if flag_check "silentUnpacker"; then
     SILENT_STATE="1"
@@ -177,26 +199,41 @@ write_unpack_state "running" "startup" ""
 
 # Function to display text if not in silent mode
 display_if_not_silent() {
+    section_label="$1"
+    detail_line="$2"
+    hold_seconds="${3:-0}"
+
     if flag_check "silentUnpacker"; then
         return 0
     fi
 
     start_pyui_message_writer
-    "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "archive=${archive_name:-unknown}" || true
-    display_image_and_text "$ICON" 35 25 "$archive_name archive detected. Unpacking.........." 75
+    "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "section=${section_label:-unknown} detail=${detail_line:-unknown}" || true
+    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+        display_image_and_text "$ICON" 35 25 "Sprucing up your device...\nUnpacking ${section_label}\n${detail_line}" 75
+    else
+        display_image_and_text "$ICON" 35 25 "Unpacking ${section_label}\n${detail_line}" 75
+    fi
+    if [ "$hold_seconds" -gt 0 ]; then
+        sleep "$hold_seconds"
+    fi
 }
 
 # Function to unpack archives from a specified directory
 unpack_archives() {
     dir="$1"
     flag_name="$2"
+    section_label="$3"
     found_count=0
     success_count=0
     fail_count=0
     skip_count=0
+    section_delay_applied=0
+
+    [ -z "$section_label" ] && section_label="archives"
 
     [ -n "$flag_name" ] && flag_add "$flag_name" --tmp
-    "$SYSTEM_EMIT" process archiveUnpacker "FLAG_SET" "archiveUnpacker.sh/unpack_archives" "flag=${flag_name:-none} dir=$dir" || true
+    "$SYSTEM_EMIT" process archiveUnpacker "FLAG_SET" "archiveUnpacker.sh/unpack_archives" "flag=${flag_name:-none} dir=$dir section=$section_label" || true
     "$SYSTEM_EMIT" process archiveUnpacker "BEGIN_DIR" "archiveUnpacker.sh/unpack_archives" "dir=$dir" || true
 
     for archive in "$dir"/*.7z; do
@@ -204,7 +241,12 @@ unpack_archives() {
             found_count=$((found_count + 1))
             archive_name=$(basename "$archive" .7z)
             "$SYSTEM_EMIT" process archiveUnpacker "ARCHIVE_CANDIDATE" "archiveUnpacker.sh/unpack_archives" "archive=$archive_name.7z dir=$dir" || true
-            display_if_not_silent
+            section_hold=0
+            if [ "$section_delay_applied" -eq 0 ]; then
+                section_hold=2
+                section_delay_applied=1
+            fi
+            display_if_not_silent "$section_label" "$archive_name.7z" "$section_hold"
 
             if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
                 if 7zr x -aoa "$archive" -o/; then
@@ -242,18 +284,29 @@ if [ "$RUN_MODE" = "all" ] &&
         "Unpacker: Finished running"
 fi
 
+if [ "$RUN_MODE" = "themes_only" ] &&
+    ! queue_has_archive "$THEME_DIR"; then
+    "$SYSTEM_EMIT" process archiveUnpacker "QUEUE_EMPTY_THEMES_FAST_PATH" "archiveUnpacker.sh/startup" "no archives in themes" || true
+    exit_with_state \
+        "complete" "queue-empty-themes" \
+        "COMPLETE" "queue-empty-themes-fast-path" \
+        "0" \
+        "Unpacker: No theme .7z files found to unpack. Exiting." \
+        "Unpacker: Finished running"
+fi
+
 log_message "Unpacker: Starting theme and archive unpacking process"
 
 run_mode_all() {
-    unpack_archives "$THEME_DIR"
-    unpack_archives "$ARCHIVE_DIR/preMenu" "pre_menu_unpacking"
+    unpack_archives "$THEME_DIR" "" "Themes"
+    unpack_archives "$ARCHIVE_DIR/preMenu" "pre_menu_unpacking" "Pre-menu content"
     if [ "$FORCE_FOREGROUND_PRECMD" = "1" ] || flag_check "save_active"; then
         if [ "$FORCE_FOREGROUND_PRECMD" = "1" ]; then
             "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_FOREGROUND_FORCED" "archiveUnpacker.sh/run_mode_all" "forced foreground pre_cmd in sequential firstboot" || true
         else
             "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_FOREGROUND_SAVE_ACTIVE" "archiveUnpacker.sh/run_mode_all" "save_active=1" || true
         fi
-        unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
+        unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
     else
         "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_HANDOFF_BACKGROUND" "archiveUnpacker.sh/run_mode_all" "save_active=0" || true
         flag_add "$HANDOFF_FLAG" --tmp
@@ -271,13 +324,22 @@ run_mode_pre_cmd() {
     "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_pre_cmd" "foreground pre_cmd run" || true
     echo "$$" > "$PRECMD_PID_FILE"
     write_unpack_state "running" "pre_cmd-active" "$$"
-    unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
+    unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
+}
+
+run_mode_themes_only() {
+    "$SYSTEM_EMIT" process archiveUnpacker "THEMES_ONLY_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_themes_only" "foreground themes-only run" || true
+    write_unpack_state "running" "themes-only-active" "$$"
+    unpack_archives "$THEME_DIR" "" "Themes"
 }
 
 dispatch_run_mode() {
     case "$RUN_MODE" in
     "all")
         run_mode_all
+        ;;
+    "themes_only")
+        run_mode_themes_only
         ;;
     "pre_cmd")
         run_mode_pre_cmd

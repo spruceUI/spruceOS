@@ -3,6 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
+FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
 
 start_pyui_message_writer
 
@@ -27,6 +28,7 @@ firstboot_trace_finalize() {
 }
 
 cleanup_firstboot() {
+    flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
     firstboot_trace_finalize
 }
 trap cleanup_firstboot EXIT
@@ -37,6 +39,12 @@ show_firstboot_screen() {
     img="$1"
     text="$2"
     duration="${3:-5}"
+    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+        case "$text" in
+            "Check out the spruce wiki on our GitHub page for tips and FAQs!"*) ;;
+            *) text="Sprucing up your device...\n${text}" ;;
+        esac
+    fi
 
     display_image_and_text "$img" 35 25 "$text" 75
     sleep "$duration"
@@ -60,12 +68,15 @@ if [ "$SSH_SERVICE_NAME" = "dropbearmulti" ]; then
     dropbear_generate_keys &
 fi
 
+flag_add "$FIRSTBOOT_PACKAGE_PHASE_FLAG" --tmp
+"$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_BEGIN" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
+
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/
     if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "Sprucing up your device"
+        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
     else
-        run_firstboot_screen_table "$SPRUCE_LOGO|Sprucing up your device|5"
+        run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking PortMaster\nAlready installed|2"
     fi
 
     rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
@@ -76,11 +87,18 @@ if [ "$PLATFORM_ARCHITECTURE" != "armhf" ]; then
     SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
     for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
         [ -f "$SCUMMVM_7Z" ] || continue
-        show_firstboot_screen "$SPRUCE_LOGO" "Extracting ScummVM!" 5
-        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log
+        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
         rm -f "$SCUMMVM_7Z"
     done
 fi
+
+flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
+"$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_END" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
+
+log_message "Firstboot: Running themes-only archive extraction before final transition screens"
+"$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEMES_ONLY_LAUNCH" "firstboot.sh/themes-only" "run_mode=themes_only" || true
+SPRUCE_FIRSTBOOT_UI="${SPRUCE_FIRSTBOOT_UI:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh themes_only
+"$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEMES_ONLY_RESULT" "firstboot.sh/themes-only" "run_mode=themes_only completed" || true
 
 run_firstboot_screen_table "$FIRSTBOOT_POST_EXTRACT_SCREENS"
 

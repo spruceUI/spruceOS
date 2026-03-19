@@ -3,6 +3,43 @@
 # Requires globals: EMU_DIR, ROM_FILE, PLATFORM, CORE, LOG_DIR
 # Provides: run_scummvm, run_scummvm_menu, run_scummvm_scan
 
+SCUMMVM_DISPLAY_ICON="/mnt/SDCARD/Emu/SCUMMVM/scummvm.png"
+SCUMMVM_DISPLAY_WRITER_STARTED=0
+
+scummvm_prepare_display() {
+	if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
+		SCUMMVM_DISPLAY_WRITER_STARTED=0
+		return
+	fi
+
+	start_pyui_message_writer
+	SCUMMVM_DISPLAY_WRITER_STARTED=1
+}
+
+scummvm_teardown_display() {
+	if [ "$SCUMMVM_DISPLAY_WRITER_STARTED" -eq 1 ]; then
+		stop_pyui_message_writer
+		SCUMMVM_DISPLAY_WRITER_STARTED=0
+	fi
+}
+
+scummvm_display_status() {
+	headline="$1"
+	detail="$2"
+
+	if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+		display_text="Sprucing up your device...\n${headline}"
+	else
+		display_text="$headline"
+	fi
+
+	if [ -n "$detail" ]; then
+		display_text="${display_text}\n${detail}"
+	fi
+
+	display_image_and_text "$SCUMMVM_DISPLAY_ICON" 35 25 "$display_text" 75
+}
+
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
@@ -45,11 +82,16 @@ run_scummvm_menu() {
 			;;
 	esac
 
+	scummvm_prepare_display
+	scummvm_display_status "Launching ScummVM" "Opening ScummVM menu..."
+
 	if [ -f "$SCUMMVM_BIN" ]; then
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
 	fi
+
+	scummvm_teardown_display
 }
 
 run_scummvm() {
@@ -111,11 +153,16 @@ run_scummvm() {
 		# Use filename as fallback game ID
 		game_id=$(cat "$ROM_FILE" | tr -d '\r\n' | xargs)
 		[ -z "$game_id" ] && game_id="$romNameNoExt"
+
+		scummvm_prepare_display
+		scummvm_display_status "Launching ScummVM" "$romNameNoExt"
 		
 		# Execute ScummVM
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+
+		scummvm_teardown_display
 	fi
 }
 
@@ -146,6 +193,9 @@ run_scummvm_scan() {
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 	esac
+
+	scummvm_prepare_display
+	scummvm_display_status "Scanning ScummVM" "Checking folders for games..."
 
     cd "$ROM_DIR" || return 1
     
@@ -192,4 +242,5 @@ run_scummvm_scan() {
 
     sync
     echo "--- ScummVM Smart Scan Completed: $(date) ---" >> "$SCAN_LOG"
+	scummvm_teardown_display
 }

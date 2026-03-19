@@ -925,14 +925,38 @@ extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
     LOG_LOCATION="$3" # Only logs errors
-    DISPLAY_LABEL="$4" # Optional: static label to show instead of filenames
+    SECTION_LABEL="$4" # Optional: section title used in "Unpacking <section>"
 
     if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
-        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [display_label]"
+        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [section_label]"
         return 1
     fi
 
-    LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+    DEFAULT_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+    PORTMASTER_ICON="/mnt/SDCARD/App/PortMaster/portmaster.png"
+    SCUMMVM_ICON="/mnt/SDCARD/Emu/SCUMMVM/scummvm.png"
+    LOGO="$DEFAULT_ICON"
+    SCUMMVM_DISPLAY_TEXT_LOG="/mnt/SDCARD/Saves/spruce/scummvm_display_text.log"
+    if [ -z "$SECTION_LABEL" ]; then
+        SECTION_LABEL="$(basename "$UPDATE_FILE" .7z)"
+    fi
+    IS_SCUMMVM_SECTION=0
+    case "$SECTION_LABEL" in
+        [Pp][Oo][Rr][Tt][Mm][Aa][Ss][Tt][Ee][Rr]) LOGO="$PORTMASTER_ICON" ;;
+        [Ss][Cc][Uu][Mm][Mm][Vv][Mm]) IS_SCUMMVM_SECTION=1 ; LOGO="$SCUMMVM_ICON" ;;
+    esac
+
+    log_scummvm_display_text() {
+        [ "$IS_SCUMMVM_SECTION" -eq 1 ] || return 0
+        mkdir -p "/mnt/SDCARD/Saves/spruce" 2>/dev/null
+        printf '%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$SCUMMVM_DISPLAY_TEXT_LOG"
+    }
+
+    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+        SECTION_TITLE="Sprucing up your device...\nUnpacking ${SECTION_LABEL}"
+    else
+        SECTION_TITLE="Unpacking ${SECTION_LABEL}"
+    fi
 
     TOTAL_FILES=$(7zr l -scsUTF-8 "$UPDATE_FILE" |
         awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
@@ -949,19 +973,33 @@ extract_7z_with_progress() {
         return 1
     fi
 
+    display_image_and_text "$LOGO" 35 25 "${SECTION_TITLE}\nPreparing extraction..." 75
+    log_scummvm_display_text "${SECTION_TITLE} | Preparing extraction..."
+    sleep 2
+
     7zr x -y -scsUTF-8 -bb1 -o"$DEST_DIR" "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
     while read -r line || [ -n "$line" ]; do
-        FILE=$(echo "$line" | sed 's/^[-[:space:]]*//')
+        case "$line" in
+            "- "*) FILE="${line#- }" ;;
+            "Extracting  "*) FILE="${line#Extracting  }" ;;
+            "Inflating  "*) FILE="${line#Inflating  }" ;;
+            *) continue ;;
+        esac
         [ -z "$FILE" ] && continue
 
         FILE_COUNT=$((FILE_COUNT + 1))
         PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
+        [ "$PERCENT_COMPLETE" -gt 100 ] && PERCENT_COMPLETE=100
 
         if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
-            display_text_with_percentage_bar \
-                "${DISPLAY_LABEL:-$FILE}" \
-                "$PERCENT_COMPLETE" \
-                "$FILE_COUNT / $TOTAL_FILES files"
+            FILE_NAME="$(basename "$FILE")"
+            PROGRESS_TEXT="${SECTION_TITLE} | ${PERCENT_COMPLETE}%: ${FILE_NAME}"
+            display_image_and_text \
+                "$LOGO" \
+                35 25 \
+                "${SECTION_TITLE}\n${PERCENT_COMPLETE}%: ${FILE_NAME}" \
+                75
+            log_scummvm_display_text "$PROGRESS_TEXT"
         fi
     done
 
@@ -971,9 +1009,11 @@ extract_7z_with_progress() {
         log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
         display_image_and_text "$LOGO" 35 25 \
             "Extraction completed with warnings. Check the log for details." 75
+        log_scummvm_display_text "Extraction completed with warnings. Check the log for details."
     else
         log_update_message "Extraction process completed successfully"
         display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
+        log_scummvm_display_text "Extraction completed!"
     fi
 
     return "$RET"

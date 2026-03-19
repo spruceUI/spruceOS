@@ -30,12 +30,13 @@ run_unpacker_foreground() {
     log_prefix="$4"
     allow_background_state="$5"
     force_foreground_precmd="$6"
+    firstboot_ui="$7"
 
     "$SYSTEM_EMIT" process archiveUnpacker "$launch_event" "runtime.sh" "$launch_context" || true
     if [ "$force_foreground_precmd" = "1" ]; then
-        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
     else
-        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
     fi
 
     unpack_state="$(read_unpack_state)"
@@ -78,18 +79,16 @@ check_and_hide_update_app &
 # runs in foreground for themes/preMenu/preCmd so extraction paths do not overlap.
 if flag_check "first_boot_${PLATFORM}"; then
     "$SYSTEM_EMIT" process firstboot "ENTER_FIRSTBOOT_SCRIPT" "runtime.sh" "sequential extraction phase: packages" || true
-    "/mnt/SDCARD/spruce/scripts/firstboot.sh"
+    SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     "$SYSTEM_EMIT" process firstboot "EXIT_FIRSTBOOT_SCRIPT" "runtime.sh" "returned from firstboot.sh" || true
 
-    start_pyui_message_writer
-    display_image_and_text "/mnt/SDCARD/spruce/imgs/refreshing.png" 35 25 "Unpacking themes.........." 75
-    sleep 5
     run_unpacker_foreground \
         "FIRSTBOOT_FOREGROUND_LAUNCH" \
         "sequential extraction after firstboot" \
         "FIRSTBOOT_FOREGROUND_RESULT" \
         "firstboot foreground run" \
         "0" \
+        "1" \
         "1"
     display_image_and_text "/mnt/SDCARD/spruce/imgs/smile.png" 35 25 "Happy gaming.........." 75
     sleep 5
@@ -100,6 +99,7 @@ else
         "FOREGROUND_RESULT" \
         "foreground run" \
         "1" \
+        "0" \
         "0"
 fi
 
