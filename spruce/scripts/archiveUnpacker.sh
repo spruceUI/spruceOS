@@ -15,14 +15,15 @@ SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 # The other mode is to unpack archives needed before the command_to_run, this is used for preCmd.
 
 # This can be called with a "pre_cmd" argument to run over preCmd only.
-# Typically you'd use that for any unpacking process since we don't want extraction to happen in the background.
-# It's rather resource heavy and we don't want to leave it running in the background.
+# On firstboot this now runs fully in the foreground; on non-firstboot paths,
+# pre_cmd may still hand off to a background worker when safe.
 
 SKIP_SILENT_CLEANUP=0
 UNPACK_HAD_FAILURE=0
 HANDOFF_BACKGROUND=0
 RUN_MODE="all"
 SILENT_STATE="0"
+FORCE_FOREGROUND_PRECMD="${UNPACKER_FORCE_FOREGROUND_PRECMD:-0}"
 TRACE_FINAL_STATE="FINALIZED"
 TRACE_FINAL_REASON="normal-exit"
 TRACE_FINALIZED=0
@@ -48,6 +49,39 @@ write_unpack_state() {
         printf 'reason=%s\n' "${reason_value:-}"
     } > "$tmp_state"
     mv -f "$tmp_state" "$STATE_FILE"
+}
+
+set_trace_outcome() {
+    TRACE_FINAL_STATE="$1"
+    TRACE_FINAL_REASON="$2"
+}
+
+exit_with_state() {
+    state_value="$1"
+    state_reason="$2"
+    trace_state="$3"
+    trace_reason="$4"
+    exit_code="${5:-0}"
+    log_line_1="$6"
+    log_line_2="$7"
+    pid_value="${8:-}"
+
+    write_unpack_state "$state_value" "$state_reason" "$pid_value"
+    set_trace_outcome "$trace_state" "$trace_reason"
+    [ -n "$log_line_1" ] && log_message "$log_line_1"
+    [ -n "$log_line_2" ] && log_message "$log_line_2"
+    exit "$exit_code"
+}
+
+exit_with_trace_only() {
+    trace_state="$1"
+    trace_reason="$2"
+    exit_code="${3:-0}"
+    log_line="$4"
+
+    set_trace_outcome "$trace_state" "$trace_reason"
+    [ -n "$log_line" ] && log_message "$log_line"
+    exit "$exit_code"
 }
 
 queue_has_archive() {
@@ -85,6 +119,29 @@ archive_exit_handler() {
     emit_archive_trace_finalize
 }
 
+parse_startup_args() {
+    arg1="$1"
+    arg2="$2"
+
+    if [ "$arg1" = "--silent" ]; then
+        flag_add "silentUnpacker" --tmp
+        SILENT_STATE="1"
+        [ -n "$arg2" ] && RUN_MODE="$arg2"
+    elif [ -n "$arg1" ]; then
+        RUN_MODE="$arg1"
+    fi
+}
+
+consume_handoff_token_if_present() {
+    arg1="$1"
+    arg2="$2"
+
+    if [ "$arg1" = "--silent" ] && [ "$arg2" = "pre_cmd" ] && flag_check "$HANDOFF_FLAG"; then
+        flag_remove "$HANDOFF_FLAG"
+        "$SYSTEM_EMIT" process archiveUnpacker "HANDOFF_TOKEN_CONSUMED" "archiveUnpacker.sh/startup" "consumed silent pre_cmd handoff token" || true
+    fi
+}
+
 "$SYSTEM_EMIT" process-init archiveUnpacker "archiveUnpacker.sh" "argv1=${1:-} argv2=${2:-}" || true
 
 # Guard against overlapping unpack workers.
@@ -109,18 +166,8 @@ log_message "Unpacker: Script started"
 trap archive_exit_handler EXIT
 
 # Process command line arguments
-if [ "$1" = "--silent" ]; then
-    flag_add "silentUnpacker" --tmp
-    SILENT_STATE="1"
-    [ -n "$2" ] && RUN_MODE="$2"
-elif [ -n "$1" ]; then
-    RUN_MODE="$1"
-fi
-
-if [ "$1" = "--silent" ] && [ "$2" = "pre_cmd" ] && flag_check "$HANDOFF_FLAG"; then
-    flag_remove "$HANDOFF_FLAG"
-    "$SYSTEM_EMIT" process archiveUnpacker "HANDOFF_TOKEN_CONSUMED" "archiveUnpacker.sh/startup" "consumed silent pre_cmd handoff token" || true
-fi
+parse_startup_args "${1:-}" "${2:-}"
+consume_handoff_token_if_present "${1:-}" "${2:-}"
 
 if flag_check "silentUnpacker"; then
     SILENT_STATE="1"
@@ -130,28 +177,13 @@ write_unpack_state "running" "startup" ""
 
 # Function to display text if not in silent mode
 display_if_not_silent() {
-    show_progress=0
-    if ! flag_check "silentUnpacker"; then
-        show_progress=1
-    elif flag_check "unpacker_ui_visible"; then
-        show_progress=1
+    if flag_check "silentUnpacker"; then
+        return 0
     fi
 
-    if [ "$show_progress" -eq 1 ]; then
-        hold_wait_loops=0
-        while flag_check "firstboot_screen_hold"; do
-            hold_wait_loops=$((hold_wait_loops + 1))
-            if [ "$hold_wait_loops" -ge 300 ]; then
-                log_message "Unpacker: firstboot screen hold wait timed out; continuing archive progress UI."
-                break
-            fi
-            sleep 0.1
-        done
-
-        start_pyui_message_writer
-        "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "archive=${archive_name:-unknown}" || true
-        display_image_and_text "$ICON" 35 25 "$archive_name archive detected. Unpacking.........." 75
-    fi
+    start_pyui_message_writer
+    "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "archive=${archive_name:-unknown}" || true
+    display_image_and_text "$ICON" 35 25 "$archive_name archive detected. Unpacking.........." 75
 }
 
 # Function to unpack archives from a specified directory
@@ -202,23 +234,25 @@ if [ "$RUN_MODE" = "all" ] &&
     ! queue_has_archive "$ARCHIVE_DIR/preMenu" &&
     ! queue_has_archive "$THEME_DIR"; then
     "$SYSTEM_EMIT" process archiveUnpacker "QUEUE_EMPTY_FAST_PATH" "archiveUnpacker.sh/startup" "no archives in themes/preMenu/preCmd" || true
-    TRACE_FINAL_STATE="COMPLETE"
-    TRACE_FINAL_REASON="queue-empty-fast-path"
-    write_unpack_state "complete" "queue-empty" ""
-    log_message "Unpacker: No .7z files found to unpack. Exiting."
-    log_message "Unpacker: Finished running"
-    exit 0
+    exit_with_state \
+        "complete" "queue-empty" \
+        "COMPLETE" "queue-empty-fast-path" \
+        "0" \
+        "Unpacker: No .7z files found to unpack. Exiting." \
+        "Unpacker: Finished running"
 fi
 
 log_message "Unpacker: Starting theme and archive unpacking process"
 
-# Process archives based on run mode
-case "$RUN_MODE" in
-"all")
+run_mode_all() {
     unpack_archives "$THEME_DIR"
     unpack_archives "$ARCHIVE_DIR/preMenu" "pre_menu_unpacking"
-    if flag_check "save_active"; then
-        "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_FOREGROUND_SAVE_ACTIVE" "archiveUnpacker.sh/run_mode_all" "save_active=1" || true
+    if [ "$FORCE_FOREGROUND_PRECMD" = "1" ] || flag_check "save_active"; then
+        if [ "$FORCE_FOREGROUND_PRECMD" = "1" ]; then
+            "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_FOREGROUND_FORCED" "archiveUnpacker.sh/run_mode_all" "forced foreground pre_cmd in sequential firstboot" || true
+        else
+            "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_FOREGROUND_SAVE_ACTIVE" "archiveUnpacker.sh/run_mode_all" "save_active=1" || true
+        fi
         unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
     else
         "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_HANDOFF_BACKGROUND" "archiveUnpacker.sh/run_mode_all" "save_active=0" || true
@@ -231,46 +265,60 @@ case "$RUN_MODE" in
         SKIP_SILENT_CLEANUP=1
         "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_HANDOFF_SPAWNED" "archiveUnpacker.sh/run_mode_all" "pid=$handoff_pid" || true
     fi
-    ;;
-"pre_cmd")
+}
+
+run_mode_pre_cmd() {
     "$SYSTEM_EMIT" process archiveUnpacker "PRECMD_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_pre_cmd" "foreground pre_cmd run" || true
     echo "$$" > "$PRECMD_PID_FILE"
     write_unpack_state "running" "pre_cmd-active" "$$"
     unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking"
-    ;;
-*)
-    TRACE_FINAL_STATE="FAILED"
-    TRACE_FINAL_REASON="invalid-run-mode"
-    write_unpack_state "failed_resumable" "invalid-run-mode" ""
-    log_message "Unpacker: Invalid run mode specified"
-    exit 1
-    ;;
-esac
+}
+
+dispatch_run_mode() {
+    case "$RUN_MODE" in
+    "all")
+        run_mode_all
+        ;;
+    "pre_cmd")
+        run_mode_pre_cmd
+        ;;
+    *)
+        exit_with_state \
+            "failed_resumable" "invalid-run-mode" \
+            "FAILED" "invalid-run-mode" \
+            "1" \
+            "Unpacker: Invalid run mode specified"
+        ;;
+    esac
+}
+
+dispatch_run_mode
 
 if [ "$HANDOFF_BACKGROUND" = "1" ]; then
-    TRACE_FINAL_STATE="HANDOFF_BACKGROUND"
-    TRACE_FINAL_REASON="pre_cmd-background-handoff"
-    log_message "Unpacker: Foreground phases finished; pre_cmd handed off to background worker."
-    exit 0
+    exit_with_trace_only \
+        "HANDOFF_BACKGROUND" "pre_cmd-background-handoff" \
+        "0" \
+        "Unpacker: Foreground phases finished; pre_cmd handed off to background worker."
 fi
 
 if [ "$UNPACK_HAD_FAILURE" -ne 0 ]; then
-    TRACE_FINAL_STATE="FAILED"
-    TRACE_FINAL_REASON="archive-extract-failure"
-    write_unpack_state "failed_resumable" "archive-extract-failure" ""
-    log_message "Unpacker: Incomplete due to extraction failures; resumable state persisted."
-    exit 1
+    exit_with_state \
+        "failed_resumable" "archive-extract-failure" \
+        "FAILED" "archive-extract-failure" \
+        "1" \
+        "Unpacker: Incomplete due to extraction failures; resumable state persisted."
 fi
 
 if queue_empty_for_mode; then
-    TRACE_FINAL_STATE="COMPLETE"
-    TRACE_FINAL_REASON="queue-empty"
-    write_unpack_state "complete" "queue-empty" ""
-    log_message "Unpacker: Finished running"
+    exit_with_state \
+        "complete" "queue-empty" \
+        "COMPLETE" "queue-empty" \
+        "0" \
+        "Unpacker: Finished running"
 else
-    TRACE_FINAL_STATE="FAILED"
-    TRACE_FINAL_REASON="queue-not-empty"
-    write_unpack_state "failed_resumable" "queue-not-empty" ""
-    log_message "Unpacker: Incomplete queue detected; resumable state persisted."
-    exit 1
+    exit_with_state \
+        "failed_resumable" "queue-not-empty" \
+        "FAILED" "queue-not-empty" \
+        "1" \
+        "Unpacker: Incomplete queue detected; resumable state persisted."
 fi

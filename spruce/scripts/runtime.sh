@@ -23,6 +23,30 @@ read_unpack_state() {
     fi
 }
 
+run_unpacker_foreground() {
+    launch_event="$1"
+    launch_context="$2"
+    result_event="$3"
+    log_prefix="$4"
+    allow_background_state="$5"
+    force_foreground_precmd="$6"
+
+    "$SYSTEM_EMIT" process archiveUnpacker "$launch_event" "runtime.sh" "$launch_context" || true
+    if [ "$force_foreground_precmd" = "1" ]; then
+        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    else
+        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    fi
+
+    unpack_state="$(read_unpack_state)"
+    if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
+        log_message "Unpacker: $log_prefix returned with background worker still active."
+    else
+        log_message "Unpacker: $log_prefix returned with state=$unpack_state."
+    fi
+    "$SYSTEM_EMIT" process archiveUnpacker "$result_event" "runtime.sh" "state=$unpack_state" || true
+}
+
 [ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
 export HOME="/mnt/SDCARD"
@@ -49,25 +73,34 @@ unstage_archives_wanted
 check_and_handle_firmware_app &
 check_and_hide_update_app &
 
-# Check for first_boot flags and run Unpacker accordingly
+# Check for first_boot flags and run extraction in a deterministic sequence.
+# firstboot handles package extraction (PortMaster/ScummVM), then archiveUnpacker
+# runs in foreground for themes/preMenu/preCmd so extraction paths do not overlap.
 if flag_check "first_boot_${PLATFORM}"; then
-    "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_SILENT_LAUNCH" "runtime.sh" "platform=$PLATFORM" || true
-    /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh --silent &
-    "$SYSTEM_EMIT" process archiveUnpacker "SILENT_LAUNCH_PID" "runtime.sh" "pid=$!" || true
-    log_message "Unpacker started silently in background due to first_boot flag"
-    "$SYSTEM_EMIT" process firstboot "ENTER_FIRSTBOOT_SCRIPT" "runtime.sh" "silent unpacker may still be active" || true
+    "$SYSTEM_EMIT" process firstboot "ENTER_FIRSTBOOT_SCRIPT" "runtime.sh" "sequential extraction phase: packages" || true
     "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     "$SYSTEM_EMIT" process firstboot "EXIT_FIRSTBOOT_SCRIPT" "runtime.sh" "returned from firstboot.sh" || true
+
+    start_pyui_message_writer
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/refreshing.png" 35 25 "Unpacking themes.........." 75
+    sleep 5
+    run_unpacker_foreground \
+        "FIRSTBOOT_FOREGROUND_LAUNCH" \
+        "sequential extraction after firstboot" \
+        "FIRSTBOOT_FOREGROUND_RESULT" \
+        "firstboot foreground run" \
+        "0" \
+        "1"
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/smile.png" 35 25 "Happy gaming.........." 75
+    sleep 5
 else
-    "$SYSTEM_EMIT" process archiveUnpacker "FOREGROUND_LAUNCH" "runtime.sh" "non-first_boot path" || true
-    /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    unpack_state="$(read_unpack_state)"
-    if [ "$unpack_state" = "running" ]; then
-        log_message "Unpacker: foreground phases returned with background worker still active."
-    else
-        log_message "Unpacker: foreground run returned with state=$unpack_state."
-    fi
-    "$SYSTEM_EMIT" process archiveUnpacker "FOREGROUND_RESULT" "runtime.sh" "state=$unpack_state" || true
+    run_unpacker_foreground \
+        "FOREGROUND_LAUNCH" \
+        "non-first_boot path" \
+        "FOREGROUND_RESULT" \
+        "foreground run" \
+        "1" \
+        "0"
 fi
 
 /mnt/SDCARD/spruce/scripts/set_up_swap.sh &
