@@ -50,7 +50,7 @@ get_shutdown_timer() {
     local IDLE_TIMEOUT=0
 
     case "$LID_TIMER" in
-        "Off")  IDLE_TIMEOUT=31536000 ;; # 1 year
+        "Off")  IDLE_TIMEOUT=2592000  ;; # 30 days
         "5s")   IDLE_TIMEOUT=5 ;;
         "30s")  IDLE_TIMEOUT=30 ;;
         "1m")   IDLE_TIMEOUT=60 ;;
