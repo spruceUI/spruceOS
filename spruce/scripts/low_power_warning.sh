@@ -106,13 +106,13 @@ while true; do
     hard_shutdown $CAPACITY
 
     # disable script if turned off in spruce.cfg
-      [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
-  
-      if [ "$CAPACITY" -le "$PERCENT" ]; then
+    [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
+
+    if [ "$CAPACITY" -le "$PERCENT" ]; then
         "$SYSTEM_EMIT" power "RUNNING" "LOW_BATTERY" "low_power_warning.sh" "battery ${CAPACITY}% at or below threshold ${PERCENT}%" || true
-          vibrate_count=0
-          flag_added=false
-          while [ "$CAPACITY" -le "$PERCENT" ]; do
+        vibrate_count=0
+        flag_added=false
+        while [ "$CAPACITY" -le "$PERCENT" ]; do
 
             if [ "$vibrate_count" -lt 2 ]; then
                 morse_code_sos "true" "." "." "." "-" "-" "-" "." "." "."
