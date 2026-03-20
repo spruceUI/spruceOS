@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import threading
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -9,6 +10,8 @@ import os
 from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
+from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_status import WifiStatus
@@ -36,11 +39,12 @@ from devices.device_common import DeviceCommon
 
 #/mnt/vendor/ctrl/dmenu_ln
 class AnbernicXXCommon(DeviceCommon):
-    def __init__(self): 
+    def __init__(self, main_ui_mode): 
         self.device_name = "ANBERNIC_RG34XXSP"
         script_dir = Path(__file__).resolve().parent
-        source = script_dir / 'anbernic-rg34xxsp-system.json'
-        self._load_system_config("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json", source)
+        default_cfg_path = script_dir / 'anbernic-rg34xxsp-system.json'
+        system_cfg_path = "/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json"
+        self._load_system_config(system_cfg_path, default_cfg_path)
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
@@ -70,6 +74,18 @@ class AnbernicXXCommon(DeviceCommon):
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
+        if(main_ui_mode):
+            # Done to try to account for external systems editting the config file
+            self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+                system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if(old_volume != new_volume):
+            Display.volume_changed(new_volume)
+
     def sleep(self):
         pass #TODO
 
@@ -89,9 +105,23 @@ class AnbernicXXCommon(DeviceCommon):
 
     def _set_brightness_to_config(self):
         pass
-                   
+                              
     def _set_lumination_to_config(self):
-        pass
+        import fcntl
+        import struct
+        DEV = "/dev/disp"
+        IOCTL_SET_BRIGHTNESS = 0x102
+        #Is actually 128
+        val = self.map_backlight_from_10_to_full_255(self.system_config.backlight //2)
+
+        # 4 unsigned long values (ARM64 = 8 bytes each)
+        args = struct.pack("QQQQ", 0, val, 0, 0)
+
+        fd = os.open(DEV, os.O_RDWR)
+        try:
+            fcntl.ioctl(fd, IOCTL_SET_BRIGHTNESS, args)
+        finally:
+            os.close(fd)     
 
     def _set_contrast_to_config(self):
         pass
@@ -118,20 +148,18 @@ class AnbernicXXCommon(DeviceCommon):
                 Display.display_message("No core found", 2_000)
                 return
 
-            #selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
 
+            shutil.copyfile("/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg", "/mnt/SDCARD/RetroArch/retroarch.cfg")
             cmds = [
-                    #"/mnt/SDCARD/RetroArch/ra64.universal",
-                    "/mnt/vendor/deep/retro/retroarch",
-                    "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG34XXSP.cfg",
+                    "/mnt/SDCARD/RetroArch/ra64.universal",
                     "-v",
+                    "--config", "/mnt/SDCARD/RetroArch/retroarch.cfg",
                     "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
                     "-L",selected_core,
                     rom_info.rom_file_path]
 
-            #directory = "/mnt/SDCARD/RetroArch/"
-            directory = "/mnt/vendor/deep/retro/"
+            directory = "/mnt/SDCARD/RetroArch/"
             PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
             Display.deinit_display()
             subprocess.run(cmds, cwd = directory)
@@ -143,13 +171,16 @@ class AnbernicXXCommon(DeviceCommon):
         MiyooTrimCommon.run_cmd(self, args, dir)
             
     def run_app(self, folder,launch):
-        from controller.controller import Controller
-        directory = os.path.dirname(launch)
-        Display.deinit_display()
-        PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-        subprocess.run([launch], cwd = directory)
-        Display.init()
-        Controller.clear_input_queue()
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            MiyooTrimCommon.run_app(self, folder,launch)
+        else:
+            from controller.controller import Controller
+            directory = os.path.dirname(launch)
+            Display.deinit_display()
+            PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
+            subprocess.run([launch], cwd = directory)
+            Display.init()
+            Controller.clear_input_queue()
     
     def map_digital_input(self, sdl_input):
         return None
@@ -159,29 +190,12 @@ class AnbernicXXCommon(DeviceCommon):
 
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
-
-    def _set_volume(self, volume):
-        #TODO
-        return volume 
-    
-    def change_volume(self, amount):
-        from display.display import Display
-        self.system_config.reload_config()
-        volume = self.get_volume() + amount
-        if(volume < 0):
-            volume = 0
-        elif(volume > 100):
-            volume = 100
-        self._set_volume(volume)
-        self.system_config.set_volume(volume)
-        self.system_config.save_config()
-        Display.volume_changed(self.get_volume())
-
+        
     def volume_up(self):
-        self.change_volume(+5)
-    
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",115)
+
     def volume_down(self):
-        self.change_volume(-5)
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",114)
 
     def special_input(self, controller_input, length_in_seconds):
         if(ControllerInput.POWER_BUTTON == controller_input):
@@ -190,9 +204,9 @@ class AnbernicXXCommon(DeviceCommon):
             else:
                 self.prompt_power_down()
         elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
+            self.volume_up(5)
         elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+            self.volume_up(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
@@ -308,7 +322,7 @@ class AnbernicXXCommon(DeviceCommon):
         return self.get_game_system_utils().get_save_state_image(rom_info)
 
     def get_wpa_supplicant_conf_path(self):
-        return None
+        return PyUiConfig.get_wpa_supplicant_conf_file_location("/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf")
 
     def supports_brightness_calibration(self):
         return False

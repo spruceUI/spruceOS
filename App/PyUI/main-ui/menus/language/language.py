@@ -204,6 +204,14 @@ class Language:
         return cls._data.get("addRemoveCollection","Add/Remove Collection")
 
     @classmethod
+    def add_recents(cls):
+        return cls._data.get("addRecents","Add Recents")
+
+    @classmethod
+    def remove_recents(cls):
+        return cls._data.get("removeRecents","Remove Recents")
+
+    @classmethod
     def launch_random_game(cls):
         return cls._data.get("launchRandomGame","Launch Random Game")
 
@@ -595,6 +603,10 @@ class Language:
     @classmethod
     def main_menu_columns(cls):
         return cls._data.get("mainMenuColumns","Main Menu Columns")
+
+    @classmethod
+    def main_menu_rows(cls):
+        return cls._data.get("mainMenuRows","Main Menu Rows")
 
     @classmethod
     def show_text(cls):

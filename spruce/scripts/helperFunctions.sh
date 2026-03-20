@@ -731,23 +731,20 @@ stop_pyui_message_writer() {
 
 display_message() {
     local message="$1"
-    local python_path
-    python_path="$(get_python_path)"
+    [ -z "$message" ] && return 0
 
-    if [ -z "$python_path" ]; then
-        echo "Error: unknown platform '$PLATFORM'" >&2
-        return 1
-    fi
-
-    MESSAGE="$message" "$python_path" - <<'EOF'
-import os, socket, sys
-msg = os.environ.get("MESSAGE", "")
+    # We use double quotes for the -c string so we can use single quotes inside.
+    # We pass "$message" as the final argument which Python picks up as sys.argv[1]
+    "$(get_python_path)" -c 'import socket, sys;
 try:
-    with socket.create_connection(("127.0.0.1", 50980), timeout=1) as s:
-        s.sendall((msg + "\n").encode("utf-8"))
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(0.5)
+    s.connect(b"\x0050980")
+    s.sendall((sys.argv[1] + "\n").encode("utf-8"))
+    s.close()
 except Exception as e:
-    print(f"Error sending message: {e}", file=sys.stderr)
-EOF
+    print(f"Sender Error: {e}", file=sys.stderr)
+' "$message"
 }
 
 log_and_display_message(){
