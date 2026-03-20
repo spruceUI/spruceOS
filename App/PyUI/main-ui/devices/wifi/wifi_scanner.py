@@ -158,7 +158,7 @@ class WiFiScanner:
         ssid = None
         freq = None
         try:
-            result = ProcessRunner.run(["wpa_cli", "status"])
+            result = ProcessRunner.run(["wpa_cli", "status"], timeout=0.5)
             for line in result.stdout.splitlines():
                 if line.startswith("ssid="):
                     ssid = line.split("=", 1)[1]
