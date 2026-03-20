@@ -8,20 +8,6 @@ else
     . /mnt/SDCARD/spruce/scripts/trace.sh
 fi
 case "${1:-}" in
-    power-boot-reconcile-pending)
-        exit 0
-        ;;
-    power-shutdown-pending)
-        exit 1
-        ;;
-    power-recent-json)
-        shift
-        count="${1:-40}"
-        if [ -n "${POWER_TRACE_EVENTS_FILE:-}" ] && [ -f "$POWER_TRACE_EVENTS_FILE" ]; then
-            tail -n "$count" "$POWER_TRACE_EVENTS_FILE"
-        fi
-        exit 0
-        ;;
     power)
         shift
         power_trace_emit "$@"

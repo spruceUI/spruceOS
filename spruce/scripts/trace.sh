@@ -1031,16 +1031,6 @@ brightness_trace_emit_cached_or_unknown() {
     trace_emit_cached_or_unknown "brightness" "$source_ref" "$context"
 }
 
-brightness_trace_emit_from_current_to_cached_or_unknown() {
-    [ "$#" -ge 2 ] || return 1
-
-    current_state="$(trace_format_level_state "BL" "$1" "UNKNOWN")"
-    source_ref="$2"
-    shift 2
-    context="$*"
-    trace_emit_from_current_to_cached_or_unknown "brightness" "$current_state" "$source_ref" "$context"
-}
-
 brightness_trace_emit_startup_baseline_if_missing() {
     source_ref="${1:-runtimeHelper.sh}"
     shift
