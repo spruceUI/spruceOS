@@ -274,6 +274,7 @@ exec_shutdown_stage_2() {
 emit_shutdown_av_trace_fallback() {
     "$SYSTEM_EMIT" av-shutdown-baselines-if-missing "save_poweroff.sh" || true
 }
+
     #######################################
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################

@@ -138,16 +138,6 @@ parse_startup_args() {
     fi
 }
 
-consume_handoff_token_if_present() {
-    arg1="$1"
-    arg2="$2"
-
-    if [ "$arg1" = "--silent" ] && [ "$arg2" = "pre_cmd" ] && flag_check "$HANDOFF_FLAG"; then
-        flag_remove "$HANDOFF_FLAG"
-        "$SYSTEM_EMIT" process archiveUnpacker "HANDOFF_TOKEN_CONSUMED" "archiveUnpacker.sh/startup" "consumed silent pre_cmd handoff token" || true
-    fi
-}
-
 wait_for_firstboot_package_phase() {
     wait_loops=0
     if flag_check "$FIRSTBOOT_PACKAGE_PHASE_FLAG"; then
@@ -188,7 +178,6 @@ trap archive_exit_handler EXIT
 
 # Process command line arguments
 parse_startup_args "${1:-}" "${2:-}"
-consume_handoff_token_if_present "${1:-}" "${2:-}"
 wait_for_firstboot_package_phase
 
 if flag_check "silentUnpacker"; then

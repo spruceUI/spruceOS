@@ -89,7 +89,7 @@ if [ "$PLATFORM_ARCHITECTURE" != "armhf" ]; then
     SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
     for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
         [ -f "$SCUMMVM_7Z" ] || continue
-        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
+        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
         rm -f "$SCUMMVM_7Z"
     done
 fi

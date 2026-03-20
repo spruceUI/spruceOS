@@ -918,6 +918,13 @@ set_network_proxy() {
     fi
 }
 
+_log_scummvm_display_text() {
+    # $1 = IS_SCUMMVM_SECTION (0|1), $2 = log path, $3 = message
+    [ "$1" -eq 1 ] || return 0
+    mkdir -p "/mnt/SDCARD/Saves/spruce" 2>/dev/null
+    printf '%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$3" >> "$2"
+}
+
 extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
@@ -943,12 +950,6 @@ extract_7z_with_progress() {
         [Ss][Cc][Uu][Mm][Mm][Vv][Mm]) IS_SCUMMVM_SECTION=1 ; LOGO="$SCUMMVM_ICON" ;;
     esac
 
-    log_scummvm_display_text() {
-        [ "$IS_SCUMMVM_SECTION" -eq 1 ] || return 0
-        mkdir -p "/mnt/SDCARD/Saves/spruce" 2>/dev/null
-        printf '%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$SCUMMVM_DISPLAY_TEXT_LOG"
-    }
-
     if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
         SECTION_TITLE="Sprucing up your device...\nUnpacking ${SECTION_LABEL}"
     else
@@ -971,7 +972,7 @@ extract_7z_with_progress() {
     fi
 
     display_image_and_text "$LOGO" 35 25 "${SECTION_TITLE}\nPreparing extraction..." 75
-    log_scummvm_display_text "${SECTION_TITLE} | Preparing extraction..."
+    _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" "${SECTION_TITLE} | Preparing extraction..."
     sleep 2
 
     7zr x -y -scsUTF-8 -bb1 -o"$DEST_DIR" "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
@@ -990,13 +991,13 @@ extract_7z_with_progress() {
 
         if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
             FILE_NAME="$(basename "$FILE")"
-            PROGRESS_TEXT="${SECTION_TITLE} | ${PERCENT_COMPLETE}%: ${FILE_NAME}"
             display_image_and_text \
                 "$LOGO" \
                 35 25 \
                 "${SECTION_TITLE}\n${PERCENT_COMPLETE}%: ${FILE_NAME}" \
                 75
-            log_scummvm_display_text "$PROGRESS_TEXT"
+            _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" \
+                "${SECTION_TITLE} | ${PERCENT_COMPLETE}%: ${FILE_NAME}"
         fi
     done
 
@@ -1006,11 +1007,12 @@ extract_7z_with_progress() {
         log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
         display_image_and_text "$LOGO" 35 25 \
             "Extraction completed with warnings. Check the log for details." 75
-        log_scummvm_display_text "Extraction completed with warnings. Check the log for details."
+        _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" \
+            "Extraction completed with warnings. Check the log for details."
     else
         log_update_message "Extraction process completed successfully"
         display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
-        log_scummvm_display_text "Extraction completed!"
+        _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" "Extraction completed!"
     fi
 
     return "$RET"

@@ -71,8 +71,8 @@ connect_services() {
 }
 
 disconnect_services() {
-		"$SYSTEM_EMIT" network "CONNECTED" "DISABLED" "networkservices.sh/disconnect_services" "stopping all network services" || true
-		log_message "Network services: Stopping all network services..."
+	"$SYSTEM_EMIT" network "CONNECTED" "DISABLED" "networkservices.sh/disconnect_services" "stopping all network services" || true
+	log_message "Network services: Stopping all network services..."
 	for service in "$SFTP_SERVICE_NAME" "$SSH_SERVICE_NAME" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in
