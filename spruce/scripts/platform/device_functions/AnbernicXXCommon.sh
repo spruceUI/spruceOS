@@ -12,6 +12,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 get_config_path() {
     echo "$SYSTEM_JSON"
@@ -202,6 +203,7 @@ set_volume() {
     system_volume=$(( (new_vol * 31 + 10) / 20 ))
 
     amixer -q set 'lineout volume' "$system_volume"
+    "$SYSTEM_EMIT" audio-level "$new_vol" "AnbernicXXCommon.sh/set_volume" 2>/dev/null || true
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
