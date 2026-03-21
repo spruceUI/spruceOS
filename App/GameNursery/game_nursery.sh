@@ -128,8 +128,8 @@ get_system_icon_from_theme() {
         "Commodore 64")     icon_name="c64";        emu_name="COMMODORE" ;;
         "Doom")             icon_name="doom";       emu_name="DOOM" ;;
         "EasyRPG")          icon_name="easyrpg";    emu_name="EASYRPG" ;;
-        "GB")               icon_name="gb";         emu_name="GB" ;;
-        "GBA")              icon_name="gba";        emu_name="GBA" ;;
+        "Gameboy")          icon_name="gb";         emu_name="GB" ;;
+        "Gameboy Advance")  icon_name="gba";        emu_name="GBA" ;;
         "Game Tank")        icon_name="gametank";   emu_name="GAMETANK" ;;
         "NES")              icon_name="fc";         emu_name="FC" ;;
         "SNES")             icon_name="sfc";        emu_name="SFC" ;;
