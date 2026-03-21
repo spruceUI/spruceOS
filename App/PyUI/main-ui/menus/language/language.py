@@ -202,11 +202,7 @@ class Language:
     @classmethod
     def add_remove_collection(cls):
         return cls._data.get("addRemoveCollection","Add/Remove Collection")
-
-    @classmethod
-    def add_recents(cls):
-        return cls._data.get("addRecents","Add Recents")
-
+    
     @classmethod
     def remove_recents(cls):
         return cls._data.get("removeRecents","Remove Recents")
