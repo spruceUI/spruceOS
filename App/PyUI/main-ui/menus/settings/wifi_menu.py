@@ -34,106 +34,74 @@ class WifiMenu:
 
 
     def write_wpa_supplicant_conf(self, ssid: str, pw_line: str):
-        """
-        Writes exactly one network block for `ssid` into the wpa_supplicant config.
-        Any existing entries for the same SSID are removed.
-        The file is written atomically to avoid corruption.
-        """
-
         file_path = Device.get_device().get_wpa_supplicant_conf_path()
 
-        HEADER = (
-            "ctrl_interface=/var/run/wpa_supplicant\n"
-            "update_config=1\n"
-        )
-
-        def normalize(text: str) -> str:
-            return text.replace("\r\n", "\n").strip()
-
-        # ---------------------------
-        # Load existing content
-        # ---------------------------
-        content = ""
-        if os.path.exists(file_path):
+        try:
             try:
                 with open(file_path, "r") as f:
-                    content = normalize(f.read())
-            except OSError as e:
-                PyUiLogger.get_logger().error(f"Failed reading {file_path}: {e}")
-                return
+                    lines = f.readlines()
+            except FileNotFoundError:
+                lines = []
 
-        # ---------------------------
-        # Extract existing network blocks
-        # ---------------------------
-        # Since we own the file, a simple non-nested block matcher is safe.
-        network_blocks = re.findall(
-            r'network\s*\{[^}]*\}',
-            content,
-            flags=re.DOTALL
-        )
+            header_lines = []
+            networks = []
 
-        preserved_blocks = []
-        removed = 0
+            current_block = []
+            in_block = False
 
-        for block in network_blocks:
-            m = re.search(r'ssid\s*=\s*"([^"]+)"', block)
-            if not m:
-                # Should not happen in our own file, but keep it just in case
-                preserved_blocks.append(block.strip())
-                continue
+            # --- Parse file ---
+            for line in lines:
+                stripped = line.strip()
 
-            existing_ssid = m.group(1)
-            if existing_ssid == ssid:
-                removed += 1
-            else:
-                preserved_blocks.append(block.strip())
+                if stripped.startswith("network={"):
+                    in_block = True
+                    current_block = [line]
+                elif in_block:
+                    current_block.append(line)
+                    if stripped == "}":
+                        networks.append(current_block)
+                        current_block = []
+                        in_block = False
+                else:
+                    header_lines.append(line)
 
-        if removed:
-            PyUiLogger.get_logger().info(
-                f"Removed {removed} existing network block(s) for '{ssid}'"
-            )
+            # --- Build new network block ---
+            new_block = [
+                "network={\n",
+                f'    ssid="{ssid}"\n',
+                f"    {pw_line}\n",
+                "}\n",
+            ]
 
-        # ---------------------------
-        # Build the new network block
-        # ---------------------------
-        new_block = (
-            "network={\n"
-            f'    ssid="{ssid}"\n'
-            f"    {pw_line}\n"
-            "}\n"
-        ).strip()
+            # --- Replace or append ---
+            found = False
+            for i, block in enumerate(networks):
+                for line in block:
+                    if f'ssid="{ssid}"' in line:
+                        networks[i] = new_block
+                        found = True
+                        break
+                if found:
+                    break
 
-        # Optionally: put newest network first (often desirable)
-        preserved_blocks.insert(0, new_block)
+            if not found:
+                networks.append(new_block)
 
-        # ---------------------------
-        # Rebuild full file deterministically
-        # ---------------------------
-        final_content = HEADER.strip() + "\n\n"
+            # --- Write back ---
+            with open(file_path, "w") as f:
+                for line in header_lines:
+                    f.write(line)
 
-        if preserved_blocks:
-            final_content += "\n\n".join(preserved_blocks) + "\n"
+                if header_lines and not header_lines[-1].endswith("\n"):
+                    f.write("\n")
 
-        # ---------------------------
-        # Atomic write
-        # ---------------------------
-        try:
-            tmp_fd, tmp_path = tempfile.mkstemp(
-                prefix="wpa_supplicant.",
-                dir=os.path.dirname(file_path)
-            )
-            with os.fdopen(tmp_fd, "w") as f:
-                f.write(final_content)
+                for block in networks:
+                    f.write("\n")
+                    for line in block:
+                        f.write(line)
 
-            os.replace(tmp_path, file_path)
-
-            PyUiLogger.get_logger().info(
-                f"Installed network '{ssid}' into {file_path}"
-            )
-
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"Failed writing {file_path}: {e}")
-
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
 
 
     def reload_wpa_supplicant_config(self):
@@ -144,78 +112,17 @@ class WifiMenu:
             PyUiLogger.get_logger().error(f"Error reloading wpa_supplicant.conf: {e}")
 
 
-    def _is_network_saved(self, ssid: str) -> bool:
-        """Check if a network with the given SSID already exists in the wpa_supplicant config."""
-        file_path = Device.get_device().get_wpa_supplicant_conf_path()
-        if not os.path.exists(file_path):
-            return False
-        try:
-            with open(file_path, "r") as f:
-                content = f.read()
-            blocks = re.findall(r'network\s*\{[^}]*\}', content, flags=re.DOTALL)
-            for block in blocks:
-                m = re.search(r'ssid\s*=\s*"([^"]+)"', block)
-                if m and m.group(1) == ssid:
-                    return True
-        except OSError:
-            pass
-        return False
-
-    def _prioritize_network(self, ssid: str):
-        """Move an existing network block to the top of the config without changing it."""
-        file_path = Device.get_device().get_wpa_supplicant_conf_path()
-        try:
-            with open(file_path, "r") as f:
-                content = f.read().replace("\r\n", "\n").strip()
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"Failed reading {file_path}: {e}")
-            return
-
-        blocks = re.findall(r'network\s*\{[^}]*\}', content, flags=re.DOTALL)
-        target_block = None
-        other_blocks = []
-
-        for block in blocks:
-            m = re.search(r'ssid\s*=\s*"([^"]+)"', block)
-            if m and m.group(1) == ssid:
-                target_block = block.strip()
-            else:
-                other_blocks.append(block.strip())
-
-        if target_block is None:
-            return
-
-        HEADER = "ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1"
-        all_blocks = [target_block] + other_blocks
-        final_content = HEADER + "\n\n" + "\n\n".join(all_blocks) + "\n"
-
-        try:
-            tmp_fd, tmp_path = tempfile.mkstemp(
-                prefix="wpa_supplicant.",
-                dir=os.path.dirname(file_path)
-            )
-            with os.fdopen(tmp_fd, "w") as f:
-                f.write(final_content)
-            os.replace(tmp_path, file_path)
-            PyUiLogger.get_logger().info(f"Prioritized network '{ssid}' in {file_path}")
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"Failed writing {file_path}: {e}")
-
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
-        if self._is_network_saved(net.ssid):
-            Display.display_message(f"Switching to {net.ssid}...", duration_ms=2000)
-            self._prioritize_network(net.ssid)
-        elif net.requires_password():
+        if(net.requires_password()):
             password = self.on_screen_keyboard.get_input("WiFi Password")
-            if password is not None and 8 <= len(password) <= 63:
-                self.write_wpa_supplicant_conf(net.ssid, f'psk="{password}"')
-                Display.display_message(f"Saved and connecting to {net.ssid}...", duration_ms=2000)
+            if(password is not None and 8 <= len(password) <= 63):
+                self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
+                Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
             else:
                 Display.display_message("Invalid WiFi password length! Must be between 8 and 63", duration_ms=5000)
-                return
-        else:
+        else:   
             self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
 
         self.reload_wpa_supplicant_config()
