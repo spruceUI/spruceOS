@@ -139,7 +139,8 @@ class WifiMenu:
     def reload_wpa_supplicant_config(self):
         try:
             ProcessRunner.run(["wpa_cli", "reconfigure"])
-            PyUiLogger.get_logger().info("wpa_supplicant.conf reloaded successfully.")
+            ProcessRunner.run(["wpa_cli", "reassociate"])
+            PyUiLogger.get_logger().info("wpa_supplicant.conf reloaded and reassociated.")
         except subprocess.CalledProcessError as e:
             PyUiLogger.get_logger().error(f"Error reloading wpa_supplicant.conf: {e}")
 
