@@ -3,6 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+STAGE_2_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
+STAGE_2_TMP=/tmp/save_poweroff_stage2.sh
+
 # --- Platform-specific configuration ---
 case "$PLATFORM" in
     "A30")
@@ -241,8 +244,12 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
-        exit 0
+        stop_pyui_message_writer
+        sync
+        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+        unset LD_LIBRARY_PATH
+        exec "$STAGE_2_TMP" --reboot
     fi
 
     log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device."
@@ -250,8 +257,12 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
-        exit 0
+        stop_pyui_message_writer
+        sync
+        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+        unset LD_LIBRARY_PATH
+        exec "$STAGE_2_TMP" --reboot
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU
     sleep 1

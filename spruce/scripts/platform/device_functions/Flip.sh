@@ -214,14 +214,7 @@ get_current_volume() {
 
 setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
-	if [ "$CORE" = "yabasanshiro" ]; then
-		# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
-		export RA_BIN="ra64.miyoo"
-	elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
-		export RA_BIN="retroarch.Flip"
-	else
-		export RA_BIN="ra64.miyoo"
-	fi
+	export RA_BIN="ra64.universal"
 			
     if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
@@ -313,7 +306,13 @@ close_ppsspp_menu() {
 }
 
 take_screenshot() {
-    close_ppsspp_menu
+    screenshot_path="$1"
+    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
+
+    if [ "$ppsspp_mode" = true ]; then
+        close_ppsspp_menu
+    fi
+
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
 }
 

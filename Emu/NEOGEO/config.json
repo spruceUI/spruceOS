@@ -31,7 +31,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ]
     },
     "Emulator_MiyooMini": {
@@ -55,6 +57,15 @@
   "releaseYear": 1990,
   "default_emulator": "fbalpha2012",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["NG","ng","NeoGeo", "neogeo"],
-  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
+  "alternativeFolderNames": [
+    "NG",
+    "ng",
+    "NeoGeo",
+    "neogeo"
+  ],
+  "ignoreList": [
+    "neogeo.zip",
+    "neocdz.zip",
+    "neocd.zip"
+  ]
 }

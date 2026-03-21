@@ -8,6 +8,7 @@ import subprocess
 import threading
 import os
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
+from display.display import Display
 from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
@@ -411,7 +412,47 @@ class MiyooMiniCommon(MiyooDevice):
             run_prefix = f"LD_PRELOAD={preload_path} "
         else:
             run_prefix = "LD_PRELOAD=/customer/lib/libpadsp.so "
-        return MiyooTrimCommon.run_game(self, rom_info, run_prefix=run_prefix)
+            preload_path="/customer/lib/libpadsp.so"
+
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            MiyooTrimCommon.run_game(self, rom_info, run_prefix=run_prefix)
+        else:
+            from controller.controller import Controller
+            menu_options = rom_info.game_system.game_system_config.get_menu_options()
+            selected_core = self.get_selected_emulator(menu_options, self.device_name)
+            if(selected_core is None):
+                Display.display_message("No core found", 2_000)
+                return
+
+            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+
+            cmds = ["/mnt/SDCARD/RetroArch/retroarch",
+                    "-v",
+                    "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
+                    "-L",selected_core,
+                    rom_info.rom_file_path]
+
+            directory = "/mnt/SDCARD/RetroArch"
+            
+            PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
+            Display.deinit_display()
+
+            env = os.environ.copy()
+            env["LD_PRELOAD"] = preload_path
+            env["HOME"] = directory
+
+            for v in [
+                "SDL_VIDEODRIVER",
+                "SDL_FBDEV",
+                "SDL_AUDIODRIVER",
+                "SDL_NOMOUSE",
+                "DISPLAY"
+            ]:
+                env.pop(v, None)
+            subprocess.run(cmds, cwd = directory, env=env)
+            Display.init()
+
+            Controller.clear_input_queue()
 
     def double_init_sdl_display(self):
         return True

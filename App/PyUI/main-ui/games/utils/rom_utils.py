@@ -30,7 +30,12 @@ class RomUtils:
     #TODO do a git system device file so we can geneically
     #support other formats/systems
     def get_miyoo_games_file(self,system):
-        return os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system),"miyoogamelist.xml")
+        system_dir = os.path.join(self.roms_path, self.get_roms_dir_for_emu_dir(system))
+        for name in ("miyoogamelist.xml", "gamelist.xml"):
+            path = os.path.join(system_dir, name)
+            if os.path.isfile(path):
+                return path
+        return ""
 
     def has_roms(self, game_system, directory = None):
         directories_to_search = []

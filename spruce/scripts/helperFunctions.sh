@@ -23,14 +23,41 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
+
 case $INFO in
-    *"sun8i"*) export PLATFORM="A30" ;;
-    *"TG5040"*)	export PLATFORM="SmartPro" ;;
-    *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
-    *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *sun8i*) export PLATFORM="A30" ;;
+    *TG5040*) export PLATFORM="SmartPro" ;;
+    *TG3040*) export PLATFORM="Brick" ;;
+    *TG5050*) export PLATFORM="SmartProS" ;;
+    *0xd05*) export PLATFORM="Flip" ;;
+    *0xd04*) export PLATFORM="Pixel2" ;;
+    *0xd03*)
+        CMDLINE=$(cat /proc/cmdline)
+
+        case $CMDLINE in
+            *lcd_type=boe*)
+                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
+                    export PLATFORM="AnbernicRGCubeXX"
+                else
+                    export PLATFORM="AnbernicRG34XXSP"
+                fi
+                ;;
+            *lcd_type=old*)
+                #TODO handle cube?
+                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
+                    export PLATFORM="AnbernicRG28XX"
+                else
+                    export PLATFORM="AnbernicXX640480"
+                fi
+                ;;
+            *)
+                export PLATFORM="AnbernicXX640480"
+                ;;
+        esac
+        ;;
+    *)
+        export PLATFORM="MiyooMini"
+        ;;
 esac
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
@@ -63,24 +90,6 @@ auto_regen_tmp_update() {
         [ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater"
     fi
 }
-
-EMULATORS="ra32.miyoo ra64.miyoo ra64.trimui_${PLATFORM} retroarch retroarch.${PLATFORM} retroarch.trimui drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
-pause_emulators() {
-    for EMU in $EMULATORS; do
-        if killall -q -19 "$EMU" 2>/dev/null; then
-            break
-        fi
-    done
-}
-
-unpause_emulators() {
-    for EMU in $EMULATORS; do
-        if killall -q -18 "$EMU" 2>/dev/null; then
-            break
-        fi
-    done
-}
-
 
 confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
@@ -705,23 +714,20 @@ stop_pyui_message_writer() {
 
 display_message() {
     local message="$1"
-    local python_path
-    python_path="$(get_python_path)"
+    [ -z "$message" ] && return 0
 
-    if [ -z "$python_path" ]; then
-        echo "Error: unknown platform '$PLATFORM'" >&2
-        return 1
-    fi
-
-    MESSAGE="$message" "$python_path" - <<'EOF'
-import os, socket, sys
-msg = os.environ.get("MESSAGE", "")
+    # We use double quotes for the -c string so we can use single quotes inside.
+    # We pass "$message" as the final argument which Python picks up as sys.argv[1]
+    "$(get_python_path)" -c 'import socket, sys;
 try:
-    with socket.create_connection(("127.0.0.1", 50980), timeout=1) as s:
-        s.sendall((msg + "\n").encode("utf-8"))
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(0.5)
+    s.connect(b"\x0050980")
+    s.sendall((sys.argv[1] + "\n").encode("utf-8"))
+    s.close()
 except Exception as e:
-    print(f"Error sending message: {e}", file=sys.stderr)
-EOF
+    print(f"Sender Error: {e}", file=sys.stderr)
+' "$message"
 }
 
 log_and_display_message(){
@@ -899,9 +905,10 @@ extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
     LOG_LOCATION="$3" # Only logs errors
+    DISPLAY_LABEL="$4" # Optional: static label to show instead of filenames
 
     if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
-        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> <logo_image>"
+        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [display_label]"
         return 1
     fi
 
@@ -932,7 +939,7 @@ extract_7z_with_progress() {
 
         if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
             display_text_with_percentage_bar \
-                "$FILE" \
+                "${DISPLAY_LABEL:-$FILE}" \
                 "$PERCENT_COMPLETE" \
                 "$FILE_COUNT / $TOTAL_FILES files"
         fi
@@ -981,9 +988,13 @@ enable_wifi() {
             kill -9 "$WPA_PID" 2>/dev/null
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            log_message "wpa_supplicant was running with the wrong conf so restarted"
+        else
+            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        log_message "Launching wpa_supplicant"
     fi
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
     /mnt/SDCARD/spruce/scripts/networkservices.sh &

@@ -9,9 +9,8 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
-EMU_PROCESSES="ra64.miyoo ra32.miyoo retroarch
-retroarch.$PLATFORM retroarch.trimui ra64.trimui_$PLATFORM \
-drastic drastic32 drastic64 pico8_dyn pico8_64 \
+EMU_PROCESSES="ra32.a30 ra32.mini ra64.universal ra64.pixel2 \
+retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
 mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 
@@ -192,11 +191,12 @@ display_appropriate_icon_and_message() {
         start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
         flag_remove "forced_shutdown"
+        sleep 1.5 # Let user read message
     elif ! flag_check "in_menu"; then
         start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
+        sleep 1.5 # Let user read message
     fi
-    sleep 1.5 # Let user read any messages
 }
 
 dim_screen_and_do_syncthing_check() {

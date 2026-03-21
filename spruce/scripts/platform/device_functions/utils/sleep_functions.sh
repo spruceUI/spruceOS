@@ -1,45 +1,13 @@
 
 SLEEP_TIMER_FILE="/tmp/sleep_timer_info"
 
-get_hw_epoch() {
-    # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds
-    hw_output=$(hwclock 2>/dev/null)
-    set -- $hw_output
-    MON=$2
-    DAY=$3
-    TIME=$4
-    YEAR=$5
-    
-    # Convert month name to number
-    case "$MON" in
-        Jan) MM=01 ;;
-        Feb) MM=02 ;;
-        Mar) MM=03 ;;
-        Apr) MM=04 ;;
-        May) MM=05 ;;
-        Jun) MM=06 ;;
-        Jul) MM=07 ;;
-        Aug) MM=08 ;;
-        Sep) MM=09 ;;
-        Oct) MM=10 ;;
-        Nov) MM=11 ;;
-        Dec) MM=12 ;;
-        *) MM=00 ;;  # fallback
-    esac
-
-    HW_STR="${YEAR}-${MM}-${DAY} ${TIME}"
-
-    # Convert to epoch seconds
-    date -d "$HW_STR" +%s 2>/dev/null
-}
-
 # -----------------------------
 # Save sleep timing info
 # -----------------------------
 save_sleep_info() {
     IDLE_TIMEOUT="$1"
 
-    START_EPOCH="$(get_hw_epoch)"
+    START_EPOCH="$(device_get_hw_epoch)"
     [ -z "$START_EPOCH" ] && {
         log_message "ERROR: Unable to read hwclock"
         return 1
@@ -104,7 +72,7 @@ device_woke_via_timer() {
 
     . "$SLEEP_TIMER_FILE"
 
-    NOW_EPOCH="$(get_hw_epoch)"
+    NOW_EPOCH="$(device_get_hw_epoch)"
     [ -z "$NOW_EPOCH" ] && {
         log_message "ERROR: Unable to read hwclock"
         echo "false"
@@ -131,7 +99,7 @@ compute_remaining_sleep_time() {
     [ ! -f "$SLEEP_TIMER_FILE" ] && return 1
     . "$SLEEP_TIMER_FILE"
 
-    NOW_EPOCH="$(get_hw_epoch)"
+    NOW_EPOCH="$(device_get_hw_epoch)"
     [ -z "$NOW_EPOCH" ] && return 1
 
     REMAINING=$(( TARGET_EPOCH - NOW_EPOCH ))

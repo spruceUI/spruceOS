@@ -20,6 +20,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 while [ 1 ]; do
+    log_message "Starting new loop of principal.sh"
     set_smart
 
     stop_pyui_message_writer
@@ -47,8 +48,6 @@ while [ 1 ]; do
         # This is to block any games from launching before all necessary assets such as cores have been unpacked
         finish_unpacking "pre_cmd_unpacking"
 
-        spruce/scripts/applySetting/idlemon_mm.sh &
-
         flag_remove "in_menu"
     fi
 
@@ -68,9 +67,9 @@ while [ 1 ]; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
+        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
+        /tmp/cmd_to_run.sh >/dev/null 2>&1
 
-        /tmp/cmd_to_run.sh &>/dev/null
-        
         rm /tmp/cmd_to_run.sh
         rm /tmp/host_msg 2>/dev/null
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
@@ -85,7 +84,8 @@ while [ 1 ]; do
         log_message ".tmp_update folder repair appears to have been successful. Removing tmp_update_repair_attempted flag."
     fi
 
-    # Bring up network and services in case they were disabled in-game or otherwise toggled
+    # Bring up network services and idlemon in case they were disabled in-game or otherwise toggled
+    /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
         /mnt/SDCARD/spruce/scripts/networkservices.sh &
     fi

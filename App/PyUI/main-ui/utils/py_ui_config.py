@@ -217,3 +217,7 @@ class PyUiConfig:
     @classmethod
     def get_reboot_cmd(cls):
         return cls.get("rebootCmd",None)
+
+    @classmethod
+    def mimic_miyoo_mainui_mode(cls):
+        return cls.get("mimicMiyooMainUiMode",False)

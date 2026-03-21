@@ -311,7 +311,6 @@ class RomsMenuCommon(ABC):
     def run_game(self, game_path):
         PyUiLogger.get_logger().info("run_game(" + game_path.rom_file_path +")")
         #recents is handled one level up to account for launched_via_special_case
-        Display.deinit_display()
 
         game_thread: subprocess.Popen = Device.get_device().run_game(game_path)
         if (game_thread is not None):

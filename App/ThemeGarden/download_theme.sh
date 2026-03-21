@@ -5,11 +5,14 @@
 encoded_name="$1"
 theme_name=$(echo "$encoded_name" | sed 's/%20/ /g' | sed "s/%27/'/g")
 
-THEME_BASE_URL="https://raw.githubusercontent.com/spruceUI/PyUI-Themes/main/PackedThemes"
+# Normalize for release asset filename (spaces->underscores, remove apostrophes/exclamation marks)
+normalized_name=$(echo "$theme_name" | sed "s/ /_/g; s/'//g; s/!//g")
+
+THEME_BASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
 ARCHIVE_DIR=/mnt/SDCARD/spruce/archives
 TMP_DIR="/mnt/SDCARD/App/ThemeGarden/tmp"
 
-theme_url="${THEME_BASE_URL}/${encoded_name}.7z"
+theme_url="${THEME_BASE_URL}/${normalized_name}.7z"
 temp_path="$TMP_DIR/${theme_name}.7z"
 final_path="$ARCHIVE_DIR/preMenu/${theme_name}.7z"
 

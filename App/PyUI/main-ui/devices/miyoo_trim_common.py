@@ -8,6 +8,7 @@ import time
 from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
+from display.display import Display
 from display.font_purpose import FontPurpose
 from games.utils.game_system import GameSystem
 from menus.app.app_utils import AppUtils
@@ -79,7 +80,7 @@ class MiyooTrimCommon():
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         Device.get_device().fix_sleep_sound_bug()
 
-
+        Display.deinit_display()
         Device.get_device().exit_pyui()
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,

@@ -1065,6 +1065,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_main_menu_row_count(cls):
+        return cls._data.get("mainMenuRowCount", 1)
+
+    @classmethod
+    def set_main_menu_row_count(cls, count):
+        cls._data["mainMenuRowCount"] = count
+        cls.save_changes()
+
+    @classmethod
     def get_recents_enabled(cls):
         return cls._data.get("recentsEnabled", True)
 

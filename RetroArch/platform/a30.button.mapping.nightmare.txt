@@ -1,0 +1,292 @@
+A30 BUTTON MAPPING NIGHTMARE
+=============================
+How physical buttons become game inputs on the Miyoo A30,
+and why every layer exists.
+
+
+LAYER 1: PHYSICAL BUTTONS -> KERNEL (gpio-keys-polled)
+======================================================
+The A30's buttons are GPIO pins read by the gpio-keys-polled kernel driver.
+This driver exposes ALL buttons as KEYBOARD key codes on /dev/input/event3.
+
+  Physical Button    Event Code    Key Name
+  ───────────────    ──────────    ────────
+  A (east)           57            KEY_SPACE
+  B (south)          29            KEY_LEFTCTRL
+  X (west)           42            KEY_LEFTSHIFT
+  Y (north)          56            KEY_LEFTALT
+  L1                 15            KEY_TAB
+  L2                 18            KEY_E
+  R1                 14            KEY_BACKSPACE
+  R2                 20            KEY_T
+  Start              28            KEY_ENTER
+  Select             97            KEY_RIGHTCTRL
+  Menu               1             KEY_ESC
+  D-Up               103           KEY_UP
+  D-Down             108           KEY_DOWN
+  D-Left             105           KEY_LEFT
+  D-Right            106           KEY_RIGHT
+
+Device: /dev/input/event3 (gpio-keys-polled)
+Set by: Kernel driver, configured by button_config sysfs parameter
+File: A30.sh device_init() writes to /sys/module/gpio_keys_polled/parameters/button_config
+
+
+LAYER 2: VIRTUAL JOYPAD (joypad binary)
+========================================
+The `joypad` binary (closed-source, runs at boot) reads event3 and creates a
+virtual joypad device on /dev/input/event4, which also appears as /dev/input/js0.
+
+It translates keyboard key codes to Xbox 360 controller button codes (BTN_*).
+It also spoofs the Xbox 360 vendor:product ID (045e:028e / 1118:654).
+
+It translates the analog stick from serial (/dev/ttyS0) to joypad axes.
+
+  Physical    Keyboard Code    Xbox BTN_ Code    joydev Index
+  ────────    ─────────────    ──────────────    ────────────
+  B           KEY_LEFTCTRL     BTN_A (0x130)     0
+  A           KEY_SPACE        BTN_B (0x131)     1
+  Y           KEY_LEFTALT      BTN_X (0x132)     2
+  X           KEY_LEFTSHIFT    BTN_Y (0x133)     3
+  L1          KEY_TAB          BTN_TL (0x136)    4
+  R1          KEY_BACKSPACE    BTN_TR (0x137)    5
+  Select      KEY_RIGHTCTRL    BTN_SELECT        6
+  Start       KEY_ENTER        BTN_START         7
+  Menu        KEY_ESC          BTN_MODE          8
+  (virtual)   -                BTN_THUMBL        9
+  (virtual)   -                BTN_THUMBR        10
+
+  D-pad: axes 6/7    Analog stick: axes 0-3
+
+IMPORTANT: The joydev kernel module assigns button indices by BTN_ code order,
+NOT by physical position. BTN_A=0, BTN_B=1, BTN_X=2, BTN_Y=3, BTN_TL=4, etc.
+The joypad binary maps physical buttons BY POSITION to Xbox BTN_ codes:
+  - B (south) -> BTN_A (Xbox south)
+  - A (east)  -> BTN_B (Xbox east)
+  - Y (north) -> BTN_X (Xbox north -- NOT BTN_Y!)
+  - X (west)  -> BTN_Y (Xbox west -- NOT BTN_X!)
+
+This is why X/Y and L/R indices are NOT where you'd naively expect them.
+
+MISSING FROM JOYPAD: L2 and R2 are NOT translated to the virtual joypad.
+There are no BTN_TL2/BTN_TR2 codes on event4. L2/R2 only exist as keyboard
+events (KEY_E / KEY_T) on event3. See Layer 4 for how they're handled.
+
+Device: /dev/input/event4 (MIYOO Pad1), /dev/input/js0
+Started by: A30.sh device_init() -> ./joypad $EVENT_PATH_KEYBOARD
+Vendor:Product: 045e:028e (Xbox 360 spoof)
+
+
+LAYER 3: RETROARCH JOYPAD DRIVER (linuxraw)
+============================================
+RetroArch's linuxraw joypad driver reads /dev/input/js0 directly.
+It gets raw button indices (0-10) and axis values.
+
+The autoconfig system matches the device by name ("MIYOO Pad1") and applies
+button mappings from the autoconfig file.
+
+  Autoconfig Entry      Index    Physical Button    RA Action
+  ────────────────      ─────    ───────────────    ─────────
+  input_b_btn           0        B (south)          B
+  input_a_btn           1        A (east)           A
+  input_y_btn           2        Y (north)          Y
+  input_x_btn           3        X (west)           X
+  input_l_btn           4        L1                 L
+  input_r_btn           5        R1                 R
+  input_select_btn      6        Select             Select
+  input_start_btn       7        Start              Start
+  input_menu_toggle_btn 8        Menu               Menu Toggle (Guide btn)
+  input_l3_btn          9        (virtual L3)       L3
+  input_r3_btn          10       (virtual R3)       R3
+
+Files:
+  RetroArch/.retroarch/autoconfig/MIYOO Pad1.cfg
+  RetroArch/.retroarch/autoconfig/linuxraw/MIYOO Pad1.cfg
+
+WHY THE BUTTON INDICES LOOK WRONG: The original autoconfig had
+input_l_btn=2, input_r_btn=3, input_x_btn=4, input_y_btn=5. This was
+wrong because it assumed the joypad binary assigned indices by physical
+label (L,R,X,Y = 2,3,4,5). In reality, joydev assigns indices by BTN_
+code order. Since the joypad maps Y(north)->BTN_X and X(west)->BTN_Y,
+the indices are swapped: Y=2(BTN_X), X=3(BTN_Y), L=4(BTN_TL), R=5(BTN_TR).
+
+
+LAYER 4: RETROARCH KEYBOARD INPUT (evdev patch)
+=================================================
+SDL2's keyboard input doesn't work on the A30 because mali_fbdev bypasses
+SDL2's video subsystem (EGL goes directly through the mali framebuffer).
+Without SDL_INIT_VIDEO, SDL_GetKeyboardState() returns nothing.
+
+PATCH: sdl_input.c was patched to directly read /dev/input/event* devices
+that have keyboard-range key codes (evdev codes 1-127). It opens them with
+O_NONBLOCK and reads struct input_event on each poll cycle.
+
+This enables ALL physical buttons to be used as keyboard inputs in RetroArch,
+in addition to their joypad equivalents. Most importantly, it enables L2 and
+R2, which ONLY exist as keyboard events (not on the joypad).
+
+  Physical    Keyboard Code    RA Key Name    Config Value
+  ────────    ─────────────    ───────────    ────────────
+  A           KEY_SPACE        space          input_player1_a = "space"
+  B           KEY_LEFTCTRL     ctrl           input_player1_b = "ctrl"
+  X           KEY_LEFTSHIFT    shift          input_player1_x = "shift"
+  Y           KEY_LEFTALT      alt            input_player1_y = "alt"
+  L1          KEY_TAB          tab            input_player1_l = "tab"
+  L2          KEY_E            e              input_player1_l2 = "e"
+  R1          KEY_BACKSPACE    backspace      input_player1_r = "backspace"
+  R2          KEY_T            t              input_player1_r2 = "t"
+  Start       KEY_ENTER        enter          input_player1_start = "enter"
+  Select      KEY_RIGHTCTRL    rctrl          input_player1_select = "rctrl"
+  Menu        KEY_ESC          escape         (used for menu toggle, see below)
+  D-Up        KEY_UP           up             input_player1_up = "up"
+  D-Down      KEY_DOWN         down           input_player1_down = "down"
+  D-Left      KEY_LEFT         left           input_player1_left = "left"
+  D-Right     KEY_RIGHT        right          input_player1_right = "right"
+
+Patch: RA repo patches/0004-evdev-keyboard-for-mali-fbdev.patch
+Applied to: input/drivers/sdl_input.c
+Guard: #ifdef HAVE_MALI_FBDEV
+File: RetroArch/platform/retroarch-A30.cfg (keyboard bindings)
+
+DUAL INPUT: Every button press (except L2/R2) generates BOTH a joypad
+input (via Layer 3) AND a keyboard input (via Layer 4). RA combines them
+into a single "pressed" state per frame — no double-fire for gameplay.
+L2/R2 are keyboard-only since the joypad binary doesn't translate them.
+
+
+LAYER 5: HOTKEYS
+=================
+Hotkeys have BOTH keyboard and joypad btn bindings as redundant paths.
+The keyboard bindings are the primary ones; btn values are fallback.
+
+  Hotkey Action          Keyboard Binding              btn Fallback
+  ──────────────         ────────────────              ────────────
+  Enable Hotkey          rctrl (Select)                6
+  Exit Emulator          ctrl (B)                      0
+  FPS Toggle             alt (Y)                       2
+  Load State             tab (L1)                      4
+  Save State             backspace (R1)                5
+  Screenshot             space (A)                     1
+  Menu Toggle            shift (X)                     nul (see below)
+  Fast Forward Toggle    t (R2)                        nul (no joypad R2)
+  Slow Motion Toggle     e (L2)                        nul (no joypad L2)
+  Shader Toggle          up (D-Up)                     nul
+  State Slot -           left (D-Left)                 nul
+  State Slot +           right (D-Right)               nul
+
+Both keyboard and joypad sources fire in the same poll cycle, so RA sees
+one "pressed" state. Toggle hotkeys don't double-fire.
+
+Files:
+  RetroArch/platform/retroarch-A30.cfg (the bindings)
+  A30.sh set_default_ra_hotkeys() (resets them to defaults)
+
+
+LAYER 6: MENU BUTTON / IGM
+============================
+The Menu button has a special path for toggling the in-game menu (IGM)
+WITHOUT requiring the hotkey modifier (Select).
+
+RetroArch has a "Guide button" code path: if the autoconfig defines
+input_menu_toggle_btn AND the main config's input_menu_toggle_btn is
+either matching or "nul", then that button toggles the menu standalone.
+
+  Autoconfig: input_menu_toggle_btn = "8"  (BTN_MODE = Menu)
+  Config:     input_menu_toggle_btn = "nul" (lets Guide button path work)
+
+Flow:
+  1. User taps Menu button
+  2. Joypad binary: KEY_ESC -> BTN_MODE -> joydev index 8
+  3. linuxraw joypad: reads button 8 from js0
+  4. RA Guide button path: autoconfig btn 8, config is "nul" -> MATCH
+  5. MENU_TOGGLE fires
+  6. IGM intercepts (if IGM.txt exists) -> shows spruce in-game menu
+
+Select+X also works for menu toggle via the keyboard hotkey path:
+  1. Select (rctrl) -> hotkey modifier active
+  2. X (shift) -> matches input_menu_toggle = "shift"
+  3. MENU_TOGGLE fires -> IGM opens
+
+WHY input_menu_toggle_btn = "nul" AND NOT "8":
+  Setting it to "8" would also work, but "nul" is more robust — it
+  tells RA "I don't have a hotkey btn for this, defer to autoconfig."
+  Setting it to "9" (L3) BREAKS the Guide button path because RA checks
+  that config value matches autoconfig value (9 != 8 -> fails).
+
+Files:
+  RetroArch/.retroarch/autoconfig/MIYOO Pad1.cfg (input_menu_toggle_btn = "8")
+  RetroArch/platform/retroarch-A30.cfg (input_menu_toggle_btn = "nul")
+  A30.sh set_default_ra_hotkeys() (sets menu_toggle_btn to "nul")
+  spruce_igm.c (intercepts MENU_TOGGLE when IGM.txt exists)
+
+
+LAYER 7: SDL_GAMECONTROLLER_IGNORE_DEVICES
+===========================================
+The MIYOO Pad1 spoofs Xbox 360 vendor:product (045e:028e). If SDL2's
+joypad driver were used (instead of linuxraw), SDL2 would recognize it
+as an Xbox controller and apply GameController remapping, which scrambles
+buttons (e.g. X acts as R1).
+
+The environment variable SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
+tells SDL2 to treat this device as a plain joystick (no remapping).
+
+Currently the A30 uses the linuxraw joypad driver (not SDL2), so this
+env var has no effect. It's set defensively in case the joypad driver
+is ever changed.
+
+File: spruce/scripts/emu/lib/ra_functions.sh (exported before RA launch)
+Also: RA repo patches/0003-skip-gamecontroller-for-miyoo-pad1.patch
+      (compile-time skip for the same device in sdl_joypad.c)
+
+
+LAYER 8: THE WATCHDOG
+======================
+The spruce power/button watchdog monitors the Menu button for tap/hold
+actions. On tap, it calls send_menu_button_to_retroarch() in A30.sh.
+
+For RA32.A30, this is a no-op — RA's input system handles the menu
+button directly via the Guide button path (Layer 6). The watchdog's
+virtual L3 keypress is not needed and is not sent.
+
+For other RA binaries (ra32.miyoo, ra64.trimui, etc.), the watchdog
+sends virtual button presses via sendevent because those binaries use
+IGM via libtmenu.so which has its own input handling.
+
+File: A30.sh send_menu_button_to_retroarch()
+
+
+SUMMARY OF INPUT FLOW
+======================
+
+  Physical Button
+       |
+       v
+  gpio-keys-polled (event3) ──────────────────────────┐
+       |                                               |
+       v                                               v
+  joypad binary                              evdev keyboard reader
+  (translates to Xbox BTN_* codes)           (sdl_input.c patch)
+       |                                               |
+       v                                               v
+  /dev/input/event4 -> /dev/input/js0        keyboard key state
+       |                                               |
+       v                                               v
+  linuxraw joypad driver                     sdl_key_pressed()
+  (reads raw button indices)                 (checks evdev state)
+       |                                               |
+       v                                               v
+  autoconfig button mapping                  keyboard key bindings
+  (_btn values: 0=B, 1=A, etc.)             (_key values: ctrl=B, space=A, etc.)
+       |                                               |
+       └──────────────┬───────────────────────────────┘
+                      |
+                      v
+              RetroArch input system
+              (combines all sources per frame)
+                      |
+                      v
+              Game input / Hotkeys / IGM
+
+  L2/R2: keyboard path ONLY (no joypad equivalent)
+  Analog stick: joypad path ONLY (no keyboard equivalent)
+  Everything else: both paths (redundant, no double-fire)
