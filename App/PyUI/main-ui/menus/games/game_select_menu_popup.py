@@ -195,10 +195,10 @@ class GameSelectMenuPopup:
             value=lambda input_value, rom_info=rom_info: self.collections_management_view(rom_info, input_value)
         ))
 
-        recents_primary_text = Language.add_recents()
+        recents_primary_text = Language.remove_recents()
         recents_lambda = lambda input_value, rom_info=rom_info: RecentsManager.remove_game(rom_info)
         if(not RecentsManager.is_recent(rom_info)):
-            recents_primary_text = Language.remove_recents()
+            recents_primary_text = Language.add_recents()
             recents_lambda = lambda input_value, rom_info=rom_info: RecentsManager.add_game(rom_info)
 
         if(RecentsManager.is_recent(rom_info)):        

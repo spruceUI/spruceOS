@@ -164,7 +164,7 @@ class WiFiScanner:
                     ssid = line.split("=", 1)[1]
                 elif line.startswith("freq="):
                     freq = int(line.split("=", 1)[1])
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to get Wi-Fi details: {e}")
 
         return ssid, freq
