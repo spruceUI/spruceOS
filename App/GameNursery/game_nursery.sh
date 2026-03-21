@@ -141,7 +141,7 @@ get_system_icon_from_theme() {
     icon_name="$(jq -r --arg cat "$category" '.[$cat].icon // empty' "$systems_file")"
     emu_name="$(jq -r --arg cat "$category" '.[$cat].emu // empty' "$systems_file")"
 
-    if [ -z "$icon_name" ] || [ -z "$emu_name" ]; then
+    if [ -z "$icon_name" ]; then
         log_message "Game Nursery: No system mapping found for '$category'"
         return 1
     fi
@@ -153,10 +153,12 @@ get_system_icon_from_theme() {
     elif [ -e "${theme_dir}/sel/${icon_name}.png" ]; then selected_icon="${theme_dir}/sel/${icon_name}.png"
     elif [ -e "${theme_dir}/${icon_name}.qoi" ];     then selected_icon="${theme_dir}/${icon_name}.qoi"
     elif [ -e "${theme_dir}/${icon_name}.png" ];     then selected_icon="${theme_dir}/${icon_name}.png"
-    elif [ -e "${fallback_dir}/${icon_name}_sel.qoi" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.qoi"
-    elif [ -e "${fallback_dir}/${icon_name}_sel.png" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.png"
-    elif [ -e "${fallback_dir}/${icon_name}.qoi" ];  then selected_icon="${fallback_dir}/${icon_name}.qoi"
-    elif [ -e "${fallback_dir}/${icon_name}.png" ];  then selected_icon="${fallback_dir}/${icon_name}.png"
+    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}_sel.qoi" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.qoi"
+    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}_sel.png" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.png"
+    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}.qoi" ];  then selected_icon="${fallback_dir}/${icon_name}.qoi"
+    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}.png" ];  then selected_icon="${fallback_dir}/${icon_name}.png"
+    elif [ -e "${theme_dir}/app/${icon_name}.qoi" ]; then selected_icon="${theme_dir}/app/${icon_name}.qoi"
+    elif [ -e "${theme_dir}/app/${icon_name}.png" ]; then selected_icon="${theme_dir}/app/${icon_name}.png"
     else return 1
     fi
 
