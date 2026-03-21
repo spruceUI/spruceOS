@@ -34,106 +34,74 @@ class WifiMenu:
 
 
     def write_wpa_supplicant_conf(self, ssid: str, pw_line: str):
-        """
-        Writes exactly one network block for `ssid` into the wpa_supplicant config.
-        Any existing entries for the same SSID are removed.
-        The file is written atomically to avoid corruption.
-        """
-
         file_path = Device.get_device().get_wpa_supplicant_conf_path()
 
-        HEADER = (
-            "ctrl_interface=/var/run/wpa_supplicant\n"
-            "update_config=1\n"
-        )
-
-        def normalize(text: str) -> str:
-            return text.replace("\r\n", "\n").strip()
-
-        # ---------------------------
-        # Load existing content
-        # ---------------------------
-        content = ""
-        if os.path.exists(file_path):
+        try:
             try:
                 with open(file_path, "r") as f:
-                    content = normalize(f.read())
-            except OSError as e:
-                PyUiLogger.get_logger().error(f"Failed reading {file_path}: {e}")
-                return
+                    lines = f.readlines()
+            except FileNotFoundError:
+                lines = []
 
-        # ---------------------------
-        # Extract existing network blocks
-        # ---------------------------
-        # Since we own the file, a simple non-nested block matcher is safe.
-        network_blocks = re.findall(
-            r'network\s*\{[^}]*\}',
-            content,
-            flags=re.DOTALL
-        )
+            header_lines = []
+            networks = []
 
-        preserved_blocks = []
-        removed = 0
+            current_block = []
+            in_block = False
 
-        for block in network_blocks:
-            m = re.search(r'ssid\s*=\s*"([^"]+)"', block)
-            if not m:
-                # Should not happen in our own file, but keep it just in case
-                preserved_blocks.append(block.strip())
-                continue
+            # --- Parse file ---
+            for line in lines:
+                stripped = line.strip()
 
-            existing_ssid = m.group(1)
-            if existing_ssid == ssid:
-                removed += 1
-            else:
-                preserved_blocks.append(block.strip())
+                if stripped.startswith("network={"):
+                    in_block = True
+                    current_block = [line]
+                elif in_block:
+                    current_block.append(line)
+                    if stripped == "}":
+                        networks.append(current_block)
+                        current_block = []
+                        in_block = False
+                else:
+                    header_lines.append(line)
 
-        if removed:
-            PyUiLogger.get_logger().info(
-                f"Removed {removed} existing network block(s) for '{ssid}'"
-            )
+            # --- Build new network block ---
+            new_block = [
+                "network={\n",
+                f'    ssid="{ssid}"\n',
+                f"    {pw_line}\n",
+                "}\n",
+            ]
 
-        # ---------------------------
-        # Build the new network block
-        # ---------------------------
-        new_block = (
-            "network={\n"
-            f'    ssid="{ssid}"\n'
-            f"    {pw_line}\n"
-            "}\n"
-        ).strip()
+            # --- Replace or append ---
+            found = False
+            for i, block in enumerate(networks):
+                for line in block:
+                    if f'ssid="{ssid}"' in line:
+                        networks[i] = new_block
+                        found = True
+                        break
+                if found:
+                    break
 
-        # Optionally: put newest network first (often desirable)
-        preserved_blocks.insert(0, new_block)
+            if not found:
+                networks.append(new_block)
 
-        # ---------------------------
-        # Rebuild full file deterministically
-        # ---------------------------
-        final_content = HEADER.strip() + "\n\n"
+            # --- Write back ---
+            with open(file_path, "w") as f:
+                for line in header_lines:
+                    f.write(line)
 
-        if preserved_blocks:
-            final_content += "\n\n".join(preserved_blocks) + "\n"
+                if header_lines and not header_lines[-1].endswith("\n"):
+                    f.write("\n")
 
-        # ---------------------------
-        # Atomic write
-        # ---------------------------
-        try:
-            tmp_fd, tmp_path = tempfile.mkstemp(
-                prefix="wpa_supplicant.",
-                dir=os.path.dirname(file_path)
-            )
-            with os.fdopen(tmp_fd, "w") as f:
-                f.write(final_content)
+                for block in networks:
+                    f.write("\n")
+                    for line in block:
+                        f.write(line)
 
-            os.replace(tmp_path, file_path)
-
-            PyUiLogger.get_logger().info(
-                f"Installed network '{ssid}' into {file_path}"
-            )
-
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"Failed writing {file_path}: {e}")
-
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
 
 
     def reload_wpa_supplicant_config(self):
