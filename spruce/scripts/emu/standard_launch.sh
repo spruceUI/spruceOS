@@ -55,8 +55,11 @@ case $EMU_NAME in
 		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast-stock" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
 			run_flycast_standalone
-		elif [ ! "$PLATFORM" = "A30" ]; then
+		elif [ "$CORE" = "Flycast-libretro" ]; then
 			export CORE="flycast"
+			run_retroarch
+		elif [ "$CORE" = "Flycast2021-libretro" ]; then
+			export CORE="flycast2021"
 			run_retroarch
 		else
 			run_retroarch

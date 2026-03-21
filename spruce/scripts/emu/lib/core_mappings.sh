@@ -27,6 +27,7 @@ get_core_folder() {
         "fbneo_libretro.so") echo "FinalBurn Neo" ;;
         "fceumm_libretro.so") echo "FCEUmm" ;;
         "flycast_libretro.so") echo "Flycast" ;;
+        "flycast2021_libretro.so") echo "Flycast 2021" ;;
         "fmsx_libretro.so") echo "fMSX" ;;
         "freechaf_libretro.so") echo "FreeChaF" ;;
         "freeintv_libretro.so") echo "FreeIntv" ;;

@@ -58,6 +58,7 @@
       ],
       "options": [
         "Flycast-libretro",
+        "Flycast2021-libretro",
         "Flycast-standalone",
         "Flycast-stock"
       ],
