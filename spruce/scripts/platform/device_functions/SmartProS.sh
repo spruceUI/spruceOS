@@ -115,10 +115,6 @@ volume_up() {
     fi
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog unecessary for smart pro s?" -v
-}
-
 setup_for_retroarch_and_get_bin_location(){
     setup_for_retroarch_and_get_bin_location_trimui
 }
@@ -327,10 +323,6 @@ set_default_ra_hotkeys() {
         "input_toggle_fast_forward_axis = \"+5\""
     
 
-}
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 new_execution_loop() {

@@ -106,14 +106,6 @@ get_current_volume() {
     log_message "Intentionally do not let spruce modify volume" -v
 }
 
-reset_playback_pack() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
-run_mixer_watchdog() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
 new_execution_loop() {
     pidof audioserver >/dev/null || audioserver &
 }

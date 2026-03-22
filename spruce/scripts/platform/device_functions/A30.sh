@@ -105,10 +105,6 @@ set_volume() {
     _set_volume "$VOLUME_LV" "$SAVE_TO_CONFIG"
 }
 
-run_mixer_watchdog() {
-    log_message "Not needed for A30: run_mixer_watchdog" -v
-}
-
 new_execution_loop() {
     log_message "Not needed for A30: new_execution_loop" -v
 }
@@ -332,11 +328,6 @@ set_default_ra_hotkeys() {
         "input_state_slot_increase = \"right\"" \
         "input_toggle_slowmotion = \"e\"" \
         "input_toggle_fast_forward = \"t\""
-}
-
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 save_volume_to_config_file() {

@@ -138,10 +138,6 @@ enter_sleep() {
     log_message "Missing enter_sleep function"
 }
 
-run_mixer_watchdog() {
-    log_message "Missing run_mixer_watchdog function"
-}
-
 new_execution_loop() {
     log_message "Missing new_execution_loop function"
 }

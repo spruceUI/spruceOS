@@ -101,10 +101,6 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-run_mixer_watchdog() {
-    log_message "*** nothing to do for run_mixer_watchdog" -v
-}
-
 new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
 }
@@ -204,10 +200,6 @@ set_default_ra_hotkeys() {
         "input_toggle_slowmotion_axis = \"+4\"" \
         "input_toggle_fast_forward_axis = \"+5\""
 
-}
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
