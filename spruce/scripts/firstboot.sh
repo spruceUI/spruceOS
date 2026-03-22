@@ -50,7 +50,7 @@ chmod +x "$SCUMMVM_DIR"/scummvm "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/fixjoy
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
 
-perform_fw_check
+A30_notify_about_FW_update_if_needed
 
 if flag_check "pre_menu_unpacking"; then
     display_image_and_text "$UNPACKING_ICON" 35 25 "Finishing up unpacking themes and files.........." 75

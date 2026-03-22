@@ -124,10 +124,6 @@ post_pyui_exit(){
     log_message "*** nothing to do for post_pyui_exit" -v
 }
 
-perform_fw_check(){
-    log_message "*** nothing to do for perform_fw_check" -v
-}
-
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     check_if_fw_needs_update_trimui

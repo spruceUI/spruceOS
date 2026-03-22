@@ -271,11 +271,6 @@ launch_startup_watchdogs(){
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
-perform_fw_check(){
-    log_message "Miyoo Flip can't perform firmware check?" -v
-}
-
-
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     VERSION="$(cat /usr/miyoo/version)"

@@ -76,10 +76,6 @@ launch_startup_watchdogs(){
     fi
 }
 
-perform_fw_check(){
-    log_message "Miyoo Flip can't perform firmware check?" -v
-}
-
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 trigger_device_sleep() {

@@ -155,11 +155,6 @@ launch_startup_watchdogs(){
     fi
 }
 
-perform_fw_check(){
-    log_message "No Fw Check for MiyooMini" -v
-}
-
-
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     log_message "No Fw Check for MiyooMini" -v

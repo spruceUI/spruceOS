@@ -167,8 +167,8 @@ launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2
 }
 
-perform_fw_check(){
-    log_message "Missing perform_fw_check function"
+A30_notify_about_FW_update_if_needed(){
+    log_message "Device is not an A30. Nothing to do for A30_notify_about_FW_update_if_needed." -v
 }
 
 check_if_fw_needs_update() {
