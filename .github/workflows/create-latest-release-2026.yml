@@ -9,10 +9,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Development branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: Development
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
