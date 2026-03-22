@@ -109,11 +109,9 @@ confirm() {
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
-                    echo "CONFIRM CONFIRMED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
                 *"key $B_B"*) 
                     RET_VAL=1 
-                    echo "CONFIRM CANCELLED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
             esac
         fi
@@ -123,7 +121,6 @@ confirm() {
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             if [ "$elapsed" -ge "$timeout" ]; then
-                echo "CONFIRM TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
                 RET_VAL=$timeout_return
             fi
         fi
@@ -222,62 +219,6 @@ flag_remove() {
     local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
     rm -f "/tmp/${flag_name}.lock"
-}
-
-# Call this to get the last button pressed
-# Returns the name of the button pressed, or "" if no matching button was pressed
-# Returned strings are simplified, so "B_L1" would return "L1"
-get_button_press() {
-    button_pressed=""
-    timeout=${1:-180}  # Default 180 second timeout if not specified
-    start_time=$(date +%s)
-
-    echo "GET_BUTTON_PRESS $(date +%s)" >>"$MESSAGES_FILE"
-
-    while true; do
-        # Check for timeout
-        current_time=$(date +%s)
-        elapsed_time=$((current_time - start_time))
-        if [ $elapsed_time -ge $timeout ]; then
-            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
-            echo "B"
-            return 1
-        fi
-
-        # Wait for log message update
-        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
-            continue
-        fi
-
-        # Get the last line of log file
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-            *"$B_L1"*) button_pressed="L1" ;;
-            *"$B_L2"*) button_pressed="L2" ;;
-            *"$B_R1"*) button_pressed="R1" ;;
-            *"$B_R2"*) button_pressed="R2" ;;
-            *"$B_X"*) button_pressed="X" ;;
-	    # this is firing on keydown and keyup, leading to duplicate presses being recognized
-	    # should this be fixed in somewhere else?
-            *"$B_A 1"*) button_pressed="A" ;;
-            *"$B_B 1"*) button_pressed="B" ;;
-            *"$B_Y"*) button_pressed="Y" ;;
-            *"$B_UP"*) button_pressed="UP" ;;
-            *"$B_DOWN"*) button_pressed="DOWN" ;;
-            *"$B_LEFT"*) button_pressed="LEFT" ;;
-            *"$B_RIGHT"*) button_pressed="RIGHT" ;;
-            *"$B_START"*) button_pressed="START" ;;
-            *"$B_START_2"*) button_pressed="START" ;;
-            *"$B_SELECT"*) button_pressed="SELECT" ;;
-            *"$B_SELECT_2"*) button_pressed="SELECT" ;;
-        esac
-
-        if [ -n "$button_pressed" ]; then
-            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$MESSAGES_FILE"
-            echo "$button_pressed"
-            return 0
-        fi
-    done
 }
 
 # Returns the path of the current theme
