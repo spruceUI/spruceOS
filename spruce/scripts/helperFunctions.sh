@@ -66,20 +66,28 @@ esac
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
-    # These echoes are needed to seperate the events in the key press log file
-    echo "ACKNOWLEDGE $(date +%s)" >> "$MESSAGES_FILE"
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in the background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
 
     while true; do
-        inotifywait "$MESSAGES_FILE"
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-        *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
-            echo "ACKNOWLEDGED $(date +%s)" >>"$MESSAGES_FILE"
-            log_message "last_line: $last_line" -v
-            break
-            ;;
-        esac
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
+                    log_message "last_line: $line" -v
+                    break
+                    ;;
+            esac
+        fi
+
+        # Prevent CPU pegging
+        sleep 0.1
     done
+
+    kill "$GE_PID" 2>/dev/null
+    display_kill
 }
 
 auto_regen_tmp_update() {
