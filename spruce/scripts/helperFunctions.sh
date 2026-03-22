@@ -15,7 +15,6 @@
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-export MESSAGES_FILE="/var/log/messages"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 
 # Export for enabling SSL support in CURL
@@ -968,66 +967,65 @@ restart_wifi() {
 
 check_and_connect_wifi() {
 
-    timeout=60  # Think about making this configurable
+    timeout=60
     start_time=$(date +%s)
 
-    # More thorough connection check
-    connection_active=0
-    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-        # Additional validation - try to ping a reliable host
-        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-            connection_active=1
-            log_message "Active WiFi connection verified"
-        else
-            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
-        fi
+    # Initial connection check
+    if ifconfig wlan0 | grep -qE "inet |inet6 " && \
+       ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+        log_message "Active WiFi connection verified"
+        return 0
     fi
 
-    if [ $connection_active -eq 0 ]; then
-        log_message "Attempting to connect to WiFi"
-        start_pyui_message_writer 1
-        restart_wifi
+    log_message "Attempting to connect to WiFi"
+    start_pyui_message_writer 1
+    restart_wifi
 		
-        display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "Waiting to connect....\nPress START to continue anyway." 75
-        {
-            while true; do
-                # Check for timeout
-                current_time=$(date +%s)
-                if [ $((current_time - start_time)) -ge $timeout ]; then
-                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
-                    break
-                fi
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
+        "Waiting to connect....\nPress START to continue anyway." 75
 
-                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
-                    break
-                fi
-                sleep 0.5
-            done
-        } &
-        while true; do
-            inotifywait "$MESSAGES_FILE"
-            last_line=$(tail -n 1 "$MESSAGES_FILE")
-            case $last_line in
-                *"$B_START"* | *"$B_START_2"*)
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
+
+    while true; do
+        # 1. Check for user input
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
-                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 "Proceeding before connected to wifi." 75
+                    kill "$GE_PID" 2>/dev/null
+                    display_kill
+                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
+                        "Proceeding before connected to wifi." 75
                     sleep 2
                     return 1
                     ;;
-                *"Successfully connected to WiFi"*)
-                    log_message "Successfully connected to WiFi"
-                    return 0
-                    ;;
-                *"WiFi connection timed out"*)
-                    log_message "WiFi connection timed out after $timeout seconds"
-                    return 1
-                    ;;
             esac
-        done
-    fi
-    stop_pyui_message_writer
-    return 0
+        fi
+
+        # 2. Check for successful connection
+        if ifconfig wlan0 | grep -qE "inet |inet6 " && \
+           ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+            log_message "Successfully connected to WiFi"
+            kill "$GE_PID" 2>/dev/null
+            display_kill
+            return 0
+        fi
+
+        # 3. Check for timeout
+        current_time=$(date +%s)
+        if [ $((current_time - start_time)) -ge $timeout ]; then
+            log_message "WiFi connection timed out after $timeout seconds"
+            kill "$GE_PID" 2>/dev/null
+            display_kill
+            return 1
+        fi
+
+        sleep 0.1
+    done
 }
 
 ##### ACTIVITY TRACKER STUFF #####

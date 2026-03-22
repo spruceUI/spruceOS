@@ -136,22 +136,13 @@ EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
     # first print event code to log file
-    logger -p 15 -t "keymon[$$]" "$line"
     # handle hotkeys and volume buttons
     case $line in
         *"key $B_START 1"*) # START key down
             START_DOWN=true
-            logger -p 15 -t "keymon[$$]" "enter_pressed 1"
         ;;
         *"key $B_START 0"*) # START key up
             START_DOWN=false
-            logger -p 15 -t "keymon[$$]" "enter_pressed 0"
-        ;;
-        *"key $B_SELECT 1"*) # SELECT key down
-            logger -p 15 -t "keymon[$$]" "rctrl_pressed 1"
-        ;;
-        *"key $B_SELECT 0"*) # SELECT key up
-            logger -p 15 -t "keymon[$$]" "rctrl_pressed 0"
         ;;
         *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] ; then
