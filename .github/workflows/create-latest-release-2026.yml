@@ -105,7 +105,32 @@ jobs:
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
 
-      - name: Create Draft Release
+      - name: Check if release already exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.get_version.outputs.version }}" --repo spruceUI/spruceOS >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} already exists, will update archive only"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} does not exist, will create new draft"
+          fi
+
+      - name: Update existing release archive
+        if: steps.check_release.outputs.exists == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          repository: spruceUI/spruceOS
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: true
+          prerelease: false
+
+      - name: Create new draft release
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
           files: spruceV${{ steps.get_version.outputs.version }}.7z
