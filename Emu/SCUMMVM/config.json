@@ -51,7 +51,6 @@
     "Emulator_A30": {
       "display": "Emulator",
       "options": [
-        "scummvm_libretro",
         "scummvm-standalone"
       ],
       "devices": [
@@ -79,6 +78,17 @@
       "overrides": {}
     }
   },
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "MIYOO_A30",
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480"
+  ],
   "sortOrder": 5600,
   "brand": "modernengine",
   "type": "pc",
