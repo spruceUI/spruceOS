@@ -76,6 +76,7 @@ device_init() {
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
+    /mnt/SDCARD/spruce/scripts/autoIconRefresh.sh &
 }
 
 set_event_arg_for_idlemon() {
