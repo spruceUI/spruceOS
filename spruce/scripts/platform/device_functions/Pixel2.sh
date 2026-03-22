@@ -30,14 +30,10 @@ get_python_path() {
 
 setup_for_retroarch_and_get_bin_location(){
     RA_DIR="/mnt/SDCARD/RetroArch"
-    export RA_BIN="retroarch.Pixel2"
+    export RA_BIN="ra64.pixel2"
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
-    if [ "$CORE" = "uae4arm" ]; then
-		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-	elif [ "$CORE" = "easyrpg" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
-	elif [ "$CORE" = "yabasanshiro" ]; then
+	if [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
 
@@ -62,10 +58,21 @@ set_loading_screen() {
     /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
 }
 
+disable_swap() {
+    swap_list=$(swapon -s)
+
+    if [ -n "$swap_list" ]; then
+        swapoff -a
+    fi
+}
+
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
     sync_volume_level
+
+    disable_swap
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
@@ -88,6 +95,7 @@ enable_or_disable_rgb() {
 }
 
 prepare_for_pyui_launch(){
+    disable_digital_to_analog
     set_performance
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
@@ -202,8 +210,13 @@ device_lid_open(){
 }
 
 take_screenshot() {
-    close_ppsspp_menu
     screenshot_path="$1"
+    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
+
+    if [ "$ppsspp_mode" = true ]; then
+        close_ppsspp_menu
+    fi
+
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
 
@@ -300,7 +313,7 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "retroarch.Pixel2" >/dev/null; then
+    if pgrep "ra64.pixel2" >/dev/null; then
         echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
     elif pgrep -f "PPSSPPSDL_Pixel2" >/dev/null; then
         send_virtual_key_L3
@@ -309,14 +322,36 @@ send_menu_button_to_retroarch() {
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
+enable_digital_to_analog() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @digital @analog \
+            --map yield btn:east btn:south \
+            --map yield btn:south btn:east \
+            --map yield btn:dpad_left:0@analog abs:x:0 \
+            --map yield btn:dpad_left:1@analog abs:x:-900 \
+            --map yield btn:dpad_right:0@analog abs:x:0 \
+            --map yield btn:dpad_right:1@analog abs:x:899 \
+            --map yield btn:dpad_up:0@analog abs:y:0 \
+            --map yield btn:dpad_up:1@analog abs:y:-900 \
+            --map yield btn:dpad_down:0@analog abs:y:0 \
+            --map yield btn:dpad_down:1@analog abs:y:899 \
+            --output name="pixel2_joypad_alt" &
+}
+
+disable_digital_to_analog() {
+    pkill "evsieve"
+}
+
 close_ppsspp_menu() {
     if pgrep -f "PPSSPPSDL" >/dev/null; then
         log_message "Closing PPSSPP menu."
         {
             echo $B_RIGHT 1
             echo $B_RIGHT 0
-            echo $B_A 1
-            echo $B_A 0
+            echo $B_B 1
+            echo $B_B 0
         } > /tmp/ppsspp_events.txt
 
         # run sendevent in a fully detached subshell
@@ -329,7 +364,7 @@ close_ppsspp_menu() {
 }
 
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -340,16 +375,13 @@ set_default_ra_hotkeys() {
         "input_fps_toggle_btn = \"3\"" \
         "input_load_state_btn = \"9\"" \
         "input_menu_toggle = \"escape\"" \
-        "input_menu_toggle_btn = \"nul\"" \
+        "input_menu_toggle_btn = \"2\"" \
         "input_quit_gamepad_combo = \"4\"" \
         "input_save_state_btn = \"10\"" \
         "input_screenshot_btn = \"0\"" \
         "input_shader_toggle_btn = \"11\"" \
         "input_state_slot_decrease_btn = \"13\"" \
-        "input_state_slot_increase_btn = \"14\"" \
-        "input_toggle_slowmotion_axis = \"+4\"" \
-        "input_toggle_fast_forward_axis = \"+5\""
-
+        "input_state_slot_increase_btn = \"14\""
 }
 
 device_system_handles_sdcard_unmount() {

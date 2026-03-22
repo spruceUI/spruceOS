@@ -41,7 +41,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "pcsx_rearmed",
@@ -57,5 +59,13 @@
   "releaseYear": 1994,
   "default_emulator": "pcsx_rearmed",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["PSX","PSONE","PLAYSTATION","psx","ps","psone","playstation"]
+  "alternativeFolderNames": [
+    "PSX",
+    "PSONE",
+    "PLAYSTATION",
+    "psx",
+    "ps",
+    "psone",
+    "playstation"
+  ]
 }

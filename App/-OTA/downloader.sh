@@ -312,7 +312,7 @@ fi
 display_image_and_text "$IMAGE_PATH" 35 25 "Download successful! Press A to install now, or B to exit and install later." 75
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
-    /mnt/SDCARD/App/-Updater/updater.sh
+    "$(get_python_path)" /mnt/SDCARD/App/-Updater/updater.py
 else
     log_message "OTA: Update declined"
     exit 0

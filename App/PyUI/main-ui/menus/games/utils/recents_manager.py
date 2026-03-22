@@ -36,3 +36,8 @@ class RecentsManager:
     def remove_game(cls, rom_info: RomInfo):
         cls._wait_for_init()
         cls._recentsManager.remove_game(rom_info)
+
+    @classmethod
+    def is_recent(cls, rom_info: RomInfo) -> bool:
+        cls._wait_for_init()
+        return cls._recentsManager.is_on_list(rom_info)

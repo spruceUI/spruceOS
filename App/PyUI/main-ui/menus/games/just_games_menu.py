@@ -12,7 +12,7 @@ class JustGamesMenu(RomsMenuCommon):
     def __init__(self):
         super().__init__()
 
-    def include_rom(self,rom_file_name, rom_file_path):
+    def include_rom(self,rom_file_name, rom_file_path, display_name=""):
         return not os.path.isdir(rom_file_path)
         
     def _get_rom_list(self) -> list[GridOrListEntry]:

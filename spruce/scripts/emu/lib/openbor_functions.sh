@@ -10,11 +10,27 @@
 #
 # Provides:
 #   run_openbor
+#   move_screenshots_if_present
+
+SS_DIR="/mnt/SDCARD/Saves/screenshots/OpenBOR"
+
+move_screenshots_if_present() {
+	if [ -n "$(ls -A $HOME/ScreenShots/*.png 2>/dev/null)" ]; then
+		mv $HOME/ScreenShots/*.png "$SS_DIR/" 2>/dev/null
+	fi
+}
 
 run_openbor() {
 	export HOME=$EMU_DIR
 	cd $HOME
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
+
+	mkdir -p "$HOME/ScreenShots"
+	mkdir -p "$SS_DIR"
+
+	move_screenshots_if_present
+	mount --bind "$SS_DIR" "$HOME/ScreenShots"
+
 	if [ "$PLATFORM" = "Flip" ]; then
 
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
@@ -37,4 +53,6 @@ run_openbor() {
 		./OpenBOR_TrimUI "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
 	fi
 	sync
+
+	umount "$HOME/ScreenShots"
 }

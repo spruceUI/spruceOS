@@ -1,5 +1,5 @@
 #!/bin/sh
 
 cd "$(dirname "$0")"
-chmod 777 ./updater.sh
-./updater.sh
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+"$(get_python_path)" ./updater.py

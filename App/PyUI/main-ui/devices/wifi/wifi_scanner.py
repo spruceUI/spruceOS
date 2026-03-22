@@ -158,13 +158,13 @@ class WiFiScanner:
         ssid = None
         freq = None
         try:
-            result = ProcessRunner.run(["wpa_cli", "status"])
+            result = ProcessRunner.run(["wpa_cli", "status"], timeout=0.5)
             for line in result.stdout.splitlines():
                 if line.startswith("ssid="):
                     ssid = line.split("=", 1)[1]
                 elif line.startswith("freq="):
                     freq = int(line.split("=", 1)[1])
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to get Wi-Fi details: {e}")
 
         return ssid, freq

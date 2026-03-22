@@ -43,7 +43,7 @@ start_idlemon_poweroff() {
     in_game)
       case "$timeout_value" in
         Off)
-          pgrep -f 'idlemon.*miyoo.*poweroffAction.sh' | xargs kill -9
+          pgrep -f 'idlemon.*ra32.*poweroffAction.sh' | xargs kill -9
           return 0
           ;;
         2m)
@@ -66,10 +66,10 @@ start_idlemon_poweroff() {
           return 1
           ;;
       esac
-      # Kill all processes with 'idlemon' and 'miyoo' in the name
-	    pgrep -f 'idlemon.*miyoo.*poweroffAction.sh' | xargs kill -9
+      # Kill existing in_game poweroff idlemon
+	    pgrep -f 'idlemon.*ra32.*poweroffAction.sh' | xargs kill -9
 	    # Start idlemon for in_game with multiple processes
-      idlemon -p "ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32,ra64,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_poweroffAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)
@@ -121,7 +121,7 @@ start_idlemon_charging() {
     in_game)
       case "$timeout_value" in
         Off)
-          pgrep -f 'idlemon.*miyoo.*chargingAction.sh' | xargs kill -9
+          pgrep -f 'idlemon.*ra32.*chargingAction.sh' | xargs kill -9
           return 0
           ;;
         30s)
@@ -145,10 +145,10 @@ start_idlemon_charging() {
           ;;
       esac
 
-      # Kill all processes with 'idlemon' and 'miyoo' in the name
-      pgrep -f 'idlemon.*miyoo.*chargingAction.sh' | xargs kill -9
+      # Kill existing in_game charging idlemon
+      pgrep -f 'idlemon.*ra32.*chargingAction.sh' | xargs kill -9
       # Start idlemon for in_game with multiple processes
-      idlemon -p "ra32.miyoo,ra64.miyoo,ra64.trimui,drastic,PPSSPP,retroarch" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
+      idlemon -p "ra32,ra64,retroarch,drastic,PPSSPP" -t "$idle_time" -c "$idle_count" -s "/mnt/SDCARD/spruce/scripts/idlemon_chargingAction.sh" -i $EVENT_ARG > /dev/null &
       ;;
 
     *)

@@ -40,7 +40,9 @@
         "MIYOO_FLIP",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK"
+        "TRIMUI_BRICK",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "Flycast-libretro",
@@ -56,10 +58,11 @@
       ],
       "options": [
         "Flycast-libretro",
+        "Flycast2021-libretro",
         "Flycast-standalone",
         "Flycast-stock"
       ],
-      "selected": "Flycast-stock",
+      "selected": "Flycast2021-libretro",
       "overrides": {}
     }
   },
@@ -75,7 +78,15 @@
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
     "MIYOO_FLIP",
-    "GKD_PIXEL2"
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480"
   ],
-  "alternativeFolderNames": ["DREAMCAST", "Sega Dreamcast", "Dreamcast", "dreamcast","dc"]
+  "alternativeFolderNames": [
+    "DREAMCAST",
+    "Sega Dreamcast",
+    "Dreamcast",
+    "dreamcast",
+    "dc"
+  ]
 }

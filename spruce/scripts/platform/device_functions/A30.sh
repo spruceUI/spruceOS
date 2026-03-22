@@ -117,11 +117,7 @@ setup_for_retroarch_and_get_bin_location(){
 	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"
 
-	if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		export RA_BIN="retroarch.A30"
-	else
-		export RA_BIN="ra32.miyoo"
-	fi
+	export RA_BIN="ra32.a30"
 
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
@@ -162,13 +158,10 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra32.miyoo" >/dev/null; then
-        send_virtual_key_L3
-    elif pgrep -f "retroarch" >/dev/null; then
-        send_virtual_key_L3R3
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
     fi
+    # ra32.a30 handles menu toggle via its own input system
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
@@ -209,8 +202,36 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+EMULATORS="ra32.a30 ra32.mini retroarch drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+pause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -19 "$EMU" 2>/dev/null; then
+            log_message "$EMU was paused"
+            break
+        fi
+    done
+}
+
+unpause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -18 "$EMU" 2>/dev/null; then
+            log_message "$EMU was unpaused"
+            break
+        fi
+    done
+}
 
 device_enter_sleep() {
+    pause_emulators
+    sleep 0.5
+    # Kill exclusive getevent to prevent buffered wake button events
+    # from causing a re-sleep loop. The power watchdog's outer loop
+    # will restart getevent fresh after sleep_helper exits.
+    if [ "$(device_uses_pseudo_sleep)" != "true" ]; then
+        kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+        sleep 0.3
+    fi
+
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -228,6 +249,7 @@ device_exit_sleep() {
 
     touch /tmp/audio_reinit_needed
     clear_wake_alarm "$WAKE_ALARM_PATH"
+    unpause_emulators
 }
 
 device_lid_open() {
@@ -307,7 +329,7 @@ set_default_ra_hotkeys() {
         "input_fps_toggle = \"alt\"" \
         "input_load_state = \"tab\"" \
         "input_menu_toggle = \"shift\"" \
-        "input_menu_toggle_btn = \"9\"" \
+        "input_menu_toggle_btn = \"nul\"" \
         "input_quit_gamepad_combo = \"0\"" \
         "input_save_state = \"backspace\"" \
         "input_screenshot = \"space\"" \
@@ -378,3 +400,5 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # A30 leaves dirty bit set?
 }
+
+

@@ -99,23 +99,82 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!spruce/flags/developer_mode
+            -x!spruce/flags/developer_mode \
+            -xr!App/adbd
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
 
-      - name: Create Draft Release
+      - name: Check if release already exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.get_version.outputs.version }}" --repo spruceUI/spruceOS >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} already exists, will update archive only"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} does not exist, will create new draft"
+          fi
+
+      - name: Update existing release archive
+        if: steps.check_release.outputs.exists == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          repository: spruceUI/spruceOS
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: true
+          prerelease: false
+
+      - name: Create new draft release
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
           files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           name: spruceOS v${{ steps.get_version.outputs.version }}
           body: |
-            ## What's New
-            [Describe changes here]
+            | Device                | Support Status        |
+            |-----------------------|-----------------------|
+            | Miyoo Flip            |  |
+            | Miyoo A30             |  |
+            | Trimui Smart Pro      |  |
+            | Trimui Brick          |  |
+            | Trimui Smart Pro S    |  |
+            | Miyoo Mini Flip       |  |
+            | Miyoo Mini Plus       |  |
+            | Miyoo Mini v1-4       |  |
+
+            # What's New
+
+            Check out the wiki for info on ROM folders and apps [Here](https://github.com/spruceUI/spruceOS/wiki)
+
+            Join our Discord [here!](https://discord.gg/sDeaS3TMuJ)
+
+            # Changelog
+
+            ## Bug Fixes
+            -
+
+            ## Improvements
+            -
 
             ## Installation
-            Download spruceV${{ steps.get_version.outputs.version }}.7z and copy the contents to a blank FAT32 formatted SD card.
+            ## New Installer App
+            - Try the all-in-one installer app for a super easy installation!
+            - No need to download a release or format your card manually!
+            - Compatible versions for Windows, Mac and Linux!
+            - [Find the Latest version for you PC here](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
+            - Lets you install Stable, Nightlies, Sprig (mini flip only) and Twig (GKD Pixel 2 only) all in one click!
+
+            ## Manual Installation
+            - Download spruceV${{ steps.get_version.outputs.version }}.7z
+            - Extract onto your PC using [7zip](https://www.7-zip.org/download.html)
+            - Copy the entire contents to a blank FAT32 formatted SD card.
+            - Seriously, use 7zip to extract onto your PC THEN copy the files. IDK why but Windows breaks stuff if you use its built in extraction tool.
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
           draft: true

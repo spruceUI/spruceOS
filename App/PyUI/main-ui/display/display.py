@@ -87,6 +87,8 @@ class Display:
     window = None
     background_texture = None
     top_bar_text = None
+    is_custom_theme_background = None
+
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
     _problematic_images = set()  # Class-level set to track images that won't load properly
@@ -239,6 +241,13 @@ class Display:
 
     @classmethod
     def deinit_display(cls):
+        if(Device.get_device().uses_deinit_v2()):
+            cls.deinit_display_v2()
+        else:
+            cls.deinit_display_v1()
+
+    @classmethod
+    def deinit_display_v1(cls):
         if cls.render_canvas:
             sdl2.SDL_DestroyTexture(cls.render_canvas)
             cls.render_canvas = None
@@ -255,22 +264,58 @@ class Display:
         cls._unload_bg_texture()
         cls._text_texture_cache.clear_cache()
         cls._image_texture_cache.clear_cache()
-        sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_VIDEO)
+        cls.bg = None
+
+        sdl2.SDL_Quit()
+        os.sync()
 
     @classmethod
-    def clear_text_cache(cls):
-        cls._text_texture_cache.clear_cache()
+    def deinit_display_v2(cls):
+        if cls.render_canvas:
+            sdl2.SDL_DestroyTexture(cls.render_canvas)
+            cls.render_canvas = None
+
+        if cls.bg_canvas:
+            sdl2.SDL_DestroyTexture(cls.bg_canvas)
+            cls.bg_canvas = None
+
+        if cls.renderer:
+            cls.renderer.destroy()
+            cls.renderer = None
+
+        if cls.window:
+            cls.window.close()
+            cls.window = None
+
         cls.deinit_fonts()
-        cls.init_fonts()
+        cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
+
+        sdl2.SDL_Quit()
+
+        import gc
+        gc.collect()
+
+        import time
+        time.sleep(0.1)
+        cls.bg_path = None
+
+    @classmethod
+    def clear_text_cache(cls, include_fonts=True):
+        cls._text_texture_cache.clear_cache()
+        if include_fonts:
+            cls.deinit_fonts()
+            cls.init_fonts()
 
     @classmethod
     def clear_image_cache(cls):
         cls._image_texture_cache.clear_cache()
 
     @classmethod
-    def clear_cache(cls):
+    def clear_cache(cls, include_fonts=True):
         cls.clear_image_cache()
-        cls.clear_text_cache()
+        cls.clear_text_cache(include_fonts)
 
     @classmethod
     def deinit_fonts(cls):
@@ -304,7 +349,7 @@ class Display:
 
     @classmethod
     def set_new_bg(cls, bg_path, is_custom_theme_background, retry=True):
-        if(bg_path is not None and bg_path != cls.bg_path):
+        if(bg_path is not None and (bg_path != cls.bg_path or cls.background_texture is None)):
             cls._unload_bg_texture()
             cls.is_custom_theme_background = is_custom_theme_background
             cls.bg_path = bg_path

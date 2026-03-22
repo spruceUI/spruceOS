@@ -7,13 +7,16 @@
 
 
 prepare_ra_config 2>/dev/null
-cd $RA_DIR/
+setup_for_retroarch_and_get_bin_location
+cd "$RA_DIR/"
 
 RA_PARAMS="-v"
-if [ "$PLATFORM" = "Pixel2" ] || [ "$PLATFORM" = "Flip" ]; then
-    CURRENT_CFG=$(get_ra_cfg_location)
-    RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
-fi
+case "$PLATFORM" in
+    "Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30")
+        CURRENT_CFG=$(get_ra_cfg_location)
+        RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
+        ;;
+esac
 
 HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS
 

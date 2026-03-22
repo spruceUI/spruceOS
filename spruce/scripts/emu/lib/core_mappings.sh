@@ -22,11 +22,12 @@ get_core_folder() {
         "duckstation_libretro.so") echo "DuckStation" ;;
         "easyrpg_libretro.so") echo "EasyRPG Player" ;;
         "ecwolf_libretro.so") echo "ECWolf" ;;
-        "fake08_libretro.so") echo "fakse-08-$(arch_suffix)" ;;
+        "fake08_libretro.so") echo "fake-08-$(arch_suffix)" ;;
         "fbalpha2012_libretro.so") echo "FB Alpha 2012" ;;
         "fbneo_libretro.so") echo "FinalBurn Neo" ;;
         "fceumm_libretro.so") echo "FCEUmm" ;;
         "flycast_libretro.so") echo "Flycast" ;;
+        "flycast2021_libretro.so") echo "Flycast 2021" ;;
         "fmsx_libretro.so") echo "fMSX" ;;
         "freechaf_libretro.so") echo "FreeChaF" ;;
         "freeintv_libretro.so") echo "FreeIntv" ;;

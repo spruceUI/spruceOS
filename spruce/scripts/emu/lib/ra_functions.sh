@@ -27,20 +27,19 @@
 #   save_custom_n64_controller_profile
 
 get_ra_cfg_location(){
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
     if [ -n "$RA_CFG_LOCATION" ]; then
         # Already set, use it
         echo "$RA_CFG_LOCATION"
-    elif [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
-		#Why is Flip here as a platform check?
-		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
 	else
-		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
+		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
 	fi
 }
 
 prepare_ra_config() {
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+	case "$PLATFORM" in
+    	"Anbernic"*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
+		*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
+	esac
 	CURRENT_CFG=$(get_ra_cfg_location)
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
@@ -70,10 +69,10 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI")
+		"TrimUI" | "GKD")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
-		"Miyoo")
+		"Miyoo" | "Anbernic")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
 			;;
 	esac
@@ -97,6 +96,31 @@ prepare_ra_config() {
 		;;
 		*) ;;
 	esac
+
+	# Handle resolution and rotation for Anbernic H700 devices
+	case "$PLATFORM" in
+		*"Anbernic"*)
+			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
+				rot="1"
+			else
+				rot="0"
+			fi
+			if sed \
+				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
+				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$DISPLAY_WIDTH\"|" \
+				-e "s|^video_fullscreen_y.*|video_fullscreen_y = \"$DISPLAY_HEIGHT\"|" \
+				-e "s|^video_windowed_position_width.*|video_windowed_position_width = \"$DISPLAY_WIDTH\"|" \
+				-e "s|^video_windowed_position_height.*|video_windowed_position_height = \"$DISPLAY_HEIGHT\"|" \
+				"$PLATFORM_CFG" > "$TMP_CFG"
+			then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		*) ;;
+	esac
+
 	# copy platform-specific RA config into place where RA wants it to be
 	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
 	sync
@@ -115,6 +139,14 @@ run_retroarch() {
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
+	# Sync IGM flag file with config setting
+	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
+	if [ "$use_igm" = "True" ]; then
+		touch "$IGM_FLAG"
+	else
+		rm -f "$IGM_FLAG"
+	fi
+
 	setup_for_retroarch_and_get_bin_location
 	cd "$RA_DIR"
 
@@ -130,27 +162,37 @@ run_retroarch() {
 
 	log_message "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
 	log_message "export PATH=\"$PATH\""
-	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 	#Swap below if debugging
 	
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
 	RA_PARAMS="-v"
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartProS")
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
 			;;
 	esac
 
+	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
+	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
+	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
+	case "$PLATFORM" in
+		"A30")
+			export SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
+			;;
+	esac
+
 	if flag_check "developer_mode"; then
+		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
+		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
-	
+
 
 	backup_ra_config 2>/dev/null
-	
+
 	ra_close_setup_saves_and_states_for_core_differences
 }
 

@@ -30,13 +30,27 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "ffplay",
         "gme"
       ],
       "selected": "ffplay",
+      "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "mpv",
+        "ffplay",
+        "gme"
+      ],
+      "selected": "mpv",
       "overrides": {}
     }
   },
@@ -46,5 +60,11 @@
   "releaseYear": 9999,
   "default_emulator": "ffplay",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["media","videos","VIDEOS","MUSIC","music"]
+  "alternativeFolderNames": [
+    "media",
+    "videos",
+    "VIDEOS",
+    "MUSIC",
+    "music"
+  ]
 }

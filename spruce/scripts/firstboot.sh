@@ -28,25 +28,24 @@ fi
 if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
     mkdir -p /mnt/SDCARD/Persistent/
     if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting PortMaster!" 75
-        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log
+        extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "Sprucing up your device"
     else
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "PortMaster already exists, removing install archive" 75
+        display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
     fi
 
     rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
+else
+    display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
 fi
 
-# Extract ScummVM standalone binaries (64-bit only)
-if [ "$PLATFORM_ARCHITECTURE" != "armhf" ]; then
-    SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
-    for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
-        [ -f "$SCUMMVM_7Z" ] || continue
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "Extracting ScummVM!" 75
-        extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log
-        rm -f "$SCUMMVM_7Z"
-    done
-fi
+# Extract ScummVM standalone binaries
+SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
+for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
+    [ -f "$SCUMMVM_7Z" ] || continue
+    extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
+    rm -f "$SCUMMVM_7Z"
+done
+chmod +x "$SCUMMVM_DIR"/scummvm "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5

@@ -538,9 +538,28 @@ class DeviceCommon(AbstractDevice):
 
         if free_mb is not None and free_mb < threshold_mb and self.last_cache_clear > 10:
             PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
-            Display.clear_cache()
+            Display.clear_cache(include_fonts=False)
             self.last_cache_clear = 0
 
     def get_image_for_activity(self, activity):
         # Implement in child classes where possible
         return None
+    
+
+    def fix_sleep_sound_bug(self):
+        pass
+
+    def uses_deinit_v2(self):
+        # Need to test 1 at a time to ensure it works
+        return False
+    
+    def get_selected_emulator(self, menu_options: dict, device_name: str):
+        for key, option in menu_options.items():
+            if key.startswith("Emulator"):
+                devices = option.get("devices", [])
+                if device_name in devices:
+                    return option.get("selected")
+        if menu_options.get("Emulator"):
+            return menu_options["Emulator"].get("selected")
+        return None
+    

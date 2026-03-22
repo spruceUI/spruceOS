@@ -9,6 +9,8 @@
 #
 # Provides:
 #   run_flycast_standalone
+#   set_ui_scale
+#   move_screenshots
 
 set_ui_scale() {
 
@@ -21,6 +23,15 @@ set_ui_scale() {
 	esac
 
 	sed "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+}
+
+move_screenshots() {
+	ss_path="/mnt/SDCARD/Saves/screenshots/$CORE/"
+	if [ ! -d "$ss_path" ]; then
+		mkdir -p "$ss_path"
+	fi
+
+	mv /mnt/SDCARD/Emu/DC/[!dc]*.png "$ss_path" 2>/dev/null
 }
 
 run_flycast_standalone() {
@@ -49,4 +60,6 @@ run_flycast_standalone() {
 
 	umount $HOME/bios
 	umount $HOME/data
+
+	move_screenshots &
 }
