@@ -189,7 +189,7 @@ set_volume() {
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         VOLUME_LV="$1"
         SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-        /mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/mm_set_volume.py "$VOLUME_LV" &
+        /mnt/SDCARD/spruce/miyoomini/bin/mm_set_volume.py "$VOLUME_LV" &
 
         # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
         if [ "$SAVE_TO_CONFIG" = true ]; then
