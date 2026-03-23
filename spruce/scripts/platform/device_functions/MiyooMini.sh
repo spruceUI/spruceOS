@@ -107,14 +107,6 @@ get_current_volume() {
     log_message "Intentionally do not let spruce modify volume" -v
 }
 
-reset_playback_pack() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
-run_mixer_watchdog() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
 new_execution_loop() {
     pidof audioserver >/dev/null || audioserver &
 }
@@ -155,11 +147,6 @@ launch_startup_watchdogs(){
         launch_common_startup_watchdogs_v2 "false"
     fi
 }
-
-perform_fw_check(){
-    log_message "No Fw Check for MiyooMini" -v
-}
-
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
@@ -203,7 +190,7 @@ set_volume() {
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         VOLUME_LV="$1"
         SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-        /mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/mm_set_volume.py "$VOLUME_LV" &
+        /mnt/SDCARD/spruce/miyoomini/bin/mm_set_volume.py "$VOLUME_LV" &
 
         # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
         if [ "$SAVE_TO_CONFIG" = true ]; then

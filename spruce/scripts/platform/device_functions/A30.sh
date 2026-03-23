@@ -105,10 +105,6 @@ set_volume() {
     _set_volume "$VOLUME_LV" "$SAVE_TO_CONFIG"
 }
 
-run_mixer_watchdog() {
-    log_message "Not needed for A30: run_mixer_watchdog" -v
-}
-
 new_execution_loop() {
     log_message "Not needed for A30: new_execution_loop" -v
 }
@@ -119,7 +115,6 @@ setup_for_retroarch_and_get_bin_location(){
 
 	export RA_BIN="ra32.a30"
 
-
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
@@ -127,7 +122,6 @@ setup_for_retroarch_and_get_bin_location(){
 	fi
 
     echo "$RA_BIN"
-
 }
 
 
@@ -174,7 +168,7 @@ post_pyui_exit(){
     killall -q -USR1 joystickinput   # return the stick to being a stick
 }
 
-perform_fw_check(){
+A30_notify_about_FW_update_if_needed(){
     FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
     # A30's firmware check
@@ -185,7 +179,6 @@ perform_fw_check(){
         display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
         sleep 5
     fi
-
 }
 
 
@@ -202,7 +195,7 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
-EMULATORS="ra32.a30 ra32.mini retroarch drastic drastic32 drastic64 PPSSPPSDL_${PLATFORM} PPSSPPSDL_TrimUI MainUI flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus"
+EMULATORS="ra32.a30 retroarch drastic32 PPSSPPSDL_A30 MainUI scummvm.a30 OpenBOR_mod OpenBOR_new"
 pause_emulators() {
     for EMU in $EMULATORS; do
         if killall -q -19 "$EMU" 2>/dev/null; then
@@ -267,10 +260,8 @@ device_specific_wake_from_sleep() {
 
 runtime_mounts_A30() {
     mkdir -p /var/lib/alsa
-    mkdir -p /mnt/SDCARD/spruce/dummy
     mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
     mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
-    mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -314,7 +305,6 @@ set_event_arg_for_idlemon() {
     log_message "nothing to do" -v
 }
 
-
 set_default_ra_hotkeys() {
         
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
@@ -338,12 +328,6 @@ set_default_ra_hotkeys() {
         "input_state_slot_increase = \"right\"" \
         "input_toggle_slowmotion = \"e\"" \
         "input_toggle_fast_forward = \"t\""
-
-}
-
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 save_volume_to_config_file() {

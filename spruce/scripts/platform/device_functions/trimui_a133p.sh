@@ -102,10 +102,6 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-run_mixer_watchdog() {
-    log_message "*** nothing to do for run_mixer_watchdog" -v
-}
-
 new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
 }
@@ -123,10 +119,6 @@ prepare_for_pyui_launch(){
 post_pyui_exit(){
     # Should we touch input_no_dpad and input_dpad_to_joystick?
     log_message "*** nothing to do for post_pyui_exit" -v
-}
-
-perform_fw_check(){
-    log_message "*** nothing to do for perform_fw_check" -v
 }
 
 # Should the above be merged into here?
@@ -211,10 +203,6 @@ set_default_ra_hotkeys() {
 
 }
 
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
-}
-
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
 	cat "$BATTERY/status"
@@ -234,7 +222,6 @@ device_cleanup_after_ports_run() {
 
 set_backlight() {
     val="$1"
-
 
     # Clamp input to 1–10
     [ "$val" -lt 1 ] && val=1

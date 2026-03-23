@@ -50,21 +50,11 @@ send_virtual_key_L3() {
 
 
 has_lid() {
-    CMDLINE=$(cat /proc/cmdline)
-
-    case "$CMDLINE" in
-        *lcd_type=boe*)
-            # RG34xxSP
-            return 0
-            ;;
-        *lcd_type=old*)
-            if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG35xxSP'; then
-                return 0
-            fi
-            ;;
+    BOARD="$(cat /mnt/vendor/oem/board.ini)"
+    case "$BOARD" in
+        *xxSP*) return 0 ;;
+        *)    return 1 ;;
     esac
-
-    return 1
 }
 
 launch_startup_watchdogs(){
@@ -75,10 +65,6 @@ launch_startup_watchdogs(){
     if has_lid >/dev/null; then
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
     fi
-}
-
-perform_fw_check(){
-    log_message "Miyoo Flip can't perform firmware check?" -v
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -108,7 +94,6 @@ close_ppsspp_menu() {
             echo $B_A 1  
             echo $B_A 0  
         } > /tmp/ppsspp_events.txt
-
 
         # run sendevent in a fully detached subshell
         (
@@ -173,7 +158,7 @@ set_default_ra_hotkeys() {
 }
 
 new_execution_loop() {
-    log_message "new_execution_loop Uneeded on this device" -v
+    log_message "new_execution_loop unneeded on this device" -v
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.

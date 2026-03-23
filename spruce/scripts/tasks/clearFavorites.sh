@@ -5,3 +5,5 @@
 rm -f /mnt/SDCARD/Saves/pyui-favorites.json
 
 log_message "Favorites: Cleared by request of user."
+
+killall MainUI

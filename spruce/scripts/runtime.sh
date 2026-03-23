@@ -121,7 +121,6 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-/mnt/SDCARD/spruce/scripts/autoIconRefresh.sh &
 developer_mode_task &
 update_checker &
 # update_notification

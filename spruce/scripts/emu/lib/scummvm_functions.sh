@@ -11,39 +11,49 @@ run_scummvm_menu() {
 
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
 	if [ ! -d "$SAVE_DIR" ]; then
 		mkdir -p "$SAVE_DIR"
 	fi
 
-	if [ ! -f "$SCUMMVM_CONFIG" ]; then
+	case "$PLATFORM" in
+		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			enable_digital_to_analog
+			;;
+		"A30")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
+			export DISPLAY_ROTATION=270
+			;;
+		*)
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+	esac
+
+	if [ ! -f "$SCUMMVM_CONFIG" ]; then
 		if [ -f "$DEFAULT_CONFIG" ]; then
-				DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
+			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
 			if [ ! -d "$DEST_DIR" ]; then
 				mkdir -p "$DEST_DIR"
 			fi
 			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
 		fi
 	fi
-
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
 
 	if [ -f "$SCUMMVM_BIN" ]; then
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
@@ -60,7 +70,6 @@ run_scummvm() {
 
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
-	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
 	SAVE_DIR="/mnt/SDCARD/Saves/saves/scummvm-sa"
 
@@ -68,32 +77,43 @@ run_scummvm() {
 		mkdir -p "$SAVE_DIR"
 	fi
 
-	if [ ! -f "$SCUMMVM_CONFIG" ]; then
+	case "$PLATFORM" in
+		"SmartProS"|"SmartPro"|"Brick"|"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			enable_digital_to_analog
+			;;
+		"A30")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
+			export DISPLAY_ROTATION=270
+			;;
+		*)
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+	esac
+
+	if [ ! -f "$SCUMMVM_CONFIG" ]; then
 		if [ -f "$DEFAULT_CONFIG" ]; then
-				DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
+			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
 			if [ ! -d "$DEST_DIR" ]; then
 				mkdir -p "$DEST_DIR"
 			fi
 			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
 		fi
 	fi
-
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
 
 	if [ -f "$SCUMMVM_BIN" ]; then
 		# Parse ROM filename
@@ -122,30 +142,38 @@ run_scummvm() {
 run_scummvm_scan() {
 	export HOME="/mnt/SDCARD/Saves/"
 
-	SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
 	SCAN_LOG="${LOG_DIR}/scummvm-scan.log"
 	ROM_DIR="/mnt/SDCARD/Roms/SCUMMVM"
 
+	case "$PLATFORM" in
+		"SmartProS"|"SmartPro"|"Brick"|"Flip"|"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"A30")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
+			export DISPLAY_ROTATION=270
+			;;
+		*)
+			SCUMMVM_BIN="$EMU_DIR/scummvm"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+	esac
+
 	# For cases where the scan is run for the first time before launching the game or opening the menu.
 	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
 		if [ -f "$DEFAULT_CONFIG" ]; then
 			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
 			[ ! -d "$DEST_DIR" ] && mkdir -p "$DEST_DIR"
 			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
 		fi
 	fi
-
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip"|"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
 
     cd "$ROM_DIR" || return 1
     

@@ -116,26 +116,8 @@ volume_up() {
     fi
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog unecessary for smart pro s?" -v
-}
-
 setup_for_retroarch_and_get_bin_location(){
     setup_for_retroarch_and_get_bin_location_trimui
-}
-
-# Send L3 and R3 press event, this would toggle in-game and pause in RA
-# or toggle in-game menu in PPSSPP
-send_virtual_key_L3R3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        echo $B_R3 1 # R3 down
-        sleep 0.1
-        echo $B_R3 0 # R3 up
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
 send_virtual_key_L3() {
@@ -155,11 +137,6 @@ prepare_for_pyui_launch(){
 post_pyui_exit(){
     log_message "post_pyui_exit not needed for Trim UI Smart Pro S " -v
 }
-
-perform_fw_check(){
-    log_message "perform_fw_check not needed for Trim UI Smart Pro S " -v
-}
-
 
 compare_current_version_to_version() {
     target_version="$1"
@@ -347,10 +324,6 @@ set_default_ra_hotkeys() {
         "input_toggle_fast_forward_axis = \"+5\""
     
 
-}
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 new_execution_loop() {

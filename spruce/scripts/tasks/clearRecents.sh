@@ -5,3 +5,5 @@
 rm -f /mnt/SDCARD/Saves/pyui-recents.json
 
 log_message "Recents: Cleared by request of user."
+
+killall MainUI

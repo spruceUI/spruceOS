@@ -15,7 +15,6 @@
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-export MESSAGES_FILE="/var/log/messages"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 export SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
@@ -67,20 +66,28 @@ esac
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
-    # These echoes are needed to seperate the events in the key press log file
-    echo "ACKNOWLEDGE $(date +%s)" >> "$MESSAGES_FILE"
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in the background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
 
     while true; do
-        inotifywait "$MESSAGES_FILE"
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-        *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
-            echo "ACKNOWLEDGED $(date +%s)" >>"$MESSAGES_FILE"
-            log_message "last_line: $last_line" -v
-            break
-            ;;
-        esac
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
+                    log_message "last_line: $line" -v
+                    break
+                    ;;
+            esac
+        fi
+
+        # Prevent CPU pegging
+        sleep 0.1
     done
+
+    kill "$GE_PID" 2>/dev/null
+    display_kill
 }
 
 auto_regen_tmp_update() {
@@ -110,11 +117,9 @@ confirm() {
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
-                    echo "CONFIRM CONFIRMED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
                 *"key $B_B"*) 
                     RET_VAL=1 
-                    echo "CONFIRM CANCELLED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
             esac
         fi
@@ -124,7 +129,6 @@ confirm() {
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             if [ "$elapsed" -ge "$timeout" ]; then
-                echo "CONFIRM TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
                 RET_VAL=$timeout_return
             fi
         fi
@@ -232,62 +236,6 @@ flag_remove() {
     local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
     rm -f "/tmp/${flag_name}.lock"
-}
-
-# Call this to get the last button pressed
-# Returns the name of the button pressed, or "" if no matching button was pressed
-# Returned strings are simplified, so "B_L1" would return "L1"
-get_button_press() {
-    button_pressed=""
-    timeout=${1:-180}  # Default 180 second timeout if not specified
-    start_time=$(date +%s)
-
-    echo "GET_BUTTON_PRESS $(date +%s)" >>"$MESSAGES_FILE"
-
-    while true; do
-        # Check for timeout
-        current_time=$(date +%s)
-        elapsed_time=$((current_time - start_time))
-        if [ $elapsed_time -ge $timeout ]; then
-            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
-            echo "B"
-            return 1
-        fi
-
-        # Wait for log message update
-        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
-            continue
-        fi
-
-        # Get the last line of log file
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-            *"$B_L1"*) button_pressed="L1" ;;
-            *"$B_L2"*) button_pressed="L2" ;;
-            *"$B_R1"*) button_pressed="R1" ;;
-            *"$B_R2"*) button_pressed="R2" ;;
-            *"$B_X"*) button_pressed="X" ;;
-	    # this is firing on keydown and keyup, leading to duplicate presses being recognized
-	    # should this be fixed in somewhere else?
-            *"$B_A 1"*) button_pressed="A" ;;
-            *"$B_B 1"*) button_pressed="B" ;;
-            *"$B_Y"*) button_pressed="Y" ;;
-            *"$B_UP"*) button_pressed="UP" ;;
-            *"$B_DOWN"*) button_pressed="DOWN" ;;
-            *"$B_LEFT"*) button_pressed="LEFT" ;;
-            *"$B_RIGHT"*) button_pressed="RIGHT" ;;
-            *"$B_START"*) button_pressed="START" ;;
-            *"$B_START_2"*) button_pressed="START" ;;
-            *"$B_SELECT"*) button_pressed="SELECT" ;;
-            *"$B_SELECT_2"*) button_pressed="SELECT" ;;
-        esac
-
-        if [ -n "$button_pressed" ]; then
-            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$MESSAGES_FILE"
-            echo "$button_pressed"
-            return 0
-        fi
-    done
 }
 
 # Returns the path of the current theme
@@ -1078,66 +1026,65 @@ restart_wifi() {
 
 check_and_connect_wifi() {
 
-    timeout=60  # Think about making this configurable
+    timeout=60
     start_time=$(date +%s)
 
-    # More thorough connection check
-    connection_active=0
-    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-        # Additional validation - try to ping a reliable host
-        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-            connection_active=1
-            log_message "Active WiFi connection verified"
-        else
-            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
-        fi
+    # Initial connection check
+    if ifconfig wlan0 | grep -qE "inet |inet6 " && \
+       ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+        log_message "Active WiFi connection verified"
+        return 0
     fi
 
-    if [ $connection_active -eq 0 ]; then
-        log_message "Attempting to connect to WiFi"
-        start_pyui_message_writer 1
-        restart_wifi
+    log_message "Attempting to connect to WiFi"
+    start_pyui_message_writer 1
+    restart_wifi
 		
-        display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "Waiting to connect....\nPress START to continue anyway." 75
-        {
-            while true; do
-                # Check for timeout
-                current_time=$(date +%s)
-                if [ $((current_time - start_time)) -ge $timeout ]; then
-                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
-                    break
-                fi
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
+        "Waiting to connect....\nPress START to continue anyway." 75
 
-                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
-                    break
-                fi
-                sleep 0.5
-            done
-        } &
-        while true; do
-            inotifywait "$MESSAGES_FILE"
-            last_line=$(tail -n 1 "$MESSAGES_FILE")
-            case $last_line in
-                *"$B_START"* | *"$B_START_2"*)
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
+
+    while true; do
+        # 1. Check for user input
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
-                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 "Proceeding before connected to wifi." 75
+                    kill "$GE_PID" 2>/dev/null
+                    display_kill
+                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
+                        "Proceeding before connected to wifi." 75
                     sleep 2
                     return 1
                     ;;
-                *"Successfully connected to WiFi"*)
-                    log_message "Successfully connected to WiFi"
-                    return 0
-                    ;;
-                *"WiFi connection timed out"*)
-                    log_message "WiFi connection timed out after $timeout seconds"
-                    return 1
-                    ;;
             esac
-        done
-    fi
-    stop_pyui_message_writer
-    return 0
+        fi
+
+        # 2. Check for successful connection
+        if ifconfig wlan0 | grep -qE "inet |inet6 " && \
+           ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+            log_message "Successfully connected to WiFi"
+            kill "$GE_PID" 2>/dev/null
+            display_kill
+            return 0
+        fi
+
+        # 3. Check for timeout
+        current_time=$(date +%s)
+        if [ $((current_time - start_time)) -ge $timeout ]; then
+            log_message "WiFi connection timed out after $timeout seconds"
+            kill "$GE_PID" 2>/dev/null
+            display_kill
+            return 1
+        fi
+
+        sleep 0.1
+    done
 }
 
 ##### ACTIVITY TRACKER STUFF #####

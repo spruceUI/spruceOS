@@ -77,14 +77,11 @@ device_init() {
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
+    /mnt/SDCARD/spruce/scripts/autoIconRefresh.sh &
 }
 
 set_event_arg_for_idlemon() {
     EVENT_ARG="-e /dev/input/event2"
-}
-
-perform_fw_check(){
-    log_message "There is only a single firmware, it was never updated" -v
 }
 
 check_if_fw_needs_update() {

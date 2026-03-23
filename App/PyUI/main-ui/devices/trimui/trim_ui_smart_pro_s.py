@@ -28,6 +28,8 @@ from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
+    SAVES_CONFIG_LOCATION = "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
+    VOLUME_FILE = SAVES_CONFIG_LOCATION
 
     def __init__(self, device_name,main_ui_mode):
         self.device_name = device_name
@@ -35,7 +37,7 @@ class TrimUISmartProS(TrimUIDevice):
 
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
-        self._load_system_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
+        self._load_system_config(TrimUISmartProS.SAVES_CONFIG_LOCATION, source)
         self.mainui_volume = 0
         if(main_ui_mode):
             self.on_mainui_config_change()
@@ -43,7 +45,7 @@ class TrimUISmartProS(TrimUIDevice):
             ConfigCopier.ensure_config(TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+                TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.ensure_wpa_supplicant_conf()
@@ -137,7 +139,7 @@ class TrimUISmartProS(TrimUIDevice):
             return 0
         
     def on_mainui_config_change(self):
-        path = TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION
+        path = TrimUISmartProS.VOLUME_FILE
         if not os.path.exists(path):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
             return

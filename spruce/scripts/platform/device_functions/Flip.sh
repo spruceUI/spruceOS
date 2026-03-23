@@ -263,18 +263,13 @@ launch_startup_watchdogs(){
 
     # Why do we need this on flip? What exactly does it do?
     # The name is kinda confusing. I think it monitors for headphones?
-    /mnt/SDCARD/spruce/scripts/mixer_watchdog.sh &
+    /mnt/SDCARD/spruce/flip/mixer_watchdog.sh &
 
     #BT is broken so don't bother with it
     #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
     
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
-
-perform_fw_check(){
-    log_message "Miyoo Flip can't perform firmware check?" -v
-}
-
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
@@ -366,9 +361,6 @@ runtime_mounts_Flip() {
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
-    # use appropriate loading images
-    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
-
 	# PortMaster ports location
     mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
     mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
@@ -459,30 +451,6 @@ set_default_ra_hotkeys() {
         "input_toggle_fast_forward_axis = \"+5\""
 
 }
-
-reset_playback_pack() {
-    VOLUME_LV=$(get_volume_level)
-    set_volume "$(( VOLUME_LV ))"
-}
-
-
-run_mixer_watchdog() {
-    JACK_PATH=/sys/class/gpio/gpio150/value
-
-    while true; do
-
-        /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
-        PID_GPIO=$!
-        wait -n
-
-        log_message "*** mixer watchdog: change detected" -v
-
-        kill $PID_GPIO 2>/dev/null
-        VOLUME_LV=$(get_volume_level)
-        set_volume "$(( VOLUME_LV ))"
-    done
-}
-
 
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
