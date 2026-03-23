@@ -263,7 +263,7 @@ launch_startup_watchdogs(){
 
     # Why do we need this on flip? What exactly does it do?
     # The name is kinda confusing. I think it monitors for headphones?
-    /mnt/SDCARD/spruce/scripts/mixer_watchdog.sh &
+    /mnt/SDCARD/spruce/flip/mixer_watchdog.sh &
 
     #BT is broken so don't bother with it
     #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
