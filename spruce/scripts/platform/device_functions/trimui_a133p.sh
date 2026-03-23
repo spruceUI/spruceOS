@@ -222,7 +222,6 @@ device_cleanup_after_ports_run() {
 set_backlight() {
     val="$1"
 
-
     # Clamp input to 1–10
     [ "$val" -lt 1 ] && val=1
     [ "$val" -gt 10 ] && val=10
