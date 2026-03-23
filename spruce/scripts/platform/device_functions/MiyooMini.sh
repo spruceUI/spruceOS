@@ -111,7 +111,6 @@ new_execution_loop() {
 }
 
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     export RA_BIN="ra32.mini"
 

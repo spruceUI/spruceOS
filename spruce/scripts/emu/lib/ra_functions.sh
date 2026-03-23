@@ -17,30 +17,20 @@
 #   pin_to_dedicated_cores
 #
 # Provides:
-#   get_ra_cfg_location
 #   prepare_ra_config
-#   backup_ra_config
 #   run_retroarch
 #   ready_architecture_dependent_states
 #   stash_architecture_dependent_states
 #   load_n64_controller_profile
 #   save_custom_n64_controller_profile
 
-get_ra_cfg_location(){
-    if [ -n "$RA_CFG_LOCATION" ]; then
-        # Already set, use it
-        echo "$RA_CFG_LOCATION"
-	else
-		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
-	fi
-}
+export RA_DIR="/mnt/SDCARD/RetroArch"
 
 prepare_ra_config() {
 	case "$PLATFORM" in
-    	"Anbernic"*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
-		*) PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
+    	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
+		*) 			 export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
 	esac
-	CURRENT_CFG=$(get_ra_cfg_location)
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
@@ -120,17 +110,6 @@ prepare_ra_config() {
 			;;
 		*) ;;
 	esac
-
-	# copy platform-specific RA config into place where RA wants it to be
-	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
-	sync
-}
-
-backup_ra_config() {
-	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	CURRENT_CFG=$(get_ra_cfg_location)
-	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
 	sync
 }
 
@@ -169,7 +148,7 @@ run_retroarch() {
 	RA_PARAMS="-v"
 	case "$PLATFORM" in
 		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"MiyooMini"|"Anbernic"*)
-			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
+			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
 
@@ -189,10 +168,6 @@ run_retroarch() {
 		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
-
-
-	backup_ra_config 2>/dev/null
-
 	ra_close_setup_saves_and_states_for_core_differences
 }
 

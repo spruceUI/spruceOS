@@ -110,9 +110,7 @@ new_execution_loop() {
 }
 
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
     export CORE_DIR="$RA_DIR/.retroarch/cores"
-
 	export RA_BIN="ra32.a30"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then

@@ -213,7 +213,6 @@ get_current_volume() {
 }
 
 setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
 	export RA_BIN="ra64.universal"
 			
     if [ "$CORE" = "uae4arm" ]; then

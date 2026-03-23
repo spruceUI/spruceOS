@@ -29,7 +29,6 @@ get_python_path() {
 }
 
 setup_for_retroarch_and_get_bin_location(){
-    RA_DIR="/mnt/SDCARD/RetroArch"
     export RA_BIN="ra64.pixel2"
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
@@ -44,10 +43,6 @@ setup_for_retroarch_and_get_bin_location(){
 	fi
 
     echo "$RA_BIN"
-}
-
-get_ra_cfg_location(){
-	echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
 }
 
 get_spruce_ra_cfg_location() {

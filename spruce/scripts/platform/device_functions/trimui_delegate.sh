@@ -126,7 +126,6 @@ enable_or_disable_rgb_trimui() {
 }
 
 setup_for_retroarch_and_get_bin_location_trimui(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
 	export RA_BIN="ra64.universal"
 	if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
