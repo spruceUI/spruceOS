@@ -17,6 +17,8 @@
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 export SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
+export SYSTEM_EMIT_GATE_DIR="${SYSTEM_EMIT_GATE_DIR:-/tmp/spruce_trace_gates}"
+export SYSTEM_EMIT_GATE_FILE="${SYSTEM_EMIT_GATE_FILE:-$SYSTEM_EMIT_GATE_DIR/enable-trace.on}"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
@@ -179,21 +181,21 @@ dim_screen() {
 finish_unpacking() {
     flag="$1"
     if flag_check "$flag"; then
-        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_ENTER" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_ENTER" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
         start_pyui_message_writer
         log_and_display_message "Finishing up unpacking archives.........."
-        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_WAIT_PRESERVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_WAIT_PRESERVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
         wait_loops=0
         while [ -f "$FLAGS_DIR/$flag.lock" ]; do
             wait_loops=$((wait_loops + 1))
             if [ $((wait_loops % 50)) -eq 0 ]; then
-                "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_WAIT_LOOP" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
+                "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_WAIT_LOOP" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
             fi
             : # null operation (no sleep needed)
         done
         flag_remove "silentUnpacker"
-        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_REMOVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
-        "$SYSTEM_EMIT" process archiveUnpacker "FINISH_UNPACKING_COMPLETE" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_REMOVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_COMPLETE" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
         stop_pyui_message_writer
     fi
 }
@@ -866,37 +868,22 @@ set_network_proxy() {
     fi
 }
 
-_log_scummvm_display_text() {
-    # $1 = IS_SCUMMVM_SECTION (0|1), $2 = log path, $3 = message
-    [ "$1" -eq 1 ] || return 0
-    mkdir -p "/mnt/SDCARD/Saves/spruce" 2>/dev/null
-    printf '%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$3" >> "$2"
-}
-
 extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
     LOG_LOCATION="$3" # Only logs errors
     SECTION_LABEL="$4" # Optional: section title used in "Unpacking <section>"
+    SUPPRESS_PROGRESS_UI="${SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI:-0}"
 
     if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
         echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [section_label]"
         return 1
     fi
 
-    DEFAULT_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
-    PORTMASTER_ICON="/mnt/SDCARD/App/PortMaster/portmaster.png"
-    SCUMMVM_ICON="/mnt/SDCARD/Emu/SCUMMVM/scummvm.png"
-    LOGO="$DEFAULT_ICON"
-    SCUMMVM_DISPLAY_TEXT_LOG="/mnt/SDCARD/Saves/spruce/scummvm_display_text.log"
+    LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
     if [ -z "$SECTION_LABEL" ]; then
         SECTION_LABEL="$(basename "$UPDATE_FILE" .7z)"
     fi
-    IS_SCUMMVM_SECTION=0
-    case "$SECTION_LABEL" in
-        [Pp][Oo][Rr][Tt][Mm][Aa][Ss][Tt][Ee][Rr]) LOGO="$PORTMASTER_ICON" ;;
-        [Ss][Cc][Uu][Mm][Mm][Vv][Mm]) IS_SCUMMVM_SECTION=1 ; LOGO="$SCUMMVM_ICON" ;;
-    esac
 
     if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
         SECTION_TITLE="Sprucing up your device...\nUnpacking ${SECTION_LABEL}"
@@ -919,9 +906,10 @@ extract_7z_with_progress() {
         return 1
     fi
 
-    display_image_and_text "$LOGO" 35 25 "${SECTION_TITLE}\nPreparing extraction..." 75
-    _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" "${SECTION_TITLE} | Preparing extraction..."
-    sleep 2
+    if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+        display_image_and_text "$LOGO" 35 25 "${SECTION_TITLE}\nPreparing extraction..." 75
+        sleep 2
+    fi
 
     7zr x -y -scsUTF-8 -bb1 -o"$DEST_DIR" "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
     while read -r line || [ -n "$line" ]; do
@@ -937,15 +925,14 @@ extract_7z_with_progress() {
         PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
         [ "$PERCENT_COMPLETE" -gt 100 ] && PERCENT_COMPLETE=100
 
-        if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ] &&
+            { [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; }; then
             FILE_NAME="$(basename "$FILE")"
             display_image_and_text \
                 "$LOGO" \
                 35 25 \
                 "${SECTION_TITLE}\n${PERCENT_COMPLETE}%: ${FILE_NAME}" \
                 75
-            _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" \
-                "${SECTION_TITLE} | ${PERCENT_COMPLETE}%: ${FILE_NAME}"
         fi
     done
 
@@ -953,14 +940,15 @@ extract_7z_with_progress() {
 
     if [ "$RET" -ne 0 ]; then
         log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
-        display_image_and_text "$LOGO" 35 25 \
-            "Extraction completed with warnings. Check the log for details." 75
-        _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" \
-            "Extraction completed with warnings. Check the log for details."
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+            display_image_and_text "$LOGO" 35 25 \
+                "Extraction completed with warnings. Check the log for details." 75
+        fi
     else
         log_update_message "Extraction process completed successfully"
-        display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
-        _log_scummvm_display_text "$IS_SCUMMVM_SECTION" "$SCUMMVM_DISPLAY_TEXT_LOG" "Extraction completed!"
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+            display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
+        fi
     fi
 
     return "$RET"

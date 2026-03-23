@@ -1,5 +1,9 @@
 #!/bin/sh
 
+TRACE_GATE_DIR="${TRACE_GATE_DIR:-/tmp/spruce_trace_gates}"
+SYSTEM_EMIT_GATE_FILE="${SYSTEM_EMIT_GATE_FILE:-$TRACE_GATE_DIR/enable-trace.on}"
+[ -f "$SYSTEM_EMIT_GATE_FILE" ] || exit 0
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 if [ -f "$SCRIPT_DIR/trace.sh" ]; then
     # shellcheck disable=SC1091

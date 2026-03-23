@@ -7,7 +7,6 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common32bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
-SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/mini-flip-system.json"

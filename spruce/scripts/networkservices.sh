@@ -5,7 +5,6 @@
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
-SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
 SSH_SERVICE_NAME=$(get_ssh_service_name)

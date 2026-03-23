@@ -5,7 +5,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/trace.sh
-SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
@@ -298,7 +297,10 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 
 "$SYSTEM_EMIT" power-shutdown-request "$s2_arg" "save_poweroff.sh" "shutdown triggered" || true
 emit_shutdown_av_trace_fallback || true
-trace_fsm_shutdown_finalize "save_poweroff.sh" || true
+# The shutdown FSM is only finalized when tracing was enabled for this boot session.
+if [ -f "$SYSTEM_EMIT_GATE_FILE" ]; then
+    trace_fsm_shutdown_finalize "save_poweroff.sh" || true
+fi
 blink_led_if_applicable
 device_prepare_for_poweroff
 log_activity_event "$(get_current_app)" "STOP"

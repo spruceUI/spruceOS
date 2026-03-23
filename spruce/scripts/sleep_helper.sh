@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 if [ -e /tmp/sleep_helper_started ]; then
     log_message "Sleep helper already active, skipping. /tmp/sleep_helper_started exists" -v

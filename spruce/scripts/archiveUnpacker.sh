@@ -7,7 +7,6 @@ STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
 PRECMD_PID_FILE="/mnt/SDCARD/spruce/flags/unpacker_precmd.pid"
 HANDOFF_FLAG="unpacker_handoff_pre_cmd"
 FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
-SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 # This is a service to unpack archives that are preformatted to land in the right place.
@@ -91,7 +90,7 @@ queue_has_archive() {
 }
 
 queue_empty_for_mode() {
-    if [ "$RUN_MODE" = "themes_only" ]; then
+    if [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
         ! queue_has_archive "$THEME_DIR"
         return
     fi
@@ -273,12 +272,12 @@ if [ "$RUN_MODE" = "all" ] &&
         "Unpacker: Finished running"
 fi
 
-if [ "$RUN_MODE" = "themes_only" ] &&
+if [ "$RUN_MODE" = "firstboot_theme_phase" ] &&
     ! queue_has_archive "$THEME_DIR"; then
-    "$SYSTEM_EMIT" process archiveUnpacker "QUEUE_EMPTY_THEMES_FAST_PATH" "archiveUnpacker.sh/startup" "no archives in themes" || true
+    "$SYSTEM_EMIT" process archiveUnpacker "QUEUE_EMPTY_FIRSTBOOT_THEME_PHASE_FAST_PATH" "archiveUnpacker.sh/startup" "no archives in themes" || true
     exit_with_state \
-        "complete" "queue-empty-themes" \
-        "COMPLETE" "queue-empty-themes-fast-path" \
+        "complete" "queue-empty-firstboot-theme-phase" \
+        "COMPLETE" "queue-empty-firstboot-theme-phase-fast-path" \
         "0" \
         "Unpacker: No theme .7z files found to unpack. Exiting." \
         "Unpacker: Finished running"
@@ -316,31 +315,28 @@ run_mode_pre_cmd() {
     unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
 }
 
-run_mode_themes_only() {
-    "$SYSTEM_EMIT" process archiveUnpacker "THEMES_ONLY_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_themes_only" "foreground themes-only run" || true
-    write_unpack_state "running" "themes-only-active" "$$"
+run_mode_firstboot_theme_phase() {
+    # firstboot.sh owns when this phase runs; archiveUnpacker owns the extraction mechanics.
+    "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEME_PHASE_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_firstboot_theme_phase" "foreground firstboot theme phase run" || true
+    write_unpack_state "running" "firstboot-theme-phase-active" "$$"
     unpack_archives "$THEME_DIR" "" "Themes"
 }
 
 dispatch_run_mode() {
     case "$RUN_MODE" in
-    "all")
-        run_mode_all
-        ;;
-    "themes_only")
-        run_mode_themes_only
-        ;;
-    "pre_cmd")
-        run_mode_pre_cmd
-        ;;
+    "all") handler="run_mode_all" ;;
+    "pre_cmd") handler="run_mode_pre_cmd" ;;
+    "firstboot_theme_phase") handler="run_mode_firstboot_theme_phase" ;;
     *)
         exit_with_state \
             "failed_resumable" "invalid-run-mode" \
             "FAILED" "invalid-run-mode" \
             "1" \
-            "Unpacker: Invalid run mode specified"
+            "Unpacker: Invalid run mode specified: $RUN_MODE"
         ;;
     esac
+
+    "$handler"
 }
 
 dispatch_run_mode
