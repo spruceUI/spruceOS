@@ -29,6 +29,10 @@ _set_scummvm_platform() {
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brick/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			start_pyui_message_writer
+			log_and_display_message "ScummVM requires Joystick mode.\nEnable it in the Fn Key and Switch Settings app."
+			sleep 2
+			stop_pyui_message_writer
 			;;
 		"Pixel2")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
