@@ -45,7 +45,7 @@ for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
     extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
     rm -f "$SCUMMVM_7Z"
 done
-chmod +x "$SCUMMVM_DIR"/scummvm "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/fixjoy 2>/dev/null
+chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
