@@ -67,7 +67,11 @@ case $EMU_NAME in
 		;;
 
 	"GB"*)
-		APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
+		if [ DISPLAY_ASPECT_RATIO = "4:3" ]; then
+			APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
+		else
+			APPLY_PO="False"
+		fi
 		/mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/applyPerfectOs.sh "$APPLY_PO"
 		run_retroarch
 		;;
