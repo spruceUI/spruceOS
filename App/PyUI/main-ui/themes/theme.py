@@ -1197,6 +1197,24 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_grid_main_menu_img_width(cls):
+        return cls._data.get("gridMainMenuImgWidth", 0)
+    
+    @classmethod
+    def set_grid_main_menu_img_width(cls, value):
+        cls._data["gridMainMenuImgWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_grid_main_menu_img_height(cls):
+        return cls._data.get("gridMainMenuImgHeight", 0)
+    
+    @classmethod
+    def set_grid_main_menu_img_height(cls, value):
+        cls._data["gridMainMenuImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_carousel_game_select_primary_img_width(cls):
         return cls._data.get("carouselGameSelectPrimaryImgWidth", 50)
     

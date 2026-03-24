@@ -123,8 +123,8 @@ class MainMenu:
             cols=Theme.get_main_menu_column_count(), 
             carousel_cols=Theme.get_main_menu_column_count(), #TODO do we care these are the same?
             rows=Theme.get_main_menu_row_count(),
-            grid_resized_width=Theme.get_grid_system_select_img_width(),
-            grid_resized_height=Theme.get_grid_system_select_img_height(),
+            grid_resized_width=Theme.get_grid_main_menu_img_width(),
+            grid_resized_height=Theme.get_grid_main_menu_img_height(),
             selected_index=selected.get_index(),
             show_grid_text=Theme.get_main_menu_show_text_grid_mode(),
             grid_view_wrap_around_single_row=Theme.get_main_menu_grid_wrap_around_single_row()
