@@ -214,16 +214,16 @@
                     "MIYOO_FLIP",
                     "GKD_PIXEL2"
                 ],
-                "display": "Use ZRAM (experimental)",
+                "display": "Use ZRAM",
                 "description": "reboot to apply",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False"
+                "selected": "True"
             },
             "swapfileSize":{
-                "display": "Swapfile size (experimental)",
+                "display": "SD card swapfile",
                 "description": "reboot to apply",
                 "options": [
                     "Off",
