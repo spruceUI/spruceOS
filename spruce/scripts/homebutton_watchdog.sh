@@ -16,11 +16,6 @@ kill_port(){
 
         capture_screen
 
-
-        # Don't relaunch if somehow the exit fails
-        rm -f /tmp/cmd_to_run.sh
-        rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
-
         SID=$(cat /tmp/last_port_sid)
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
@@ -266,6 +261,12 @@ home_key_down () {
                 log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
                 kill_port
+
+                # Ensure holding home can always be used
+                # To do a fresh boot on any errors
+                rm -f /tmp/cmd_to_run.sh
+                rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+
             fi
         ) &
         menu_hold_pid=$!
