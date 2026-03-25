@@ -117,9 +117,9 @@ configure_retroachievements() {
 	# update auth token if spruce rac username different from what was in ppsspp.ini
 	# or just create it if it's missing
 	if [ "$rac_mode" = "Softcore" ] || [ "$rac_mode" = "Hardcore" ]; then
-		rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 		ini_user="$(grep '^AchievementsUserName' "$PSP_DIR/ppsspp.ini" | sed 's/.*= *"\(.*\)".*/\1/')"
 		if [ "$ini_user" != "$rac_user" ] || [ ! -f "$PSP_DIR/ppsspp_retroachievements.dat" ]; then
+			rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 			/mnt/SDCARD/spruce/scripts/emu/psp_rac_auth.sh "$rac_user" "$rac_pass"
 		fi
 	fi
