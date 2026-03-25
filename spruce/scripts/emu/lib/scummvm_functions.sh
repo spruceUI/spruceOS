@@ -3,6 +3,82 @@
 # Requires globals: EMU_DIR, ROM_FILE, PLATFORM, CORE, LOG_DIR
 # Provides: run_scummvm, run_scummvm_menu, run_scummvm_scan
 
+# Sets SCUMMVM_BIN, SCUMMVM_CONFIG, DEFAULT_CONFIG based on PLATFORM
+_set_scummvm_platform() {
+	case "$PLATFORM" in
+		"Flip")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"SmartPro")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsp/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsp/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"SmartProS")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsps/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsps/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"Brick")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brick/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			start_pyui_message_writer
+			log_and_display_message "ScummVM requires Joystick mode.\nEnable it in the Fn Key and Switch Settings app."
+			sleep 2
+			stop_pyui_message_writer
+			;;
+		"Pixel2")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-pixel2/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-pixel2/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			enable_digital_to_analog
+			;;
+		"Anbernic"*)
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-anbernic/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-anbernic/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+		"A30")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
+			export DISPLAY_ROTATION=270
+			;;
+		"MiyooMini")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.mini"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-mini/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-mini/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib32:$LD_LIBRARY_PATH"
+			;;
+		*)
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
+	esac
+
+	# Copy default config if user config doesn't exist yet
+	if [ ! -f "$SCUMMVM_CONFIG" ]; then
+		if [ -f "$DEFAULT_CONFIG" ]; then
+			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
+			if [ ! -d "$DEST_DIR" ]; then
+				mkdir -p "$DEST_DIR"
+			fi
+			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
+		fi
+	fi
+}
+
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
@@ -17,48 +93,16 @@ run_scummvm_menu() {
 		mkdir -p "$SAVE_DIR"
 	fi
 
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
-			;;
-		"A30")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
-			export DISPLAY_ROTATION=270
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
-
-	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		if [ -f "$DEFAULT_CONFIG" ]; then
-			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
-			if [ ! -d "$DEST_DIR" ]; then
-				mkdir -p "$DEST_DIR"
-			fi
-			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
-		fi
-	fi
+	_set_scummvm_platform
 
 	if [ -f "$SCUMMVM_BIN" ]; then
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+
+
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
+
+
 	fi
 }
 
@@ -77,52 +121,16 @@ run_scummvm() {
 		mkdir -p "$SAVE_DIR"
 	fi
 
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
-			;;
-		"A30")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
-			export DISPLAY_ROTATION=270
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
-
-	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		if [ -f "$DEFAULT_CONFIG" ]; then
-			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
-			if [ ! -d "$DEST_DIR" ]; then
-				mkdir -p "$DEST_DIR"
-			fi
-			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
-		fi
-	fi
+	_set_scummvm_platform
 
 	if [ -f "$SCUMMVM_BIN" ]; then
 		# Parse ROM filename
 		romName=$(basename "$ROM_FILE")
 		romNameNoExt=${romName%.*}
-		
+
 		# Correct data path: look for a folder with the same name as the .scummvm file
 		DATA_PATH="$(dirname "$ROM_FILE")/$romNameNoExt"
-		
+
 		# Fallback to parent directory if folder does not exist
 		if [ ! -d "$DATA_PATH" ]; then
 			DATA_PATH="$(dirname "$ROM_FILE")"
@@ -131,11 +139,15 @@ run_scummvm() {
 		# Use filename as fallback game ID
 		game_id=$(cat "$ROM_FILE" | tr -d '\r\n' | xargs)
 		[ -z "$game_id" ] && game_id="$romNameNoExt"
-		
+
 		# Execute ScummVM
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+
+
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+
+
 	fi
 }
 
@@ -145,42 +157,14 @@ run_scummvm_scan() {
 	SCAN_LOG="${LOG_DIR}/scummvm-scan.log"
 	ROM_DIR="/mnt/SDCARD/Roms/SCUMMVM"
 
-	case "$PLATFORM" in
-		"SmartProS"|"SmartPro"|"Brick"|"Flip"|"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-		"A30")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
-			export DISPLAY_ROTATION=270
-			;;
-		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm"
-			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			;;
-	esac
-
-	# For cases where the scan is run for the first time before launching the game or opening the menu.
-	if [ ! -f "$SCUMMVM_CONFIG" ]; then
-		if [ -f "$DEFAULT_CONFIG" ]; then
-			DEST_DIR=$(dirname "$SCUMMVM_CONFIG")
-			[ ! -d "$DEST_DIR" ] && mkdir -p "$DEST_DIR"
-			cp "$DEFAULT_CONFIG" "$SCUMMVM_CONFIG"
-		fi
-	fi
+	_set_scummvm_platform
 
     cd "$ROM_DIR" || return 1
-    
+
     for dir in */; do
         [ -d "$dir" ] || continue
         dirName=${dir%/}
-        [ "$dirName" = "Imgs" ] && continue 
+        [ "$dirName" = "Imgs" ] && continue
 
         targetFile="${dirName}.scummvm"
         full_path="$ROM_DIR/$dirName"
