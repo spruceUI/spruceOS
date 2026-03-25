@@ -805,15 +805,18 @@ get_pyui_config_value() {
 map_color_name_to_hex() {
     name="$1"
     case "$name" in
-        "Red")    hex=FF0000 ;;
-        "Pink")   hex=FF3333 ;;
-        "Purple") hex=FF00FF ;;
-        "Blue")   hex=0000FF ;;
-        "Cyan")   hex=00FFFF ;;
-        "Green")  hex=00FF00 ;;
-        "Yellow") hex=FFFF00 ;;
-        "Orange") hex=FF5500 ;;
-        *)        hex=FFFFFF ;;
+        "Red")          hex=FF0000 ;;
+        "Pink")         hex=FF3333 ;;
+        "Fuchsia")      hex=FF0022 ;;
+        "Purple")       hex=FF00FF ;;
+        "Dark Purple")  hex=2200CC ;;
+        "Blue")         hex=0000FF ;;
+        "Cyan")         hex=00FFFF ;;
+        "Teal")         hex=00FF22 ;;
+        "Green")        hex=00FF00 ;;
+        "Yellow")       hex=FFFF00 ;;
+        "Orange")       hex=FF1100 ;;
+        *)              hex=FFFFFF ;;
     esac
     echo "$hex"
 }

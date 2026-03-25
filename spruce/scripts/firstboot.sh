@@ -83,17 +83,37 @@ run_firstboot_package_phase() {
         display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
     fi
 
-    # Extract ScummVM standalone binaries
+    # Keep the branch's sequential firstboot contract, but use the current upstream
+    # ScummVM packaging rules so firstboot only extracts the payloads needed by this device.
     SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
-    if [ -n "$(find "$SCUMMVM_DIR" -maxdepth 1 -name 'scummvm_*.7z' | head -n 1)" ]; then
-        run_firstboot_screen_table "$SPRUCE_LOGO|Extracting ScummVM|2"
+    case "$PLATFORM" in
+        "A30")       SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a30.7z" ;;
+        "MiyooMini") SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_mini.7z" ;;
+        *)           SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_64.7z" ;;
+    esac
+
+    MINI_SCUMMVM_ARCHIVES_FOUND=0
+    if [ "$PLATFORM" = "MiyooMini" ] && [ -n "$(find "$SCUMMVM_DIR" -maxdepth 1 -name 'scummvm_mini_*.7z' | head -n 1)" ]; then
+        MINI_SCUMMVM_ARCHIVES_FOUND=1
     fi
-    for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
-        [ -f "$SCUMMVM_7Z" ] || continue
+
+    if [ -f "$SCUMMVM_7Z" ] || [ "$MINI_SCUMMVM_ARCHIVES_FOUND" = "1" ]; then
+        run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking ScummVM|2"
+    fi
+
+    if [ -f "$SCUMMVM_7Z" ]; then
         SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
-        rm -f "$SCUMMVM_7Z"
-    done
-    chmod +x "$SCUMMVM_DIR"/scummvm "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/fixjoy 2>/dev/null
+    fi
+
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        for archive in "$SCUMMVM_DIR"/scummvm_mini_*.7z; do
+            [ -f "$archive" ] || continue
+            SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
+        done
+    fi
+
+    rm -f "$SCUMMVM_DIR"/scummvm_*.7z
+    chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
     flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
     "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_END" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true

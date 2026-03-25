@@ -31,6 +31,50 @@ prepare_ra_config() {
     	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
 		*) 			 export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
 	esac
+
+	# Set up RetroAchievements based on spruceUI config
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+	log_message "Cheevos mode is $rac_mode" -v
+	case "$rac_mode" in
+		"Disabled")
+			# disable cheevos but leave everything else alone
+			TMP_CFG="$(mktemp)"
+			if sed -e "s|^cheevos_enable.*|cheevos_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Softcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
+				-e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" \
+				-e "s|^cheevos_username.*|cheevos_username = \"$rac_user\"|" \
+				-e "s|^cheevos_password.*|cheevos_password = \"$rac_pass\"|" \
+			"$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Hardcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
+				-e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"true\"|" \
+				-e "s|^cheevos_username.*|cheevos_username = \"$rac_user\"|" \
+				-e "s|^cheevos_password.*|cheevos_password = \"$rac_pass\"|" \
+			"$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+	esac
+
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
@@ -47,11 +91,11 @@ prepare_ra_config() {
 	# Set auto load state based on spruceUI config
 	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "Custom")"
 	log_message "auto load setting is $auto_load" -v
-	if [ "$auto_load" = "True" ]; then
+	if [ "$auto_load" = "True" ] && [ "$rac_mode" != "Hardcore" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
-	elif [ "$auto_load" = "False" ]; then
+	elif [ "$auto_load" = "False" ] || [ "$rac_mode" = "Hardcore" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
@@ -90,19 +134,13 @@ prepare_ra_config() {
 	# Handle resolution and rotation for Anbernic H700 devices
 	case "$PLATFORM" in
 		*"Anbernic"*)
+			TMP_CFG="$(mktemp)"
 			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
 				rot="1"
 			else
 				rot="0"
 			fi
-			if sed \
-				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
-				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$DISPLAY_WIDTH\"|" \
-				-e "s|^video_fullscreen_y.*|video_fullscreen_y = \"$DISPLAY_HEIGHT\"|" \
-				-e "s|^video_windowed_position_width.*|video_windowed_position_width = \"$DISPLAY_WIDTH\"|" \
-				-e "s|^video_windowed_position_height.*|video_windowed_position_height = \"$DISPLAY_HEIGHT\"|" \
-				"$PLATFORM_CFG" > "$TMP_CFG"
-			then
+			if sed -e "s|^video_rotation.*|video_rotation = \"$rot\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
 				mv "$TMP_CFG" "$PLATFORM_CFG"
 			else
 				rm -f "$TMP_CFG"
@@ -126,7 +164,7 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
-	setup_for_retroarch_and_get_bin_location
+	setup_for_retroarch
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
@@ -168,6 +206,7 @@ run_retroarch() {
 		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
+	backup_rac_creds_to_spruce_cfg
 	ra_close_setup_saves_and_states_for_core_differences
 }
 
@@ -341,6 +380,38 @@ stash_architecture_dependent_states() {
 		mkdir -p "$BASE/$CORE-$SUFFIX"
         umount "$BASE/$CORE"
     done
+}
+
+backup_rac_creds_to_spruce_cfg() {
+
+	# if spruce setting for RAC mode is auto or disabled, do nothing.
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	case "$rac_mode" in
+		"Softcore"|"Hardcore") ;;
+		*) return ;;
+	esac
+
+	ra_user="$(grep '^cheevos_username' "$PLATFORM_CFG" | sed 's/.*= *"\(.*\)".*/\1/')"
+	ra_pass="$(grep '^cheevos_password' "$PLATFORM_CFG" | sed 's/.*= *"\(.*\)".*/\1/')"
+	json_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	json_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+
+	# if neither user nor pass have been updated during RA runtime, do nothing.
+	[ "$ra_user" = "$json_user" ] && [ "$ra_pass" = "$json_pass" ] && return
+
+	# don't update spruce json if either user or pass was blanked during runtime.
+	[ -z "$ra_user" ] && return
+	[ -z "$ra_pass" ] && return
+
+	log_message "Cheevos creds updated during runtime. Syncing back to spruce-config.json."
+	SPRUCE_JSON="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+	TMP_JSON="$(mktemp)"
+	jq \
+		--arg user "$ra_user" \
+		--arg pass "$ra_pass" \
+		'.menuOptions["RetroAchievements Settings"].username.selected = $user
+		 | .menuOptions["RetroAchievements Settings"].password.selected = $pass' \
+		"$SPRUCE_JSON" > "$TMP_JSON" && mv "$TMP_JSON" "$SPRUCE_JSON"
 }
 
 load_n64_controller_profile() {

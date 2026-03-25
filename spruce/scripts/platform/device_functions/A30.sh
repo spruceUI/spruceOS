@@ -109,9 +109,8 @@ new_execution_loop() {
     log_message "Not needed for A30: new_execution_loop" -v
 }
 
-setup_for_retroarch_and_get_bin_location(){
+setup_for_retroarch(){
     export CORE_DIR="$RA_DIR/.retroarch/cores"
-	export RA_BIN="ra32.a30"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"

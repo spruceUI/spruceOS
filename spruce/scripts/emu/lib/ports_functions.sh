@@ -113,5 +113,4 @@ run_A30_port() {
     # clean up and back up any RA config modifications
     umount /mnt/SDCARD/Roms/PORTS
     umount /mnt/SDCARD/RetroArch/retroarch
-    backup_ra_config 2>/dev/null
 }

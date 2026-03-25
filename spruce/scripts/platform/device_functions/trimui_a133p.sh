@@ -40,6 +40,8 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
+    disable_wifi
+    rmmod xradio_wlan
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -48,6 +50,18 @@ device_enter_sleep() {
 
 device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
+    modprobe xradio_wlan
+    if [ -f /tmp/wifi_on ]; then
+        # wait for wlan0 to appear (up to ~5s)
+        for _ in 1 2 3 4 5; do
+            ip link show wlan0 >/dev/null 2>&1 && break
+            sleep 1
+        done
+
+        if ! pidof wpa_supplicant >/dev/null 2>&1; then
+            enable_or_disable_wifi_per_system_json
+        fi
+    fi
 }
 
 get_current_volume() {
@@ -103,10 +117,6 @@ get_volume_level() {
 
 new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
-}
-
-setup_for_retroarch_and_get_bin_location(){
-    setup_for_retroarch_and_get_bin_location_trimui
 }
 
 prepare_for_pyui_launch(){

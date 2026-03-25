@@ -255,13 +255,12 @@ device_lid_open() {
     head -c 1 "/sys/class/power_supply/axp2202-battery/hallkey" 2>/dev/null || echo "1"
 }
 
-setup_for_retroarch_and_get_bin_location(){
+setup_for_retroarch(){
 	#RA_DIR="/mnt/vendor/deep/retro"
     #export RA_BIN="retroarch"
     #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-	export RA_BIN="ra64.universal"
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then

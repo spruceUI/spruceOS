@@ -16,11 +16,6 @@ kill_port(){
 
         capture_screen
 
-
-        # Don't relaunch if somehow the exit fails
-        rm -f /tmp/cmd_to_run.sh
-        rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
-
         SID=$(cat /tmp/last_port_sid)
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
@@ -89,7 +84,7 @@ kill_ppsspp() {
 
 kill_ra_and_standard_emulators() { 
 	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!" 
-    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus scummvm scummvm.a30
+    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus scummvm scummvm.64 scummvm.a30 scummvm.mini
 }
 
 kill_emulator() {
@@ -266,6 +261,12 @@ home_key_down () {
                 log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
                 kill_port
+
+                # Ensure holding home can always be used
+                # To do a fresh boot on any errors
+                rm -f /tmp/cmd_to_run.sh
+                rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+
             fi
         ) &
         menu_hold_pid=$!
