@@ -95,6 +95,7 @@ prepare_ra_config() {
 			else
 				rot="0"
 			fi
+			# I don't think any of the below are actually needed except rotation. Need to verify.
 			if sed \
 				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
 				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$DISPLAY_WIDTH\"|" \

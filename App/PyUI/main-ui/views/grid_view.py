@@ -24,6 +24,10 @@ class GridView(View):
         super().__init__()
         self.resized_width = resized_width
         self.resized_height = resized_height
+        if(self.resized_width == 0):
+            self.resized_width = None
+        if(self.resized_height == 0):
+            self.resized_height = None
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection

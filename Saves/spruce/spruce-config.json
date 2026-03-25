@@ -214,16 +214,16 @@
                     "MIYOO_FLIP",
                     "GKD_PIXEL2"
                 ],
-                "display": "Use ZRAM (experimental)",
+                "display": "Use ZRAM",
                 "description": "reboot to apply",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False"
+                "selected": "True"
             },
             "swapfileSize":{
-                "display": "Swapfile size (experimental)",
+                "display": "SD card swapfile",
                 "description": "reboot to apply",
                 "options": [
                     "Off",
@@ -375,6 +375,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "AnbernicXX640480"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
@@ -510,9 +511,12 @@
                 "options": [
                     "Red",
                     "Pink",
+                    "Fuchsia",
                     "Purple",
+                    "Dark Purple",
                     "Blue",
                     "Cyan",
+                    "Teal",
                     "Green",
                     "Yellow",
                     "Orange",
@@ -575,9 +579,12 @@
                     "System-specific",
                     "Red",
                     "Pink",
+                    "Fuchsia",
                     "Purple",
+                    "Dark Purple",
                     "Blue",
                     "Cyan",
+                    "Teal",
                     "Green",
                     "Yellow",
                     "Orange",
