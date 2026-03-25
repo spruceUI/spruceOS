@@ -136,7 +136,6 @@
             }
         },
         "System Settings": {
-
             "checkForUpdates": {
                 "devices":["MIYOO_FLIP",
                            "MIYOO_MINI",
@@ -628,6 +627,29 @@
                     "5000"
                 ],
                 "selected": "4000"
+            }
+        },
+        "RetroAchievements Settings": {
+            "modeToggle": {
+                "display": "Retroachivements mode",
+                "description": "auto leaves config alone",
+                "options": [
+                    "Auto",
+                    "Disabled",
+                    "Softcore",
+                    "Hardcore"
+                ],
+                "selected": "Auto"
+            },
+            "username": {
+                "display": "Username",
+                "type": "freeText",
+                "selected": ""
+            },
+            "password": {
+                "display": "Password",
+                "type": "freeText",
+                "selected": ""
             }
         }
     }
