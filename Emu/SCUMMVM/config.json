@@ -18,7 +18,11 @@
         "GKD_PIXEL2",
         "ANBERNIC_RG34XXSP",
         "ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
       ]
     },
     {
@@ -33,7 +37,11 @@
         "GKD_PIXEL2",
         "ANBERNIC_RG34XXSP",
         "ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
       ]
     }
   ],
@@ -55,6 +63,20 @@
       ],
       "devices": [
         "MIYOO_A30"
+      ],
+      "selected": "scummvm-standalone",
+      "overrides": {}
+    },
+    "Emulator_MiyooMini": {
+      "display": "Emulator",
+      "options": [
+        "scummvm-standalone"
+      ],
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
       ],
       "selected": "scummvm-standalone",
       "overrides": {}
@@ -87,7 +109,11 @@
     "GKD_PIXEL2",
     "ANBERNIC_RG34XXSP",
     "ANBERNIC_RG28XX",
-    "ANBERNIC_RGXX640480"
+    "ANBERNIC_RGXX640480",
+    "MIYOO_MINI",
+    "MIYOO_MINI_V4",
+    "MIYOO_MINI_PLUS",
+    "MIYOO_MINI_FLIP"
   ],
   "sortOrder": 5600,
   "brand": "modernengine",

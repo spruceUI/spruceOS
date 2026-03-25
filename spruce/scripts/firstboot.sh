@@ -38,14 +38,24 @@ else
     display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
 fi
 
-# Extract ScummVM standalone binaries
+# Extract ScummVM standalone binary for this device's architecture
 SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
-for SCUMMVM_7Z in "$SCUMMVM_DIR"/scummvm_*.7z; do
-    [ -f "$SCUMMVM_7Z" ] || continue
+case "$PLATFORM" in
+    "A30")       SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a30.7z" ;;
+    "MiyooMini") SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_mini.7z" ;;
+    *)           SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_64.7z" ;;
+esac
+if [ -f "$SCUMMVM_7Z" ]; then
     extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
-    rm -f "$SCUMMVM_7Z"
-done
-chmod +x "$SCUMMVM_DIR"/scummvm "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/fixjoy 2>/dev/null
+fi
+# Extract Mini-specific data archives (plugins, extra, theme)
+if [ "$PLATFORM" = "MiyooMini" ]; then
+    for archive in "$SCUMMVM_DIR"/scummvm_mini_*.7z; do
+        [ -f "$archive" ] && extract_7z_with_progress "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
+    done
+fi
+rm -f "$SCUMMVM_DIR"/scummvm_*.7z
+chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
 display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
 sleep 5
