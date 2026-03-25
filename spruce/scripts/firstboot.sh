@@ -48,6 +48,12 @@ esac
 if [ -f "$SCUMMVM_7Z" ]; then
     extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
 fi
+# Extract Mini-specific data archives (plugins, extra, theme)
+if [ "$PLATFORM" = "MiyooMini" ]; then
+    for archive in "$SCUMMVM_DIR"/scummvm_mini_*.7z; do
+        [ -f "$archive" ] && extract_7z_with_progress "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "Installing ScummVM"
+    done
+fi
 rm -f "$SCUMMVM_DIR"/scummvm_*.7z
 chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
