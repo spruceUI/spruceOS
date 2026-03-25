@@ -70,6 +70,46 @@ load_ppsspp_configs() {
 	PSP_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
 	cp -f "$PSP_DIR/controls-$PLATFORM.ini" "$PSP_DIR/controls.ini"
 	cp -f "$PSP_DIR/ppsspp-$PLATFORM.ini" "$PSP_DIR/ppsspp.ini"
+
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	# rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+	log_message "Cheevos mode is $rac_mode" -v
+	case "$rac_mode" in
+		"Disabled")
+			# disable cheevos but leave everything else alone
+			TMP_CFG="$(mktemp)"
+			if sed -e "s|^AchievementsEnable.*|AchievementsEnable = False|" "$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Softcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
+				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = False|" \
+				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
+			"$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Hardcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
+				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = True|" \
+				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
+			"$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+	esac
 }
 
 save_ppsspp_configs() {
