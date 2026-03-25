@@ -115,10 +115,6 @@ volume_up() {
     fi
 }
 
-setup_for_retroarch_and_get_bin_location(){
-    setup_for_retroarch_and_get_bin_location_trimui
-}
-
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up

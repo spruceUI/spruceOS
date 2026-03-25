@@ -164,7 +164,7 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
-	setup_for_retroarch_and_get_bin_location
+	setup_for_retroarch
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then

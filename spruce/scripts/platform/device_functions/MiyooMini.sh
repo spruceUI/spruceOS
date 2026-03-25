@@ -110,9 +110,8 @@ new_execution_loop() {
     pidof audioserver >/dev/null || audioserver &
 }
 
-setup_for_retroarch_and_get_bin_location(){
+setup_for_retroarch(){
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-    export RA_BIN="ra32.mini"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"

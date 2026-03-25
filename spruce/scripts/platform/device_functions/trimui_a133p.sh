@@ -119,10 +119,6 @@ new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
 }
 
-setup_for_retroarch_and_get_bin_location(){
-    setup_for_retroarch_and_get_bin_location_trimui
-}
-
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick

@@ -212,8 +212,7 @@ get_current_volume() {
     amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-setup_for_retroarch_and_get_bin_location(){
-	export RA_BIN="ra64.universal"
+setup_for_retroarch(){
 			
     if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH

@@ -28,8 +28,7 @@ get_python_path() {
     echo "/mnt/SDCARD/spruce/pixel2/bin/python"
 }
 
-setup_for_retroarch_and_get_bin_location(){
-    export RA_BIN="ra64.pixel2"
+setup_for_retroarch(){
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
 	if [ "$CORE" = "yabasanshiro" ]; then
