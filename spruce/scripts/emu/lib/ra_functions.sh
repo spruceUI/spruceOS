@@ -78,11 +78,11 @@ prepare_ra_config() {
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
-	if [ "$auto_save" = "True" ] && [ "$rac_mode" != "Hardcore" ]; then
+	if [ "$auto_save" = "True" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_save.*|savestate_auto_save = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
-	elif [ "$auto_save" = "False" ] || [ "$rac_mode" = "Hardcore" ]; then
+	elif [ "$auto_save" = "False" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_save.*|savestate_auto_save = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
