@@ -57,9 +57,6 @@ _set_scummvm_platform() {
 			SCUMMVM_BIN="$EMU_DIR/scummvm.mini"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-mini/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-mini/scummvm.ini"
-			export SDL_VIDEODRIVER=mmiyoo
-			export DIRECT_FB=1
-			export DISPLAY_ROTATION=180
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
@@ -100,7 +97,11 @@ run_scummvm_menu() {
 	if [ -f "$SCUMMVM_BIN" ]; then
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+
+
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
+
+
 	fi
 }
 
@@ -141,7 +142,11 @@ run_scummvm() {
 		# Execute ScummVM
 		export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+
+
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+
+
 	fi
 }
 
