@@ -399,6 +399,10 @@ backup_rac_creds_to_spruce_cfg() {
 	# if neither user nor pass have been updated during RA runtime, do nothing.
 	[ "$ra_user" = "$json_user" ] && [ "$ra_pass" = "$json_pass" ] && return
 
+	# don't update spruce json if either user or pass was blanked during runtime.
+	[ -z "$ra_user" ] && return
+	[ -z "$ra_pass" ] && return
+
 	log_message "Cheevos creds updated during runtime. Syncing back to spruce-config.json."
 	SPRUCE_JSON="/mnt/SDCARD/Saves/spruce/spruce-config.json"
 	TMP_JSON="$(mktemp)"
