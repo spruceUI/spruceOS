@@ -320,9 +320,8 @@ class RomSelectOptionsBuilder:
                         icon_searcher=lambda rom_info=rom_info: self._get_favorite_icon(rom_info)
                     )
                 )
-
-        file_rom_list.sort(key=lambda entry: entry.get_primary_text())   
-        folder_rom_list.sort(key=lambda entry: entry.get_primary_text())   
+        file_rom_list.sort(key=lambda entry: entry.get_sort_key())   
+        folder_rom_list.sort(key=lambda entry: entry.get_sort_key())
 
         return folder_rom_list + file_rom_list
 

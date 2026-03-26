@@ -14,7 +14,7 @@ from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher

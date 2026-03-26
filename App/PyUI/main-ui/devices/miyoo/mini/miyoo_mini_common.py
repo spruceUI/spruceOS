@@ -18,7 +18,7 @@ from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFli
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner

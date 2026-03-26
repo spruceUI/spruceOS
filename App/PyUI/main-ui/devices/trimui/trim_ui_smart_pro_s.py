@@ -11,7 +11,7 @@ from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice

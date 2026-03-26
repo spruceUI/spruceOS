@@ -409,6 +409,10 @@ class Language:
         return cls._data.get("l2R2SkipByLetterForDaijishoThemes","L2/R2 Skip By Letter for Daijisho Themes")
 
     @classmethod
+    def ignore_articles_when_sorting(cls):
+        return cls._data.get("ignoreArticlesWhenSorting","Ignore articles when sorting")
+
+    @classmethod
     def hold_menu_for_gameswitcher(cls):
         return cls._data.get("holdMenuForGameswitcher","Hold Menu for GameSwitcher")
 
