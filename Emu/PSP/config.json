@@ -6,7 +6,12 @@
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "subfolder_launch_file": "EBOOT.PBP",
   "extlist": "iso|cso|chd|pbp",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
