@@ -1111,7 +1111,7 @@ process_trace_init() {
     [ -n "$last_state" ] || last_state="UNKNOWN"
 
     case "$last_state" in
-        UNKNOWN|FINALIZED|COMPLETE|FAILED|HANDOFF_BACKGROUND|SKIPPED_LOCK)
+        UNKNOWN|FINALIZED|COMPLETE|FAILED|WARNING|HANDOFF_BACKGROUND|SKIPPED_LOCK)
             ;;
         *)
             trace_fsm_emit_inconsistency \

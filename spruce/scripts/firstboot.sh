@@ -122,7 +122,7 @@ run_firstboot_package_phase() {
 run_firstboot_theme_phase() {
     # Themes are intentionally part of firstboot, but firstboot phase completion is not the
     # same thing as full boot completion. runtime.sh still owns the single closing UX once all
-    # required foreground unpack work has finished cleanly.
+    # required foreground unpack work has finished cleanly, including the degraded-warning path.
     log_message "Firstboot: Running theme extraction phase before runtime-owned completion UX"
     "$SYSTEM_EMIT" process firstboot "THEME_PHASE_LAUNCH" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase" || true
 
@@ -131,11 +131,11 @@ run_firstboot_theme_phase() {
         return 0
     fi
 
-    FIRSTBOOT_FINAL_STATE="FAILED"
-    FIRSTBOOT_FINAL_REASON="firstboot-theme-phase-failed"
-    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_RESULT" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase status=failed" || true
-    log_message "Firstboot: Theme extraction phase failed; skipping firstboot wrap-up."
-    return 1
+    FIRSTBOOT_FINAL_STATE="WARNING"
+    FIRSTBOOT_FINAL_REASON="theme-phase-degraded"
+    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_RESULT" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase status=warning" || true
+    log_message "Firstboot: Theme extraction phase completed with warnings; continuing to wrap-up."
+    return 2
 }
 
 run_firstboot_wrapup_phase() {
@@ -155,8 +155,17 @@ run_firstboot_wrapup_phase() {
 
 run_firstboot_intro_phase
 run_firstboot_package_phase
-run_firstboot_theme_phase || exit $?
+run_firstboot_theme_phase
+theme_phase_rc=$?
+case "$theme_phase_rc" in
+    0) ;;
+    2) ;;
+    *) exit "$theme_phase_rc" ;;
+esac
 run_firstboot_wrapup_phase
 
 log_message "Finished firstboot script"
 "$SYSTEM_EMIT" process firstboot "COMPLETED" "firstboot.sh/shutdown" "platform=$PLATFORM" || true
+if [ "$theme_phase_rc" -eq 2 ]; then
+    exit 2
+fi

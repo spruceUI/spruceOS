@@ -13,6 +13,7 @@
 
 WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
+SPRUCE_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 initialize_system_emit_gate
 if system_emit_gate_enabled; then
@@ -49,12 +50,27 @@ check_and_hide_update_app &
 
 # firstboot.sh owns onboarding and firstboot-required phases, but runtime owns the single
 # closing UX because only runtime knows when every required foreground unpack step has
-# finished. "Happy gaming" should remain first-boot-only and appear once.
+# finished. firstboot may return success, warning, or failure; runtime chooses the closing
+# UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_${PLATFORM}"; then
     "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_LAUNCH" "runtime.sh" "sequential extraction phase: packages" || true
-    if SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"; then
-        "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_RESULT" "runtime.sh" "returned from firstboot.sh status=success" || true
+    SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
+    firstboot_rc="$?"
+    case "$firstboot_rc" in
+        0)
+            firstboot_result="success"
+            ;;
+        2)
+            firstboot_result="warning"
+            ;;
+        *)
+            firstboot_result="failed"
+            ;;
+    esac
 
+    "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_RESULT" "runtime.sh" "returned from firstboot.sh status=$firstboot_result" || true
+
+    if [ "$firstboot_rc" -eq 0 ] || [ "$firstboot_rc" -eq 2 ]; then
         if run_unpacker_foreground \
             "FIRSTBOOT_FOREGROUND_LAUNCH" \
             "sequential extraction after firstboot" \
@@ -65,13 +81,16 @@ if flag_check "first_boot_${PLATFORM}"; then
             "1"; then
             display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
             sleep 3
-            display_image_and_text "$HAPPY_ICON" 35 25 "Happy gaming.........." 75
+            if [ "$firstboot_rc" -eq 2 ]; then
+                display_image_and_text "$SPRUCE_ICON" 35 25 "Spruce setup completed with warnings.\nSome themes may need attention." 75
+            else
+                display_image_and_text "$HAPPY_ICON" 35 25 "Happy gaming.........." 75
+            fi
             sleep 3
         else
             log_message "Firstboot: Skipping completion UX because foreground unpack did not finish cleanly."
         fi
     else
-        "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_RESULT" "runtime.sh" "returned from firstboot.sh status=failed" || true
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
 else
