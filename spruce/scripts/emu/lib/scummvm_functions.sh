@@ -29,10 +29,8 @@ _set_scummvm_platform() {
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brick/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			start_pyui_message_writer
-			log_and_display_message "ScummVM requires Joystick mode.\nEnable it in the Fn Key and Switch Settings app."
-			sleep 2
-			stop_pyui_message_writer
+			touch /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
+			SCUMMVM_BRICK_JOYSTICK=1
 			;;
 		"Pixel2")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
@@ -102,7 +100,7 @@ run_scummvm_menu() {
 
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
 
-
+		[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 	fi
 }
 
@@ -147,7 +145,7 @@ run_scummvm() {
 
 		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
 
-
+		[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 	fi
 }
 
