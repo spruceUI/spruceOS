@@ -19,14 +19,20 @@ class SettingsMenu(ABC):
     def build_options_list(self):
         pass
 
+    def reload_options(self):
+        # Figure out in sub settings menus when this actually needs to change 
+        # Probably just the main page with wifi/volume
+        return True 
+
     def show_menu(self) :
         selected = Selection(None, None, 0)
         list_view = None
         self.theme_changed = False
         self.theme_ever_changed = False
+        option_list = self.build_options_list()
         while(selected is not None):
-            option_list = self.build_options_list()
-            
+            if(self.reload_options()):
+                option_list = self.build_options_list()
             if(self.theme_changed):
                 self.theme_ever_changed = True
 
