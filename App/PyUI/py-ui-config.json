@@ -23,6 +23,10 @@
         {
             "display":"RetroArch version",
             "cmd":"/mnt/SDCARD/App/PyUI/get-ra-version.sh"
+        },
+        {
+            "display":"PPSSPP version",
+            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
         }
     ]
 }

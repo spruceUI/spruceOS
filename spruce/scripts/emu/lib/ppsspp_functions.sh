@@ -50,23 +50,24 @@ run_ppsspp() {
 	mount --bind "$SS_DIR" "$PSP_SS_DIR"
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
+
+	# handle lack of analog sticks on Pixel2
 	case "$PLATFORM" in
-		"Brick"|"SmartPro")
-			PPSSPPSDL="./PPSSPPSDL_TrimUI"
-			;;
-		"Pixel2")
-			enable_digital_to_analog
-			PPSSPPSDL="./PPSSPPSDL_Pixel2"
-			;;
-		*"Anbernic"*)
-			PPSSPPSDL="/mnt/vendor/deep/ppsspp/PPSSPPSDL"
-			;;
-		*)
-			PPSSPPSDL="./PPSSPPSDL_${PLATFORM}"
-			;;
+		"Pixel2") enable_digital_to_analog ;;
 	esac
+
+	# accommodate both relative and absolute paths for PPSSPP bin location
+	case "$PSP_BIN" in
+		"/"*) PPSSPPSDL="$PSP_BIN" ;;
+		*)    PPSSPPSDL="./$PSP_BIN" ;;
+	esac
+
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
-	"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	if [ -z "$ROM_FILE" ]; then
+		"$PPSSPPSDL" --fullscreen > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	else
+		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	fi
 
 	umount "$PSP_SS_DIR"
 	save_ppsspp_configs

@@ -7,16 +7,14 @@ export HOME=/mnt/SDCARD/Saves
 export EMU_DIR=/mnt/SDCARD/Emu/PSP/
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
+unset ROM_FILE
+LOG_DIR="/mnt/SDCARD/Saves/spruce"
+CORE="PPSSPP-SA"
+
 cd $EMU_DIR
 
 move_dotconfig_into_place
-load_ppsspp_configs
-case "$PLATFORM" in
-    "Brick"|"SmartPro") PPSSPPSDL="./PPSSPPSDL_TrimUI" ;;
-    *) 					PPSSPPSDL="./PPSSPPSDL_${PLATFORM}" ;;
-esac
-/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
-"$PPSSPPSDL" --fullscreen
 
-save_ppsspp_configs
+run_ppsspp
+
 auto_regen_tmp_update

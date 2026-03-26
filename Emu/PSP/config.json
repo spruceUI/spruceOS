@@ -23,7 +23,7 @@
   "brand": "Sony",
   "type": "handheld",
   "releaseYear": 2004,
-  "default_emulator": "standalone",
+  "default_emulator": "PPSSPP-SA",
   "scaling_min_freq": 1008000,
   "devices": [
     "TRIMUI_BRICK",
