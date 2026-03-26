@@ -49,6 +49,7 @@ _set_scummvm_platform() {
 			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib32:$LD_LIBRARY_PATH"
 			export DISPLAY_ROTATION=270
 			;;
 		"MiyooMini")
@@ -143,7 +144,13 @@ run_scummvm() {
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
 
 
-		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --save-slot=0 --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+		# Auto-load from autosave slot 0 if a save exists
+		SAVE_SLOT_ARG=""
+		if [ -f "$SAVE_DIR/$game_id.s00" ]; then
+			SAVE_SLOT_ARG="--save-slot=0"
+		fi
+
+		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" $SAVE_SLOT_ARG --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
 
 		[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 	fi
