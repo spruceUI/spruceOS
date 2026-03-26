@@ -211,6 +211,7 @@ set_backlight() {
     jq ".backlight = $value" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     # Should we get this from path or always from PyUI?
     /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
+    "$SYSTEM_EMIT" brightness-level "$value" "MiyooMini.sh/set_backlight" 2>/dev/null || true
 }
 
 brightness_down() {

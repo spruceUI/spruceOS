@@ -369,24 +369,167 @@ set_volume_to_config() {
     [ -n "$vol" ] && set_volume "$vol"
 }
 
+emit_startup_av_trace_from_config() {
+    "$SYSTEM_EMIT" av-startup-baselines-if-missing "runtimeHelper.sh" || true
+}
+
+initialize_system_emit_gate() {
+    # Read the persistent ENABLE_TRACE flag once during boot, then mirror the decision into /tmp
+    # so hot-path emit checks do not hit the SD card on every invocation.
+    mkdir -p "$SYSTEM_EMIT_GATE_DIR" 2>/dev/null || return 1
+    rm -f "$SYSTEM_EMIT_GATE_FILE"
+
+    if flag_check "ENABLE_TRACE"; then
+        touch "$SYSTEM_EMIT_GATE_FILE"
+        rm -f "$SYSTEM_EMIT_GATE_DIR/trace.off"
+        return 0
+    fi
+
+    touch "$SYSTEM_EMIT_GATE_DIR/trace.off"
+    return 1
+}
+
+system_emit_gate_enabled() {
+    [ -f "$SYSTEM_EMIT_GATE_FILE" ]
+}
+
+UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
+
+read_unpack_state() {
+    if [ -f "$UNPACK_STATE_FILE" ]; then
+        sed -n 's/^state=//p' "$UNPACK_STATE_FILE" | head -n 1
+    else
+        echo "idle"
+    fi
+}
+
+run_unpacker_foreground() {
+    launch_event="$1"
+    launch_context="$2"
+    result_event="$3"
+    log_prefix="$4"
+    allow_background_state="$5"
+    force_foreground_precmd="$6"
+    firstboot_ui="$7"
+
+    "$SYSTEM_EMIT" process runtime "$launch_event" "runtimeHelper.sh" "$launch_context" || true
+    if [ "$force_foreground_precmd" = "1" ]; then
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    else
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    fi
+
+    unpack_state="$(read_unpack_state)"
+    if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
+        log_message "Unpacker: $log_prefix returned with background worker still active."
+    else
+        log_message "Unpacker: $log_prefix returned with state=$unpack_state."
+    fi
+    "$SYSTEM_EMIT" process runtime "$result_event" "runtimeHelper.sh" "state=$unpack_state" || true
+
+    if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
+        return 0
+    fi
+
+    [ "$unpack_state" = "complete" ]
+}
+
 auto_resume_game() {
-    log_message "save_active flag detected. Autoresuming game."
+    AUTORESUME_ID="$(date +%s)-$$"
+    save_active_state="0"; flag_check "save_active" && save_active_state="1"
+    in_menu_state="0"; flag_check "in_menu" && in_menu_state="1"
+    log_message "Auto Resume[$AUTORESUME_ID] start: save_active=$save_active_state in_menu=$in_menu_state"
 
     # Ensure device is properly initialized (volume, wifi, etc) before launching auto-resume
-    /mnt/SDCARD/App/PyUI/launch.sh -startupInitOnly True
+    AUTORESUME_INIT_TIMEOUT_SEC=20
+    log_message "Auto Resume[$AUTORESUME_ID] init start: launching PyUI startupInitOnly timeout=${AUTORESUME_INIT_TIMEOUT_SEC}s"
+    /mnt/SDCARD/App/PyUI/launch.sh -startupInitOnly True &
+    init_pid="$!"
+    init_timed_out=0
+    init_degraded=0
+    init_start_ts="$(date +%s)"
+    init_next_heartbeat=2
+    log_message "Auto Resume[$AUTORESUME_ID] init pid=$init_pid"
+    while kill -0 "$init_pid" 2>/dev/null; do
+        now_ts="$(date +%s)"
+        elapsed=$((now_ts - init_start_ts))
+        if [ "$elapsed" -ge "$init_next_heartbeat" ]; then
+            log_message "Auto Resume[$AUTORESUME_ID] init wait heartbeat: elapsed=${elapsed}s pid=$init_pid alive=1"
+            init_next_heartbeat=$((init_next_heartbeat + 2))
+        fi
+        if [ "$elapsed" -ge "$AUTORESUME_INIT_TIMEOUT_SEC" ]; then
+            init_timed_out=1
+            listener_state="absent"
+            [ -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt ] && listener_state="present"
+            init_cmdline="unavailable"
+            if [ -r "/proc/$init_pid/cmdline" ]; then
+                init_cmdline="$(tr '\000' ' ' < "/proc/$init_pid/cmdline" 2>/dev/null)"
+                [ -z "$init_cmdline" ] && init_cmdline="empty"
+            fi
+            init_ps="unavailable"
+            if command -v ps >/dev/null 2>&1; then
+                init_ps="$(ps 2>/dev/null | awk -v p="$init_pid" '$1==p{print; found=1} END{if(!found) print "not-found"}')"
+            fi
+            log_message "Auto Resume[$AUTORESUME_ID] init timeout: startupInitOnly exceeded ${AUTORESUME_INIT_TIMEOUT_SEC}s (pid=$init_pid); listener=$listener_state cmdline=$init_cmdline ps=$init_ps"
+            kill "$init_pid" 2>/dev/null || true
+            sleep 1
+            kill -9 "$init_pid" 2>/dev/null || true
+            if kill -0 "$init_pid" 2>/dev/null; then
+                log_message "Auto Resume[$AUTORESUME_ID] init kill result: pid still alive after SIGTERM+SIGKILL"
+            else
+                log_message "Auto Resume[$AUTORESUME_ID] init kill result: pid exited after timeout"
+            fi
+            break
+        fi
+        sleep 0.2
+    done
+    wait "$init_pid" 2>/dev/null
+    init_rc="$?"
+    if [ "$init_timed_out" -eq 1 ]; then
+        init_degraded=1
+        log_message "Auto Resume[$AUTORESUME_ID] init degraded: continuing resume stage without startupInitOnly completion wait_rc=$init_rc"
+    else
+        log_message "Auto Resume[$AUTORESUME_ID] init complete: startupInitOnly exit_code=$init_rc"
+    fi
 
     # moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
     # copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
     MOVE_OR_COPY=cp
     if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
 
-    # move command to cmd_to_run.sh so game switcher can work correctly
-    $MOVE_OR_COPY "/mnt/SDCARD/spruce/flags/lastgame.lock" /tmp/cmd_to_run.sh && sync
+    # runtimeHelper producer contract:
+    # stage once and hand off; principal.sh owns execution and cleanup.
+    AUTORESUME_STAGED_FLAG="autoresume_staged"
+    AUTORESUME_CONSUMED_FLAG="autoresume_consumed"
+    STAGED_PATH="/tmp/cmd_to_run.sh"
+    STAGED_TMP="/tmp/cmd_to_run.sh.autoresume.tmp"
 
-    sleep 4
-    nice -n -20 /tmp/cmd_to_run.sh &> /dev/null
-    rm -f /tmp/cmd_to_run.sh # remove tmp command file after game exit; otherwise the game will load again in principal.sh later
-    log_message "Auto Resume executed"
+    if flag_check "$AUTORESUME_STAGED_FLAG"; then
+        log_message "Auto Resume[$AUTORESUME_ID] stage skipped: existing staged marker already present."
+        return 1
+    fi
+
+    rm -f "$STAGED_TMP" "$STAGED_PATH"
+    log_message "Auto Resume[$AUTORESUME_ID] stage attempt: source=/mnt/SDCARD/spruce/flags/lastgame.lock target=$STAGED_PATH mode=$MOVE_OR_COPY degraded_init=$init_degraded"
+    if $MOVE_OR_COPY "/mnt/SDCARD/spruce/flags/lastgame.lock" "$STAGED_TMP"; then
+        mv -f "$STAGED_TMP" "$STAGED_PATH" || return 1
+        chmod a+x "$STAGED_PATH"
+        flag_add "$AUTORESUME_STAGED_FLAG" --tmp
+        flag_remove "$AUTORESUME_CONSUMED_FLAG"
+        sync
+        if [ "$init_degraded" -eq 1 ]; then
+            log_message "Auto Resume[$AUTORESUME_ID] staged for principal.sh execution (degraded_init=1 stage_once=1 path=$STAGED_PATH)"
+        else
+            log_message "Auto Resume[$AUTORESUME_ID] staged for principal.sh execution (stage_once=1 path=$STAGED_PATH)"
+        fi
+    else
+        rm -f "$STAGED_TMP" "$STAGED_PATH"
+        flag_remove "$AUTORESUME_STAGED_FLAG"
+        log_message "Auto Resume[$AUTORESUME_ID] staging failed (lastgame.lock copy/move failed); fallback to normal menu boot path."
+        return 1
+    fi
+
+    return 0
 }
 
 set_up_boot_action() {

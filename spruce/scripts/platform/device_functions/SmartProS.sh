@@ -459,6 +459,7 @@ set_backlight() {
     # update device system json
     tmp=$(mktemp)
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    "$SYSTEM_EMIT" brightness-level "$val" "SmartProS.sh/set_backlight" 2>/dev/null || true
 }
 
 

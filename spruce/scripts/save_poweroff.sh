@@ -4,6 +4,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/trace.sh
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
@@ -241,8 +242,10 @@ clean_up_flags() {
     # Set flag to trigger autoresume on boot if appropriate
     if flag_check "in_menu"; then
         flag_remove "save_active"
+        log_message "save_active cleared by save_poweroff: shutdown initiated from menu"
     else
         flag_add "save_active"
+        log_message "save_active set by save_poweroff: shutdown initiated outside menu"
     fi
     flag_remove "sleep.powerdown"
     flag_remove "emulator_launched"
@@ -266,6 +269,11 @@ exec_shutdown_stage_2() {
     fi
 }
 
+
+emit_shutdown_av_trace_fallback() {
+    "$SYSTEM_EMIT" av-shutdown-baselines-if-missing "save_poweroff.sh" || true
+}
+
     #######################################
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################
@@ -287,6 +295,12 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 ################### MAIN ######################
                   ########
 
+"$SYSTEM_EMIT" power-shutdown-request "$s2_arg" "save_poweroff.sh" "shutdown triggered" || true
+emit_shutdown_av_trace_fallback || true
+# The shutdown FSM is only finalized when tracing was enabled for this boot session.
+if [ -f "$SYSTEM_EMIT_GATE_FILE" ]; then
+    trace_fsm_shutdown_finalize "save_poweroff.sh" || true
+fi
 blink_led_if_applicable
 device_prepare_for_poweroff
 log_activity_event "$(get_current_app)" "STOP"

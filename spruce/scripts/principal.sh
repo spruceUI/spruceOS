@@ -58,6 +58,36 @@ while [ 1 ]; do
     # When you select a game or app, MainUI writes that command to a temp file and closes itself.
     # This section handles what becomes of that temp file.
     if [ -f /tmp/cmd_to_run.sh ]; then
+        is_autoresume_launch=0
+        if flag_check "autoresume_staged"; then
+            is_autoresume_launch=1
+            if flag_check "autoresume_consumed"; then
+                log_message "Auto Resume contract violation prevented: staged command already consumed once in this boot; removing duplicate /tmp/cmd_to_run.sh"
+                rm -f /tmp/cmd_to_run.sh
+                flag_remove "autoresume_staged"
+                continue
+            fi
+            flag_add "autoresume_consumed" --tmp
+        fi
+
+        if [ ! -s /tmp/cmd_to_run.sh ]; then
+            log_message "cmd_to_run rejected: empty or invalid file; removing and continuing to menu."
+            rm -f /tmp/cmd_to_run.sh
+            [ "$is_autoresume_launch" -eq 1 ] && flag_remove "autoresume_staged"
+            continue
+        fi
+
+        if ! sh -n /tmp/cmd_to_run.sh >/dev/null 2>&1; then
+            log_message "cmd_to_run rejected: syntax check failed; removing and continuing to menu."
+            rm -f /tmp/cmd_to_run.sh
+            [ "$is_autoresume_launch" -eq 1 ] && flag_remove "autoresume_staged"
+            continue
+        fi
+
+        if [ "$is_autoresume_launch" -eq 1 ]; then
+            log_message "Auto Resume consume start: staged file accepted by canonical launcher"
+        fi
+
         sync
         cmd="$(sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh)"
         log_activity_event "$cmd" "START"
@@ -69,11 +99,21 @@ while [ 1 ]; do
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
         log_message "Running: $(cat /tmp/cmd_to_run.sh)"
         /tmp/cmd_to_run.sh >/dev/null 2>&1
+        cmd_exit_code=$?
 
         rm /tmp/cmd_to_run.sh
+        if [ -f /tmp/cmd_to_run.sh ]; then
+            rm -f /tmp/cmd_to_run.sh
+            log_message "cmd_to_run cleanup required second removal attempt"
+        fi
         rm /tmp/host_msg 2>/dev/null
         rm /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Disables turbo buttons in menu for Flip
         killall -9 udpbcast 2>/dev/null
+
+        if [ "$is_autoresume_launch" -eq 1 ]; then
+            flag_remove "autoresume_staged"
+            log_message "Auto Resume consume complete: launched once via principal, exit_code=$cmd_exit_code, staged artifact removed"
+        fi
 
         log_activity_event "$cmd" "STOP"
         sync
