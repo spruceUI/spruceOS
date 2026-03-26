@@ -635,14 +635,13 @@
         "RetroAchievements Settings": {
             "modeToggle": {
                 "display": "Retroachivements mode",
-                "description": "auto leaves config alone",
                 "options": [
-                    "Auto",
+                    "Manual",
                     "Disabled",
                     "Softcore",
                     "Hardcore"
                 ],
-                "selected": "Auto"
+                "selected": "Manual"
             },
             "username": {
                 "display": "Username",

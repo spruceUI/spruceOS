@@ -74,7 +74,7 @@ run_ppsspp() {
 }
 
 configure_retroachievements() {
-	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	log_message "Cheevos mode is $rac_mode" -v
 

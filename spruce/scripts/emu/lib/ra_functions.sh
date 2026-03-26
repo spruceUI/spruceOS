@@ -33,7 +33,7 @@ prepare_ra_config() {
 	esac
 
 	# Set up RetroAchievements based on spruceUI config
-	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 	log_message "Cheevos mode is $rac_mode" -v
@@ -385,7 +385,7 @@ stash_architecture_dependent_states() {
 backup_rac_creds_to_spruce_cfg() {
 
 	# if spruce setting for RAC mode is auto or disabled, do nothing.
-	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Auto")"
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	case "$rac_mode" in
 		"Softcore"|"Hardcore") ;;
 		*) return ;;
