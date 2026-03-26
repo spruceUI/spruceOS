@@ -4,6 +4,7 @@ import threading
 from typing import Callable, TypeVar
 
 from devices.device import Device
+from devices.miyoo.user_config import UserConfig
 from utils.cached_exists import CachedExists
 
 T = TypeVar('T')  # Generic input type
@@ -150,6 +151,17 @@ class GridOrListEntry:
     def get_primary_text_long(self):
         return self.primary_text_long or self.primary_text
     
+    def get_sort_key(self):
+        text = self.get_primary_text().strip() or ""
+        lower = text.lower()
+
+        if(UserConfig.get_ignore_articles_when_sorting()):
+            for article in ("the ", "a ", "an "):
+                if lower.startswith(article):
+                    return (text[len(article):] + ", " + article.strip()).lower()
+                    
+        return lower        
+
     def get_value_text(self):
         return self.value_text
     

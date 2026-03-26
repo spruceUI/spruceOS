@@ -10,7 +10,7 @@ from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
@@ -465,7 +465,7 @@ class DeviceCommon(AbstractDevice):
         ConfigCopier.ensure_config(config_path, config_if_missing)
 
         try:
-            self.system_config = SystemConfig(config_path)
+            self.system_config = DeviceUserConfig(config_path)
         except Exception as e:
             logger = PyUiLogger.get_logger()
             logger.error(f"Failed to load system config, backing up and resetting config: {e}")
@@ -479,7 +479,7 @@ class DeviceCommon(AbstractDevice):
                 pass  # config may not exist; ignore
 
             ConfigCopier.ensure_config(config_path, config_if_missing)
-            self.system_config = SystemConfig(config_path)
+            self.system_config = DeviceUserConfig(config_path)
 
 
     def is_filesystem_read_only(self,path="/mnt/SDCARD"):

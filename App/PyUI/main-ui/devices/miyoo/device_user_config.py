@@ -7,7 +7,7 @@ from utils.consts import GAME_SWITCHER, RECENTS
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
-class SystemConfig:
+class DeviceUserConfig:
     def __init__(self, filepath):
         self._lock = threading.Lock()
         self.filepath = filepath

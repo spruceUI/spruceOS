@@ -6,6 +6,7 @@ import sys
 import threading
 from devices.device import Device
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MIYOO_MINI_FLIP_VARIABLES, MIYOO_MINI_PLUS, MIYOO_MINI_V1_V2_V3_VARIABLES, MIYOO_MINI_V4_VARIABLES
+from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
@@ -215,6 +216,7 @@ def main():
         with log_timing("Config initialization", PyUiLogger.get_logger()):    
             verify_config_exists(args.pyUiConfig)
             PyUiConfig.init(args.pyUiConfig)
+            UserConfig.reload_config()
             CfwSystemConfig.init(args.cfwConfig)
 
         main_ui_mode = True
