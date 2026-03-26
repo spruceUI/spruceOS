@@ -50,18 +50,21 @@ get_shutdown_timer() {
     local IDLE_TIMEOUT=0
 
     case "$LID_TIMER" in
-        "Off")  IDLE_TIMEOUT=2592000  ;; # 30 days
-        "5s")   IDLE_TIMEOUT=5 ;;
-        "30s")  IDLE_TIMEOUT=30 ;;
-        "1m")   IDLE_TIMEOUT=60 ;;
-        "2m")   IDLE_TIMEOUT=120 ;;
-        "5m")   IDLE_TIMEOUT=300 ;;
-        "15m")  IDLE_TIMEOUT=900 ;;
-        "30m")  IDLE_TIMEOUT=1800 ;;
-        "60m")  IDLE_TIMEOUT=3600 ;;
-        "2h")   IDLE_TIMEOUT=7200 ;;
-        "3h")   IDLE_TIMEOUT=10800 ;;
-        "4h")   IDLE_TIMEOUT=14400 ;;
+        "Off")   IDLE_TIMEOUT=2592000  ;; # 30 days
+        "5s")    IDLE_TIMEOUT=5 ;;
+        "30s")   IDLE_TIMEOUT=30 ;;
+        "1m")    IDLE_TIMEOUT=60 ;;
+        "2m")    IDLE_TIMEOUT=120 ;;
+        "5m")    IDLE_TIMEOUT=300 ;;
+        "15m")   IDLE_TIMEOUT=900 ;;
+        "30m")   IDLE_TIMEOUT=1800 ;;
+        "60m")   IDLE_TIMEOUT=3600 ;;
+        "2h")    IDLE_TIMEOUT=7200 ;;
+        "3h")    IDLE_TIMEOUT=10800 ;;
+        "4h")    IDLE_TIMEOUT=14400 ;;
+        "6h")    IDLE_TIMEOUT=21600 ;;
+        "12h")   IDLE_TIMEOUT=43200 ;;
+        "24h")   IDLE_TIMEOUT=86400 ;;
     esac
 
     echo "$IDLE_TIMEOUT"
