@@ -143,7 +143,7 @@ run_scummvm() {
 		export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
 
 
-		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+		"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" --save-slot=0 --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
 
 		[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 	fi

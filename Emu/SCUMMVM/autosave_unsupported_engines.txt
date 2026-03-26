@@ -1,0 +1,20 @@
+Engines that do not support auto-save on exit (SIGUSR1 save-and-quit)
+=====================================================================
+
+These engines will still quit cleanly but will NOT save when exiting
+via GameSwitcher or home button. This is no worse than a normal exit.
+
+Autosave fully disabled:
+- BladeRunner (has its own save system per Act)
+- SCI (King's Quest, Space Quest, Leisure Suit Larry, etc.)
+- BBVS (Beavis and Butt-Head in Virtual Stupidity)
+- Petka
+- AGS (some individual games opt out)
+
+Autosave blocked by engine:
+- Hypno (Spider: The Video Game)
+- Freescape (Driller, Castle Master, Dark Side, Total Eclipse)
+- Private (Private Eye)
+
+Effectively blocked:
+- SCUMM HE games (Pajama Sam, Putt-Putt, Freddi Fish, SPY Fox)
