@@ -82,9 +82,18 @@ kill_ppsspp() {
     killall -q -15 PPSSPPSDL_TrimUI
 }
 
-kill_ra_and_standard_emulators() { 
-	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!" 
-    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus scummvm scummvm.64 scummvm.a30 scummvm.mini
+kill_scummvm() {
+	log_message "homebutton_watchdog.sh: Saving and killing ScummVM!"
+    # Send SIGUSR1 to trigger autosave, then wait for it to finish
+    killall -q -USR1 scummvm scummvm.64 scummvm.a30 scummvm.mini
+    sleep 2
+    # SIGTERM as fallback in case it didn't exit
+    killall -q -15 scummvm scummvm.64 scummvm.a30 scummvm.mini
+}
+
+kill_ra_and_standard_emulators() {
+	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!"
+    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus
 }
 
 kill_emulator() {
@@ -92,6 +101,8 @@ kill_emulator() {
         kill_drastic
     elif pgrep -f "./PPSSPPSDL" >/dev/null; then
         kill_ppsspp
+    elif pgrep -f "./scummvm" >/dev/null; then
+        kill_scummvm
     else
         kill_ra_and_standard_emulators
     fi
