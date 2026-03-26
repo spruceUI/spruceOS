@@ -50,7 +50,16 @@ case $EMU_NAME in
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
 		run_A30_port
 		;;
-		
+
+	"ARCADE")
+		if [ "$CORE" = "advmame-standalone" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/advmame_functions.sh
+			run_advmame
+		else
+			run_retroarch
+		fi
+		;;
+
 	"DC"|"NAOMI")
 		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast-stock" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
@@ -123,7 +132,9 @@ case $EMU_NAME in
 	"PSP")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
 		[ ! -d "/mnt/SDCARD/Saves/.config" ] && move_dotconfig_into_place
+		load_ppsspp_configs
 		run_ppsspp
+		save_ppsspp_configs
 		;;
 
 	"SATURN")
