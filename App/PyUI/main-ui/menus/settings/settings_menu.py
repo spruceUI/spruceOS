@@ -278,6 +278,9 @@ class SettingsMenu(ABC):
 
     def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize):
         value = get_value_func()
+        if(value is None):
+            value = 0
+            
         delta = 0
         if input == ControllerInput.DPAD_LEFT:
             delta = -1
