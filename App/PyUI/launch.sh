@@ -203,7 +203,6 @@ case "$PLATFORM" in
             "$@" >/dev/null 2>&1
         fi
 
-
     ;;
 ############################################################
 # GKD Pixel 2
@@ -230,4 +229,36 @@ case "$PLATFORM" in
         else
             "$@" >/dev/null 2>&1
         fi
+    ;;
+
+############################################################
+# MagicX Zero28
+############################################################
+
+    "Zero28" )
+
+        cd /usr/magicx/bin
+        export PYSDL2_DLL_PATH="/usr/magicx/lib"
+        DEVICE="MAGICX_ZERO28"
+
+        cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device $DEVICE \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json"
+
+        # Convert to positional args
+        set -- $cmd "$@"
+
+        log_message "Starting PyUI on $PLATFORM"
+        if [ $button_listener_mode -eq 1 ]; then
+            "$@"
+        elif [ "$redirect_output" -eq 1 ]; then
+            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
+        else
+            "$@" >/dev/null 2>&1
+        fi
+    ;;
+
 esac

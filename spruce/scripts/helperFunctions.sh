@@ -57,8 +57,12 @@ case $INFO in
                 ;;
         esac
         ;;
-    *)
-        export PLATFORM="MiyooMini"
+    *) 
+        if [ -e /usr/magicx ]; then
+            export PLATFORM="Zero28"
+        else
+            export PLATFORM="MiyooMini" 
+        fi
         ;;
 esac
 

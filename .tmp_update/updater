@@ -8,7 +8,13 @@ case $INFO in
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *) 
+        if [ -e /usr/magicx ]; then
+            export PLATFORM="Zero28"
+        else
+            export PLATFORM="MiyooMini" 
+        fi
+        ;;
 esac
 
 
