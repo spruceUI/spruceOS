@@ -653,6 +653,62 @@
                 "type": "freeText",
                 "selected": ""
             }
+        },
+        "Fn Key and Switch Settings": {
+            "fn1": {
+                "display": "Left button (Fn1)",
+                "devices": ["TRIMUI_BRICK"],
+                "options": [
+                    "Nothing",
+                    "Select",
+                    "Start",
+                    "Menu"
+                ],
+                "selected": "Nothing"
+            },
+            "fn2": {
+                "display": "Right button (Fn2)",
+                "devices": ["TRIMUI_BRICK"],
+                "options": [
+                    "Nothing",
+                    "Select",
+                    "Start",
+                    "Menu"
+                ],
+                "selected": "Nothing"
+            },
+            "switchBrick": {
+                "display": "Toggle switch",
+                "devices": ["TRIMUI_BRICK"],
+                "options": [
+                    "Nothing",
+                    "D-pad <-> Analog",
+                    "Toggle LEDs",
+                    "Mute"
+                ],
+                "selected": "D-pad <-> Analog"
+            },
+            "switchTSP": {
+                "display": "Toggle switch",
+                "devices": ["TRIMUI_SMART_PRO"],
+                "options": [
+                    "Nothing",
+                    "Toggle LEDs",
+                    "Mute"
+                ],
+                "selected": "Nothing"
+            },
+            "switchTSPS": {
+                "display": "Toggle switch",
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "options": [
+                    "Nothing",
+                    "Toggle LEDs",
+                    "Toggle Fan",
+                    "Mute"
+                ],
+                "selected": "Nothing"
+            }
         }
     }
 }
