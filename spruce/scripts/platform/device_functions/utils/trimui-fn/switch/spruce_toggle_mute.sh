@@ -1,6 +1,8 @@
 #!/bin/sh
-echo "============= scene silent ============"
+echo "============= Mute ============"
+
 mkdir -p /tmp/system/
+
 case "$1" in
 1 ) 
     echo "Enter silent"

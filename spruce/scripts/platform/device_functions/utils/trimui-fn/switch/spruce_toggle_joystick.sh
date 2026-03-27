@@ -1,6 +1,8 @@
 #!/bin/sh
 echo "============= Joystick ============"
 
+mkdir -p /tmp/trimui_inputd
+
 case "$1" in
 1 ) 
     echo "Joystick On"
