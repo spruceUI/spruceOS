@@ -13,19 +13,7 @@ get_config_path() {
 }
 
 init_gpio_a133p() {
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio107/direction
-    echo -n 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    echo -n out > /sys/class/gpio/gpio227/direction
-    echo -n 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    echo -n in > /sys/class/gpio/gpio243/direction
+    :
 }
 
 device_init() {

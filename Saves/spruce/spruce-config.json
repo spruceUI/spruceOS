@@ -657,6 +657,7 @@
         "Fn Key and Switch Settings": {
             "fn1": {
                 "display": "Left button (Fn1)",
+                "description": "also acts as L3",
                 "devices": ["TRIMUI_BRICK"],
                 "options": [
                     "Nothing",
@@ -668,6 +669,7 @@
             },
             "fn2": {
                 "display": "Right button (Fn2)",
+                "description": "also acts as R3",
                 "devices": ["TRIMUI_BRICK"],
                 "options": [
                     "Nothing",
@@ -684,7 +686,7 @@
                     "Nothing",
                     "D-pad <-> Analog",
                     "Toggle LEDs",
-                    "Mute"
+                    "Toggle Mute"
                 ],
                 "selected": "D-pad <-> Analog"
             },
@@ -694,7 +696,7 @@
                 "options": [
                     "Nothing",
                     "Toggle LEDs",
-                    "Mute"
+                    "Toggle Mute"
                 ],
                 "selected": "Nothing"
             },
@@ -705,7 +707,7 @@
                     "Nothing",
                     "Toggle LEDs",
                     "Toggle Fan",
-                    "Mute"
+                    "Toggle Mute"
                 ],
                 "selected": "Nothing"
             }
