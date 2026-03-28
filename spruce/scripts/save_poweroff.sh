@@ -177,6 +177,7 @@ stop_problematic_scripts() {
 
     # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
     killall -q -9 homebutton_watchdog.sh
+    killall -q -9 fn_setting_watchdog.sh
     killall -q -9 buttons_watchdog.sh
     killall -q -9 idlemon_mm.sh
     killall -q -9 low_power_warning.sh

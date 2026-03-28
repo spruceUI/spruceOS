@@ -45,7 +45,7 @@ get_switch_val() {
 }
 
 
-get_script_from_menu_description() {
+get_scripts_from_menu_description() {
     case "$1" in
 
         "D-pad <-> Analog") echo "toggle_joystick.sh" ;;
@@ -53,13 +53,14 @@ get_script_from_menu_description() {
         "Toggle Mute")      echo "toggle_mute.sh" ;;
         "Toggle Fan")       echo "toggle_fan.sh" ;;
 
-        "Select")           echo "send_select.sh" ;;
-        "Start")            echo "send_start.sh" ;;
-        "Menu")             echo "send_menu.sh" ;;
+        "Select")           echo "press_select.sh release_select.sh" ;;
+        "Start")            echo "press_start.sh release_start.sh" ;;
+        "Menu")             echo "press_menu.sh release_menu.sh" ;;
 
         *)                  echo "" ;;
     esac
 }
+
 
 init_tmp_dirs() {
     mkdir -p /tmp/trimui_inputd
@@ -76,25 +77,45 @@ init_tmp_dirs() {
 update_scripts_to_run() {
 
     # Clean out remnant scripts
-    rm -f "$SWITCH_DIR"/*
-    rm -f "$BUTTON_DIR"/*
+    rm -f "$SWITCH_DIR"/* 2>/dev/null
+    rm -f "$BUTTON_DIR"/* 2>/dev/null
 
     switch_val="$(get_switch_val)"
     fn1_val="$(get_fn1_val)"
     fn2_val="$(get_fn2_val)"
 
-    fn1_script="$(get_script_from_menu_description "$fn1_val")"
-    fn2_script="$(get_script_from_menu_description "$fn2_val")"
-    switch_script="$(get_script_from_menu_description "$switch_val")"
+    set --
+    scripts="$(get_scripts_from_menu_description "$fn1_val")"
+    set -- $scripts
+    fn1_press="$1"
+    fn1_release="$2"
+
+    set --
+    scripts="$(get_scripts_from_menu_description "$fn2_val")"
+    set -- $scripts
+    fn2_press="$1"
+    fn2_release="$2"
+
+    set --
+    set -- $(get_scripts_from_menu_description "$switch_val")
+    switch_script="$1"
 
     if [ -n "$switch_script" ] && [ -f "$SPRUCE_FN_DIR/switch/$switch_script" ]; then
         cp -f "$SPRUCE_FN_DIR/switch/$switch_script" "$SWITCH_DIR"/
     fi
-    if [ -n "$fn1_script" ] && [ -f "$SPRUCE_FN_DIR/button/$fn1_script" ]; then
-        cp -f "$SPRUCE_FN_DIR/button/$fn1_script" "$BUTTON_DIR"/fn1.sh
+
+    if [ -n "$fn1_press" ] && [ -f "$SPRUCE_FN_DIR/button/$fn1_press" ]; then
+        cp -f "$SPRUCE_FN_DIR/button/$fn1_press" "$BUTTON_DIR/fn1_press.sh"
     fi
-    if [ -n "$fn2_script" ] && [ -f "$SPRUCE_FN_DIR/button/$fn2_script" ]; then
-        cp -f "$SPRUCE_FN_DIR/button/$fn2_script" "$BUTTON_DIR"/fn2.sh
+    if [ -n "$fn1_release" ] && [ -f "$SPRUCE_FN_DIR/button/$fn1_release" ]; then
+        cp -f "$SPRUCE_FN_DIR/button/$fn1_release" "$BUTTON_DIR/fn1_release.sh"
+    fi
+
+    if [ -n "$fn2_press" ] && [ -f "$SPRUCE_FN_DIR/button/$fn2_press" ]; then
+        cp -f "$SPRUCE_FN_DIR/button/$fn2_press" "$BUTTON_DIR/fn2_press.sh"
+    fi
+    if [ -n "$fn2_release" ] && [ -f "$SPRUCE_FN_DIR/button/$fn2_release" ]; then
+        cp -f "$SPRUCE_FN_DIR/button/$fn2_release" "$BUTTON_DIR/fn2_release.sh"
     fi
 }
 

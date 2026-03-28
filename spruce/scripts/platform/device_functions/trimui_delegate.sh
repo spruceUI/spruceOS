@@ -249,3 +249,8 @@ brightness_up() {
     backlight=$(current_backlight)
     set_backlight $((backlight + 1))
 }
+
+launch_startup_watchdogs(){
+    launch_common_startup_watchdogs_v2
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/trimui-fn/fn_setting_watchdog.sh &
+}

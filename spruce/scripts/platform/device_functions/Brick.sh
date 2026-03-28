@@ -38,18 +38,16 @@ device_init() {
     fi
 }
 
+BUTTON_DIR=/tmp/spruce_fnkey
 device_L3_button_pressed() {
-    log_message "L3 button press functions not defined for $PLATFORM" -v
+    [ -f "$BUTTON_DIR/fn1_press.sh" ] && "$BUTTON_DIR/fn1_press.sh" &
 }
-
 device_L3_button_released() {
-    log_message "L3 button release functions not defined for $PLATFORM" -v
+    [ -f "$BUTTON_DIR/fn1_release.sh" ] && "$BUTTON_DIR/fn1_release.sh" &
 }
-
 device_R3_button_pressed() {
-    log_message "R3 button functions not defined for $PLATFORM" -v
+    [ -f "$BUTTON_DIR/fn2_press.sh" ] && "$BUTTON_DIR/fn2_press.sh" &
 }
-
 device_R3_button_released() {
-    log_message "R3 button release functions not defined for $PLATFORM" -v
+    [ -f "$BUTTON_DIR/fn2_release.sh" ] && "$BUTTON_DIR/fn2_release.sh" &
 }
