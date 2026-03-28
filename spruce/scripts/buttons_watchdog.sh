@@ -212,5 +212,18 @@ getevent $EVENTS | while read line; do
         *"key $B_HOME 1"*) # Home Button Pressed
             device_home_button_pressed
         ;;
+
+        *"key $B_L3 1"*) # L3 Button Pressed
+            device_L3_button_pressed
+        ;;
+        *"key $B_L3 0"*) # L3 Button Released
+            device_L3_button_released
+        ;;
+        *"key $B_R3 1"*) # R3 Button Pressed
+            device_R3_button_pressed
+        ;;
+        *"key $B_R3 0"*) # R3 Button Released
+            device_R3_button_released
+        ;;        
     esac
 done

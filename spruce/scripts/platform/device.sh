@@ -363,3 +363,19 @@ device_get_hw_epoch() {
     # Convert to epoch seconds
     date -d "$HW_STR" +%s 2>/dev/null
 }
+
+device_L3_button_pressed() {
+    log_message "L3 button press functions not defined for $PLATFORM" -v
+}
+
+device_L3_button_released() {
+    log_message "L3 button release functions not defined for $PLATFORM" -v
+}
+
+device_R3_button_pressed() {
+    log_message "R3 button functions not defined for $PLATFORM" -v
+}
+
+device_R3_button_released() {
+    log_message "R3 button release functions not defined for $PLATFORM" -v
+}
