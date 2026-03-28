@@ -7,7 +7,7 @@
 
 
 # we stow all our function scripts in $SPRUCE_FN_DIR/switch and $SPRUCE_FN_DIR/button.
-SPRUCE_FN_DIR="/mnt/SDCARD/spruce/platform/device_functions/utils/trimui-fn"
+SPRUCE_FN_DIR="/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/trimui-fn"
 
 # Place scripts here to be called when using the function switch.
 # Switch up (off) = sends a 0 as the first argument to the script.
@@ -76,6 +76,8 @@ init_tmp_dirs() {
 
 update_scripts_to_run() {
 
+    log_message "Updating fnkey and switch scripts"
+
     # Clean out remnant scripts
     rm -f "$SWITCH_DIR"/* 2>/dev/null
     rm -f "$BUTTON_DIR"/* 2>/dev/null
@@ -83,6 +85,8 @@ update_scripts_to_run() {
     switch_val="$(get_switch_val)"
     fn1_val="$(get_fn1_val)"
     fn2_val="$(get_fn2_val)"
+    log_message "s: $switch_val ; f1: $fn1_val ; f2: $fn2_val"
+
 
     set --
     scripts="$(get_scripts_from_menu_description "$fn1_val")"
@@ -90,15 +94,23 @@ update_scripts_to_run() {
     fn1_press="$1"
     fn1_release="$2"
 
+    log_message "f1 press script: $fn1_press"
+    log_message "f1 release script: $fn1_release"
+
     set --
     scripts="$(get_scripts_from_menu_description "$fn2_val")"
     set -- $scripts
     fn2_press="$1"
     fn2_release="$2"
 
+    log_message "f2 press script: $fn2_press"
+    log_message "f2 release script: $fn2_release"
+
     set --
     set -- $(get_scripts_from_menu_description "$switch_val")
     switch_script="$1"
+
+    log_message "switch toggle script: $switch_script"
 
     if [ -n "$switch_script" ] && [ -f "$SPRUCE_FN_DIR/switch/$switch_script" ]; then
         cp -f "$SPRUCE_FN_DIR/switch/$switch_script" "$SWITCH_DIR"/
@@ -144,6 +156,7 @@ monitor_for_config_changes() {
             values_differ "$prev_fn2" "$next_fn2" || \
             values_differ "$prev_switch" "$next_switch"
         then
+            log_message "One of the fn settings has changed."
             update_scripts_to_run
             prev_fn1="$next_fn1"
             prev_fn2="$next_fn2"
