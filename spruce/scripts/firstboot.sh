@@ -115,6 +115,22 @@ run_firstboot_package_phase() {
     rm -f "$SCUMMVM_DIR"/scummvm_*.7z
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
+    # Advmame packaging rules so firstboot only extracts the payloads needed by this device.
+    ADVMAME_DIR="/mnt/SDCARD/Emu/ARCADE"
+    case "$PLATFORM" in
+        "Brick" | "SmartPro" | "SmartProS" | "Flip")
+            ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
+            ;;
+    esac
+
+    if [ -f "$ADVMAME_7Z" ]; then
+        run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking AdvanceMAME|2"
+        SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$ADVMAME_7Z" "$ADVMAME_DIR" /mnt/SDCARD/Saves/spruce/advmame_extract.log "AdvanceMAME"
+    fi
+
+    rm -f "$ADVMAME_DIR"/advmame.7z
+    chmod +x "$ADVMAME_DIR"/advmame 2>/dev/null
+
     flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
     "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_END" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
 }
