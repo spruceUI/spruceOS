@@ -94,8 +94,8 @@ update_scripts_to_run() {
     fn1_press="$1"
     fn1_release="$2"
 
-    log_message "f1 press script: $fn1_press"
-    log_message "f1 release script: $fn1_release"
+    log_message "f1 press script: $fn1_press" -v
+    log_message "f1 release script: $fn1_release" -v
 
     set --
     scripts="$(get_scripts_from_menu_description "$fn2_val")"
@@ -103,14 +103,14 @@ update_scripts_to_run() {
     fn2_press="$1"
     fn2_release="$2"
 
-    log_message "f2 press script: $fn2_press"
-    log_message "f2 release script: $fn2_release"
+    log_message "f2 press script: $fn2_press" -v
+    log_message "f2 release script: $fn2_release" -v
 
     set --
     set -- $(get_scripts_from_menu_description "$switch_val")
     switch_script="$1"
 
-    log_message "switch toggle script: $switch_script"
+    log_message "switch toggle script: $switch_script" -v
 
     if [ -n "$switch_script" ] && [ -f "$SPRUCE_FN_DIR/switch/$switch_script" ]; then
         cp -f "$SPRUCE_FN_DIR/switch/$switch_script" "$SWITCH_DIR"/
@@ -156,7 +156,7 @@ monitor_for_config_changes() {
             values_differ "$prev_fn2" "$next_fn2" || \
             values_differ "$prev_switch" "$next_switch"
         then
-            log_message "One of the fn settings has changed."
+            log_message "One of the fn settings has changed." -v
             update_scripts_to_run
             prev_fn1="$next_fn1"
             prev_fn2="$next_fn2"
