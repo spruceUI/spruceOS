@@ -363,8 +363,10 @@ stash_architecture_dependent_states() {
 
     # List of cores to handle
     for CORE in $CORE_LIST; do
-		mkdir -p "$BASE/$CORE-$SUFFIX"
-        umount "$BASE/$CORE"
+		for BASE in "$STATES" "$SAVES"; do
+			mkdir -p "$BASE/$CORE-$SUFFIX"
+			umount "$BASE/$CORE"
+        done
     done
 }
 
