@@ -35,9 +35,9 @@
     "Emulator_64": {
       "display": "Emulator",
       "options": [
-        "fbneo_libretro",
-        "mame2003_plus_libretro",
-        "fbalpha2012_libretro",
+        "fbneo",
+        "mame2003_plus",
+        "fbalpha2012",
         "advmame-standalone"
       ],
       "selected": "fbneo_libretro",
