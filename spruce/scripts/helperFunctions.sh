@@ -1080,6 +1080,7 @@ check_and_connect_wifi() {
 
         sleep 0.1
     done
+    stop_pyui_message_writer
 }
 
 ##### ACTIVITY TRACKER STUFF #####

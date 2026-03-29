@@ -28,13 +28,26 @@
       "overrides": {},
       "devices": [
         "MIYOO_A30",
-        "MIYOO_FLIP",
-        "TRIMUI_SMART_PRO",
-        "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK",
-        "GKD_PIXEL2",
         "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
         "ANBERNIC_RGXX640480"
+      ]
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "options": [
+        "fbneo",
+        "mame2003_plus",
+        "fbalpha2012",
+        "advmame-standalone"
+      ],
+      "selected": "fbneo_libretro",
+      "overrides": {},
+      "devices": [
+        "MIYOO_FLIP",
+        "GKD_PIXEL2",
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S"
       ]
     },
     "Emulator_MiyooMini": {
