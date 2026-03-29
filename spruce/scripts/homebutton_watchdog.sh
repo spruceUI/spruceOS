@@ -197,6 +197,7 @@ prepare_game_switcher() {
         touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
 
         kill_emulator
+        kill_port
 
     # if in MainUI menu
     elif pgrep "MainUI" >/dev/null; then
@@ -271,7 +272,6 @@ home_key_down () {
                 HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
                 log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
-                kill_port
 
                 # Ensure holding home can always be used
                 # To do a fresh boot on any errors
