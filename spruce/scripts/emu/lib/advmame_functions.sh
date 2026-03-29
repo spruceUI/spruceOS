@@ -43,5 +43,13 @@ run_advmame() {
 			[ -f "$EMU_DIR/advmame.log" ] && cp "$EMU_DIR/advmame.log" "$ADVMAME_LOG"
 			kill -9 $(pidof gptokeyb2)
 			;;
+		"Pixel2")
+			[ -f "$EMU_DIR/advmame.log" ] && rm "$EMU_DIR/advmame.log"
+			export SDL_GAMECONTROLLERCONFIG="/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt"
+			/mnt/SDCARD/spruce/pixel2/bin/gptokeyb2 $EMU_DIR/advmame -c "$EMU_DIR/advmame.ini" &
+			HOME=$HOME $EMU_DIR/advmame -cfg $RC_FILE -dir_rom "$ROM_DIR" "${GAME%.*}" -log
+			[ -f "$EMU_DIR/advmame.log" ] && cp "$EMU_DIR/advmame.log" "$ADVMAME_LOG"
+			kill -9 $(pidof gptokeyb2)
+			;;
 	esac
 }
