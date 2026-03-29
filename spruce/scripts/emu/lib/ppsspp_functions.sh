@@ -51,6 +51,15 @@ run_ppsspp() {
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
+	# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
+	case "$PLATFORM" in
+		"Brick"|"SmartPro")
+			export SDL_VIDEODRIVER=mali
+			"$EMU_DIR/setalpha" 0
+			rm -f "$PSP_DIR/FailedGraphicsBackends.txt"
+			;;
+	esac
+
 	# handle lack of analog sticks on Pixel2
 	case "$PLATFORM" in
 		"Pixel2") enable_digital_to_analog ;;
