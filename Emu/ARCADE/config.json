@@ -28,7 +28,6 @@
       "overrides": {},
       "devices": [
         "MIYOO_A30",
-        "GKD_PIXEL2",
         "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
         "ANBERNIC_RGXX640480"
       ]
@@ -45,6 +44,7 @@
       "overrides": {},
       "devices": [
         "MIYOO_FLIP",
+        "GKD_PIXEL2",
         "TRIMUI_BRICK",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S"
