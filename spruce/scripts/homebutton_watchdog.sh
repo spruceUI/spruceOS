@@ -306,7 +306,6 @@ home_key_up () {
             TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
             log_message "homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
             perform_action "$TAP_HOME"
-            kill_port
         fi
 
         resume_drastic
