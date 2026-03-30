@@ -49,14 +49,14 @@ _set_scummvm_platform() {
 			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib32:$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="$EMU_DIR/liba30:$LD_LIBRARY_PATH"
 			export DISPLAY_ROTATION=270
 			;;
 		"MiyooMini")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.mini"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-mini/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-mini/scummvm.ini"
-			export LD_LIBRARY_PATH="$EMU_DIR/lib32:$LD_LIBRARY_PATH"
+			export LD_LIBRARY_PATH="$EMU_DIR/libmini:$LD_LIBRARY_PATH"
 			;;
 		*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
