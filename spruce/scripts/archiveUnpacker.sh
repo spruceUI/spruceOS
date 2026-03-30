@@ -29,6 +29,7 @@ TRACE_FINAL_REASON="normal-exit"
 TRACE_FINALIZED=0
 FIRSTBOOT_ARCHIVE_TOTAL="${SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL:-0}"
 FIRSTBOOT_ARCHIVE_COMPLETED="${SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED:-0}"
+FIRSTBOOT_PROGRESS_STATE_FILE="/tmp/firstboot_extract_progress_state"
 
 emit_archive_trace_finalize() {
     [ "$TRACE_FINALIZED" = "1" ] && return 0
@@ -103,14 +104,30 @@ count_archives_in_dir() {
     printf '%s\n' "$count"
 }
 
-firstboot_theme_progress_display() {
+firstboot_unified_progress_active() {
+    [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] || return 1
+    [ "$FIRSTBOOT_ARCHIVE_TOTAL" -gt 0 ] 2>/dev/null
+}
+
+write_firstboot_progress_state() {
+    firstboot_unified_progress_active || return 0
+
+    tmp_state="${FIRSTBOOT_PROGRESS_STATE_FILE}.$$"
+    {
+        printf 'total=%s\n' "$FIRSTBOOT_ARCHIVE_TOTAL"
+        printf 'completed=%s\n' "$FIRSTBOOT_ARCHIVE_COMPLETED"
+    } > "$tmp_state"
+    mv -f "$tmp_state" "$FIRSTBOOT_PROGRESS_STATE_FILE"
+}
+
+firstboot_unified_progress_display() {
     [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] || return 0
-    [ "$RUN_MODE" = "firstboot_theme_phase" ] || return 0
 
     if [ "$FIRSTBOOT_ARCHIVE_TOTAL" -le 0 ] 2>/dev/null; then
         FIRSTBOOT_ARCHIVE_TOTAL=$((FIRSTBOOT_ARCHIVE_COMPLETED + $(count_archives_in_dir "$THEME_DIR")))
     fi
 
+    write_firstboot_progress_state
     display_firstboot_extract_progress "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL"
 }
 
@@ -232,7 +249,7 @@ display_if_not_silent() {
 
     start_pyui_message_writer
     "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "section=${section_label:-unknown} detail=${detail_line:-unknown}" || true
-    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+    if firstboot_unified_progress_active; then
         :
     elif [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
         display_image_and_text "$ICON" 35 25 "Sprucing up your device...\nUnpacking ${section_label}\n${detail_line}" 75
@@ -272,7 +289,7 @@ unpack_archives() {
                 section_delay_applied=1
             fi
             display_if_not_silent "$section_label" "$archive_name.7z" "$section_hold"
-            if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+            if [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
                 log_firstboot_theme_archive_status "$section_label" "start" "$archive_name.7z"
             fi
 
@@ -294,9 +311,11 @@ unpack_archives() {
                 archive_status="skipped"
             fi
 
-            if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+            if firstboot_unified_progress_active; then
                 FIRSTBOOT_ARCHIVE_COMPLETED=$((FIRSTBOOT_ARCHIVE_COMPLETED + 1))
-                firstboot_theme_progress_display
+                firstboot_unified_progress_display
+            fi
+            if [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
                 log_firstboot_theme_archive_status "$section_label" "$archive_status" "$archive_name.7z"
             fi
         fi

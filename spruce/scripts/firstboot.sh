@@ -18,6 +18,7 @@ FIRSTBOOT_FINAL_REASON="normal-exit"
 FIRSTBOOT_FINALIZED=0
 FIRSTBOOT_ARCHIVE_TOTAL=0
 FIRSTBOOT_ARCHIVE_COMPLETED=0
+FIRSTBOOT_PROGRESS_STATE_FILE="/tmp/firstboot_extract_progress_state"
 
 firstboot_trace_finalize() {
     [ "$FIRSTBOOT_FINALIZED" = "1" ] && return 0
@@ -68,6 +69,16 @@ run_firstboot_intro_phase() {
     fi
 }
 
+write_firstboot_progress_state() {
+    tmp_state="${FIRSTBOOT_PROGRESS_STATE_FILE}.$$"
+
+    {
+        printf 'total=%s\n' "$FIRSTBOOT_ARCHIVE_TOTAL"
+        printf 'completed=%s\n' "$FIRSTBOOT_ARCHIVE_COMPLETED"
+    } > "$tmp_state"
+    mv -f "$tmp_state" "$FIRSTBOOT_PROGRESS_STATE_FILE"
+}
+
 count_archives_matching() {
     dir="$1"
     pattern="$2"
@@ -94,6 +105,7 @@ log_firstboot_archive_status() {
 
 show_firstboot_archive_progress() {
     [ "$FIRSTBOOT_ARCHIVE_TOTAL" -gt 0 ] || return 0
+    write_firstboot_progress_state
     display_firstboot_extract_progress "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL" "$SPRUCE_LOGO"
 }
 
@@ -158,9 +170,11 @@ run_firstboot_package_phase() {
     fi
 
     FIRSTBOOT_THEME_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/Themes" '*.7z')"
-    FIRSTBOOT_ARCHIVE_TOTAL=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT + FIRSTBOOT_THEME_ARCHIVE_TOTAL))
+    FIRSTBOOT_PREMENU_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/spruce/archives/preMenu" '*.7z')"
+    FIRSTBOOT_PRECMD_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/spruce/archives/preCmd" '*.7z')"
+    FIRSTBOOT_ARCHIVE_TOTAL=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT + FIRSTBOOT_THEME_ARCHIVE_TOTAL + FIRSTBOOT_PREMENU_ARCHIVE_TOTAL + FIRSTBOOT_PRECMD_ARCHIVE_TOTAL))
 
-    log_firstboot_archive_status "ARCHIVE_PLAN" "all" "plan" "package_total=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT)) theme_total=$FIRSTBOOT_THEME_ARCHIVE_TOTAL"
+    log_firstboot_archive_status "ARCHIVE_PLAN" "all" "plan" "package_total=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT)) theme_total=$FIRSTBOOT_THEME_ARCHIVE_TOTAL pre_menu_total=$FIRSTBOOT_PREMENU_ARCHIVE_TOTAL pre_cmd_total=$FIRSTBOOT_PRECMD_ARCHIVE_TOTAL"
     show_firstboot_archive_progress
 
     if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then

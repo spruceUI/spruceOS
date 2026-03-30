@@ -223,7 +223,7 @@ format_firstboot_extract_progress_text() {
     completed="${1:-0}"
     total="${2:-0}"
     percent="$(calculate_progress_percent "$completed" "$total")"
-    printf 'Sprucing up your device...\nExtracting files: %s%%' "$percent"
+    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
 }
 
 display_firstboot_extract_progress() {

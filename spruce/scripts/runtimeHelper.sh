@@ -394,12 +394,21 @@ system_emit_gate_enabled() {
 }
 
 UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
+FIRSTBOOT_PROGRESS_STATE_FILE="/tmp/firstboot_extract_progress_state"
 
 read_unpack_state() {
     if [ -f "$UNPACK_STATE_FILE" ]; then
         sed -n 's/^state=//p' "$UNPACK_STATE_FILE" | head -n 1
     else
         echo "idle"
+    fi
+}
+
+read_firstboot_progress_value() {
+    key="$1"
+
+    if [ -f "$FIRSTBOOT_PROGRESS_STATE_FILE" ]; then
+        sed -n "s/^${key}=//p" "$FIRSTBOOT_PROGRESS_STATE_FILE" | head -n 1
     fi
 }
 
@@ -413,11 +422,25 @@ run_unpacker_foreground() {
     firstboot_ui="$7"
 
     "$SYSTEM_EMIT" process runtime "$launch_event" "runtimeHelper.sh" "$launch_context" || true
-    if [ "$force_foreground_precmd" = "1" ]; then
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    else
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    firstboot_archive_total=""
+    firstboot_archive_completed=""
+    if [ "${firstboot_ui:-0}" = "1" ]; then
+        firstboot_archive_total="$(read_firstboot_progress_value total)"
+        firstboot_archive_completed="$(read_firstboot_progress_value completed)"
     fi
+
+    if [ "$force_foreground_precmd" = "1" ]; then
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${firstboot_archive_total:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${firstboot_archive_completed:-0}" \
+        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    else
+        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${firstboot_archive_total:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${firstboot_archive_completed:-0}" \
+        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    fi
+    [ "${firstboot_ui:-0}" = "1" ] && rm -f "$FIRSTBOOT_PROGRESS_STATE_FILE"
 
     unpack_state="$(read_unpack_state)"
     if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
