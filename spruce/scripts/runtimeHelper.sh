@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 
@@ -394,7 +395,6 @@ system_emit_gate_enabled() {
 }
 
 UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
-FIRSTBOOT_PROGRESS_STATE_FILE="/tmp/firstboot_extract_progress_state"
 
 read_unpack_state() {
     if [ -f "$UNPACK_STATE_FILE" ]; then
@@ -404,11 +404,19 @@ read_unpack_state() {
     fi
 }
 
-read_firstboot_progress_value() {
-    key="$1"
+run_archive_unpacker_foreground() {
+    force_foreground_precmd="$1"
 
-    if [ -f "$FIRSTBOOT_PROGRESS_STATE_FILE" ]; then
-        sed -n "s/^${key}=//p" "$FIRSTBOOT_PROGRESS_STATE_FILE" | head -n 1
+    if [ "$force_foreground_precmd" = "1" ]; then
+        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
+        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    else
+        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
+        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
     fi
 }
 
@@ -422,25 +430,9 @@ run_unpacker_foreground() {
     firstboot_ui="$7"
 
     "$SYSTEM_EMIT" process runtime "$launch_event" "runtimeHelper.sh" "$launch_context" || true
-    firstboot_archive_total=""
-    firstboot_archive_completed=""
-    if [ "${firstboot_ui:-0}" = "1" ]; then
-        firstboot_archive_total="$(read_firstboot_progress_value total)"
-        firstboot_archive_completed="$(read_firstboot_progress_value completed)"
-    fi
-
-    if [ "$force_foreground_precmd" = "1" ]; then
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${firstboot_archive_total:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${firstboot_archive_completed:-0}" \
-        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    else
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${firstboot_archive_total:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${firstboot_archive_completed:-0}" \
-        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    fi
-    [ "${firstboot_ui:-0}" = "1" ] && rm -f "$FIRSTBOOT_PROGRESS_STATE_FILE"
+    firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
+    run_archive_unpacker_foreground "$force_foreground_precmd"
+    firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"
 
     unpack_state="$(read_unpack_state)"
     if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then

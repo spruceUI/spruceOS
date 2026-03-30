@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
 
@@ -18,7 +19,6 @@ FIRSTBOOT_FINAL_REASON="normal-exit"
 FIRSTBOOT_FINALIZED=0
 FIRSTBOOT_ARCHIVE_TOTAL=0
 FIRSTBOOT_ARCHIVE_COMPLETED=0
-FIRSTBOOT_PROGRESS_STATE_FILE="/tmp/firstboot_extract_progress_state"
 
 firstboot_trace_finalize() {
     [ "$FIRSTBOOT_FINALIZED" = "1" ] && return 0
@@ -69,29 +69,6 @@ run_firstboot_intro_phase() {
     fi
 }
 
-write_firstboot_progress_state() {
-    tmp_state="${FIRSTBOOT_PROGRESS_STATE_FILE}.$$"
-
-    {
-        printf 'total=%s\n' "$FIRSTBOOT_ARCHIVE_TOTAL"
-        printf 'completed=%s\n' "$FIRSTBOOT_ARCHIVE_COMPLETED"
-    } > "$tmp_state"
-    mv -f "$tmp_state" "$FIRSTBOOT_PROGRESS_STATE_FILE"
-}
-
-count_archives_matching() {
-    dir="$1"
-    pattern="$2"
-    count=0
-
-    for archive in "$dir"/$pattern; do
-        [ -f "$archive" ] || continue
-        count=$((count + 1))
-    done
-
-    printf '%s\n' "$count"
-}
-
 log_firstboot_archive_status() {
     event="$1"
     label="$2"
@@ -104,9 +81,32 @@ log_firstboot_archive_status() {
 }
 
 show_firstboot_archive_progress() {
-    [ "$FIRSTBOOT_ARCHIVE_TOTAL" -gt 0 ] || return 0
-    write_firstboot_progress_state
-    display_firstboot_extract_progress "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL" "$SPRUCE_LOGO"
+    firstboot_progress_show "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL" "$SPRUCE_LOGO"
+}
+
+plan_firstboot_archive_totals() {
+    PORTMASTER_ARCHIVE_COUNT=0
+    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ] && [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] && [ -f /mnt/SDCARD/App/PortMaster/portmaster.7z ]; then
+        PORTMASTER_ARCHIVE_COUNT=1
+    fi
+
+    SCUMMVM_ARCHIVE_COUNT=0
+    if [ -f "$SCUMMVM_7Z" ]; then
+        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
+    fi
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + $(firstboot_progress_count_archives_matching "$SCUMMVM_DIR" 'scummvm_mini_*.7z')))
+    fi
+
+    ADVMAME_ARCHIVE_COUNT=0
+    if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
+        ADVMAME_ARCHIVE_COUNT=1
+    fi
+
+    FIRSTBOOT_THEME_ARCHIVE_TOTAL="$(firstboot_progress_count_archives_matching "/mnt/SDCARD/Themes" '*.7z')"
+    FIRSTBOOT_PREMENU_ARCHIVE_TOTAL="$(firstboot_progress_count_archives_matching "/mnt/SDCARD/spruce/archives/preMenu" '*.7z')"
+    FIRSTBOOT_PRECMD_ARCHIVE_TOTAL="$(firstboot_progress_count_archives_matching "/mnt/SDCARD/spruce/archives/preCmd" '*.7z')"
+    FIRSTBOOT_ARCHIVE_TOTAL=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT + FIRSTBOOT_THEME_ARCHIVE_TOTAL + FIRSTBOOT_PREMENU_ARCHIVE_TOTAL + FIRSTBOOT_PRECMD_ARCHIVE_TOTAL))
 }
 
 run_firstboot_archive_extract() {
@@ -151,28 +151,7 @@ run_firstboot_package_phase() {
             ;;
     esac
 
-    PORTMASTER_ARCHIVE_COUNT=0
-    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ] && [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] && [ -f /mnt/SDCARD/App/PortMaster/portmaster.7z ]; then
-        PORTMASTER_ARCHIVE_COUNT=1
-    fi
-
-    SCUMMVM_ARCHIVE_COUNT=0
-    if [ -f "$SCUMMVM_7Z" ]; then
-        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
-    fi
-    if [ "$PLATFORM" = "MiyooMini" ]; then
-        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + $(count_archives_matching "$SCUMMVM_DIR" 'scummvm_mini_*.7z')))
-    fi
-
-    ADVMAME_ARCHIVE_COUNT=0
-    if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
-        ADVMAME_ARCHIVE_COUNT=1
-    fi
-
-    FIRSTBOOT_THEME_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/Themes" '*.7z')"
-    FIRSTBOOT_PREMENU_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/spruce/archives/preMenu" '*.7z')"
-    FIRSTBOOT_PRECMD_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/spruce/archives/preCmd" '*.7z')"
-    FIRSTBOOT_ARCHIVE_TOTAL=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT + FIRSTBOOT_THEME_ARCHIVE_TOTAL + FIRSTBOOT_PREMENU_ARCHIVE_TOTAL + FIRSTBOOT_PRECMD_ARCHIVE_TOTAL))
+    plan_firstboot_archive_totals
 
     log_firstboot_archive_status "ARCHIVE_PLAN" "all" "plan" "package_total=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT)) theme_total=$FIRSTBOOT_THEME_ARCHIVE_TOTAL pre_menu_total=$FIRSTBOOT_PREMENU_ARCHIVE_TOTAL pre_cmd_total=$FIRSTBOOT_PRECMD_ARCHIVE_TOTAL"
     show_firstboot_archive_progress
@@ -240,19 +219,28 @@ run_firstboot_theme_phase() {
     return 2
 }
 
-run_firstboot_wrapup_phase() {
+run_firstboot_wrapup_firmware_notice() {
     if command -v A30_notify_about_FW_update_if_needed >/dev/null 2>&1; then
         A30_notify_about_FW_update_if_needed
     fi
+}
 
-    # create splore launcher if it doesn't already exist
+run_firstboot_wrapup_splore_launcher() {
     if [ ! -f "$SPLORE_CART" ]; then
         touch "$SPLORE_CART" && log_message "firstboot.sh: created $SPLORE_CART"
     else
         log_message "firstboot.sh: $SPLORE_CART already found."
     fi
+}
 
+run_firstboot_wrapup_pyui_compile() {
     "$(get_python_path)" -O -m compileall /mnt/SDCARD/App/PyUI/main-ui/
+}
+
+run_firstboot_wrapup_phase() {
+    run_firstboot_wrapup_firmware_notice
+    run_firstboot_wrapup_splore_launcher
+    run_firstboot_wrapup_pyui_compile
 }
 
 run_firstboot_intro_phase
