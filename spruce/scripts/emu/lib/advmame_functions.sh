@@ -33,6 +33,7 @@ run_advmame() {
 	case "$PLATFORM" in
 		"SmartPro"|"Brick")
 			[ -f "$EMU_DIR/advmame.log" ] && rm "$EMU_DIR/advmame.log"
+			export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/PortMaster:$LD_LIBRARY_PATH"
 			export SDL_GAMECONTROLLERCONFIG="/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
 			export SDL_VIDEODRIVER=mali
 			"$EMU_DIR/setalpha" 0
@@ -43,6 +44,7 @@ run_advmame() {
 			;;
 		"SmartProS"|"Flip")
 			[ -f "$EMU_DIR/advmame.log" ] && rm "$EMU_DIR/advmame.log"
+			export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/PortMaster:$LD_LIBRARY_PATH"
 			export SDL_GAMECONTROLLERCONFIG="/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"
 			/mnt/SDCARD/Persistent/portmaster/PortMaster/gptokeyb2 $EMU_DIR/advmame -c "$EMU_DIR/advmame.ini" &
 			$EMU_DIR/advmame -dir_rom "$ROM_DIR" "${GAME%.*}" -log
