@@ -16,6 +16,8 @@ FIRSTBOOT_PRE_EXTRACT_SCREENS="$SPRUCE_LOGO|Installing spruce $SPRUCE_VERSION|5"
 FIRSTBOOT_FINAL_STATE="COMPLETE"
 FIRSTBOOT_FINAL_REASON="normal-exit"
 FIRSTBOOT_FINALIZED=0
+FIRSTBOOT_ARCHIVE_TOTAL=0
+FIRSTBOOT_ARCHIVE_COMPLETED=0
 
 firstboot_trace_finalize() {
     [ "$FIRSTBOOT_FINALIZED" = "1" ] && return 0
@@ -66,25 +68,63 @@ run_firstboot_intro_phase() {
     fi
 }
 
+count_archives_matching() {
+    dir="$1"
+    pattern="$2"
+    count=0
+
+    for archive in "$dir"/$pattern; do
+        [ -f "$archive" ] || continue
+        count=$((count + 1))
+    done
+
+    printf '%s\n' "$count"
+}
+
+log_firstboot_archive_status() {
+    event="$1"
+    label="$2"
+    status="$3"
+    extra_context="$4"
+    percent="$(calculate_progress_percent "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL")"
+
+    log_message "Firstboot: archive_progress event=$event label=$label status=$status progress=${percent}% completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL ${extra_context}"
+    "$SYSTEM_EMIT" process firstboot "$event" "firstboot.sh/archive-progress" "label=$label status=$status completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL percent=$percent ${extra_context}" || true
+}
+
+show_firstboot_archive_progress() {
+    [ "$FIRSTBOOT_ARCHIVE_TOTAL" -gt 0 ] || return 0
+    display_firstboot_extract_progress "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL" "$SPRUCE_LOGO"
+}
+
+run_firstboot_archive_extract() {
+    archive_path="$1"
+    dest_dir="$2"
+    log_location="$3"
+    label="$4"
+
+    [ -f "$archive_path" ] || return 0
+
+    archive_name="$(basename "$archive_path")"
+    show_firstboot_archive_progress
+    log_firstboot_archive_status "ARCHIVE_BEGIN" "$label" "start" "archive=$archive_name"
+    SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$archive_path" "$dest_dir" "$log_location" "$label"
+    rc=$?
+    FIRSTBOOT_ARCHIVE_COMPLETED=$((FIRSTBOOT_ARCHIVE_COMPLETED + 1))
+    show_firstboot_archive_progress
+
+    if [ "$rc" -eq 0 ]; then
+        log_firstboot_archive_status "ARCHIVE_RESULT" "$label" "success" "archive=$archive_name rc=$rc"
+    else
+        log_firstboot_archive_status "ARCHIVE_RESULT" "$label" "failed" "archive=$archive_name rc=$rc"
+    fi
+
+    return "$rc"
+}
+
 run_firstboot_package_phase() {
     flag_add "$FIRSTBOOT_PACKAGE_PHASE_FLAG" --tmp
     "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_BEGIN" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
-
-    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
-        mkdir -p /mnt/SDCARD/Persistent/
-        if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-            extract_7z_with_progress /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
-        else
-            run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking PortMaster\nAlready installed|2"
-        fi
-
-        rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
-    else
-        display_image_and_text "$SPRUCE_LOGO" 35 25 "Sprucing up your device" 75
-    fi
-
-    # Keep the branch's sequential firstboot contract, but use the current upstream
-    # ScummVM packaging rules so firstboot only extracts the payloads needed by this device.
     SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
     case "$PLATFORM" in
         "A30")       SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a30.7z" ;;
@@ -92,23 +132,58 @@ run_firstboot_package_phase() {
         *)           SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_64.7z" ;;
     esac
 
-    MINI_SCUMMVM_ARCHIVES_FOUND=0
-    if [ "$PLATFORM" = "MiyooMini" ] && [ -n "$(find "$SCUMMVM_DIR" -maxdepth 1 -name 'scummvm_mini_*.7z' | head -n 1)" ]; then
-        MINI_SCUMMVM_ARCHIVES_FOUND=1
+    ADVMAME_DIR="/mnt/SDCARD/Emu/ARCADE"
+    ADVMAME_7Z=""
+    case "$PLATFORM" in
+        "Brick" | "SmartPro" | "SmartProS" | "Flip")
+            ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
+            ;;
+    esac
+
+    PORTMASTER_ARCHIVE_COUNT=0
+    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ] && [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] && [ -f /mnt/SDCARD/App/PortMaster/portmaster.7z ]; then
+        PORTMASTER_ARCHIVE_COUNT=1
     fi
 
-    if [ -f "$SCUMMVM_7Z" ] || [ "$MINI_SCUMMVM_ARCHIVES_FOUND" = "1" ]; then
-        run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking ScummVM|2"
+    SCUMMVM_ARCHIVE_COUNT=0
+    if [ -f "$SCUMMVM_7Z" ]; then
+        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
+    fi
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + $(count_archives_matching "$SCUMMVM_DIR" 'scummvm_mini_*.7z')))
+    fi
+
+    ADVMAME_ARCHIVE_COUNT=0
+    if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
+        ADVMAME_ARCHIVE_COUNT=1
+    fi
+
+    FIRSTBOOT_THEME_ARCHIVE_TOTAL="$(count_archives_matching "/mnt/SDCARD/Themes" '*.7z')"
+    FIRSTBOOT_ARCHIVE_TOTAL=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT + FIRSTBOOT_THEME_ARCHIVE_TOTAL))
+
+    log_firstboot_archive_status "ARCHIVE_PLAN" "all" "plan" "package_total=$((PORTMASTER_ARCHIVE_COUNT + SCUMMVM_ARCHIVE_COUNT + ADVMAME_ARCHIVE_COUNT)) theme_total=$FIRSTBOOT_THEME_ARCHIVE_TOTAL"
+    show_firstboot_archive_progress
+
+    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
+        mkdir -p /mnt/SDCARD/Persistent/
+        if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
+            run_firstboot_archive_extract /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
+        else
+            log_message "Firstboot: PortMaster already installed, skipping archive extraction"
+            "$SYSTEM_EMIT" process firstboot "ARCHIVE_SKIP" "firstboot.sh/archive-progress" "label=PortMaster status=already-installed completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
+        fi
+
+        rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
     fi
 
     if [ -f "$SCUMMVM_7Z" ]; then
-        SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
+        run_firstboot_archive_extract "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
     fi
 
     if [ "$PLATFORM" = "MiyooMini" ]; then
         for archive in "$SCUMMVM_DIR"/scummvm_mini_*.7z; do
             [ -f "$archive" ] || continue
-            SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
+            run_firstboot_archive_extract "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
         done
     fi
 
@@ -118,22 +193,14 @@ run_firstboot_package_phase() {
     fi
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
-    # Advmame packaging rules so firstboot only extracts the payloads needed by this device.
-    ADVMAME_DIR="/mnt/SDCARD/Emu/ARCADE"
-    case "$PLATFORM" in
-        "Brick" | "SmartPro" | "SmartProS" | "Flip")
-            ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
-            ;;
-    esac
-
-    if [ -f "$ADVMAME_7Z" ]; then
-        run_firstboot_screen_table "$SPRUCE_LOGO|Unpacking AdvanceMAME|2"
-        SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$ADVMAME_7Z" "$ADVMAME_DIR" /mnt/SDCARD/Saves/spruce/advmame_extract.log "AdvanceMAME"
+    if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
+        run_firstboot_archive_extract "$ADVMAME_7Z" "$ADVMAME_DIR" /mnt/SDCARD/Saves/spruce/advmame_extract.log "AdvanceMAME"
     fi
 
     rm -f "$ADVMAME_DIR"/advmame.7z
     chmod +x "$ADVMAME_DIR"/advmame 2>/dev/null
 
+    log_firstboot_archive_status "PACKAGE_PHASE_STATUS" "package-phase" "complete" "completed=$FIRSTBOOT_ARCHIVE_COMPLETED"
     flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
     "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_END" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
 }
@@ -143,9 +210,12 @@ run_firstboot_theme_phase() {
     # same thing as full boot completion. runtime.sh still owns the single closing UX once all
     # required foreground unpack work has finished cleanly, including the degraded-warning path.
     log_message "Firstboot: Running theme extraction phase before runtime-owned completion UX"
-    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_LAUNCH" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase" || true
+    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_LAUNCH" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
 
-    if SPRUCE_FIRSTBOOT_UI="${SPRUCE_FIRSTBOOT_UI:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh firstboot_theme_phase; then
+    if SPRUCE_FIRSTBOOT_UI="${SPRUCE_FIRSTBOOT_UI:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="$FIRSTBOOT_ARCHIVE_TOTAL" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="$FIRSTBOOT_ARCHIVE_COMPLETED" \
+        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh firstboot_theme_phase; then
         "$SYSTEM_EMIT" process firstboot "THEME_PHASE_RESULT" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase status=success" || true
         return 0
     fi

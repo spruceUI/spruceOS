@@ -204,6 +204,37 @@ finish_unpacking() {
     fi
 }
 
+calculate_progress_percent() {
+    completed="${1:-0}"
+    total="${2:-0}"
+
+    if [ "$total" -le 0 ] 2>/dev/null; then
+        printf '100\n'
+        return 0
+    fi
+
+    percent=$((completed * 100 / total))
+    [ "$percent" -lt 0 ] && percent=0
+    [ "$percent" -gt 100 ] && percent=100
+    printf '%s\n' "$percent"
+}
+
+format_firstboot_extract_progress_text() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    percent="$(calculate_progress_percent "$completed" "$total")"
+    printf 'Sprucing up your device...\nExtracting files: %s%%' "$percent"
+}
+
+display_firstboot_extract_progress() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
+
+    start_pyui_message_writer
+    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
 # Usage 2: flag_add "flag_name" --tmp   --> creates flag in /tmp/ instead, to avoid unnecessary SD writes and stuck states

@@ -27,6 +27,8 @@ FORCE_FOREGROUND_PRECMD="${UNPACKER_FORCE_FOREGROUND_PRECMD:-0}"
 TRACE_FINAL_STATE="FINALIZED"
 TRACE_FINAL_REASON="normal-exit"
 TRACE_FINALIZED=0
+FIRSTBOOT_ARCHIVE_TOTAL="${SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL:-0}"
+FIRSTBOOT_ARCHIVE_COMPLETED="${SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED:-0}"
 
 emit_archive_trace_finalize() {
     [ "$TRACE_FINALIZED" = "1" ] && return 0
@@ -87,6 +89,39 @@ exit_with_trace_only() {
 queue_has_archive() {
     dir="$1"
     [ -n "$(find "$dir" -maxdepth 1 -name '*.7z' | head -n 1)" ]
+}
+
+count_archives_in_dir() {
+    dir="$1"
+    count=0
+
+    for archive in "$dir"/*.7z; do
+        [ -f "$archive" ] || continue
+        count=$((count + 1))
+    done
+
+    printf '%s\n' "$count"
+}
+
+firstboot_theme_progress_display() {
+    [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] || return 0
+    [ "$RUN_MODE" = "firstboot_theme_phase" ] || return 0
+
+    if [ "$FIRSTBOOT_ARCHIVE_TOTAL" -le 0 ] 2>/dev/null; then
+        FIRSTBOOT_ARCHIVE_TOTAL=$((FIRSTBOOT_ARCHIVE_COMPLETED + $(count_archives_in_dir "$THEME_DIR")))
+    fi
+
+    display_firstboot_extract_progress "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL"
+}
+
+log_firstboot_theme_archive_status() {
+    label="$1"
+    status="$2"
+    archive_name="$3"
+    percent="$(calculate_progress_percent "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL")"
+
+    log_message "Unpacker: firstboot_theme_archive label=$label status=$status archive=$archive_name progress=${percent}% completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL"
+    "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEME_ARCHIVE_STATUS" "archiveUnpacker.sh/firstboot-theme-progress" "label=$label status=$status archive=$archive_name completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL percent=$percent" || true
 }
 
 queue_empty_for_mode() {
@@ -197,7 +232,9 @@ display_if_not_silent() {
 
     start_pyui_message_writer
     "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "section=${section_label:-unknown} detail=${detail_line:-unknown}" || true
-    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+        firstboot_theme_progress_display
+    elif [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
         display_image_and_text "$ICON" 35 25 "Sprucing up your device...\nUnpacking ${section_label}\n${detail_line}" 75
     else
         display_image_and_text "$ICON" 35 25 "Unpacking ${section_label}\n${detail_line}" 75
@@ -235,20 +272,32 @@ unpack_archives() {
                 section_delay_applied=1
             fi
             display_if_not_silent "$section_label" "$archive_name.7z" "$section_hold"
+            if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+                log_firstboot_theme_archive_status "$section_label" "start" "$archive_name.7z"
+            fi
 
             if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
                 if 7zr x -aoa "$archive" -o/; then
                     rm -f "$archive"
                     success_count=$((success_count + 1))
                     log_message "Unpacker: Unpacked and removed: $archive_name.7z"
+                    archive_status="success"
                 else
                     fail_count=$((fail_count + 1))
                     UNPACK_HAD_FAILURE=1
                     log_message "Unpacker: Failed to unpack: $archive_name.7z"
+                    archive_status="failed"
                 fi
             else
                 skip_count=$((skip_count + 1))
                 log_message "Unpacker: Skipped unpacking: $archive_name.7z (incorrect folder structure)"
+                archive_status="skipped"
+            fi
+
+            if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
+                FIRSTBOOT_ARCHIVE_COMPLETED=$((FIRSTBOOT_ARCHIVE_COMPLETED + 1))
+                firstboot_theme_progress_display
+                log_firstboot_theme_archive_status "$section_label" "$archive_status" "$archive_name.7z"
             fi
         fi
     done
@@ -319,6 +368,12 @@ run_mode_firstboot_theme_phase() {
     # firstboot.sh owns when this phase runs; archiveUnpacker owns the extraction mechanics.
     "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEME_PHASE_MODE_FOREGROUND" "archiveUnpacker.sh/run_mode_firstboot_theme_phase" "foreground firstboot theme phase run" || true
     write_unpack_state "running" "firstboot-theme-phase-active" "$$"
+    if [ "$FIRSTBOOT_ARCHIVE_TOTAL" -le 0 ] 2>/dev/null; then
+        FIRSTBOOT_ARCHIVE_TOTAL=$((FIRSTBOOT_ARCHIVE_COMPLETED + $(count_archives_in_dir "$THEME_DIR")))
+    fi
+    log_message "Unpacker: firstboot theme archive plan completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL"
+    "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEME_ARCHIVE_PLAN" "archiveUnpacker.sh/run_mode_firstboot_theme_phase" "completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
+    firstboot_theme_progress_display
     unpack_archives "$THEME_DIR" "" "Themes"
 }
 
