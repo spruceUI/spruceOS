@@ -233,7 +233,7 @@ display_if_not_silent() {
     start_pyui_message_writer
     "$SYSTEM_EMIT" process archiveUnpacker "UI_NOTIFY_ARCHIVE" "archiveUnpacker.sh/display_if_not_silent" "section=${section_label:-unknown} detail=${detail_line:-unknown}" || true
     if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] && [ "$RUN_MODE" = "firstboot_theme_phase" ]; then
-        firstboot_theme_progress_display
+        :
     elif [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
         display_image_and_text "$ICON" 35 25 "Sprucing up your device...\nUnpacking ${section_label}\n${detail_line}" 75
     else

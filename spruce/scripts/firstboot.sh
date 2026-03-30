@@ -106,7 +106,6 @@ run_firstboot_archive_extract() {
     [ -f "$archive_path" ] || return 0
 
     archive_name="$(basename "$archive_path")"
-    show_firstboot_archive_progress
     log_firstboot_archive_status "ARCHIVE_BEGIN" "$label" "start" "archive=$archive_name"
     SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI=1 extract_7z_with_progress "$archive_path" "$dest_dir" "$log_location" "$label"
     rc=$?

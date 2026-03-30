@@ -71,6 +71,7 @@ if flag_check "first_boot_${PLATFORM}"; then
     "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_RESULT" "runtime.sh" "returned from firstboot.sh status=$firstboot_result" || true
 
     if [ "$firstboot_rc" -eq 0 ] || [ "$firstboot_rc" -eq 2 ]; then
+        foreground_unpack_ok=0
         if run_unpacker_foreground \
             "FIRSTBOOT_FOREGROUND_LAUNCH" \
             "sequential extraction after firstboot" \
@@ -79,6 +80,13 @@ if flag_check "first_boot_${PLATFORM}"; then
             "0" \
             "1" \
             "1"; then
+            foreground_unpack_ok=1
+        fi
+
+        if [ "$foreground_unpack_ok" -eq 1 ] || [ "$firstboot_rc" -eq 2 ]; then
+            if [ "$foreground_unpack_ok" -ne 1 ] && [ "$firstboot_rc" -eq 2 ]; then
+                log_message "Firstboot: Showing warning completion UX despite foreground unpack result because firstboot returned warning."
+            fi
             display_image_and_text "$WIKI_ICON" 35 25 "Check out the spruce wiki on our GitHub page for tips and FAQs!" 75
             sleep 3
             if [ "$firstboot_rc" -eq 2 ]; then
