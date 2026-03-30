@@ -373,7 +373,6 @@ run_mode_firstboot_theme_phase() {
     fi
     log_message "Unpacker: firstboot theme archive plan completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL"
     "$SYSTEM_EMIT" process archiveUnpacker "FIRSTBOOT_THEME_ARCHIVE_PLAN" "archiveUnpacker.sh/run_mode_firstboot_theme_phase" "completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
-    firstboot_theme_progress_display
     unpack_archives "$THEME_DIR" "" "Themes"
 }
 
