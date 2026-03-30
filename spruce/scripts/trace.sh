@@ -21,6 +21,8 @@ TRACE_STATE_FLUSH_INTERVAL="${TRACE_STATE_FLUSH_INTERVAL:-20}"
 TRACE_TRIM_INTERVAL="${TRACE_TRIM_INTERVAL:-20}"
 TRACE_FSM_DIR="${TRACE_FSM_DIR:-$TRACE_DIR/fsm}"
 TRACE_CACHE_DIR="${TRACE_CACHE_DIR:-/tmp/spruce_trace_cache}"
+TRACE_LOCK_DIR="${TRACE_LOCK_DIR:-/tmp/spruce_trace_lock}"
+TRACE_LOCK_RETRY_DELAY="${TRACE_LOCK_RETRY_DELAY:-0.05}"
 # Maximum magnitude of a single audio/brightness step before it is flagged
 # as a large jump.  Set to 0 to disable the check for that subsystem.
 AUDIO_LARGE_JUMP_THRESHOLD="${AUDIO_LARGE_JUMP_THRESHOLD:-5}"
@@ -32,6 +34,7 @@ trace_trim_counter=0
 trace_unknown_domain_warned=""
 trace_cached_boot_id=""
 trace_cached_build_id=""
+trace_lock_depth=0
 
 trace_normalize_subsystem() {
     case "$1" in
@@ -118,7 +121,130 @@ trace_build() {
 }
 
 trace_escape_json() {
-    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+    printf '%s' "$1" | awk '
+        BEGIN {
+            ORS=""
+            backspace = sprintf("%c", 8)
+            formfeed = sprintf("%c", 12)
+        }
+        {
+            if (NR > 1) {
+                printf "\\n"
+            }
+
+            gsub(/\\/, "\\\\")
+            gsub(/"/, "\\\"")
+            gsub(/\t/, "\\t")
+            gsub(/\r/, "\\r")
+            gsub(backspace, "\\b")
+            gsub(formfeed, "\\f")
+
+            printf "%s", $0
+        }
+    '
+}
+
+trace_lock_pid_file() {
+    printf '%s/pid\n' "$TRACE_LOCK_DIR"
+}
+
+trace_lock_boot_file() {
+    printf '%s/boot_id\n' "$TRACE_LOCK_DIR"
+}
+
+trace_lock_is_stale() {
+    lock_pid_file="$(trace_lock_pid_file)"
+    [ -r "$lock_pid_file" ] || return 1
+
+    lock_pid="$(cat "$lock_pid_file" 2>/dev/null)"
+    case "$lock_pid" in
+        ''|*[!0-9]*)
+            return 0
+            ;;
+    esac
+
+    lock_boot_file="$(trace_lock_boot_file)"
+    if [ -r "$lock_boot_file" ]; then
+        lock_boot_id="$(cat "$lock_boot_file" 2>/dev/null)"
+        current_boot_id="$(trace_boot_id)"
+        [ "$lock_boot_id" = "$current_boot_id" ] || return 0
+    fi
+
+    kill -0 "$lock_pid" 2>/dev/null || return 0
+    return 1
+}
+
+trace_lock_write_metadata() {
+    pid_file="$(trace_lock_pid_file)"
+    boot_file="$(trace_lock_boot_file)"
+    pid_tmp="${pid_file}.tmp.$$"
+    boot_tmp="${boot_file}.tmp.$$"
+
+    if ! printf '%s\n' "$$" > "$pid_tmp"; then
+        rm -f "$pid_tmp" "$boot_tmp" 2>/dev/null || true
+        return 1
+    fi
+    if ! mv "$pid_tmp" "$pid_file"; then
+        rm -f "$pid_tmp" "$boot_tmp" 2>/dev/null || true
+        return 1
+    fi
+
+    if ! trace_boot_id > "$boot_tmp"; then
+        rm -f "$pid_tmp" "$boot_tmp" 2>/dev/null || true
+        return 1
+    fi
+    if ! mv "$boot_tmp" "$boot_file"; then
+        rm -f "$pid_tmp" "$boot_tmp" 2>/dev/null || true
+        return 1
+    fi
+
+    return 0
+}
+
+trace_lock_acquire() {
+    if [ "${trace_lock_depth:-0}" -gt 0 ]; then
+        trace_lock_depth=$((trace_lock_depth + 1))
+        return 0
+    fi
+
+    retry_delay="${TRACE_LOCK_RETRY_DELAY:-0.05}"
+    while ! mkdir "$TRACE_LOCK_DIR" 2>/dev/null; do
+        if trace_lock_is_stale; then
+            rm -rf "$TRACE_LOCK_DIR" 2>/dev/null || true
+            continue
+        fi
+        sleep "$retry_delay"
+    done
+
+    if ! trace_lock_write_metadata; then
+        rm -rf "$TRACE_LOCK_DIR" 2>/dev/null || true
+        return 1
+    fi
+    trace_lock_depth=1
+}
+
+trace_lock_release() {
+    case "${trace_lock_depth:-0}" in
+        ''|0)
+            return 0
+            ;;
+        *)
+            trace_lock_depth=$((trace_lock_depth - 1))
+            ;;
+    esac
+
+    [ "$trace_lock_depth" -eq 0 ] || return 0
+
+    rm -f "$(trace_lock_pid_file)" "$(trace_lock_boot_file)" 2>/dev/null || true
+    rmdir "$TRACE_LOCK_DIR" 2>/dev/null || true
+}
+
+trace_with_lock() {
+    trace_lock_acquire || return 1
+    "$@"
+    status=$?
+    trace_lock_release
+    return "$status"
 }
 
 trace_trim_file() {
@@ -190,14 +316,7 @@ trace_next_seq() {
     trace_load_state
     trace_seq=$(( ${trace_seq:-0} + 1 ))
     printf '%s\n' "$trace_seq"
-
-    flush_interval="$TRACE_STATE_FLUSH_INTERVAL"
-    case "$flush_interval" in
-        ''|*[!0-9]*) flush_interval=20 ;;
-    esac
-    if [ ! -f "$TRACE_STATE_FILE" ] || [ "$flush_interval" -le 1 ] || [ $((trace_seq % flush_interval)) -eq 0 ]; then
-        trace_save_state
-    fi
+    trace_save_state
 }
 
 trace_emit_core() {
@@ -501,7 +620,7 @@ trace_fsm_emit_lifecycle() {
 # 2. Clears all FSM state files so the new session starts fresh.
 # 3. Seeds power state as BOOTING and emits BOOTING→RUNNING + FSM_INIT.
 # Never returns non-zero.
-trace_fsm_boot_init() {
+trace_fsm_boot_init_unlocked() {
     _bi_source="${1:-runtime.sh}"
 
     trace_ensure_dirs
@@ -600,13 +719,17 @@ trace_fsm_boot_init() {
     return 0
 }
 
+trace_fsm_boot_init() {
+    trace_with_lock trace_fsm_boot_init_unlocked "$@"
+}
+
 # Called once during shutdown (save_poweroff.sh), after the power-state emit
 # and before stage 2 takes over.
 # 1. Validates that the power FSM is now in OFF or REBOOT (i.e. the emit
 #    actually happened).  If not, records INCONSISTENT_END.
 # 2. Writes FSM_FINALIZE to close the session cleanly.
 # Never returns non-zero.
-trace_fsm_shutdown_finalize() {
+trace_fsm_shutdown_finalize_unlocked() {
     _sf_source="${1:-save_poweroff.sh}"
 
     # -----------------------------------------------------------------------
@@ -670,6 +793,10 @@ trace_fsm_shutdown_finalize() {
     done
 
     return 0
+}
+
+trace_fsm_shutdown_finalize() {
+    trace_with_lock trace_fsm_shutdown_finalize_unlocked "$@"
 }
 
 # Extract the trailing integer from a state name such as VOL_12 or BL_3.

@@ -11,92 +11,79 @@ if [ -f "$SCRIPT_DIR/trace.sh" ]; then
 else
     . /mnt/SDCARD/spruce/scripts/trace.sh
 fi
-case "${1:-}" in
+
+subcommand="${1:-}"
+[ -n "$subcommand" ] || {
+    printf '%s\n' "system-emit: unknown subcommand '<none>'" >&2
+    exit 2
+}
+shift
+
+case "$subcommand" in
     power)
-        shift
-        power_trace_emit "$@"
+        trace_with_lock power_trace_emit "$@"
         ;;
     power-shutdown-request)
-        shift
-        power_trace_emit_shutdown_request "$@"
+        trace_with_lock power_trace_emit_shutdown_request "$@"
         ;;
     network)
-        shift
-        network_trace_emit "$@"
+        trace_with_lock network_trace_emit "$@"
         ;;
     audio-level)
-        shift
-        audio_trace_emit_level "$@"
+        trace_with_lock audio_trace_emit_level "$@"
         ;;
     audio-levels)
-        shift
-        audio_trace_emit_levels "$@"
+        trace_with_lock audio_trace_emit_levels "$@"
         ;;
     audio-cached-or-unknown)
-        shift
-        audio_trace_emit_cached_or_unknown "$@"
+        trace_with_lock audio_trace_emit_cached_or_unknown "$@"
         ;;
     audio-from-current-to-cached-or-unknown)
-        shift
-        audio_trace_emit_from_current_to_cached_or_unknown "$@"
+        trace_with_lock audio_trace_emit_from_current_to_cached_or_unknown "$@"
         ;;
     audio-startup-baseline-if-missing)
-        shift
-        audio_trace_emit_startup_baseline_if_missing "$@"
+        trace_with_lock audio_trace_emit_startup_baseline_if_missing "$@"
         ;;
     audio-shutdown-baseline-if-missing)
-        shift
-        audio_trace_emit_shutdown_baseline_if_missing "$@"
+        trace_with_lock audio_trace_emit_shutdown_baseline_if_missing "$@"
         ;;
     audio-wake-restore)
-        shift
-        audio_trace_emit_wake_restore "$@"
+        trace_with_lock audio_trace_emit_wake_restore "$@"
         ;;
     brightness-level)
-        shift
-        brightness_trace_emit_level "$@"
+        trace_with_lock brightness_trace_emit_level "$@"
         ;;
     brightness-levels)
-        shift
-        brightness_trace_emit_levels "$@"
+        trace_with_lock brightness_trace_emit_levels "$@"
         ;;
     brightness-cached-or-unknown)
-        shift
-        brightness_trace_emit_cached_or_unknown "$@"
+        trace_with_lock brightness_trace_emit_cached_or_unknown "$@"
         ;;
     brightness-startup-baseline-if-missing)
-        shift
-        brightness_trace_emit_startup_baseline_if_missing "$@"
+        trace_with_lock brightness_trace_emit_startup_baseline_if_missing "$@"
         ;;
     brightness-shutdown-baseline-if-missing)
-        shift
-        brightness_trace_emit_shutdown_baseline_if_missing "$@"
+        trace_with_lock brightness_trace_emit_shutdown_baseline_if_missing "$@"
         ;;
     brightness-wake-baseline)
-        shift
-        brightness_trace_emit_wake_baseline "$@"
+        trace_with_lock brightness_trace_emit_wake_baseline "$@"
         ;;
     av-startup-baselines-if-missing)
-        shift
-        av_trace_emit_startup_baselines_if_missing "$@"
+        trace_with_lock av_trace_emit_startup_baselines_if_missing "$@"
         ;;
     av-shutdown-baselines-if-missing)
-        shift
-        av_trace_emit_shutdown_baselines_if_missing "$@"
+        trace_with_lock av_trace_emit_shutdown_baselines_if_missing "$@"
         ;;
     process-init)
-        shift
-        process_trace_init "$@"
+        trace_with_lock process_trace_init "$@"
         ;;
     process-finalize)
-        shift
-        process_trace_finalize "$@"
+        trace_with_lock process_trace_finalize "$@"
         ;;
     process)
-        shift
-        process_trace_emit "$@"
+        trace_with_lock process_trace_emit "$@"
         ;;
     *)
-        printf '%s\n' "system-emit: unknown subcommand '${1:-<none>}'" >&2
+        printf '%s\n' "system-emit: unknown subcommand '$subcommand'" >&2
         exit 2
 esac
