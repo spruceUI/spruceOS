@@ -112,7 +112,10 @@ run_firstboot_package_phase() {
         done
     fi
 
-    rm -f "$SCUMMVM_DIR"/scummvm_*.7z
+    rm -f "$SCUMMVM_7Z"
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        rm -f "$SCUMMVM_DIR"/scummvm_mini_*.7z
+    fi
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
     # Advmame packaging rules so firstboot only extracts the payloads needed by this device.
