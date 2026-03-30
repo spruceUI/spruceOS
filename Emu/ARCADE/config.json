@@ -40,7 +40,7 @@
         "fbalpha2012",
         "advmame-standalone"
       ],
-      "selected": "fbneo_libretro",
+      "selected": "fbneo",
       "overrides": {},
       "devices": [
         "MIYOO_FLIP",
