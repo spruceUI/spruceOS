@@ -203,15 +203,15 @@ class GridView(View):
                          x_offset,
                          cell_y + bg_offset // offset_divisor,
                          render_mode,
-                         target_width=int(bg_width*1.05),
-                         target_height=int(bg_height*1.05))
+                         target_width=int(bg_width*1.05) if bg_width is not None else None,
+                         target_height=int(bg_height*1.05) if bg_height is not None else None)
         elif(self.unselected_bg is not None):
             Display.render_image(self.unselected_bg,
                          x_offset,
                          cell_y + bg_offset // offset_divisor,
                          render_mode,
-                         target_width=int(bg_width*1.05),
-                         target_height=int(bg_height*1.05))
+                         target_width=int(bg_width*1.05)if bg_width is not None else None,
+                         target_height=int(bg_height*1.05)if bg_height is not None else None)
 
         self._render_primary_image(image_path,
                          x_offset,
