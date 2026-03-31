@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$1" == "True" ]; then
+if [ "$1" = "True" ]; then
     if ! flag_check "perfectOverlays"; then
         /mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/GB.sh apply
         /mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/GBC.sh apply
@@ -10,7 +10,7 @@ if [ "$1" == "True" ]; then
         log_message "Turning on Perfect Overlays"
         flag_add "perfectOverlays"
     fi
-elif [ "$1" == "False" ]; then
+elif [ "$1" = "False" ]; then
     if flag_check "perfectOverlays"; then
         /mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/GB.sh remove
         /mnt/SDCARD/spruce/scripts/applySetting/PerfectOverlays/GBC.sh remove

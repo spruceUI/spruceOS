@@ -76,7 +76,7 @@ case $EMU_NAME in
 		;;
 
 	"GB"*)
-		if [ DISPLAY_ASPECT_RATIO = "4:3" ]; then
+		if [ "$DISPLAY_ASPECT_RATIO" = "4:3" ]; then
 			APPLY_PO="$(get_config_value '.menuOptions."Emulator Settings".perfectOverlays.selected' "False")"
 		else
 			APPLY_PO="False"
