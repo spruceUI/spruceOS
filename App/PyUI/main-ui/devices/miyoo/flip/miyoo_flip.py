@@ -136,7 +136,7 @@ class MiyooFlip(MiyooDevice):
             if(self.is_wifi_enabled()):
                 if(not self.connection_seems_up()):
                     self.stop_wifi_services()
-                self.start_wifi_services()
+                self.start_wifi_services(foreground_call=False)
 
         self.init_bluetooth()
 

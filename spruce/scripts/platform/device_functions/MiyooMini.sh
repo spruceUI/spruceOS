@@ -56,6 +56,15 @@ device_init() {
     if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
         # Screen is off by like ~8px unless you do this, not sure why
         cat /proc/ls
+        # export brightness settings
+        echo 0 > /sys/class/pwm/pwmchip0/export
+        # Unsure what this value should be, 1k seems to work
+        echo 1000 >  /sys/class/pwm/pwmchip0/pwm0/period
+        backlight=$(jq -r '.backlight' "$SYSTEM_JSON")
+        duty_cycle=$((backlight * 10))
+        echo "$duty_cycle" > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+        echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
+
     fi
     killall -9 main ### SUPER important in preventing .tmp_update suicide
 }
