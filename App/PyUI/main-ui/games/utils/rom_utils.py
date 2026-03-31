@@ -88,7 +88,7 @@ class RomUtils:
         for dir_to_search in directories_to_search:
             for root, dirs, files in os.walk(dir_to_search, topdown=True):
                 # Skip "Imgs" directories
-                dirs[:] = [d for d in dirs if d != "Imgs"]
+                dirs[:] = [d for d in dirs if d != "Imgs" and not d.startswith('.')]
 
                 # Files
                 for name in files:
