@@ -21,6 +21,8 @@ from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 from utils.time_logger import log_timing
 from views.grid_or_list_entry import GridOrListEntry
+from views.util.icon_searcher import IconSearcher
+from views.util.image_searcher import ImageSearcher
 
 
 class RomSelectOptionsBuilder:
@@ -272,13 +274,13 @@ class RomSelectOptionsBuilder:
 
     def build_rom_list(self, game_system,filter: Callable[[str, str, str], bool] = lambda a,b,c: True, subfolder = None,
                        prefer_savestate_screenshot: bool = False) -> list[GridOrListEntry]:
-        with log_timing("build_rom_list", PyUiLogger.get_logger()):    
-            file_rom_list = []
-            folder_rom_list = []
-
+        with log_timing("self.rom_utils.get_roms", PyUiLogger.get_logger()):    
             # Get valid files and folders once
             valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
 
+        with log_timing("build_rom_list", PyUiLogger.get_logger()):    
+            file_rom_list = []
+            folder_rom_list = []
             miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
 
             append_file = file_rom_list.append
@@ -301,8 +303,7 @@ class RomSelectOptionsBuilder:
 
                 rom_info = RomInfo(game_system, rom_file_path, display_name)
 
-                # Pre-bind parameters to lambdas to avoid repeated closures
-                img_search = lambda _, ri=rom_info, ge=game_entry: get_image_path(ri, ge, prefer_savestate_screenshot)
+                img_search = ImageSearcher(rom_info, game_entry, prefer_savestate_screenshot, get_image_path)
 
                 append_file(
                     GridOrListEntry(
@@ -311,7 +312,7 @@ class RomSelectOptionsBuilder:
                         value=rom_info,
                         image_path_searcher=img_search,
                         image_path_selected_searcher=img_search,
-                        icon_searcher=lambda _, ri=rom_info: get_favorite_icon(ri)
+                        icon_searcher=IconSearcher(rom_info,get_favorite_icon)
                     )
                 )
 

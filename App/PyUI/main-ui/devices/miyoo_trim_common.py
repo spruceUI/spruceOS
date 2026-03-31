@@ -134,7 +134,7 @@ class MiyooTrimCommon():
                 '-D', 'nl80211',
                 '-i', 'wlan0',
                 '-c', Device.get_device().get_wpa_supplicant_conf_path()
-            ])
+            ], timeout=20)
             time.sleep(0.5)  # Wait for it to initialize
             PyUiLogger.get_logger().info("wpa_supplicant started.")
         except Exception as e:
@@ -176,7 +176,7 @@ class MiyooTrimCommon():
         Device.get_device().system_config.set_wifi(1)
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","up"])
-        Device.get_device().start_wifi_services()
+        Device.get_device().start_wifi_services(foreground_call=True)
         Device.get_device().get_wifi_status.force_refresh()
         Device.get_device().get_ip_addr_text.force_refresh()
 

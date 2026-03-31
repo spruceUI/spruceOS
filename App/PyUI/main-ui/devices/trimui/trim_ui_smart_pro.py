@@ -67,7 +67,7 @@ class TrimUISmartPro(TrimUIDevice):
         if include_wifi and self.is_wifi_enabled():
             if not self.connection_seems_up():
                 self.stop_wifi_services()
-            self.start_wifi_services()
+            self.start_wifi_services(foreground_call=False)
 
     #Untested
     @throttle.limit_refresh(5)
