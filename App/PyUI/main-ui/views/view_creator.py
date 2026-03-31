@@ -148,7 +148,7 @@ class ViewCreator:
                     img_width=img_width,
                     img_height=img_height,
                     selected_index=selected_index,
-                    show_icons=ImageListView.SHOW_ICONS,
+                    show_icons=ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=image_render,
                     text_to_image_relationship=text_to_image_relationship,
                     selected_bg=Theme.get_list_small_selected_bg(),
