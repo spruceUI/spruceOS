@@ -84,7 +84,7 @@ class RomUtils:
         valid_suffix_set = {s.lower() for s in config.get_extlist()}
         ignore_set = set(config.get_ignore_list())
         scan_subfolders = config.scan_subfolders()
-
+        
         for dir_to_search in directories_to_search:
             for root, dirs, files in os.walk(dir_to_search, topdown=True):
                 # Skip "Imgs" directories
@@ -103,19 +103,11 @@ class RomUtils:
                 if scan_subfolders:
                     for d in dirs:
                         dir_path = os.path.join(root, d)
-                        # Only consider folders that actually contain ROMs
-                        # Check quickly if it has at least one valid file inside
-                        try:
-                            with os.scandir(dir_path) as it:
-                                if any(
-                                    e.is_file(follow_symlinks=False) and
-                                    ((not valid_suffix_set and not e.name.endswith(('.xml', '.txt', '.db')))
-                                    or Path(e.name).suffix.lower() in valid_suffix_set)
-                                    for e in it if not e.name.startswith('.')
-                                ):
-                                    valid_folders.append(dir_path)
-                        except (FileNotFoundError, PermissionError):
-                            continue
+                        roms_in_dir, valid_folders = self.get_roms(game_system, dir_path)
+                        if(len(roms_in_dir) > 0 or len(valid_folders) > 0):
+                            PyUiLogger.get_logger().info(f"found {roms_in_dir} in {dir_path}")
+                            valid_folders.append(os.path.join(root, dir_path))
+
 
                 # If not scanning subfolders, break after the top directory
                 if not scan_subfolders:
