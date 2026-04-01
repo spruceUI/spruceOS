@@ -373,16 +373,16 @@ class MiyooMiniCommon(MiyooDevice):
                     ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=3, print=True)
                     if(foreground_call):
                         Display.display_message("Starting WiFi process\n(May take up to 20s)")
-                    ProcessRunner.run([
+                    subprocess.Popen([
                         "wpa_supplicant",
                         "-B",
                         "-D", "nl80211",
                         "-i", "wlan0",
                         "-c", self.get_wpa_supplicant_conf_path()
-                    ], timeout=20)
+                    ])
                     if(foreground_call):
                         Display.display_message("Starting ip address assignment process\n(May take up to 20s)")
-                    ProcessRunner.run(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script", "-b"], timeout=20, print=True)
+                    subprocess.Popen(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script", "-b"])
                     time.sleep(3)
                     os.system("clear")
 
