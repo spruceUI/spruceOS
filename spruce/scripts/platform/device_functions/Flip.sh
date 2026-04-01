@@ -111,10 +111,7 @@ set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
     VOLUME_RAW=$(( VOLUME_LV * 5 ))
-    HP_VOLUME_MAX=15  # Headphone amp gain cap (0-63). Stock is 58 which is way too loud.
-    HP_VOLUME=$(( VOLUME_RAW * HP_VOLUME_MAX / 100 ))
     log_message "Setting volume to ${VOLUME_RAW}"
-
 
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
@@ -135,6 +132,8 @@ set_volume() {
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
             amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
+
+        amixer set SoftMaster "${VOLUME_RAW}%" 2>&1
     fi
 
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
@@ -462,10 +461,23 @@ device_system_handles_sdcard_unmount() {
 }
 
 device_write_default_asound_rc() {
-    cat > "$ASOUND_CONF" <<EOF
+cat > "$ASOUND_CONF" <<EOF
+pcm.softvol {
+    type softvol
+    slave {
+        pcm "dmix"
+    }
+    control {
+        name "SoftMaster"
+        card 0
+    }
+    min_dB -51.0
+    max_dB 0.0
+}
+
 pcm.!default {
     type plug
-    slave.pcm "dmix"
+    slave.pcm "softvol"
 }
 
 ctl.!default {
