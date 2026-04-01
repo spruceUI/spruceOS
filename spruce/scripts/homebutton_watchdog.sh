@@ -64,22 +64,10 @@ kill_drastic() {
 }
 
 kill_ppsspp() {
-	log_message "homebutton_watchdog.sh: Killing PPSSPP!" 
+	log_message "homebutton_watchdog.sh: Killing PPSSPP!"
 
-    # use sendevent to send SELECT + R1 combo buttons to PPSSPP
-    {
-        # send autosave hot key
-        echo $B_SELECT 1 # SELECT press
-        echo $B_R1 1     # R1 press
-        echo $B_R1 0     # R1 release
-        echo $B_SELECT 0 # SELECT release
-        echo 0 0 0       # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
-    
-    sleep 1 # wait to ensure save process is started
-    # kill PPSSPP with signal 15, it should exit after saving is done
-    killall -q -15 PPSSPPSDL_$PLATFORM
-    killall -q -15 PPSSPPSDL_TrimUI
+    # Send SIGUSR1 to trigger save-and-quit (saves state then exits cleanly)
+    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30
 }
 
 kill_scummvm() {
