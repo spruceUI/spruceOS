@@ -1082,10 +1082,10 @@ check_and_connect_wifi() {
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
                     kill "$GE_PID" 2>/dev/null
-                    display_kill
                     display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
                         "Proceeding before connected to wifi." 75
                     sleep 2
+                    stop_pyui_message_writer
                     return 1
                     ;;
             esac
@@ -1096,7 +1096,7 @@ check_and_connect_wifi() {
            ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
             log_message "Successfully connected to WiFi"
             kill "$GE_PID" 2>/dev/null
-            display_kill
+            stop_pyui_message_writer
             return 0
         fi
 
@@ -1105,7 +1105,7 @@ check_and_connect_wifi() {
         if [ $((current_time - start_time)) -ge $timeout ]; then
             log_message "WiFi connection timed out after $timeout seconds"
             kill "$GE_PID" 2>/dev/null
-            display_kill
+            stop_pyui_message_writer
             return 1
         fi
 
