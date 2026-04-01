@@ -287,7 +287,7 @@ class DeviceCommon(AbstractDevice):
             subprocess.Popen([
                 'udhcpc',
                 '-i', 'wlan0'
-            ], timeout=20)
+            ])
             time.sleep(0.5)  # Wait for it to initialize
             PyUiLogger.get_logger().info("udhcpc started.")
         except Exception as e:
