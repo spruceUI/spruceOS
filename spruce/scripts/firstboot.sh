@@ -94,8 +94,10 @@ plan_firstboot_archive_totals() {
     if [ -f "$SCUMMVM_7Z" ]; then
         SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
     fi
-    if [ "$PLATFORM" = "MiyooMini" ]; then
-        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + $(firstboot_progress_count_archives_matching "$SCUMMVM_DIR" 'scummvm_mini_*.7z')))
+    [ -f "$SCUMMVM_DIR/scummvm_extra.7z" ] && SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
+    [ -f "$SCUMMVM_DIR/scummvm_theme.7z" ] && SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
+    if [ "$PLATFORM" = "MiyooMini" ] && [ -f "$SCUMMVM_DIR/scummvm_mini_plugins.7z" ]; then
+        SCUMMVM_ARCHIVE_COUNT=$((SCUMMVM_ARCHIVE_COUNT + 1))
     fi
 
     ADVMAME_ARCHIVE_COUNT=0
@@ -172,17 +174,16 @@ run_firstboot_package_phase() {
         run_firstboot_archive_extract "$SCUMMVM_7Z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
     fi
 
+    run_firstboot_archive_extract "$SCUMMVM_DIR/scummvm_extra.7z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
+    run_firstboot_archive_extract "$SCUMMVM_DIR/scummvm_theme.7z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
+
     if [ "$PLATFORM" = "MiyooMini" ]; then
-        for archive in "$SCUMMVM_DIR"/scummvm_mini_*.7z; do
-            [ -f "$archive" ] || continue
-            run_firstboot_archive_extract "$archive" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
-        done
+        run_firstboot_archive_extract "$SCUMMVM_DIR/scummvm_mini_plugins.7z" "$SCUMMVM_DIR" /mnt/SDCARD/Saves/spruce/scummvm_extract.log "ScummVM"
     fi
 
     rm -f "$SCUMMVM_7Z"
-    if [ "$PLATFORM" = "MiyooMini" ]; then
-        rm -f "$SCUMMVM_DIR"/scummvm_mini_*.7z
-    fi
+    rm -f "$SCUMMVM_DIR"/scummvm_extra.7z "$SCUMMVM_DIR"/scummvm_theme.7z
+    rm -f "$SCUMMVM_DIR"/scummvm_mini_plugins.7z
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
     if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
