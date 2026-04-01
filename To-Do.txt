@@ -1,0 +1,24 @@
+================================================================================
+                            spruceOS To-Do List
+================================================================================
+
+
+--- Chris ---------------------------------------------------------------------
+
+
+
+--- Sun -----------------------------------------------------------------------
+
+- Flip headphone volume
+- ScummVM add display to scan
+- WiFi on brick/tsp?
+- Installer update, backup/restore/updater scripts, add version of release to UI
+- Flycast, Mupen, duckstation SA?????
+- Retroarch cores
+- Fix cache on pix2 RA build
+- 32b Retroarch for flip/XX
+
+
+--- Ry ------------------------------------------------------------------------
+
+
