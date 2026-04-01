@@ -164,6 +164,9 @@ run_scummvm_scan() {
 
 	_set_scummvm_platform
 
+	start_pyui_message_writer
+	display_image_and_text "/mnt/SDCARD/Emu/SCUMMVM/scummvm.png" 35 25 "Scanning Games.........." 75
+
     cd "$ROM_DIR" || return 1
 
     for dir in */; do
@@ -209,4 +212,5 @@ run_scummvm_scan() {
 
     sync
     echo "--- ScummVM Smart Scan Completed: $(date) ---" >> "$SCAN_LOG"
+	stop_pyui_message_writer
 }
