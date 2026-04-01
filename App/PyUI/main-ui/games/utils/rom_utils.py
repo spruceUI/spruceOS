@@ -86,32 +86,30 @@ class RomUtils:
         scan_subfolders = config.scan_subfolders()
         
         for dir_to_search in directories_to_search:
-            for root, dirs, files in os.walk(dir_to_search, topdown=True):
-                # Skip "Imgs" directories
-                dirs[:] = [d for d in dirs if d != "Imgs" and not d.startswith('.')]
-
-                # Files
-                for name in files:
+            try:
+                entries = os.listdir(dir_to_search)
+                for name in entries:
                     if name.startswith('.'):
                         continue
-                    suffix = Path(name).suffix.lower()
-                    if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
-                        if name not in ignore_set:
-                            valid_files.append(os.path.join(root, name))
 
-                # Folders
-                if scan_subfolders:
-                    for d in dirs:
-                        dir_path = os.path.join(root, d)
-                        roms_in_dir, valid_folders = self.get_roms(game_system, dir_path)
-                        if(len(roms_in_dir) > 0 or len(valid_folders) > 0):
-                            PyUiLogger.get_logger().info(f"found {roms_in_dir} in {dir_path}")
-                            valid_folders.append(os.path.join(root, dir_path))
+                    full_path = os.path.join(dir_to_search, name)
+                    if os.path.isdir(full_path):
+                        if(not scan_subfolders):
+                            continue
+                        if name == "Imgs":
+                            continue
+                        else:
+                            roms_for_subfolder, folder_for_subfolder = self.get_roms(game_system, full_path)
+                            if(len(roms_for_subfolder) > 0 or len(folder_for_subfolder) > 0):
+                                valid_folders.append(full_path)
+                    else: #is file
+                        suffix = Path(name).suffix.lower()
+                        if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
+                            if name not in ignore_set:
+                                valid_files.append(full_path)
 
-
-                # If not scanning subfolders, break after the top directory
-                if not scan_subfolders:
-                    break
+            except OSError:
+                continue  # skip unreadable dirs
 
         # Cache the result if supported
         if Device.get_device().supports_caching_rom_lists():

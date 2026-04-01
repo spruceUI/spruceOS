@@ -107,7 +107,7 @@ class MiyooMiniCommon(MiyooDevice):
 
     def startup_init(self, include_wifi=True):
         if(self.is_wifi_enabled()):
-            self.start_wifi_services()
+            self.start_wifi_services(foreground_call=False)
         self.on_mainui_config_change()
         self._set_lumination_to_config()
         self._set_contrast_to_config()
@@ -260,9 +260,24 @@ class MiyooMiniCommon(MiyooDevice):
             os.replace(tmp_path, path)
 
         except Exception:
-            # Silently ignore all failures
-            pass
+            try:
+                import subprocess
 
+                # Escape key for safety (basic)
+                safe_key = key.replace('"', r'\"')
+
+                # sed regex:
+                # ("key"\s*:\s*)   -> capture key + colon + any whitespace
+                # [^,}]*           -> match existing value (until , or })
+                # replace with new value
+                sed_expr = rf's/("{safe_key}"[[:space:]]*:[[:space:]]*)[^,}}]*/\1{value}/'
+
+                ProcessRunner.run(
+                    ["sed", "-i", "-r", sed_expr, path],
+                    check=False,print=True
+                )
+            except Exception:
+                pass
     def _set_lumination_to_config(self):
         # Miyoo internally has lumination but it does not work
         self._update_stock_config("brightness", self.system_config.backlight)
@@ -327,14 +342,14 @@ class MiyooMiniCommon(MiyooDevice):
         return self.miyoo_mini_specific_model_variables.get_battery_percent()
     
 
-    def start_wifi_services(self):
+    def start_wifi_services(self,foreground_call=False):
         if(self.miyoo_mini_specific_model_variables.supports_wifi):
             try:
                 # Check if system already has an IP address
-                result = subprocess.run(
+                result = ProcessRunner.run(
                     ["ip", "route", "get", "1"],
-                    capture_output=True,
-                    text=True
+                    print=True,
+                    timeout=1
                 )
 
                 # Extract the last field (the IP) like `awk '{print $NF;exit}'`
@@ -343,20 +358,31 @@ class MiyooMiniCommon(MiyooDevice):
 
                 if not ip:
                     PyUiLogger.get_logger().info("Wifi is disabled - trying to enable it...")
-
-                    subprocess.run(["insmod", "/mnt/SDCARD/8188fu.ko"])
-                    subprocess.run(["ifconfig", "lo", "up"])
-                    subprocess.run(["/customer/app/axp_test", "wifion"])
+                    if(foreground_call):
+                        Display.display_message("Loading WiFi driver\n(May take up to 5s)")
+                    ProcessRunner.run(["insmod", "/mnt/SDCARD/8188fu.ko"], timeout=5, print=True)
+                    if(foreground_call):
+                        Display.display_message("Starting network loopback interface\n(May take up to 5s)")
+                    ProcessRunner.run(["ifconfig", "lo", "up"], timeout=5, print=True)
+                    if(foreground_call):
+                        Display.display_message("Running miyoo-mini custom wifion script\n(May take up to 10s)")
+                    ProcessRunner.run(["/customer/app/axp_test", "wifion"], timeout=10, print=True)
                     time.sleep(2)
-                    subprocess.run(["ifconfig", "wlan0", "up"])
-                    subprocess.run([
+                    if(foreground_call):
+                        Display.display_message("Starting wlan0\n(May take up to 3s)")
+                    ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=3, print=True)
+                    if(foreground_call):
+                        Display.display_message("Starting WiFi process\n(May take up to 20s)")
+                    subprocess.Popen([
                         "wpa_supplicant",
                         "-B",
                         "-D", "nl80211",
                         "-i", "wlan0",
                         "-c", self.get_wpa_supplicant_conf_path()
                     ])
-                    subprocess.run(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script"])
+                    if(foreground_call):
+                        Display.display_message("Starting ip address assignment process\n(May take up to 20s)")
+                    subprocess.Popen(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script", "-b"])
                     time.sleep(3)
                     os.system("clear")
 
@@ -367,7 +393,7 @@ class MiyooMiniCommon(MiyooDevice):
     def set_wifi_power(self, value):
         if(self.miyoo_mini_specific_model_variables.supports_wifi):
             if(0 == value):
-                ProcessRunner.run(["ifconfig", "wlan0", "down"])
+                ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=5)
 
     def get_bluetooth_scanner(self):
         return None

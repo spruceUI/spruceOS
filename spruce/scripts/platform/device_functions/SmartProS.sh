@@ -180,12 +180,6 @@ check_if_fw_needs_update() {
 
 take_screenshot() {
     screenshot_path="$1"
-    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
-
-    if [ "$ppsspp_mode" = true ]; then
-        close_ppsspp_menu
-    fi
-
     /mnt/SDCARD/spruce/bin64/kmsgrab "$screenshot_path"
 }
 

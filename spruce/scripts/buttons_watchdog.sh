@@ -102,7 +102,7 @@ take_screenshot_bg() {
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
 
     vibrate &
-    take_screenshot "$ss_name" false
+    take_screenshot "$ss_name"
 }
 
 # Setup global screenshot shortcut

@@ -202,12 +202,6 @@ device_lid_open(){
 
 take_screenshot() {
     screenshot_path="$1"
-    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
-
-    if [ "$ppsspp_mode" = true ]; then
-        close_ppsspp_menu
-    fi
-
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
 
@@ -336,24 +330,6 @@ disable_digital_to_analog() {
     pkill "evsieve"
 }
 
-close_ppsspp_menu() {
-    if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "Closing PPSSPP menu."
-        {
-            echo $B_RIGHT 1
-            echo $B_RIGHT 0
-            echo $B_B 1
-            echo $B_B 0
-        } > /tmp/ppsspp_events.txt
-
-        # run sendevent in a fully detached subshell
-        (
-            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
-        ) < /dev/null > /dev/null 2>&1 &
-
-        sleep 0.3
-    fi
-}
 
 set_default_ra_hotkeys() {
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
