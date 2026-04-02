@@ -180,7 +180,7 @@ stop_problematic_scripts() {
     killall -q -9 buttons_watchdog.sh
     killall -q -9 idlemon_mm.sh
     killall -q -9 low_power_warning.sh
-    killall -q -9 autoIconRefresh.sh
+    killall -q -9 theme_watchdog.sh
     killall -q -9 inotifywait
     killall -q -9 inotifywatch
     killall -q -9 getevent
