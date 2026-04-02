@@ -275,9 +275,6 @@ check_if_fw_needs_update() {
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
 
-
-}
-
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
