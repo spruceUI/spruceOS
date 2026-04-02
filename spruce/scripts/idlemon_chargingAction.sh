@@ -5,12 +5,29 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Turn off screen and wait for input to wake up
-if [ "$(device_get_charging_status)" = "Charging" ] ; then
+
+if [ "$(device_get_charging_status)" = "Charging" ]; then
     turn_off_screen
 
-    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" | while read -r _; do
-        turn_on_screen
-        exit 0
+    rm -f /tmp/ge_out 2>/dev/null
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
+
+    while true; do
+        # Turn on the screen if USB is disconnected
+        if [ "$(device_get_charging_status)" = "Discharging" ]; then
+            break
+        fi
+
+        # Turn on the screen if any button is pressed
+        if [ -s "/tmp/ge_out" ]; then
+            break
+        fi
+
+        sleep 1
     done
+
+    turn_on_screen
+    kill "$GE_PID" 2>/dev/null
+    exit 0
 fi

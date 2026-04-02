@@ -46,7 +46,7 @@ dir_inp /mnt/SDCARD/Saves/saves/advmame/inp
 dir_memcard /mnt/SDCARD/Saves/saves/advmame/memcard
 dir_nvram /mnt/SDCARD/Saves/saves/advmame/nvram
 dir_sample /mnt/SDCARD/Saves/saves/advmame/sample
-dir_snap /mnt/SDCARD/Saves/saves/advmame/snap
+dir_snap /mnt/SDCARD/Saves/screenshots/advmame
 dir_sta /mnt/SDCARD/Saves/saves/advmame/sta
 display_adjust none
 display_antialias yes
