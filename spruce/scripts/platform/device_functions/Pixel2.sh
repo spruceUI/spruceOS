@@ -66,7 +66,6 @@ device_init() {
     sync_volume_level
 
     disable_swap
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
@@ -99,6 +98,11 @@ prepare_for_pyui_launch(){
 
 post_pyui_exit(){
     log_message "This doesn't need to do anything when exitting pyui" -v
+}
+
+launch_startup_watchdogs(){
+    launch_common_startup_watchdogs_v2 "true"
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
