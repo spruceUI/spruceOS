@@ -113,6 +113,7 @@ set_volume() {
     VOLUME_RAW=$(( VOLUME_LV * 5 ))
     log_message "Setting volume to ${VOLUME_RAW}"
 
+
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
@@ -121,7 +122,6 @@ set_volume() {
         amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
 
         if are_headphones_plugged_in; then
-            amixer cset "name='headphone volume'" "$HP_VOLUME" >/dev/null 2>&1
             amixer sset "Playback Path" "HP" >/dev/null 2>&1
         else
             amixer sset "Playback Path" "SPK" >/dev/null 2>&1
@@ -133,7 +133,7 @@ set_volume() {
             amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
 
-        amixer set SoftMaster "${VOLUME_RAW}%" 2>&1
+        amixer set SoftMaster "$((VOLUME_RAW / 2 + 50))%" 2>&1
     fi
 
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
@@ -472,7 +472,7 @@ pcm.softvol {
         card 0
     }
     min_dB -51.0
-    max_dB 0.0
+    max_dB -4.5
 }
 
 pcm.!default {
