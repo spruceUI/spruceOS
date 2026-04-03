@@ -18,6 +18,7 @@
 - 32b Retroarch for flip/XX
 - ppsspp control mapping
 - tsps fan blob rework 
+- ppsspp updater scripts 
 
 
 --- Ry ------------------------------------------------------------------------
