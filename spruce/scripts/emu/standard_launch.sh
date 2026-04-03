@@ -151,6 +151,8 @@ case $EMU_NAME in
 			run_scummvm_menu
 		elif [ "$RUN_SCUMMVM_SCAN" = "true" ]; then
 			run_scummvm_scan
+		elif [ "$SYNC_GAME_ID" = "true" ]; then
+			sync_game_id
 		elif [ "$CORE" = "scummvm-standalone" ]; then
 			run_scummvm
 		else
