@@ -11,7 +11,7 @@
 
 - Flip headphone volume
 - WiFi on brick/tsp?
-- Installer update, backup/restore/updater scripts, add version of release to UI
+- Installer update, add version of release to UI
 - Flycast, Mupen, duckstation SA?????
 - Retroarch cores
 - Fix cache on pix2 RA build
@@ -19,6 +19,7 @@
 - ppsspp control mapping
 - tsps fan blob rework 
 - ppsspp updater scripts 
+- shift updater scripts to firstboot.sh 
 
 
 --- Ry ------------------------------------------------------------------------
