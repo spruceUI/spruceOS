@@ -292,24 +292,10 @@ set_event_arg() {
     EVENT_ARG="-e /dev/input/event2"
 }
 
-send_virtual_key_L3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        sleep 0.1
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
-}
-
 send_menu_button_to_retroarch() {
     if pgrep "ra64.pixel2" >/dev/null; then
         echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
-    elif pgrep -f "PPSSPPSDL_Pixel2" >/dev/null; then
-        send_virtual_key_L3
     fi
-    # PICO8 has no in-game menu and
-    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
 enable_digital_to_analog() {
