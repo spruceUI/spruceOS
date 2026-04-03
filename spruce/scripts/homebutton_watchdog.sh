@@ -67,7 +67,7 @@ kill_ppsspp() {
 	log_message "homebutton_watchdog.sh: Killing PPSSPP!"
 
     # Send SIGUSR1 to trigger save-and-quit (saves state then exits cleanly)
-    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30
+    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
 }
 
 kill_scummvm() {
