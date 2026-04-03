@@ -14,7 +14,7 @@
 
 run_mupen_standalone() {
 
-	export HOME="$EMU_DIR/mupen64plus"
+	export HOME="$EMU_DIR/${MUPEN_DIR:-mupen64plus}"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	export XDG_CONFIG_HOME="$HOME"
 	export XDG_DATA_HOME="$HOME"

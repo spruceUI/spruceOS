@@ -18,14 +18,15 @@
       "overrides": {}
     },
     "Emulator_A30": {
-      "display": "Retroarch Core",
+      "display": "Emulator",
       "devices": [
         "MIYOO_A30"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
         "km_parallel_n64_xtreme_amped_turbo",
-        "mupen64plus"
+        "mupen64plus",
+        "mupen64plus-standalone"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}
