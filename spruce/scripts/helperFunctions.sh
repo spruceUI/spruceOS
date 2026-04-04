@@ -637,6 +637,75 @@ record_video() {
     fi
 }
 
+run_upgrade_scripts() {
+    UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
+    last_update_file="/mnt/SDCARD/App/spruceRestore/.lastUpdate"
+
+    if [ -f "$last_update_file" ]; then
+        current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
+    else
+        current_version="2.0.0"
+    fi
+
+    log_message "Upgrade scripts: current version is $current_version"
+
+    if [ ! -d "$UPGRADE_SCRIPTS_DIR" ]; then
+        log_message "Upgrade scripts: directory not found, skipping"
+        return 0
+    fi
+
+    is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
+    is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
+    allow_same_version=0
+
+    if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+        allow_same_version=1
+        log_message "Upgrade scripts: dev/tester mode detected, allowing same version upgrades"
+    fi
+
+    cd "$UPGRADE_SCRIPTS_DIR" || return 1
+
+    for script in *.sh; do
+        [ -f "$script" ] || continue
+
+        script_version=$(echo "$script" | cut -d'.' -f1-3)
+
+        version_compare=$(echo "$current_version $script_version" | awk '{
+            split($1, a, ".")
+            split($2, b, ".")
+            for (i = 1; i <= 3; i++) {
+                if (a[i] < b[i]) { print "older"; exit }
+                else if (a[i] > b[i]) { print "newer"; exit }
+            }
+            print "equal"
+        }')
+
+        if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
+            log_message "Upgrade scripts: running $script"
+            output=$(sh "$script" 2>&1)
+            exit_status=$?
+            log_message "Upgrade scripts: output from $script:"
+            echo "$output" >> "${log_file:-/mnt/SDCARD/Saves/spruce/spruce.log}"
+
+            if [ $exit_status -eq 0 ]; then
+                log_message "Upgrade scripts: $script completed successfully"
+                echo "spruce_version=$script_version" > "$last_update_file"
+                current_version=$script_version
+            else
+                log_message "Upgrade scripts: $script failed with exit status $exit_status"
+                cd - > /dev/null
+                return 1
+            fi
+        else
+            log_message "Upgrade scripts: skipping $script (current $current_version >= $script_version)"
+        fi
+    done
+
+    cd - > /dev/null
+    log_message "Upgrade scripts: completed. Current version: $current_version"
+    return 0
+}
+
 
 ##########     NEW PYUI-BASED SETTING SYSTEM     ##########
 

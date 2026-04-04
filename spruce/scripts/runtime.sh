@@ -112,6 +112,13 @@ else
         "0"
 fi
 
+# Run upgrade scripts on first boot after PC installer (or if flag was left by a failed restore)
+if flag_check "run_upgrades"; then
+    log_message "run_upgrades flag detected, running upgrade scripts"
+    run_upgrade_scripts
+    flag_remove "run_upgrades"
+fi
+
 /mnt/SDCARD/spruce/scripts/set_up_swap.sh &
 
 launch_startup_watchdogs
