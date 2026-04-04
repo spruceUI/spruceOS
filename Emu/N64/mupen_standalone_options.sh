@@ -92,7 +92,11 @@ do_cycle() {
     case "$1" in
         video_plugin)
             local cur=$(get_setting video_plugin)
-            local next=$(cycle_value "$cur" rice glide64mk2 gliden64)
+            if [ "$PLATFORM" = "A30" ]; then
+                local next=$(cycle_value "$cur" rice)
+            else
+                local next=$(cycle_value "$cur" rice glide64mk2 gliden64)
+            fi
             set_setting video_plugin "$next"
             ;;
         frameskip)
@@ -123,7 +127,17 @@ build_menu() {
     local cpu=$(label_cpu "$(get_setting cpu_emulator)")
     local exp=$(label_expansion "$(get_setting expansion_pak)")
 
-    cat > /tmp/mupen_options.json << ENDJSON
+    if [ "$PLATFORM" = "A30" ]; then
+        cat > /tmp/mupen_options.json << ENDJSON
+{
+    "Frameskip: $fs": "$SELF cycle frameskip",
+    "CPU Mode: $cpu": "$SELF cycle cpu_emulator",
+    "Expansion Pak: $exp": "$SELF cycle expansion_pak",
+    "Back": "EXIT"
+}
+ENDJSON
+    else
+        cat > /tmp/mupen_options.json << ENDJSON
 {
     "Video Plugin: $vp": "$SELF cycle video_plugin",
     "Frameskip: $fs": "$SELF cycle frameskip",
@@ -132,6 +146,7 @@ build_menu() {
     "Back": "EXIT"
 }
 ENDJSON
+    fi
 }
 
 ##### MAIN #####
