@@ -100,7 +100,8 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
             -x!spruce/flags/developer_mode \
-            -xr!App/adbd
+            -xr!App/adbd \
+            -x!To-Do.txt
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
