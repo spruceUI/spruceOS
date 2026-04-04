@@ -25,19 +25,47 @@ run_mupen_standalone() {
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
 
-	# Define arguments for Hacked Rice:
-	# --resolution: 4:3 Render Canvas (960x720)
-	# --set: Physical Viewport (1280x720)
+	# Read standalone settings (video plugin, frameskip, etc.)
+	STANDALONE_SETTINGS="/mnt/SDCARD/Emu/N64/standalone_settings.json"
+	if [ -f "$STANDALONE_SETTINGS" ]; then
+		SA_PLUGIN=$(jq -r '.video_plugin // "rice"' "$STANDALONE_SETTINGS")
+		SA_FRAMESKIP=$(jq -r '.frameskip // "0"' "$STANDALONE_SETTINGS")
+		SA_CPU=$(jq -r '.cpu_emulator // "2"' "$STANDALONE_SETTINGS")
+		SA_EXPANSION=$(jq -r '.expansion_pak // "1"' "$STANDALONE_SETTINGS")
+	else
+		SA_PLUGIN="rice"
+		SA_FRAMESKIP="0"
+		SA_CPU="2"
+		SA_EXPANSION="1"
+	fi
+
+	# Map plugin name to .so filename
+	case "$SA_PLUGIN" in
+		rice) GFX_PLUGIN="mupen64plus-video-rice.so" ;;
+		glide64mk2) GFX_PLUGIN="mupen64plus-video-glide64mk2.so" ;;
+		gliden64) GFX_PLUGIN="mupen64plus-video-GLideN64.so" ;;
+		*) GFX_PLUGIN="mupen64plus-video-rice.so" ;;
+	esac
+
 	if [ "$PLATFORM" = "A30" ]; then
 		# A30: render at 480x360 (4:3 fitting in 480-wide portrait framebuffer)
-		ARGS="--gfx mupen64plus-video-rice.so --resolution 480x360"
+		ARGS="--gfx $GFX_PLUGIN --resolution 480x360"
 	else
-		ARGS="--gfx mupen64plus-video-rice.so --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
-		# Tell the core to offset the viewport to center 4:3 on widescreen
+		ARGS="--gfx $GFX_PLUGIN --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
+		# Center 4:3 on widescreen displays
 		if [ "$DISPLAY_WIDTH" -gt "$G_WIDTH" ]; then
 			export M64P_VIEWPORT_X=$(( (DISPLAY_WIDTH - G_WIDTH) / 2 ))
 		fi
 	fi
+
+	# Apply standalone settings via --set
+	if [ "$SA_FRAMESKIP" = "auto" ]; then
+		ARGS="$ARGS --set Video-Rice[SkipFrame]=1 --set Video-Glide64mk2[autoframeskip]=1"
+	elif [ "$SA_FRAMESKIP" != "0" ]; then
+		ARGS="$ARGS --set Video-Rice[SkipFrame]=1 --set Video-Glide64mk2[maxframeskip]=$SA_FRAMESKIP"
+	fi
+	ARGS="$ARGS --set Core[R4300Emulator]=$SA_CPU"
+	[ "$SA_EXPANSION" = "0" ] && ARGS="$ARGS --set Core[DisableExtraMem]=True"
 
 	case "$ROM_FILE" in
 	*.n64 | *.v64 | *.z64)
