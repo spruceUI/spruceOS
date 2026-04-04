@@ -5,6 +5,10 @@
 # - Flip: old binding "Pause = 1-111,10-109,10-104" (keyboard/raw codes) → "Pause = 10-196:10-191"
 # - Brick/SmartPro/SmartProS/AnbernicRGCubeXX: Pause line was missing entirely → add it
 # All devices now use the same unified Select+Square combo for Pause.
+#
+# Fix PPSSPP menu confirm button (ButtonPreference)
+# - Old value 0 = Circle confirms (Japanese style, east button)
+# - New value 1 = Cross confirms (Western style, south button)
 
 TARGET_VERSION="4.1.2"
 
@@ -54,6 +58,34 @@ done
 
 # Patch the active controls.ini (restored from backup, may be stale)
 patch_controls_file "$PSP_DIR/controls.ini"
+
+# --- Fix PPSSPP menu confirm button ---
+
+patch_button_preference() {
+    file="$1"
+    [ -f "$file" ] || return 0
+
+    if grep -q '^ButtonPreference = 1' "$file"; then
+        log_message "$(basename "$file"): ButtonPreference already correct, skipping"
+        return 0
+    fi
+
+    if grep -q '^ButtonPreference = ' "$file"; then
+        sed "s|^ButtonPreference = .*|ButtonPreference = 1|" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+        log_message "$(basename "$file"): Updated ButtonPreference to 1"
+    else
+        echo "ButtonPreference = 1" >> "$file"
+        log_message "$(basename "$file"): Added ButtonPreference = 1"
+    fi
+}
+
+# Patch all per-platform ppsspp config files
+for ini in "$PSP_DIR"/ppsspp-*.ini; do
+    patch_button_preference "$ini"
+done
+
+# Patch the active ppsspp.ini (restored from backup, may be stale)
+patch_button_preference "$PSP_DIR/ppsspp.ini"
 
 log_message "Upgrade to version $TARGET_VERSION completed successfully"
 exit 0
