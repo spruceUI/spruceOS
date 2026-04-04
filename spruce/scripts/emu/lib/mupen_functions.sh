@@ -39,7 +39,12 @@ run_mupen_standalone() {
 	*.n64 | *.v64 | *.z64)
 		ROM_PATH="$ROM_FILE"
 		;;
-	*.zip | *.7z)
+	*.zip)
+		TEMP_ROM=$(mktemp -d)
+		unzip -o "$ROM_FILE" -d "$TEMP_ROM"
+		ROM_PATH="$(find "$TEMP_ROM" -type f | head -1)"
+		;;
+	*.7z)
 		TEMP_ROM=$(mktemp)
 		ROM_PATH="$TEMP_ROM"
 		7zr e "$ROM_FILE" -so >"$TEMP_ROM"
@@ -65,5 +70,5 @@ run_mupen_standalone() {
 		kill -9 $(pidof gptokeyb2)
 	fi
 
-	rm -f "$TEMP_ROM"
+	rm -rf "$TEMP_ROM"
 }
