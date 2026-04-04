@@ -406,35 +406,19 @@ device_home_button_pressed() {
 }
 
 device_stop_thermal_process(){
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    case "$custom_thermal_watchdog" in
-        "Cool")
-            killall thermal-watchdog
-            ;;
-        *)
-            pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
-            if [ -n "$pid" ]; then
-                kill "$pid"
-            fi
-            ;;
-    esac
+    killall thermal-watchdog 2>/dev/null
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state
 }
 
 device_run_thermal_process(){
-    # Initial trip point = 60C (Fan should kick on -- No throttling noticed)
-    # Second trip point = 70C (CPU/GPU Start getting throttled)
-    # Third trip point = 105C (Likely Critical shutdown -- Untested) 
+    THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
+    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
 
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
-    if [ "$custom_thermal_watchdog" = "Cool" ]; then
-        # Fan is always on
-        echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    else
-        # Fan adjusts only to prevent throttling
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    fi
+    # Convert display name to lowercase profile name
+    profile=$(echo "$selected" | tr 'A-Z' 'a-z')
 
+    echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
+    /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
 }
 
 set_backlight() {

@@ -288,10 +288,13 @@
                 "display": "Thermal Control",
                 "description": "Customize fan profiles",
                 "options": [
-                    "Adaptive",
-                    "Cool"
+                    "Off",
+                    "Quiet",
+                    "Conservative",
+                    "Smart",
+                    "Sport"
                 ],
-                "selected": "Adaptive"
+                "selected": "Smart"
             }
         },
         "Emulator Settings": {
