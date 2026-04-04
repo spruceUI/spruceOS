@@ -14,8 +14,8 @@ if [ "$(device_get_charging_status)" = "Charging" ]; then
     GE_PID=$!
 
     while true; do
-        # Turn on the screen if USB is disconnected
-        if [ "$(device_get_charging_status)" = "Discharging" ]; then
+        # Turn on the screen if USB is disconnected or battery is full
+        if [ "$(device_get_charging_status)" != "Charging" ]; then
             break
         fi
 
