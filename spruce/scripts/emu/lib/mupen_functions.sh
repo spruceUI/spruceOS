@@ -25,6 +25,9 @@ run_mupen_standalone() {
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
 
+	# Define arguments for Hacked Rice:
+	# --resolution: 4:3 Render Canvas (960x720)
+	# --set: Physical Viewport (1280x720)
 	if [ "$PLATFORM" = "A30" ]; then
 		# A30: render at 480x360 (4:3 fitting in 480-wide portrait framebuffer)
 		ARGS="--gfx mupen64plus-video-rice.so --resolution 480x360"
@@ -45,16 +48,18 @@ run_mupen_standalone() {
 
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	if [ "$PLATFORM" = "A30" ]; then
-		# Block SDL from seeing the virtual joypad; use keyboard input only
-		export SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
-		export SDL_JOYSTICK_DEVICE=-1
 		export M64P_ROTATE=1
+		# Input shim: grabs keyboard (event3), R2-hold for C-buttons, passthrough rest
+		./a30_input_shim /dev/input/event3 &
+		sleep 0.3
 	else
 		./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 		sleep 0.3
 	fi
 	./mupen64plus $ARGS "$ROM_PATH" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
-	if [ "$PLATFORM" != "A30" ]; then
+	if [ "$PLATFORM" = "A30" ]; then
+		kill -9 $(pidof a30_input_shim) 2>/dev/null
+	else
 		kill -9 $(pidof gptokeyb2)
 	fi
 
