@@ -16,8 +16,6 @@
 - Retroarch cores
 - 32b Retroarch for flip/XX
 - ppsspp control mapping
-- tsps fan blob rework 
-
 
 --- Ry ------------------------------------------------------------------------
 
