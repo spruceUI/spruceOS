@@ -79,9 +79,18 @@ kill_scummvm() {
     killall -q -15 scummvm scummvm.64 scummvm.a30 scummvm.mini
 }
 
+kill_mupen() {
+	log_message "homebutton_watchdog.sh: Saving and killing mupen64plus!"
+    # Send SIGUSR1 to trigger save-state-and-quit
+    killall -q -USR1 mupen64plus
+    sleep 2
+    # SIGTERM as fallback in case it didn't exit
+    killall -q -15 mupen64plus
+}
+
 kill_ra_and_standard_emulators() {
 	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!"
-    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui mupen64plus
+    killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui
 }
 
 kill_emulator() {
@@ -91,6 +100,8 @@ kill_emulator() {
         kill_ppsspp
     elif pgrep -f "./scummvm" >/dev/null; then
         kill_scummvm
+    elif pgrep -f "mupen64plus" >/dev/null; then
+        kill_mupen
     else
         kill_ra_and_standard_emulators
     fi

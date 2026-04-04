@@ -46,6 +46,8 @@ run_mupen_standalone() {
 		;;
 	esac
 
+	export M64P_AUTOLOAD=1
+
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	if [ "$PLATFORM" = "A30" ]; then
 		export M64P_ROTATE=1
