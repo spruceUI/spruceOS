@@ -33,6 +33,10 @@ run_mupen_standalone() {
 		ARGS="--gfx mupen64plus-video-rice.so --resolution 480x360"
 	else
 		ARGS="--gfx mupen64plus-video-rice.so --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
+		# Tell the core to offset the viewport to center 4:3 on widescreen
+		if [ "$DISPLAY_WIDTH" -gt "$G_WIDTH" ]; then
+			export M64P_VIEWPORT_X=$(( (DISPLAY_WIDTH - G_WIDTH) / 2 ))
+		fi
 	fi
 
 	case "$ROM_FILE" in
