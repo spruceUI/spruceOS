@@ -149,10 +149,9 @@ case $EMU_NAME in
 		. /mnt/SDCARD/spruce/scripts/emu/lib/scummvm_functions.sh
 		if [ "$OPEN_SCUMMVM_MENU" = "true" ]; then
 			run_scummvm_menu
+			sync_game_id
 		elif [ "$RUN_SCUMMVM_SCAN" = "true" ]; then
 			run_scummvm_scan
-		elif [ "$SYNC_GAME_ID" = "true" ]; then
-			sync_game_id
 		elif [ "$CORE" = "scummvm-standalone" ]; then
 			run_scummvm
 		else
