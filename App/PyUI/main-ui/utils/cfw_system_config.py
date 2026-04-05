@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 class CfwSystemConfig():
     _data = {}
@@ -52,6 +53,15 @@ class CfwSystemConfig():
             menu_options[name]['selected'] = selected_value
             cls.save_config()
             cls.reload_config()
+            if name == "customThermals":
+                profile = selected_value.lower()
+                try:
+                    with open("/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog/active_profile", "w") as f:
+                        f.write(profile + "\n")
+                    if subprocess.run(["pgrep", "-x", "thermal-watchdog"], capture_output=True).returncode != 0:
+                        subprocess.Popen(["/mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog"])
+                except Exception:
+                    pass
         else:
             # Optional: log or raise if not found
             pass

@@ -7,7 +7,7 @@
 
 THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
 
-selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
+selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
 profile=$(echo "$selected" | tr 'A-Z' 'a-z')
 
 echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"

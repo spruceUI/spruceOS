@@ -412,7 +412,7 @@ device_stop_thermal_process(){
 
 device_run_thermal_process(){
     THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
-    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
+    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
 
     # Convert display name to lowercase profile name
     profile=$(echo "$selected" | tr 'A-Z' 'a-z')
