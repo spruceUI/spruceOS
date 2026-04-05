@@ -51,13 +51,16 @@ $NEW_PAUSE" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
     fi
 }
 
-# Patch all per-platform controls files
-for ini in "$PSP_DIR"/controls-*.ini; do
-    patch_controls_file "$ini"
-done
 
-# Patch the active controls.ini (restored from backup, may be stale)
-patch_controls_file "$PSP_DIR/controls.ini"
+if [ "$PLATFORM" != "Pixel2" ]; then
+    # Patch all per-platform controls files except the pixel2
+    for ini in "$PSP_DIR"/controls-*.ini; do
+        patch_controls_file "$ini"
+    done
+
+    # Patch the active controls.ini (restored from backup, may be stale)
+    patch_controls_file "$PSP_DIR/controls.ini"
+fi
 
 # --- Fix PPSSPP menu confirm button ---
 
