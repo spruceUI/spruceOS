@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Fix PPSSPP Pause hotkey in controls INI files
-# - A30: old binding "Pause = 10-106" (wrong keycode) → "Pause = 10-196:10-191" (Select+Square)
-# - Flip: old binding "Pause = 1-111,10-109,10-104" (keyboard/raw codes) → "Pause = 10-196:10-191"
-# - Brick/SmartPro/SmartProS/AnbernicRGCubeXX: Pause line was missing entirely → add it
-# All devices now use the same unified Select+Square combo for Pause.
+# - A30: old binding "Pause = 10-106" (wrong keycode) → "Pause = 10-196:10-188" (Select+Triangle)
+# - Flip: old binding "Pause = 1-111,10-109,10-104" (keyboard/raw codes) → "Pause = 10-196:10-188"
+# - Brick/SmartPro/SmartProS/AnbernicRGCubeXX: Pause line was missing or wrong → fix it
+# All devices now use the same unified Select+Triangle combo for Pause.
 #
 # Fix PPSSPP menu confirm button (ButtonPreference)
 # - Old value 0 = Circle confirms (Japanese style, east button)
@@ -23,7 +23,7 @@ fi
 log_message "Starting upgrade to version $TARGET_VERSION"
 
 PSP_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
-NEW_PAUSE='Pause = 10-196:10-191'
+NEW_PAUSE='Pause = 10-196:10-188'
 
 patch_controls_file() {
     file="$1"
