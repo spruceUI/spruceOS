@@ -12,10 +12,11 @@
 - Flip headphone volume
 - WiFi on brick/tsp?
 - Installer update, add version of release to UI
-- Flycast, duckstation SA?
+- Flycast, duckstation, saturn SA?
 - Retroarch cores
 - 32b Retroarch for flip/XX
-- ppsspp control mapping
+
+
 
 --- Ry ------------------------------------------------------------------------
 
