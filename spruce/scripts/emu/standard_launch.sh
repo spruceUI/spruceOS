@@ -86,7 +86,10 @@ case $EMU_NAME in
 		;;
 
 	"MEDIA")
-		if [ "$CORE" = "ffplay" ]; then
+		if [ "$CORE" = "gvu" ] || [ "$OPEN_GVU_BROWSER" = "true" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
+			run_gvu
+		elif [ "$CORE" = "ffplay" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/media_functions.sh
 			run_ffplay
 		elif [ "$CORE" = "mpv" ]; then

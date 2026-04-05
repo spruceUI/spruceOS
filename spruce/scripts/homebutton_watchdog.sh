@@ -88,6 +88,11 @@ kill_mupen() {
     killall -q -15 mupen64plus
 }
 
+kill_gvu() {
+	log_message "homebutton_watchdog.sh: Killing GVU!"
+	killall -q -15 gvu
+}
+
 kill_ra_and_standard_emulators() {
 	log_message "homebutton_watchdog.sh: Killing miscelaneous emus!"
     killall -q -15 ra32.a30 ra32.mini ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast-stock yabasanshiro yabasanshiro.trimui
@@ -102,6 +107,8 @@ kill_emulator() {
         kill_scummvm
     elif pgrep -f "mupen64plus" >/dev/null; then
         kill_mupen
+    elif pgrep "gvu" >/dev/null; then
+        kill_gvu
     else
         kill_ra_and_standard_emulators
     fi
