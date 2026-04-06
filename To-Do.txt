@@ -14,8 +14,6 @@
 - Installer update, add version of release to UI
 - Flycast, duckstation, saturn SA?
 - 32b Retroarch for flip/XX
-- busybox unzip doesnt work for a30 mupen SA
-
 
 
 --- Ry ------------------------------------------------------------------------
