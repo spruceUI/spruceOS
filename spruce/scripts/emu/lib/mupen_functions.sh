@@ -76,7 +76,11 @@ run_mupen_standalone() {
 		;;
 	*.zip)
 		TEMP_ROM=$(mktemp -d)
-		unzip -o "$ROM_FILE" -d "$TEMP_ROM"
+		"$(get_python_path)" -c "
+import zipfile, sys
+with zipfile.ZipFile(sys.argv[1]) as z:
+    z.extractall(sys.argv[2])
+" "$ROM_FILE" "$TEMP_ROM"
 		ROM_PATH="$(find "$TEMP_ROM" -type f | head -1)"
 		;;
 	*.7z)
