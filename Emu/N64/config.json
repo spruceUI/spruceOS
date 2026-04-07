@@ -36,6 +36,17 @@
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}
     },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["Default", "64-bit", "32-bit"],
+      "selected": "Default",
+      "overrides": {}
+    },
     "Emulator_64": {
       "display": "Emulator",
       "devices": [

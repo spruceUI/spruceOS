@@ -154,6 +154,13 @@ prepare_ra_config() {
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
+	# Check for per-emulator RA build override
+	ra_build_override="$(jq -r '.menuOptions.raBuild.selected // empty' "$EMU_JSON_PATH" 2>/dev/null)"
+	case "$ra_build_override" in
+		"32-bit") export RA_BIN="ra32.universal" ;;
+		"64-bit") export RA_BIN="ra64.universal" ;;
+	esac
+
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
 	# Sync IGM flag file with config setting
@@ -346,8 +353,15 @@ ready_architecture_dependent_states() {
     STATES="/mnt/SDCARD/Saves/states"
     SAVES="/mnt/SDCARD/Saves/saves"
 
-    SUFFIX="64"
-    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+    # Derive suffix from RA binary, not platform architecture
+    case "$RA_BIN" in
+        ra32.*) SUFFIX="32" ;;
+        ra64.*) SUFFIX="64" ;;
+        *)
+            SUFFIX="64"
+            [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+            ;;
+    esac
 
     # List of cores to handle
     for CORE in ${CORE_LIST}; do

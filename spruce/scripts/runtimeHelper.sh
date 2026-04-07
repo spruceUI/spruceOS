@@ -341,7 +341,8 @@ unstage_archives_wanted() {
     fi
     if [ "$DEVICE_USES_64_BIT_RA" = "true" ]; then
         unstage_archive "cores64.7z" "preCmd"
-    else
+    fi
+    if [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || [ "$DEVICE_USES_64_BIT_RA" != "true" ]; then
         unstage_archive "cores32.7z" "preCmd"
     fi
 }

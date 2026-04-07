@@ -221,7 +221,11 @@ setup_for_retroarch(){
 	elif [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
-	export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	if [ "$RA_BIN" = "ra32.universal" ]; then
+		export CORE_DIR="$RA_DIR/.retroarch/cores"
+	else
+		export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"

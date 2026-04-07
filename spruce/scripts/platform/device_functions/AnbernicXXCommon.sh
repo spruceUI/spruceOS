@@ -210,7 +210,7 @@ get_volume_level() {
 
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null; then
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
         echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
     fi
 }
@@ -241,14 +241,18 @@ setup_for_retroarch(){
     #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+    if [ "$RA_BIN" = "ra32.universal" ]; then
+        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+    else
+        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+    fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-    
+
     echo "$RA_BIN"
 }
 
