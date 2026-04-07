@@ -20,13 +20,15 @@ from html import escape as html_escape
 class PyUiMessenger:
     """Sends display messages to the PyUI realtime listener on port 50980."""
 
-    HOST = "127.0.0.1"
-    PORT = 50980
+    SOCKET_ADDR = b"\x0050980"
 
     def send_message(self, json_str: str) -> None:
         try:
-            with socket.create_connection((self.HOST, self.PORT), timeout=1) as s:
-                s.sendall((json_str + "\n").encode("utf-8"))
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            s.connect(self.SOCKET_ADDR)
+            s.sendall((json_str + "\n").encode("utf-8"))
+            s.close()
         except Exception:
             pass
 
