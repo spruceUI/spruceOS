@@ -186,6 +186,7 @@ run_scummvm_scan() {
 	
 	sync
 	echo "--- ScummVM Smart Scan Completed: $(date) ---" >> "$SCAN_LOG"
+	stop_pyui_message_writer
 }
 
 sync_game_id() {
