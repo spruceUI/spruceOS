@@ -243,6 +243,7 @@ setup_for_retroarch(){
 
     if [ "$RA_BIN" = "ra32.universal" ]; then
         export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+        export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
     else
         export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
     fi

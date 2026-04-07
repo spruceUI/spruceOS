@@ -223,6 +223,7 @@ setup_for_retroarch(){
 	fi
 	if [ "$RA_BIN" = "ra32.universal" ]; then
 		export CORE_DIR="$RA_DIR/.retroarch/cores"
+		export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
 	else
 		export CORE_DIR="$RA_DIR/.retroarch/cores64"
 	fi
