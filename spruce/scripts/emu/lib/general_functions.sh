@@ -28,6 +28,9 @@ set_emu_core_from_emu_json() {
     # Try the architecture suffix
     ARCH_SUFFIX="64"
     [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && ARCH_SUFFIX="32"
+    # Override if raBuild is set to 32-bit
+    ra_build="$(jq -r '.menuOptions.raBuild.selected // empty' "$EMU_JSON_PATH" 2>/dev/null)"
+    [ "$ra_build" = "32-bit" ] && ARCH_SUFFIX="32"
     CORE_PATH=".menuOptions.Emulator_$ARCH_SUFFIX.selected"
     if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
         export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
