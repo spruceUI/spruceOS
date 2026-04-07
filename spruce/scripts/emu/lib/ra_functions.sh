@@ -154,9 +154,8 @@ prepare_ra_config() {
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
-	# Check for per-emulator RA build override
-	ra_build_override="$(jq -r '.menuOptions.raBuild.selected // empty' "$EMU_JSON_PATH" 2>/dev/null)"
-	case "$ra_build_override" in
+	# Apply per-game or system-wide RA build selection
+	case "$RA_BUILD" in
 		"32-bit") export RA_BIN="ra32.universal" ;;
 		"64-bit") export RA_BIN="ra64.universal" ;;
 	esac

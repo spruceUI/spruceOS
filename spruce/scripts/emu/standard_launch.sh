@@ -33,6 +33,7 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 ##### MAIN EXECUTION #####
  ########################
 
+export RA_BUILD="$(get_effective_ra_build)"
 set_emu_core_from_emu_json
 if [ -z "$CORE" ] || [ "$CORE" = "null" ]; then	use_default_emulator ; fi
 get_core_override
