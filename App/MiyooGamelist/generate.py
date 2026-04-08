@@ -297,8 +297,8 @@ class GamelistGenerator:
 
         # Pass 2: write entries, using raw filename for ALL duplicates
         writer = GamelistXmlWriter()
-        for file_rel_path, img_rel_path, cleaned, filename_no_ext in rom_entries:
-            if name_count.get(cleaned, 0) > 1:
+        for file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned in rom_entries:
+            if name_count.get(dedup_key, 0) > 1:
                 display_name = filename_no_ext
             else:
                 display_name = cleaned
@@ -366,7 +366,7 @@ class GamelistGenerator:
             dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
             name_count[dedup_key] = name_count.get(dedup_key, 0) + 1
 
-            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext))
+            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned))
 
 
 # ---------------------------------------------------------------------------
