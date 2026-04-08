@@ -10,6 +10,7 @@
 --- Sun -----------------------------------------------------------------------
 
 - firstboot scummvm is deleting mini plugins on other devices 
+- Moonlight. arch64 for sure.... maybe mini and a30?
 - Mini splore update from tenlevels
 - Flip headphone volume
 - WiFi on brick/tsp?
