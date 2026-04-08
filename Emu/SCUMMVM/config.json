@@ -43,6 +43,25 @@
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP"
       ]
+    },
+    {
+      "name": "Generate namelist",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
     }
   ],
   "menuOptions": {

@@ -4,7 +4,6 @@
 MiyooGamelist Generator for FBNEO.
 """
 
-import csv
 import time
 from pathlib import Path
 
@@ -13,13 +12,19 @@ sys.path.insert(0, "/mnt/SDCARD/App/MiyooGamelist/")
 
 from generate import PyUiMessenger, GamelistXmlWriter
 
+# ---- helpers -----------------------------------------------------------
+
+def get_id_from_file(fpath):
+    with open(fpath) as f:
+        return f.read()
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    fbneo_csv = Path("/mnt/SDCARD/Emu/FBNEO/fbneo.csv")
-    roms_dir = Path("/mnt/SDCARD/Roms/FBNEO")
+    scummvm_list = Path("/tmp/scvm_gameid.txt")
+    roms_dir = Path("/mnt/SDCARD/Roms/SCUMMVM")
     output_xml = roms_dir.joinpath('miyoogamelist.xml')
     image_path = "/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 
@@ -27,20 +32,31 @@ def main() -> None:
     messenger.display_image_and_text(image_path, "Generating namelist...")
     time.sleep(1)
 
-    csvgames = {}
-    with open(fbneo_csv, newline='') as csvfile:
-        reader = csv.reader(csvfile)
+    # Parse scummvm --list-games output
+    txtgames = {}
+    with open(scummvm_list, newline='') as txtfile:
+        for line in txtfile:
+            if ":" in line:
+                idx1 = line.find(":")
+                idx2 = line.find(" ")
 
-        for row in reader:
-            csvgames[row[0]] = row[1]
+                gid = line[idx1+1:idx2]
+                name = line[idx2:].strip()
 
+                txtgames[gid] = name
+
+    # Write XML
     games_c = 0
     game_writer = GamelistXmlWriter()
-    for f in roms_dir.iterdir():
+    for f in roms_dir.rglob("*.scummvm"):
+        file_id = get_id_from_file(f)
+
         try:
-            display_name = csvgames[f.name]
+            display_name = txtgames[file_id]
             img_path = f"./Imgs/{f.stem}.png"
-            rel_path = f"./{f.name}"
+
+            repl_path = str(f).replace(str(roms_dir), "")
+            rel_path = f".{repl_path}"
 
             game_writer.add_entry(rel_path, display_name, img_path)
             games_c += 1
