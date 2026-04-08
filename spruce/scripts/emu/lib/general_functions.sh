@@ -19,6 +19,8 @@
  
 
 get_effective_ra_build() {
+    # raBuild selection only applies to devices with both 32-bit and 64-bit universal RA
+    [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || return
     ra_build="$(jq -r --arg game "$GAME" \
         '.menuOptions.raBuild.overrides[$game] // .menuOptions.raBuild.selected // empty' \
         "$EMU_JSON_PATH" 2>/dev/null)"
