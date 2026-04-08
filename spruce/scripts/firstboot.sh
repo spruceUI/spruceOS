@@ -183,7 +183,9 @@ run_firstboot_package_phase() {
 
     rm -f "$SCUMMVM_7Z"
     rm -f "$SCUMMVM_DIR"/scummvm_extra.7z "$SCUMMVM_DIR"/scummvm_theme.7z
-    rm -f "$SCUMMVM_DIR"/scummvm_mini_plugins.7z
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        rm -f "$SCUMMVM_DIR"/scummvm_mini_plugins.7z
+    fi
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
     if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
