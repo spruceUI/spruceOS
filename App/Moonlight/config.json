@@ -3,6 +3,17 @@
   "icon": "retroarch.png",
   "launch": "launch.sh",
   "description": "Game Streaming (L+R to exit)",
-  "devices": ["MIYOO_FLIP", "GKD_PIXEL2"],
+  "devices": [
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "TRIMUI_BRICK",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480",
+    "ANBERNIC_RGCUBEXX",
+    "MAGICX_ZERO28"
+  ],
   "hideInSimpleMode": false
 }
