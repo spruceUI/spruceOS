@@ -1,4 +1,4 @@
-import codecs
+import re
 import subprocess
 import time
 import threading
@@ -109,7 +109,13 @@ class WiFiScanner:
 
     def _decode_ssid(self, ssid: str) -> str:
         try:
-            return codecs.escape_decode(ssid.encode("utf-8"))[0].decode("utf-8")
+            return re.sub(
+                r'(\\x[0-9a-fA-F]{2})+',
+                lambda m: bytes(
+                    int(b, 16) for b in re.findall(r'\\x([0-9a-fA-F]{2})', m.group(0))
+                ).decode('utf-8', errors='replace'),
+                ssid
+            )
         except Exception:
             PyUiLogger.get_logger().warning(f"Failed to decode escaped SSID: {ssid}")
             return ssid
