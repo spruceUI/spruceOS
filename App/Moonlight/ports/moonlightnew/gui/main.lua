@@ -476,7 +476,8 @@ function executeCommandAndSaveOutput(command, fileName)
     local keydirOption = string.format("-keydir %s/keys", currentDir)  -- Option to add
 
     -- Construct the full command including the keydir option
-    local fullCommand = string.format("LD_LIBRARY_PATH=%s/moonlight/libs:/usr/lib/compat %s/moonlight/%s %s > %s 2>&1 &", currentDir, currentDir, command, keydirOption, outputFileName)
+    local sysLibPath = os.getenv("LD_LIBRARY_PATH") or ""
+    local fullCommand = string.format("LD_LIBRARY_PATH=%s/moonlight/libs:%s %s/moonlight/%s %s > %s 2>&1 &", currentDir, sysLibPath, currentDir, command, keydirOption, outputFileName)
 
     -- Execute the command in the background
     os.execute(fullCommand)
@@ -1336,8 +1337,8 @@ function writeSelectedApp(selectedApp, bitrate, resolution, framerate, codec, re
     
     
     -- Construct the command string with app name, bitrate, resolution, framerate, codec, remote, and IP address
-    local command = 'stream -app "' .. selectedApp .. '" ' ..
-                    '-keydir "$GAMEDIR/keys" ' ..  
+    local command = 'stream -platform sdl -app "' .. selectedApp .. '" ' ..
+                    '-keydir "$GAMEDIR/keys" ' ..
                     '-bitrate ' .. bitrate .. ' ' ..
                     '-width ' .. width .. ' ' ..
                     '-height ' .. height .. ' ' ..
