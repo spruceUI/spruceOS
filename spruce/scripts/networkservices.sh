@@ -17,7 +17,7 @@ syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyn
 connect_services() {
 
 	while true; do
-		if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+		if network_is_connected true; then
 			break
 		fi
 		sleep 0.5
