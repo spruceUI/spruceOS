@@ -262,8 +262,8 @@ developer_mode_task() {
         ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            # Loop until WiFi is connected
-            while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
+            # Loop until network is connected
+            while ! network_is_connected true; do
                 sleep 0.2
             done
 

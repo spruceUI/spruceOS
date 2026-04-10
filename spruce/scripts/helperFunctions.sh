@@ -1119,22 +1119,45 @@ restart_wifi() {
     enable_wifi
 }
 
+network_is_connected() {
+    CHECK_ETH="${1:-false}" # Defaults to false if no argument
+
+	iface_up=false
+
+    if ifconfig wlan0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+        iface_up=true
+    fi
+
+    if [ "$CHECK_ETH" = true ]; then
+        if ifconfig eth0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+            iface_up=true
+        fi
+    fi
+
+	if $iface_up; then
+		if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+			return 0 # Success
+        fi
+	fi
+
+	return 1 # No network connection
+}
+
 check_and_connect_wifi() {
 
     timeout=60
     start_time=$(date +%s)
 
     # Initial connection check
-    if ifconfig wlan0 | grep -qE "inet |inet6 " && \
-       ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-        log_message "Active WiFi connection verified"
+    if network_is_connected true; then
+        log_message "Active network connection verified"
         return 0
     fi
 
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
     restart_wifi
-		
+
     display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
         "Waiting to connect....\nPress START to continue anyway." 75
 
@@ -1161,8 +1184,7 @@ check_and_connect_wifi() {
         fi
 
         # 2. Check for successful connection
-        if ifconfig wlan0 | grep -qE "inet |inet6 " && \
-           ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+        if network_is_connected; then
             log_message "Successfully connected to WiFi"
             kill "$GE_PID" 2>/dev/null
             stop_pyui_message_writer

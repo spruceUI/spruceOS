@@ -60,7 +60,7 @@ handle_network_services() {
 		/mnt/SDCARD/spruce/scripts/networkservices.sh off
 		
 		if [ "$disable_wifi_in_game" = "True" ]; then
-			if ifconfig wlan0 | grep "inet addr:" >/dev/null 2>&1; then
+			if network_is_connected; then
 				ifconfig wlan0 down &
 			fi
 			killall wpa_supplicant
