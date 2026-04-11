@@ -190,7 +190,7 @@ run_retroarch() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
 	RA_PARAMS=""
-	if flag_check "verbose_retroarch"; then
+	if [ "$VERBOSE_EMU" = "1" ]; then
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
@@ -208,7 +208,7 @@ run_retroarch() {
 			;;
 	esac
 
-	if flag_check "verbose_retroarch"; then
+	if [ "$VERBOSE_EMU" = "1" ]; then
 		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else

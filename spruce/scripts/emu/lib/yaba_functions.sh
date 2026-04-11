@@ -37,8 +37,8 @@ run_yabasanshiro() {
 	jq --arg guid "$GUID" '.player1.deviceGUID = $guid' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
 
 	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
-		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > $(emu_log_file) 2>&1
 	else
-		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 }

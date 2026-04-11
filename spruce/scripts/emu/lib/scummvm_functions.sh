@@ -87,7 +87,7 @@ run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
 	# ROM_FILE, CORE not present 
-	SCUMMVM_LOG="${LOG_DIR}/scummvm-standalone-${PLATFORM}.log"
+	SCUMMVM_LOG="$(emu_log_file)"
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
 	_set_scummvm_platform
@@ -101,7 +101,7 @@ run_scummvm_menu() {
 run_scummvm() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
-	SCUMMVM_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
+	SCUMMVM_LOG="$(emu_log_file)"
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 
 	_set_scummvm_platform

@@ -35,7 +35,7 @@ run_drastic64() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 	ready_arch_64_states
 	pin_to_dedicated_cores drastic64 2
-	./drastic64 "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic64 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -43,7 +43,7 @@ run_drastic_trngaje_a133p() {
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH:$HOME/lib64"
 	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
-	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -72,7 +72,7 @@ run_drastic_A30() {
 	export EGL_VIDEODRIVER=mmiyoo
 
 	pin_to_dedicated_cores drastic32 2
-	./drastic32 "$ROM_FILE"  > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic32 "$ROM_FILE"  > $(emu_log_file) 2>&1
 
 	# remove soft link and resume joystickinput
 	rm /dev/ttyS0
@@ -106,7 +106,7 @@ run_drastic_steward_Flip() {
 	ready_arch_32_states
 	export SDL_VIDEODRIVER=NDS
 	export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
-	./drastic32 "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_32_states
 }
 
@@ -114,7 +114,7 @@ run_drastic_trngaje_Flip() {
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
 	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
-	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -192,7 +192,7 @@ run_drastic_steward_Brick() {
 	sleep 1
 	export SDL_VIDEODRIVER=NDS
 	ready_arch_32_states
-	./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic32 "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_32_states
 	sync
 	kill_runner
@@ -244,13 +244,13 @@ run_drastic_stock_Pixel2() {
 	ready_arch_64_states
 	pin_to_dedicated_cores drastic64 2
 	# Disable loging for now, it's writting a lot to it
-	./drastic64 "$ROM_FILE" # > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic64 "$ROM_FILE" # > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
 run_drastic_trngaje_Pixel2() {
 	export LD_LIBRARY_PATH="$HOME/lib64_Pixel2_trngaje:$LD_LIBRARY_PATH"
-	./drastic "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 }
 
 

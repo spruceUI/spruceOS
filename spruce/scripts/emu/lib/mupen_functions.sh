@@ -102,7 +102,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 		./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
 		sleep 0.3
 	fi
-	./mupen64plus $ARGS "$ROM_PATH" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+	./mupen64plus $ARGS "$ROM_PATH" > $(emu_log_file) 2>&1
 	if [ "$PLATFORM" = "A30" ]; then
 		kill -9 $(pidof a30_input_shim) 2>/dev/null
 	else

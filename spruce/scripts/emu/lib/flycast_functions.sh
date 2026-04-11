@@ -53,9 +53,9 @@ run_flycast_standalone() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
 	if [ "$CORE" = "Flycast-stock" ]; then
-		./flycast-stock "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		./flycast-stock "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
-		./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		./flycast "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 
 	umount $HOME/bios

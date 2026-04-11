@@ -56,9 +56,9 @@ run_gvu() {
 	fi
 
 	if [ "$OPEN_GVU_BROWSER" = "true" ]; then
-		"$GVU_BIN" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$GVU_BIN" > $(emu_log_file) 2>&1
 	else
-		"$GVU_BIN" "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$GVU_BIN" "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 }
 
@@ -69,13 +69,13 @@ run_ffplay() {
 	if [ "$PLATFORM" = "A30" ]; then
 		export PATH="$EMU_DIR"/bin32:"$PATH"
 		export LD_LIBRARY_PATH="$EMU_DIR"/lib32:/usr/miyoo/lib:/usr/lib:"$LD_LIBRARY_PATH"
-		ffplay -vf transpose=2 -fs -i "$ROM_FILE" > ffplay.log 2>&1
+		ffplay -vf transpose=2 -fs -i "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
 		/mnt/SDCARD/spruce/bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
-		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -loglevel 24 -i "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -loglevel 24 -i "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 
 	kill -9 "$(pidof gptokeyb)"
@@ -94,7 +94,7 @@ run_mpv() {
 
 	/usr/bin/mpv --fs --geometry="640x480" --hwdec=drm --vo=sdl \
 				 --input-conf=$INPUT_CONF --msg-level=all=warn \
-				"$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+				"$ROM_FILE" > $(emu_log_file) 2>&1
 
 	kill -9 "$(pidof gptokeyb)"
 }

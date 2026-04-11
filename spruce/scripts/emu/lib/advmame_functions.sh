@@ -26,7 +26,7 @@ run_advmame() {
 		cp "$DEF_RC" "$RC_FILE"
 	fi
 
-	ADVMAME_LOG="${LOG_DIR}/${CORE}-${PLATFORM}.log"
+	ADVMAME_LOG="$(emu_log_file)"
 	ROM_DIR=$(dirname "$ROM_FILE")
 
 	cd "$EMU_DIR"

@@ -389,6 +389,15 @@
                 ],
                 "selected": "False"
             },
+            "verboseLogging": {
+                "display": "Verbose emulator logging",
+                "description": "log output to SD card for debugging",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "genesisPlusGXWide": {
                 "devices": ["TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "display": "Genesis Plus GX: enable widescreen",

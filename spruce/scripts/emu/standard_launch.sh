@@ -13,6 +13,12 @@ log_message "trying: $0 $@"
 . /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
 
 export LOG_DIR=/mnt/SDCARD/Saves/spruce
+VERBOSE_SETTING="$(get_config_value '.menuOptions."Emulator Settings".verboseLogging.selected' "False")"
+if [ "$VERBOSE_SETTING" = "True" ]; then
+	export VERBOSE_EMU=1
+else
+	export VERBOSE_EMU=0
+fi
 emu_name=${0#*/Emu/}   # remove prefix up to /Emu/
 emu_name=${emu_name%%/*}  # keep only up to next /
 export EMU_NAME="$emu_name"

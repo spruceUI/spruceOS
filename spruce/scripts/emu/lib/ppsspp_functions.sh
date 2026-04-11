@@ -73,9 +73,9 @@ run_ppsspp() {
 
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	if [ -z "$ROM_FILE" ]; then
-		"$PPSSPPSDL" --fullscreen > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$PPSSPPSDL" --fullscreen > $(emu_log_file) 2>&1
 	else
-		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > $(emu_log_file) 2>&1
 	fi
 
 	umount "$PSP_SS_DIR"

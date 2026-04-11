@@ -16,7 +16,18 @@
 #   get_mode_override
 #   set_cpu_mode
 #   pin_to_dedicated_cores
- 
+#   emu_log_file
+
+
+# Returns the log file path for standalone emulators.
+# When verbose_emulators flag is not set, returns /dev/null.
+emu_log_file() {
+	if [ "$VERBOSE_EMU" = "1" ]; then
+		echo "${LOG_DIR}/${CORE}-${PLATFORM}.log"
+	else
+		echo "/dev/null"
+	fi
+}
 
 get_effective_ra_build() {
     # raBuild selection only applies to devices with both 32-bit and 64-bit universal RA
