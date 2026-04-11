@@ -148,5 +148,24 @@ if [ -f "$BRICK_CFG" ]; then
     log_message "Fixed Brick viewport to 1024x768"
 fi
 
+# --- Optimize Brick and SmartPro RetroArch audio/video settings ---
+# User-tested: alsathread + lower resampler quality + video_threaded off
+# gives flawless mGBA and gpSP on Brick/TSP.
+
+for cfg in \
+    "$RA_PLATFORM/retroarch-Brick.cfg" \
+    "$RA_PLATFORM/retroarch-SmartPro.cfg"
+do
+    if [ -f "$cfg" ]; then
+        sed 's|^audio_driver = "alsa"|audio_driver = "alsathread"|' \
+            "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
+        sed 's|^audio_resampler_quality = "3"|audio_resampler_quality = "1"|' \
+            "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
+        sed 's|^video_threaded = "true"|video_threaded = "false"|' \
+            "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
+        log_message "Optimized audio/video settings in $(basename "$cfg")"
+    fi
+done
+
 log_message "Upgrade to version $TARGET_VERSION completed successfully"
 exit 0
