@@ -2,7 +2,7 @@
   "label": "Moonlight",
   "icon": "moonlight.png",
   "launch": "launch.sh",
-  "description": "Game Streaming (L+R to exit)",
+  "description": "Game Streaming (Exit: L+R gui, L+R+ST+SL stream)",
   "devices": [
     "MIYOO_FLIP",
     "GKD_PIXEL2",
