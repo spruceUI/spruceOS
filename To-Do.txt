@@ -13,7 +13,7 @@
 - Flip headphone volume
 - WiFi on brick/tsp?
 - Installer update, add version of release to UI
-- Flycast, duckstation, saturn SA?
+- Duckstation, saturn SA?
 
 
 --- Ry ------------------------------------------------------------------------
