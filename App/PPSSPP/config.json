@@ -1,6 +1,6 @@
 {
   "label": "PPSSPP",
-  "icon": "retroarch.png",
+  "icon": "ppsspp.png",
   "launch": "launch.sh",
   "description": "Configure PSP emulator",
   "devices": ["MIYOO_A30", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "MIYOO_FLIP", "GKD_PIXEL2"],

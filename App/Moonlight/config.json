@@ -1,6 +1,6 @@
 {
   "label": "Moonlight",
-  "icon": "retroarch.png",
+  "icon": "moonlight.png",
   "launch": "launch.sh",
   "description": "Game Streaming (L+R to exit)",
   "devices": [
