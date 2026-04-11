@@ -1,15 +1,19 @@
 #!/bin/sh
 # scrape_covers.sh — fetch cover art for a GVU media folder
 #
-# Usage: scrape_covers.sh <folder_path> [tmdb_api_key]
+# Usage: scrape_covers.sh <folder_path> [tmdb_api_key] [--movie]
 #
 # Saves cover.jpg to <folder_path>/cover.jpg.
-# Season folder detection: if basename matches "Season N" / "S01" patterns,
-# the parent directory name is used as the show/search name.
 #
-# Sources (in order):
-#   1. TMDB (The Movie Database) — requires API key
-#   2. TVMaze — no key needed, TV shows only
+# TV show mode (default):
+#   Season folder detection: if basename matches "Season N" / "S01" patterns,
+#   the parent directory name is used as the show/search name.
+#   Sources: TMDB (multi search) → TVMaze fallback.
+#
+# Movie mode (--movie flag):
+#   Uses TMDB /search/movie endpoint.  Year is stripped from folder name for
+#   search but passed as the year= param when present (e.g. "Title (1985)").
+#   TVMaze is skipped (TV-only database).
 #
 # Writes progress messages to stdout.
 # Exit 0 = success, non-zero = failure.
@@ -21,8 +25,10 @@ set -e
 
 FOLDER="$1"
 TMDB_KEY="${2:-}"
+MOVIE_MODE="${3:-}"
 
-TMDB_SEARCH="http://api.themoviedb.org/3/search/multi"
+TMDB_SEARCH_MULTI="http://api.themoviedb.org/3/search/multi"
+TMDB_SEARCH_MOVIE="http://api.themoviedb.org/3/search/movie"
 TMDB_IMG_BASE="http://image.tmdb.org/t/p/w500"
 TVMAZE_SEARCH="http://api.tvmaze.com/search/shows"
 
@@ -38,23 +44,37 @@ if [ -z "$FOLDER" ]; then
 fi
 
 # -------------------------------------------------------------------------
-# Determine search name
-# Season folder: "Season 1", "Season 01", "season 2", "S01", "s02", etc.
+# Determine search name and optional year
 # -------------------------------------------------------------------------
 name=$(basename "$FOLDER")
 season_num=""
-if echo "$name" | grep -qiE '^(season[ _-]*[0-9]+|s[0-9]{1,2})$'; then
-    parent=$(dirname "$FOLDER")
-    show=$(basename "$parent")
-    echo "Season folder detected: '$name' — using parent name: '$show'"
-    # Extract numeric season number, stripping leading zeros
-    season_num=$(echo "$name" | sed -n 's/^[Ss]eason[[:space:]_-]*0*\([1-9][0-9]*\)$/\1/p')
-    if [ -z "$season_num" ]; then
-        season_num=$(echo "$name" | sed -n 's/^[Ss]0*\([1-9][0-9]*\)$/\1/p')
+year_param=""
+
+if [ "$MOVIE_MODE" = "--movie" ]; then
+    # Extract year if present: "Title (1985)" → year_param="&year=1985"
+    year=$(echo "$name" | sed -n 's/.*(\([0-9]\{4\}\)).*/\1/p')
+    if [ -n "$year" ]; then
+        year_param="&year=${year}"
     fi
-    name="$show"
+    # Strip year and surrounding whitespace/parens for a clean search query
+    name=$(echo "$name" | sed 's/[[:space:]]*([0-9]\{4\})[[:space:]]*//' \
+                        | sed 's/[[:space:]]*$//')
+    echo "Movie search: '$name'${year:+ (year=$year)}"
+else
+    # Season folder detection for TV shows
+    if echo "$name" | grep -qiE '^(season[ _-]*[0-9]+|s[0-9]{1,2})$'; then
+        parent=$(dirname "$FOLDER")
+        show=$(basename "$parent")
+        echo "Season folder detected: '$name' — using parent name: '$show'"
+        # Extract numeric season number, stripping leading zeros
+        season_num=$(echo "$name" | sed -n 's/^[Ss]eason[[:space:]_-]*0*\([1-9][0-9]*\)$/\1/p')
+        if [ -z "$season_num" ]; then
+            season_num=$(echo "$name" | sed -n 's/^[Ss]0*\([1-9][0-9]*\)$/\1/p')
+        fi
+        name="$show"
+    fi
+    echo "Searching for: $name"
 fi
-echo "Searching for: $name"
 
 # -------------------------------------------------------------------------
 # URL-encode the query (spaces and common punctuation)
@@ -85,7 +105,11 @@ show_id=""
 # -------------------------------------------------------------------------
 if [ -n "$TMDB_KEY" ]; then
     echo "Trying TMDB..."
-    url="${TMDB_SEARCH}?api_key=${TMDB_KEY}&query=${query}&page=1"
+    if [ "$MOVIE_MODE" = "--movie" ]; then
+        url="${TMDB_SEARCH_MOVIE}?api_key=${TMDB_KEY}&query=${query}${year_param}&page=1"
+    else
+        url="${TMDB_SEARCH_MULTI}?api_key=${TMDB_KEY}&query=${query}&page=1"
+    fi
     if $WGET -q --no-check-certificate -T 10 -O "$tmpfile" "$url" 2>/dev/null; then
         # Split on commas so each JSON field is on its own line, then extract
         # the first "poster_path" value (skips "null" entries).
@@ -105,57 +129,72 @@ if [ -n "$TMDB_KEY" ]; then
 fi
 
 # -------------------------------------------------------------------------
-# 2. TVMaze — always queried for show_id (needed for season art bulk scraping
+# 2. TVMaze — TV shows only; skipped entirely in movie mode.
+#    Always queried for show_id (needed for season art bulk scraping
 #    even when TMDB already provided the show cover).  Image URL only used as
 #    fallback when TMDB found nothing.
 # -------------------------------------------------------------------------
-echo "Querying TVMaze..."
-url="${TVMAZE_SEARCH}?q=${query}"
-if $WGET -q --no-check-certificate -T 10 -O "$tmpfile" "$url" 2>/dev/null; then
-    # Extract show ID for season artwork lookup
-    show_id=$(tr ',' '\n' < "$tmpfile" \
-              | grep '"id"' | head -1 \
-              | sed 's/[^0-9]*\([0-9]*\).*/\1/' || true)
-
+if [ "$MOVIE_MODE" = "--movie" ]; then
+    # TVMaze is TV-only — skip it entirely for movies
     if [ -z "$cover_url" ]; then
-        # TMDB found nothing — use TVMaze medium portrait (consistent sizing)
-        show_orig=$(tr ',' '\n' < "$tmpfile" \
-                    | grep '"medium"' | head -1 \
-                    | sed 's/.*"medium":"\([^"]*\)".*/\1/' || true)
-        show_orig=$(echo "$show_orig" | sed 's|^https://|http://|')
-
-        # Season-specific artwork (only when in a detected season folder)
-        if [ -n "$season_num" ] && [ -n "$show_id" ]; then
-            echo "TVMaze: fetching season $season_num artwork for show $show_id"
-            seas_url="http://api.tvmaze.com/shows/${show_id}/seasons"
-            if $WGET -q --no-check-certificate -T 10 -O "$tmpfile" "$seas_url" 2>/dev/null; then
-                # Anchor to $ because after tr each field ends at EOL (no trailing chars).
-                # grep -A 20: "number" and "original" are ~13 comma-separated fields apart.
-                orig=$(tr ',' '\n' < "$tmpfile" \
-                       | grep -A 20 '"number":'"$season_num"'$' \
-                       | grep '"medium"' | head -1 \
-                       | sed 's/.*"medium":"\([^"]*\)".*/\1/' || true)
-                orig=$(echo "$orig" | sed 's|^https://|http://|')
-                if [ -n "$orig" ] && [ "$orig" != "null" ]; then
-                    cover_url="$orig"
-                    echo "TVMaze: found season $season_num artwork"
-                fi
-            fi
-        fi
-
-        if [ -z "$cover_url" ]; then
-            if [ -n "$show_orig" ] && [ "$show_orig" != "null" ]; then
-                cover_url="$show_orig"
-                echo "TVMaze: found show image"
-            else
-                echo "TVMaze: no image in results"
-            fi
-        fi
-    else
-        echo "TVMaze: show_id=${show_id} (show cover already found via TMDB)"
+        echo "ERROR: No cover art found (movie mode requires a TMDB API key)" >&2
+        echo "error" > /tmp/gvu_scrape_done
+        exit 1
     fi
 else
-    echo "TVMaze: request failed"
+    # -----------------------------------------------------------------------
+    # 2. TVMaze — always queried for show_id (needed for season art bulk
+    #    scraping even when TMDB already provided the show cover).  Image URL
+    #    only used as fallback when TMDB found nothing.
+    # -----------------------------------------------------------------------
+    echo "Querying TVMaze..."
+    url="${TVMAZE_SEARCH}?q=${query}"
+    if $WGET -q --no-check-certificate -T 10 -O "$tmpfile" "$url" 2>/dev/null; then
+        # Extract show ID for season artwork lookup
+        show_id=$(tr ',' '\n' < "$tmpfile" \
+                  | grep '"id"' | head -1 \
+                  | sed 's/[^0-9]*\([0-9]*\).*/\1/' || true)
+
+        if [ -z "$cover_url" ]; then
+            # TMDB found nothing — use TVMaze medium portrait (consistent sizing)
+            show_orig=$(tr ',' '\n' < "$tmpfile" \
+                        | grep '"medium"' | head -1 \
+                        | sed 's/.*"medium":"\([^"]*\)".*/\1/' || true)
+            show_orig=$(echo "$show_orig" | sed 's|^https://|http://|')
+
+            # Season-specific artwork (only when in a detected season folder)
+            if [ -n "$season_num" ] && [ -n "$show_id" ]; then
+                echo "TVMaze: fetching season $season_num artwork for show $show_id"
+                seas_url="http://api.tvmaze.com/shows/${show_id}/seasons"
+                if $WGET -q --no-check-certificate -T 10 -O "$tmpfile" "$seas_url" 2>/dev/null; then
+                    # Anchor to $ because after tr each field ends at EOL.
+                    # grep -A 20: "number" and "medium" are ~13 fields apart.
+                    orig=$(tr ',' '\n' < "$tmpfile" \
+                           | grep -A 20 '"number":'"$season_num"'$' \
+                           | grep '"medium"' | head -1 \
+                           | sed 's/.*"medium":"\([^"]*\)".*/\1/' || true)
+                    orig=$(echo "$orig" | sed 's|^https://|http://|')
+                    if [ -n "$orig" ] && [ "$orig" != "null" ]; then
+                        cover_url="$orig"
+                        echo "TVMaze: found season $season_num artwork"
+                    fi
+                fi
+            fi
+
+            if [ -z "$cover_url" ]; then
+                if [ -n "$show_orig" ] && [ "$show_orig" != "null" ]; then
+                    cover_url="$show_orig"
+                    echo "TVMaze: found show image"
+                else
+                    echo "TVMaze: no image in results"
+                fi
+            fi
+        else
+            echo "TVMaze: show_id=${show_id} (show cover already found via TMDB)"
+        fi
+    else
+        echo "TVMaze: request failed"
+    fi
 fi
 
 # -------------------------------------------------------------------------
@@ -180,7 +219,7 @@ if $WGET -q --no-check-certificate -T 10 -O "$tmpimg" "$cover_url" 2>/dev/null; 
     # When called on a show folder (not a season subfolder), and TVMaze returned
     # a show ID, fetch individual season artwork for each season subdirectory.
     # -------------------------------------------------------------------------
-    if [ -z "$season_num" ] && [ -n "$show_id" ]; then
+    if [ -z "$season_num" ] && [ -n "$show_id" ] && [ "$MOVIE_MODE" != "--movie" ]; then
         echo "Fetching season artwork for show $show_id..."
         seas_url="http://api.tvmaze.com/shows/${show_id}/seasons"
         if $WGET -q --no-check-certificate -T 10 -O "$tmpseasons" "$seas_url" 2>/dev/null; then
