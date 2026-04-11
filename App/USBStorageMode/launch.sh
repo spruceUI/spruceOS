@@ -95,11 +95,18 @@ cleanup_usb_gadget() {
             [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
             [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
             ;;
-        "Flip" | "Pixel2" | "SmartProS")
+        "Flip" | "Pixel2")
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
+            rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
+            ;;
+        "SmartProS")
+            echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
+            sleep 1
+            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            sleep 2
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
             ;;
     esac
