@@ -12,7 +12,12 @@
 #   run_pcsx_standalone
 
 run_pcsx_standalone() {
-	export LD_LIBRARY_PATH="$EMU_DIR/libs:$LD_LIBRARY_PATH"
+	case "$PLATFORM" in
+		"A30")       PCSX_LIBDIR="$EMU_DIR/liba30" ;;
+		"MiyooMini") PCSX_LIBDIR="$EMU_DIR/libmini" ;;
+		*)           PCSX_LIBDIR="$EMU_DIR/libs" ;;
+	esac
+	[ -d "$PCSX_LIBDIR" ] && export LD_LIBRARY_PATH="$PCSX_LIBDIR:$LD_LIBRARY_PATH"
 	export HOME="$EMU_DIR"
 
 	mkdir -p "$HOME/.pcsx/bios"
