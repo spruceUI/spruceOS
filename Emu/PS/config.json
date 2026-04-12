@@ -58,7 +58,8 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "swanstation"
+        "swanstation",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
