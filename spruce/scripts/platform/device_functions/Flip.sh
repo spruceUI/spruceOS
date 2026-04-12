@@ -133,7 +133,8 @@ set_volume() {
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
+            # Also set lowest volume as 1 isntead of 5
+            amixer cset "name='SPK Volume'" 1 >/dev/null 2>&1
         fi
     fi
 
