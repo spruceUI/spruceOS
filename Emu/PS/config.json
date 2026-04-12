@@ -29,7 +29,8 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "km_duckswanstation_xtreme_amped"
+        "km_duckswanstation_xtreme_amped",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
@@ -58,7 +59,8 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "swanstation"
+        "swanstation",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
