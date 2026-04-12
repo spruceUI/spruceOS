@@ -41,7 +41,7 @@ run_flycast_standalone() {
 	export HOME="/mnt/SDCARD/Emu/DC"
 	export XDG_DATA_HOME="/mnt/SDCARD/Emu/DC/data"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Emu/DC/config"
-	export LD_LIBRARY_PATH="$HOME/lib-TrimUI:$LD_LIBRARY_PATH:$HOME/lib64"
+	export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
 
 	mkdir -p "$HOME/bios"
 	mkdir -p "$HOME/data"
