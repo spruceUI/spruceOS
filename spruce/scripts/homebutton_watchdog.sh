@@ -224,7 +224,11 @@ perform_action() {
         prepare_game_switcher
         ;;
     "Emulator menu")
-        send_menu_button_to_retroarch
+        if pgrep -f "./PPSSPPSDL" >/dev/null; then
+            killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
+        else
+            send_menu_button_to_retroarch
+        fi
         ;;
     "Exit game")
         # resume MainUI if it is running
