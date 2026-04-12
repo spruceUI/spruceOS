@@ -4,7 +4,7 @@
 #   EMU_DIR
 #   ROM_FILE
 #   PLATFORM
-#   CORE
+#   PCSX_BIN  (from platform .cfg)
 #   LD_LIBRARY_PATH
 #   LOG_DIR
 #
@@ -21,7 +21,7 @@ run_pcsx_standalone() {
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
-	./pcsx -cdfile "$ROM_FILE" > $(emu_log_file) 2>&1
+	"./${PCSX_BIN:-pcsx}" -cdfile "$ROM_FILE" > $(emu_log_file) 2>&1
 
 	umount "$HOME/.pcsx/bios" 2>/dev/null
 }

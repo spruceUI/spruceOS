@@ -96,10 +96,10 @@ kill_gvu() {
 kill_pcsx() {
 	log_message "homebutton_watchdog.sh: Saving and killing PCSX-ReARMed!"
     # Send SIGUSR1 to trigger save-state-and-quit
-    killall -q -USR1 pcsx
+    killall -q -USR1 pcsx pcsx_a30 pcsx_mini
     sleep 2
     # SIGTERM as fallback in case it didn't exit
-    killall -q -15 pcsx
+    killall -q -15 pcsx pcsx_a30 pcsx_mini
 }
 
 kill_ra_and_standard_emulators() {
@@ -116,7 +116,7 @@ kill_emulator() {
         kill_scummvm
     elif pgrep -f "mupen64plus" >/dev/null; then
         kill_mupen
-    elif pgrep -x "pcsx" >/dev/null; then
+    elif pgrep -x "pcsx\|pcsx_a30\|pcsx_mini" >/dev/null; then
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
@@ -238,7 +238,7 @@ perform_action() {
         if pgrep -f "./PPSSPPSDL" >/dev/null; then
             killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
         elif pgrep -x "pcsx" >/dev/null; then
-            killall -q -USR2 pcsx
+            killall -q -USR2 pcsx pcsx_a30 pcsx_mini
         else
             send_menu_button_to_retroarch
         fi
