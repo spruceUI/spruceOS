@@ -290,6 +290,7 @@
                 "options": [
                     "Off",
                     "Quiet",
+                    "Adaptive",
                     "Conservative",
                     "Smart",
                     "Sport"

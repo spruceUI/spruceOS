@@ -407,6 +407,8 @@ device_home_button_pressed() {
 
 device_stop_thermal_process(){
     killall thermal-watchdog 2>/dev/null
+    pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
+    [ -n "$pid" ] && kill "$pid"
     echo 0 > /sys/class/thermal/cooling_device0/cur_state
 }
 
@@ -414,11 +416,14 @@ device_run_thermal_process(){
     THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
     selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
 
-    # Convert display name to lowercase profile name
-    profile=$(echo "$selected" | tr 'A-Z' 'a-z')
-
-    echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
-    /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    if [ "$selected" = "Adaptive" ]; then
+        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+    else
+        # Convert display name to lowercase profile name
+        profile=$(echo "$selected" | tr 'A-Z' 'a-z')
+        echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
+    fi
 }
 
 set_backlight() {
