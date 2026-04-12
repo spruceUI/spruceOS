@@ -23,13 +23,29 @@
       "overrides": {}
     },
     "Emulator_A30": {
-      "display": "Retroarch Core",
+      "display": "Emulator",
       "devices": [
         "MIYOO_A30"
       ],
       "options": [
         "pcsx_rearmed",
-        "km_duckswanstation_xtreme_amped"
+        "km_duckswanstation_xtreme_amped",
+        "PCSX-ReARMed-standalone"
+      ],
+      "selected": "pcsx_rearmed",
+      "overrides": {}
+    },
+    "Emulator_Mini": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_FLIP"
+      ],
+      "options": [
+        "pcsx_rearmed",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}

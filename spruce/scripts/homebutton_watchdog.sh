@@ -116,7 +116,7 @@ kill_emulator() {
         kill_scummvm
     elif pgrep -f "mupen64plus" >/dev/null; then
         kill_mupen
-    elif pgrep -x "pcsx\|pcsx_a30\|pcsx_mini" >/dev/null; then
+    elif pgrep -f pcsx >/dev/null; then
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
@@ -237,7 +237,7 @@ perform_action() {
     "Emulator menu")
         if pgrep -f "./PPSSPPSDL" >/dev/null; then
             killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
-        elif pgrep -x "pcsx" >/dev/null; then
+        elif pgrep -f pcsx >/dev/null; then
             killall -q -USR2 pcsx pcsx_a30 pcsx_mini
         else
             send_menu_button_to_retroarch
