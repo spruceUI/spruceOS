@@ -10,10 +10,8 @@
 --- Sun -----------------------------------------------------------------------
 
 - Mini splore update from tenlevels
-- Flip headphone volume
-- WiFi on brick/tsp?
 - Installer update, add version of release to UI
-- Duckstation, saturn SA?
+- Duckstation SA?
 
 
 --- Ry ------------------------------------------------------------------------
