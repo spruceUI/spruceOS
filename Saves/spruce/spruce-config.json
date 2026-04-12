@@ -294,6 +294,7 @@
                     "Smart",
                     "Sport"
                 ],
+                "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
                 "selected": "Smart"
             }
         },
