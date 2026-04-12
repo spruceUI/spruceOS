@@ -675,6 +675,26 @@
                 "type": "freeText",
                 "selected": ""
             }
+        },
+        "Audio Settings": {
+            "headphoneMultiplier": {
+                "display": "Headphone Audio Multiplier",
+                "devices": ["MIYOO_FLIP"],
+                "description": "Headphone Audio Multiplier",
+                "options": [
+                    "0.1",
+                    "0.2",
+                    "0.3",
+                    "0.4",
+                    "0.5",
+                    "0.6",
+                    "0.7",
+                    "0.8",
+                    "0.9",
+                    "1.0"
+                ],
+                "selected": "1.0"
+            }
         }
     }
 }

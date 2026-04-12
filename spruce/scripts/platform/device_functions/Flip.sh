@@ -133,8 +133,7 @@ set_volume() {
         # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
         if [ "$VOLUME_RAW" -eq 5 ]; then
             amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            # Also set lowest volume as 1 isntead of 5
-            amixer cset "name='SPK Volume'" 1 >/dev/null 2>&1
+            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
         fi
     fi
 
@@ -465,7 +464,43 @@ device_system_handles_sdcard_unmount() {
 }
 
 device_write_default_asound_rc() {
-    cat > "$ASOUND_CONF" <<EOF
+    hp_multiplier="$(get_config_value '.menuOptions."Audio Settings".headphoneMultiplier.selected' "1.0")"
+    use_hp_scaling=0
+    are_headphones_plugged_in && [ "$hp_multiplier" != "1.0" ] && use_hp_scaling=1
+
+    if [ "$use_hp_scaling" -eq 1 ]; then
+        cat > "$ASOUND_CONF" <<EOF
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    slave {
+        pcm "hw:0"
+        period_time 0
+        period_size 1024
+        buffer_size 8192
+    }
+}
+
+pcm.atten {
+    type route
+    slave.pcm "dmixer"
+
+    ttable.0.0 $hp_multiplier
+    ttable.1.1 $hp_multiplier
+}
+
+pcm.!default {
+    type plug
+    slave.pcm "atten"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
+    else
+        cat > "$ASOUND_CONF" <<EOF
 pcm.!default {
     type plug
     slave.pcm "dmix"
@@ -476,4 +511,5 @@ ctl.!default {
     card 0
 }
 EOF
+    fi
 }
