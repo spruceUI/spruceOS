@@ -13,7 +13,11 @@
 
 run_pcsx_standalone() {
 	case "$PLATFORM" in
-		"A30")       PCSX_LIBDIR="$EMU_DIR/liba30" ;;
+		"A30")
+			PCSX_LIBDIR="$EMU_DIR/liba30"
+			export PCSX_ROTATE=270
+			export ALSA_NAME=none
+			;;
 		"MiyooMini") PCSX_LIBDIR="$EMU_DIR/libmini" ;;
 		*)           PCSX_LIBDIR="$EMU_DIR/libs" ;;
 	esac
