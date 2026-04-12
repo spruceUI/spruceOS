@@ -51,15 +51,15 @@ class DeviceCommon(AbstractDevice):
 
     def power_off(self):
         if PyUiConfig.get_poweroff_cmd():
-            self.run_cmd([PyUiConfig.get_poweroff_cmd()])
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd([self.power_off_cmd()])
+            self.run_cmd([self.power_off_cmd()], is_power_cmd=True)
 
     def reboot(self):
         if PyUiConfig.get_reboot_cmd():
-            self.run_cmd([PyUiConfig.get_reboot_cmd()])
+            self.run_cmd([PyUiConfig.get_reboot_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd([self.reboot_cmd()])
+            self.run_cmd([self.reboot_cmd()], is_power_cmd=True)
 
 
     def input_timeout_default(self):
