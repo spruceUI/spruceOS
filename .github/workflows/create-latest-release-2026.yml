@@ -90,6 +90,11 @@ jobs:
           echo "Themes downloaded:"
           ls -lh Themes
 
+      - name: Archive Licenses folder
+        run: |
+          7z a -t7z -mx=9 Licenses.7z Licenses/
+          rm -rf Licenses/
+
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
