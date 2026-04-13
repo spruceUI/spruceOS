@@ -20,28 +20,22 @@
 
 handle_network_services() {
 
-	# If WiFi is disabled at the system level, skip all network handling
-	if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-		log_message "WiFi is disabled, skipping network services"
-		return
-	fi
-
 	wifi_needed=false
 	syncthing_sync_needed=false
 	wifi_connected=false
+	wifi_is_on="$(jq -r '.wifi // 0' "$SYSTEM_JSON")"
 	disable_wifi_in_game="$(get_config_value '.menuOptions."Battery Settings".disableWifiInGame.selected' "False")"
 	disable_net_serv_in_game="$(get_config_value '.menuOptions."Battery Settings".disableNetworkServicesInGame.selected' "False")"
 	syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
-	sync_before_launch_enabled="$(get_config_value '.menuOptions."Network Settings".syncBeforeLaunch.selected' "True")"
 
-	##### RAC Check #####
-	if [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+	##### RAC Check — only if WiFi is already on #####
+	if [ "$wifi_is_on" -ne 0 ] && [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
 		log_message "Retro Achievements enabled, WiFi connection needed"
 		wifi_needed=true
 	fi
 
-	##### Syncthing Sync Check, perform only once per session #####
-	if [ "$syncthing_enabled" = "True" ] && [ "$sync_before_launch_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
+	##### Syncthing Sync Check — syncs even if WiFi is off, once per session #####
+	if [ "$syncthing_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
 		log_message "Syncthing is enabled, WiFi connection needed"
 		wifi_needed=true
 		syncthing_sync_needed=true
@@ -52,6 +46,28 @@ handle_network_services() {
 		if check_and_connect_wifi; then
 			wifi_connected=true
 		fi
+	fi
+
+	# If WiFi failed and Syncthing was the reason, offer to disable it
+	if $syncthing_sync_needed && ! $wifi_connected; then
+		log_message "WiFi connection failed, prompting to disable Syncthing"
+		start_pyui_message_writer 1
+		display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 20 \
+			"WiFi unavailable.\nPress A to continue,\nB to disable Syncthing." 75
+		if confirm; then
+			log_message "User chose to continue without Syncthing sync"
+		else
+			log_message "User chose to disable Syncthing"
+			SPRUCE_JSON="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+			TMP_JSON="$(mktemp)"
+			jq '.menuOptions["Network Settings"].enableSyncthing.selected = "False"' \
+				"$SPRUCE_JSON" > "$TMP_JSON" && mv "$TMP_JSON" "$SPRUCE_JSON"
+			display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
+				"Syncthing disabled." 75
+			sleep 2
+		fi
+		stop_pyui_message_writer
+		syncthing_sync_needed=false
 	fi
 
 	# Handle Syncthing sync if needed and connected
