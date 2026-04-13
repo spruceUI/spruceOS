@@ -20,8 +20,14 @@
 
 handle_network_services() {
 
+	# If WiFi is disabled at the system level, skip all network handling
+	if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+		log_message "WiFi is disabled, skipping network services"
+		return
+	fi
+
 	wifi_needed=false
-	syncthing_enabled=false
+	syncthing_sync_needed=false
 	wifi_connected=false
 	disable_wifi_in_game="$(get_config_value '.menuOptions."Battery Settings".disableWifiInGame.selected' "False")"
 	disable_net_serv_in_game="$(get_config_value '.menuOptions."Battery Settings".disableNetworkServicesInGame.selected' "False")"
@@ -35,25 +41,24 @@ handle_network_services() {
 	fi
 
 	##### Syncthing Sync Check, perform only once per session #####
-	if [ "$syncthing_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
+	if [ "$syncthing_enabled" = "True" ] && [ "$sync_before_launch_enabled" = "True" ] && ! flag_check "syncthing_startup_synced"; then
 		log_message "Syncthing is enabled, WiFi connection needed"
 		wifi_needed=true
-		syncthing_enabled=true
+		syncthing_sync_needed=true
 	fi
 
 	# Connect to WiFi if needed for any service
-	if [ "$sync_before_launch_enabled" = "True" ] && $wifi_needed; then
+	if $wifi_needed; then
 		if check_and_connect_wifi; then
 			wifi_connected=true
 		fi
 	fi
 
-	# Handle Syncthing sync if enabled
-	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
+	# Handle Syncthing sync if needed and connected
+	if $syncthing_sync_needed && $wifi_connected; then
 		start_syncthing_process
 		/mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced" --tmp
-
 	fi
 
 	# Handle network service disabling
