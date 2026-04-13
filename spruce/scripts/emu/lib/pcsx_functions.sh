@@ -30,7 +30,7 @@ run_pcsx_standalone() {
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
-	"./${PCSX_BIN:-pcsx}" -cdfile "$ROM_FILE" -load 1 > $(emu_log_file) 2>&1
+	"./${PCSX_BIN:-pcsx_64}" -cdfile "$ROM_FILE" -load 1 > $(emu_log_file) 2>&1
 
 	umount "$HOME/.pcsx/bios" 2>/dev/null
 }
