@@ -1,0 +1,25 @@
+fMSX (MSX Emulator)
+https://github.com/libretro/fmsx-libretro
+
+Copyright (c) Marat Fayzullin 2005-2017
+
+Licensed under a custom non-commercial license
+
+---
+
+fMSX
+MSX emulator
+Copyright (C) Marat Fayzullin 2005-2017  
+
+LICENCE
+
+fMSX source code is open for everyone to see but it is not in public 
+domain. You can look and learn from it, but you cannot change it or copy 
+it without giving a credit to the original author and a few other 
+conditions. If you would like to port fMSX to another platform or make 
+changes to the code, please, contact me by email or some other means.
+
+You cannot use fMSX source code for commercial purposes unless you 
+contact me to arrange the conditions of such usage. If your company 
+intends to use MSX software in its products and you are considering 
+using fMSX source code, please, email me about licensing.
