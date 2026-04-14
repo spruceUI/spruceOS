@@ -9,6 +9,7 @@
 
 --- Sun -----------------------------------------------------------------------
 
+- RA rumble support
 - Mini splore update from tenlevels
 - Installer update, add version of release to UI
 - Duckstation SA?
