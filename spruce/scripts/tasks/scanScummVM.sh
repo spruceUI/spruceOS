@@ -9,3 +9,5 @@ LOG_DIR="/mnt/SDCARD/Saves/spruce"
 log_message "Scanning for ScummVM games..."
 run_scummvm_scan
 log_message "ScummVM scan complete."
+
+killall MainUI

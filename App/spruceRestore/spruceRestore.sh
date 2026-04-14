@@ -3,7 +3,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 APP_DIR=/mnt/SDCARD/App/spruceRestore
-UPGRADE_SCRIPTS_DIR=/mnt/SDCARD/App/spruceRestore/UpgradeScripts
 BACKUP_DIR=/mnt/SDCARD/Saves/spruce
 ICON_PATH="/mnt/SDCARD/spruce/imgs/restore.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
@@ -12,23 +11,6 @@ python_path="$(get_python_path)"
 # Set up logging
 log_file="$BACKUP_DIR/spruceRestore.log"
 >"$log_file" # Empty out or create the log file
-
-compare_versions() {
-    echo "$1 $2" | awk '{
-        split($1, a, ".")
-        split($2, b, ".")
-        for (i = 1; i <= 3; i++) {
-            if (a[i] < b[i]) {
-                print "older"
-                exit
-            } else if (a[i] > b[i]) {
-                print "newer"
-                exit
-            }
-        }
-        print "equal"
-    }'
-}
 
 kill_network_services() {
     ssh_service=$(get_ssh_service_name)
@@ -173,81 +155,20 @@ fi
 
 
 #-----Upgrade-----
-UPDATE_IMAGE_PATH="$APP_DIR/imgs/spruceUpdate.png"
-UPDATE_SUCCESSFUL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateSuccess.png"
-UPDATE_FAIL_IMAGE_PATH="$APP_DIR/imgs/spruceUpdateFailed.png"
 
 log_message "Starting upgrade process..."
-display_image_and_text "$ICON_PATH" 25 25  "Applying upgrades to your system..." 75
+display_image_and_text "$ICON_PATH" 25 25 "Applying upgrades to your system..." 75
 sleep 2
-# Read the current version from .lastUpdate file
-if [ -f "$last_update_file" ]; then
-    current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
+
+if run_upgrade_scripts; then
+    display_image_and_text "$ICON_PATH" 25 25 "Upgrades successful!" 75
+    sleep 2
 else
-    current_version="2.0.0"
+    display_image_and_text "$ICON_PATH" 25 25 "Migration failed; check $log_file for details." 75
+    exit 1
 fi
 
-log_message "Current version: $current_version"
-
-# List the contents of the directory for debugging
-log_message "Contents of $UPGRADE_SCRIPTS_DIR: $(ls -l "$UPGRADE_SCRIPTS_DIR")"
-
-# Use cd and a direct for loop instead of find
-cd "$UPGRADE_SCRIPTS_DIR" || exit 1
-
-# Before the upgrade loop, add check for developer/tester mode
-is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
-is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
-allow_same_version=0
-
-if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
-    allow_same_version=1
-    log_message "Dev/Tester mode detected; allowing same version upgrades"
-fi
-
-# Modify the version comparison logic in the upgrade loop
-for script in *.sh; do
-    [ -f "$script" ] || continue  # Skip if no .sh files found
-    
-    script_name="$script"
-    script_version=$(echo "$script_name" | cut -d'.' -f1-3)
-
-    version_compare=$(compare_versions "$current_version" "$script_version")
-    # Run if version is older OR if same version and in developer/tester mode
-    if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
-        log_message "Starting upgrade script: $script_name"
-        display_image_and_text "$ICON_PATH" 25 25 "Applying $script_name upgrades to your system..." 75
-
-        log_message "Executing $script_name..."
-        output=$(sh "$script" 2>&1)
-        exit_status=$?
-
-        log_message "Output from $script_name:"
-        echo "$output" >>"$log_file"
-
-        if [ $exit_status -eq 0 ]; then
-            log_message "Successfully completed $script_name"
-            echo "spruce_version=$script_version" >"$last_update_file"
-            current_version=$script_version
-        else
-            log_message "Error running $script_name. Exit status: $exit_status"
-            log_message "Error details: $output"
-            display_image_and_text "$ICON_PATH" 25 25 "Migration failed; check $log_file for details." 75
-
-            cd - >/dev/null
-            exit 1
-        fi
-
-        log_message "Finished processing $script_name"
-    else
-        log_message "Skipping $script_name: Current version $current_version is equal to or higher than $script_version"
-    fi
-done
-cd - >/dev/null
-
-log_message "Upgrade process completed. Current version: $current_version"
-display_image_and_text "$ICON_PATH" 25 25 "Upgrades successful!" 75
-sleep 2
+flag_remove "run_upgrades"
 
 
 # Apply settings

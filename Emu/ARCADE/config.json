@@ -32,6 +32,17 @@
         "ANBERNIC_RGXX640480"
       ]
     },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
+      "overrides": {}
+    },
     "Emulator_64": {
       "display": "Emulator",
       "options": [
@@ -40,7 +51,7 @@
         "fbalpha2012",
         "advmame-standalone"
       ],
-      "selected": "fbneo_libretro",
+      "selected": "fbneo",
       "overrides": {},
       "devices": [
         "MIYOO_FLIP",

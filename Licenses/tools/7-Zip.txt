@@ -1,0 +1,31 @@
+7-Zip (7zr)
+https://www.7-zip.org/
+
+Copyright (c) 1999-2024 Igor Pavlov
+
+Licensed under the GNU Lesser General Public License v2.1
+with unRAR license restriction
+
+---
+
+7-Zip is free software distributed under the GNU LGPL.
+The unRAR code is subject to restrictions on reverse engineering
+of RAR archives. See below.
+
+LGPL License:
+7-Zip source code is licensed under the GNU LGPL license.
+
+unRAR Restriction:
+The decompression engine for RAR archives was developed using
+source code of the unRAR program. All copyrights to original
+unRAR code are owned by Alexander L. Roshal.
+
+The license for original unRAR code has the following restriction:
+The unRAR sources cannot be used to re-create the RAR compression
+algorithm, which is proprietary. Distribution of modified unRAR
+sources in separate form or as a part of other software is permitted,
+provided that full text of this paragraph, starting from "unRAR
+Restriction" is included in license, or in documentation if license
+is not available, and that any such software includes a notice that
+it uses unRAR technology and is not affiliated with or endorsed by
+Alexander L. Roshal.

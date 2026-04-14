@@ -1,6 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
 import os
-import threading
 from typing import Callable, TypeVar
 
 from devices.device import Device
@@ -10,10 +8,23 @@ from utils.cached_exists import CachedExists
 T = TypeVar('T')  # Generic input type
 
 class GridOrListEntry:
-    
-    # Shared ThreadPoolExecutor for all instances 
-    _desc_executor = ThreadPoolExecutor(max_workers=1)
-
+    __slots__ = (
+        "primary_text",
+        "primary_text_long",
+        "value_text",
+        "image_path",
+        "image_path_selected",
+        "description",
+        "_description",
+        "_description_func",
+        "icon",
+        "value",
+        "image_path_searcher",
+        "image_path_selected_searcher",
+        "icon_searcher",
+        "extra_data",
+    )
+        
     def __init__(
         self,
         primary_text,
@@ -42,35 +53,18 @@ class GridOrListEntry:
         self.icon = icon
 
         self._description = None
-        self._description_func = None
-        self._description_event = threading.Event()
         self.extra_data = extra_data
         if callable(description):
             self._description_func = description
-            # Submit to thread pool and get Future
-            self._description_future = self._desc_executor.submit(self._load_description_func)
         else:
-            self._description_future = None
+            self._description_func = None
             self._description = description
-            self._description_event.set()  # No async loading needed
-
-    def _load_description_func(self):
-        try:
-            desc = self._description_func()
-        except Exception as e:
-            desc = f"[Error loading description: {e}]"
-        self._description = desc
-        self._description_event.set()
-        return desc
 
     def get_description(self):
         # If description is loading asynchronously, block here until done
-        if self._description_future is not None:
-            # Wait for future to complete if it hasn't yet
-            self._description_future.result()
-        else:
-            # If no future, make sure event is set
-            self._description_event.wait()
+        if self._description_func is not None:
+            self._description = self._description_func()
+            self._description_func = None
 
         return self._description
 

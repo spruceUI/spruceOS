@@ -5,7 +5,12 @@
   "themecolor": "FFFF88",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Standalone Options",
+      "launch": "/mnt/SDCARD/Emu/N64/mupen_standalone_options.sh"
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -18,20 +23,32 @@
       "overrides": {}
     },
     "Emulator_A30": {
-      "display": "Retroarch Core",
+      "display": "Emulator",
       "devices": [
         "MIYOO_A30"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
         "km_parallel_n64_xtreme_amped_turbo",
-        "mupen64plus"
+        "mupen64plus",
+        "mupen64plus-standalone"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}
     },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
+      "overrides": {}
+    },
     "Emulator_64": {
-      "display": "Emulator",
+      "display": "Emulator64",
       "devices": [
         "MIYOO_FLIP",
         "TRIMUI_SMART_PRO",
@@ -45,6 +62,22 @@
         "km_ludicrousn64_2k22_xtreme_amped",
         "parallel_n64",
         "mupen64plus_next",
+        "mupen64plus-standalone"
+      ],
+      "selected": "km_ludicrousn64_2k22_xtreme_amped",
+      "overrides": {}
+    },
+    "Emulator_32": {
+      "display": "Emulator32",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": [
+        "km_ludicrousn64_2k22_xtreme_amped",
+        "km_parallel_n64_xtreme_amped_turbo",
+        "mupen64plus",
         "mupen64plus-standalone"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",

@@ -1,8 +1,19 @@
 {
   "label": "Moonlight",
-  "icon": "retroarch.png",
+  "icon": "moonlight.png",
   "launch": "launch.sh",
-  "description": "Game Streaming (L+R to exit)",
-  "devices": ["MIYOO_FLIP", "GKD_PIXEL2"],
+  "description": "Game Streaming (Exit: L+R gui, L+R+ST+SL stream)",
+  "devices": [
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "TRIMUI_BRICK",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480",
+    "ANBERNIC_RGCUBEXX",
+    "MAGICX_ZERO28"
+  ],
   "hideInSimpleMode": false
 }

@@ -2,6 +2,7 @@
   "poll_interval_ms": 1000,
   "block_duration_secs": 15,
   "fan_curve": [
+    { "temp": 75000, "fan_level": 31 },
     { "temp": 65000, "fan_level": 17 },
     { "temp": 62500, "fan_level": 16 },
     { "temp": 60000, "fan_level": 15 },

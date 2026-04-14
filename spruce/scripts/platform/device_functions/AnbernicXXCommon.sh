@@ -82,26 +82,6 @@ device_enter_sleep() {
 }
 
 
-close_ppsspp_menu() {
-
-    if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
-        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
-        {
-            echo $B_RIGHT 1  
-            echo $B_RIGHT 0  
-            echo $B_A 1  
-            echo $B_A 0  
-        } > /tmp/ppsspp_events.txt
-
-        # run sendevent in a fully detached subshell
-        (
-            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
-        ) < /dev/null > /dev/null 2>&1 &
-
-        sleep 0.5
-    fi
-}
 
 take_screenshot() {
     log_message "Unable to doso on 34xxsp currently"
@@ -230,7 +210,7 @@ get_volume_level() {
 
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null; then
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
         echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
     fi
 }
@@ -261,14 +241,19 @@ setup_for_retroarch(){
     #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-    export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+    if [ "$RA_BIN" = "ra32.universal" ]; then
+        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+        export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
+    else
+        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+    fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-    
+
     echo "$RA_BIN"
 }
 

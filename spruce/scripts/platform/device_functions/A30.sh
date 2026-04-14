@@ -192,7 +192,7 @@ take_screenshot() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
-EMULATORS="ra32.a30 retroarch drastic32 PPSSPPSDL_A30 MainUI scummvm.a30 OpenBOR_mod OpenBOR_new"
+EMULATORS="ra32.a30 retroarch drastic32 PPSSPPSDL_A30 MainUI scummvm.a30 OpenBOR_mod OpenBOR_new mupen64plus"
 pause_emulators() {
     for EMU in $EMULATORS; do
         if killall -q -19 "$EMU" 2>/dev/null; then

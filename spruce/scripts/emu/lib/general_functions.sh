@@ -8,6 +8,7 @@
 #   /mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh
 #
 # Provides:
+#   get_effective_ra_build
 #   set_emu_core_from_emu_json
 #   get_cpu_mode_from_emu_json
 #   use_default_emulator
@@ -15,7 +16,27 @@
 #   get_mode_override
 #   set_cpu_mode
 #   pin_to_dedicated_cores
- 
+#   emu_log_file
+
+
+# Returns the log file path for standalone emulators.
+# When verbose_emulators flag is not set, returns /dev/null.
+emu_log_file() {
+	if [ "$VERBOSE_EMU" = "1" ]; then
+		echo "${LOG_DIR}/${CORE}-${PLATFORM}.log"
+	else
+		echo "/dev/null"
+	fi
+}
+
+get_effective_ra_build() {
+    # raBuild selection only applies to devices with both 32-bit and 64-bit universal RA
+    [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || return
+    ra_build="$(jq -r --arg game "$GAME" \
+        '.menuOptions.raBuild.overrides[$game] // .menuOptions.raBuild.selected // empty' \
+        "$EMU_JSON_PATH" 2>/dev/null)"
+    echo "$ra_build"
+}
 
 set_emu_core_from_emu_json() {
     # Try to use platform-specific emulator if it exists
@@ -28,6 +49,8 @@ set_emu_core_from_emu_json() {
     # Try the architecture suffix
     ARCH_SUFFIX="64"
     [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && ARCH_SUFFIX="32"
+    # Override if raBuild is set to 32-bit (per-game or system-wide)
+    [ "$RA_BUILD" = "32-bit" ] && ARCH_SUFFIX="32"
     CORE_PATH=".menuOptions.Emulator_$ARCH_SUFFIX.selected"
     if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
         export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
@@ -57,6 +80,8 @@ get_core_override() {
             ARCADE|DC|NAOMI|N64|PS)
                 if [ "$PLATFORM" = "A30" ]; then
                     core_section=".menuOptions.Emulator_A30"
+                elif [ "$RA_BUILD" = "32-bit" ] && jq -e '.menuOptions.Emulator_32' "$EMU_JSON_PATH" >/dev/null 2>&1; then
+                    core_section=".menuOptions.Emulator_32"
                 else
                     core_section=".menuOptions.Emulator_64"
                 fi

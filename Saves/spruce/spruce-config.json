@@ -288,10 +288,15 @@
                 "display": "Thermal Control",
                 "description": "Customize fan profiles",
                 "options": [
+                    "Off",
+                    "Quiet",
                     "Adaptive",
-                    "Cool"
+                    "Conservative",
+                    "Smart",
+                    "Sport"
                 ],
-                "selected": "Adaptive"
+                "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
+                "selected": "Smart"
             }
         },
         "Emulator Settings": {
@@ -377,9 +382,18 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "AnbernicXX640480"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "verboseLogging": {
+                "display": "Verbose emulator logging",
+                "description": "log output to SD card for debugging",
                 "options": [
                     "True",
                     "False"
@@ -424,6 +438,15 @@
                     "False"
                 ],
                 "selected":"False"
+            },
+            "syncBeforeLaunch": {
+                "display": "Sync saves before launching games",
+                "description": "Syncthing must be enabled",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"True"
             },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
@@ -652,6 +675,26 @@
                 "display": "Password",
                 "type": "freeText",
                 "selected": ""
+            }
+        },
+        "Audio Settings": {
+            "headphoneMultiplier": {
+                "display": "Headphone Audio Multiplier",
+                "devices": ["MIYOO_FLIP"],
+                "description": "Headphone Audio Multiplier",
+                "options": [
+                    "0.1",
+                    "0.2",
+                    "0.3",
+                    "0.4",
+                    "0.5",
+                    "0.6",
+                    "0.7",
+                    "0.8",
+                    "0.9",
+                    "1.0"
+                ],
+                "selected": "1.0"
             }
         },
         "Fn Key and Switch Settings": {

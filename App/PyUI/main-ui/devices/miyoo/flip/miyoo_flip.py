@@ -87,9 +87,9 @@ class MiyooFlip(MiyooDevice):
             miyoo_stock_json_file = script_dir.parent / 'stock/flip.json'
             ConfigCopier.ensure_config(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
             self.hardware_poller = MiyooFlipPoller(self)
-            threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             if(PyUiConfig.enable_button_watchers()):
+                threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd
                 # debug in terminal: hexdump  /dev/miyooio
@@ -136,7 +136,7 @@ class MiyooFlip(MiyooDevice):
             if(self.is_wifi_enabled()):
                 if(not self.connection_seems_up()):
                     self.stop_wifi_services()
-                self.start_wifi_services()
+                self.start_wifi_services(foreground_call=False)
 
         self.init_bluetooth()
 

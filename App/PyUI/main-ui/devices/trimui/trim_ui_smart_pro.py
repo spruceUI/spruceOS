@@ -64,6 +64,10 @@ class TrimUISmartPro(TrimUIDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
+        if include_wifi and self.is_wifi_enabled():
+            if not self.connection_seems_up():
+                self.stop_wifi_services()
+            self.start_wifi_services(foreground_call=False)
 
     #Untested
     @throttle.limit_refresh(5)

@@ -51,15 +51,15 @@ class DeviceCommon(AbstractDevice):
 
     def power_off(self):
         if PyUiConfig.get_poweroff_cmd():
-            self.run_cmd([PyUiConfig.get_poweroff_cmd()])
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd([self.power_off_cmd()])
+            self.run_cmd([self.power_off_cmd()], is_power_cmd=True)
 
     def reboot(self):
         if PyUiConfig.get_reboot_cmd():
-            self.run_cmd([PyUiConfig.get_reboot_cmd()])
+            self.run_cmd([PyUiConfig.get_reboot_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd([self.reboot_cmd()])
+            self.run_cmd([self.reboot_cmd()], is_power_cmd=True)
 
 
     def input_timeout_default(self):
@@ -218,7 +218,7 @@ class DeviceCommon(AbstractDevice):
                     PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
                     PyUiLogger.get_logger().info("Restarting WiFi services")
                     self.stop_wifi_services()
-                    self.start_wifi_services()
+                    self.start_wifi_services(foreground_call=False)
                 else:
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
@@ -293,12 +293,19 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
 
-    def start_wifi_services(self):
+    def start_wifi_services(self, foreground_call=False):
         if not self.connection_seems_up():
             PyUiLogger.get_logger().info("Starting WiFi Services")
+            if(foreground_call):
+                Display.display_message("Turning on WiFi Power")
+                
             self.set_wifi_power(1)
             time.sleep(1)  
+            if(foreground_call):
+                Display.display_message("Starting WiFi process")
             self.start_wpa_supplicant()
+            if(foreground_call):
+                Display.display_message("Starting ip address assignment process")
             self.start_udhcpc()
 
 

@@ -1,0 +1,15 @@
+O2EM (Odyssey 2 / Videopac)
+https://github.com/libretro/libretro-o2em
+
+Copyright (c) Andre de la Rocha
+
+Licensed under the Artistic License
+
+---
+
+The Artistic License applies to this software.
+See https://opensource.org/licenses/Artistic-2.0 for the full text.
+
+In summary, you are free to use, modify, and distribute this software
+provided that modified versions are clearly marked as such and are not
+misrepresented as the original software.

@@ -85,8 +85,8 @@ class GKDDevice(DeviceCommon):
     def run_game(self, rom_info):
         return MiyooTrimCommon.run_game(self, rom_info)
 
-    def run_cmd(self, args, dir = None):
-        MiyooTrimCommon.run_cmd(self, args, dir)
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        MiyooTrimCommon.run_cmd(self, args, dir, is_power_cmd)
         
     def run_app(self, folder,launch):
         MiyooTrimCommon.run_app(self, folder,launch)
@@ -169,7 +169,13 @@ class GKDDevice(DeviceCommon):
                 return "No USB adapter"
 
             try:
-                addrs = psutil.net_if_addrs().get("wlan0")
+                wlan_addrs = psutil.net_if_addrs().get("wlan0")
+                eth_addrs = psutil.net_if_addrs().get("eth0")
+
+                wlan_addrs = wlan_addrs if wlan_addrs else []
+                eth_addrs = eth_addrs if eth_addrs else []
+
+                addrs = wlan_addrs + eth_addrs
                 if addrs:
                     for addr in addrs:
                         if addr.family == socket.AF_INET:

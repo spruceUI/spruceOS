@@ -154,11 +154,17 @@ prepare_ra_config() {
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
+	# Apply per-game or system-wide RA build selection
+	case "$RA_BUILD" in
+		"32-bit") export RA_BIN="ra32.universal" ;;
+		"64-bit") export RA_BIN="ra64.universal" ;;
+	esac
+
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
 	# Sync IGM flag file with config setting
 	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
-	if [ "$use_igm" = "True" ]; then
+	if [ "$use_igm" = "True" ] && [ "$CORE" != "dosbox_pure" ]; then
 		touch "$IGM_FLAG"
 	else
 		rm -f "$IGM_FLAG"
@@ -183,7 +189,10 @@ run_retroarch() {
 	
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
-	RA_PARAMS="-v"
+	RA_PARAMS=""
+	if [ "$VERBOSE_EMU" = "1" ]; then
+		RA_PARAMS="-v"
+	fi
 	case "$PLATFORM" in
 		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"MiyooMini"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
@@ -199,7 +208,7 @@ run_retroarch() {
 			;;
 	esac
 
-	if flag_check "developer_mode"; then
+	if [ "$VERBOSE_EMU" = "1" ]; then
 		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
@@ -346,8 +355,15 @@ ready_architecture_dependent_states() {
     STATES="/mnt/SDCARD/Saves/states"
     SAVES="/mnt/SDCARD/Saves/saves"
 
-    SUFFIX="64"
-    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+    # Derive suffix from RA binary, not platform architecture
+    case "$RA_BIN" in
+        ra32.*) SUFFIX="32" ;;
+        ra64.*) SUFFIX="64" ;;
+        *)
+            SUFFIX="64"
+            [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+            ;;
+    esac
 
     # List of cores to handle
     for CORE in ${CORE_LIST}; do

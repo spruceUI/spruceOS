@@ -1,4 +1,7 @@
 import json
+import subprocess
+
+from utils.logger import PyUiLogger
 
 class CfwSystemConfig():
     _data = {}
@@ -42,6 +45,7 @@ class CfwSystemConfig():
         """Return a specific menu option by category and name, or None if not found."""
         return cls._data.get('menuOptions', {}).get(category, {}).get(name)
 
+
     @classmethod
     def set_menu_option(cls, category, name, selected_value):
         """
@@ -49,13 +53,22 @@ class CfwSystemConfig():
         """
         menu_options = cls._data.get('menuOptions', {}).get(category, {})
         if name in menu_options:
-            menu_options[name]['selected'] = selected_value
+            option = menu_options[name]
+
+            option['selected'] = selected_value
+
+            change_cmd = option.get('changeCmd')
+            if change_cmd:
+                try:
+                    subprocess.run(change_cmd, shell=True, check=True)
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Command failed: {change_cmd} -> {e}")
+
             cls.save_config()
             cls.reload_config()
         else:
             # Optional: log or raise if not found
             pass
-
     @classmethod
     def get_selected_value(cls, category, name):
         """Return the selected value of a menu option, or None if not found."""

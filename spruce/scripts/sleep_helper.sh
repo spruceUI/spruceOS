@@ -170,6 +170,10 @@ trigger_sleep() {
     fi
 }
 
+# Disable idle/shutdown timer during sleep
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 trigger_sleep
 
 device_exit_sleep
@@ -192,3 +196,6 @@ kill "$GET_EVENT_PID" 2>/dev/null
 
 sleep 2 #don't allow resleeping for a few seconds
 rm -f /tmp/sleep_helper_started
+
+# Restart idle timer if needed (idlemon_mm checks for it)
+/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &

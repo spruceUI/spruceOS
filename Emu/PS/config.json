@@ -29,9 +29,21 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "km_duckswanstation_xtreme_amped"
+        "km_duckswanstation_xtreme_amped",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
+      "overrides": {}
+    },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
       "overrides": {}
     },
     "Emulator_64": {
@@ -47,7 +59,8 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "swanstation"
+        "swanstation",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}

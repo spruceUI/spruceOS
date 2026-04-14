@@ -204,6 +204,37 @@ finish_unpacking() {
     fi
 }
 
+calculate_progress_percent() {
+    completed="${1:-0}"
+    total="${2:-0}"
+
+    if [ "$total" -le 0 ] 2>/dev/null; then
+        printf '100\n'
+        return 0
+    fi
+
+    percent=$((completed * 100 / total))
+    [ "$percent" -lt 0 ] && percent=0
+    [ "$percent" -gt 100 ] && percent=100
+    printf '%s\n' "$percent"
+}
+
+format_firstboot_extract_progress_text() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    percent="$(calculate_progress_percent "$completed" "$total")"
+    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
+}
+
+display_firstboot_extract_progress() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
+
+    start_pyui_message_writer
+    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
 # Usage 2: flag_add "flag_name" --tmp   --> creates flag in /tmp/ instead, to avoid unnecessary SD writes and stuck states
@@ -604,6 +635,75 @@ record_video() {
             fi
         ) &
     fi
+}
+
+run_upgrade_scripts() {
+    UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
+    last_update_file="/mnt/SDCARD/App/spruceRestore/.lastUpdate"
+
+    if [ -f "$last_update_file" ]; then
+        current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
+    else
+        current_version="2.0.0"
+    fi
+
+    log_message "Upgrade scripts: current version is $current_version"
+
+    if [ ! -d "$UPGRADE_SCRIPTS_DIR" ]; then
+        log_message "Upgrade scripts: directory not found, skipping"
+        return 0
+    fi
+
+    is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
+    is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
+    allow_same_version=0
+
+    if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+        allow_same_version=1
+        log_message "Upgrade scripts: dev/tester mode detected, allowing same version upgrades"
+    fi
+
+    cd "$UPGRADE_SCRIPTS_DIR" || return 1
+
+    for script in *.sh; do
+        [ -f "$script" ] || continue
+
+        script_version=$(echo "$script" | cut -d'.' -f1-3)
+
+        version_compare=$(echo "$current_version $script_version" | awk '{
+            split($1, a, ".")
+            split($2, b, ".")
+            for (i = 1; i <= 3; i++) {
+                if (a[i] < b[i]) { print "older"; exit }
+                else if (a[i] > b[i]) { print "newer"; exit }
+            }
+            print "equal"
+        }')
+
+        if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
+            log_message "Upgrade scripts: running $script"
+            output=$(sh "$script" 2>&1)
+            exit_status=$?
+            log_message "Upgrade scripts: output from $script:"
+            echo "$output" >> "${log_file:-/mnt/SDCARD/Saves/spruce/spruce.log}"
+
+            if [ $exit_status -eq 0 ]; then
+                log_message "Upgrade scripts: $script completed successfully"
+                echo "spruce_version=$script_version" > "$last_update_file"
+                current_version=$script_version
+            else
+                log_message "Upgrade scripts: $script failed with exit status $exit_status"
+                cd - > /dev/null
+                return 1
+            fi
+        else
+            log_message "Upgrade scripts: skipping $script (current $current_version >= $script_version)"
+        fi
+    done
+
+    cd - > /dev/null
+    log_message "Upgrade scripts: completed. Current version: $current_version"
+    return 0
 }
 
 
@@ -1019,22 +1119,45 @@ restart_wifi() {
     enable_wifi
 }
 
+network_is_connected() {
+    CHECK_ETH="${1:-false}" # Defaults to false if no argument
+
+	iface_up=false
+
+    if ifconfig wlan0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+        iface_up=true
+    fi
+
+    if [ "$CHECK_ETH" = true ]; then
+        if ifconfig eth0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+            iface_up=true
+        fi
+    fi
+
+	if $iface_up; then
+		if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+			return 0 # Success
+        fi
+	fi
+
+	return 1 # No network connection
+}
+
 check_and_connect_wifi() {
 
     timeout=60
     start_time=$(date +%s)
 
     # Initial connection check
-    if ifconfig wlan0 | grep -qE "inet |inet6 " && \
-       ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-        log_message "Active WiFi connection verified"
+    if network_is_connected true; then
+        log_message "Active network connection verified"
         return 0
     fi
 
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
     restart_wifi
-		
+
     display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
         "Waiting to connect....\nPress START to continue anyway." 75
 
@@ -1051,21 +1174,20 @@ check_and_connect_wifi() {
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
                     kill "$GE_PID" 2>/dev/null
-                    display_kill
                     display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
                         "Proceeding before connected to wifi." 75
                     sleep 2
+                    stop_pyui_message_writer
                     return 1
                     ;;
             esac
         fi
 
         # 2. Check for successful connection
-        if ifconfig wlan0 | grep -qE "inet |inet6 " && \
-           ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+        if network_is_connected; then
             log_message "Successfully connected to WiFi"
             kill "$GE_PID" 2>/dev/null
-            display_kill
+            stop_pyui_message_writer
             return 0
         fi
 
@@ -1074,7 +1196,7 @@ check_and_connect_wifi() {
         if [ $((current_time - start_time)) -ge $timeout ]; then
             log_message "WiFi connection timed out after $timeout seconds"
             kill "$GE_PID" 2>/dev/null
-            display_kill
+            stop_pyui_message_writer
             return 1
         fi
 

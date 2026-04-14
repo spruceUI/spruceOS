@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 
@@ -261,8 +262,8 @@ developer_mode_task() {
         ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            # Loop until WiFi is connected
-            while ! ifconfig wlan0 | grep -qE "inet |inet6 "; do
+            # Loop until network is connected
+            while ! network_is_connected true; do
                 sleep 0.2
             done
 
@@ -340,7 +341,8 @@ unstage_archives_wanted() {
     fi
     if [ "$DEVICE_USES_64_BIT_RA" = "true" ]; then
         unstage_archive "cores64.7z" "preCmd"
-    else
+    fi
+    if [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || [ "$DEVICE_USES_64_BIT_RA" != "true" ]; then
         unstage_archive "cores32.7z" "preCmd"
     fi
 }
@@ -403,6 +405,22 @@ read_unpack_state() {
     fi
 }
 
+run_archive_unpacker_foreground() {
+    force_foreground_precmd="$1"
+
+    if [ "$force_foreground_precmd" = "1" ]; then
+        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
+        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    else
+        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
+        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
+        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
+    fi
+}
+
 run_unpacker_foreground() {
     launch_event="$1"
     launch_context="$2"
@@ -413,11 +431,9 @@ run_unpacker_foreground() {
     firstboot_ui="$7"
 
     "$SYSTEM_EMIT" process runtime "$launch_event" "runtimeHelper.sh" "$launch_context" || true
-    if [ "$force_foreground_precmd" = "1" ]; then
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    else
-        SPRUCE_FIRSTBOOT_UI="${firstboot_ui:-0}" /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    fi
+    firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
+    run_archive_unpacker_foreground "$force_foreground_precmd"
+    firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"
 
     unpack_state="$(read_unpack_state)"
     if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then

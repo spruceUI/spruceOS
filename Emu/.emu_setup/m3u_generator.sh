@@ -44,7 +44,7 @@ if [ -d "$FULLPATH" ]; then
         sync
         mkdir -p "$DIRNAME"
 
-        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME.*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs to directory
+        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
         find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sed -e 's/^//' | sort > "$FILENAME.m3u"  # create playlist of discs
     done
 
@@ -57,7 +57,7 @@ if [ -d "$FULLPATH" ]; then
         sync
         mkdir -p "$DIRNAME"
 
-        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME.*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs to directory
+        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
         find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sort > "$FILENAME.m3u" # create playlist of discs
     done
 
@@ -70,7 +70,7 @@ if [ -d "$FULLPATH" ]; then
         sync
         mkdir -p "$DIRNAME"
 
-        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs to directory
+        find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
         find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sort > "$FILENAME.m3u" # create playlist of discs
     done
 else

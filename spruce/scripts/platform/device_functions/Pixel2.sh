@@ -66,11 +66,9 @@ device_init() {
     sync_volume_level
 
     disable_swap
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 
     # Loading screen daemon
     /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
-    /mnt/SDCARD/spruce/scripts/autoIconRefresh.sh &
 }
 
 set_event_arg_for_idlemon() {
@@ -99,6 +97,12 @@ prepare_for_pyui_launch(){
 
 post_pyui_exit(){
     log_message "This doesn't need to do anything when exitting pyui" -v
+}
+
+launch_startup_watchdogs(){
+    launch_common_startup_watchdogs_v2 "true"
+    /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
@@ -202,12 +206,6 @@ device_lid_open(){
 
 take_screenshot() {
     screenshot_path="$1"
-    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
-
-    if [ "$ppsspp_mode" = true ]; then
-        close_ppsspp_menu
-    fi
-
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
 }
 
@@ -294,24 +292,10 @@ set_event_arg() {
     EVENT_ARG="-e /dev/input/event2"
 }
 
-send_virtual_key_L3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        sleep 0.1
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
-}
-
 send_menu_button_to_retroarch() {
     if pgrep "ra64.pixel2" >/dev/null; then
         echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
-    elif pgrep -f "PPSSPPSDL_Pixel2" >/dev/null; then
-        send_virtual_key_L3
     fi
-    # PICO8 has no in-game menu and
-    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
 
 enable_digital_to_analog() {
@@ -336,24 +320,6 @@ disable_digital_to_analog() {
     pkill "evsieve"
 }
 
-close_ppsspp_menu() {
-    if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "Closing PPSSPP menu."
-        {
-            echo $B_RIGHT 1
-            echo $B_RIGHT 0
-            echo $B_B 1
-            echo $B_B 0
-        } > /tmp/ppsspp_events.txt
-
-        # run sendevent in a fully detached subshell
-        (
-            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
-        ) < /dev/null > /dev/null 2>&1 &
-
-        sleep 0.3
-    fi
-}
 
 set_default_ra_hotkeys() {
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"

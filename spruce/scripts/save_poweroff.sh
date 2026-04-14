@@ -10,7 +10,7 @@ FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
-EMU_PROCESSES="ra32.a30 ra32.mini ra64.universal ra64.pixel2 \
+EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
 retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast-stock yabasanshiro yabasanshiro.trimui \
 mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
@@ -181,7 +181,7 @@ stop_problematic_scripts() {
     killall -q -9 buttons_watchdog.sh
     killall -q -9 idlemon_mm.sh
     killall -q -9 low_power_warning.sh
-    killall -q -9 autoIconRefresh.sh
+    killall -q -9 theme_watchdog.sh
     killall -q -9 inotifywait
     killall -q -9 inotifywatch
     killall -q -9 getevent

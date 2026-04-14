@@ -92,7 +92,7 @@ class MuosDevice(DeviceCommon):
         return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    def run_cmd(self, args, dir = None):
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
         PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
         subprocess.run(args, cwd = dir)
     

@@ -1,0 +1,31 @@
+================================================================================
+                            spruceOS To-Do List
+================================================================================
+
+
+--- Chris ---------------------------------------------------------------------
+
+
+
+--- Sun -----------------------------------------------------------------------
+
+- Mini splore update from tenlevels
+- Installer update, add version of release to UI
+- Duckstation SA?
+
+
+--- Ry ------------------------------------------------------------------------
+
+- RA cfg overhaul
+- add more shaders branch
+    - cut out unusably slow on tsps
+    - organize a little
+    - merge
+- fn buttons and switch branch
+    - y no work on tsps at all?
+    - test on tsp
+    - implement light toggle
+    - implement fan toggle
+    - merge
+
+    

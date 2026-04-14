@@ -221,7 +221,12 @@ setup_for_retroarch(){
 	elif [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
-	export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	if [ "$RA_BIN" = "ra32.universal" ]; then
+		export CORE_DIR="$RA_DIR/.retroarch/cores"
+		export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
+	else
+		export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -275,37 +280,8 @@ check_if_fw_needs_update() {
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
 
-
-close_ppsspp_menu() {
-
-    if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
-        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
-        {
-            echo $B_RIGHT 1  
-            echo $B_RIGHT 0  
-            echo $B_A 1  
-            echo $B_A 0  
-        } > /tmp/ppsspp_events.txt
-
-
-        # run sendevent in a fully detached subshell
-        (
-            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
-        ) < /dev/null > /dev/null 2>&1 &
-
-        sleep 0.5
-    fi
-}
-
 take_screenshot() {
     screenshot_path="$1"
-    ppsspp_mode="${2:-true}"   # Optional 2nd arg, defaults to true
-
-    if [ "$ppsspp_mode" = true ]; then
-        close_ppsspp_menu
-    fi
-
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
 }
 
@@ -488,7 +464,43 @@ device_system_handles_sdcard_unmount() {
 }
 
 device_write_default_asound_rc() {
-    cat > "$ASOUND_CONF" <<EOF
+    hp_multiplier="$(get_config_value '.menuOptions."Audio Settings".headphoneMultiplier.selected' "1.0")"
+    use_hp_scaling=0
+    are_headphones_plugged_in && [ "$hp_multiplier" != "1.0" ] && use_hp_scaling=1
+
+    if [ "$use_hp_scaling" -eq 1 ]; then
+        cat > "$ASOUND_CONF" <<EOF
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    slave {
+        pcm "hw:0"
+        period_time 0
+        period_size 1024
+        buffer_size 8192
+    }
+}
+
+pcm.atten {
+    type route
+    slave.pcm "dmixer"
+
+    ttable.0.0 $hp_multiplier
+    ttable.1.1 $hp_multiplier
+}
+
+pcm.!default {
+    type plug
+    slave.pcm "atten"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
+    else
+        cat > "$ASOUND_CONF" <<EOF
 pcm.!default {
     type plug
     slave.pcm "dmix"
@@ -499,4 +511,5 @@ ctl.!default {
     card 0
 }
 EOF
+    fi
 }

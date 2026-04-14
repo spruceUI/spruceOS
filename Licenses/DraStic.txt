@@ -1,0 +1,11 @@
+DraStic Nintendo DS Emulator
+https://www.drastic-ds.com/
+
+DraStic is a proprietary, closed-source Nintendo DS emulator
+developed by Exophase.
+
+DraStic is distributed as freeware. All rights reserved by the
+original author. No source code is available.
+
+spruceOS includes DraStic binaries with permission for personal,
+non-commercial use.

@@ -1,5 +1,6 @@
 
 
+from functools import partial
 import os
 from pathlib import Path
 from typing import Callable
@@ -18,7 +19,10 @@ from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
+from utils.time_logger import log_timing
 from views.grid_or_list_entry import GridOrListEntry
+from views.util.icon_searcher import IconSearcher
+from views.util.image_searcher import ImageSearcher
 
 
 class RomSelectOptionsBuilder:
@@ -270,60 +274,78 @@ class RomSelectOptionsBuilder:
 
     def build_rom_list(self, game_system,filter: Callable[[str, str, str], bool] = lambda a,b,c: True, subfolder = None,
                        prefer_savestate_screenshot: bool = False) -> list[GridOrListEntry]:
-        file_rom_list = []
-        folder_rom_list = []
-        valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
+        with log_timing("self.rom_utils.get_roms", PyUiLogger.get_logger()):    
+            # Get valid files and folders once
+            valid_files, valid_folders = self.rom_utils.get_roms(game_system, subfolder)
 
+        with log_timing("build_rom_list", PyUiLogger.get_logger()):    
+            file_rom_list = []
+            folder_rom_list = []
+            miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
 
-        miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
-        
-        for rom_file_path in valid_files:
-            rom_file_name = os.path.basename(rom_file_path)
-            game_entry = miyoo_game_list.get_by_file_path(rom_file_path)
-            if(game_entry is not None):
-                display_name = game_entry.name
-            else:
-                display_name = RomFileNameUtils.get_rom_name_without_extensions(game_system,rom_file_path)
-            if(filter(rom_file_name, rom_file_path, display_name)):
+            append_file = file_rom_list.append
+            append_folder = folder_rom_list.append
+            get_by_file_path = miyoo_game_list.get_by_file_path
+            get_name_no_ext = RomFileNameUtils.get_rom_name_without_extensions
+            get_image_path = self.get_image_path
+            get_favorite_icon = self._get_favorite_icon
+            folder_name = game_system.folder_name
 
-                rom_info = RomInfo(game_system,rom_file_path, display_name)
+            # Process valid files
+            for rom_file_path in valid_files:
+                rom_file_name = os.path.basename(rom_file_path)
 
-                file_rom_list.append(
-                    GridOrListEntry(
-                        primary_text=display_name,
-                        description=game_system.folder_name, 
-                        value=rom_info,
-                        image_path_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
-                        image_path_selected_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
-                        icon_searcher=lambda rom_info=rom_info: self._get_favorite_icon(rom_info)
-                    )
-                )
+                game_entry = get_by_file_path(rom_file_path)
+                display_name = game_entry.name if game_entry else get_name_no_ext(game_system, rom_file_path)
 
-        for rom_file_path in valid_folders:
-            rom_file_name = os.path.basename(rom_file_path)
-            game_entry = miyoo_game_list.get_by_file_path(rom_file_path)
-            if(game_entry is not None):
-                display_name = game_entry.name
-            else:
-                display_name = rom_file_name
-            if(filter(rom_file_name, rom_file_path, display_name)):
+                if not filter(rom_file_name, rom_file_path, display_name):
+                    continue
 
                 rom_info = RomInfo(game_system, rom_file_path, display_name)
 
-                folder_rom_list.append(
+                img_search = ImageSearcher(rom_info, game_entry, prefer_savestate_screenshot, get_image_path)
+
+                append_file(
                     GridOrListEntry(
                         primary_text=display_name,
-                        description=game_system.folder_name, 
+                        description=folder_name,
                         value=rom_info,
-                        image_path_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
-                        image_path_selected_searcher= lambda rom_info=rom_info, game_entry=game_entry: self.get_image_path(rom_info, game_entry, prefer_savestate_screenshot=prefer_savestate_screenshot),
-                        icon_searcher=lambda rom_info=rom_info: self._get_favorite_icon(rom_info)
+                        image_path_searcher=img_search,
+                        image_path_selected_searcher=img_search,
+                        icon_searcher=IconSearcher(rom_info,get_favorite_icon)
                     )
                 )
-        file_rom_list.sort(key=lambda entry: entry.get_sort_key())   
-        folder_rom_list.sort(key=lambda entry: entry.get_sort_key())
 
-        return folder_rom_list + file_rom_list
+            # Process valid folders
+            for rom_file_path in valid_folders:
+                rom_file_name = os.path.basename(rom_file_path)
+                game_entry = get_by_file_path(rom_file_path)
+                display_name = game_entry.name if game_entry else rom_file_name
+
+                if not filter(rom_file_name, rom_file_path, display_name):
+                    continue
+
+                rom_info = RomInfo(game_system, rom_file_path, display_name)
+
+                # Pre-bind parameters to lambdas
+                img_search = lambda _, ri=rom_info, ge=game_entry: get_image_path(ri, ge, prefer_savestate_screenshot)
+
+                append_folder(
+                    GridOrListEntry(
+                        primary_text=display_name,
+                        description=folder_name,
+                        value=rom_info,
+                        image_path_searcher=img_search,
+                        image_path_selected_searcher=img_search,
+                        icon_searcher=lambda _, ri=rom_info: get_favorite_icon(ri)
+                    )
+                )
+
+            # Sort once
+            file_rom_list.sort(key=lambda entry: entry.get_sort_key())
+            folder_rom_list.sort(key=lambda entry: entry.get_sort_key())
+
+            return folder_rom_list + file_rom_list
 
 _rom_select_options_builder_instance = None
 

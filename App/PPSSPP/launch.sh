@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/emu/lib/general_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
 
 export HOME=/mnt/SDCARD/Saves
