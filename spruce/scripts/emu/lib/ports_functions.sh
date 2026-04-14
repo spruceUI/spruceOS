@@ -10,7 +10,7 @@
 # Provides:
 #   extract_game_dir
 #   is_retroarch_port
-#   set_port_mode
+#   set_port_abxy_scheme
 #   run_port
 /mnt/SDCARD/spruce/scripts/asound-setup.sh /mnt/SDCARD/Saves/flip/home
 extract_game_dir(){
@@ -34,9 +34,18 @@ is_retroarch_port() {
     fi
 }
 
-set_port_mode() {
+set_port_abxy_scheme() {
     rm "$PM_DIR/gamecontrollerdb.txt"
-	PORT_CONTROL="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+
+    # try to get a controller mode override first
+    PORT_CONTROL=$(jq -r --arg game "$GAME" ".menuOptions.controlMode.overrides[\$game]" "$EMU_JSON_PATH")
+
+    # if that returns empty or literal null, fall back to selection for the whole PORTS system.
+    if [ -z "$PORT_CONTROL" ] || [ "$PORT_CONTROL" = "null" ]; then
+	    PORT_CONTROL="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+    fi
+
+    # apply that selection
     if [ "$PORT_CONTROL" = "X360" ]; then
         cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_360.txt" "$PM_DIR/gamecontrollerdb.txt"
     else
@@ -63,7 +72,7 @@ run_port() {
         export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
     fi
 
-    set_port_mode
+    set_port_abxy_scheme
     is_retroarch_port
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
@@ -90,7 +99,7 @@ run_A30_port() {
     # ensure correct RA bin and config are available
     . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
     touch /mnt/SDCARD/RetroArch/retroarch
-    mount --bind /mnt/SDCARD/RetroArch/retroarch.A30 /mnt/SDCARD/RetroArch/retroarch
+    mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
     # make A30PORTS accessible from PORTS for backwards compatibility
@@ -104,5 +113,4 @@ run_A30_port() {
     # clean up and back up any RA config modifications
     umount /mnt/SDCARD/Roms/PORTS
     umount /mnt/SDCARD/RetroArch/retroarch
-    backup_ra_config 2>/dev/null
 }

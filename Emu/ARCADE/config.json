@@ -28,11 +28,37 @@
       "overrides": {},
       "devices": [
         "MIYOO_A30",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
+      ]
+    },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
         "MIYOO_FLIP",
-        "TRIMUI_SMART_PRO",
-        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "options": [
+        "fbneo",
+        "mame2003_plus",
+        "fbalpha2012",
+        "advmame-standalone"
+      ],
+      "selected": "fbneo",
+      "overrides": {},
+      "devices": [
+        "MIYOO_FLIP",
+        "GKD_PIXEL2",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S"
       ]
     },
     "Emulator_MiyooMini": {
@@ -59,6 +85,13 @@
   "releaseYear": 1971,
   "default_emulator": "fbneo",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["arcade", "Arcade"],
-  "ignoreList": ["neogeo.zip","neocdz.zip","neocd.zip"]
+  "alternativeFolderNames": [
+    "arcade",
+    "Arcade"
+  ],
+  "ignoreList": [
+    "neogeo.zip",
+    "neocdz.zip",
+    "neocd.zip"
+  ]
 }

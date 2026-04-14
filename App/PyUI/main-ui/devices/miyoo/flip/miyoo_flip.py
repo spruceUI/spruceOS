@@ -1,6 +1,7 @@
 import inspect
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import threading
 import time
@@ -86,9 +87,9 @@ class MiyooFlip(MiyooDevice):
             miyoo_stock_json_file = script_dir.parent / 'stock/flip.json'
             ConfigCopier.ensure_config(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
             self.hardware_poller = MiyooFlipPoller(self)
-            threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             if(PyUiConfig.enable_button_watchers()):
+                threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd
                 # debug in terminal: hexdump  /dev/miyooio
@@ -135,10 +136,9 @@ class MiyooFlip(MiyooDevice):
             if(self.is_wifi_enabled()):
                 if(not self.connection_seems_up()):
                     self.stop_wifi_services()
-                self.start_wifi_services()
+                self.start_wifi_services(foreground_call=False)
 
         self.init_bluetooth()
-        self.apply_timezone(self.system_config.get_timezone())
 
     def init_bluetooth(self):
         if(self.system_config.is_bluetooth_enabled()):
@@ -360,11 +360,32 @@ class MiyooFlip(MiyooDevice):
             self.system_config.set_timezone(tz)
             self.apply_timezone(tz)
 
+
     def apply_timezone(self, timezone):
-        os.environ['TZ'] = timezone
-        time.tzset()  
-        #If we set the time be sure to
-        #export TZ='{timezone}'
+        zoneinfo_path = f"/usr/share/zoneinfo/{timezone}"
+        localtime_path = "/userdata/localtime"
+        timezone_path = "/userdata/timezone"
+
+        if not os.path.isfile(zoneinfo_path):
+            Display.write_message_multiline([f"Error getting timezone file",
+                                             f"Does not appear to be a file",f"{timezone}"
+                                             ],3_000)
+            return
+
+        def safe_delete(path):
+            if os.path.lexists(path):
+                if os.path.isdir(path) and not os.path.islink(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
+
+        safe_delete(localtime_path)
+        safe_delete(timezone_path)
+
+        shutil.copyfile(zoneinfo_path, localtime_path)
+        shutil.copyfile(localtime_path, timezone_path)
+
+        Display.display_message("May need to reboot to apply timezone setting",3_000)
 
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, theme_path)

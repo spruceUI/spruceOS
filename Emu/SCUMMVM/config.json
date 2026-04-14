@@ -5,7 +5,65 @@
   "themecolor": "90db09",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "scummvm",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Open ScummVM Menu",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/open_scummvm_menu.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
+    },
+    {
+      "name": "Scan ScummVM Games",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/scan_scummvm_game.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
+    },
+    {
+      "name": "Generate namelist",
+      "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -16,13 +74,73 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Emulator",
+      "options": [
+        "scummvm-standalone"
+      ],
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "selected": "scummvm-standalone",
+      "overrides": {}
+    },
+    "Emulator_MiyooMini": {
+      "display": "Emulator",
+      "options": [
+        "scummvm-standalone"
+      ],
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ],
+      "selected": "scummvm-standalone",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "options": [
+        "scummvm-standalone"
+      ],
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
+      ],
+      "selected": "scummvm-standalone",
+      "overrides": {}
     }
   },
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "MIYOO_A30",
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP",
+    "ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480",
+    "MIYOO_MINI",
+    "MIYOO_MINI_V4",
+    "MIYOO_MINI_PLUS",
+    "MIYOO_MINI_FLIP"
+  ],
   "sortOrder": 5600,
   "brand": "modernengine",
   "type": "pc",
   "releaseYear": 2001,
   "default_emulator": "scummvm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["scummvm"]
+  "alternativeFolderNames": [
+    "scummvm"
+  ]
 }

@@ -4,17 +4,25 @@
   "Reset RetroArch config":  "/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh",
   "Reset DraStic config": "/mnt/SDCARD/spruce/scripts/tasks/resetNDS.sh",
   "Reset PPSSPP config": "/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh",
+  "Reauthorize PPSSPP cheevos": "/mnt/SDCARD/spruce/scripts/tasks/fetchPPSSPPauth.sh",
   "Clean up macOS dotfiles": "/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh",
   "Repair SD Card": "/mnt/SDCARD/spruce/scripts/tasks/repairSD.sh",
   "Bug report": "/mnt/SDCARD/spruce/scripts/tasks/bugReport.sh",
+  "Scan ScummVM games": "/mnt/SDCARD/spruce/scripts/tasks/scanScummVM.sh",
+  "Clear all Recents": "/mnt/SDCARD/spruce/scripts/tasks/clearRecents.sh",
+  "Clear all Favorites": "/mnt/SDCARD/spruce/scripts/tasks/clearFavorites.sh",
   "descriptions": {
     "Forget all WiFi networks": "disconnect and clear all saved networks",
     "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
     "Reset RetroArch config": "restore spruce default RA config for current device",
     "Reset DraStic config": "restore spruce default NDS config for current device",
     "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
+    "Reauthorize PPSSPP cheevos": "update auth token for RetroAchievements",
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
     "Repair SD Card": "reboot and attempt an fsck.fat on your card",
-    "Bug report": "collect logs and other info for bug reports"
+    "Bug report": "collect logs and other info for bug reports",
+    "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM",
+    "Clear all Recents": "delete your recently played games list",
+    "Clear all Favorites": "delete your favorited games list"
   }
 }

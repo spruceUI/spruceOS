@@ -9,10 +9,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Development branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: Development
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
@@ -61,34 +61,39 @@ jobs:
           fi
 
       - name: Pull PyUI Themes
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Cloning PyUI-Themes repo..."
-          git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
-
           mkdir -p Themes
+          RELEASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
 
-          echo "Copying selected themes..."
-          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/ART_BOOK_OUTLINE.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/GREEN.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/OTB.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/SLABS.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
+          echo "Downloading selected themes from PyUI-Themes release..."
+          wget -q --no-check-certificate -O "Themes/ALEKFULL_NX_ES.7z" "${RELEASE_URL}/ALEKFULL_NX_ES.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_OUTLINE.7z" "${RELEASE_URL}/ART_BOOK_OUTLINE.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_NEXT.7z" "${RELEASE_URL}/ART_BOOK_NEXT.7z" || true
+          wget -q --no-check-certificate -O "Themes/Avocado.7z" "${RELEASE_URL}/Avocado.7z" || true
+          wget -q --no-check-certificate -O "Themes/Cosy by KyleBing.7z" "${RELEASE_URL}/Cosy_by_KyleBing.7z" || true
+          wget -q --no-check-certificate -O "Themes/Grape.7z" "${RELEASE_URL}/Grape.7z" || true
+          wget -q --no-check-certificate -O "Themes/GREEN.7z" "${RELEASE_URL}/GREEN.7z" || true
+          wget -q --no-check-certificate -O "Themes/HeyDW's Blue.7z" "${RELEASE_URL}/HeyDWs_Blue.7z" || true
+          wget -q --no-check-certificate -O "Themes/M.7z" "${RELEASE_URL}/M.7z" || true
+          wget -q --no-check-certificate -O "Themes/MINIMAL.7z" "${RELEASE_URL}/MINIMAL.7z" || true
+          wget -q --no-check-certificate -O "Themes/MinUInspired (logos).7z" "${RELEASE_URL}/MinUInspired_(logos).7z" || true
+          wget -q --no-check-certificate -O "Themes/OTB.7z" "${RELEASE_URL}/OTB.7z" || true
+          wget -q --no-check-certificate -O "Themes/Pico-8.7z" "${RELEASE_URL}/Pico-8.7z" || true
+          wget -q --no-check-certificate -O "Themes/SLABS.7z" "${RELEASE_URL}/SLABS.7z" || true
+          wget -q --no-check-certificate -O "Themes/SPRUCE (simple).7z" "${RELEASE_URL}/SPRUCE_(simple).7z" || true
 
-          echo "Themes copied:"
+          # Remove any empty files from failed downloads
+          find Themes -name "*.7z" -empty -delete
+
+          echo "Themes downloaded:"
           ls -lh Themes
 
-          echo "Removing cloned PyUI Themes repo"
-          rm -rf pyui_themes
+      - name: Archive Licenses folder
+        run: |
+          7z a -t7z -mx=9 Licenses.7z Licenses/
+          rm -rf Licenses/
 
       - name: Create 7z archive
         run: |
@@ -99,23 +104,83 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!spruce/flags/developer_mode
+            -x!spruce/flags/developer_mode \
+            -xr!App/adbd \
+            -x!To-Do.txt
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
 
-      - name: Create Draft Release
+      - name: Check if release already exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.get_version.outputs.version }}" --repo spruceUI/spruceOS >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} already exists, will update archive only"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Release v${{ steps.get_version.outputs.version }} does not exist, will create new draft"
+          fi
+
+      - name: Update existing release archive
+        if: steps.check_release.outputs.exists == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          tag_name: v${{ steps.get_version.outputs.version }}
+          repository: spruceUI/spruceOS
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: true
+          prerelease: false
+
+      - name: Create new draft release
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
           files: spruceV${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           name: spruceOS v${{ steps.get_version.outputs.version }}
           body: |
-            ## What's New
-            [Describe changes here]
+            | Device                | Support Status        |
+            |-----------------------|-----------------------|
+            | Miyoo Flip            |  |
+            | Miyoo A30             |  |
+            | Trimui Smart Pro      |  |
+            | Trimui Brick          |  |
+            | Trimui Smart Pro S    |  |
+            | Miyoo Mini Flip       |  |
+            | Miyoo Mini Plus       |  |
+            | Miyoo Mini v1-4       |  |
+
+            # What's New
+
+            Check out the wiki for info on ROM folders and apps [Here](https://github.com/spruceUI/spruceOS/wiki)
+
+            Join our Discord [here!](https://discord.gg/sDeaS3TMuJ)
+
+            # Changelog
+
+            ## Bug Fixes
+            -
+
+            ## Improvements
+            -
 
             ## Installation
-            Download spruceV${{ steps.get_version.outputs.version }}.7z and copy the contents to a blank FAT32 formatted SD card.
+            ## New Installer App
+            - Try the all-in-one installer app for a super easy installation!
+            - No need to download a release or format your card manually!
+            - Compatible versions for Windows, Mac and Linux!
+            - [Find the Latest version for you PC here](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
+            - Lets you install Stable, Nightlies, Sprig (mini flip only) and Twig (GKD Pixel 2 only) all in one click!
+
+            ## Manual Installation
+            - Download spruceV${{ steps.get_version.outputs.version }}.7z
+            - Extract onto your PC using [7zip](https://www.7-zip.org/download.html)
+            - Copy the entire contents to a blank FAT32 formatted SD card.
+            - Seriously, use 7zip to extract onto your PC THEN copy the files. IDK why but Windows breaks stuff if you use its built in extraction tool.
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
           draft: true

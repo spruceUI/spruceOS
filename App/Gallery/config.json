@@ -1,0 +1,15 @@
+{
+  "label": "Gallery",
+  "icon": "gallery.png",
+  "launch": "launch.sh",
+  "description": "Screenshots viewer",
+  "devices": ["TRIMUI_BRICK",
+              "TRIMUI_SMART_PRO",
+              "TRIMUI_SMART_PRO_S",
+              "MIYOO_FLIP",
+              "GKD_PIXEL2",
+              "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+              "ANBERNIC_RGXX640480"
+              ],
+  "hideInSimpleMode": false
+}

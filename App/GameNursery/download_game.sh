@@ -2,17 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-JSON_FILE="$1"
+GAME_NAME="$1"
+GAME_URL="$2"
+REQUIRES_FILES="$3"
 TMP_DIR="/mnt/SDCARD/App/GameNursery/tmp"
-
-SHORT_NAME="$(jq -r '.shortname' "$JSON_FILE")"
-if [ "$SHORT_NAME" != "null" ] && [ -n "$SHORT_NAME" ]; then
-    GAME_NAME="$SHORT_NAME"
-else
-    GAME_NAME="$(jq -r '.display' "$JSON_FILE")"
-fi
-
-GAME_URL="$(jq -r '.url' "$JSON_FILE")"
 ZIP_NAME="$(basename "$GAME_URL")"
 
 start_pyui_message_writer
@@ -57,8 +50,11 @@ if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
     sleep 4
 	exit 1
 else
-	log_and_display_message "$GAME_NAME installed successfully!"
+	if [ "$REQUIRES_FILES" = "true" ]; then
+		log_and_display_message "$GAME_NAME installed! Note: this game requires additional files to play."
+	else
+		log_and_display_message "$GAME_NAME installed successfully!"
+	fi
     sleep 2
 	rm -f "$TMP_DIR/$ZIP_NAME" 2>/dev/null
 fi
-

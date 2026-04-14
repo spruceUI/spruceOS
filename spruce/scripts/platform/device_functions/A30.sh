@@ -8,6 +8,7 @@ export EVENT_PATH_KEYBOARD="/dev/input/event3"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 
 get_config_path() {
@@ -19,7 +20,7 @@ set_overclock() {
     if ! flag_check "setting_cpu"; then
         oc_freq="$(get_config_value '.menuOptions."System Settings".overclockSpeedA30.selected' "1344")"
 
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null
         /mnt/SDCARD/spruce/a30/setcpu/utils "performance" 4 $oc_freq 384 1080 1
@@ -86,33 +87,30 @@ enter_sleep() {
     echo -n mem >/sys/power/state
 }
 
+trigger_device_sleep() {
+    enter_sleep
+}
+
 get_current_volume() {
     amixer get 'Soft Volume Master' | sed -n 's/.*Front Left: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-# Not updated to match other devices yet, takes raw value
 set_volume() {
-    amixer set 'Soft Volume Master' "$new_vol" 
-}
+    VOLUME_LV="${1:-0}"
+    SAVE_TO_CONFIG="${2:-true}"
 
-run_mixer_watchdog() {
-    log_message "Not needed for A30: run_mixer_watchdog" -v
+    [ "$VOLUME_LV" -lt 0 ] && VOLUME_LV=0
+    [ "$VOLUME_LV" -gt 20 ] && VOLUME_LV=20
+
+    _set_volume "$VOLUME_LV" "$SAVE_TO_CONFIG"
 }
 
 new_execution_loop() {
     log_message "Not needed for A30: new_execution_loop" -v
 }
 
-setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
+setup_for_retroarch(){
     export CORE_DIR="$RA_DIR/.retroarch/cores"
-
-	if [ "$use_igm" = "False" ] || [ "$CORE" = "km_parallel_n64_xtreme_amped_turbo" ]; then
-		export RA_BIN="retroarch.A30"
-	else
-		export RA_BIN="ra32.miyoo"
-	fi
-
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -121,7 +119,6 @@ setup_for_retroarch_and_get_bin_location(){
 	fi
 
     echo "$RA_BIN"
-
 }
 
 
@@ -152,13 +149,10 @@ send_virtual_key_L3() {
 }
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra32.miyoo" >/dev/null; then
-        send_virtual_key_L3
-    elif pgrep -f "retroarch" >/dev/null; then
-        send_virtual_key_L3R3
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+    if pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
     fi
+    # ra32.a30 handles menu toggle via its own input system
     # PICO8 has no in-game menu and
     # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
 }
@@ -171,22 +165,17 @@ post_pyui_exit(){
     killall -q -USR1 joystickinput   # return the stick to being a stick
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs
-}
-
-perform_fw_check(){
+A30_notify_about_FW_update_if_needed(){
     FW_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
 
     # A30's firmware check
     VERSION=$(cat /usr/miyoo/version)
     if [ "$VERSION" -lt 20240713100458 ]; then
         log_message "Detected firmware version $VERSION, turning off wifi and suggesting update"
-        sed -i 's|"wifi":	1|"wifi":	0|g' "$SYSTEM_JSON"
+        jq '.wifi = 0' "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
         display_image_and_text "$FW_ICON" 35 25 "Visit the App section from the main menu to update your firmware to the latest version. It fixes the A30's Wi-Fi issues!" 75
         sleep 5
     fi
-
 }
 
 
@@ -201,6 +190,66 @@ take_screenshot() {
     /mnt/SDCARD/spruce/a30/screenshot.sh "$screenshot_path"
 }
 
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+DISPLAY_ENHANCE_PATH="/sys/devices/virtual/disp/disp/attr/enhance"
+EMULATORS="ra32.a30 retroarch drastic32 PPSSPPSDL_A30 MainUI scummvm.a30 OpenBOR_mod OpenBOR_new mupen64plus"
+pause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -19 "$EMU" 2>/dev/null; then
+            log_message "$EMU was paused"
+            break
+        fi
+    done
+}
+
+unpause_emulators() {
+    for EMU in $EMULATORS; do
+        if killall -q -18 "$EMU" 2>/dev/null; then
+            log_message "$EMU was unpaused"
+            break
+        fi
+    done
+}
+
+device_enter_sleep() {
+    pause_emulators
+    sleep 0.5
+    # Kill exclusive getevent to prevent buffered wake button events
+    # from causing a re-sleep loop. The power watchdog's outer loop
+    # will restart getevent fresh after sleep_helper exits.
+    if [ "$(device_uses_pseudo_sleep)" != "true" ]; then
+        kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+        sleep 0.3
+    fi
+
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    sync
+    trigger_device_sleep
+}
+
+device_exit_sleep() {
+    if [ "$(device_woke_via_timer)" != "true" ] && [ -e "$DISPLAY_ENHANCE_PATH" ]; then
+        ENHANCE_SETTINGS=$(cat "$DISPLAY_ENHANCE_PATH" 2>/dev/null)
+        [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
+    fi
+
+    touch /tmp/audio_reinit_needed
+    clear_wake_alarm "$WAKE_ALARM_PATH"
+    unpause_emulators
+}
+
+device_lid_open() {
+    return 1
+}
+
+device_uses_pseudo_sleep() {
+    echo "false"
+}
+
 device_specific_wake_from_sleep() {
     log_message "nothing to do" -v
 }
@@ -208,10 +257,8 @@ device_specific_wake_from_sleep() {
 
 runtime_mounts_A30() {
     mkdir -p /var/lib/alsa
-    mkdir -p /mnt/SDCARD/spruce/dummy
     mount -o bind "/mnt/SDCARD/miyoo/var/lib" /var/lib &
     mount -o bind /mnt/SDCARD/miyoo/lib /usr/miyoo/lib &
-    mount -o bind /mnt/SDCARD/miyoo/res/skin /usr/miyoo/res/skin &
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -242,10 +289,6 @@ device_init() {
         echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
     fi
 
-    # listen hotkeys for brightness adjustment, volume buttons and power button
-    # What is being changed later that prevents this from running with the other watchdogs?
-    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
-
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
 
@@ -258,7 +301,6 @@ device_init() {
 set_event_arg_for_idlemon() {
     log_message "nothing to do" -v
 }
-
 
 set_default_ra_hotkeys() {
         
@@ -274,7 +316,7 @@ set_default_ra_hotkeys() {
         "input_fps_toggle = \"alt\"" \
         "input_load_state = \"tab\"" \
         "input_menu_toggle = \"shift\"" \
-        "input_menu_toggle_btn = \"9\"" \
+        "input_menu_toggle_btn = \"nul\"" \
         "input_quit_gamepad_combo = \"0\"" \
         "input_save_state = \"backspace\"" \
         "input_screenshot = \"space\"" \
@@ -283,26 +325,23 @@ set_default_ra_hotkeys() {
         "input_state_slot_increase = \"right\"" \
         "input_toggle_slowmotion = \"e\"" \
         "input_toggle_fast_forward = \"t\""
-
-}
-
-
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
 }
 
 save_volume_to_config_file() {
     VOLUME_LV=$1
-    sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOLUME_LV/" "$SYSTEM_JSON"
+    jq ".vol = $VOLUME_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 }
 
 _set_volume() {
     VOLUME_LV="$1"
+    SAVE_TO_CONFIG="${2:-true}"
     VOLUME_RAW=$(( (VOLUME_LV * 255 + 10) / 20 ))
     log_message "Setting volume to ${VOLUME_RAW}"
-    amixer set 'Soft Volume Master' $VOLUME_RAW > /dev/null
-    save_volume_to_config_file "$VOLUME_LV"
+    amixer set 'Soft Volume Master' "$VOLUME_RAW" > /dev/null
 
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        save_volume_to_config_file "$VOLUME_LV"
+    fi
 }
 
 volume_down() {
@@ -310,7 +349,7 @@ volume_down() {
     # if value greater than zero
     if [ $VOLUME_LV -gt 0 ] ; then
         VOLUME_LV=$((VOLUME_LV-1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
@@ -319,7 +358,7 @@ volume_up() {
     # if value less than 20
     if [ $VOLUME_LV -lt 20 ] ; then
         VOLUME_LV=$((VOLUME_LV+1))
-        _set_volume "$VOLUME_LV"
+        set_volume "$VOLUME_LV"
     fi
 }
 
@@ -336,3 +375,11 @@ device_get_charging_status() {
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # A30 leaves dirty bit set?
+}
+
+

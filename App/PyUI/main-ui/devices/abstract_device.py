@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import subprocess
 
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from utils.image_utils import ImageUtils
@@ -93,7 +93,7 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def run_cmd(self, args, dir = None):
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
         pass
 
     @abstractmethod
@@ -289,7 +289,7 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
-    def get_system_config(self) -> SystemConfig:
+    def get_system_config(self) -> DeviceUserConfig:
         pass
 
     @abstractmethod

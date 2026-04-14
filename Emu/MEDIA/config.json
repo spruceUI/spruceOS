@@ -4,13 +4,74 @@
   "iconsel": "ffplay_sel.png",
   "themecolor": "DDEEFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka",
-  "launchlist": [],
+  "extlist": "mp4|mkv|avi|mov|flv|ts|mp3|m4a|wav|aac|flac|ogg|opus|mka|ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz",
+  "launchlist": [
+    {
+      "name": "Open GVU Browser",
+      "launch": "/mnt/SDCARD/Emu/MEDIA/open_gvu_browser.sh"
+    }
+  ],
+  "menuOptions": {
+    "Emulator_32": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_A30",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ],
+      "options": [
+        "gvu",
+        "ffplay",
+        "gme"
+      ],
+      "selected": "gvu",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
+      ],
+      "options": [
+        "gvu",
+        "ffplay",
+        "gme"
+      ],
+      "selected": "gvu",
+      "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "mpv",
+        "ffplay",
+        "gme"
+      ],
+      "selected": "mpv",
+      "overrides": {}
+    }
+  },
   "sortOrder": 3300,
   "brand": "Misc",
   "type": "mediaplayer",
   "releaseYear": 9999,
   "default_emulator": "ffplay",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["media","videos","VIDEOS","MUSIC","music"]
+  "alternativeFolderNames": [
+    "media",
+    "videos",
+    "VIDEOS",
+    "MUSIC",
+    "music"
+  ]
 }

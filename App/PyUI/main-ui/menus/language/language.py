@@ -202,6 +202,10 @@ class Language:
     @classmethod
     def add_remove_collection(cls):
         return cls._data.get("addRemoveCollection","Add/Remove Collection")
+    
+    @classmethod
+    def remove_recents(cls):
+        return cls._data.get("removeRecents","Remove Recents")
 
     @classmethod
     def launch_random_game(cls):
@@ -405,6 +409,10 @@ class Language:
         return cls._data.get("l2R2SkipByLetterForDaijishoThemes","L2/R2 Skip By Letter for Daijisho Themes")
 
     @classmethod
+    def ignore_articles_when_sorting(cls):
+        return cls._data.get("ignoreArticlesWhenSorting","Ignore articles when sorting")
+
+    @classmethod
     def hold_menu_for_gameswitcher(cls):
         return cls._data.get("holdMenuForGameswitcher","Hold Menu for GameSwitcher")
 
@@ -595,6 +603,10 @@ class Language:
     @classmethod
     def main_menu_columns(cls):
         return cls._data.get("mainMenuColumns","Main Menu Columns")
+
+    @classmethod
+    def main_menu_rows(cls):
+        return cls._data.get("mainMenuRows","Main Menu Rows")
 
     @classmethod
     def show_text(cls):

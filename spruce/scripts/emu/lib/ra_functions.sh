@@ -17,31 +17,64 @@
 #   pin_to_dedicated_cores
 #
 # Provides:
-#   get_ra_cfg_location
 #   prepare_ra_config
-#   backup_ra_config
 #   run_retroarch
 #   ready_architecture_dependent_states
 #   stash_architecture_dependent_states
 #   load_n64_controller_profile
 #   save_custom_n64_controller_profile
 
-get_ra_cfg_location(){
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
-    if [ -n "$RA_CFG_LOCATION" ]; then
-        # Already set, use it
-        echo "$RA_CFG_LOCATION"
-    elif [ "$use_igm" = "True" ] && [ "$PLATFORM" = "Flip" ]; then
-		#Why is Flip here as a platform check?
-		echo "/mnt/SDCARD/RetroArch/ra64.miyoo.cfg"				# this is the one weird exception
-	else
-		echo "/mnt/SDCARD/RetroArch/retroarch.cfg"				# this is used almost universally
-	fi
-}
+export RA_DIR="/mnt/SDCARD/RetroArch"
 
 prepare_ra_config() {
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	CURRENT_CFG=$(get_ra_cfg_location)
+	case "$PLATFORM" in
+    	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
+		*) 			 export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
+	esac
+
+	# Set up RetroAchievements based on spruceUI config
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
+	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+	log_message "Cheevos mode is $rac_mode" -v
+	case "$rac_mode" in
+		"Disabled")
+			# disable cheevos but leave everything else alone
+			TMP_CFG="$(mktemp)"
+			if sed -e "s|^cheevos_enable.*|cheevos_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Softcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
+				-e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" \
+				-e "s|^cheevos_username.*|cheevos_username = \"$rac_user\"|" \
+				-e "s|^cheevos_password.*|cheevos_password = \"$rac_pass\"|" \
+			"$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		"Hardcore")
+			TMP_CFG="$(mktemp)"
+			if sed \
+				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
+				-e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"true\"|" \
+				-e "s|^cheevos_username.*|cheevos_username = \"$rac_user\"|" \
+				-e "s|^cheevos_password.*|cheevos_password = \"$rac_pass\"|" \
+			"$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+	esac
+
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v
@@ -58,11 +91,11 @@ prepare_ra_config() {
 	# Set auto load state based on spruceUI config
 	auto_load="$(get_config_value '.menuOptions."Emulator Settings".raAutoLoad.selected' "Custom")"
 	log_message "auto load setting is $auto_load" -v
-	if [ "$auto_load" = "True" ]; then
+	if [ "$auto_load" = "True" ] && [ "$rac_mode" != "Hardcore" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_load.*|savestate_auto_load = "true"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
-	elif [ "$auto_load" = "False" ]; then
+	elif [ "$auto_load" = "False" ] || [ "$rac_mode" = "Hardcore" ]; then
 		TMP_CFG="$(mktemp)"
 	    sed 's|^savestate_auto_load.*|savestate_auto_load = "false"|' "$PLATFORM_CFG" > "$TMP_CFG"
 		mv "$TMP_CFG" "$PLATFORM_CFG"
@@ -70,10 +103,10 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI")
+		"TrimUI" | "GKD")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
-		"Miyoo")
+		"Miyoo" | "Anbernic")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")"
 			;;
 	esac
@@ -97,23 +130,47 @@ prepare_ra_config() {
 		;;
 		*) ;;
 	esac
-	# copy platform-specific RA config into place where RA wants it to be
-	cp -f "$PLATFORM_CFG" "$CURRENT_CFG"
-}
 
-backup_ra_config() {
-	# copy any changes to retroarch.cfg made during RA runtime back to platform-specific config
-	PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
-	CURRENT_CFG=$(get_ra_cfg_location)
-	[ -e "$CURRENT_CFG" ] && cp -f "$CURRENT_CFG" "$PLATFORM_CFG"
+	# Handle resolution and rotation for Anbernic H700 devices
+	case "$PLATFORM" in
+		*"Anbernic"*)
+			TMP_CFG="$(mktemp)"
+			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
+				rot="1"
+			else
+				rot="0"
+			fi
+			if sed -e "s|^video_rotation.*|video_rotation = \"$rot\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PLATFORM_CFG"
+			else
+				rm -f "$TMP_CFG"
+			fi
+			;;
+		*) ;;
+	esac
+	sync
 }
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
+	# Apply per-game or system-wide RA build selection
+	case "$RA_BUILD" in
+		"32-bit") export RA_BIN="ra32.universal" ;;
+		"64-bit") export RA_BIN="ra64.universal" ;;
+	esac
+
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
-	setup_for_retroarch_and_get_bin_location
+	# Sync IGM flag file with config setting
+	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
+	if [ "$use_igm" = "True" ] && [ "$CORE" != "dosbox_pure" ]; then
+		touch "$IGM_FLAG"
+	else
+		rm -f "$IGM_FLAG"
+	fi
+
+	setup_for_retroarch
 	cd "$RA_DIR"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
@@ -128,27 +185,37 @@ run_retroarch() {
 
 	log_message "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
 	log_message "export PATH=\"$PATH\""
-	log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" -v --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 	#Swap below if debugging
 	
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 
-	RA_PARAMS="-v"
+	RA_PARAMS=""
+	if [ "$VERBOSE_EMU" = "1" ]; then
+		RA_PARAMS="-v"
+	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartProS")
-			RA_PARAMS="${RA_PARAMS} --config ${CURRENT_CFG}"
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"MiyooMini"|"Anbernic"*)
+			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
 
-	if flag_check "developer_mode"; then
+	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
+	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
+	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
+	case "$PLATFORM" in
+		"A30")
+			export SDL_GAMECONTROLLER_IGNORE_DEVICES=0x045E/0x028E
+			;;
+	esac
+
+	if [ "$VERBOSE_EMU" = "1" ]; then
+		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
+		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
 		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
-	
-
-	backup_ra_config 2>/dev/null
-	
+	backup_rac_creds_to_spruce_cfg
 	ra_close_setup_saves_and_states_for_core_differences
 }
 
@@ -288,8 +355,15 @@ ready_architecture_dependent_states() {
     STATES="/mnt/SDCARD/Saves/states"
     SAVES="/mnt/SDCARD/Saves/saves"
 
-    SUFFIX="64"
-    [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+    # Derive suffix from RA binary, not platform architecture
+    case "$RA_BIN" in
+        ra32.*) SUFFIX="32" ;;
+        ra64.*) SUFFIX="64" ;;
+        *)
+            SUFFIX="64"
+            [ "$PLATFORM_ARCHITECTURE" = "armhf" ] && SUFFIX="32"
+            ;;
+    esac
 
     # List of cores to handle
     for CORE in ${CORE_LIST}; do
@@ -319,9 +393,43 @@ stash_architecture_dependent_states() {
 
     # List of cores to handle
     for CORE in $CORE_LIST; do
-		mkdir -p "$BASE/$CORE-$SUFFIX"
-        umount "$BASE/$CORE"
+		for BASE in "$STATES" "$SAVES"; do
+			mkdir -p "$BASE/$CORE-$SUFFIX"
+			umount "$BASE/$CORE"
+        done
     done
+}
+
+backup_rac_creds_to_spruce_cfg() {
+
+	# if spruce setting for RAC mode is auto or disabled, do nothing.
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
+	case "$rac_mode" in
+		"Softcore"|"Hardcore") ;;
+		*) return ;;
+	esac
+
+	ra_user="$(grep '^cheevos_username' "$PLATFORM_CFG" | sed 's/.*= *"\(.*\)".*/\1/')"
+	ra_pass="$(grep '^cheevos_password' "$PLATFORM_CFG" | sed 's/.*= *"\(.*\)".*/\1/')"
+	json_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	json_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+
+	# if neither user nor pass have been updated during RA runtime, do nothing.
+	[ "$ra_user" = "$json_user" ] && [ "$ra_pass" = "$json_pass" ] && return
+
+	# don't update spruce json if either user or pass was blanked during runtime.
+	[ -z "$ra_user" ] && return
+	[ -z "$ra_pass" ] && return
+
+	log_message "Cheevos creds updated during runtime. Syncing back to spruce-config.json."
+	SPRUCE_JSON="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+	TMP_JSON="$(mktemp)"
+	jq \
+		--arg user "$ra_user" \
+		--arg pass "$ra_pass" \
+		'.menuOptions["RetroAchievements Settings"].username.selected = $user
+		 | .menuOptions["RetroAchievements Settings"].password.selected = $pass' \
+		"$SPRUCE_JSON" > "$TMP_JSON" && mv "$TMP_JSON" "$SPRUCE_JSON"
 }
 
 load_n64_controller_profile() {

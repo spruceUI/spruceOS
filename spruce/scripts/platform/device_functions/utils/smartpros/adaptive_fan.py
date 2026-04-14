@@ -17,6 +17,7 @@ FAN_MIN, FAN_MAX = 0, 31
 SAMPLE_INTERVAL = 1.0      # seconds
 TREND_WINDOW = 10           # seconds to measure trend
 TARGET_MARGIN = 1.0        # °C around target for tracking
+FAILSAFE_TEMP = 75.0       # °C — force max fan above this (A523 datasheet limit)
 DEBUG = False
 
 # -----------------------------
@@ -58,9 +59,9 @@ def main(lower_bound, upper_bound, debug):
     DEBUG = debug
 
     target_temp = (lower_bound + upper_bound) / 2
-    
+
     current_fan = read_fan_speed()
-    
+
     if DEBUG:
         print(f"Target {target_temp:.2f}°C between {lower_bound}-{upper_bound}°C")
 
@@ -69,12 +70,21 @@ def main(lower_bound, upper_bound, debug):
     current_fan = set_fan_speed(current_fan)
 
     temp_read_count = 0
-    initial_temp = get_max_temperature()    
+    initial_temp = get_max_temperature()
 
     while True:
         temp = get_max_temperature()
         temp_read_count += 1
         if temp is None:
+            time.sleep(SAMPLE_INTERVAL)
+            continue
+
+        # Failsafe: force max fan above thermal limit
+        if temp >= FAILSAFE_TEMP:
+            if current_fan != FAN_MAX:
+                current_fan = set_fan_speed(FAN_MAX)
+                temp_read_count = 0
+                initial_temp = temp
             time.sleep(SAMPLE_INTERVAL)
             continue
 
@@ -100,7 +110,7 @@ def main(lower_bound, upper_bound, debug):
                     if(temp > upper_bound):
                         # Bigger adjustments if outside margins
                         new_fan = current_fan + max(1,abs(int(delta_temp*3)))
-                    else: 
+                    else:
                         new_fan = current_fan + 1
             elif temp < lower_bound or delta_temp < -2.0:
                 # Temperature too low, decrease fan if trend not already up

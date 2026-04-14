@@ -85,7 +85,7 @@ rgb_led lrm12 blink2 0000FF 1500 "-1" mmc0
 if [ "$PLATFORM" = "A30" ]; then
     VERSION="$(cat /usr/miyoo/version)"
     if [ "$VERSION" -lt 20240713100458 ]; then
-        sed -i 's|"#label":|"label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+        jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json" > "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" && mv "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
         display_image_and_text "$IMAGE_PATH" 35 25 "Firmware version is too old. Please update your firmware using the Firmware Updater app, then try again." 75
         sleep 5
         exit 1
@@ -219,9 +219,9 @@ else
     exit 0
 fi
 
-BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
-CHARGING="$(cat $BATTERY/online)"
-if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" -eq 0 ]; then
+BATTERY_CAPACITY="$(device_get_battery_percent)"
+CHARGING="$(device_get_charging_status)"
+if [ "$BATTERY_CAPACITY" -lt 20 ] && [ "$CHARGING" = "Discharging" ]; then
     display_image_and_text "$IMAGE_PATH" 35 25 "Battery too low to complete update. You can still download it now, but you will need to charge your device to at least 20% or plug it in. Afterwards you may use the EZ Updater app to complete the update process." 75
     sleep 5
     log_message "OTA: Battery level: $BATTERY_CAPACITY%
@@ -263,12 +263,14 @@ if [ -f "/mnt/SDCARD/$FILENAME" ]; then
     fi
 fi
 
+sync
+
 if [ "$goto_install" != "true" ]; then  # do the downloadin'
     # Check free disk space
     sdcard_mountpoint="$(mount | grep -m 1 "$SD_MOUNTPOINT" | awk '{print $1}')"
     sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
     min_install_space=$(((TARGET_SIZE * 2) + 128))
-    if [ "$free_space" -lt "$min_install_space" ]; then
+    if [ "$sdcard_freespace" -lt "$min_install_space" ]; then
         log_message "OTA: Not enough free space on SD card (at least ${min_install_space}MB should be free)"
         display_image_and_text "$IMAGE_PATH" 35 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
         sleep 5
@@ -295,12 +297,12 @@ fi
 
 rm -rf "$TMP_DIR"
 # Show updater app
-sed -i 's|"#label"|"label"|' "/mnt/SDCARD/App/-Updater/config.json"
+jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
 
 # Check battery level before asking to update
-BATTERY_CAPACITY="$(cat $BATTERY/capacity)"
-CHARGING="$(cat $BATTERY/online)"
-if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING -eq 0 ]; then
+BATTERY_CAPACITY="$(device_get_battery_percent)"
+CHARGING="$(device_get_charging_status)"
+if [ $BATTERY_CAPACITY -lt 20 ] && [ $CHARGING = "Discharging" ]; then
     display_image_and_text "$BAD_IMG" 35 25 "Battery too low to safely update. Please charge to at least 20% or plug in your device. You can run the EZ Updater app to install the already downloaded update." 75
     sleep 5
     exit 0
@@ -310,7 +312,7 @@ fi
 display_image_and_text "$IMAGE_PATH" 35 25 "Download successful! Press A to install now, or B to exit and install later." 75
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
-    /mnt/SDCARD/App/-Updater/updater.sh
+    "$(get_python_path)" /mnt/SDCARD/App/-Updater/updater.py
 else
     log_message "OTA: Update declined"
     exit 0

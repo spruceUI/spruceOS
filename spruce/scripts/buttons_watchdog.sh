@@ -2,26 +2,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ "$PLATFORM" = "A30" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem"
-    SET_OR_CSET="set"
-    NAME_QUALIFIER=""
-    AMIXER_CONTROL="'Soft Volume Master'"
-elif [ "$PLATFORM" = "Flip" ]; then
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"
-    SET_OR_CSET="cset"
-    NAME_QUALIFIER="name="
-    AMIXER_CONTROL="'SPK Volume'"
-else    # trimui
-    BIN_PATH="/mnt/SDCARD/spruce/bin64"
-    SETSHAREDMEM_PATH="$BIN_PATH/setsharedmem-flip"     # this doesn't work yet. setsharedmem-flip is too high glibc
-    SET_OR_CSET="set"                                   # need to double check this 
-    NAME_QUALIFIER=""                                   # also need to check if this is necessary
-    AMIXER_CONTROL="'Soft Volume Master'"
-fi
-
 START_DOWN=false
 
 nearest_system_brightness() {
@@ -96,44 +76,73 @@ map_brightness_to_system_value() {
 
 
 volume_down_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_down in background
-        # it makes sure to run whole volume_up function even volume_down_bg is killed
-        volume_down &
+        if [ $CURR_VOLUME -gt 0 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} - 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
 
 volume_up_bg() {
-    while true; do 
+    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    while true; do
         sleep 0.3
-        # fire volume_up in background
-        # it makes sure to run whole volume_up function even volume_up_bg is killed
-        volume_up &
+        if [ $CURR_VOLUME -lt 20 ]; then
+            CURR_VOLUME=$((${CURR_VOLUME} + 1))
+            set_volume "$CURR_VOLUME" false &
+        fi
     done
 }
+
+take_screenshot_bg() {
+    timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
+    ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
+
+    vibrate &
+    take_screenshot "$ss_name"
+}
+
+# Setup global screenshot shortcut
+SS_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
+SS_B1=$B_L2
+SS_B2=$B_R2
+
+case "$SS_SHORTCUT" in
+    "L2+R2+Y")
+        SS_B3=$B_Y
+        ;;
+    "L2+R2+X")
+        SS_B3=$B_X
+        ;;
+    "L2+R2+DOWN")
+        SS_B3=$B_DOWN
+        ;;
+    "Off")
+        SS_B1="NULL"
+        SS_B2="NULL"
+        SS_B3="NULL"
+        ;;
+esac
+
+SS_B1_DOWN=false
+SS_B2_DOWN=false
+SS_B3_DOWN=false
 
 # scan all button input
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
     # first print event code to log file
-    logger -p 15 -t "keymon[$$]" "$line"
     # handle hotkeys and volume buttons
     case $line in
         *"key $B_START 1"*) # START key down
             START_DOWN=true
-            logger -p 15 -t "keymon[$$]" "enter_pressed 1"
         ;;
         *"key $B_START 0"*) # START key up
             START_DOWN=false
-            logger -p 15 -t "keymon[$$]" "enter_pressed 0"
-        ;;
-        *"key $B_SELECT 1"*) # SELECT key down
-            logger -p 15 -t "keymon[$$]" "rctrl_pressed 1"
-        ;;
-        *"key $B_SELECT 0"*) # SELECT key up
-            logger -p 15 -t "keymon[$$]" "rctrl_pressed 0"
         ;;
         *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] ; then
@@ -145,10 +154,40 @@ getevent $EVENTS | while read line; do
                 brightness_up
             fi
         ;;
+        *"key $SS_B1 1"*) # Screenshot key 1 down
+            SS_B1_DOWN=true
+            if [ "$SS_B2_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $SS_B1 0"*) # Screenshot key 1 up
+            SS_B1_DOWN=false
+        ;;
+        *"key $SS_B2 1"*) # Screenshot key 2 down
+            SS_B2_DOWN=true
+            if [ "$SS_B1_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $SS_B2 0"*) # Screenshot key 2 up
+            SS_B2_DOWN=false
+        ;;
+        *"key $SS_B3 1"*) # Screenshot key 3 down
+            SS_B3_DOWN=true
+            if [ "$SS_B1_DOWN" = true ] && [ "$SS_B2_DOWN" = true ] ; then
+                take_screenshot_bg &
+            fi
+        ;;
+        *"key $SS_B3 0"*) # Screenshot key 3 up
+            SS_B3_DOWN=false
+        ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
+
             volume_down # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_down_bg &
             PID_DOWN=$!
         ;;
@@ -159,7 +198,10 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
             PID_UP=""
+
             volume_up # ensure fire the first run
+
+            CURR_VOLUME=$(get_volume_level)
             volume_up_bg &
             PID_UP=$!
         ;;

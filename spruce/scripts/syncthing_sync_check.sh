@@ -3,7 +3,7 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-SYNCTHING_CONFIG_DIR="${ST_DIR/config:-/mnt/SDCARD/spruce/bin/Syncthing/config}"
+SYNCTHING_CONFIG_DIR="${ST_DIR:=/mnt/SDCARD/Saves/syncthing}/config"
 API_ENDPOINT="http://localhost:8384/rest"
 CONFIG_XML="$SYNCTHING_CONFIG_DIR/config.xml"
 API_KEY=""
@@ -180,17 +180,28 @@ calculate_total_completion() {
 }
 
 monitor_start_button() {
-    messages_file="/var/log/messages"
+
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in the background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
+
     while true; do
-        inotifywait "$messages_file"
-        last_line=$(tail -n 1 "$messages_file")
-        case $last_line in
-            *"key $B_START"* | *"key $B_START_2"*)
-                log_message "SyncthingCheck: START button pressed - cancelling sync"
-                touch /tmp/sync_cancelled
-                ;;
-        esac
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START"* | *"key $B_START_2"*)
+                    log_message "SyncthingCheck: START button pressed - cancelling sync"
+                    touch /tmp/sync_cancelled
+                    break
+                    ;;
+            esac
+        fi
+        sleep 0.1
     done
+
+    kill "$GE_PID" 2>/dev/null
+    rm -f /tmp/ge_out 2>/dev/null
 }
 
 monitor_sync_status() {

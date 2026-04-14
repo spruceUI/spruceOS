@@ -17,11 +17,12 @@ syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyn
 connect_services() {
 
 	while true; do
-		if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+		if network_is_connected true; then
 			break
 		fi
 		sleep 0.5
 	done
+	"$SYSTEM_EMIT" network "ENABLED" "CONNECTED" "networkservices.sh/connect_services" "IP confirmed internet reachable" || true
 
 	# Samba check
 	if [ "$samba_enabled" = "True" ]; then
@@ -69,7 +70,7 @@ connect_services() {
 }
 
 disconnect_services() {
-
+	"$SYSTEM_EMIT" network "CONNECTED" "DISABLED" "networkservices.sh/disconnect_services" "stopping all network services" || true
 	log_message "Network services: Stopping all network services..."
 	for service in "$SFTP_SERVICE_NAME" "$SSH_SERVICE_NAME" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then

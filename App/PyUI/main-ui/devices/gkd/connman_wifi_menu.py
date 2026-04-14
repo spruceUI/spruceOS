@@ -144,7 +144,7 @@ class ConnmanWifiMenu:
         interfaces = Path("/sys/class/net/")
 
         for i in interfaces.iterdir():
-            if i.name == "wlan0":
+            if i.name in ["wlan0", "eth0"]:
                 return True
 
         return False

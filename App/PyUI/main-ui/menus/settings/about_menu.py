@@ -1,4 +1,3 @@
-
 from devices.device import Device
 from menus.settings import settings_menu
 from utils.logger import PyUiLogger
@@ -14,9 +13,11 @@ class AboutMenu(settings_menu.SettingsMenu):
     def do_nothing(self, input_value):
         pass
 
+    def reload_options(self):
+        return False
+
     def build_options_list(self):
         option_list = []
-
         for text, value in Device.get_device().get_about_info_entries():
             option_list.append(
                 GridOrListEntry(

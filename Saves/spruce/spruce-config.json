@@ -64,13 +64,16 @@
                     "60m",
                     "2h",
                     "3h",
-                    "4h"
+                    "4h",
+                    "6h",
+                    "12h",
+                    "24h"
                 ],
                 "selected": "5m"
             },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
-                "description": "only applies in main UI",
+                "description": "only applies in main UI (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
@@ -81,7 +84,7 @@
             },
             "idlemonInGame": {
                 "display": "Shutdown while idle in game",
-                "description": "in RA, PPSSPP, or DraStic",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
                 "options": [
                     "Off",
                     "2m",
@@ -94,7 +97,7 @@
             "idlemonChargingInMenu": {
                 "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in menu",
-                "description": "only applies in main UI",
+                "description": "only applies in main UI (reboot to apply)",
                 "options": [
                     "Off",
                     "10s",
@@ -106,7 +109,7 @@
             "idlemonChargingInGame": {
                 "devices":["GKD_PIXEL2"],
                 "display": "Turn screen off when charging in game",
-                "description": "in RA, PPSSPP, or DraStic",
+                "description": "in RA, PPSSPP, or DraStic (reboot to apply)",
                 "options": [
                     "Off",
                     "30s",
@@ -136,8 +139,16 @@
             }
         },
         "System Settings": {
-
             "checkForUpdates": {
+                "devices":["MIYOO_FLIP",
+                           "MIYOO_MINI",
+                           "MIYOO_MINI_V4",
+                           "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP",
+                           "TRIMUI_BRICK",
+                           "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S",
+                           "MIYOO_A30"],
                 "display": "Check for spruce updates on startup",
                 "description": "if connected to Wi-Fi",
                 "options": [
@@ -153,7 +164,8 @@
                     "spruceUI",
                     "Random Game",
                     "Game Switcher",
-                    "Splore"
+                    "Splore",
+                    "Apotris (GBA)"
                 ],
                 "selected": "spruceUI"
             },
@@ -200,26 +212,20 @@
                 "selected": "True"
             },
             "useZRAM":{
-                "devices": ["MIYOO_FLIP"],
-                "display": "Use ZRAM (experimental)",
+                "devices": [
+                    "MIYOO_FLIP",
+                    "GKD_PIXEL2"
+                ],
+                "display": "Use ZRAM",
                 "description": "reboot to apply",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False"
+                "selected": "True"
             },
             "swapfileSize":{
-                "devices":["MIYOO_FLIP",
-                           "MIYOO_MINI",
-                           "MIYOO_MINI_V4",
-                           "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP",
-                           "TRIMUI_BRICK",
-                           "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S",
-                           "MIYOO_A30"],
-                "display": "Swapfile size (experimental)",
+                "display": "SD card swapfile",
                 "description": "reboot to apply",
                 "options": [
                     "Off",
@@ -229,6 +235,17 @@
                 ],
                 "selected": "Off"
             },
+            "globalScreenshotShortcut": {
+                "display": "Global sceenshot shortcut",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "L2+R2+Y",
+                    "L2+R2+X",
+                    "L2+R2+DOWN"
+                ],
+                "selected": "L2+R2+Y"
+            },
             "overclockSpeedMiyooMini": {
                 "devices": ["MIYOO_MINI",
                             "MIYOO_MINI_V4",
@@ -237,6 +254,7 @@
                 "display": "Overclock Speed",
                 "description": "Clockspeed to use for overclocking",
                 "options": [
+                    "1500",
                     "1600",
                     "1700",
                     "1800"
@@ -270,10 +288,15 @@
                 "display": "Thermal Control",
                 "description": "Customize fan profiles",
                 "options": [
+                    "Off",
+                    "Quiet",
                     "Adaptive",
-                    "Cool"
+                    "Conservative",
+                    "Smart",
+                    "Sport"
                 ],
-                "selected": "Adaptive"
+                "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
+                "selected": "Smart"
             }
         },
         "Emulator Settings": {
@@ -329,7 +352,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2"],
                 "options": [
                     "Select",
                     "Start",
@@ -359,8 +382,18 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "verboseLogging": {
+                "display": "Verbose emulator logging",
+                "description": "log output to SD card for debugging",
                 "options": [
                     "True",
                     "False"
@@ -405,6 +438,15 @@
                     "False"
                 ],
                 "selected":"False"
+            },
+            "syncBeforeLaunch": {
+                "display": "Sync saves before launching games",
+                "description": "Syncthing must be enabled",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"True"
             },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
@@ -494,9 +536,12 @@
                 "options": [
                     "Red",
                     "Pink",
+                    "Fuchsia",
                     "Purple",
+                    "Dark Purple",
                     "Blue",
                     "Cyan",
+                    "Teal",
                     "Green",
                     "Yellow",
                     "Orange",
@@ -559,9 +604,12 @@
                     "System-specific",
                     "Red",
                     "Pink",
+                    "Fuchsia",
                     "Purple",
+                    "Dark Purple",
                     "Blue",
                     "Cyan",
+                    "Teal",
                     "Green",
                     "Yellow",
                     "Orange",
@@ -605,6 +653,48 @@
                     "5000"
                 ],
                 "selected": "4000"
+            }
+        },
+        "RetroAchievements Settings": {
+            "modeToggle": {
+                "display": "Retroachivements mode",
+                "options": [
+                    "Manual",
+                    "Disabled",
+                    "Softcore",
+                    "Hardcore"
+                ],
+                "selected": "Manual"
+            },
+            "username": {
+                "display": "Username",
+                "type": "freeText",
+                "selected": ""
+            },
+            "password": {
+                "display": "Password",
+                "type": "freeText",
+                "selected": ""
+            }
+        },
+        "Audio Settings": {
+            "headphoneMultiplier": {
+                "display": "Headphone Audio Multiplier",
+                "devices": ["MIYOO_FLIP"],
+                "description": "Headphone Audio Multiplier",
+                "options": [
+                    "0.1",
+                    "0.2",
+                    "0.3",
+                    "0.4",
+                    "0.5",
+                    "0.6",
+                    "0.7",
+                    "0.8",
+                    "0.9",
+                    "1.0"
+                ],
+                "selected": "1.0"
             }
         }
     }

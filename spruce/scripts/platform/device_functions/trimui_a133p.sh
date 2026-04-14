@@ -40,6 +40,8 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
+    disable_wifi
+    rmmod xradio_wlan
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -48,6 +50,18 @@ device_enter_sleep() {
 
 device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
+    modprobe xradio_wlan
+    if [ -f /tmp/wifi_on ]; then
+        # wait for wlan0 to appear (up to ~5s)
+        for _ in 1 2 3 4 5; do
+            ip link show wlan0 >/dev/null 2>&1 && break
+            sleep 1
+        done
+
+        if ! pidof wpa_supplicant >/dev/null 2>&1; then
+            enable_or_disable_wifi_per_system_json
+        fi
+    fi
 }
 
 get_current_volume() {
@@ -65,7 +79,7 @@ set_volume() {
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
-            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
             if ! pgrep MainUI >/dev/null; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi
@@ -101,16 +115,8 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-run_mixer_watchdog() {
-    log_message "*** nothing to do for run_mixer_watchdog" -v
-}
-
 new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
-}
-
-setup_for_retroarch_and_get_bin_location(){
-    setup_for_retroarch_and_get_bin_location_trimui
 }
 
 prepare_for_pyui_launch(){
@@ -124,22 +130,14 @@ post_pyui_exit(){
     log_message "*** nothing to do for post_pyui_exit" -v
 }
 
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
-perform_fw_check(){
-    log_message "*** nothing to do for perform_fw_check" -v
-}
-
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     check_if_fw_needs_update_trimui
 }
 
 take_screenshot() {
-    close_ppsspp_menu
-    /mnt/SDCARD/spruce/bin64/fbscreenshot "$1"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path"
 }
 
 
@@ -208,10 +206,6 @@ set_default_ra_hotkeys() {
 
 }
 
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
-}
-
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
 	cat "$BATTERY/status"
@@ -231,7 +225,6 @@ device_cleanup_after_ports_run() {
 
 set_backlight() {
     val="$1"
-
 
     # Clamp input to 1–10
     [ "$val" -lt 1 ] && val=1
@@ -271,21 +264,12 @@ EOF
 
     tmp=$(mktemp)
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    "$SYSTEM_EMIT" brightness-level "$val" "trimui_a133p.sh/set_backlight" 2>/dev/null || true
 }
 
-current_backlight() {
-    jq -r '.backlight' "$SYSTEM_JSON"
-}
 
-brightness_down() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight - 1))
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # Brick/SmartPro leaves dirty bit set?
 }
-
-brightness_up() {
-    local backlight
-    backlight=$(current_backlight)
-    set_backlight $((backlight + 1))
-}
-

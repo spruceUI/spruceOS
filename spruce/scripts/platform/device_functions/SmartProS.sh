@@ -10,7 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 get_config_path() {
-    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system-system.json"
+    echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
 }
 
 ###############################################################################
@@ -85,7 +85,7 @@ set_volume() {
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
-            sed -i "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json
+            sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
             if ! pgrep MainUI >/dev/null; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi
@@ -115,28 +115,6 @@ volume_up() {
     fi
 }
 
-run_mixer_watchdog() {
-    log_message "run_mixer_watchdog unecessary for smart pro s?" -v
-}
-
-setup_for_retroarch_and_get_bin_location(){
-    setup_for_retroarch_and_get_bin_location_trimui
-}
-
-# Send L3 and R3 press event, this would toggle in-game and pause in RA
-# or toggle in-game menu in PPSSPP
-send_virtual_key_L3R3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        echo $B_R3 1 # R3 down
-        sleep 0.1
-        echo $B_R3 0 # R3 up
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
-}
-
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up
@@ -154,15 +132,6 @@ prepare_for_pyui_launch(){
 post_pyui_exit(){
     log_message "post_pyui_exit not needed for Trim UI Smart Pro S " -v
 }
-
-launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
-}
-
-perform_fw_check(){
-    log_message "perform_fw_check not needed for Trim UI Smart Pro S " -v
-}
-
 
 compare_current_version_to_version() {
     target_version="$1"
@@ -210,8 +179,8 @@ check_if_fw_needs_update() {
 }
 
 take_screenshot() {
-    close_ppsspp_menu
-    /mnt/SDCARD/spruce/bin64/kmsgrab "$1"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/kmsgrab "$screenshot_path"
 }
 
 init_gpio_SmartProS() {
@@ -346,10 +315,6 @@ set_default_ra_hotkeys() {
 
 }
 
-reset_playback_pack() {
-    log_message "reset_playback_pack Uneeded on this device" -v
-}
-
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
 }
@@ -388,7 +353,7 @@ device_exit_sleep(){
         done
 
         if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            enable_or_disable_wifi_per_system_json
         fi
     fi
     device_run_tsps_blobs
@@ -401,15 +366,6 @@ device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
 }
 
-
-kill_wifi(){
-    rm -f /tmp/wifi_on
-    if pidof wpa_supplicant >/dev/null 2>&1; then
-        : > /tmp/wifi_on
-        killall wpa_supplicant
-    fi
-}
-
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
@@ -417,7 +373,7 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    kill_wifi
+    disable_wifi
 
     save_cores_online
     cores_online 0
@@ -442,7 +398,7 @@ device_run_tsps_blobs() {
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
-    kill_wifi
+    disable_wifi
 }
 
 device_home_button_pressed() {
@@ -450,33 +406,48 @@ device_home_button_pressed() {
 }
 
 device_stop_thermal_process(){
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Stock")"
-    case "$custom_thermal_watchdog" in
-        "Cool")
-            killall thermal-watchdog
-            ;;
-        *)
-            pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
-            if [ -n "$pid" ]; then
-                kill "$pid"
-            fi
-            ;;
-    esac
+    killall thermal-watchdog 2>/dev/null
+    pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
+    [ -n "$pid" ] && kill "$pid"
+    echo 0 > /sys/class/thermal/cooling_device0/cur_state
 }
 
 device_run_thermal_process(){
-    # Initial trip point = 60C (Fan should kick on -- No throttling noticed)
-    # Second trip point = 70C (CPU/GPU Start getting throttled)
-    # Third trip point = 105C (Likely Critical shutdown -- Untested) 
+    THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
+    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
 
-    custom_thermal_watchdog="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Adaptive")"
-    if [ "$custom_thermal_watchdog" = "Cool" ]; then
-        # Fan is always on
-        echo "smart" > /mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    else
-        # Fan adjusts only to prevent throttling
+    if [ "$selected" = "Adaptive" ]; then
         python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+    else
+        # Convert display name to lowercase profile name
+        profile=$(echo "$selected" | tr 'A-Z' 'a-z')
+        echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
+        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
     fi
+}
 
+set_backlight() {
+    val="$1"
+
+    # Clamp input to 1–10
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+
+    # Convert 1–10 → 1–255
+    val_255=$(( (val - 1) * 254 / 9 + 1 ))
+
+    # actually change the backlight
+    echo "$val_255" > /sys/class/backlight/backlight0/brightness
+
+    # update device system json
+    tmp=$(mktemp)
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    "$SYSTEM_EMIT" brightness-level "$val" "SmartProS.sh/set_backlight" 2>/dev/null || true
+}
+
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # SmartProS leaves dirty bit set?
 }

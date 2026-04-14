@@ -8,6 +8,7 @@ import time
 from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from devices.device import Device
 from devices.utils.process_runner import ProcessRunner
+from display.display import Display
 from display.font_purpose import FontPurpose
 from games.utils.game_system import GameSystem
 from menus.app.app_utils import AppUtils
@@ -79,7 +80,7 @@ class MiyooTrimCommon():
         MiyooTrimCommon.write_cmd_to_run(f'''chmod a+x "{launch_path}";{run_prefix}"{launch_path}" "{escaped_path}"''')
         Device.get_device().fix_sleep_sound_bug()
 
-
+        Display.deinit_display()
         Device.get_device().exit_pyui()
         #try:
         #    return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
@@ -89,8 +90,9 @@ class MiyooTrimCommon():
         #    return None
         
     @staticmethod
-    def run_cmd(device, args, dir = None):
-        Device.get_device().fix_sleep_sound_bug()
+    def run_cmd(device, args, dir = None, is_power_cmd = False):
+        if not is_power_cmd:
+            Device.get_device().fix_sleep_sound_bug()
         PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
         subprocess.run(args, cwd = dir)
 
@@ -175,7 +177,7 @@ class MiyooTrimCommon():
         Device.get_device().system_config.set_wifi(1)
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","up"])
-        Device.get_device().start_wifi_services()
+        Device.get_device().start_wifi_services(foreground_call=True)
         Device.get_device().get_wifi_status.force_refresh()
         Device.get_device().get_ip_addr_text.force_refresh()
 
@@ -228,25 +230,35 @@ class MiyooTrimCommon():
             f.write(y_zero + "\n")
         PyUiLogger.get_logger().info("Calibration Complete")
 
-
     @staticmethod
     def set_theme(json_path, theme_path: str):
         try:
-            # Read the existing JSON
-            try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-            except FileNotFoundError:
-                data = {}  # start with empty if file doesn't exist
+            with open(json_path, "r", encoding="utf-8") as f:
+                content = f.read()
 
-            # Update the "Theme" entry
-            data["theme"] = theme_path
+            # Regex to match: "theme": "anything"
+            theme_pattern = r'("theme"\s*:\s*")[^"]*(")'
 
-            # Write back to the file
+            if re.search(theme_pattern, content):
+                # Replace existing theme value
+                content = re.sub(
+                    theme_pattern,
+                    rf'\1{theme_path}\2',
+                    content
+                )
+            else:
+                # Insert theme before the first closing brace
+                insert_pattern = r'\}'
+                replacement = f'    "theme": "{theme_path}",\n}}'
+                content = re.sub(insert_pattern, replacement, content, count=1)
+
             with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+                f.write(content)
+
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Could not set theme in {json_path} : {e}")
+            PyUiLogger.get_logger().error(
+                f"Could not set theme in {json_path} : {e}"
+            )
 
 
     @staticmethod

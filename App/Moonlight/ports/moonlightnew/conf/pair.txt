@@ -1,0 +1,3 @@
+Connecting to 192.168.xxx.xx...
+Please enter the following PIN on the target PC: 2670
+Failed to pair to server: Already paired

@@ -15,22 +15,55 @@
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
-export MESSAGES_FILE="/var/log/messages"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
+export SYSTEM_EMIT="${SYSTEM_EMIT:-/mnt/SDCARD/spruce/scripts/system-emit}"
+export SYSTEM_EMIT_GATE_DIR="${SYSTEM_EMIT_GATE_DIR:-/tmp/spruce_trace_gates}"
+export SYSTEM_EMIT_GATE_FILE="${SYSTEM_EMIT_GATE_FILE:-$SYSTEM_EMIT_GATE_DIR/enable-trace.on}"
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
+
 case $INFO in
-    *"sun8i"*) export PLATFORM="A30" ;;
-    *"TG5040"*)	export PLATFORM="SmartPro" ;;
-    *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
-    *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *sun8i*) export PLATFORM="A30" ;;
+    *TG5040*) export PLATFORM="SmartPro" ;;
+    *TG3040*) export PLATFORM="Brick" ;;
+    *TG5050*) export PLATFORM="SmartProS" ;;
+    *0xd05*) export PLATFORM="Flip" ;;
+    *0xd04*) export PLATFORM="Pixel2" ;;
+    *0xd03*)
+        CMDLINE=$(cat /proc/cmdline)
+
+        case $CMDLINE in
+            *lcd_type=boe*)
+                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
+                    export PLATFORM="AnbernicRGCubeXX"
+                else
+                    export PLATFORM="AnbernicRG34XXSP"
+                fi
+                ;;
+            *lcd_type=old*)
+                #TODO handle cube?
+                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
+                    export PLATFORM="AnbernicRG28XX"
+                else
+                    export PLATFORM="AnbernicXX640480"
+                fi
+                ;;
+            *)
+                export PLATFORM="AnbernicXX640480"
+                ;;
+        esac
+        ;;
+    *) 
+        if [ -e /usr/magicx ]; then
+            export PLATFORM="Zero28"
+        else
+            export PLATFORM="MiyooMini" 
+        fi
+        ;;
 esac
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
@@ -39,20 +72,28 @@ esac
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
-    # These echoes are needed to seperate the events in the key press log file
-    echo "ACKNOWLEDGE $(date +%s)" >> "$MESSAGES_FILE"
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in the background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
 
     while true; do
-        inotifywait "$MESSAGES_FILE"
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-        *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
-            echo "ACKNOWLEDGED $(date +%s)" >>"$MESSAGES_FILE"
-            log_message "last_line: $last_line" -v
-            break
-            ;;
-        esac
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
+                    log_message "last_line: $line" -v
+                    break
+                    ;;
+            esac
+        fi
+
+        # Prevent CPU pegging
+        sleep 0.1
     done
+
+    kill "$GE_PID" 2>/dev/null
+    display_kill
 }
 
 auto_regen_tmp_update() {
@@ -62,93 +103,6 @@ auto_regen_tmp_update() {
         [ ! -d "$tmp_dir" ] && mkdir "$tmp_dir" && flag_add "tmp_update_repair_attempted" && log_message ".tmp_update folder repair attempted. Adding tmp_update_repair_attempted flag."
         [ ! -f "$tmp_dir/updater" ] && cp "$updater" "$tmp_dir/updater"
     fi
-}
-
-
-restart_wifi() {
-    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
-    log_message "Restarting Wi-Fi interface wlan0"
-
-    # Bring the interface down and kill any running services
-    ifconfig wlan0 down
-    killall wpa_supplicant 2>/dev/null
-    killall udhcpc 2>/dev/null
-
-    # Bring the interface back up and reconnect
-    ifconfig wlan0 up
-    wpa_supplicant -B -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-    udhcpc -i wlan0 &
-}
-
-check_and_connect_wifi() {
-    # ########################################################################
-    # WARNING: Avoid running this function in-game, it will lead to stuttters!
-    # ########################################################################
-
-    timeout=60  # Think about making this configurable
-    start_time=$(date +%s)
-
-    # More thorough connection check
-    connection_active=0
-    if ifconfig wlan0 | grep -qE "inet |inet6 "; then
-        # Additional validation - try to ping a reliable host
-        if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-            connection_active=1
-            log_message "Active WiFi connection verified"
-        else
-            log_message "WiFi interface has IP but no connectivity - attempting reconnect"
-            ifconfig wlan0 down  # Force a reconnection attempt
-            connection_active=0
-        fi
-    fi
-
-    if [ $connection_active -eq 0 ]; then
-        log_message "Attempting to connect to WiFi"
-
-        restart_wifi
-		
-        display --icon "/mnt/SDCARD/spruce/imgs/signal.png" -t "Waiting to connect....
-Press START to continue anyway."
-        {
-            while true; do
-                # Check for timeout
-                current_time=$(date +%s)
-                if [ $((current_time - start_time)) -ge $timeout ]; then
-                    echo "WiFi connection timed out" >> "$MESSAGES_FILE"
-                    break
-                fi
-
-                if ifconfig wlan0 | grep -qE "inet |inet6 " && ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
-                    echo "Successfully connected to WiFi" >> "$MESSAGES_FILE"
-                    break
-                fi
-                sleep 0.5
-            done
-        } &
-        while true; do
-            inotifywait "$MESSAGES_FILE"
-            last_line=$(tail -n 1 "$MESSAGES_FILE")
-            case $last_line in
-                *"$B_START"* | *"$B_START_2"*)
-                    log_message "WiFi connection cancelled by user"
-                    display  --icon "/mnt/SDCARD/spruce/imgs/notfound.png" -d 2 -t "Proceeding before connected to wifi."
-                    return 1
-                    ;;
-                *"Successfully connected to WiFi"*)
-                    log_message "Successfully connected to WiFi"
-                    display_kill
-                    return 0
-                    ;;
-                *"WiFi connection timed out"*)
-                    log_message "WiFi connection timed out after $timeout seconds"
-                    display_kill
-                    return 1
-                    ;;
-            esac
-        done
-    fi
-
-    return 0
 }
 
 confirm() {
@@ -169,11 +123,9 @@ confirm() {
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
-                    echo "CONFIRM CONFIRMED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
                 *"key $B_B"*) 
                     RET_VAL=1 
-                    echo "CONFIRM CANCELLED $(date +%s)" >>"$MESSAGES_FILE"
                 ;;
             esac
         fi
@@ -183,7 +135,6 @@ confirm() {
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             if [ "$elapsed" -ge "$timeout" ]; then
-                echo "CONFIRM TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
                 RET_VAL=$timeout_return
             fi
         fi
@@ -200,9 +151,15 @@ confirm() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    start_brightness="$SYSTEM_BRIGHTNESS_4"
+    # Get current brightness
+    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
     end_brightness="$SYSTEM_BRIGHTNESS_0"
-    delay=0.01 # 50ms delay between each step
+    delay=0.05 # 50ms delay between each step
+    
+    # Start at 4 if higher (so it's faster)
+    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
+        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    fi
 
     # Check if another dim_screen is running
     if pgrep -f "dim_screen" | grep -v $$ >/dev/null; then
@@ -210,11 +167,8 @@ dim_screen() {
         return 1
     fi
 
-    # Get current brightness
-    current_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-
     # Check if we're already at target brightness
-    if [ "$current_brightness" -le "$end_brightness" ]; then
+    if [ "$start_brightness" -le "$end_brightness" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
@@ -231,21 +185,66 @@ dim_screen() {
 finish_unpacking() {
     flag="$1"
     if flag_check "$flag"; then
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_ENTER" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
         start_pyui_message_writer
         log_and_display_message "Finishing up unpacking archives.........."
-        flag_remove "silentUnpacker"
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_WAIT_PRESERVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        wait_loops=0
         while [ -f "$FLAGS_DIR/$flag.lock" ]; do
+            wait_loops=$((wait_loops + 1))
+            if [ $((wait_loops % 50)) -eq 0 ]; then
+                "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_WAIT_LOOP" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
+            fi
             : # null operation (no sleep needed)
         done
+        flag_remove "silentUnpacker"
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_REMOVE_SILENT" "helperFunctions.sh/finish_unpacking" "flag=$flag" || true
+        "$SYSTEM_EMIT" process helperFunctions "FINISH_UNPACKING_COMPLETE" "helperFunctions.sh/finish_unpacking" "flag=$flag loops=$wait_loops" || true
         stop_pyui_message_writer
     fi
 }
 
+calculate_progress_percent() {
+    completed="${1:-0}"
+    total="${2:-0}"
+
+    if [ "$total" -le 0 ] 2>/dev/null; then
+        printf '100\n'
+        return 0
+    fi
+
+    percent=$((completed * 100 / total))
+    [ "$percent" -lt 0 ] && percent=0
+    [ "$percent" -gt 100 ] && percent=100
+    printf '%s\n' "$percent"
+}
+
+format_firstboot_extract_progress_text() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    percent="$(calculate_progress_percent "$completed" "$total")"
+    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
+}
+
+display_firstboot_extract_progress() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
+
+    start_pyui_message_writer
+    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
+}
+
 # Add a flag
 # Usage: flag_add "flag_name"
+# Usage 2: flag_add "flag_name" --tmp   --> creates flag in /tmp/ instead, to avoid unnecessary SD writes and stuck states
 flag_add() {
     local flag_name="$1"
-    touch "$FLAGS_DIR/${flag_name}.lock"
+    local dest="$FLAGS_DIR"
+    if [ "$2" = "--tmp" ]; then
+        dest="/tmp"
+    fi
+    touch "$dest/${flag_name}.lock"
 }
 
 # Check if a flag exists
@@ -253,7 +252,7 @@ flag_add() {
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
 flag_check() {
     local flag_name="$1"
-    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ]; then
+    if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then
         return 0
     else
         return 1
@@ -273,62 +272,7 @@ flag_path() {
 flag_remove() {
     local flag_name="$1"
     rm -f "$FLAGS_DIR/${flag_name}.lock"
-}
-
-# Call this to get the last button pressed
-# Returns the name of the button pressed, or "" if no matching button was pressed
-# Returned strings are simplified, so "B_L1" would return "L1"
-get_button_press() {
-    button_pressed=""
-    timeout=${1:-180}  # Default 180 second timeout if not specified
-    start_time=$(date +%s)
-
-    echo "GET_BUTTON_PRESS $(date +%s)" >>"$MESSAGES_FILE"
-
-    while true; do
-        # Check for timeout
-        current_time=$(date +%s)
-        elapsed_time=$((current_time - start_time))
-        if [ $elapsed_time -ge $timeout ]; then
-            echo "GET_BUTTON_PRESS TIMEOUT $(date +%s)" >>"$MESSAGES_FILE"
-            echo "B"
-            return 1
-        fi
-
-        # Wait for log message update
-        if ! inotifywait -t 1 "$MESSAGES_FILE" >/dev/null 2>&1; then
-            continue
-        fi
-
-        # Get the last line of log file
-        last_line=$(tail -n 1 "$MESSAGES_FILE")
-        case "$last_line" in
-            *"$B_L1"*) button_pressed="L1" ;;
-            *"$B_L2"*) button_pressed="L2" ;;
-            *"$B_R1"*) button_pressed="R1" ;;
-            *"$B_R2"*) button_pressed="R2" ;;
-            *"$B_X"*) button_pressed="X" ;;
-	    # this is firing on keydown and keyup, leading to duplicate presses being recognized
-	    # should this be fixed in somewhere else?
-            *"$B_A 1"*) button_pressed="A" ;;
-            *"$B_B 1"*) button_pressed="B" ;;
-            *"$B_Y"*) button_pressed="Y" ;;
-            *"$B_UP"*) button_pressed="UP" ;;
-            *"$B_DOWN"*) button_pressed="DOWN" ;;
-            *"$B_LEFT"*) button_pressed="LEFT" ;;
-            *"$B_RIGHT"*) button_pressed="RIGHT" ;;
-            *"$B_START"*) button_pressed="START" ;;
-            *"$B_START_2"*) button_pressed="START" ;;
-            *"$B_SELECT"*) button_pressed="SELECT" ;;
-            *"$B_SELECT_2"*) button_pressed="SELECT" ;;
-        esac
-
-        if [ -n "$button_pressed" ]; then
-            echo "GET_BUTTON_PRESS RECEIVED $button_pressed $(date +%s)" >>"$MESSAGES_FILE"
-            echo "$button_pressed"
-            return 0
-        fi
-    done
+    rm -f "/tmp/${flag_name}.lock"
 }
 
 # Returns the path of the current theme
@@ -549,7 +493,7 @@ log_precise() {
 
 low_battery_check() {
     if flag_check "low_battery"; then
-        CAPACITY=$(cat $BATTERY/capacity)
+        CAPACITY=$(device_get_battery_percent)
         start_pyui_message_writer
         log_and_display_message "Battery has $CAPACITY% left. Charge or shutdown your device."
         sleep 1
@@ -662,7 +606,7 @@ record_video() {
         date_str=$(date +%Y-%m-%d_%H-%M-%S)
         set_performance
         # Prevent the CPU from being clocked down while recording
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
 
         # If no output file specified, create one with timestamp
         if [ -z "$output_file" ]; then
@@ -693,6 +637,75 @@ record_video() {
     fi
 }
 
+run_upgrade_scripts() {
+    UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
+    last_update_file="/mnt/SDCARD/App/spruceRestore/.lastUpdate"
+
+    if [ -f "$last_update_file" ]; then
+        current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')
+    else
+        current_version="2.0.0"
+    fi
+
+    log_message "Upgrade scripts: current version is $current_version"
+
+    if [ ! -d "$UPGRADE_SCRIPTS_DIR" ]; then
+        log_message "Upgrade scripts: directory not found, skipping"
+        return 0
+    fi
+
+    is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
+    is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
+    allow_same_version=0
+
+    if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+        allow_same_version=1
+        log_message "Upgrade scripts: dev/tester mode detected, allowing same version upgrades"
+    fi
+
+    cd "$UPGRADE_SCRIPTS_DIR" || return 1
+
+    for script in *.sh; do
+        [ -f "$script" ] || continue
+
+        script_version=$(echo "$script" | cut -d'.' -f1-3)
+
+        version_compare=$(echo "$current_version $script_version" | awk '{
+            split($1, a, ".")
+            split($2, b, ".")
+            for (i = 1; i <= 3; i++) {
+                if (a[i] < b[i]) { print "older"; exit }
+                else if (a[i] > b[i]) { print "newer"; exit }
+            }
+            print "equal"
+        }')
+
+        if [ "$version_compare" = "older" ] || ([ "$version_compare" = "equal" ] && [ $allow_same_version -eq 1 ]); then
+            log_message "Upgrade scripts: running $script"
+            output=$(sh "$script" 2>&1)
+            exit_status=$?
+            log_message "Upgrade scripts: output from $script:"
+            echo "$output" >> "${log_file:-/mnt/SDCARD/Saves/spruce/spruce.log}"
+
+            if [ $exit_status -eq 0 ]; then
+                log_message "Upgrade scripts: $script completed successfully"
+                echo "spruce_version=$script_version" > "$last_update_file"
+                current_version=$script_version
+            else
+                log_message "Upgrade scripts: $script failed with exit status $exit_status"
+                cd - > /dev/null
+                return 1
+            fi
+        else
+            log_message "Upgrade scripts: skipping $script (current $current_version >= $script_version)"
+        fi
+    done
+
+    cd - > /dev/null
+    log_message "Upgrade scripts: completed. Current version: $current_version"
+    return 0
+}
+
 
 ##########     NEW PYUI-BASED SETTING SYSTEM     ##########
 
@@ -713,6 +726,7 @@ get_config_value() {
 start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_START_REQUEST" "helperFunctions.sh/start_pyui_message_writer" "wait_for_listener=${wait_for_listener:-unset}" || true
 
     ifconfig lo up
     ifconfig lo 127.0.0.1
@@ -720,12 +734,14 @@ start_pyui_message_writer() {
     # Check if PyUI is already running with the realtime port argument
     if pgrep -f "sgDisplayRealtimePort" >/dev/null; then
         log_message "Real Time message listener already running."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_REUSE_LISTENER" "helperFunctions.sh/start_pyui_message_writer" "listener already running" || true
         return
     fi
     
     rm -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_LAUNCHED" "helperFunctions.sh/start_pyui_message_writer" "pid=$!" || true
 
     # Optional wait for the listener file
     if [ "$wait_for_listener" != "0" ]; then
@@ -734,6 +750,7 @@ start_pyui_message_writer() {
             sleep 0.1
         done
         log_message "Realtime message network listener detected."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_HANDSHAKE_COMPLETE" "helperFunctions.sh/start_pyui_message_writer" "listener file detected" || true
     fi
 }
 
@@ -742,9 +759,11 @@ kill_pyui_message_writer() {
 
     # Check if PyUI is already running with the realtime port argument
     pids=$(pgrep -f "sgDisplayRealtimePort" | awk '{print $1}')
+    "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_TARGETS" "helperFunctions.sh/kill_pyui_message_writer" "target_pids=${pids:-none}" || true
 
     if [ -n "$pids" ]; then
         log_message "Real Time message listener is running. Killing it..."
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_SIGNAL" "helperFunctions.sh/kill_pyui_message_writer" "sending EXIT_APP before kill" || true
         display_message "$(printf '{"cmd":"EXIT_APP","args":[]}')"
         sleep 0.5
 
@@ -754,6 +773,7 @@ kill_pyui_message_writer() {
         done
         # Optionally wait for processes to exit
         sleep 1
+        "$SYSTEM_EMIT" process helperFunctions "PYUI_WRITER_KILL_COMPLETE" "helperFunctions.sh/kill_pyui_message_writer" "kill sequence complete" || true
     fi    
 
 }
@@ -765,23 +785,20 @@ stop_pyui_message_writer() {
 
 display_message() {
     local message="$1"
-    local python_path
-    python_path="$(get_python_path)"
+    [ -z "$message" ] && return 0
 
-    if [ -z "$python_path" ]; then
-        echo "Error: unknown platform '$PLATFORM'" >&2
-        return 1
-    fi
-
-    MESSAGE="$message" "$python_path" - <<'EOF'
-import os, socket, sys
-msg = os.environ.get("MESSAGE", "")
+    # We use double quotes for the -c string so we can use single quotes inside.
+    # We pass "$message" as the final argument which Python picks up as sys.argv[1]
+    "$(get_python_path)" -c 'import socket, sys;
 try:
-    with socket.create_connection(("127.0.0.1", 50980), timeout=1) as s:
-        s.sendall((msg + "\n").encode("utf-8"))
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(0.5)
+    s.connect(b"\x0050980")
+    s.sendall((sys.argv[1] + "\n").encode("utf-8"))
+    s.close()
 except Exception as e:
-    print(f"Error sending message: {e}", file=sys.stderr)
-EOF
+    print(f"Sender Error: {e}", file=sys.stderr)
+' "$message"
 }
 
 log_and_display_message(){
@@ -840,8 +857,10 @@ download_and_display_progress() {
 		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null
+        sync
 		return 1
     else
+        sync
         return 0
 	fi
 }
@@ -890,15 +909,18 @@ get_pyui_config_value() {
 map_color_name_to_hex() {
     name="$1"
     case "$name" in
-        "Red")    hex=FF0000 ;;
-        "Pink")   hex=FF3333 ;;
-        "Purple") hex=FF00FF ;;
-        "Blue")   hex=0000FF ;;
-        "Cyan")   hex=00FFFF ;;
-        "Green")  hex=00FF00 ;;
-        "Yellow") hex=FFFF00 ;;
-        "Orange") hex=FF5500 ;;
-        *)        hex=FFFFFF ;;
+        "Red")          hex=FF0000 ;;
+        "Pink")         hex=FF3333 ;;
+        "Fuchsia")      hex=FF0022 ;;
+        "Purple")       hex=FF00FF ;;
+        "Dark Purple")  hex=2200CC ;;
+        "Blue")         hex=0000FF ;;
+        "Cyan")         hex=00FFFF ;;
+        "Teal")         hex=00FF22 ;;
+        "Green")        hex=00FF00 ;;
+        "Yellow")       hex=FFFF00 ;;
+        "Orange")       hex=FF1100 ;;
+        *)              hex=FFFFFF ;;
     esac
     echo "$hex"
 }
@@ -957,13 +979,24 @@ extract_7z_with_progress() {
     UPDATE_FILE="$1"
     DEST_DIR="$2"
     LOG_LOCATION="$3" # Only logs errors
+    SECTION_LABEL="$4" # Optional: section title used in "Unpacking <section>"
+    SUPPRESS_PROGRESS_UI="${SPRUCE_SUPPRESS_EXTRACT_PROGRESS_UI:-0}"
 
     if [ -z "$UPDATE_FILE" ] || [ -z "$DEST_DIR" ] || [ -z "$LOG_LOCATION" ]; then
-        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> <logo_image>"
+        echo "Usage: extract_7z_with_progress <archive.7z> <destination> <log_file> [section_label]"
         return 1
     fi
 
     LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
+    if [ -z "$SECTION_LABEL" ]; then
+        SECTION_LABEL="$(basename "$UPDATE_FILE" .7z)"
+    fi
+
+    if [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ]; then
+        SECTION_TITLE="Sprucing up your device...\nUnpacking ${SECTION_LABEL}"
+    else
+        SECTION_TITLE="Unpacking ${SECTION_LABEL}"
+    fi
 
     TOTAL_FILES=$(7zr l -scsUTF-8 "$UPDATE_FILE" |
         awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
@@ -980,19 +1013,33 @@ extract_7z_with_progress() {
         return 1
     fi
 
+    if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+        display_image_and_text "$LOGO" 35 25 "${SECTION_TITLE}\nPreparing extraction..." 75
+        sleep 2
+    fi
+
     7zr x -y -scsUTF-8 -bb1 -o"$DEST_DIR" "$UPDATE_FILE" 2>>"$LOG_LOCATION" |
     while read -r line || [ -n "$line" ]; do
-        FILE=$(echo "$line" | sed 's/^[-[:space:]]*//')
+        case "$line" in
+            "- "*) FILE="${line#- }" ;;
+            "Extracting  "*) FILE="${line#Extracting  }" ;;
+            "Inflating  "*) FILE="${line#Inflating  }" ;;
+            *) continue ;;
+        esac
         [ -z "$FILE" ] && continue
 
         FILE_COUNT=$((FILE_COUNT + 1))
         PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
+        [ "$PERCENT_COMPLETE" -gt 100 ] && PERCENT_COMPLETE=100
 
-        if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
-            display_text_with_percentage_bar \
-                "$FILE" \
-                "$PERCENT_COMPLETE" \
-                "$FILE_COUNT / $TOTAL_FILES files"
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ] &&
+            { [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; }; then
+            FILE_NAME="$(basename "$FILE")"
+            display_image_and_text \
+                "$LOGO" \
+                35 25 \
+                "${SECTION_TITLE}\n${PERCENT_COMPLETE}%: ${FILE_NAME}" \
+                75
         fi
     done
 
@@ -1000,53 +1047,165 @@ extract_7z_with_progress() {
 
     if [ "$RET" -ne 0 ]; then
         log_update_message "Warning: Some files may have been skipped during extraction. Check $LOG_LOCATION for details."
-        display_image_and_text "$LOGO" 35 25 \
-            "Extraction completed with warnings. Check the log for details." 75
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+            display_image_and_text "$LOGO" 35 25 \
+                "Extraction completed with warnings. Check the log for details." 75
+        fi
     else
         log_update_message "Extraction process completed successfully"
-        display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
+        if [ "$SUPPRESS_PROGRESS_UI" != "1" ]; then
+            display_image_and_text "$LOGO" 35 25 "Extraction completed!" 75
+        fi
     fi
 
     return "$RET"
 }
 
-enable_or_disable_wifi() {
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        ifconfig wlan0 down         2>/dev/null
-        rm -f /tmp/wifion           2>/dev/null
-        touch /tmp/wifioff          2>/dev/null
-        killall -9 wpa_supplicant   2>/dev/null
-        killall -9 udhcpc           2>/dev/null
-        log_message "WiFi turned off"
 
-        device_wifi_power_off
+##### WIFI HANDLING #####
 
-    else
-    
-        device_wifi_power_on
+disable_wifi() {
+    ifconfig wlan0 down         2>/dev/null
+    rm -f /tmp/wifion           2>/dev/null
+    touch /tmp/wifioff          2>/dev/null
+    killall -9 wpa_supplicant   2>/dev/null
+    killall -9 udhcpc           2>/dev/null
+    log_message "WiFi turned off"
+    device_wifi_power_off
+}
 
-        rm -f /tmp/wifioff          2>/dev/null
-        touch /tmp/wifion           2>/dev/null
-        ifconfig wlan0 up           2>/dev/null
+enable_wifi() {
+    device_wifi_power_on
 
-        # check if WPA supplicant needs to be started or restarted
-        WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
-        if [ -n "$WPA_PID" ]; then
-            WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-            if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-                log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
-                kill -9 "$WPA_PID" 2>/dev/null
-                sleep 1
-                wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-            fi
-        else    # wpa_supplicant was not running at all, so start it
+    rm -f /tmp/wifioff          2>/dev/null
+    touch /tmp/wifion           2>/dev/null
+    ifconfig wlan0 up           2>/dev/null
+
+    # check if WPA supplicant needs to be started or restarted
+    WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
+    if [ -n "$WPA_PID" ]; then
+        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
+        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+            log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
+            kill -9 "$WPA_PID" 2>/dev/null
+            sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            log_message "wpa_supplicant was running with the wrong conf so restarted"
+        else
+            log_message "wpa_supplicant was running with the correct conf file already"
         fi
-        pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
-        log_message "WiFi turned on"
+    else    # wpa_supplicant was not running at all, so start it
+        wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        log_message "Launching wpa_supplicant"
+    fi
+    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+    /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    log_message "WiFi turned on"
+}
+
+enable_or_disable_wifi_per_system_json() {
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+        disable_wifi
+    else
+        enable_wifi
     fi
 }
+
+restart_wifi() {
+    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
+    log_message "Restarting Wi-Fi interface wlan0"
+    disable_wifi
+    sleep 1
+    enable_wifi
+}
+
+network_is_connected() {
+    CHECK_ETH="${1:-false}" # Defaults to false if no argument
+
+	iface_up=false
+
+    if ifconfig wlan0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+        iface_up=true
+    fi
+
+    if [ "$CHECK_ETH" = true ]; then
+        if ifconfig eth0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+            iface_up=true
+        fi
+    fi
+
+	if $iface_up; then
+		if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+			return 0 # Success
+        fi
+	fi
+
+	return 1 # No network connection
+}
+
+check_and_connect_wifi() {
+
+    timeout=60
+    start_time=$(date +%s)
+
+    # Initial connection check
+    if network_is_connected true; then
+        log_message "Active network connection verified"
+        return 0
+    fi
+
+    log_message "Attempting to connect to WiFi"
+    start_pyui_message_writer 1
+    restart_wifi
+
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
+        "Waiting to connect....\nPress START to continue anyway." 75
+
+    rm -f /tmp/ge_out 2>/dev/null
+
+    # Start getevent in background
+    getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
+    GE_PID=$!
+
+    while true; do
+        # 1. Check for user input
+        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+            case "$line" in
+                *"key $B_START"* | *"key $B_START_2"*)
+                    log_message "WiFi connection cancelled by user"
+                    kill "$GE_PID" 2>/dev/null
+                    display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 35 25 \
+                        "Proceeding before connected to wifi." 75
+                    sleep 2
+                    stop_pyui_message_writer
+                    return 1
+                    ;;
+            esac
+        fi
+
+        # 2. Check for successful connection
+        if network_is_connected; then
+            log_message "Successfully connected to WiFi"
+            kill "$GE_PID" 2>/dev/null
+            stop_pyui_message_writer
+            return 0
+        fi
+
+        # 3. Check for timeout
+        current_time=$(date +%s)
+        if [ $((current_time - start_time)) -ge $timeout ]; then
+            log_message "WiFi connection timed out after $timeout seconds"
+            kill "$GE_PID" 2>/dev/null
+            stop_pyui_message_writer
+            return 1
+        fi
+
+        sleep 0.1
+    done
+    stop_pyui_message_writer
+}
+
+##### ACTIVITY TRACKER STUFF #####
 
 get_current_app() {
     if [ -f /tmp/cmd_to_run.sh ]; then
@@ -1119,4 +1278,3 @@ log_activity_event() {
     printf '{"ts":%s,"event":"%s","app":"%s","pid":%s}\n' \
         "$ts" "$event" "$safe_app" "$pid" >> "$LOG_FILE"
 }
-

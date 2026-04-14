@@ -10,7 +10,7 @@ from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from devices.abstract_device import AbstractDevice
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
@@ -20,6 +20,7 @@ from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class DeviceCommon(AbstractDevice):
@@ -49,10 +50,16 @@ class DeviceCommon(AbstractDevice):
                     return
 
     def power_off(self):
-        self.run_cmd([self.power_off_cmd()])
+        if PyUiConfig.get_poweroff_cmd():
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
+        else:
+            self.run_cmd([self.power_off_cmd()], is_power_cmd=True)
 
     def reboot(self):
-        self.run_cmd([self.reboot_cmd()])
+        if PyUiConfig.get_reboot_cmd():
+            self.run_cmd([PyUiConfig.get_reboot_cmd()], is_power_cmd=True)
+        else:
+            self.run_cmd([self.reboot_cmd()], is_power_cmd=True)
 
 
     def input_timeout_default(self):
@@ -211,7 +218,7 @@ class DeviceCommon(AbstractDevice):
                     PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
                     PyUiLogger.get_logger().info("Restarting WiFi services")
                     self.stop_wifi_services()
-                    self.start_wifi_services()
+                    self.start_wifi_services(foreground_call=False)
                 else:
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
@@ -286,12 +293,19 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
 
-    def start_wifi_services(self):
+    def start_wifi_services(self, foreground_call=False):
         if not self.connection_seems_up():
             PyUiLogger.get_logger().info("Starting WiFi Services")
+            if(foreground_call):
+                Display.display_message("Turning on WiFi Power")
+                
             self.set_wifi_power(1)
             time.sleep(1)  
+            if(foreground_call):
+                Display.display_message("Starting WiFi process")
             self.start_wpa_supplicant()
+            if(foreground_call):
+                Display.display_message("Starting ip address assignment process")
             self.start_udhcpc()
 
 
@@ -458,7 +472,7 @@ class DeviceCommon(AbstractDevice):
         ConfigCopier.ensure_config(config_path, config_if_missing)
 
         try:
-            self.system_config = SystemConfig(config_path)
+            self.system_config = DeviceUserConfig(config_path)
         except Exception as e:
             logger = PyUiLogger.get_logger()
             logger.error(f"Failed to load system config, backing up and resetting config: {e}")
@@ -472,7 +486,7 @@ class DeviceCommon(AbstractDevice):
                 pass  # config may not exist; ignore
 
             ConfigCopier.ensure_config(config_path, config_if_missing)
-            self.system_config = SystemConfig(config_path)
+            self.system_config = DeviceUserConfig(config_path)
 
 
     def is_filesystem_read_only(self,path="/mnt/SDCARD"):
@@ -531,9 +545,28 @@ class DeviceCommon(AbstractDevice):
 
         if free_mb is not None and free_mb < threshold_mb and self.last_cache_clear > 10:
             PyUiLogger.get_logger().warning(f"Low memory detected: {free_mb} MB available, clearing display cache.")
-            Display.clear_cache()
+            Display.clear_cache(include_fonts=False)
             self.last_cache_clear = 0
 
     def get_image_for_activity(self, activity):
         # Implement in child classes where possible
         return None
+    
+
+    def fix_sleep_sound_bug(self):
+        pass
+
+    def uses_deinit_v2(self):
+        # Need to test 1 at a time to ensure it works
+        return False
+    
+    def get_selected_emulator(self, menu_options: dict, device_name: str):
+        for key, option in menu_options.items():
+            if key.startswith("Emulator"):
+                devices = option.get("devices", [])
+                if device_name in devices:
+                    return option.get("selected")
+        if menu_options.get("Emulator"):
+            return menu_options["Emulator"].get("selected")
+        return None
+    

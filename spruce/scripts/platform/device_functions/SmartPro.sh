@@ -55,19 +55,68 @@ device_init() {
     fi
 }
 
-send_virtual_key_L3R3() {
-    {
-        echo $B_L3 1 # L3 down
-        echo $B_R3 1 # R3 down
-        sleep 0.1
-        echo $B_L3 0 # R3 up
-        echo $B_R3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
-}
-
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.trimui_$PLATFORM" >/dev/null; then
+    if pgrep "ra64.universal" >/dev/null; then
         send_virtual_key_L3R3
     fi
+}
+
+# this is a modified version of rumble_gpio with higher duty ratios for medium and weak intensities.
+vibrate() {
+    duration=50
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
+
+    # Parse arguments in any order
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
+        esac
+        shift
+    done
+
+    case "$intensity" in
+        Strong)
+            timer=0
+            echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
+            while [ $timer -lt $duration ]; do
+                sleep 0.002
+                timer=$((timer + 2))
+            done
+            echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
+            ;;
+        Medium)
+            timer=0
+            (
+                while [ $timer -lt $duration ]; do
+                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
+                    sleep 0.007
+                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
+                    sleep 0.001
+                    timer=$((timer + 8))
+                done
+            ) &
+            ;;
+        Weak)
+            timer=0
+            (
+                while [ $timer -lt $duration ]; do
+                    echo -n 1 > /sys/class/gpio/${RUMBLE_GPIO}/value
+                    sleep 0.005
+                    echo -n 0 > /sys/class/gpio/${RUMBLE_GPIO}/value
+                    sleep 0.001
+                    timer=$((timer + 6))
+                done
+            ) &
+            ;;
+        *)
+            echo "Invalid intensity: $intensity"
+            return 1
+            ;;
+    esac
 }

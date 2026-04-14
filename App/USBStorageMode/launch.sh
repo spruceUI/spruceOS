@@ -3,13 +3,16 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+STAGE_2_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
+STAGE_2_TMP=/tmp/save_poweroff_stage2.sh
+
 # --- Platform-specific configuration ---
 case "$PLATFORM" in
     "A30")
         STORAGE_DEVICE="/dev/mmcblk0p1"
         MOUNT_POINT="/mnt/SDCARD"
         USB_GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
-        LUN_PATH="$GADGET_PATH/lun0"
+        LUN_PATH="$USB_GADGET_PATH/lun0"
         LUN_FILE="$LUN_PATH/file"
         ;;
     "Brick" | "SmartPro")
@@ -92,11 +95,18 @@ cleanup_usb_gadget() {
             [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
             [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
             ;;
-        "Flip" | "Pixel2" | "SmartProS")
+        "Flip" | "Pixel2")
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
+            rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
+            ;;
+        "SmartProS")
+            echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
+            sleep 1
+            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            sleep 2
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
             ;;
     esac
@@ -153,9 +163,9 @@ configure_usb_gadget() {
             ;;
         "Pixel2")
             mkdir $USB_GADGET_PATH -m 0770
-            echo "0x2207" > $USB_GADGET_PATH/rockchip/idVendor
-            echo "0x0000" > $USB_GADGET_PATH/rockchip/idProduct
-            echo "0x0200" > $USB_GADGET_PATH/rockchip/bcdUSB
+            echo "0x2207" > $USB_GADGET_PATH/idVendor
+            echo "0x0000" > $USB_GADGET_PATH/idProduct
+            echo "0x0200" > $USB_GADGET_PATH/bcdUSB
             mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
             echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
             echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
@@ -226,6 +236,10 @@ if [ "$(device_get_charging_status)" = "Discharging" ]; then
     exit 0
 fi
 
+# Disable idle/shutdown timer while in USB mode (device reboots on exit, so no need to restart)
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 log_and_display_message "Connecting USB Mass Storage Mode..."
 configure_usb_gadget
 log_and_display_message "" # Clear the "Connecting" message
@@ -237,8 +251,12 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
-        exit 0
+        stop_pyui_message_writer
+        sync
+        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+        unset LD_LIBRARY_PATH
+        exec "$STAGE_2_TMP" --reboot
     fi
 
     log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device."
@@ -246,8 +264,12 @@ while true; do
         cleanup_usb_gadget
         log_and_display_message "Device will now reboot."
         sleep 3
-        reboot
-        exit 0
+        stop_pyui_message_writer
+        sync
+        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+        unset LD_LIBRARY_PATH
+        exec "$STAGE_2_TMP" --reboot
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU
     sleep 1

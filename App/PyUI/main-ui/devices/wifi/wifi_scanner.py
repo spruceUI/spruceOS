@@ -1,3 +1,4 @@
+import re
 import subprocess
 import time
 import threading
@@ -83,6 +84,7 @@ class WiFiScanner:
                 continue
 
             bssid, freq, signal, flags, ssid = parts[:5]
+            ssid = self._decode_ssid(ssid)
 
             try:
                 network = WiFiNetwork(
@@ -104,6 +106,19 @@ class WiFiScanner:
                     self._known_bssids.add(net.bssid)
                     self._known_ssids.add(net.ssid)
                     self._networks.append(net)
+
+    def _decode_ssid(self, ssid: str) -> str:
+        try:
+            return re.sub(
+                r'(\\x[0-9a-fA-F]{2})+',
+                lambda m: bytes(
+                    int(b, 16) for b in re.findall(r'\\x([0-9a-fA-F]{2})', m.group(0))
+                ).decode('utf-8', errors='replace'),
+                ssid
+            )
+        except Exception:
+            PyUiLogger.get_logger().warning(f"Failed to decode escaped SSID: {ssid}")
+            return ssid
 
     # ----------------------------
     # Public API
@@ -158,13 +173,13 @@ class WiFiScanner:
         ssid = None
         freq = None
         try:
-            result = ProcessRunner.run(["wpa_cli", "status"])
+            result = ProcessRunner.run(["wpa_cli", "status"], timeout=0.5)
             for line in result.stdout.splitlines():
                 if line.startswith("ssid="):
-                    ssid = line.split("=", 1)[1]
+                    ssid = self._decode_ssid(line.split("=", 1)[1])
                 elif line.startswith("freq="):
                     freq = int(line.split("=", 1)[1])
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to get Wi-Fi details: {e}")
 
         return ssid, freq

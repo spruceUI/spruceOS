@@ -79,35 +79,39 @@ jobs:
           fi
 
       - name: Pull selected PyUI Themes
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Cloning PyUI-Themes repo..."
-          git clone --depth=1 "https://github.com/spruceUI/PyUI-Themes.git" pyui_themes
-
           mkdir -p Themes
+          RELEASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
 
-          echo "Copying selected themes..."
+          echo "Downloading selected themes from PyUI-Themes release..."
+          wget -q --no-check-certificate -O "Themes/ALEKFULL_NX_ES.7z" "${RELEASE_URL}/ALEKFULL_NX_ES.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_OUTLINE.7z" "${RELEASE_URL}/ART_BOOK_OUTLINE.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_NEXT.7z" "${RELEASE_URL}/ART_BOOK_NEXT.7z" || true
+          wget -q --no-check-certificate -O "Themes/Avocado.7z" "${RELEASE_URL}/Avocado.7z" || true
+          wget -q --no-check-certificate -O "Themes/Cosy by KyleBing.7z" "${RELEASE_URL}/Cosy_by_KyleBing.7z" || true
+          wget -q --no-check-certificate -O "Themes/Grape.7z" "${RELEASE_URL}/Grape.7z" || true
+          wget -q --no-check-certificate -O "Themes/GREEN.7z" "${RELEASE_URL}/GREEN.7z" || true
+          wget -q --no-check-certificate -O "Themes/HeyDW's Blue.7z" "${RELEASE_URL}/HeyDWs_Blue.7z" || true
+          wget -q --no-check-certificate -O "Themes/M.7z" "${RELEASE_URL}/M.7z" || true
+          wget -q --no-check-certificate -O "Themes/MINIMAL.7z" "${RELEASE_URL}/MINIMAL.7z" || true
+          wget -q --no-check-certificate -O "Themes/MinUInspired (logos).7z" "${RELEASE_URL}/MinUInspired_(logos).7z" || true
+          wget -q --no-check-certificate -O "Themes/OTB.7z" "${RELEASE_URL}/OTB.7z" || true
+          wget -q --no-check-certificate -O "Themes/Pico-8.7z" "${RELEASE_URL}/Pico-8.7z" || true
+          wget -q --no-check-certificate -O "Themes/SLABS.7z" "${RELEASE_URL}/SLABS.7z" || true
+          wget -q --no-check-certificate -O "Themes/SPRUCE (simple).7z" "${RELEASE_URL}/SPRUCE_(simple).7z" || true
 
-          cp "pyui_themes/PackedThemes/ALEKFULL_NX_ES.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/ART_BOOK_OUTLINE.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/ART_BOOK_NEXT.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Avocado.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Cosy by KyleBing.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Grape.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/GREEN.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/HeyDW's Blue.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/M.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/MINIMAL.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/MinUInspired (logos).7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/OTB.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/Pico-8.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/SLABS.7z" Themes/ || true
-          cp "pyui_themes/PackedThemes/SPRUCE (simple).7z" Themes/ || true
+          # Remove any empty files from failed downloads
+          find Themes -name "*.7z" -empty -delete
 
-          echo "Themes copied:"
+          echo "Themes downloaded:"
           ls -lh Themes
 
-          echo "Removing cloned PyUI Themes repo"
-          rm -rf pyui_themes
+      - name: Archive Licenses folder
+        run: |
+          7z a -t7z -mx=9 Licenses.7z Licenses/
+          rm -rf Licenses/
 
       - name: Create 7z archive
         run: |
@@ -118,7 +122,8 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!commits_nightly.txt
+            -x!commits_nightly.txt \
+            -x!To-Do.txt
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 

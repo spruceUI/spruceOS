@@ -12,8 +12,8 @@ class SearchedRomsMenu(RomsMenuCommon):
         super().__init__()
         self.search_str = search_str
 
-    def include_rom(self,rom_file_name, rom_file_path):
-        return self.search_str in rom_file_name.upper() or os.path.isdir(rom_file_path)
+    def include_rom(self,rom_file_name, rom_file_path, display_name=""):
+        return self.search_str in rom_file_name.upper() or self.search_str in display_name.upper() or os.path.isdir(rom_file_path)
         
     def _get_rom_list(self) -> list[GridOrListEntry]:
         roms = []
@@ -38,7 +38,7 @@ class SearchedRomsMenu(RomsMenuCommon):
                     # Recurse into subdirectory
                     sub_roms = _collect_roms_recursively(game_system, rom_path)
                     all_roms.extend(sub_roms)
-                    if(self.search_str in rom_name.upper()):
+                    if(self.search_str in rom_name.upper() or self.search_str in entry.get_primary_text().upper()):
                         all_roms.append(entry)
                 else:
                     all_roms.append(entry)

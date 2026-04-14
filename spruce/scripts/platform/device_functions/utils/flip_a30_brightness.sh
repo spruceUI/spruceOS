@@ -27,18 +27,13 @@ brightness_down() {
 
         # update brightness level
         BRIGHTNESS_LV=$((BRIGHTNESS_LV-1))
-
-        logger -p 15 -t "keymon[$$]" "brightness down"
-        logger -p 15 -t "keymon[$$]" "setLCDBrightness $BRIGHTNESS_LV"
         
         # update screen brightness
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
         echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"backlight\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
-
-        logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
+        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 
     elif [ "$PLATFORM" = "Flip" ] && [ "$extended_brightness" = "True" ]; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
@@ -87,20 +82,13 @@ brightness_up() {
         # update brightness level
         BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
 
-        logger -p 15 -t "keymon[$$]" "brightness up"
-        logger -p 15 -t "keymon[$$]" "setLCDBrightness $BRIGHTNESS_LV"
-
         # update screen brightness
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
         echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
 
         # Update MainUI Config file
-        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"backlight\": $BRIGHTNESS_LV/" "$SYSTEM_JSON"
-
-        logger -p 15 -t "keymon[$$]" "loadSystemState brightness changed 1 $BRIGHTNESS_LV"
+        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     
-        # write both level value to shared memory for MainUI to update its UI
-
     fi
 
     $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"

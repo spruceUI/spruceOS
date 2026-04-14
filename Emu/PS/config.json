@@ -29,9 +29,21 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "km_duckswanstation_xtreme_amped"
+        "km_duckswanstation_xtreme_amped",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
+      "overrides": {}
+    },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
       "overrides": {}
     },
     "Emulator_64": {
@@ -41,11 +53,14 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ],
       "options": [
         "pcsx_rearmed",
-        "swanstation"
+        "swanstation",
+        "PCSX-ReARMed-standalone"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
@@ -57,5 +72,13 @@
   "releaseYear": 1994,
   "default_emulator": "pcsx_rearmed",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["PSX","PSONE","PLAYSTATION","psx","ps","psone","playstation"]
+  "alternativeFolderNames": [
+    "PSX",
+    "PSONE",
+    "PLAYSTATION",
+    "psx",
+    "ps",
+    "psone",
+    "playstation"
+  ]
 }

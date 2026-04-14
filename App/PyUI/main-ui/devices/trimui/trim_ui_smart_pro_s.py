@@ -11,7 +11,7 @@ from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice
@@ -28,6 +28,8 @@ from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
+    SAVES_CONFIG_LOCATION = "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
+    VOLUME_FILE = SAVES_CONFIG_LOCATION
 
     def __init__(self, device_name,main_ui_mode):
         self.device_name = device_name
@@ -35,7 +37,7 @@ class TrimUISmartProS(TrimUIDevice):
 
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
-        self._load_system_config("/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json", source)
+        self._load_system_config(TrimUISmartProS.SAVES_CONFIG_LOCATION, source)
         self.mainui_volume = 0
         if(main_ui_mode):
             self.on_mainui_config_change()
@@ -43,7 +45,7 @@ class TrimUISmartProS(TrimUIDevice):
             ConfigCopier.ensure_config(TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+                TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.ensure_wpa_supplicant_conf()
@@ -137,7 +139,7 @@ class TrimUISmartProS(TrimUIDevice):
             return 0
         
     def on_mainui_config_change(self):
-        path = TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION
+        path = TrimUISmartProS.VOLUME_FILE
         if not os.path.exists(path):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
             return
@@ -187,7 +189,7 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Powering off...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.power_off_cmd()])
+        super().power_off()
         # So we dont update the display while shutting down
         time.sleep(10)
 
@@ -196,7 +198,7 @@ class TrimUISmartProS(TrimUIDevice):
         Display.display_message("Rebooting...")
         self._prepare_for_power_action()
         time.sleep(1)
-        self.run_cmd([self.reboot_cmd()])
+        super().reboot()
         # So we dont update the display while rebooting
         time.sleep(10)
 

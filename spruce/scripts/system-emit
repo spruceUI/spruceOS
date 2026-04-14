@@ -1,0 +1,89 @@
+#!/bin/sh
+
+TRACE_GATE_DIR="${TRACE_GATE_DIR:-/tmp/spruce_trace_gates}"
+SYSTEM_EMIT_GATE_FILE="${SYSTEM_EMIT_GATE_FILE:-$TRACE_GATE_DIR/enable-trace.on}"
+[ -f "$SYSTEM_EMIT_GATE_FILE" ] || exit 0
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+if [ -f "$SCRIPT_DIR/trace.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$SCRIPT_DIR/trace.sh"
+else
+    . /mnt/SDCARD/spruce/scripts/trace.sh
+fi
+
+subcommand="${1:-}"
+[ -n "$subcommand" ] || {
+    printf '%s\n' "system-emit: unknown subcommand '<none>'" >&2
+    exit 2
+}
+shift
+
+case "$subcommand" in
+    power)
+        trace_with_lock power_trace_emit "$@"
+        ;;
+    power-shutdown-request)
+        trace_with_lock power_trace_emit_shutdown_request "$@"
+        ;;
+    network)
+        trace_with_lock network_trace_emit "$@"
+        ;;
+    audio-level)
+        trace_with_lock audio_trace_emit_level "$@"
+        ;;
+    audio-levels)
+        trace_with_lock audio_trace_emit_levels "$@"
+        ;;
+    audio-cached-or-unknown)
+        trace_with_lock audio_trace_emit_cached_or_unknown "$@"
+        ;;
+    audio-from-current-to-cached-or-unknown)
+        trace_with_lock audio_trace_emit_from_current_to_cached_or_unknown "$@"
+        ;;
+    audio-startup-baseline-if-missing)
+        trace_with_lock audio_trace_emit_startup_baseline_if_missing "$@"
+        ;;
+    audio-shutdown-baseline-if-missing)
+        trace_with_lock audio_trace_emit_shutdown_baseline_if_missing "$@"
+        ;;
+    audio-wake-restore)
+        trace_with_lock audio_trace_emit_wake_restore "$@"
+        ;;
+    brightness-level)
+        trace_with_lock brightness_trace_emit_level "$@"
+        ;;
+    brightness-levels)
+        trace_with_lock brightness_trace_emit_levels "$@"
+        ;;
+    brightness-cached-or-unknown)
+        trace_with_lock brightness_trace_emit_cached_or_unknown "$@"
+        ;;
+    brightness-startup-baseline-if-missing)
+        trace_with_lock brightness_trace_emit_startup_baseline_if_missing "$@"
+        ;;
+    brightness-shutdown-baseline-if-missing)
+        trace_with_lock brightness_trace_emit_shutdown_baseline_if_missing "$@"
+        ;;
+    brightness-wake-baseline)
+        trace_with_lock brightness_trace_emit_wake_baseline "$@"
+        ;;
+    av-startup-baselines-if-missing)
+        trace_with_lock av_trace_emit_startup_baselines_if_missing "$@"
+        ;;
+    av-shutdown-baselines-if-missing)
+        trace_with_lock av_trace_emit_shutdown_baselines_if_missing "$@"
+        ;;
+    process-init)
+        trace_with_lock process_trace_init "$@"
+        ;;
+    process-finalize)
+        trace_with_lock process_trace_finalize "$@"
+        ;;
+    process)
+        trace_with_lock process_trace_emit "$@"
+        ;;
+    *)
+        printf '%s\n' "system-emit: unknown subcommand '$subcommand'" >&2
+        exit 2
+esac

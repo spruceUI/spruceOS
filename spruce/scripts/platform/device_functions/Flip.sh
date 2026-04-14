@@ -212,16 +212,7 @@ get_current_volume() {
     amixer get 'SPK' | sed -n 's/.*Mono: *\([0-9]*\).*/\1/p' | tr -d '[]%'
 }
 
-setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
-	if [ "$CORE" = "yabasanshiro" ]; then
-		# "Error(s): /usr/miyoo/lib/libtmenu.so: undefined symbol: GetKeyShm" if you try to use non-Miyoo RA for this core
-		export RA_BIN="ra64.miyoo"
-	elif [ "$use_igm" = "False" ] || [ "$CORE" = "parallel_n64" ]; then
-		export RA_BIN="retroarch.Flip"
-	else
-		export RA_BIN="ra64.miyoo"
-	fi
+setup_for_retroarch(){
 			
     if [ "$CORE" = "uae4arm" ]; then
 		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
@@ -230,7 +221,12 @@ setup_for_retroarch_and_get_bin_location(){
 	elif [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
-	export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	if [ "$RA_BIN" = "ra32.universal" ]; then
+		export CORE_DIR="$RA_DIR/.retroarch/cores"
+		export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
+	else
+		export CORE_DIR="$RA_DIR/.retroarch/cores64"
+	fi
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -270,7 +266,7 @@ launch_startup_watchdogs(){
 
     # Why do we need this on flip? What exactly does it do?
     # The name is kinda confusing. I think it monitors for headphones?
-    /mnt/SDCARD/spruce/scripts/mixer_watchdog.sh &
+    /mnt/SDCARD/spruce/flip/mixer_watchdog.sh &
 
     #BT is broken so don't bother with it
     #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
@@ -278,42 +274,14 @@ launch_startup_watchdogs(){
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
-perform_fw_check(){
-    log_message "Miyoo Flip can't perform firmware check?" -v
-}
-
-
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
 
-
-close_ppsspp_menu() {
-
-    if pgrep -f "PPSSPPSDL" >/dev/null; then
-        log_message "homebutton_watchdog.sh: Closing PPSSPP menu."
-        # use sendevent to send SELECT + R1 combo buttons to PPSSPP
-        {
-            echo $B_RIGHT 1  
-            echo $B_RIGHT 0  
-            echo $B_A 1  
-            echo $B_A 0  
-        } > /tmp/ppsspp_events.txt
-
-
-        # run sendevent in a fully detached subshell
-        (
-            sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP < /tmp/ppsspp_events.txt
-        ) < /dev/null > /dev/null 2>&1 &
-
-        sleep 0.5
-    fi
-}
-
 take_screenshot() {
-    close_ppsspp_menu
+    screenshot_path="$1"
     /mnt/SDCARD/spruce/flip/screenshot.sh "$screenshot_path"
 }
 
@@ -366,9 +334,6 @@ runtime_mounts_Flip() {
     /mnt/sdcard/spruce/flip/mount_muOS.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
-
-    # use appropriate loading images
-    [ -d "/mnt/SDCARD/miyoo355/app/skin" ] && mount --bind /mnt/SDCARD/miyoo355/app/skin /usr/miyoo/bin/skin
 
 	# PortMaster ports location
     mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
@@ -461,30 +426,6 @@ set_default_ra_hotkeys() {
 
 }
 
-reset_playback_pack() {
-    VOLUME_LV=$(get_volume_level)
-    set_volume "$(( VOLUME_LV ))"
-}
-
-
-run_mixer_watchdog() {
-    JACK_PATH=/sys/class/gpio/gpio150/value
-
-    while true; do
-
-        /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
-        PID_GPIO=$!
-        wait -n
-
-        log_message "*** mixer watchdog: change detected" -v
-
-        kill $PID_GPIO 2>/dev/null
-        VOLUME_LV=$(get_volume_level)
-        set_volume "$(( VOLUME_LV ))"
-    done
-}
-
-
 new_execution_loop() {
     log_message "new_execution_loop Uneeded on this device" -v
 }
@@ -514,4 +455,61 @@ device_wifi_power_on() {
 
 device_wifi_power_off() { 
     echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 1 # Flip leaves dirty bit set?
+}
+
+device_write_default_asound_rc() {
+    hp_multiplier="$(get_config_value '.menuOptions."Audio Settings".headphoneMultiplier.selected' "1.0")"
+    use_hp_scaling=0
+    are_headphones_plugged_in && [ "$hp_multiplier" != "1.0" ] && use_hp_scaling=1
+
+    if [ "$use_hp_scaling" -eq 1 ]; then
+        cat > "$ASOUND_CONF" <<EOF
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    slave {
+        pcm "hw:0"
+        period_time 0
+        period_size 1024
+        buffer_size 8192
+    }
+}
+
+pcm.atten {
+    type route
+    slave.pcm "dmixer"
+
+    ttable.0.0 $hp_multiplier
+    ttable.1.1 $hp_multiplier
+}
+
+pcm.!default {
+    type plug
+    slave.pcm "atten"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
+    else
+        cat > "$ASOUND_CONF" <<EOF
+pcm.!default {
+    type plug
+    slave.pcm "dmix"
+}
+
+ctl.!default {
+    type hw
+    card 0
+}
+EOF
+    fi
 }

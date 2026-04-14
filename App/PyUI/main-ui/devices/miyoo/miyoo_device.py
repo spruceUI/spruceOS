@@ -48,8 +48,8 @@ class MiyooDevice(DeviceCommon):
         return self.is_hdmi_connected()
 
 
-    def run_cmd(self, args, dir = None):
-        MiyooTrimCommon.run_cmd(self, args, dir)
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        MiyooTrimCommon.run_cmd(self, args, dir,is_power_cmd)
 
     def run_app(self, folder,launch):
         MiyooTrimCommon.run_app(self, folder,launch)

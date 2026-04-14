@@ -129,7 +129,7 @@ set_smart() {
     fi
 
     if ! flag_check "setting_cpu"; then
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online "$CPU_SMART_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
@@ -168,7 +168,7 @@ set_smart() {
 set_performance() {
     log_message "set_performance called"
     if ! flag_check "setting_cpu"; then
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online "$DEVICE_MAX_CORES_ONLINE"
 
         unlock_governor 2>/dev/null
@@ -199,7 +199,7 @@ set_performance() {
 set_overclock() {
     log_message "set_overclock called"
     if ! flag_check "setting_cpu"; then
-        flag_add "setting_cpu"
+        flag_add "setting_cpu" --tmp
         cores_online 01234567   # bring all up before potentially offlining cpu0
         cores_online "$DEVICE_MAX_CORES_ONLINE"
         unlock_governor 2>/dev/null

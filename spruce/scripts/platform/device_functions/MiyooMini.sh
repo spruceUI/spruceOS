@@ -27,13 +27,13 @@ cores_online() {
 set_smart() {
     log_message "Setting cpu to ondemand"
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1400
+    cpuclock 1300
 }
 
 set_performance() {
     log_message "Setting cpu to performance"
     echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    cpuclock 1600
+    cpuclock 1400
 }
 
 set_overclock() {
@@ -56,7 +56,17 @@ device_init() {
     if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
         # Screen is off by like ~8px unless you do this, not sure why
         cat /proc/ls
+        # export brightness settings
+        echo 0 > /sys/class/pwm/pwmchip0/export
+        # Unsure what this value should be, 1k seems to work
+        echo 1000 >  /sys/class/pwm/pwmchip0/pwm0/period
+        backlight=$(jq -r '.backlight' "$SYSTEM_JSON")
+        duty_cycle=$((backlight * 10))
+        echo "$duty_cycle" > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+        echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
+
     fi
+    killall -9 main ### SUPER important in preventing .tmp_update suicide
 }
 
 vibrate() {
@@ -105,27 +115,12 @@ get_current_volume() {
     log_message "Intentionally do not let spruce modify volume" -v
 }
 
-set_volume() {
-    log_message "Intentionally do not let spruce modify volume" -v
-}
-
-
-reset_playback_pack() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
-run_mixer_watchdog() {
-    log_message "Intentionally do not let spruce modify audio, let keymon" -v
-}
-
 new_execution_loop() {
     pidof audioserver >/dev/null || audioserver &
 }
 
-setup_for_retroarch_and_get_bin_location(){
-	RA_DIR="/mnt/SDCARD/RetroArch"
+setup_for_retroarch(){
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-    export RA_BIN="retroarch"
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -152,13 +147,12 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "true"
+    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_FLIP" ]; then
+        launch_common_startup_watchdogs_v2 "true"
+    else
+        launch_common_startup_watchdogs_v2 "false"
+    fi
 }
-
-perform_fw_check(){
-    log_message "No Fw Check for MiyooMini" -v
-}
-
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
@@ -198,15 +192,16 @@ set_volume() {
     # NOTE: This won't always work. They will often just error.
     # But sometimes they do work. It's based on if something else is already controlling the volume.
     # The main purpose of this is for NDS volume since drastic does some weird stuff
-    # Might be worth considering adding an if block of if <x> is running then do this
-    
-    VOLUME_LV="$1"
-    SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
-    /mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/mm_set_volume.py "$VOLUME_LV" &
+    # Can add more apps as needed
+    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+        VOLUME_LV="$1"
+        SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+        /mnt/SDCARD/spruce/miyoomini/bin/mm_set_volume.py "$VOLUME_LV" &
 
-    # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
-    if [ "$SAVE_TO_CONFIG" = true ]; then
-        save_volume_to_config_file "$VOLUME_LV"
+        # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
+        if [ "$SAVE_TO_CONFIG" = true ]; then
+            save_volume_to_config_file "$VOLUME_LV"
+        fi
     fi
 }
 
@@ -222,9 +217,10 @@ set_backlight() {
     [ "$value" -lt 0 ] && value=0
     [ "$value" -gt 10 ] && value=10
 
-    sed -i "s/\"backlight\": *[0-9][0-9]*/\"backlight\": $value/" "$SYSTEM_JSON"
+    jq ".backlight = $value" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     # Should we get this from path or always from PyUI?
     /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
+    "$SYSTEM_EMIT" brightness-level "$value" "MiyooMini.sh/set_backlight" 2>/dev/null || true
 }
 
 brightness_down() {
@@ -276,7 +272,6 @@ device_enter_sleep() {
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
     echo "GUI_SHOW 0 off" > "$SCREEN_BLANK_FILE" 2>/dev/null    # blank the screen
     echo "0" > "$BRIGHTNESS_FILE" 2>/dev/null                   # set brightness to 0
-    [ -e "$BUTTON_ENABLE_FILE" ] && echo "N" > "$BUTTON_ENABLE_FILE" 2>/dev/null # disable input
     touch /tmp/screen_blanked                                   # create flag file
     cpuclock 100                                                # slow cpu to a crawl
 }
@@ -291,11 +286,20 @@ device_exit_sleep() {
     else
         echo "50" > "$BRIGHTNESS_FILE" 2>/dev/null              # default if previous not found
     fi
-    [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
     rm -f /tmp/screen_blanked /tmp/saved_brightness             # clean up temp files
 
     sleep 0.5
     send_event /dev/input/event0 116:1 
+
+
+    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
+        #TODO don't have a mini to test on but this should potentially be
+        #MMP only
+        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+    else
+        [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
+
+    fi
 
     pgrep retroarch 2>/dev/null && set_smart # return to smart mode
 }
@@ -305,7 +309,11 @@ device_lid_sensor_ready() {
 }
 
 device_lid_open(){
-    head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    if [ -e "$LID_HALL_FILE" ]; then
+        head -c 1 "$LID_HALL_FILE" 2>/dev/null
+    else
+        echo "1"
+    fi
 }
 
 
@@ -357,4 +365,10 @@ run_poweroff_cmd() {
     else
         poweroff
     fi
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
 }

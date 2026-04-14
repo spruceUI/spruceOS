@@ -28,16 +28,10 @@ get_python_path() {
     echo "/mnt/SDCARD/spruce/pixel2/bin/python"
 }
 
-setup_for_retroarch_and_get_bin_location(){
-    RA_DIR="/mnt/SDCARD/RetroArch"
-    export RA_BIN="retroarch.Pixel2"
+setup_for_retroarch(){
     export CORE_DIR="$RA_DIR/.retroarch/cores64"
 
-    if [ "$CORE" = "uae4arm" ]; then
-		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
-	elif [ "$CORE" = "easyrpg" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
-	elif [ "$CORE" = "yabasanshiro" ]; then
+	if [ "$CORE" = "yabasanshiro" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
 	fi
 
@@ -50,25 +44,35 @@ setup_for_retroarch_and_get_bin_location(){
     echo "$RA_BIN"
 }
 
-get_ra_cfg_location(){
-	echo "/mnt/SDCARD/RetroArch/retroarch.cfg"
-}
-
 get_spruce_ra_cfg_location() {
     echo "/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
+}
+
+set_loading_screen() {
+    /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
+}
+
+disable_swap() {
+    swap_list=$(swapon -s)
+
+    if [ -n "$swap_list" ]; then
+        swapoff -a
+    fi
 }
 
 device_init() {
     touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
+    sync_volume_level
+
+    disable_swap
+
+    # Loading screen daemon
+    /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
 }
 
 set_event_arg_for_idlemon() {
     EVENT_ARG="-e /dev/input/event2"
-}
-
-perform_fw_check(){
-    log_message "There is only a single firmware, it was never updated" -v
 }
 
 check_if_fw_needs_update() {
@@ -80,6 +84,7 @@ enable_or_disable_rgb() {
 }
 
 prepare_for_pyui_launch(){
+    disable_digital_to_analog
     set_performance
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
@@ -95,7 +100,9 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "false"
+    launch_common_startup_watchdogs_v2 "true"
+    /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
@@ -107,67 +114,43 @@ device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
 
-get_volume_level() {
-    VALUE=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '(?<=\s)(\d*)(?=\%)' | head -n1)
+sync_volume_level() {
+    VALUE=$(get_volume_level)
+    set_volume "$VALUE" false
+}
 
-    logger "Volume value: $VALUE"
-    case $VALUE in
-        $SYSTEM_VOLUME_0) echo 0 ;;
-        $SYSTEM_VOLUME_1) echo 1 ;;
-        $SYSTEM_VOLUME_2) echo 2 ;;
-        $SYSTEM_VOLUME_3) echo 3 ;;
-        $SYSTEM_VOLUME_4) echo 4 ;;
-        $SYSTEM_VOLUME_5) echo 5 ;;
-        $SYSTEM_VOLUME_6) echo 6 ;;
-        $SYSTEM_VOLUME_7) echo 7 ;;
-        $SYSTEM_VOLUME_8) echo 8 ;;
-        $SYSTEM_VOLUME_9) echo 9 ;;
-        $SYSTEM_VOLUME_10) echo 10 ;;
-        $SYSTEM_VOLUME_11) echo 11 ;;
-        $SYSTEM_VOLUME_12) echo 12 ;;
-        $SYSTEM_VOLUME_13) echo 13 ;;
-        $SYSTEM_VOLUME_14) echo 14 ;;
-        $SYSTEM_VOLUME_15) echo 15 ;;
-        $SYSTEM_VOLUME_16) echo 16 ;;
-        $SYSTEM_VOLUME_17) echo 17 ;;
-        $SYSTEM_VOLUME_18) echo 18 ;;
-        $SYSTEM_VOLUME_19) echo 19 ;;
-        $SYSTEM_VOLUME_20) echo 20 ;;
-        *) echo 10 ;;
-    esac
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
 }
 
 set_volume() {
     VOL_VAL="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}" # Optional 2nd arg, defaults to true
 
-    logger "Setting volume to $VOL_VAL"
-    if [ $VOL_VAL -lt 0 ]; then
-        VOL_VAL=0
-    elif [ $VOL_VAL -gt 20 ]; then
-        VOL_VAL=20
-    fi
-
     # Set volume
     SYSTEM_VOL=$(map_mainui_volume_to_system_value "$VOL_VAL")
-    pactl -- set-sink-volume @DEFAULT_SINK@ ${SYSTEM_VOL}%
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ $SYSTEM_VOL
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         # Update Config file
-        sed -i "s/\"vol\":\s*\([0-9]*\)/\"vol\": $VOL_VAL/" "$SYSTEM_JSON"
+        save_volume_to_config_file "$VOL_VAL"
     fi
 }
 
 volume_down() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} - 1))
-    set_volume "$VALUE"
+    if [ $VALUE -gt 0 ] ; then
+        VALUE=$((${VALUE} - 1))
+        set_volume "$VALUE"
+    fi
 }
 
 volume_up() {
     VALUE=$(get_volume_level)
-    VALUE=$((${VALUE} + 1))
-    set_volume "$VALUE"
+    if [ $VALUE -lt 20 ] ; then
+        VALUE=$((${VALUE} + 1))
+        set_volume "$VALUE"
+    fi
 }
 
 # Map the MainUI Volume level to System Value
@@ -201,6 +184,8 @@ map_mainui_volume_to_system_value() {
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
+    turn_off_screen
+
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -210,6 +195,7 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    turn_on_screen
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
@@ -277,7 +263,8 @@ set_backlight() {
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
     if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
-        sed -i "s/\"backlight\":\s*\([0-9]\|10\)/\"backlight\": $new_bl/" "$SYSTEM_JSON"
+        jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+        "$SYSTEM_EMIT" brightness-level "$new_bl" "Pixel2.sh/set_backlight" 2>/dev/null || true
     fi
 }
 
@@ -305,28 +292,37 @@ set_event_arg() {
     EVENT_ARG="-e /dev/input/event2"
 }
 
-send_virtual_key_L3() {
-    {
-        echo $B_MENU 0 # MENU up
-        echo $B_L3 1 # L3 down
-        sleep 0.1
-        echo $B_L3 0 # L3 up
-        echo 0 0 0   # tell sendevent to exit
-    } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
+send_menu_button_to_retroarch() {
+    if pgrep "ra64.pixel2" >/dev/null; then
+        echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
+    fi
 }
 
-send_menu_button_to_retroarch() {
-    if pgrep "retroarch.Pixel2" >/dev/null; then
-        echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
-    elif pgrep -f "PPSSPPSDL_Pixel2" >/dev/null; then
-        send_virtual_key_L3
-    fi
-    # PICO8 has no in-game menu and
-    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
+enable_digital_to_analog() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @digital @analog \
+            --map yield btn:east btn:south \
+            --map yield btn:south btn:east \
+            --map yield btn:dpad_left:0@analog abs:x:0 \
+            --map yield btn:dpad_left:1@analog abs:x:-900 \
+            --map yield btn:dpad_right:0@analog abs:x:0 \
+            --map yield btn:dpad_right:1@analog abs:x:899 \
+            --map yield btn:dpad_up:0@analog abs:y:0 \
+            --map yield btn:dpad_up:1@analog abs:y:-900 \
+            --map yield btn:dpad_down:0@analog abs:y:0 \
+            --map yield btn:dpad_down:1@analog abs:y:899 \
+            --output name="pixel2_joypad_alt" &
 }
+
+disable_digital_to_analog() {
+    pkill "evsieve"
+}
+
 
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -337,14 +333,17 @@ set_default_ra_hotkeys() {
         "input_fps_toggle_btn = \"3\"" \
         "input_load_state_btn = \"9\"" \
         "input_menu_toggle = \"escape\"" \
-        "input_menu_toggle_btn = \"nul\"" \
+        "input_menu_toggle_btn = \"2\"" \
         "input_quit_gamepad_combo = \"4\"" \
         "input_save_state_btn = \"10\"" \
         "input_screenshot_btn = \"0\"" \
         "input_shader_toggle_btn = \"11\"" \
         "input_state_slot_decrease_btn = \"13\"" \
-        "input_state_slot_increase_btn = \"14\"" \
-        "input_toggle_slowmotion_axis = \"+4\"" \
-        "input_toggle_fast_forward_axis = \"+5\""
+        "input_state_slot_increase_btn = \"14\""
+}
 
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
 }

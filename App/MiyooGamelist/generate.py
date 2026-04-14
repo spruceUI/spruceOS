@@ -20,13 +20,15 @@ from html import escape as html_escape
 class PyUiMessenger:
     """Sends display messages to the PyUI realtime listener on port 50980."""
 
-    HOST = "127.0.0.1"
-    PORT = 50980
+    SOCKET_ADDR = b"\x0050980"
 
     def send_message(self, json_str: str) -> None:
         try:
-            with socket.create_connection((self.HOST, self.PORT), timeout=1) as s:
-                s.sendall((json_str + "\n").encode("utf-8"))
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            s.connect(self.SOCKET_ADDR)
+            s.sendall((json_str + "\n").encode("utf-8"))
+            s.close()
         except Exception:
             pass
 
@@ -295,8 +297,8 @@ class GamelistGenerator:
 
         # Pass 2: write entries, using raw filename for ALL duplicates
         writer = GamelistXmlWriter()
-        for file_rel_path, img_rel_path, cleaned, filename_no_ext in rom_entries:
-            if name_count.get(cleaned, 0) > 1:
+        for file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned in rom_entries:
+            if name_count.get(dedup_key, 0) > 1:
                 display_name = filename_no_ext
             else:
                 display_name = cleaned
@@ -364,7 +366,7 @@ class GamelistGenerator:
             dedup_key = f"{rel_path}/{cleaned}" if rel_path else cleaned
             name_count[dedup_key] = name_count.get(dedup_key, 0) + 1
 
-            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext))
+            rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned))
 
 
 # ---------------------------------------------------------------------------

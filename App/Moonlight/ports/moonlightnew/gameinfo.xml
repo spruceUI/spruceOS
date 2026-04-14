@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gameList>
+  <game>
+    <path>./Moonlight New.sh</path>
+    <name>Moonlight New</name>
+    <desc>"Moonlight Embedded is an open source client for Sunshine and NVIDIA GameStream for embedded Linux systems. Moonlight allows you to stream your full collection of games and applications from your PC to other devices to play them remotely". Now with a brand new custom-made launcher!"</desc>
+    <releasedate>20240630T000000</releasedate>
+    <developer>JanTrueno</developer>
+    <genre>Other</genre>
+    <image>./moonlightnew/cover.png</image>
+  </game>
+</gameList>

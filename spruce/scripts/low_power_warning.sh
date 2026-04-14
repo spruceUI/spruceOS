@@ -57,27 +57,31 @@ log_battery() {
 
     # Keep only last 1000 lines
     if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
-        sed -i '1d' "$LOG_FILE"
+        sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
+    fi
+}
+
+init_battery_log() {
+    CAPACITY=$(device_get_battery_percent)
+    CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+    [ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
+    echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
+    if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
+        sed '1d' "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
     fi
 }
 
 hard_shutdown() {
     CAPACITY=$1
     if [ "$CAPACITY" -le 1 ]; then
-        flag_add "forced_shutdown"
+        flag_add "forced_shutdown" --tmp
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         exit
     fi
 }
 
 # Log boot entry
-CAPACITY=$(cat $BATTERY/capacity)
-CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-[ ! -d "$LOG_DIR" ] && mkdir -p "$LOG_DIR"
-echo "${CURRENT_TIME} - Boot: ${CAPACITY}%" >>"$LOG_FILE"
-if [ "$(wc -l <"$LOG_FILE")" -gt "$MAX_LINES" ]; then
-    sed -i '1d' "$LOG_FILE"
-fi
+# init_battery_log
 LAST_LOG=$(date +%s)
 
 while true; do
@@ -88,7 +92,7 @@ while true; do
     # Add battery logging
     CURRENT_TIME=$(date +%s)
     if [ $((CURRENT_TIME - LAST_LOG)) -gt $LOG_INTERVAL ]; then
-        log_battery
+        # log_battery
         LAST_LOG=$(date +%s) # Keep this as Unix timestamp
     fi
 
@@ -104,6 +108,7 @@ while true; do
     [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
 
     if [ "$CAPACITY" -le "$PERCENT" ]; then
+        "$SYSTEM_EMIT" power "RUNNING" "LOW_BATTERY" "low_power_warning.sh" "battery ${CAPACITY}% at or below threshold ${PERCENT}%" || true
         vibrate_count=0
         flag_added=false
         while [ "$CAPACITY" -le "$PERCENT" ]; do
@@ -116,7 +121,7 @@ while true; do
                     if flag_check "in_menu"; then
                         display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
                     else
-                        flag_add "low_battery"
+                        flag_add "low_battery" --tmp
                     fi
                     flag_added=true
                 fi

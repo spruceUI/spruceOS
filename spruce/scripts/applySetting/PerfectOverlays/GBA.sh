@@ -19,7 +19,8 @@ input_overlay = \"./.retroarch/overlay/Perfect/Perfect_GBA/Bright_Version/Perfec
 input_overlay_enable = \"true\"
 input_overlay_opacity = \"1.000000\"
 input_player1_analog_dpad_mode = \"0\"
-video_crop_overscan = \"false\""
+video_crop_overscan = \"false\"
+video_viewport_bias_y = \"0.000000\""
 
     GBA_GLSP="shaders = \"1\"
 shader0 = \"../../shaders/sharpshimmerless/shaders/sharp-shimmerless.glsl\"
@@ -90,7 +91,8 @@ input_overlay
 input_overlay_enable
 input_overlay_opacity
 input_player1_analog_dpad_mode
-video_crop_overscan"
+video_crop_overscan
+video_viewport_bias_y"
 
     GBA_GLSP_KEYS="shaders
 shader0

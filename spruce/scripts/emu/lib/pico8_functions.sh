@@ -45,7 +45,7 @@ run_pico8() {
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		PICO8_BINARY="pico8_dyn"
-		sed -i 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt"
+		sed 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
 	elif [ "$PLATFORM" = "MiyooMini" ]; then
 		export SDL_VIDEODRIVER=mmiyoo
@@ -55,18 +55,18 @@ run_pico8() {
 		PICO8_BINARY="pico8_dyn"
 		killall audioserver
 		cpuclock 1600
-		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
+		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
 	else
 		PICO8_BINARY="pico8_64"
-		sed -i 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt"
+		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 	fi
 
 	if [ "${GAME##*.}" = "splore" ]; then
 		check_and_connect_wifi
-		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > $(emu_log_file) 2>&1
 	else
-		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > $(emu_log_file) 2>&1
 	fi
 	sync
 

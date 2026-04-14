@@ -9,6 +9,8 @@
 #
 # Provides:
 #   run_flycast_standalone
+#   set_ui_scale
+#   move_screenshots
 
 set_ui_scale() {
 
@@ -20,7 +22,16 @@ set_ui_scale() {
 		*) SCALING=100 ;;
 	esac
 
-	sed -i "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG"
+	sed "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+}
+
+move_screenshots() {
+	ss_path="/mnt/SDCARD/Saves/screenshots/$CORE/"
+	if [ ! -d "$ss_path" ]; then
+		mkdir -p "$ss_path"
+	fi
+
+	mv /mnt/SDCARD/Emu/DC/[!dc]*.png "$ss_path" 2>/dev/null
 }
 
 run_flycast_standalone() {
@@ -30,7 +41,7 @@ run_flycast_standalone() {
 	export HOME="/mnt/SDCARD/Emu/DC"
 	export XDG_DATA_HOME="/mnt/SDCARD/Emu/DC/data"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Emu/DC/config"
-	export LD_LIBRARY_PATH="$HOME/lib-TrimUI:$LD_LIBRARY_PATH:$HOME/lib64"
+	export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
 
 	mkdir -p "$HOME/bios"
 	mkdir -p "$HOME/data"
@@ -42,11 +53,13 @@ run_flycast_standalone() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
 	if [ "$CORE" = "Flycast-stock" ]; then
-		./flycast-stock "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		./flycast-stock "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
-		./flycast "$ROM_FILE" > ${LOG_DIR}/${CORE}-${PLATFORM}.log 2>&1
+		./flycast "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 
 	umount $HOME/bios
 	umount $HOME/data
+
+	move_screenshots &
 }

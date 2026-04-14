@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import subprocess
 import sdl2
 import sdl2.sdlmixer as sdlmixer
@@ -241,6 +242,45 @@ class Sdl2AudioPlayer:
                 PyUiLogger.get_logger().warning(f"Mix_LoadMUS exception for {path}: {e}")
                 return None
 
+        def reinit_audio():
+            """Tear down and reinitialize SDL2 audio (e.g. after sleep/wake kills ALSA)."""
+            nonlocal loop_channel, loop_music_path, loop_chunk_path
+            PyUiLogger.get_logger().warning("Reinitializing SDL2 audio after sleep/wake...")
+            loop_channel = None
+            loop_music_path = None
+            loop_chunk_path = None
+            # Save paths so we can re-preload after reinit
+            old_chunk_paths = list(chunk_map.keys())
+            for p, cptr in list(chunk_map.items()):
+                try:
+                    sdlmixer.Mix_FreeChunk(cptr)
+                except Exception:
+                    pass
+            chunk_map.clear()
+            for p, mptr in list(music_map.items()):
+                try:
+                    sdlmixer.Mix_FreeMusic(mptr)
+                except Exception:
+                    pass
+            music_map.clear()
+            try:
+                sdlmixer.Mix_CloseAudio()
+            except Exception:
+                pass
+            try:
+                sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_AUDIO)
+            except Exception:
+                pass
+            ok = worker_init()
+            if ok:
+                PyUiLogger.get_logger().info("SDL2 audio reinit succeeded.")
+                # Re-preload previously cached WAVs
+                for p in old_chunk_paths:
+                    safe_load_chunk(p)
+            else:
+                PyUiLogger.get_logger().warning("SDL2 audio reinit failed.")
+            return ok
+
         def stop_loop_internal():
             nonlocal loop_channel, loop_music_path, loop_chunk_path
             # Stop both music and chunk loop if present
@@ -280,7 +320,10 @@ class Sdl2AudioPlayer:
             try:
                 cmd: _Cmd = Sdl2AudioPlayer._cmd_q.get(timeout=0.2)
             except queue.Empty:
-                # nothing to do; allow loop to continue and react to running state
+                # Check if device requested audio reinit (e.g. A30 after sleep/wake)
+                if os.path.exists("/tmp/audio_reinit_needed"):
+                    os.remove("/tmp/audio_reinit_needed")
+                    reinit_audio()
                 continue
 
             try:

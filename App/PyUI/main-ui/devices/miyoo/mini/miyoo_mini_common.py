@@ -8,6 +8,7 @@ import subprocess
 import threading
 import os
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
+from display.display import Display
 from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
@@ -17,7 +18,7 @@ from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFli
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
@@ -106,7 +107,7 @@ class MiyooMiniCommon(MiyooDevice):
 
     def startup_init(self, include_wifi=True):
         if(self.is_wifi_enabled()):
-            self.start_wifi_services()
+            self.start_wifi_services(foreground_call=False)
         self.on_mainui_config_change()
         self._set_lumination_to_config()
         self._set_contrast_to_config()
@@ -259,9 +260,24 @@ class MiyooMiniCommon(MiyooDevice):
             os.replace(tmp_path, path)
 
         except Exception:
-            # Silently ignore all failures
-            pass
+            try:
+                import subprocess
 
+                # Escape key for safety (basic)
+                safe_key = key.replace('"', r'\"')
+
+                # sed regex:
+                # ("key"\s*:\s*)   -> capture key + colon + any whitespace
+                # [^,}]*           -> match existing value (until , or })
+                # replace with new value
+                sed_expr = rf's/("{safe_key}"[[:space:]]*:[[:space:]]*)[^,}}]*/\1{value}/'
+
+                ProcessRunner.run(
+                    ["sed", "-i", "-r", sed_expr, path],
+                    check=False,print=True
+                )
+            except Exception:
+                pass
     def _set_lumination_to_config(self):
         # Miyoo internally has lumination but it does not work
         self._update_stock_config("brightness", self.system_config.backlight)
@@ -326,14 +342,14 @@ class MiyooMiniCommon(MiyooDevice):
         return self.miyoo_mini_specific_model_variables.get_battery_percent()
     
 
-    def start_wifi_services(self):
+    def start_wifi_services(self,foreground_call=False):
         if(self.miyoo_mini_specific_model_variables.supports_wifi):
             try:
                 # Check if system already has an IP address
-                result = subprocess.run(
+                result = ProcessRunner.run(
                     ["ip", "route", "get", "1"],
-                    capture_output=True,
-                    text=True
+                    print=True,
+                    timeout=1
                 )
 
                 # Extract the last field (the IP) like `awk '{print $NF;exit}'`
@@ -342,20 +358,31 @@ class MiyooMiniCommon(MiyooDevice):
 
                 if not ip:
                     PyUiLogger.get_logger().info("Wifi is disabled - trying to enable it...")
-
-                    subprocess.run(["insmod", "/mnt/SDCARD/8188fu.ko"])
-                    subprocess.run(["ifconfig", "lo", "up"])
-                    subprocess.run(["/customer/app/axp_test", "wifion"])
+                    if(foreground_call):
+                        Display.display_message("Loading WiFi driver\n(May take up to 5s)")
+                    ProcessRunner.run(["insmod", "/mnt/SDCARD/8188fu.ko"], timeout=5, print=True)
+                    if(foreground_call):
+                        Display.display_message("Starting network loopback interface\n(May take up to 5s)")
+                    ProcessRunner.run(["ifconfig", "lo", "up"], timeout=5, print=True)
+                    if(foreground_call):
+                        Display.display_message("Running miyoo-mini custom wifion script\n(May take up to 10s)")
+                    ProcessRunner.run(["/customer/app/axp_test", "wifion"], timeout=10, print=True)
                     time.sleep(2)
-                    subprocess.run(["ifconfig", "wlan0", "up"])
-                    subprocess.run([
+                    if(foreground_call):
+                        Display.display_message("Starting wlan0\n(May take up to 3s)")
+                    ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=3, print=True)
+                    if(foreground_call):
+                        Display.display_message("Starting WiFi process\n(May take up to 20s)")
+                    subprocess.Popen([
                         "wpa_supplicant",
                         "-B",
                         "-D", "nl80211",
                         "-i", "wlan0",
                         "-c", self.get_wpa_supplicant_conf_path()
                     ])
-                    subprocess.run(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script"])
+                    if(foreground_call):
+                        Display.display_message("Starting ip address assignment process\n(May take up to 20s)")
+                    subprocess.Popen(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script", "-b"])
                     time.sleep(3)
                     os.system("clear")
 
@@ -366,7 +393,7 @@ class MiyooMiniCommon(MiyooDevice):
     def set_wifi_power(self, value):
         if(self.miyoo_mini_specific_model_variables.supports_wifi):
             if(0 == value):
-                ProcessRunner.run(["ifconfig", "wlan0", "down"])
+                ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=5)
 
     def get_bluetooth_scanner(self):
         return None
@@ -411,7 +438,47 @@ class MiyooMiniCommon(MiyooDevice):
             run_prefix = f"LD_PRELOAD={preload_path} "
         else:
             run_prefix = "LD_PRELOAD=/customer/lib/libpadsp.so "
-        return MiyooTrimCommon.run_game(self, rom_info, run_prefix=run_prefix)
+            preload_path="/customer/lib/libpadsp.so"
+
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            MiyooTrimCommon.run_game(self, rom_info, run_prefix=run_prefix)
+        else:
+            from controller.controller import Controller
+            menu_options = rom_info.game_system.game_system_config.get_menu_options()
+            selected_core = self.get_selected_emulator(menu_options, self.device_name)
+            if(selected_core is None):
+                Display.display_message("No core found", 2_000)
+                return
+
+            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"
+
+            cmds = ["/mnt/SDCARD/RetroArch/retroarch",
+                    "-v",
+                    "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
+                    "-L",selected_core,
+                    rom_info.rom_file_path]
+
+            directory = "/mnt/SDCARD/RetroArch"
+            
+            PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
+            Display.deinit_display()
+
+            env = os.environ.copy()
+            env["LD_PRELOAD"] = preload_path
+            env["HOME"] = directory
+
+            for v in [
+                "SDL_VIDEODRIVER",
+                "SDL_FBDEV",
+                "SDL_AUDIODRIVER",
+                "SDL_NOMOUSE",
+                "DISPLAY"
+            ]:
+                env.pop(v, None)
+            subprocess.run(cmds, cwd = directory, env=env)
+            Display.init()
+
+            Controller.clear_input_queue()
 
     def double_init_sdl_display(self):
         return True
@@ -426,7 +493,7 @@ class MiyooMiniCommon(MiyooDevice):
         return 35
 
     def supports_volume(self):
-        return True #can read but not write
+        return self.miyoo_mini_specific_model_variables.supports_volume
 
     def supports_analog_calibration(self):
         return False

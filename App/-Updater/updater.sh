@@ -2,6 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Disable idle/shutdown timer during update
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 APP_DIR="/mnt/SDCARD/App/-Updater"
 UPDATE_FILE=""
 LOG_LOCATION="/mnt/SDCARD/Saves/spruce/updater.log"
@@ -120,8 +124,8 @@ unmount_binds() {
         done
 
         if [ "$SKIP" -eq 0 ]; then
-        echo "[UMOUNT] Attempting to unmount $TARGET"
-        umount "$TARGET" || echo "[ERROR] Failed to unmount $TARGET"
+            echo "[UMOUNT] Attempting to unmount $TARGET"
+            umount "$TARGET" || echo "[ERROR] Failed to unmount $TARGET"
         fi
     fi
     done
@@ -130,6 +134,7 @@ unmount_binds() {
 
 ##### MAIN EXECUTION #####
 
+sync
 start_pyui_message_writer
 
 # twinkle them lights
@@ -201,7 +206,7 @@ fi
 # Find update 7z file; exit and hide updater app if none exists
 if ! check_for_update_file; then
     display_image_and_text "$BAD_IMG" 35 25 "No update file found" 75
-    sed -i 's|"label"|"#label"|' "$APP_DIR/config.json"
+    jq 'if .label then ."#label" = .label | del(.label) else . end' "$APP_DIR/config.json" > "$APP_DIR/config.json.tmp" && mv "$APP_DIR/config.json.tmp" "$APP_DIR/config.json"
     sleep 5
     exit 1
 fi
@@ -345,6 +350,8 @@ else
     sleep 5
 fi
 
+sync
+
 # Extract update file
 log_update_message "Extracting update file."
 cd /mnt/SDCARD
@@ -367,7 +374,7 @@ awk '$1 ~ /^[0-9][0-9][0-9][0-9]-/ { count++ } END { print count }')
 # -----------------------------
 FILE_COUNT=0
 PERCENT_COMPLETE=0
-THROTTLE=10  # update display every 10 files
+LAST_SENT_PERCENT=-1  # Added to track state
 
 # -----------------------------
 # 3️⃣ Extract and update UI
@@ -381,12 +388,14 @@ while read -r line || [ -n "$line" ]; do
     FILE_COUNT=$((FILE_COUNT + 1))
     PERCENT_COMPLETE=$((FILE_COUNT * 100 / TOTAL_FILES))
 
-    # Throttle UI updates for performance
-    if [ $((FILE_COUNT % THROTTLE)) -eq 0 ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
+    # Update UI only when percentage integer changes
+    if [ "$PERCENT_COMPLETE" -ne "$LAST_SENT_PERCENT" ] || [ "$FILE_COUNT" -eq "$TOTAL_FILES" ]; then
         display_text_with_percentage_bar \
             "$FILE" \
             "$PERCENT_COMPLETE" \
             "$FILE_COUNT / $TOTAL_FILES files"
+        
+        LAST_SENT_PERCENT="$PERCENT_COMPLETE"
     fi
 done
 
@@ -406,7 +415,7 @@ else
     display_image_and_text "$LOGO" 35 25 "Update completed!" 75
 fi
 
-
+sync
 sleep 5
 
 # Verify extraction success
@@ -436,6 +445,8 @@ if [ "$DELETE_UPDATE" = true ]; then
     find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" -exec rm {} \;
     log_update_message "All update files deleted"
 fi
+
+sync
 
 # Restore backup
 /mnt/SDCARD/App/spruceRestore/spruceRestore.sh
@@ -467,13 +478,11 @@ fi
 
 sleep 5
 vibrate &
-
-# Reboot device
-killall -9 runtime.sh principal.sh MainUI
+stop_pyui_message_writer
 
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log"
 if [ "$PLATFORM" = "A30" ]; then
-    poweroff
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh
 else
-    reboot
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
 fi

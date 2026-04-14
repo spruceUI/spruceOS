@@ -201,7 +201,9 @@ class KeyWatcherController(ControllerInterface):
 
     
     def clear_input_queue(self):
-        pass
+        with self.lock:
+            self.input_queue.clear()
+            self.held_controller_inputs.clear()
 
     def init_controller(self):
         pass

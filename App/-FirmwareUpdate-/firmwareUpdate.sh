@@ -3,6 +3,10 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
+# Disable idle/shutdown timer during firmware update
+killall -q idlemon 2>/dev/null
+killall -q idlemon_mm.sh 2>/dev/null
+
 start_pyui_message_writer
 
 SD_ROOT="/mnt/SDCARD"
@@ -68,7 +72,7 @@ confirm_update() {
 	acknowledge
 	flag_add "first_boot_$PLATFORM"
 	sync
-	reboot
+	/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
 }
 
 check_for_connection() {
@@ -94,7 +98,7 @@ check_for_connection() {
 if [ "$SKIP_VERSION_CHECK" = false ] && [ "$NEEDS_UPDATE" = false ]; then
 	log_and_display_message "Firmware is up to date - happy gaming!!!!!!!!!!"
 	sleep 5
-	sed -i 's|"label":|"#label":|' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
+	jq 'if .label then ."#label" = .label | del(.label) else . end' "/mnt/SDCARD/App/-FirmwareUpdate-/config.json" > "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" && mv "/mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp" "/mnt/SDCARD/App/-FirmwareUpdate-/config.json"
 	exit 0
 else
 	log_message "firmwareUpdate.sh: Firmware requires update. Continuing."

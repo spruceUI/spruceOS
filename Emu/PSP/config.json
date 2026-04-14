@@ -4,8 +4,14 @@
   "iconsel": "psp_sel.png",
   "themecolor": "64A8BD",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "iso|cso|chd",
-  "launchlist": [],
+  "subfolder_launch_file": "EBOOT.PBP",
+  "extlist": "iso|cso|chd|pbp",
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -22,7 +28,7 @@
   "brand": "Sony",
   "type": "handheld",
   "releaseYear": 2004,
-  "default_emulator": "standalone",
+  "default_emulator": "PPSSPP-SA",
   "scaling_min_freq": 1008000,
   "devices": [
     "TRIMUI_BRICK",
@@ -30,7 +36,15 @@
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
     "MIYOO_FLIP",
-    "GKD_PIXEL2"
+    "GKD_PIXEL2",
+    "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+    "ANBERNIC_RGXX640480"
   ],
-  "alternativeFolderNames": ["psp","ppsspp","PPSSPP","playstationportable","PLAYSTATIONPORTABLE"]
+  "alternativeFolderNames": [
+    "psp",
+    "ppsspp",
+    "PPSSPP",
+    "playstationportable",
+    "PLAYSTATIONPORTABLE"
+  ]
 }

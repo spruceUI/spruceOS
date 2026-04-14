@@ -70,6 +70,14 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     )
                 )
                 option_list.append(
+                    self.build_numeric_entry(
+                        primary_text=Language.main_menu_rows(),
+                        get_value_func=Theme.get_main_menu_row_count,
+                        set_value_func=Theme.set_main_menu_row_count
+                    )
+                )
+                
+                option_list.append(
                     self.build_enabled_disabled_entry(
                         primary_text=Language.show_text(),
                         get_value_func=Theme.get_main_menu_show_text_grid_mode,
@@ -80,7 +88,26 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     self.build_enabled_disabled_entry("Wrap-Around", 
                         Theme.get_main_menu_grid_wrap_around_single_row, 
                         Theme.set_main_menu_grid_wrap_around_single_row)
-                    )            
+                    )      
+                option_list.append(
+                    self.build_numeric_entry(
+                        primary_text=Language.img_width(),
+                        get_value_func=Theme.get_grid_main_menu_img_width,
+                        set_value_func=Theme.set_grid_main_menu_img_width,
+                        min=0
+                    )
+                )
+                option_list.append(
+                    self.build_numeric_entry(
+                        primary_text=Language.img_height(),
+                        get_value_func=Theme.get_grid_main_menu_img_height,
+                        set_value_func=Theme.set_grid_main_menu_img_height,
+                        min=0
+                    )
+                )
+
+                
+                      
         if(not Theme.skip_main_menu() or Theme.show_extras_in_system_select_menu()):
             option_list.append(
                 self.build_enabled_disabled_entry(

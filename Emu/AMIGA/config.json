@@ -5,7 +5,12 @@
   "themecolor": "e85c17",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|adf|adz|dms|fdi|ipf|hdf|hdz|lha|slave|info|cue|ccd|nrg|mds|iso|chd|uae|m3u|rp9",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",
@@ -31,7 +36,9 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2"
+        "GKD_PIXEL2",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
       ]
     },
     "Emulator_MiyooMini": {
@@ -58,5 +65,10 @@
   "releaseYear": 1985,
   "default_emulator": "uae4arm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["amiga", "amiga500", "Amiga", "amiga1200"]
+  "alternativeFolderNames": [
+    "amiga",
+    "amiga500",
+    "Amiga",
+    "amiga1200"
+  ]
 }

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;

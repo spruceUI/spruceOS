@@ -8,9 +8,10 @@ from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
-from devices.miyoo.system_config import SystemConfig
+from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from display.display import Display
 from games.utils.device_specific.muos_game_system_utils import MuosGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
@@ -87,10 +88,11 @@ class MuosDevice(DeviceCommon):
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         launch_path = os.path.join(rom_info.game_system.game_system_config.get_emu_folder(),rom_info.game_system.game_system_config.get_launch())
         PyUiLogger.get_logger().info(f"About to launch {launch_path} with rom {rom_info.rom_file_path}")
+        Display.deinit_display()
         return subprocess.Popen([launch_path,rom_info.rom_file_path], stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    def run_cmd(self, args, dir = None):
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
         PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
         subprocess.run(args, cwd = dir)
     

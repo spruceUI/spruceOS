@@ -138,16 +138,12 @@ enter_sleep() {
     log_message "Missing enter_sleep function"
 }
 
-run_mixer_watchdog() {
-    log_message "Missing run_mixer_watchdog function"
-}
-
 new_execution_loop() {
     log_message "Missing new_execution_loop function"
 }
 
-setup_for_retroarch_and_get_bin_location(){
-    log_message "Missing setup_for_retroarch_and_get_bin_location function"
+setup_for_retroarch(){
+    log_message "Missing setup_for_retroarch function"
 }
 
 send_menu_button_to_retroarch() {
@@ -163,11 +159,12 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    log_message "Missing launch_startup_watchdogs function"
+    log_message "No device-specific launch_startup_watchdogs function. Launching non-lid common watchdogs."
+    launch_common_startup_watchdogs_v2
 }
 
-perform_fw_check(){
-    log_message "Missing perform_fw_check function"
+A30_notify_about_FW_update_if_needed(){
+    log_message "Device is not an A30. Nothing to do for A30_notify_about_FW_update_if_needed." -v
 }
 
 check_if_fw_needs_update() {
@@ -293,6 +290,11 @@ run_poweroff_cmd() {
     poweroff
 }
 
+device_run_reboot_cmd() {
+    log_message "Missing device_run_reboot_cmd -- using default of reboot"
+    reboot
+}
+
 save_volume_to_config_file() {
     VOLUME_LV=$1
 
@@ -314,4 +316,50 @@ device_wifi_power_on() {
 
 device_wifi_power_off() { 
     log_message "Missing device_wifi_power_off function" -v
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
+    return 0
+}
+
+device_write_default_asound_rc() {
+    # Do these need to be unique per device? Don't have a way 
+    # to test currently
+    log_message "Missing device_write_default_asound_rc function" -v
+}
+
+
+device_get_hw_epoch() {
+    # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds
+    hw_output=$(hwclock 2>/dev/null)
+    set -- $hw_output
+    MON=$2
+    DAY=$3
+    TIME=$4
+    YEAR=$5
+    
+    # Convert month name to number
+    case "$MON" in
+        Jan) MM=01 ;;
+        Feb) MM=02 ;;
+        Mar) MM=03 ;;
+        Apr) MM=04 ;;
+        May) MM=05 ;;
+        Jun) MM=06 ;;
+        Jul) MM=07 ;;
+        Aug) MM=08 ;;
+        Sep) MM=09 ;;
+        Oct) MM=10 ;;
+        Nov) MM=11 ;;
+        Dec) MM=12 ;;
+        *) MM=00 ;;  # fallback
+    esac
+
+    HW_STR="${YEAR}-${MM}-${DAY} ${TIME}"
+
+    # Convert to epoch seconds
+    date -d "$HW_STR" +%s 2>/dev/null
 }

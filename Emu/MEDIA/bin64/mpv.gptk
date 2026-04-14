@@ -1,0 +1,18 @@
+b = space
+a = 3
+a = add_shift
+y = j
+x = o
+x = add_shift
+
+up = up
+down = down
+left = left
+right = right
+
+l1 = 9
+r1 = 0
+
+back = i
+guide = q
+guide = add_shift
