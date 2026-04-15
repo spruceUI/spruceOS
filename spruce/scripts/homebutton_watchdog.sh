@@ -239,6 +239,8 @@ perform_action() {
             killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
         elif pgrep -f "pcsx_64|pcsx_a30|pcsx_mini" >/dev/null; then
             killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
+        elif pgrep -f "mupen64plus" >/dev/null; then
+            killall -q -USR2 mupen64plus
         else
             send_menu_button_to_retroarch
         fi

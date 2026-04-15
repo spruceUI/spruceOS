@@ -12,6 +12,22 @@
 # Provides:
 #   run_mupen_standalone
 
+# Read a value from mupen64plus.cfg by [section] and key.
+# Usage: get_cfg_value section key default
+get_cfg_value() {
+	local result
+	result=$(awk -v sec="$1" -v key="$2" '
+		/^\[/ { in_sec = (index($0, "[" sec "]") > 0) }
+		in_sec && index($0, key) == 1 && index($0, "=") > 0 {
+			sub(/^[^=]*= */, "")
+			sub(/ *$/, "")
+			print
+			exit
+		}
+	' "$HOME/.config/mupen64plus/mupen64plus.cfg" 2>/dev/null)
+	echo "${result:-$3}"
+}
+
 run_mupen_standalone() {
 
 	export HOME="$EMU_DIR/${MUPEN_DIR:-mupen64plus}"
@@ -21,23 +37,18 @@ run_mupen_standalone() {
 	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
 	cd "$HOME"
 
-	# Calculate 4:3 canvas for the hacked rice patch
+	# Calculate 4:3 canvas for the Rice/Glide64mk2 viewport centering patch
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
 
-	# Read standalone settings (video plugin, frameskip, etc.)
-	STANDALONE_SETTINGS="/mnt/SDCARD/Emu/N64/standalone_settings.json"
-	if [ -f "$STANDALONE_SETTINGS" ]; then
-		SA_PLUGIN=$(jq -r '.video_plugin // "rice"' "$STANDALONE_SETTINGS")
-		SA_FRAMESKIP=$(jq -r '.frameskip // "0"' "$STANDALONE_SETTINGS")
-		SA_CPU=$(jq -r '.cpu_emulator // "2"' "$STANDALONE_SETTINGS")
-		SA_EXPANSION=$(jq -r '.expansion_pak // "1"' "$STANDALONE_SETTINGS")
-	else
-		SA_PLUGIN="rice"
-		SA_FRAMESKIP="0"
-		SA_CPU="2"
-		SA_EXPANSION="1"
-	fi
+	# Read video plugin from overlay config (written to [SpruceOS] section)
+	# Values: 0=GLideN64, 1=Rice, 2=Glide64mk2
+	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
+	case "$SA_PLUGIN_NUM" in
+		0) SA_PLUGIN="gliden64" ;;
+		2) SA_PLUGIN="glide64mk2" ;;
+		*) SA_PLUGIN="rice" ;;
+	esac
 
 	# Map plugin name to .so filename
 	case "$SA_PLUGIN" in
@@ -61,15 +72,6 @@ run_mupen_standalone() {
 		fi
 	fi
 
-	# Apply standalone settings via --set
-	if [ "$SA_FRAMESKIP" = "auto" ]; then
-		ARGS="$ARGS --set Video-Rice[SkipFrame]=1 --set Video-Glide64mk2[autoframeskip]=1"
-	elif [ "$SA_FRAMESKIP" != "0" ]; then
-		ARGS="$ARGS --set Video-Rice[SkipFrame]=1 --set Video-Glide64mk2[maxframeskip]=$SA_FRAMESKIP"
-	fi
-	ARGS="$ARGS --set Core[R4300Emulator]=$SA_CPU"
-	[ "$SA_EXPANSION" = "0" ] && ARGS="$ARGS --set Core[DisableExtraMem]=True"
-
 	case "$ROM_FILE" in
 	*.n64 | *.v64 | *.z64)
 		ROM_PATH="$ROM_FILE"
@@ -91,6 +93,8 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	esac
 
 	export M64P_AUTOLOAD=1
+	export EMU_VIDEO_PLUGIN="$SA_PLUGIN"
+	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
 
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
 	if [ "$PLATFORM" = "A30" ]; then
