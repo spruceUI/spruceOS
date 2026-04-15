@@ -296,10 +296,12 @@ home_key_down () {
                 log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
 
-                # Ensure holding home can always be used
-                # To do a fresh boot on any errors
-                rm -f /tmp/cmd_to_run.sh
-                rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+                # Only clean up game state when the action actually killed the game.
+                # "Emulator menu" just opens an in-game menu — the game is still running.
+                if [ "$HOLD_HOME" != "Emulator menu" ]; then
+                    rm -f /tmp/cmd_to_run.sh
+                    rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+                fi
 
             fi
         ) &
