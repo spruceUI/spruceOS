@@ -1,0 +1,1027 @@
+{
+  "emulator": "mupen64plus-GLideN64",
+  "config_file": "mupen64plus.cfg",
+  "config_section": "Video-GLideN64",
+  "options_hint": "Restart game to apply changes",
+  "save_state": true,
+  "load_state": true,
+  "sections": [
+    {
+      "name": "Audio",
+      "ini_section": "Audio-SDL",
+      "items": [
+        {
+          "key": "AUDIO_SYNC",
+          "label": "Audio Sync",
+          "description": "Synchronize audio and video (may drop frames)",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "RESAMPLE",
+          "label": "Resampling",
+          "description": "Audio resampling algorithm (restart required)",
+          "type": "cycle",
+          "values": [
+            "trivial",
+            "src-zero-order-hold",
+            "src-linear",
+            "src-sinc-fastest",
+            "src-sinc-medium-quality",
+            "src-sinc-best-quality"
+          ],
+          "labels": [
+            "Trivial",
+            "Zero-Order Hold",
+            "Linear",
+            "Sinc (Fast)",
+            "Sinc (Medium)",
+            "Sinc (Best)"
+          ],
+          "default": 3
+        }
+      ]
+    },
+    {
+      "name": "Core",
+      "ini_section": "Core",
+      "items": [
+        {
+          "key": "CountPerOpDenomPot",
+          "label": "CPU Overclock",
+          "description": "Overclock emulated N64 CPU (restart required)",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Off",
+            "2x",
+            "4x",
+            "8x"
+          ],
+          "default": 0
+        },
+        {
+          "key": "frame_skip",
+          "label": "Frame Skip",
+          "description": "Auto-skip frames when below target FPS",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Off",
+            "20fps",
+            "25fps",
+            "30fps"
+          ],
+          "default": 0,
+          "ini_section": "SpruceOS"
+        },
+        {
+          "key": "rewind_buffer",
+          "label": "Rewind Buffer",
+          "description": "Off saves RAM, Large gives more rewind time",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Off",
+            "Small (5s)",
+            "Medium (15s)",
+            "Large (30s)"
+          ],
+          "default": 0,
+          "ini_section": "SpruceOS"
+        },
+        {
+          "key": "VideoPlugin",
+          "label": "Video Plugin",
+          "description": "Restart game to apply",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "GLideN64",
+            "Rice",
+            "Glide64mk2"
+          ],
+          "default": 1,
+          "ini_section": "SpruceOS"
+        }
+      ]
+    },
+    {
+      "name": "Debug",
+      "items": [
+        {
+          "key": "ShowFPS",
+          "label": "Show FPS",
+          "description": "Display frames per second (restart required)",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "ShowFPS",
+          "label": "Show FPS",
+          "description": "Display frames per second (restart required)",
+          "type": "bool",
+          "default": false,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "ShowPercent",
+          "label": "Show Speed %",
+          "description": "Display emulation speed percentage (restart required)",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "ShowVIS",
+          "label": "Show VI/s",
+          "description": "Display VI interrupts per second (restart required)",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        }
+      ]
+    },
+    {
+      "name": "Frame Buffer",
+      "items": [
+        {
+          "key": "EnableCopyColorFromRDRAM",
+          "label": "Color from RDRAM",
+          "description": "Copy color buffer from N64 memory",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableCopyColorToRDRAM",
+          "label": "Color to RDRAM",
+          "description": "Copy color buffer to N64 memory",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "Off",
+            "Sync",
+            "Async"
+          ],
+          "default": 2,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableCopyDepthToRDRAM",
+          "label": "Depth to RDRAM",
+          "description": "Copy depth buffer to N64 memory",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "Off",
+            "From VRAM",
+            "Software"
+          ],
+          "default": 2,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "DisableFBInfo",
+          "label": "Disable FB Info",
+          "description": "Disable frame buffer info (performance)",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableFBEmulation",
+          "label": "FB Emulation",
+          "description": "Frame buffer emulation (required for many effects)",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "FrameBufferSetting",
+          "label": "FB Setting",
+          "description": "Frame buffer emulation mode",
+          "type": "cycle",
+          "values": [
+            0,
+            1
+          ],
+          "labels": [
+            "ROM Default",
+            "Disable"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "EnableN64DepthCompare",
+          "label": "N64 Depth Compare",
+          "description": "N64 depth compare (CPU intensive)",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "Off",
+            "Fast",
+            "Compatible"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "RenderToTexture",
+          "label": "Render To Texture",
+          "description": "Render-to-texture emulation mode",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "None",
+            "Ignore",
+            "Normal"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "ScreenUpdateSetting",
+          "label": "Screen Update",
+          "description": "Control when the screen is updated",
+          "type": "cycle",
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "labels": [
+            "VI Update",
+            "VI Change",
+            "CI Change",
+            "1st CI Change",
+            "1st Primitive",
+            "Before Clear",
+            "After Drawn"
+          ],
+          "default": 4,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        }
+      ]
+    },
+    {
+      "name": "Hi-Res Textures",
+      "items": [
+        {
+          "key": "txHresAltCRC",
+          "label": "Alt CRC",
+          "description": "Use alternative CRC for texture matching",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txHiresEnable",
+          "label": "Enable Hi-Res",
+          "description": "Load high-resolution texture packs",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txHiresTextureFileStorage",
+          "label": "File Storage",
+          "description": "Lazy load textures from files",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txHiresFullAlphaChannel",
+          "label": "Full Alpha Channel",
+          "description": "Use full alpha channel for hi-res",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txHiresVramLimit",
+          "label": "VRAM Limit",
+          "description": "Hi-res texture VRAM limit in MB (0=no limit)",
+          "type": "int",
+          "min": 0,
+          "max": 200,
+          "step": 50,
+          "default": 200,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "LoadHiResCRCOnly",
+          "label": "Hi-Res CRC Only",
+          "description": "Match hi-res textures by CRC only",
+          "type": "bool",
+          "default": true,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "LoadHiResTextures",
+          "label": "Load Hi-Res Textures",
+          "description": "Enable hi-resolution texture file loading",
+          "type": "bool",
+          "default": false,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        }
+      ]
+    },
+    {
+      "name": "Performance",
+      "items": [
+        {
+          "key": "AccurateTextureMapping",
+          "label": "Accurate Texture Mapping",
+          "description": "Use different texture coordinate clamping",
+          "type": "bool",
+          "default": true,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "BackgroundsMode",
+          "label": "Backgrounds Mode",
+          "description": "Background rendering mode",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "One piece",
+            "Stripped",
+            "Best performance"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "FastTextureLoading",
+          "label": "Fast Texture Loading",
+          "description": "Faster algorithm for texture loading and CRC",
+          "type": "bool",
+          "default": false,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "EnableFragmentDepthWrite",
+          "label": "Fragment Depth Write",
+          "description": "Write fragment depth in shader",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableInaccurateTextureCoordinates",
+          "label": "Inaccurate Tex Coords",
+          "description": "Faster but less accurate texture coords",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableLegacyBlending",
+          "label": "Legacy Blending",
+          "description": "Use legacy blending mode",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableShadersStorage",
+          "label": "Shader Cache",
+          "description": "Cache compiled shaders to disk",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "SkipFrame",
+          "label": "Skip Frame",
+          "description": "Skip every other frame",
+          "type": "bool",
+          "default": false,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "ThreadedVideo",
+          "label": "Threaded Video",
+          "description": "Run video backend on a separate thread (restart required)",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        }
+      ]
+    },
+    {
+      "name": "Rendering",
+      "items": [
+        {
+          "key": "anisotropy",
+          "label": "Anisotropic Filtering",
+          "description": "Anisotropic texture filtering",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "labels": [
+            "Off",
+            "1x",
+            "2x",
+            "4x",
+            "8x",
+            "16x"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "AnisotropicFiltering",
+          "label": "Anisotropic Filtering",
+          "description": "Anisotropic texture filtering",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "labels": [
+            "Off",
+            "1x",
+            "2x",
+            "4x",
+            "8x",
+            "16x"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "AspectRatio",
+          "label": "Aspect Ratio",
+          "description": "Display aspect ratio mode",
+          "type": "cycle",
+          "values": [
+            3,
+            1,
+            2,
+            0
+          ],
+          "labels": [
+            "Auto",
+            "4:3",
+            "16:9",
+            "Stretch"
+          ],
+          "default": 1,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "AspectRatio",
+          "label": "Aspect Ratio",
+          "description": "Display aspect ratio mode",
+          "type": "cycle",
+          "values": [
+            3,
+            1,
+            2,
+            0
+          ],
+          "labels": [
+            "Auto",
+            "4:3",
+            "16:9",
+            "Stretch"
+          ],
+          "default": 1,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "bilinearMode",
+          "label": "Bilinear Mode",
+          "description": "Texture bilinear filtering mode",
+          "type": "cycle",
+          "values": [
+            0,
+            1
+          ],
+          "labels": [
+            "3-point",
+            "Standard"
+          ],
+          "default": 1,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "BufferSwapMode",
+          "label": "Buffer Swap Mode",
+          "description": "Frame buffer swap timing",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "On VI update",
+            "On VI origin change",
+            "On buffer update"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableClipping",
+          "label": "Clipping",
+          "description": "Vertex clipping",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "ColorQuality",
+          "label": "Color Quality",
+          "description": "Color bit depth for rendering",
+          "type": "cycle",
+          "values": [
+            0,
+            1
+          ],
+          "labels": [
+            "32-bit",
+            "16-bit"
+          ],
+          "default": 1,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "EnableCoverage",
+          "label": "Coverage",
+          "description": "Coverage calculation (anti-aliasing)",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "OpenGLDepthBufferSetting",
+          "label": "Depth Buffer",
+          "description": "Z-buffer depth",
+          "type": "cycle",
+          "values": [
+            16,
+            32
+          ],
+          "labels": [
+            "16-bit",
+            "32-bit"
+          ],
+          "default": 16,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "EnableDitheringPattern",
+          "label": "Dithering Pattern",
+          "description": "N64 dithering pattern emulation",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableHiresNoiseDithering",
+          "label": "Hi-Res Noise Dithering",
+          "description": "Noise dithering for hi-res output",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "DitheringQuantization",
+          "label": "Dithering Quantization",
+          "description": "Dithering quantization",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "RDRAMImageDitheringMode",
+          "label": "RDRAM Dithering",
+          "description": "RDRAM image dithering algorithm",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Off",
+            "Bayer",
+            "Magic Square",
+            "Blue Noise"
+          ],
+          "default": 3,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "FogMethod",
+          "label": "Fog",
+          "description": "Fog generation",
+          "type": "cycle",
+          "values": [
+            0,
+            1
+          ],
+          "labels": [
+            "Off",
+            "On"
+          ],
+          "default": 1,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "ForceGammaCorrection",
+          "label": "Force Gamma",
+          "description": "Force gamma correction",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "GammaCorrectionLevel",
+          "label": "Gamma Level",
+          "description": "Gamma correction level",
+          "type": "cycle",
+          "values": [
+            10,
+            15,
+            20,
+            25,
+            30,
+            35,
+            40,
+            45,
+            50
+          ],
+          "labels": [
+            "1.0",
+            "1.5",
+            "2.0",
+            "2.5",
+            "3.0",
+            "3.5",
+            "4.0",
+            "4.5",
+            "5.0"
+          ],
+          "float_scale": 10,
+          "default": 20,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "FXAA",
+          "label": "FXAA",
+          "description": "Fast approximate anti-aliasing",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableHWLighting",
+          "label": "HW Lighting",
+          "description": "Hardware per-pixel lighting",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableHybridFilter",
+          "label": "Hybrid Filter",
+          "description": "Hybrid integer scaling filter",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "EnableLOD",
+          "label": "LOD Emulation",
+          "description": "Level-of-detail texture emulation",
+          "type": "bool",
+          "default": true,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "MultiSampling",
+          "label": "Multi-Sampling",
+          "description": "Multi-sample anti-aliasing level",
+          "type": "cycle",
+          "values": [
+            0,
+            2,
+            4,
+            8
+          ],
+          "labels": [
+            "Off",
+            "2x",
+            "4x",
+            "8x"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "MultiSampling",
+          "label": "Multi-Sampling",
+          "description": "Multi-sample anti-aliasing level",
+          "type": "cycle",
+          "values": [
+            0,
+            2,
+            4,
+            8,
+            16
+          ],
+          "labels": [
+            "Off",
+            "2x",
+            "4x",
+            "8x",
+            "16x"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "UseNativeResolutionFactor",
+          "label": "Resolution Factor",
+          "description": "Internal rendering resolution multiplier",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "labels": [
+            "Auto",
+            "1x",
+            "2x",
+            "3x",
+            "4x"
+          ],
+          "default": 2,
+          "plugin": "gliden64"
+        }
+      ]
+    },
+    {
+      "name": "Shortcuts",
+      "items": []
+    },
+    {
+      "name": "Texture Enhancement",
+      "items": [
+        {
+          "key": "txDeposterize",
+          "label": "Deposterize",
+          "description": "Reduce posterization in enhanced textures",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txEnhancementMode",
+          "label": "Enhancement Mode",
+          "description": "Texture enhancement algorithm",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "labels": [
+            "None",
+            "2xSaI",
+            "HQ2x",
+            "HQ2xS",
+            "LQ2x",
+            "LQ2xS",
+            "HQ4x",
+            "2xBRZ"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "txFilterMode",
+          "label": "Filter Mode",
+          "description": "Native texture filter mode",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "labels": [
+            "None",
+            "Smooth 1",
+            "Smooth 2",
+            "Smooth 3",
+            "Smooth 4",
+            "Sharp 1",
+            "Sharp 2"
+          ],
+          "default": 0,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "ForceTextureFilter",
+          "label": "Force Texture Filter",
+          "description": "Force texture filtering behavior",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "Auto",
+            "Off",
+            "On"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "txFilterIgnoreBG",
+          "label": "Ignore BG Textures",
+          "description": "Skip enhancement for background textures",
+          "type": "bool",
+          "default": false,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "Mipmapping",
+          "label": "Mipmapping",
+          "description": "Mipmap filtering quality",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Off",
+            "Nearest",
+            "Bilinear",
+            "Trilinear"
+          ],
+          "default": 2,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "txCacheSize",
+          "label": "Texture Cache Size",
+          "description": "Memory cache for enhanced textures (MB)",
+          "type": "int",
+          "min": 0,
+          "max": 500,
+          "step": 50,
+          "default": 50,
+          "plugin": "gliden64"
+        },
+        {
+          "key": "TextureEnhancement",
+          "label": "Texture Enhancement",
+          "description": "Primary texture enhancement filter",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "labels": [
+            "None",
+            "2X",
+            "2xSaI",
+            "HQ2X",
+            "LQ2X",
+            "HQ4X",
+            "Sharpen",
+            "Sharpen More",
+            "External",
+            "Mirrored"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        },
+        {
+          "key": "TextureQuality",
+          "label": "Texture Quality",
+          "description": "Color bit depth for textures",
+          "type": "cycle",
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "labels": [
+            "Default",
+            "32-bit",
+            "16-bit"
+          ],
+          "default": 0,
+          "plugin": "rice",
+          "ini_section": "Video-Rice"
+        }
+      ]
+    }
+  ]
+}
