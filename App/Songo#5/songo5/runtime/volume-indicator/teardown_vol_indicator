@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VOL_CFW_DIR="${SCRIPT_DIR}/$1"
+
+if [ -d "$VOL_CFW_DIR" ]; then
+	sh "${VOL_CFW_DIR}/teardown"
+    echo "Found cfw scripts for volume indicator, tearing down."
+else
+    echo "No cfw scripts found for volume indicator, skipping teardown"
+fi

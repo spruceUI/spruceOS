@@ -1,0 +1,6 @@
+#!/bin/bash
+. "/etc/profile.d/001-functions"
+
+percent=$(get_setting display.brightness)
+brightness_255=$(( (percent * 255) / 100 ))
+echo "$brightness_255"

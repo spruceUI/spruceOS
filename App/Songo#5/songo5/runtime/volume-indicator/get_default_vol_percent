@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# PulseAudio (if available)
+if command -v pactl >/dev/null 2>&1; then
+    VOL_LINE=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | head -n1)
+
+    if [ -n "$VOL_LINE" ]; then
+        # Extract first number followed by %
+        VOL=$(echo "$VOL_LINE" | awk '{for(i=1;i<=NF;i++) if($i ~ /%/) {print $i; exit}}')
+
+        if [ -n "$VOL" ]; then
+            echo "$VOL"
+            exit 0
+        fi
+    fi
+fi
+
+# ALSA fallback
+if command -v amixer >/dev/null 2>&1; then
+    VOL_LINE=$(amixer sget Master 2>/dev/null | tail -n 1)
+
+    if [ -n "$VOL_LINE" ]; then
+        set -- $VOL_LINE
+
+        for token in "$@"; do
+            case "$token" in
+                *%*)
+                    echo "$token" | tr -d '[]'
+                    exit 0
+                    ;;
+            esac
+        done
+    fi
+fi
+
+echo "0"
+exit 1
