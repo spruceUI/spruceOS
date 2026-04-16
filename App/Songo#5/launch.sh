@@ -18,11 +18,6 @@ if [ -f /mnt/SDCARD/spruce/twig ]; then
     fi
 fi
 
-echo "LOOKING FOR CFW_NAME ${CFW_NAME}"
-export CFW_NAME
-echo "LOOKING FOR DEVICE ID ${DEVICE_NAME}"
-export DEVICE_NAME
-
 # Create directory for save files
 CONFDIR="$GAMEDIR/conf/"
 $ESUDO mkdir -p "${CONFDIR}"
