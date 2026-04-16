@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VOL_CFW_DIR="${SCRIPT_DIR}/$1"
+
+if [ -d "$VOL_CFW_DIR" ]; then
+	sh "${VOL_CFW_DIR}/setup"
+    echo "Found cfw scripts for volume indicator, CFW: $1"
+else
+    echo "No cfw scripts found for volume indicator"
+fi

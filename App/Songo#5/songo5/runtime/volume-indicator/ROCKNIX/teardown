@@ -1,0 +1,16 @@
+#!/bin/sh
+
+ORIGINAL="/usr/bin/volume"
+BACKUP="/tmp/rocknix-volume-original.sh"
+WRAPPER="/tmp/rocknix-volume-wrapper.sh"
+
+umount -l "$ORIGINAL"
+
+# Remove temp files
+if [ -f "$WRAPPER" ]; then
+    rm -f "$WRAPPER"
+fi
+
+if [ -f "$BACKUP" ]; then
+    rm -f "$BACKUP"
+fi

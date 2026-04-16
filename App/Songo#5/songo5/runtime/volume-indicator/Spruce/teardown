@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Busy box seems to spawn 2
+for pid in $(ps | grep "[v]ol_listener" | awk '{print $1}'); do
+    kill "$pid" 2>/dev/null
+done
