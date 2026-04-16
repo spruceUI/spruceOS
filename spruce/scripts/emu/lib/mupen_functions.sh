@@ -28,15 +28,9 @@ get_cfg_value() {
 	echo "${result:-$3}"
 }
 
-run_mupen_standalone() {
-
-	export HOME="$EMU_DIR/${MUPEN_DIR:-mupen64plus}"
-	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
-	export XDG_CONFIG_HOME="$HOME"
-	export XDG_DATA_HOME="$HOME"
-	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
-	cd "$HOME"
-
+# Build launch args from current config. Called before each launch so
+# a restart picks up any settings changed via the overlay menu.
+build_mupen_args() {
 	# Calculate 4:3 canvas for the Rice/Glide64mk2 viewport centering patch
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
@@ -59,18 +53,27 @@ run_mupen_standalone() {
 	esac
 
 	if [ "$PLATFORM" = "A30" ]; then
-		# A30: render at 480x360 (4:3 fitting in 480-wide portrait framebuffer)
 		ARGS="--gfx $GFX_PLUGIN --resolution 480x360"
 	elif [ "$SA_PLUGIN" = "gliden64" ]; then
-		# GLideN64 has built-in 4:3 centering — give it full display resolution
 		ARGS="--gfx $GFX_PLUGIN --resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} --set GLideN64[AspectRatio]=1"
 	else
-		# Rice/Glide64mk2: render at 4:3, offset viewport on widescreen
 		ARGS="--gfx $GFX_PLUGIN --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
 		if [ "$DISPLAY_WIDTH" -gt "$G_WIDTH" ]; then
 			export M64P_VIEWPORT_X=$(( (DISPLAY_WIDTH - G_WIDTH) / 2 ))
 		fi
 	fi
+
+	export EMU_VIDEO_PLUGIN="$SA_PLUGIN"
+}
+
+run_mupen_standalone() {
+
+	export HOME="$EMU_DIR/${MUPEN_DIR:-mupen64plus}"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
+	export XDG_CONFIG_HOME="$HOME"
+	export XDG_DATA_HOME="$HOME"
+	export LD_LIBRARY_PATH="$HOME:$LD_LIBRARY_PATH"
+	cd "$HOME"
 
 	case "$ROM_FILE" in
 	*.n64 | *.v64 | *.z64)
@@ -93,25 +96,39 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	esac
 
 	export M64P_AUTOLOAD=1
-	export EMU_VIDEO_PLUGIN="$SA_PLUGIN"
 	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
 
+	rm -f /tmp/mupen_restart
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
-	if [ "$PLATFORM" = "A30" ]; then
-		export M64P_ROTATE=1
-		# Input shim: grabs keyboard (event3), R2-hold for C-buttons, passthrough rest
-		./a30_input_shim /dev/input/event3 &
-		sleep 0.3
-	else
-		./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
-		sleep 0.3
-	fi
-	./mupen64plus $ARGS "$ROM_PATH" > $(emu_log_file) 2>&1
-	if [ "$PLATFORM" = "A30" ]; then
-		kill -9 $(pidof a30_input_shim) 2>/dev/null
-	else
-		kill -9 $(pidof gptokeyb2)
-	fi
+
+	while true; do
+		build_mupen_args
+
+		if [ "$PLATFORM" = "A30" ]; then
+			export M64P_ROTATE=1
+			./a30_input_shim /dev/input/event3 &
+			sleep 0.3
+		else
+			./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
+			sleep 0.3
+		fi
+
+		./mupen64plus $ARGS "$ROM_PATH" > $(emu_log_file) 2>&1
+
+		if [ "$PLATFORM" = "A30" ]; then
+			kill -9 $(pidof a30_input_shim) 2>/dev/null
+		else
+			kill -9 $(pidof gptokeyb2)
+		fi
+
+		# Restart loop: overlay writes /tmp/mupen_restart when user selects Restart
+		if [ -f /tmp/mupen_restart ]; then
+			rm -f /tmp/mupen_restart
+			log_message "mupen_functions.sh: Restarting mupen64plus"
+		else
+			break
+		fi
+	done
 
 	rm -rf "$TEMP_ROM"
 }
