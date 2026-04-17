@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [[ "$BL_TYPE" == "TYPE1" ]]; then
+  echo "$BL_COMMAND" > "$SYSFS_BL_COMMAND"
+  echo "$BL_NAME" > "$SYSFS_BL_NAME"
+  echo "$1" > "$SYSFS_BL_PARAM"
+  echo "1" > "$SYSFS_BL_START"
+elif [[ "$BL_TYPE" == "TYPE2" ]]; then
+  if [[ "$1" == "0" ]]; then
+    echo "1" > "$SYSFS_BL_POWER"
+  else
+    echo "$1" > "$SYSFS_BL_BRIGHTNESS"
+    echo "0" > "$SYSFS_BL_POWER"
+  fi
+fi

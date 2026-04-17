@@ -1,0 +1,42 @@
+#!/bin/sh
+
+ORIGINAL="/usr/bin/volume"
+BACKUP="/tmp/rocknix-volume-original.sh"
+WRAPPER="/tmp/rocknix-volume-wrapper.sh"
+
+if [ ! -f "$BACKUP" ]; then
+  echo "Backing up original script..."
+  cp "$ORIGINAL" "$BACKUP"
+else
+  echo "Backup already exists"
+fi
+
+echo "Creating wrapper script..."
+cat > "$WRAPPER" << 'EOF'
+#!/bin/sh
+
+# Call original script
+/tmp/rocknix-volume-original.sh "$@"
+
+. /etc/profile.d/001-functions
+
+# Send new vol value to Godot
+HOST="127.0.0.1"
+PORT="23456"
+
+VAL=$(get_setting "audio.volume" 2>/dev/null | tr -d '\n\r')
+
+echo "$VAL" | nc "$HOST" "$PORT" 2>/dev/null &
+EOF
+
+chmod +x "$WRAPPER"
+
+
+# Avoid double mount
+if findmnt -n "$ORIGINAL" >/dev/null 2>&1; then
+  echo "Already bind-mounted, skipping"
+  exit 0
+fi
+
+echo "Bind-mounting wrapper over original..."
+mount --bind "$WRAPPER" "$ORIGINAL"

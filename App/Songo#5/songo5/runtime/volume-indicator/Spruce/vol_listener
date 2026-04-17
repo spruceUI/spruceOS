@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+HOST="127.0.0.1"
+PORT="23456"
+
+send_tcp() {
+    VAL="$1"
+
+    # Try nc first
+    if command -v nc >/dev/null 2>&1; then
+        echo "$VAL" | nc "$HOST" "$PORT" 2>/dev/null
+        return
+    fi
+
+    # Try bash /dev/tcp
+    exec 3<>/dev/tcp/$HOST/$PORT
+    echo "$VAL" >&3
+    exec 3>&-
+    return
+}
+
+EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
+# Add volume device if it exists
+[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && \
+EVENTS="$EVENT_PATH_VOLUME"
+
+getevent $EVENTS | while read -r line; do
+    case "$line" in
+        *"key "*"$B_VOLDOWN"*|*"key "*"$B_VOLUP"*)
+            (
+                sleep 0.1   # 100ms delay (tweak as needed)
+                #VAL=$("$SCRIPT_DIR/../get_default_vol_percent")
+                VAL=$(get_volume_level)
+                VAL=$((VAL * 5))
+                send_tcp $VAL
+                #echo "$VAL" | nc "$HOST" "$PORT" 2>/dev/null
+            ) &
+        ;;
+    esac
+done

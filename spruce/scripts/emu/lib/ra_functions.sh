@@ -26,6 +26,25 @@
 
 export RA_DIR="/mnt/SDCARD/RetroArch"
 
+# ── sysfs rumble env setup ─────────────────────────────────────────
+# Export the right env vars so RetroArch's sysfs rumble fallback patch
+# knows which hardware interface to use for this device.
+
+setup_rumble_env() {
+	case "$PLATFORM" in
+		"SmartProS")
+			export RUMBLE_MOTOR_SCALE="/sys/class/motor/max_scale"
+			export RUMBLE_MOTOR_LEVEL="/sys/class/motor/level"
+			;;
+		"A30")
+			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
+			;;
+		"SmartPro"|"Brick"|"Zero28"|"Flip")
+			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
+			;;
+	esac
+}
+
 prepare_ra_config() {
 	case "$PLATFORM" in
     	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
@@ -188,6 +207,8 @@ run_retroarch() {
 	#Swap below if debugging
 	
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
+
+	setup_rumble_env
 
 	RA_PARAMS=""
 	if [ "$VERBOSE_EMU" = "1" ]; then
