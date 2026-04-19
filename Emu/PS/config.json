@@ -53,7 +53,6 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "GKD_PIXEL2",
         "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
         "ANBERNIC_RGXX640480"
       ],
@@ -61,6 +60,18 @@
         "pcsx_rearmed",
         "swanstation",
         "PCSX-ReARMed-standalone"
+      ],
+      "selected": "pcsx_rearmed",
+      "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "pcsx_rearmed",
+        "swanstation"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
