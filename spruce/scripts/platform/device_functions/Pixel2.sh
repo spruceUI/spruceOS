@@ -49,7 +49,29 @@ get_spruce_ra_cfg_location() {
 }
 
 set_loading_screen() {
-    /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
+    THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    LOADING_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_merged.png"
+
+    if [ ! -f "$LOADING_IMG" ]; then
+        # Get background and last loading images
+        BG_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_bg.png"
+        LAST_IMG=$(find "/mnt/SDCARD/Themes/${THEME_NAME}/skin/" -maxdepth 1 -name 'app_loading_0*.png' -type f | tail -n 1)
+
+        # If the background image doesn't exists use the default one
+        if [ ! -f "$BG_IMG" ]; then
+            BG_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_bg.png"
+        fi
+
+        # If there's no loading images use the default one
+        if [ -z "$LAST_IMG" ]; then
+            LAST_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_05.png"
+        fi
+
+        # Composite both images for the final loading image
+        magick composite -gravity center "$LAST_IMG" "$BG_IMG" "$LOADING_IMG"
+    fi
+
+    /mnt/SDCARD/spruce/pixel2/bin/awww img "$LOADING_IMG" --transition-type none --no-resize
 }
 
 disable_swap() {
