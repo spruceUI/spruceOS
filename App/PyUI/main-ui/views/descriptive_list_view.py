@@ -8,6 +8,7 @@ from display.render_mode import RenderMode
 from display.resize_type import ResizeType
 from themes.theme import Theme
 from utils.logger import PyUiLogger
+from views.favorite_overlay import render_favorite_overlay
 from views.grid_or_list_entry import GridOrListEntry
 from views.list_view import ListView
 from views.text_utils import TextUtils
@@ -16,9 +17,11 @@ class DescriptiveListView(ListView):
 
     def __init__(self, top_bar_text,
                  options: List[GridOrListEntry], selected_bg, selected : int = 0,
-                 icon_and_desc_use_image_in_place_of_icon=None):
+                 icon_and_desc_use_image_in_place_of_icon=None,
+                 show_favorite_overlay=False):
         super().__init__()
         self.icon_and_desc_use_image_in_place_of_icon = icon_and_desc_use_image_in_place_of_icon
+        self.show_favorite_overlay = show_favorite_overlay
         self.top_bar_text = top_bar_text
         self.set_options(options)
         self.selected : int = selected
@@ -90,13 +93,21 @@ class DescriptiveListView(ListView):
             if(not self.contains_any_icons):
                 target_icon_w = 0
             if(iconPath is not None):
-                icon_w, icon_h = Display.render_image(iconPath, 
-                                    row_offset_x + target_icon_w//2, 
+                icon_w, icon_h = Display.render_image(iconPath,
+                                    row_offset_x + target_icon_w//2,
                                     row_offset_y + self.each_entry_height//2,
-                                    render_mode = RenderMode.MIDDLE_CENTER_ALIGNED, 
-                                    target_width=target_icon_w, 
+                                    render_mode = RenderMode.MIDDLE_CENTER_ALIGNED,
+                                    target_width=target_icon_w,
                                     target_height=int(self.each_entry_height*0.90))
-                
+
+            if self.show_favorite_overlay and self.icon_and_desc_use_image_in_place_of_icon:
+                render_favorite_overlay(gridOrListEntry,
+                                        row_offset_x + target_icon_w//2,
+                                        row_offset_y + self.each_entry_height//2,
+                                        RenderMode.MIDDLE_CENTER_ALIGNED,
+                                        target_icon_w,
+                                        int(self.each_entry_height*0.90))
+
             icon_w = target_icon_w
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_TITLE) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE)

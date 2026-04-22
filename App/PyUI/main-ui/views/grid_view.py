@@ -10,6 +10,7 @@ from display.y_render_option import YRenderOption
 from controller.controller import Controller
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
+from views.favorite_overlay import render_favorite_overlay
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
@@ -18,9 +19,9 @@ from views.view import View
 class GridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str = None,
                  selected_index=0, show_grid_text=True, resized_width=None, resized_height=None,
-                 set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None, 
+                 set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None,
                  unselected_bg = None, grid_img_y_offset=None, missing_image_path=None,
-                 wrap_around_single_row=None):
+                 wrap_around_single_row=None, show_favorite_overlay=False):
         super().__init__()
         self.resized_width = resized_width
         self.resized_height = resized_height
@@ -69,6 +70,7 @@ class GridView(View):
         self.usable_width = Device.get_device().screen_width() - (2 * self.x_pad)
         self.icon_width = self.usable_width / self.cols  # Initial icon width
         self.set_bg_offset_to_image_offset = Theme.grid_bg_offset_to_image_offset()
+        self.show_favorite_overlay = show_favorite_overlay
 
     def set_options(self, options):
         self.options = options
@@ -213,13 +215,23 @@ class GridView(View):
                          target_width=int(bg_width*1.05)if bg_width is not None else None,
                          target_height=int(bg_height*1.05)if bg_height is not None else None)
 
+        image_y = cell_y + img_offset // offset_divisor
         self._render_primary_image(image_path,
                          x_offset,
-                         cell_y + img_offset // offset_divisor,
+                         image_y,
                          render_mode,
                          target_width=self.resized_width,
                          target_height=self.resized_height,
                          resize_type=self.resize_type)
+
+        if self.show_favorite_overlay:
+            render_favorite_overlay(imageTextPair,
+                                    x_offset,
+                                    image_y,
+                                    render_mode,
+                                    self.resized_width,
+                                    self.resized_height)
+
         color = Theme.text_color_selected(
             self.font_purpose) if actual_index == self.selected else Theme.text_color(self.font_purpose)
 

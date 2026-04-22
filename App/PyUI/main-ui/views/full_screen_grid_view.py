@@ -10,6 +10,7 @@ from controller.controller import Controller
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from views.favorite_overlay import render_favorite_overlay
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
@@ -18,11 +19,12 @@ from views.view import View
 class FullScreenGridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], selected_bg: str = None,
                  selected_index=0, show_grid_text=True,
-                 set_top_bar_text_to_selection=False, 
+                 set_top_bar_text_to_selection=False,
                  unselected_bg = None, missing_image_path=None,
                  resize_type = ResizeType.ZOOM,
                  render_text_overlay = True,
-                 image_resize_height_multiplier = None):
+                 image_resize_height_multiplier = None,
+                 show_favorite_overlay=False):
         super().__init__()
         if(render_text_overlay is None):
             render_text_overlay = True
@@ -74,6 +76,7 @@ class FullScreenGridView(View):
         self.render_bottom_bar_text_enabled = image_resize_height_multiplier != 1.0
         self.image_resize_height_multiplier = image_resize_height_multiplier
         self.y_rotate_instead = False
+        self.show_favorite_overlay = show_favorite_overlay
 
     def set_options(self, options):
         self.options = options
@@ -210,7 +213,15 @@ class FullScreenGridView(View):
                                     target_width=self.resized_width,
                                     target_height=self.resized_height,
                                     resize_type=self.resize_type)
-        
+
+        if self.show_favorite_overlay:
+            render_favorite_overlay(imageTextPair,
+                                    x_offset,
+                                    y_offset,
+                                    render_mode,
+                                    self.resized_width,
+                                    self.resized_height)
+
         if(render_text_overlay and (not self.set_top_bar_text_to_selection or self.image_resize_height_multiplier == 1.0)):
             self._render_shadowed_text(primary_text, Device.get_device().screen_height() * 0.68, FontPurpose.SHADOWED_BACKDROP, FontPurpose.SHADOWED, 25,text_alpha)
             self._render_shadowed_text(secondary_text, Device.get_device().screen_height() * 0.78, FontPurpose.SHADOWED_BACKDROP_SMALL, FontPurpose.SHADOWED_SMALL, 27,text_alpha)

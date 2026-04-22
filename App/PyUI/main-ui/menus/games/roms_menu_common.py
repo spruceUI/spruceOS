@@ -133,7 +133,8 @@ class RomsMenuCommon(ABC):
                         allow_scrolling_text=True, # roms select is allowed to scroll
                         full_screen_grid_resize_type=self.full_screen_grid_resize_type(),
                         image_resize_height_multiplier=self.get_image_resize_height_multiplier(),
-                        icon_and_desc_use_image_in_place_of_icon=True)
+                        icon_and_desc_use_image_in_place_of_icon=True,
+                        show_favorite_overlay=True)
 
     def _run_rom_selection(self, page_name):
         rom_list = self._get_rom_list()

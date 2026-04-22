@@ -10,6 +10,7 @@ from controller.controller import Controller
 from display.resize_type import ResizeType
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
+from views.favorite_overlay import render_favorite_overlay
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
@@ -31,7 +32,8 @@ class CarouselView(View):
                   fixed_width=None,
                   fixed_selected_width=None,
                   selected_offset=None,
-                  use_selected_image_in_animation=None):
+                  use_selected_image_in_animation=None,
+                  show_favorite_overlay=False):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -92,6 +94,7 @@ class CarouselView(View):
         self.include_index_text = True
         self.missing_image_path = missing_image_path
         self.skip_next_animation = False
+        self.show_favorite_overlay = show_favorite_overlay
 
 
     def set_options(self, options):
@@ -359,13 +362,21 @@ class CarouselView(View):
             else:
                 image = imageTextPair.get_image_path_ideal(widths[visible_index],Display.get_usable_screen_height())
 
-            self._render_image(image, 
-                                    x_offset, 
+            self._render_image(image,
+                                    x_offset,
                                     y_image_offset,
                                     render_mode,
                                     target_width=widths[visible_index],
                                     target_height=Display.get_usable_screen_height(),
                                     resize_type=self.resize_type)
+
+            if self.show_favorite_overlay:
+                render_favorite_overlay(imageTextPair,
+                                        x_offset,
+                                        y_image_offset,
+                                        render_mode,
+                                        widths[visible_index],
+                                        Display.get_usable_screen_height())
 
     def get_selected_option(self):
         if 0 <= self.selected < len(self.options):

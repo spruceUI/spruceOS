@@ -59,7 +59,8 @@ class ViewCreator:
                     carousel_use_selected_image_in_animation=None,
                     carousel_resize_type=None,
                     grid_view_wrap_around_single_row=None,
-                    icon_and_desc_use_image_in_place_of_icon=None) -> object:
+                    icon_and_desc_use_image_in_place_of_icon=None,
+                    show_favorite_overlay=False) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -80,7 +81,8 @@ class ViewCreator:
                     options=options,
                     selected=selected_index,
                     selected_bg=selected_bg,
-                    icon_and_desc_use_image_in_place_of_icon=icon_and_desc_use_image_in_place_of_icon
+                    icon_and_desc_use_image_in_place_of_icon=icon_and_desc_use_image_in_place_of_icon,
+                    show_favorite_overlay=show_favorite_overlay,
                 )
 
             case ViewType.TEXT_AND_IMAGE:
@@ -148,7 +150,7 @@ class ViewCreator:
                     img_width=img_width,
                     img_height=img_height,
                     selected_index=selected_index,
-                    show_icons=ImageListView.DONT_SHOW_ICONS,
+                    show_icons=ImageListView.SHOW_ICONS if show_favorite_overlay else ImageListView.DONT_SHOW_ICONS,
                     image_render_mode=image_render,
                     text_to_image_relationship=text_to_image_relationship,
                     selected_bg=Theme.get_list_small_selected_bg(),
@@ -199,7 +201,8 @@ class ViewCreator:
                     resize_type=grid_resize_type,
                     grid_img_y_offset=grid_img_y_offset,
                     missing_image_path=missing_image_path,
-                    wrap_around_single_row=grid_view_wrap_around_single_row
+                    wrap_around_single_row=grid_view_wrap_around_single_row,
+                    show_favorite_overlay=show_favorite_overlay,
                 )
 
             case ViewType.FULLSCREEN_GRID:
@@ -221,7 +224,8 @@ class ViewCreator:
                     missing_image_path=missing_image_path,
                     resize_type=full_screen_grid_resize_type,
                     render_text_overlay=full_screen_grid_render_text_overlay,
-                    image_resize_height_multiplier=image_resize_height_multiplier
+                    image_resize_height_multiplier=image_resize_height_multiplier,
+                    show_favorite_overlay=show_favorite_overlay,
                 )
             case ViewType.CAROUSEL:
                 return CarouselView(
@@ -243,7 +247,8 @@ class ViewCreator:
                     additional_y_offset=carousel_additional_y_offset,
                     selected_offset=carousel_selected_offset,
                     use_selected_image_in_animation=carousel_use_selected_image_in_animation,
-                    resize_type=carousel_resize_type
+                    resize_type=carousel_resize_type,
+                    show_favorite_overlay=show_favorite_overlay,
                 )
 
             case _:
