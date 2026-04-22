@@ -6,14 +6,14 @@ from utils.logger import PyUiLogger
 
 class MiyooGamesFileParser:
 
-    def __init__(self):
-        pass
+    def __init__(self, default_dir = "/mnt/SDCARD/Roms/"):
+        self.dir = default_dir
 
     def parse_recents(self):
-        return self._parse('/mnt/SDCARD/Roms/recentlist.json')
+        return self._parse(os.path.join(self.dir, "recentlist.json"))
 
     def parse_favorites(self):
-        return self._parse('/mnt/SDCARD/Roms/favourite.json')
+        return self._parse(os.path.join(self.dir, "favourite.json"))
 
     def _parse(self, file_path):
         # List to hold the parsed JSON objects

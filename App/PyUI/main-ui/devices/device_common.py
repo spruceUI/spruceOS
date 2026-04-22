@@ -16,9 +16,11 @@ from devices.wifi.wifi_scanner import WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
+from menus.settings.button_remapper import ButtonRemapper
 from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -27,6 +29,7 @@ class DeviceCommon(AbstractDevice):
 
     def __init__(self):
         self.last_cache_clear = 0
+        self.button_remapper = ButtonRemapper(self.system_config)
 
     def prompt_power_down(self):
         from display.display import Display
@@ -311,22 +314,31 @@ class DeviceCommon(AbstractDevice):
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
-        import psutil
-        if self.is_wifi_enabled():
-            try:
-                addrs = psutil.net_if_addrs().get("wlan0")
-                if addrs:
-                    for addr in addrs:
-                        if addr.family == socket.AF_INET:
-                            return addr.address
-                    return "Connecting"
-                else:
-                    return "Connecting"
-            except Exception:
-                return "Error"
-        
-        return "Off"
-    
+        import subprocess
+
+        if not self.is_wifi_enabled():
+            return "Off"
+
+        try:
+            # Query interface address
+            result = subprocess.run(
+                ["ip", "-4", "addr", "show", "wlan0"],
+                capture_output=True,
+                text=True
+            )
+
+            output = result.stdout
+
+            # Look for "inet x.x.x.x"
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("inet "):
+                    return line.split()[1].split("/")[0]
+
+            return "Connecting"
+
+        except Exception:
+            return "Error"    
 
     def exit_pyui(self):
         Display.deinit_display()
@@ -570,3 +582,32 @@ class DeviceCommon(AbstractDevice):
             return menu_options["Emulator"].get("selected")
         return None
     
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)
+
+    def capture_framebuffer(self):
+        pass
+
+    def restore_framebuffer(self):
+        pass
+
+    def clear_framebuffer(self):
+        pass
+
+    def are_headphones_plugged_in(self):
+        return False
+        
+    def get_image_utils(self):
+        return FfmpegImageUtils()
+
+
+    @throttle.limit_refresh(5)
+    def is_hdmi_connected(self):
+        return False
+    
+    def is_lid_closed(self):
+        return False
+    
+    def map_key(self, key_code):
+        PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+        return None
