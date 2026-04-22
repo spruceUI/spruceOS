@@ -11,6 +11,7 @@ from views.full_screen_grid_view import FullScreenGridView
 from views.grid_or_list_entry import GridOrListEntry
 from views.grid_view import GridView
 from views.image_list_view import ImageListView
+from views.non_descriptive_list_view import NonDescriptiveListView
 from views.popup_text_list_view import PopupTextListView
 from views.text_list_view import TextListView
 from views.text_to_image_relationship import TextToImageRelationship
@@ -148,7 +149,7 @@ class ViewCreator:
                     img_width=img_width,
                     img_height=img_height,
                     selected_index=selected_index,
-                    show_icons=ImageListView.DONT_SHOW_ICONS,
+                    use_icons_to_calculate_line_height=NonDescriptiveListView.DONT_USE_ICONS_FOR_LINE_HEIGHT_CALC,
                     image_render_mode=image_render,
                     text_to_image_relationship=text_to_image_relationship,
                     selected_bg=Theme.get_list_small_selected_bg(),
@@ -160,7 +161,7 @@ class ViewCreator:
                     top_bar_text=top_bar_text,
                     options=options,
                     selected_index=selected_index,
-                    show_icons=ImageListView.DONT_SHOW_ICONS,
+                    show_icons=NonDescriptiveListView.DONT_USE_ICONS_FOR_LINE_HEIGHT_CALC,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
                     selected_bg=Theme.get_list_small_selected_bg(),
                     allow_scrolling=allow_scrolling_text
@@ -170,7 +171,7 @@ class ViewCreator:
                 return PopupTextListView(
                     options=options,
                     selected_index=selected_index,
-                    show_icons=ImageListView.DONT_SHOW_ICONS,
+                    show_icons=NonDescriptiveListView.DONT_USE_ICONS_FOR_LINE_HEIGHT_CALC,
                     image_render_mode=RenderMode.MIDDLE_RIGHT_ALIGNED,
                     selected_bg=Theme.get_popup_menu_selected_bg()
                 )

@@ -18,7 +18,7 @@ class TextListView(NonDescriptiveListView):
         super().__init__(top_bar_text=top_bar_text,
                          options=options,
                          selected_index=selected_index,
-                         use_icons_for_line_height=show_icons,
+                         use_icons_to_calculate_line_height=show_icons,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
                          usable_height=usable_height)
@@ -59,7 +59,7 @@ class TextListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            if(self.use_icons_for_line_height and imageTextPair.get_icon() is not None):
+            if(self.use_icons_to_calculate_line_height and imageTextPair.get_icon() is not None):
                 icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),x_value, y_value)
                 x_value += icon_width
             else:
