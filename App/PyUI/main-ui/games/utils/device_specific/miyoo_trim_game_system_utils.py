@@ -169,13 +169,11 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                 #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
-            PyUiLogger.get_logger().debug(f"Checking {folder}, game_system_config={game_system_config}")
             if(game_system_config is not None 
                and (self.contains_needed_files(game_system_config) 
                                                    or PyUiConfig.show_all_game_systems())):
                 devices = game_system_config.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
-                PyUiLogger.get_logger().debug(f"Checking {folder}, is supported = {supported_device}")
 
                 if(supported_device):
                     folder_paths = self.build_paths_array(folder, game_system_config)

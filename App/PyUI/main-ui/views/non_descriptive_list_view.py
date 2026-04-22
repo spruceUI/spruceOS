@@ -7,12 +7,12 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.list_view import ListView
 
 class NonDescriptiveListView(ListView):
-    SHOW_ICONS = True
-    DONT_SHOW_ICONS = False
+    USE_ICONS_FOR_LINE_HEIGHT_CALC = True
+    DONT_USE_ICONS_FOR_LINE_HEIGHT_CALC = False
 
     def __init__(self, top_bar_text,
                  options: List[GridOrListEntry],
-                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None):
+                 selected_index : int, use_icons_to_calculate_line_height : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None):
         super().__init__()
         self.top_bar_text = top_bar_text
         self.set_options(options)
@@ -23,7 +23,7 @@ class NonDescriptiveListView(ListView):
         self.current_top = 0
         self.base_y_offset = Display.get_top_bar_height() + 5
         #TODO get line height padding from theme
-        self.show_icons = show_icons
+        self.use_icons_to_calculate_line_height = use_icons_to_calculate_line_height
         self.image_render_mode = image_render_mode
         self.selected_bg = selected_bg
         self.line_height = self._calculate_line_height()   
@@ -43,7 +43,7 @@ class NonDescriptiveListView(ListView):
     def _calculate_line_height(self):
         text_line_height = Display.get_line_height(FontPurpose.LIST) + 10  # add 10px padding between lines
         icon_line_height = 0
-        if(self.show_icons):
+        if(self.use_icons_to_calculate_line_height):
             for gridOrListEntry in self.options:
                 if(gridOrListEntry.get_icon() is not None):
                     icon_w, icon_h = Display.get_image_dimensions(gridOrListEntry.get_icon())
