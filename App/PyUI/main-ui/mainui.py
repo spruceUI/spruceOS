@@ -114,6 +114,9 @@ def initialize_device(device, main_ui_mode):
     elif "ANBERNIC_MUOS" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX(device))        
+    elif "ROCKNIX_RGDS" == device:
+        from devices.rocknix.rocknix_rgds import RocknixRgds
+        Device.init(RocknixRgds(device))        
     elif "GKD_PIXEL2" == device:
         from devices.gkd.gkd_pixel2 import GKDPixel2
         Device.init(GKDPixel2(device, main_ui_mode))

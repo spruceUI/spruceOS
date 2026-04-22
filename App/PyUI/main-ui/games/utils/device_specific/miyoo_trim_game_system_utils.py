@@ -117,9 +117,9 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "yabasanshiro": ["YabaSanshiro"]
     }
 
-    def __init__(self):
-        self.roms_paths = ["/mnt/SDCARD/Roms/"]
-        self.emu_path = "/mnt/SDCARD/Emu/"
+    def __init__(self, roms_path = "/mnt/SDCARD/Roms/", emu_path="/mnt/SDCARD/Emu/"):
+        self.roms_paths = [roms_path]
+        self.emu_path = emu_path
         if(not os.path.exists(self.emu_path)):
             self.emu_path =  "/mnt/SDCARD/Emus/"
             
@@ -164,16 +164,19 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         for folder in folders:
             game_system_config = None
             try:
-                game_system_config = FileBasedGameSystemConfig(folder)
+                game_system_config = FileBasedGameSystemConfig(folder,os.path.join(self.emu_path, folder))
             except Exception as e:
                 #PyUiLogger().get_logger().info(f"{folder} contains a broken config.json : {e}")
                 pass
 
+            PyUiLogger.get_logger().debug(f"Checking {folder}, game_system_config={game_system_config}")
             if(game_system_config is not None 
                and (self.contains_needed_files(game_system_config) 
                                                    or PyUiConfig.show_all_game_systems())):
                 devices = game_system_config.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
+                PyUiLogger.get_logger().debug(f"Checking {folder}, is supported = {supported_device}")
+
                 if(supported_device):
                     folder_paths = self.build_paths_array(folder, game_system_config)
                     if(len(folder_paths) > 0):

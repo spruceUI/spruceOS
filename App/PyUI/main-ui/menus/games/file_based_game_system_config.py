@@ -4,9 +4,9 @@ import os
 from utils.logger import PyUiLogger
 
 class FileBasedGameSystemConfig():
-    def __init__(self, system_name):
+    def __init__(self, system_name, emu_folder):
         self.system_name = system_name
-        self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
+        self.emu_folder = emu_folder
         if(not os.path.exists(self.emu_folder)):
             self.emu_folder =  f"/mnt/SDCARD/Emus/{system_name}"
         self.config_path = f"{self.emu_folder}/config.json"

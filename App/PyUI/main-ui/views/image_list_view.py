@@ -23,7 +23,7 @@ class ImageListView(NonDescriptiveListView):
         super().__init__(top_bar_text=top_bar_text,
                          options=options,
                          selected_index=selected_index,
-                         show_icons=show_icons,
+                         use_icons_for_line_height=show_icons,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
                          usable_height=usable_height)
@@ -96,7 +96,7 @@ class ImageListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            if(self.show_icons and imageTextPair.get_icon() is not None):
+            if(self.use_icons_for_line_height and imageTextPair.get_icon() is not None):
                 icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
                 text_x_value += icon_width + 5 #TODO get 5 from somewhere
 
