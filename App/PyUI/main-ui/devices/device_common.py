@@ -611,3 +611,6 @@ class DeviceCommon(AbstractDevice):
     def map_key(self, key_code):
         PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
         return None
+
+    def get_game_images_folder_name(self):
+        return "Imgs"
