@@ -21,7 +21,8 @@ class RocknixDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.muos_systems = self.load_assign_json()
-        self.game_utils = MiyooTrimGameSystemUtils(roms_path="/storage/roms/",emu_path="/storage/Emu")
+        self.game_utils = MiyooTrimGameSystemUtils()
+        super().__init__()
 
     def sleep(self):
         pass
@@ -74,18 +75,19 @@ class RocknixDevice(DeviceCommon):
             Display.display_message("No core found", 2_000)
             return
 
-        selected_core = "/storage/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
+        selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
 
         #shutil.copyfile("/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg", "/mnt/SDCARD/RetroArch/retroarch.cfg")
         cmds = [
-                "/usr/bin/retroarch",
+                #"/usr/bin/retroarch",
+                "/mnt/SDCARD/RetroArch/ra64.rgds",
                 "-v",
-                "--config", "/storage/.config/retroarch/retroarch.cfg",
-                "--log-file","/storage/Saves/spruce/retroarch.log",
+                "--config", "/mnt/SDCARD/RetroArch/platform/retroarch-RGDS.cfg",
+                "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
                 "-L",selected_core,
                 rom_info.rom_file_path]
 
-        directory = "/storage/RetroArch/"
+        directory = "/mnt/SDCARD/RetroArch/"
         PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
         Display.deinit_display()
         subprocess.run(cmds, cwd = directory)
@@ -171,12 +173,8 @@ class RocknixDevice(DeviceCommon):
     def get_charge_status(self):
         return ChargeStatus.DISCONNECTED
     
-    @throttle.limit_refresh(15)
-    def get_battery_percent(self):
-        return 0
-
     def get_app_finder(self):
-        return MiyooAppFinder(app_dir="/storage/App")
+        return MiyooAppFinder()
     
     def parse_favorites(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_favorites()
@@ -200,22 +198,22 @@ class RocknixDevice(DeviceCommon):
         return None
 
     def get_favorites_path(self):
-        return "/storage/pyui/config/pyui-favorites.json"
+        return "/mnt/SDCARD/Saves/pyui-favorites.json"
     
     def get_recents_path(self):
-        return "/storage/pyui/config/pyui-recents.json"
+        return "/mnt/SDCARD/Saves/pyui-recents.json"
             
     def get_apps_config_path(self):
-        return "/storage/pyui/config/pyui-apps.json"
+        return "/mnt/SDCARD/Saves/pyui-apps.json"
 
     def get_collections_path(self):
-        return "/storage/pyui/config/storage/collections/"
+        return "/mnt/SDCARD/Collections/"
 
     def launch_stock_os_menu(self):
         os._exit(0)
 
     def get_state_path(self):
-        return "/storage/pyui/config/pyui-state.json"
+        return "/mnt/SDCARD/pyui/config/pyui-state.json"
 
     def calibrate_sticks(self):
         pass
@@ -304,9 +302,6 @@ class RocknixDevice(DeviceCommon):
         return False
 
     def supports_hue_calibration(self):
-        return False
-
-    def supports_qoi(self):
         return False
 
     def keep_running_on_error(self):

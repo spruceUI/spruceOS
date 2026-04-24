@@ -1,27 +1,22 @@
 import os
 from pathlib import Path
 import sys
-import threading
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
-from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
-from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
+from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.rocknix.rocknix_device import RocknixDevice
-from devices.utils.process_runner import ProcessRunner
 from utils import throttle
-from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 class RocknixRgds(RocknixDevice):
 
     def __init__(self, device_name):
         self.device_name = device_name
         self.load_rgds_system_json()
-        self.miyoo_games_file_parser = MiyooGamesFileParser("/storage/roms/")        
+        self.miyoo_games_file_parser = MiyooGamesFileParser()        
 
         super().__init__()
 
@@ -31,7 +26,7 @@ class RocknixRgds(RocknixDevice):
         self.script_dir = os.path.join(base_dir, "devices","rocknix")
         self.parent_dir = os.path.dirname(base_dir)
         source = os.path.join(self.script_dir,"rgds-system.json") 
-        system_json_path = "/storage/pyui/config/rgds-system.json"
+        system_json_path = "/mnt/SDCARD/App/PyUI/config/rgds-system.json"
         self._load_system_config(system_json_path, Path(source))
 
     
@@ -77,7 +72,7 @@ class RocknixRgds(RocknixDevice):
         key_mappings[KeyEvent(1, 547, 0)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
         
-        return KeyWatcherController(event_path="/dev/input/event6", mapping_provider=DictKeyMappingProvider(key_mappings))
+        return KeyWatcherController(event_path="/dev/input/by-path/platform-rocknix-singleadc-joypad-event-joystick", mapping_provider=DictKeyMappingProvider(key_mappings))
 
     def get_device_name(self):
         return self.device_name
@@ -91,3 +86,19 @@ class RocknixRgds(RocknixDevice):
     def screen_rotation(self):
         return 0
 
+    @throttle.limit_refresh(15)
+    def get_battery_percent(self):
+        with open("/sys/class/power_supply/battery/capacity", "r") as f:
+            return int(f.read().strip()) 
+        return 0
+
+    @throttle.limit_refresh(5)
+    def get_charge_status(self):
+        #Probably need to find the power and not just usb
+        with open("/sys/class/power_supply/charger/online", "r") as f:
+            ac_online = int(f.read().strip())
+            
+        if(ac_online):
+           return ChargeStatus.CHARGING
+        else:
+            return ChargeStatus.DISCONNECTED

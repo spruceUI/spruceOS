@@ -336,9 +336,6 @@ class AnbernicXXCommon(DeviceCommon):
     def supports_hue_calibration(self):
         return False
 
-    def supports_qoi(self):
-        return True
-
     def keep_running_on_error(self):
         return False
 
