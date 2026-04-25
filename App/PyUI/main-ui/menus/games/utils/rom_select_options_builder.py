@@ -305,13 +305,12 @@ class RomSelectOptionsBuilder:
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
 
-                rom_info = RomInfo(game_system, rom_file_path, display_name)
-
                 append_file(
                     RomGridOrListEntry(
                         display_name=display_name,
+                        game_system=game_system,
+                        rom_file_path=rom_file_path,
                         folder_name=folder_name,
-                        rom_info=rom_info,
                         game_entry=game_entry,
                         prefer_savestate_screenshot=prefer_savestate_screenshot,
                         get_image_path_fn=get_image_path,
@@ -328,13 +327,12 @@ class RomSelectOptionsBuilder:
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
 
-                rom_info = RomInfo(game_system, rom_file_path, display_name)
-
                 append_folder(
                     RomGridOrListEntry(
                         display_name=display_name,
+                        game_system=game_system,
+                        rom_file_path=rom_file_path,
                         folder_name=folder_name,
-                        rom_info=rom_info,
                         game_entry=game_entry,
                         prefer_savestate_screenshot=prefer_savestate_screenshot,
                         get_image_path_fn=get_image_path,
