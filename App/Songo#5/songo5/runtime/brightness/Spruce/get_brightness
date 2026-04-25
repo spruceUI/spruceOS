@@ -1,0 +1,58 @@
+#!/bin/sh
+
+
+
+if [ -n "${DEVICE_BRIGHTNESS_PATH}" ] && [ -f "${DEVICE_BRIGHTNESS_PATH}" ]; then
+    DEVICE_BRIGHTNESS_VAL=$(cat "$DEVICE_BRIGHTNESS_PATH" 2>/dev/null)
+
+    case "$DEVICE_BRIGHTNESS_VAL" in
+        ''|*[!0-9]*)
+            ;;
+        *)
+            if [ "$DEVICE_BRIGHTNESS_VAL" -ge 0 ] && [ "$DEVICE_BRIGHTNESS_VAL" -le 255 ]; then
+                echo "$DEVICE_BRIGHTNESS_VAL"
+                exit 0
+            fi
+            ;;
+    esac
+fi
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+brightness_spruce="$(current_backlight)"
+
+case "$brightness_spruce" in
+    ''|*[!0-9]*)
+        echo 155
+        exit 1
+        ;;
+esac
+
+if [ "$brightness_spruce" -lt 0 ] || [ "$brightness_spruce" -gt 10 ]; then
+    echo 155
+    exit 1
+fi
+
+if [ -n "${SYSTEM_BRIGHTNESS_0+x}" ]; then
+    varname="SYSTEM_BRIGHTNESS_$brightness_spruce"
+
+    eval "mapped_val=\${$varname}"
+
+    case "$mapped_val" in
+        ''|*[!0-9]*)
+            echo 155
+            exit 1
+            ;;
+    esac
+
+    echo "$mapped_val"
+    exit 0
+fi
+
+# This should just be for Brick and Smart pro
+if [ "$brightness_spruce" -lt 2 ]; then
+    echo 4
+else
+    val_255=$(( (brightness_spruce - 1) * 254 / 9 + 1 ))
+    echo "$val_255"
+fi

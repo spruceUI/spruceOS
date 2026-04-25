@@ -66,6 +66,8 @@ class MiyooGameList:
 
 
     def get_by_file_path(self, file_path):
+        if not self.games_by_file_name:
+            return None
         # Normalize the path and find the portion after "Roms/"
         parts = file_path.split("/Roms/", 1)
         if len(parts) < 2:

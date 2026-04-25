@@ -49,9 +49,9 @@ class CollectionsManager:
                 game_system = cls._game_system_utils.get_game_system_by_name(entry.game_system_name)
                 if game_system is not None:
                     rom_info_list.append(RomInfo(game_system, entry.rom_file_path))
-            except Exception:
+            except Exception as e:
                 PyUiLogger.get_logger().error(
-                    f"Unable to load config for {entry.game_system_name} so skipping entry"
+                    f"Unable to load config for {entry.game_system_name} so skipping entry {e}"
                 )
                 
         # Sort by filename (case-insensitive)

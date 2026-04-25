@@ -8,7 +8,21 @@
   "launchlist": [
     {
       "name": "Open GVU Browser",
-      "launch": "/mnt/SDCARD/Emu/MEDIA/open_gvu_browser.sh"
+      "launch": "/mnt/SDCARD/Emu/MEDIA/open_gvu_browser.sh",
+      "devices": [
+        "TRIMUI_BRICK",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "MIYOO_FLIP",
+        "MIYOO_A30",
+        "ANBERNIC_RG34XXSP",
+        "ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
     }
   ],
   "menuOptions": {

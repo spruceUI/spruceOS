@@ -6,8 +6,8 @@ from utils.cached_exists import CachedExists
 
 class MiyooAppFinder:
 
-    def __init__(self):
-        self.app_dir = "/mnt/SDCARD/App/"
+    def __init__(self, app_dir= "/mnt/SDCARD/App/"):
+        self.app_dir = app_dir
         if(not CachedExists.exists(self.app_dir)):
             self.app_dir = "/mnt/SDCARD/Apps/"
 

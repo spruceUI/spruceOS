@@ -27,6 +27,10 @@
         {
             "display":"PPSSPP version",
             "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
+        },
+        {
+            "display":"SD Card usage",
+            "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
         }
     ]
 }

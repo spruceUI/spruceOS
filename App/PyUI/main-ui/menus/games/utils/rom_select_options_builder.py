@@ -21,6 +21,7 @@ from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 from utils.time_logger import log_timing
 from views.grid_or_list_entry import GridOrListEntry
+from views.rom_grid_or_list_entry import RomGridOrListEntry
 from views.util.icon_searcher import IconSearcher
 from views.util.image_searcher import ImageSearcher
 
@@ -102,10 +103,12 @@ class RomSelectOptionsBuilder:
         # Path pieces after the system folder (subfolders + filename)
         relative_parts = parts[system_index + 1 : -1]
 
+        images_folder_name = Device.get_device().get_game_images_folder_name()
+
         # Build mirrored Imgs path
         mirrored_path_base = os.path.join(
             os.sep.join(parts[:system_index + 1]),  # Folder/Roms/MD
-            "Imgs",
+            images_folder_name,
             *relative_parts,
             base_name
         )
@@ -116,7 +119,7 @@ class RomSelectOptionsBuilder:
             return mirrored_qoi_path
 
         # ---- Fallback to old behavior (top-level image) ----
-        flat_root = os.path.join(os.sep.join(parts[:system_index + 1]), "Imgs", base_name)
+        flat_root = os.path.join(os.sep.join(parts[:system_index + 1]), images_folder_name, base_name)
         flat_qoi_path = flat_root+ ".qoi"
 
         if CachedExists.exists(flat_qoi_path) and Device.get_device().supports_qoi():
@@ -176,7 +179,7 @@ class RomSelectOptionsBuilder:
         
         # Attempt to construct alternate path by replacing "Roms" with "Imgs"
         imgs_older_equal_to_roms_parts = parts.copy()
-        imgs_older_equal_to_roms_parts[roms_index] = "Imgs"
+        imgs_older_equal_to_roms_parts[roms_index] = images_folder_name
 
         # Imgs folder equal to roms path
         path = self.first_existing(
@@ -218,14 +221,15 @@ class RomSelectOptionsBuilder:
 
         # ES format
         path = self.first_existing(
-            os.path.join(root_dir, "Imgs", base_name + "-image")
+            os.path.join(root_dir, images_folder_name, base_name + "-image")
         )
         if path:
+            PyUiLogger.get_logger().debug(f"Image path is {path}")
             return path
 
         # ES format 2
         path = self.first_existing(
-            os.path.join(root_dir, "Imgs", base_name + "-thumb")
+            os.path.join(root_dir, images_folder_name, base_name + "-thumb")
         )
         if path:
             return path
@@ -301,18 +305,16 @@ class RomSelectOptionsBuilder:
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
 
-                rom_info = RomInfo(game_system, rom_file_path, display_name)
-
-                img_search = ImageSearcher(rom_info, game_entry, prefer_savestate_screenshot, get_image_path)
-
                 append_file(
-                    GridOrListEntry(
-                        primary_text=display_name,
-                        description=folder_name,
-                        value=rom_info,
-                        image_path_searcher=img_search,
-                        image_path_selected_searcher=img_search,
-                        icon_searcher=IconSearcher(rom_info,get_favorite_icon)
+                    RomGridOrListEntry(
+                        display_name=display_name,
+                        game_system=game_system,
+                        rom_file_path=rom_file_path,
+                        folder_name=folder_name,
+                        game_entry=game_entry,
+                        prefer_savestate_screenshot=prefer_savestate_screenshot,
+                        get_image_path_fn=get_image_path,
+                        get_favorite_icon=get_favorite_icon
                     )
                 )
 
@@ -325,19 +327,16 @@ class RomSelectOptionsBuilder:
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
 
-                rom_info = RomInfo(game_system, rom_file_path, display_name)
-
-                # Pre-bind parameters to lambdas
-                img_search = lambda _, ri=rom_info, ge=game_entry: get_image_path(ri, ge, prefer_savestate_screenshot)
-
                 append_folder(
-                    GridOrListEntry(
-                        primary_text=display_name,
-                        description=folder_name,
-                        value=rom_info,
-                        image_path_searcher=img_search,
-                        image_path_selected_searcher=img_search,
-                        icon_searcher=lambda _, ri=rom_info: get_favorite_icon(ri)
+                    RomGridOrListEntry(
+                        display_name=display_name,
+                        game_system=game_system,
+                        rom_file_path=rom_file_path,
+                        folder_name=folder_name,
+                        game_entry=game_entry,
+                        prefer_savestate_screenshot=prefer_savestate_screenshot,
+                        get_image_path_fn=get_image_path,
+                        get_favorite_icon=get_favorite_icon
                     )
                 )
 

@@ -5,12 +5,7 @@
   "themecolor": "FFFF88",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip|7z|n64|z64|v64",
-  "launchlist": [
-    {
-      "name": "Standalone Options",
-      "launch": "/mnt/SDCARD/Emu/N64/mupen_standalone_options.sh"
-    }
-  ],
+  "launchlist": [],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VOL_LISTENER="$SCRIPT_DIR/vol_listener"
+
+# Start in background
+$VOL_LISTENER &
+
+echo "vol_listener started, PID=$!)"
