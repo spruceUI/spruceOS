@@ -541,10 +541,6 @@ class MiyooMiniCommon(MiyooDevice):
     def apply_timezone(self, timezone):
         ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
         ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
-
-    def supports_caching_rom_lists(self):
-        return True #Is there enough RAM
-
     
     def get_fw_version(self):
         try:
