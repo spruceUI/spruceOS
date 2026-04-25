@@ -428,10 +428,6 @@ class MiyooMiniCommon(MiyooDevice):
         except Exception as e:
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
-    def fix_sleep_sound_bug(self):
-        pass #uneeded
-
-
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         preload_path = "/mnt/SDCARD/miyoo/app/../lib/libpadsp.so"
         if os.path.exists(preload_path):
