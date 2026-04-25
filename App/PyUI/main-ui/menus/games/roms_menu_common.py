@@ -17,6 +17,7 @@ from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
+from views.rom_grid_or_list_entry import RomGridOrListEntry
 from views.selection import Selection
 from abc import ABC, abstractmethod
 
@@ -84,6 +85,19 @@ class RomsMenuCommon(ABC):
                     icon=None,
                     value=rom_info)
             )
+            rom_list.append(
+                    RomGridOrListEntry(
+                            display_name=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
+                            folder_name="Collections",
+                            game_system=rom_info.game_system,
+                            rom_file_path=rom_info.rom_file_path,
+                            game_entry=None,
+                            prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
+                            get_image_path_fn=lambda a, b, c: img_path,
+                            get_favorite_icon=None
+                    )
+            )
+
         return rom_list
 
     def get_view_type(self):
@@ -135,15 +149,15 @@ class RomsMenuCommon(ABC):
                         image_resize_height_multiplier=self.get_image_resize_height_multiplier(),
                         icon_and_desc_use_image_in_place_of_icon=True)
 
-    def _run_rom_selection(self, page_name):
+    def _run_rom_selection(self, page_name, verify_system=True):
         rom_list = self._get_rom_list()
 
         current_device = Device.get_device().get_device_name()
 
         filtered_roms = []
         for rom_info_ui_entry in rom_list:
-            if(rom_info_ui_entry.value.game_system.game_system_config):
-                devices = rom_info_ui_entry.value.game_system.game_system_config.get_devices()
+            if(verify_system and rom_info_ui_entry.game_system.game_system_config):
+                devices = rom_info_ui_entry.game_system.game_system_config.get_devices()
                 supported_device = not devices or current_device in devices
                 if supported_device:
                     filtered_roms.append(rom_info_ui_entry)

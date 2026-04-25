@@ -39,7 +39,8 @@ class RecentsMenu(RomsMenuCommon):
                 RomGridOrListEntry(
                         display_name=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
                         folder_name="Recents",
-                        rom_info=rom_info,
+                        game_system=rom_info.game_system,
+                        rom_file_path=rom_info.rom_file_path,
                         game_entry=None,
                         prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
                         get_image_path_fn=get_image_path_fn,
