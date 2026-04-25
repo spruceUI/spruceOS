@@ -5,6 +5,9 @@ from devices.device import Device
 from games.utils.game_system import GameSystem
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from utils.logger import PyUiLogger
+import os
+import json
+from pathlib import Path
 
 class RomUtils:
     def __init__(self, roms_path):
@@ -17,6 +20,9 @@ class RomUtils:
         }
 
         self._get_roms_cache: dict[tuple, tuple[list[str], list[str]]] = {}
+
+    def get_cache_dir(self):
+        return os.path.join(Device.get_device().get_saves_dir(),"cache")
 
     def get_roms_dir_for_emu_dir(self, emu_dir):
         # Could read config.json but don't want to waste time
@@ -71,48 +77,118 @@ class RomUtils:
 
         return False # No valid files found
 
-    def get_roms(self, game_system: GameSystem, directory=None):
-        cache_key = (game_system, directory)
-        if cache_key in self._get_roms_cache:
-            return self._get_roms_cache[cache_key]
 
+    def _get_cache_file(self,directory):
+        safe_name = directory.replace("/", "_").replace("\\", "_")
+        return os.path.join(self.get_cache_dir(), f"{safe_name}.json")
+
+
+    def _load_disk_cache(self,directory, mtime):
+        cache_file = self._get_cache_file(directory)
+
+        try:
+            with open(cache_file, "r") as f:
+                data = json.load(f)
+
+            if data.get("mtime") == mtime:
+                return data["files"], data["folders"]
+            else:
+                PyUiLogger.get_logger().info(f"Folder update detected [{directory}]")
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
+        return None
+
+
+    def _save_disk_cache(self,directory, mtime, files, folders):
+        os.makedirs(self.get_cache_dir(), exist_ok=True)
+        cache_file = self._get_cache_file(directory)
+
+        with open(cache_file, "w") as f:
+            json.dump({
+                "mtime": mtime,
+                "files": files,
+                "folders": folders
+            }, f)
+
+
+    def get_roms(self, game_system: GameSystem, directory=None):
         directories_to_search = [directory] if directory else game_system.folder_paths
-        valid_files = []
-        valid_folders = []
+
+        all_valid_files = []
+        all_valid_folders = []
 
         config = game_system.game_system_config
         valid_suffix_set = {s.lower() for s in config.get_extlist()}
         ignore_set = set(config.get_ignore_list())
         scan_subfolders = config.scan_subfolders()
-        
+
         for dir_to_search in directories_to_search:
             try:
+                dir_mtime = os.path.getmtime(dir_to_search)
+            except OSError:
+                continue
+
+            cache_key = (dir_to_search, dir_mtime)
+
+            # --- In-memory cache ---
+            if cache_key in self._get_roms_cache:
+                files, folders = self._get_roms_cache[cache_key]
+                all_valid_files.extend(files)
+                all_valid_folders.extend(folders)
+                continue
+
+            # --- Disk cache ---
+            if Device.get_device().supports_caching_rom_lists():
+                cached = self._load_disk_cache(dir_to_search, dir_mtime)
+                if cached:
+                    self._get_roms_cache[cache_key] = cached
+                    files, folders = cached
+                    all_valid_files.extend(files)
+                    all_valid_folders.extend(folders)
+                    continue
+
+            # --- Fresh scan ---
+            valid_files = []
+            valid_folders = []
+
+            try:
                 entries = os.listdir(dir_to_search)
-                for name in entries:
-                    if name.startswith('.'):
+            except OSError:
+                continue
+
+            for name in entries:
+                if name.startswith('.'):
+                    continue
+
+                full_path = os.path.join(dir_to_search, name)
+
+                if os.path.isdir(full_path):
+                    if not scan_subfolders:
+                        continue
+                    if name == "Imgs":
                         continue
 
-                    full_path = os.path.join(dir_to_search, name)
-                    if os.path.isdir(full_path):
-                        if(not scan_subfolders):
-                            continue
-                        if name == "Imgs":
-                            continue
-                        else:
-                            roms_for_subfolder, folder_for_subfolder = self.get_roms(game_system, full_path)
-                            if(len(roms_for_subfolder) > 0 or len(folder_for_subfolder) > 0):
-                                valid_folders.append(full_path)
-                    else: #is file
-                        suffix = Path(name).suffix.lower()
-                        if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
-                            if name not in ignore_set:
-                                valid_files.append(full_path)
+                    roms_sub, folders_sub = self.get_roms(game_system, full_path)
 
-            except OSError:
-                continue  # skip unreadable dirs
+                    if roms_sub or folders_sub:
+                        valid_folders.append(full_path)
 
-        # Cache the result if supported
-        if Device.get_device().supports_caching_rom_lists():
-            self._get_roms_cache[cache_key] = (valid_files, valid_folders)
+                else:
+                    suffix = Path(name).suffix.lower()
 
-        return valid_files, valid_folders
+                    if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
+                        if name not in ignore_set:
+                            valid_files.append(full_path)
+
+            result = (valid_files, valid_folders)
+
+            # --- Save caches ---
+            if Device.get_device().supports_caching_rom_lists():
+                self._get_roms_cache[cache_key] = result
+                self._save_disk_cache(dir_to_search, dir_mtime, valid_files, valid_folders)
+
+            all_valid_files.extend(valid_files)
+            all_valid_folders.extend(valid_folders)
+
+        return all_valid_files, all_valid_folders

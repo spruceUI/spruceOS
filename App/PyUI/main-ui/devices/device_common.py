@@ -392,6 +392,9 @@ class DeviceCommon(AbstractDevice):
     def supports_caching_rom_lists(self):
         return True
 
+    def get_saves_dir(self):
+        return "/mnt/SDCARD/Saves/"
+
     def keep_running_on_error(self):
         return True
 
