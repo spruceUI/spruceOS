@@ -314,13 +314,15 @@ class MiyooFlip(MiyooDevice):
         return self.system_config.get_volume()
 
     def fix_sleep_sound_bug(self):
-        config_volume = self.system_config.get_volume()
-        if(config_volume == 20):
-            self.volume_down()
-            self.volume_up()
-        else:
-            self.volume_up()
-            self.volume_down()
+        # When running in MainUI mode we do not want to mess with the volume 
+        if(not PyUiConfig.mimic_miyoo_mainui_mode()):
+            config_volume = self.system_config.get_volume()
+            if(config_volume == 20):
+                self.volume_down()
+                self.volume_up()
+            else:
+                self.volume_up()
+                self.volume_down()
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         return MiyooTrimCommon.run_game(self,rom_info)
