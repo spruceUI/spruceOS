@@ -54,6 +54,30 @@ display_core_unrecognized_for_platform_message() {
 	stop_pyui_message_writer
 }
 
+#### RGXX #####
+# Can we move these run_drastic's into their respective devicefunctions.sh so we dont have to remember
+# to come here to add DS support?
+run_drastic_AnbernicRGXX() {
+	ready_arch_32_states
+	/mnt/vendor/deep/drastic-modify/launch.sh "$ROM_FILE" > $(emu_log_file) 2>&1
+	# Don't see any benefit to the below one, just seems worse in every way so not even adding
+	#/mnt/vendor/deep/drastic/drastic "$ROM_FILE" > $(emu_log_file) 2>&1
+	stash_arch_32_states
+}
+
+run_drastic_AnbernicRGCubeXX() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicRG34XXSP() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicRG28XX() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX640480() {
+	run_drastic_AnbernicRGXX
+}
+
 ##### A30 #####
 
 # Only Steward version is available on A30. Hardcode this "core" selection.
