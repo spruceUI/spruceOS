@@ -316,6 +316,16 @@ device_lid_open(){
     fi
 }
 
+device_wifi_is_available() {
+    case "$(get_miyoo_mini_variant)" in
+        "MIYOO_MINI"|"MIYOO_MINI_V4")
+            return 1 # False
+            ;;
+        *)
+            return 0 # True
+            ;;
+    esac
+}
 
 device_prepare_for_ports_run() {
     log_message "device_prepare_for_ports_run uneeded on this device" -v
