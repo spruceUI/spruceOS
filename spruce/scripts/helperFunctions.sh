@@ -1154,6 +1154,11 @@ check_and_connect_wifi() {
         return 0
     fi
 
+    # Check if device has wifi available
+    if ! device_wifi_is_available; then
+        return 1
+    fi
+
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
     restart_wifi

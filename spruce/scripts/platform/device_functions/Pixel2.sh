@@ -226,6 +226,18 @@ device_lid_open(){
     return 1
 }
 
+device_wifi_is_available() {
+    if [ -d /sys/class/net/wlan0 ] || [ -d /sys/class/net/eth0 ]; then
+        if [ "$(cat /sys/class/net/*0/operstate)" = "up" ]; then
+            return 0 # True
+        else
+            return 1 # False
+        fi
+    else
+        return 1 # False
+    fi
+}
+
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
