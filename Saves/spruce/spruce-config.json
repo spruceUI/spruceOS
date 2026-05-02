@@ -439,15 +439,6 @@
                 ],
                 "selected":"False"
             },
-            "syncBeforeLaunch": {
-                "display": "Sync saves before launching games",
-                "description": "Syncthing must be enabled",
-                "options":[
-                    "True",
-                    "False"
-                ],
-                "selected":"True"
-            },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
                 "description": "http://{ip_addr}:8080",
