@@ -19,6 +19,10 @@
 #   handle_network_services
 
 handle_network_services() {
+	if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+		log_message "network_functions.sh: WiFi is off, don't try to connect."
+		return 0
+	fi
 
 	wifi_needed=false
 	syncthing_enabled=false
