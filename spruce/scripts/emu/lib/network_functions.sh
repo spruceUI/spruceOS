@@ -19,6 +19,10 @@
 #   handle_network_services
 
 handle_network_services() {
+	if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+		log_message "network_functions.sh: WiFi is off, don't try to connect."
+		return 0
+	fi
 
 	wifi_needed=false
 	syncthing_enabled=false
@@ -26,7 +30,6 @@ handle_network_services() {
 	disable_wifi_in_game="$(get_config_value '.menuOptions."Battery Settings".disableWifiInGame.selected' "False")"
 	disable_net_serv_in_game="$(get_config_value '.menuOptions."Battery Settings".disableNetworkServicesInGame.selected' "False")"
 	syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
-	sync_before_launch_enabled="$(get_config_value '.menuOptions."Network Settings".syncBeforeLaunch.selected' "True")"
 
 	##### RAC Check #####
 	if [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
@@ -42,7 +45,7 @@ handle_network_services() {
 	fi
 
 	# Connect to WiFi if needed for any service
-	if [ "$sync_before_launch_enabled" = "True" ] && $wifi_needed; then
+	if $wifi_needed; then
 		if check_and_connect_wifi; then
 			wifi_connected=true
 		fi
