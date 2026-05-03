@@ -43,7 +43,7 @@ run_drastic_trngaje_a133p() {
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH:$HOME/lib64"
 	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
-	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
+	LD_PRELOAD=$HOME/lib64_A133P_trngaje/libadvdrastic.so ./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -224,8 +224,15 @@ run_drastic_SmartPro(){
 # Only original version is currently available on TSPS. Hardcode this "core" selection.
 
 run_drastic_SmartProS() {
-	export CORE="DraStic-original"
-	run_drastic64
+	#export CORE="DraStic-original"
+	if [ "$CORE" = "DraStic-original" ]; then
+		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
+        else
+                display_core_unrecognized_for_platform_message
+        fi
+
 }
 
 ##### PIXEL 2 #####
