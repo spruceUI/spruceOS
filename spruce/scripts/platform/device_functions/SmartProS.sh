@@ -291,7 +291,7 @@ device_init() {
             echo 1 114 0 # Vol down released
             echo 0 0 0   # tell sendevent to exit
         } | sendevent $EVENT_PATH_VOLUME 
-        sleep 1
+        sleep 3
         echo 0 > /sys/class/speaker/mute
     ) &
 }
