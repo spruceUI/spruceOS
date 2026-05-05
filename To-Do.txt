@@ -12,7 +12,7 @@
 - Mini splore update from tenlevels
 - Installer update, add version of release to UI
 - Duckstation SA?
-
+- Towards end of release cycle - update script to handle RA config changes, etc. (use my changes, don't just make stuff up again plz Claude)
 
 --- Ry ------------------------------------------------------------------------
 
