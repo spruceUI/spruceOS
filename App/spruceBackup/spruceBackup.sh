@@ -84,6 +84,7 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
+/mnt/SDCARD/App/FileManagement/config.ini
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
@@ -107,11 +108,13 @@ folders="
 /mnt/SDCARD/RetroArch/.retroarch/shaders
 /mnt/SDCARD/RetroArch/.retroarch/cheats
 /mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartPro.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-SmartProS.cfg
-/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg
 /mnt/SDCARD/Saves/spruce/backups/spruce-config.json
 /mnt/SDCARD/Saves/spruce/emu_backups
 /mnt/SDCARD/Saves/spruce/theme_backups
