@@ -45,8 +45,14 @@ power_button_pressed() {
 trap 'kill $GET_EVENT_PID 2>/dev/null; rm -f "$POWER_BUTTON_PIPE"' EXIT
 
 get_shutdown_timer() {
+    local DISABLE_IF_CHARGING
+    DISABLE_IF_CHARGING="$(get_config_value '.menuOptions."Battery Settings".disableShutdownFromSleepIfCharging.selected' "False")"
     local LID_TIMER
-    LID_TIMER="$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "15m")"
+    if [ "$DISABLE_IF_CHARGING" = "True" ] && [ "$(device_get_charging_status)" = "Charging" ]; then
+        LID_TIMER="Off"
+    else
+        LID_TIMER="$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "15m")"
+    fi
     local IDLE_TIMEOUT=0
 
     case "$LID_TIMER" in

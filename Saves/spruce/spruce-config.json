@@ -71,6 +71,15 @@
                 ],
                 "selected": "5m"
             },
+            "disableShutdownFromSleepIfCharging": {
+                "display": "Only shutdown after sleeping if unplugged",
+                "description": "ignores shutdown timeout if charging",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "idlemonInMenu": {
                 "display": "Shutdown while idle in menu",
                 "description": "only applies in main UI (reboot to apply)",
