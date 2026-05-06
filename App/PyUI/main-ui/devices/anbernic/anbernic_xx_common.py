@@ -3,6 +3,8 @@ import re
 import shutil
 import subprocess
 import threading
+import time
+
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
@@ -46,8 +48,6 @@ class AnbernicXXCommon(DeviceCommon):
         system_cfg_path = "/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json"
         self._load_system_config(system_cfg_path, default_cfg_path)
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        self.hardware_poller = MiyooFlipPoller(self)
-        threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
         self.game_utils = MiyooTrimGameSystemUtils()
 
         self._set_lumination_to_config()
@@ -57,6 +57,8 @@ class AnbernicXXCommon(DeviceCommon):
         #self._set_hue_to_config()
 
         if(PyUiConfig.enable_button_watchers()):
+            self.hardware_poller = MiyooFlipPoller(self)
+            threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
             from controller.controller import Controller
             #/dev/miyooio if we want to get rid of miyoo_inputd
             # debug in terminal: hexdump  /dev/miyooio
@@ -207,9 +209,6 @@ class AnbernicXXCommon(DeviceCommon):
             self.volume_up(5)
         elif(ControllerInput.VOLUME_DOWN == controller_input):
             self.volume_up(-5)
-
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
@@ -430,8 +429,11 @@ class AnbernicXXCommon(DeviceCommon):
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
-
+    @throttle.limit_refresh(5)
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
+        if(not self.is_wifi_enabled()):
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+
         try:
             result = subprocess.run(
                 ["iw", "dev", "wlan0", "link"],
@@ -473,11 +475,12 @@ class AnbernicXXCommon(DeviceCommon):
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
+        if not self.is_wifi_enabled():
+            return "Off"
+
         import socket
         import fcntl
         import struct
-        if not self.is_wifi_enabled():
-            return "Off"
 
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -513,10 +516,35 @@ class AnbernicXXCommon(DeviceCommon):
         return self.system_config.is_wifi_enabled()
 
     def disable_wifi(self):
-        pass
-
+        self.system_config.set_wifi(0)
+        self.system_config.save_config()
+        PyUiLogger.get_logger().info("Stopping WiFi Services")
+        ProcessRunner.run(['killall', '-15', 'wpa_supplicant'])
+        time.sleep(0.1)  
+        ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
+        time.sleep(0.1)  
+         
     def enable_wifi(self):
-        pass
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
+        try:
+            # Check if wpa_supplicant is running using ps -f
+            result = self.get_running_processes()
+            if 'wpa_supplicant' in result.stdout:
+                return
+
+            # If not running, start it in the background
+            subprocess.Popen([
+                'wpa_supplicant',
+                '-B',
+                '-D', 'nl80211',
+                '-i', 'wlan0',
+                '-c', self.get_wpa_supplicant_conf_path()
+            ])
+            time.sleep(0.5)  # Wait for it to initialize
+            PyUiLogger.get_logger().info("wpa_supplicant started.")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
 
     def uses_deinit_v2(self):
         return True
