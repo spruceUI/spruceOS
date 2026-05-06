@@ -107,7 +107,7 @@ enable_or_disable_rgb() {
 
 prepare_for_pyui_launch(){
     disable_digital_to_analog
-    set_performance
+    set_overclock
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
         # SDL2 takes forever, let it initialize before going to powersave
