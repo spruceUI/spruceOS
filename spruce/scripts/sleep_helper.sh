@@ -140,6 +140,12 @@ trigger_sleep() {
                 fi
             fi
 
+            local PREV_TIMEOUT=IDLE_TIMEOUT
+            IDLE_TIMEOUT=$(get_shutdown_timer)
+            if [ "$IDLE_TIMEOUT" -ne "$PREV_TIMEOUT" ]; then
+                log_message "Detected a change in timeout, restarting idle timeout countdown: ${IDLE_TIMEOUT}s until poweroff if lid remains closed"
+                start_ts=$(date +%s)
+            fi
             sleep 1
             now_ts=$(date +%s)
             elapsed=$((now_ts - start_ts))
