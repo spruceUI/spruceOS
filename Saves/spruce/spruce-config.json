@@ -72,8 +72,8 @@
                 "selected": "5m"
             },
             "disableShutdownFromSleepIfCharging": {
-                "display": "Only shutdown after sleeping if unplugged",
-                "description": "ignores shutdown timeout if charging",
+                "display": "Shutdown after sleeping if unplugged",
+                "description": "ignore shutdown timeout if charging",
                 "options": [
                     "True",
                     "False"
