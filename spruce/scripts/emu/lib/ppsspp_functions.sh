@@ -21,9 +21,10 @@ SS_DIR="/mnt/SDCARD/Saves/screenshots/PPSSPP"
 PSP_SS_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SCREENSHOT"
 PSP_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
 
-move_dotconfig_into_place() {
-	if [ -d "/mnt/SDCARD/Emu/.emu_setup/.config" ]; then
-		cp -rf "/mnt/SDCARD/Emu/.emu_setup/.config" "/mnt/SDCARD/Saves/.config" && log_message "Copied .config folder into Saves folder."
+set_up_default_configs_if_needed() {
+	if [ ! -d "/mnt/SDCARD/Saves/.config/ppsspp/PSP" ]; then
+		mkdir -p "/mnt/SDCARD/Saves/.config/ppsspp/"
+		cp -rf "/mnt/SDCARD/Emu/PSP/default_configs" "/mnt/SDCARD/Saves/.config/ppsspp/PSP" && log_message "Copied .config folder into Saves folder."
 	else
 		log_message "WARNING!!! No .config folder found!"
 	fi
@@ -37,6 +38,7 @@ move_screenshots_if_present() {
 
 run_ppsspp() {
 
+	set_up_default_configs_if_needed
 	load_ppsspp_configs
 	configure_retroachievements
 
