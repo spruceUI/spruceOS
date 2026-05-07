@@ -474,10 +474,7 @@ class AnbernicXXCommon(DeviceCommon):
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
     @throttle.limit_refresh(10)
-    def get_ip_addr_text(self):
-        if not self.is_wifi_enabled():
-            return "Off"
-
+    def _get_ip_addr_text(self):
         import socket
         import fcntl
         import struct
@@ -496,6 +493,10 @@ class AnbernicXXCommon(DeviceCommon):
         except Exception:
             return "Error"
         
+    def get_ip_addr_text(self):
+        if not self.is_wifi_enabled():
+            return "Off"
+        return self._get_ip_addr_text()
              
     def set_wifi_power(self, value):
         pass
@@ -523,6 +524,10 @@ class AnbernicXXCommon(DeviceCommon):
         time.sleep(0.1)  
         ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
         time.sleep(0.1)  
+        ProcessRunner.run(['killall', '-15', 'dhclient'])
+        time.sleep(0.1)  
+        ProcessRunner.run(['killall', '-9', 'dhclient'])
+        time.sleep(0.1)  
          
     def enable_wifi(self):
         self.system_config.set_wifi(1)
@@ -543,6 +548,14 @@ class AnbernicXXCommon(DeviceCommon):
             ])
             time.sleep(0.5)  # Wait for it to initialize
             PyUiLogger.get_logger().info("wpa_supplicant started.")
+
+            subprocess.Popen([
+                'dhclient',
+                'wlan0'
+            ])
+            time.sleep(0.5)  # Wait for it to initialize
+            PyUiLogger.get_logger().info("dhclient started")
+
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
 

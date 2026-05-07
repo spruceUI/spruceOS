@@ -256,7 +256,7 @@ setup_for_retroarch(){
     echo "$RA_BIN"
 }
 
-prepare_for_pyui_launch(){
-	# Where else to put this?
+device_extra_wifi_setup(){
     dhclient wlan0
+    log_message "Starting dhclient"
 }
