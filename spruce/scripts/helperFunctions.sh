@@ -1082,6 +1082,8 @@ enable_wifi() {
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
     /mnt/SDCARD/spruce/scripts/networkservices.sh &
     log_message "WiFi turned on"
+
+    device_extra_wifi_setup
 }
 
 enable_or_disable_wifi_per_system_json() {
