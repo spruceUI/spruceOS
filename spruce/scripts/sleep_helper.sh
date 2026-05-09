@@ -45,14 +45,8 @@ power_button_pressed() {
 trap 'kill $GET_EVENT_PID 2>/dev/null; rm -f "$POWER_BUTTON_PIPE"' EXIT
 
 get_shutdown_timer() {
-    local DISABLE_IF_CHARGING
-    DISABLE_IF_CHARGING="$(get_config_value '.menuOptions."Battery Settings".disableShutdownFromSleepIfCharging.selected' "False")"
     local LID_TIMER
-    if [ "$DISABLE_IF_CHARGING" = "True" ] && [ "$(device_get_charging_status)" = "Charging" ]; then
-        LID_TIMER="Off"
-    else
-        LID_TIMER="$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "15m")"
-    fi
+    LID_TIMER="$(get_config_value '.menuOptions."Battery Settings".shutdownFromSleep.selected' "15m")"
     local IDLE_TIMEOUT=0
 
     case "$LID_TIMER" in
@@ -140,15 +134,17 @@ trigger_sleep() {
                 fi
             fi
 
-            local PREV_TIMEOUT=$IDLE_TIMEOUT
-            IDLE_TIMEOUT=$(get_shutdown_timer)
-            if [ "$IDLE_TIMEOUT" != "$PREV_TIMEOUT" ]; then
-                log_message "Detected a change in timeout, restarting idle timeout countdown: ${IDLE_TIMEOUT}s until poweroff if lid remains closed"
-                start_ts=$(date +%s)
-            fi
             sleep 1
             now_ts=$(date +%s)
             elapsed=$((now_ts - start_ts))
+            if [ "$elapsed" -ge "$IDLE_TIMEOUT" ]; then
+                local DISABLE_IF_CHARGING="$(get_config_value '.menuOptions."Battery Settings".disableShutdownFromSleepIfCharging.selected' "False")"
+                if [ "$DISABLE_IF_CHARGING" = "True" ] && [ "$(device_get_charging_status)" = "Charging" ]; then
+                    log_message "Device is plugged in and shutdown prevention option enabled, restarting sleep countdown"
+                    start_ts=$(date +%s)
+                    elapsed=$((now_ts - start_ts))
+                fi
+            fi
         done
 
         # Timeout reached without exitting sleep → poweroff
