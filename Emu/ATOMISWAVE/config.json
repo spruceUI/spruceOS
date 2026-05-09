@@ -1,7 +1,7 @@
 {
-  "label": "Naomi",
-  "icon": "naomi.png",
-  "iconsel": "naomi_sel.png",
+  "label": "Atomiswave",
+  "icon": "atomiswave.png",
+  "iconsel": "atomiswave_sel.png",
   "themecolor": "FFFFFF",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "chd|cdi|gdi|cue|iso|m3u|zip|dat",
@@ -76,12 +76,12 @@
     }
   },
   "sortOrder": 1800,
-  "brand": "Sega",
+  "brand": "Sammy",
   "type": "arcade",
-  "releaseYear": 1998,
+  "releaseYear": 2003,
   "default_emulator": "flycast",
   "scaling_min_freq": 1008000,
   "alternativeFolderNames": [
-    "naomi"
+    "atomiswave"
   ]
 }
