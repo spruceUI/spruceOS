@@ -67,7 +67,7 @@ case $EMU_NAME in
 		fi
 		;;
 
-	"DC"|"NAOMI")
+	"DC"|"NAOMI"|"ATOMISWAVE")
 		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast-stock" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
 			run_flycast_standalone
