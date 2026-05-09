@@ -72,6 +72,10 @@
                 "selected": "5m"
             },
             "disableShutdownFromSleepIfCharging": {
+                "devices":["MIYOO_MINI",
+                           "MIYOO_MINI_V4",
+                           "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP"],
                 "display": "Shutdown after sleeping if unplugged",
                 "description": "ignore shutdown timeout if charging",
                 "options": [
