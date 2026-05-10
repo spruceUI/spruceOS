@@ -106,7 +106,7 @@ enable_or_disable_rgb() {
 }
 
 prepare_for_pyui_launch(){
-    disable_digital_to_analog
+    disable_dpad_mod
     set_overclock
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
@@ -331,11 +331,11 @@ send_menu_button_to_retroarch() {
     fi
 }
 
-enable_digital_to_analog() {
+enable_dpad_to_analog() {
     evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
             --hook btn:tl2 btn:tr2 toggle \
             --withhold btn:tl2 btn:tr2 \
-            --toggle "" @digital @analog \
+            --toggle "" @dpad @analog \
             --map yield btn:east btn:south \
             --map yield btn:south btn:east \
             --map yield btn:dpad_left:0@analog abs:x:0 \
@@ -349,10 +349,28 @@ enable_digital_to_analog() {
             --output name="pixel2_joypad_alt" &
 }
 
-disable_digital_to_analog() {
-    pkill "evsieve"
+enable_dpad_to_mouse() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @dpad @mouse \
+            --hook btn:dpad_left:1~2 send-key=key:left \
+            --hook btn:dpad_right:1~2 send-key=key:right \
+            --hook btn:dpad_up:1~2 send-key=key:up \
+            --hook btn:dpad_down:1~2 send-key=key:down \
+            --oscillate key:left key:right key:up key:down period=0.01 \
+            --map yield key:left:1@mouse rel:x:-2 \
+            --map yield key:right:1@mouse rel:x:2 \
+            --map yield key:up:1@mouse rel:y:-2 \
+            --map yield key:down:1@mouse rel:y:2 \
+            --map yield btn:tl:0~1@mouse btn:left \
+            --map yield btn:tr:0~1@mouse btn:right \
+            --output &
 }
 
+disable_dpad_mod() {
+    pkill "evsieve"
+}
 
 set_default_ra_hotkeys() {
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
