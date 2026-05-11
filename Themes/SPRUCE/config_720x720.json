@@ -42,11 +42,12 @@
         "selectedcolor": "#FBF1C7"
     },
     "bindOverMiyooTheme": true,
-    "recentsEnabled": false,
+    "recentsEnabled": true,
     "topBarInitialXOffset": 67,
     "setTopBarTextToGameSelection": true,
     "fullScreenGridGameMenuResizeType": "FIT",
     "mainMenuTitle": "",
     "displayVolumeNumbers": true,
-    "gameSystemSelectRowCount": 3
+    "mainMenuColCount": 5,
+    "gameSelectionViewType": "TEXT_AND_IMAGE"
 }
