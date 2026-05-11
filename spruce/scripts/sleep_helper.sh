@@ -137,6 +137,14 @@ trigger_sleep() {
             sleep 1
             now_ts=$(date +%s)
             elapsed=$((now_ts - start_ts))
+            if [ "$elapsed" -ge "$IDLE_TIMEOUT" ]; then
+                local DISABLE_IF_CHARGING="$(get_config_value '.menuOptions."Battery Settings".disableShutdownFromSleepIfCharging.selected' "False")"
+                if [ "$DISABLE_IF_CHARGING" = "True" ] && [ "$(device_get_charging_status)" = "Charging" ]; then
+                    log_message "Device is plugged in and shutdown prevention option enabled, restarting sleep countdown"
+                    start_ts=$(date +%s)
+                    elapsed=$((now_ts - start_ts))
+                fi
+            fi
         done
 
         # Timeout reached without exitting sleep → poweroff
