@@ -27,3 +27,5 @@
     - merge
 - add trimui zram modules from bmdhacks
 - reset config tasks for more standalone emulators
+- add vibrate to XX devices
+- bug: powerbutton watchdog kills everything BUT RA... or does RA just immediately relaunch?
