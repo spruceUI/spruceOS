@@ -11,10 +11,10 @@
 
 - Mini splore update from tenlevels
 - Installer update, add version of release to UI
-- Duckstation SA?
 - Towards end of release cycle:
     - update script to handle RA config changes, etc. (use my changes, don't just make stuff up again plz Claude)
     - also handle migration of any user-backed up stuff that used to be in Emu/.emu_setup which no longer exists
+- update vTree to latest
     
 --- Ry ------------------------------------------------------------------------
 
