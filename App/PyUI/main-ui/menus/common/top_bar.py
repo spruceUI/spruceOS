@@ -33,12 +33,15 @@ class TopBar:
         battery_percent = Device.get_device().get_battery_percent()
         charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
-        img_padding = max(6, int(10 * Theme._default_multiplier))
+        img_padding = max(6, int(8 * Theme._default_multiplier))
         target_icon_height = min(
-            max(24, int(32 * Theme._default_multiplier)),
-            max(24, visual_top_bar_h - 4))
+            max(28, int(36 * Theme._default_multiplier)),
+            max(28, visual_top_bar_h - 2))
 
         x_offset = Device.get_device().screen_width() - img_padding
+        w, h = Display.render_text(str(battery_percent)+"%", x_offset, center_of_bar, Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
+        x_offset = x_offset - w - img_padding
+
         if(Theme.display_battery_icon()):
             w, h = Display.render_image(
                 battery_icon, x_offset, center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED,

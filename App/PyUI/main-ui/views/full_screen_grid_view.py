@@ -450,15 +450,19 @@ class FullScreenGridView(View):
         if box_art_image_path is None:
             return False
 
-        margin = int(22 * Theme._default_multiplier)
-        gap = int(20 * Theme._default_multiplier)
-        top_y = self.get_top_bar_height() + int(28 * Theme._default_multiplier) + y_add_offset
+        margin = int(18 * Theme._default_multiplier)
+        gap = int(18 * Theme._default_multiplier)
+        top_y = self.get_top_bar_height() + int(18 * Theme._default_multiplier) + y_add_offset
+        text_margin = int(18 * Theme._default_multiplier)
+        text_reserve_h = int(76 * Theme._default_multiplier)
 
         box_art_width = int(210 * Theme._default_multiplier)
-        box_art_height = int(315 * Theme._default_multiplier)
-        preview_width = Device.get_device().screen_width() - (margin * 2) - gap - box_art_width
-        preview_height = int(preview_width * 0.75)
-        preview_y = top_y + int(18 * Theme._default_multiplier)
+        box_art_height = max(
+            int(330 * Theme._default_multiplier),
+            Device.get_device().screen_height() - top_y - text_reserve_h - text_margin)
+        preview_width = int((Device.get_device().screen_width() - (margin * 2) - gap - box_art_width) * 0.92)
+        preview_height = int(preview_width * 0.70)
+        preview_y = top_y + int(24 * Theme._default_multiplier)
 
         box_art_x = margin + x_offset
         preview_x = margin + box_art_width + gap + x_offset
