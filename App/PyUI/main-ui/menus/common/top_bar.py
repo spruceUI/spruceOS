@@ -26,16 +26,17 @@ class TopBar:
     def render_top_bar_menu_skipped(self, title, hide_top_bar_icons = False) :
         from display.display import Display
         top_bar_bg = Theme.get_title_bar_bg()
-        self.top_bar_w, self.top_bar_h = Display.get_image_dimensions(top_bar_bg)
-        center_of_bar = self.top_bar_h //2
+        visual_top_bar_w, visual_top_bar_h = Display.get_image_dimensions(top_bar_bg)
+        visual_top_bar_h = max(32, visual_top_bar_h)
+        center_of_bar = visual_top_bar_h //2
 
         battery_percent = Device.get_device().get_battery_percent()
         charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
-        img_padding = max(6, int(8 * Theme._default_multiplier))
+        img_padding = max(6, int(10 * Theme._default_multiplier))
         target_icon_height = min(
-            max(12, int(22 * Theme._default_multiplier)),
-            max(12, self.top_bar_h - img_padding))
+            max(24, int(32 * Theme._default_multiplier)),
+            max(24, visual_top_bar_h - 4))
 
         x_offset = Device.get_device().screen_width() - img_padding
         if(Theme.display_battery_icon()):
@@ -57,6 +58,9 @@ class TopBar:
                 Theme.get_volume_indicator(self.volume), x_offset, center_of_bar,
                 RenderMode.MIDDLE_RIGHT_ALIGNED, target_height=target_icon_height)
             x_offset = x_offset - w - img_padding
+
+        self.top_bar_w = visual_top_bar_w
+        self.top_bar_h = 0
 
 
     def render_top_bar_menu_not_skipped(self, title, hide_top_bar_icons = False) :
