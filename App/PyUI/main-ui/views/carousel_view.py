@@ -16,12 +16,12 @@ from views.view import View
 from utils.logger import PyUiLogger
 
 class CarouselView(View):
-    def __init__(self,top_bar_text, options: List[GridOrListEntry], cols : int, 
-                  selected_index=0, show_grid_text=False,  
-                  set_top_bar_text_to_selection=False, 
-                  set_bottom_bar_text_to_selection=None, 
+    def __init__(self,top_bar_text, options: List[GridOrListEntry], cols : int,
+                  selected_index=0, show_grid_text=False,
+                  set_top_bar_text_to_selection=False,
+                  set_bottom_bar_text_to_selection=None,
                   resize_type=None,
-                  selected_entry_width_percent=None, 
+                  selected_entry_width_percent=None,
                   shrink_further_away = None,
                   sides_hang_off_edge = None,
                   missing_image_path = None,
@@ -31,12 +31,10 @@ class CarouselView(View):
                   fixed_width=None,
                   fixed_selected_width=None,
                   selected_offset=None,
-                  use_selected_image_in_animation=None,
-                  top_bar_status_only=False):
+                  use_selected_image_in_animation=None):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
-        self.top_bar_status_only = top_bar_status_only
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.options : List[GridOrListEntry] = list(options)
         self.options_are_sorted = self.is_alphabetized(options)
@@ -53,7 +51,7 @@ class CarouselView(View):
         self.options_length = len(options)
         if(self.selected_entry_width_percent is None):
             self.selected_entry_width_percent = 40
-        self.fixed_width = fixed_width        
+        self.fixed_width = fixed_width
 
         if(x_pad is None):
             x_pad = 10
@@ -78,13 +76,13 @@ class CarouselView(View):
 
         while(len(self.options) <= cols*2):
             self.options += self.options
-                       
+
         cols = min(cols, len(self.options))
         if(cols %2 == 0):
-            cols +=1 
-        
+            cols +=1
+
         cols = min(cols, len(self.options))
-        
+
         self.cols = cols
         self.current_left = len(self.options)-(cols-1)//2
         self.current_right = (cols-1)//2
@@ -185,7 +183,7 @@ class CarouselView(View):
             right = [secondary_width_percent for i in range(k)]
 
             image_widths = left + mid + right
-        
+
         if(self.sides_hang_off_edge):
             n = len(image_widths)
 
@@ -200,7 +198,7 @@ class CarouselView(View):
             new_widths = [w + x for w in image_widths]
         else:
             total = sum(image_widths)
-            target = 100 
+            target = 100
             extra_per_item = (target - total) / len(image_widths)
 
             new_widths = [w + extra_per_item for w in image_widths]
@@ -209,7 +207,7 @@ class CarouselView(View):
 
 
     def _clear(self):
-        
+
         if self.selected < len(self.options):
             selected = self.options[self.selected]
             bg = Theme.get_bg_for_img(selected.get_image_path())
@@ -219,43 +217,41 @@ class CarouselView(View):
                 Display.set_new_bg(bg, is_custom_theme_background=True)
 
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
-            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True,
-                          top_bar_status_only=self.top_bar_status_only)
+            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
         elif(self.set_bottom_bar_text_to_selection):
-            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text(),
-                          top_bar_status_only=self.top_bar_status_only)
+            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
         else:
-            Display.clear("", bottom_bar_text="", top_bar_status_only=self.top_bar_status_only)
+            Display.clear("", bottom_bar_text="")
 
     def _render_image(self,
-                      image_path: str, 
-                      x: int, 
-                      y: int, 
-                      render_mode, 
-                      target_width, 
+                      image_path: str,
+                      x: int,
+                      y: int,
+                      render_mode,
+                      target_width,
                       target_height,
                       resize_type):
-        width, height = Display.render_image(image_path=image_path, 
-                            x=x, 
+        width, height = Display.render_image(image_path=image_path,
+                            x=x,
                             y=y,
                             render_mode=render_mode,
                             target_width=target_width,
                             target_height=target_height,
                             resize_type=resize_type)
         if(0 == width and 0 == height):
-            Display.render_image(image_path=self.missing_image_path, 
-                                x=x, 
+            Display.render_image(image_path=self.missing_image_path,
+                                x=x,
                                 y=y,
                                 render_mode=render_mode,
                                 target_width=target_width,
                                 target_height=target_height,
                                 resize_type=resize_type)
-            
+
     def _render(self):
         self.correct_selected_for_off_list()
         self._clear()
 
-        
+
         #TODO Get hard coded values for padding from +
         usable_width = Device.get_device().screen_width()
         visible_options, selected_visible_index = self.get_visible_options()
@@ -273,7 +269,7 @@ class CarouselView(View):
 
         else:
             widths = [self.fixed_width for _ in range(self.cols)]
-            widths[selected_visible_index] = self.fixed_selected_width               
+            widths[selected_visible_index] = self.fixed_selected_width
             # Step 1: cumulative offsets
             x_offsets = [0] + [sum(widths[:i]) for i in range(1, len(widths))]
 
@@ -312,7 +308,7 @@ class CarouselView(View):
             self.animate_transition()
         else:
             self.animated_count = 0
-        
+
         iterable = list(enumerate(visible_options))
 
         self.render_images(iterable, x_offsets, widths, render_selected_only=False)
@@ -335,7 +331,7 @@ class CarouselView(View):
             letter = ''
             if(self.options_are_sorted):
                 letter = self.options[self.selected].get_primary_text()[0]
-            Display.add_index_text(self.selected%self.options_length + 1, self.options_length, 
+            Display.add_index_text(self.selected%self.options_length + 1, self.options_length,
                                    letter=letter)
 
         Display.present()
@@ -356,15 +352,15 @@ class CarouselView(View):
             elif(not render_selected_only and is_selected):
                 continue
             x_offset = x_offsets[visible_index]
-           
+
             y_image_offset = Display.get_center_of_usable_screen_height() + self.additional_y_offset
             if(is_selected):
                 image = imageTextPair.get_image_path_selected_ideal(widths[visible_index],Display.get_usable_screen_height())
             else:
                 image = imageTextPair.get_image_path_ideal(widths[visible_index],Display.get_usable_screen_height())
 
-            self._render_image(image, 
-                                    x_offset, 
+            self._render_image(image,
+                                    x_offset,
                                     y_image_offset,
                                     render_mode,
                                     target_width=widths[visible_index],
@@ -379,39 +375,31 @@ class CarouselView(View):
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
         self._render()
-        
+
         if(Controller.get_input()):
             if Controller.last_input() == ControllerInput.DPAD_LEFT:
                 self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
                 self.adjust_selected(1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
-                if(Theme.skip_main_menu()):
-                    Display.restore_bg()
-                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
-                else:
-                    self.skip_next_animation = True
-                    self.adjust_selected(-1* self.cols, skip_by_letter=False)
+                self.skip_next_animation = True
+                self.adjust_selected(-1* self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R1:
-                if(Theme.skip_main_menu()):
-                    Display.restore_bg()
-                    return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
-                else:
-                    self.skip_next_animation = True
-                    self.adjust_selected(self.cols, skip_by_letter=False)
+                self.skip_next_animation = True
+                self.adjust_selected(self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L2:
                 self.skip_next_animation = True
-                self.adjust_selected(-1* self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
+                self.adjust_selected(-1* self.cols, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.R2:
                 self.skip_next_animation = True
-                self.adjust_selected(self.cols, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
+                self.adjust_selected(self.cols, skip_by_letter=False)
             elif Controller.last_input() in select_controller_inputs:
                 Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
                 Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
-                
+
         return Selection(self.get_selected_option(),None, self.selected)
 
     def adjust_selected(self, amount, skip_by_letter):
@@ -435,7 +423,7 @@ class CarouselView(View):
                 widths_for_animation = list(self.prev_widths)
                 image_list = list(self.prev_visible_options)
                 new_visible_options, selected_visible_index = self.get_visible_options()
-        
+
                 if(not self.sides_hang_off_edge):
                     if rotate_left:
                         image_list.insert(0,new_visible_options[0])
@@ -464,7 +452,7 @@ class CarouselView(View):
                                 end_width = widths_for_animation[i+1]
                             else:
                                 # Last item exits to the right
-                                end_x_offset = (x_offsets_for_animation[-1] - x_offsets_for_animation[-2]) + x_offsets_for_animation[-1] 
+                                end_x_offset = (x_offsets_for_animation[-1] - x_offsets_for_animation[-2]) + x_offsets_for_animation[-1]
                                 end_width = start_width
                         else:
                             if i > 0:
@@ -477,7 +465,7 @@ class CarouselView(View):
 
                         new_x_offset = start_x_offset + (end_x_offset - start_x_offset) * t
                         new_width = start_width + (end_width - start_width) * t
-                        frame_x_offset.append(int(new_x_offset))         
+                        frame_x_offset.append(int(new_x_offset))
                         frame_widths.append(new_width)
 
                     if(not self.sides_hang_off_edge):
@@ -495,8 +483,8 @@ class CarouselView(View):
                         else:
                             image = imageTextPair.get_image_path_ideal(frame_widths[visible_index],Display.get_usable_screen_height())
 
-                        self._render_image(image, 
-                                                x_offset, 
+                        self._render_image(image,
+                                                x_offset,
                                                 y_image_offset,
                                                 render_mode,
                                                 target_width=frame_widths[visible_index],
@@ -517,7 +505,7 @@ class CarouselView(View):
                     #    time.sleep(frame_duration - (delta_time))
                     Display.present()
                     #last_frame_time = time.time()
-            
+
             self.animated_count += 1
         else:
             self.skip_next_animation = False

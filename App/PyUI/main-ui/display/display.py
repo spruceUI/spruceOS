@@ -87,8 +87,6 @@ class Display:
     window = None
     background_texture = None
     top_bar_text = None
-    hide_top_bar_icons = False
-    top_bar_status_only = False
     is_custom_theme_background = None
 
     _image_texture_cache = ImageTextureCache()
@@ -432,16 +430,13 @@ class Display:
             cls.bg_canvas = None
 
     @classmethod
-    def clear(cls,
-              top_bar_text,
+    def clear(cls, 
+              top_bar_text, 
               hide_top_bar_icons = False,
               bottom_bar_text = None,
               render_bottom_bar_icons_and_images = True,
-              force_top_and_bottom_bar = False,
-              top_bar_status_only = False):
+              force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
-        cls.hide_top_bar_icons = hide_top_bar_icons
-        cls.top_bar_status_only = top_bar_status_only
         
         if cls.is_custom_theme_background:
             #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
@@ -455,7 +450,7 @@ class Display:
         
 
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
-            cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons,top_bar_status_only)
+            cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
             cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
 
     @classmethod
@@ -989,7 +984,7 @@ class Display:
     @classmethod
     def present(cls, fade=False):
         if Theme.render_top_and_bottom_bar_last():
-            cls.top_bar.render_top_bar(cls.top_bar_text, cls.hide_top_bar_icons, cls.top_bar_status_only)
+            cls.top_bar.render_top_bar(cls.top_bar_text)
             cls.bottom_bar.render_bottom_bar()
 
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
