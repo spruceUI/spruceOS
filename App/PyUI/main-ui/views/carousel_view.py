@@ -31,10 +31,12 @@ class CarouselView(View):
                   fixed_width=None,
                   fixed_selected_width=None,
                   selected_offset=None,
-                  use_selected_image_in_animation=None):
+                  use_selected_image_in_animation=None,
+                  top_bar_status_only=False):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
+        self.top_bar_status_only = top_bar_status_only
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.options : List[GridOrListEntry] = list(options)
         self.options_are_sorted = self.is_alphabetized(options)
@@ -217,11 +219,13 @@ class CarouselView(View):
                 Display.set_new_bg(bg, is_custom_theme_background=True)
 
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
-            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True,
+                          top_bar_status_only=self.top_bar_status_only)
         elif(self.set_bottom_bar_text_to_selection):
-            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
+            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text(),
+                          top_bar_status_only=self.top_bar_status_only)
         else:
-            Display.clear("", bottom_bar_text="")
+            Display.clear("", bottom_bar_text="", top_bar_status_only=self.top_bar_status_only)
 
     def _render_image(self,
                       image_path: str, 

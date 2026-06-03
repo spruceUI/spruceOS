@@ -18,9 +18,9 @@ from views.view import View
 class GridView(View):
     def __init__(self, top_bar_text, options: List[GridOrListEntry], cols: int, rows: int, selected_bg: str = None,
                  selected_index=0, show_grid_text=True, resized_width=None, resized_height=None,
-                 set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None, 
+                 set_top_bar_text_to_selection=False, set_bottom_bar_text_to_selection=False, resize_type=None,
                  unselected_bg = None, grid_img_y_offset=None, missing_image_path=None,
-                 wrap_around_single_row=None):
+                 wrap_around_single_row=None, top_bar_status_only=False):
         super().__init__()
         self.resized_width = resized_width
         self.resized_height = resized_height
@@ -30,6 +30,7 @@ class GridView(View):
             self.resized_height = None
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
+        self.top_bar_status_only = top_bar_status_only
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection
         self.set_bottom_bar_text_to_selection = set_bottom_bar_text_to_selection
         self.set_options(options)
@@ -239,11 +240,13 @@ class GridView(View):
     def _render(self):
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(
-                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True,
+                top_bar_status_only=self.top_bar_status_only)
         elif(self.set_bottom_bar_text_to_selection and len(self.options) > 0):
-            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
+            Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text(),
+                          top_bar_status_only=self.top_bar_status_only)
         else:
-            Display.clear(self.top_bar_text)
+            Display.clear(self.top_bar_text, top_bar_status_only=self.top_bar_status_only)
         self.correct_selected_for_off_list()
 
         if(self.rows > 1):

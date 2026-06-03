@@ -22,7 +22,8 @@ class FullScreenGridView(View):
                  unselected_bg = None, missing_image_path=None,
                  resize_type = ResizeType.ZOOM,
                  render_text_overlay = True,
-                 image_resize_height_multiplier = None):
+                 image_resize_height_multiplier = None,
+                 top_bar_status_only=False):
         super().__init__()
         if(render_text_overlay is None):
             render_text_overlay = True
@@ -36,6 +37,7 @@ class FullScreenGridView(View):
             self.resize_type = ResizeType.ZOOM
 
         self.top_bar_text = top_bar_text
+        self.top_bar_status_only = top_bar_status_only
         self.set_top_bar_text_to_selection = set_top_bar_text_to_selection and not Theme.skip_main_menu()
         self.options: List[GridOrListEntry] = options
 
@@ -260,9 +262,12 @@ class FullScreenGridView(View):
     def _clear(self):
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(
-                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True, render_bottom_bar_icons_and_images=False)
+                self.options[self.selected].get_primary_text(), hide_top_bar_icons=True,
+                render_bottom_bar_icons_and_images=False,
+                top_bar_status_only=self.top_bar_status_only)
         else:
-            Display.clear(self.top_bar_text, render_bottom_bar_icons_and_images=False)
+            Display.clear(self.top_bar_text, render_bottom_bar_icons_and_images=False,
+                          top_bar_status_only=self.top_bar_status_only)
 
     def _render_entire_screen(self, index, x_offset):
         self._clear()

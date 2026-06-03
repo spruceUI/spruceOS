@@ -18,11 +18,50 @@ class TopBar:
         self.selected_tab = "Games"
         self.top_bar_h = 0
 
-    def render_top_bar(self, title, hide_top_bar_icons = False) :
+    def render_top_bar(self, title, hide_top_bar_icons = False, status_only = False) :
+        if(status_only):
+            self.render_status_only_top_bar()
+            return
+
         if(Theme.skip_main_menu()):
             self.render_top_bar_menu_skipped(title, hide_top_bar_icons)
         else:
             self.render_top_bar_menu_not_skipped(title, hide_top_bar_icons)
+
+    def render_status_only_top_bar(self):
+        from display.display import Display
+        self.title = ""
+        self.top_bar_w = 0
+        self.top_bar_h = 0
+
+        padding = max(4, int(6 * Theme._default_multiplier))
+        target_icon_height = max(8, int(16 * Theme._default_multiplier))
+        center_of_icons = padding + target_icon_height // 2
+        x_offset = Device.get_device().screen_width() - padding
+
+        battery_percent = Device.get_device().get_battery_percent()
+        charging = Device.get_device().get_charge_status()
+        battery_icon = Theme.get_battery_icon(charging,battery_percent)
+
+        if(Theme.display_battery_icon()):
+            w, h = Display.render_image(
+                battery_icon,
+                x_offset,
+                center_of_icons,
+                RenderMode.MIDDLE_RIGHT_ALIGNED,
+                target_height=target_icon_height)
+            x_offset = x_offset - w - padding
+
+        if(Device.get_device().supports_wifi() and Device.get_device().is_wifi_enabled()):
+            wifi_status = Device.get_device().get_wifi_status()
+            wifi_icon = Theme.get_wifi_icon(wifi_status)
+            w, h = Display.render_image(
+                wifi_icon,
+                x_offset,
+                center_of_icons,
+                RenderMode.MIDDLE_RIGHT_ALIGNED,
+                target_height=target_icon_height)
+            x_offset = x_offset - w - padding
 
     def render_top_bar_menu_skipped(self, title, hide_top_bar_icons = False) :
         from display.display import Display

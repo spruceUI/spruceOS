@@ -43,8 +43,11 @@ class RecentsMenuGS(RecentsMenu):
     def get_set_top_bar_text_to_game_selection(self):
         return Theme.get_set_top_bar_text_to_game_selection_for_game_switcher()
 
+    def top_bar_status_only(self):
+        return True
+
     def get_image_resize_height_multiplier(self):
         if(ResizeType.ZOOM == Theme.get_resize_type_for_game_switcher() and Theme.true_full_screen_game_switcher()):
             return 1.0
         else:
-            return None  
+            return None
