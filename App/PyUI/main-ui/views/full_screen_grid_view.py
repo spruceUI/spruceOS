@@ -462,7 +462,8 @@ class FullScreenGridView(View):
             Device.get_device().screen_height() - top_y - text_reserve_h - text_margin)
         preview_width = int((Device.get_device().screen_width() - (margin * 2) - gap - box_art_width) * 0.92)
         preview_height = int(preview_width * 0.70)
-        preview_y = top_y + int(24 * Theme._default_multiplier)
+        right_stack_y = top_y + int(42 * Theme._default_multiplier)
+        preview_y = right_stack_y
 
         box_art_x = margin + x_offset
         preview_x = margin + box_art_width + gap + x_offset
@@ -476,10 +477,10 @@ class FullScreenGridView(View):
             ResizeType.ZOOM
         )
         if preview_image_path is not None:
-            progress_y = top_y - int(8 * Theme._default_multiplier)
+            progress_y = right_stack_y
             progress_h = self._render_playtime_progress_bar(extra_data, preview_x, progress_y, preview_width)
             if progress_h > 0:
-                preview_y = top_y + progress_h + int(8 * Theme._default_multiplier)
+                preview_y = progress_y + progress_h + int(8 * Theme._default_multiplier)
 
             self._render_framed_image(
                 preview_image_path,
