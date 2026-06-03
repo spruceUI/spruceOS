@@ -26,14 +26,16 @@ class TopBar:
     def render_top_bar_menu_skipped(self, title, hide_top_bar_icons = False) :
         from display.display import Display
         top_bar_bg = Theme.get_title_bar_bg()
-        self.top_bar_w, self.top_bar_h = Display.render_image(top_bar_bg,0,0)
+        self.top_bar_w, self.top_bar_h = Display.get_image_dimensions(top_bar_bg)
         center_of_bar = self.top_bar_h //2
 
         battery_percent = Device.get_device().get_battery_percent()
         charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
-        img_padding = max(4, int(6 * Theme._default_multiplier))
-        target_icon_height = max(8, int(16 * Theme._default_multiplier))
+        img_padding = max(6, int(8 * Theme._default_multiplier))
+        target_icon_height = min(
+            max(12, int(22 * Theme._default_multiplier)),
+            max(12, self.top_bar_h - img_padding))
 
         x_offset = Device.get_device().screen_width() - img_padding
         if(Theme.display_battery_icon()):
