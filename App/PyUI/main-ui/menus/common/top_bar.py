@@ -4,7 +4,6 @@ import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
-from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -30,50 +29,31 @@ class TopBar:
         self.top_bar_w, self.top_bar_h = Display.render_image(top_bar_bg,0,0)
         center_of_bar = self.top_bar_h //2
 
-        x_offset = Theme.get_top_bar_initial_x_offset()
-
-        text_padding = 20 * Theme._default_multiplier
-        tabs = [("Game", Language.games())]
-        if(Theme.get_apps_enabled()):
-            tabs.append(("App", Language.apps()))
-        if(Theme.get_settings_enabled()):
-            tabs.append(("Setting", Language.settings()))
-
-        for tab_key, tab_text in tabs:
-            tab_color = Theme.text_color_selected(FontPurpose.GRID_ONE_ROW) if tab_key == self.selected_tab else Theme.text_color(FontPurpose.GRID_ONE_ROW)
-            w, h = Display.render_text(tab_text,x_offset, center_of_bar,  tab_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
-            x_offset += w +text_padding
-
         battery_percent = Device.get_device().get_battery_percent()
         charging = Device.get_device().get_charge_status()
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
-        img_padding = 10
+        img_padding = max(4, int(6 * Theme._default_multiplier))
+        target_icon_height = max(8, int(16 * Theme._default_multiplier))
 
-        #Battery Text
         x_offset = Device.get_device().screen_width() - img_padding
-        if(Theme.display_battery_percent()):
-            w, h = Display.render_text(str(battery_percent)+"%",x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-            x_offset = x_offset - w - img_padding
-
         if(Theme.display_battery_icon()):
-            #Battery Icon
             w, h = Display.render_image(
-                battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
+                battery_icon, x_offset, center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED,
+                target_height=target_icon_height)
             x_offset = x_offset - w - img_padding
 
-        #Wifi
         if(Device.get_device().supports_wifi() and Device.get_device().is_wifi_enabled()):
             wifi_status = Device.get_device().get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
-            w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            w, h = Display.render_image(
+                wifi_icon, x_offset, center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED,
+                target_height=target_icon_height)
             x_offset = x_offset - w - img_padding
 
-        #Volume
         if(time.time() - self.volume_changed_time < 3 and Device.get_device().supports_volume()):
-            if(Theme.display_volume_numbers()):
-                w, h = Display.render_text(str(self.volume),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
-                x_offset = x_offset - w  #Don't padd the number from the icon
-            w, h = Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            w, h = Display.render_image(
+                Theme.get_volume_indicator(self.volume), x_offset, center_of_bar,
+                RenderMode.MIDDLE_RIGHT_ALIGNED, target_height=target_icon_height)
             x_offset = x_offset - w - img_padding
 
 
