@@ -72,6 +72,7 @@ get_current_volume() {
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
+    SHOW_OSD="${3:-true}"   # Optional 3rd arg, defaults to true
     mkdir -p /tmp/system 2>/dev/null
     echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
     if [ "$SAVE_TO_CONFIG" = true ]; then
@@ -80,7 +81,7 @@ set_volume() {
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
             sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
-            if ! pgrep MainUI >/dev/null; then
+            if ! pgrep MainUI >/dev/null && [ "$SHOW_OSD" = true ]; then
                 /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
             fi
         fi

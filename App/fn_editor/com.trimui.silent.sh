@@ -20,8 +20,10 @@ case "$1" in
     cur="$(get_volume_level)"
     [ -z "$cur" ] && cur=0
     echo "$cur" > "$SAVED_VOL_FILE"
-    # Drop spruce's volume to 0 (updates SYSTEM_JSON .vol -> UI reflects it)
-    set_volume 0
+    # Drop spruce's volume to 0 (updates SYSTEM_JSON .vol -> UI reflects it).
+    # Pass "true false" so the config is saved but the stock volume OSD popup
+    # is not shown; the switch already shows its own toast.
+    set_volume 0 true false
     # Belt and suspenders: cut the speaker amp outright
     echo 1 > /sys/class/speaker/mute
     touch /tmp/system/muted
@@ -30,10 +32,10 @@ case "$1" in
     echo "Exit silent"
     echo 0 > /sys/class/speaker/mute
     rm -f /tmp/system/muted
-    # Restore the volume we had before entering silent
+    # Restore the volume we had before entering silent (no OSD popup)
     saved="$(cat "$SAVED_VOL_FILE" 2>/dev/null)"
     [ -z "$saved" ] && saved=0
-    set_volume "$saved"
+    set_volume "$saved" true false
     rm -f "$SAVED_VOL_FILE"
     ;;
 *)

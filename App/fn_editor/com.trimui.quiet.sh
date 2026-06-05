@@ -21,15 +21,17 @@ case "$1" in
     cur="$(get_volume_level)"
     [ -z "$cur" ] && cur=0
     echo "$cur" > "$SAVED_VOL_FILE"
-    # Lower spruce's volume (updates SYSTEM_JSON .vol -> UI reflects it)
-    set_volume "$QUIET_VOL"
+    # Lower spruce's volume (updates SYSTEM_JSON .vol -> UI reflects it).
+    # Pass "true false" so the config is saved but the stock volume OSD popup
+    # is not shown; the switch already shows its own toast.
+    set_volume "$QUIET_VOL" true false
     ;;
 0 )
     echo "Exit quiet"
-    # Restore the volume we had before entering quiet
+    # Restore the volume we had before entering quiet (no OSD popup)
     saved="$(cat "$SAVED_VOL_FILE" 2>/dev/null)"
     [ -z "$saved" ] && saved=0
-    set_volume "$saved"
+    set_volume "$saved" true false
     rm -f "$SAVED_VOL_FILE"
     ;;
 *)
