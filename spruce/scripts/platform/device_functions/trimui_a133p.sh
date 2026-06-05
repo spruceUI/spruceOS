@@ -187,7 +187,7 @@ device_init_a133p() {
             echo 1 114 1 # Vol down pressed
             echo 1 114 0 # Vol down released
             echo 0 0 0   # tell sendevent to exit
-        } | sendevent $EVENT_PATH_VOLUME 
+        } | sendevent $EVENT_PATH_VOLUME
         sleep 1
         echo 0 > /sys/class/speaker/mute
     ) &
