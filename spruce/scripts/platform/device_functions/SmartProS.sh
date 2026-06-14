@@ -263,6 +263,10 @@ device_init() {
     device_run_tsps_blobs
     device_run_thermal_process
 
+    # Install the configured switch action into /usr/trimui/scene so the physical
+    # switch follows Settings -> Button Settings -> Switch action.
+    sh /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
+
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
 
@@ -414,7 +418,93 @@ device_prepare_for_poweroff() {
 }
 
 device_home_button_pressed() {
-    touch /tmp/show_osdd
+    # The Smart Pro S has no Fn keys, only the top Home button (KEY_HOMEPAGE) and
+    # the switch. The stock OSD daemon (trimui_osdd) is absent on this device, so
+    # the old "touch /tmp/show_osdd" was a no-op. Instead run the action the user
+    # picked in Settings -> Button Settings -> Home button action.
+    action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
+
+    case "$action" in
+        "Game Switcher")
+            # Only meaningful in game; out of game PyUI owns the menu.
+            [ -f /tmp/cmd_to_run.sh ] && home_button_game_switcher
+            ;;
+        "Exit game")
+            killall -q -CONT MainUI
+            home_button_kill_emulator
+            ;;
+        "Emulator menu")
+            home_button_ra_menu
+            ;;
+        "Toggle LED")
+            # Toggle through spruce's LED system (not the stock ledc.sh, whose
+            # shmvar-based brightness is dead here). "Off" is a static 000000 since
+            # effect=0 only freezes the animation on its last colour. We read the
+            # left LED's current colour to decide which way to flip.
+            cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
+            case "$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")" in
+                Red) hex="FF0000" ;; Green) hex="00FF00" ;; Blue) hex="0000FF" ;;
+                Yellow) hex="FFFF00" ;; Cyan) hex="00FFFF" ;; Magenta) hex="FF00FF" ;;
+                Orange) hex="FF8800" ;; *) hex="FFFFFF" ;;
+            esac
+            if [ "$cur" = "000000" ]; then
+                rgb_led lrm12 static "$hex" &
+            else
+                rgb_led lrm12 static "000000" &
+            fi
+            ;;
+        "Screenshot")
+            ts="$(date '+_%Y.%m.%d_%H.%M.%S.png')"
+            mkdir -p /mnt/SDCARD/Saves/screenshots
+            take_screenshot "/mnt/SDCARD/Saves/screenshots/$PLATFORM$ts"
+            vibrate &
+            ;;
+        "Nothing"|*)
+            log_message "device_home_button_pressed: action '$action', nothing to do"
+            ;;
+    esac
+}
+
+# Self-contained helpers for device_home_button_pressed (mirrors the dispatch in
+# homebutton_watchdog.sh, which only listens for the Menu key, not Home).
+home_button_kill_emulator() {
+    if pgrep -f "./PPSSPPSDL" >/dev/null; then
+        killall -q -USR1 PPSSPPSDL_SmartProS
+    elif pgrep -f "pcsx_64" >/dev/null; then
+        killall -q -USR1 pcsx_64
+    elif pgrep -f "mupen64plus" >/dev/null; then
+        killall -q -USR1 mupen64plus
+    else
+        killall -q -15 ra64.universal retroarch flycast yabasanshiro.trimui pico8_64
+    fi
+}
+
+home_button_ra_menu() {
+    if pgrep -f "./PPSSPPSDL" >/dev/null; then
+        killall -q -USR2 PPSSPPSDL_SmartProS
+    elif pgrep -f "pcsx_64" >/dev/null; then
+        killall -q -USR2 pcsx_64
+    else
+        {
+            echo $B_MENU 1
+            echo $B_L3 1
+            echo $B_L3 0
+            echo $B_MENU 0
+            echo 0 0 0
+        } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
+    fi
+}
+
+home_button_game_switcher() {
+    capture_dir="/mnt/SDCARD/Saves/states/.gameswitcher"
+    mkdir -p "$capture_dir"
+    CMD="$(cat /tmp/cmd_to_run.sh 2>/dev/null)"
+    GAME_PATH="$(echo "$CMD" | grep -o '".*"' | tail -n1 | tr -d '"')"
+    SHORT_NAME="${GAME_PATH##*/}"; SHORT_NAME="${SHORT_NAME%.*}"
+    take_screenshot "$capture_dir/${SHORT_NAME}.state.auto.png"
+    touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+    home_button_kill_emulator
+    rm -f /tmp/cmd_to_run.sh /mnt/SDCARD/spruce/flags/lastgame.lock
 }
 
 device_stop_thermal_process(){
