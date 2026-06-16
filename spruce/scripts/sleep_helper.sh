@@ -92,6 +92,18 @@ read_system_json_int() {
     return 0
 }
 
+run_timeout_poweroff() {
+    "$POWER_OFF_SCRIPT"
+    poweroff_status=$?
+    if [ "$poweroff_status" -eq 0 ]; then
+        rm -f /tmp/sleep_helper_started
+        exit 0
+    fi
+
+    log_message "Timeout poweroff failed with status $poweroff_status; resuming wake path"
+    return "$poweroff_status"
+}
+
 trigger_sleep() {
     log_message "Entering sleep"
     "$SYSTEM_EMIT" power "RUNNING" "SLEEP" "sleep_helper.sh" "entering sleep" || true
@@ -146,7 +158,7 @@ trigger_sleep() {
             # Set clocks bad to full speed
             set_performance
             sleep 0.1
-            "$POWER_OFF_SCRIPT" &
+            run_timeout_poweroff
         fi
     else
         
@@ -163,7 +175,7 @@ trigger_sleep() {
         if [ "$(device_woke_via_timer)" = "true" ]; then
             log_message "Idle time exceeded, triggering poweroff -- IDLE_TIMEOUT=$IDLE_TIMEOUT"
             sleep 0.1
-            "$POWER_OFF_SCRIPT" &
+            run_timeout_poweroff
         else
             log_message "Woke from sleep manually"
         fi
