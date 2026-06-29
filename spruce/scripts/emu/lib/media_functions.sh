@@ -92,7 +92,8 @@ run_mpv() {
 	/mnt/SDCARD/spruce/bin64/gptokeyb -k "mpv" -c "./bin64/mpv.gptk" &
 	sleep 0.5
 
-	/usr/bin/mpv --fs --geometry="640x480" --hwdec=drm --vo=sdl \
+	/usr/bin/mpv --profile=fast --fs --geometry="640x480" --hwdec=rkmpp \
+				 --vo=dmabuf-wayland --swapchain-depth=8 \
 				 --input-conf=$INPUT_CONF --msg-level=all=warn \
 				"$ROM_FILE" > $(emu_log_file) 2>&1
 

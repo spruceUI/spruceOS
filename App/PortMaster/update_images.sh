@@ -13,10 +13,7 @@ if [ -f /mnt/SDCARD/Persistent/portmaster/bin/python3 ] ; then
 		$PM_PYTHON_PATH -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
 	fi
 else # Pixel2 stock portmaster
-	PM_PYTHON_PATH="/mnt/SDCARD/spruce/pixel2/bin/python"
-	if [ ! -d "/mnt/SDCARD/spruce/pixel2/lib/python3.10/site-packages/PIL/" ] ; then
-		$PM_PYTHON_PATH -m pip install --no-index --find-links=/mnt/SDCARD/App/PortMaster/pillow_offline Pillow
-	fi
+	PM_PYTHON_PATH="/usr/bin/python"
 fi
 
 

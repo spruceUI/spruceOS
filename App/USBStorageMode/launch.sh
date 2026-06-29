@@ -29,7 +29,7 @@ case "$PLATFORM" in
         ;;
     "Pixel2")
         STORAGE_DEVICE="/dev/mmcblk0p3"
-        MOUNT_POINT="/storage/games-external"
+        MOUNT_POINT="/mnt/SDCARD/"
         USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
         USB_UDC_CONTROLLER="ff300000.usb"
         USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"

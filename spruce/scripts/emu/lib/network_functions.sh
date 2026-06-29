@@ -65,6 +65,7 @@ handle_network_services() {
 
 		if [ "$disable_wifi_in_game" = "True" ]; then
 			if network_is_connected; then
+				device_wifi_power_off
 				ifconfig wlan0 down &
 			fi
 			killall wpa_supplicant
