@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -33,7 +34,7 @@ class Language:
     def _read_from_file(cls, filepath):
         if(filepath is not None):
             try:
-                with open(filepath, 'r') as f:
+                with open(filepath, 'r', encoding='utf-8') as f:
                     cls._data = json.load(f)
                     #PyUiLogger.get_logger().info(f"Languages loaded from {filepath}")
             except FileNotFoundError:
@@ -55,7 +56,7 @@ class Language:
     def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(cls._data, f, indent=4)
             PyUiLogger.get_logger().info(f"Settings saved to {filepath}")
         except Exception as e:
@@ -88,6 +89,58 @@ class Language:
     @classmethod
     def clear(cls):
         cls._data.clear()
+
+    @classmethod
+    def get_fonts_dir(cls):
+        base_dir = os.path.abspath(sys.path[0])
+        parent_dir = os.path.dirname(base_dir)
+        return os.path.join(parent_dir, "fonts")
+
+    @classmethod
+    def get_display_name_for_file(cls, language_file: str) -> str:
+        base_dir = os.path.abspath(sys.path[0])
+        parent_dir = os.path.dirname(base_dir)
+        lang_path = os.path.join(parent_dir, "lang", f"{language_file}.json")
+        try:
+            with open(lang_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data.get("displayName", language_file)
+        except Exception:
+            return language_file
+
+    @classmethod
+    def display_name(cls) -> str:
+        return cls._data.get("displayName", PyUiConfig.get_language() or "English")
+
+    @classmethod
+    def _font_config_key_for_purpose(cls, font_purpose: FontPurpose) -> str:
+        match font_purpose:
+            case FontPurpose.GRID_ONE_ROW | FontPurpose.GRID_MULTI_ROW | FontPurpose.LIST_INDEX | FontPurpose.LIST_TOTAL:
+                return "grid"
+            case FontPurpose.SHADOWED | FontPurpose.SHADOWED_BACKDROP | FontPurpose.SHADOWED_SMALL | FontPurpose.SHADOWED_BACKDROP_SMALL:
+                return "shadowed"
+            case _:
+                return "list"
+
+    @classmethod
+    def get_font_for_purpose(cls, font_purpose: FontPurpose):
+        fonts_config = cls._data.get("fonts")
+        if not fonts_config:
+            return None
+
+        filename = fonts_config.get(cls._font_config_key_for_purpose(font_purpose))
+        if not filename:
+            filename = fonts_config.get("default")
+
+        if not filename:
+            return None
+
+        font_path = os.path.join(cls.get_fonts_dir(), filename)
+        if os.path.exists(font_path):
+            return font_path
+
+        PyUiLogger.get_logger().warning(f"Language font not found: {font_path}")
+        return None
 
     @classmethod
     def games(cls):

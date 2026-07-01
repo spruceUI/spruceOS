@@ -1,0 +1,5 @@
+Roboto Font
+Copyright 2011 The Roboto Project Authors (https://github.com/googlefonts/roboto)
+
+Licensed under the Apache License, Version 2.0.
+https://www.apache.org/licenses/LICENSE-2.0

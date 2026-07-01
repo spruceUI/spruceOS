@@ -1,6 +1,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
@@ -68,6 +69,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if (lang is not None):
                 PyUiConfig.set_language(lang)
                 Language.load()
+                Display.clear_text_cache()
 
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):

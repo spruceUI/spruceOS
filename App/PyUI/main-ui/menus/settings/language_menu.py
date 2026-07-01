@@ -3,6 +3,7 @@
 import os
 import sys
 from controller.controller_inputs import ControllerInput
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -34,7 +35,7 @@ class LanguageMenu():
             try:
                 options.append(
                     GridOrListEntry(
-                        primary_text=language,
+                        primary_text=Language.get_display_name_for_file(language),
                         image_path=None,
                         image_path_selected=None,
                         description=None,

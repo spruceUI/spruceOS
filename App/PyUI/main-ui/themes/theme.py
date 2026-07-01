@@ -10,6 +10,7 @@ from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
 from menus.games.utils.daijisho_theme_index import DaijishoThemeIndex
+from menus.language.language import Language
 from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -463,6 +464,10 @@ class Theme():
 
     @classmethod
     def get_font(cls, font_purpose : FontPurpose):
+        language_font = Language.get_font_for_purpose(font_purpose)
+        if language_font:
+            return language_font
+
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
