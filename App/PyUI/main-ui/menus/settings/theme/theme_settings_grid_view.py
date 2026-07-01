@@ -55,7 +55,7 @@ class ThemeSettingsGridView(ThemeSettingsMenuCommon):
             )
         )
         option_list.append(
-            self.build_enabled_disabled_entry("Set Grid BG Offset To Image Offset",
+            self.build_enabled_disabled_entry(Language.label("setGridBgOffsetToImageOffset", "Set Grid BG Offset To Image Offset"),
                                                 Theme.grid_bg_offset_to_image_offset,
                                                 Theme.set_grid_bg_offset_to_image_offset)
         )        

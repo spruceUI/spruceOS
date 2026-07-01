@@ -56,7 +56,7 @@ class GameSelectMenuPopup:
 
     def execute_game_search(self, game_system, input_value):
         from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
-        search_txt = OnScreenKeyboard().get_input("Game Search:")
+        search_txt = OnScreenKeyboard().get_input(Language.game_search())
         if(search_txt is not None):
             return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 

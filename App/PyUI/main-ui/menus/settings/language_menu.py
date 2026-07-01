@@ -49,7 +49,7 @@ class LanguageMenu():
 
         view = ViewCreator.create_view(
             view_type=ViewType.ICON_AND_DESC,
-            top_bar_text="Language", 
+            top_bar_text=Language.language_settings(), 
             options=options, 
             selected_index=selected.get_index(),
         )

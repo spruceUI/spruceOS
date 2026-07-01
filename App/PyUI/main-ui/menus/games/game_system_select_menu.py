@@ -239,31 +239,31 @@ class GameSystemSelectMenu:
         if(Theme.skip_main_menu() and Theme.show_extras_in_system_select_menu()) or Theme.merge_main_menu_and_game_menu():
             if(Theme.get_recents_enabled()):
                 systems_list.append(GridOrListEntry(
-                        primary_text="Recents",
-                        primary_text_long="Recents",
+                        primary_text=Language.recents(),
+                        primary_text_long=Language.recents(),
                         image_path=self.get_main_menu_icon("recents",Theme.recent()),
                         image_path_selected=self.get_main_menu_icon_selected("recents",Theme.recent_selected()),
-                        description = "Launch Recents",
+                        description = Language.label("launchRecents", "Launch Recents"),
                         icon=self.get_main_menu_icon_selected("recents",Theme.recent_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Recents", self.recents_menu.run_rom_selection)
                     )  )
             if(Theme.get_favorites_enabled()):
                 systems_list.append(GridOrListEntry(
-                        primary_text="Favorites",
-                        primary_text_long="Favorites",
+                        primary_text=Language.favorites(),
+                        primary_text_long=Language.favorites(),
                         image_path=self.get_main_menu_icon("favorites",Theme.favorite()),
                         image_path_selected=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
-                        description = "Launch Favorites",
+                        description = Language.label("launchFavorites", "Launch Favorites"),
                         icon=self.get_main_menu_icon_selected("favorites",Theme.favorite_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Favorites", self.favorites_menu.run_rom_selection)
                     ) )         
             if(Theme.get_collections_enabled()):
                 systems_list.append(GridOrListEntry(
-                        primary_text="Collections",
-                        primary_text_long="Collections",
+                        primary_text=Language.collections(),
+                        primary_text_long=Language.collections(),
                         image_path=self.get_main_menu_icon("collections",Theme.collection()),
                         image_path_selected=self.get_main_menu_icon_selected("collections",Theme.collection_selected()),
-                        description = "Launch Collections",
+                        description = Language.label("launchCollections", "Launch Collections"),
                         icon=self.get_main_menu_icon_selected("collections",Theme.collection_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Collections", self.collections_menu.run_rom_selection)
                     )          )    
@@ -275,21 +275,21 @@ class GameSystemSelectMenu:
 
             if(Theme.get_apps_enabled()):
                 systems_list.append(GridOrListEntry(
-                        primary_text="Apps",
-                        primary_text_long="Applications",
+                        primary_text=Language.apps(),
+                        primary_text_long=Language.label("applications", "Applications"),
                         image_path=self.get_main_menu_icon("apps",Theme.app()),
                         image_path_selected=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
-                        description = "Launch Applications",
+                        description = Language.label("launchApplications", "Launch Applications"),
                         icon=self.get_main_menu_icon_selected("apps",Theme.app_selected()),
                         value=lambda input_value: self.run_extra(input_value, "Apps",self.app_menu.run_app_selection)
              ))        
             if(Theme.get_settings_enabled() or (Theme.merge_main_menu_and_game_menu() and not Theme.skip_main_menu())):
                 systems_list.append(GridOrListEntry(
-                        primary_text="Settings",
-                        primary_text_long="Settings",
+                        primary_text=Language.settings(),
+                        primary_text_long=Language.settings(),
                         image_path=self.get_main_menu_icon("settings",Theme.settings()),
                         image_path_selected=self.get_main_menu_icon_selected("settings",Theme.settings_selected()),
-                        description = "Launch Settings",
+                        description = Language.label("launchSettings", "Launch Settings"),
                         icon=self.get_main_menu_icon_selected("settings",Theme.settings_selected()),
                         value=lambda input_value: self.settings_menu.show_menu() if ControllerInput.A == input_value else None
                     )  )

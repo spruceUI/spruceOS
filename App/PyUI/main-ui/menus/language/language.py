@@ -113,6 +113,56 @@ class Language:
         return cls._data.get("displayName", PyUiConfig.get_language() or "English")
 
     @classmethod
+    def label(cls, key: str, default: str) -> str:
+        return cls._data.get(key, default)
+
+    @classmethod
+    def enum_label(cls, section: str, name: str, default: str | None = None) -> str:
+        section_data = cls._data.get(section)
+        if isinstance(section_data, dict) and name in section_data:
+            return section_data[name]
+        if default is not None:
+            return default
+        return name.replace("_", " ").title()
+
+    @classmethod
+    def boolean_label(cls, value) -> str:
+        if isinstance(value, bool):
+            key = "true" if value else "false"
+        else:
+            key = str(value).lower()
+        booleans = cls._data.get("booleans", {})
+        if key in booleans:
+            return booleans[key]
+        return str(value)
+
+    @classmethod
+    def on_off_label(cls, enabled: bool) -> str:
+        on_off = cls._data.get("onOff", {})
+        key = "on" if enabled else "off"
+        return on_off.get(key, "On" if enabled else "Off")
+
+    @classmethod
+    def view_type_label(cls, view_type) -> str:
+        return cls.enum_label("viewTypes", view_type.name, view_type.name.replace("_", " ").title())
+
+    @classmethod
+    def resize_type_label(cls, resize_type) -> str:
+        return cls.enum_label("resizeTypes", resize_type.name, resize_type.name)
+
+    @classmethod
+    def controller_input_label(cls, controller_input) -> str:
+        return cls.enum_label("controllerInputs", controller_input.name, controller_input.name)
+
+    @classmethod
+    def game_system_sort_mode_label(cls, mode: str) -> str:
+        return cls.enum_label("gameSystemSortModes", mode, mode)
+
+    @classmethod
+    def screen_type_label(cls, screen_type: str) -> str:
+        return cls.enum_label("screenTypes", screen_type, screen_type)
+
+    @classmethod
     def _font_config_key_for_purpose(cls, font_purpose: FontPurpose) -> str:
         match font_purpose:
             case FontPurpose.GRID_ONE_ROW | FontPurpose.GRID_MULTI_ROW | FontPurpose.LIST_INDEX | FontPurpose.LIST_TOTAL:

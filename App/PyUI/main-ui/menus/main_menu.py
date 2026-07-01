@@ -46,7 +46,7 @@ class MainMenu:
                     primary_text=Language.recents(),
                     image_path=Theme.recent(),
                     image_path_selected=Theme.recent_selected(),
-                    description="Recent",
+                    description=Language.label("recentDesc", "Recent"),
                     icon=None,
                     value="Recent"
                 )
@@ -58,7 +58,7 @@ class MainMenu:
                     primary_text=Language.collections(),
                     image_path=Theme.collection(),
                     image_path_selected=Theme.collection_selected(),
-                    description="Collection",
+                    description=Language.label("collectionDesc", "Collection"),
                     icon=None,
                     value="Collection"
                 )
@@ -70,7 +70,7 @@ class MainMenu:
                     primary_text=Language.favorites(),
                     image_path=Theme.favorite(),
                     image_path_selected=Theme.favorite_selected(),
-                    description="Favorite",
+                    description=Language.label("favoriteDesc", "Favorite"),
                     icon=None,
                     value="Favorite"
                 )
@@ -81,7 +81,7 @@ class MainMenu:
                 primary_text=Language.games(),
                 image_path=Theme.game(),
                 image_path_selected=Theme.game_selected(),
-                description="Your games",
+                description=Language.label("yourGamesDesc", "Your games"),
                 icon=None,
                 value="Game"
             )
@@ -94,7 +94,7 @@ class MainMenu:
                     primary_text=Language.apps(),
                     image_path=Theme.app(),
                     image_path_selected=Theme.app_selected(),
-                    description="Your Apps",
+                    description=Language.label("yourAppsDesc", "Your Apps"),
                     icon=None,
                     value="App"
                 )
@@ -106,7 +106,7 @@ class MainMenu:
                     primary_text=Language.settings(),
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
-                    description="Your Apps",
+                    description=Language.label("yourSettingsDesc", "Your settings"),
                     icon=None,
                     value="Setting"
                 )

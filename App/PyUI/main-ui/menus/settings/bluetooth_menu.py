@@ -70,7 +70,7 @@ class BluetoothMenu:
                 option_list.append(
                     GridOrListEntry(
                             primary_text=Language.status(),
-                            value_text="<    " + ("Scanning" if bluetooth_enabled else "Off") + "    >",
+                            value_text="<    " + (Language.label("scanning", "Scanning") if bluetooth_enabled else Language.on_off_label(False)) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -97,7 +97,7 @@ class BluetoothMenu:
 
                 list_view = ViewCreator.create_view(
                         view_type=ViewType.ICON_AND_DESC,
-                        top_bar_text="Bluetooth Configuration", 
+                        top_bar_text=Language.label("bluetoothConfiguration", "Bluetooth Configuration"), 
                         options=option_list,
                         selected_index=selected.get_index()) #always reset to the top in case devices change during a scan
 

@@ -50,7 +50,7 @@ class AppMenu:
                             primary_text=boxart_scraper_config.get_label() + "(Hidden)" if AppsManager.is_hidden(boxart_scraper_config) else boxart_scraper_config.get_label(),
                             image_path=None,
                             image_path_selected=None,
-                            description="Scrape game boxart",
+                            description=Language.label("scrapeBoxartDesc", "Scrape game boxart"),
                             icon=icon,
                             extra_data=boxart_scraper_config,
                             value=BoxArtScraper().scrape_boxart
@@ -66,7 +66,7 @@ class AppMenu:
                             primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
                             image_path=None,
                             image_path_selected=None,
-                            description="Track app usage",
+                            description=Language.label("trackAppUsageDesc", "Track app usage"),
                             icon=icon,
                             extra_data=activity_tracker_config,
                             value=ActivityTracker().run_activity_tracking_app

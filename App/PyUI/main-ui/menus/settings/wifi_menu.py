@@ -116,7 +116,7 @@ class WifiMenu:
     def switch_network(self, net: WiFiNetwork):
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password()):
-            password = self.on_screen_keyboard.get_input("WiFi Password")
+            password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
                 self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
                 Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
@@ -140,7 +140,7 @@ class WifiMenu:
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.status(),
-                value_text="<    " + ("On" if wifi_enabled else "Off") + "    >",
+                value_text="<    " + Language.on_off_label(wifi_enabled) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,
@@ -154,7 +154,7 @@ class WifiMenu:
             if not networks:
                 option_list.append(
                     GridOrListEntry(
-                        primary_text="Scanning for networks...",
+                        primary_text=Language.label("scanningForNetworks", "Scanning for networks..."),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -241,7 +241,7 @@ class WifiMenu:
                 # Render view
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="WiFi Configuration",
+                    top_bar_text=Language.label("wifiConfiguration", "WiFi Configuration"),
                     options=option_list,
                     selected_index=selected.get_index(),
                 )

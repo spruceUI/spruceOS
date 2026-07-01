@@ -1,6 +1,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from menus.language.language import Language
 from menus.settings import settings_menu
 from utils.consts import COLLECTIONS, FAVORITES, GAME_SELECT, GAME_SWITCHER, RECENTS
 from views.grid_or_list_entry import GridOrListEntry
@@ -21,8 +22,8 @@ class GameArtDisplaySettingsMenu(settings_menu.SettingsMenu):
         for screen_type in [COLLECTIONS,FAVORITES,GAME_SELECT,RECENTS,GAME_SWITCHER]:
             option_list.append(
                     GridOrListEntry(
-                            primary_text=screen_type,
-                            value_text="<    " + ("Screenshot" if Device.get_device().get_system_config().use_savestate_screenshots(screen_type) else "Boxart") + "    >",
+                            primary_text=Language.screen_type_label(screen_type),
+                            value_text="<    " + (Language.label("screenshot", "Screenshot") if Device.get_device().get_system_config().use_savestate_screenshots(screen_type) else Language.label("boxart", "Boxart")) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,

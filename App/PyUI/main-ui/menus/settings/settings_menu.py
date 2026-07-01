@@ -2,6 +2,7 @@ import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
+from menus.language.language import Language
 from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -39,7 +40,7 @@ class SettingsMenu(ABC):
             if(list_view is None or self.theme_changed):
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="Settings", 
+                    top_bar_text=Language.settings(), 
                     options=option_list,
                     selected_index=selected.get_index())
                 self.theme_changed = False
@@ -187,7 +188,7 @@ class SettingsMenu(ABC):
 
         return GridOrListEntry(
             primary_text=primary_text,
-            value_text="<    " + str(get_value_func()) + "    >",
+            value_text="<    " + Language.boolean_label(get_value_func()) + "    >",
             image_path=None,
             image_path_selected=None,
             description=None,
@@ -226,7 +227,7 @@ class SettingsMenu(ABC):
 
         return GridOrListEntry(
             primary_text=primary_text,
-            value_text="<    " + str(get_value_func().name) + "    >",
+            value_text="<    " + Language.view_type_label(get_value_func()) + "    >",
             image_path=None,
             image_path_selected=None,
             description=None,
@@ -247,11 +248,20 @@ class SettingsMenu(ABC):
         set_view_type_func(next_view_type)
 
 
-    def build_enum_entry(self, primary_text, get_value_func, set_value_func, get_next_enum_type) -> GridOrListEntry:
+    def build_enum_entry(self, primary_text, get_value_func, set_value_func, get_next_enum_type, enum_section=None) -> GridOrListEntry:
+        current = get_value_func()
+        if enum_section == "resizeTypes":
+            display_value = Language.resize_type_label(current)
+        elif enum_section == "viewTypes":
+            display_value = Language.view_type_label(current)
+        elif enum_section:
+            display_value = Language.enum_label(enum_section, current.name)
+        else:
+            display_value = current.name
 
         return GridOrListEntry(
             primary_text=primary_text,
-            value_text="<    " + str(get_value_func().name) + "    >",
+            value_text="<    " + display_value + "    >",
             image_path=None,
             image_path_selected=None,
             description=None,
