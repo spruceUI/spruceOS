@@ -462,7 +462,7 @@ load_n64_controller_profile() {
 		*) return 0 ;; # exit early if jq fails or config is broken
 	esac
 
-	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+	SRC="/mnt/SDCARD/Emu/N64/remaps"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 
 	for dir in "$DST"/*; do
@@ -484,7 +484,7 @@ save_custom_n64_controller_profile() {
 		* ) return 0 ;; # exit function early; no need to back up remap
 	esac
 
-	REMAP_BACKUP="/mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp"
+	REMAP_BACKUP="/mnt/SDCARD/Emu/N64/remaps/Custom.rmp"
 	REMAP_DIR="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 
 	case "$CORE" in

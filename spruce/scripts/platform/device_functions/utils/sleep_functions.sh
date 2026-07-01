@@ -125,7 +125,7 @@ device_continue_sleep() {
     fi
 
     # Re-arm the wakealarm using earlier function
-    set_wake_alarm "$REMAINING" || return 1
+    set_wake_alarm "$REMAINING" "$WAKE_ALARM_PATH" || return 1
 
     # Go back to sleep
     trigger_device_sleep

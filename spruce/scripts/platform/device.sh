@@ -363,3 +363,9 @@ device_get_hw_epoch() {
     # Convert to epoch seconds
     date -d "$HW_STR" +%s 2>/dev/null
 }
+
+device_extra_wifi_setup() {
+    # Do these need to be unique per device? Don't have a way 
+    # to test currently
+    log_message "Missing device_extra_wifi_setup function" -v
+}

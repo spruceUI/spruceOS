@@ -120,6 +120,13 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         if(ViewType.CAROUSEL == Theme.get_view_type_for_game_switcher()):
             option_list.append(
                 self.build_enabled_disabled_entry(
+                    "Vertical Carousel",
+                    get_value_func=Theme.get_game_switcher_use_vertical_carousel,
+                    set_value_func=Theme.set_game_switcher_use_vertical_carousel,
+                )
+            )
+            option_list.append(
+                self.build_enabled_disabled_entry(
                     primary_text=Language.topbar_gamename(),
                     get_value_func=Theme.get_set_top_bar_text_to_game_selection,
                     set_value_func=Theme.set_set_top_bar_text_to_game_selection,

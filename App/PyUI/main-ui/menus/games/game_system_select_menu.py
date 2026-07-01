@@ -378,7 +378,8 @@ class GameSystemSelectMenu:
                         carousel_x_offset=Theme.get_carousel_system_external_x_offset(),
                         carousel_fixed_width=Theme.get_carousel_system_fixed_width() if not Theme.get_carousel_system_use_percentage_mode() else None,
                         carousel_fixed_selected_width=Theme.get_carousel_system_fixed_selected_width() if not Theme.get_carousel_system_use_percentage_mode() else None,
-                        grid_view_wrap_around_single_row=Theme.get_system_select_grid_wrap_around_single_row()
+                        grid_view_wrap_around_single_row=Theme.get_system_select_grid_wrap_around_single_row(),
+                        veritcal_carousel=Theme.get_system_select_use_vertical_carousel()
                      )
         else:
             view.set_options(self.systems_list)

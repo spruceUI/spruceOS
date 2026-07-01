@@ -49,7 +49,29 @@ get_spruce_ra_cfg_location() {
 }
 
 set_loading_screen() {
-    /mnt/SDCARD/spruce/pixel2/bin/awww img /mnt/SDCARD/Themes/loading.png --transition-type none --no-resize
+    THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    LOADING_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_merged.png"
+
+    if [ ! -f "$LOADING_IMG" ]; then
+        # Get background and last loading images
+        BG_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_bg.png"
+        LAST_IMG=$(find "/mnt/SDCARD/Themes/${THEME_NAME}/skin/" -maxdepth 1 -name 'app_loading_0*.png' -type f | tail -n 1)
+
+        # If the background image doesn't exists use the default one
+        if [ ! -f "$BG_IMG" ]; then
+            BG_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_bg.png"
+        fi
+
+        # If there's no loading images use the default one
+        if [ -z "$LAST_IMG" ]; then
+            LAST_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_05.png"
+        fi
+
+        # Composite both images for the final loading image
+        magick composite -gravity center "$LAST_IMG" "$BG_IMG" "$LOADING_IMG"
+    fi
+
+    /mnt/SDCARD/spruce/pixel2/bin/awww img "$LOADING_IMG" --transition-type none --no-resize
 }
 
 disable_swap() {
@@ -84,8 +106,8 @@ enable_or_disable_rgb() {
 }
 
 prepare_for_pyui_launch(){
-    disable_digital_to_analog
-    set_performance
+    disable_dpad_mod
+    set_overclock
     echo "performance" > /sys/class/devfreq/dmc/governor
     (
         # SDL2 takes forever, let it initialize before going to powersave
@@ -204,6 +226,18 @@ device_lid_open(){
     return 1
 }
 
+device_wifi_is_available() {
+    if [ -d /sys/class/net/wlan0 ] || [ -d /sys/class/net/eth0 ]; then
+        if [ "$(cat /sys/class/net/*0/operstate)" = "up" ]; then
+            return 0 # True
+        else
+            return 1 # False
+        fi
+    else
+        return 1 # False
+    fi
+}
+
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
@@ -264,7 +298,6 @@ set_backlight() {
     if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
-        "$SYSTEM_EMIT" brightness-level "$new_bl" "Pixel2.sh/set_backlight" 2>/dev/null || true
     fi
 }
 
@@ -298,11 +331,11 @@ send_menu_button_to_retroarch() {
     fi
 }
 
-enable_digital_to_analog() {
+enable_dpad_to_analog() {
     evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
             --hook btn:tl2 btn:tr2 toggle \
             --withhold btn:tl2 btn:tr2 \
-            --toggle "" @digital @analog \
+            --toggle "" @dpad @analog \
             --map yield btn:east btn:south \
             --map yield btn:south btn:east \
             --map yield btn:dpad_left:0@analog abs:x:0 \
@@ -316,10 +349,28 @@ enable_digital_to_analog() {
             --output name="pixel2_joypad_alt" &
 }
 
-disable_digital_to_analog() {
-    pkill "evsieve"
+enable_dpad_to_mouse() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @dpad @mouse \
+            --hook btn:dpad_left:1~2 send-key=key:left \
+            --hook btn:dpad_right:1~2 send-key=key:right \
+            --hook btn:dpad_up:1~2 send-key=key:up \
+            --hook btn:dpad_down:1~2 send-key=key:down \
+            --oscillate key:left key:right key:up key:down period=0.01 \
+            --map yield key:left:1@mouse rel:x:-2 \
+            --map yield key:right:1@mouse rel:x:2 \
+            --map yield key:up:1@mouse rel:y:-2 \
+            --map yield key:down:1@mouse rel:y:2 \
+            --map yield btn:tl:0~1@mouse btn:left \
+            --map yield btn:tr:0~1@mouse btn:right \
+            --output &
 }
 
+disable_dpad_mod() {
+    pkill "evsieve"
+}
 
 set_default_ra_hotkeys() {
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"

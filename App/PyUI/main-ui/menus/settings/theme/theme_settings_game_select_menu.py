@@ -89,15 +89,22 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
     def build_carousel_specific_options(self):
         option_list = []
         option_list.append(
+            self.build_enabled_disabled_entry(
+                "Vertical Carousel",
+                Theme.get_game_select_use_vertical_carousel,
+                Theme.set_game_select_use_vertical_carousel)
+        )
+
+        option_list.append(
             self.build_numeric_entry(
-                primary_text=Language.cols(),
+                primary_text=Language.rows() if Theme.get_system_select_use_vertical_carousel() else Language.cols(),
                 get_value_func=Theme.get_game_select_carousel_col_count,
                 set_value_func=Theme.set_game_select_carousel_col_count
             )
         )
         option_list.append(
             self.build_percent_entry(
-                primary_text=Language.prim_img_width(),
+                primary_text=Language.prim_img_height() if Theme.get_system_select_use_vertical_carousel() else Language.prim_img_width(),
                 get_value_func=Theme.get_carousel_game_select_primary_img_width,
                 set_value_func=Theme.set_carousel_game_select_primary_img_width
             )

@@ -668,6 +668,10 @@ class Language:
         return cls._data.get("primImgWidth","Prim Img Width %")
 
     @classmethod
+    def prim_img_height(cls):
+        return cls._data.get("primImgHeight","Prim Img Height %")
+
+    @classmethod
     def shrink_further_away(cls):
         return cls._data.get("shrinkFurtherAway","Shrink Further Away")
 

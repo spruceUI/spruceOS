@@ -371,30 +371,6 @@ set_volume_to_config() {
     [ -n "$vol" ] && set_volume "$vol"
 }
 
-emit_startup_av_trace_from_config() {
-    "$SYSTEM_EMIT" av-startup-baselines-if-missing "runtimeHelper.sh" || true
-}
-
-initialize_system_emit_gate() {
-    # Read the persistent ENABLE_TRACE flag once during boot, then mirror the decision into /tmp
-    # so hot-path emit checks do not hit the SD card on every invocation.
-    mkdir -p "$SYSTEM_EMIT_GATE_DIR" 2>/dev/null || return 1
-    rm -f "$SYSTEM_EMIT_GATE_FILE"
-
-    if flag_check "ENABLE_TRACE"; then
-        touch "$SYSTEM_EMIT_GATE_FILE"
-        rm -f "$SYSTEM_EMIT_GATE_DIR/trace.off"
-        return 0
-    fi
-
-    touch "$SYSTEM_EMIT_GATE_DIR/trace.off"
-    return 1
-}
-
-system_emit_gate_enabled() {
-    [ -f "$SYSTEM_EMIT_GATE_FILE" ]
-}
-
 UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
 
 read_unpack_state() {
@@ -422,15 +398,11 @@ run_archive_unpacker_foreground() {
 }
 
 run_unpacker_foreground() {
-    launch_event="$1"
-    launch_context="$2"
-    result_event="$3"
-    log_prefix="$4"
-    allow_background_state="$5"
-    force_foreground_precmd="$6"
-    firstboot_ui="$7"
+    log_prefix="$1"
+    allow_background_state="$2"
+    force_foreground_precmd="$3"
+    firstboot_ui="$4"
 
-    "$SYSTEM_EMIT" process runtime "$launch_event" "runtimeHelper.sh" "$launch_context" || true
     firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
     run_archive_unpacker_foreground "$force_foreground_precmd"
     firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"
@@ -441,7 +413,6 @@ run_unpacker_foreground() {
     else
         log_message "Unpacker: $log_prefix returned with state=$unpack_state."
     fi
-    "$SYSTEM_EMIT" process runtime "$result_event" "runtimeHelper.sh" "state=$unpack_state" || true
 
     if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
         return 0

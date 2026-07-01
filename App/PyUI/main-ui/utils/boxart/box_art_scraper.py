@@ -661,7 +661,7 @@ class BoxArtScraper:
         sys_name = os.path.basename(sys_path)
 
         # Central Imgs folder at system level
-        sys_imgs_dir = os.path.join(sys_path, "Imgs")
+        sys_imgs_dir = os.path.join(sys_path, Device.get_device().get_game_images_folder_name())
 
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
@@ -674,7 +674,7 @@ class BoxArtScraper:
             return tasks
 
         for root, _, files in os.walk(sys_path):
-            if "Imgs" in root:
+            if Device.get_device().get_game_images_folder_name() in root:
                 continue
 
             # Calculate relative path from system root to preserve folder structure

@@ -184,15 +184,29 @@ class ThemePatcher():
                 preserve_aspect_ratio = True
                 is_icon = "icons" in input_file.lower()
 
+                # Images which go from one left edge to right, but not full screen
                 if(img_width == theme_width and img_height != theme_height and not is_icon):
                     new_width = target_width
                     preserve_aspect_ratio = False
 
+                # Images which go from top to bottom, but not full screen
                 if(img_height == theme_height and img_width != theme_width and not is_icon):
                     new_height = target_height
                     preserve_aspect_ratio = False
 
-                image_utils.resize_image(input_file, output_file, new_width, new_height,preserve_aspect_ratio=preserve_aspect_ratio)
+                # Fullscreen images
+                if(img_height == theme_height and img_width == theme_width and not is_icon):
+                    new_width = target_width
+                    new_height = target_height
+                    preserve_aspect_ratio = False
+
+                #PyUiLogger().get_logger().info(f"theme_width {theme_width} theme_height {theme_height}")
+                #PyUiLogger().get_logger().info(f"img_width {img_width} img_height {img_height}")
+                #PyUiLogger().get_logger().info(f"new_width {new_width} new_height {new_height}")
+                #PyUiLogger().get_logger().info(f"is_icon {is_icon} preserve_aspect_ratio {preserve_aspect_ratio}")
+
+                image_utils.resize_image(input_file, output_file, new_width, new_height,
+                                         preserve_aspect_ratio=preserve_aspect_ratio)
 
                 if not os.path.exists(output_file):
                     # Means non image -- should this be raised as an error as part of resize?

@@ -37,7 +37,7 @@ _set_scummvm_platform() {
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-pixel2/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-pixel2/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
+			enable_dpad_to_analog
 			;;
 		"Anbernic"*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"

@@ -5,6 +5,10 @@ get_python_path() {
     echo "/mnt/SDCARD/spruce/flip/bin/python3.10"
 }
 
+device_wifi_is_available() {
+    return 0 # True
+}
+
 send_virtual_key_L3R3() {
     {
         echo $B_MENU 0 # MENU up

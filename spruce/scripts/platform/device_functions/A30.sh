@@ -246,6 +246,10 @@ device_lid_open() {
     return 1
 }
 
+device_wifi_is_available() {
+    return 0 # True
+}
+
 device_uses_pseudo_sleep() {
     echo "false"
 }

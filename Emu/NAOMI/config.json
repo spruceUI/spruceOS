@@ -8,7 +8,7 @@
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
-      "launch": "/mnt/SDCARD/Emu/.emu_setup/m3u_generator.sh"
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh"
     }
   ],
   "menuOptions": {
@@ -77,7 +77,7 @@
   },
   "sortOrder": 1800,
   "brand": "Sega",
-  "type": "homeconsole",
+  "type": "arcade",
   "releaseYear": 1998,
   "default_emulator": "flycast",
   "scaling_min_freq": 1008000,

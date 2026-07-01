@@ -36,7 +36,10 @@ class RecentsMenuGS(RecentsMenu):
         
     def get_view_type(self):
         return Theme.get_view_type_for_game_switcher()
-    
+
+    def get_game_select_use_vertical_carousel(self):
+        return Theme.get_game_switcher_use_vertical_carousel()
+
     def full_screen_grid_resize_type(self):
         return Theme.get_resize_type_for_game_switcher()
 

@@ -251,7 +251,7 @@ if flag_check "tester_mode"; then
 fi
 
 # Compare versions using awk
-SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaskipVersionCheck.selected' "True")"
+SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "True")"
 BETA_UPDATE=false
 
 if [ "$DEVELOPER_MODE" -eq 1 ] || [ "$TESTER_MODE" -eq 1 ]; then

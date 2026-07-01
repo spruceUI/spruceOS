@@ -428,10 +428,6 @@ class MiyooMiniCommon(MiyooDevice):
         except Exception as e:
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
-    def fix_sleep_sound_bug(self):
-        pass #uneeded
-
-
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         preload_path = "/mnt/SDCARD/miyoo/app/../lib/libpadsp.so"
         if os.path.exists(preload_path):
@@ -541,10 +537,6 @@ class MiyooMiniCommon(MiyooDevice):
     def apply_timezone(self, timezone):
         ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
         ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
-
-    def supports_caching_rom_lists(self):
-        return True #Is there enough RAM
-
     
     def get_fw_version(self):
         try:

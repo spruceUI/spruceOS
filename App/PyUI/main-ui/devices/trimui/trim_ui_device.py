@@ -90,9 +90,6 @@ class TrimUIDevice(DeviceCommon):
 
     def get_volume(self):
         return self.system_config.get_volume()
-        
-    def fix_sleep_sound_bug(self):
-        pass
 
     def sleep(self):
         try:

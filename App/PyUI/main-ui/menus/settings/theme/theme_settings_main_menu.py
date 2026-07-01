@@ -105,6 +105,12 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                         min=0
                     )
                 )
+            elif(ViewType.CAROUSEL == Theme.get_view_type_for_main_menu()):
+                option_list.append(
+                    self.build_enabled_disabled_entry("Vertical Carousel", 
+                            Theme.get_main_menu_use_vertical_carousel, 
+                            Theme.set_main_menu_use_vertical_carousel)
+                )
 
                 
                       

@@ -167,7 +167,6 @@ set_volume() {
     system_volume=$(( (new_vol * 31 + 10) / 20 ))
 
     amixer -q set 'lineout volume' "$system_volume"
-    "$SYSTEM_EMIT" audio-level "$new_vol" "AnbernicXXCommon.sh/set_volume" 2>/dev/null || true
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -257,7 +256,7 @@ setup_for_retroarch(){
     echo "$RA_BIN"
 }
 
-prepare_for_pyui_launch(){
-	# Where else to put this?
+device_extra_wifi_setup(){
     dhclient wlan0
+    log_message "Starting dhclient"
 }

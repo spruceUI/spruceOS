@@ -14,25 +14,13 @@ SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SPRUCE_VERSION="$(cat "/mnt/SDCARD/spruce/spruce")"
 SPLORE_CART="/mnt/SDCARD/Roms/PICO8/-=☆ Launch Splore ☆=-.splore"
 FIRSTBOOT_PRE_EXTRACT_SCREENS="$SPRUCE_LOGO|Installing spruce $SPRUCE_VERSION|5"
-FIRSTBOOT_FINAL_STATE="COMPLETE"
-FIRSTBOOT_FINAL_REASON="normal-exit"
-FIRSTBOOT_FINALIZED=0
 FIRSTBOOT_ARCHIVE_TOTAL=0
 FIRSTBOOT_ARCHIVE_COMPLETED=0
 
-firstboot_trace_finalize() {
-    [ "$FIRSTBOOT_FINALIZED" = "1" ] && return 0
-    "$SYSTEM_EMIT" process-finalize firstboot "firstboot.sh" "$FIRSTBOOT_FINAL_STATE" "reason=$FIRSTBOOT_FINAL_REASON platform=$PLATFORM" || true
-    FIRSTBOOT_FINALIZED=1
-}
-
 cleanup_firstboot() {
     flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
-    firstboot_trace_finalize
 }
 trap cleanup_firstboot EXIT
-
-"$SYSTEM_EMIT" process-init firstboot "firstboot.sh" "platform=$PLATFORM" || true
 
 show_firstboot_screen() {
     img="$1"
@@ -77,7 +65,6 @@ log_firstboot_archive_status() {
     percent="$(calculate_progress_percent "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL")"
 
     log_message "Firstboot: archive_progress event=$event label=$label status=$status progress=${percent}% completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL ${extra_context}"
-    "$SYSTEM_EMIT" process firstboot "$event" "firstboot.sh/archive-progress" "label=$label status=$status completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL percent=$percent ${extra_context}" || true
 }
 
 show_firstboot_archive_progress() {
@@ -137,7 +124,6 @@ run_firstboot_archive_extract() {
 
 run_firstboot_package_phase() {
     flag_add "$FIRSTBOOT_PACKAGE_PHASE_FLAG" --tmp
-    "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_BEGIN" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
     SCUMMVM_DIR="/mnt/SDCARD/Emu/SCUMMVM"
     case "$PLATFORM" in
         "A30")       SCUMMVM_7Z="$SCUMMVM_DIR/scummvm_a30.7z" ;;
@@ -164,7 +150,6 @@ run_firstboot_package_phase() {
             run_firstboot_archive_extract /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
         else
             log_message "Firstboot: PortMaster already installed, skipping archive extraction"
-            "$SYSTEM_EMIT" process firstboot "ARCHIVE_SKIP" "firstboot.sh/archive-progress" "label=PortMaster status=already-installed completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
         fi
 
         rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
@@ -197,7 +182,6 @@ run_firstboot_package_phase() {
 
     log_firstboot_archive_status "PACKAGE_PHASE_STATUS" "package-phase" "complete" "completed=$FIRSTBOOT_ARCHIVE_COMPLETED"
     flag_remove "$FIRSTBOOT_PACKAGE_PHASE_FLAG"
-    "$SYSTEM_EMIT" process firstboot "PACKAGE_PHASE_END" "firstboot.sh/package-phase" "flag=$FIRSTBOOT_PACKAGE_PHASE_FLAG" || true
 }
 
 run_firstboot_theme_phase() {
@@ -205,19 +189,14 @@ run_firstboot_theme_phase() {
     # same thing as full boot completion. runtime.sh still owns the single closing UX once all
     # required foreground unpack work has finished cleanly, including the degraded-warning path.
     log_message "Firstboot: Running theme extraction phase before runtime-owned completion UX"
-    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_LAUNCH" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL" || true
 
     if SPRUCE_FIRSTBOOT_UI="${SPRUCE_FIRSTBOOT_UI:-0}" \
         SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="$FIRSTBOOT_ARCHIVE_TOTAL" \
         SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="$FIRSTBOOT_ARCHIVE_COMPLETED" \
         /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh firstboot_theme_phase; then
-        "$SYSTEM_EMIT" process firstboot "THEME_PHASE_RESULT" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase status=success" || true
         return 0
     fi
 
-    FIRSTBOOT_FINAL_STATE="WARNING"
-    FIRSTBOOT_FINAL_REASON="theme-phase-degraded"
-    "$SYSTEM_EMIT" process firstboot "THEME_PHASE_RESULT" "firstboot.sh/theme-phase" "run_mode=firstboot_theme_phase status=warning" || true
     log_message "Firstboot: Theme extraction phase completed with warnings; continuing to wrap-up."
     return 2
 }
@@ -258,7 +237,6 @@ esac
 run_firstboot_wrapup_phase
 
 log_message "Finished firstboot script"
-"$SYSTEM_EMIT" process firstboot "COMPLETED" "firstboot.sh/shutdown" "platform=$PLATFORM" || true
 if [ "$theme_phase_rc" -eq 2 ]; then
     exit 2
 fi

@@ -55,5 +55,12 @@ class ThemeSettingsTopAndBottomBar(ThemeSettingsMenuCommon):
                                               Theme.set_show_clock)
         )
 
-                
+        option_list.append(
+            self.build_enabled_disabled_entry("Render Top Bar Last",
+                                              Theme.render_top_and_bottom_bar_last,
+                                              Theme.set_render_top_and_bottom_bar_last)
+        )
+
+
+
         return option_list

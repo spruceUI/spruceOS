@@ -67,7 +67,7 @@ case $EMU_NAME in
 		fi
 		;;
 
-	"DC"|"NAOMI")
+	"DC"|"NAOMI"|"ATOMISWAVE")
 		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast-stock" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
 			run_flycast_standalone
@@ -150,7 +150,6 @@ case $EMU_NAME in
 
 	"PSP")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
-		[ ! -d "/mnt/SDCARD/Saves/.config" ] && move_dotconfig_into_place
 		run_ppsspp
 		;;
 

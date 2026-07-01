@@ -127,7 +127,8 @@ class MainMenu:
             grid_resized_height=Theme.get_grid_main_menu_img_height(),
             selected_index=selected.get_index(),
             show_grid_text=Theme.get_main_menu_show_text_grid_mode(),
-            grid_view_wrap_around_single_row=Theme.get_main_menu_grid_wrap_around_single_row()
+            grid_view_wrap_around_single_row=Theme.get_main_menu_grid_wrap_around_single_row(),
+            veritcal_carousel=Theme.get_main_menu_use_vertical_carousel()
         )
 
     def launch_selection(self, selection):
