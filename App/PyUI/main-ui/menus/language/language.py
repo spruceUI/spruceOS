@@ -159,6 +159,28 @@ class Language:
         return cls.enum_label("gameSystemSortModes", mode, mode)
 
     @classmethod
+    def game_system_label(cls, system_key: str, default: str) -> str:
+        systems = cls._data.get("gameSystems", {})
+        if system_key in systems:
+            return systems[system_key]
+        return default
+
+    @classmethod
+    def menu_option_display(cls, display: str) -> str:
+        displays = cls._data.get("menuOptionDisplays", {})
+        return displays.get(display, display)
+
+    @classmethod
+    def governor_option_label(cls, value: str) -> str:
+        options = cls._data.get("governorOptions", {})
+        return options.get(value, value)
+
+    @classmethod
+    def launch_option_name(cls, name: str) -> str:
+        options = cls._data.get("launchOptions", {})
+        return options.get(name, name)
+
+    @classmethod
     def screen_type_label(cls, screen_type: str) -> str:
         return cls.enum_label("screenTypes", screen_type, screen_type)
 

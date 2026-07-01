@@ -182,7 +182,7 @@ class GameConfigMenu:
                     if(supported_device):
                         config_list.append(
                         GridOrListEntry(
-                            primary_text=config_option.get('name'),
+                            primary_text=Language.launch_option_name(config_option.get('name')),
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -204,16 +204,17 @@ class GameConfigMenu:
                     supported_device = not devices or Device.get_device().get_device_name() in devices
                     if(supported_device):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
-                        display_name = option.get('display')
+                        display_name = Language.menu_option_display(option.get('display'))
                         contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
                         if(contains_override):
                             display_name = display_name + "*"
                         
                         overridable_entries.append(name)
+                        localized_value = Language.governor_option_label(effective_value) if name == "Governor" else effective_value
                         config_list.append(
                                         GridOrListEntry(
                                         primary_text=display_name,
-                                        value_text="<    " + effective_value + "    >",
+                                        value_text="<    " + localized_value + "    >",
                                         image_path=None,
                                         image_path_selected=None,
                                         description=None,

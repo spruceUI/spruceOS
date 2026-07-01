@@ -515,6 +515,9 @@ class Theme():
 
     @classmethod
     def get_fallback_font(cls):
+        language_font = Language.get_font_for_purpose(FontPurpose.LIST)
+        if language_font:
+            return language_font
         base_dir = os.path.abspath(sys.path[0])
         return os.path.join(base_dir, "themes", "font.ttf")
 
