@@ -123,6 +123,14 @@ class Language:
                 return "list"
 
     @classmethod
+    def font_purpose_size_label(cls, font_purpose: FontPurpose) -> str:
+        purposes = cls._data.get("fontPurposeSizes", {})
+        if font_purpose.name in purposes:
+            return purposes[font_purpose.name]
+        size_suffix = cls._data.get("size", "Size")
+        return f"{font_purpose.name} {size_suffix}"
+
+    @classmethod
     def get_font_for_purpose(cls, font_purpose: FontPurpose):
         fonts_config = cls._data.get("fonts")
         if not fonts_config:

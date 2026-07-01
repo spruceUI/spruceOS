@@ -1,4 +1,20 @@
 {
+    "fontPurposeSizes": {
+        "TOP_BAR_TEXT": "Top Bar Text Size",
+        "BATTERY_PERCENT": "Battery Percent Size",
+        "LIST": "List Size",
+        "MESSAGE": "Message Size",
+        "DESCRIPTIVE_LIST_TITLE": "Descriptive List Title Size",
+        "DESCRIPTIVE_LIST_DESCRIPTION": "Descriptive List Description Size",
+        "GRID_ONE_ROW": "Grid One Row Size",
+        "GRID_MULTI_ROW": "Grid Multi Row Size",
+        "LIST_INDEX": "List Index Size",
+        "LIST_TOTAL": "List Total Size",
+        "SHADOWED": "Shadowed Size",
+        "SHADOWED_BACKDROP": "Shadowed Backdrop Size",
+        "SHADOWED_SMALL": "Shadowed Small Size",
+        "SHADOWED_BACKDROP_SMALL": "Shadowed Backdrop Small Size"
+    },
     "Games" : "Games",
     "Recents": "Recents",
     "Apps": "Apps",

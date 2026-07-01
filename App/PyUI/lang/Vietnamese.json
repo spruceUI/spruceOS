@@ -6,6 +6,22 @@
         "shadowed": "BeVietnamPro-SemiBold.ttf",
         "default": "BeVietnamPro-Regular.ttf"
     },
+    "fontPurposeSizes": {
+        "TOP_BAR_TEXT": "Cỡ chữ thanh trên",
+        "BATTERY_PERCENT": "Cỡ chữ % pin",
+        "LIST": "Cỡ chữ danh sách",
+        "MESSAGE": "Cỡ chữ thông báo",
+        "DESCRIPTIVE_LIST_TITLE": "Cỡ chữ tiêu đề",
+        "DESCRIPTIVE_LIST_DESCRIPTION": "Cỡ chữ mô tả",
+        "GRID_ONE_ROW": "Cỡ chữ lưới (1 hàng)",
+        "GRID_MULTI_ROW": "Cỡ chữ lưới (nhiều hàng)",
+        "LIST_INDEX": "Cỡ chữ số thứ tự",
+        "LIST_TOTAL": "Cỡ chữ tổng số",
+        "SHADOWED": "Cỡ chữ đổ bóng",
+        "SHADOWED_BACKDROP": "Cỡ chữ nền đổ bóng",
+        "SHADOWED_SMALL": "Cỡ chữ đổ bóng nhỏ",
+        "SHADOWED_BACKDROP_SMALL": "Cỡ chữ nền đổ bóng nhỏ"
+    },
     "Games": "Trò chơi",
     "Recents": "Gần đây",
     "Apps": "Ứng dụng",
