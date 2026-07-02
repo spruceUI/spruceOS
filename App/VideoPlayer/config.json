@@ -1,6 +1,6 @@
 {
     "label": "Video Player",
-    "icon": "ffplay.png",
+    "icon": "icon.png",
     "launch": "launch.sh",
     "description": "Deprecated: use PyUI Video Player in Apps menu",
     "hide": true,

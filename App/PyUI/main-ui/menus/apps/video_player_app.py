@@ -1,9 +1,13 @@
 import os
 import re
+import time
 
+from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.on_screen_keyboard import OnScreenKeyboard
 from display.display import Display
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -14,62 +18,99 @@ VIDEO_EXTENSIONS = {
     ".mp4", ".mkv", ".avi", ".mov", ".flv", ".ts", ".webm",
     ".m4v", ".wmv", ".mpeg", ".mpg", ".3gp",
 }
-VIDEO_ROOTS = (
-    "/mnt/SDCARD/Roms/MEDIA",
-    "/mnt/SDCARD/Roms/media",
-    "/mnt/SDCARD/Roms/VIDEOS",
-    "/mnt/SDCARD/Roms/videos",
-)
+VIDEO_ROOT = "/mnt/SDCARD/Roms/MEDIA"
+MEDIA_LAUNCH = "/mnt/SDCARD/Emu/MEDIA/../../spruce/scripts/emu/standard_launch.sh"
 
 
 class VideoPlayerApp:
     def run(self, _input=None):
-        root = self._default_root()
-        if root is None:
-            Display.display_message("No video folder found.\nAdd files to Roms/MEDIA/")
-            return
-        self._browse(root, root)
+        os.makedirs(VIDEO_ROOT, exist_ok=True)
+        Controller.clear_input_queue()
+        time.sleep(0.2)
+        options = [
+            GridOrListEntry(
+                primary_text=Language.get("browseVideos", "Browse videos"),
+                description=Language.get("openMediaFolder", "Open Roms/MEDIA"),
+                value=self._browse_root,
+            ),
+            GridOrListEntry(
+                primary_text=Language.get("searchVideos", "Search videos"),
+                description=Language.get("findVideosByName", "Find videos by name"),
+                value=self._search_videos,
+            ),
+            GridOrListEntry(
+                primary_text=Language.get("videoControls", "Controls"),
+                description=Language.get("videoControlsDesc", "Playback button guide"),
+                value=self._show_controls,
+            ),
+        ]
+        selected = Selection(None, None, 0)
+        view = ViewCreator.create_view(
+            view_type=ViewType.ICON_AND_DESC,
+            top_bar_text=Language.get("videoPlayer", "Video Player"),
+            options=options,
+            selected_index=selected.get_index(),
+        )
+        while True:
+            picked = view.get_selection([ControllerInput.A, ControllerInput.B])
+            if picked.get_input() == ControllerInput.B:
+                return
+            if picked.get_input() == ControllerInput.A:
+                picked.get_selection().get_value()()
+                Controller.clear_input_queue()
+                time.sleep(0.2)
 
-    def _default_root(self):
-        for path in VIDEO_ROOTS:
-            if os.path.isdir(path):
-                return path
-        return None
+    def _browse_root(self):
+        self._browse(VIDEO_ROOT, VIDEO_ROOT)
+
+    def _show_controls(self):
+        Display.display_message(
+            Language.get(
+                "videoControlsHelp",
+                "Playback controls:\nB: Pause/Resume\nLeft/Right: Seek\nUp/Down: Prev/Next\nMENU: Exit player\n\nBrowser:\nX: Refresh\nB: Back",
+            ),
+            duration_ms=5000,
+        )
+
+    def _search_videos(self):
+        query = OnScreenKeyboard().get_input(Language.get("videoSearch", "Video Search:"))
+        if not query:
+            return
+        matches = self._search_entries(query)
+        if not matches:
+            Display.display_message(Language.get("noMatchingVideos", "No matching videos."))
+            return
+        selected = Selection(None, None, 0)
+        view = ViewCreator.create_view(
+            view_type=ViewType.ICON_AND_DESC,
+            top_bar_text=Language.get("videoSearchTitle", "Video Search"),
+            options=self._entries_to_options(matches),
+            selected_index=selected.get_index(),
+        )
+        while selected is not None:
+            picked = view.get_selection([ControllerInput.A, ControllerInput.B])
+            if picked.get_input() == ControllerInput.B:
+                return
+            if picked.get_input() == ControllerInput.A:
+                self._play_video(picked.get_selection().get_extra_data()["path"])
+                return
 
     def _browse(self, current_dir, root_dir):
         selected = Selection(None, None, 0)
         while selected is not None:
             entries = self._list_entries(current_dir, root_dir)
-            if not entries:
-                Display.display_message("No videos in this folder.")
-                if current_dir == root_dir:
-                    return
-                current_dir = os.path.dirname(current_dir.rstrip("/")) or root_dir
-                selected = Selection(None, None, 0)
-                continue
-
-            options = []
-            for entry in entries:
-                options.append(
-                    GridOrListEntry(
-                        primary_text=entry["label"],
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=entry.get("description"),
-                        icon=None,
-                        extra_data=entry,
-                        value=0,
-                    )
-                )
+            options = self._entries_to_options(entries)
 
             view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
-                top_bar_text=os.path.basename(current_dir.rstrip("/")) or "Videos",
+                top_bar_text=os.path.basename(current_dir.rstrip("/")) or Language.get("videos", "Videos"),
                 options=options,
                 selected_index=selected.get_index(),
             )
-            picked = view.get_selection([ControllerInput.A, ControllerInput.B])
+            picked = view.get_selection([ControllerInput.A, ControllerInput.B, ControllerInput.X])
+            if picked.get_input() == ControllerInput.X:
+                selected = Selection(None, None, picked.get_index())
+                continue
             if picked.get_input() == ControllerInput.B:
                 if current_dir == root_dir:
                     return
@@ -95,7 +136,7 @@ class VideoPlayerApp:
             entries.append(
                 {
                     "label": "..",
-                    "description": "Parent folder",
+                    "description": Language.get("parentFolder", "Parent folder"),
                     "kind": "up",
                 }
             )
@@ -114,7 +155,7 @@ class VideoPlayerApp:
                 entries.append(
                     {
                         "label": f"[{name}]",
-                        "description": "Folder",
+                        "description": Language.get("folder", "Folder"),
                         "kind": "dir",
                         "path": path,
                     }
@@ -123,12 +164,51 @@ class VideoPlayerApp:
                 entries.append(
                     {
                         "label": name,
-                        "description": "Play video",
+                        "description": Language.get("playVideo", "Play video"),
                         "kind": "file",
                         "path": path,
                     }
                 )
         return entries
+
+    def _entries_to_options(self, entries):
+        options = []
+        for entry in entries:
+            options.append(
+                GridOrListEntry(
+                    primary_text=entry["label"],
+                    value_text=None,
+                    image_path=None,
+                    image_path_selected=None,
+                    description=entry.get("description"),
+                    icon=None,
+                    extra_data=entry,
+                    value=0,
+                )
+            )
+        return options
+
+    def _search_entries(self, query):
+        matches = []
+        query = query.lower()
+        for dirpath, dirnames, filenames in os.walk(VIDEO_ROOT):
+            dirnames[:] = [name for name in dirnames if not name.startswith(".")]
+            for name in sorted(filenames, key=str.lower):
+                if name.startswith(".") or not self._is_video_file(name):
+                    continue
+                if query not in name.lower():
+                    continue
+                path = os.path.join(dirpath, name)
+                rel_dir = os.path.relpath(dirpath, VIDEO_ROOT)
+                matches.append(
+                    {
+                        "label": name,
+                        "description": Language.get("playVideo", "Play video") if rel_dir == "." else rel_dir,
+                        "kind": "file",
+                        "path": path,
+                    }
+                )
+        return matches
 
     def _is_video_file(self, name):
         _, ext = os.path.splitext(name.lower())
@@ -137,20 +217,12 @@ class VideoPlayerApp:
     def _play_video(self, path):
         from devices.miyoo_trim_common import MiyooTrimCommon
 
-        device = Device.get_device()
-        width = device.screen_width()
-        height = device.screen_height()
+        if not os.path.isfile(MEDIA_LAUNCH):
+            Display.display_message(Language.get("mediaLauncherMissing", "Media launcher missing."))
+            return
+
         escaped = re.sub(r'([$`"\\])', r"\\\1", path)
-        emu_dir = "/mnt/SDCARD/Emu/MEDIA"
-        cmd = (
-            f'export PATH="{emu_dir}/bin64:$PATH"; '
-            f'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:{emu_dir}/lib64"; '
-            f'cd "{emu_dir}"; '
-            f'/mnt/SDCARD/spruce/bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" & '
-            f"sleep 1; "
-            f'ffplay -x {width} -y {height} -fs -loglevel 24 -i "{escaped}"; '
-            f'kill -9 "$(pidof gptokeyb)" 2>/dev/null'
-        )
+        cmd = f'chmod a+x "{MEDIA_LAUNCH}"; "{MEDIA_LAUNCH}" "{escaped}"'
         Display.deinit_display()
         MiyooTrimCommon.write_cmd_to_run(cmd)
-        device.exit_pyui()
+        Device.get_device().exit_pyui()
