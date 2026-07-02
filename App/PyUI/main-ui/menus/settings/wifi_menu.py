@@ -119,7 +119,12 @@ class WifiMenu:
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
                 self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
-                Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
+                Display.display_message(
+                    Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
+                    .replace("{ssid}", net.ssid)
+                    .replace("{password}", password),
+                    duration_ms=5000,
+                )
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
         else:   

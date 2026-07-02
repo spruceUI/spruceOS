@@ -195,10 +195,9 @@ class GameSystemSelectMenu:
     def get_rom_count_text(self, game_system):
         roms = get_rom_select_options_builder().build_rom_list(game_system, subfolder=None)
         rom_count = len(roms)
-        if(rom_count > 1):
-               return f"{len(roms)} games"  
-        else:
-            return f"{len(roms)} game"
+        if rom_count > 1:
+            return Language.label("gameCountPlural", "{count} games").replace("{count}", str(rom_count))
+        return Language.label("gameCountSingular", "{count} game").replace("{count}", str(rom_count))
         
     def game_system_selected(self, input_value, game_system : GameSystem):
         if(ControllerInput.A == input_value):
@@ -313,7 +312,10 @@ class GameSystemSelectMenu:
                     primary_text_long=GameSystemSelectMenu.full_name_mapping.get(game_system.folder_name.lower()),
                     image_path=image_path,
                     image_path_selected=image_path_selected,
-                    description = lambda idx=index, gs=game_system: f"{gs.display_name} - {self.get_rom_count_text(gs)} - System {idx} of {total_count}",
+                    description = lambda idx=index, gs=game_system, total=total_count: Language.label(
+                        "systemIndexDescription",
+                        "{name} - {count} - System {index} of {total}",
+                    ).replace("{name}", gs.display_name).replace("{count}", self.get_rom_count_text(gs)).replace("{index}", str(idx)).replace("{total}", str(total)),
                     icon=icon,
                     value=lambda input_value, game_system=game_system: self.game_system_selected(input_value, game_system)
                 )          

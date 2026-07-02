@@ -169,7 +169,10 @@ class ActivityTracker:
                 img = Device.get_device().get_image_for_activity(app)
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
-                time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+                if hours > 0:
+                    time_str = Language.label("activityTimeHoursMinutes", "{hours}h {minutes}m").replace("{hours}", str(hours)).replace("{minutes}", str(minutes))
+                else:
+                    time_str = Language.label("activityTimeMinutesOnly", "{minutes}m").replace("{minutes}", str(minutes))
                 if app.endswith("launch.sh"):
                     primary = app.rsplit("/", 2)[-2]   # directory before launch.sh
                 else:

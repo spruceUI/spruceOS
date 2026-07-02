@@ -274,7 +274,7 @@ class GameConfigMenu:
             if(view is None):        
                 view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text=self.game_system.display_name + " Configuration", 
+                    top_bar_text=Language.label("gameConfigurationTitle", "{system} Configuration").replace("{system}", self.game_system.display_name),
                     options=config_list,
                     selected_index=selected.get_index())
             else:
