@@ -3,7 +3,6 @@ import re
 
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from devices.miyoo_trim_common import MiyooTrimCommon
 from display.display import Display
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -136,6 +135,8 @@ class VideoPlayerApp:
         return ext in VIDEO_EXTENSIONS
 
     def _play_video(self, path):
+        from devices.miyoo_trim_common import MiyooTrimCommon
+
         device = Device.get_device()
         width = device.screen_width()
         height = device.screen_height()

@@ -9,8 +9,6 @@ from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.app_utils import AppUtils
 from menus.app.hidden_apps_manager import AppsManager
-from menus.apps.trimui_fn_settings_app import TrimuiFnSettingsApp
-from menus.apps.video_player_app import VideoPlayerApp
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.activity.activity_tracker import ActivityTracker
@@ -41,6 +39,9 @@ class AppMenu:
         Display.reinitialize()
         
     def append_pyui_apps(self, app_list):
+        from menus.apps.trimui_fn_settings_app import TrimuiFnSettingsApp
+        from menus.apps.video_player_app import VideoPlayerApp
+
         system_config = Device.get_device().get_system_config()
         if(not system_config.simple_mode_enabled()):
             boxart_scraper_config = PyUiAppConfig("Boxart Scraper")
