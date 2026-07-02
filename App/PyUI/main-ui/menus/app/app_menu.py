@@ -9,6 +9,8 @@ from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.app_utils import AppUtils
 from menus.app.hidden_apps_manager import AppsManager
+from menus.apps.trimui_fn_settings_app import TrimuiFnSettingsApp
+from menus.apps.video_player_app import VideoPlayerApp
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.activity.activity_tracker import ActivityTracker
@@ -73,6 +75,49 @@ class AppMenu:
                         )
                 )
 
+            if Device.get_device().get_device_name() in (
+                "TRIMUI_SMART_PRO_S",
+                "TRIMUI_SMART_PRO",
+                "TRIMUI_BRICK",
+            ):
+                video_player_config = PyUiAppConfig("Video Player")
+                hidden = AppsManager.is_hidden(video_player_config) and not self.show_all_apps
+                if not hidden:
+                    icon = AppUtils.get_icon(None, "ffplay.png")
+                    app_list.append(
+                        GridOrListEntry(
+                            primary_text=video_player_config.get_label()
+                            + ("(Hidden)" if AppsManager.is_hidden(video_player_config) else ""),
+                            image_path=None,
+                            image_path_selected=None,
+                            description="Browse and play videos (PyUI)",
+                            icon=icon,
+                            extra_data=video_player_config,
+                            value=VideoPlayerApp().run,
+                        )
+                    )
+
+            if Device.get_device().get_device_name() in (
+                "TRIMUI_SMART_PRO_S",
+                "TRIMUI_SMART_PRO",
+            ):
+                fn_settings_config = PyUiAppConfig("Fn & Switch Settings")
+                hidden = AppsManager.is_hidden(fn_settings_config) and not self.show_all_apps
+                if not hidden:
+                    icon = AppUtils.get_icon(None, "fnkey.png")
+                    app_list.append(
+                        GridOrListEntry(
+                            primary_text=fn_settings_config.get_label()
+                            + ("(Hidden)" if AppsManager.is_hidden(fn_settings_config) else ""),
+                            image_path=None,
+                            image_path_selected=None,
+                            description="Smart Pro Fn keys and switches",
+                            icon=icon,
+                            extra_data=fn_settings_config,
+                            value=TrimuiFnSettingsApp().run,
+                        )
+                    )
+
                 
     def run_app_selection(self) :
         running = True
@@ -90,7 +135,7 @@ class AppMenu:
                 devices = app.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
-                if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
+                if(allowed_in_mode and app.get_label() is not None and not app.is_hidden() and not hidden and supported_device):
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(

@@ -2,7 +2,7 @@
     "label":"Fn Key and Switch Settings",
     "icon":"fnkey.png",
     "launch":"launch.sh",
-    "description":"Configure Fn key and switch assignments",
-    "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+    "description":"Brick fn editor (stock UI)",
+    "devices": ["TRIMUI_BRICK"],
     "hideInSimpleMode": true
 }
