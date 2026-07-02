@@ -228,7 +228,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if(contains_entry_for_device and not self.is_excluded_setting(category)):
                 option_list.append(
                         GridOrListEntry(
-                                primary_text=category,
+                                primary_text=Language.settings_category(category),
                                 value_text=None,
                                 image_path=None,
                                 image_path_selected=None,

@@ -3,6 +3,8 @@ import os
 import shutil
 import time
 from devices.device import Device
+from display.display import Display
+from menus.language.language import Language
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 
@@ -35,7 +37,7 @@ class ThemePatcher():
             return False
 
         Display.clear("Patching Theme")
-        Display.display_message("Patching theme to faster assets")
+        Display.display_message(Language.label("patchingThemeAssets", "Patching theme to faster assets"))
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.lower().endswith(".png"):

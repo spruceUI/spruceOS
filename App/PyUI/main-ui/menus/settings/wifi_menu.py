@@ -121,7 +121,7 @@ class WifiMenu:
                 self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
                 Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
             else:
-                Display.display_message("Invalid WiFi password length! Must be between 8 and 63", duration_ms=5000)
+                Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
         else:   
             self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
 
@@ -261,5 +261,5 @@ class WifiMenu:
                 time.sleep(0.05)
 
         finally:
-            Display.display_message("Stopping WiFi scanner...")
+            Display.display_message(Language.label("stoppingWifiScanner", "Stopping WiFi scanner..."))
             self.wifi_scanner.stop()

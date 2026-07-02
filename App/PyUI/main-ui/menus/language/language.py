@@ -171,6 +171,40 @@ class Language:
         return displays.get(display, display)
 
     @classmethod
+    def menu_option_description(cls, description: str) -> str:
+        if not description:
+            return description
+        descriptions = cls._data.get("menuOptionDescriptions", {})
+        return descriptions.get(description, description)
+
+    @classmethod
+    def settings_category(cls, category: str) -> str:
+        categories = cls._data.get("settingsCategories", {})
+        return categories.get(category, category)
+
+    @classmethod
+    def menu_option_value(cls, value) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bool):
+            return cls.boolean_label(value)
+        text = str(value)
+        if text in ("True", "False"):
+            return cls.boolean_label(text == "True")
+        values = cls._data.get("menuOptionValues", {})
+        if text in values:
+            return values[text]
+        governor = cls._data.get("governorOptions", {})
+        if text in governor:
+            return governor[text]
+        return text
+
+    @classmethod
+    def select_option_prompt(cls, name: str) -> str:
+        template = cls.label("selectOptionPrompt", "Select a {name}")
+        return template.replace("{name}", name)
+
+    @classmethod
     def governor_option_label(cls, value: str) -> str:
         options = cls._data.get("governorOptions", {})
         return options.get(value, value)

@@ -95,7 +95,7 @@ class SettingsMenu(ABC):
             if(selected_index == len(all_options)):
                 selected_index = 0
         elif(ControllerInput.A == input):
-            selected_index = self.get_selected_index(f"Select a {entry_name}", all_options)
+            selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
 
         PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -114,8 +114,10 @@ class SettingsMenu(ABC):
         menu_options = CfwSystemConfig.get_menu_options(category=category)
 
         for name, option in menu_options.items():
-            display_name = option.get('display')
-            description = self.replace_dynamic_text_in_description(option.get('description'))
+            display_name = Language.menu_option_display(option.get('display'))
+            description = self.replace_dynamic_text_in_description(
+                Language.menu_option_description(option.get('description'))
+            )
             devices = option.get('devices')
             supported_device = not devices or Device.get_device().get_device_name() in devices
             if(supported_device):
@@ -143,7 +145,7 @@ class SettingsMenu(ABC):
                     option_list.append(
                                     GridOrListEntry(
                                     primary_text=display_name,
-                                    value_text="<    " + selected_value + "    >",
+                                    value_text="<    " + Language.menu_option_value(selected_value) + "    >",
                                     image_path=None,
                                     image_path_selected=None,
                                     description=description,

@@ -47,10 +47,19 @@ class BluetoothMenu:
 
             if not output or success_token.lower() not in output.lower():
                 log.info(f"{name} FAILED for {device.address}")
-                Display.display_message(f"Bluetooth device {device.name} failed to connect at step: {name}. {output}", duration_ms=5000)
+                Display.display_message(
+                    Language.label("bluetoothConnectFailed", "Bluetooth device {name} failed to connect at step: {step}. {output}")
+                    .replace("{name}", device.name)
+                    .replace("{step}", name)
+                    .replace("{output}", output),
+                    duration_ms=5000,
+                )
                 return False
 
-        Display.display_message(f"Bluetooth device {device.name} connected successfully", duration_ms=5000)
+        Display.display_message(
+            Language.label("bluetoothConnectSuccess", "Bluetooth device {name} connected successfully").replace("{name}", device.name),
+            duration_ms=5000,
+        )
         self.bluetooth_scanner.refresh_devices()
         return True
 
@@ -115,5 +124,5 @@ class BluetoothMenu:
                     selected = None
 
         finally:
-            Display.display_message("Stopping Bluetooth scanner...")
+            Display.display_message(Language.label("stoppingBluetoothScanner", "Stopping Bluetooth scanner..."))
             self.bluetooth_scanner.stop()

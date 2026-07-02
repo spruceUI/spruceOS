@@ -85,7 +85,7 @@ class GameConfigMenu:
                     selected_index = 0
             elif(ControllerInput.A == input):
                 #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-                selected_index = self.get_selected_index(f"Select a {entry_name}", all_options)
+                selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
 
             PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -222,7 +222,7 @@ class GameConfigMenu:
                             display_name = display_name + "*"
                         
                         overridable_entries.append(name)
-                        localized_value = Language.governor_option_label(effective_value) if name == "Governor" else effective_value
+                        localized_value = Language.menu_option_value(effective_value)
                         config_list.append(
                                         GridOrListEntry(
                                         primary_text=display_name,
