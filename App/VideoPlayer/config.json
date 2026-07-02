@@ -1,0 +1,8 @@
+{
+    "label": "Video Player",
+    "icon": "ffplay.png",
+    "launch": "launch.sh",
+    "description": "TrimUI stock hardware video player (TinaPlayer)",
+    "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+    "hideInSimpleMode": false
+}

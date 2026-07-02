@@ -67,14 +67,6 @@ class TrimUISmartProS(TrimUIDevice):
 
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self._set_hue_to_config()
-        if include_wifi and self.is_wifi_enabled():
-            if not self.connection_seems_up():
-                self.stop_wifi_services()
-            self.start_wifi_services(foreground_call=False)
 
     #Untested
     @throttle.limit_refresh(5)
@@ -111,16 +103,16 @@ class TrimUISmartProS(TrimUIDevice):
     
     
     def supports_brightness_calibration(self):
-        return True
+        return False
 
     def supports_contrast_calibration(self):
-        return True
+        return False
 
     def supports_saturation_calibration(self):
-        return True
+        return False
 
     def supports_hue_calibration(self):
-        return True
+        return False
 
     def get_image_utils(self):
         return FfmpegImageUtils()
@@ -172,30 +164,6 @@ class TrimUISmartProS(TrimUIDevice):
                 f.write(str(val))
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting backlight: {e}")
-
-    def _set_contrast_to_config(self):
-        try:
-            super()._set_contrast_to_config()
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error setting contrast: {e}")
-
-    def _set_saturation_to_config(self):
-        try:
-            super()._set_saturation_to_config()
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error setting saturation: {e}")
-
-    def _set_brightness_to_config(self):
-        try:
-            super()._set_brightness_to_config()
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error setting brightness: {e}")
-
-    def _set_hue_to_config(self):
-        try:
-            super()._set_hue_to_config()
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error setting hue: {e}")
 
     def enable_bluetooth(self):
         if(not self.is_bluetooth_enabled()):
