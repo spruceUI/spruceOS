@@ -137,14 +137,20 @@ class GameConfigMenu:
 
     def delete_rom(self, input_value):
         if(ControllerInput.A == input_value):
-            if UserPrompt.prompt_yes_no(Language.delete_rom(), [f"Would you like to permanently delete", f"{self.game.display_name}?"]):
+            if UserPrompt.prompt_yes_no(Language.delete_rom(), [
+                Language.label("deleteRomPrompt1", "Would you like to permanently delete"),
+                f"{self.game.display_name}?",
+            ]):
                 path = self.game.rom_file_path
                 if os.path.isdir(path):
                     shutil.rmtree(path)
                 else:
                     os.remove(path)
                 self.perform_boxart_deletion()
-                Display.display_message(f"{path} deleted.",2000)
+                Display.display_message(
+                    Language.label("deleteRomDeleted", "{path} deleted.").replace("{path}", path),
+                    2000,
+                )
                 FavoritesManager.remove_favorite(self.game)
                 RecentsManager.remove_game(self.game)
                 CollectionsManager.remove_game_from_collections(self.game)
@@ -161,9 +167,15 @@ class GameConfigMenu:
 
     def delete_boxart(self, input_value):
         if(ControllerInput.A == input_value):
-            if UserPrompt.prompt_yes_no(Language.delete_boxart(), [f"Would you like to permanently delete the boxart for", f"{self.game.display_name}?"]):
+            if UserPrompt.prompt_yes_no(Language.delete_boxart(), [
+                Language.label("deleteBoxartPrompt1", "Would you like to permanently delete the boxart for"),
+                f"{self.game.display_name}?",
+            ]):
                 self.perform_boxart_deletion()
-                Display.display_message(f"Boxart for {self.game.display_name} deleted.",2000)
+                Display.display_message(
+                    Language.label("deleteBoxartDeleted", "Boxart for {name} deleted.").replace("{name}", self.game.display_name),
+                    2000,
+                )
 
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
