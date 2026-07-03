@@ -140,6 +140,9 @@
     "videoControls": "Controls",
     "videoControlsDesc": "Playback button guide",
     "videoControlsHelp": "Playback controls:\nB: Pause/Resume\nLeft/Right: Seek\nUp/Down: Prev/Next\nMENU: Exit player\n\nBrowser:\nX: Refresh\nB: Back",
+    "refreshVideoIndex": "Refresh video index",
+    "refreshVideoIndexDesc": "Rebuild cached video search list",
+    "videoIndexUpdated": "Video index updated",
     "fnKeySettings": "Fn Key Settings",
     "fnKeySettingsDesc": "Fn key and DIP switch actions",
     "functionKeyActions": "Function key actions",
@@ -151,5 +154,7 @@
     "dipSwitchActions": "DIP switch actions",
     "dipSwitchActionsDesc": "Parallel scripts run by stock scene.sh",
     "joystickMode": "Joystick mode",
-    "joystickModeDesc": "D-pad as left stick"
+    "joystickModeDesc": "D-pad as left stick",
+    "fnDiagnostics": "Diagnostics",
+    "fnDiagnosticsDesc": "Fn switch, CPU, fan, and scene status"
 }

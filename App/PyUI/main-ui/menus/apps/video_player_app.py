@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import time
@@ -20,6 +21,7 @@ VIDEO_EXTENSIONS = {
 }
 VIDEO_ROOT = "/mnt/SDCARD/Roms/MEDIA"
 MEDIA_LAUNCH = "/mnt/SDCARD/Emu/MEDIA/../../spruce/scripts/emu/standard_launch.sh"
+VIDEO_CACHE = "/mnt/SDCARD/Saves/spruce/video-index.json"
 
 
 class VideoPlayerApp:
@@ -37,6 +39,11 @@ class VideoPlayerApp:
                 primary_text=Language.get("searchVideos", "Search videos"),
                 description=Language.get("findVideosByName", "Find videos by name"),
                 value=self._search_videos,
+            ),
+            GridOrListEntry(
+                primary_text=Language.get("refreshVideoIndex", "Refresh video index"),
+                description=Language.get("refreshVideoIndexDesc", "Rebuild cached video search list"),
+                value=self._refresh_index,
             ),
             GridOrListEntry(
                 primary_text=Language.get("videoControls", "Controls"),
@@ -95,6 +102,14 @@ class VideoPlayerApp:
                 self._play_video(picked.get_selection().get_extra_data()["path"])
                 return
 
+    def _refresh_index(self):
+        entries = self._build_video_index()
+        self._write_video_index(entries)
+        Display.display_message(
+            Language.get("videoIndexUpdated", "Video index updated") + f"\n{len(entries)} files",
+            duration_ms=2500,
+        )
+
     def _browse(self, current_dir, root_dir):
         selected = Selection(None, None, 0)
         while selected is not None:
@@ -109,6 +124,7 @@ class VideoPlayerApp:
             )
             picked = view.get_selection([ControllerInput.A, ControllerInput.B, ControllerInput.X])
             if picked.get_input() == ControllerInput.X:
+                self._refresh_index()
                 selected = Selection(None, None, picked.get_index())
                 continue
             if picked.get_input() == ControllerInput.B:
@@ -191,24 +207,75 @@ class VideoPlayerApp:
     def _search_entries(self, query):
         matches = []
         query = query.lower()
+        for item in self._load_or_build_video_index():
+            name = item.get("name", "")
+            path = item.get("path", "")
+            if query not in name.lower() or not os.path.isfile(path):
+                continue
+            rel_dir = item.get("folder", ".")
+            matches.append(
+                {
+                    "label": name,
+                    "description": Language.get("playVideo", "Play video") if rel_dir == "." else rel_dir,
+                    "kind": "file",
+                    "path": path,
+                }
+            )
+        return matches
+
+    def _load_or_build_video_index(self):
+        entries = self._read_video_index()
+        if entries is None:
+            entries = self._build_video_index()
+            self._write_video_index(entries)
+        return entries
+
+    def _read_video_index(self):
+        try:
+            if not os.path.isfile(VIDEO_CACHE):
+                return None
+            cache_mtime = os.path.getmtime(VIDEO_CACHE)
+            root_mtime = os.path.getmtime(VIDEO_ROOT)
+            if root_mtime > cache_mtime:
+                return None
+            with open(VIDEO_CACHE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            entries = data.get("entries")
+            return entries if isinstance(entries, list) else None
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Cannot read video index: {e}")
+            return None
+
+    def _write_video_index(self, entries):
+        try:
+            os.makedirs(os.path.dirname(VIDEO_CACHE), exist_ok=True)
+            with open(VIDEO_CACHE, "w", encoding="utf-8") as f:
+                json.dump({"created": int(time.time()), "entries": entries}, f)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Cannot write video index: {e}")
+
+    def _build_video_index(self):
+        entries = []
         for dirpath, dirnames, filenames in os.walk(VIDEO_ROOT):
             dirnames[:] = [name for name in dirnames if not name.startswith(".")]
             for name in sorted(filenames, key=str.lower):
                 if name.startswith(".") or not self._is_video_file(name):
                     continue
-                if query not in name.lower():
-                    continue
                 path = os.path.join(dirpath, name)
-                rel_dir = os.path.relpath(dirpath, VIDEO_ROOT)
-                matches.append(
+                try:
+                    stat = os.stat(path)
+                except OSError:
+                    continue
+                entries.append(
                     {
-                        "label": name,
-                        "description": Language.get("playVideo", "Play video") if rel_dir == "." else rel_dir,
-                        "kind": "file",
+                        "name": name,
                         "path": path,
+                        "folder": os.path.relpath(dirpath, VIDEO_ROOT),
+                        "mtime": int(stat.st_mtime),
+                        "size": stat.st_size,
                     }
                 )
-        return matches
+        return entries
 
     def _is_video_file(self, name):
         _, ext = os.path.splitext(name.lower())

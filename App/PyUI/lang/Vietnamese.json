@@ -140,6 +140,9 @@
     "videoControls": "Điều khiển",
     "videoControlsDesc": "Hướng dẫn nút phát video",
     "videoControlsHelp": "Điều khiển khi phát:\nB: Tạm dừng/Tiếp tục\nTrái/Phải: Tua\nLên/Xuống: Video trước/tiếp\nMENU: Thoát trình phát\n\nTrình duyệt:\nX: Làm mới\nB: Quay lại",
+    "refreshVideoIndex": "Làm mới chỉ mục video",
+    "refreshVideoIndexDesc": "Tạo lại danh sách tìm kiếm video đã lưu",
+    "videoIndexUpdated": "Đã cập nhật chỉ mục video",
     "fnKeySettings": "Cài đặt phím Fn",
     "fnKeySettingsDesc": "Hành động phím Fn và công tắc DIP",
     "functionKeyActions": "Hành động phím chức năng",
@@ -151,5 +154,7 @@
     "dipSwitchActions": "Hành động công tắc DIP",
     "dipSwitchActionsDesc": "Các script chạy song song bằng scene.sh gốc",
     "joystickMode": "Chế độ joystick",
-    "joystickModeDesc": "D-pad làm cần analog trái"
+    "joystickModeDesc": "D-pad làm cần analog trái",
+    "fnDiagnostics": "Chẩn đoán",
+    "fnDiagnosticsDesc": "Trạng thái công tắc Fn, CPU, quạt và scene"
 }

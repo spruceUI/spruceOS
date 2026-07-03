@@ -6,6 +6,7 @@ import time
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
+from display.display import Display
 from menus.language.language import Language
 from menus.apps.trimui_input_helpers import TrimuiInputHelpers
 from utils.logger import PyUiLogger
@@ -17,6 +18,10 @@ from views.view_type import ViewType
 FN_EDITOR_DIR = "/mnt/SDCARD/App/fn_editor"
 STOCK_FN_EDITOR_DIR = "/usr/trimui/apps/fn_editor"
 SCENE_DIR = "/usr/trimui/scene"
+GPIO363_VALUE = "/sys/class/gpio/gpio363/value"
+THERMAL_PROFILE = "/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog/active_profile"
+CPU4_DIR = "/sys/devices/system/cpu/cpu4/cpufreq"
+FAN_STATE = "/sys/class/thermal/cooling_device0/cur_state"
 
 
 class TrimuiFnSettingsApp:
@@ -76,6 +81,15 @@ class TrimuiFnSettingsApp:
                 icon=None,
                 value=self._toggle_joystick,
             ),
+            GridOrListEntry(
+                primary_text=Language.get("fnDiagnostics", "Diagnostics"),
+                value_text=self._dip_state_label(),
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("fnDiagnosticsDesc", "Fn switch, CPU, fan, and scene status"),
+                icon=None,
+                value=self._show_diagnostics,
+            ),
         ]
 
     def _switch_actions_menu(self, _input):
@@ -123,6 +137,57 @@ class TrimuiFnSettingsApp:
             TrimuiInputHelpers.set_joystick_mode(False)
         elif input_value in (ControllerInput.DPAD_RIGHT, ControllerInput.R1, ControllerInput.A):
             TrimuiInputHelpers.set_joystick_mode(True)
+
+    def _show_diagnostics(self, _input):
+        lines = [
+            Language.get("fnDiagnostics", "Diagnostics"),
+            f"DIP: {self._read_file(GPIO363_VALUE, '?')}",
+            f"Thermal: {self._read_file(THERMAL_PROFILE, '?')}",
+            f"Fan: {self._read_file(FAN_STATE, '?')}",
+            f"CPU4: {self._cpu4_summary()}",
+            f"Scenes: {self._scene_summary()}",
+            f"CPU scene: {self._process_count('com.trimui.cpuperformance.sh')}",
+        ]
+        Display.display_message("\n".join(lines), duration_ms=7000)
+
+    def _dip_state_label(self):
+        state = self._read_file(GPIO363_VALUE, "?")
+        if state == "1":
+            return "On"
+        if state == "0":
+            return "Off"
+        return state
+
+    def _read_file(self, path, default=""):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read().strip() or default
+        except Exception:
+            return default
+
+    def _cpu4_summary(self):
+        governor = self._read_file(os.path.join(CPU4_DIR, "scaling_governor"), "?")
+        min_freq = self._read_file(os.path.join(CPU4_DIR, "scaling_min_freq"), "?")
+        max_freq = self._read_file(os.path.join(CPU4_DIR, "scaling_max_freq"), "?")
+        cur_freq = self._read_file(os.path.join(CPU4_DIR, "scaling_cur_freq"), "?")
+        return f"{governor} {min_freq}-{max_freq} ({cur_freq})"
+
+    def _scene_summary(self):
+        try:
+            names = sorted(name for name in os.listdir(SCENE_DIR) if name.endswith(".sh"))
+        except Exception:
+            return "?"
+        if not names:
+            return "None"
+        return ", ".join(names[:3]) + ("..." if len(names) > 3 else "")
+
+    def _process_count(self, pattern):
+        try:
+            output = subprocess.check_output(["pgrep", "-f", pattern], stderr=subprocess.DEVNULL, text=True)
+            count = len([line for line in output.splitlines() if line.strip()])
+        except Exception:
+            count = 0
+        return str(count)
 
     def _load_scripts(self, filename):
         path = os.path.join(FN_EDITOR_DIR, filename)
