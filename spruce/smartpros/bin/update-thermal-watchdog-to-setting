@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Load helper functions (provides get_config_value)
+# Load helper functions (provides get_config_value and get_python_path)
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 CONFIG_PATH="/mnt/SDCARD/Saves/spruce/spruce-config.json"
@@ -17,7 +17,7 @@ pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
 [ -n "$pid" ] && kill "$pid"
 
 if [ "$option" = "Adaptive" ]; then
-    python "$ADAPTIVE_SCRIPT" --lower 60 --upper 70 &
+    "$(get_python_path)" "$ADAPTIVE_SCRIPT" --lower 60 --upper 70 &
 else
     # Convert to lowercase
     profile="$(printf '%s' "$option" | tr '[:upper:]' '[:lower:]')"

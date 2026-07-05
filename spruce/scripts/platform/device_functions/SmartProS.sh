@@ -429,7 +429,7 @@ device_run_thermal_process(){
     selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
 
     if [ "$selected" = "Adaptive" ]; then
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
+        "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
     else
         # Convert display name to lowercase profile name
         profile=$(echo "$selected" | tr 'A-Z' 'a-z')
