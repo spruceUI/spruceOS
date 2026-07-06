@@ -17,6 +17,7 @@ from menus.games.utils.miyoo_game_list import MiyooGameList
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from themes.theme import Theme
+from menus.language.language import Language
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 from utils.time_logger import log_timing
@@ -152,12 +153,14 @@ class RomSelectOptionsBuilder:
                     if(Device.get_device().get_system_config().never_prompt_boxart_resize()):
                         RomSelectOptionsBuilder._user_doesnt_want_to_resize = True
                     else:
-                        Display.display_message_multiline([f"Would you like to optimize boxart?",
-                                                           "Originals will be converted, be sure to backup!",
-                                                           "A = Yes, B = No, X/Y = Never Prompt",
-                                                           "",
-                                                           "You can manually do this in:",
-                                                           "Settings -> Extra Settings -> Optimize BoxArt"], 0)
+                        Display.display_message_multiline([
+                            Language.label("optimizeBoxartPrompt1", "Would you like to optimize boxart?"),
+                            Language.label("optimizeBoxartPrompt2", "Originals will be converted, be sure to backup!"),
+                            Language.label("optimizeBoxartPrompt3", "A = Yes, B = No, X/Y = Never Prompt"),
+                            "",
+                            Language.label("optimizeBoxartPrompt4", "You can manually do this in:"),
+                            Language.label("optimizeBoxartPrompt5", "Settings -> Extra Settings -> Optimize BoxArt"),
+                        ], 0)
                         input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
                         
                         if(input == ControllerInput.B):

@@ -1,6 +1,7 @@
 
 from display.display import Display
 from display.font_purpose import FontPurpose
+from menus.language.language import Language
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
@@ -20,7 +21,7 @@ class ThemeSettingsFonts(ThemeSettingsMenuCommon):
             if(FontPurpose.ON_SCREEN_KEYBOARD != purpose):
                 option_list.append(
                     self.build_numeric_entry(
-                        primary_text=purpose.name + " Size",
+                        primary_text=Language.font_purpose_size_label(purpose),
                         get_value_func=lambda font_purpose=purpose :  Theme.get_font_size(font_purpose),
                         set_value_func=lambda size, font_purpose=purpose :  Theme.set_font_size(font_purpose,size)
                     )

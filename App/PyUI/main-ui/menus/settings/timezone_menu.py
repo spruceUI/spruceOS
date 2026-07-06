@@ -5,6 +5,7 @@ import os
 from zoneinfo import ZoneInfo
 from controller.controller_inputs import ControllerInput
 from utils.logger import PyUiLogger
+from menus.language.language import Language
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -74,7 +75,7 @@ class TimezoneMenu():
 
         view = ViewCreator.create_view(
             view_type=ViewType.ICON_AND_DESC,
-            top_bar_text="Timezone", 
+            top_bar_text=Language.set_timezone(), 
             options=options, 
             selected_index=selected.get_index(),
         )

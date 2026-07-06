@@ -221,6 +221,7 @@ def main():
             PyUiConfig.init(args.pyUiConfig)
             UserConfig.reload_config()
             CfwSystemConfig.init(args.cfwConfig)
+            Language.init()
 
         main_ui_mode = True
 
@@ -247,7 +248,6 @@ def main():
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
-        Language.init()
 
         Device.get_device().perform_sdcard_ro_check()
 

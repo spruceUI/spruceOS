@@ -1,6 +1,7 @@
 import json
 import os
 
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 
 class FileBasedGameSystemConfig():
@@ -27,7 +28,8 @@ class FileBasedGameSystemConfig():
         return self.emu_folder
 
     def get_label(self):
-        return self._data.get('label')
+        raw_label = self._data.get('label')
+        return Language.game_system_label(self.system_name, raw_label)
 
     def get_icon(self):
         return self._data.get('icon')

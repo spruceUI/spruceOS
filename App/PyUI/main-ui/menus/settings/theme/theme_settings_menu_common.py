@@ -1,5 +1,6 @@
 
 
+from menus.language.language import Language
 from abc import abstractmethod
 from controller.controller_inputs import ControllerInput
 from menus.settings.settings_menu import SettingsMenu
@@ -33,7 +34,7 @@ class ThemeSettingsMenuCommon(SettingsMenu):
                 reload_view = False
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="Settings", 
+                    top_bar_text=Language.settings(), 
                     options=option_list,
                     selected_index=selected.get_index())
                 self.theme_changed = False
