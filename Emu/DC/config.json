@@ -70,7 +70,7 @@
       "options": [
         "Flycast2021-libretro",
         "Flycast-standalone",
-        "Flycast-stock"
+        "Flycast2024"
       ],
       "selected": "Flycast2021-libretro",
       "overrides": {}

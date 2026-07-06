@@ -69,9 +69,9 @@
       "options": [
         "Flycast-libretro",
         "Flycast-standalone",
-        "Flycast-stock"
+        "Flycast2024"
       ],
-      "selected": "Flycast-stock",
+      "selected": "Flycast2024",
       "overrides": {}
     }
   },
