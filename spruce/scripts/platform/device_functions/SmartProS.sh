@@ -9,6 +9,28 @@
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
+# --- Smart Pro S: open the in-game RetroArch menu on a MENU tap ---------------
+# The generic 64-bit implementation (common64bit.sh) toggles the RA menu by
+# sending "MENU_TOGGLE" to RetroArch's UDP command interface (127.0.0.1:55355).
+# On this device's ra64.universal build that socket is bound but never acts on
+# commands (VERSION/GET_STATUS get no reply, MENU_TOGGLE is a no-op), so a short
+# MENU tap did nothing while a game was running; only MENU+X (RetroArch's own
+# input hotkey layer) worked. Override it to inject the configured menu-toggle
+# controller combo instead. input_menu_toggle_gamepad_combo = "2" is L3 + R3,
+# and send_virtual_key_L3R3 (from common64bit.sh) drives exactly that combo via
+# sendevent on the input device, which does open the menu.
+send_menu_button_to_retroarch() {
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
+        send_virtual_key_L3R3
+    elif pgrep -f "retroarch" >/dev/null; then
+        send_virtual_key_L3R3
+    elif pgrep -f "PPSSPPSDL" >/dev/null; then
+        send_virtual_key_L3
+    fi
+    # PICO8 has no in-game menu and
+    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
+}
+
 get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
 }
