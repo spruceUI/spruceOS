@@ -36,8 +36,13 @@ device_init() {
     # flip, so overlay our Brick-only versions with a bind mount.
     FN_DIP_DIR="/usr/trimui/apps/fn_editor"
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "${FN_DIP_DIR}/show_fn_dip_on_msg.sh" &
+    fn_dip_on_pid=$!
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "${FN_DIP_DIR}/show_fn_dip_off_msg.sh" &
-    wait
+    fn_dip_off_pid=$!
+    # Wait only for the two bind mounts, not a bare `wait`: device_init_a133p
+    # leaves fire-and-forget background jobs running (the startup-volume helper
+    # sleeps then blocks on sendevent), and a bare `wait` would hang boot on them.
+    wait "$fn_dip_on_pid" "$fn_dip_off_pid"
 
     run_trimui_osdd
 
