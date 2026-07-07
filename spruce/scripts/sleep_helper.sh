@@ -41,8 +41,15 @@ power_button_pressed() {
     fi
 }
 
+cleanup() {
+    kill "${GET_EVENT_PID:-}" 2>/dev/null
+    rm -f /tmp/sleep_helper_started /tmp/power_pressed_flag
+}
+
 # Clean up on exit
-trap 'kill $GET_EVENT_PID 2>/dev/null; rm -f "$POWER_BUTTON_PIPE"' EXIT
+trap cleanup EXIT
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 get_shutdown_timer() {
     local LID_TIMER
