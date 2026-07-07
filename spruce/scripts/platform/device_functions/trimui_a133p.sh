@@ -154,12 +154,6 @@ runtime_mounts_a133p() {
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
     /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
-    # Show the configured switch action's name in the Fn switch popup instead
-    # of a generic ON/OFF. trimui_scened calls these popup scripts on every
-    # flip, so overlay our versions before the blobs start below.
-    FN_DIP_DIR="/usr/trimui/apps/fn_editor"
-    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "${FN_DIP_DIR}/show_fn_dip_on_msg.sh" &
-    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "${FN_DIP_DIR}/show_fn_dip_off_msg.sh" &
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI

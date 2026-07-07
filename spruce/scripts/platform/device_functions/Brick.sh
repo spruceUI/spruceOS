@@ -30,6 +30,15 @@ init_gpio_a133p() {
 
 device_init() {
     device_init_a133p
+
+    # Show the configured switch action's name in the Fn switch popup instead
+    # of a generic ON/OFF. trimui_scened calls these popup scripts on every
+    # flip, so overlay our Brick-only versions with a bind mount.
+    FN_DIP_DIR="/usr/trimui/apps/fn_editor"
+    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "${FN_DIP_DIR}/show_fn_dip_on_msg.sh" &
+    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "${FN_DIP_DIR}/show_fn_dip_off_msg.sh" &
+    wait
+
     run_trimui_osdd
 
     if [ ! -x /bin/bash ]; then
