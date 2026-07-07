@@ -20,9 +20,8 @@
 # and send_virtual_key_L3R3 (from common64bit.sh) drives exactly that combo via
 # sendevent on the input device, which does open the menu.
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
-        send_virtual_key_L3R3
-    elif pgrep -f "retroarch" >/dev/null; then
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null \
+        || pgrep -f "retroarch" >/dev/null; then
         send_virtual_key_L3R3
     elif pgrep -f "PPSSPPSDL" >/dev/null; then
         send_virtual_key_L3
@@ -507,13 +506,7 @@ home_button_ra_menu() {
     elif pgrep -f "pcsx_64" >/dev/null; then
         killall -q -USR2 pcsx_64
     else
-        {
-            echo $B_MENU 1
-            echo $B_L3 1
-            echo $B_L3 0
-            echo $B_MENU 0
-            echo 0 0 0
-        } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
+        send_menu_button_to_retroarch
     fi
 }
 

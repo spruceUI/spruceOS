@@ -23,21 +23,23 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SCENE_DIR="/usr/trimui/scene"
-ACTIONS_DIR="/usr/trimui/apps/fn_editor"
 SELF_DIR="/mnt/SDCARD/spruce/smartpros/bin"
 
 apply_now() {
     action="$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "Nothing")"
 
-    # Map the menu label to the action script to install. Volume actions reuse the
-    # stock fn_editor scripts (they only touch the speaker, which works as-is); the
-    # LED action uses a spruce-native script that drives the LEDs through rgb_led
-    # rather than the stock ledc.sh (whose shmvar-based brightness is dead here).
+    # Map the menu label to the spruce-native action script to install. All three
+    # actions drive spruce's own systems rather than the stock scene scripts,
+    # whose control numbering is wrong on this device: the stock quiet script
+    # pokes tinymix control 9 (DACL DACR Swap, not volume) and the stock ledc.sh
+    # derives brightness from a shmvar spruce never populates. scene-rgb-led.sh
+    # drives the LEDs via rgb_led; scene-quiet.sh / scene-silent.sh go through
+    # set_volume so the audio and the in-UI volume reading stay in sync.
     src=""; name=""
     case "$action" in
-        "LED off")     src="$SELF_DIR/scene-rgb-led.sh";      name="scene-rgb-led.sh" ;;
-        "Quiet Mode")  src="$ACTIONS_DIR/com.trimui.quiet.sh"; name="com.trimui.quiet.sh" ;;
-        "Silent Mode") src="$ACTIONS_DIR/com.trimui.silent.sh"; name="com.trimui.silent.sh" ;;
+        "LED off")     src="$SELF_DIR/scene-rgb-led.sh"; name="scene-rgb-led.sh" ;;
+        "Quiet Mode")  src="$SELF_DIR/scene-quiet.sh";   name="scene-quiet.sh" ;;
+        "Silent Mode") src="$SELF_DIR/scene-silent.sh";  name="scene-silent.sh" ;;
         "Nothing"|*)   src=""; name="" ;;
     esac
 
