@@ -425,17 +425,7 @@ device_stop_thermal_process(){
 }
 
 device_run_thermal_process(){
-    THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
-    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
-
-    if [ "$selected" = "Adaptive" ]; then
-        "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    else
-        # Convert display name to lowercase profile name
-        profile=$(echo "$selected" | tr 'A-Z' 'a-z')
-        echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    fi
+    /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
 }
 
 set_backlight() {
