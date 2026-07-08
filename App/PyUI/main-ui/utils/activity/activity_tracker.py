@@ -4,6 +4,7 @@
 from typing import Dict
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from menus.language.language import Language
 from utils.activity.activity_log import ActivityLog
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -21,14 +22,14 @@ class ActivityTracker:
         option_list = []
         option_list.append(
             GridOrListEntry(
-                primary_text="Game Tracking",
+                primary_text=Language.label("gameTracking", "Game Tracking"),
                 value=lambda input_value,activity_list=activity_log,
                 : self.all_apps_list(activity_list)
             )
         )
         option_list.append(
             GridOrListEntry(
-                primary_text="System Tracking",
+                primary_text=Language.label("systemTracking", "System Tracking"),
                 value=lambda input_value,activity_list=activity_log,
                 : self.by_system_list(activity_list)
             )
@@ -38,7 +39,7 @@ class ActivityTracker:
 
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
-                top_bar_text="Activity Tracker", 
+                top_bar_text=Language.label("activityTracker", "Activity Tracker"), 
                 options=option_list,
                 selected_index=0)
 
@@ -57,42 +58,42 @@ class ActivityTracker:
         option_list = []
         option_list.append(
             GridOrListEntry(
-                primary_text="Today",
+                primary_text=Language.label("today", "Today"),
                 value=lambda input_value,activity_list=activity_log.all_apps_today(),
                 : self.display_activity_details(activity_list)
             )
         )
         option_list.append(
             GridOrListEntry(
-                primary_text="This Week",
+                primary_text=Language.label("thisWeek", "This Week"),
                 value=lambda input_value,activity_list=activity_log.all_apps_this_week(),
                 : self.display_activity_details(activity_list)
             )
         )
         option_list.append(
             GridOrListEntry(
-                primary_text="This Month",
+                primary_text=Language.label("thisMonth", "This Month"),
                 value=lambda input_value,activity_list=activity_log.all_apps_this_month(),
                 : self.display_activity_details(activity_list)
             )
         )  
         option_list.append(
             GridOrListEntry(
-                primary_text="This Year",
+                primary_text=Language.label("thisYear", "This Year"),
                 value=lambda input_value,activity_list=activity_log.all_apps_this_year(),
                 : self.display_activity_details(activity_list)
             )
         ) 
         option_list.append(
             GridOrListEntry(
-                primary_text="All Time",
+                primary_text=Language.label("allTime", "All Time"),
                 value=lambda input_value,activity_list=activity_log.all_apps_all_time(),
                 : self.display_activity_details(activity_list)
             )
         )  
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
-                top_bar_text="Activity Tracker", 
+                top_bar_text=Language.label("activityTracker", "Activity Tracker"), 
                 options=option_list,
                 selected_index=0)
 
@@ -110,35 +111,35 @@ class ActivityTracker:
         option_list = []       
         option_list.append(
             GridOrListEntry(
-                primary_text="Today",
+                primary_text=Language.label("today", "Today"),
                 value=lambda input_value,activity_list=activity_log.systems_today(),
                 : self.display_activity_details(activity_list)
             )
         )  
         option_list.append(
             GridOrListEntry(
-                primary_text="This Week",
+                primary_text=Language.label("thisWeek", "This Week"),
                 value=lambda input_value,activity_list=activity_log.systems_this_week(),
                 : self.display_activity_details(activity_list)
             )
         )  
         option_list.append(
             GridOrListEntry(
-                primary_text="This Month",
+                primary_text=Language.label("thisMonth", "This Month"),
                 value=lambda input_value,activity_list=activity_log.systems_this_month(),
                 : self.display_activity_details(activity_list)
             )
         )          
         option_list.append(
             GridOrListEntry(
-                primary_text="This Year",
+                primary_text=Language.label("thisYear", "This Year"),
                 value=lambda input_value,activity_list=activity_log.systems_this_year(),
                 : self.display_activity_details(activity_list)
             )
         )  
         option_list.append(
             GridOrListEntry(
-                primary_text="All Time",
+                primary_text=Language.label("allTime", "All Time"),
                 value=lambda input_value,activity_list=activity_log.systems_all_time(),
                 : self.display_activity_details(activity_list)
             )
@@ -146,7 +147,7 @@ class ActivityTracker:
 
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
-                top_bar_text="System Activity Tracker", 
+                top_bar_text=Language.label("systemActivityTracker", "System Activity Tracker"), 
                 options=option_list,
                 selected_index=0)
 
@@ -168,7 +169,10 @@ class ActivityTracker:
                 img = Device.get_device().get_image_for_activity(app)
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
-                time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+                if hours > 0:
+                    time_str = Language.label("activityTimeHoursMinutes", "{hours}h {minutes}m").replace("{hours}", str(hours)).replace("{minutes}", str(minutes))
+                else:
+                    time_str = Language.label("activityTimeMinutesOnly", "{minutes}m").replace("{minutes}", str(minutes))
                 if app.endswith("launch.sh"):
                     primary = app.rsplit("/", 2)[-2]   # directory before launch.sh
                 else:
@@ -183,7 +187,7 @@ class ActivityTracker:
 
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
-                top_bar_text="Activity Tracker", 
+                top_bar_text=Language.label("activityTracker", "Activity Tracker"), 
                 options=option_list,
                 selected_index=0)
 

@@ -43,7 +43,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.hold_menu_for_gameswitcher(),
-                        value_text="<    " + str(Device.get_device().get_system_config().game_switcher_enabled()) + "    >",
+                        value_text="<    " + Language.boolean_label(Device.get_device().get_system_config().game_switcher_enabled()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -55,7 +55,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.prefer_savestate_screenshots(),
-                        value_text="<    " + str(Device.get_device().get_system_config().use_savestate_screenshots(GAME_SWITCHER)) + "    >",
+                        value_text="<    " + Language.boolean_label(Device.get_device().get_system_config().use_savestate_screenshots(GAME_SWITCHER)) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -83,7 +83,8 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                 primary_text=Language.view_type(),
                 get_value_func=Theme.get_view_type_for_game_switcher,
                 set_value_func=Theme.set_view_type_for_game_switcher,
-                get_next_enum_type=get_next_view_type
+                get_next_enum_type=get_next_view_type,
+                enum_section="viewTypes"
             )
         )
 
@@ -93,7 +94,8 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                     primary_text=Language.full_screen_resize_type(),
                     get_value_func=Theme.get_resize_type_for_game_switcher,
                     set_value_func=Theme.set_resize_type_for_game_switcher,
-                    get_next_enum_type=get_next_resize_type
+                    get_next_enum_type=get_next_resize_type,
+                    enum_section="resizeTypes"
                 )
             )
 
@@ -136,7 +138,7 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                     GridOrListEntry(
                             primary_text=Language.use_recents_for_gameswitcher(),
-                            value_text="<    " + ("No" if Device.get_device().get_system_config().use_custom_gameswitcher_path() else "Yes") + "    >",
+                            value_text="<    " + (Language.label("no", "No") if Device.get_device().get_system_config().use_custom_gameswitcher_path() else Language.label("yes", "Yes")) + "    >",
                             image_path=None,
                             image_path_selected=None,
                             description=None,

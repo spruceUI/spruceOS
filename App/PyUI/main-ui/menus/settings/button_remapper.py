@@ -2,6 +2,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.miyoo.device_user_config import DeviceUserConfig
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
@@ -33,14 +34,12 @@ class ButtonRemapper:
         option_list = []
 
         for controller_input in ControllerInput:
-            current_value = controller_input.name
-            if(controller_input in self.button_mapping):
-                current_value = self.button_mapping[controller_input].name
+            mapped_input = self.button_mapping.get(controller_input, controller_input)
 
             option_list.append(
                     GridOrListEntry(
-                            primary_text=controller_input.name,
-                            value_text=current_value,
+                            primary_text=Language.controller_input_label(controller_input),
+                            value_text=Language.controller_input_label(mapped_input),
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -55,7 +54,7 @@ class ButtonRemapper:
         selected = Selection(None,None,0)
         list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text=f"Button Remapper", 
+                    top_bar_text=Language.label("buttonRemapper", "Button Remapper"), 
                     options=self.build_remap_buttons_options(),
                     selected_index=selected.get_index())
         while(selected is not None):    
@@ -148,7 +147,7 @@ class ButtonRemapper:
         for controller_input in ControllerInput:
             option_list.append(
                     GridOrListEntry(
-                            primary_text=controller_input.name,
+                            primary_text=Language.controller_input_label(controller_input),
                             image_path=None,
                             image_path_selected=None,
                             description=None,

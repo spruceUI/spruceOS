@@ -26,31 +26,31 @@ class ThemeSettingsTopAndBottomBar(ThemeSettingsMenuCommon):
         )
                 
         option_list.append(
-            self.build_enabled_disabled_entry("Show Battery Percent",
+            self.build_enabled_disabled_entry(Language.label("showBatteryPercent", "Show Battery Percent"),
                                               Theme.display_battery_percent,
                                               Theme.set_display_battery_percent)
         )
 
         option_list.append(
-            self.build_enabled_disabled_entry("Show Battery Icon",
+            self.build_enabled_disabled_entry(Language.label("showBatteryIcon", "Show Battery Icon"),
                                               Theme.display_battery_icon,
                                               Theme.set_display_battery_icon)
         )
 
         option_list.append(
-            self.build_enabled_disabled_entry("Show Volume Numbers",
+            self.build_enabled_disabled_entry(Language.label("showVolumeNumbers", "Show Volume Numbers"),
                                               Theme.display_volume_numbers,
                                               Theme.set_display_volume_numbers)
         )
 
         option_list.append(
-            self.build_enabled_disabled_entry("Show Bottom Bar Buttons",
+            self.build_enabled_disabled_entry(Language.label("showBottomBarButtons", "Show Bottom Bar Buttons"),
                                               Theme.show_bottom_bar_buttons,
                                               Theme.set_show_bottom_bar_buttons)
         )
 
         option_list.append(
-            self.build_enabled_disabled_entry("Show Clock",
+            self.build_enabled_disabled_entry(Language.label("showClock", "Show Clock"),
                                               Theme.show_clock,
                                               Theme.set_show_clock)
         )

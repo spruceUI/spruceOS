@@ -10,6 +10,7 @@ from display.on_screen_keyboard import OnScreenKeyboard
 from display.display import Display
 from menus.language.language import Language
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -19,14 +20,17 @@ VIDEO_EXTENSIONS = {
     ".mp4", ".mkv", ".avi", ".mov", ".flv", ".ts", ".webm",
     ".m4v", ".wmv", ".mpeg", ".mpg", ".3gp",
 }
-VIDEO_ROOT = "/mnt/SDCARD/Roms/MEDIA"
 MEDIA_LAUNCH = "/mnt/SDCARD/Emu/MEDIA/../../spruce/scripts/emu/standard_launch.sh"
 VIDEO_CACHE = "/mnt/SDCARD/Saves/spruce/video-index.json"
 
 
 class VideoPlayerApp:
+    def _video_root(self):
+        return PyUiConfig.get_video_root_path()
+
     def run(self, _input=None):
-        os.makedirs(VIDEO_ROOT, exist_ok=True)
+        video_root = self._video_root()
+        os.makedirs(video_root, exist_ok=True)
         Controller.clear_input_queue()
         time.sleep(0.2)
         options = [
@@ -68,7 +72,8 @@ class VideoPlayerApp:
                 time.sleep(0.2)
 
     def _browse_root(self):
-        self._browse(VIDEO_ROOT, VIDEO_ROOT)
+        video_root = self._video_root()
+        self._browse(video_root, video_root)
 
     def _show_controls(self):
         Display.display_message(
@@ -235,7 +240,7 @@ class VideoPlayerApp:
             if not os.path.isfile(VIDEO_CACHE):
                 return None
             cache_mtime = os.path.getmtime(VIDEO_CACHE)
-            root_mtime = os.path.getmtime(VIDEO_ROOT)
+            root_mtime = os.path.getmtime(self._video_root())
             if root_mtime > cache_mtime:
                 return None
             with open(VIDEO_CACHE, "r", encoding="utf-8") as f:
@@ -256,7 +261,8 @@ class VideoPlayerApp:
 
     def _build_video_index(self):
         entries = []
-        for dirpath, dirnames, filenames in os.walk(VIDEO_ROOT):
+        video_root = self._video_root()
+        for dirpath, dirnames, filenames in os.walk(video_root):
             dirnames[:] = [name for name in dirnames if not name.startswith(".")]
             for name in sorted(filenames, key=str.lower):
                 if name.startswith(".") or not self._is_video_file(name):
@@ -270,7 +276,7 @@ class VideoPlayerApp:
                     {
                         "name": name,
                         "path": path,
-                        "folder": os.path.relpath(dirpath, VIDEO_ROOT),
+                        "folder": os.path.relpath(dirpath, video_root),
                         "mtime": int(stat.st_mtime),
                         "size": stat.st_size,
                     }

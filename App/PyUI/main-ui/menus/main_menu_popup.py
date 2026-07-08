@@ -19,7 +19,7 @@ class MainMenuPopup:
 
     def rom_search(self, input):
         if (ControllerInput.A == input):
-            search_txt = OnScreenKeyboard().get_input("Game Search:")
+            search_txt = OnScreenKeyboard().get_input(Language.game_search())
             if (search_txt is not None):
                 return SearchedRomsMenu(search_txt.upper()).run_rom_selection()
 
@@ -99,7 +99,7 @@ class MainMenuPopup:
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
-            top_bar_text="Main Menu Sub Options",
+            top_bar_text=Language.label("mainMenuSubOptions", "Main Menu Sub Options"),
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows)

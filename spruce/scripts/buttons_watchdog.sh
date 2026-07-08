@@ -97,25 +97,6 @@ volume_up_bg() {
     done
 }
 
-run_fn_config() {
-    config="$1"
-    echo "$(date '+%H:%M:%S') fn config $config" >> /tmp/buttons_watchdog_fn.log
-    [ -f "$config" ] || return 0
-
-    launch=$(jq -r '.launch // empty' "$config" 2>/dev/null)
-    echo "$(date '+%H:%M:%S') fn launch $launch" >> /tmp/buttons_watchdog_fn.log
-    [ -n "$launch" ] || return 0
-
-    case "$launch" in
-        */*) script="$launch" ;;
-        *) script="/mnt/SDCARD/App/fn_editor/$launch" ;;
-    esac
-
-    [ -f "$script" ] || return 0
-    echo "$(date '+%H:%M:%S') fn script $script" >> /tmp/buttons_watchdog_fn.log
-    sh "$script" &
-}
-
 run_dip_scene() {
     state="$1"
     echo "$(date '+%H:%M:%S') dip state $state" >> /tmp/buttons_watchdog_dip.log
@@ -211,11 +192,17 @@ getevent $EVENTS | while read line; do
                 brightness_up
             fi
         ;;
-        *"key $B_L3 1"*) # Left Fn key down
-            run_fn_config "/usr/trimui/fnkeys/f1key.json"
+        *"key $B_FN_LEFT 1"*) # Left Fn key down
+            fn_key_down left
         ;;
-        *"key $B_R3 1"*) # Right Fn key down
-            run_fn_config "/usr/trimui/fnkeys/f2key.json"
+        *"key $B_FN_LEFT 0"*) # Left Fn key up
+            fn_key_up left
+        ;;
+        *"key $B_FN_RIGHT 1"*) # Right Fn key down
+            fn_key_down right
+        ;;
+        *"key $B_FN_RIGHT 0"*) # Right Fn key up
+            fn_key_up right
         ;;
         *"key $SS_B1 1"*) # Screenshot key 1 down
             SS_B1_DOWN=true

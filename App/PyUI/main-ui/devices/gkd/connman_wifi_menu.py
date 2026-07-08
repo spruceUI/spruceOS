@@ -71,12 +71,17 @@ class ConnmanWifiMenu:
     def switch_network(self, net: WiFiNetwork):
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password()):
-            password = self.on_screen_keyboard.get_input("WiFi Password")
+            password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
                 self.write_connman_conf(net, password)
-                Display.display_message(f"Updating config file for {net.ssid} with password {password}", duration_ms=5000)
+                Display.display_message(
+                    Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
+                    .replace("{ssid}", net.ssid)
+                    .replace("{password}", password),
+                    duration_ms=5000,
+                )
             else:
-                Display.display_message("Invalid WiFi password length! Must be between 8 and 63", duration_ms=5000)
+                Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
 
         self.connman_connect(net.id_str)
 
@@ -92,7 +97,7 @@ class ConnmanWifiMenu:
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.status(),
-                value_text="<    " + ("On" if wifi_enabled else "Off") + "    >",
+                value_text="<    " + Language.on_off_label(wifi_enabled) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,
@@ -219,5 +224,5 @@ class ConnmanWifiMenu:
                 time.sleep(0.05)
 
         finally:
-            Display.display_message("Stopping WiFi scanner...")
+            Display.display_message(Language.label("stoppingWifiScanner", "Stopping WiFi scanner..."))
             self.wifi_scanner.stop()

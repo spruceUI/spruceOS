@@ -13,6 +13,7 @@
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
+    "videoRootPath":"/mnt/SDCARD/Roms/MEDIA",
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "aboutEntries" : [

@@ -35,7 +35,8 @@ class ThemePatcher():
             return False
 
         Display.clear("Patching Theme")
-        Display.display_message("Patching theme to faster assets")
+        from menus.language.language import Language
+        Display.display_message(Language.label("patchingThemeAssets", "Patching theme to faster assets"))
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.lower().endswith(".png"):

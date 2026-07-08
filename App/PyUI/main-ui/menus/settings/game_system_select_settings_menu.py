@@ -20,7 +20,10 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         elif (ControllerInput.DPAD_RIGHT == input):
             PyUiConfig.set_game_system_sort_mode(self.get_next_entry(PyUiConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,+1))
         elif (ControllerInput.A):
-            selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(GAME_SYSTEM_SORT_MODE_OPTIONS, "Game System Sort Mode")
+            selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(
+                GAME_SYSTEM_SORT_MODE_OPTIONS,
+                Language.label("gameSystemSortModeTitle", "Game System Sort Mode"),
+                label_func=Language.game_system_sort_mode_label)
             if(selected_index is not None):
                 PyUiConfig.set_game_system_sort_mode(GAME_SYSTEM_SORT_MODE_OPTIONS[selected_index])
 
@@ -95,8 +98,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.show_all_systems(),
-                value_text="<    " +
-                ("On" if PyUiConfig.show_all_game_systems() else "Off") + "    >",
+                value_text="<    " + Language.on_off_label(PyUiConfig.show_all_game_systems()) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,
@@ -108,7 +110,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.game_system_sorting(),
-                value_text="<    " + PyUiConfig.game_system_sort_mode()+ "    >",
+                value_text="<    " + Language.game_system_sort_mode_label(PyUiConfig.game_system_sort_mode()) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,

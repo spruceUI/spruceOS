@@ -310,6 +310,14 @@ device_home_button_pressed() {
     log_message "Missing device_home_button_pressed function" -v
 }
 
+fn_key_down() {
+    :
+}
+
+fn_key_up() {
+    :
+}
+
 device_wifi_power_on() { 
     log_message "Missing device_wifi_power_on function" -v
 }
