@@ -89,7 +89,7 @@ run_mpv() {
 	INPUT_CONF="/tmp/mpv_input.conf"
 	printf 'VOLUME_UP ignore\nVOLUME_DOWN ignore' > $INPUT_CONF
 
-	/mnt/SDCARD/spruce/bin64/gptokeyb -k "mpv" -c "./bin64/mpv.gptk" &
+	gptokeyb -k "mpv" -c "./mpv.gptk" &
 	sleep 0.5
 
 	/usr/bin/mpv --profile=fast --fs --geometry="640x480" --hwdec=rkmpp \

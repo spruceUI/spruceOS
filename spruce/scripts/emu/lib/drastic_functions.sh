@@ -270,9 +270,9 @@ run_drastic_Pixel2() {
 }
 
 run_drastic_trngaje_Pixel2() {
-	eady_arch_64_states
+	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_Pixel2_trngaje:$LD_LIBRARY_PATH"
-	./drastic64 "$ROM_FILE" > $(emu_log_file) 2>&1
+	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 

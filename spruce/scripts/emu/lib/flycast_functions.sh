@@ -52,7 +52,7 @@ run_flycast_standalone() {
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
-	if [ "$CORE" = "Flycast2024" ]; then
+	if [ "$CORE" = "Flycast2024-standalone" ]; then
 		./flycast2024 "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
 		./flycast "$ROM_FILE" > $(emu_log_file) 2>&1

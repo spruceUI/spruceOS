@@ -67,11 +67,11 @@
         "GKD_PIXEL2"
       ],
       "options": [
-        "Flycast-libretro",
+        "Flycast2021-libretro",
         "Flycast-standalone",
-        "Flycast2024"
+        "Flycast2024-standalone"
       ],
-      "selected": "Flycast2024",
+      "selected": "Flycast2021-libretro",
       "overrides": {}
     }
   },

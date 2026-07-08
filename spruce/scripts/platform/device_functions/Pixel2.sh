@@ -359,7 +359,7 @@ set_event_arg() {
 
 send_menu_button_to_retroarch() {
     if pgrep "ra64.pixel2" >/dev/null; then
-        echo "MENU_TOGGLE" | nc -u -w0.1 127.0.0.1 55355
+        echo "MENU_TOGGLE" | socat -t 0.1 - udp:127.0.0.1:55355
     fi
 }
 
