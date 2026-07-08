@@ -237,6 +237,8 @@ class GridView(View):
                                  render_mode=RenderMode.BOTTOM_CENTER_ALIGNED)
 
     def _render(self):
+        if Display._screensaver_active:
+            return
         if (self.set_top_bar_text_to_selection) and len(self.options) > 0:
             Display.clear(
                 self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)

@@ -270,6 +270,8 @@ class FullScreenGridView(View):
         self._render_bottom_bar_text()
 
     def _render(self):
+        if Display._screensaver_active:
+            return
         self.correct_selected_for_off_list()
 
         if(self.selected != self.last_selected):
