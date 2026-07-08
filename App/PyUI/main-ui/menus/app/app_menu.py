@@ -53,7 +53,7 @@ class AppMenu:
                 value=handler,
             )
         )
-
+    
     def save_app_selection(self, selected):
         if(selected.get_selection() is not None):
             PyUiState.set_last_app_selection(selected.get_selection().get_extra_data().get_label())
@@ -65,7 +65,7 @@ class AppMenu:
         Device.get_device().run_app(folder,launch)
         Controller.clear_input_queue()
         Display.reinitialize()
-
+        
     def append_pyui_apps(self, app_list):
         from menus.apps.trimui_fn_settings_app import TrimuiFnSettingsApp
         from menus.apps.video_player_app import VideoPlayerApp
@@ -141,9 +141,10 @@ class AppMenu:
                         hidden=AppsManager.is_hidden(fn_settings_config),
                     )
 
+                
     def run_app_selection(self) :
         running = True
-
+    
         system_config = Device.get_device().get_system_config()
 
         while(running):
@@ -157,7 +158,7 @@ class AppMenu:
                 devices = app.get_devices()
                 supported_device = not devices or Device.get_device().get_device_name() in devices
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
-                if(allowed_in_mode and app.get_label() is not None and not app.is_hidden() and not hidden and supported_device):
+                if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(
@@ -187,12 +188,12 @@ class AppMenu:
             if(view is None):
                 view = ViewCreator.create_view(
                     view_type=Theme.get_view_type_for_app_menu(),
-                    top_bar_text=Language.apps(),
+                    top_bar_text=Language.apps(), 
                     options=app_list,
                     selected_index=selected.get_index())
             else:
                 view.set_options(app_list)
-
+            
             selected = Selection(None, None, None)
             while(selected.get_input() is None):
                 selected = view.get_selection(select_controller_inputs = [ControllerInput.A, ControllerInput.MENU])
@@ -214,4 +215,5 @@ class AppMenu:
                 elif(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
                     self.save_app_selection(selected)
                     return ControllerInput.R1
-
+                        
+                    
