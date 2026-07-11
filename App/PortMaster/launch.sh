@@ -7,6 +7,7 @@ case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
     *"TG5040"*)	export PLATFORM="SmartPro" ;;
     *"TG3040"*)	export PLATFORM="Brick"	;;
+    *"TG4040"*)	export PLATFORM="BrickPro"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"0xd05"*) export PLATFORM="Flip" ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
@@ -21,7 +22,7 @@ case "$PLATFORM" in
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
         export HOME="/mnt/SDCARD/Saves/flip/home"
         ;;
-    Brick|SmartPro)
+    Brick|SmartPro|BrickPro)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
