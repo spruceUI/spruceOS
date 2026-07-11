@@ -49,7 +49,13 @@ get_spruce_ra_cfg_location() {
 }
 
 set_loading_screen() {
-    THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    else
+        THEME_NAME="SPRUCE"
+    fi
+
     LOADING_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_merged.png"
 
     if [ ! -f "$LOADING_IMG" ]; then
