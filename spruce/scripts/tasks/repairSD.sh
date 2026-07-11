@@ -94,6 +94,18 @@ case $INFO in
         DISPLAY_HEIGHT=768
         DISPLAY_ROTATION=0
         ;;
+    *"TG4040"*)
+        PLATFORM="BrickPro"
+        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
+        SD_DEV="/dev/mmcblk1p1"
+        BIN_DIR="/mnt/SDCARD/spruce/bin64"
+        MAX_FREQ=1800000
+        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png" 
+        TEXT_WIDTH=960
+        DISPLAY_WIDTH=1024
+        DISPLAY_HEIGHT=768
+        DISPLAY_ROTATION=0
+        ;;
     *"TG5040"*)
         PLATFORM="SmartPro"
         LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
