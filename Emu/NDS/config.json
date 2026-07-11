@@ -46,6 +46,17 @@
       "selected": "DraStic-original",
       "overrides": {}
     },
+    "Emulator_BrickPro": {
+      "display": "Emulator",
+      "devices": [
+        "TRIMUI_BRICK_PRO"
+      ],
+      "options": [
+        "DraStic-original"
+      ],
+      "selected": "DraStic-original",
+      "overrides": {}
+    },
     "Emulator_SmartPro": {
       "display": "Emulator",
       "devices": [
