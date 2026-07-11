@@ -253,10 +253,15 @@ while true; do
         sleep 3
         stop_pyui_message_writer
         sync
-        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
-        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
-        unset LD_LIBRARY_PATH
-        exec "$STAGE_2_TMP" --reboot
+
+        if device_system_handles_sdcard_unmount; then
+            device_run_reboot_cmd
+        else
+            cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+            export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+            unset LD_LIBRARY_PATH
+            exec "$STAGE_2_TMP" --reboot
+        fi
     fi
 
     log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device."
@@ -266,10 +271,15 @@ while true; do
         sleep 3
         stop_pyui_message_writer
         sync
-        cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
-        export PATH=/usr/bin:/usr/sbin:/bin:/sbin
-        unset LD_LIBRARY_PATH
-        exec "$STAGE_2_TMP" --reboot
+
+        if device_system_handles_sdcard_unmount; then
+            device_run_reboot_cmd
+        else
+            cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
+            export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+            unset LD_LIBRARY_PATH
+            exec "$STAGE_2_TMP" --reboot
+        fi
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU
     sleep 1
