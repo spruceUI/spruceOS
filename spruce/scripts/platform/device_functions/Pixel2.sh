@@ -305,7 +305,7 @@ vibrate() {
             "Strong") intensity=0xFFFF ;;
     esac
 
-    rumble /dev/input/event0 $intensity $duration
+    rumble $EVENT_PATH_READ_INPUTS_SPRUCE $intensity $duration
 }
 
 current_backlight() {
