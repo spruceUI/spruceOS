@@ -100,7 +100,7 @@ device_init() {
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event3"
+    EVENT_ARG="-e /dev/input/event2"
 }
 
 check_if_fw_needs_update() {
@@ -360,7 +360,7 @@ turn_on_screen() {
 }
 
 set_event_arg() {
-    EVENT_ARG="-e /dev/input/event3"
+    EVENT_ARG="-e /dev/input/event2"
 }
 
 send_menu_button_to_retroarch() {
