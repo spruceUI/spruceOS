@@ -52,9 +52,10 @@
         "TRIMUI_BRICK_PRO"
       ],
       "options": [
+        "DraStic-Steward",
         "DraStic-original"
       ],
-      "selected": "DraStic-original",
+      "selected": "DraStic-Steward",
       "overrides": {}
     },
     "Emulator_SmartPro": {
