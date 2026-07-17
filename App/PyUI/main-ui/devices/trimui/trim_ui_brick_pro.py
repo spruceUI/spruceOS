@@ -127,7 +127,7 @@ class TrimUIBrickPro(TrimUIDevice):
         return self.device_name
         
     def set_theme(self, theme_path: str):
-        MiyooTrimCommon.set_theme(TrimUIBrick.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)
+        MiyooTrimCommon.set_theme(TrimUIBrickPro.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)
 
     def get_audio_system(self):
         return self.audio_player
