@@ -14,7 +14,7 @@ case "$BASE" in
     com.trimui.ledc.sh)                 MSG="LED: OFF" ;;
     com.trimui.quiet.sh)                MSG="Quiet: $STATE" ;;
     com.trimui.silent.sh)               MSG="Silent: $STATE" ;;
-    com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh) MSG="Joystick: $STATE" ;;
+    com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh|spruce_toggle_joystick.sh) MSG="Joystick: $STATE" ;;
     *)                                  MSG="$STATE" ;;
 esac
 
