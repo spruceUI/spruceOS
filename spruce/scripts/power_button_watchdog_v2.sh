@@ -4,7 +4,29 @@
 
 log_message "power_button_watchdog_v2.sh: Started up."
 
+LAST_POWER_DOWN=0
+power_hold_pid=""
+getevent_pid=""
+POWER_EVENT_PIPE="/tmp/power_button_watchdog.$$"
 
+cleanup_power_watchdog () {
+    if [ -n "$power_hold_pid" ]; then
+        kill "$power_hold_pid" 2>/dev/null
+        wait "$power_hold_pid" 2>/dev/null
+        power_hold_pid=""
+    fi
+
+    if [ -n "$getevent_pid" ]; then
+        kill "$getevent_pid" 2>/dev/null
+        wait "$getevent_pid" 2>/dev/null
+        getevent_pid=""
+    fi
+
+    rm -f /tmp/powerbtn /tmp/powerbtn_cancelled "$POWER_EVENT_PIPE"
+}
+
+trap 'cleanup_power_watchdog; rm -f /tmp/powerbtn /tmp/powerbtn_cancelled' EXIT
+trap 'cleanup_power_watchdog; rm -f /tmp/powerbtn /tmp/powerbtn_cancelled; exit 0' INT TERM
 
 power_key_up () {
     if [ -e /tmp/powerbtn ]; then
@@ -50,7 +72,9 @@ power_key_down () {
                 vibrate &
                 rm -f /tmp/powerbtn
                 rm -f /tmp/powerbtn_cancelled
-                killall getevent 2>/dev/null
+                if [ -n "$getevent_pid" ]; then
+                    kill "$getevent_pid" 2>/dev/null
+                fi
                 sleep 0.1
                 "$POWER_OFF_SCRIPT"
             fi
@@ -63,7 +87,17 @@ power_key_down () {
 
 while true; do
     log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
-    getevent -exclusive -pid $$ $EVENT_PATH_POWER | while read line; do
+    rm -f "$POWER_EVENT_PIPE"
+    if ! mkfifo "$POWER_EVENT_PIPE"; then
+        log_message "power_button_watchdog_v2.sh: Failed to create $POWER_EVENT_PIPE"
+        sleep 1
+        continue
+    fi
+
+    getevent -exclusive -pid $$ "$EVENT_PATH_POWER" > "$POWER_EVENT_PIPE" &
+    getevent_pid=$!
+
+    while read -r line; do
         now=$(date +%s)
         case $line in
             # Power key down
@@ -84,8 +118,12 @@ while true; do
                     LAST_POWER_DOWN=$(date +%s)
                 ;;
             esac
-    done
+    done < "$POWER_EVENT_PIPE"
+
+    kill "$getevent_pid" 2>/dev/null
+    wait "$getevent_pid" 2>/dev/null
+    getevent_pid=""
+    rm -f "$POWER_EVENT_PIPE"
     log_message "power_button_watchdog_v2.sh: getevent pipe exited, restarting..."
     sleep 1
 done
-

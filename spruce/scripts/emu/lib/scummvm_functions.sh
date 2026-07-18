@@ -32,12 +32,18 @@ _set_scummvm_platform() {
 			touch /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 			SCUMMVM_BRICK_JOYSTICK=1
 			;;
+		"BrickPro")
+			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
+			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brickpro/scummvm.ini"
+			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brickpro/scummvm.ini"
+			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			;;
 		"Pixel2")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-pixel2/scummvm.ini"
 			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-pixel2/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
-			enable_digital_to_analog
+			enable_dpad_to_analog
 			;;
 		"Anbernic"*)
 			SCUMMVM_BIN="$EMU_DIR/scummvm.64"

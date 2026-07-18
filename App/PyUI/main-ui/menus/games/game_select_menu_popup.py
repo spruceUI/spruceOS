@@ -48,7 +48,7 @@ class GameSelectMenuPopup:
         roms_only = [rom for rom in rom_list if not os.path.isdir(rom.get_value().rom_file_path)]
 
         if not roms_only:
-            Display.display_message("No valid ROMs available to launch.", duration_ms=2000)
+            Display.display_message(Language.label("noValidRomsToLaunch", "No valid ROMs available to launch."), duration_ms=2000)
             return
 
         selected_rom = random.choice(roms_only)
@@ -56,7 +56,7 @@ class GameSelectMenuPopup:
 
     def execute_game_search(self, game_system, input_value):
         from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
-        search_txt = OnScreenKeyboard().get_input("Game Search:")
+        search_txt = OnScreenKeyboard().get_input(Language.game_search())
         if(search_txt is not None):
             return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 
@@ -112,7 +112,7 @@ class GameSelectMenuPopup:
 
     def select_specific_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
-            Display.display_message("Loading boxart list...")
+            Display.display_message(Language.label("loadingBoxartList", "Loading boxart list..."))
             scraper = BoxArtScraper()
             if(not scraper.check_wifi()):
                 return
@@ -125,7 +125,7 @@ class GameSelectMenuPopup:
                 )
 
                 start_index = self.find_index_for_boxart(name_without_ext, image_list)
-                boxart_download = ListOfOptionsSelectionMenu().get_selected_option_index(image_list,"Select Box Art", start_index)
+                boxart_download = ListOfOptionsSelectionMenu().get_selected_option_index(image_list, Language.label("selectBoxArtTitle", "Select Box Art"), start_index)
 
                 if(boxart_download is not None):
                     box_art = image_list[boxart_download]
@@ -135,7 +135,11 @@ class GameSelectMenuPopup:
                         os.remove(existing_image)
                         Display.clear_image_cache()
                     PyUiLogger().get_logger().info(f"Downloading {box_art} to {img_path}")
-                    Display.display_message(f"Downloading {box_art} to {img_path}")
+                    Display.display_message(
+                        Language.label("downloadingBoxartTo", "Downloading {boxart} to {path}")
+                        .replace("{boxart}", box_art)
+                        .replace("{path}", img_path)
+                    )
                     scraper.download_remote_image_for_system(rom_info.game_system.folder_name, box_art,img_path)
                     BoxArtResizer.patch_boxart_list([img_path])
 
@@ -239,7 +243,7 @@ class GameSelectMenuPopup:
     def run_game_select_popup_menu(self, rom_info : RomInfo, additional_popup_options = [], rom_list= []):
         popup_options = []
         popup_options.append(GridOrListEntry(
-            primary_text=f"{rom_info.game_system.display_name} Game Search",
+            primary_text=Language.system_game_search().replace("$system", rom_info.game_system.display_name),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description=None,
@@ -252,7 +256,7 @@ class GameSelectMenuPopup:
 
         if(not Device.get_device().get_system_config().simple_mode_enabled()):
             popup_options.append(GridOrListEntry(
-                primary_text=f"Toggle View",
+                primary_text=Language.label("toggleView", "Toggle View"),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -263,7 +267,7 @@ class GameSelectMenuPopup:
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,
-            top_bar_text=f"{rom_info.game_system.display_name} Menu Sub Options",
+            top_bar_text=Language.system_menu_sub_options().replace("$system", rom_info.game_system.display_name),
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())

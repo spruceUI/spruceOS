@@ -15,11 +15,6 @@ WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 SPRUCE_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
-initialize_system_emit_gate
-if system_emit_gate_enabled; then
-    . /mnt/SDCARD/spruce/scripts/trace.sh
-fi
-
 [ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
 
 export HOME="/mnt/SDCARD"
@@ -27,10 +22,6 @@ export HOME="/mnt/SDCARD"
 rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
-if system_emit_gate_enabled; then
-    trace_fsm_boot_init "runtime.sh" || true
-    emit_startup_av_trace_from_config || true
-fi
 
 run_sd_card_fix_if_triggered    # do this before anything else
 set_performance
@@ -53,29 +44,12 @@ check_and_hide_update_app &
 # finished. firstboot may return success, warning, or failure; runtime chooses the closing
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_${PLATFORM}"; then
-    "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_LAUNCH" "runtime.sh" "sequential extraction phase: packages" || true
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
-    case "$firstboot_rc" in
-        0)
-            firstboot_result="success"
-            ;;
-        2)
-            firstboot_result="warning"
-            ;;
-        *)
-            firstboot_result="failed"
-            ;;
-    esac
-
-    "$SYSTEM_EMIT" process runtime "FIRSTBOOT_SCRIPT_RESULT" "runtime.sh" "returned from firstboot.sh status=$firstboot_result" || true
 
     if [ "$firstboot_rc" -eq 0 ] || [ "$firstboot_rc" -eq 2 ]; then
         foreground_unpack_ok=0
         if run_unpacker_foreground \
-            "FIRSTBOOT_FOREGROUND_LAUNCH" \
-            "sequential extraction after firstboot" \
-            "FIRSTBOOT_FOREGROUND_RESULT" \
             "firstboot foreground run" \
             "0" \
             "1" \
@@ -103,9 +77,6 @@ if flag_check "first_boot_${PLATFORM}"; then
     fi
 else
     run_unpacker_foreground \
-        "FOREGROUND_LAUNCH" \
-        "non-first_boot path" \
-        "FOREGROUND_RESULT" \
         "foreground run" \
         "1" \
         "0" \
@@ -122,7 +93,6 @@ fi
 /mnt/SDCARD/spruce/scripts/set_up_swap.sh &
 
 launch_startup_watchdogs
-"$SYSTEM_EMIT" process runtime "STARTUP_WATCHDOGS_LAUNCHED" "runtime.sh" "startup_watchdogs launched" || true
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then

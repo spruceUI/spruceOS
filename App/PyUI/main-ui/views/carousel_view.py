@@ -7,13 +7,10 @@ from display.font_purpose import FontPurpose
 from display.display import Display
 from display.render_mode import RenderMode
 from controller.controller import Controller
-from display.resize_type import ResizeType
 from themes.theme import Theme
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
-from utils.logger import PyUiLogger
 
 class CarouselView(View):
     def __init__(self,top_bar_text, options: List[GridOrListEntry], cols : int, 
@@ -31,7 +28,8 @@ class CarouselView(View):
                   fixed_width=None,
                   fixed_selected_width=None,
                   selected_offset=None,
-                  use_selected_image_in_animation=None):
+                  use_selected_image_in_animation=None,
+                  veritcal_carousel=None):
         super().__init__()
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text
@@ -92,7 +90,9 @@ class CarouselView(View):
         self.include_index_text = True
         self.missing_image_path = missing_image_path
         self.skip_next_animation = False
-
+        self.veritcal_carousel = veritcal_carousel
+        if(self.veritcal_carousel is None):
+            self.veritcal_carousel = False
 
     def set_options(self, options):
         #Carousel breaks but the options shouldn't change the view
@@ -247,7 +247,7 @@ class CarouselView(View):
                                 target_height=target_height,
                                 resize_type=resize_type)
             
-    def _render(self):
+    def _render_horizontal(self):
         self.correct_selected_for_off_list()
         self._clear()
 
@@ -305,14 +305,14 @@ class CarouselView(View):
 
 
         if(self.prev_visible_options is not None and self.selected != self.prev_selected):
-            self.animate_transition()
+            self.animate_transition_horizontal()
         else:
             self.animated_count = 0
         
         iterable = list(enumerate(visible_options))
 
-        self.render_images(iterable, x_offsets, widths, render_selected_only=False)
-        self.render_images(iterable, x_offsets, widths, render_selected_only=True)
+        self.render_images_horizontal(iterable, x_offsets, widths, render_selected_only=False)
+        self.render_images_horizontal(iterable, x_offsets, widths, render_selected_only=True)
 
         if self.selected < len(self.options):
             selected = self.options[self.selected]
@@ -336,13 +336,108 @@ class CarouselView(View):
 
         Display.present()
 
+    def _render_vertical(self):
+        self.correct_selected_for_off_list()
+        self._clear()
+
+        
+        #TODO Get hard coded values for padding from +
+        usable_height = Device.get_device().screen_height()
+        visible_options, selected_visible_index = self.get_visible_options()
+
+        if(self.fixed_width is None):
+            image_height_percentages = self.get_width_percentages()
+            #PyUiLogger.get_logger().debug(f"image_width_percentages  = {image_width_percentages}")
+            heights = [int(round(percent/100 * usable_height)) for percent in image_height_percentages]
+            y_offsets = [0] + [sum(heights[:i]) for i in range(1, len(heights))]
+            if(self.sides_hang_off_edge and not self.shrink_further_away):
+                #Add one extra that is offscreen
+                y_offsets = [-y_offsets[1]] + y_offsets + [y_offsets[len(y_offsets)-1] + (y_offsets[len(y_offsets)-1] - y_offsets[len(y_offsets)-2])]
+                heights = [heights[0]] + heights + [heights[len(heights)-1]]
+                y_offsets = [x - heights[0]//2 for x in y_offsets]
+
+        else:
+            heights = [self.fixed_width for _ in range(self.cols)]
+            heights[selected_visible_index] = self.fixed_selected_width               
+            # Step 1: cumulative offsets
+            y_offsets = [0] + [sum(heights[:i]) for i in range(1, len(heights))]
+
+            # Step 2: center the middle image
+            screen_center = Device.get_device().screen_height() // 2
+            mid = len(y_offsets) // 2
+            middle_height = heights[mid]
+
+            middle_center_y = screen_center - (middle_height // 2)
+            shift = middle_center_y - y_offsets[mid]
+
+            # Apply shift
+            y_offsets = [x + shift for x in y_offsets]
+
+            # Step 3: fan outward from the center
+            y_offsets = [
+                x + (i - mid) * self.x_offset
+                for i, x in enumerate(y_offsets)
+            ]
+
+        #Center the x_offset in its spot
+        y_offsets = [y + h // 2 for y, h in zip(y_offsets, heights)]
+
+        # now handle padding
+        heights = [h - 2* self.x_pad for h in heights]
+
+        if(self.fixed_width is not None):
+            mid = len(y_offsets) // 2
+            y_offsets = [
+                x + (i - mid) * self.x_offset
+                for i, x in enumerate(y_offsets)
+            ]
+
+
+        if(self.prev_visible_options is not None and self.selected != self.prev_selected):
+            self.animate_transition_vertical()
+        else:
+            self.animated_count = 0
+        
+        iterable = list(enumerate(visible_options))
+
+        self.render_images_vertical(iterable, y_offsets, heights, render_selected_only=False)
+        self.render_images_vertical(iterable, y_offsets, heights, render_selected_only=True)
+
+        if self.selected < len(self.options):
+            selected = self.options[self.selected]
+            overlay = Theme.get_overlay_for_img(selected.get_image_path())
+            if(overlay is not None):
+                Display.render_image(overlay,
+                                     Device.get_device().screen_width()//2,
+                                     Device.get_device().screen_height()//2,
+                                     RenderMode.MIDDLE_CENTER_ALIGNED)
+
+        self.prev_selected = self.selected
+        self.prev_visible_options = visible_options
+        self.prev_y_offsets = y_offsets
+        self.prev_heights = heights
+        if(self.include_index_text):
+            letter = ''
+            if(self.options_are_sorted):
+                letter = self.options[self.selected].get_primary_text()[0]
+            Display.add_index_text(self.selected%self.options_length + 1, self.options_length, 
+                                   letter=letter)
+
+        Display.present()
+
+    def _render(self):
+        if(self.veritcal_carousel):
+            self._render_vertical()
+        else:
+            self._render_horizontal()
+
     def get_img_render_mode(self):
         if(self.additional_y_offset > 0):
             return RenderMode.BOTTOM_CENTER_ALIGNED
 
         return RenderMode.MIDDLE_CENTER_ALIGNED
 
-    def render_images(self, iterable, x_offsets, widths, render_selected_only):
+    def render_images_horizontal(self, iterable, x_offsets, widths, render_selected_only):
         render_mode = self.get_img_render_mode()
 
         for visible_index, imageTextPair in iterable:
@@ -366,6 +461,31 @@ class CarouselView(View):
                                     target_width=widths[visible_index],
                                     target_height=Display.get_usable_screen_height(),
                                     resize_type=self.resize_type)
+            
+    def render_images_vertical(self, iterable, y_offsets, heights, render_selected_only):
+        render_mode = self.get_img_render_mode()
+
+        for visible_index, imageTextPair in iterable:
+            is_selected = imageTextPair == self.options[self.selected]
+            if(render_selected_only and not is_selected):
+                continue
+            elif(not render_selected_only and is_selected):
+                continue
+            y_offset = y_offsets[visible_index]
+           
+            x_image_offset = Device.get_device().screen_width() //2  + self.additional_y_offset
+            if(is_selected):
+                image = imageTextPair.get_image_path_selected_ideal(Device.get_device().screen_width() ,heights[visible_index])
+            else:
+                image = imageTextPair.get_image_path_ideal(Device.get_device().screen_width() ,heights[visible_index])
+
+            self._render_image(image, 
+                                x_image_offset, 
+                                y_offset,
+                                render_mode,
+                                target_width=Device.get_device().screen_width() ,
+                                target_height=heights[visible_index],
+                                resize_type=self.resize_type)            
 
     def get_selected_option(self):
         if 0 <= self.selected < len(self.options):
@@ -380,6 +500,10 @@ class CarouselView(View):
             if Controller.last_input() == ControllerInput.DPAD_LEFT:
                 self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
+                self.adjust_selected(1, skip_by_letter=False)
+            if Controller.last_input() == ControllerInput.DPAD_UP:
+                self.adjust_selected(-1, skip_by_letter=False)
+            elif Controller.last_input() == ControllerInput.DPAD_DOWN:
                 self.adjust_selected(1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.L1:
                 if(Theme.skip_main_menu()):
@@ -417,7 +541,7 @@ class CarouselView(View):
         self.current_right += amount
         self.correct_selected_for_off_list()
 
-    def animate_transition(self):
+    def animate_transition_horizontal(self):
         if(not self.skip_next_animation):
             animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
             if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
@@ -507,12 +631,103 @@ class CarouselView(View):
                         Display.add_index_text(self.selected%self.options_length +1, self.options_length,
                                             letter=letter)
 
-                    #curr_time = time.time()
-                    #delta_time = curr_time - last_frame_time
-                    #if delta_time < frame_duration:
-                    #    time.sleep(frame_duration - (delta_time))
                     Display.present()
-                    #last_frame_time = time.time()
+            
+            self.animated_count += 1
+        else:
+            self.skip_next_animation = False
+
+    def animate_transition_vertical(self):
+        if(not self.skip_next_animation):
+            animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
+            if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
+                render_mode = self.get_img_render_mode()
+                #frame_duration = 1 / 60.0  # 60 FPS
+                #last_frame_time = 0
+
+                diff = (self.selected - self.prev_selected) % (len(self.options) + 1)
+                rotate_up = diff > (len(self.options) + 1) // 2
+                y_offsets_for_animation = list(self.prev_y_offsets)
+                heights_for_animation = list(self.prev_heights)
+                image_list = list(self.prev_visible_options)
+                new_visible_options, selected_visible_index = self.get_visible_options()
+        
+                if(not self.sides_hang_off_edge):
+                    if rotate_up:
+                        image_list.insert(0,new_visible_options[0])
+                        y_offsets_for_animation.insert(0, y_offsets_for_animation[0] - (y_offsets_for_animation[1] - y_offsets_for_animation[0]))
+                        heights_for_animation.insert(0, heights_for_animation[0])
+                        image_list = list(reversed(image_list))
+                    else:
+                        image_list.append(new_visible_options[-1])
+                        y_offsets_for_animation.append(y_offsets_for_animation[-1] + y_offsets_for_animation[-1] - y_offsets_for_animation[-2])
+                        heights_for_animation.append(heights_for_animation[-1])
+
+                for frame in range(animation_frames):
+                    self._clear()
+
+                    frame_y_offset = []
+                    frame_heights = []
+                    t = frame / (animation_frames - 1)
+
+                    for i in range(len(y_offsets_for_animation)):
+                        start_y_offset = y_offsets_for_animation[i]
+                        start_height = heights_for_animation[i]
+
+                        if rotate_up:
+                            if i < len(y_offsets_for_animation) - 1:
+                                end_y_offset = y_offsets_for_animation[i + 1]
+                                end_height = heights_for_animation[i+1]
+                            else:
+                                # Last item exits to the right
+                                end_y_offset = (y_offsets_for_animation[-1] - y_offsets_for_animation[-2]) + y_offsets_for_animation[-1] 
+                                end_height = start_height
+                        else:
+                            if i > 0:
+                                end_y_offset = y_offsets_for_animation[i - 1]
+                                end_height = heights_for_animation[i - 1]
+                            else:
+                                # First item exits to the left0+12
+                                end_y_offset = y_offsets_for_animation[0] - (y_offsets_for_animation[1] - y_offsets_for_animation[0])
+                                end_height = start_height
+
+                        new_y_offset = start_y_offset + (end_y_offset - start_y_offset) * t
+                        new_height = start_height + (end_height - start_height) * t
+                        frame_y_offset.append(int(new_y_offset))         
+                        frame_heights.append(new_height)
+
+                    if(not self.sides_hang_off_edge):
+                        if rotate_up:
+                            frame_y_offset = list(reversed(frame_y_offset))
+                            frame_heights = list(reversed(frame_heights))
+
+                    for visible_index, imageTextPair in enumerate(image_list):
+
+                        x_image_offset = Device.get_device().screen_width() //2  + self.additional_y_offset
+                        y_offset = frame_y_offset[visible_index]
+
+                        if(imageTextPair == self.options[self.selected] and self.use_selected_image_in_animation):
+                            image = imageTextPair.get_image_path_selected_ideal(frame_heights[visible_index],Display.get_usable_screen_height())
+                        else:
+                            image = imageTextPair.get_image_path_ideal(frame_heights[visible_index],Display.get_usable_screen_height())
+
+                        self._render_image(image, 
+                                                x_image_offset, 
+                                                y_offset,
+                                                render_mode,
+                                                target_width=Device.get_device().screen_width(),
+                                                target_height=frame_heights[visible_index],
+                                                resize_type=self.resize_type)
+
+                    if(self.include_index_text):
+                        letter = ''
+                        if(self.options_are_sorted):
+                            letter = self.options[self.selected].get_primary_text()[0]
+
+                        Display.add_index_text(self.selected%self.options_length +1, self.options_length,
+                                            letter=letter)
+
+                    Display.present()
             
             self.animated_count += 1
         else:

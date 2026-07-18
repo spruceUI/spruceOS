@@ -41,5 +41,13 @@ if [ ! -f "${SWAPFILE}" ]; then
     fi
 fi
 
-swapon -p 40 "${SWAPFILE}" || swapon "$SWAPFILE" || log_message "swapon command failed; proceeding without swap memory."
+case "$(swapon --help 2>&1)" in
+    *"-p"*)
+        swapon -p 40 "$SWAPFILE"
+        ;;
+    *)
+        swapon "$SWAPFILE"
+        ;;
+esac || log_message "swapon command failed; proceeding without swap memory."
+
 echo 10 > /proc/sys/vm/swappiness

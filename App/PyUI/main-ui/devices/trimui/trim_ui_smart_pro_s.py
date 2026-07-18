@@ -19,6 +19,7 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from display.display import Display
+from menus.language.language import Language
 from utils import throttle
 from utils.config_copier import ConfigCopier
 
@@ -186,7 +187,7 @@ class TrimUISmartProS(TrimUIDevice):
         time.sleep(1)
 
     def power_off(self):
-        Display.display_message("Powering off...")
+        Display.display_message(Language.label("poweringOff", "Powering off..."))
         self._prepare_for_power_action()
         time.sleep(1)
         super().power_off()
@@ -195,7 +196,7 @@ class TrimUISmartProS(TrimUIDevice):
 
 
     def reboot(self):
-        Display.display_message("Rebooting...")
+        Display.display_message(Language.label("rebooting", "Rebooting..."))
         self._prepare_for_power_action()
         time.sleep(1)
         super().reboot()

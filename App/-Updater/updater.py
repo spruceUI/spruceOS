@@ -320,7 +320,7 @@ def main():
     developer_mode = flag_check("developer_mode")
     tester_mode = flag_check("tester_mode")
     skip_check = (developer_mode or tester_mode or
-        get_config_value('.menuOptions."Network Settings".otaskipVersionCheck.selected', "True") == "True")
+        get_config_value('.menuOptions."Network Settings".otaSkipVersionCheck.selected', "True") == "True")
     beta = "-beta" in update_file
 
     update_ver = parse_version(update_version)

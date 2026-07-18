@@ -48,3 +48,14 @@ device_init() {
         chmod +x /bin/bash
     fi
 }
+
+launch_startup_watchdogs() {
+    launch_common_startup_watchdogs_v2
+
+    # Dispatch the Brick's Fn keys (spruce does not run the stock keymon that
+    # would otherwise do this). Launched here so it lives alongside the other
+    # durable watchdogs and survives the early-boot churn; pinned like them.
+    /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
+}

@@ -4,7 +4,6 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
-. /mnt/SDCARD/spruce/scripts/trace.sh
 
 FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
@@ -156,7 +155,7 @@ close_non_emu_cmd_to_run() {
     if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
         kill_current_process
         # remove lastgame flag to prevent loading any App after next boot
-        rm "${FLAGS_DIR}/lastgame.lock"
+        rm -f -- "${FLAGS_DIR}/lastgame.lock"
     fi
 }
 
@@ -269,11 +268,6 @@ exec_shutdown_stage_2() {
     fi
 }
 
-
-emit_shutdown_av_trace_fallback() {
-    "$SYSTEM_EMIT" av-shutdown-baselines-if-missing "save_poweroff.sh" || true
-}
-
     #######################################
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################
@@ -295,12 +289,6 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 ################### MAIN ######################
                   ########
 
-"$SYSTEM_EMIT" power-shutdown-request "$s2_arg" "save_poweroff.sh" "shutdown triggered" || true
-emit_shutdown_av_trace_fallback || true
-# The shutdown FSM is only finalized when tracing was enabled for this boot session.
-if [ -f "$SYSTEM_EMIT_GATE_FILE" ]; then
-    trace_fsm_shutdown_finalize "save_poweroff.sh" || true
-fi
 blink_led_if_applicable
 device_prepare_for_poweroff
 log_activity_event "$(get_current_app)" "STOP"

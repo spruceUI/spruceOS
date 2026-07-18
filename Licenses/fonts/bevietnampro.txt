@@ -1,0 +1,5 @@
+Be Vietnam Pro
+Copyright 2018 The Be Vietnam Pro Project Authors (https://github.com/bettergui/Be-Vietnam-Pro)
+
+Licensed under the SIL Open Font License, Version 1.1.
+https://openfontlicense.org

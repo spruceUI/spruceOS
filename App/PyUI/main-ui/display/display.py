@@ -22,9 +22,10 @@ from utils.time_logger import log_timing
 
 @dataclass
 class CachedImageTexture:
-    def __init__(self, surface, texture):
-        self.surface = surface
+    def __init__(self, texture, width, height):
         self.texture = texture
+        self.width = width
+        self.height = height
 
 class ImageTextureCache:
     def __init__(self):
@@ -34,13 +35,12 @@ class ImageTextureCache:
         return self.cache.get(texture_id)
 
     def add_texture(self, texture_id, surface, texture):
-        self.cache[texture_id] = CachedImageTexture(surface,texture)
+        self.cache[texture_id] = CachedImageTexture(texture, surface.contents.w, surface.contents.h)
         return True
     
     def clear_cache(self):
         for entry in self.cache.values():
             sdl2.SDL_DestroyTexture(entry.texture)
-            sdl2.SDL_FreeSurface(entry.surface)
         self.cache.clear()
 
     def size(self):
@@ -54,9 +54,10 @@ class TextTextureKey:
 
 @dataclass
 class CachedTextTexture:
-    def __init__(self, surface, texture):
-        self.surface = surface
+    def __init__(self, texture, width, height):
         self.texture = texture
+        self.width = width
+        self.height = height
 
 class TextTextureCache:
     def __init__(self):
@@ -66,13 +67,12 @@ class TextTextureCache:
         return self.cache.get(TextTextureKey(texture_id, font, color))
 
     def add_texture(self, texture_id, font, color, surface, texture):
-        self.cache[TextTextureKey(texture_id, font, color)] = CachedTextTexture(surface,texture)
+        self.cache[TextTextureKey(texture_id, font, color)] = CachedTextTexture(texture, surface.contents.w, surface.contents.h)
         return True
     
     def clear_cache(self):
         for entry in self.cache.values():
             sdl2.SDL_DestroyTexture(entry.texture)
-            sdl2.SDL_FreeSurface(entry.surface)
         self.cache.clear()
         
 class Display:
@@ -87,6 +87,8 @@ class Display:
     window = None
     background_texture = None
     top_bar_text = None
+    bottom_bar_text = None
+    _add_index_last_args = None
     is_custom_theme_background = None
 
     _image_texture_cache = ImageTextureCache()
@@ -452,6 +454,7 @@ class Display:
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
             cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
+        cls.bottom_bar_text = bottom_bar_text
 
     @classmethod
     def _log(cls, msg):
@@ -488,7 +491,7 @@ class Display:
 
 
     @classmethod
-    def _render_surface_texture(cls, x, y, texture, surface, render_mode: RenderMode, texture_id,
+    def _render_surface_texture(cls, x, y, texture, w, h, render_mode: RenderMode, texture_id,
                                 scale_width=None, scale_height=None, crop_w=None, crop_h=None,
                                 resize_type=ResizeType.FIT):
         #If resize_type is none set it to fit for now,
@@ -496,8 +499,8 @@ class Display:
         if(resize_type is None):
             resize_type=ResizeType.FIT
         
-        orig_w = surface.contents.w
-        orig_h = surface.contents.h
+        orig_w = w
+        orig_h = h
         render_w, render_h = cls._calculate_scaled_width_and_height(orig_w, orig_h, scale_width, scale_height, resize_type)
 
         # Adjust position based on render mode
@@ -613,9 +616,12 @@ class Display:
         loaded_font = cls.fonts[purpose]
         cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, purpose, color)
         cached = True
+        texture_w = None
+        texture_h = None
         if cache and alpha is None:
-            surface = cache.surface
             texture = cache.texture
+            texture_w = cache.width
+            texture_h = cache.height
         else:
             sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
             surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
@@ -648,7 +654,8 @@ class Display:
                         x=x,
                         y=y, 
                         texture=texture, 
-                        surface=surface, 
+                        w=surface.contents.w, 
+                        h=surface.contents.h,
                         render_mode=render_mode, 
                         texture_id=text, 
                         crop_w=crop_w, 
@@ -658,12 +665,17 @@ class Display:
                 return w,h
             else:
                 cached = cls._text_texture_cache.add_texture(text, purpose, color, surface, texture)
+                texture_w = surface.contents.w
+                texture_h = surface.contents.h
+                sdl2.SDL_FreeSurface(surface)
+
 
         w,h = cls._render_surface_texture(
                 x=x,
                 y=y, 
                 texture=texture, 
-                surface=surface, 
+                w=texture_w, 
+                h=texture_h,
                 render_mode=render_mode, 
                 texture_id=text, 
                 crop_w=crop_w, 
@@ -671,7 +683,7 @@ class Display:
         
         if not cached:
             sdl2.SDL_DestroyTexture(texture)
-            sdl2.SDL_FreeSurface(surface)
+    
 
         return w,h
 
@@ -705,9 +717,12 @@ class Display:
 
         cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
         cached = True
+        texture_w = None
+        texture_h = None
         if cache:
-            surface = cache.surface
             texture = cache.texture
+            texture_w = cache.width
+            texture_h = cache.height
         else:
             surface = Display.image_load(image_path)
             surface = cls.convert_surface_to_safe_format(surface)
@@ -752,11 +767,15 @@ class Display:
 
             sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
             cached = cls._image_texture_cache.add_texture(image_path,surface, texture)
+            texture_w = surface.contents.w
+            texture_h = surface.contents.h
+            sdl2.SDL_FreeSurface(surface)
 
-        w,h = cls._render_surface_texture(x=x, 
+        final_w,final_h = cls._render_surface_texture(x=x, 
                                            y=y, 
                                            texture=texture, 
-                                           surface=surface, 
+                                           w=texture_w, 
+                                           h=texture_h,
                                            render_mode=render_mode, 
                                            scale_width=target_width, 
                                            scale_height=target_height,
@@ -766,10 +785,10 @@ class Display:
         
         if(not cached):
             sdl2.SDL_DestroyTexture(texture)
-            sdl2.SDL_FreeSurface(surface)
             PyUiLogger.get_logger().info(f"Destroyed {image_path}. Image cache size is {cls._image_texture_cache.size()}");
-        
-        return w,h
+
+
+        return final_w,final_h
 
     @classmethod
     def render_image_centered(cls, image_path: str, x: int, y: int, target_width=None, target_height=None):
@@ -985,7 +1004,11 @@ class Display:
     def present(cls, fade=False):
         if Theme.render_top_and_bottom_bar_last():
             cls.top_bar.render_top_bar(cls.top_bar_text)
-            cls.bottom_bar.render_bottom_bar()
+            cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text)
+            if cls._add_index_last_args is not None:
+                cls.add_index_text(*cls._add_index_last_args)
+                cls._add_index_last_args = None
+            cls.bottom_bar_text = None
 
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
 
@@ -1056,8 +1079,10 @@ class Display:
         sdl2.sdlttf.TTF_SizeUTF8(cls.fonts[purpose].font, text.encode('utf-8'), w, h)
         return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
     
+
     @classmethod
     def add_index_text(cls, index, total, force_include_index = False, letter = None):
+        cls._add_index_last_args = (index, total, force_include_index, letter)
         if(force_include_index or Theme.show_index_text()):
             y_padding = max(5, cls.get_bottom_bar_height() // 4)
             y_value = Device.get_device().screen_height() - y_padding

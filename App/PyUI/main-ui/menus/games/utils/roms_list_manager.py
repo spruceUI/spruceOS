@@ -121,8 +121,8 @@ class RomsListManager:
                 game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
                 if game_system is not None:
                     rom_info_list.append(RomInfo(game_system, entry.rom_file_path, entry.display_name))
-            except Exception:
-                PyUiLogger.get_logger().error(f"Unable to load config for {entry.game_system_name}, skipping entry")
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"Unable to load config for {entry.game_system_name}, skipping entry : {e}")
 
         return rom_info_list
 

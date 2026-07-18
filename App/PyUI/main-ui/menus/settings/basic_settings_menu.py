@@ -94,7 +94,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         elif(ControllerInput.X == input and not Device.get_device().get_system_config().simple_mode_enabled()):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
-            selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, "Themes")
+            selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, Language.theme())
 
 
         if(selected_index is not None):
@@ -302,7 +302,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 Display.clear_text_cache()
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="Settings", 
+                    top_bar_text=Language.settings(), 
                     options=option_list,
                     selected_index=selected.get_index())
                     

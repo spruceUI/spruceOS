@@ -11,21 +11,21 @@
 
 - Mini splore update from tenlevels
 - Installer update, add version of release to UI
-- Duckstation SA?
-
-
+- Towards end of release cycle:
+    - update script to handle RA config changes, etc. (use my changes, don't just make stuff up again plz Claude)
+    - also handle migration of any user-backed up stuff that used to be in Emu/.emu_setup which no longer exists
+- update vTree to latest
+    
 --- Ry ------------------------------------------------------------------------
 
 - RA cfg overhaul
-- add more shaders branch
-    - cut out unusably slow on tsps
-    - organize a little
-    - merge
 - fn buttons and switch branch
     - y no work on tsps at all?
     - test on tsp
     - implement light toggle
     - implement fan toggle
     - merge
-
-    
+- add trimui zram modules from bmdhacks
+- reset config tasks for more standalone emulators
+- add vibrate to XX devices
+- bug: powerbutton watchdog kills everything BUT RA... or does RA just immediately relaunch?

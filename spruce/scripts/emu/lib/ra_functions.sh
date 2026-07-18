@@ -39,7 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		"SmartPro"|"Brick"|"Zero28"|"Flip")
+		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
@@ -215,7 +215,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"A30"|"MiyooMini"|"Anbernic"*)
+		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"A30"|"MiyooMini"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
@@ -462,7 +462,7 @@ load_n64_controller_profile() {
 		*) return 0 ;; # exit early if jq fails or config is broken
 	esac
 
-	SRC="/mnt/SDCARD/Emu/.emu_setup/n64_controller"
+	SRC="/mnt/SDCARD/Emu/N64/remaps"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 
 	for dir in "$DST"/*; do
@@ -484,7 +484,7 @@ save_custom_n64_controller_profile() {
 		* ) return 0 ;; # exit function early; no need to back up remap
 	esac
 
-	REMAP_BACKUP="/mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp"
+	REMAP_BACKUP="/mnt/SDCARD/Emu/N64/remaps/Custom.rmp"
 	REMAP_DIR="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 
 	case "$CORE" in

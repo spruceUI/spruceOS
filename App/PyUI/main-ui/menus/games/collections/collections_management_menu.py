@@ -38,7 +38,7 @@ class CollectionsManagementMenu():
         for collection_name in collections_containing:
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Remove from " + collection_name,
+                            primary_text=Language.remove_from() + " " + collection_name,
                             value_text="",
                             image_path=None,
                             image_path_selected=None,

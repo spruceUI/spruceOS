@@ -41,8 +41,15 @@ power_button_pressed() {
     fi
 }
 
+cleanup() {
+    kill "${GET_EVENT_PID:-}" 2>/dev/null
+    rm -f /tmp/sleep_helper_started /tmp/power_pressed_flag
+}
+
 # Clean up on exit
-trap 'kill $GET_EVENT_PID 2>/dev/null; rm -f "$POWER_BUTTON_PIPE"' EXIT
+trap cleanup EXIT
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 get_shutdown_timer() {
     local LID_TIMER
@@ -56,6 +63,7 @@ get_shutdown_timer() {
         "1m")    IDLE_TIMEOUT=60 ;;
         "2m")    IDLE_TIMEOUT=120 ;;
         "5m")    IDLE_TIMEOUT=300 ;;
+        "10m")   IDLE_TIMEOUT=600 ;;
         "15m")   IDLE_TIMEOUT=900 ;;
         "30m")   IDLE_TIMEOUT=1800 ;;
         "60m")   IDLE_TIMEOUT=3600 ;;
@@ -65,6 +73,7 @@ get_shutdown_timer() {
         "6h")    IDLE_TIMEOUT=21600 ;;
         "12h")   IDLE_TIMEOUT=43200 ;;
         "24h")   IDLE_TIMEOUT=86400 ;;
+        *)       IDLE_TIMEOUT=900 ;;
     esac
 
     echo "$IDLE_TIMEOUT"
@@ -92,9 +101,20 @@ read_system_json_int() {
     return 0
 }
 
+run_timeout_poweroff() {
+    "$POWER_OFF_SCRIPT"
+    poweroff_status=$?
+    if [ "$poweroff_status" -eq 0 ]; then
+        rm -f /tmp/sleep_helper_started
+        exit 0
+    fi
+
+    log_message "Timeout poweroff failed with status $poweroff_status; resuming wake path"
+    return "$poweroff_status"
+}
+
 trigger_sleep() {
     log_message "Entering sleep"
-    "$SYSTEM_EMIT" power "RUNNING" "SLEEP" "sleep_helper.sh" "entering sleep" || true
     lid_ever_closed=false
     sleep_exited=false
     # Get the lid powerdown timeout
@@ -102,8 +122,6 @@ trigger_sleep() {
     IDLE_TIMEOUT=$(get_shutdown_timer)
     start_ts=$(date +%s)
     set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
-    "$SYSTEM_EMIT" audio-from-current-to-cached-or-unknown "0" "sleep_helper.sh" "muted on sleep entry" || true
-    "$SYSTEM_EMIT" brightness-cached-or-unknown "sleep_helper.sh" "brightness baseline cached or unavailable on sleep entry" || true
     device_enter_sleep "$IDLE_TIMEOUT"
     if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
@@ -138,6 +156,14 @@ trigger_sleep() {
             sleep 1
             now_ts=$(date +%s)
             elapsed=$((now_ts - start_ts))
+            if [ "$elapsed" -ge "$IDLE_TIMEOUT" ]; then
+                local DISABLE_IF_CHARGING="$(get_config_value '.menuOptions."Battery Settings".disableShutdownFromSleepIfCharging.selected' "False")"
+                if [ "$DISABLE_IF_CHARGING" = "True" ] && [ "$(device_get_charging_status)" = "Charging" ]; then
+                    log_message "Device is plugged in and shutdown prevention option enabled, restarting sleep countdown"
+                    start_ts=$(date +%s)
+                    elapsed=$((now_ts - start_ts))
+                fi
+            fi
         done
 
         # Timeout reached without exitting sleep → poweroff
@@ -146,7 +172,7 @@ trigger_sleep() {
             # Set clocks bad to full speed
             set_performance
             sleep 0.1
-            "$POWER_OFF_SCRIPT" &
+            run_timeout_poweroff
         fi
     else
         
@@ -163,7 +189,7 @@ trigger_sleep() {
         if [ "$(device_woke_via_timer)" = "true" ]; then
             log_message "Idle time exceeded, triggering poweroff -- IDLE_TIMEOUT=$IDLE_TIMEOUT"
             sleep 0.1
-            "$POWER_OFF_SCRIPT" &
+            run_timeout_poweroff
         else
             log_message "Woke from sleep manually"
         fi
@@ -177,7 +203,6 @@ killall -q idlemon_mm.sh 2>/dev/null
 trigger_sleep
 
 device_exit_sleep
-"$SYSTEM_EMIT" power "SLEEP" "RUNNING" "sleep_helper.sh" "woke from sleep" || true
 
 log_activity_event "$current_app" "START"
 
@@ -187,9 +212,6 @@ case "$VOLUME_LV" in
     ''|*[!0-9]*) ;;
     *) set_volume "$VOLUME_LV" ;;
 esac
-"$SYSTEM_EMIT" audio-wake-restore "0" "$VOLUME_LV" "sleep_helper.sh" || true
-WAKE_BL="$(read_system_json_int '.backlight' || true)"
-"$SYSTEM_EMIT" brightness-wake-baseline "$WAKE_BL" "sleep_helper.sh" || true
 
 
 kill "$GET_EVENT_PID" 2>/dev/null

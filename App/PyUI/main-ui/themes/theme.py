@@ -10,6 +10,7 @@ from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
 from menus.games.utils.daijisho_theme_index import DaijishoThemeIndex
+from menus.language.language import Language
 from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -305,7 +306,13 @@ class Theme():
     def show_top_bar_text(cls): return cls._data.get("showTopBarText", True)
     
     @classmethod
-    def render_top_and_bottom_bar_last(cls): return cls._data.get("renderTopAndBottomBarLast", False)
+    def render_top_and_bottom_bar_last(cls): 
+        return cls._data.get("renderTopAndBottomBarLast", False)
+    
+    @classmethod
+    def set_render_top_and_bottom_bar_last(cls, value): 
+        cls._data["renderTopAndBottomBarLast"] = value
+        cls.save_changes()
     
     @classmethod
     def confirm_text(cls): return cls._data.get("confirmText", "Okay")
@@ -463,6 +470,10 @@ class Theme():
 
     @classmethod
     def get_font(cls, font_purpose : FontPurpose):
+        language_font = Language.get_font_for_purpose(font_purpose)
+        if language_font:
+            return language_font
+
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
@@ -504,6 +515,9 @@ class Theme():
 
     @classmethod
     def get_fallback_font(cls):
+        language_font = Language.get_font_for_purpose(FontPurpose.LIST)
+        if language_font:
+            return language_font
         base_dir = os.path.abspath(sys.path[0])
         return os.path.join(base_dir, "themes", "font.ttf")
 
@@ -847,6 +861,15 @@ class Theme():
         cls.save_changes()
 
     @classmethod
+    def get_main_menu_use_vertical_carousel(cls):
+        return cls._data.get("mainMenuUseVerticalCarousel", False)
+
+    @classmethod
+    def set_main_menu_use_vertical_carousel(cls, value):
+        cls._data["mainMenuUseVerticalCarousel"] = value
+        cls.save_changes()
+
+    @classmethod
     def get_view_type_for_system_select_menu(cls):
         view_type_str = cls._data.get("systemSelectViewType", "GRID_VIEW")
         return getattr(ViewType, view_type_str, ViewType.GRID)
@@ -974,6 +997,15 @@ class Theme():
     @classmethod
     def set_carousel_system_fixed_selected_width(cls, value):
         cls._data["carouselSystemFixedSelectedWidth"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_system_select_use_vertical_carousel(cls):
+        return cls._data.get("carouselSystemUseVerticalCarousel", False)
+
+    @classmethod
+    def set_system_select_use_vertical_carousel(cls, value):
+        cls._data["carouselSystemUseVerticalCarousel"] = value
         cls.save_changes()
 
     @classmethod
@@ -1320,6 +1352,24 @@ class Theme():
     @classmethod
     def set_set_top_bar_text_to_game_selection(cls, value):
         cls._data["setTopBarTextToGameSelection"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_switcher_use_vertical_carousel(cls):
+        return cls._data.get("gameSwitcherUseVerticalCarousel", False)
+    
+    @classmethod
+    def set_game_switcher_use_vertical_carousel(cls, value):
+        cls._data["gameSwitcherUseVerticalCarousel"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_game_select_use_vertical_carousel(cls):
+        return cls._data.get("gameSelectUseVerticalCarousel", False)
+    
+    @classmethod
+    def set_game_select_use_vertical_carousel(cls, value):
+        cls._data["gameSelectUseVerticalCarousel"] = value
         cls.save_changes()
 
     @classmethod

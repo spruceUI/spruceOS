@@ -13,17 +13,14 @@ from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
 
 class ImageListView(NonDescriptiveListView):
-    SHOW_ICONS = True
-    DONT_SHOW_ICONS = False
-
     def __init__(self, top_bar_text,
                  options: List[GridOrListEntry], img_offset_x : int, img_offset_y : int, img_width : int, img_height: int,
-                 selected_index : int, show_icons : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None,
+                 selected_index : int, use_icons_to_calculate_line_height : bool, image_render_mode: RenderMode, selected_bg = None, usable_height = None,
                  text_to_image_relationship = TextToImageRelationship.LEFT_OF_IMAGE):
         super().__init__(top_bar_text=top_bar_text,
                          options=options,
                          selected_index=selected_index,
-                         show_icons=show_icons,
+                         use_icons_to_calculate_line_height=use_icons_to_calculate_line_height,
                          image_render_mode=image_render_mode,
                          selected_bg=selected_bg,
                          usable_height=usable_height)
@@ -96,7 +93,7 @@ class ImageListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            if(self.show_icons and imageTextPair.get_icon() is not None):
+            if(imageTextPair.get_icon() is not None):
                 icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
                 text_x_value += icon_width + 5 #TODO get 5 from somewhere
 

@@ -132,7 +132,7 @@ class ThemeSettingsMenu():
             if (list_view is None or self.theme_changed):
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="Settings",
+                    top_bar_text=Language.settings(),
                     options=option_list,
                     selected_index=selected.get_index())
                 self.theme_changed = False

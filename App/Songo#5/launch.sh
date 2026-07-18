@@ -1,12 +1,16 @@
 #!/bin/bash
 # PORTMASTER: songo5.zip, Songo5.sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+set_smart
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GAMEDIR="$SCRIPT_DIR/songo5"
 
 runtime="sbc_4_3_rcv12"
 pck_filename="Songo5.pck"
-gptk_filename="songo5.gptk"
+#gptk_filename="songo5.gptk"
 
 # Logging
 > "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
@@ -17,6 +21,7 @@ if [ -f /mnt/SDCARD/spruce/twig ]; then
 		pck_filename="SongoLibmaliWarning.pck"
     fi
 fi
+
 
 # Create directory for save files
 CONFDIR="$GAMEDIR/conf/"
@@ -96,8 +101,9 @@ echo "XDG_DATA_HOME"
 echo $XDG_DATA_HOME
 
 export SONGO_BINARIES_DIR="$GAMEDIR/runtime"
+export SONGO_DIR_TIP="On Spruce I suggest making a MUSIC folder in /mnt/SDCARD/"
 
-$GPTOKEYB "$GAMEDIR/runtime/$runtime" -c "$GAMEDIR/$gptk_filename" &
+#$GPTOKEYB "$GAMEDIR/runtime/$runtime" -c "$GAMEDIR/$gptk_filename" &
 
 # Might need to uncomment this, keep it around for now
 # sleep 0.6 # For TSP only, do not move/modify this line.

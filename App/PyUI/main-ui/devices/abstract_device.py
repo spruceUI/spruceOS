@@ -452,3 +452,11 @@ class AbstractDevice(ABC):
     @abstractmethod
     def get_image_for_activity(self, activity):
         pass
+
+    @abstractmethod
+    def get_game_images_folder_name(self):
+        pass
+
+    @abstractmethod
+    def get_saves_dir(self):
+        pass

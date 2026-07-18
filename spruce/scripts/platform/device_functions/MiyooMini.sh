@@ -220,7 +220,6 @@ set_backlight() {
     jq ".backlight = $value" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     # Should we get this from path or always from PyUI?
     /mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/set_shared_memory 1 "$value"
-    "$SYSTEM_EMIT" brightness-level "$value" "MiyooMini.sh/set_backlight" 2>/dev/null || true
 }
 
 brightness_down() {
@@ -316,6 +315,16 @@ device_lid_open(){
     fi
 }
 
+device_wifi_is_available() {
+    case "$(get_miyoo_mini_variant)" in
+        "MIYOO_MINI"|"MIYOO_MINI_V4")
+            return 1 # False
+            ;;
+        *)
+            return 0 # True
+            ;;
+    esac
+}
 
 device_prepare_for_ports_run() {
     log_message "device_prepare_for_ports_run uneeded on this device" -v

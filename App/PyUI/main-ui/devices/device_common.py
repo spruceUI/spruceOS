@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
+from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
 from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
@@ -16,9 +17,11 @@ from devices.wifi.wifi_scanner import WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
+from menus.settings.button_remapper import ButtonRemapper
 from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
 from utils.config_copier import ConfigCopier
+from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -27,6 +30,7 @@ class DeviceCommon(AbstractDevice):
 
     def __init__(self):
         self.last_cache_clear = 0
+        self.button_remapper = ButtonRemapper(self.system_config)
 
     def prompt_power_down(self):
         from display.display import Display
@@ -35,11 +39,11 @@ class DeviceCommon(AbstractDevice):
         while(True):
             PyUiLogger.get_logger().info("Prompting for shutdown")
             Display.clear("Power")
-            Display.render_text_centered(f"Would you like to power down?",self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            Display.render_text_centered(Language.label("powerDownPrompt", "Would you like to power down?"),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             if(self.reboot_cmd() is not None):
-                Display.render_text_centered(f"A = Power Down, X = Reboot, B = Cancel",self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_text_centered(Language.label("powerDownOptionsWithReboot", "A = Power Down, X = Reboot, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             else:
-                Display.render_text_centered(f"A = Power Down, B = Cancel",self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_text_centered(Language.label("powerDownOptions", "A = Power Down, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             Display.present()
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
@@ -245,7 +249,11 @@ class DeviceCommon(AbstractDevice):
         if not self.is_wifi_enabled():
             return WifiStatus.OFF
 
-        if self.get_ip_addr_text() in ["Off", "Error", "Connecting"]:
+        if self.get_ip_addr_text() in [
+            Language.label("wifiStatusOff", "Off"),
+            Language.label("wifiStatusError", "Error"),
+            Language.label("wifiStatusConnecting", "Connecting"),
+        ]:
             return WifiStatus.OFF
 
         info = self.get_wifi_connection_quality_info()
@@ -297,36 +305,45 @@ class DeviceCommon(AbstractDevice):
         if not self.connection_seems_up():
             PyUiLogger.get_logger().info("Starting WiFi Services")
             if(foreground_call):
-                Display.display_message("Turning on WiFi Power")
+                Display.display_message(Language.label("turningOnWifiPower", "Turning on WiFi Power"))
                 
             self.set_wifi_power(1)
             time.sleep(1)  
             if(foreground_call):
-                Display.display_message("Starting WiFi process")
+                Display.display_message(Language.label("startingWifiProcess", "Starting WiFi process"))
             self.start_wpa_supplicant()
             if(foreground_call):
-                Display.display_message("Starting ip address assignment process")
+                Display.display_message(Language.label("startingIpAssignment", "Starting ip address assignment process"))
             self.start_udhcpc()
 
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
-        import psutil
-        if self.is_wifi_enabled():
-            try:
-                addrs = psutil.net_if_addrs().get("wlan0")
-                if addrs:
-                    for addr in addrs:
-                        if addr.family == socket.AF_INET:
-                            return addr.address
-                    return "Connecting"
-                else:
-                    return "Connecting"
-            except Exception:
-                return "Error"
-        
-        return "Off"
-    
+        import subprocess
+
+        if not self.is_wifi_enabled():
+            return Language.label("wifiStatusOff", "Off")
+
+        try:
+            # Query interface address
+            result = subprocess.run(
+                ["ip", "-4", "addr", "show", "wlan0"],
+                capture_output=True,
+                text=True
+            )
+
+            output = result.stdout
+
+            # Look for "inet x.x.x.x"
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("inet "):
+                    return line.split()[1].split("/")[0]
+
+            return Language.label("wifiStatusConnecting", "Connecting")
+
+        except Exception:
+            return Language.label("wifiStatusError", "Error")    
 
     def exit_pyui(self):
         Display.deinit_display()
@@ -379,6 +396,9 @@ class DeviceCommon(AbstractDevice):
 
     def supports_caching_rom_lists(self):
         return True
+
+    def get_saves_dir(self):
+        return "/mnt/SDCARD/Saves/"
 
     def keep_running_on_error(self):
         return True
@@ -449,16 +469,16 @@ class DeviceCommon(AbstractDevice):
                 return f.read().strip()
         except Exception as e:
             PyUiLogger.get_logger().error(f"Could not read MAC address for interface {iface} : {e}")
-            return "Unknown"
+            return Language.label("aboutUnknown", "Unknown")
 
     def get_fw_version(self):
-        return "Unknown"
+        return Language.label("aboutUnknown", "Unknown")
 
     def get_about_info_entries(self):
         about_info_entries = []
-        about_info_entries.append( ("IP Address", self.get_ip_addr_text()) )
-        about_info_entries.append( ("Mac Address", self.get_mac_address()) )
-        about_info_entries.append( ("FW Version",self.get_fw_version()) )
+        about_info_entries.append( (Language.label("aboutIpAddress", "IP Address"), self.get_ip_addr_text()) )
+        about_info_entries.append( (Language.label("aboutMacAddress", "Mac Address"), self.get_mac_address()) )
+        about_info_entries.append( (Language.label("aboutFwVersion", "FW Version"),self.get_fw_version()) )
         about_info_entries.extend(self.get_device_specific_about_info_entries())
         return about_info_entries
     
@@ -499,7 +519,7 @@ class DeviceCommon(AbstractDevice):
 
     def perform_sdcard_ro_check(self):
         if self.is_filesystem_read_only("/mnt/SDCARD"):
-            Display.display_message("Warning: /mnt/SDCARD is read-only. Please check your SD card.", duration_ms=10000)
+            Display.display_message(Language.label("sdcardReadOnlyWarning", "Warning: /mnt/SDCARD is read-only. Please check your SD card."), duration_ms=10000)
 
     def sync_hw_clock(self):
         #Is this different per device? Should be right for the tina linux handhelds at least
@@ -570,3 +590,35 @@ class DeviceCommon(AbstractDevice):
             return menu_options["Emulator"].get("selected")
         return None
     
+    def check_for_button_remap(self, input):
+        return self.button_remapper.get_mappping(input)
+
+    def capture_framebuffer(self):
+        pass
+
+    def restore_framebuffer(self):
+        pass
+
+    def clear_framebuffer(self):
+        pass
+
+    def are_headphones_plugged_in(self):
+        return False
+        
+    def get_image_utils(self):
+        return FfmpegImageUtils()
+
+
+    @throttle.limit_refresh(5)
+    def is_hdmi_connected(self):
+        return False
+    
+    def is_lid_closed(self):
+        return False
+    
+    def map_key(self, key_code):
+        PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+        return None
+
+    def get_game_images_folder_name(self):
+        return "Imgs"

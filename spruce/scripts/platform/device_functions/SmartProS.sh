@@ -276,12 +276,24 @@ device_init() {
     tinymix set 29 1
     amixer set DAC 255 # reset this to max so we're not double attenuating vol with two different mixer controls
 
-
     echo 1 > /sys/class/drm/card0-DSI-1/rotate
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
-
-    echo 0 > /sys/class/speaker/mute
-
+    
+    (
+        # Set volume on startup by simulating button presses
+        # Alternative is shared memory to keymon
+        # Delay is to prevent audio pop
+        sleep 3
+        {
+            echo 1 115 1 # Vol up pressed
+            echo 1 115 0 # Vol up released
+            echo 1 114 1 # Vol down pressed
+            echo 1 114 0 # Vol down released
+            echo 0 0 0   # tell sendevent to exit
+        } | sendevent $EVENT_PATH_VOLUME 
+        sleep 3
+        echo 0 > /sys/class/speaker/mute
+    ) &
 }
 
 set_event_arg_for_idlemon() {
@@ -413,17 +425,7 @@ device_stop_thermal_process(){
 }
 
 device_run_thermal_process(){
-    THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
-    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
-
-    if [ "$selected" = "Adaptive" ]; then
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    else
-        # Convert display name to lowercase profile name
-        profile=$(echo "$selected" | tr 'A-Z' 'a-z')
-        echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    fi
+    /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
 }
 
 set_backlight() {
@@ -442,7 +444,6 @@ set_backlight() {
     # update device system json
     tmp=$(mktemp)
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
-    "$SYSTEM_EMIT" brightness-level "$val" "SmartProS.sh/set_backlight" 2>/dev/null || true
 }
 
 

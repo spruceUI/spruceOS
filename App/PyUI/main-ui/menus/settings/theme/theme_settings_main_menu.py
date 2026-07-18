@@ -17,7 +17,7 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
     def main_menu_title(self, input_value):
         if(ControllerInput.A == input_value):
             new_title = self.on_screen_keyboard.get_input(
-                "Main Menu Title",
+                Language.label("mainMenuTitle", "Main Menu Title"),
                 Theme.get_main_menu_title()
             )
             if(new_title is not None):
@@ -85,8 +85,8 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                     )
                 )
                 option_list.append(
-                    self.build_enabled_disabled_entry("Wrap-Around", 
-                        Theme.get_main_menu_grid_wrap_around_single_row, 
+                    self.build_enabled_disabled_entry(Language.label("wrapAround", "Wrap-Around"),
+                        Theme.get_main_menu_grid_wrap_around_single_row,
                         Theme.set_main_menu_grid_wrap_around_single_row)
                     )      
                 option_list.append(
@@ -104,6 +104,12 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
                         set_value_func=Theme.set_grid_main_menu_img_height,
                         min=0
                     )
+                )
+            elif(ViewType.CAROUSEL == Theme.get_view_type_for_main_menu()):
+                option_list.append(
+                    self.build_enabled_disabled_entry("Vertical Carousel", 
+                            Theme.get_main_menu_use_vertical_carousel, 
+                            Theme.set_main_menu_use_vertical_carousel)
                 )
 
                 
@@ -147,7 +153,7 @@ class ThemeSettingsMainMenu(ThemeSettingsMenuCommon):
             )
             option_list.append(
                 GridOrListEntry(
-                    primary_text="Main Menu Title",
+                    primary_text=Language.label("mainMenuTitle", "Main Menu Title"),
                     value_text=Theme.get_main_menu_title(),
                     value=self.main_menu_title
                 )

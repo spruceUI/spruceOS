@@ -1,0 +1,88 @@
+{
+  "label": "Atomiswave",
+  "icon": "atomiswave.png",
+  "iconsel": "atomiswave_sel.png",
+  "themecolor": "FFFFFF",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "chd|cdi|gdi|cue|iso|m3u|zip|dat",
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh"
+    }
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "flycast",
+        "km_flycast_xtreme"
+      ],
+      "selected": "flycast",
+      "overrides": {}
+    },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+      ],
+      "options": ["64-bit", "32-bit"],
+      "selected": "64-bit",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
+        "ANBERNIC_RGXX640480"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone"
+      ],
+      "selected": "Flycast-libretro",
+      "overrides": {}
+    },
+    "Emulator_Pixel2": {
+      "display": "Emulator",
+      "devices": [
+        "GKD_PIXEL2"
+      ],
+      "options": [
+        "Flycast-libretro",
+        "Flycast-standalone",
+        "Flycast-stock"
+      ],
+      "selected": "Flycast-stock",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 1800,
+  "brand": "Sammy",
+  "type": "arcade",
+  "releaseYear": 2003,
+  "default_emulator": "flycast",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": [
+    "atomiswave"
+  ]
+}

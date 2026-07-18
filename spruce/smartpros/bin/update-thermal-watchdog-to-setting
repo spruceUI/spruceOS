@@ -1,29 +1,72 @@
 #!/bin/sh
 
-# Load helper functions (provides get_config_value)
+# Load helper functions (provides get_config_value and get_python_path)
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 CONFIG_PATH="/mnt/SDCARD/Saves/spruce/spruce-config.json"
 PROFILE_PATH="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog/active_profile"
 WATCHDOG_BIN="/mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog"
+PKILL_BIN="/mnt/SDCARD/spruce/smartpros/bin/pkill"
 ADAPTIVE_SCRIPT="/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py"
 
-# Get selected value (default = Smart)
-option="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
+stop_thermal_processes() {
+    "$PKILL_BIN" -f "$WATCHDOG_BIN" 2>/dev/null
+    pgrep -f '[a]daptive_fan.py' 2>/dev/null | while read -r pid; do
+        [ -n "$pid" ] && kill "$pid" 2>/dev/null
+    done
+}
 
-# Stop any running thermal process first
-killall thermal-watchdog 2>/dev/null
-pid=$(ps -eo pid,args | grep '[a]daptive_fan.py' | awk '{print $1}')
-[ -n "$pid" ] && kill "$pid"
+thermal_processes_running() {
+    pgrep -f "$WATCHDOG_BIN" >/dev/null 2>&1 && return 0
+    pgrep -f '[a]daptive_fan.py' >/dev/null 2>&1
+}
+
+wait_for_thermal_processes_to_stop() {
+    tries=0
+    while [ "$tries" -lt 10 ]; do
+        thermal_processes_running || return 0
+        sleep 0.1
+        tries=$((tries + 1))
+    done
+
+    "$PKILL_BIN" -9 -f "$WATCHDOG_BIN" 2>/dev/null
+    pgrep -f '[a]daptive_fan.py' 2>/dev/null | while read -r pid; do
+        [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
+    done
+
+    tries=0
+    while [ "$tries" -lt 5 ]; do
+        thermal_processes_running || return 0
+        sleep 0.1
+        tries=$((tries + 1))
+    done
+
+    return 1
+}
+
+write_active_profile() {
+    profile="$1"
+    tmp_profile="${PROFILE_PATH}.$$"
+    if printf '%s\n' "$profile" > "$tmp_profile" 2>/dev/null; then
+        mv "$tmp_profile" "$PROFILE_PATH"
+    else
+        rm -f "$tmp_profile"
+        exit 1
+    fi
+}
+
+# Prefer the caller's freshly selected value; fall back to saved config for boot/manual runs.
+option="${1:-}"
+[ -z "$option" ] && option="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
+
+stop_thermal_processes
+wait_for_thermal_processes_to_stop || exit 1
 
 if [ "$option" = "Adaptive" ]; then
-    python "$ADAPTIVE_SCRIPT" --lower 60 --upper 70 &
+    "$(get_python_path)" "$ADAPTIVE_SCRIPT" --lower 60 --upper 70 &
 else
     # Convert to lowercase
     profile="$(printf '%s' "$option" | tr '[:upper:]' '[:lower:]')"
-
-    # Write profile (safely)
-    printf '%s\n' "$profile" > "$PROFILE_PATH" 2>/dev/null
-
+    write_active_profile "$profile"
     "$WATCHDOG_BIN" >/dev/null 2>&1 &
 fi

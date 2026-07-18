@@ -45,7 +45,7 @@ class CollectionsMenu(RomsMenuCommon):
             return self.build_rom_selection_for_collection(self.current_collection)
 
     def run_rom_selection(self) :
-        return self._run_rom_selection("Collections")
+        return self._run_rom_selection("Collections", verify_system=False)
 
     #def _run_subfolder_menu(self, rom_info : RomInfo) -> list[GridOrListEntry]:
     #    if(self.current_collection is None):

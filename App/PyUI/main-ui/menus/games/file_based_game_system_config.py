@@ -1,12 +1,17 @@
 import json
 import os
 
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 
 class FileBasedGameSystemConfig():
-    def __init__(self, system_name):
+    def __init__(self, system_name, emu_folder = None):
         self.system_name = system_name
-        self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
+        self.emu_folder = emu_folder
+        if(self.emu_folder is None):
+            # TODO pass this in vs defaulting to None
+            self.emu_folder = f"/mnt/SDCARD/Emu/{system_name}"
+
         if(not os.path.exists(self.emu_folder)):
             self.emu_folder =  f"/mnt/SDCARD/Emus/{system_name}"
         self.config_path = f"{self.emu_folder}/config.json"
@@ -23,7 +28,8 @@ class FileBasedGameSystemConfig():
         return self.emu_folder
 
     def get_label(self):
-        return self._data.get('label')
+        raw_label = self._data.get('label')
+        return Language.game_system_label(self.system_name, raw_label)
 
     def get_icon(self):
         return self._data.get('icon')
