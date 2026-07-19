@@ -137,7 +137,7 @@ enable_or_disable_rgb() {
 # Toggle the RGB LEDs between the configured colour and off. Device-specific
 # (the LED sysfs paths differ per device), so implemented in the device file.
 toggle_led() {
-    log_message "Missing toggle_led function" -v
+    log_message "Missing toggle_led function"
 }
 
 enter_sleep() {
