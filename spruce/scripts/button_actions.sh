@@ -235,20 +235,6 @@ prepare_game_switcher() {
 
 }
 
-# Toggle the RGB LEDs between the configured colour and off, through spruce's own
-# LED system. "Off" is a static 000000 rather than effect=0, which only freezes
-# the animation on its last colour. Reads the left LED to decide which way to
-# flip. Devices without RGB LEDs never offer this action, so it stays here.
-toggle_led() {
-    cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
-    hex="$(led_color_hex)"
-    if [ "$cur" = "000000" ]; then
-        rgb_led lrm12 static "$hex" &
-    else
-        rgb_led lrm12 static "000000" &
-    fi
-}
-
 perform_action() {
     # handle short press
     case $1 in

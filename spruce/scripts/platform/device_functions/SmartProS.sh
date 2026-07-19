@@ -9,27 +9,6 @@
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
-# --- Smart Pro S: open the in-game RetroArch menu on a MENU tap ---------------
-# The generic 64-bit implementation (common64bit.sh) toggles the RA menu by
-# sending "MENU_TOGGLE" to RetroArch's UDP command interface (127.0.0.1:55355).
-# On this device's ra64.universal build that socket is bound but never acts on
-# commands (VERSION/GET_STATUS get no reply, MENU_TOGGLE is a no-op), so a short
-# MENU tap did nothing while a game was running; only MENU+X (RetroArch's own
-# input hotkey layer) worked. Override it to inject the configured menu-toggle
-# controller combo instead. input_menu_toggle_gamepad_combo = "2" is L3 + R3,
-# and send_virtual_key_L3R3 (from common64bit.sh) drives exactly that combo via
-# sendevent on the input device, which does open the menu.
-send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null \
-        || pgrep -f "retroarch" >/dev/null; then
-        send_virtual_key_L3R3
-    elif pgrep -f "PPSSPPSDL" >/dev/null; then
-        send_virtual_key_L3
-    fi
-    # PICO8 has no in-game menu and
-    # NDS has 2 in-game menus that are activated by hotkeys with menu button short tap
-}
-
 get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-smart-pro-s-system.json"
 }
@@ -91,6 +70,20 @@ enable_or_disable_rgb() {
         chmod 777 "$enable_file" 2>/dev/null
         echo 1 > "$enable_file" 2>/dev/null
         # don't lock them back afterwards
+    fi
+}
+
+# Toggle the RGB LEDs between the configured colour and off, through spruce's own
+# LED system (not the stock ledc.sh, whose shmvar-based brightness is dead here).
+# "Off" is a static 000000 since effect=0 only freezes the animation on its last
+# colour. Reads the left LED's current colour to decide which way to flip.
+toggle_led() {
+    cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
+    hex="$(led_color_hex)"
+    if [ "$cur" = "000000" ]; then
+        rgb_led lrm12 static "$hex" &
+    else
+        rgb_led lrm12 static "000000" &
     fi
 }
 
