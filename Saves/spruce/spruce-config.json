@@ -312,6 +312,35 @@
                 "selected": "Medium"
             }
         },
+        "Button Settings": {
+            "homeAction": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Home button action",
+                "description": "What the top Home button does",
+                "options": [
+                    "Game Switcher",
+                    "Emulator menu",
+                    "Exit game",
+                    "Toggle LED",
+                    "Screenshot",
+                    "Nothing"
+                ],
+                "selected": "Game Switcher"
+            },
+            "switchAction": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Switch action",
+                "description": "What flipping the physical switch does",
+                "options": [
+                    "LED off",
+                    "Quiet Mode",
+                    "Silent Mode",
+                    "Nothing"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/smartpros/bin/apply-switch-action",
+                "selected": "LED off"
+            }
+        },
         "Emulator Settings": {
             "tapHomeAction": {
                 "display": "Tap home key action",
