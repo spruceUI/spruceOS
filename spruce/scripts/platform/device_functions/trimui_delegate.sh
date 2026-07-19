@@ -49,6 +49,23 @@
 #   rgb_led r off
 # ---------------------------------------------------------------------------
 
+# Map the RGB LED Settings "defaultLEDcolor" name to a hex string.
+# Shared by the Smart Pro S Home "Toggle LED" action and scene-rgb-led.sh so the
+# colour table lives in one place. Pass an explicit name to override the config.
+led_color_hex() {
+    name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
+    case "$name" in
+        Red)     echo "FF0000" ;;
+        Green)   echo "00FF00" ;;
+        Blue)    echo "0000FF" ;;
+        Yellow)  echo "FFFF00" ;;
+        Cyan)    echo "00FFFF" ;;
+        Magenta) echo "FF00FF" ;;
+        Orange)  echo "FF8800" ;;
+        *)       echo "FFFFFF" ;;
+    esac
+}
+
 rgb_led_trimui() {
 
     # early out if disabled

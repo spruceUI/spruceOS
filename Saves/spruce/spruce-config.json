@@ -336,7 +336,7 @@
                     "Silent Mode",
                     "Nothing"
                 ],
-                "changeCmd": "sh /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action",
+                "changeCmd": "/mnt/SDCARD/spruce/smartpros/bin/apply-switch-action",
                 "selected": "LED off"
             }
         },

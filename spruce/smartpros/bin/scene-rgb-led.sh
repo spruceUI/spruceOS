@@ -12,17 +12,8 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh
 
-# defaultLEDcolor is a name in config; map the common ones to hex, default white.
-case "$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")" in
-    Red)     hex="FF0000" ;;
-    Green)   hex="00FF00" ;;
-    Blue)    hex="0000FF" ;;
-    Yellow)  hex="FFFF00" ;;
-    Cyan)    hex="00FFFF" ;;
-    Magenta) hex="FF00FF" ;;
-    Orange)  hex="FF8800" ;;
-    *)       hex="FFFFFF" ;;
-esac
+# defaultLEDcolor is a name in config; led_color_hex (trimui_delegate.sh) maps it.
+hex="$(led_color_hex)"
 
 # Note: rgb_led_trimui "off" sets effect=0 (disable), which only FREEZES the
 # animation engine -- the LEDs keep their last lit colour rather than going dark.

@@ -286,7 +286,7 @@ device_init() {
 
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action.
-    sh /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
+    /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
 
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
@@ -463,11 +463,7 @@ device_home_button_pressed() {
             # effect=0 only freezes the animation on its last colour. We read the
             # left LED's current colour to decide which way to flip.
             cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
-            case "$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")" in
-                Red) hex="FF0000" ;; Green) hex="00FF00" ;; Blue) hex="0000FF" ;;
-                Yellow) hex="FFFF00" ;; Cyan) hex="00FFFF" ;; Magenta) hex="FF00FF" ;;
-                Orange) hex="FF8800" ;; *) hex="FFFFFF" ;;
-            esac
+            hex="$(led_color_hex)"
             if [ "$cur" = "000000" ]; then
                 rgb_led lrm12 static "$hex" &
             else
