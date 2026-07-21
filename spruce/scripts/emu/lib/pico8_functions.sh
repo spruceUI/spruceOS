@@ -103,7 +103,7 @@ load_pico8_control_profile() {
 		"MiyooMini")
 			export LD_LIBRARY_PATH="$HOME"/lib-MiyooMini:$LD_LIBRARY_PATH
 			;;
-		"Brick" | "SmartPro")
+		"Brick"* | "SmartPro")
 			export LD_LIBRARY_PATH="$HOME"/lib-trimui:$LD_LIBRARY_PATH
 			;;
 		"SmartProS")

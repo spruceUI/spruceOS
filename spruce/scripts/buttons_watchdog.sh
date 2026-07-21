@@ -1,6 +1,9 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+# Shared button-action dispatch (perform_action), used by the top Home button
+# via device_home_button_pressed on devices that have one (e.g. Smart Pro S).
+. /mnt/SDCARD/spruce/scripts/button_actions.sh
 
 START_DOWN=false
 

@@ -39,7 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		"SmartPro"|"Brick"|"Zero28"|"Flip")
+		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
