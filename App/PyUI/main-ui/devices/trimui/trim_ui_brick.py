@@ -51,7 +51,7 @@ class TrimUIBrick(TrimUIDevice):
             # it. A bare stat() per tick is cheap; the granularity-repeat window
             # stays ~2s since it counts down in seconds.
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-                "/mnt/SDCARD/Saves/trim-ui-brick-system.json", self.on_system_config_changed, interval=0.05, repeat_trigger_for_mtime_granularity_issues=True)
+                "/mnt/SDCARD/Saves/trim-ui-brick-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
             if(PyUiConfig.enable_button_watchers()):
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd
