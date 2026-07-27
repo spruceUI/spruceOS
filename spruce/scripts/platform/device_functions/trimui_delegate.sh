@@ -195,6 +195,26 @@ check_if_fw_needs_update_trimui() {
     [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
 }
 
+# Common startup watchdogs for every TrimUI device, plus the volume sync one.
+# Devices with extra watchdogs (the Brick and its Fn keys) override
+# launch_startup_watchdogs and call this first.
+launch_trimui_startup_watchdogs() {
+    launch_common_startup_watchdogs_v2
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+
+    # Keep spruce's stored volume in sync with whoever last wrote
+    # /tmp/system/set_volume (the stock firmware on the Brick, spruce's own hold
+    # loop on the Smart Pro and Smart Pro S) so the in-UI volume bar tracks the
+    # hardware Volume +/- keys, including while a key is held.
+    /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
+}
+
+launch_startup_watchdogs() {
+    launch_trimui_startup_watchdogs
+}
+
 run_trimui_blobs() {
     blobs="$1"
 

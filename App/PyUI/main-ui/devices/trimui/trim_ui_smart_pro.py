@@ -42,8 +42,14 @@ class TrimUISmartPro(TrimUIDevice):
             self.ensure_wpa_supplicant_conf()
             threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
+            # Poll briskly (50ms) so the volume bar tracks the hardware Volume
+            # keys closely: the volume sync watchdog mirrors every step written
+            # to /tmp/system/set_volume into this file immediately, so a held key
+            # should see the bar ramp rather than trail it. A bare stat() per
+            # tick is cheap; the granularity-repeat window stays ~2s since it
+            # counts down in seconds.
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-                "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+                "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.05, repeat_trigger_for_mtime_granularity_issues=True)
             if(PyUiConfig.enable_button_watchers()):
                 from controller.controller import Controller
                 #/dev/miyooio if we want to get rid of miyoo_inputd

@@ -1,32 +1,40 @@
 #!/bin/sh
-# Mirror the firmware volume value into spruce's stored volume so the in-UI
-# volume bar tracks the hardware Volume +/- keys, including while held.
+# Mirror /tmp/system/set_volume into spruce's stored volume so the in-UI volume
+# bar tracks the hardware Volume +/- keys, including while a key is held.
 #
-# On the Brick the physical volume keys are handled by the stock firmware
-# (trimui_inputd/hardwareservice), which owns /tmp/system/set_volume: it writes
-# the new level there on every key event (autorepeat included) and applies it to
-# ALSA and to its own config (/mnt/UDISK/system.json). spruce never read that
-# file back, so its own .vol (SYSTEM_JSON) only changed when spruce itself set
-# the volume. The UI volume bar reads .vol, so holding a volume key moved the
-# audio but not the bar (it updated once at most, never ramped).
+# /tmp/system/set_volume is the level command file the TrimUI firmware watches:
+# whoever wants the volume changed writes the new level there. Two writers exist
+# on the A133P devices, and neither keeps spruce's own .vol (SYSTEM_JSON) current
+# while a key is held:
 #
-# This watchdog reacts to writes of /tmp/system/set_volume and mirrors the value
-# into SYSTEM_JSON, the file PyUI's config watcher polls to redraw the bar. That
-# is the watchdog's whole job: the durable copy and ALSA are the firmware's, so
-# we deliberately do NOT call set_volume here (it would just re-poke the
-# firmware's command file and add a redundant synchronous flash write). Keeping
-# to a single in-place edit of SYSTEM_JSON is what lets the bar chase the OSD
-# instead of crawling behind it while a key is held.
+#   - the stock firmware (trimui_inputd/hardwareservice). On the Brick it owns
+#     the volume keys outright (Brick.cfg sets no EVENT_PATH_VOLUME, so spruce's
+#     buttons_watchdog never reads them) and writes the file on every key event,
+#     autorepeat included. spruce never read it back, so .vol only moved when
+#     spruce itself set the volume.
+#   - spruce itself, through set_volume. On the Smart Pro buttons_watchdog does
+#     own the keys, but its hold loop steps with SAVE_TO_CONFIG=false and only
+#     writes .vol when the key is released.
+#
+# The UI volume bar reads .vol, so either way holding a volume key moved the
+# audio while the bar sat still. This watchdog reacts to writes of the command
+# file and mirrors the value into SYSTEM_JSON, the file PyUI's config watcher
+# polls to redraw the bar. That is its whole job: the durable copy and ALSA
+# belong to whoever wrote the command file, so we deliberately do NOT call
+# set_volume here (it would just re-poke the command file and add a redundant
+# synchronous flash write). Keeping to a single in-place edit of SYSTEM_JSON is
+# what lets the bar chase the level instead of crawling behind it.
 #
 # Events are delivered by inotifywait so there is no fixed poll delay; if it is
 # missing or exits we fall back to interval polling so syncing still works.
 #
-# It also lifts Silent Mode's hard mute on the first volume-up. Silent Mode mutes
-# the speaker amp (/sys/class/speaker/mute) and that mute is otherwise only
-# cleared by flipping the switch back. So raising the volume bumped ALSA and the
-# OSD but produced no sound. When a non-zero volume arrives while the amp is
-# muted we clear the mute (and its marker) so volume-up restores audio without
-# touching the switch.
+# It also lifts Silent Mode's hard mute on the first volume-up. That switch is
+# Brick hardware, so it never fires elsewhere. Silent Mode mutes the speaker amp
+# (/sys/class/speaker/mute) and that mute is otherwise only cleared by flipping
+# the switch back. So raising the volume bumped ALSA and the OSD but produced no
+# sound. When a non-zero volume arrives while Silent Mode's marker is present we
+# clear the mute (and the marker) so volume-up restores audio without touching
+# the switch.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -41,10 +49,15 @@ mkdir -p "$SET_VOLUME_DIR" 2>/dev/null
 
 last_seen=""
 
-# Lift Silent Mode's amp mute when the volume is raised above 0.
+# Lift Silent Mode's amp mute when the volume is raised above 0. Gated on Silent
+# Mode's own marker so we only ever clear the mute Silent Mode set: the Smart Pro
+# and Smart Pro S also mute the amp for the first seconds of boot to avoid an
+# audio pop, and the startup volume keypresses they simulate must not cut that
+# short.
 unmute_if_raised() {
     vol="$1"
     [ "$vol" -gt 0 ] 2>/dev/null || return 0
+    [ -f "$MUTED_MARKER" ] || return 0
     [ -w "$SPEAKER_MUTE_FILE" ] || return 0
     [ "$(cat "$SPEAKER_MUTE_FILE" 2>/dev/null)" = "1" ] || return 0
     echo 0 > "$SPEAKER_MUTE_FILE"

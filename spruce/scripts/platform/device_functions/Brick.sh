@@ -39,18 +39,14 @@ device_init() {
 }
 
 launch_startup_watchdogs() {
-    launch_common_startup_watchdogs_v2
-
-    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    # Common plus the shared TrimUI ones (volume sync); sets SYSTEM_CPU.
+    launch_trimui_startup_watchdogs
 
     # Dispatch the Brick's Fn keys (spruce does not run the stock keymon that
     # would otherwise do this). Launched here so it lives alongside the other
     # durable watchdogs and survives the early-boot churn; pinned like them.
+    # Brick-only: the Fn keys report as B_L3/B_R3, which are the stick clicks on
+    # the Smart Pro.
     /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
-
-    # Keep spruce's stored volume in sync with the firmware volume keys so the
-    # in-UI volume bar tracks the hardware Volume +/- keys (including on hold).
-    /mnt/SDCARD/spruce/brick/volume_sync_watchdog.sh &
-    pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
 }
