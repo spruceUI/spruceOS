@@ -45,12 +45,6 @@ class TrimUISmartProS(TrimUIDevice):
             trim_stock_json_file = script_dir / 'stock/brick.json'
             ConfigCopier.ensure_config(TrimUISmartProS.TRIMUI_STOCK_CONFIG_LOCATION, trim_stock_json_file)
 
-            # Poll briskly (50ms) so the volume bar tracks the hardware Volume
-            # keys closely: the volume sync watchdog mirrors every step written
-            # to /tmp/system/set_volume into this file immediately, so a held key
-            # should see the bar ramp rather than trail it. A bare stat() per
-            # tick is cheap; the granularity-repeat window stays ~2s since it
-            # counts down in seconds.
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
                 TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
