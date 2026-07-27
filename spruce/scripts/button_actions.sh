@@ -201,6 +201,11 @@ capture_screen(){
 }
 
 prepare_game_switcher() {
+    # $1: set by callers that own the main menu (the top Home button) so a press
+    # there opens the switcher too. The Menu button leaves it empty, since PyUI
+    # already opens the switcher from its own menu-key handler.
+    open_gs_in_mainui="$1"
+
     # if in game or app now
     if [ -f /tmp/cmd_to_run.sh ]; then
 
@@ -226,7 +231,13 @@ prepare_game_switcher() {
     # if in MainUI menu
     elif pgrep "MainUI" >/dev/null; then
 
-        log_message "button_actions.sh: letting PyUI handle menu button"
+        if [ -n "$open_gs_in_mainui" ]; then
+            # Same trigger file the in-game path uses above; PyUI picks it up
+            # from Controller.get_input while the menu is running.
+            touch /mnt/SDCARD/App/PyUI/pyui_gs_trigger
+        else
+            log_message "button_actions.sh: letting PyUI handle menu button"
+        fi
         # otherwise other program is running, exit normally
     else
         log_message "button_actions.sh: /tmp/cmd_to_run.sh not found and MainUI is not running, bypassing game switcher."
@@ -237,9 +248,10 @@ prepare_game_switcher() {
 
 perform_action() {
     # handle short press
+    # $2 is forwarded to prepare_game_switcher, see there.
     case $1 in
     "Game Switcher")
-        prepare_game_switcher
+        prepare_game_switcher "$2"
         ;;
     "Emulator menu")
         if pgrep -f "./PPSSPPSDL" >/dev/null; then

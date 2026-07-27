@@ -439,7 +439,9 @@ device_home_button_pressed() {
     # shared perform_action dispatch (button_actions.sh, sourced by
     # buttons_watchdog.sh) that the Menu button also uses.
     action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
-    perform_action "$action"
+    # Pass 1 so the action also runs in the main menu, where the Home button is
+    # unused (PyUI never sees it: KEY_HOMEPAGE is not in the key mapping).
+    perform_action "$action" 1
 
     # perform_action leaves game-state cleanup to the caller (as the hold-home
     # path in homebutton_watchdog.sh does). Clear it only for actions that

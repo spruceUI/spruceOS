@@ -163,15 +163,8 @@ class MainMenu:
             self.settings_menu.show_menu()
 
     def check_for_gameswitcher(self):
-        py_ui_dir = Path(__file__).resolve().parent.parent.parent
-        gs_trigger_file = py_ui_dir / "pyui_gs_trigger"
-        if (gs_trigger_file).exists():
-            gs_trigger_file.unlink()
-            from controller.controller import Controller
-            from menus.games.recents_menu_gs import RecentsMenuGS
-            Controller.gs_triggered = True
-            RecentsMenuGS().run_rom_selection()
-            Controller.gs_triggered = False
+        from controller.controller import Controller
+        Controller.check_for_gs_trigger()
 
     def check_for_boxart_resizing(self):
         from games.utils.box_art_resizer import BoxArtResizer
