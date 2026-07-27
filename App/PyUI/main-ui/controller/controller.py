@@ -1,6 +1,4 @@
 import time
-from pathlib import Path
-
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 
@@ -143,27 +141,24 @@ class Controller:
                 Controller.last_controller_input = None
 
 
-    # Path the shell touches to ask a running PyUI to open the Game Switcher
-    # (button_actions.sh and runtimeHelper.sh). Resolved once: get_input checks
-    # it on every pass, and resolve() hits the filesystem.
-    _gs_trigger_file = Path(__file__).resolve().parent.parent.parent / "pyui_gs_trigger"
-
-    # Open the Game Switcher if the shell asked for it. Called both at startup
-    # (MainMenu) and from get_input, so a press that arrives while the menu is
-    # already up is acted on instead of sitting unread until the next launch.
+    # The Home button only exists on the Smart Pro S. In game the shell watchdog
+    # runs whatever the user picked in Button Settings, but the Game Switcher
+    # action needs a running PyUI to show it, so handle that one here. The other
+    # actions (screenshot, LED, ...) stay with the watchdog, which is why this
+    # checks the setting instead of always opening the switcher: otherwise a
+    # Home press would both take a screenshot and open the switcher.
     @staticmethod
-    def check_for_gs_trigger():
-        if(not Controller._gs_trigger_file.exists()):
+    def home_button_pressed():
+        from utils.cfw_system_config import CfwSystemConfig
+        if(Controller.gs_triggered):
             return
-        Controller._gs_trigger_file.unlink(missing_ok=True)
+        if("Game Switcher" != CfwSystemConfig.get_selected_value("Button Settings", "homeAction")):
+            return
         from menus.games.recents_menu_gs import RecentsMenuGS
         Controller.gs_triggered = True
+        Controller.clear_last_input()
+        PyUiLogger.get_logger().info("Home button: starting GS().run_rom_selection()")
         RecentsMenuGS().run_rom_selection()
-        # Drop a press made while the switcher was already up: the watchdog has
-        # no debounce, so it would otherwise reopen the switcher on exit.
-        Controller._gs_trigger_file.unlink(missing_ok=True)
-        # Same as the held-MENU path below: drop whatever exited the switcher so
-        # it isn't replayed on the screen underneath.
         Controller.clear_last_input()
         Controller.gs_triggered = False
 
@@ -173,10 +168,6 @@ class Controller:
             #Let user stop holding menu
             Controller.first_check_after_gs_triggered = False
             time.sleep(0.3)
-        # Don't re-enter while the switcher is already on screen, and don't run
-        # it from the nested get_input inside check_for_hotkey.
-        if(not Controller.gs_triggered and not called_from_check_for_hotkey):
-            Controller.check_for_gs_trigger()
         DEFAULT_TIMEOUT_FLAG = -2
         INPUT_DEBOUNCE_SECONDS = 0.2
         POLL_INTERVAL_SECONDS = 0.005
@@ -230,7 +221,12 @@ class Controller:
 
                 if Controller.last_controller_input is not None:
                     Theme.controller_button_pressed(Controller.last_controller_input)
-                    if Controller.last_controller_input == ControllerInput.MENU:
+                    if Controller.last_controller_input == ControllerInput.HOME:
+                        # Consumed here, never handed to a view: no menu binds it.
+                        if not called_from_check_for_hotkey:
+                            Controller.home_button_pressed()
+                        Controller.clear_last_input()
+                    elif Controller.last_controller_input == ControllerInput.MENU:
                         if not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
