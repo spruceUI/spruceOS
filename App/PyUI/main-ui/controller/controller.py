@@ -141,6 +141,27 @@ class Controller:
                 Controller.last_controller_input = None
 
 
+    # The Home button only exists on the Smart Pro S. In game the shell watchdog
+    # runs whatever the user picked in Button Settings, but the Game Switcher
+    # action needs a running PyUI to show it, so handle that one here. The other
+    # actions (screenshot, LED, ...) stay with the watchdog, which is why this
+    # checks the setting instead of always opening the switcher: otherwise a
+    # Home press would both take a screenshot and open the switcher.
+    @staticmethod
+    def home_button_pressed():
+        from utils.cfw_system_config import CfwSystemConfig
+        if(Controller.gs_triggered):
+            return
+        if("Game Switcher" != CfwSystemConfig.get_selected_value("Button Settings", "homeAction")):
+            return
+        from menus.games.recents_menu_gs import RecentsMenuGS
+        Controller.gs_triggered = True
+        Controller.clear_last_input()
+        PyUiLogger.get_logger().info("Home button: starting GS().run_rom_selection()")
+        RecentsMenuGS().run_rom_selection()
+        Controller.clear_last_input()
+        Controller.gs_triggered = False
+
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
         if(Controller.first_check_after_gs_triggered):
@@ -200,7 +221,12 @@ class Controller:
 
                 if Controller.last_controller_input is not None:
                     Theme.controller_button_pressed(Controller.last_controller_input)
-                    if Controller.last_controller_input == ControllerInput.MENU:
+                    if Controller.last_controller_input == ControllerInput.HOME:
+                        # Consumed here, never handed to a view: no menu binds it.
+                        if not called_from_check_for_hotkey:
+                            Controller.home_button_pressed()
+                        Controller.clear_last_input()
+                    elif Controller.last_controller_input == ControllerInput.MENU:
                         if not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
