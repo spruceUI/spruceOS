@@ -52,7 +52,7 @@ class TrimUISmartProS(TrimUIDevice):
             # tick is cheap; the granularity-repeat window stays ~2s since it
             # counts down in seconds.
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.05, repeat_trigger_for_mtime_granularity_issues=True)
+                TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.ensure_wpa_supplicant_conf()
