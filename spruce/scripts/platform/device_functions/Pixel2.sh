@@ -220,27 +220,19 @@ map_mainui_volume_to_system_value() {
 }
 
 restore_audio() {
-    HP_STATUS=$(cat /sys/class/gpio/gpio86/value)
     AUDIO_SINK=$(pactl list sinks short | grep rk817 | cut -c 0-2)
-
-    case "$HP_STATUS" in
-        "0")
-            SMODE="SPK"
-            ;;
-        "1")
-            SMODE="HP"
-            ;;
-    esac
-
-    amixer -c0 sset "Playback Path" "$SMODE"
     pactl suspend-sink "$AUDIO_SINK" 1
+
+    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
     turn_off_screen
+
     amixer -c0 sset "Playback Path" "OFF"
+    pkill gpiomon
 
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"

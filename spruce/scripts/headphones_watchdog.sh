@@ -2,27 +2,32 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-VOLUME_LV=$(get_volume_level)
-set_volume "$(( VOLUME_LV ))"
-
-JACK_PATH=/sys/class/gpio/gpio86/value
 PLAYBACK_PATH="Playback Path"
 PLAYBACK_PATH_SPK="SPK"
 PLAYBACK_PATH_HP="HP"
 
-PREV_VALUE=$(cat $JACK_PATH)
+# Initial value at boot, 0 unplugged, 1 plugged
+case $(gpioget --numeric -c 2 22) in
+	0)
+		amixer -c0 sset "${PLAYBACK_PATH}" "${PLAYBACK_PATH_SPK}"
+		PREV_VALUE=2
+		;;
+	1)
+		amixer -c0 sset "${PLAYBACK_PATH}" "${PLAYBACK_PATH_HP}"
+		PREV_VALUE=1
+		;;
+esac
 
-while true; do
-    NEW_VALUE=$(cat $JACK_PATH)
+# Monitoring value, 1 plugged, 2 unplugged
+gpiomon --format="%e" -c 2 22 | while read line; do
+    NEW_VALUE=$line
 
     if [ "$NEW_VALUE" != "$PREV_VALUE" ]; then
-        log_message "*** headphones watchdog: change detected" -v
-
         case "$NEW_VALUE" in
-            "0")
+            2)
                 amixer -c0 sset "${PLAYBACK_PATH}" "${PLAYBACK_PATH_SPK}"
                 ;;
-            "1")
+            1)
                 amixer -c0 sset "${PLAYBACK_PATH}" "${PLAYBACK_PATH_HP}"
                 ;;
         esac
@@ -32,6 +37,4 @@ while true; do
 
         PREV_VALUE="$NEW_VALUE"
     fi
-
-    sleep 1
 done
