@@ -201,18 +201,6 @@ class PyUiConfig:
     @classmethod
     def get_activity_log_path(cls):
         return cls.get("activityLogPath",None)
-
-    @classmethod
-    def get_video_root_path(cls):
-        return cls.get("videoRootPath", "/mnt/SDCARD/Roms/MEDIA")
-
-    @classmethod
-    def get_screensaver_timeout_sec(cls):
-        return cls.get("screensaverTimeoutSec", 120)
-
-    @classmethod
-    def get_activity_log_path(cls):
-        return cls.get("activityLogPath",None)
     
     @classmethod
     def get_about_entries(cls):

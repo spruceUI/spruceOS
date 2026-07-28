@@ -1720,3 +1720,7 @@ class Theme():
     @classmethod
     def get_screensaver_blur(cls):
         return cls._data.get("screensaver", {}).get("blur", 0)
+
+    @classmethod
+    def get_screensaver_timeout_sec(cls):
+        return cls._data.get("screensaver", {}).get("screensaverTimeoutSec", 60)

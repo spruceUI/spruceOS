@@ -15,10 +15,8 @@ from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
-from menus.settings.screensaver_settings_menu import ScreenSaverSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from utils.cfw_system_config import CfwSystemConfig
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -75,10 +73,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):
             GameArtDisplaySettingsMenu().show_menu()
-
-    def launch_screensaver_settings(self,input):
-        if(ControllerInput.A == input):
-            ScreenSaverSettingsMenu().show_menu()
 
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
@@ -189,17 +183,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.launch_controller_settings
-                )
-        )
-
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.get("screensaver", "Screensaver"),
-                        image_path=None,
-                        image_path_selected=None,
-                        description=Language.get("screensaverDesc", "Idle screen display settings"),
-                        icon=None,
-                        value=self.launch_screensaver_settings
                 )
         )
 

@@ -1,11 +1,11 @@
 import os
 import copy
+from pathlib import Path
 
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from menus.settings import settings_menu
 from themes.theme import Theme
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
@@ -40,17 +40,16 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             self._set_screensaver_prop("showBattery", not current)
 
     def change_timeout(self, input):
-        current = PyUiConfig.get_screensaver_timeout_sec()
+        current = Theme.get_screensaver_timeout_sec()
         if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
-            new_val = min(300, current + 30)
+            new_val = min(300, current + 5)
         elif ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input:
-            new_val = max(0, current - 30)
+            new_val = max(0, current - 5)
         elif ControllerInput.A == input:
             new_val = 0 if current > 0 else 120
         else:
             return
-        PyUiConfig.set("screensaverTimeoutSec", new_val)
-        PyUiConfig.save()
+        self._set_screensaver_prop("screensaverTimeoutSec", new_val)
 
     def change_overlay_opacity(self, input):
         current = Theme._data.get("screensaver", {}).get("overlayOpacity", 0.3)
@@ -96,6 +95,7 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             selected = max(0, min(selected, len(widgets) - 1))
             if dirty:
                 self._render_layout_preview(ScreenSaver, widgets, selected)
+                Display.clear("")
                 dirty = False
 
             if not Controller.get_input(timeout=0.2):
@@ -195,7 +195,7 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         return fonts[(index + 1) % len(fonts)]
 
     def _find_fonts(self):
-        font_dirs = ["/mnt/SDCARD/App/PyUI/fonts", Theme.get_theme_path()]
+        font_dirs = [Theme.get_theme_path()]
         fonts = []
         for font_dir in font_dirs:
             if not os.path.isdir(font_dir):
@@ -207,13 +207,36 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         return fonts
 
     def change_bg_color(self, input):
-        if ControllerInput.A != input:
+        if ControllerInput.DPAD_LEFT == input:
+            current = Theme._data.get("screensaver", {}).get("bgColor", "#000000")
+
+            try:
+                index = COLOR_PALETTE.index(current)
+            except ValueError:
+                index = 0
+
+            new_color = COLOR_PALETTE[(index - 1) % len(COLOR_PALETTE)]
+            self._set_screensaver_prop("bgColor", new_color)
             return
 
-        current = Theme._data.get("screensaver", {}).get("bgColor", "#000000")
-        new_color = self._show_rgb_picker(current)
-        if new_color is not None:
+        elif ControllerInput.DPAD_RIGHT == input:
+            current = Theme._data.get("screensaver", {}).get("bgColor", "#000000")
+
+            try:
+                index = COLOR_PALETTE.index(current)
+            except ValueError:
+                index = 0
+
+            new_color = COLOR_PALETTE[(index + 1) % len(COLOR_PALETTE)]
             self._set_screensaver_prop("bgColor", new_color)
+            return        
+        elif ControllerInput.A == input:
+            current = Theme._data.get("screensaver", {}).get("bgColor", "#000000")
+            new_color = self._show_rgb_picker(current)
+            if new_color is not None:
+                self._set_screensaver_prop("bgColor", new_color)
+        else:
+            return
 
     def _show_rgb_picker(self, current):
         color = self._normalize_hex_color(current) or "#000000"
@@ -295,7 +318,10 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         for index, path in enumerate(images):
             if path == current:
                 selected_index = index
-            image_path = path or "/mnt/SDCARD/App/PyUI/main-ui/themes/screensaver.png"
+
+            script_dir = Path(__file__).resolve().parent
+            default_screen_saver = script_dir / 'themes' / 'screensaver.png'
+            image_path = path or default_screen_saver
             option_list.append(
                 GridOrListEntry(
                     primary_text=self._format_image_label(path),
@@ -331,7 +357,7 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         return "#" + hex_part.upper()
 
     def _find_bg_images(self):
-        user_dir = "/mnt/SDCARD/App/PyUI/screensavers"
+        user_dir = Path(__file__).resolve().parent.parent.parent.parent
         os.makedirs(user_dir, exist_ok=True)
         paths = [user_dir, Theme.get_theme_path(), "/mnt/SDCARD/App/PyUI/main-ui/themes"]
         images = []
@@ -376,13 +402,19 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             "#103030": "Deep teal",
             "#303030": "Gray",
             "#FFFFFF": "White",
+            "#66F7FF": "Blue",
+            "#FF4FD8": "Pink",
+            "#FFE66D": "Yellow",
+            "#FF9F1C": "Orange",
+            "#FF4040": "Red",
+            "#80FF72": "Green",
         }
         return labels.get(color, color)
 
     def build_options_list(self):
         option_list = []
 
-        timeout = PyUiConfig.get_screensaver_timeout_sec()
+        timeout = Theme.get_screensaver_timeout_sec()
         timeout_text = f"{timeout // 60}m {timeout % 60}s" if timeout > 0 else Language.get("off", "Off")
         option_list.append(
             GridOrListEntry(
@@ -422,18 +454,19 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             )
         )
 
-        overlay_opacity = self._get_screensaver_prop("overlayOpacity", 0.3)
-        option_list.append(
-            GridOrListEntry(
-                primary_text=Language.get("screensaverOverlayOpacity", "Overlay opacity"),
-                value_text="<    " + f"{int(overlay_opacity * 100)}%" + "    >",
-                image_path=None,
-                image_path_selected=None,
-                description=Language.get("screensaverOverlayOpacityDesc", "Dark overlay over background (0=off, 100=full black)"),
-                icon=None,
-                value=self.change_overlay_opacity
-            )
-        )
+        # TODO figure out why opacity isn't working
+        #overlay_opacity = self._get_screensaver_prop("overlayOpacity", 0.3)
+        #option_list.append(
+        #    GridOrListEntry(
+        #        primary_text=Language.get("screensaverOverlayOpacity", "Overlay opacity"),
+        #        value_text="<    " + f"{int(overlay_opacity * 100)}%" + "    >",
+        #        image_path=None,
+        #        image_path_selected=None,
+        #        description=Language.get("screensaverOverlayOpacityDesc", "Dark overlay over background (0=off, 100=full black)"),
+        #        icon=None,
+        #        value=self.change_overlay_opacity
+        #    )
+        #)
 
         option_list.append(
             GridOrListEntry(

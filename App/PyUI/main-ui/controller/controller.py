@@ -11,7 +11,8 @@ class Controller:
     index = None
     name = None
     mapping = None
-    last_input_time = time.time()
+    last_input_time = 0
+    screensaver_input_tracking_time = time.time()
     hold_delay = 0
     additional_button_watchers = []
     is_check_for_hotkey = False
@@ -197,6 +198,7 @@ class Controller:
                     ScreenSaver.clear_cache()
                     Display.restore_from_blank()
                     Controller.last_input_time = time.time()
+                    Controller.screensaver_input_tracking_time = time.time()
                     Controller._screensaver_active = False
                     Controller.last_controller_input = None
                     return False
@@ -245,9 +247,9 @@ class Controller:
             elapsed = time.time() - start_time
             remaining_time = timeout - elapsed
             remaining_time = max(remaining_time, 0.001)
-            screensaver_timeout = PyUiConfig.get_screensaver_timeout_sec()
+            screensaver_timeout = Theme.get_screensaver_timeout_sec()
             if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
-                idle_remaining = screensaver_timeout - (time.time() - Controller.last_input_time)
+                idle_remaining = screensaver_timeout - (time.time() - Controller.screensaver_input_tracking_time)
                 remaining_time = min(remaining_time, max(idle_remaining, 0.001))
             while True:
 
@@ -307,8 +309,9 @@ class Controller:
                 #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
                 Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
+        Controller.last_input_time = time.time()
         if Controller.last_controller_input is not None:
-            Controller.last_input_time = time.time()
+            Controller.screensaver_input_tracking_time = time.time()
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 
@@ -319,18 +322,18 @@ class Controller:
         if Controller._game_running:
             return False
 
-        screensaver_timeout = PyUiConfig.get_screensaver_timeout_sec()
+        screensaver_timeout = Theme.get_screensaver_timeout_sec()
         if screensaver_timeout <= 0:
             return False
 
-        if time.time() - Controller.last_input_time < screensaver_timeout:
+        if time.time() - Controller.screensaver_input_tracking_time < screensaver_timeout:
             return False
 
         Controller.controller_interface.clear_input_queue()
         Display.blank_screen()
         Controller._screensaver_active = True
         Controller._screensaver_ignore_input_until = time.time() + 0.5
-        Controller.last_input_time = time.time()
+        Controller.screensaver_input_tracking_time = time.time()
         return True
 
     @staticmethod
