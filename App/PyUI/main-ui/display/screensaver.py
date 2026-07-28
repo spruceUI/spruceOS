@@ -180,8 +180,6 @@ class ScreenSaver:
 
         candidates.append(os.path.join(Theme.get_theme_path(), "screensaver.gif"))
         candidates.append(os.path.join(Theme.get_theme_path(), "screensaver.png"))
-        candidates.append("/mnt/SDCARD/App/PyUI/main-ui/themes/screensaver.gif")
-        candidates.append("/mnt/SDCARD/App/PyUI/main-ui/themes/screensaver.png")
 
         for path in candidates:
             if path and os.path.exists(path):
@@ -435,7 +433,6 @@ class ScreenSaver:
         candidates = []
         if font:
             candidates.append(font)
-            candidates.append(os.path.join("/mnt/SDCARD/App/PyUI/fonts", font))
             candidates.append(os.path.join(Theme.get_theme_path(), font))
         candidates.append(Theme.get_font(FontPurpose.LIST))
         for path in candidates:
