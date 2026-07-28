@@ -32,6 +32,9 @@ device_init() {
     device_init_a133p
     run_trimui_osdd
 
+    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_on_msg.sh" &
+    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_off_msg.sh" &
+
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
         chmod +x /bin/bash
