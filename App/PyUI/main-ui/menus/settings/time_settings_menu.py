@@ -34,6 +34,12 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
         if (ControllerInput.A == input):
             SetTimeMenu().show_menu()
 
+    def get_current_timezone(self):
+        system_config = Device.get_device().get_system_config()
+        if hasattr(system_config, "get_timezone"):
+            return system_config.get_timezone()
+        return getattr(system_config, "timezone", None)
+
 
     def build_options_list(self):
         option_list = []
@@ -55,7 +61,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.set_timezone(),
-                    value_text=None,
+                    value_text="<    " + (self.get_current_timezone() or "") + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,

@@ -1692,3 +1692,31 @@ class Theme():
     @classmethod
     def get_overlay_for_img(cls, img_path):
         return cls.get_relative_img(img_path, "overlay")
+
+    @classmethod
+    def get_screensaver_widgets(cls):
+        return cls._data.get("screensaver", {}).get("widgets", [
+            {"type": "clock", "x": 0.5, "y": 0.35, "fontSize": 64, "color": "#FFFFFF"},
+            {"type": "date", "x": 0.5, "y": 0.55, "fontSize": 24, "color": "#AAAAAA"},
+            {"type": "battery", "x": 0.5, "y": 0.70, "fontSize": 20, "color": "#88CC88"},
+        ])
+
+    @classmethod
+    def get_screensaver_bg_color(cls):
+        return cls._data.get("screensaver", {}).get("bgColor", "#000000")
+
+    @classmethod
+    def get_screensaver_bg_image(cls):
+        return cls._data.get("screensaver", {}).get("bgImage", "")
+
+    @classmethod
+    def get_screensaver_overlay_opacity(cls):
+        return cls._data.get("screensaver", {}).get("overlayOpacity", 0.3)
+
+    @classmethod
+    def get_screensaver_overlay_color(cls):
+        return cls._data.get("screensaver", {}).get("overlayColor", "#000000")
+
+    @classmethod
+    def get_screensaver_blur(cls):
+        return cls._data.get("screensaver", {}).get("blur", 0)

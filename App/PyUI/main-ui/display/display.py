@@ -93,6 +93,8 @@ class Display:
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
+    _screensaver_active = False
+    _screensaver_saved_lumination = None
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
@@ -378,6 +380,8 @@ class Display:
 
     @classmethod
     def set_page_bg(cls, page_bg):
+        if cls._screensaver_active:
+            return
         background = Theme.background(page_bg)
         if(background is not None and os.path.exists(background)):
             cls.set_new_bg(background, is_custom_theme_background=True)
@@ -1030,6 +1034,20 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
         cls.renderer.present()
         Device.get_device().post_present_operations()
+
+    @classmethod
+    def blank_screen(cls):
+        if cls._screensaver_active:
+            return
+        cls._screensaver_active = True
+        from display.screensaver import ScreenSaver
+        ScreenSaver.render()
+
+    @classmethod
+    def restore_from_blank(cls):
+        if not cls._screensaver_active:
+            return
+        cls._screensaver_active = False
 
     #TODO make default false and fix everywhere
     @classmethod
