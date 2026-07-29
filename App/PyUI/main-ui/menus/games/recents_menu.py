@@ -1,4 +1,5 @@
 
+import re
 import sys
 from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
@@ -34,10 +35,17 @@ class RecentsMenu(RomsMenuCommon):
             display_name = rom_info.display_name
             if(display_name is None):
                 display_name =  RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+            system = self._extract_game_system(rom_info.rom_file_path)
 
+            # Remove any trailing " (System)" groups
+            display_name = re.sub(
+                rf"(?:\s*\({re.escape(system)}\))+$",
+                "",
+                display_name,
+            )
             rom_list.append(
                 RomGridOrListEntry(
-                        display_name=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
+                        display_name=display_name  +" (" + system +")",
                         folder_name="Recents",
                         game_system=rom_info.game_system,
                         rom_file_path=rom_info.rom_file_path,
