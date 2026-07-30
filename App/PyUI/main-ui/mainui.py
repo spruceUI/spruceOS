@@ -90,6 +90,9 @@ def initialize_device(device, main_ui_mode):
     elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick(device,main_ui_mode))
+    elif "TRIMUI_BRICK_PRO" == device or "SPRUCE_TRIMUI_BRICK_PRO" == device:
+        from devices.trimui.trim_ui_brick_pro import TrimUIBrickPro
+        Device.init(TrimUIBrickPro(device,main_ui_mode))
     elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
         Device.init(TrimUISmartPro(device,main_ui_mode))

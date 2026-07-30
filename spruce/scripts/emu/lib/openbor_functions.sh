@@ -56,7 +56,7 @@ run_openbor() {
 	else # TrimUI Brick, SmartPro, or SmartProS
 
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
-			if [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Brick" ]; then
+			if [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "BrickPro" ]; then
 				export SDL_VIDEODRIVER=mali
 				"/mnt/SDCARD/Emu/PSP/setalpha" 0
 				export LD_LIBRARY_PATH=$EMU_DIR/lib64mod:$LD_LIBRARY_PATH

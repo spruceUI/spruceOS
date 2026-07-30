@@ -17,7 +17,6 @@ from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from utils.cfw_system_config import CfwSystemConfig
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -74,6 +73,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):
             GameArtDisplaySettingsMenu().show_menu()
+
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
             BoxArtResizer.patch_boxart()

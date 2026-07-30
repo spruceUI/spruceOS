@@ -23,7 +23,7 @@ run_yabasanshiro() {
 		"Flip")
 			GUID=030000005e0400008e02000014010000
 			;;
-		"Brick"|"SmartPro"|"SmartProS")
+		"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 			GUID=0300a3845e0400008e02000014010000
 			;;
 		"Pixel2")

@@ -134,7 +134,7 @@ run_firstboot_package_phase() {
     ADVMAME_DIR="/mnt/SDCARD/Emu/ARCADE"
     ADVMAME_7Z=""
     case "$PLATFORM" in
-        "Brick" | "SmartPro" | "SmartProS" | "Flip")
+        "Brick" | "BrickPro" | "SmartPro" | "SmartProS" | "Flip")
             ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
             ;;
     esac

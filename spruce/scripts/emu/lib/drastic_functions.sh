@@ -188,6 +188,19 @@ run_drastic_MiyooMini() {
 	echo $sv > /proc/sys/vm/swappiness
 }
 
+### BRICK PRO ###
+
+run_drastic_BrickPro(){ # todo: fix trngaje
+    if [ "$CORE" = "DraStic-original" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
+		run_drastic64
+	elif [ "$CORE" = "DraStic-Steward" ]; then
+		run_drastic_steward_Brick
+	else
+		display_core_unrecognized_for_platform_message
+	fi
+}
+
 ##### BRICK #####
 
 run_drastic_Brick(){

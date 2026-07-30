@@ -12,6 +12,7 @@ class Controller:
     name = None
     mapping = None
     last_input_time = 0
+    screensaver_input_tracking_time = time.time()
     hold_delay = 0
     additional_button_watchers = []
     is_check_for_hotkey = False
@@ -27,6 +28,9 @@ class Controller:
     first_check_after_gs_triggered = False
     controller_interface = None
     _watch_for_secret_code = False
+    _screensaver_active = False
+    _screensaver_ignore_input_until = 0
+    _game_running = False
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -141,6 +145,27 @@ class Controller:
                 Controller.last_controller_input = None
 
 
+    # The Home button only exists on the Smart Pro S. In game the shell watchdog
+    # runs whatever the user picked in Button Settings, but the Game Switcher
+    # action needs a running PyUI to show it, so handle that one here. The other
+    # actions (screenshot, LED, ...) stay with the watchdog, which is why this
+    # checks the setting instead of always opening the switcher: otherwise a
+    # Home press would both take a screenshot and open the switcher.
+    @staticmethod
+    def home_button_pressed():
+        from utils.cfw_system_config import CfwSystemConfig
+        if(Controller.gs_triggered):
+            return
+        if("Game Switcher" != CfwSystemConfig.get_selected_value("Button Settings", "homeAction")):
+            return
+        from menus.games.recents_menu_gs import RecentsMenuGS
+        Controller.gs_triggered = True
+        Controller.clear_last_input()
+        PyUiLogger.get_logger().info("Home button: starting GS().run_rom_selection()")
+        RecentsMenuGS().run_rom_selection()
+        Controller.clear_last_input()
+        Controller.gs_triggered = False
+
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
         if(Controller.first_check_after_gs_triggered):
@@ -150,6 +175,37 @@ class Controller:
         DEFAULT_TIMEOUT_FLAG = -2
         INPUT_DEBOUNCE_SECONDS = 0.2
         POLL_INTERVAL_SECONDS = 0.005
+
+        from display.display import Display
+
+        # Screensaver: if already blanked, wait for any input to restore
+        if Controller._screensaver_active:
+            from display.screensaver import ScreenSaver
+            while True:
+                ScreenSaver.render_if_needed()
+                Controller.controller_interface.force_refresh()
+                if Controller.still_held_down():
+                    time.sleep(POLL_INTERVAL_SECONDS)
+                    continue
+                ms = int(POLL_INTERVAL_SECONDS * 1000)
+                inp = Controller.controller_interface.get_input(ms)
+                if inp is not None and time.time() < Controller._screensaver_ignore_input_until:
+                    Controller.controller_interface.clear_input_queue()
+                    continue
+                if inp is not None:
+                    Controller.set_last_input(inp)
+                    Controller.controller_interface.clear_input_queue()
+                    ScreenSaver.clear_cache()
+                    Display.restore_from_blank()
+                    Controller.last_input_time = time.time()
+                    Controller.screensaver_input_tracking_time = time.time()
+                    Controller._screensaver_active = False
+                    Controller.last_controller_input = None
+                    return False
+
+        # Screensaver: check if idle timeout reached (skip if game running)
+        if not called_from_check_for_hotkey and Controller._try_start_screensaver(Display):
+            return False
 
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"Controller.last_controller_input = {Controller.last_controller_input}")
@@ -191,6 +247,10 @@ class Controller:
             elapsed = time.time() - start_time
             remaining_time = timeout - elapsed
             remaining_time = max(remaining_time, 0.001)
+            screensaver_timeout = Theme.get_screensaver_timeout_sec()
+            if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
+                idle_remaining = screensaver_timeout - (time.time() - Controller.screensaver_input_tracking_time)
+                remaining_time = min(remaining_time, max(idle_remaining, 0.001))
             while True:
 
                 ms_remaining = int(remaining_time * 1000)
@@ -200,7 +260,12 @@ class Controller:
 
                 if Controller.last_controller_input is not None:
                     Theme.controller_button_pressed(Controller.last_controller_input)
-                    if Controller.last_controller_input == ControllerInput.MENU:
+                    if Controller.last_controller_input == ControllerInput.HOME:
+                        # Consumed here, never handed to a view: no menu binds it.
+                        if not called_from_check_for_hotkey:
+                            Controller.home_button_pressed()
+                        Controller.clear_last_input()
+                    elif Controller.last_controller_input == ControllerInput.MENU:
                         if not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
@@ -212,7 +277,12 @@ class Controller:
                         break  # Valid non-hotkey input
                 elapsed = time.time() - start_time
                 remaining_time = timeout - elapsed
+                if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
+                    idle_remaining = screensaver_timeout - (time.time() - Controller.last_input_time)
+                    remaining_time = min(remaining_time, idle_remaining)
                 if remaining_time <= 0:
+                    if not called_from_check_for_hotkey:
+                        Controller._try_start_screensaver(Display)
                     break
 
 
@@ -240,10 +310,31 @@ class Controller:
                 Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
         Controller.last_input_time = time.time()
+        if Controller.last_controller_input is not None:
+            Controller.screensaver_input_tracking_time = time.time()
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 
         return Controller.last_controller_input is not None and not was_hotkey
+
+    @staticmethod
+    def _try_start_screensaver(Display):
+        if Controller._game_running:
+            return False
+
+        screensaver_timeout = Theme.get_screensaver_timeout_sec()
+        if screensaver_timeout <= 0:
+            return False
+
+        if time.time() - Controller.screensaver_input_tracking_time < screensaver_timeout:
+            return False
+
+        Controller.controller_interface.clear_input_queue()
+        Display.blank_screen()
+        Controller._screensaver_active = True
+        Controller._screensaver_ignore_input_until = time.time() + 0.5
+        Controller.screensaver_input_tracking_time = time.time()
+        return True
 
     @staticmethod
     def allow_pyui_game_switcher():

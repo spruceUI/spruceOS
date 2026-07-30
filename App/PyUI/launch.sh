@@ -56,7 +56,7 @@ case "$PLATFORM" in
 ############################################################
 # Brick / SmartPro / SmartProS
 ############################################################
-    "Brick" | "SmartPro" | "SmartProS" )
+    "Brick" | "BrickPro" | "SmartPro" | "SmartProS" )
         tinymix set 9 1
         tinymix set 1 0
 
@@ -66,6 +66,8 @@ case "$PLATFORM" in
 
         if [ "$PLATFORM" = "Brick" ]; then
             DEVICE="TRIMUI_BRICK"
+        elif [ "$PLATFORM" = "BrickPro" ]; then
+            DEVICE="TRIMUI_BRICK_PRO"
         elif [ "$PLATFORM" = "SmartProS" ]; then
             DEVICE="TRIMUI_SMART_PRO_S"
         else

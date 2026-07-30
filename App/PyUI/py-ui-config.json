@@ -14,6 +14,7 @@
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
     "videoRootPath":"/mnt/SDCARD/Roms/MEDIA",
+    "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "aboutEntries" : [
@@ -22,16 +23,16 @@
            "cmd":"cat /mnt/SDCARD/spruce/spruce"
         },
         {
-            "display":"RetroArch version",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-ra-version.sh"
+           "display":"RetroArch version",
+           "cmd":"/mnt/SDCARD/App/PyUI/get-ra-version.sh"
         },
         {
-            "display":"PPSSPP version",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
+           "display":"PPSSPP version",
+           "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
         },
         {
-            "display":"SD Card usage",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
+           "display":"SD Card usage",
+           "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
         }
     ]
 }

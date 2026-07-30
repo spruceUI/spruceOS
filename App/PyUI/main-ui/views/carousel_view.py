@@ -426,6 +426,8 @@ class CarouselView(View):
         Display.present()
 
     def _render(self):
+        if Display._screensaver_active:
+            return
         if(self.veritcal_carousel):
             self._render_vertical()
         else:

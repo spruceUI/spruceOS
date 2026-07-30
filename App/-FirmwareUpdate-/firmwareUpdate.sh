@@ -17,7 +17,7 @@ FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
 NEEDS_UPDATE=true
 case "$PLATFORM" in
-	"A30"|"Flip"|"Brick"|"SmartPro"|"SmartProS")
+	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
 	*)
