@@ -108,7 +108,9 @@ check_if_fw_needs_update() {
 }
 
 enable_or_disable_rgb() {
-    log_message "rgb led not supported on this" -v
+    killall -q cava 2>/dev/null
+    killall -q leds_manager.sh 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
 }
 
 prepare_for_pyui_launch(){
@@ -132,6 +134,7 @@ launch_startup_watchdogs(){
     /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
