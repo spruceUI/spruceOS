@@ -84,7 +84,7 @@ class GameSelectMenuPopup:
             )
             rom_image_list.append((name_without_ext, img_path))
             
-            BoxArtScraper().download_boxart_batch(rom_info.game_system.folder_name, rom_image_list)
+            BoxArtScraper().download_boxart_batch(rom_info.game_system.system_name, rom_image_list)
 
     def find_index_for_boxart(self, boxart_name, boxart_list):
         name_lower = boxart_name.lower()
@@ -117,7 +117,7 @@ class GameSelectMenuPopup:
             if(not scraper.check_wifi()):
                 return
 
-            image_list = scraper.get_image_list_for_system(rom_info.game_system.folder_name)
+            image_list = scraper.get_image_list_for_system(rom_info.game_system.system_name)
             if(image_list is not None):
                 name_without_ext = RomFileNameUtils.get_rom_name_without_extensions(
                     rom_info.game_system,
@@ -140,7 +140,7 @@ class GameSelectMenuPopup:
                         .replace("{boxart}", box_art)
                         .replace("{path}", img_path)
                     )
-                    scraper.download_remote_image_for_system(rom_info.game_system.folder_name, box_art,img_path)
+                    scraper.download_remote_image_for_system(rom_info.game_system.system_name, box_art,img_path)
                     BoxArtResizer.patch_boxart_list([img_path])
 
     def get_game_options(self, rom_info : RomInfo, additional_popup_options = [], rom_list= [], use_full_text = True):

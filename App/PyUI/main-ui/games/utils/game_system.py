@@ -12,6 +12,13 @@ class GameSystem:
         return os.path.basename(self._folder_paths[0])
 
     @property
+    def system_name(self):
+        # Canonical system name (the Emu/ folder name used to load config.json).
+        # Unlike folder_name, this is stable even when the ROM folder uses an
+        # alternativeFolderName, so it's the correct key for storage/lookup.
+        return self._game_system_config.system_name
+
+    @property
     def folder_paths(self):
         return self._folder_paths
     

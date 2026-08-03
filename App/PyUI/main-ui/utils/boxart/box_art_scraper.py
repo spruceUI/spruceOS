@@ -84,6 +84,7 @@ class BoxArtScraper:
         self.preferred_region = Device.get_device().get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)
         self._arcade_xml_cache = None  # Single global dict: rom_name -> display_name for all arcade systems
+        self._folder_to_system = None  # Lazy map: on-disk ROM folder name -> canonical system name
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -187,6 +188,18 @@ class BoxArtScraper:
             "ZXS": "Sinclair - ZX Spectrum",
         }
         return mapping.get(system.upper(), "")
+
+    def _resolve_canonical_system_name(self, folder_name: str) -> str:
+        """Map an on-disk ROM folder name (which may be an alternativeFolderName)
+        to its canonical system name. All alias/extension/list lookups are keyed
+        by the canonical name, so alternative folders must be resolved first.
+        Falls back to the folder name itself if no active system claims it."""
+        if self._folder_to_system is None:
+            self._folder_to_system = {}
+            for system in self.game_system_utils.get_active_systems():
+                for path in system.folder_paths:
+                    self._folder_to_system[os.path.basename(path)] = system.system_name
+        return self._folder_to_system.get(folder_name, folder_name)
 
     def _get_supported_extensions(self, sys_name: str) -> list[str]:
         """Get extensions from Emu config.json."""
@@ -674,7 +687,9 @@ class BoxArtScraper:
         tasks = []
 
         sys_path = os.path.join(self.roms_dir, sys_dir)
-        sys_name = os.path.basename(sys_path)
+        # sys_dir may be an alternativeFolderName; resolve to the canonical
+        # system name that the alias/extension/list lookups are keyed by.
+        sys_name = self._resolve_canonical_system_name(os.path.basename(sys_path))
 
         # Central Imgs folder at system level
         sys_imgs_dir = os.path.join(sys_path, Device.get_device().get_game_images_folder_name())
