@@ -216,18 +216,22 @@ class GamelistGenerator:
                 self._log(f"SKIP {system_name}: no extlist found")
                 continue
 
-            rom_path = os.path.join(self.roms_dir, system_name)
-            if not os.path.isdir(rom_path):
+            # A system's ROMs may live under the canonical folder name or any of
+            # its alternativeFolderNames; generate a gamelist for each that exists.
+            rom_dirs = self._get_rom_dirs(system_name)
+            if not rom_dirs:
                 self._log(f"SKIP {system_name}: no ROM directory")
                 continue
 
-            self.messenger.display_image_and_text(
-                self.image_path,
-                f"Generating miyoogamelist.xml for {system_name}...",
-            )
-            rom_count = self._generate_for_system(system_name, rom_path, extlist)
-            self._log(f"OK   {system_name}: {rom_count} ROMs")
-            generated += 1
+            for rom_path in rom_dirs:
+                folder = os.path.basename(rom_path)
+                self.messenger.display_image_and_text(
+                    self.image_path,
+                    f"Generating miyoogamelist.xml for {folder}...",
+                )
+                rom_count = self._generate_for_system(system_name, rom_path, extlist)
+                self._log(f"OK   {system_name} ({folder}): {rom_count} ROMs")
+                generated += 1
 
         self._log("=" * 40)
         self._log(f"Done. Generated gamelists for {generated} systems.")
@@ -280,6 +284,27 @@ class GamelistGenerator:
             return {ext for ext in raw.split("|") if ext}
         except (FileNotFoundError, json.JSONDecodeError, KeyError):
             return None
+
+    def _get_rom_dirs(self, system_name: str) -> list:
+        """Return every existing ROM directory for a system: the canonical
+        Roms/{system} folder plus any alternativeFolderNames from config.json."""
+        folder_names = [system_name]
+        config_path = os.path.join(self.emu_dir, system_name, "config.json")
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for alt in data.get("alternativeFolderNames", []) or []:
+                if alt and alt not in folder_names:
+                    folder_names.append(alt)
+        except (FileNotFoundError, json.JSONDecodeError, KeyError):
+            pass
+
+        rom_dirs = []
+        for folder in folder_names:
+            candidate = os.path.join(self.roms_dir, folder)
+            if os.path.isdir(candidate):
+                rom_dirs.append(candidate)
+        return rom_dirs
 
     # ---- per-system generation ---------------------------------------------
 
