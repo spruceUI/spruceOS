@@ -13,10 +13,15 @@ from utils.logger import PyUiLogger
 
 
 class ScreenSaver:
+    # Stored in the theme as bgImage to select the random box art mode
+    BOXART_SENTINEL = "__boxart__"
+
     _animation_path = None
     _animation = None
     _animation_frame = 0
     _animation_next_time = 0
+    _boxart_current = None
+    _boxart_next_time = 0
 
     @classmethod
     def render(cls):
@@ -38,12 +43,16 @@ class ScreenSaver:
 
     @classmethod
     def render_if_needed(cls):
-        if cls._animation_path and time.time() >= cls._animation_next_time:
+        now = time.time()
+        if cls._animation_path and now >= cls._animation_next_time:
+            cls.render()
+        elif cls._boxart_next_time and now >= cls._boxart_next_time:
             cls.render()
 
     @classmethod
     def clear_cache(cls):
         cls._clear_animation()
+        cls._clear_boxart()
 
     @classmethod
     def _present_without_bars(cls, Display):
@@ -78,7 +87,11 @@ class ScreenSaver:
         blur = ss.get("blur", 0)
         bg_color = Theme.hex_to_color(ss.get("bgColor", "#000000"))
 
-        if bg_image and os.path.exists(bg_image):
+        if bg_image == cls.BOXART_SENTINEL:
+            cls._clear_animation()
+            cls._render_boxart_background(screen_w, screen_h, Display, bg_color)
+        elif bg_image and os.path.exists(bg_image):
+            cls._clear_boxart()
             if bg_image.lower().endswith(".gif"):
                 cls._render_gif_background(bg_image, screen_w, screen_h, Display, bg_color)
             else:
@@ -86,6 +99,7 @@ class ScreenSaver:
                 cls._render_static_background(bg_image, screen_w, screen_h, Display, bg_color, blur)
         else:
             cls._clear_animation()
+            cls._clear_boxart()
             sdl2.SDL_SetRenderDrawColor(Display.renderer.sdlrenderer,
                 bg_color[0], bg_color[1], bg_color[2], 255)
             sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
@@ -118,6 +132,84 @@ class ScreenSaver:
             sdl2.SDL_SetRenderDrawColor(Display.renderer.sdlrenderer,
                 bg_color[0], bg_color[1], bg_color[2], 255)
             sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
+
+    @classmethod
+    def _render_boxart_background(cls, screen_w, screen_h, Display, bg_color):
+        from utils.boxart.boxart_library import BoxArtLibrary
+
+        BoxArtLibrary.ensure_scanned()
+
+        sdl2.SDL_SetRenderDrawColor(Display.renderer.sdlrenderer,
+            bg_color[0], bg_color[1], bg_color[2], 255)
+        sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
+
+        interval = Theme.get_screensaver_boxart_interval_sec()
+        now = time.time()
+
+        # Only advance on a cycle boundary. render() also gets called for unrelated reasons
+        # (blank_screen, the layout editor redrawing) and those must not push the deadline out.
+        if cls._boxart_current is None or now >= cls._boxart_next_time:
+            next_surface = cls._load_next_boxart()
+            if next_surface is not None:
+                cls._free_boxart_surface()
+                cls._boxart_current = next_surface
+
+            # While scanning there is nothing to show yet, so check back shortly and draw
+            # just the background colour. Once the scan is done and still empty, back off.
+            still_waiting = cls._boxart_current is None and BoxArtLibrary.is_scanning()
+            cls._boxart_next_time = now + (1 if still_waiting else interval)
+
+        if cls._boxart_current is None:
+            return
+
+        cls._draw_fitted_surface(cls._boxart_current, screen_w, screen_h, Display)
+
+    @classmethod
+    def _load_next_boxart(cls):
+        """Load the next box art surface, dropping any that fail to decode."""
+        from utils.boxart.boxart_library import BoxArtLibrary
+
+        MAX_ATTEMPTS = 5
+        for _ in range(MAX_ATTEMPTS):
+            candidate = BoxArtLibrary.next_image()
+            if candidate is None:
+                return None
+            surface = sdl2.sdlimage.IMG_Load(candidate.encode("utf-8"))
+            if surface:
+                return surface
+            PyUiLogger.get_logger().warning(f"ScreenSaver could not load box art {candidate}")
+            BoxArtLibrary.discard(candidate)
+        return None
+
+    @classmethod
+    def _draw_fitted_surface(cls, surface, screen_w, screen_h, Display):
+        """Aspect fit the surface centered on screen, leaving the background colour visible."""
+        texture = sdl2.SDL_CreateTextureFromSurface(Display.renderer.renderer, surface)
+        if texture:
+            src_w = surface.contents.w
+            src_h = surface.contents.h
+            if src_w > 0 and src_h > 0:
+                sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
+                scale = min(screen_w / src_w, screen_h / src_h)
+                dst_w = max(1, int(src_w * scale))
+                dst_h = max(1, int(src_h * scale))
+                src = sdl2.SDL_Rect(0, 0, src_w, src_h)
+                dst = sdl2.SDL_Rect((screen_w - dst_w) // 2, (screen_h - dst_h) // 2, dst_w, dst_h)
+                sdl2.SDL_RenderCopy(Display.renderer.renderer, texture, src, dst)
+            sdl2.SDL_DestroyTexture(texture)
+
+    @classmethod
+    def _free_boxart_surface(cls):
+        if cls._boxart_current is not None:
+            sdl2.SDL_FreeSurface(cls._boxart_current)
+            cls._boxart_current = None
+
+    @classmethod
+    def _clear_boxart(cls):
+        from utils.boxart.boxart_library import BoxArtLibrary
+        cls._free_boxart_surface()
+        cls._boxart_next_time = 0
+        BoxArtLibrary.reset()
 
     @classmethod
     def _render_gif_background(cls, bg_image, screen_w, screen_h, Display, bg_color):
@@ -172,6 +264,9 @@ class ScreenSaver:
 
     @classmethod
     def _get_bg_image(cls, configured_path):
+        if configured_path == cls.BOXART_SENTINEL:
+            return configured_path
+
         candidates = []
         if configured_path:
             candidates.append(configured_path)

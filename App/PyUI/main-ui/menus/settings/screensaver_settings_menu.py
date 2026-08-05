@@ -305,30 +305,43 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         if ControllerInput.A != input:
             return
 
+        from display.screensaver import ScreenSaver
+
         ss = Theme._data.get("screensaver", {})
         current = ss.get("bgImage", "")
-        images = [""] + self._find_bg_images()
+        images = [ScreenSaver.BOXART_SENTINEL, ""] + self._find_bg_images()
         selected = self._show_image_selection(images, current)
         if selected is not None:
             self._set_screensaver_prop("bgImage", selected)
 
     def _show_image_selection(self, images, current):
+        from display.screensaver import ScreenSaver
+
+        main_ui_dir = Path(__file__).resolve().parent.parent.parent
+        default_screen_saver = str(main_ui_dir / 'themes' / 'screensaver.png')
+
         selected_index = 0
         option_list = []
         for index, path in enumerate(images):
             if path == current:
                 selected_index = index
 
-            script_dir = Path(__file__).resolve().parent
-            default_screen_saver = script_dir / 'themes' / 'screensaver.png'
-            image_path = path or default_screen_saver
+            # The boxart mode has no single file to preview, and the default entry has no
+            # path at all, so both fall back to the bundled screensaver artwork
+            is_boxart = path == ScreenSaver.BOXART_SENTINEL
+            image_path = default_screen_saver if (is_boxart or not path) else path
+            if is_boxart:
+                description = Language.get("screensaverBgBoxartDesc", "Cycle randomly through box art on the card")
+            else:
+                description = path or Language.get("screensaverBgDefault", "Default")
+
             option_list.append(
                 GridOrListEntry(
                     primary_text=self._format_image_label(path),
                     value=path,
                     image_path=image_path if os.path.exists(image_path) else None,
                     image_path_selected=image_path if os.path.exists(image_path) else None,
-                    description=path or Language.get("screensaverBgDefault", "Default"),
+                    description=description,
                 )
             )
 
@@ -385,6 +398,9 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         return Theme._data.get("screensaver", {}).get(key, default)
 
     def _format_image_label(self, path):
+        from display.screensaver import ScreenSaver
+        if path == ScreenSaver.BOXART_SENTINEL:
+            return Language.get("screensaverBgBoxart", "Random boxart")
         if not path:
             return Language.get("screensaverBgDefault", "Default")
         return os.path.basename(path)

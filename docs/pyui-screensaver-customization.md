@@ -28,10 +28,42 @@ Theme-specific defaults can also be added as:
 Open `Settings > Screensaver`.
 
 - `Timeout`: global idle timeout before screensaver starts.
-- `Background image`: choose image/GIF with preview.
+- `Background image`: choose `Random boxart`, an image, or a GIF, with preview.
 - `Background color`: RGB picker with live preview.
 - `Overlay opacity`: dim background.
 - `Edit layout`: visual widget editor.
+
+## Random Boxart
+
+Pick `Random boxart` as the `Background image` to cycle through the box art already on the
+card instead of a fixed background. Covers are drawn centred at their correct aspect ratio,
+with the `Background color` filling the space either side.
+
+The pool is every image under:
+
+```text
+<Roms>/<System>/Imgs/
+```
+
+on both SD cards, including mirrored subfolders. Order is random.
+
+Each cover is shown for 15 seconds. To change that, set `boxartIntervalSec` in the
+`screensaver` block of the active theme's `config.json`:
+
+```json
+"screensaver": {
+    "bgImage": "__boxart__",
+    "boxartIntervalSec": 30
+}
+```
+
+Notes:
+
+- The card is scanned once, in the background, the first time the boxart screensaver runs.
+  Box art added afterwards is picked up the next time PyUI restarts.
+- Clock, date and battery widgets still draw on top of the cover. The shipped layout puts
+  them in the middle of the screen, so you will probably want to move them out to the edges
+  with `Edit layout`.
 
 ## Visual Layout Editor
 
