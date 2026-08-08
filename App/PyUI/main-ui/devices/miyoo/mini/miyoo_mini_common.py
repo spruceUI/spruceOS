@@ -360,7 +360,7 @@ class MiyooMiniCommon(MiyooDevice):
                     PyUiLogger.get_logger().info("Wifi is disabled - trying to enable it...")
                     if(foreground_call):
                         Display.display_message("Loading WiFi driver\n(May take up to 5s)")
-                    ProcessRunner.run(["insmod", "/mnt/SDCARD/8188fu.ko"], timeout=5, print=True)
+                    ProcessRunner.run(["insmod", "/mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko"], timeout=5, print=True)
                     if(foreground_call):
                         Display.display_message("Starting network loopback interface\n(May take up to 5s)")
                     ProcessRunner.run(["ifconfig", "lo", "up"], timeout=5, print=True)
