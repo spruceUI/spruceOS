@@ -26,7 +26,7 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
-    if [ "$(jq -r '.wifi // 0' "/mnt/SDCARD/Saves/mini-flip-system.json")" -eq 0 ]; then
+    if [ "$(jq -r '.wifi // 0' "/mnt/SDCARD/Saves/mini-flip-system.json")" -eq 1 ]; then
         insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
         ifconfig lo up
         /customer/app/axp_test wifion
