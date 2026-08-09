@@ -13,6 +13,7 @@ import glob
 from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
+from menus.language.language import Language
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 import re
@@ -83,6 +84,7 @@ class BoxArtScraper:
         self.preferred_region = Device.get_device().get_system_config().get_preferred_region()
         self._cache = {}  # sys_name -> list of (filename, token_set)
         self._arcade_xml_cache = None  # Single global dict: rom_name -> display_name for all arcade systems
+        self._folder_to_system = None  # Lazy map: on-disk ROM folder name -> canonical system name
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -109,7 +111,7 @@ class BoxArtScraper:
             self.log_message("Cloudflare ping successful; device is online.")
             return True
         else:
-            self.log_and_display_message("Cloudflare ping failed; device is offline. Aborting.")
+            self.log_and_display_message(Language.label("cloudflareOfflineAborting", "Cloudflare ping failed; device is offline. Aborting."))
             return False
 
     def get_ra_alias(self, system: str) -> str:
@@ -186,6 +188,18 @@ class BoxArtScraper:
             "ZXS": "Sinclair - ZX Spectrum",
         }
         return mapping.get(system.upper(), "")
+
+    def _resolve_canonical_system_name(self, folder_name: str) -> str:
+        """Map an on-disk ROM folder name (which may be an alternativeFolderName)
+        to its canonical system name. All alias/extension/list lookups are keyed
+        by the canonical name, so alternative folders must be resolved first.
+        Falls back to the folder name itself if no active system claims it."""
+        if self._folder_to_system is None:
+            self._folder_to_system = {}
+            for system in self.game_system_utils.get_active_systems():
+                for path in system.folder_paths:
+                    self._folder_to_system[os.path.basename(path)] = system.system_name
+        return self._folder_to_system.get(folder_name, folder_name)
 
     def _get_supported_extensions(self, sys_name: str) -> list[str]:
         """Get extensions from Emu config.json."""
@@ -305,7 +319,9 @@ class BoxArtScraper:
         """Match ROM to image name based on db/<system>_games.txt."""
         image_list_file = self._find_game_list_file(sys_name)
         if not image_list_file:
-            self.log_and_display_message(f"Image list file not found for {sys_name}.")
+            self.log_and_display_message(
+                Language.label("imageListNotFound", "Image list file not found for {system}.").replace("{system}", sys_name)
+            )
             time.sleep(2)
             return None
 
@@ -600,15 +616,19 @@ class BoxArtScraper:
 
         roms_and_paths: list of (rom_file_name, image_path)
         """
-        self.log_and_display_message("Scraping box art. Please be patient, especially with large libraries!")
+        self.log_and_display_message(Language.label("scrapingBoxartPatient", "Scraping box art. Please be patient, especially with large libraries!"))
         if not roms_and_paths:
-            self.log_and_display_message(f"No roms are missing boxart for {sys_name}.")
+            self.log_and_display_message(
+                Language.label("noMissingBoxartForSystem", "No roms are missing boxart for {system}.").replace("{system}", sys_name)
+            )
             time.sleep(2)
             return
 
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
-            self.log_and_display_message(f"Remote system name not found - unable to download box art for {sys_name}.")
+            self.log_and_display_message(
+                Language.label("remoteSystemNotFound", "Remote system name not found - unable to download box art for {system}.").replace("{system}", sys_name)
+            )
             time.sleep(2)
             return
 
@@ -622,7 +642,11 @@ class BoxArtScraper:
 
             for future in as_completed(futures):
                 count = count +1
-                self.log_and_display_message(f"Scraping box art... ({count}/{len(roms_and_paths)})")
+                self.log_and_display_message(
+                    Language.label("scrapingBoxartProgress", "Scraping box art... ({count}/{total})")
+                    .replace("{count}", str(count))
+                    .replace("{total}", str(len(roms_and_paths)))
+                )
                 try:
                     future.result()  # triggers exception if any occurred
                 except Exception as e:
@@ -640,7 +664,12 @@ class BoxArtScraper:
 
             for future in as_completed(futures):
                 count = count +1
-                self.log_and_display_message(f"Scraping box art... ({count}/{len(tasks)}). Found {success_count} so far.")
+                self.log_and_display_message(
+                    Language.label("scrapingBoxartProgressFound", "Scraping box art... ({count}/{total}). Found {found} so far.")
+                    .replace("{count}", str(count))
+                    .replace("{total}", str(len(tasks)))
+                    .replace("{found}", str(success_count))
+                )
                 try:
                     result = future.result()
                     if result: 
@@ -649,7 +678,7 @@ class BoxArtScraper:
                 except Exception as e:
                     self.log_message(f"BoxartScraper: Error processing a ROM - {e}")
 
-        self.log_and_display_message("Scraping complete!")
+        self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
         time.sleep(2)
         BoxArtResizer.patch_boxart_list(downloaded_files)
 
@@ -658,7 +687,9 @@ class BoxArtScraper:
         tasks = []
 
         sys_path = os.path.join(self.roms_dir, sys_dir)
-        sys_name = os.path.basename(sys_path)
+        # sys_dir may be an alternativeFolderName; resolve to the canonical
+        # system name that the alias/extension/list lookups are keyed by.
+        sys_name = self._resolve_canonical_system_name(os.path.basename(sys_path))
 
         # Central Imgs folder at system level
         sys_imgs_dir = os.path.join(sys_path, Device.get_device().get_game_images_folder_name())
@@ -698,14 +729,14 @@ class BoxArtScraper:
 
     def check_wifi(self):
         if not Device.get_device().is_wifi_enabled():
-            Display.display_message("Wifi must be connected", 2000)
+            Display.display_message(Language.label("wifiMustBeConnected", "Wifi must be connected"), 2000)
             return False
 
         if not self._ping("thumbnails.libretro.com"):
-            self.log_and_display_message("Libretro thumbnail service unavailable; trying fallback.")
+            self.log_and_display_message(Language.label("libretroUnavailable", "Libretro thumbnail service unavailable; trying fallback."))
             if not self._ping("github.com"):
                 self.log_and_display_message(
-                    "Libretro thumbnail GitHub repo is also currently unavailable. Please try again later."
+                    Language.label("libretroGithubUnavailable", "Libretro thumbnail GitHub repo is also currently unavailable. Please try again later.")
                 )
                 time.sleep(3)
                 return False
@@ -713,7 +744,7 @@ class BoxArtScraper:
             
     def scrape_boxart(self, max_workers=8):
         self.log_and_display_message(
-            "Scraping box art. Please be patient, especially with large libraries!"
+            Language.label("scrapingBoxartPatient", "Scraping box art. Please be patient, especially with large libraries!")
         )
 
         if(not self.check_wifi()):

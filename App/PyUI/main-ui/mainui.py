@@ -90,6 +90,9 @@ def initialize_device(device, main_ui_mode):
     elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
         from devices.trimui.trim_ui_brick import TrimUIBrick
         Device.init(TrimUIBrick(device,main_ui_mode))
+    elif "TRIMUI_BRICK_PRO" == device or "SPRUCE_TRIMUI_BRICK_PRO" == device:
+        from devices.trimui.trim_ui_brick_pro import TrimUIBrickPro
+        Device.init(TrimUIBrickPro(device,main_ui_mode))
     elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
         from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
         Device.init(TrimUISmartPro(device,main_ui_mode))
@@ -221,6 +224,7 @@ def main():
             PyUiConfig.init(args.pyUiConfig)
             UserConfig.reload_config()
             CfwSystemConfig.init(args.cfwConfig)
+            Language.init()
 
         main_ui_mode = True
 
@@ -247,7 +251,6 @@ def main():
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
-        Language.init()
 
         Device.get_device().perform_sdcard_ro_check()
 

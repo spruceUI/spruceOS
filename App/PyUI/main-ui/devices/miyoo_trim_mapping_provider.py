@@ -33,8 +33,12 @@ class MiyooTrimKeyMappingProvider:
         self.key_mappings[KeyEvent(3, 2, 0)] = [InputResult(ControllerInput.L2, KeyState.RELEASE)]  
         self.key_mappings[KeyEvent(3, 2, 255)] = [InputResult(ControllerInput.L2, KeyState.PRESS)]  
 
-        self.key_mappings[KeyEvent(1, 316, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]  
+        self.key_mappings[KeyEvent(1, 316, 0)] = [InputResult(ControllerInput.MENU, KeyState.RELEASE)]
         self.key_mappings[KeyEvent(1, 316, 1)] = [InputResult(ControllerInput.MENU, KeyState.PRESS)]
+        # KEY_HOMEPAGE, the Smart Pro S top Home button. No other device using
+        # this provider has one, so the mapping is inert there.
+        self.key_mappings[KeyEvent(1, 172, 0)] = [InputResult(ControllerInput.HOME, KeyState.RELEASE)]
+        self.key_mappings[KeyEvent(1, 172, 1)] = [InputResult(ControllerInput.HOME, KeyState.PRESS)]
         self.key_mappings[KeyEvent(1, 315, 0)] = [InputResult(ControllerInput.START, KeyState.RELEASE)]
         self.key_mappings[KeyEvent(1, 315, 1)] = [InputResult(ControllerInput.START, KeyState.PRESS)]  
         self.key_mappings[KeyEvent(1, 314, 0)] = [InputResult(ControllerInput.SELECT, KeyState.RELEASE)]   

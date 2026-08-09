@@ -73,6 +73,20 @@ enable_or_disable_rgb() {
     fi
 }
 
+# Toggle the RGB LEDs between the configured colour and off, through spruce's own
+# LED system (not the stock ledc.sh, whose shmvar-based brightness is dead here).
+# "Off" is a static 000000 since effect=0 only freezes the animation on its last
+# colour. Reads the left LED's current colour to decide which way to flip.
+toggle_led() {
+    cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
+    hex="$(led_color_hex)"
+    if [ "$cur" = "000000" ]; then
+        rgb_led lrm12 static "$hex" &
+    else
+        rgb_led lrm12 static "000000" &
+    fi
+}
+
 set_volume() {
     new_vol="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
@@ -263,6 +277,10 @@ device_init() {
     device_run_tsps_blobs
     device_run_thermal_process
 
+    # Install the configured switch action into /usr/trimui/scene so the physical
+    # switch follows Settings -> Button Settings -> Switch action.
+    /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
+
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
 
@@ -414,7 +432,24 @@ device_prepare_for_poweroff() {
 }
 
 device_home_button_pressed() {
-    touch /tmp/show_osdd
+    # The Smart Pro S has no Fn keys, only the top Home button (KEY_HOMEPAGE) and
+    # the switch. The stock OSD daemon (trimui_osdd) is absent on this device, so
+    # the old "touch /tmp/show_osdd" was a no-op. Instead run the action the user
+    # picked in Settings -> Button Settings -> Home button action, through the
+    # shared perform_action dispatch (button_actions.sh, sourced by
+    # buttons_watchdog.sh) that the Menu button also uses.
+    action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
+    perform_action "$action"
+
+    # perform_action leaves game-state cleanup to the caller (as the hold-home
+    # path in homebutton_watchdog.sh does). Clear it only for actions that
+    # actually end the game; menu/LED/screenshot leave the game running.
+    case "$action" in
+        "Game Switcher"|"Exit game")
+            rm -f /tmp/cmd_to_run.sh
+            rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+            ;;
+    esac
 }
 
 device_stop_thermal_process(){
@@ -425,17 +460,7 @@ device_stop_thermal_process(){
 }
 
 device_run_thermal_process(){
-    THERMAL_PROFILE_DIR="/mnt/SDCARD/spruce/smartpros/etc/thermal-watchdog"
-    selected="$(get_config_value '.menuOptions."System Settings".customThermals.selected' "Smart")"
-
-    if [ "$selected" = "Adaptive" ]; then
-        python /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/adaptive_fan.py --lower 60 --upper 70 &
-    else
-        # Convert display name to lowercase profile name
-        profile=$(echo "$selected" | tr 'A-Z' 'a-z')
-        echo "$profile" > "$THERMAL_PROFILE_DIR/active_profile"
-        /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog &
-    fi
+    /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
 }
 
 set_backlight() {

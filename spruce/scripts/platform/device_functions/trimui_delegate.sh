@@ -49,6 +49,23 @@
 #   rgb_led r off
 # ---------------------------------------------------------------------------
 
+# Map the RGB LED Settings "defaultLEDcolor" name to a hex string.
+# Shared by the Smart Pro S Home "Toggle LED" action and scene-rgb-led.sh so the
+# colour table lives in one place. Pass an explicit name to override the config.
+led_color_hex() {
+    name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
+    case "$name" in
+        Red)     echo "FF0000" ;;
+        Green)   echo "00FF00" ;;
+        Blue)    echo "0000FF" ;;
+        Yellow)  echo "FFFF00" ;;
+        Cyan)    echo "00FFFF" ;;
+        Magenta) echo "FF00FF" ;;
+        Orange)  echo "FF8800" ;;
+        *)       echo "FFFFFF" ;;
+    esac
+}
+
 rgb_led_trimui() {
 
     # early out if disabled
@@ -193,6 +210,26 @@ compare_current_version_to_version_trimui() {
 check_if_fw_needs_update_trimui() {
     current_fw_is="$(compare_current_version_to_version_trimui "$TARGET_FW_VERSION")"
     [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
+}
+
+# Common startup watchdogs for every TrimUI device, plus the volume sync one.
+# Devices with extra watchdogs (the Brick and its Fn keys) override
+# launch_startup_watchdogs and call this first.
+launch_trimui_startup_watchdogs() {
+    launch_common_startup_watchdogs_v2
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+
+    # Keep spruce's stored volume in sync with whoever last wrote
+    # /tmp/system/set_volume (the stock firmware on the Brick, spruce's own hold
+    # loop on the Smart Pro and Smart Pro S) so the in-UI volume bar tracks the
+    # hardware Volume +/- keys, including while a key is held.
+    /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
+}
+
+launch_startup_watchdogs() {
+    launch_trimui_startup_watchdogs
 }
 
 run_trimui_blobs() {

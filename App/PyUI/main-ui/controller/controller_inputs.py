@@ -6,6 +6,7 @@ class ControllerInput(Enum):
     X = auto()
     Y = auto()
     MENU = auto()
+    HOME = auto()
     DPAD_UP = auto()
     DPAD_DOWN = auto()
     DPAD_LEFT = auto()

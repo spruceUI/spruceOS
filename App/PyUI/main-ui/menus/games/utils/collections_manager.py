@@ -37,7 +37,7 @@ class CollectionsManager:
     @classmethod
     def convert_to_rom_list_entry(cls, rom_info):
         cls._wait_for_init()
-        return RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        return RomsListEntry(rom_info.rom_file_path, rom_info.game_system.system_name)
 
     @classmethod
     def load_entries_as_rom_info(cls, game_list) -> List['RomInfo']:

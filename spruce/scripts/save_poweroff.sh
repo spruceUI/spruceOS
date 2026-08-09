@@ -155,7 +155,7 @@ close_non_emu_cmd_to_run() {
     if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
         kill_current_process
         # remove lastgame flag to prevent loading any App after next boot
-        rm "${FLAGS_DIR}/lastgame.lock"
+        rm -f -- "${FLAGS_DIR}/lastgame.lock"
     fi
 }
 
@@ -180,6 +180,7 @@ stop_problematic_scripts() {
     killall -q -9 idlemon_mm.sh
     killall -q -9 low_power_warning.sh
     killall -q -9 theme_watchdog.sh
+    killall -q -9 volume_sync_watchdog.sh
     killall -q -9 inotifywait
     killall -q -9 inotifywatch
     killall -q -9 getevent

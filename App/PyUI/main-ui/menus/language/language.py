@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+from display.font_purpose import FontPurpose
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
@@ -33,7 +34,7 @@ class Language:
     def _read_from_file(cls, filepath):
         if(filepath is not None):
             try:
-                with open(filepath, 'r') as f:
+                with open(filepath, 'r', encoding='utf-8') as f:
                     cls._data = json.load(f)
                     #PyUiLogger.get_logger().info(f"Languages loaded from {filepath}")
             except FileNotFoundError:
@@ -55,7 +56,7 @@ class Language:
     def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(cls._data, f, indent=4)
             PyUiLogger.get_logger().info(f"Settings saved to {filepath}")
         except Exception as e:
@@ -88,6 +89,172 @@ class Language:
     @classmethod
     def clear(cls):
         cls._data.clear()
+
+    @classmethod
+    def get_fonts_dir(cls):
+        base_dir = os.path.abspath(sys.path[0])
+        parent_dir = os.path.dirname(base_dir)
+        return os.path.join(parent_dir, "fonts")
+
+    @classmethod
+    def get_display_name_for_file(cls, language_file: str) -> str:
+        base_dir = os.path.abspath(sys.path[0])
+        parent_dir = os.path.dirname(base_dir)
+        lang_path = os.path.join(parent_dir, "lang", f"{language_file}.json")
+        try:
+            with open(lang_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data.get("displayName", language_file)
+        except Exception:
+            return language_file
+
+    @classmethod
+    def display_name(cls) -> str:
+        return cls._data.get("displayName", PyUiConfig.get_language() or "English")
+
+    @classmethod
+    def label(cls, key: str, default: str) -> str:
+        return cls._data.get(key, default)
+
+    @classmethod
+    def enum_label(cls, section: str, name: str, default: str | None = None) -> str:
+        section_data = cls._data.get(section)
+        if isinstance(section_data, dict) and name in section_data:
+            return section_data[name]
+        if default is not None:
+            return default
+        return name.replace("_", " ").title()
+
+    @classmethod
+    def boolean_label(cls, value) -> str:
+        if isinstance(value, bool):
+            key = "true" if value else "false"
+        else:
+            key = str(value).lower()
+        booleans = cls._data.get("booleans", {})
+        if key in booleans:
+            return booleans[key]
+        return str(value)
+
+    @classmethod
+    def on_off_label(cls, enabled: bool) -> str:
+        on_off = cls._data.get("onOff", {})
+        key = "on" if enabled else "off"
+        return on_off.get(key, "On" if enabled else "Off")
+
+    @classmethod
+    def view_type_label(cls, view_type) -> str:
+        return cls.enum_label("viewTypes", view_type.name, view_type.name.replace("_", " ").title())
+
+    @classmethod
+    def resize_type_label(cls, resize_type) -> str:
+        return cls.enum_label("resizeTypes", resize_type.name, resize_type.name)
+
+    @classmethod
+    def controller_input_label(cls, controller_input) -> str:
+        return cls.enum_label("controllerInputs", controller_input.name, controller_input.name)
+
+    @classmethod
+    def game_system_sort_mode_label(cls, mode: str) -> str:
+        return cls.enum_label("gameSystemSortModes", mode, mode)
+
+    @classmethod
+    def game_system_label(cls, system_key: str, default: str) -> str:
+        systems = cls._data.get("gameSystems", {})
+        if system_key in systems:
+            return systems[system_key]
+        return default
+
+    @classmethod
+    def menu_option_display(cls, display: str) -> str:
+        displays = cls._data.get("menuOptionDisplays", {})
+        return displays.get(display, display)
+
+    @classmethod
+    def menu_option_description(cls, description: str) -> str:
+        if not description:
+            return description
+        descriptions = cls._data.get("menuOptionDescriptions", {})
+        return descriptions.get(description, description)
+
+    @classmethod
+    def settings_category(cls, category: str) -> str:
+        categories = cls._data.get("settingsCategories", {})
+        return categories.get(category, category)
+
+    @classmethod
+    def menu_option_value(cls, value) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bool):
+            return cls.boolean_label(value)
+        text = str(value)
+        if text in ("True", "False"):
+            return cls.boolean_label(text == "True")
+        values = cls._data.get("menuOptionValues", {})
+        if text in values:
+            return values[text]
+        governor = cls._data.get("governorOptions", {})
+        if text in governor:
+            return governor[text]
+        return text
+
+    @classmethod
+    def select_option_prompt(cls, name: str) -> str:
+        template = cls.label("selectOptionPrompt", "Select a {name}")
+        return template.replace("{name}", name)
+
+    @classmethod
+    def governor_option_label(cls, value: str) -> str:
+        options = cls._data.get("governorOptions", {})
+        return options.get(value, value)
+
+    @classmethod
+    def launch_option_name(cls, name: str) -> str:
+        options = cls._data.get("launchOptions", {})
+        return options.get(name, name)
+
+    @classmethod
+    def screen_type_label(cls, screen_type: str) -> str:
+        return cls.enum_label("screenTypes", screen_type, screen_type)
+
+    @classmethod
+    def _font_config_key_for_purpose(cls, font_purpose: FontPurpose) -> str:
+        match font_purpose:
+            case FontPurpose.GRID_ONE_ROW | FontPurpose.GRID_MULTI_ROW | FontPurpose.LIST_INDEX | FontPurpose.LIST_TOTAL:
+                return "grid"
+            case FontPurpose.SHADOWED | FontPurpose.SHADOWED_BACKDROP | FontPurpose.SHADOWED_SMALL | FontPurpose.SHADOWED_BACKDROP_SMALL:
+                return "shadowed"
+            case _:
+                return "list"
+
+    @classmethod
+    def font_purpose_size_label(cls, font_purpose: FontPurpose) -> str:
+        purposes = cls._data.get("fontPurposeSizes", {})
+        if font_purpose.name in purposes:
+            return purposes[font_purpose.name]
+        size_suffix = cls._data.get("size", "Size")
+        return f"{font_purpose.name} {size_suffix}"
+
+    @classmethod
+    def get_font_for_purpose(cls, font_purpose: FontPurpose):
+        fonts_config = cls._data.get("fonts")
+        if not fonts_config:
+            return None
+
+        filename = fonts_config.get(cls._font_config_key_for_purpose(font_purpose))
+        if not filename:
+            filename = fonts_config.get("default")
+
+        if not filename:
+            return None
+
+        font_path = os.path.join(cls.get_fonts_dir(), filename)
+        if os.path.exists(font_path):
+            return font_path
+
+        PyUiLogger.get_logger().warning(f"Language font not found: {font_path}")
+        return None
 
     @classmethod
     def games(cls):

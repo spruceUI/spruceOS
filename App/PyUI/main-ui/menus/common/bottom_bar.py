@@ -1,6 +1,7 @@
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 
@@ -46,7 +47,7 @@ class BottomBar:
 
         if(Theme.show_bottom_bar_buttons()):
             confirm_text_y = bottom_icons_y - confirm_icon_h//2
-            confirm_text_w, confirm_text_h = Display.render_text(Theme.confirm_text(),
+            confirm_text_w, confirm_text_h = Display.render_text(Language.label("confirmText", Theme.confirm_text()),
                                                                 x_offset,
                                                                 confirm_text_y,
                                                                 Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),
@@ -59,7 +60,7 @@ class BottomBar:
                 back_icon, x_offset, bottom_icons_y, RenderMode.BOTTOM_LEFT_ALIGNED)
             x_offset += padding + back_icon_w 
             back_text_y = bottom_icons_y - back_icon_h//2
-            back_text_w, back_text_h = Display.render_text(Theme.back_text(),
+            back_text_w, back_text_h = Display.render_text(Language.label("backText", Theme.back_text()),
                                                         x_offset,
                                                         back_text_y,
                                                         Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_TITLE),

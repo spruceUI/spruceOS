@@ -72,7 +72,7 @@ class GameSystemSelectMenuPopup:
                 )
                 rom_image_list.append((name_without_ext, img_path))
             
-            BoxArtScraper().download_boxart_batch(game_system.folder_name, rom_image_list)
+            BoxArtScraper().download_boxart_batch(game_system.system_name, rom_image_list)
 
     def run_popup_menu_selection(self, game_system : GameSystem):
         popup_options = []

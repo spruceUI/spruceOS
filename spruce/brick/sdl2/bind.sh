@@ -7,7 +7,7 @@ DST_DIR="/mnt/SDCARD/spruce/brick/sdl2"
 
 
 case "$PLATFORM" in
-	Brick|SmartPro)
+	Brick|SmartPro|BrickPro)
 		SRC_DIR="/usr/trimui/lib"
 
 		# Create destination directory if missing

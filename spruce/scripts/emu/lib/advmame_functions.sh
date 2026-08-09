@@ -31,7 +31,7 @@ run_advmame() {
 
 	cd "$EMU_DIR"
 	case "$PLATFORM" in
-		"SmartPro"|"Brick")
+		"SmartPro"|"Brick"|"BrickPro")
 			[ -f "$EMU_DIR/advmame.log" ] && rm "$EMU_DIR/advmame.log"
 			export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/PortMaster:$LD_LIBRARY_PATH"
 			export SDL_GAMECONTROLLERCONFIG="/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"

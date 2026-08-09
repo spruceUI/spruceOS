@@ -43,12 +43,12 @@ class RomsListManager:
         return (str(Path(rom_file_path).resolve()), game_system_name)
 
     def add_game(self, rom_info: RomInfo):
-        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
 
         if key in self._entries_dict:
             self.remove_game(rom_info)
 
-        new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.folder_name, rom_info.display_name)
+        new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.system_name, rom_info.display_name)
         self._entries.insert(0, new_entry)
         self._entries_dict[key] = new_entry
 
@@ -56,7 +56,7 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def remove_game(self, rom_info: RomInfo):
-        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
         entry = self._entries_dict.pop(key, None)
         if entry:
             self._entries = [e for e in self._entries if self._entry_key(e.rom_file_path, e.game_system_name) != key]
@@ -110,7 +110,7 @@ class RomsListManager:
         return self.rom_info_list
 
     def is_on_list(self, rom_info: RomInfo) -> bool:
-        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.folder_name)
+        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
         return key in self._entries_dict
 
     def load_entries_as_rom_info(self) -> List[RomInfo]:

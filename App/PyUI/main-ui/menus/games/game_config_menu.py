@@ -85,7 +85,7 @@ class GameConfigMenu:
                     selected_index = 0
             elif(ControllerInput.A == input):
                 #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-                selected_index = self.get_selected_index(f"Select a {entry_name}", all_options)
+                selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
 
             PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -137,14 +137,20 @@ class GameConfigMenu:
 
     def delete_rom(self, input_value):
         if(ControllerInput.A == input_value):
-            if UserPrompt.prompt_yes_no(Language.delete_rom(), [f"Would you like to permanently delete", f"{self.game.display_name}?"]):
+            if UserPrompt.prompt_yes_no(Language.delete_rom(), [
+                Language.label("deleteRomPrompt1", "Would you like to permanently delete"),
+                f"{self.game.display_name}?",
+            ]):
                 path = self.game.rom_file_path
                 if os.path.isdir(path):
                     shutil.rmtree(path)
                 else:
                     os.remove(path)
                 self.perform_boxart_deletion()
-                Display.display_message(f"{path} deleted.",2000)
+                Display.display_message(
+                    Language.label("deleteRomDeleted", "{path} deleted.").replace("{path}", path),
+                    2000,
+                )
                 FavoritesManager.remove_favorite(self.game)
                 RecentsManager.remove_game(self.game)
                 CollectionsManager.remove_game_from_collections(self.game)
@@ -161,9 +167,15 @@ class GameConfigMenu:
 
     def delete_boxart(self, input_value):
         if(ControllerInput.A == input_value):
-            if UserPrompt.prompt_yes_no(Language.delete_boxart(), [f"Would you like to permanently delete the boxart for", f"{self.game.display_name}?"]):
+            if UserPrompt.prompt_yes_no(Language.delete_boxart(), [
+                Language.label("deleteBoxartPrompt1", "Would you like to permanently delete the boxart for"),
+                f"{self.game.display_name}?",
+            ]):
                 self.perform_boxart_deletion()
-                Display.display_message(f"Boxart for {self.game.display_name} deleted.",2000)
+                Display.display_message(
+                    Language.label("deleteBoxartDeleted", "Boxart for {name} deleted.").replace("{name}", self.game.display_name),
+                    2000,
+                )
 
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
@@ -182,7 +194,7 @@ class GameConfigMenu:
                     if(supported_device):
                         config_list.append(
                         GridOrListEntry(
-                            primary_text=config_option.get('name'),
+                            primary_text=Language.launch_option_name(config_option.get('name')),
                             image_path=None,
                             image_path_selected=None,
                             description=None,
@@ -204,16 +216,17 @@ class GameConfigMenu:
                     supported_device = not devices or Device.get_device().get_device_name() in devices
                     if(supported_device):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
-                        display_name = option.get('display')
+                        display_name = Language.menu_option_display(option.get('display'))
                         contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
                         if(contains_override):
                             display_name = display_name + "*"
                         
                         overridable_entries.append(name)
+                        localized_value = Language.menu_option_value(effective_value)
                         config_list.append(
                                         GridOrListEntry(
                                         primary_text=display_name,
-                                        value_text="<    " + effective_value + "    >",
+                                        value_text="<    " + localized_value + "    >",
                                         image_path=None,
                                         image_path_selected=None,
                                         description=None,
@@ -261,7 +274,7 @@ class GameConfigMenu:
             if(view is None):        
                 view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text=self.game_system.display_name + " Configuration", 
+                    top_bar_text=Language.label("gameConfigurationTitle", "{system} Configuration").replace("{system}", self.game_system.display_name),
                     options=config_list,
                     selected_index=selected.get_index())
             else:

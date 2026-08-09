@@ -10,6 +10,7 @@ from devices.wifi.wifi_status import WifiStatus
 from display.font_purpose import FontPurpose
 from display.resize_type import ResizeType
 from menus.games.utils.daijisho_theme_index import DaijishoThemeIndex
+from menus.language.language import Language
 from themes.theme_patcher import ThemePatcher
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -469,6 +470,10 @@ class Theme():
 
     @classmethod
     def get_font(cls, font_purpose : FontPurpose):
+        language_font = Language.get_font_for_purpose(font_purpose)
+        if language_font:
+            return language_font
+
         try:
             match font_purpose:
                 case FontPurpose.TOP_BAR_TEXT:
@@ -510,6 +515,9 @@ class Theme():
 
     @classmethod
     def get_fallback_font(cls):
+        language_font = Language.get_font_for_purpose(FontPurpose.LIST)
+        if language_font:
+            return language_font
         base_dir = os.path.abspath(sys.path[0])
         return os.path.join(base_dir, "themes", "font.ttf")
 
@@ -1684,3 +1692,40 @@ class Theme():
     @classmethod
     def get_overlay_for_img(cls, img_path):
         return cls.get_relative_img(img_path, "overlay")
+
+    @classmethod
+    def get_screensaver_widgets(cls):
+        return cls._data.get("screensaver", {}).get("widgets", [
+            {"type": "clock", "x": 0.5, "y": 0.35, "fontSize": 64, "color": "#FFFFFF"},
+            {"type": "date", "x": 0.5, "y": 0.55, "fontSize": 24, "color": "#AAAAAA"},
+            {"type": "battery", "x": 0.5, "y": 0.70, "fontSize": 20, "color": "#88CC88"},
+        ])
+
+    @classmethod
+    def get_screensaver_bg_color(cls):
+        return cls._data.get("screensaver", {}).get("bgColor", "#000000")
+
+    @classmethod
+    def get_screensaver_bg_image(cls):
+        return cls._data.get("screensaver", {}).get("bgImage", "")
+
+    @classmethod
+    def get_screensaver_overlay_opacity(cls):
+        return cls._data.get("screensaver", {}).get("overlayOpacity", 0.3)
+
+    @classmethod
+    def get_screensaver_overlay_color(cls):
+        return cls._data.get("screensaver", {}).get("overlayColor", "#000000")
+
+    @classmethod
+    def get_screensaver_blur(cls):
+        return cls._data.get("screensaver", {}).get("blur", 0)
+
+    @classmethod
+    def get_screensaver_timeout_sec(cls):
+        return cls._data.get("screensaver", {}).get("screensaverTimeoutSec", 60)
+
+    @classmethod
+    def get_screensaver_boxart_interval_sec(cls):
+        interval = cls._data.get("screensaver", {}).get("boxartIntervalSec", 15)
+        return max(1, int(interval))

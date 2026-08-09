@@ -26,14 +26,16 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
-    insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
-    ifconfig lo up
-    /customer/app/axp_test wifion
-    sleep 2
-    ifconfig wlan0 up
-    wpa_supplicant -B -D nl80211 -i wlan0 -c /mnt/SDCARD/Saves/spruce/wpa_supplicant.conf
-    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-    adbd &
+    if [ "$(jq -r '.wifi // 0' "/mnt/SDCARD/Saves/mini-flip-system.json")" -eq 1 ]; then
+        insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
+        ifconfig lo up
+        /customer/app/axp_test wifion
+        sleep 2
+        ifconfig wlan0 up
+        wpa_supplicant -B -D nl80211 -i wlan0 -c /mnt/SDCARD/Saves/spruce/wpa_supplicant.conf
+        udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+        adbd &
+    fi
 ) &
 
 cd /mnt/SDCARD/spruce/scripts

@@ -18,6 +18,7 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
       *"sun8i"*) export PLATFORM="A30" ;;
       *"TG5040"*)	export PLATFORM="SmartPro" ;;
       *"TG3040"*)	export PLATFORM="Brick"	;;
+      *"TG4040"*)	export PLATFORM="BrickPro"	;;
       *"TG5050"*)	export PLATFORM="SmartProS"	;;
       *"0xd05"*) export PLATFORM="Flip" ;;
       *) export PLATFORM="MiyooMini" ;;
@@ -28,7 +29,7 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
       Flip|SmartProS)
           export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
           ;;
-      Brick|SmartPro)
+      Brick|SmartPro|BrickPro)
           export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
           ;;
   esac

@@ -1,4 +1,5 @@
 import json
+import shlex
 import subprocess
 
 from utils.logger import PyUiLogger
@@ -57,14 +58,14 @@ class CfwSystemConfig():
 
             option['selected'] = selected_value
 
+            cls.save_config()
             change_cmd = option.get('changeCmd')
             if change_cmd:
                 try:
-                    subprocess.run(change_cmd, shell=True, check=True)
+                    command = shlex.split(change_cmd)
+                    subprocess.run(command + [str(selected_value)], check=True)
                 except Exception as e:
                     PyUiLogger.get_logger().error(f"Command failed: {change_cmd} -> {e}")
-
-            cls.save_config()
             cls.reload_config()
         else:
             # Optional: log or raise if not found

@@ -21,7 +21,7 @@ class CollectionsAddMenu():
         CollectionsManager.add_game_to_collection(collection_name, self.rom_info)
 
     def create_new_collection_and_add_to(self):
-        collection_name = OnScreenKeyboard().get_input("Collection Name:")
+        collection_name = OnScreenKeyboard().get_input(Language.label("collectionName", "Collection Name:"))
         if(collection_name is not None and collection_name != ""):
             self.add_to_collection(collection_name)
 
@@ -43,7 +43,7 @@ class CollectionsAddMenu():
         for collection_name in collections_containing:
             option_list.append(
                     GridOrListEntry(
-                            primary_text="Add to " + collection_name,
+                            primary_text=Language.add_to() + " " + collection_name,
                             value_text="",
                             image_path=None,
                             image_path_selected=None,

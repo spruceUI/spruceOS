@@ -1,6 +1,7 @@
 
 
 from controller.controller_inputs import ControllerInput
+from menus.settings.screensaver_settings_menu import ScreenSaverSettingsMenu
 from menus.settings.theme.theme_settings_fonts import ThemeSettingsFonts
 from menus.settings.theme.theme_settings_game_select_menu import ThemeSettingsGameSelectMenu
 from menus.settings.theme.theme_settings_grid_view import ThemeSettingsGridView
@@ -43,6 +44,9 @@ class ThemeSettingsMenu():
         if (input == ControllerInput.A):
             ThemeSettingsTopAndBottomBar().show_theme_options_menu()
 
+    def launch_screensaver_settings(self,input):
+        if(ControllerInput.A == input):
+            ScreenSaverSettingsMenu().show_menu()
 
     def build_options_list(self):
         option_list = []
@@ -120,6 +124,18 @@ class ThemeSettingsMenu():
             )
         )
 
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.get("screensaver", "Screensaver"),
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_screensaver_settings
+                )
+        )
+
+
         return option_list
 
     def show_theme_options_menu(self):
@@ -132,7 +148,7 @@ class ThemeSettingsMenu():
             if (list_view is None or self.theme_changed):
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="Settings",
+                    top_bar_text=Language.settings(),
                     options=option_list,
                     selected_index=selected.get_index())
                 self.theme_changed = False

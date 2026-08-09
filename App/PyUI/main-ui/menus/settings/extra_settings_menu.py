@@ -1,6 +1,7 @@
 
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
@@ -16,7 +17,6 @@ from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from utils.cfw_system_config import CfwSystemConfig
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -68,10 +68,12 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if (lang is not None):
                 PyUiConfig.set_language(lang)
                 Language.load()
+                Display.clear_text_cache()
 
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):
             GameArtDisplaySettingsMenu().show_menu()
+
     def resize_boxart(self, input):
         if (ControllerInput.A == input):
             BoxArtResizer.patch_boxart()
@@ -226,7 +228,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             if(contains_entry_for_device and not self.is_excluded_setting(category)):
                 option_list.append(
                         GridOrListEntry(
-                                primary_text=category,
+                                primary_text=Language.settings_category(category),
                                 value_text=None,
                                 image_path=None,
                                 image_path_selected=None,
