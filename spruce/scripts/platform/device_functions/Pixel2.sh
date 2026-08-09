@@ -347,11 +347,11 @@ brightness_up() {
 }
 
 turn_off_screen() {
-    swaymsg "output * power off"
+    echo 1 > /sys/class/backlight/backlight/bl_power
 }
 
 turn_on_screen() {
-    swaymsg "output * power on"
+    echo 0 > /sys/class/backlight/backlight/bl_power
 }
 
 set_event_arg() {
