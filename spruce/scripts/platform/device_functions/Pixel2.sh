@@ -25,7 +25,7 @@ get_config_path() {
 }
 
 get_python_path() {
-    echo "/mnt/SDCARD/spruce/pixel2/bin/python"
+    echo "/usr/bin/python"
 }
 
 setup_for_retroarch(){
@@ -49,7 +49,13 @@ get_spruce_ra_cfg_location() {
 }
 
 set_loading_screen() {
-    THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    else
+        THEME_NAME="SPRUCE"
+    fi
+
     LOADING_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_merged.png"
 
     if [ ! -f "$LOADING_IMG" ]; then
@@ -71,7 +77,12 @@ set_loading_screen() {
         magick composite -gravity center "$LAST_IMG" "$BG_IMG" "$LOADING_IMG"
     fi
 
-    /mnt/SDCARD/spruce/pixel2/bin/awww img "$LOADING_IMG" --transition-type none --no-resize
+    # Wait for sway socket to be available
+    while [ ! -S /var/run/0-runtime-dir/sway-ipc.0.sock ]; do
+        true
+    done
+
+    swaymsg output "*" bg "$LOADING_IMG" fill
 }
 
 disable_swap() {
@@ -83,14 +94,9 @@ disable_swap() {
 }
 
 device_init() {
-    touch /mnt/SDCARD/spruce/pixel2/bin/MainUI
-    mount --bind /mnt/SDCARD/spruce/pixel2/bin/python /mnt/SDCARD/spruce/pixel2/bin/MainUI
     sync_volume_level
-
     disable_swap
-
-    # Loading screen daemon
-    /mnt/SDCARD/spruce/pixel2/bin/awww-daemon --no-cache & set_loading_screen
+    set_loading_screen &
 }
 
 set_event_arg_for_idlemon() {
@@ -102,13 +108,15 @@ check_if_fw_needs_update() {
 }
 
 enable_or_disable_rgb() {
-    log_message "rgb led not supported on this" -v
+    killall -q cava 2>/dev/null
+    killall -q leds_manager.sh 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
 }
 
 prepare_for_pyui_launch(){
     disable_dpad_mod
     set_overclock
-    echo "performance" > /sys/class/devfreq/dmc/governor
+    echo "performance" > "$GPU_GOVENOR_DIR/governor"
     (
         # SDL2 takes forever, let it initialize before going to powersave
         sleep 5
@@ -123,8 +131,10 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "true"
+    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
@@ -134,6 +144,15 @@ device_get_charging_status() {
 
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
+}
+
+device_wifi_power_on() {
+    rfkill unblock wifi
+    sleep 1
+}
+
+device_wifi_power_off() {
+    rfkill block wifi
 }
 
 sync_volume_level() {
@@ -203,10 +222,20 @@ map_mainui_volume_to_system_value() {
     esac
 }
 
+restore_audio() {
+    AUDIO_SINK=$(pactl list sinks short | grep rk817 | cut -c 0-2)
+    pactl suspend-sink "$AUDIO_SINK" 1
+
+    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
+}
+
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
     turn_off_screen
+
+    amixer -c0 sset "Playback Path" "OFF"
+    pkill gpiomon
 
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -217,7 +246,11 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    backlight=$(current_backlight)
+    set_backlight $backlight
     turn_on_screen
+    restore_audio
+
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
@@ -240,7 +273,7 @@ device_wifi_is_available() {
 
 take_screenshot() {
     screenshot_path="$1"
-    /mnt/SDCARD/spruce/pixel2/bin/grim -o DSI-1 "${screenshot_path}"
+    grim -o DSI-1 "${screenshot_path}"
 }
 
 vibrate() {
@@ -267,7 +300,7 @@ vibrate() {
             "Strong") intensity=0xFFFF ;;
     esac
 
-    /mnt/SDCARD/spruce/pixel2/bin/rumble $EVENT_PATH_READ_INPUTS_SPRUCE $intensity $duration
+    rumble $EVENT_PATH_READ_INPUTS_SPRUCE $intensity $duration
 }
 
 current_backlight() {
@@ -327,7 +360,7 @@ set_event_arg() {
 
 send_menu_button_to_retroarch() {
     if pgrep "ra64.pixel2" >/dev/null; then
-        echo "MENU_TOGGLE" | /mnt/SDCARD/spruce/pixel2/bin/netcat -u -w0.1 127.0.0.1 55355
+        echo "MENU_TOGGLE" | socat -t 0.1 - udp:127.0.0.1:55355
     fi
 }
 

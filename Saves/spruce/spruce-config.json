@@ -529,6 +529,19 @@
                 "selected": "http"
             }
         },
+        "LEDs Settings": {
+            "LEDsMode": {
+                "display": "LEDs mode",
+                "devices": ["GKD_PIXEL2"],
+                "description": "reload UI to apply",
+                "options": [
+                    "Off",
+                    "Battery",
+                    "Audio"
+                ],
+                "selected": "Battery"
+            }
+        },
         "RGB LED Settings": {
             "disableLEDs": {
                 "display": "Disable RGB LEDs in all contexts",

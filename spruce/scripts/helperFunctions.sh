@@ -1107,8 +1107,9 @@ network_is_connected() {
     CHECK_ETH="${1:-false}" # Defaults to false if no argument
 
 	iface_up=false
+    wifi_iface=$(ls /sys/class/net/ | grep wlan | head -1)
 
-    if ifconfig wlan0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+    if ifconfig "$wifi_iface" | grep -qE "inet |inet6 " >/dev/null 2>&1; then
         iface_up=true
     fi
 

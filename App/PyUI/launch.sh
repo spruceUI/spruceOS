@@ -214,7 +214,7 @@ case "$PLATFORM" in
         cd /usr/bin/
         export PYSDL2_DLL_PATH="/usr/lib"
 
-        cmd="/mnt/SDCARD/spruce/pixel2/bin/MainUI \
+        cmd="/usr/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
             -device GKD_PIXEL2 \
             -logDir /mnt/SDCARD/Saves/spruce \

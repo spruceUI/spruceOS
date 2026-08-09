@@ -14,10 +14,15 @@ if [ -n "$WPA_SUPPLICANT_FILE" ] ; then
 
     # Bring up interface to avoid issues with MainUI
     ifconfig wlan0 up
-elif [ -d /storage/.cache/connman/ ] ; then # Connman
-    rm -r /storage/.cache/connman/[!settings]*
-    systemctl restart connman
-    connmanctl enable wifi
+elif [ -d /storage/.config/NetworkManager/ ] ; then # NetworkManager
+    rfkill block wifi
+
+    NUUID=$(nmcli -t -f UUID,DEVICE connection show | grep wlan | cut -d : -f 1)
+    echo "$NUUID" | while IFS= read -r line ; do
+        nmcli connection delete uuid "$line"
+    done
+
+    rfkill unblock wifi
 fi
 
 log_message "Wifi: All networks forgotten by request of user."
