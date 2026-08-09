@@ -72,28 +72,19 @@ class RomsMenuCommon(ABC):
         raw_rom_list = CollectionsManager.get_games_in_collection(collection)
         
         rom_list = []
+        get_image_path_fn = get_rom_select_options_builder().get_image_path
 
         for rom_info in raw_rom_list:
             rom_file_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
-            img_path = self._get_image_path(rom_info)
-            rom_list.append(
-                GridOrListEntry(
-                    primary_text=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
-                    image_path=img_path,
-                    image_path_selected=img_path,
-                    description=collection, 
-                    icon=None,
-                    value=rom_info)
-            )
             rom_list.append(
                     RomGridOrListEntry(
                             display_name=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
-                            folder_name="Collections",
+                            folder_name=collection,
                             game_system=rom_info.game_system,
                             rom_file_path=rom_info.rom_file_path,
                             game_entry=None,
                             prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
-                            get_image_path_fn=lambda a, b, c: img_path,
+                            get_image_path_fn=get_image_path_fn,
                             get_favorite_icon=None
                     )
             )
