@@ -156,7 +156,13 @@ device_wifi_power_off() {
 }
 
 sync_volume_level() {
-    VALUE=$(get_volume_level)
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        VALUE=$(get_volume_level)
+    else
+        VALUE=10
+    fi
+
     set_volume "$VALUE" false
 }
 
