@@ -4,7 +4,7 @@
 
 # spruceOS 
 
-  - SpruceOS is a community software package intended to help you get the most out of your Miyoo and TrimUI devices.
+  - SpruceOS is a community software package intended to help you get the most out of your Miyoo, TrimUI and Anbernic RG XX devices.
   - Our mission is to provide a balanced user experience for both brand new and well-seasoned emulation enthusiasts alike: sane and well-optimized defaults for those who don't want to tweak settings, but immensely deep customization options for those that do.
   - Spruce is intended to be sleek, intuitive, efficient, and user friendly. We hope that you enjoy it.
 
