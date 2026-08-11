@@ -10,6 +10,7 @@ fi
 
 7zr a -spf2 "$output7z" \
             -i'!/mnt/SDCARD/Saves/*.json' \
+            -i'!/mnt/SDCARD/Saves/cache/*.json' \
             -i'!/mnt/SDCARD/Saves/spruce/*.log' \
             -i'!/mnt/SDCARD/Saves/spruce/*.json' \
             -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*' \
