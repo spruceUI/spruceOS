@@ -1,5 +1,6 @@
 import queue
 import threading
+import time
 
 from utils.logger import PyUiLogger
 
@@ -21,6 +22,11 @@ class RomListVerifier:
     turns out to be wrong the cache is corrected and the generation counter moves,
     which the rom menus watch so they can rebuild themselves.
     """
+
+    # Opening the game menu asks for a rom count for every system, so a whole
+    # card's worth of folders can end up queued at once. Pause between them so
+    # the sweep doesn't sit on the card while the menu is loading box art.
+    PAUSE_BETWEEN_CHECKS_SECONDS = 0.05
 
     _queue = queue.Queue()
     _worker = None
@@ -79,3 +85,7 @@ class RomListVerifier:
 
             if changed:
                 PyUiLogger.get_logger().info(f"Rom list was out of date, refreshed [{key}]")
+
+            # Counter is already updated, so this costs the user nothing -- it
+            # only spaces out the next folder we go and read.
+            time.sleep(cls.PAUSE_BETWEEN_CHECKS_SECONDS)

@@ -117,7 +117,14 @@ class RomUtils:
 
 
     def _scan_directory(self, game_system: GameSystem, dir_to_search):
-        """Read a single directory and work out which entries count as games."""
+        """
+        Read a single directory and work out which entries count as games.
+
+        Uses scandir rather than listdir so the file/directory answer comes back
+        as part of the directory read instead of costing a separate lookup per
+        entry. On a folder holding a few thousand games that is the difference
+        between one read and several thousand, which matters on these devices.
+        """
         config = game_system.game_system_config
         valid_suffix_set = {s.lower() for s in config.get_extlist()}
         ignore_set = set(config.get_ignore_list())
@@ -127,33 +134,40 @@ class RomUtils:
         valid_folders = []
 
         try:
-            entries = os.listdir(dir_to_search)
+            with os.scandir(dir_to_search) as entries:
+                for entry in entries:
+                    name = entry.name
+
+                    if name.startswith('.'):
+                        continue
+
+                    try:
+                        # follow_symlinks stays on to match the os.path.isdir this
+                        # replaced, so symlinked rom folders keep working
+                        is_dir = entry.is_dir()
+                    except OSError:
+                        is_dir = False
+
+                    if is_dir:
+                        if not scan_subfolders:
+                            continue
+                        if name == "Imgs":
+                            continue
+
+                        roms_sub, folders_sub = self.get_roms(game_system, entry.path)
+
+                        if roms_sub or folders_sub:
+                            valid_folders.append(entry.path)
+
+                    else:
+                        dot = name.rfind('.')
+                        suffix = name[dot:].lower() if dot != -1 else ''
+
+                        if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
+                            if name not in ignore_set:
+                                valid_files.append(entry.path)
         except OSError:
             return valid_files, valid_folders
-
-        for name in entries:
-            if name.startswith('.'):
-                continue
-
-            full_path = os.path.join(dir_to_search, name)
-
-            if os.path.isdir(full_path):
-                if not scan_subfolders:
-                    continue
-                if name == "Imgs":
-                    continue
-
-                roms_sub, folders_sub = self.get_roms(game_system, full_path)
-
-                if roms_sub or folders_sub:
-                    valid_folders.append(full_path)
-
-            else:
-                suffix = Path(name).suffix.lower()
-
-                if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
-                    if name not in ignore_set:
-                        valid_files.append(full_path)
 
         return valid_files, valid_folders
 
@@ -209,7 +223,11 @@ class RomUtils:
 
         # Compare against the listing we served, whatever date it was stored
         # under -- a date that shifted underneath us is not itself a change.
-        if cached is not None and cached[1] == files and cached[2] == folders:
+        # Compared as sets because the order a directory reads back in can change
+        # on its own, and the menu sorts the list anyway.
+        if (cached is not None
+                and set(cached[1]) == set(files)
+                and set(cached[2]) == set(folders)):
             if cached[0] != dir_mtime:
                 self._write_cache(dir_to_search, dir_mtime, files, folders)
             return False
