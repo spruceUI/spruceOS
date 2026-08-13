@@ -59,7 +59,7 @@ class MiDispLcdParam(ctypes.Structure):
 
 
 class MiDispSyncInfo(ctypes.Structure):
-    """MI_DISP_SyncInfo_t. Read and written back untouched; only the size matters."""
+    """MI_DISP_SyncInfo_t. Read back and sent again untouched; only the size matters."""
     _fields_ = [
         ("bSynm", ctypes.c_uint8),
         ("bIop", ctypes.c_uint8),
@@ -385,6 +385,7 @@ class MiyooMiniCommon(MiyooDevice):
 
     _mi_disp_lib = None
     _mi_disp_lib_tried = False
+    _mi_sys_lib = None
 
     def _load_mi_disp(self):
         """
@@ -404,7 +405,9 @@ class MiyooMiniCommon(MiyooDevice):
         # startup script already puts on LD_LIBRARY_PATH.
         for dependency in ("libmi_sys.so", "libmi_common.so", "libmi_panel.so"):
             try:
-                ctypes.CDLL(dependency, mode=ctypes.RTLD_GLOBAL)
+                handle = ctypes.CDLL(dependency, mode=ctypes.RTLD_GLOBAL)
+                if dependency == "libmi_sys.so":
+                    MiyooMiniCommon._mi_sys_lib = handle
                 PyUiLogger.get_logger().info(f"Loaded MI dependency {dependency}")
             except Exception as e:
                 PyUiLogger.get_logger().info(f"MI dependency {dependency} not loaded: {e}")
@@ -420,6 +423,173 @@ class MiyooMiniCommon(MiyooDevice):
         PyUiLogger.get_logger().warning("No MI display library available")
         return None
 
+    # Observed on the V4 the first time the params are read back. Only used if
+    # the read fails, so that a bad read costs the settings rather than the
+    # picture.
+    DEFAULT_CSC_MATRIX = 3
+    DEFAULT_SHARPNESS = 0
+
+    _last_csc = None
+    _lcd_output_ready = None
+
+    def _read_lcd_param(self, lib, params):
+        try:
+            return lib.MI_DISP_GetLcdParam(0, ctypes.byref(params))
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"MI_DISP_GetLcdParam unavailable: {e}")
+            return -1
+
+    def _prepare_lcd_output(self):
+        """
+        Get the display device into a state where the lcd params can be read
+        and written, once per process and as early as we can manage.
+
+        Getting there disturbs the picture, which is why it matters that this
+        happens here rather than on every apply. It used to run on all four of
+        the settings restored at startup and again on every change from the
+        menu. That is where the fuzzy static during boot came from, the flash
+        in the menus whenever a setting was applied, and -- since the
+        screensaver only redraws once a minute -- a single garbage frame left
+        sitting on screen underneath the clock rather than being replaced.
+
+        Deliberately left where it is, on the first apply, rather than moved
+        into device init to get it done before SDL takes the display. That was
+        tried: the settings applied, but the device hung on shutdown, with the
+        screen stuck on the fuzz and needing the battery pulled. Moving it back
+        after SDL is up shut down cleanly again. Not chased further than that,
+        since with the device handed back below there is no longer a reason to
+        want it earlier.
+
+        Escalates rather than reconfiguring up front, since the cheapest step
+        that works is the one that disturbs least. Only the last of these
+        touches the display at all:
+
+          1. Just read the params. If the device is already up, nothing else
+             is needed and nothing gets touched.
+          2. MI_SYS_Init first. Every MI module wants this before it will
+             answer, and nothing in PyUI had called it -- SDL's mmiyoo backend
+             does its own, but through its own handle. This is the step worth
+             hoping for: it costs nothing on screen.
+          3. MI_DISP_Enable on its own.
+          4. MI_DISP_SetPubAttr as an lcd output, then enable. This is the
+             step the V4 actually needs, and the only one that touches the
+             display. Note it runs after step 3, which matters: on its own
+             MI_DISP_GetPubAttr comes back rc=31 and the struct would go out
+             zeroed, taking the panel timings with it, but following an enable
+             it returns rc=0 and the timings are read back and sent again
+             untouched.
+        """
+        if MiyooMiniCommon._lcd_output_ready is not None:
+            return MiyooMiniCommon._lcd_output_ready
+
+        MiyooMiniCommon._lcd_output_ready = False
+
+        lib = self._load_mi_disp()
+        if lib is None:
+            return False
+
+        params = MiDispLcdParam()
+
+        rc = self._read_lcd_param(lib, params)
+        if rc == 0:
+            PyUiLogger.get_logger().info("MI display lcd params readable as is")
+            MiyooMiniCommon._lcd_output_ready = True
+            return True
+
+        if self._mi_sys_lib is not None:
+            try:
+                rc_sys = self._mi_sys_lib.MI_SYS_Init()
+                rc = self._read_lcd_param(lib, params)
+                PyUiLogger.get_logger().info(
+                    f"MI_SYS_Init rc={rc_sys}, GetLcdParam rc={rc}")
+                if rc == 0:
+                    MiyooMiniCommon._lcd_output_ready = True
+                    return True
+            except Exception as e:
+                PyUiLogger.get_logger().info(f"MI_SYS_Init unavailable: {e}")
+
+        try:
+            rc_enable = lib.MI_DISP_Enable(0)
+            rc = self._read_lcd_param(lib, params)
+            PyUiLogger.get_logger().info(
+                f"MI_DISP_Enable rc={rc_enable}, GetLcdParam rc={rc}")
+            if rc == 0:
+                MiyooMiniCommon._lcd_output_ready = True
+                return True
+
+            attrs = MiDispPubAttr()
+            rc_get = lib.MI_DISP_GetPubAttr(0, ctypes.byref(attrs))
+            attrs.eIntfType = E_MI_DISP_INTF_LCD
+            attrs.eIntfSync = E_MI_DISP_OUTPUT_USER
+            rc_set = lib.MI_DISP_SetPubAttr(0, ctypes.byref(attrs))
+            rc_enable = lib.MI_DISP_Enable(0)
+            rc = self._read_lcd_param(lib, params)
+            PyUiLogger.get_logger().info(
+                f"MI_DISP GetPubAttr rc={rc_get} SetPubAttr rc={rc_set} "
+                f"Enable rc={rc_enable}, GetLcdParam rc={rc}")
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not enable MI display device: {e}")
+            return False
+
+        MiyooMiniCommon._lcd_output_ready = rc == 0
+        if not MiyooMiniCommon._lcd_output_ready:
+            PyUiLogger.get_logger().warning(
+                "MI display lcd params unreadable, screen settings will not apply")
+            return False
+
+        self._release_display_if_params_survive(lib, params)
+        return True
+
+    def _release_display_if_params_survive(self, lib, params):
+        """
+        Hand the display device back if the lcd params can still be reached
+        without it.
+
+        Stock never has this device enabled. The bug report dump has DevStatus
+        0 with no channels enabled, and everything worked that way: SDL's
+        mmiyoo backend drives the panel through fb0 and gfx and leaves disp
+        alone. Enabling it is a change that outlives the call -- it switches on
+        a layer underneath an alpha blended osd (mi_fb0 reports ARGB8888 with
+        Enable Alpha Blend=1) with nothing feeding it, so it scans out whatever
+        was in that memory. That is the fuzz, and it is why the screensaver
+        still showed it a minute after the one and only reconfigure.
+
+        So put it back if we can. If the params can still be read and written
+        with the device disabled then nothing was gained by holding it enabled,
+        and the picture is left the way stock has it.
+
+        Both directions get tested, not just the read: writing is what actually
+        applies a setting, and it is the one that has to keep working. The
+        write puts back exactly what was just read, so it changes nothing.
+        """
+        try:
+            rc_disable = lib.MI_DISP_Disable(0)
+            rc = self._read_lcd_param(lib, params)
+            rc_write = lib.MI_DISP_SetLcdParam(0, ctypes.byref(params)) if rc == 0 else -1
+        except Exception as e:
+            PyUiLogger.get_logger().info(f"MI_DISP_Disable unavailable: {e}")
+            return
+
+        PyUiLogger.get_logger().info(
+            f"MI_DISP_Disable rc={rc_disable}, GetLcdParam rc={rc}, "
+            f"SetLcdParam rc={rc_write}")
+
+        if rc == 0 and rc_write == 0:
+            PyUiLogger.get_logger().info(
+                "MI display params still reachable disabled, leaving it that way")
+            return
+
+        # Needed after all. Put it back and carry on, at the cost of the layer
+        # underneath being whatever it is.
+        try:
+            rc_enable = lib.MI_DISP_Enable(0)
+            rc = self._read_lcd_param(lib, params)
+            PyUiLogger.get_logger().info(
+                f"MI display params need it enabled, re-enabled rc={rc_enable}, "
+                f"GetLcdParam rc={rc}")
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not re-enable MI display device: {e}")
+
     def _apply_lcd_csc(self, luma, contrast, hue, saturation):
         """
         Drive brightness, contrast, hue and saturation through the LCD output's
@@ -428,38 +598,37 @@ class MiyooMiniCommon(MiyooDevice):
         This is a different block from the one the proc 'csc' command reaches.
         That one sits on the video path and does nothing to the menu, which is
         why every attempt through it failed no matter which matrix was used.
-        This one is only reachable through the MI library, and only once the
-        device has been configured as an lcd output and enabled.
+        This one is only reachable through the MI library, and only once
+        _prepare_lcd_output has had the device up.
+
+        Nothing below that line touches how the display is configured. Writing
+        the csc coefficients on their own is not what disturbs the picture;
+        reconfiguring the output is, so that is done once and not from here.
 
         All four values are 0-100. Luma and contrast keep a floor so the panel
         cannot be driven to something unreadable from the menu.
         """
+        if not self._prepare_lcd_output():
+            return False
+
         lib = self._load_mi_disp()
         if lib is None:
             return False
 
-        # GetLcdParam on its own comes back rc=31 with an empty struct: the device
-        # has to be configured as an lcd output and enabled first. Koriki does the
-        # same three calls before touching the params.
-        try:
-            attrs = MiDispPubAttr()
-            rc = lib.MI_DISP_GetPubAttr(0, ctypes.byref(attrs))
-            attrs.eIntfType = E_MI_DISP_INTF_LCD
-            attrs.eIntfSync = E_MI_DISP_OUTPUT_USER
-            rc_set = lib.MI_DISP_SetPubAttr(0, ctypes.byref(attrs))
-            rc_enable = lib.MI_DISP_Enable(0)
-            PyUiLogger.get_logger().info(
-                f"MI_DISP GetPubAttr rc={rc} SetPubAttr rc={rc_set} Enable rc={rc_enable}")
-        except Exception as e:
-            PyUiLogger.get_logger().warning(f"Could not enable MI display device: {e}")
-            return False
+        wanted = (
+            self._clamp_csc(luma, floor=10),
+            self._clamp_csc(contrast, floor=10),
+            self._clamp_csc(hue),
+            self._clamp_csc(saturation),
+        )
+
+        # Every setting restored at startup calls through here, so without this
+        # the same four values get written three times over on every boot.
+        if MiyooMiniCommon._last_csc == wanted:
+            return True
 
         params = MiDispLcdParam()
-        try:
-            rc = lib.MI_DISP_GetLcdParam(0, ctypes.byref(params))
-        except Exception as e:
-            PyUiLogger.get_logger().warning(f"MI_DISP_GetLcdParam unavailable: {e}")
-            return False
+        rc = self._read_lcd_param(lib, params)
 
         PyUiLogger.get_logger().info(
             f"MI_DISP_GetLcdParam rc={rc} matrix={params.stCsc.eCscMatrix} "
@@ -468,12 +637,19 @@ class MiyooMiniCommon(MiyooDevice):
             f"sharpness={params.u32Sharpness}")
 
         if rc != 0:
-            return False
+            # The read came back empty, so the rest of the struct is zeroed and
+            # writing it as is would clear the matrix along with everything else.
+            # Fill in what the panel reported when the read did work.
+            params.stCsc.eCscMatrix = self.DEFAULT_CSC_MATRIX
+            params.u32Sharpness = self.DEFAULT_SHARPNESS
+            PyUiLogger.get_logger().warning(
+                f"MI_DISP_GetLcdParam failed rc={rc}, writing with matrix="
+                f"{self.DEFAULT_CSC_MATRIX} sharpness={self.DEFAULT_SHARPNESS}")
 
-        params.stCsc.u32Luma = self._clamp_csc(luma, floor=10)
-        params.stCsc.u32Contrast = self._clamp_csc(contrast, floor=10)
-        params.stCsc.u32Hue = self._clamp_csc(hue)
-        params.stCsc.u32Saturation = self._clamp_csc(saturation)
+        (params.stCsc.u32Luma,
+         params.stCsc.u32Contrast,
+         params.stCsc.u32Hue,
+         params.stCsc.u32Saturation) = wanted
 
         try:
             rc = lib.MI_DISP_SetLcdParam(0, ctypes.byref(params))
@@ -485,6 +661,9 @@ class MiyooMiniCommon(MiyooDevice):
             f"MI_DISP_SetLcdParam rc={rc} luma={params.stCsc.u32Luma} "
             f"contrast={params.stCsc.u32Contrast} hue={params.stCsc.u32Hue} "
             f"saturation={params.stCsc.u32Saturation}")
+
+        if rc == 0:
+            MiyooMiniCommon._last_csc = wanted
         return rc == 0
 
     def _clamp_csc(self, value, floor=0):
@@ -768,6 +947,11 @@ class MiyooMiniCommon(MiyooDevice):
                 env.pop(v, None)
             subprocess.run(cmds, cwd = directory, env=env)
             Display.init()
+
+            # RetroArch brings the display up itself, so whatever csc it left
+            # behind is not what we last wrote. Forget it so the next apply
+            # actually reaches the panel rather than matching a stale cache.
+            MiyooMiniCommon._last_csc = None
 
             Controller.clear_input_queue()
 
