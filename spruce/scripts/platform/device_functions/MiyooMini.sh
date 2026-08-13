@@ -56,15 +56,25 @@ device_init() {
     if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
         # Screen is off by like ~8px unless you do this, not sure why
         cat /proc/ls
+    fi
+
+    # Export and prime the pwm backlight channel.
+    #
+    # This used to sit inside the Plus branch above, which left the OG Mini and
+    # the V4 with no pwm0 node at all -- /sys/class/pwm/pwmchip0 exists but is
+    # never exported. Nothing could drive the backlight, and device_exit_sleep,
+    # which restores brightness through that same node, had nothing to write to
+    # either. Flip is deliberately left out: its backlight already works and it
+    # does not come through here today.
+    if [ "$variant" = "MIYOO_MINI_PLUS" ] || is_mini_og; then
         # export brightness settings
-        echo 0 > /sys/class/pwm/pwmchip0/export
+        [ -d /sys/class/pwm/pwmchip0/pwm0 ] || echo 0 > /sys/class/pwm/pwmchip0/export
         # Unsure what this value should be, 1k seems to work
         echo 1000 >  /sys/class/pwm/pwmchip0/pwm0/period
         backlight=$(jq -r '.backlight' "$SYSTEM_JSON")
         duty_cycle=$((backlight * 10))
         echo "$duty_cycle" > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
         echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
-
     fi
     killall -9 main ### SUPER important in preventing .tmp_update suicide
 }

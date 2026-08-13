@@ -1,3 +1,4 @@
+import ctypes
 import re
 import tempfile
 import time
@@ -36,6 +37,64 @@ MAX_RAW_VALUE = 30
 MI_AO_SETVOLUME = 0x4008690b
 MI_AO_GETVOLUME = 0xc008690c
 MI_AO_SETMUTE   = 0x4008690d
+
+
+class MiDispCsc(ctypes.Structure):
+    """MI_DISP_Csc_t. Every field 0-100; stock defaults are 50 except saturation at 40."""
+    _fields_ = [
+        ("eCscMatrix", ctypes.c_uint32),
+        ("u32Luma", ctypes.c_uint32),
+        ("u32Contrast", ctypes.c_uint32),
+        ("u32Hue", ctypes.c_uint32),
+        ("u32Saturation", ctypes.c_uint32),
+    ]
+
+
+class MiDispLcdParam(ctypes.Structure):
+    """MI_DISP_LcdParam_t -- 24 bytes, six u32."""
+    _fields_ = [
+        ("stCsc", MiDispCsc),
+        ("u32Sharpness", ctypes.c_uint32),
+    ]
+
+
+class MiDispSyncInfo(ctypes.Structure):
+    """MI_DISP_SyncInfo_t. Read and written back untouched; only the size matters."""
+    _fields_ = [
+        ("bSynm", ctypes.c_uint8),
+        ("bIop", ctypes.c_uint8),
+        ("u8Intfb", ctypes.c_uint8),
+        ("u16Vact", ctypes.c_uint16),
+        ("u16Vbb", ctypes.c_uint16),
+        ("u16Vfb", ctypes.c_uint16),
+        ("u16Hact", ctypes.c_uint16),
+        ("u16Hbb", ctypes.c_uint16),
+        ("u16Hfb", ctypes.c_uint16),
+        ("u16Hmid", ctypes.c_uint16),
+        ("u16Bvact", ctypes.c_uint16),
+        ("u16Bvbb", ctypes.c_uint16),
+        ("u16Bvfb", ctypes.c_uint16),
+        ("u16Hpw", ctypes.c_uint16),
+        ("u16Vpw", ctypes.c_uint16),
+        ("bIdv", ctypes.c_uint8),
+        ("bIhs", ctypes.c_uint8),
+        ("bIvs", ctypes.c_uint8),
+        ("u32FrameRate", ctypes.c_uint32),
+    ]
+
+
+class MiDispPubAttr(ctypes.Structure):
+    """MI_DISP_PubAttr_t."""
+    _fields_ = [
+        ("u32BgColor", ctypes.c_uint32),
+        ("eIntfType", ctypes.c_uint32),
+        ("eIntfSync", ctypes.c_uint32),
+        ("stSyncInfo", MiDispSyncInfo),
+    ]
+
+
+E_MI_DISP_INTF_LCD = 6
+E_MI_DISP_OUTPUT_USER = 32
 
 class MiyooMiniCommon(MiyooDevice):
     OUTPUT_MIXER = 2
@@ -231,6 +290,14 @@ class MiyooMiniCommon(MiyooDevice):
         try:
             # Only proceed if file exists
             if not os.path.isfile(path):
+                PyUiLogger.get_logger().warning(f"{path} does not exist, cannot store {key}")
+                return
+
+            # On the OG Mini and the V4 this file is empty, which sent every write
+            # through the sed fallback below where there was nothing to match. Say
+            # so rather than spawning a sed per setting on every boot to no effect.
+            if os.path.getsize(path) == 0:
+                PyUiLogger.get_logger().warning(f"{path} is empty, cannot store {key}")
                 return
 
             # Load existing JSON (fail silently if invalid)
@@ -278,24 +345,252 @@ class MiyooMiniCommon(MiyooDevice):
                 )
             except Exception:
                 pass
+    BACKLIGHT_PWM_DUTY_CYCLE = "/sys/class/pwm/pwmchip0/pwm0/duty_cycle"
+
     def _set_lumination_to_config(self):
         # Miyoo internally has lumination but it does not work
         self._update_stock_config("brightness", self.system_config.backlight)
         self.miyoo_mini_flip_shared_memory_writer.set_brightness(self.system_config.backlight)
+        self._write_backlight_pwm(self.system_config.backlight)
+
+    def _write_backlight_pwm(self, backlight):
+        """
+        Drive the backlight ourselves.
+
+        keymon is running and does pick up the shared memory write above, but on
+        the OG Mini and the V4 that never reached the panel, so the backlight
+        setting did nothing at all. Writing the pwm channel is what the sprig
+        build does on this same hardware. Duty cycle matches what device_init
+        sets at boot, against the same period of 1000.
+        """
+        if not os.path.exists(self.BACKLIGHT_PWM_DUTY_CYCLE):
+            return
+
+        try:
+            duty_cycle = max(0, min(10, int(backlight))) * 10
+            with open(self.BACKLIGHT_PWM_DUTY_CYCLE, "w") as f:
+                f.write(str(duty_cycle))
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not set backlight pwm: {e}")
+
+    DISPLAY_DEVICE = "/dev/mi_disp"
+    DISPLAY_CONTROL_NODE = "/proc/mi_modules/mi_disp/mi_disp0"
+    # Colour balance channels. Never 0: that is a black screen with no way back
+    # from the menu.
+    MIN_CHANNEL_GAIN = 24
+    MAX_CHANNEL_GAIN = 255
+
+    def _clamp_channel(self, value):
+        return int(max(self.MIN_CHANNEL_GAIN, min(self.MAX_CHANNEL_GAIN, round(value))))
+
+    _mi_disp_lib = None
+    _mi_disp_lib_tried = False
+
+    def _load_mi_disp(self):
+        """
+        The MI display library, or None.
+
+        Lives in /customer/lib on the device, which the startup script already has
+        on LD_LIBRARY_PATH. Loaded lazily and only attempted once.
+        """
+        if self._mi_disp_lib_tried:
+            return self._mi_disp_lib
+
+        MiyooMiniCommon._mi_disp_lib_tried = True
+
+        # libmi_disp.so does not carry its own dependencies -- loading it on its
+        # own fails with "undefined symbol: MI_SYS_Mmap". Pull what it leans on
+        # into the global symbol table first. They live in /config/lib, which the
+        # startup script already puts on LD_LIBRARY_PATH.
+        for dependency in ("libmi_sys.so", "libmi_common.so", "libmi_panel.so"):
+            try:
+                ctypes.CDLL(dependency, mode=ctypes.RTLD_GLOBAL)
+                PyUiLogger.get_logger().info(f"Loaded MI dependency {dependency}")
+            except Exception as e:
+                PyUiLogger.get_logger().info(f"MI dependency {dependency} not loaded: {e}")
+
+        for name in ("libmi_disp.so", "/config/lib/libmi_disp.so"):
+            try:
+                MiyooMiniCommon._mi_disp_lib = ctypes.CDLL(name, mode=ctypes.RTLD_GLOBAL)
+                PyUiLogger.get_logger().info(f"Loaded MI display library from {name}")
+                return MiyooMiniCommon._mi_disp_lib
+            except Exception as e:
+                PyUiLogger.get_logger().info(f"Could not load {name}: {e}")
+
+        PyUiLogger.get_logger().warning("No MI display library available")
+        return None
+
+    def _apply_lcd_csc(self, luma, contrast, hue, saturation):
+        """
+        Drive brightness, contrast, hue and saturation through the LCD output's
+        colour space conversion.
+
+        This is a different block from the one the proc 'csc' command reaches.
+        That one sits on the video path and does nothing to the menu, which is
+        why every attempt through it failed no matter which matrix was used.
+        This one is only reachable through the MI library, and only once the
+        device has been configured as an lcd output and enabled.
+
+        All four values are 0-100. Luma and contrast keep a floor so the panel
+        cannot be driven to something unreadable from the menu.
+        """
+        lib = self._load_mi_disp()
+        if lib is None:
+            return False
+
+        # GetLcdParam on its own comes back rc=31 with an empty struct: the device
+        # has to be configured as an lcd output and enabled first. Koriki does the
+        # same three calls before touching the params.
+        try:
+            attrs = MiDispPubAttr()
+            rc = lib.MI_DISP_GetPubAttr(0, ctypes.byref(attrs))
+            attrs.eIntfType = E_MI_DISP_INTF_LCD
+            attrs.eIntfSync = E_MI_DISP_OUTPUT_USER
+            rc_set = lib.MI_DISP_SetPubAttr(0, ctypes.byref(attrs))
+            rc_enable = lib.MI_DISP_Enable(0)
+            PyUiLogger.get_logger().info(
+                f"MI_DISP GetPubAttr rc={rc} SetPubAttr rc={rc_set} Enable rc={rc_enable}")
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not enable MI display device: {e}")
+            return False
+
+        params = MiDispLcdParam()
+        try:
+            rc = lib.MI_DISP_GetLcdParam(0, ctypes.byref(params))
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"MI_DISP_GetLcdParam unavailable: {e}")
+            return False
+
+        PyUiLogger.get_logger().info(
+            f"MI_DISP_GetLcdParam rc={rc} matrix={params.stCsc.eCscMatrix} "
+            f"luma={params.stCsc.u32Luma} contrast={params.stCsc.u32Contrast} "
+            f"hue={params.stCsc.u32Hue} saturation={params.stCsc.u32Saturation} "
+            f"sharpness={params.u32Sharpness}")
+
+        if rc != 0:
+            return False
+
+        params.stCsc.u32Luma = self._clamp_csc(luma, floor=10)
+        params.stCsc.u32Contrast = self._clamp_csc(contrast, floor=10)
+        params.stCsc.u32Hue = self._clamp_csc(hue)
+        params.stCsc.u32Saturation = self._clamp_csc(saturation)
+
+        try:
+            rc = lib.MI_DISP_SetLcdParam(0, ctypes.byref(params))
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"MI_DISP_SetLcdParam unavailable: {e}")
+            return False
+
+        PyUiLogger.get_logger().info(
+            f"MI_DISP_SetLcdParam rc={rc} luma={params.stCsc.u32Luma} "
+            f"contrast={params.stCsc.u32Contrast} hue={params.stCsc.u32Hue} "
+            f"saturation={params.stCsc.u32Saturation}")
+        return rc == 0
+
+    def _clamp_csc(self, value, floor=0):
+        return int(max(floor, min(100, round(value))))
+
+
+    _display_fd = None
+
+    def _ensure_display_device_open(self):
+        """
+        Hold the display device open so its control node stays alive.
+
+        /proc/mi_modules/mi_disp/mi_disp0 only exists while something has
+        /dev/mi_disp open. On stock firmware MainUI holds it; spruce kills MainUI
+        and renders through the framebuffer, so nothing did, the node was never
+        there, and every contrast and saturation write went nowhere.
+
+        It has to stay open rather than being opened per write: closing the device
+        takes the node away again, and the display instance the csc values were
+        applied to goes with it, so anything written is immediately undone. This
+        is the same state stock runs in, and why sprig's shell script works on the
+        Flip -- something over there is already holding the device.
+        """
+        if self._display_fd is not None:
+            return True
+
+        try:
+            fd = os.open(self.DISPLAY_DEVICE, os.O_RDWR)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not open {self.DISPLAY_DEVICE}: {e}")
+            return False
+
+        # Created by the driver's open handler, so it should already be there.
+        for _ in range(20):
+            if os.path.exists(self.DISPLAY_CONTROL_NODE):
+                self._display_fd = fd
+                PyUiLogger.get_logger().info(
+                    f"Holding {self.DISPLAY_DEVICE} open so {self.DISPLAY_CONTROL_NODE} stays available")
+                return True
+            time.sleep(0.01)
+
+        PyUiLogger.get_logger().warning(
+            f"{self.DISPLAY_CONTROL_NODE} did not appear after opening {self.DISPLAY_DEVICE}")
+        os.close(fd)
+        return False
+
+    def _set_screen_values_to_config(self):
+        """
+        Push brightness, contrast, hue, saturation and colour balance at the
+        display engine.
+
+        Two separate paths, because the panel only listens to each for its own
+        half. Brightness, contrast, hue and saturation go through the LCD
+        output's colour space conversion, reachable only via the MI library.
+        Colour balance goes through the colortemp command on the disp proc node,
+        whose per channel values are gains with 128 as unity.
+
+        Config values run 0-20 and both interfaces want a different scale, so
+        each is converted at the point of use.
+        """
+        self._apply_lcd_csc(
+            luma=self.system_config.brightness * 5,
+            contrast=self.system_config.contrast * 5,
+            hue=self.system_config.hue * 5,
+            saturation=self.system_config.saturation * 5,
+        )
+
+        red = self._clamp_channel(self.get_disp_red())
+        green = self._clamp_channel(self.get_disp_green())
+        blue = self._clamp_channel(self.get_disp_blue())
+        colortemp = f"colortemp 0 0 0 0 {blue} {green} {red}"
+
+        if not self._ensure_display_device_open():
+            return
+
+        try:
+            with open(self.DISPLAY_CONTROL_NODE, "w") as f:
+                f.write(colortemp + "\n")
+            PyUiLogger.get_logger().info(f"Applied colour balance: [{colortemp}]")
+        except Exception as e:
+            PyUiLogger.get_logger().warning(
+                f"Could not apply colour balance [{colortemp}]: {e}")
 
     def _set_contrast_to_config(self):
         self._update_stock_config("contrast", self.system_config.contrast)
-    
+        self._set_screen_values_to_config()
+
     def _set_saturation_to_config(self):
-        #Doesn't seem to work?
         self._update_stock_config("saturation", self.system_config.saturation)
+        self._set_screen_values_to_config()
 
     def _set_brightness_to_config(self):
-        #Doesn't seem to work?
         self._update_stock_config("lumination", self.system_config.brightness)
+        self._set_screen_values_to_config()
 
     def _set_hue_to_config(self):
-        pass
+        self._set_screen_values_to_config()
+
+    def _set_disp_red_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_green_to_config(self):
+        self._set_screen_values_to_config()
+
+    def _set_disp_blue_to_config(self):
+        self._set_screen_values_to_config()
     
     def take_snapshot(self, path):
         return None
