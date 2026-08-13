@@ -83,6 +83,15 @@ class ScreenSaver:
             cls.render()
 
     @classmethod
+    def is_animating(cls):
+        """
+        True when the background itself keeps changing -- gif frames or box art
+        rotation. Those need the CPU to go on doing real work, so the device
+        should not be idled down underneath them.
+        """
+        return bool(cls._animation_path) or bool(cls._boxart_next_time)
+
+    @classmethod
     def clear_cache(cls):
         cls._clear_animation()
         cls._clear_boxart()

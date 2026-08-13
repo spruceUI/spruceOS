@@ -1729,3 +1729,7 @@ class Theme():
     def get_screensaver_boxart_interval_sec(cls):
         interval = cls._data.get("screensaver", {}).get("boxartIntervalSec", 15)
         return max(1, int(interval))
+
+    @classmethod
+    def get_screensaver_low_power(cls):
+        return cls._data.get("screensaver", {}).get("lowPowerWhileIdle", True)

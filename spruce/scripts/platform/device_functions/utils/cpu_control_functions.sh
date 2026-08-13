@@ -94,6 +94,10 @@ restore_cores_online() {
 set_powersave(){
     log_message "set_powersave() called"
     if ! flag_check "setting_cpu"; then
+        # Was missing, unlike set_smart/set_performance/set_overclock: without it
+        # this neither takes the lock nor stops the flag_remove below from
+        # clearing a guard some other CPU change is relying on.
+        flag_add "setting_cpu" --tmp
 
         cores_online "$DEVICE_MIN_CORES_ONLINE"
         unlock_governor 2>/dev/null
