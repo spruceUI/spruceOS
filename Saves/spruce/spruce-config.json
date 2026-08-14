@@ -424,7 +424,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
@@ -527,6 +527,19 @@
                     "socks5"
                 ],
                 "selected": "http"
+            }
+        },
+        "LEDs Settings": {
+            "LEDsMode": {
+                "display": "LEDs mode",
+                "devices": ["GKD_PIXEL2"],
+                "description": "reload UI to apply",
+                "options": [
+                    "Off",
+                    "Battery",
+                    "Audio"
+                ],
+                "selected": "Battery"
             }
         },
         "RGB LED Settings": {

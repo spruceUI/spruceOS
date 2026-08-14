@@ -51,6 +51,11 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             return
         self._set_screensaver_prop("screensaverTimeoutSec", new_val)
 
+    def toggle_low_power(self, input):
+        if input in (ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT):
+            current = Theme._data.get("screensaver", {}).get("lowPowerWhileIdle", True)
+            self._set_screensaver_prop("lowPowerWhileIdle", not current)
+
     def change_overlay_opacity(self, input):
         current = Theme._data.get("screensaver", {}).get("overlayOpacity", 0.3)
         if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
@@ -441,6 +446,19 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
                 description=Language.get("screensaverTimeoutDesc", "Minutes before screensaver activates (0=off)"),
                 icon=None,
                 value=self.change_timeout
+            )
+        )
+
+        low_power = self._get_screensaver_prop("lowPowerWhileIdle", True)
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverLowPower", "Low power while idle"),
+                value_text="<    " + (Language.get("on", "On") if low_power else Language.get("off", "Off")) + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverLowPowerDesc", "Slow the CPU down while the screensaver is showing (skipped for animated backgrounds)"),
+                icon=None,
+                value=self.toggle_low_power
             )
         )
 

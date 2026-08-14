@@ -89,10 +89,11 @@ run_mpv() {
 	INPUT_CONF="/tmp/mpv_input.conf"
 	printf 'VOLUME_UP ignore\nVOLUME_DOWN ignore' > $INPUT_CONF
 
-	/mnt/SDCARD/spruce/bin64/gptokeyb -k "mpv" -c "./bin64/mpv.gptk" &
+	gptokeyb -k "mpv" -c "./mpv.gptk" &
 	sleep 0.5
 
-	/usr/bin/mpv --fs --geometry="640x480" --hwdec=drm --vo=sdl \
+	/usr/bin/mpv --profile=fast --fs --geometry="640x480" --hwdec=rkmpp \
+				 --vo=dmabuf-wayland --swapchain-depth=8 \
 				 --input-conf=$INPUT_CONF --msg-level=all=warn \
 				"$ROM_FILE" > $(emu_log_file) 2>&1
 

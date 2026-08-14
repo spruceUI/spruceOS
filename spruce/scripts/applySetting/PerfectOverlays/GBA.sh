@@ -13,9 +13,7 @@ GBA_MGBA_GB_FILE=/mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GBA.opt
 
 apply_overlay() {
     # Define configurations
-    GBA_CFG="aspect_ratio_index = \"23\"
-custom_viewport_height = \"427\"
-input_overlay = \"./.retroarch/overlay/Perfect/Perfect_GBA/Bright_Version/Perfect_GBA_bright_1playerinsertcoin_adapted.cfg\"
+    GBA_CFG="input_overlay = \"./.retroarch/overlay/Perfect/Perfect_GBA/Bright_Version/Perfect_GBA_bright_1playerinsertcoin_adapted.cfg\"
 input_overlay_enable = \"true\"
 input_overlay_opacity = \"1.000000\"
 input_player1_analog_dpad_mode = \"0\"

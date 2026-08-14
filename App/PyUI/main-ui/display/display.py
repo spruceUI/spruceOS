@@ -94,6 +94,7 @@ class Display:
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
     _screensaver_active = False
+    _screensaver_lowered_cpu = False
     _screensaver_saved_lumination = None
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
@@ -1043,10 +1044,30 @@ class Display:
         from display.screensaver import ScreenSaver
         ScreenSaver.render()
 
+        # Sitting on a still screensaver there is nothing left to do, so let the
+        # device idle down. Rendering first means ScreenSaver knows by now whether
+        # the background animates; gif and box art are left alone because they
+        # carry on doing real work.
+        if Theme.get_screensaver_low_power() and not ScreenSaver.is_animating():
+            try:
+                Device.get_device().set_cpu_low_power()
+                cls._screensaver_lowered_cpu = True
+            except Exception as e:
+                PyUiLogger.get_logger().warning(f"Could not lower CPU for screensaver: {e}")
+
     @classmethod
     def restore_from_blank(cls):
         if not cls._screensaver_active:
             return
+
+        # Before anything redraws, so waking up doesn't happen at idle clocks.
+        if cls._screensaver_lowered_cpu:
+            cls._screensaver_lowered_cpu = False
+            try:
+                Device.get_device().set_cpu_normal()
+            except Exception as e:
+                PyUiLogger.get_logger().warning(f"Could not restore CPU after screensaver: {e}")
+
         cls._screensaver_active = False
 
     #TODO make default false and fix everywhere

@@ -1,5 +1,5 @@
 {
-    "label": "adbd",
+    "label": "Start ADB daemon",
     "icon": "adbd.png",
     "launch": "launch.sh",
     "description": "adbd",

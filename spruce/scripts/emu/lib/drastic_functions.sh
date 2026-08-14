@@ -275,26 +275,18 @@ run_drastic_SmartProS() {
 ##### PIXEL 2 #####
 
 run_drastic_Pixel2() {
-	if [ "$CORE" = "DraStic-stock" ]; then
-		run_drastic_stock_Pixel2
-	elif [ "$CORE" = "DraStic-trngaje" ]; then
+	if [ "$CORE" = "DraStic-trngaje" ]; then
 		run_drastic_trngaje_Pixel2
 	else
 		display_core_unrecognized_for_platform_message
 	fi
 }
 
-run_drastic_stock_Pixel2() {
-	ready_arch_64_states
-	pin_to_dedicated_cores drastic64 2
-	# Disable loging for now, it's writting a lot to it
-	./drastic64 "$ROM_FILE" # > $(emu_log_file) 2>&1
-	stash_arch_64_states
-}
-
 run_drastic_trngaje_Pixel2() {
+	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_Pixel2_trngaje:$LD_LIBRARY_PATH"
 	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
+	stash_arch_64_states
 }
 
 

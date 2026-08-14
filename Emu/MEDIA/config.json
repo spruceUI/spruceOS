@@ -68,7 +68,6 @@
       ],
       "options": [
         "mpv",
-        "ffplay",
         "gme"
       ],
       "selected": "mpv",

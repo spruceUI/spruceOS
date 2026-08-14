@@ -5,6 +5,7 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from games.utils.rom_list_verifier import RomListVerifier
 from menus.games.game_config_menu import GameConfigMenu
 from menus.games.game_select_menu_popup import GameSelectMenuPopup
 from menus.games.in_game_menu_listener import InGameMenuListener
@@ -72,28 +73,19 @@ class RomsMenuCommon(ABC):
         raw_rom_list = CollectionsManager.get_games_in_collection(collection)
         
         rom_list = []
+        get_image_path_fn = get_rom_select_options_builder().get_image_path
 
         for rom_info in raw_rom_list:
             rom_file_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
-            img_path = self._get_image_path(rom_info)
-            rom_list.append(
-                GridOrListEntry(
-                    primary_text=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
-                    image_path=img_path,
-                    image_path_selected=img_path,
-                    description=collection, 
-                    icon=None,
-                    value=rom_info)
-            )
             rom_list.append(
                     RomGridOrListEntry(
                             display_name=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
-                            folder_name="Collections",
+                            folder_name=collection,
                             game_system=rom_info.game_system,
                             rom_file_path=rom_info.rom_file_path,
                             game_entry=None,
                             prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
-                            get_image_path_fn=lambda a, b, c: img_path,
+                            get_image_path_fn=get_image_path_fn,
                             get_favorite_icon=None
                     )
             )
@@ -154,7 +146,7 @@ class RomsMenuCommon(ABC):
                         veritcal_carousel=self.get_game_select_use_vertical_carousel(),
                         )
 
-    def _run_rom_selection(self, page_name, verify_system=True):
+    def _build_rom_list(self, verify_system=True):
         rom_list = self._get_rom_list()
 
         current_device = Device.get_device().get_device_name()
@@ -170,9 +162,33 @@ class RomsMenuCommon(ABC):
                 # Collections are fake without a system
                 filtered_roms.append(rom_info_ui_entry)
 
-        rom_list = filtered_roms
+        return filtered_roms
 
-        return self._run_rom_selection_for_rom_list(page_name,rom_list)
+    def _run_rom_selection(self, page_name, verify_system=True):
+        return self._run_rom_selection_for_rom_list(
+            page_name,
+            self._build_rom_list(verify_system),
+            refresh_rom_list=lambda: self._build_rom_list(verify_system)
+        )
+
+    def _keep_selection_on_refresh(self, rom_list, selected):
+        """Stay on the same game after the list has been rebuilt underneath us."""
+        if(selected is None):
+            return selected
+
+        previous_path = None
+        if(selected.get_selection() is not None and selected.get_selection().get_value() is not None):
+            previous_path = selected.get_selection().get_value().rom_file_path
+
+        if(previous_path is not None):
+            for index, entry in enumerate(rom_list):
+                if(entry.get_value().rom_file_path == previous_path):
+                    return Selection(entry, selected.get_input(), index)
+
+        # The game we were sitting on is gone, so stay as close to it as we can
+        index = min(selected.get_index(), max(len(rom_list) - 1, 0))
+        entry = rom_list[index] if rom_list else None
+        return Selection(entry, selected.get_input(), index)
 
     def get_additional_menu_options(self):
         return []
@@ -199,9 +215,10 @@ class RomsMenuCommon(ABC):
     def default_to_last_game_selection(self):
         return True
    
-    def _run_rom_selection_for_rom_list(self, page_name, rom_list) :
+    def _run_rom_selection_for_rom_list(self, page_name, rom_list, refresh_rom_list=None) :
         selected = Selection(None,None,0)
         view = None
+        rom_list_generation = RomListVerifier.generation()
         last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name)
 
         last_subfolder = self._check_for_last_subfolder_existance(last_subfolder, rom_list)
@@ -215,6 +232,15 @@ class RomsMenuCommon(ABC):
                     selected = Selection(None,None,index)
 
         while(selected is not None):
+            # A background check found the cached listing was out of date, so
+            # pick up what's actually in the folder now.
+            if(refresh_rom_list is not None and RomListVerifier.generation() != rom_list_generation):
+                rom_list_generation = RomListVerifier.generation()
+                rom_list = refresh_rom_list()
+                selected = self._keep_selection_on_refresh(rom_list, selected)
+                view = self.create_view(page_name,rom_list,selected)
+                PyUiLogger.get_logger().info(f"Refreshed rom list for {page_name}")
+
             Display.set_page_bg(page_name)
             if(view is None):
                 view = self.create_view(page_name,rom_list,selected)

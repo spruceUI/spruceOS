@@ -27,7 +27,7 @@ class FavoritesMenu(RomsMenuCommon):
             rom_list.append(
                 RomGridOrListEntry(
                         display_name=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
-                        folder_name="Recents",
+                        folder_name="Favorites",
                         game_system=rom_info.game_system,
                         rom_file_path=rom_info.rom_file_path,
                         game_entry=None,

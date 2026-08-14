@@ -3,10 +3,12 @@ from pathlib import Path
 
 from devices.device import Device
 from games.utils.game_system import GameSystem
+from games.utils.rom_list_verifier import RomListVerifier
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from utils.logger import PyUiLogger
 import os
 import json
+import threading
 from pathlib import Path
 
 class RomUtils:
@@ -19,7 +21,9 @@ class RomUtils:
             "WSC":"WS"
         }
 
-        self._get_roms_cache: dict[tuple, tuple[list[str], list[str]]] = {}
+        # directory -> (folder date it was read at, game files, subfolders)
+        self._get_roms_cache: dict[str, tuple[float, list[str], list[str]]] = {}
+        self._cache_lock = threading.Lock()
 
     def get_cache_dir(self):
         return os.path.join(Device.get_device().get_saves_dir(),"cache")
@@ -94,7 +98,7 @@ class RomUtils:
                 return data["files"], data["folders"]
             else:
                 PyUiLogger.get_logger().info(f"Folder update detected [{directory}]")
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, json.JSONDecodeError, KeyError, OSError):
             pass
 
         return None
@@ -112,16 +116,130 @@ class RomUtils:
             }, f)
 
 
+    def _scan_directory(self, game_system: GameSystem, dir_to_search):
+        """
+        Read a single directory and work out which entries count as games.
+
+        Uses scandir rather than listdir so the file/directory answer comes back
+        as part of the directory read instead of costing a separate lookup per
+        entry. On a folder holding a few thousand games that is the difference
+        between one read and several thousand, which matters on these devices.
+        """
+        config = game_system.game_system_config
+        valid_suffix_set = {s.lower() for s in config.get_extlist()}
+        ignore_set = set(config.get_ignore_list())
+        scan_subfolders = config.scan_subfolders()
+
+        valid_files = []
+        valid_folders = []
+
+        try:
+            with os.scandir(dir_to_search) as entries:
+                for entry in entries:
+                    name = entry.name
+
+                    if name.startswith('.'):
+                        continue
+
+                    try:
+                        # follow_symlinks stays on to match the os.path.isdir this
+                        # replaced, so symlinked rom folders keep working
+                        is_dir = entry.is_dir()
+                    except OSError:
+                        is_dir = False
+
+                    if is_dir:
+                        if not scan_subfolders:
+                            continue
+                        if name == "Imgs":
+                            continue
+
+                        roms_sub, folders_sub = self.get_roms(game_system, entry.path)
+
+                        if roms_sub or folders_sub:
+                            valid_folders.append(entry.path)
+
+                    else:
+                        dot = name.rfind('.')
+                        suffix = name[dot:].lower() if dot != -1 else ''
+
+                        if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
+                            if name not in ignore_set:
+                                valid_files.append(entry.path)
+        except OSError:
+            return valid_files, valid_folders
+
+        return valid_files, valid_folders
+
+    def _read_cache(self, dir_to_search, dir_mtime):
+        """
+        The cached listing for a directory, or None if we have nothing usable.
+
+        A folder date that has moved is a reliable sign the folder changed, so we
+        rescan on the spot. A date that hasn't moved proves nothing -- that is
+        what _verify_cached_listing sorts out afterwards.
+        """
+        with self._cache_lock:
+            cached = self._get_roms_cache.get(dir_to_search)
+
+        if cached is not None and cached[0] == dir_mtime:
+            return cached[1], cached[2]
+
+        if not Device.get_device().supports_caching_rom_lists():
+            return None
+
+        on_disk = self._load_disk_cache(dir_to_search, dir_mtime)
+
+        if on_disk is not None:
+            with self._cache_lock:
+                self._get_roms_cache[dir_to_search] = (dir_mtime, on_disk[0], on_disk[1])
+
+        return on_disk
+
+    def _write_cache(self, dir_to_search, dir_mtime, files, folders):
+        if not Device.get_device().supports_caching_rom_lists():
+            return
+
+        with self._cache_lock:
+            self._get_roms_cache[dir_to_search] = (dir_mtime, files, folders)
+
+        self._save_disk_cache(dir_to_search, dir_mtime, files, folders)
+
+    def _verify_cached_listing(self, game_system: GameSystem, dir_to_search):
+        """
+        Re-read a directory we served from cache and correct the cache if what we
+        handed the menu no longer matches what is actually there. Runs on the
+        RomListVerifier worker thread; returns True when the listing was wrong.
+        """
+        try:
+            dir_mtime = os.path.getmtime(dir_to_search)
+        except OSError:
+            return False
+
+        files, folders = self._scan_directory(game_system, dir_to_search)
+
+        with self._cache_lock:
+            cached = self._get_roms_cache.get(dir_to_search)
+
+        # Compare against the listing we served, whatever date it was stored
+        # under -- a date that shifted underneath us is not itself a change.
+        # Compared as sets because the order a directory reads back in can change
+        # on its own, and the menu sorts the list anyway.
+        if (cached is not None
+                and set(cached[1]) == set(files)
+                and set(cached[2]) == set(folders)):
+            if cached[0] != dir_mtime:
+                self._write_cache(dir_to_search, dir_mtime, files, folders)
+            return False
+
+        self._write_cache(dir_to_search, dir_mtime, files, folders)
+        return True
+
     def get_roms(self, game_system: GameSystem, directory=None):
         directories_to_search = [directory] if directory else game_system.folder_paths
 
         all_valid_files = []
         all_valid_folders = []
-
-        config = game_system.game_system_config
-        valid_suffix_set = {s.lower() for s in config.get_extlist()}
-        ignore_set = set(config.get_ignore_list())
-        scan_subfolders = config.scan_subfolders()
 
         for dir_to_search in directories_to_search:
             try:
@@ -129,64 +247,24 @@ class RomUtils:
             except OSError:
                 continue
 
-            cache_key = (dir_to_search, dir_mtime)
+            cached = self._read_cache(dir_to_search, dir_mtime)
 
-            # --- In-memory cache ---
-            if cache_key in self._get_roms_cache:
-                files, folders = self._get_roms_cache[cache_key]
+            if cached is not None:
+                files, folders = cached
                 all_valid_files.extend(files)
                 all_valid_folders.extend(folders)
+
+                # The folder's date can't be trusted on its own -- archive tools
+                # rewrite it after extracting -- so confirm the listing in the
+                # background and let the menus know if it was stale.
+                RomListVerifier.schedule(
+                    dir_to_search,
+                    lambda d=dir_to_search: self._verify_cached_listing(game_system, d),
+                )
                 continue
 
-            # --- Disk cache ---
-            if Device.get_device().supports_caching_rom_lists():
-                cached = self._load_disk_cache(dir_to_search, dir_mtime)
-                if cached:
-                    self._get_roms_cache[cache_key] = cached
-                    files, folders = cached
-                    all_valid_files.extend(files)
-                    all_valid_folders.extend(folders)
-                    continue
-
-            # --- Fresh scan ---
-            valid_files = []
-            valid_folders = []
-
-            try:
-                entries = os.listdir(dir_to_search)
-            except OSError:
-                continue
-
-            for name in entries:
-                if name.startswith('.'):
-                    continue
-
-                full_path = os.path.join(dir_to_search, name)
-
-                if os.path.isdir(full_path):
-                    if not scan_subfolders:
-                        continue
-                    if name == "Imgs":
-                        continue
-
-                    roms_sub, folders_sub = self.get_roms(game_system, full_path)
-
-                    if roms_sub or folders_sub:
-                        valid_folders.append(full_path)
-
-                else:
-                    suffix = Path(name).suffix.lower()
-
-                    if (not valid_suffix_set and not name.endswith(('.xml', '.txt', '.db'))) or suffix in valid_suffix_set:
-                        if name not in ignore_set:
-                            valid_files.append(full_path)
-
-            result = (valid_files, valid_folders)
-
-            # --- Save caches ---
-            if Device.get_device().supports_caching_rom_lists():
-                self._get_roms_cache[cache_key] = result
-                self._save_disk_cache(dir_to_search, dir_mtime, valid_files, valid_folders)
+            valid_files, valid_folders = self._scan_directory(game_system, dir_to_search)
+            self._write_cache(dir_to_search, dir_mtime, valid_files, valid_folders)
 
             all_valid_files.extend(valid_files)
             all_valid_folders.extend(valid_folders)
