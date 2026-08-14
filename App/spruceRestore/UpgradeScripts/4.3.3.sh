@@ -74,8 +74,14 @@ fi
 GBA_CFG_FILES="/mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GBA.cfg"
 
-ASPECT_LINE='^aspect_ratio_index[[:space:]]*=[[:space:]]*"23"[[:space:]]*$'
-VIEWPORT_LINE='^custom_viewport_height[[:space:]]*=[[:space:]]*"427"[[:space:]]*$'
+# Matched literally, single spaces and all, the way 4.1.2.sh matches this very
+# key. Every upgrade script that has actually run on these devices sticks to
+# plain anchored text and none of them use character classes, so this stays on
+# the idiom that is known to work rather than betting on what the device's
+# busybox was compiled with. update_config_file writes the line with echo, so
+# the spacing is exactly this, and RetroArch writes it the same way.
+ASPECT_LINE='^aspect_ratio_index = "23"$'
+VIEWPORT_LINE='^custom_viewport_height = "427"$'
 
 # Not piped into the loop: that runs it in a subshell, and nothing it does to
 # the surrounding shell survives. Neither path contains a space.
