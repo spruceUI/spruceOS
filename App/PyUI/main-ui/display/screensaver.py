@@ -74,12 +74,18 @@ class ScreenSaver:
 
     @classmethod
     def render_if_needed(cls):
-        now = time.time()
-        if cls._animation_path and now >= cls._animation_next_time:
+        # Two different clocks on purpose. Frame and box art pacing is "how long
+        # since the last one", so it uses the monotonic clock and survives the
+        # user setting the time. The widget deadline is an actual wall clock
+        # instant -- the start of the next minute -- so it has to stay on
+        # time.time() or the clock would stop ticking on the minute.
+        elapsed_now = time.monotonic()
+        wall_now = time.time()
+        if cls._animation_path and elapsed_now >= cls._animation_next_time:
             cls.render()
-        elif cls._boxart_next_time and now >= cls._boxart_next_time:
+        elif cls._boxart_next_time and elapsed_now >= cls._boxart_next_time:
             cls.render()
-        elif cls._widgets_next_time and now >= cls._widgets_next_time:
+        elif cls._widgets_next_time and wall_now >= cls._widgets_next_time:
             cls.render()
 
     @classmethod
@@ -209,7 +215,7 @@ class ScreenSaver:
         sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
 
         interval = Theme.get_screensaver_boxart_interval_sec()
-        now = time.time()
+        now = time.monotonic()
 
         # Only advance on a cycle boundary. render() also gets called for unrelated reasons
         # (blank_screen, the layout editor redrawing) and those must not push the deadline out.
@@ -303,7 +309,7 @@ class ScreenSaver:
         if delay < 100:
             delay = 100
         cls._animation_frame = (frame + 1) % anim.count
-        cls._animation_next_time = time.time() + delay / 1000.0
+        cls._animation_next_time = time.monotonic() + delay / 1000.0
 
     @classmethod
     def _load_animation(cls, bg_image, Display):
