@@ -145,14 +145,16 @@ jobs:
           body: |
             | Device                | Support Status        |
             |-----------------------|-----------------------|
-            | Miyoo Flip            |  |
-            | Miyoo A30             |  |
-            | Trimui Smart Pro      |  |
-            | Trimui Brick          |  |
-            | Trimui Smart Pro S    |  |
-            | Miyoo Mini Flip       |  |
-            | Miyoo Mini Plus       |  |
-            | Miyoo Mini v1-4       |  |
+            | Miyoo Flip            | Stable |
+            | Miyoo A30             | Stable |
+            | Trimui Smart Pro      | Stable |
+            | Trimui Brick          | Stable |
+            | Trimui Smart Pro S    | Stable |
+            | Trimui Brick Pro      | Stable |
+            | Miyoo Mini Flip       | Stable |
+            | Miyoo Mini Plus       | Stable |
+            | Miyoo Mini v1-4       | Stable |
+            | Anbernic RGXX+ series | In Development, testers wanted! |
 
             # What's New
 
@@ -173,8 +175,18 @@ jobs:
             - Try the all-in-one installer app for a super easy installation!
             - No need to download a release or format your card manually!
             - Compatible versions for Windows, Mac and Linux!
-            - [Find the Latest version for you PC here](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
             - Lets you install Stable, Nightlies, Sprig (mini flip only) and Twig (GKD Pixel 2 only) all in one click!
+
+            | Platform | Download |
+            |----------|----------|
+            | Windows (x64) | [spruceos-installer-windows.exe](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/spruceos-installer-windows.exe) |
+            | macOS (Apple Silicon + Intel) | [SpruceOS-Installer-macOS-Universal.zip](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/SpruceOS-Installer-macOS-Universal.zip) |
+            | Linux x64 | [spruceos-installer-linux-x64.tar.gz](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/spruceos-installer-linux-x64.tar.gz) |
+            | Linux ARM64 | [spruceos-installer-linux-arm64.tar.gz](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/spruceos-installer-linux-arm64.tar.gz) |
+            | Linux ARMv7 | [spruceos-installer-linux-armv7.tar.gz](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/spruceos-installer-linux-armv7.tar.gz) |
+            | Linux i686 (32-bit) | [spruceos-installer-linux-i686.tar.gz](https://github.com/spruceUI/spruceOS-Installer/releases/latest/download/spruceos-installer-linux-i686.tar.gz) |
+
+            These always grab the newest installer — [see all installer releases here](https://github.com/spruceUI/spruceOS-Installer/releases/latest)
 
             ## Manual Installation
             - Download spruceV${{ steps.get_version.outputs.version }}.7z
