@@ -231,8 +231,13 @@ def main():
         if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
             main_ui_mode = False
 
-        with log_timing("Device initialization", PyUiLogger.get_logger()):    
+        with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
+
+        # TZ only lives in the environment, so the saved zone has to be put back
+        # every launch. Do it before anything reads the clock, and before any
+        # emulator is launched, since they inherit it from here.
+        Device.get_device().restore_saved_timezone()
 
         PyUiState.init(Device.get_device().get_state_path())
 

@@ -375,11 +375,68 @@ class DeviceCommon(AbstractDevice):
     def supports_popup_menu(self):
         return True
     
+    # spruce ships its own copy of the tz database. The Miyoo Mini has none at
+    # all and a read-only squashfs root, so there is nowhere to install one, and
+    # the devices that do have a firmware copy disagree about which zones they
+    # carry. Shipping it means every device offers the same list.
+    SPRUCE_ZONEINFO_DIR = "/mnt/SDCARD/spruce/zoneinfo"
+
+    def get_zoneinfo_dir(self):
+        return DeviceCommon.SPRUCE_ZONEINFO_DIR
+
     def supports_timezone_setting(self):
-        return False
+        return os.path.isdir(self.get_zoneinfo_dir())
 
     def apply_timezone(self, timezone):
-        pass
+        """
+        Point this process at the chosen zone and make it take effect now.
+
+        glibc reads a tz file from any absolute path when TZ starts with a
+        colon, which is what lets this work with the database on the SD card
+        rather than in /etc. tzset() republishes it to the C library, so the
+        clock is right immediately instead of after a reboot, and anything
+        launched from here inherits TZ through the environment.
+        """
+        zone_file = os.path.join(self.get_zoneinfo_dir(), timezone)
+
+        if not os.path.isfile(zone_file):
+            PyUiLogger.get_logger().error(f"No tz file for {timezone} at {zone_file}")
+            return False
+
+        os.environ["TZ"] = f":{zone_file}"
+        time.tzset()
+        PyUiLogger.get_logger().info(f"Applied timezone {timezone} from {zone_file}")
+        return True
+
+    def restore_saved_timezone(self):
+        """
+        Re-apply the saved zone at start up. TZ lives in this process's
+        environment and nowhere else, so it has to be set again every launch.
+        Quiet when nothing is saved yet -- that is a normal first boot.
+
+        This deliberately calls the shared implementation rather than whatever
+        the device overrode apply_timezone with. Those overrides write files the
+        rest of the system reads, and that work belongs to the moment the user
+        picks a zone, not to every launch -- on the Pixel 2 the override even
+        restarts a service. All that is needed here is TZ.
+        """
+        if not os.path.isdir(self.get_zoneinfo_dir()):
+            return
+
+        try:
+            system_config = self.get_system_config()
+            # Only a zone the user actually chose. get_timezone() falls back to
+            # America/New_York, and applying that to a device whose owner never
+            # touched the setting would drag a correct clock hours off.
+            if not getattr(system_config, "has_timezone", lambda: False)():
+                return
+            timezone = system_config.get_timezone()
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not read saved timezone: {e}")
+            return
+
+        if timezone:
+            DeviceCommon.apply_timezone(self, timezone)
 
     def set_theme(self, theme_path):
         pass
@@ -391,8 +448,21 @@ class DeviceCommon(AbstractDevice):
         return None
 
     def prompt_timezone_update(self):
-        #Unsupported by default
-        pass
+        from menus.settings.timezone_menu import TimezoneMenu
+
+        if not self.supports_timezone_setting():
+            PyUiLogger.get_logger().warning(
+                f"No timezone database at {self.get_zoneinfo_dir()}")
+            return
+
+        timezone_menu = TimezoneMenu()
+        tz = timezone_menu.ask_user_for_timezone(
+            timezone_menu.list_timezone_files(self.get_zoneinfo_dir(),
+                                              verify_via_datetime=True))
+
+        if tz is not None:
+            self.get_system_config().set_timezone(tz)
+            self.apply_timezone(tz)
 
     def supports_caching_rom_lists(self):
         return True
@@ -529,7 +599,7 @@ class DeviceCommon(AbstractDevice):
                 check=True
             )
         except Exception as e:
-            PyUiLogger.get_logger.error(f"Failed to run hwclock: {e}")
+            PyUiLogger.get_logger().error(f"Failed to run hwclock: {e}")
 
     SPRUCE_HELPER_FUNCTIONS = "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 

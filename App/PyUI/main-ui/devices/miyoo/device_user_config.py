@@ -299,7 +299,16 @@ class DeviceUserConfig:
 
     def get_timezone(self):
         return self.config.get("timezone",'America/New_York')
-       
+
+    def has_timezone(self):
+        """
+        Whether the user has actually picked a zone. get_timezone falls back to
+        America/New_York, which is fine for showing something in the menu but
+        must not be mistaken for a choice: applying it to a device that has
+        never set one would move a clock the user had already set correctly.
+        """
+        return bool(self.config.get("timezone"))
+
     def set_timezone(self, value):
         self.config["timezone"] = value
         self.save_config()
