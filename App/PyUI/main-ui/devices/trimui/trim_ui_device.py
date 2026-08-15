@@ -19,7 +19,6 @@ from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGa
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
-from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -311,41 +310,35 @@ class TrimUIDevice(DeviceCommon):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
     
-    def supports_timezone_setting(self):
-        return True
-
-    def prompt_timezone_update(self):
-        timezone_menu = TimezoneMenu()
-        tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/usr/share/zoneinfo', verify_via_datetime=True))
-
-        if (tz is not None):
-            self.system_config.set_timezone(tz)
-            self.apply_timezone(tz)
+    # supports_timezone_setting and prompt_timezone_update come from
+    # DeviceCommon now, so the zone list matches the other devices.
 
     def apply_timezone(self, timezone):
         """
         timezone example: "America/New_York"
-        """
 
-        zoneinfo_path = Path("/usr/share/zoneinfo") / timezone
+        The shared behaviour sets TZ and republishes it. On top of that the
+        TrimUI points /etc/localtime at the same file, so anything that reads
+        the system timezone rather than the environment agrees, and writes the
+        result back to the hardware clock.
+        """
+        if not super().apply_timezone(timezone):
+            return False
+
+        zoneinfo_path = Path(self.get_zoneinfo_dir()) / timezone
         localtime_path = Path("/etc/localtime")
 
-        if not zoneinfo_path.exists():
-            raise ValueError(f"Invalid timezone: {timezone}")
-
-        # Update system timezone symlink 
+        # Update system timezone symlink
         try:
             subprocess.run(
                 ["ln", "-sf", str(zoneinfo_path), str(localtime_path)],
                 check=True
             )
         except Exception as e:
-            PyUiLogger.get_logger.error(f"Failed to update /etc/localtime: {e}")
+            PyUiLogger.get_logger().error(f"Failed to update /etc/localtime: {e}")
 
-        # Update environment for current process
-        os.environ["TZ"] = timezone
-        time.tzset()
         self.sync_hw_clock()
+        return True
 
     @throttle.limit_refresh(1)
     def post_present_operations(self):

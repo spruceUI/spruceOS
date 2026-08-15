@@ -1006,17 +1006,13 @@ class MiyooMiniCommon(MiyooDevice):
     def get_device_name(self):
         return self.device_name
     
-    def supports_timezone_setting(self):
-        return True
+    # Timezone support is inherited from DeviceCommon. The Mini has no tz
+    # database of its own and a read-only root, so it relies entirely on the
+    # copy spruce ships and on TZ pointing at it. What used to be here was a
+    # prompt that did nothing and a symlink into /mnt/SDCARD/miyoo285, a path
+    # left over from Sprig that no spruce install has ever had.
 
-    def prompt_timezone_update(self):
-        #No timezone update for miyoo mini
-        pass
 
-    def apply_timezone(self, timezone):
-        ProcessRunner.run(["rm", "-f", "/tmp/localtime"])
-        ProcessRunner.run(["ln", "-s", "/mnt/SDCARD/miyoo285/zoneinfo/"+timezone ,"/tmp/localtime"])
-    
     def get_fw_version(self):
         try:
             # Run fw_printenv and capture output

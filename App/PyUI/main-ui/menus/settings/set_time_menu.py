@@ -15,11 +15,23 @@ from menus.language.language import Language
 class SetTimeMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
-        # Get the output of `date` (e.g. "Wed Nov 12 17:37:42 UTC 2025")
-        result = subprocess.check_output(["date"], text=True).strip()
-
-        # Parse to datetime (may raise if %Z not recognized in some locales)
-        dt = datetime.strptime(result, "%a %b %d %H:%M:%S %Z %Y")
+        # Get the output of `date` (e.g. "Wed Nov 12 17:37:42 UTC 2025") and read
+        # the numbers back off it.
+        #
+        # The zone name in the middle used to always be UTC. Now that a timezone
+        # can be set it is whichever abbreviation the zone uses, including the
+        # numeric ones like "+0545", and %Z only matches those while `date` and
+        # Python agree on TZ. They do, since date is a child of this process, and
+        # every zone shipped parses. But a failure here would take out the whole
+        # menu, and the clock is readable without shelling out at all, so fall
+        # back rather than raise.
+        try:
+            result = subprocess.check_output(["date"], text=True).strip()
+            dt = datetime.strptime(result, "%a %b %d %H:%M:%S %Z %Y")
+        except Exception as e:
+            PyUiLogger.get_logger().warning(
+                f"Could not read the clock from `date`, using local time: {e}")
+            dt = datetime.now()
 
         # Assign numeric fields
         self.day = dt.day

@@ -74,12 +74,18 @@ class ScreenSaver:
 
     @classmethod
     def render_if_needed(cls):
-        now = time.time()
-        if cls._animation_path and now >= cls._animation_next_time:
+        # Two different clocks on purpose. Frame and box art pacing is "how long
+        # since the last one", so it uses the monotonic clock and survives the
+        # user setting the time. The widget deadline is an actual wall clock
+        # instant -- the start of the next minute -- so it has to stay on
+        # time.time() or the clock would stop ticking on the minute.
+        elapsed_now = time.monotonic()
+        wall_now = time.time()
+        if cls._animation_path and elapsed_now >= cls._animation_next_time:
             cls.render()
-        elif cls._boxart_next_time and now >= cls._boxart_next_time:
+        elif cls._boxart_next_time and elapsed_now >= cls._boxart_next_time:
             cls.render()
-        elif cls._widgets_next_time and now >= cls._widgets_next_time:
+        elif cls._widgets_next_time and wall_now >= cls._widgets_next_time:
             cls.render()
 
     @classmethod
@@ -171,17 +177,21 @@ class ScreenSaver:
         if cls._static_surface is None or cls._static_key != key:
             cls._free_static_surface()
 
-            surface = sdl2.sdlimage.IMG_Load(bg_image.encode("utf-8"))
+            surface = Display.image_load(bg_image)
             if surface:
+                # Blur first: it reads the pixels itself and only understands 24
+                # and 32 bit surfaces, so it has to see the format IMG_Load gave
+                # us rather than whatever the renderer wants.
                 if blur > 0:
                     surface = cls._apply_blur(surface, blur)
+                surface = Display.convert_surface_to_safe_format(surface)
+            if surface:
                 cls._static_surface = surface
                 cls._static_key = key
 
         if cls._static_surface is None:
-            sdl2.SDL_SetRenderDrawColor(Display.renderer.sdlrenderer,
-                bg_color[0], bg_color[1], bg_color[2], 255)
-            sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
+            PyUiLogger.get_logger().error(f"ScreenSaver could not load background {bg_image}")
+            cls._clear_to_bg_color(Display, bg_color)
             return
 
         texture = sdl2.SDL_CreateTextureFromSurface(Display.renderer.renderer, cls._static_surface)
@@ -190,6 +200,40 @@ class ScreenSaver:
             dst = sdl2.SDL_Rect(0, 0, screen_w, screen_h)
             sdl2.SDL_RenderCopy(Display.renderer.renderer, texture, None, dst)
             sdl2.SDL_DestroyTexture(texture)
+        else:
+            # Falling through here without drawing anything would leave whatever
+            # the menu last drew on screen, which reads as the screensaver simply
+            # ignoring the chosen image.
+            PyUiLogger.get_logger().error(
+                f"ScreenSaver could not create a texture for {bg_image}: {cls._sdl_error()}")
+            cls._clear_to_bg_color(Display, bg_color)
+
+    @classmethod
+    def _clear_to_bg_color(cls, Display, bg_color):
+        sdl2.SDL_SetRenderDrawColor(Display.renderer.sdlrenderer,
+            bg_color[0], bg_color[1], bg_color[2], 255)
+        sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
+
+    @classmethod
+    def _sdl_error(cls):
+        error = sdl2.SDL_GetError()
+        return error.decode("utf-8", "replace") if error else "unknown error"
+
+    @classmethod
+    def _texture_from_borrowed_surface(cls, surface, Display):
+        """
+        Same pixel format conversion Display.convert_surface_to_safe_format does,
+        but through a copy. Gif frames belong to the animation and get reused every
+        time round, so the original has to be left alone.
+        """
+        if surface and Device.get_device().might_require_surface_format_conversion():
+            if surface.contents.format.contents.format not in Display.supported_formats:
+                converted = sdl2.SDL_ConvertSurfaceFormat(surface, sdl2.SDL_PIXELFORMAT_ARGB1555, 0)
+                if converted:
+                    texture = sdl2.SDL_CreateTextureFromSurface(Display.renderer.renderer, converted)
+                    sdl2.SDL_FreeSurface(converted)
+                    return texture
+        return sdl2.SDL_CreateTextureFromSurface(Display.renderer.renderer, surface)
 
     @classmethod
     def _free_static_surface(cls):
@@ -209,7 +253,7 @@ class ScreenSaver:
         sdl2.SDL_RenderClear(Display.renderer.sdlrenderer)
 
         interval = Theme.get_screensaver_boxart_interval_sec()
-        now = time.time()
+        now = time.monotonic()
 
         # Only advance on a cycle boundary. render() also gets called for unrelated reasons
         # (blank_screen, the layout editor redrawing) and those must not push the deadline out.
@@ -234,12 +278,14 @@ class ScreenSaver:
         """Load the next box art surface, dropping any that fail to decode."""
         from utils.boxart.boxart_library import BoxArtLibrary
 
+        from display.display import Display
+
         MAX_ATTEMPTS = 5
         for _ in range(MAX_ATTEMPTS):
             candidate = BoxArtLibrary.next_image()
             if candidate is None:
                 return None
-            surface = sdl2.sdlimage.IMG_Load(candidate.encode("utf-8"))
+            surface = Display.convert_surface_to_safe_format(Display.image_load(candidate))
             if surface:
                 return surface
             PyUiLogger.get_logger().warning(f"ScreenSaver could not load box art {candidate}")
@@ -290,20 +336,26 @@ class ScreenSaver:
         anim = cls._animation.contents
         frame = cls._animation_frame % anim.count
         surface = anim.frames[frame]
-        texture = sdl2.SDL_CreateTextureFromSurface(Display.renderer.renderer, surface)
-        if not texture:
-            return
-        sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
-        src = sdl2.SDL_Rect(0, 0, anim.w, anim.h)
-        dst = sdl2.SDL_Rect(0, 0, screen_w, screen_h)
-        sdl2.SDL_RenderCopy(Display.renderer.renderer, texture, src, dst)
-        sdl2.SDL_DestroyTexture(texture)
+        texture = cls._texture_from_borrowed_surface(surface, Display)
+        if texture:
+            sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
+            src = sdl2.SDL_Rect(0, 0, anim.w, anim.h)
+            dst = sdl2.SDL_Rect(0, 0, screen_w, screen_h)
+            sdl2.SDL_RenderCopy(Display.renderer.renderer, texture, src, dst)
+            sdl2.SDL_DestroyTexture(texture)
+        else:
+            PyUiLogger.get_logger().error(
+                f"ScreenSaver could not create a texture for frame {frame} of {bg_image}: {cls._sdl_error()}")
+            cls._clear_to_bg_color(Display, bg_color)
 
+        # Outside the branch on purpose: a frame that failed still has to move the
+        # clock on, or render_if_needed sees a deadline in the past and retries
+        # flat out.
         delay = anim.delays[frame] if anim.delays else 100
         if delay < 100:
             delay = 100
         cls._animation_frame = (frame + 1) % anim.count
-        cls._animation_next_time = time.time() + delay / 1000.0
+        cls._animation_next_time = time.monotonic() + delay / 1000.0
 
     @classmethod
     def _load_animation(cls, bg_image, Display):

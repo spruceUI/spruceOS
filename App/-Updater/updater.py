@@ -246,6 +246,12 @@ def extract_with_progress(archive):
             name = line.strip().lstrip("- ")
             if not name:
                 continue
+            # 7zr reports failures on stdout, mixed in with the per-file listing.
+            # Without this they go straight into the progress bar and are gone,
+            # leaving "completed with warnings" as the only thing in the log.
+            if name.startswith(("ERROR", "WARNING", "Cannot", "Can not", "Skipping")):
+                log.warning(f"7zr: {name}")
+                continue
             count += 1
             pct = count * 100 // total
             if pct != last_pct or count == total:
@@ -389,7 +395,7 @@ def main():
 
     ret = extract_with_progress(update_file)
     if ret != 0:
-        log.warning("Extraction completed with warnings")
+        log.warning(f"Extraction completed with warnings (7zr exit code {ret})")
         ui.image_and_text(LOGO, 35, 25, "Update completed with warnings. Check the update log for details.")
     else:
         log.info("Extraction completed successfully")

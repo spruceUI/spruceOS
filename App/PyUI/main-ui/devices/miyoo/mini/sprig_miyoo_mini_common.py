@@ -180,5 +180,6 @@ class SprigMiyooMiniCommon(MiyooMiniCommon):
     def _set_disp_green_to_config(self):
         self._set_screen_values_to_config()
 
-    def supports_timezone_setting(self):
-        return False
+    # supports_timezone_setting was forced off here because the Mini had no way
+    # to change its timezone. It does now, via the database spruce ships, so
+    # this falls through to DeviceCommon like every other device.

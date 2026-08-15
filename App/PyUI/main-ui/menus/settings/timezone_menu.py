@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import os
+import zoneinfo
 from zoneinfo import ZoneInfo
 from controller.controller_inputs import ControllerInput
 from utils.logger import PyUiLogger
@@ -20,25 +21,24 @@ class TimezoneMenu():
         PyUiLogger.get_logger().info(f"Scanning {timezone_dir} for timezones")
         potential_timezone_entries = []
 
-        # Iterate over each subdirectory in the base directory
-        for subfolder in os.listdir(timezone_dir):
-            subfolder_path = os.path.join(timezone_dir, subfolder)
+        # ZoneInfo resolves names against its own search path, not against the
+        # directory being listed, and that path defaults to /usr/share/zoneinfo
+        # and friends. Without this every entry fails to verify on any device
+        # whose zones live somewhere else, and the menu comes up empty.
+        if verify_via_datetime:
+            zoneinfo.reset_tzpath(to=[timezone_dir])
 
-            # Make sure it's a directory
-            if os.path.isdir(subfolder_path):
-                PyUiLogger.get_logger().info(f"Checking subfolder {subfolder} for timezones")
-                # List all files in the subfolder
-                for filename in os.listdir(subfolder_path):
-                    file_path = os.path.join(subfolder_path, filename)
-                    
-                    # Only include if it's a regular file
-                    if os.path.isfile(file_path):
-                        potential_timezone_entries.append(f"{subfolder}/{filename}")
-
-        for filename in os.listdir(timezone_dir):
-            file_path = os.path.join(subfolder_path, filename)
-            if os.path.isfile(file_path):
-                potential_timezone_entries.append(f"{filename}")
+        # Walk the whole tree rather than the top two levels. Zones sit at three
+        # different depths: UTC at the top, America/New_York one down, and
+        # America/Argentina/Buenos_Aires two down. Scanning only one level below
+        # the root, which is what this did before, silently dropped every zone
+        # in Argentina, Indiana, Kentucky and North Dakota.
+        for dirpath, _, filenames in os.walk(timezone_dir):
+            for filename in filenames:
+                file_path = os.path.join(dirpath, filename)
+                if os.path.isfile(file_path):
+                    potential_timezone_entries.append(
+                        os.path.relpath(file_path, timezone_dir))
 
         timezone_entries = []
         for entry in potential_timezone_entries:
@@ -51,6 +51,10 @@ class TimezoneMenu():
                 # If timezone fails to load for any reason, skip it
                 PyUiLogger.get_logger().warning(f"Failed to load timezone {entry}: {e}")
 
+        # os.listdir hands these back in whatever order the filesystem holds
+        # them, which is unusable in a list this long.
+        timezone_entries.sort()
+        PyUiLogger.get_logger().info(f"Found {len(timezone_entries)} timezones in {timezone_dir}")
         return timezone_entries
 
 

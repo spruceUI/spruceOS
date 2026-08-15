@@ -11,8 +11,12 @@ class Controller:
     index = None
     name = None
     mapping = None
+    # Every clock reading in here measures how long something has been going on,
+    # never what time of day it is, so they all use time.monotonic(). time.time()
+    # jumps when the user sets the clock in settings, and a jump forward used to
+    # look like a long idle and kick the screensaver on mid-edit.
     last_input_time = 0
-    screensaver_input_tracking_time = time.time()
+    screensaver_input_tracking_time = time.monotonic()
     hold_delay = 0
     additional_button_watchers = []
     is_check_for_hotkey = False
@@ -189,7 +193,7 @@ class Controller:
                     continue
                 ms = int(POLL_INTERVAL_SECONDS * 1000)
                 inp = Controller.controller_interface.get_input(ms)
-                if inp is not None and time.time() < Controller._screensaver_ignore_input_until:
+                if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
                     continue
                 if inp is not None:
@@ -197,8 +201,8 @@ class Controller:
                     Controller.controller_interface.clear_input_queue()
                     ScreenSaver.clear_cache()
                     Display.restore_from_blank()
-                    Controller.last_input_time = time.time()
-                    Controller.screensaver_input_tracking_time = time.time()
+                    Controller.last_input_time = time.monotonic()
+                    Controller.screensaver_input_tracking_time = time.monotonic()
                     Controller._screensaver_active = False
                     Controller.last_controller_input = None
                     return False
@@ -218,7 +222,7 @@ class Controller:
         if timeout == DEFAULT_TIMEOUT_FLAG:
             timeout = Device.get_device().input_timeout_default()
 
-        now = time.time()
+        now = time.monotonic()
         time_since_last_input = now - Controller.last_input_time
 
         # Clear stale events if enough time has passed
@@ -228,10 +232,10 @@ class Controller:
                 Controller.clear_input_queue()
 
         Controller.controller_interface.force_refresh()
-        start_time = time.time()
+        start_time = time.monotonic()
 
         # Wait if the input is being held down (anti-repeat logic)
-        while Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
+        while Controller.still_held_down() and (time.monotonic() - start_time < Controller.hold_delay):
             Controller.controller_interface.force_refresh()
             time.sleep(POLL_INTERVAL_SECONDS)
 
@@ -244,12 +248,12 @@ class Controller:
             Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
 
             # Blocking wait for event until timeout
-            elapsed = time.time() - start_time
+            elapsed = time.monotonic() - start_time
             remaining_time = timeout - elapsed
             remaining_time = max(remaining_time, 0.001)
             screensaver_timeout = Theme.get_screensaver_timeout_sec()
             if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
-                idle_remaining = screensaver_timeout - (time.time() - Controller.screensaver_input_tracking_time)
+                idle_remaining = screensaver_timeout - (time.monotonic() - Controller.screensaver_input_tracking_time)
                 remaining_time = min(remaining_time, max(idle_remaining, 0.001))
             while True:
 
@@ -275,10 +279,10 @@ class Controller:
                                 Controller.check_for_hotkey()
                     else:
                         break  # Valid non-hotkey input
-                elapsed = time.time() - start_time
+                elapsed = time.monotonic() - start_time
                 remaining_time = timeout - elapsed
                 if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
-                    idle_remaining = screensaver_timeout - (time.time() - Controller.last_input_time)
+                    idle_remaining = screensaver_timeout - (time.monotonic() - Controller.last_input_time)
                     remaining_time = min(remaining_time, idle_remaining)
                 if remaining_time <= 0:
                     if not called_from_check_for_hotkey:
@@ -288,7 +292,7 @@ class Controller:
 
         #TODO i think this loop is in the wrong place
         # Wait if the input is being held down (anti-repeat logic)
-        while started_held_down and Controller.still_held_down() and (time.time() - start_time < Controller.hold_delay):
+        while started_held_down and Controller.still_held_down() and (time.monotonic() - start_time < Controller.hold_delay):
             Controller.controller_interface.force_refresh()
             time.sleep(POLL_INTERVAL_SECONDS)
 
@@ -309,9 +313,9 @@ class Controller:
                 #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
                 Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
-        Controller.last_input_time = time.time()
+        Controller.last_input_time = time.monotonic()
         if Controller.last_controller_input is not None:
-            Controller.screensaver_input_tracking_time = time.time()
+            Controller.screensaver_input_tracking_time = time.monotonic()
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 
@@ -326,14 +330,14 @@ class Controller:
         if screensaver_timeout <= 0:
             return False
 
-        if time.time() - Controller.screensaver_input_tracking_time < screensaver_timeout:
+        if time.monotonic() - Controller.screensaver_input_tracking_time < screensaver_timeout:
             return False
 
         Controller.controller_interface.clear_input_queue()
         Display.blank_screen()
         Controller._screensaver_active = True
-        Controller._screensaver_ignore_input_until = time.time() + 0.5
-        Controller.screensaver_input_tracking_time = time.time()
+        Controller._screensaver_ignore_input_until = time.monotonic() + 0.5
+        Controller.screensaver_input_tracking_time = time.monotonic()
         return True
 
     @staticmethod
@@ -363,9 +367,9 @@ class Controller:
         Controller.clear_last_input()
 
         was_hotkey = False
-        start_time = time.time()
+        start_time = time.monotonic()
 
-        while(not was_hotkey and time.time() - start_time < 0.3):
+        while(not was_hotkey and time.monotonic() - start_time < 0.3):
             if(Controller.get_input(timeout=0.05, called_from_check_for_hotkey=True)):
                 Controller.perform_hotkey(Controller.last_input())
                 time.sleep(0.1)
@@ -397,9 +401,9 @@ class Controller:
         if(is_down):
             if(controller_input in Controller.hold_buttons):
                 if controller_input not in Controller.last_press_time_map:
-                    Controller.last_press_time_map[controller_input] = time.time()   
+                    Controller.last_press_time_map[controller_input] = time.monotonic()   
                 else:
-                    last_press_time_length = time.time() - Controller.last_press_time_map[controller_input]
+                    last_press_time_length = time.monotonic() - Controller.last_press_time_map[controller_input]
                     if(last_press_time_length > TRIGGER_TIME_FOR_HOLD_BUTTONS):
                         PyUiLogger.get_logger().info(f"Starting special non sdl event : {controller_input}")
                         Controller.special_non_sdl_event = True
@@ -416,7 +420,7 @@ class Controller:
         elif(not is_down):
             Controller.non_sdl_input = None
             if(controller_input in Controller.hold_buttons):
-                last_press_time_length = time.time() - Controller.last_press_time_map[controller_input]
+                last_press_time_length = time.monotonic() - Controller.last_press_time_map[controller_input]
                 if(last_press_time_length < TRIGGER_TIME_FOR_HOLD_BUTTONS):
                     Device.get_device().special_input(controller_input, 0)
 

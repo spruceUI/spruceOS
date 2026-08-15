@@ -25,7 +25,6 @@ from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from menus.games.utils.rom_info import RomInfo
-from menus.settings.timezone_menu import TimezoneMenu
 import sdl2
 from utils import throttle
 from utils.config_copier import ConfigCopier
@@ -351,28 +350,25 @@ class MiyooFlip(MiyooDevice):
     def get_device_name(self):
         return self.device_name
     
-    def supports_timezone_setting(self):
-        return True
-
-    def prompt_timezone_update(self):
-        timezone_menu = TimezoneMenu()
-        tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/usr/share/zoneinfo', verify_via_datetime=True))
-
-        if (tz is not None):
-            self.system_config.set_timezone(tz)
-            self.apply_timezone(tz)
-
+    # supports_timezone_setting and prompt_timezone_update come from
+    # DeviceCommon now, so the Flip offers the same zone list as every other
+    # device instead of whatever its firmware happens to carry.
 
     def apply_timezone(self, timezone):
-        zoneinfo_path = f"/usr/share/zoneinfo/{timezone}"
-        localtime_path = "/userdata/localtime"
-        timezone_path = "/userdata/timezone"
-
-        if not os.path.isfile(zoneinfo_path):
+        """
+        Take the shared behaviour, which sets TZ and makes the clock correct
+        straight away, then keep writing the two files the stock layer reads so
+        it agrees with us after the next boot.
+        """
+        if not super().apply_timezone(timezone):
             Display.write_message_multiline([f"Error getting timezone file",
                                              f"Does not appear to be a file",f"{timezone}"
                                              ],3_000)
-            return
+            return False
+
+        zoneinfo_path = os.path.join(self.get_zoneinfo_dir(), timezone)
+        localtime_path = "/userdata/localtime"
+        timezone_path = "/userdata/timezone"
 
         def safe_delete(path):
             if os.path.lexists(path):
@@ -387,7 +383,8 @@ class MiyooFlip(MiyooDevice):
         shutil.copyfile(zoneinfo_path, localtime_path)
         shutil.copyfile(localtime_path, timezone_path)
 
-        Display.display_message("May need to reboot to apply timezone setting",3_000)
+        Display.display_message("Timezone updated",2_000)
+        return True
 
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, theme_path)
