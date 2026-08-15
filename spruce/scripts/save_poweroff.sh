@@ -29,6 +29,17 @@ blink_led_if_applicable() {
     [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 }
 
+# This script's own pid plus every process it is running inside of, up to init.
+own_process_chain() {
+    local p="$$"
+    local chain=""
+    while [ -n "$p" ] && [ "$p" != "0" ] && [ "$p" != "1" ]; do
+        chain="$chain $p"
+        p="$(awk '/^PPid:/ {print $2}' "/proc/$p/status" 2>/dev/null)"
+    done
+    echo "$chain"
+}
+
 kill_current_process() {
     pid="$(pgrep -f '/tmp/cmd_to_run.sh' | head -n1)"
     ppid=$pid
@@ -37,9 +48,22 @@ kill_current_process() {
         pid=$(pgrep -P $ppid)
     done
 
-    if [ "" != "$ppid" ]; then
-        kill -9 $ppid
-    fi
+    # A shutdown can be asked for by the very app we are walking down into: the
+    # updater reboots the device from a process the launcher started, so the
+    # deepest child of cmd_to_run.sh is this script. Killing it left the device
+    # sitting on "Update complete. Rebooting..." with no shutdown running at
+    # all, until the user held the power button.
+    local protected=" $(own_process_chain) "
+    for target in $ppid; do
+        case "$protected" in
+        *" $target "*)
+            log_message "save_poweroff.sh: not killing $target, the shutdown is running inside it"
+            continue
+            ;;
+        esac
+        log_message "save_poweroff.sh: killing current process $target"
+        kill -9 "$target"
+    done
 }
 
 unmount_all() {
