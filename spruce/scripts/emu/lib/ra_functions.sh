@@ -156,10 +156,19 @@ prepare_ra_config() {
 			TMP_CFG="$(mktemp)"
 			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
 				rot="1"
+				vid_x="640"
+				vid_y="480"
 			else
 				rot="0"
+				vid_x="0"
+				vid_y="0"
 			fi
-			if sed -e "s|^video_rotation.*|video_rotation = \"$rot\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+
+			if sed \
+				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
+				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$vid_x\"|" \
+				-e "s|^video_fullscreen_y.*|video_fullscreen_y = \"$vid_y\"|" \
+				"$PLATFORM_CFG" > "$TMP_CFG"; then
 				mv "$TMP_CFG" "$PLATFORM_CFG"
 			else
 				rm -f "$TMP_CFG"
