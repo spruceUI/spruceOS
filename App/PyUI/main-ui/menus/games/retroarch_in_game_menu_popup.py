@@ -17,8 +17,8 @@ class RetroarchInGameMenuPopup:
         pass
         
     def send_cmd_to_ra(self, cmd):
-        ra_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); 
-        ra_socket.sendto(cmd, ('127.0.0.1', 55355))
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as ra_socket:
+            ra_socket.sendto(cmd, ('127.0.0.1', 55355))
 
     def exit_game(self, input):
         if(ControllerInput.A == input):
