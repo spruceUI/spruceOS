@@ -74,7 +74,7 @@ kill_ppsspp() {
 	log_message "button_actions.sh: Killing PPSSPP!"
 
     # Send SIGUSR1 to trigger save-and-quit (saves state then exits cleanly)
-    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
+    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2 PPSSPPSDL_h700
 }
 
 kill_scummvm() {
@@ -243,7 +243,7 @@ perform_action() {
         ;;
     "Emulator menu")
         if pgrep -f "./PPSSPPSDL" >/dev/null; then
-            killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
+            killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2 PPSSPPSDL_h700
         elif pgrep -f "pcsx_64|pcsx_a30|pcsx_mini" >/dev/null; then
             killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
         elif pgrep -f "mupen64plus" >/dev/null; then
