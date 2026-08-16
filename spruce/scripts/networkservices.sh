@@ -16,10 +16,16 @@ syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyn
 
 connect_services() {
 
+	elapsed=0
 	while true; do
 		if network_is_connected true; then
 			break
 		fi
+		if [ "$elapsed" -ge 120 ]; then
+			log_message "Network services: no connectivity after 60s, deferring service start"
+			return 1
+		fi
+		elapsed=$((elapsed + 1))
 		sleep 0.5
 	done
 
