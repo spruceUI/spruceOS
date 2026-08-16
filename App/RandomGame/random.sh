@@ -67,11 +67,12 @@ if [ ! -d "$ROM_DIR" ] || [ ! -d "$EMU_DIR" ]; then
 fi
 
 NOTOK=1
-ATTEMPTS=0
+MAX_ATTEMPTS=30
+attempt_count=0
 while [ "$NOTOK" -eq 1 ]; do
     NOTOK=0
-    ATTEMPTS=$((ATTEMPTS + 1))
-    if [ "$ATTEMPTS" -gt 30 ]; then
+    attempt_count=$((attempt_count + 1))
+    if [ "$attempt_count" -gt "$MAX_ATTEMPTS" ]; then
         display --icon "$IMAGE_PATH" -t "No eligible games found. Add some games first!" -d 3
         exit 1
     fi
