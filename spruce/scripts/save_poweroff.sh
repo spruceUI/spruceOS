@@ -273,16 +273,18 @@ exec_shutdown_stage_2() {
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################
 
-PIDFILE="/tmp/save_poweroff.pid"
-if [ -f "$PIDFILE" ]; then
-    oldpid="$(cat "$PIDFILE")"
+LOCKDIR="/tmp/save_poweroff.lock"
+PIDFILE="$LOCKDIR/pid"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+    oldpid="$(cat "$PIDFILE" 2>/dev/null)"
     if [ -n "$oldpid" ] && kill -0 "$oldpid" 2>/dev/null; then
-    log_message "save_poweroff.sh called in duplicate. Ignoring second call."
+        log_message "save_poweroff.sh called in duplicate. Ignoring second call."
         exit 0
     fi
+    log_message "save_poweroff.sh reclaiming stale lock (owner ${oldpid:-unknown} gone)."
 fi
 echo $$ > "$PIDFILE"
-trap 'rm -f "$PIDFILE"' EXIT INT TERM
+trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = "$$" ] && rm -rf "$LOCKDIR"' EXIT INT TERM
 
 
 
