@@ -1068,18 +1068,24 @@ enable_wifi() {
     touch /tmp/wifion           2>/dev/null
     ifconfig wlan0 up           2>/dev/null
 
-    # check if WPA supplicant needs to be started or restarted
     WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
     if [ -n "$WPA_PID" ]; then
-        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-            log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
-            kill -9 "$WPA_PID" 2>/dev/null
+        WPA_CORRECT_RUNNING=0
+        for wpa_pid in $WPA_PID; do
+            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
+            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+                WPA_CORRECT_RUNNING=1
+            else
+                log_message "wpa_supplicant $wpa_pid using wrong config; stopping it"
+                kill -9 "$wpa_pid" 2>/dev/null
+            fi
+        done
+        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
+            log_message "wpa_supplicant was running with the correct conf file already"
+        else
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
             log_message "wpa_supplicant was running with the wrong conf so restarted"
-        else
-            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
