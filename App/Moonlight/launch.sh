@@ -22,7 +22,11 @@ COMMAND=$(cat command.txt)
 
 export GAMEDIR
 /mnt/SDCARD/spruce/bin64/gptokeyb "moonlight" &
-eval "./moonlight $COMMAND"
+set -f
+# shellcheck disable=SC2086
+set -- $COMMAND
+set +f
+./moonlight "$@"
 kill -9 $(pidof gptokeyb) 2>/dev/null
 
 rm -f command.txt
