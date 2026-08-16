@@ -1246,26 +1246,37 @@ enable_wifi() {
     fi
 
     # check if WPA supplicant needs to be started or restarted
+    # pgrep can return SEVERAL pids: a stale supplicant from a previous config
+    # and a fresh one can both match. The old single-pid form redirected
+    # /proc/$WPA_PID/cmdline with a multi-word variable, which fails outright,
+    # so a wrong-config supplicant survived and the UI never associated.
     WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
     if [ -n "$WPA_PID" ]; then
-        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-            # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
-            # that is the OS underneath us, and it is very likely ASSOCIATED
-            # RIGHT NOW. spruce takes ownership here by design, but taking it by
-            # killing that process and starting ours against a config that may
-            # hold no networks at all just drops a working connection, and the
-            # user sees WiFi die a few seconds into boot for no reason.
-            #
-            # Carry its networks across first, then take over.
-            log_message "wpa_supplicant using wrong config; taking over with $WPA_SUPPLICANT_FILE"
-            import_wpa_networks_from "$(wpa_conf_path_of_pid "$WPA_PID")"
-            kill -9 "$WPA_PID" 2>/dev/null
+        WPA_CORRECT_RUNNING=0
+        for wpa_pid in $WPA_PID; do
+            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
+            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+                WPA_CORRECT_RUNNING=1
+            else
+                # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
+                # that is the OS underneath us, and it is very likely ASSOCIATED
+                # RIGHT NOW. spruce takes ownership here by design, but taking it by
+                # killing that process and starting ours against a config that may
+                # hold no networks at all just drops a working connection, and the
+                # user sees WiFi die a few seconds into boot for no reason.
+                #
+                # Carry its networks across first, then take over.
+                log_message "wpa_supplicant $wpa_pid using wrong config; taking over with $WPA_SUPPLICANT_FILE"
+                import_wpa_networks_from "$(wpa_conf_path_of_pid "$wpa_pid")"
+                kill -9 "$wpa_pid" 2>/dev/null
+            fi
+        done
+        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
+            log_message "wpa_supplicant was running with the correct conf file already"
+        else
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
             log_message "wpa_supplicant was running with the wrong conf so restarted"
-        else
-            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
