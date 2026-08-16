@@ -221,7 +221,8 @@ unpack_archives() {
                 log_firstboot_theme_archive_status "$section_label" "start" "$archive_name.7z"
             fi
 
-            if 7zr l "$archive" | grep -q "/mnt/SDCARD/"; then
+            member_paths=$(7zr l -slt "$archive" 2>/dev/null | sed -n 's/^Path = //p' | sed '1d')
+            if [ -n "$member_paths" ] && ! printf '%s\n' "$member_paths" | grep -qvE '^mnt(/SDCARD(/.*)?)?$'; then
                 if 7zr x -aoa "$archive" -o/; then
                     rm -f "$archive"
                     log_message "Unpacker: Unpacked and removed: $archive_name.7z"
