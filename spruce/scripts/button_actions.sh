@@ -18,7 +18,8 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
-    if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
+    case "$CMD" in
+    */Roms/PORTS/*)
         rm -f /tmp/menubtn
 
         capture_screen
@@ -27,8 +28,8 @@ kill_port(){
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
         kill -9 -"$SID" 2>/dev/null
-
-    fi
+        ;;
+    esac
 }
 
 # TODO bypass all of this if drastic original as killall -15 does not work on it
