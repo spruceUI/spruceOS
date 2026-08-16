@@ -340,7 +340,7 @@ class TrimUIDevice(DeviceCommon):
                 check=True
             )
         except Exception as e:
-            PyUiLogger.get_logger.error(f"Failed to update /etc/localtime: {e}")
+            PyUiLogger.get_logger().error(f"Failed to update /etc/localtime: {e}")
 
         # Update environment for current process
         os.environ["TZ"] = timezone
