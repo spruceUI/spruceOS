@@ -60,9 +60,7 @@ class TrimUISmartProS(TrimUIDevice):
                 Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
                 volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
                 volume_key_polling_thread.start()
-                self.power_key_watcher = KeyWatcher("/dev/input/event0")
-                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-                power_key_polling_thread.start()
+                self.power_key_watcher = self.volume_key_watcher
                 
         super().__init__()
 
