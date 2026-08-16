@@ -77,6 +77,7 @@ read_current() {
 # Silent Mode unmute. Cheap enough to run on every key event, even held.
 sync_value() {
     new_vol="$1"
+    [ -e /tmp/sleep_helper_started ] && return 0
     [ "$new_vol" = "$last_seen" ] && return 0
     last_seen="$new_vol"
     if [ "$new_vol" != "$(get_volume_level)" ]; then
