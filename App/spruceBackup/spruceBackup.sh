@@ -165,9 +165,10 @@ backup_theme_configs
 log_message "Creating 7z archive"
 7zr a -spf -mmt=2 "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 
-if [ $? -eq 0 ]; then  
+backup_status=$?
+if [ "$backup_status" -eq 0 ]; then
     display_image_and_text "$ICON_PATH" 25 25 "Backup completed successfully! Backups can be found in the Saves/spruce/backups/ directory." 75
-elif [ $? -eq 1 ]; then # exit code 1 is with warnings, but still creates an archive.
+elif [ "$backup_status" -eq 1 ]; then # exit code 1 is with warnings, but still creates an archive.
     display_image_and_text "$ICON_PATH" 25 25 "Backup completed but with warnings. Check Saves/spruce/spruceBackup.log for more details. Backups can be found in the Saves/spruce/backups/ directory." 75
 else                    # exit codes 2+ are various actual failures
     display_image_and_text "$BAD_IMG" 25 25 "Backup failed. Check Saves/spruce/spruceBackup.log for more details." 75
@@ -188,3 +189,7 @@ log_message "Backup process finished running"
 
 auto_regen_tmp_update
 sync
+
+if [ "${backup_status:-0}" -ge 2 ]; then
+    exit "$backup_status"
+fi

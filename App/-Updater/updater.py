@@ -350,8 +350,12 @@ def main():
 
     kill_network_services()
 
-    # Backup
-    subprocess.run([f"{SD_ROOT}/App/spruceBackup/spruceBackup.sh"], timeout=300)
+    try:
+        backup = subprocess.run([f"{SD_ROOT}/App/spruceBackup/spruceBackup.sh"], timeout=300)
+    except subprocess.TimeoutExpired:
+        fail("Backup timed out; aborting update before touching any files")
+    if backup.returncode != 0:
+        fail(f"Backup failed with code {backup.returncode}; aborting update before touching any files")
     set_led_trigger("heartbeat")
 
     # Delete old files
