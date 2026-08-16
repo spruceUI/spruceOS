@@ -3,18 +3,15 @@
 # This script is intended to be copied to /tmp/ at the end of the original
 # save_poweroff.sh, and handle the final unmounting of the SD card before
 # finally shutting down.
-echo 1
 # Use only system binaries — NOT anything on the SD card we're about to unmount.
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 unset LD_LIBRARY_PATH
-echo 2
 cd /tmp
 
 # Detach stage2 from inherited stdin/stdout/stderr so it does not
 # keep the SD filesystem busy during the final remount.
 exec </dev/null >/dev/null 2>&1
 
-echo 3
 # Close any file descriptors inherited from save_poweroff.sh that may
 # still reference files on the SD card.
 for fd in $(ls /proc/$$/fd 2>/dev/null | grep -E '^[3-9][0-9]*$'); do
@@ -55,7 +52,6 @@ STRICT_UNMOUNT="${SPRUCE_STRICT_UNMOUNT:-0}"
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     exec </dev/null >/dev/null 2>&1
 fi
-echo 4
 # Where the card is actually mounted.
 #
 # This used to be guessed from /proc/cpuinfo, which is wrong wherever the mount
@@ -134,7 +130,6 @@ else
         *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
     esac
 fi
-echo 5
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
@@ -181,13 +176,10 @@ for pidpath in /proc/[0-9]*; do
     [ "$holds_sd" -eq 1 ] && kill -9 "$pid" 2>/dev/null
 done
 
-echo 6
 # Give the kernel time to close file descriptors from killed processes
 sleep 0.1
-echo 7
 # Flush all pending writes
 sync
-echo 8
 # Discover the SD card's block device from its mount entry
 SD_DEV=$(awk -v mp="$SD_MOUNTPOINT" '$2 == mp {print $1; exit}' /proc/mounts)
 
@@ -197,20 +189,17 @@ SD_DEV=$(awk -v mp="$SD_MOUNTPOINT" '$2 == mp {print $1; exit}' /proc/mounts)
 #   - An overlay on /usr with upperdir on /mnt/SDCARD/Persistent/...
 #   - A duplicate mount of the same device at /userdata
 # All of these must be removed before the SD card can be cleanly unmounted.
-echo 9
 # 1. Squashfs loop mounts whose source file is on the SD card
 #    (also check /mnt/SDCARD in case of symlinks)
 awk '$1 ~ "^/mnt/sdcard/" || $1 ~ "^/mnt/SDCARD/" {print $2}' /proc/mounts | \
     sort -r | while read -r mnt; do
     umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
 done
-echo 10
 # 2. Overlay filesystems that use the SD card for upper/work dirs
 awk '$1 == "overlay" && ($0 ~ "/mnt/sdcard" || $0 ~ "/mnt/SDCARD") {print $2}' /proc/mounts | \
     while read -r mnt; do
     umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
 done
-echo 11
 # 3. Any other mounts of the same block device (e.g. /userdata)
 if [ -n "$SD_DEV" ]; then
     awk -v dev="$SD_DEV" -v mp="$SD_MOUNTPOINT" '$1 == dev && $2 != mp {print $2}' /proc/mounts | \
@@ -218,7 +207,6 @@ if [ -n "$SD_DEV" ]; then
         umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
     done
 fi
-echo 12
 # 4. Now remount the SD card read-only (clears the filesystem dirty flag)
 #    and perform the final unmount.
 mount -o remount,ro "$SD_MOUNTPOINT" 2>/dev/null
@@ -260,7 +248,6 @@ else
     # that does not.
     umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
 fi
-echo 13
 
 # Cut the power, and do not take "maybe" for an answer.
 #
@@ -293,7 +280,6 @@ if [ "$STRICT_UNMOUNT" != "1" ]; then
     else
         poweroff
     fi
-    echo 14
     exit 0
 fi
 
