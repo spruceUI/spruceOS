@@ -24,7 +24,7 @@ shader0 = \"../../shaders/shaders/sharp-bilinear-simple.glsl\"
 filter_linear0 = \"true\"
 wrap_mode0 = \"clamp_to_border\"
 mipmap_input0 = \"false\"
-alias0 = ""
+alias0 = \"\"
 float_framebuffer0 = \"false\"
 srgb_framebuffer0 = \"false\""
 
