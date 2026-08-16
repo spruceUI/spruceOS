@@ -32,7 +32,10 @@ fi
 # initialize temporary nursery file directory
 
 mkdir "$TMP_DIR" 2>/dev/null
-cd "$TMP_DIR"
+if ! cd "$TMP_DIR"; then
+    log_and_display_message "Could not enter download directory. Aborting."
+    exit 1
+fi
 rm -r ./* 2>/dev/null
 
 # attempt to download the game
