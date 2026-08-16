@@ -21,17 +21,17 @@ morse_code_sos() {
     for symbol in "$@"; do
         case $symbol in
         ".")
-            echo 1 >${LED_PATH}/brightness
+            [ "$LED_PATH" != "not applicable" ] && echo 1 >${LED_PATH}/brightness
             [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dot_duration
             ;;
         "-")
-            echo 1 >${LED_PATH}/brightness
+            [ "$LED_PATH" != "not applicable" ] && echo 1 >${LED_PATH}/brightness
             [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dash_duration
             ;;
         esac
-        echo 0 >${LED_PATH}/brightness
+        [ "$LED_PATH" != "not applicable" ] && echo 0 >${LED_PATH}/brightness
         # No need to set vibrate to off as we passed duration to vibrate function
         sleep $intra_char_gap
     done
@@ -108,16 +108,15 @@ while true; do
         LAST_LOG=$(date +%s) # Keep this as Unix timestamp
     fi
 
+    # force a safe shutdown at 1% regardless of settings
+    hard_shutdown $CAPACITY
+
+    [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
+
     # Set default value if PERCENT is empty or non-numeric
     case $PERCENT in
     '' | *[!0-9]*) PERCENT=4 ;;
     esac
-
-    # force a safe shutdown at 1% regardless of settings
-    hard_shutdown $CAPACITY
-
-    # disable script if turned off in spruce.cfg
-    [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
 
     if [ "$CAPACITY" -le "$PERCENT" ]; then
         vibrate_count=0
@@ -144,21 +143,21 @@ while true; do
 
             hard_shutdown $CAPACITY
 
-            # disable script if turned off in spruce.cfg
-            [ "$PERCENT" = "Off" ] && sleep $SLEEP && continue
+            [ "$PERCENT" = "Off" ] && break
+            case $PERCENT in
+            '' | *[!0-9]*) PERCENT=4 ;;
+            esac
         done
-    elif [ "$LED_PATH" != "not applicable" ]; then
-        if [ "$LED_MODE" = "Always on" ]; then
-            echo 1 >${LED_PATH}/brightness
-            flag_remove "low_battery"
-
-        elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
-            echo 1 >${LED_PATH}/brightness
-            flag_remove "low_battery"
-
-        else # if [ "$LED_MODE" = "Always Off" ]; then
-            echo 0 >${LED_PATH}/brightness
-            flag_remove "low_battery"
+    else
+        flag_remove "low_battery"
+        if [ "$LED_PATH" != "not applicable" ]; then
+            if [ "$LED_MODE" = "Always on" ]; then
+                echo 1 >${LED_PATH}/brightness
+            elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
+                echo 1 >${LED_PATH}/brightness
+            else # if [ "$LED_MODE" = "Always Off" ]; then
+                echo 0 >${LED_PATH}/brightness
+            fi
         fi
     fi
 
