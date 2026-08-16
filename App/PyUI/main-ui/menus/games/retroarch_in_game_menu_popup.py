@@ -106,7 +106,11 @@ class RetroarchInGameMenuPopup:
         while (popup_selection := popup_view.get_selection()):
             if(popup_selection.get_input() is not None):
                 break
-        
+
+        if popup_selection is None:
+            self.send_cmd_to_ra(b'PAUSE_TOGGLE')
+            return True
+
         if(ControllerInput.A == popup_selection.get_input()): 
             self.send_cmd_to_ra(b'PAUSE_TOGGLE')
             return popup_selection.get_selection().get_value()(popup_selection.get_input())
