@@ -179,6 +179,52 @@ prepare_ra_config() {
 	sync
 }
 
+# Every H700 Anbernic pad reports the same SDL name ("ANBERNIC-keys") and GUID,
+# so RetroArch cannot pick a per-model autoconfig by itself, and it re-applies
+# the name-matched autoconfig when the pad connects (overriding any --appendconfig
+# binds). So write the autoconfig that matches the detected model before launch.
+# Face/dpad/shoulders/start/select and the left stick are identical across the
+# line; only triggers and stick-clicks move. Indices verified on the CubeXX and
+# cross-checked against MustardOS's per-model sdl_map.
+write_baseos_ra_autoconfig() {
+	ac="$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
+	[ -d "${ac%/*}" ] || return 0
+
+	# Shared across every model
+	common='input_driver = "sdl2"
+input_device = "ANBERNIC-keys"
+input_vendor_id = "1"
+input_product_id = "1"
+input_a_btn = "3"
+input_b_btn = "4"
+input_x_btn = "6"
+input_y_btn = "5"
+input_l_btn = "7"
+input_r_btn = "8"
+input_select_btn = "9"
+input_start_btn = "10"
+input_up_btn = "h0up"
+input_down_btn = "h0down"
+input_left_btn = "h0left"
+input_right_btn = "h0right"
+input_l_x_plus_axis = "+0"
+input_l_x_minus_axis = "-0"
+input_l_y_plus_axis = "+1"
+input_l_y_minus_axis = "-1"'
+
+	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+		rg34xxsp|rg35xxh|rg35xxpro|rg40xxh|rg40xxv|rgcubexx)
+			# Analog-stick models: L3/R3 take b12/b15, L2/R2 shift to b13/b14,
+			# and there is a right stick on axes 2/3.
+			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\ninput_r3_btn = "15"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\n' "$common" > "$ac"
+			;;
+		*)
+			# Stickless models: no L3/R3 or right stick, L2/R2 stay at b12/b13.
+			printf '%s\ninput_l2_btn = "12"\ninput_r2_btn = "13"\n' "$common" > "$ac"
+			;;
+	esac
+}
+
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
@@ -233,6 +279,7 @@ run_retroarch() {
 	# Overlay the sdl2 input drivers on top without touching the shared cfg.
 	if [ -n "$SPRUCE_BASEOS" ] && [ -f "$RA_DIR/platform/retroarch-AnbernicRG_XX-baseos.cfg" ]; then
 		RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/retroarch-AnbernicRG_XX-baseos.cfg"
+		write_baseos_ra_autoconfig
 	fi
 
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
