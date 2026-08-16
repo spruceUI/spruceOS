@@ -283,6 +283,8 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
+            [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
+            PID_UP=""
 
             if menu_vol_brightness_active; then
                 brightness_down # ensure fire the first run
@@ -303,6 +305,8 @@ getevent $EVENTS | while read line; do
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
             kill $PID_UP 2&> /dev/null
             PID_UP=""
+            [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
+            PID_DOWN=""
 
             if menu_vol_brightness_active; then
                 brightness_up # ensure fire the first run
