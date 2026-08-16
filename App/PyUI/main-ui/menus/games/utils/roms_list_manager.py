@@ -66,12 +66,16 @@ class RomsListManager:
 
     def save_to_file(self):
         try:
-            with open(self.entries_file, 'w') as f:
+            tmp_path = f"{self.entries_file}.tmp"
+            with open(tmp_path, 'w') as f:
                 json.dump(
                     [entry.__dict__ for entry in self._entries],
                     f,
                     indent=4
                 )
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, self.entries_file)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to save entries: {e}")
 
