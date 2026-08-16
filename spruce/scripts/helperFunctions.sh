@@ -729,10 +729,15 @@ start_pyui_message_writer() {
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
 
-    # Optional wait for the listener file
     if [ "$wait_for_listener" != "0" ]; then
         log_message "Waiting for realtime_message_network_listener to appear..."
+        listener_tries=0
         while [ ! -e "/mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt" ]; do
+            listener_tries=$((listener_tries + 1))
+            if [ "$listener_tries" -ge 150 ]; then
+                log_message "Realtime message listener never appeared after 15s; continuing without it."
+                return 1
+            fi
             sleep 0.1
         done
         log_message "Realtime message network listener detected."
