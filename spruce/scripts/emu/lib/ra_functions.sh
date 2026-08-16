@@ -228,10 +228,14 @@ input_l_y_minus_axis = "-1"'
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
-	# Apply per-game or system-wide RA build selection
+	# Apply per-game or system-wide RA build selection. The binary names are
+	# device-overridable because "64-bit" is not always the universal build -
+	# Anbernic XX under BaseOS runs the H700-tuned ra64.h700. Hardcoding the
+	# name here would quietly swap that back for the generic binary, which
+	# still runs, so the only symptom would be lost performance.
 	case "$RA_BUILD" in
-		"32-bit") export RA_BIN="ra32.universal" ;;
-		"64-bit") export RA_BIN="ra64.universal" ;;
+		"32-bit") export RA_BIN="${RA_BIN_32:-ra32.universal}" ;;
+		"64-bit") export RA_BIN="${RA_BIN_64:-ra64.universal}" ;;
 	esac
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"

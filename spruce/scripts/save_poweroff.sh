@@ -10,6 +10,7 @@ BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
 EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
+ra64.h700 ra32.h700 \
 retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast2024 yabasanshiro yabasanshiro.trimui \
 mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"

@@ -278,7 +278,10 @@ get_volume_level() {
 
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
+    # Every RetroArch binary this device can launch has to be listed here or the
+    # home button silently does nothing in-game. ra64.h700 is the BaseOS default.
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null \
+       || pgrep "ra64.h700" >/dev/null || pgrep "ra32.h700" >/dev/null; then
         echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
     fi
 }
@@ -309,12 +312,27 @@ setup_for_retroarch(){
     #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-    if [ "$RA_BIN" = "ra32.universal" ]; then
-        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-        export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
-    else
-        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
-    fi
+    # Match on the arch prefix rather than one exact filename: ra32.h700 is a
+    # 32-bit binary too, and the old equality test would have handed it the
+    # 64-bit core directory and no 32-bit library path at all.
+    case "$RA_BIN" in
+        ra32.*)
+            export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+            if [ -n "$SPRUCE_BASEOS" ]; then
+                # BaseOS has no /usr/lib32 - its harvest carries only the armhf
+                # loader and libc (enough for the vendor bluetooth binary). The
+                # rest of the 32-bit closure ships with spruce; see the
+                # PROVENANCE note in spruce/h700/lib32.
+                export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
+            else
+                # Stock Anbernic is Ubuntu with a full 32-bit multilib.
+                export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
+            fi
+            ;;
+        *)
+            export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+            ;;
+    esac
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"

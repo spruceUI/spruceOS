@@ -111,7 +111,7 @@ kill_pcsx() {
 
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
-    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
+    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
 }
 
 kill_emulator() {
