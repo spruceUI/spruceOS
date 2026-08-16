@@ -69,6 +69,7 @@ kill_drastic() {
         echo $B_MENU 0  # MENU release
         echo 0 0 0      # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_DRASTIC &
+    DRASTIC_COMBO_PID=$!
 
     killall -q -15 drastic drastic64
 }
@@ -318,5 +319,7 @@ perform_action() {
             log_message "button_actions.sh: $1 is an unknown action to perform"
             ;;
     esac
+    [ -n "$DRASTIC_COMBO_PID" ] && wait "$DRASTIC_COMBO_PID" 2>/dev/null
+    DRASTIC_COMBO_PID=""
     killall sendevent
 }
