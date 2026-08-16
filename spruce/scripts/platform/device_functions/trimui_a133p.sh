@@ -279,8 +279,8 @@ except Exception as e:
     traceback.print_exc()
 EOF
 
-    tmp=$(mktemp)
-    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
 

@@ -477,8 +477,8 @@ set_backlight() {
     echo "$val_255" > /sys/class/backlight/backlight0/brightness
 
     # update device system json
-    tmp=$(mktemp)
-    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
 
