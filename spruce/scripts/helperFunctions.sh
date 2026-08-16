@@ -762,14 +762,19 @@ except Exception as e:
 ' "$message"
 }
 
+json_escape() {
+    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
+        -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
+}
+
 log_and_display_message(){
     log_message "$1"
-    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_option_list(){
     log_message "Display option list $1"
-    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_text_with_percentage_bar(){
@@ -778,9 +783,9 @@ display_text_with_percentage_bar(){
     # $3 = Optional bottom text
     log_message "Display text with percentage bar $1 $2"
     if [ $# -eq 2 ]; then
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$(json_escape "$1")" "$2")"
     else
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$(json_escape "$1")" "$2" "$(json_escape "$3")")"
     fi
 }
 
@@ -911,7 +916,7 @@ display_image_and_text() {
 
     display_message "$(printf \
         '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' \
-        "$img" "$text" "$size" "$img_y" "$text_y"
+        "$(json_escape "$img")" "$(json_escape "$text")" "$size" "$img_y" "$text_y"
     )"
 }
 
