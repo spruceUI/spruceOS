@@ -156,6 +156,8 @@ jobs:
             | Miyoo Mini v1-4       | Stable |
             | Anbernic RGXX+ series | In Development, testers wanted! |
 
+            > **Anbernic RGXX+ series:** these devices need a modified TF1 image, which you can grab [here](https://github.com/spruceUI/RGXX-images/releases/tag/images). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
             # What's New
 
             Check out the wiki for info on ROM folders and apps [Here](https://github.com/spruceUI/spruceOS/wiki)
