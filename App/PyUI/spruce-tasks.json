@@ -17,7 +17,7 @@
     "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
     "Reset RetroArch config": "restore spruce default RA config for current device",
     "Reset DraStic config": "restore spruce default NDS config for current device",
-    "Reset PCSX ReARMed config": "restore spruce default PSX standalone config",
+    "Reset PCSX ReARMED config": "restore spruce default PSX standalone config",
     "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
     "Reauthorize PPSSPP cheevos": "update auth token for RetroAchievements",
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
