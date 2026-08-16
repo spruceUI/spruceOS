@@ -65,8 +65,14 @@ if [ ! -d "$ROM_DIR" ] || [ ! -d "$EMU_DIR" ]; then
 fi
 
 NOTOK=1
+ATTEMPTS=0
 while [ "$NOTOK" -eq 1 ]; do
     NOTOK=0
+    ATTEMPTS=$((ATTEMPTS + 1))
+    if [ "$ATTEMPTS" -gt 30 ]; then
+        display --icon "$IMAGE_PATH" -t "No eligible games found. Add some games first!" -d 3
+        exit 1
+    fi
     # TODO: this _will_ select an empty folder, probably shouldn't
     SELECTED_FOLDER=$(get_rand_folder "$ROM_DIR")
     SELECTED_GAME=$(get_rand_file "$SELECTED_FOLDER")
