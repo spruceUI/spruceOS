@@ -193,7 +193,7 @@
     "screen1_x":192,
     "screen1_y":288,
     "screen1_w":256,
-    "screen1_h":192,
+    "screen1_h":192
 
 
 },
@@ -283,7 +283,7 @@
     "screen1_y":0,
     "screen1_w":640,
     "screen1_h":480
-},
+}
 ]
 
 }
