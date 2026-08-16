@@ -92,7 +92,10 @@ jobs:
 
       - name: Create 7z archive
         run: |
-          7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
+          # Dot-directories must be named explicitly - the shell's * does not
+          # match them. .system carries the BaseOS hand-off shim, and without it
+          # a fresh install leaves an Anbernic XX on "ADD FRONTEND TO SD CARD".
+          7z a -t7z -mx=9 -mf=off "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update .system \
             -xr!.git \
             -xr!.github \
             -x!.gitignore \
