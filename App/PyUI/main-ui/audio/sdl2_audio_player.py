@@ -151,6 +151,13 @@ class Sdl2AudioPlayer:
 
     @staticmethod
     def audio_cleanup():
+        if Sdl2AudioPlayer._worker_thread is None or not Sdl2AudioPlayer._running:
+            Sdl2AudioPlayer._worker_thread = None
+            Sdl2AudioPlayer._cmd_q = None
+            Sdl2AudioPlayer._running = False
+            Sdl2AudioPlayer._initialized = False
+            Sdl2AudioPlayer._init_failed = False
+            return
         # Request worker to cleanup and terminate; block until worker exits or timeout
         Sdl2AudioPlayer._send_cmd("cleanup")
         if Sdl2AudioPlayer._worker_thread:
