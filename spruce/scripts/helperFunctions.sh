@@ -32,28 +32,45 @@ case $INFO in
     *0xd05*) export PLATFORM="Flip" ;;
     *0xd04*) export PLATFORM="Pixel2" ;;
     *0xd03*)
-        CMDLINE=$(cat /proc/cmdline)
+        # BaseOS (github.com/pvaibhav/BaseOS) replaces the Anbernic stock userland,
+        # so /mnt/vendor/oem/board.ini does not exist there. It names the exact
+        # build target in /etc/baseos-release instead, which beats the lcd_type
+        # plus board.ini guesswork below - that cannot tell an RG34XX from an
+        # RG34XXSP, or an RG40XXV from an RG35XXH.
+        BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
 
-        case $CMDLINE in
-            *lcd_type=boe*)
-                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
-                    export PLATFORM="AnbernicRGCubeXX"
-                else
-                    export PLATFORM="AnbernicRG34XXSP"
-                fi
-                ;;
-            *lcd_type=old*)
-                #TODO handle cube?
-                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
-                    export PLATFORM="AnbernicRG28XX"
-                else
+        if [ -n "$BASEOS_TARGET" ]; then
+            export SPRUCE_BASEOS=1
+            case $BASEOS_TARGET in
+                rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
+                rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
+                rg34xx|rg34xxsp) export PLATFORM="AnbernicRG34XXSP" ;;
+                *)               export PLATFORM="AnbernicXX640480" ;;
+            esac
+        else
+            CMDLINE=$(cat /proc/cmdline)
+
+            case $CMDLINE in
+                *lcd_type=boe*)
+                    if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
+                        export PLATFORM="AnbernicRGCubeXX"
+                    else
+                        export PLATFORM="AnbernicRG34XXSP"
+                    fi
+                    ;;
+                *lcd_type=old*)
+                    #TODO handle cube?
+                    if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
+                        export PLATFORM="AnbernicRG28XX"
+                    else
+                        export PLATFORM="AnbernicXX640480"
+                    fi
+                    ;;
+                *)
                     export PLATFORM="AnbernicXX640480"
-                fi
-                ;;
-            *)
-                export PLATFORM="AnbernicXX640480"
-                ;;
-        esac
+                    ;;
+            esac
+        fi
         ;;
     *) 
         if [ -e /usr/magicx ]; then

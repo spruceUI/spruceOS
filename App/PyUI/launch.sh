@@ -131,9 +131,45 @@ case "$PLATFORM" in
 # Anbernic RG34XXSP
 ############################################################
     "AnbernicRG34XXSP" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
-        export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
-        export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
-    
+        if [ -n "$SPRUCE_BASEOS" ]; then
+            # BaseOS ships no SDL2 and no python: use the aarch64 pair we
+            # already bundle. MainUI is the bind-mounted alias of python3.10 set
+            # up in device_init - spruce greps for that process name.
+            # Our usual SDL2 only speaks KMSDRM and wayland. BaseOS has neither
+            # libdrm/libgbm nor wayland - its mali blob is the fbdev winsys
+            # build - so that SDL2 falls back to the dummy driver and renders
+            # nowhere. Prefer a mali-fbdev SDL2 when one is staged alongside.
+            PYUI_DLL=/mnt/SDCARD/App/PyUI/dll
+            [ -f /mnt/SDCARD/App/PyUI/dll-mali/libSDL2-2.0.so.0 ] && PYUI_DLL=/mnt/SDCARD/App/PyUI/dll-mali
+
+            export PYSDL2_DLL_PATH="$PYUI_DLL"
+            export LD_LIBRARY_PATH="$PYUI_DLL:/mnt/SDCARD/spruce/flip/lib:/usr/lib"
+            PYUI_BIN=/mnt/SDCARD/spruce/flip/bin/MainUI
+
+            # BaseOS runs no udev and no mdev - devtmpfs creates the nodes and
+            # nothing else is listening. SDL's joystick layer goes looking for
+            # udev during SDL_Init and hangs there, which strands PyUI before it
+            # ever opens the display. BaseOS documents this and NextUI sets the
+            # same variable.
+            export SDL_JOYSTICK_DISABLE_UDEV=1
+
+            # Name the driver rather than letting SDL probe: the mali build is
+            # the only backend on this box that can reach the panel, and a
+            # failure to select it should be a loud error, not a silent
+            # fallback to dummy.
+            case "$PYUI_DLL" in
+                *dll-mali) export SDL_VIDEODRIVER=mali ;;
+            esac
+
+            # Bring-up only: BaseOS support is not shippable yet and a silent
+            # PyUI is unfixable, so keep stderr. Drop this once it boots.
+            redirect_output=1
+        else
+            export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
+            export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
+            PYUI_BIN=python3
+        fi
+
         if [ "$PLATFORM" = "AnbernicRG34XXSP" ]; then
             DEVICE="ANBERNIC_RG34XXSP"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
@@ -146,7 +182,7 @@ case "$PLATFORM" in
             DEVICE="ANBERNIC_RGXX640480"
         fi
 
-        python3 \
+        "$PYUI_BIN" \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
             -device "$DEVICE" \
             -logDir /mnt/SDCARD/Saves/spruce \

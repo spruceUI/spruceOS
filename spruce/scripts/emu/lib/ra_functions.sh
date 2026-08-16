@@ -229,6 +229,12 @@ run_retroarch() {
 			;;
 	esac
 
+	# BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
+	# Overlay the sdl2 input drivers on top without touching the shared cfg.
+	if [ -n "$SPRUCE_BASEOS" ] && [ -f "$RA_DIR/platform/retroarch-AnbernicRG_XX-baseos.cfg" ]; then
+		RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/retroarch-AnbernicRG_XX-baseos.cfg"
+	fi
+
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
 	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).

@@ -49,6 +49,16 @@ send_virtual_key_L3() {
 
 
 has_lid() {
+    # BaseOS has no vendor partition, so board.ini is gone. Its build target is
+    # the same information: every clamshell target ends in "sp" (rg34xxsp,
+    # rg35xxsp, rgsp).
+    if [ -n "$SPRUCE_BASEOS" ]; then
+        case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+            *sp) return 0 ;;
+            *)   return 1 ;;
+        esac
+    fi
+
     BOARD="$(cat /mnt/vendor/oem/board.ini)"
     case "$BOARD" in
         *xxSP*) return 0 ;;
@@ -93,18 +103,56 @@ runtime_mounts_anbernic_34xxsp() {
     #mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     #mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
-    ln -s /usr/bin/python3 /usr/bin/MainUI
+    # Half of spruce finds the UI with `pgrep MainUI` / `killall MainUI`, so the
+    # interpreter has to carry that name. On stock that is a symlink to the
+    # system python; under BaseOS there is no system python, so alias the
+    # bundled one the same way Flip.sh does.
+    if [ -n "$SPRUCE_BASEOS" ]; then
+        MAINUI="/mnt/SDCARD/spruce/flip/bin/MainUI"
+        touch "$MAINUI"
+        # -o bind, not --bind: BaseOS is BusyBox and its mount does not take the
+        # util-linux long option stock Ubuntu accepted. A failed bind here is
+        # silent and leaves the empty mount point behind, so PyUI execs a 0-byte
+        # file and principal.sh spins forever on a blank screen. Verify, and fall
+        # back to a plain copy rather than trusting the mount.
+        mount -o bind /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI" 2>/dev/null
+        if [ ! -s "$MAINUI" ]; then
+            log_message "MainUI bind mount failed, copying interpreter instead"
+            umount "$MAINUI" 2>/dev/null
+            cp /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI"
+            chmod +x "$MAINUI"
+        fi
+    else
+        ln -s /usr/bin/python3 /usr/bin/MainUI
+    fi
 
-    mount --bind /mnt/vendor/deep/retro/retroarch-1.20 /mnt/sdcard/RetroArch/retroarch
+    # Stock lets us borrow Anbernic's own RetroArch assets off the vendor
+    # partition. BaseOS drops that partition; skip rather than fail the mount.
+    if [ -d /mnt/vendor/deep/retro/retroarch-1.20 ]; then
+        mount --bind /mnt/vendor/deep/retro/retroarch-1.20 /mnt/sdcard/RetroArch/retroarch
+    fi
 }
 
 device_init() {
+    # launch_startup_watchdogs runs every watchdog through /bin/bash. Stock
+    # Anbernic is Ubuntu and has one; BaseOS is BusyBox and does not, so the
+    # watchdogs would all fail silently and take the power and home buttons with
+    # them. Same static aarch64 bash the TrimUI devices drop in for this reason.
+    if [ ! -x /bin/bash ]; then
+        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
+        chmod +x /bin/bash 2>/dev/null
+    fi
+
     runtime_mounts_anbernic_34xxsp
 
-    {
-        sleep 10
-        /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
-    } &
+    # BaseOS composes its own adb gadget and binds the UDC during boot. Starting
+    # ours as well would leave two daemons fighting over one controller.
+    if [ -z "$SPRUCE_BASEOS" ]; then
+        {
+            sleep 10
+            /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
+        } &
+    fi
 }
 
 set_event_arg_for_idlemon() {
